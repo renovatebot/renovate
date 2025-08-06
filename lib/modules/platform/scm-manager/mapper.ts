@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import type { Pr } from '../types';
 import type { PullRequest } from './schema';
 
@@ -8,7 +7,7 @@ export function mapPrFromScmToRenovate(pr: PullRequest): Pr {
     targetBranch: pr.target,
     createdAt: pr.creationDate,
     closedAt: pr.closeDate ?? undefined,
-    hasAssignees: !is.nullOrUndefined(pr.reviewer) && pr.reviewer.length > 0,
+    hasAssignees: !!pr.reviewer?.length,
     labels: pr.labels,
     number: parseInt(pr.id),
     reviewers: pr.reviewer
