@@ -1943,7 +1943,18 @@ describe('modules/platform/azure/index', () => {
                   id: AZURE_POLICY_TYPES.MinimumNumberOfReviewers,
                 },
               },
-              status: PolicyEvaluationStatus.Queued,
+              status: PolicyEvaluationStatus.Rejected,
+            },
+            {
+              configuration: {
+                settings: undefined,
+                isEnabled: true,
+                isBlocking: true,
+                type: {
+                  id: AZURE_POLICY_TYPES.WorkItemLinking,
+                },
+              },
+              status: PolicyEvaluationStatus.Rejected,
             },
           ] satisfies PolicyEvaluationRecord[]),
         }),
@@ -1958,7 +1969,10 @@ describe('modules/platform/azure/index', () => {
         id: pullRequestIdMock,
         strategy: 'auto',
         platformOptions: {
-          azureBypassPolicyTypes: ['MinimumNumberOfReviewers'],
+          azureBypassPolicyTypes: [
+            'MinimumNumberOfReviewers',
+            '40e92b44-2fe1-4dd6-b3d8-74a9c21d0c6e',
+          ],
           azureBypassPolicyReason: bypassReasonMock,
         },
       });
