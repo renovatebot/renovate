@@ -13,10 +13,10 @@ import type { PackageDependency } from '../types';
 function matchAction(action: string): z.Schema {
   return z
     .string()
-    .regex(regEx(`(?:https?://[^/]+/)?${escapeRegExp(action)}(@.+)?$`));
+    .regex(regEx(`(?:https?://[^/]+/)?${escapeRegExp(action)}(?:@.+)?$`));
 }
 
-const setupUVSchema = z
+const SetupUVSchema = z
   .object({
     // https://github.com/astral-sh/setup-uv
     uses: matchAction('astral-sh/setup-uv'),
@@ -43,7 +43,7 @@ const setupUVSchema = z
     };
   });
 
-const setupPnpmSchema = z
+const SetupPnpmSchema = z
   .object({
     uses: matchAction('pnpm/action-setup'),
     with: z.object({
@@ -70,7 +70,7 @@ const setupPnpmSchema = z
     };
   });
 
-const setupPDMSchema = z
+const SetupPDMSchema = z
   .object({
     uses: matchAction('pdm-project/setup-pdm'),
     with: z.object({ version: z.string().optional() }),
@@ -95,7 +95,7 @@ const setupPDMSchema = z
     };
   });
 
-const installBianrySchema = z
+const InstallBinarySchema = z
   .object({
     uses: z.union([
       matchAction('jaxxstorm/action-install-gh-release'),
@@ -113,7 +113,7 @@ const installBianrySchema = z
     };
   });
 
-const setupPixiSchema = z
+const SetupPixiSchema = z
   .object({
     uses: matchAction('prefix-dev/setup-pixi'),
     with: z.object({ 'pixi-version': z.string() }),
@@ -135,10 +135,10 @@ const setupPixiSchema = z
  *
  * each type should return `PackageDependency | undefined`
  */
-export const communityActions = z.union([
-  setupUVSchema,
-  setupPnpmSchema,
-  setupPDMSchema,
-  installBianrySchema,
-  setupPixiSchema,
+export const CommunityActions = z.union([
+  InstallBinarySchema,
+  SetupPDMSchema,
+  SetupPixiSchema,
+  SetupPnpmSchema,
+  SetupUVSchema,
 ]);
