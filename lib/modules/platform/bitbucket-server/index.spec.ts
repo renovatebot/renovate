@@ -2778,7 +2778,6 @@ Followed by some information.
           const lines = [
             'docs/** @reviewer-group/content-designers:random',
             'docs/api/** @reviewer-group/devs:random(2)',
-            'docs/api/** @reviewer-group/another:non-existent',
           ];
 
           const rules = bitbucket.extractRulesFromCodeOwnersLines(lines);
@@ -2789,8 +2788,6 @@ Followed by some information.
           expect(rules[1].usernames).toEqual([
             '@reviewer-group/content-designers:random',
           ]);
-          // Applies whole group in case of non-existent modifier
-          expect(rules[2].usernames).toEqual(['@reviewer-group/another']);
         });
 
         it('matches paths correctly using glob patterns', () => {
@@ -3120,6 +3117,49 @@ Followed by some information.
             expect(userArray.map((u) => u.emailAddress)).toContain(user);
           });
         });
+
+        it('handles non-existent modifier correctly', async () => {
+          const scope = await initRepo();
+          const userArray = [
+            { slug: 'zoe', active: true, emailAddress: 'zoe@zoe.com' },
+            {
+              slug: 'user1',
+              active: true,
+              emailAddress: 'user1@user1.com',
+            },
+            {
+              slug: 'user2',
+              active: true,
+              emailAddress: 'user2@user2.com',
+            },
+          ];
+
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/settings/reviewer-groups?limit=100`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [
+                {
+                  name: 'my-reviewer-group',
+                  scope: {
+                    type: 'REPOSITORY',
+                  },
+                  users: userArray,
+                },
+              ],
+            });
+
+          const users = await bitbucket.expandGroupMembers([
+            '@reviewer-group/my-reviewer-group:non-existent',
+          ]);
+          expect(users).toHaveLength(3);
+          users.forEach((user) => {
+            expect(userArray.map((u) => u.emailAddress)).toContain(user);
+          });
+        });
+
         it('handles paginated responses and finds matching group in next page', async () => {
           const scope = await initRepo();
           scope
