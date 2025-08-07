@@ -1221,18 +1221,12 @@ function isReviewerGroup(entry: string): boolean {
 }
 
 function parseModifier(value: string): number | null {
-  const randomPrefix = 'random';
-
-  if (value.startsWith(randomPrefix)) {
-    const match = /^random\((\d+)\)$/.exec(value);
-    if (match) {
-      return parseInt(match[1], 10); // e.g., random(2) → 2
-    } else {
-      return 1; // plain "random"
-    }
+  const match = /^random(?:\((\d+)\))?$/.exec(value);
+  if (match) {
+    return parseInt(match[1] ?? "1", 10); // e.g., random(2) → 2
+  } else {
+    return null;
   }
-
-  return null; // Not a random selector
 }
 
 function resolveRandom(users: string[], count?: number): string[] {
