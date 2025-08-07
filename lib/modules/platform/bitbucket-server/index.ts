@@ -23,6 +23,7 @@ import {
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { sampleSize } from '../../../util/sample';
 import { sanitize } from '../../../util/sanitize';
 import { ensureTrailingSlash, getQueryString } from '../../../util/url';
 import type {
@@ -1181,7 +1182,7 @@ export async function expandGroupMembers(
         expandedUsers.push(...groupUsers);
         continue;
       }
-      expandedUsers.push(...resolveRandom(groupUsers, randomCount));
+      expandedUsers.push(...sampleSize(groupUsers, randomCount));
     } else {
       expandedUsers.push(baseEntry); // Add the user entry
     }
@@ -1200,20 +1201,34 @@ export function extractRulesFromCodeOwnersLines(
     .reverse();
 
   for (const line of reversedLines) {
-    const safeLine = line.replace(/\\\\ /g, '<<SPACE>>'); // double-backslash before space
-    const [pattern, ...rawEntries] = safeLine.trim().split(/\s+/);
-    const realEntries = rawEntries.map((u) => u.replace(/<<SPACE>>/g, ' '));
-
+    const [pattern, ...entries] = splitEscapedSpaces(line);
     const matcher = ignore().add(pattern);
     results.push({
       pattern,
-      usernames: [...new Set(realEntries)],
+      usernames: [...new Set(entries)],
       score: pattern.length,
       match: (path: string) => matcher.ignores(path),
     });
   }
 
   return results;
+}
+
+function splitEscapedSpaces(str: string): string[] {
+  const parts = str.split(' ');
+  const result: string[] = [];
+
+  for (const part of parts) {
+    const last = result[result.length - 1];
+
+    if (last?.endsWith(String.raw`\\`)) {
+      result[result.length - 1] = last.slice(0, -2) + ' ' + part;
+    } else {
+      result.push(part);
+    }
+  }
+
+  return result;
 }
 
 function isReviewerGroup(entry: string): boolean {
@@ -1223,18 +1238,10 @@ function isReviewerGroup(entry: string): boolean {
 function parseModifier(value: string): number | null {
   const match = /^random(?:\((\d+)\))?$/.exec(value);
   if (match) {
-    return parseInt(match[1] ?? "1", 10); // e.g., random(2) → 2
+    return parseInt(match[1] ?? '1', 10); // e.g., random(2) → 2
   } else {
     return null;
   }
-}
-
-function resolveRandom(users: string[], count?: number): string[] {
-  if (!count || users.length <= count) {
-    return users;
-  }
-  const shuffled = [...users].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
 }
 
 // Gets active users by name, from a reviewer group
