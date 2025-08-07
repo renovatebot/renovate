@@ -1227,7 +1227,7 @@ export async function expandGroupMembers(
     const [baseEntry, modifier] = reviewer.split(':');
 
     if (isReviewerGroup(baseEntry)) {
-      const groupName = baseEntry.replace(regEx(/^@reviewer-group\//), '');
+      const groupName = baseEntry.replace(regEx('^@reviewer-group/'), '');
       const groupUsers = await getUsersFromReviewerGroup(groupName);
       if (groupUsers.length === 0) {
         continue;
@@ -1296,7 +1296,7 @@ function isReviewerGroup(entry: string): boolean {
 }
 
 function parseModifier(value: string): number | null {
-  const match = regEx(/^random(?:\((\d+)\))?$/).exec(value);
+  const match = regEx('^random(?:\\((\\d+)\\))?$').exec(value);
   if (match) {
     return parseInt(match[1] ?? '1', 10); // e.g., random(2) → 2
   } else {
