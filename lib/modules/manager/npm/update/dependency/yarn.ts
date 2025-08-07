@@ -14,7 +14,7 @@ export function updateYarnrcCatalogDependency({
 
   const catalogName = depType?.split('.').at(-1);
 
-  // istanbul ignore if
+  // istanbul ignore if -- @preserve
   if (!is.string(catalogName)) {
     logger.error(
       'No catalogName was found; this is likely an extraction error.',
@@ -78,7 +78,7 @@ export function updateYarnrcCatalogDependency({
     return null;
   }
 
-  // istanbul ignore if: this should not happen in practice, but we must satisfy th etypes
+  // istanbul ignore if -- @preserve : this should not happen in practice, but we must satisfy th etypes
   if (!modifiedDocument.contents?.srcToken) {
     return null;
   }
