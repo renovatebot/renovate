@@ -1368,7 +1368,12 @@ describe('modules/manager/npm/extract/index', () => {
           list:
             is-positive: 1.0.0
       `;
-      fs.findLocalSiblingOrParent.mockResolvedValue('.yarnrc.yml');
+      fs.findLocalSiblingOrParent.mockImplementation(
+        async (_, name) =>
+          await new Promise((resolve) =>
+            resolve(name === '.yarnrc.yml' ? '.yarnrc.yml' : null),
+          ),
+      );
 
       fs.readLocalFile.mockResolvedValueOnce(input01PackageManager);
       fs.readLocalFile.mockResolvedValue(yarnrc);
@@ -1392,6 +1397,53 @@ describe('modules/manager/npm/extract/index', () => {
         },
         packageFile: '.yarnrc.yml',
       });
+    });
+  });
+
+  it('extracts yarnrc.yml and adds it as packageFile and packageManager to false if no deps', async () => {
+    const yarnrc = codeBlock`
+        nodeLinker: node-modules
+
+        plugins:
+          - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
+            path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
+            spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
+
+        catalogs:
+          list:
+            is-positive: 1.0.0
+      `;
+
+    fs.findLocalSiblingOrParent.mockImplementation(
+      async (_, name) =>
+        await new Promise((resolve) =>
+          resolve(name === '.yarnrc.yml' ? '.yarnrc.yml' : null),
+        ),
+    );
+
+    fs.readLocalFile.mockResolvedValueOnce(
+      '{"name": "simulate deps to be null", brokenJsonHere: }',
+    );
+    fs.readLocalFile.mockResolvedValue(yarnrc);
+
+    const res = await extractAllPackageFiles(defaultExtractConfig, [
+      'package.json',
+    ]);
+
+    expect(res[0]).toEqual({
+      deps: [
+        {
+          currentValue: '1.0.0',
+          datasource: 'npm',
+          depName: 'is-positive',
+          depType: 'yarn.catalog.default',
+          prettyDepType: 'yarn.catalog.default',
+        },
+      ],
+      managerData: {
+        hasPackageManager: false,
+      },
+      packageFile: '.yarnrc.yml',
     });
   });
 
