@@ -23,13 +23,6 @@ For more information see [the OpenTelemetry docs](opentelemetry.md).
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
-## `RENOVATE_STATIC_REPO_CONFIG`
-
-If set to a _valid_ `JSON` string containing a _valid_ Renovate configuration, it will be applied to the repository config before resolving the actual configuration file within the repository.
-
-> [!warning]
-> An invalid value will result in the scan being aborted.
-
 ## `RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP`
 
 If set to any value, Renovate will skip attempting to get release labels (e.g. gitRef, sourceUrl) from manifest annotations for `https://index.docker.io`.
@@ -120,6 +113,15 @@ If set, Renovate will persist repository cache locally after uploading to S3.
 
 If set, Renovate will use SQLite as the backend for the package cache.
 Don't combine with `redisUrl`, Redis would be preferred over SQlite.
+
+## `RENOVATE_X_STATIC_REPO_CONFIG_FILE`
+
+If set to a valid path pointing to a file containing a _valid_ Renovate configuration in `JSON` format, it will be applied to the repository config before resolving the actual configuration file within the repository.
+
+!!! warning If the file is missing or contains invalid configuration, the scan will be aborted.
+
+!!! note
+You probably **shouldn’t use this** unless you have a very specific reason to override the repository’s normal configuration resolution process.
 
 ## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
 
