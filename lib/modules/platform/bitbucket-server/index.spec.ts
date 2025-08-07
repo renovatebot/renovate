@@ -2774,10 +2774,11 @@ Followed by some information.
           ]);
         });
 
-        it('supports reviewer groups with :random and :random(N)', () => {
+        it('supports reviewer groups with modifiers)', () => {
           const lines = [
             'docs/** @reviewer-group/content-designers:random',
             'docs/api/** @reviewer-group/devs:random(2)',
+            'docs/api/** @reviewer-group/another:non-existent',
           ];
 
           const rules = bitbucket.extractRulesFromCodeOwnersLines(lines);
@@ -2788,6 +2789,8 @@ Followed by some information.
           expect(rules[1].usernames).toEqual([
             '@reviewer-group/content-designers:random',
           ]);
+          // Applies whole group in case of non-existent modifier
+          expect(rules[2].usernames).toEqual(['@reviewer-group/another']);
         });
 
         it('matches paths correctly using glob patterns', () => {
