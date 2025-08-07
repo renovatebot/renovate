@@ -67,7 +67,7 @@ This means that Renovate will:
 
 ### with:version support for built-in Actions
 
-Renovate supports updating the "with" version for `actions/setup-go`, `actions/setup-node`, and `actions/setup-python`, although not all syntaxes are supported out of the box.
+Renovate supports updating the "with" version for `actions/setup-dotnet`, `actions/setup-go`, `actions/setup-node`, and `actions/setup-python`, although not all syntaxes are supported out of the box.
 
 By default, Renovate will use `npm`-style semver versioning for `go` and `python`, and Renovate's built-in `node` versioning for updating `node`.
 The goal of these defaults is to match as closely as possible to what these GitHub Actions support.

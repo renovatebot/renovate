@@ -2,12 +2,14 @@ import { GlobalConfig } from '../../../config/global';
 import { logger, withMeta } from '../../../logger';
 import { detectPlatform } from '../../../util/common';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { DotnetVersionDatasource } from '../../datasource/dotnet-version';
 import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
+import * as dotnetSdkVersioning from '../../versioning/dotnet-sdk';
 import * as nodeVersioning from '../../versioning/node';
 import * as npmVersioning from '../../versioning/npm';
 import { getDep } from '../dockerfile/extract';
@@ -175,12 +177,22 @@ function extractRunner(runner: string): PackageDependency | null {
   return dependency;
 }
 
-const versionedActions: Record<string, string> = {
-  go: npmVersioning.id,
-  node: nodeVersioning.id,
-  python: npmVersioning.id,
+interface VersionedAction {
+  versioning: string;
+  datasource?: string;
+  packageName?: string;
+}
+
+const versionedActions: Record<string, VersionedAction> = {
+  dotnet: {
+    versioning: dotnetSdkVersioning.id,
+    datasource: DotnetVersionDatasource.id,
+    packageName: 'dotnet-sdk',
+  },
+  go: { versioning: npmVersioning.id },
+  node: { versioning: nodeVersioning.id },
+  python: { versioning: npmVersioning.id },
   // Not covered yet because they use different datasources/packageNames:
-  // - dotnet
   // - java
 };
 
@@ -195,20 +207,27 @@ function extractSteps(
       continue;
     }
 
-    for (const [action, versioning] of Object.entries(versionedActions)) {
+    for (const [
+      action,
+      { versioning, datasource, packageName },
+    ] of Object.entries(versionedActions)) {
       const actionName = `actions/setup-${action}`;
       if (step.uses === actionName || step.uses?.startsWith(`${actionName}@`)) {
         const fieldName = `${action}-version`;
         const currentValue = step.with?.[fieldName];
         if (currentValue) {
-          deps.push({
-            datasource: GithubReleasesDatasource.id,
-            depName: action,
-            packageName: `actions/${action}-versions`,
-            versioning,
-            extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$', // Actions release tags are like 1.24.1-13667719799
-            currentValue,
-            depType: 'uses-with',
+          currentValue.split(newlineRegex).forEach((value) => {
+            if (value) {
+              deps.push({
+                datasource: datasource ?? GithubReleasesDatasource.id,
+                depName: action,
+                packageName: packageName ?? `actions/${action}-versions`,
+                versioning,
+                extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$', // Actions release tags are like 1.24.1-13667719799
+                currentValue: value,
+                depType: 'uses-with',
+              });
+            }
           });
         }
       }
