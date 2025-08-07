@@ -2,6 +2,32 @@ import { codeBlock } from 'common-tags';
 import * as npmUpdater from '../..';
 
 describe('modules/manager/npm/update/dependency/yarn', () => {
+  it(`returns null if catalogName is missing`, () => {
+    const upgrade = {
+      depType: 'yarn.catalog',
+      depName: 'react',
+      newValue: '19.0.0',
+    };
+
+    const yarnrcYaml = codeBlock`
+      nodeLinker: node-modules
+
+      plugins:
+        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
+          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
+          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
+
+      catalogs:
+        list:
+          react: 18.3.1
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: yarnrcYaml,
+      upgrade,
+    });
+    expect(testContent).toBeNull();
+  });
+
   it('handles implicit default catalog dependency', () => {
     const upgrade = {
       depType: 'yarn.catalog.default',
