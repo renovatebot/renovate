@@ -1,7 +1,7 @@
 import { regEx } from '../../../util/regex';
 import type { DotnetSdkVersion } from './types';
 
-// We can't just use `Number.parseInt()` beacause it parses `123abc` as `123`,
+// We can't just use `Number.parseInt()` because it parses `123abc` as `123`,
 // which leads to incorrect version comparison.
 function ensureNumber(input: string): number | null {
   if (!regEx(/^\d+$/).test(input)) {
