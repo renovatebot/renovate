@@ -104,9 +104,9 @@ export async function getLockedVersions(
         packageFile.extractedConstraints.npm = npm;
       }
 
-      const packageDir = dirname(packageFile.packageFile);
-      const npmRootDir = dirname(npmLock);
-      const relativeDir = relative(npmRootDir, packageDir);
+      const packageDir = upath.dirname(packageFile.packageFile);
+      const npmRootDir = upath.dirname(npmLock);
+      const relativeDir = upath.relative(npmRootDir, packageDir);
 
       for (const dep of packageFile.deps) {
         // TODO: types (#22198)
