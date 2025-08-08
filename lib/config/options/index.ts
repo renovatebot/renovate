@@ -1127,6 +1127,14 @@ const options: RenovateOptions[] = [
     stage: 'global',
   },
   {
+    name: 'gitPrivateKeyPassphrase',
+    description: 'Passphrase for the `gitPrivateKey`',
+    type: 'string',
+    cli: false,
+    globalOnly: true,
+    stage: 'global',
+  },
+  {
     name: 'gitIgnoredAuthors',
     description:
       'Git authors which are ignored by Renovate. Must conform to [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322).',
@@ -2111,7 +2119,14 @@ const options: RenovateOptions[] = [
     description:
       'The merge strategy to use when automerging PRs. Used only if `automergeType=pr`.',
     type: 'string',
-    allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
+    allowedValues: [
+      'auto',
+      'fast-forward',
+      'merge-commit',
+      'rebase',
+      'rebase-merge',
+      'squash',
+    ],
     default: 'auto',
     supportedPlatforms: ['azure', 'bitbucket', 'forgejo', 'gitea', 'github'],
   },
@@ -3069,6 +3084,7 @@ const options: RenovateOptions[] = [
         'Because you closed this PR without merging, Renovate will ignore this update. You will not get PRs for the `{{{depName}}}` `{{{newDigestShort}}}` update again.',
       ignoreOther:
         'Because you closed this PR without merging, Renovate will ignore this update (`{{{newValue}}}`). You will get a PR once a newer version is released. To ignore this dependency forever, add it to the `ignoreDeps` array of your Renovate config.',
+      artifactErrorWarning: 'You probably do not want to merge this PR as-is.',
     },
   },
   {

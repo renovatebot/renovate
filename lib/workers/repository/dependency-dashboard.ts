@@ -25,51 +25,67 @@ interface DependencyDashboard {
 }
 
 const rateLimitedRe = regEx(
-  ' - \\[ \\] <!-- unlimit-branch=([^\\s]+) -->',
+  ` - \\[ \\] ${getMarkdownComment('unlimit-branch=([^\\s]+)')}`,
   'g',
 );
 const pendingApprovalRe = regEx(
-  ' - \\[ \\] <!-- approve-branch=([^\\s]+) -->',
+  ` - \\[ \\] ${getMarkdownComment('approve-branch=([^\\s]+)')}`,
   'g',
 );
-const generalBranchRe = regEx(' <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->');
+const generalBranchRe = regEx(
+  ` ${getMarkdownComment('([a-zA-Z]+)-branch=([^\\s]+)')}`,
+);
 const markedBranchesRe = regEx(
-  ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->',
+  ` - \\[x\\] ${getMarkdownComment('([a-zA-Z]+)-branch=([^\\s]+)')}`,
   'g',
 );
 
 const approveAllPendingPrs = 'approve-all-pending-prs';
 const createAllRateLimitedPrs = 'create-all-rate-limited-prs';
+const createConfigMigrationPr = 'create-config-migration-pr';
+const configMigrationPrInfo = 'config-migration-pr-info';
 const rebaseAllOpenPrs = 'rebase-all-open-prs';
 
-function isCheckboxMarked(issueBody: string, type: string): boolean {
-  return issueBody.includes(' - [x] <!-- ' + type + ' -->');
+function getMarkdownComment(comment: string): string {
+  return `<!-- ${comment} -->`;
+}
+
+function isBoxChecked(issueBody: string, type: string): boolean {
+  return issueBody.includes(getCheckbox(type, true));
+}
+
+function isBoxUnchecked(issueBody: string, type: string): boolean {
+  return issueBody.includes(getCheckbox(type));
+}
+
+function getCheckbox(type: string, checked = false): string {
+  return ` - [${checked ? 'x' : ' '}] ${getMarkdownComment(type)}`;
 }
 
 function checkOpenAllRateLimitedPR(issueBody: string): boolean {
-  return isCheckboxMarked(issueBody, createAllRateLimitedPrs);
+  return isBoxChecked(issueBody, createAllRateLimitedPrs);
 }
 
 function checkApproveAllPendingPR(issueBody: string): boolean {
-  return isCheckboxMarked(issueBody, approveAllPendingPrs);
+  return isBoxChecked(issueBody, approveAllPendingPrs);
 }
 
 function checkRebaseAll(issueBody: string): boolean {
-  return isCheckboxMarked(issueBody, rebaseAllOpenPrs);
+  return isBoxChecked(issueBody, rebaseAllOpenPrs);
 }
 
 function getConfigMigrationCheckboxState(
   issueBody: string,
 ): 'no-checkbox' | 'checked' | 'unchecked' | 'migration-pr-exists' {
-  if (issueBody.includes('<!-- config-migration-pr-info -->')) {
+  if (issueBody.includes(getMarkdownComment(configMigrationPrInfo))) {
     return 'migration-pr-exists';
   }
 
-  if (issueBody.includes(' - [x] <!-- create-config-migration-pr -->')) {
+  if (isBoxChecked(issueBody, createConfigMigrationPr)) {
     return 'checked';
   }
 
-  if (issueBody.includes(' - [ ] <!-- create-config-migration-pr -->')) {
+  if (isBoxUnchecked(issueBody, createConfigMigrationPr)) {
     return 'unchecked';
   }
 
@@ -169,8 +185,7 @@ export async function readDashboardBody(
 }
 
 function getListItem(branch: BranchConfig, type: string): string {
-  let item = ' - [ ] ';
-  item += `<!-- ${type}-branch=${branch.branchName} -->`;
+  let item = getCheckbox(`${type}-branch=${branch.branchName}`);
   if (branch.prNo) {
     // TODO: types (#22198)
     item += `[${branch.prTitle!}](../pull/${branch.prNo})`;
@@ -207,9 +222,6 @@ function getBranchesListMd(
   }
 
   let result = `## ${title}\n\n${description}`;
-  const ensureNewLines = (n = 2): void => {
-    result = result.trimEnd() + '\n'.repeat(n);
-  };
 
   const categorized: Record<string, BranchConfig[]> = {};
   const uncategorized: BranchConfig[] = [];
@@ -221,36 +233,37 @@ function getBranchesListMd(
     }
   }
 
-  const toListItem = (branch: BranchConfig): string =>
-    getListItem(branch, listItemType);
   if (Object.keys(categorized).length > 0) {
     for (const [category, branches] of Object.entries(categorized).sort(
       ([keyA], [keyB]) => keyA.localeCompare(keyB),
     )) {
-      ensureNewLines();
+      result = result.trimEnd() + '\n\n';
       result += `### ${category}\n\n`;
-      result += branches.map(toListItem).join('');
+      result += branches
+        .map((branch: BranchConfig): string =>
+          getListItem(branch, listItemType),
+        )
+        .join('');
     }
     if (uncategorized.length > 0) {
-      ensureNewLines();
+      result = result.trimEnd() + '\n\n';
       result += `### Others`;
     }
   }
-  ensureNewLines();
-  result += uncategorized.map(toListItem).join('');
+  result = result.trimEnd() + '\n\n';
+  result += uncategorized
+    .map((branch: BranchConfig): string => getListItem(branch, listItemType))
+    .join('');
 
-  if (filteredBranches.length > 1 && bulkComment && bulkMessage) {
+  if (bulkComment && bulkMessage && filteredBranches.length > 1) {
     if (Object.keys(categorized).length > 0) {
-      ensureNewLines();
+      result = result.trimEnd() + '\n\n';
       result += '### All\n\n';
     }
-    result += ' - [ ] ';
-    result += `<!-- ${bulkComment} -->`;
+    result += getCheckbox(bulkComment);
     result += `${bulkIcon ? bulkIcon + ' ' : ''}**${bulkMessage}**${bulkIcon ? ' ' + bulkIcon : ''}`;
   }
-
-  ensureNewLines();
-  return result;
+  return result.trimEnd() + '\n\n';
 }
 
 function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
@@ -367,15 +380,18 @@ export async function ensureDependencyDashboard(
   if (configMigrationRes.result === 'pr-exists') {
     issueBody +=
       '## Config Migration Needed\n\n' +
-      `<!-- config-migration-pr-info --> See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
+      getMarkdownComment(configMigrationPrInfo) +
+      ` See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
   } else if (configMigrationRes?.result === 'pr-modified') {
     issueBody +=
       '## Config Migration Needed (error)\n\n' +
-      `<!-- config-migration-pr-info --> The Config Migration branch exists but has been modified by another user. Renovate will not push to this branch unless it is first deleted. \n\n See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
+      getMarkdownComment(configMigrationPrInfo) +
+      ` The Config Migration branch exists but has been modified by another user. Renovate will not push to this branch unless it is first deleted. \n\n See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
   } else if (configMigrationRes?.result === 'add-checkbox') {
     issueBody +=
       '## Config Migration Needed\n\n' +
-      ' - [ ] <!-- create-config-migration-pr --> Select this checkbox to let Renovate create an automated Config Migration PR.' +
+      getCheckbox(createConfigMigrationPr) +
+      ' Select this checkbox to let Renovate create an automated Config Migration PR.' +
       '\n\n';
   }
 
@@ -556,7 +572,9 @@ export async function ensureDependencyDashboard(
         delete dependencyDashboardChecks[branchName];
       }
       for (const branchName of Object.keys(dependencyDashboardChecks)) {
-        const checkText = `- [ ] <!-- ${dependencyDashboardChecks[branchName]}-branch=${branchName} -->`;
+        const checkText = getCheckbox(
+          `${dependencyDashboardChecks[branchName]}-branch=${branchName}`,
+        );
         issueBody = issueBody.replace(
           checkText,
           checkText.replace('[ ]', '[x]'),

@@ -6,7 +6,7 @@ This final config describes what Renovate will do during its run.
 The final config is internal to Renovate, and is _not_ saved or cached for a later run.
 But you can always find the final config in Renovate's logs.
 
-Renovate reads the configuration files in this order (from from top to bottom):
+Renovate reads the configuration files in this order (from top to bottom):
 
 1. Default config
 2. Global config

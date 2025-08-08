@@ -317,6 +317,7 @@ You may choose from these values:
 - `fast-forward`, "fast-forwarding" the main branch reference, no new commits in the resultant tree
 - `merge-commit`, create a new merge commit
 - `rebase`, rewrite history as part of the merge, but usually keep the individual commits
+- `rebase-merge`, create a new merge commit, but rebase the commits prior merging (azure-only)
 - `squash`, flatten the commits that are being merged into a single new commit
 
 Platforms may only support _some_ of these merge strategies.
@@ -349,7 +350,7 @@ If you're not already using `bors-ng` or similar, don't worry about this option.
 
 ## azureWorkItemId
 
-When creating a PR in Azure DevOps, some branches can be protected with branch policies to [check for linked work items](https://docs.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops#check-for-linked-work-items).
+When creating a PR in Azure DevOps, some branches can be protected with branch policies to [check for linked work items](https://learn.microsoft.com/azure/devops/repos/git/branch-policies#check-for-linked-work-items).
 Creating a work item in Azure DevOps is beyond the scope of Renovate, but Renovate can link an already existing work item when creating PRs.
 
 ## baseBranchPatterns
@@ -4508,6 +4509,7 @@ If you want, you can change the text in the comment with the `userStrings` confi
 
 You can edit these user-facing strings:
 
+- `artifactErrorWarning`: Text of the PR comment when artifact errors occur during updates.
 - `ignoreDigest`: Text of the PR comment for digest upgrades.
 - `ignoreMajor`: Text of the PR comment for major upgrades.
 - `ignoreOther`: Text of the PR comment for other (neither digest nor major) upgrades.
@@ -4518,6 +4520,7 @@ For example:
 ```json
 {
   "userStrings": {
+    "artifactErrorWarning": "Custom text for artifact errors.",
     "ignoreTopic": "Custom topic for PR comment",
     "ignoreMajor": "Custom text for major upgrades.",
     "ignoreDigest": "Custom text for digest upgrades.",
