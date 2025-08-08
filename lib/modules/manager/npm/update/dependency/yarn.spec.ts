@@ -36,7 +36,34 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       expect(testContent).toBeNull();
     });
 
-    it('ensure continuation even if content and update does not match', () => {
+    it('ensure continuation even if catalog list and update does not match', () => {
+      const upgrade = {
+        depType: 'yarn.catalog.react17',
+        depName: 'react',
+        newValue: '19.0.0',
+      };
+
+      const yarnrcYaml = codeBlock`
+      nodeLinker: node-modules
+
+      plugins:
+        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
+          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
+          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
+
+      catalogs:
+        list:
+          react18:
+            react: 18.3.1
+    `;
+      const testContent = updateYarnrcCatalogDependency({
+        fileContent: yarnrcYaml,
+        upgrade,
+      });
+      expect(testContent).toBeNull();
+    });
+
+    it('ensure continuation even if dependency and update does not match', () => {
       const upgrade = {
         depType: 'yarn.catalog.react18',
         depName: 'react',
@@ -56,6 +83,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
           react18:
             react-dom: 18.3.1
     `;
+
       const testContent = updateYarnrcCatalogDependency({
         fileContent: yarnrcYaml,
         upgrade,
