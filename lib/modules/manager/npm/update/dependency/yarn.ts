@@ -28,7 +28,7 @@ export function updateYarnrcCatalogDependency({
   newValue = getNewNpmAliasValue(newValue, upgrade) ?? newValue;
 
   logger.trace(
-    `npm.updateYarnrcCatalogDependency(): ${depType}:${managerData?.catalogName}.${depName} = ${newValue}`,
+    `npm.updateYarnrcCatalogDependency(): ${depType}::${catalogName}.${depName} = ${newValue}`,
   );
 
   let document;
