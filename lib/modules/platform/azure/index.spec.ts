@@ -1916,7 +1916,6 @@ describe('modules/platform/azure/index', () => {
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
-      const bypassReasonMock = 'Bypassed by Renovate';
 
       const updatePullRequestMock = vi.fn().mockResolvedValueOnce({});
 
@@ -1973,7 +1972,6 @@ describe('modules/platform/azure/index', () => {
             'MinimumNumberOfReviewers',
             '40e92b44-2fe1-4dd6-b3d8-74a9c21d0c6e',
           ],
-          azureBypassPolicyReason: bypassReasonMock,
         },
       });
 
@@ -1986,7 +1984,7 @@ describe('modules/platform/azure/index', () => {
             deleteSourceBranch: true,
             mergeCommitMessage: 'title',
             bypassPolicy: true,
-            bypassReason: bypassReasonMock,
+            bypassReason: 'Auto-merge by Renovate',
           },
         },
         '1',
@@ -2040,6 +2038,9 @@ describe('modules/platform/azure/index', () => {
         branchName: branchNameMock,
         id: pullRequestIdMock,
         strategy: 'auto',
+        platformOptions: {
+          azureBypassPolicyTypes: [AZURE_POLICY_TYPES.RequiredReviewers],
+        },
       });
 
       expect(updatePullRequestMock).toHaveBeenCalledWith(
@@ -2050,7 +2051,7 @@ describe('modules/platform/azure/index', () => {
             mergeStrategy: GitPullRequestMergeStrategy.Squash,
             deleteSourceBranch: true,
             mergeCommitMessage: 'title',
-            bypassPolicy: undefined,
+            bypassPolicy: false,
             bypassReason: undefined,
           },
         },
