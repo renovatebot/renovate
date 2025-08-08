@@ -231,7 +231,6 @@ export async function extractAllPackageFiles(
   const npmFiles: PackageFile<NpmManagerData>[] = [];
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
-    // istanbul ignore else
     if (content) {
       // pnpm workspace files are their own package file, defined via managerFilePatterns.
       // We duck-type the content here, to allow users to rename the file itself.
