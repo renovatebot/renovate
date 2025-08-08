@@ -626,7 +626,7 @@
     "typefaces": "https://github.com/KyleAMathews/typefaces",
     "typescript-eslint": "https://github.com/typescript-eslint/typescript-eslint",
     "typography-js": "https://github.com/KyleAMathews/typography.js",
-    "ui5-web-components": [
+    "ui5-webcomponents": [
       "https://github.com/SAP/ui5-webcomponents",
       "https://github.com/SAP/ui5-webcomponents-react",
       "https://github.com/SAP/ui5-webcomponents-ngx"
