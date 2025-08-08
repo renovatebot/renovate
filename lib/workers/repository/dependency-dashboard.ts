@@ -203,19 +203,18 @@ function getListItem(branch: BranchConfig, type: string): string {
 }
 
 function splitBranchesByCategory(filteredBranches: BranchConfig[]): {
-  categorized: Record<string, BranchConfig[]>;
+  categories: Record<string, BranchConfig[]>;
   uncategorized: BranchConfig[];
 } {
-  const categorized: Record<string, BranchConfig[]> = {};
+  const categories: Record<string, BranchConfig[]> = {};
   const uncategorized: BranchConfig[] = [];
   for (const branch of filteredBranches) {
-    if (branch.dependencyDashboardCategory) {
-      (categorized[branch.dependencyDashboardCategory] ??= []).push(branch);
-    } else {
-      uncategorized.push(branch);
-    }
+    const targetArray = branch.dependencyDashboardCategory
+      ? (categories[branch.dependencyDashboardCategory] ??= [])
+      : uncategorized;
+    targetArray.push(branch);
   }
-  return { categorized, uncategorized };
+  return { categories, uncategorized };
 }
 
 function getBranchList(branches: BranchConfig[], listItemType: string): string {
@@ -243,11 +242,11 @@ function getBranchesListMd(
     return '';
   }
 
-  const { categorized, uncategorized } =
+  const { categories, uncategorized } =
     splitBranchesByCategory(filteredBranches);
   let result = `## ${title}\n\n${description}`;
-  if (Object.keys(categorized).length > 0) {
-    for (const [category, branches] of Object.entries(categorized).sort(
+  if (Object.keys(categories).length > 0) {
+    for (const [category, branches] of Object.entries(categories).sort(
       ([keyA], [keyB]) => keyA.localeCompare(keyB),
     )) {
       result = result.trimEnd() + '\n\n';
@@ -263,7 +262,7 @@ function getBranchesListMd(
   result += getBranchList(uncategorized, listItemType);
 
   if (bulkComment && bulkMessage && filteredBranches.length > 1) {
-    if (Object.keys(categorized).length > 0) {
+    if (Object.keys(categories).length > 0) {
       result = result.trimEnd() + '\n\n';
       result += '### All\n\n';
     }
