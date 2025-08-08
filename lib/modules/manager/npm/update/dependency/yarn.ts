@@ -14,7 +14,6 @@ export function updateYarnrcCatalogDependency({
 
   const catalogName = depType?.split('.').at(-1);
 
-  // istanbul ignore if -- @preserve
   if (!is.string(catalogName)) {
     logger.error(
       'No catalogName was found; this is likely an extraction error.',
@@ -78,7 +77,8 @@ export function updateYarnrcCatalogDependency({
     return null;
   }
 
-  // istanbul ignore if -- @preserve : this should not happen in practice, but we must satisfy th etypes
+  //this should not happen in practice, but we must satisfy th etypes
+  /* istanbul ignore if -- @preserve */
   if (!modifiedDocument.contents?.srcToken) {
     return null;
   }
@@ -114,7 +114,8 @@ function changeDependencyIn(
   }
 
   if (newName) {
-    // istanbul ignore if: the try..catch block above already throws if a key is an alias
+    // the try..catch block above already throws if a key is an alias
+    /* istanbul ignore if -- @preserve */
     if (!CST.isScalar(relevantNode.srcToken?.key)) {
       return null;
     }
