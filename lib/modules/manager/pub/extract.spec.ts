@@ -34,6 +34,7 @@ describe('modules/manager/pub/extract', () => {
       const dependenciesDepType = 'dependencies';
       const devDependenciesDepType = 'dev_dependencies';
       const dartDatasource = 'dart';
+      const gitRefDatasource = 'git-refs';
       const skipReason = undefined;
       const content = codeBlock`
         environment:
@@ -55,6 +56,22 @@ describe('modules/manager/pub/extract', () => {
           qux: false
           path_dep:
             path: path1
+          git_package:
+            git:
+              url: https://github.com/some-url/some-package
+          git_package_ref:
+            git:
+              url: https://github.com/some-url/some-package-ref
+              ref: v1.0.0
+          git_package_version:
+            git:
+              url: https://github.com/some-url/some-package-version
+            version: ^1.1.0
+          git_package_version_extract:
+            git:
+              url: https://github.com/some-url/some-package-version-extract
+              tag_pattern: v
+            version: ^1.1.0
         dev_dependencies:
           test: ^0.1.0
           build:
@@ -102,6 +119,39 @@ describe('modules/manager/pub/extract', () => {
             depType: dependenciesDepType,
             datasource: dartDatasource,
             skipReason: 'path-dependency',
+          },
+          {
+            currentValue: '',
+            depName: 'git_package',
+            packageName: 'https://github.com/some-url/some-package',
+            depType: dependenciesDepType,
+            datasource: gitRefDatasource,
+            skipReason: 'unspecified-version',
+          },
+          {
+            currentValue: 'v1.0.0',
+            depName: 'git_package_ref',
+            packageName: 'https://github.com/some-url/some-package-ref',
+            depType: dependenciesDepType,
+            datasource: gitRefDatasource,
+            skipReason,
+          },
+          {
+            currentValue: '^1.1.0',
+            depName: 'git_package_version',
+            packageName: 'https://github.com/some-url/some-package-version',
+            depType: dependenciesDepType,
+            datasource: gitRefDatasource,
+            skipReason,
+          },
+          {
+            currentValue: '^1.1.0',
+            depName: 'git_package_version_extract',
+            packageName: 'https://github.com/some-url/some-package-version-extract',
+            depType: dependenciesDepType,
+            datasource: gitRefDatasource,
+            extractVersion: 'v',
+            skipReason,
           },
           {
             currentValue: '^0.1.0',

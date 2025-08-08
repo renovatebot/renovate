@@ -3,6 +3,7 @@ import type { SkipReason } from '../../../types';
 import { DartDatasource } from '../../datasource/dart';
 import { DartVersionDatasource } from '../../datasource/dart-version';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version';
+import { GitRefsDatasource } from '../../datasource/git-refs';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { PubspecSchema } from './schema';
 import { parsePubspec } from './utils';
@@ -32,11 +33,14 @@ function extractFromSection(
     let currentValue = sectionContent[depName];
     let skipReason: SkipReason | undefined;
     let registryUrls: string[] | undefined;
+    let gitUrl: string | undefined;
+    let tagPattern: string | undefined;
 
     if (!is.string(currentValue)) {
       const version = currentValue.version;
       const path = currentValue.path;
       const hosted = currentValue.hosted;
+      const git = currentValue.git;
 
       if (is.string(hosted)) {
         registryUrls = [hosted];
@@ -44,24 +48,51 @@ function extractFromSection(
         registryUrls = [hosted.url];
       }
 
+      if (is.object(git)) {
+        gitUrl = git?.url;
+      }
+
       if (version) {
         currentValue = version;
       } else if (path) {
         currentValue = '';
         skipReason = 'path-dependency';
+      } else if (is.object(git) && is.string(git?.ref)) {
+        currentValue = git?.ref;
+      } else if (is.object(git) && !is.string(git?.ref) && is.string(version)) {
+        currentValue = version;
+      } else if (is.object(git) && !is.string(git?.ref) && !is.string(version)) {
+        currentValue = '';
+        skipReason = 'unspecified-version';
       } else {
         currentValue = '';
       }
+
+      if (is.object(git) && is.string(git?.tag_pattern)) {
+        tagPattern = git?.tag_pattern;
+      }
     }
 
-    deps.push({
-      depName,
-      depType: sectionKey,
-      currentValue,
-      datasource: DartDatasource.id,
-      ...(registryUrls && { registryUrls }),
-      skipReason,
-    });
+    if (gitUrl === undefined) {
+      deps.push({
+        depName,
+        depType: sectionKey,
+        currentValue,
+        datasource: DartDatasource.id,
+        ...(registryUrls && { registryUrls }),
+        skipReason,
+      });
+    } else {
+      deps.push({
+        depName,
+        depType: sectionKey,
+        packageName: gitUrl,
+        datasource: GitRefsDatasource.id,
+        extractVersion: tagPattern,
+        currentValue,
+        skipReason,
+      });
+    }
   }
 
   return deps;
