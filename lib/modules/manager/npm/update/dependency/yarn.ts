@@ -10,7 +10,7 @@ export function updateYarnrcCatalogDependency({
   fileContent,
   upgrade,
 }: UpdateDependencyConfig): string | null {
-  const { depType, managerData, depName } = upgrade;
+  const { depType, depName } = upgrade;
 
   const catalogName = depType?.split('.').at(-1);
 
