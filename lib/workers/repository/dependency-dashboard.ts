@@ -202,6 +202,22 @@ function getListItem(branch: BranchConfig, type: string): string {
   return item + ' (' + uniquePackages.join(', ') + ')\n';
 }
 
+function splitBranchesByCategory(filteredBranches: BranchConfig[]): {
+  categorized: Record<string, BranchConfig[]>;
+  uncategorized: BranchConfig[];
+} {
+  const categorized: Record<string, BranchConfig[]> = {};
+  const uncategorized: BranchConfig[] = [];
+  for (const branch of filteredBranches) {
+    if (branch.dependencyDashboardCategory) {
+      (categorized[branch.dependencyDashboardCategory] ??= []).push(branch);
+    } else {
+      uncategorized.push(branch);
+    }
+  }
+  return { categorized, uncategorized };
+}
+
 function getBranchesListMd(
   branches: BranchConfig[],
   predicate: (
@@ -221,18 +237,9 @@ function getBranchesListMd(
     return '';
   }
 
+  const { categorized, uncategorized } =
+    splitBranchesByCategory(filteredBranches);
   let result = `## ${title}\n\n${description}`;
-
-  const categorized: Record<string, BranchConfig[]> = {};
-  const uncategorized: BranchConfig[] = [];
-  for (const branch of filteredBranches) {
-    if (branch.dependencyDashboardCategory) {
-      (categorized[branch.dependencyDashboardCategory] ??= []).push(branch);
-    } else {
-      uncategorized.push(branch);
-    }
-  }
-
   if (Object.keys(categorized).length > 0) {
     for (const [category, branches] of Object.entries(categorized).sort(
       ([keyA], [keyB]) => keyA.localeCompare(keyB),
