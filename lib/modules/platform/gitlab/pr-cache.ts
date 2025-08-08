@@ -37,7 +37,7 @@ export class GitlabPrCache {
         updated_at: null,
         author,
       };
-    } else if (pullRequestCache.updated_at?.match(/\.\d\d\dZ$/)) {
+    } else if (pullRequestCache.updated_at?.match(regEx(/\.\d\d\dZ$/))) {
       logger.debug('Resetting PR cache of older format');
       pullRequestCache = {
         items: {},
