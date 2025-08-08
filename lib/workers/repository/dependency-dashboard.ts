@@ -218,6 +218,12 @@ function splitBranchesByCategory(filteredBranches: BranchConfig[]): {
   return { categorized, uncategorized };
 }
 
+function getBranchList(branches: BranchConfig[], listItemType: string): string {
+  return branches
+    .map((branch: BranchConfig): string => getListItem(branch, listItemType))
+    .join('');
+}
+
 function getBranchesListMd(
   branches: BranchConfig[],
   predicate: (
@@ -246,11 +252,7 @@ function getBranchesListMd(
     )) {
       result = result.trimEnd() + '\n\n';
       result += `### ${category}\n\n`;
-      result += branches
-        .map((branch: BranchConfig): string =>
-          getListItem(branch, listItemType),
-        )
-        .join('');
+      result += getBranchList(branches, listItemType);
     }
     if (uncategorized.length > 0) {
       result = result.trimEnd() + '\n\n';
@@ -258,9 +260,7 @@ function getBranchesListMd(
     }
   }
   result = result.trimEnd() + '\n\n';
-  result += uncategorized
-    .map((branch: BranchConfig): string => getListItem(branch, listItemType))
-    .join('');
+  result += getBranchList(uncategorized, listItemType);
 
   if (bulkComment && bulkMessage && filteredBranches.length > 1) {
     if (Object.keys(categorized).length > 0) {
@@ -268,7 +268,8 @@ function getBranchesListMd(
       result += '### All\n\n';
     }
     result += getCheckbox(bulkComment);
-    result += `${bulkIcon ? bulkIcon + ' ' : ''}**${bulkMessage}**${bulkIcon ? ' ' + bulkIcon : ''}`;
+    const icon = ` ${bulkIcon ?? ''} `;
+    result += `${icon}**${bulkMessage}**${icon}`.trim();
   }
   return result.trimEnd() + '\n\n';
 }
