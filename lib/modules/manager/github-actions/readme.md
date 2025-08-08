@@ -75,3 +75,14 @@ For example, normally the `^` syntax is not used in `go` or `python`, but it's s
 
 Depending on your use case, you may need to change `versioning` manually.
 If you find a use case which you think Renovate could/should automatically detect and support without manual configuration, please raise a Discussion to suggest it.
+
+### commonly used community actions
+
+Renovate also supports some commonly used community actions:
+
+- `astral-sh/setup-uv`
+- `pnpm/action-setup`
+- `pdm-project/setup-pdm`
+- `jaxxstorm/action-install-gh-release`
+- `sigoden/install-binary`
+- `prefix-dev/setup-pixi`
