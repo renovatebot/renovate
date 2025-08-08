@@ -147,7 +147,8 @@ describe('modules/manager/pub/extract', () => {
           {
             currentValue: '^1.1.0',
             depName: 'git_package_version_extract',
-            packageName: 'https://github.com/some-url/some-package-version-extract',
+            packageName:
+              'https://github.com/some-url/some-package-version-extract',
             depType: dependenciesDepType,
             datasource: gitRefDatasource,
             extractVersion: 'v',

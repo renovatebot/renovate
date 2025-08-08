@@ -61,7 +61,11 @@ function extractFromSection(
         currentValue = git?.ref;
       } else if (is.object(git) && !is.string(git?.ref) && is.string(version)) {
         currentValue = version;
-      } else if (is.object(git) && !is.string(git?.ref) && !is.string(version)) {
+      } else if (
+        is.object(git) &&
+        !is.string(git?.ref) &&
+        !is.string(version)
+      ) {
         currentValue = '';
         skipReason = 'unspecified-version';
       } else {
