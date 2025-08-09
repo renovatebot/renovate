@@ -2863,16 +2863,19 @@ Followed by some information.
                       slug: 'alice',
                       active: true,
                       emailAddress: 'alice@alice.com',
+                      displayName: 'alice',
                     },
                     {
                       slug: 'bob',
                       active: false,
-                      emailAddresses: 'bob@bob.com',
+                      emailAddress: 'bob@bob.com',
+                      displayName: 'bob',
                     },
                     {
                       slug: 'carol',
                       active: true,
                       emailAddress: 'carol@carol.com',
+                      displayName: 'carol',
                     },
                   ],
                 },
@@ -2901,6 +2904,7 @@ Followed by some information.
                       slug: 'dave',
                       active: true,
                       emailAddress: 'dave@dave.com',
+                      displayName: 'dave',
                     },
                   ],
                 },
@@ -2943,11 +2947,13 @@ Followed by some information.
                       slug: 'user1',
                       active: false,
                       emailAddress: 'user1@user1.com',
+                      displayName: 'user1',
                     },
                     {
                       slug: 'user2',
                       active: false,
                       emailAddress: 'user2@user2.com',
+                      displayName: 'user2',
                     },
                   ],
                 },
@@ -2979,6 +2985,7 @@ Followed by some information.
                       slug: 'jane',
                       active: true,
                       emailAddress: 'jane@project.com',
+                      displayName: 'jane',
                     },
                   ],
                 },
@@ -2992,6 +2999,7 @@ Followed by some information.
                       slug: 'zoe',
                       active: true,
                       emailAddress: 'zoe@repo.com',
+                      displayName: 'zoe',
                     },
                   ],
                 },
@@ -3024,6 +3032,7 @@ Followed by some information.
                       slug: 'jane',
                       active: true,
                       emailAddress: 'jane@project.com',
+                      displayName: 'jane',
                     },
                   ],
                 },
@@ -3040,16 +3049,23 @@ Followed by some information.
           const scope = await initRepo();
 
           const userArray = [
-            { slug: 'zoe', active: true, emailAddress: 'zoe@zoe.com' },
+            {
+              slug: 'zoe',
+              active: true,
+              emailAddress: 'zoe@zoe.com',
+              displayName: 'zoe',
+            },
             {
               slug: 'user1',
               active: true,
               emailAddress: 'user1@user1.com',
+              displayName: 'user1',
             },
             {
               slug: 'user2',
               active: true,
               emailAddress: 'user2@user2.com',
+              displayName: 'user2',
             },
           ];
 
@@ -3079,16 +3095,23 @@ Followed by some information.
         it('handles random with number correctly', async () => {
           const scope = await initRepo();
           const userArray = [
-            { slug: 'zoe', active: true, emailAddress: 'zoe@zoe.com' },
+            {
+              slug: 'zoe',
+              active: true,
+              emailAddress: 'zoe@zoe.com',
+              displayName: 'zoe',
+            },
             {
               slug: 'user1',
               active: true,
               emailAddress: 'user1@user1.com',
+              displayName: 'user1',
             },
             {
               slug: 'user2',
               active: true,
               emailAddress: 'user2@user2.com',
+              displayName: 'user2',
             },
           ];
 
@@ -3121,16 +3144,23 @@ Followed by some information.
         it('handles non-existent modifier correctly', async () => {
           const scope = await initRepo();
           const userArray = [
-            { slug: 'zoe', active: true, emailAddress: 'zoe@zoe.com' },
+            {
+              slug: 'zoe',
+              active: true,
+              emailAddress: 'zoe@zoe.com',
+              displayName: 'zoe',
+            },
             {
               slug: 'user1',
               active: true,
               emailAddress: 'user1@user1.com',
+              displayName: 'user1',
             },
             {
               slug: 'user2',
               active: true,
               emailAddress: 'user2@user2.com',
+              displayName: 'user2',
             },
           ];
 
@@ -3180,6 +3210,7 @@ Followed by some information.
                       slug: 'nope',
                       active: true,
                       emailAddress: 'nope@nope.com',
+                      displayName: 'nope',
                     },
                   ],
                 },
@@ -3203,11 +3234,13 @@ Followed by some information.
                       slug: 'alice',
                       active: true,
                       emailAddress: 'alice@alice.com',
+                      displayName: 'alice',
                     },
                     {
                       slug: 'bob',
                       active: true,
                       emailAddress: 'bob@bob.com',
+                      displayName: 'bob',
                     },
                   ],
                 },
