@@ -202,6 +202,35 @@ function getListItem(branch: BranchConfig, type: string): string {
   return item + ' (' + uniquePackages.join(', ') + ')\n';
 }
 
+function getBranchesListMd(
+  branches: BranchConfig[],
+  predicate: (
+    value: BranchConfig,
+    index: number,
+    array: BranchConfig[],
+  ) => unknown,
+  title: string,
+  description: string,
+  listItemType = 'approvePr',
+  bulkComment?: string,
+  bulkMessage?: string,
+  bulkIcon?: string,
+): string {
+  const filteredBranches = branches.filter(predicate);
+  if (filteredBranches.length === 0) {
+    return '';
+  }
+  let result = `## ${title}\n\n${description}\n\n`;
+  result += `${filteredBranches
+    .map((branch: BranchConfig): string => getListItem(branch, listItemType))
+    .join('')}`;
+  if (bulkComment && bulkMessage && filteredBranches.length > 1) {
+    result += getCheckbox(bulkComment);
+    result += `${bulkIcon ? bulkIcon + ' ' : ''}**${bulkMessage}**${bulkIcon ? ' ' + bulkIcon : ''}\n`;
+  }
+  return result + '\n';
+}
+
 function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
   let newIssueBody = issueBody;
   const repoProblems = extractRepoProblems(config.repository);
@@ -356,103 +385,68 @@ export async function ensureDependencyDashboard(
     issueBody += getAbandonedPackagesMd(packageFiles);
   }
 
-  const pendingApprovals = branches.filter(
+  issueBody += getBranchesListMd(
+    branches,
     (branch) => branch.result === 'needs-approval',
+    'Pending Approval',
+    'The following branches are pending approval. To create them, click on a checkbox below.',
+    'approve',
+    approveAllPendingPrs,
+    'Create all pending approval PRs at once',
+    '🔐',
   );
-  if (pendingApprovals.length) {
-    issueBody += '## Pending Approval\n\n';
-    issueBody += `The following branches are pending approval. To create them, click on a checkbox below.\n\n`;
-    for (const branch of pendingApprovals) {
-      issueBody += getListItem(branch, 'approve');
-    }
-    if (pendingApprovals.length > 1) {
-      issueBody += getCheckbox(approveAllPendingPrs);
-      issueBody += '🔐 **Create all pending approval PRs at once** 🔐\n';
-    }
-    issueBody += '\n';
-  }
-  const awaitingSchedule = branches.filter(
+  issueBody += getBranchesListMd(
+    branches,
     (branch) => branch.result === 'not-scheduled',
+    'Awaiting Schedule',
+    'The following updates are awaiting their schedule. To get an update now, click on a checkbox below.',
+    'unschedule',
   );
-  if (awaitingSchedule.length) {
-    issueBody += '## Awaiting Schedule\n\n';
-    issueBody +=
-      'The following updates are awaiting their schedule. To get an update now, click on a checkbox below.\n\n';
-    for (const branch of awaitingSchedule) {
-      issueBody += getListItem(branch, 'unschedule');
-    }
-    issueBody += '\n';
-  }
-  const rateLimited = branches.filter(
+  issueBody += getBranchesListMd(
+    branches,
     (branch) =>
       branch.result === 'branch-limit-reached' ||
       branch.result === 'pr-limit-reached' ||
       branch.result === 'commit-limit-reached',
+    'Rate-Limited',
+    'The following updates are currently rate-limited. To force their creation now, click on a checkbox below.',
+    'unlimit',
+    createAllRateLimitedPrs,
+    'Create all rate-limited PRs at once',
+    '🔐',
   );
-  if (rateLimited.length) {
-    issueBody += '## Rate-Limited\n\n';
-    issueBody +=
-      'The following updates are currently rate-limited. To force their creation now, click on a checkbox below.\n\n';
-    for (const branch of rateLimited) {
-      issueBody += getListItem(branch, 'unlimit');
-    }
-    if (rateLimited.length > 1) {
-      issueBody += getCheckbox(createAllRateLimitedPrs);
-      issueBody += '🔐 **Create all rate-limited PRs at once** 🔐\n';
-    }
-    issueBody += '\n';
-  }
-  const errorList = branches.filter((branch) => branch.result === 'error');
-  if (errorList.length) {
-    issueBody += '## Errored\n\n';
-    issueBody +=
-      'The following updates encountered an error and will be retried. To force a retry now, click on a checkbox below.\n\n';
-    for (const branch of errorList) {
-      issueBody += getListItem(branch, 'retry');
-    }
-    issueBody += '\n';
-  }
-  const awaitingPr = branches.filter(
+  issueBody += getBranchesListMd(
+    branches,
+    (branch) => branch.result === 'error',
+    'Errored',
+    'The following updates encountered an error and will be retried. To force a retry now, click on a checkbox below.',
+    'retry',
+  );
+  issueBody += getBranchesListMd(
+    branches,
     (branch) => branch.result === 'needs-pr-approval',
+    'PR Creation Approval Required',
+    'The following branches exist but PR creation requires approval. To approve PR creation, click on a checkbox below.',
   );
-  if (awaitingPr.length) {
-    issueBody += '## PR Creation Approval Required\n\n';
-    issueBody +=
-      'The following branches exist but PR creation requires approval. To approve PR creation, click on a checkbox below.\n\n';
-    for (const branch of awaitingPr) {
-      issueBody += getListItem(branch, 'approvePr');
-    }
-    issueBody += '\n';
-  }
-  const prEdited = branches.filter((branch) => branch.result === 'pr-edited');
-  if (prEdited.length) {
-    issueBody += '## Edited/Blocked\n\n';
-    issueBody += `The following updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox below.\n\n`;
-    for (const branch of prEdited) {
-      issueBody += getListItem(branch, 'rebase');
-    }
-    issueBody += '\n';
-  }
-  const prPending = branches.filter((branch) => branch.result === 'pending');
-  if (prPending.length) {
-    issueBody += '## Pending Status Checks\n\n';
-    issueBody += `The following updates await pending status checks. To force their creation now, click on a checkbox below.\n\n`;
-    for (const branch of prPending) {
-      issueBody += getListItem(branch, 'approvePr');
-    }
-    issueBody += '\n';
-  }
-  const prPendingBranchAutomerge = branches.filter(
+  issueBody += getBranchesListMd(
+    branches,
+    (branch) => branch.result === 'pr-edited',
+    'Edited/Blocked',
+    'The following updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox below.',
+    'rebase',
+  );
+  issueBody += getBranchesListMd(
+    branches,
+    (branch) => branch.result === 'pending',
+    'Pending Status Checks',
+    'The following updates await pending status checks. To force their creation now, click on a checkbox below.',
+  );
+  issueBody += getBranchesListMd(
+    branches,
     (branch) => branch.prBlockedBy === 'BranchAutomerge',
+    'Pending Branch Automerge',
+    'The following updates await pending status checks before automerging. To abort the branch automerge and create a PR instead, click on a checkbox below.',
   );
-  if (prPendingBranchAutomerge.length) {
-    issueBody += '## Pending Branch Automerge\n\n';
-    issueBody += `The following updates await pending status checks before automerging. To abort the branch automerge and create a PR instead, click on a checkbox below.\n\n`;
-    for (const branch of prPendingBranchAutomerge) {
-      issueBody += getListItem(branch, 'approvePr');
-    }
-    issueBody += '\n';
-  }
 
   const warn = getDepWarningsDashboard(packageFiles, config);
   if (warn) {
@@ -473,52 +467,35 @@ export async function ensureDependencyDashboard(
     'automerged',
     'pr-edited',
   ];
-  let inProgress = branches.filter(
+  const inProgress = branches.filter(
     (branch) =>
       !otherRes.includes(branch.result!) &&
       branch.prBlockedBy !== 'BranchAutomerge',
   );
-  const otherBranches = inProgress.filter(
+  issueBody += getBranchesListMd(
+    inProgress,
     (branch) => !!branch.prBlockedBy || !branch.prNo,
+    'Other Branches',
+    'The following updates are pending. To force the creation of a PR, click on a checkbox below.',
+    'other',
   );
-  // istanbul ignore if
-  if (otherBranches.length) {
-    issueBody += '## Other Branches\n\n';
-    issueBody += `The following updates are pending. To force the creation of a PR, click on a checkbox below.\n\n`;
-    for (const branch of otherBranches) {
-      issueBody += getListItem(branch, 'other');
-    }
-    issueBody += '\n';
-  }
-  inProgress = inProgress.filter(
+  issueBody += getBranchesListMd(
+    inProgress,
     (branch) => branch.prNo && !branch.prBlockedBy,
+    'Open',
+    'The following updates have all been created. To force a retry/rebase of any, click on a checkbox below.',
+    'rebase',
+    rebaseAllOpenPrs,
+    'Click on this checkbox to rebase all open PRs at once',
   );
-  if (inProgress.length) {
-    issueBody += '## Open\n\n';
-    issueBody +=
-      'The following updates have all been created. To force a retry/rebase of any, click on a checkbox below.\n\n';
-    for (const branch of inProgress) {
-      issueBody += getListItem(branch, 'rebase');
-    }
-    if (inProgress.length > 2) {
-      issueBody += getCheckbox(rebaseAllOpenPrs);
-      issueBody += '**Click on this checkbox to rebase all open PRs at once**';
-      issueBody += '\n';
-    }
-    issueBody += '\n';
-  }
-  const alreadyExisted = branches.filter(
+
+  issueBody += getBranchesListMd(
+    branches,
     (branch) => branch.result === 'already-existed',
+    'Ignored or Blocked',
+    'The following updates are blocked by an existing closed PR. To recreate the PR, click on a checkbox below.',
+    'recreate',
   );
-  if (alreadyExisted.length) {
-    issueBody += '## Ignored or Blocked\n\n';
-    issueBody +=
-      'The following updates are blocked by an existing closed PR. To recreate the PR, click on a checkbox below.\n\n';
-    for (const branch of alreadyExisted) {
-      issueBody += getListItem(branch, 'recreate');
-    }
-    issueBody += '\n';
-  }
 
   if (!hasBranches) {
     issueBody +=
@@ -537,7 +514,7 @@ export async function ensureDependencyDashboard(
   issueBody += footer;
 
   if (config.dependencyDashboardIssue) {
-    // If we're not changing the dashboard issue then we can skip checking if the user changed it
+    // If we're not changing the dashboard issue, then we can skip checking if the user changed it.
     // The cached issue we get back here will reflect its state at the _start_ of our run
     const cachedIssue = await platform.getIssue?.(
       config.dependencyDashboardIssue,

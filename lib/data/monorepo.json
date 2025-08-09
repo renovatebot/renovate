@@ -400,6 +400,7 @@
     "ksp": "https://github.com/google/ksp",
     "ktor": "https://github.com/ktorio/ktor",
     "lamar": "https://github.com/JasperFx/lamar",
+    "langchain4j": "https://github.com/langchain4j/langchain4j",
     "lerna": "https://github.com/lerna/lerna",
     "lerna-lite": "https://github.com/lerna-lite/lerna-lite",
     "lexical": "https://github.com/facebook/lexical",
