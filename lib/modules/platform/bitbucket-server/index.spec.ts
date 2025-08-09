@@ -3045,6 +3045,32 @@ Followed by some information.
           expect(users).toEqual(['jane@project.com']);
         });
 
+        it('deals with not found groups correctly', async () => {
+          const scope = await initRepo();
+
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/settings/reviewer-groups?limit=100`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [
+                {
+                  name: 'other-group',
+                  scope: {
+                    type: 'PROJECT',
+                  },
+                  users: [],
+                },
+              ],
+            });
+
+          const users = await bitbucket.expandGroupMembers([
+            '@reviewer-group/my-group',
+          ]);
+          expect(users).toEqual([]);
+        });
+
         it('handles random without number correctly', async () => {
           const scope = await initRepo();
 
