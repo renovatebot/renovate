@@ -370,7 +370,7 @@ describe('modules/manager/pep621/processors/uv', () => {
 
   describe('updateArtifacts()', () => {
     it('returns null if there is no lock file', async () => {
-      fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       const updatedDeps = [{ packageName: 'dep1' }];
       const result = await processor.updateArtifacts(
         {
@@ -391,7 +391,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         binarySource: 'docker',
         dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
       });
-      fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce('test content');
       fs.readLocalFile.mockResolvedValueOnce('test content');
       // python
@@ -452,7 +452,7 @@ describe('modules/manager/pep621/processors/uv', () => {
     it('returns artifact error', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
-      fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       fs.readLocalFile.mockImplementationOnce(() => {
         throw new Error('test error');
       });
@@ -476,7 +476,7 @@ describe('modules/manager/pep621/processors/uv', () => {
     it('return update dep update', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);
-      fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce('test content');
       fs.readLocalFile.mockResolvedValueOnce('changed test content');
       // python
@@ -542,7 +542,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
-      fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce('test content');
       fs.readLocalFile.mockResolvedValueOnce('changed test content');
       // python
@@ -684,7 +684,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           getAccessToken: vi.fn().mockResolvedValue(undefined),
         })),
       );
-      fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce('test content');
       fs.readLocalFile.mockResolvedValueOnce('changed test content');
       // python
@@ -783,7 +783,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           getAccessToken: vi.fn().mockResolvedValue(undefined),
         })),
       );
-      fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce('test content');
       fs.readLocalFile.mockResolvedValueOnce('changed test content');
       // python
@@ -839,7 +839,7 @@ describe('modules/manager/pep621/processors/uv', () => {
     it('return update on lockfileMaintenance', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);
-      fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce('test content');
       fs.readLocalFile.mockResolvedValueOnce('changed test content');
       // python
