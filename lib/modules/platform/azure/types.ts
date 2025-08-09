@@ -1,3 +1,4 @@
+import { AZURE_POLICY_TYPES } from '../../../constants';
 import type { Pr } from '../types';
 
 export interface AzurePr extends Pr {
@@ -11,3 +12,8 @@ export const AzurePrVote = {
   ApprovedWithSuggestions: 5,
   Approved: 10,
 } as const;
+
+export const getAzurePolicyTypes = (): string[] => [
+  ...Object.values(AZURE_POLICY_TYPES),
+  ...Object.keys(AZURE_POLICY_TYPES),
+];
