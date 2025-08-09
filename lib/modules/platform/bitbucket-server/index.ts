@@ -1298,7 +1298,7 @@ function isReviewerGroup(entry: string): boolean {
 function parseModifier(value: string): number | null {
   const match = regEx('^random(?:\\((\\d+)\\))?$').exec(value);
   if (match) {
-    return parseInt(match[1] ?? '1', 10); // e.g., random(2) → 2
+    return parseInt(match[1] ?? '1', 10);
   } else {
     return null;
   }
