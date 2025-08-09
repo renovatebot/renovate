@@ -9,6 +9,7 @@ import {
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { NpmDatasource } from '../../../datasource/npm';
 
+import type { YarnrcConfig } from '../schema';
 import type {
   ExtractConfig,
   PackageFile,
@@ -19,7 +20,6 @@ import { getExtractedConstraints } from './common/dependency';
 import { extractPackageJson } from './common/package-file';
 import { extractPnpmWorkspaceFile, tryParsePnpmWorkspaceYaml } from './pnpm';
 import { postExtract } from './post';
-import type { YarnrcConfig } from '../schema';
 import type { NpmPackage } from './types';
 import { isZeroInstall } from './yarn';
 import {
