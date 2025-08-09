@@ -475,6 +475,16 @@ The above configuration approach will mean the values are redacted in logs like 
          "customEnvVariables": {"SECRET_TOKEN": "{{ secrets.SECRET_TOKEN }}"},
 ```
 
+## deleteAdditionalConfigFile
+
+If set to `true` Renovate tries to delete the additional self-hosted config file after reading it.
+
+The process that runs Renovate must have the correct permissions to delete the additional config file.
+
+<!-- prettier-ignore -->
+!!! tip
+    You can tell Renovate where to find your config file with the `RENOVATE_ADDITONAL_CONFIG_FILE` environment variable.
+
 ## deleteConfigFile
 
 If set to `true` Renovate tries to delete the self-hosted config file after reading it.

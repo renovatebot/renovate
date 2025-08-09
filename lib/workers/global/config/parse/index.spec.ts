@@ -304,5 +304,38 @@ describe('workers/global/config/parse/index', () => {
         },
       });
     });
+
+    it('overrides file config with additional file config', async () => {
+      const additionalConfigPath = upath.join(
+        __dirname,
+        '__fixtures__/additional-config.js',
+      );
+      fileConfigParser.getConfig.mockResolvedValueOnce({
+        labels: ['file-config'],
+      });
+      const env: NodeJS.ProcessEnv = {
+        RENOVATE_ADDITIONAL_CONFIG_FILE: additionalConfigPath,
+      };
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig.labels).toMatchObject(['additional-file-config']);
+    });
+
+    it('merges extends from file config with additional file config', async () => {
+      const additionalConfigPath = upath.join(
+        __dirname,
+        '__fixtures__/additional-config.js',
+      );
+      fileConfigParser.getConfig.mockResolvedValueOnce({
+        extends: [':pinDigests'],
+      });
+      const env: NodeJS.ProcessEnv = {
+        RENOVATE_ADDITIONAL_CONFIG_FILE: additionalConfigPath,
+      };
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig.extends).toMatchObject([
+        ':pinDigests',
+        'customManagers:azurePipelinesVersions',
+      ]);
+    });
   });
 });
