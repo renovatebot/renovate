@@ -5,7 +5,6 @@ import upath from 'upath';
 import { PLATFORM_GPG_FAILED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { exec } from '../exec';
-import type { ExecResult } from '../exec/types';
 import { newlineRegex, regEx } from '../regex';
 import { addSecretForSanitizing } from '../sanitize';
 
@@ -20,12 +19,17 @@ let gitPrivateKey: PrivateKey | undefined;
 
 abstract class PrivateKey {
   protected readonly key: string;
+  protected readonly passphrase: string | undefined;
   protected keyId: string | undefined;
   protected abstract readonly gpgFormat: string;
 
-  constructor(key: string) {
+  constructor(key: string, passphrase: string | undefined) {
     this.key = key;
+    this.passphrase = passphrase;
     addSecretForSanitizing(this.key, 'global');
+    if (this.passphrase) {
+      addSecretForSanitizing(this.passphrase, 'global');
+    }
     logger.debug(
       'gitPrivateKey: successfully set (but not yet written/configured)',
     );
@@ -55,8 +59,13 @@ abstract class PrivateKey {
 class GPGKey extends PrivateKey {
   protected readonly gpgFormat = 'openpgp';
 
-  constructor(key: string) {
-    super(key.trim());
+  constructor(key: string, passphrase: string | undefined) {
+    super(key.trim(), passphrase);
+    if (passphrase) {
+      logger.warn(
+        'Passphrase is not yet supported for GPG keys, it will be ignored',
+      );
+    }
   }
 
   protected async importKey(): Promise<string | undefined> {
@@ -82,12 +91,21 @@ class SSHKey extends PrivateKey {
 
   protected async importKey(): Promise<string | undefined> {
     const keyFileName = upath.join(os.tmpdir() + '/git-private-ssh.key');
-    if (await this.hasPassphrase(keyFileName)) {
-      throw new Error('SSH key must have an empty passhprase');
-    }
     await fs.outputFile(keyFileName, this.key.replace(/\n?$/, '\n'));
     process.on('exit', () => fs.removeSync(keyFileName));
     await fs.chmod(keyFileName, 0o600);
+
+    // If there's a passphrase, decrypt the private key and save without passphrase
+    if (this.passphrase) {
+      await exec(
+        // -p: change passphrase
+        // -f: key file
+        // -P: old passphrase
+        // -N: new passphrase (empty = no passphrase)
+        `ssh-keygen -p -f ${keyFileName} -P "${this.passphrase}" -N ""`,
+      );
+    }
+
     // HACK: `git` calls `ssh-keygen -Y sign ...` internally for SSH-based
     // commit signing. Technically, only the private key is needed for signing,
     // but `ssh-keygen` has an implementation quirk which requires also the
@@ -95,22 +113,11 @@ class SSHKey extends PrivateKey {
     // private key just to satisfy `ssh-keygen` until the problem has been
     // resolved.
     // https://github.com/renovatebot/renovate/issues/18197#issuecomment-2152333710
-    const { stdout } = await exec(`ssh-keygen -y -P "" -f ${keyFileName}`);
+    const { stdout } = await exec(`ssh-keygen -y -f ${keyFileName}`);
     const pubFileName = `${keyFileName}.pub`;
     await fs.outputFile(pubFileName, stdout);
     process.on('exit', () => fs.removeSync(pubFileName));
     return keyFileName;
-  }
-
-  private async hasPassphrase(keyFileName: string): Promise<boolean> {
-    try {
-      await exec(`ssh-keygen -y -P "" -f ${keyFileName}`);
-    } catch (err) {
-      return (err as ExecResult).stderr.includes(
-        'incorrect passphrase supplied to decrypt private key',
-      );
-    }
-    return false;
   }
 }
 
@@ -118,22 +125,28 @@ function getPrivateKeyFormat(key: string): PrivateKeyFormat {
   return sshKeyRegex.test(key) ? 'ssh' : 'gpg';
 }
 
-function createPrivateKey(key: string): PrivateKey {
+function createPrivateKey(
+  key: string,
+  passphrase: string | undefined,
+): PrivateKey {
   switch (getPrivateKeyFormat(key)) {
     case 'gpg':
       logger.debug('gitPrivateKey: GPG key detected');
-      return new GPGKey(key);
+      return new GPGKey(key, passphrase);
     case 'ssh':
       logger.debug('gitPrivateKey: SSH key detected');
-      return new SSHKey(key);
+      return new SSHKey(key, passphrase);
   }
 }
 
-export function setPrivateKey(key: string | undefined): void {
+export function setPrivateKey(
+  key: string | undefined,
+  passphrase: string | undefined,
+): void {
   if (!is.nonEmptyStringAndNotWhitespace(key)) {
     return;
   }
-  gitPrivateKey = createPrivateKey(key);
+  gitPrivateKey = createPrivateKey(key, passphrase);
 }
 
 export async function writePrivateKey(): Promise<void> {

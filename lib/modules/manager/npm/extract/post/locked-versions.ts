@@ -56,7 +56,7 @@ export async function getLockedVersions(
       if (!lockFileCache[npmLock]) {
         logger.trace('Retrieving/parsing ' + npmLock);
         const cache = await getNpmLock(npmLock);
-        // istanbul ignore if
+        /* v8 ignore next 4 -- needs test */
         if (!cache) {
           logger.warn({ npmLock }, 'Npm: unable to get lockfile');
           return;
