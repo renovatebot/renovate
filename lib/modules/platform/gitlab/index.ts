@@ -65,7 +65,7 @@ import {
 } from './http';
 import { getMR, updateMR } from './merge-request';
 import { GitlabPrCache } from './pr-cache';
-import { LastPipelineId } from './schema';
+import { GitLabApprovalRules, LastPipelineId } from './schema';
 import type {
   GitLabMergeRequest,
   GitlabComment,
@@ -751,6 +751,53 @@ export async function createPr({
   }
   const description = sanitize(rawDescription);
   logger.debug(`Creating Merge Request: ${title}`);
+
+  let reviewerIds: number[] = [];
+  if (platformPrOptions?.gitLabReviewersFromApprovalRule) {
+    logger.debug(
+      `Fetching reviewers from GitLab approval rule: ${platformPrOptions.gitLabReviewersFromApprovalRule}`,
+    );
+    try {
+      const opts: GitlabHttpOptions = {};
+      opts.cacheProvider = memCacheProvider;
+
+      const approvalRules = await gitlabApi.getJson(
+        `projects/${config.repository}/approval_rules`,
+        opts,
+        GitLabApprovalRules,
+      );
+
+      const approvalRuleReviewerIds = new Set<number>();
+      const matchingApprovalRule = approvalRules.body.find(
+        (rule) =>
+          rule.name === platformPrOptions.gitLabReviewersFromApprovalRule,
+      );
+
+      if (matchingApprovalRule) {
+        if (matchingApprovalRule.eligible_approvers?.length) {
+          logger.debug('Found matching approval rule');
+          for (const approver of matchingApprovalRule.eligible_approvers) {
+            approvalRuleReviewerIds.add(approver.id);
+          }
+          reviewerIds = Array.from(approvalRuleReviewerIds);
+
+          logger.debug(
+            { reviewerIds },
+            'Extracted reviewer IDs from approval rules',
+          );
+        } else {
+          logger.debug(
+            'Matching approval rule found but has no eligible approvers',
+          );
+        }
+      } else {
+        logger.debug('No matching approval rule found');
+      }
+    } catch (err) {
+      logger.warn({ err }, 'Failed to fetch GitLab approval rules');
+    }
+  }
+
   const res = await gitlabApi.postJson<GitLabMergeRequest>(
     `projects/${config.repository}/merge_requests`,
     {
@@ -762,6 +809,7 @@ export async function createPr({
         description,
         labels: (labels ?? []).join(','),
         squash: config.squash,
+        reviewer_ids: reviewerIds,
       },
     },
   );
