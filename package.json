@@ -334,7 +334,7 @@
     "jest-extended": "6.0.0",
     "lint-staged": "16.1.2",
     "markdownlint-cli2": "0.18.1",
-    "memfs": "4.28.1",
+    "memfs": "4.35.0",
     "nock": "14.0.8",
     "npm-run-all2": "8.0.4",
     "nyc": "17.1.0",
