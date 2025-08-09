@@ -1233,16 +1233,15 @@ export async function expandGroupMembers(
         continue;
       }
 
-      if (modifier === undefined) {
-        expandedUsers.push(...groupUsers); // Add all users from the group
-        continue;
+      if (modifier) {
+        const randomCount = parseModifier(modifier);
+        if (randomCount) {
+          expandedUsers.push(...sampleSize(groupUsers, randomCount));
+          continue;
+        }
       }
-      const randomCount = parseModifier(modifier);
-      if (randomCount === null) {
-        expandedUsers.push(...groupUsers);
-        continue;
-      }
-      expandedUsers.push(...sampleSize(groupUsers, randomCount));
+
+      expandedUsers.push(...groupUsers);
     } else {
       expandedUsers.push(baseEntry); // Add the user entry
     }
