@@ -723,8 +723,20 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
         config.dependencyDashboardTitle,
       );
-      expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('dependency-dashboard-with-1-PR-group.txt'),
+      expect(platform.ensureIssue.mock.calls[0][0].body.trim()).toBe(
+        codeBlock`
+This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+## Group Size Not Met
+
+The following branches have not met their minimum group size. To create them, click on a checkbox below.
+
+ - [ ] <!-- approveGroup-branch=groupBranch1 -->undefined
+
+## Detected dependencies
+
+None detected
+`,
       );
 
       // same with dry run
