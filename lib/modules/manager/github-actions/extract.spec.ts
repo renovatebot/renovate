@@ -586,6 +586,20 @@ describe('modules/manager/github-actions/extract', () => {
       jobs:
         build:
           steps:
+            - name: "Setup .NET"
+              uses: actions/setup-dotnet@v3
+              with:
+                dotnet-version: '8.0.x'
+            - name: "Setup .NET with exact version"
+              uses: actions/setup-dotnet@v3
+              with:
+                dotnet-version: '9.0.303'
+            - name: "Setup .NET with multiple versions"
+              uses: actions/setup-dotnet@v3
+              with:
+                dotnet-version: |
+                  8.0.x
+                  9.0.x
             - name: "Setup Node.js"
               uses: actions/setup-node@v3
               with:
@@ -609,6 +623,39 @@ describe('modules/manager/github-actions/extract', () => {
 
       const res = extractPackageFile(yamlContent, 'workflow.yml');
       expect(res?.deps).toMatchObject([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v3',
+          datasource: 'github-tags',
+          depName: 'actions/setup-dotnet',
+          depType: 'action',
+          replaceString: 'actions/setup-dotnet@v3',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v3',
+          datasource: 'github-tags',
+          depName: 'actions/setup-dotnet',
+          depType: 'action',
+          replaceString: 'actions/setup-dotnet@v3',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v3',
+          datasource: 'github-tags',
+          depName: 'actions/setup-dotnet',
+          depType: 'action',
+          replaceString: 'actions/setup-dotnet@v3',
+          versioning: 'docker',
+        },
         {
           autoReplaceStringTemplate:
             '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
@@ -663,6 +710,42 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
           versioning: 'docker',
+        },
+        {
+          depName: 'dotnet',
+          packageName: 'dotnet-sdk',
+          currentValue: '8.0.x',
+          datasource: 'dotnet-version',
+          versioning: 'dotnet-sdk',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+        {
+          depName: 'dotnet',
+          packageName: 'dotnet-sdk',
+          currentValue: '9.0.303',
+          datasource: 'dotnet-version',
+          versioning: 'dotnet-sdk',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+        {
+          depName: 'dotnet',
+          packageName: 'dotnet-sdk',
+          currentValue: '8.0.x',
+          datasource: 'dotnet-version',
+          versioning: 'dotnet-sdk',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+        {
+          depName: 'dotnet',
+          packageName: 'dotnet-sdk',
+          currentValue: '9.0.x',
+          datasource: 'dotnet-version',
+          versioning: 'dotnet-sdk',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
         },
         {
           depName: 'node',
@@ -717,6 +800,20 @@ describe('modules/manager/github-actions/extract', () => {
         runs:
           using: 'composite'
           steps:
+            - name: "Setup .NET"
+              uses: actions/setup-dotnet@v3
+              with:
+                dotnet-version: '8.0.x'
+            - name: "Setup .NET with exact version"
+              uses: actions/setup-dotnet@v3
+              with:
+                dotnet-version: '9.0.303'
+            - name: "Setup .NET with multiple versions"
+              uses: actions/setup-dotnet@v3
+              with:
+                dotnet-version: |
+                  8.0.x
+                  9.0.x
             - name: "Setup Node.js"
               uses: actions/setup-node@v3
               with:
@@ -741,6 +838,39 @@ describe('modules/manager/github-actions/extract', () => {
 
       const res = extractPackageFile(yamlContent, 'action.yml');
       expect(res?.deps).toMatchObject([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v3',
+          datasource: 'github-tags',
+          depName: 'actions/setup-dotnet',
+          depType: 'action',
+          replaceString: 'actions/setup-dotnet@v3',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v3',
+          datasource: 'github-tags',
+          depName: 'actions/setup-dotnet',
+          depType: 'action',
+          replaceString: 'actions/setup-dotnet@v3',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v3',
+          datasource: 'github-tags',
+          depName: 'actions/setup-dotnet',
+          depType: 'action',
+          replaceString: 'actions/setup-dotnet@v3',
+          versioning: 'docker',
+        },
         {
           autoReplaceStringTemplate:
             '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
@@ -795,6 +925,42 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
           versioning: 'docker',
+        },
+        {
+          depName: 'dotnet',
+          packageName: 'dotnet-sdk',
+          currentValue: '8.0.x',
+          datasource: 'dotnet-version',
+          versioning: 'dotnet-sdk',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+        {
+          depName: 'dotnet',
+          packageName: 'dotnet-sdk',
+          currentValue: '9.0.303',
+          datasource: 'dotnet-version',
+          versioning: 'dotnet-sdk',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+        {
+          depName: 'dotnet',
+          packageName: 'dotnet-sdk',
+          currentValue: '8.0.x',
+          datasource: 'dotnet-version',
+          versioning: 'dotnet-sdk',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+        {
+          depName: 'dotnet',
+          packageName: 'dotnet-sdk',
+          currentValue: '9.0.x',
+          datasource: 'dotnet-version',
+          versioning: 'dotnet-sdk',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
         },
         {
           depName: 'node',
