@@ -67,13 +67,14 @@ async function rebaseCheck(
     logger.debug(
       `Manual rebase requested via PR labels for #${branchPr.number}`,
     );
-    // istanbul ignore if
+    /* v8 ignore start -- needs test */
     if (GlobalConfig.get('dryRun')) {
       logger.info(
         `DRY-RUN: Would delete label ${config.rebaseLabel!} from #${
           branchPr.number
         }`,
       );
+      /* v8 ignore stop -- needs test */
     } else {
       await platform.deleteLabel(branchPr.number, config.rebaseLabel!);
     }
@@ -93,9 +94,10 @@ async function rebaseCheck(
 async function deleteBranchSilently(branchName: string): Promise<void> {
   try {
     await scm.deleteBranch(branchName);
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore start -- needs test */
+  } catch (err) {
     logger.debug({ branchName, err }, 'Branch auto-remove failed');
-  }
+  } /* v8 ignore stop -- needs test */
 }
 
 function userChangedTargetBranch(pr: Pr): boolean {
@@ -188,7 +190,6 @@ export async function processBranch(
       );
       return {
         branchExists: false,
-        prNo: branchPr?.number,
         result: 'pending',
       };
     }
@@ -199,7 +200,6 @@ export async function processBranch(
         );
         return {
           branchExists,
-          prNo: branchPr?.number,
           result: 'needs-approval',
         };
       }
@@ -209,7 +209,6 @@ export async function processBranch(
         );
         return {
           branchExists,
-          prNo: branchPr?.number,
           result: 'needs-approval',
         };
       }
@@ -228,7 +227,6 @@ export async function processBranch(
       logger.debug('Reached branch limit - skipping branch creation');
       return {
         branchExists,
-        prNo: branchPr?.number,
         result: 'branch-limit-reached',
       };
     }
@@ -329,7 +327,6 @@ export async function processBranch(
         logger.debug('Skipping branch creation as not within schedule');
         return {
           branchExists,
-          prNo: branchPr?.number,
           result: 'not-scheduled',
         };
       }
@@ -426,7 +423,6 @@ export async function processBranch(
         );
         return {
           branchExists,
-          prNo: branchPr?.number,
           result: 'pending',
         };
       }
@@ -496,7 +492,6 @@ export async function processBranch(
     ) {
       await scm.checkoutBranch(config.baseBranch);
       const res = await getUpdatedPackageFiles(config);
-      // istanbul ignore if
       if (res.artifactErrors && config.artifactErrors) {
         res.artifactErrors = config.artifactErrors.concat(res.artifactErrors);
       }
@@ -583,7 +578,6 @@ export async function processBranch(
         }
       } else if (config.updatedArtifacts?.length && branchPr) {
         // If there are artifacts, no errors, and an existing PR then ensure any artifacts error comment is removed
-        // istanbul ignore if
         if (GlobalConfig.get('dryRun')) {
           logger.info(
             `DRY-RUN: Would ensure comment removal in PR #${branchPr.number}`,
@@ -645,7 +639,6 @@ export async function processBranch(
           platformPrOptions,
         });
       }
-      // istanbul ignore if
       if (platform.refreshPr) {
         await platform.refreshPr(branchPr.number);
       }
@@ -653,7 +646,6 @@ export async function processBranch(
     if (!commitSha && !branchExists) {
       return {
         branchExists,
-        prNo: branchPr?.number,
         result: 'no-work',
       };
     }
@@ -701,18 +693,23 @@ export async function processBranch(
         return { branchExists: false, result: 'automerged' };
       }
       if (mergeStatus === 'off schedule') {
-        logger.debug(
-          'Branch cannot automerge now because automergeSchedule is off schedule - skipping',
-        );
-        return {
-          branchExists,
-          result: 'not-scheduled',
-          commitSha,
-        };
+        if (userRebaseRequested) {
+          config.forcePr = true;
+        } else {
+          logger.debug(
+            'Branch cannot automerge now because automergeSchedule is off schedule - skipping',
+          );
+          return {
+            branchExists,
+            result: 'not-scheduled',
+            commitSha,
+          };
+        }
       }
       if (
         mergeStatus === 'stale' &&
         ['conflicted', 'never'].includes(config.rebaseWhen!) &&
+        /* v8 ignore next -- needs test */
         !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel))
       ) {
         logger.warn(
@@ -733,7 +730,8 @@ export async function processBranch(
         config.branchAutomergeFailureMessage = mergeStatus;
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore start -- needs test */
+  } catch (err) {
     if (err.statusCode === 404) {
       logger.debug({ err }, 'Received a 404 error - aborting run');
       throw new Error(REPOSITORY_CHANGED);
@@ -816,7 +814,7 @@ export async function processBranch(
       result: 'error',
       commitSha,
     };
-  }
+  } /* v8 ignore stop -- needs test */
   try {
     logger.debug('Ensuring PR');
     logger.debug(
@@ -963,7 +961,8 @@ export async function processBranch(
         }
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore start -- needs test */
+  } catch (err) {
     if (
       err instanceof ExternalHostError ||
       [PLATFORM_RATE_LIMIT_EXCEEDED, REPOSITORY_CHANGED].includes(err.message)
@@ -973,7 +972,7 @@ export async function processBranch(
     }
     // Otherwise don't throw here - we don't want to stop the other renovations
     logger.error({ err }, `Error ensuring PR`);
-  }
+  } /* v8 ignore stop -- needs test */
   if (!branchExists) {
     return {
       branchExists: true,
