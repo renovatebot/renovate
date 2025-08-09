@@ -6,6 +6,19 @@ export const PnpmCatalogsSchema = z.object({
   catalogs: z.optional(z.record(z.record(z.string()))),
 });
 
+export const YarnrcSchema = z.object({
+  npmRegistryServer: z.string().optional(),
+  npmScopes: z
+    .record(
+      z.object({
+        npmRegistryServer: z.string().optional(),
+      }),
+    )
+    .optional(),
+});
+
+export type YarnrcConfig = z.infer<typeof YarnrcSchema>;
+
 export const PnpmWorkspaceFileSchema = z
   .object({
     packages: z.array(z.string()),
