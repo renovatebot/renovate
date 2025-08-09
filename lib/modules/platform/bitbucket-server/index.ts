@@ -52,7 +52,7 @@ import type {
   PullRequestActivity,
   PullRequestCommentActivity,
 } from './schema';
-import { UserSchema, UsersSchema, isEmail } from './schema';
+import { isEmail, UserSchema, UsersSchema } from './schema';
 import type {
   BbsConfig,
   BbsPr,
@@ -62,7 +62,15 @@ import type {
   BbsRestUserRef,
 } from './types';
 import * as utils from './utils';
-import { getExtraCloneOpts } from './utils';
+import { getExtraCloneOpts } from './utils'; /*
+ * Version: 5.3 (EOL Date: 15 Aug 2019)
+ * See following docs for api information:
+ * https://docs.atlassian.com/bitbucket-server/rest/5.3.0/bitbucket-rest.html
+ * https://docs.atlassian.com/bitbucket-server/rest/5.3.0/bitbucket-build-rest.html
+ *
+ * See following page for uptodate supported versions
+ * https://confluence.atlassian.com/support/atlassian-support-end-of-life-policy-201851003.html#AtlassianSupportEndofLifePolicy-BitbucketServer
+ */
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -1222,25 +1230,24 @@ export async function expandGroupMembers(
 ): Promise<string[]> {
   logger.debug(`expandGroupMembers(${reviewers.join(', ')})`);
   const expandedUsers: string[] = [];
+  const reviewerGroupPrefix = '@reviewer-group/';
 
   for (const reviewer of reviewers) {
     const [baseEntry, modifier] = reviewer.split(':');
 
-    if (isReviewerGroup(baseEntry)) {
-      const groupName = baseEntry.replace(regEx('^@reviewer-group/'), '');
+    if (baseEntry.startsWith(reviewerGroupPrefix)) {
+      const groupName = baseEntry.replace(reviewerGroupPrefix, '');
       const groupUsers = await getUsersFromReviewerGroup(groupName);
-      if (groupUsers.length === 0) {
+      if (!groupUsers.length) {
         continue;
       }
 
-      if (modifier === undefined) {
-        expandedUsers.push(...groupUsers); // Add all users from the group
-        continue;
-      }
-      const randomCount = parseModifier(modifier);
-      if (randomCount === null) {
-        expandedUsers.push(...groupUsers);
-        continue;
+      if (modifier) {
+        const randomCount = parseModifier(modifier);
+        if (randomCount === null) {
+          expandedUsers.push(...groupUsers);
+          continue;
+        }
       }
       expandedUsers.push(...sampleSize(groupUsers, randomCount));
     } else {
@@ -1289,10 +1296,6 @@ function splitEscapedSpaces(str: string): string[] {
   }
 
   return result;
-}
-
-function isReviewerGroup(entry: string): boolean {
-  return entry.startsWith('@reviewer-group/');
 }
 
 function parseModifier(value: string): number | null {
