@@ -9,12 +9,12 @@ import {
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { NpmDatasource } from '../../../datasource/npm';
 
-import type { YarnrcConfig } from '../schema';
 import type {
   ExtractConfig,
   PackageFile,
   PackageFileContent,
 } from '../../types';
+import type { YarnrcConfig } from '../schema';
 import type { NpmLockFiles, NpmManagerData } from '../types';
 import { getExtractedConstraints } from './common/dependency';
 import { extractPackageJson } from './common/package-file';
