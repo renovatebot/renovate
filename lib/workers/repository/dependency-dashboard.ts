@@ -397,6 +397,13 @@ export async function ensureDependencyDashboard(
   );
   issueBody += getBranchesListMd(
     branches,
+    (branch) => branch.result === 'minimum-group-size-not-met',
+    'Group Size Not Met',
+    'The following branches have not met their minimum group size. To create them, click on a checkbox below.',
+    'approveGroup',
+  );
+  issueBody += getBranchesListMd(
+    branches,
     (branch) => branch.result === 'not-scheduled',
     'Awaiting Schedule',
     'The following updates are awaiting their schedule. To get an update now, click on a checkbox below.',
@@ -466,6 +473,7 @@ export async function ensureDependencyDashboard(
     'error',
     'automerged',
     'pr-edited',
+    'minimum-group-size-not-met',
   ];
   const inProgress = branches.filter(
     (branch) =>

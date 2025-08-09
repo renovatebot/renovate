@@ -160,6 +160,28 @@ function compilePrTitle(
   logger.trace(`prTitle: ` + JSON.stringify(upgrade.prTitle));
 }
 
+function getMinimumGroupSize(upgrades: BranchUpgradeConfig[]): number {
+  let minimumGroupSize = 1;
+  const groupSizes = new Set<number>();
+
+  for (const upg of upgrades) {
+    if (upg.minimumGroupSize) {
+      groupSizes.add(upg.minimumGroupSize);
+      if (minimumGroupSize < upg.minimumGroupSize) {
+        minimumGroupSize = upg.minimumGroupSize;
+      }
+    }
+  }
+
+  if (groupSizes.size > 1) {
+    logger.debug(
+      'Multiple minimumGroupSize values found for this branch, using highest.',
+    );
+  }
+
+  return minimumGroupSize;
+}
+
 // Sorted by priority, from low to high
 const semanticCommitTypeByPriority = ['chore', 'ci', 'build', 'fix', 'feat'];
 
@@ -461,6 +483,7 @@ export function generateBranchConfig(
     }
   }
 
+  config.minimumGroupSize = getMinimumGroupSize(config.upgrades);
   // Set skipInstalls to false if any upgrade in the branch has it false
   config.skipInstalls = config.upgrades.every(
     (upgrade) => upgrade.skipInstalls !== false,
