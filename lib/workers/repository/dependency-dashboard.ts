@@ -202,6 +202,27 @@ function getListItem(branch: BranchConfig, type: string): string {
   return item + ' (' + uniquePackages.join(', ') + ')\n';
 }
 
+function splitBranchesByCategory(filteredBranches: BranchConfig[]): {
+  categories: Record<string, BranchConfig[]>;
+  uncategorized: BranchConfig[];
+} {
+  const categories: Record<string, BranchConfig[]> = {};
+  const uncategorized: BranchConfig[] = [];
+  for (const branch of filteredBranches) {
+    const targetArray = branch.dependencyDashboardCategory
+      ? (categories[branch.dependencyDashboardCategory] ??= [])
+      : uncategorized;
+    targetArray.push(branch);
+  }
+  return { categories, uncategorized };
+}
+
+function getBranchList(branches: BranchConfig[], listItemType: string): string {
+  return branches
+    .map((branch: BranchConfig): string => getListItem(branch, listItemType))
+    .join('');
+}
+
 function getBranchesListMd(
   branches: BranchConfig[],
   predicate: (
@@ -220,15 +241,36 @@ function getBranchesListMd(
   if (filteredBranches.length === 0) {
     return '';
   }
-  let result = `## ${title}\n\n${description}\n\n`;
-  result += `${filteredBranches
-    .map((branch: BranchConfig): string => getListItem(branch, listItemType))
-    .join('')}`;
-  if (bulkComment && bulkMessage && filteredBranches.length > 1) {
-    result += getCheckbox(bulkComment);
-    result += `${bulkIcon ? bulkIcon + ' ' : ''}**${bulkMessage}**${bulkIcon ? ' ' + bulkIcon : ''}\n`;
+
+  const { categories, uncategorized } =
+    splitBranchesByCategory(filteredBranches);
+  let result = `## ${title}\n\n${description}`;
+  if (Object.keys(categories).length > 0) {
+    for (const [category, branches] of Object.entries(categories).sort(
+      ([keyA], [keyB]) => keyA.localeCompare(keyB),
+    )) {
+      result = result.trimEnd() + '\n\n';
+      result += `### ${category}\n\n`;
+      result += getBranchList(branches, listItemType);
+    }
+    if (uncategorized.length > 0) {
+      result = result.trimEnd() + '\n\n';
+      result += `### Others`;
+    }
   }
-  return result + '\n';
+  result = result.trimEnd() + '\n\n';
+  result += getBranchList(uncategorized, listItemType);
+
+  if (bulkComment && bulkMessage && filteredBranches.length > 1) {
+    if (Object.keys(categories).length > 0) {
+      result = result.trimEnd() + '\n\n';
+      result += '### All\n\n';
+    }
+    result += getCheckbox(bulkComment);
+    const icon = ` ${bulkIcon ?? ''} `;
+    result += `${icon}**${bulkMessage}**${icon}`.trim();
+  }
+  return result.trimEnd() + '\n\n';
 }
 
 function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
@@ -488,7 +530,6 @@ export async function ensureDependencyDashboard(
     rebaseAllOpenPrs,
     'Click on this checkbox to rebase all open PRs at once',
   );
-
   issueBody += getBranchesListMd(
     branches,
     (branch) => branch.result === 'already-existed',
