@@ -759,6 +759,21 @@ Before the first commit in a repository, Renovate will:
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
 
+## gitPrivateKeyPassphrase
+
+Passphrase for the `gitPrivateKey` when the private key is protected with a passphrase.
+
+Currently supported for SSH keys only.
+When provided, Renovate will automatically decrypt the SSH private key during the signing process.
+
+<!-- prettier-ignore -->
+!!! note
+    Passphrases are not yet supported for GPG keys. If you provide a passphrase for a GPG key, it will be ignored and a warning will be logged.
+
+<!-- prettier-ignore -->
+!!! warning
+    Store this value securely as it provides access to decrypt your private key. Consider using environment variables or secure secret management systems rather than storing it in plain text configuration files.
+
 ## gitTimeout
 
 To handle the case where the underlying Git processes appear to hang, configure the timeout with the number of milliseconds to wait after last received content on either `stdOut` or `stdErr` streams before sending a `SIGINT` kill message.

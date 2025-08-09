@@ -117,6 +117,7 @@ export interface ProcessBranchResult {
 
 export async function processBranch(
   branchConfig: BranchConfig,
+  forceRebase = false,
 ): Promise<ProcessBranchResult> {
   let commitSha: string | null = null;
   let config: BranchConfig = { ...branchConfig };
@@ -452,7 +453,10 @@ export async function processBranch(
       !!config.rebaseRequested;
     const userApproveAllPendingPR = !!config.dependencyDashboardAllPending;
     const userOpenAllRateLimtedPR = !!config.dependencyDashboardAllRateLimited;
-    if (userRebaseRequested) {
+    if (forceRebase) {
+      logger.debug('Force rebase because branch needs updating');
+      config.reuseExistingBranch = false;
+    } else if (userRebaseRequested) {
       logger.debug('User has requested rebase');
       config.reuseExistingBranch = false;
     } else if (dependencyDashboardCheck === 'global-config') {
@@ -516,6 +520,12 @@ export async function processBranch(
         logger.debug(
           `Updated ${config.updatedPackageFiles.length} package files`,
         );
+        if (config.reuseExistingBranch && !forceRebase) {
+          logger.debug(
+            'Existing branch needs updating. Restarting processBranch() with a clean branch',
+          );
+          return processBranch(branchConfig, true);
+        }
       } else {
         logger.debug('No package files need updating');
       }
@@ -538,6 +548,12 @@ export async function processBranch(
           },
           `Updated ${config.updatedArtifacts.length} lock files`,
         );
+        if (config.reuseExistingBranch && !forceRebase) {
+          logger.debug(
+            'Existing branch needs updating. Restarting processBranch() with a clean branch',
+          );
+          return processBranch(branchConfig, true);
+        }
       } else {
         logger.debug('No updated lock files in branch');
       }
