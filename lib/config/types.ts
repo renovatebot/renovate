@@ -132,6 +132,7 @@ export interface GlobalOnlyConfig {
   repositories?: RenovateRepository[];
   useCloudMetadataServices?: boolean;
   deleteConfigFile?: boolean;
+  gitCredentialPassing?: string;
 }
 
 // Config options used within the repository worker, but not user configurable
@@ -173,6 +174,7 @@ export interface RepoGlobalConfig {
   s3Endpoint?: string;
   s3PathStyle?: boolean;
   cachePrivatePackages?: boolean;
+  gitCredentialPassing?: string;
 }
 
 export interface LegacyAdminConfig {
