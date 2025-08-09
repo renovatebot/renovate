@@ -51,8 +51,14 @@ import type {
   Comment,
   PullRequestActivity,
   PullRequestCommentActivity,
+  ReviewerGroups,
 } from './schema';
-import { UserSchema, UsersSchema, isEmail } from './schema';
+import {
+  ReviewerGroupsSchema,
+  UserSchema,
+  UsersSchema,
+  isEmail,
+} from './schema';
 import type {
   BbsConfig,
   BbsPr,
@@ -1307,23 +1313,16 @@ function parseModifier(value: string): number | null {
 // Supports both repository-scoped and project-scoped groups following the BitBucket server logic described here:
 // https://confluence.atlassian.com/bitbucketserver/code-owners-1296171116.html#Codeowners-Whatifaprojectandrepositorycontainareviewergroupwiththesamename?
 async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
-  interface reviewerGroup {
-    name: string;
-    users: { emailAddress: string; active: boolean }[];
-    scope: { type: 'REPOSITORY' | 'PROJECT' };
-  }
-
-  const allGroups: reviewerGroup[] = [];
+  const allGroups: ReviewerGroups = [];
 
   try {
-    const { body } = await bitbucketServerHttp.getJsonUnchecked<
-      reviewerGroup[]
-    >(
+    const reviewerGroups = await bitbucketServerHttp.getJson(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/settings/reviewer-groups`,
       { paginate: true },
+      ReviewerGroupsSchema,
     );
 
-    allGroups.push(...body);
+    allGroups.push(...reviewerGroups.body);
   } catch (err) {
     logger.debug({ err, groupName }, 'Failed to get reviewer groups for repo');
     return [];
