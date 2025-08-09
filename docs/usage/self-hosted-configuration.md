@@ -405,6 +405,7 @@ Other valid cache namespaces are as follows:
 - `datasource-jenkins-plugins`
 - `datasource-maven:cache-provider`
 - `datasource-maven:postprocess-reject`
+- `datasource-nextcloud`
 - `datasource-node-version`
 - `datasource-npm:cache-provider`
 - `datasource-nuget-v3`
