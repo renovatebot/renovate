@@ -19,9 +19,9 @@ import { getExtractedConstraints } from './common/dependency';
 import { extractPackageJson } from './common/package-file';
 import { extractPnpmWorkspaceFile, tryParsePnpmWorkspaceYaml } from './pnpm';
 import { postExtract } from './post';
+import type { YarnrcConfig } from '../schema';
 import type { NpmPackage } from './types';
 import { isZeroInstall } from './yarn';
-import type { YarnrcConfig } from '../schema';
 import {
   loadConfigFromLegacyYarnrc,
   loadConfigFromYarnrcYml,
