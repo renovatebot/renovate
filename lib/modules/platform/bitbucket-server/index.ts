@@ -52,7 +52,7 @@ import type {
   PullRequestActivity,
   PullRequestCommentActivity,
 } from './schema';
-import { isEmail, UserSchema, UsersSchema } from './schema';
+import { UserSchema, UsersSchema, isEmail } from './schema';
 import type {
   BbsConfig,
   BbsPr,
@@ -62,15 +62,7 @@ import type {
   BbsRestUserRef,
 } from './types';
 import * as utils from './utils';
-import { getExtraCloneOpts } from './utils'; /*
- * Version: 5.3 (EOL Date: 15 Aug 2019)
- * See following docs for api information:
- * https://docs.atlassian.com/bitbucket-server/rest/5.3.0/bitbucket-rest.html
- * https://docs.atlassian.com/bitbucket-server/rest/5.3.0/bitbucket-build-rest.html
- *
- * See following page for uptodate supported versions
- * https://confluence.atlassian.com/support/atlassian-support-end-of-life-policy-201851003.html#AtlassianSupportEndofLifePolicy-BitbucketServer
- */
+import { getExtraCloneOpts } from './utils';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -1244,12 +1236,13 @@ export async function expandGroupMembers(
 
       if (modifier) {
         const randomCount = parseModifier(modifier);
-        if (randomCount === null) {
-          expandedUsers.push(...groupUsers);
+        if (randomCount) {
+          expandedUsers.push(...sampleSize(groupUsers, randomCount));
           continue;
         }
       }
-      expandedUsers.push(...sampleSize(groupUsers, randomCount));
+
+      expandedUsers.push(...groupUsers);
     } else {
       expandedUsers.push(baseEntry); // Add the user entry
     }
