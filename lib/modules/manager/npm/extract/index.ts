@@ -20,11 +20,11 @@ import { extractPackageJson } from './common/package-file';
 import { extractPnpmWorkspaceFile, tryParsePnpmWorkspaceYaml } from './pnpm';
 import { postExtract } from './post';
 import type { NpmPackage } from './types';
-import { isZeroInstall } from './yarn';
+import { extractYarnCatalogsFromYml, isZeroInstall } from './yarn';
 import type { YarnConfig } from './yarnrc';
 import {
   loadConfigFromLegacyYarnrc,
-  loadConfigFromYarnrcYml,
+  loadYarnRcYml,
   resolveRegistryUrl,
 } from './yarnrc';
 
@@ -137,13 +137,7 @@ export async function extractPackageFile(
     ? await isZeroInstall(yarnrcYmlFileName)
     : false;
 
-  let yarnConfig: YarnConfig | null = null;
-  const repoYarnrcYml = yarnrcYmlFileName
-    ? await readLocalFile(yarnrcYmlFileName, 'utf8')
-    : null;
-  if (is.string(repoYarnrcYml) && repoYarnrcYml.trim().length > 0) {
-    yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
-  }
+  let yarnConfig: YarnConfig | null = await loadYarnRcYml(yarnrcYmlFileName);
 
   const legacyYarnrcFileName = await findLocalSiblingOrParent(
     packageFile,
@@ -258,6 +252,30 @@ export async function extractAllPackageFiles(
             ...deps,
             packageFile,
           });
+        }
+
+        if (packageFile === 'package.json') {
+          const yarnrcYmlFileName = await findLocalSiblingOrParent(
+            packageFile,
+            '.yarnrc.yml',
+          );
+
+          const yarnConfig: YarnConfig | null =
+            await loadYarnRcYml(yarnrcYmlFileName);
+
+          if (yarnConfig?.catalogs) {
+            const catalogsDeps = await extractYarnCatalogsFromYml(
+              yarnConfig.catalogs,
+              packageFile,
+              deps?.managerData?.hasPackageManager ?? false,
+            );
+            if (catalogsDeps) {
+              npmFiles.push({
+                ...catalogsDeps,
+                packageFile: '.yarnrc.yml',
+              });
+            }
+          }
         }
       }
     } else {

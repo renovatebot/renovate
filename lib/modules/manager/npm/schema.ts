@@ -12,6 +12,23 @@ export const PnpmWorkspaceFileSchema = z
   })
   .and(PnpmCatalogsSchema);
 
+export const YarnCatalogsSchema = z.object({
+  options: z.optional(z.union([z.string(), z.array(z.string())])),
+  list: z.record(z.union([z.string(), z.record(z.string())])),
+});
+
+export const YarnrcYmlSchema = z.object({
+  npmRegistryServer: z.string().optional(),
+  npmScopes: z
+    .record(
+      z.object({
+        npmRegistryServer: z.string().optional(),
+      }),
+    )
+    .optional(),
+  catalogs: YarnCatalogsSchema.optional(),
+});
+
 export const PackageManagerSchema = z
   .string()
   .transform((val) => val.split('@'))
