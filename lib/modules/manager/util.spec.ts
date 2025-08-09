@@ -53,6 +53,54 @@ describe('modules/manager/util', () => {
     });
   });
 
+  it('applies GitHub source for tag with SSH URL', () => {
+    const dependency: PackageDependency = {};
+    const git = 'ssh://git@github.com/foo/bar';
+    const tag = 'v1.2.3';
+
+    applyGitSource(dependency, git, undefined, tag, undefined);
+
+    expect(dependency).toStrictEqual({
+      datasource: GithubTagsDatasource.id,
+      registryUrls: ['https://github.com'],
+      packageName: 'foo/bar',
+      currentValue: tag,
+      skipReason: undefined,
+    });
+  });
+
+  it('applies GitLab source for tag with SSH URL', () => {
+    const dependency: PackageDependency = {};
+    const git = 'ssh://git@gitlab.com/foo/bar';
+    const tag = 'v1.2.3';
+
+    applyGitSource(dependency, git, undefined, tag, undefined);
+
+    expect(dependency).toStrictEqual({
+      datasource: GitlabTagsDatasource.id,
+      registryUrls: ['https://gitlab.com'],
+      packageName: 'foo/bar',
+      currentValue: tag,
+      skipReason: undefined,
+    });
+  });
+
+  it('applies GitHub source for tag with HTTPS URL', () => {
+    const dependency: PackageDependency = {};
+    const git = 'https://github.com/foo/bar';
+    const tag = 'v1.2.3';
+
+    applyGitSource(dependency, git, undefined, tag, undefined);
+
+    expect(dependency).toStrictEqual({
+      datasource: GithubTagsDatasource.id,
+      registryUrls: ['https://github.com'],
+      packageName: 'foo/bar',
+      currentValue: tag,
+      skipReason: undefined,
+    });
+  });
+
   it('applies git source for rev', () => {
     const dependency: PackageDependency = {};
     const git = 'https://github.com/foo/bar';
