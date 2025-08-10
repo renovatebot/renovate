@@ -319,7 +319,7 @@ describe('workers/repository/update/pr/code-owners', () => {
         ]);
       });
 
-      it('ignores lines with no owners and uses fallback for empty rule', async () => {
+      it('does not return owners when an empty rule overrides a broader rule', async () => {
         fs.readLocalFile.mockResolvedValueOnce(
           [
             'docs/images/**', // empty rule

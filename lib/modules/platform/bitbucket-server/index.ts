@@ -68,7 +68,7 @@ import type {
   BbsRestUserRef,
 } from './types';
 import * as utils from './utils';
-import { getExtraCloneOpts } from './utils';
+import { getExtraCloneOpts, parseModifier, splitEscapedSpaces } from './utils';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -1278,32 +1278,6 @@ export function extractRulesFromCodeOwnersLines(
   }
 
   return results;
-}
-
-function splitEscapedSpaces(str: string): string[] {
-  const parts = str.split(' ');
-  const result: string[] = [];
-
-  for (const part of parts) {
-    const last = result[result.length - 1];
-
-    if (last?.endsWith(String.raw`\\`)) {
-      result[result.length - 1] = last.slice(0, -2) + ' ' + part;
-    } else {
-      result.push(part);
-    }
-  }
-
-  return result;
-}
-
-function parseModifier(value: string): number | null {
-  const match = regEx('^random(?:\\((\\d+)\\))?$').exec(value);
-  if (match) {
-    return parseInt(match[1] ?? '1', 10);
-  } else {
-    return null;
-  }
 }
 
 // Gets active users by name, from a reviewer group
