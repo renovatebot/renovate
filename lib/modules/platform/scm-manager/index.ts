@@ -332,7 +332,6 @@ export function maxBodyLength(): number {
   return 200000;
 }
 
-/* istanbul ignore next */
 export function invalidatePrCache(): void {
   config.prList = null;
 }
