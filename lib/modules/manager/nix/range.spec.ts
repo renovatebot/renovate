@@ -1,7 +1,7 @@
 import type { RangeConfig } from '../types';
 import { getRangeStrategy } from '.';
 
-describe('modules/manager/composer/range', () => {
+describe('modules/manager/nix/range', () => {
   it('returns same if nixpkgs', () => {
     const config: RangeConfig = { rangeStrategy: 'widen', depName: 'nixpkgs' };
     expect(getRangeStrategy(config)).toBe('widen');

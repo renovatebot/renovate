@@ -886,4 +886,326 @@ describe('modules/manager/nix/extract', () => {
       ],
     });
   });
+
+  it('returns null when flake.lock file cannot be read', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
+  it('returns null when flake.nix file cannot be read', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "root": {}
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
+  it('returns null when flake.lock has invalid JSON', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('{ invalid json');
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
+  it('returns deps when no root inputs but deps exist', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "root": {}
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+
+    const result = await extractPackageFile('', 'flake.nix');
+    expect(result).toBeNull();
+  });
+
+  it('handles currentDigest replacement when config provided', async () => {
+    const flakeNix = codeBlock`{
+      inputs = {
+        disko.url = "github:nix-community/disko/newdigest123";
+      };
+    }`;
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "disko": {
+          "locked": {
+            "lastModified": 1744145203,
+            "narHash": "sha256-I2oILRiJ6G+BOSjY+0dGrTPe080L3pbKpc+gCV3Nmyk=",
+            "owner": "nix-community",
+            "repo": "disko",
+            "rev": "76c0a6dba345490508f36c1aa3c7ba5b6b460989",
+            "type": "github"
+          },
+          "original": {
+            "owner": "nix-community",
+            "repo": "disko",
+            "rev": "olddigest123",
+            "type": "github"
+          }
+        },
+        "root": {
+          "inputs": {
+            "disko": "disko"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    const config = {
+      currentDigest: 'olddigest123',
+      newDigest: 'newdigest123',
+    };
+
+    const result = await extractPackageFile(flakeNix, 'flake.nix', config);
+    expect(result?.deps[0]).toMatchObject({
+      currentDigest: 'newdigest123',
+      depName: 'disko',
+      packageName: 'https://github.com/nix-community/disko',
+    });
+  });
+
+  it('includes nixpkgs with ref when original has rev', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "nixpkgs": {
+          "locked": {
+            "lastModified": 1720031269,
+            "narHash": "sha256-rwz8NJZV+387rnWpTYcXaRNvzUSnnF9aHONoJIYmiUQ=",
+            "owner": "NixOS",
+            "repo": "nixpkgs",
+            "rev": "9f4128e00b0ae8ec65918efeba59db998750ead6",
+            "type": "github"
+          },
+          "original": {
+            "owner": "NixOS",
+            "ref": "nixos-unstable",
+            "repo": "nixpkgs",
+            "rev": "specific-commit-hash",
+            "type": "github"
+          }
+        },
+        "root": {
+          "inputs": {
+            "nixpkgs": "nixpkgs"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          currentValue: 'nixos-unstable',
+          currentDigest: 'specific-commit-hash',
+          depName: 'nixpkgs',
+          packageName: 'https://github.com/NixOS/nixpkgs',
+        },
+      ],
+    });
+  });
+
+  it('includes github flake with ref when original has rev', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "flake-utils": {
+          "locked": {
+            "lastModified": 1726560853,
+            "narHash": "sha256-X6rJYSESBVr3hBoH0WbKE5KvhPU5bloyZ2L4K60/fPQ=",
+            "owner": "numtide",
+            "repo": "flake-utils",
+            "rev": "c1dfcf08411b08f6b8615f7d8971a2bfa81d5e8a",
+            "type": "github"
+          },
+          "original": {
+            "owner": "numtide",
+            "repo": "flake-utils",
+            "ref": "main",
+            "rev": "specific-commit-hash",
+            "type": "github"
+          }
+        },
+        "root": {
+          "inputs": {
+            "flake-utils": "flake-utils"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          currentValue: 'main',
+          currentDigest: 'specific-commit-hash',
+          depName: 'flake-utils',
+          packageName: 'https://github.com/numtide/flake-utils',
+        },
+      ],
+    });
+  });
+
+  it('includes gitlab flake with custom host', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "custom-project": {
+          "locked": {
+            "lastModified": 1728650932,
+            "narHash": "sha256-mGKzqdsRyLnGNl6WjEr7+sghGgBtYHhJQ4mjpgRTCsU=",
+            "owner": "group",
+            "repo": "project",
+            "rev": "65ae9c147349829d3df0222151f53f79821c5134",
+            "type": "gitlab",
+            "host": "gitlab.example.com"
+          },
+          "original": {
+            "owner": "group",
+            "repo": "project",
+            "type": "gitlab",
+            "host": "gitlab.example.com"
+          }
+        },
+        "root": {
+          "inputs": {
+            "custom-project": "custom-project"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          currentDigest: undefined,
+          datasource: 'git-refs',
+          depName: 'custom-project',
+          packageName: 'https://gitlab.example.com/group/project',
+          lockedVersion: '65ae9c147349829d3df0222151f53f79821c5134',
+        },
+      ],
+    });
+  });
+
+  it('includes sourcehut flake with custom host', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "custom-project": {
+          "locked": {
+            "lastModified": 1723569650,
+            "narHash": "sha256-Ho/sAhEUeSug52JALgjrKVUPCBe8+PovbJj/lniKxp8=",
+            "owner": "~user",
+            "repo": "project",
+            "rev": "88f0d9ae98942bf49cba302c42b2a0f6e05f9b58",
+            "type": "sourcehut",
+            "host": "git.custom.org"
+          },
+          "original": {
+            "owner": "~user",
+            "repo": "project",
+            "type": "sourcehut",
+            "host": "git.custom.org"
+          }
+        },
+        "root": {
+          "inputs": {
+            "custom-project": "custom-project"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          currentDigest: undefined,
+          datasource: 'git-refs',
+          depName: 'custom-project',
+          packageName: 'https://git.custom.org/~user/project',
+          lockedVersion: '88f0d9ae98942bf49cba302c42b2a0f6e05f9b58',
+        },
+      ],
+    });
+  });
+
+  it('includes tarball flake with ref when original has rev', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "data-mesher": {
+          "locked": {
+            "lastModified": 1727355895,
+            "narHash": "sha256-grZIaLgk5GgoDuTt49RTCLBh458H4YJdIAU4B3onXRw=",
+            "rev": "c7e39452affcc0f89e023091524e38b3aaf109e9",
+            "type": "tarball",
+            "url": "https://git.clan.lol/api/v1/repos/clan/data-mesher/archive/c7e39452affcc0f89e023091524e38b3aaf109e9.tar.gz"
+          },
+          "original": {
+            "type": "tarball",
+            "url": "https://git.clan.lol/clan/data-mesher/archive/main.tar.gz",
+            "ref": "main",
+            "rev": "specific-commit-hash"
+          }
+        },
+        "root": {
+          "inputs": {
+            "data-mesher": "data-mesher"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          currentValue: 'main',
+          currentDigest: 'specific-commit-hash',
+          datasource: 'git-refs',
+          depName: 'data-mesher',
+          packageName: 'https://git.clan.lol/clan/data-mesher',
+        },
+      ],
+    });
+  });
+
+  it('handles unknown flake lock type', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "unknown-flake": {
+          "locked": {
+            "lastModified": 1727355895,
+            "narHash": "sha256-grZIaLgk5GgoDuTt49RTCLBh458H4YJdIAU4B3onXRw=",
+            "rev": "c7e39452affcc0f89e023091524e38b3aaf109e9",
+            "type": "unknown-type"
+          },
+          "original": {
+            "type": "unknown-type"
+          }
+        },
+        "root": {
+          "inputs": {
+            "unknown-flake": "unknown-flake"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
 });
