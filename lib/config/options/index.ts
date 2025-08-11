@@ -3172,6 +3172,14 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'deleteAdditionalConfigFile',
+    description:
+      'If set to `true`, Renovate tries to delete the additional self-hosted config file after reading it.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
     name: 's3Endpoint',
     description:
       'If set, Renovate will use this string as the `endpoint` when creating the AWS S3 client instance.',
