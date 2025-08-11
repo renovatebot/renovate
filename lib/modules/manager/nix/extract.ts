@@ -21,17 +21,21 @@ const lockableChannelLockedUrl = regEx(
 
 export async function extractPackageFile(
   _content: string,
-  packageFile: string,
+  flakeFile: string,
   config?: Record<string, any>,
 ): Promise<PackageFileContent | null> {
-  const flakeLockFile = getSiblingFileName(packageFile, 'flake.lock');
+  // flake.lock
+  const flakeLockFile = getSiblingFileName(flakeFile, 'flake.lock');
   const flakeLockContents = await readLocalFile(flakeLockFile, 'utf8');
 
-  logger.trace(`nix.extractPackageFile(${flakeLockFile})`);
+  // flake.nix
+  const flakeContents = await readLocalFile(flakeFile, 'utf8');
+
+  logger.trace(`nix.extractPackageFile(${flakeLockContents})`);
 
   const deps: PackageDependency[] = [];
 
-  const flakeLockParsed = NixFlakeLock.safeParse(lockContents);
+  const flakeLockParsed = NixFlakeLock.safeParse(flakeLockContents);
   if (!flakeLockParsed.success) {
     logger.debug(
       { flakeLockFile, error: flakeLockParsed.error },
@@ -74,7 +78,7 @@ export async function extractPackageFile(
     if (flakeLocked === undefined) {
       logger.debug(
         { flakeLockFile, flakeInput },
-        `input is missing locked, skipping`,
+        `Found empty flake input, skipping`,
       );
       continue;
     }
@@ -92,14 +96,15 @@ export async function extractPackageFile(
       continue;
     }
 
-    // istanbul ignore if: if there's a new digest, pretend we updated it so confirmations pass
+    // istanbul ignore if: if there's a new digest, set the corresponding digest in the lockfile so confirmations pass
     const currentDigest = config?.currentDigest;
     const newDigest = config?.newDigest;
     if (
       currentDigest &&
       newDigest &&
       flakeOriginal.rev &&
-      flakeOriginal.rev === currentDigest
+      flakeOriginal.rev === currentDigest && // currentDigest is the old digest
+      flakeContents?.includes(newDigest) // flake.nix contains the new digest
     ) {
       flakeOriginal.rev = newDigest;
     }
@@ -210,7 +215,7 @@ export async function extractPackageFile(
       // istanbul ignore next: just a safeguard
       default:
         logger.debug(
-          { packageLockFile },
+          { flakeLockFile },
           `Unknown flake.lock type "${flakeLocked.type}", skipping`,
         );
         break;
