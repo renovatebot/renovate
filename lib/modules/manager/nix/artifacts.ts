@@ -40,7 +40,7 @@ export async function updateArtifacts({
   } else {
     const inputs = updatedDeps
       .map(({ depName }) => depName)
-      .filter(isNonEmptyStringAndNotWhitespace)
+      .filter(is.nonEmptyStringAndNotWhitespace)
       .map((depName) => quote(depName))
       .join(' ');
     cmd += `flake update ${inputs}`;
