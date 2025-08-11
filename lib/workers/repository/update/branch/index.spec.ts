@@ -723,19 +723,26 @@ describe('workers/repository/update/branch/index', () => {
     it('automerges when branch is behind but not conflicted and rebaseWhen=never', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>()],
+          updatedPackageFiles: [],
         }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>()],
+        updatedArtifacts: [],
       });
       scm.branchExists.mockResolvedValue(true);
-      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      scm.isBranchConflicted.mockResolvedValue(false);
+      platform.getBranchPr.mockResolvedValueOnce(null as any);
+      checkExisting.prAlreadyExisted.mockResolvedValueOnce(undefined as any);
+      commit.commitFilesToBranch.mockResolvedValue(null as any);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       config.automerge = true;
       config.automergeType = 'branch';
       config.rebaseWhen = 'never';
+      config.ignoreTests = true;
+      config.prCreation = 'immediate';
+      config.reuseExistingBranch = true;
+      config.cacheFingerprintMatch = 'matched' as CacheFingerprintMatchResult;
       await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledWith(
