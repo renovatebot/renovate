@@ -41,7 +41,7 @@ export async function getCurrentUser(): Promise<User> {
   const response = await scmManagerHttp.getJson(
     URLS.ME,
     {
-      scmmContentType: CONTENT_TYPES.ME,
+      headers: { accept: CONTENT_TYPES.ME },
       token,
     },
     UserSchema,
@@ -53,7 +53,7 @@ export async function getRepo(repoPath: string): Promise<Repo> {
   const response = await scmManagerHttp.getJson(
     URLS.REPO(repoPath),
     {
-      scmmContentType: CONTENT_TYPES.REPOSITORY,
+      headers: { accept: CONTENT_TYPES.REPOSITORY },
       token,
     },
     RepoSchema,
@@ -65,7 +65,7 @@ export async function getAllRepos(): Promise<Repo[]> {
   const response = await scmManagerHttp.getJson(
     URLS.ALL_REPOS,
     {
-      scmmContentType: CONTENT_TYPES.REPOSITORIES,
+      headers: { accept: CONTENT_TYPES.REPOSITORIES },
       token,
     },
     PagedRepoSchema,
@@ -79,7 +79,7 @@ export async function getDefaultBranch(repo: Repo): Promise<string> {
   const response = await scmManagerHttp.getJson(
     defaultBranchUrl.href,
     {
-      scmmContentType: CONTENT_TYPES.GIT_CONFIG,
+      headers: { accept: CONTENT_TYPES.GIT_CONFIG },
       token,
     },
     DefaultBranchSchema,
@@ -92,7 +92,7 @@ export async function getAllRepoPrs(repoPath: string): Promise<PullRequest[]> {
   const response = await scmManagerHttp.getJson(
     URLS.PULLREQUESTS_WITH_PAGINATION(repoPath),
     {
-      scmmContentType: CONTENT_TYPES.PULLREQUESTS,
+      headers: { accept: CONTENT_TYPES.PULLREQUESTS },
       token,
     },
     PagedPullRequestSchema,
@@ -107,7 +107,7 @@ export async function getRepoPr(
   const response = await scmManagerHttp.getJson(
     URLS.PULLREQUEST_BY_ID(repoPath, id),
     {
-      scmmContentType: CONTENT_TYPES.PULLREQUEST,
+      headers: { accept: CONTENT_TYPES.PULLREQUEST },
       token,
     },
     PullRequestSchema,
@@ -123,11 +123,11 @@ export async function createScmPr(
   const createPrResponse = await scmManagerHttp.postJson(
     URLS.PULLREQUESTS(repoPath),
     {
-      scmmContentType: CONTENT_TYPES.PULLREQUEST,
       token,
       body: params,
       headers: {
         'Content-Type': CONTENT_TYPES.PULLREQUEST,
+        accept: CONTENT_TYPES.PULLREQUEST,
       },
     },
   );
@@ -135,7 +135,7 @@ export async function createScmPr(
   const getCreatedPrResponse = await scmManagerHttp.getJson(
     createPrResponse.headers.location!,
     {
-      scmmContentType: CONTENT_TYPES.PULLREQUEST,
+      headers: { accept: CONTENT_TYPES.PULLREQUEST },
       token,
     },
     PullRequestSchema,

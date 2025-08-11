@@ -22,7 +22,7 @@ describe('util/http/scm-manager', () => {
       .reply(200);
 
     const response = await scmManagerHttp.getJsonUnchecked('example', {
-      scmmContentType: expectedAcceptHeader,
+      headers: { accept: expectedAcceptHeader },
     });
 
     expect(response.statusCode).toEqual(200);
