@@ -8,7 +8,6 @@ import {
   getDefaultBranch,
   getRepo,
   getRepoPr,
-  setToken,
   updateScmPr,
 } from './scm-manager-helper';
 import type { PullRequestCreateParams, PullRequestUpdateParams } from './types';
@@ -17,13 +16,7 @@ import * as httpMock from '~test/http-mock';
 describe('modules/platform/scm-manager/scm-manager-helper', () => {
   const endpoint = 'http://localhost:8080/scm/api/v2';
   const token = 'apiToken';
-  const expectingAuthHeader = {
-    reqheaders: {
-      authorization: `Bearer ${token}`,
-    },
-  };
   setBaseUrl(endpoint);
-  setToken(token);
 
   const repo: Repo = {
     contact: 'test@test.com',
@@ -74,12 +67,9 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
         name: 'test',
       };
 
-      httpMock
-        .scope(endpoint, expectingAuthHeader)
-        .get('/me')
-        .reply(200, expectedUser);
+      httpMock.scope(endpoint).get('/me').reply(200, expectedUser);
 
-      expect(await getCurrentUser()).toEqual(expectedUser);
+      expect(await getCurrentUser(token)).toEqual(expectedUser);
     });
 
     it.each`
@@ -89,11 +79,8 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
     `(
       'should throw expected response $expectedResponse',
       async ({ expectedResponse }: { expectedResponse: number }) => {
-        httpMock
-          .scope(endpoint, expectingAuthHeader)
-          .get('/me')
-          .reply(expectedResponse);
-        await expect(getCurrentUser()).rejects.toThrow();
+        httpMock.scope(endpoint).get('/me').reply(expectedResponse);
+        await expect(getCurrentUser(token)).rejects.toThrow();
       },
     );
   });
@@ -101,7 +88,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
   describe(getRepo, () => {
     it('should return the repo', async () => {
       httpMock
-        .scope(endpoint, expectingAuthHeader)
+        .scope(endpoint)
         .get(`/repositories/${repo.namespace}/${repo.name}`)
         .reply(200, repo);
 
@@ -118,7 +105,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
       'should throw expected response $expectedResponse',
       async ({ expectedResponse }: { expectedResponse: number }) => {
         httpMock
-          .scope(endpoint, expectingAuthHeader)
+          .scope(endpoint)
           .get(`/repositories/${repo.namespace}/${repo.name}`)
           .reply(expectedResponse);
 
@@ -132,7 +119,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
   describe(getAllRepos, () => {
     it('should return all repos', async () => {
       httpMock
-        .scope(endpoint, expectingAuthHeader)
+        .scope(endpoint)
         .get('/repositories?pageSize=1000000')
         .reply(200, {
           page: 0,
@@ -152,7 +139,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
       'should throw expected response $expectedResponse',
       async ({ expectedResponse }: { expectedResponse: number }) => {
         httpMock
-          .scope(endpoint, expectingAuthHeader)
+          .scope(endpoint)
           .get('/repositories?pageSize=1000000')
           .reply(expectedResponse);
 
@@ -164,7 +151,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
   describe(getDefaultBranch, () => {
     it('should return the default branch', async () => {
       httpMock
-        .scope(endpoint, expectingAuthHeader)
+        .scope(endpoint)
         .get('/config/git/default/repo/default-branch')
         .reply(200, {
           defaultBranch: 'develop',
@@ -183,7 +170,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
       'should throw expected response $expectedResponse',
       async ({ expectedResponse }: { expectedResponse: number }) => {
         httpMock
-          .scope(endpoint, expectingAuthHeader)
+          .scope(endpoint)
           .get('/config/git/default/repo/default-branch')
           .reply(expectedResponse);
 
@@ -195,7 +182,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
   describe(getAllRepoPrs, () => {
     it('should return all repo PRs', async () => {
       httpMock
-        .scope(endpoint, expectingAuthHeader)
+        .scope(endpoint)
         .get(
           `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
         )
@@ -222,7 +209,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
       'should throw expected response $expectedResponse',
       async ({ expectedResponse }: { expectedResponse: number }) => {
         httpMock
-          .scope(endpoint, expectingAuthHeader)
+          .scope(endpoint)
           .get(
             `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
           )
@@ -238,7 +225,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
   describe(getRepoPr, () => {
     it('should return the repo PR', async () => {
       httpMock
-        .scope(endpoint, expectingAuthHeader)
+        .scope(endpoint)
         .get(`/pull-requests/${repo.namespace}/${repo.name}/${pullRequest.id}`)
         .reply(200, pullRequest);
 
@@ -257,7 +244,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
       'should throw expected response $expectedResponse',
       async ({ expectedResponse }: { expectedResponse: number }) => {
         httpMock
-          .scope(endpoint, expectingAuthHeader)
+          .scope(endpoint)
           .get(
             `/pull-requests/${repo.namespace}/${repo.name}/${pullRequest.id}`,
           )
@@ -283,14 +270,14 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
       const expectedPrId = 1337;
 
       httpMock
-        .scope(endpoint, expectingAuthHeader)
+        .scope(endpoint)
         .post(`/pull-requests/${repo.namespace}/${repo.name}`)
         .reply(201, undefined, {
           location: `${endpoint}/pull-requests/${repo.namespace}/${repo.name}/${expectedPrId}`,
         });
 
       httpMock
-        .scope(endpoint, expectingAuthHeader)
+        .scope(endpoint)
         .get(`/pull-requests/${repo.namespace}/${repo.name}/${expectedPrId}`)
         .reply(200, pullRequest);
 
@@ -312,7 +299,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
       'should throw expected response $expectedResponse',
       async ({ expectedResponse }: { expectedResponse: number }) => {
         httpMock
-          .scope(endpoint, expectingAuthHeader)
+          .scope(endpoint)
           .post(`/pull-requests/${repo.namespace}/${repo.name}`)
           .reply(expectedResponse);
 
@@ -341,12 +328,12 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
       const expectedPrId = 1337;
 
       httpMock
-        .scope(endpoint, expectingAuthHeader)
+        .scope(endpoint)
         .get(`/pull-requests/${repo.namespace}/${repo.name}/${expectedPrId}`)
         .reply(200, pullRequest);
 
       httpMock
-        .scope(endpoint, expectingAuthHeader)
+        .scope(endpoint)
         .put(`/pull-requests/${repo.namespace}/${repo.name}/${expectedPrId}`)
         .reply(204);
 
@@ -371,12 +358,12 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
         const expectedPrId = 1337;
 
         httpMock
-          .scope(endpoint, expectingAuthHeader)
+          .scope(endpoint)
           .get(`/pull-requests/${repo.namespace}/${repo.name}/${expectedPrId}`)
           .reply(200, pullRequest);
 
         httpMock
-          .scope(endpoint, expectingAuthHeader)
+          .scope(endpoint)
           .put(`/pull-requests/${repo.namespace}/${repo.name}/${expectedPrId}`)
           .reply(expectedResponse);
 
