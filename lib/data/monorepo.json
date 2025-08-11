@@ -627,6 +627,11 @@
     "typefaces": "https://github.com/KyleAMathews/typefaces",
     "typescript-eslint": "https://github.com/typescript-eslint/typescript-eslint",
     "typography-js": "https://github.com/KyleAMathews/typography.js",
+    "ui5-webcomponents": [
+      "https://github.com/SAP/ui5-webcomponents",
+      "https://github.com/SAP/ui5-webcomponents-react",
+      "https://github.com/SAP/ui5-webcomponents-ngx"
+    ],
     "unhead": "https://github.com/unjs/unhead",
     "unocss": "https://github.com/unocss/unocss",
     "uppy": "https://github.com/transloadit/uppy",
