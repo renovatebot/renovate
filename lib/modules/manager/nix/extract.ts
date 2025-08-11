@@ -20,16 +20,13 @@ const lockableChannelLockedUrl = regEx(
 );
 
 export async function extractPackageFile(
-  _content: string,
+  flakeContents: string,
   flakeFile: string,
   config?: Record<string, any>,
 ): Promise<PackageFileContent | null> {
   // flake.lock
   const flakeLockFile = getSiblingFileName(flakeFile, 'flake.lock');
   const flakeLockContents = await readLocalFile(flakeLockFile, 'utf8');
-
-  // flake.nix
-  const flakeContents = await readLocalFile(flakeFile, 'utf8');
 
   logger.trace(`nix.extractPackageFile(${flakeLockContents})`);
 
