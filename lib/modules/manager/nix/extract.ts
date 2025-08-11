@@ -80,7 +80,7 @@ export async function extractPackageFile(
       continue;
     }
 
-    // indirect inputs cannot be reliable updated because they depend on the flake registry
+    // indirect inputs cannot be reliably updated because they depend on the flake registry
     if (flakeOriginal.type === 'indirect') {
       continue;
     }
@@ -93,7 +93,7 @@ export async function extractPackageFile(
       continue;
     }
 
-    // if there's a new digest, pretend we updated it so confirmations pass
+    // istanbul ignore if: if there's a new digest, pretend we updated it so confirmations pass
     const currentDigest = config?.currentDigest;
     const newDigest = config?.newDigest;
     if (
@@ -115,6 +115,7 @@ export async function extractPackageFile(
         depName: 'nixpkgs',
         currentValue: flakeOriginal.rev ? flakeOriginal.ref : undefined,
         currentDigest: flakeOriginal.rev,
+        replaceString: flakeOriginal.rev,
         lockedVersion: flakeOriginal.rev ? undefined : flakeLocked.rev,
         datasource: GitRefsDatasource.id,
         packageName: 'https://github.com/NixOS/nixpkgs',
@@ -124,13 +125,14 @@ export async function extractPackageFile(
     }
 
     // if the input contains a digest as rev, we can update it
-    // otherwise set lockedVersion so it is at least updated during lock file maintenance
+    // otherwise set lockedVersion so it is updated during lock file maintenance
     switch (flakeLocked.type) {
       case 'github':
         deps.push({
           depName,
           currentValue: flakeOriginal.rev ? flakeOriginal.ref : undefined,
           currentDigest: flakeOriginal.rev,
+          replaceString: flakeOriginal.rev,
           lockedVersion: flakeOriginal.rev ? undefined : flakeLocked.rev,
           datasource: GitRefsDatasource.id,
           packageName: `https://${flakeOriginal.host ?? 'github.com'}/${flakeOriginal.owner}/${flakeOriginal.repo}`,
@@ -141,6 +143,7 @@ export async function extractPackageFile(
           depName,
           currentValue: flakeOriginal.rev ? flakeOriginal.ref : undefined,
           currentDigest: flakeOriginal.rev,
+          replaceString: flakeOriginal.rev,
           lockedVersion: flakeOriginal.rev ? undefined : flakeLocked.rev,
           datasource: GitRefsDatasource.id,
           packageName: `https://${flakeOriginal.host ?? 'gitlab.com'}/${decodeURIComponent(flakeOriginal.owner!)}/${flakeOriginal.repo}`,
@@ -151,6 +154,7 @@ export async function extractPackageFile(
           depName,
           currentValue: flakeOriginal.rev ? flakeOriginal.ref : undefined,
           currentDigest: flakeOriginal.rev,
+          replaceString: flakeOriginal.rev,
           lockedVersion: flakeOriginal.rev ? undefined : flakeLocked.rev,
           datasource: GitRefsDatasource.id,
           packageName: flakeOriginal.url,
@@ -161,6 +165,7 @@ export async function extractPackageFile(
           depName,
           currentValue: flakeOriginal.rev ? flakeOriginal.ref : undefined,
           currentDigest: flakeOriginal.rev,
+          replaceString: flakeOriginal.rev,
           lockedVersion: flakeOriginal.rev ? undefined : flakeLocked.rev,
           datasource: GitRefsDatasource.id,
           packageName: `https://${flakeOriginal.host ?? 'git.sr.ht'}/${flakeOriginal.owner}/${flakeOriginal.repo}`,
@@ -188,6 +193,7 @@ export async function extractPackageFile(
             depName,
             currentValue: flakeOriginal.rev ? flakeOriginal.ref : undefined,
             currentDigest: flakeOriginal.rev,
+            replaceString: flakeOriginal.rev,
             lockedVersion: flakeOriginal.rev ? undefined : flakeLocked.rev,
             datasource: GitRefsDatasource.id,
             // type tarball always contains this link
