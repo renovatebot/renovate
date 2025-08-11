@@ -20,7 +20,7 @@ import {
 } from './util';
 
 /**
- * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
+ * https://learn.microsoft.com/nuget/concepts/package-versioning
  * This article mentions that  Nuget 3.x and later tries to restore the lowest possible version
  * regarding to given version range.
  * 1.3.4 equals [1.3.4,)

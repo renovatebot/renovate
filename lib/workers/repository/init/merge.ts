@@ -8,6 +8,7 @@ import { parseFileConfig } from '../../../config/parse';
 import * as presets from '../../../config/presets';
 import { applySecretsAndVariablesToConfig } from '../../../config/secrets';
 import type { AllConfig, RenovateConfig } from '../../../config/types';
+import * as configValidation from '../../../config/validation';
 import {
   CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
@@ -20,13 +21,12 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
 import { parseJson } from '../../../util/common';
 import { setUserEnv } from '../../../util/env';
-import { readLocalFile } from '../../../util/fs';
+import { readLocalFile, readSystemFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
 import { maskToken } from '../../../util/mask';
 import { regEx } from '../../../util/regex';
-import { parseAndValidateOrExit } from '../../global/config/parse/env';
 import { getOnboardingConfig } from '../onboarding/branch/config';
 import {
   getOnboardingConfigFromCache,
@@ -198,11 +198,11 @@ export async function mergeRenovateConfig(
     };
   }
   const configFileParsed = repoConfig?.configFileParsed ?? {};
-  // I think we do not need to use combined env here as static repo config is meant to be in the env var and not file/repo config
-  const configFileAndEnv = await mergeStaticRepoEnvConfig(
+  const configFileAndEnv = await resolveStaticRepoConfig(
     configFileParsed,
-    process.env,
+    process.env.RENOVATE_X_STATIC_REPO_CONFIG_FILE,
   );
+
   if (is.nonEmptyArray(returnConfig.extends)) {
     configFileAndEnv.extends = [
       ...returnConfig.extends,
@@ -341,24 +341,81 @@ export function setNpmTokenInNpmrc(config: RenovateConfig): void {
   delete config.npmToken;
 }
 
-export async function mergeStaticRepoEnvConfig(
+export async function resolveStaticRepoConfig(
   config: AllConfig,
-  env: NodeJS.ProcessEnv,
+  filename: string | undefined,
 ): Promise<AllConfig> {
-  const repoEnvConfig = await parseAndValidateOrExit(
-    env,
-    'RENOVATE_STATIC_REPO_CONFIG',
-  );
-
-  if (!is.nonEmptyObject(repoEnvConfig)) {
+  if (!is.nonEmptyString(filename)) {
     return config;
   }
 
-  // merge extends
-  if (is.nonEmptyArray(repoEnvConfig.extends)) {
-    config.extends = [...repoEnvConfig.extends, ...(config.extends ?? [])];
-    delete repoEnvConfig.extends;
+  let staticRepoConfig: AllConfig;
+
+  try {
+    staticRepoConfig = await tryReadStaticRepoFileConfig(filename);
+  } catch (err) {
+    logger.fatal({ err }, 'Failed to load static repository config file');
+    process.exit(1);
   }
-  // renovate repo config overrides RENOVATE_STATIC_REPO_CONFIG
-  return mergeChildConfig(repoEnvConfig, config);
+
+  if (!is.nonEmptyObject(staticRepoConfig)) {
+    return config;
+  }
+
+  return mergeStaticConfig(config, staticRepoConfig);
+}
+
+export async function tryReadStaticRepoFileConfig(
+  staticRepoConfigFile: string,
+): Promise<AllConfig> {
+  logger.debug(`Reading static repo config file from ${staticRepoConfigFile}`);
+
+  let staticRepoConfigRaw: string;
+  try {
+    staticRepoConfigRaw = await readSystemFile(staticRepoConfigFile, 'utf8');
+  } catch (err) {
+    throw new Error(
+      `Failed to read static repo config file: "${staticRepoConfigFile}"`,
+      { cause: err },
+    );
+  }
+
+  const staticRepoConfig = parseJson(
+    staticRepoConfigRaw,
+    staticRepoConfigFile,
+  ) as AllConfig;
+
+  const { errors } = await configValidation.validateConfig(
+    'repo',
+    staticRepoConfig,
+  );
+
+  if (is.nonEmptyArray(errors)) {
+    logger.fatal(
+      { validationErrors: errors },
+      'static repository config validation errors',
+    );
+    throw new Error('Invalid renovate configuration in static config file');
+  }
+
+  logger.debug(
+    { staticRepoConfig },
+    'Static repository config file successfully parsed and validated',
+  );
+
+  return staticRepoConfig;
+}
+
+export function mergeStaticConfig(
+  config: AllConfig,
+  staticRepoConfig: AllConfig,
+): AllConfig {
+  // merge extends
+  if (is.nonEmptyArray(staticRepoConfig.extends)) {
+    config.extends = [...staticRepoConfig.extends, ...(config.extends ?? [])];
+    delete staticRepoConfig.extends;
+  }
+
+  // renovate repo config overrides RENOVATE_STATIC_REPO_CONFIG[_FILE]
+  return mergeChildConfig(staticRepoConfig, config);
 }

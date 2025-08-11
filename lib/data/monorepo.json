@@ -312,6 +312,7 @@
     "fabric-chaincode-node": "https://github.com/hyperledger/fabric-chaincode-node",
     "fabric8-kubernetes-client": "https://github.com/fabric8io/kubernetes-client",
     "faro-web-sdk": "https://github.com/grafana/faro-web-sdk",
+    "fastendpoints": "https://github.com/FastEndpoints/FastEndpoints",
     "feathers": "https://github.com/feathersjs/feathers",
     "featuremanagement-dotnet": "https://github.com/microsoft/FeatureManagement-Dotnet",
     "feign": "https://github.com/OpenFeign/feign",
@@ -325,7 +326,6 @@
     ],
     "formatjs": "https://github.com/formatjs/formatjs",
     "framework7": "https://github.com/framework7io/framework7",
-    "fumadocs": "https://github.com/fuma-nama/fumadocs",
     "funogram": "https://github.com/Dolfik1/Funogram",
     "fusioncache": "https://github.com/ZiggyCreatures/FusionCache",
     "gatsby": "https://github.com/gatsbyjs/gatsby",
@@ -378,6 +378,7 @@
     "jasmine": "https://github.com/jasmine/jasmine",
     "javahamcrest": "https://github.com/hamcrest/JavaHamcrest",
     "javascriptengineswitcher": "https://github.com/Taritsyn/JavaScriptEngineSwitcher",
+    "jaxb-ri": "https://github.com/eclipse-ee4j/jaxb-ri",
     "jersey": "https://github.com/eclipse-ee4j/jersey",
     "jest": [
       "https://github.com/facebook/jest",
@@ -399,6 +400,7 @@
     "ksp": "https://github.com/google/ksp",
     "ktor": "https://github.com/ktorio/ktor",
     "lamar": "https://github.com/JasperFx/lamar",
+    "langchain4j": "https://github.com/langchain4j/langchain4j",
     "lerna": "https://github.com/lerna/lerna",
     "lerna-lite": "https://github.com/lerna-lite/lerna-lite",
     "lexical": "https://github.com/facebook/lexical",
@@ -625,6 +627,11 @@
     "typefaces": "https://github.com/KyleAMathews/typefaces",
     "typescript-eslint": "https://github.com/typescript-eslint/typescript-eslint",
     "typography-js": "https://github.com/KyleAMathews/typography.js",
+    "ui5-webcomponents": [
+      "https://github.com/SAP/ui5-webcomponents",
+      "https://github.com/SAP/ui5-webcomponents-react",
+      "https://github.com/SAP/ui5-webcomponents-ngx"
+    ],
     "unhead": "https://github.com/unjs/unhead",
     "unocss": "https://github.com/unocss/unocss",
     "uppy": "https://github.com/transloadit/uppy",

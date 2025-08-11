@@ -1,5 +1,5 @@
 import os from 'node:os';
-import { dirname, join } from 'upath';
+import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import {
@@ -97,8 +97,8 @@ export async function getJavaConstraint(
 export async function getJvmConfiguration(
   gradlewFile: string,
 ): Promise<string | null> {
-  const daemonJvmFile = join(
-    dirname(gradlewFile),
+  const daemonJvmFile = upath.join(
+    upath.dirname(gradlewFile),
     'gradle/gradle-daemon-jvm.properties',
   );
   const daemonJvm = await readLocalFile(daemonJvmFile, 'utf8');
@@ -122,10 +122,10 @@ export async function getJvmConfiguration(
 export async function getJavaLanguageVersion(
   gradlewFile: string,
 ): Promise<string | null> {
-  const localGradleDir = dirname(gradlewFile);
-  let buildFileName = join(localGradleDir, 'build.gradle');
+  const localGradleDir = upath.dirname(gradlewFile);
+  let buildFileName = upath.join(localGradleDir, 'build.gradle');
   if (!(await localPathExists(buildFileName))) {
-    buildFileName = join(localGradleDir, 'build.gradle.kts');
+    buildFileName = upath.join(localGradleDir, 'build.gradle.kts');
   }
 
   const buildFileContent = await readLocalFile(buildFileName, 'utf8');

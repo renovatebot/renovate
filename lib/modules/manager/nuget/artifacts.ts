@@ -1,5 +1,5 @@
 import { quote } from 'shlex';
-import { join } from 'upath';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -40,7 +40,7 @@ async function createCachedNuGetConfigFile(
 
   const contents = createNuGetConfigXml(registries);
 
-  const cachedNugetConfigFile = join(nugetCacheDir, `nuget.config`);
+  const cachedNugetConfigFile = upath.join(nugetCacheDir, `nuget.config`);
   await ensureDir(nugetCacheDir);
   await outputCacheFile(cachedNugetConfigFile, contents);
 
@@ -52,7 +52,7 @@ async function runDotnetRestore(
   dependentPackageFileNames: string[],
   config: UpdateArtifactsConfig,
 ): Promise<void> {
-  const nugetCacheDir = join(privateCacheDir(), 'nuget');
+  const nugetCacheDir = upath.join(privateCacheDir(), 'nuget');
 
   const nugetConfigFile = await createCachedNuGetConfigFile(
     nugetCacheDir,
@@ -65,7 +65,7 @@ async function runDotnetRestore(
   const execOptions: ExecOptions = {
     docker: {},
     extraEnv: {
-      NUGET_PACKAGES: join(nugetCacheDir, 'packages'),
+      NUGET_PACKAGES: upath.join(nugetCacheDir, 'packages'),
       MSBUILDDISABLENODEREUSE: '1',
     },
     toolConstraints: [{ toolName: 'dotnet', constraint: dotnetVersion }],

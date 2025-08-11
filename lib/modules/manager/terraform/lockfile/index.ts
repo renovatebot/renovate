@@ -171,7 +171,7 @@ export async function updateArtifacts({
         const updateLock = locks.find(
           (value) => value.packageName === packageName,
         );
-        // istanbul ignore if: needs test
+        /* v8 ignore next 4 -- needs test */
         if (!updateLock) {
           logger.debug(`Skipping. No lock found for "${packageName}"`);
           continue;
@@ -204,7 +204,7 @@ export async function updateArtifacts({
               registryUrl,
               updateLock.packageName,
               newVersion!,
-            )) ?? /* istanbul ignore next: needs test */ [],
+            )) ?? /* v8 ignore next: needs test */ [],
           ...updateLock,
         };
         updates.push(update);
@@ -222,7 +222,6 @@ export async function updateArtifacts({
     const res = writeLockUpdates(updates, lockFilePath, lockFileContent);
     return [res];
   } catch (err) {
-    /* istanbul ignore next */
     return [
       {
         artifactError: {
