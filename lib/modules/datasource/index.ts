@@ -7,7 +7,6 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { coerceArray } from '../../util/array';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
-import { resolveTtlValues } from '../../util/cache/package/ttl';
 import type { PackageCacheNamespace } from '../../util/cache/package/types';
 import { clone } from '../../util/clone';
 import { filterMap } from '../../util/filter-map';
@@ -105,14 +104,7 @@ async function getRegistryReleases(
 
   if (cache) {
     logger.trace({ cacheKey }, 'Caching datasource response');
-
-    // This is meant to be short-lived cache, so we ignore `hardTtlMinutes`
-    // and stick to the `softTtlMinutes` value
-    const { softTtlMinutes: cacheMinutes } = resolveTtlValues(
-      cacheNamespace,
-      15,
-    );
-    await packageCache.set(cacheNamespace, cacheKey, res, cacheMinutes);
+    await packageCache.set(cacheNamespace, cacheKey, res, 15);
     DatasourceCacheStats.set(datasource.id, registryUrl, config.packageName);
   } else {
     DatasourceCacheStats.skip(datasource.id, registryUrl, config.packageName);

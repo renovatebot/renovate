@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
+import type { Nullish } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { GitlabProject } from '../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../util/http/gitlab';
@@ -25,7 +26,7 @@ export async function fetchJSONFile(
   fileName: string,
   endpoint: string,
   tag?: string,
-): Promise<Preset> {
+): Promise<Nullish<Preset>> {
   let url = endpoint;
   let ref = '';
   let res: HttpResponse;
@@ -48,7 +49,9 @@ export async function fetchJSONFile(
     if (err instanceof ExternalHostError) {
       throw err;
     }
-    logger.debug(`Preset file ${fileName} not found in ${repo}`);
+    logger.debug(
+      `Preset file ${fileName} not found in ${repo}: ${err.message}`,
+    );
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
@@ -61,7 +64,7 @@ export function getPresetFromEndpoint(
   presetPath?: string,
   endpoint = Endpoint,
   tag?: string,
-): Promise<Preset | undefined> {
+): Promise<Nullish<Preset>> {
   return fetchPreset({
     repo,
     filePreset: presetName,
@@ -77,6 +80,6 @@ export function getPreset({
   presetPath,
   presetName = 'default',
   tag = undefined,
-}: PresetConfig): Promise<Preset | undefined> {
+}: PresetConfig): Promise<Nullish<Preset>> {
   return getPresetFromEndpoint(repo, presetName, presetPath, Endpoint, tag);
 }

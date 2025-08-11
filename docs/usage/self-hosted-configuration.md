@@ -341,6 +341,8 @@ Other valid cache namespaces are as follows:
 - `changelog-bitbucket-release`
 - `changelog-bitbucket-server-notes@v2`
 - `changelog-bitbucket-server-release`
+- `changelog-forgejo-notes@v2`
+- `changelog-forgejo-release`
 - `changelog-gitea-notes@v2`
 - `changelog-gitea-release`
 - `changelog-github-notes@v2`
@@ -376,6 +378,8 @@ Other valid cache namespaces are as follows:
 - `datasource-docker-tags`
 - `datasource-dotnet-version`
 - `datasource-endoflife-date`
+- `datasource-forgejo-releases`
+- `datasource-forgejo-tags`
 - `datasource-galaxy-collection`
 - `datasource-galaxy`
 - `datasource-git-refs`
@@ -754,6 +758,21 @@ Before the first commit in a repository, Renovate will:
 
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
+
+## gitPrivateKeyPassphrase
+
+Passphrase for the `gitPrivateKey` when the private key is protected with a passphrase.
+
+Currently supported for SSH keys only.
+When provided, Renovate will automatically decrypt the SSH private key during the signing process.
+
+<!-- prettier-ignore -->
+!!! note
+    Passphrases are not yet supported for GPG keys. If you provide a passphrase for a GPG key, it will be ignored and a warning will be logged.
+
+<!-- prettier-ignore -->
+!!! warning
+    Store this value securely as it provides access to decrypt your private key. Consider using environment variables or secure secret management systems rather than storing it in plain text configuration files.
 
 ## gitTimeout
 

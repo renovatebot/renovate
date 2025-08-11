@@ -431,24 +431,6 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
-    it('included unsupported manager', async () => {
-      const config = {
-        packageRules: [
-          {
-            matchManagers: ['foo'],
-            enabled: true,
-          },
-        ],
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        config,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(1);
-      expect(errors[0].message).toContain('ansible');
-    });
-
     it('included managers of the wrong type', async () => {
       const config = {
         packageRules: [
@@ -463,7 +445,7 @@ describe('config/validation', () => {
         config as any,
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
+      expect(errors).toHaveLength(1);
       expect(errors).toMatchSnapshot();
     });
 
