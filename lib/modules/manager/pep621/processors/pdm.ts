@@ -25,31 +25,17 @@ export class PdmProcessor implements PyProjectProcessor {
     project: PyProject,
     deps: PackageDependency[],
   ): PackageDependency<Pep621ManagerData>[] {
-    const pdm = project.tool?.pdm;
-    if (!pdm) {
-      return deps;
+    const devDependencies = project.tool?.pdm?.devDependencies;
+    if (devDependencies) {
+      deps.push(...devDependencies);
     }
 
-    const devDependencies = pdm['dev-dependencies'];
-    deps.push(...devDependencies);
-
-    const pdmSource = pdm.source;
-    if (!pdmSource) {
-      return deps;
-    }
-
-    // add pypi default url, if there is no source declared with the name `pypi`. https://daobook.github.io/pdm/pyproject/tool-pdm/#specify-other-sources-for-finding-packages
-    const containsPyPiUrl = pdmSource.some((value) => value.name === 'pypi');
-    const registryUrls: string[] = [];
-    if (!containsPyPiUrl) {
-      registryUrls.push(PypiDatasource.defaultURL);
-    }
-    for (const source of pdmSource) {
-      registryUrls.push(source.url);
-    }
-    for (const dep of deps) {
-      if (dep.datasource === PypiDatasource.id) {
-        dep.registryUrls = [...registryUrls];
+    const registryUrls = project.tool?.pdm?.registryUrls;
+    if (registryUrls) {
+      for (const dep of deps) {
+        if (dep.datasource === PypiDatasource.id) {
+          dep.registryUrls = registryUrls;
+        }
       }
     }
 
