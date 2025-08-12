@@ -71,6 +71,8 @@ const PdmSchema = z
           registryUrls.push(source.url);
         }
 
+        // Add pypi default url, if there is no source declared with the name `pypi`
+        // @see https://daobook.github.io/pdm/pyproject/tool-pdm/#specify-other-sources-for-finding-packages
         if (!containsPyPiUrl) {
           registryUrls.unshift(PypiDatasource.defaultURL);
         }
