@@ -1530,6 +1530,40 @@ describe('modules/datasource/docker/index', () => {
       await expect(getPkgReleases(config)).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
+    it('uses quay api with fallback from v1 to v2 on 401 Unauthorized', async () => {
+      httpMock
+        .scope('https://quay.io')
+        .get(
+          '/api/v1/repository/bitnami/redis/tag/?limit=100&page=1&onlyActiveTags=true',
+        )
+        .reply(401, 'Unauthorized')
+        .get('/v2/')
+        .reply(200, '', {})
+        .get('/v2/bitnami/redis/tags/list?n=10000')
+        .reply(200, {})
+        .get('/v2/bitnami/redis/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0', '2.0.0'] })
+        .get('/v2/bitnami/redis/manifests/2.0.0')
+        .reply(200, '', {});
+
+      const config = {
+        datasource: DockerDatasource.id,
+        packageName: 'bitnami/redis',
+        registryUrls: ['https://quay.io'],
+      };
+      const res = await getPkgReleases(config);
+      expect(res?.releases).toHaveLength(2);
+
+      // Verify the debug log for fallback was called
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect.objectContaining({
+          registryHost: 'https://quay.io',
+          dockerRepository: 'bitnami/redis',
+        }),
+        'Quay v1 API unauthorized, falling back to Docker v2 API',
+      );
+    });
+
     it('jfrog artifactory - retry tags for official images by injecting `/library` after repository and before image', async () => {
       const tags1 = [...range(1, 10000)].map((i) => `${i}.0.0`);
       const tags2 = [...range(10000, 20000)].map((i) => `${i}.0.0`);
