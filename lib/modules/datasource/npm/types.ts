@@ -7,7 +7,7 @@ export interface NpmrcRules {
 }
 
 export interface NpmAttestations {
-  url: string;
+  url?: string;
 }
 
 export interface NpmDistribution {
