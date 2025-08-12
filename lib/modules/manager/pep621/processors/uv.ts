@@ -5,7 +5,7 @@ import { logger } from '../../../../logger';
 import type { HostRule } from '../../../../types';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
-import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import { findLocalSiblingOrParent, readLocalFile } from '../../../../util/fs';
 import { getGitEnvironmentVariables } from '../../../../util/git/auth';
 import { find } from '../../../../util/host-rules';
 import { Result } from '../../../../util/result';
@@ -120,21 +120,25 @@ export class UvProcessor implements PyProjectProcessor {
     deps: PackageDependency[],
     packageFile: string,
   ): Promise<PackageDependency[]> {
-    const lockFileName = getSiblingFileName(packageFile, 'uv.lock');
-    const lockFileContent = await readLocalFile(lockFileName, 'utf8');
-    if (lockFileContent) {
-      const { val: lockFileMapping, err } = Result.parse(
-        lockFileContent,
-        UvLockfileSchema,
-      ).unwrap();
+    const lockFileName = await findLocalSiblingOrParent(packageFile, 'uv.lock');
+    if (lockFileName === null) {
+      logger.debug({ packageFile }, `No uv lock file found`);
+    } else {
+      const lockFileContent = await readLocalFile(lockFileName, 'utf8');
+      if (lockFileContent) {
+        const { val: lockFileMapping, err } = Result.parse(
+          lockFileContent,
+          UvLockfileSchema,
+        ).unwrap();
 
-      if (err) {
-        logger.debug({ packageFile, err }, `Error parsing uv lock file`);
-      } else {
-        for (const dep of deps) {
-          const packageName = dep.packageName;
-          if (packageName && packageName in lockFileMapping) {
-            dep.lockedVersion = lockFileMapping[packageName];
+        if (err) {
+          logger.debug({ packageFile, err }, `Error parsing uv lock file`);
+        } else {
+          for (const dep of deps) {
+            const packageName = dep.packageName;
+            if (packageName && packageName in lockFileMapping) {
+              dep.lockedVersion = lockFileMapping[packageName];
+            }
           }
         }
       }
@@ -152,7 +156,14 @@ export class UvProcessor implements PyProjectProcessor {
     const { isLockFileMaintenance } = config;
 
     // abort if no lockfile is defined
-    const lockFileName = getSiblingFileName(packageFileName, 'uv.lock');
+    const lockFileName = await findLocalSiblingOrParent(
+      packageFileName,
+      'uv.lock',
+    );
+    if (lockFileName === null) {
+      logger.debug({ packageFileName }, `No uv lock file found`);
+      return null;
+    }
     try {
       const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
       if (!existingLockFileContent) {
