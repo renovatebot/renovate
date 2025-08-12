@@ -59,8 +59,6 @@ function extractFromSection(
         skipReason = 'path-dependency';
       } else if (is.object(git) && is.string(git?.ref)) {
         currentValue = git?.ref;
-      } else if (is.object(git) && !is.string(git?.ref) && is.string(version)) {
-        currentValue = version;
       } else if (
         is.object(git) &&
         !is.string(git?.ref) &&
