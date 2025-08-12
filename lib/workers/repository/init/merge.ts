@@ -391,7 +391,7 @@ export async function tryReadStaticRepoFileConfig(
     staticRepoConfig,
   );
 
-  if (is.nonEmptyArray(errors)) {
+  if (is.nonEmptyArray(errors) || is.nonEmptyArray(warnings)) {
     logger.info(
       { errors, warnings },
       'Static repo config validation issues detected',
