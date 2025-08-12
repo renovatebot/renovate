@@ -261,7 +261,7 @@
     "validate-npm-package-name": "6.0.2",
     "vuln-vects": "1.1.0",
     "xmldoc": "2.0.2",
-    "yaml": "2.8.0",
+    "yaml": "2.8.1",
     "zod": "3.25.76"
   },
   "optionalDependencies": {
