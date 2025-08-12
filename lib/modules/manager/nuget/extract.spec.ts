@@ -52,7 +52,7 @@ describe('modules/manager/nuget/extract', () => {
         ),
       ).toBeNull();
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'Skipping versions.props as it is not XML',
+        'NuGet: Skipping versions.props as it is not XML',
       );
     });
 
