@@ -577,10 +577,6 @@ describe('workers/repository/init/merge', () => {
             name: 'should terminate when static config is invalid JSON',
             setup: () => fs.readSystemFile.mockResolvedValue('invalid json'),
           },
-          {
-            name: 'should terminate when static config has invalid renovate configuration',
-            setup: () => fs.readSystemFile.mockResolvedValue('{"foo":"bar"}'),
-          },
         ])('$name', async ({ setup }) => {
           const [exitMock, error] = mockProcessExitOnce();
           setup();
@@ -591,6 +587,31 @@ describe('workers/repository/init/merge', () => {
 
           expect(exitMock).toHaveBeenCalledOnce();
           expect(exitMock).toHaveBeenCalledWith(1);
+        });
+
+        it('should log static config validation errors and warnings', async () => {
+          const invalidConfig = { foo: 'bar' };
+
+          fs.readSystemFile.mockResolvedValue(JSON.stringify(invalidConfig));
+
+          const resolved = await resolveStaticRepoConfig(
+            {},
+            'static_config.json',
+          );
+
+          expect(resolved).toStrictEqual(invalidConfig);
+          expect(logger.logger.info).toHaveBeenCalledExactlyOnceWith(
+            {
+              errors: [
+                {
+                  message: 'Invalid configuration option: foo',
+                  topic: 'Configuration Error',
+                },
+              ],
+              warnings: [],
+            },
+            'Static repo config validation issues detected',
+          );
         });
       });
     });

@@ -385,23 +385,23 @@ export async function tryReadStaticRepoFileConfig(
     staticRepoConfigFile,
   ) as AllConfig;
 
-  const { errors } = await configValidation.validateConfig(
+  // validate and log issues here to preserve context, caller handles migration and full validation.
+  const { errors, warnings } = await configValidation.validateConfig(
     'repo',
     staticRepoConfig,
   );
 
   if (is.nonEmptyArray(errors)) {
-    logger.fatal(
-      { validationErrors: errors },
-      'static repository config validation errors',
+    logger.info(
+      { errors, warnings },
+      'Static repo config validation issues detected',
     );
-    throw new Error('Invalid renovate configuration in static config file');
+  } else {
+    logger.debug(
+      { staticRepoConfig },
+      'Static repository config file successfully parsed and validated',
+    );
   }
-
-  logger.debug(
-    { staticRepoConfig },
-    'Static repository config file successfully parsed and validated',
-  );
 
   return staticRepoConfig;
 }
