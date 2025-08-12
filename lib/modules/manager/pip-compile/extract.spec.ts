@@ -63,7 +63,6 @@ describe('modules/manager/pip-compile/extract', () => {
         {},
       );
       expect(packageFile).toHaveProperty('deps');
-      expect(packageFile?.deps).toEqual([]);
       expect(packageFile?.deps[0]).toHaveProperty('depType', 'requires-python');
       expect(packageFile?.deps[1]).toHaveProperty('depName', 'aiohttp');
     });
