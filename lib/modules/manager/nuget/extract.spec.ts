@@ -6,6 +6,7 @@ import { DotnetVersionDatasource } from '../../datasource/dotnet-version';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
 import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
 const config: ExtractConfig = {};
 
@@ -41,8 +42,10 @@ describe('modules/manager/nuget/extract', () => {
     it('extracts package file version', async () => {
       const packageFile = 'sample.csproj';
       const sample = Fixtures.get(packageFile);
+      vi.spyOn(fs, 'localPathExists').mockResolvedValueOnce(true);
       const res = await extractPackageFile(sample, packageFile, config);
       expect(res?.packageFileVersion).toBe('0.1.0');
+      expect(res?.lockFiles).toEqual(['packages.lock.json']);
     });
 
     it('does not fail on package file without version', async () => {
