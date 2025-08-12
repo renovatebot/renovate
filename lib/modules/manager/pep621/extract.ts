@@ -1,5 +1,5 @@
-import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
+import { massage as massageToml, parse as parseToml } from '../../../util/toml';
 import { PythonVersionDatasource } from '../../datasource/python-version';
 import * as pep440 from '../../versioning/pep440';
 import type {
@@ -8,12 +8,23 @@ import type {
   PackageFileContent,
 } from '../types';
 import { processors } from './processors';
-import {
-  depTypes,
-  parseDependencyGroupRecord,
-  parseDependencyList,
-  parsePyProject,
-} from './utils';
+import { type PyProject, PyProjectSchema } from './schema';
+
+export function parsePyProject(
+  content: string,
+  packageFile?: string,
+): PyProject | null {
+  try {
+    const jsonMap = parseToml(massageToml(content));
+    return PyProjectSchema.parse(jsonMap);
+  } catch (err) {
+    logger.debug(
+      { packageFile, err },
+      `Failed to parse and validate pyproject file`,
+    );
+    return null;
+  }
+}
 
 export async function extractPackageFile(
   content: string,
@@ -22,20 +33,17 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent | null> {
   logger.trace(`pep621.extractPackageFile(${packageFile})`);
 
-  const deps: PackageDependency[] = [];
-
-  const def = parsePyProject(packageFile, content);
-  if (is.nullOrUndefined(def)) {
+  const def = parsePyProject(content, packageFile);
+  if (!def) {
     return null;
   }
 
-  const packageFileVersion = def.project?.version;
+  const deps: PackageDependency[] = [];
+
   const pythonConstraint = def.project?.['requires-python'];
-  let extractedConstraints;
-  if (is.nonEmptyString(pythonConstraint)) {
-    extractedConstraints = {
-      extractedConstraints: { python: pythonConstraint },
-    };
+  const extractedConstraints: Record<string, string> = {};
+  if (pythonConstraint) {
+    extractedConstraints.python = pythonConstraint;
     deps.push({
       packageName: 'python',
       depType: 'requires-python',
@@ -44,32 +52,27 @@ export async function extractPackageFile(
       datasource: PythonVersionDatasource.id,
       versioning: pep440.id,
     });
-  } else {
-    extractedConstraints = {};
   }
 
-  // pyProject standard definitions
-  deps.push(
-    ...parseDependencyList(depTypes.dependencies, def.project?.dependencies),
-  );
-  deps.push(
-    ...parseDependencyGroupRecord(
-      depTypes.dependencyGroups,
-      def['dependency-groups'],
-    ),
-  );
-  deps.push(
-    ...parseDependencyGroupRecord(
-      depTypes.optionalDependencies,
-      def.project?.['optional-dependencies'],
-    ),
-  );
-  deps.push(
-    ...parseDependencyList(
-      depTypes.buildSystemRequires,
-      def['build-system']?.requires,
-    ),
-  );
+  const projectDependencies = def.project?.dependencies;
+  if (projectDependencies) {
+    deps.push(...projectDependencies);
+  }
+
+  const dependencyGroups = def['dependency-groups'];
+  if (dependencyGroups) {
+    deps.push(...dependencyGroups);
+  }
+
+  const projectOptionalDependencies = def.project?.['optional-dependencies'];
+  if (projectOptionalDependencies) {
+    deps.push(...projectOptionalDependencies);
+  }
+
+  const buildSystemRequires = def['build-system']?.requires;
+  if (buildSystemRequires) {
+    deps.push(...buildSystemRequires);
+  }
 
   // process specific tool sets
   let processedDeps = deps;
@@ -82,7 +85,8 @@ export async function extractPackageFile(
     );
   }
 
+  const packageFileVersion = def.project?.version;
   return processedDeps.length
-    ? { ...extractedConstraints, deps: processedDeps, packageFileVersion }
+    ? { extractedConstraints, deps: processedDeps, packageFileVersion }
     : null;
 }

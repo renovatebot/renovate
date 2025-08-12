@@ -8,6 +8,7 @@ import { parse } from './parser';
 import type { ResultFragment } from './parser/fragments';
 import { RuleToMavenPackageDep, fillRegistryUrls } from './parser/maven';
 import { RuleToDockerPackageDep } from './parser/oci';
+import { RulesImgPullToDockerPackageDep } from './parser/rules-img';
 import {
   GitRepositoryToPackageDep,
   RuleToBazelModulePackageDep,
@@ -24,6 +25,7 @@ export async function extractPackageFile(
     const gitRepositoryDeps = extractGitRepositoryDeps(records);
     const mavenDeps = extractMavenDeps(records);
     const dockerDeps = LooseArray(RuleToDockerPackageDep).parse(records);
+    const rulesImgDeps = extractRulesImgDeps(records);
 
     if (gitRepositoryDeps.length) {
       pfc.deps.push(...gitRepositoryDeps);
@@ -35,6 +37,10 @@ export async function extractPackageFile(
 
     if (dockerDeps.length) {
       pfc.deps.push(...dockerDeps);
+    }
+
+    if (rulesImgDeps.length) {
+      pfc.deps.push(...rulesImgDeps);
     }
 
     return pfc.deps.length ? pfc : null;
@@ -75,4 +81,8 @@ function extractMavenDeps(records: ResultFragment[]): PackageDependency[] {
   return LooseArray(RuleToMavenPackageDep)
     .transform(fillRegistryUrls)
     .parse(records);
+}
+
+function extractRulesImgDeps(records: ResultFragment[]): PackageDependency[] {
+  return LooseArray(RulesImgPullToDockerPackageDep).parse(records);
 }
