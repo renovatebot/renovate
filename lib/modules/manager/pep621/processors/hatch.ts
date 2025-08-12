@@ -11,7 +11,7 @@ export class HatchProcessor implements PyProjectProcessor {
     pyproject: PyProject,
     deps: PackageDependency[],
   ): PackageDependency[] {
-    const hatchDeps = pyproject.tool?.hatch.deps;
+    const hatchDeps = pyproject.tool?.hatch?.deps;
     if (hatchDeps) {
       deps.push(...hatchDeps);
     }

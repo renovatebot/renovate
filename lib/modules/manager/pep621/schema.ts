@@ -32,9 +32,8 @@ type DependencyGroupSchema = z.ZodType<
 >;
 
 function DependencyGroup(depType: string): DependencyGroupSchema {
-  return LooseRecord(LooseArray(Pep508Dependency(depType)))
-    .catch({})
-    .transform((depGroups) => {
+  return LooseRecord(LooseArray(Pep508Dependency(depType))).transform(
+    (depGroups) => {
       const deps: PackageDependency[] = [];
       for (const [depGroup, groupDeps] of Object.entries(depGroups)) {
         for (const dep of groupDeps) {
@@ -46,11 +45,12 @@ function DependencyGroup(depType: string): DependencyGroupSchema {
         }
       }
       return deps;
-    }) as DependencyGroupSchema;
+    },
+  ) as unknown as DependencyGroupSchema;
 }
 
 const PdmSchema = z.object({
-  'dev-dependencies': DependencyGroup(depTypes.pdmDevDependencies),
+  'dev-dependencies': DependencyGroup(depTypes.pdmDevDependencies).catch([]),
   source: z
     .array(
       z.object({
@@ -152,9 +152,12 @@ export const PyProjectSchema = z.object({
       dependencies: LooseArray(Pep508Dependency(depTypes.dependencies)).catch(
         [],
       ),
-      'optional-dependencies': DependencyGroup(depTypes.optionalDependencies),
+      'optional-dependencies': DependencyGroup(
+        depTypes.optionalDependencies,
+      ).catch([]),
     })
-    .optional(),
+    .optional()
+    .catch(undefined),
   'build-system': z
     .object({
       requires: LooseArray(
@@ -162,16 +165,18 @@ export const PyProjectSchema = z.object({
       ).catch([]),
       'build-backend': z.string().optional().catch(undefined),
     })
-    .optional(),
-  'dependency-groups': DependencyGroup(depTypes.dependencyGroups).optional(),
+    .optional()
+    .catch(undefined),
+  'dependency-groups': DependencyGroup(depTypes.dependencyGroups).catch([]),
   tool: z
     .object({
-      pixi: PixiConfigSchema.optional(),
-      pdm: PdmSchema.optional(),
-      hatch: HatchSchema,
-      uv: UvSchema.optional(),
+      pixi: PixiConfigSchema.optional().catch(undefined),
+      pdm: PdmSchema.optional().catch(undefined),
+      hatch: HatchSchema.optional().catch(undefined),
+      uv: UvSchema.optional().catch(undefined),
     })
-    .optional(),
+    .optional()
+    .catch(undefined),
 });
 
 export const PdmLockfileSchema = Toml.pipe(
