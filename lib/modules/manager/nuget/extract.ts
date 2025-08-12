@@ -202,7 +202,7 @@ export async function extractPackageFile(
   // Simple xml validation.
   // Should start with `<` and end with `>` after trimming all whitespace
   if (!regEx(/^\s*<.+>$/m).test(content.trim())) {
-    logger.debug(`Skipping ${packageFile} as it is not XML`);
+    logger.debug(`NuGet: Skipping ${packageFile} as it is not XML`);
     return null;
   }
 
