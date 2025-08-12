@@ -2514,6 +2514,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     allowedValues: [
       'bundlerConservative',
+      'dotnetWorkloadRestore',
       'gomodMassage',
       'gomodTidy',
       'gomodTidy1.17',
