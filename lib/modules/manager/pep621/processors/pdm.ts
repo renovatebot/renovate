@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
@@ -16,7 +15,7 @@ import type {
 } from '../../types';
 import { PdmLockfileSchema, type PyProject } from '../schema';
 import type { Pep621ManagerData } from '../types';
-import { depTypes, parseDependencyGroupRecord } from '../utils';
+import { depTypes } from '../utils';
 import type { PyProjectProcessor } from './types';
 
 const pdmUpdateCMD = 'pdm update --no-sync --update-eager';
@@ -27,19 +26,15 @@ export class PdmProcessor implements PyProjectProcessor {
     deps: PackageDependency[],
   ): PackageDependency<Pep621ManagerData>[] {
     const pdm = project.tool?.pdm;
-    if (is.nullOrUndefined(pdm)) {
+    if (!pdm) {
       return deps;
     }
 
-    deps.push(
-      ...parseDependencyGroupRecord(
-        depTypes.pdmDevDependencies,
-        pdm['dev-dependencies'],
-      ),
-    );
+    const devDependencies = pdm['dev-dependencies'];
+    deps.push(...devDependencies);
 
     const pdmSource = pdm.source;
-    if (is.nullOrUndefined(pdmSource)) {
+    if (!pdmSource) {
       return deps;
     }
 
@@ -67,7 +62,7 @@ export class PdmProcessor implements PyProjectProcessor {
     packageFile: string,
   ): Promise<PackageDependency[]> {
     if (
-      is.nullOrUndefined(project.tool?.pdm) &&
+      !project.tool?.pdm &&
       project['build-system']?.['build-backend'] !== 'pdm.backend'
     ) {
       return Promise.resolve(deps);
@@ -104,7 +99,7 @@ export class PdmProcessor implements PyProjectProcessor {
     const lockFileName = getSiblingFileName(packageFileName, 'pdm.lock');
     try {
       const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
-      if (is.nullOrUndefined(existingLockFileContent)) {
+      if (!existingLockFileContent) {
         logger.debug('No pdm.lock found');
         return null;
       }
@@ -180,7 +175,7 @@ function generateCMDs(updatedDeps: Upgrade<Pep621ManagerData>[]): string[] {
   for (const dep of updatedDeps) {
     switch (dep.depType) {
       case depTypes.optionalDependencies: {
-        if (is.nullOrUndefined(dep.managerData?.depGroup)) {
+        if (!dep.managerData?.depGroup) {
           logger.once.warn(
             { dep: dep.depName },
             'Unexpected optional dependency without group',
@@ -196,7 +191,7 @@ function generateCMDs(updatedDeps: Upgrade<Pep621ManagerData>[]): string[] {
       }
       case depTypes.dependencyGroups:
       case depTypes.pdmDevDependencies: {
-        if (is.nullOrUndefined(dep.managerData?.depGroup)) {
+        if (!dep.managerData?.depGroup) {
           logger.once.warn(
             { dep: dep.depName },
             'Unexpected dev dependency without group',
@@ -234,7 +229,7 @@ function addPackageToCMDRecord(
   commandPrefix: string,
   packageName: string,
 ): void {
-  if (is.nullOrUndefined(packagesByCMD[commandPrefix])) {
+  if (!packagesByCMD[commandPrefix]) {
     packagesByCMD[commandPrefix] = [];
   }
   packagesByCMD[commandPrefix].push(packageName);

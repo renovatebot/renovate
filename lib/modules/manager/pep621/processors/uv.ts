@@ -20,7 +20,7 @@ import type {
 } from '../../types';
 import { applyGitSource } from '../../util';
 import { type PyProject, UvLockfileSchema } from '../schema';
-import { depTypes, parseDependencyList } from '../utils';
+import { depTypes } from '../utils';
 import type { PyProjectProcessor } from './types';
 
 const uvUpdateCMD = 'uv lock';
@@ -28,7 +28,7 @@ const uvUpdateCMD = 'uv lock';
 export class UvProcessor implements PyProjectProcessor {
   process(project: PyProject, deps: PackageDependency[]): PackageDependency[] {
     const uv = project.tool?.uv;
-    if (is.nullOrUndefined(uv)) {
+    if (!uv) {
       return deps;
     }
 
@@ -42,12 +42,10 @@ export class UvProcessor implements PyProjectProcessor {
       ?.filter((index) => !index.explicit && index.name !== defaultIndex?.name)
       ?.map(({ url }) => url);
 
-    deps.push(
-      ...parseDependencyList(
-        depTypes.uvDevDependencies,
-        uv['dev-dependencies'],
-      ),
-    );
+    const devDependencies = uv['dev-dependencies'];
+    if (devDependencies) {
+      deps.push(...devDependencies);
+    }
 
     // https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
     // Skip sources that do not make sense to handle (e.g. path).
@@ -157,7 +155,7 @@ export class UvProcessor implements PyProjectProcessor {
     const lockFileName = getSiblingFileName(packageFileName, 'uv.lock');
     try {
       const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
-      if (is.nullOrUndefined(existingLockFileContent)) {
+      if (!existingLockFileContent) {
         logger.debug('No uv.lock found');
         return null;
       }
@@ -336,7 +334,7 @@ async function getUvIndexCredentials(
 ): Promise<NodeJS.ProcessEnv> {
   const uv_indexes = project.tool?.uv?.index;
 
-  if (is.nullOrUndefined(uv_indexes)) {
+  if (!uv_indexes) {
     return {};
   }
 
