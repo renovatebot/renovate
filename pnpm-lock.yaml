@@ -99,8 +99,8 @@ importers:
         specifier: 1.6.8
         version: 1.6.8
       '@renovatebot/pep440':
-        specifier: 4.1.0
-        version: 4.1.0
+        specifier: 4.2.0
+        version: 4.2.0
       '@renovatebot/ruby-semver':
         specifier: 4.0.0
         version: 4.0.0
@@ -1605,9 +1605,9 @@ packages:
     resolution: {integrity: sha512-BjNyJtjk8vg4LNqu2XdYg15oOgukUSV+Nz2DLjXCyuV0SRGi3tNjLY4BSmbmAQEwfZqsS/6Y2pqSGLw4m1yxOA==}
     engines: {node: '>=18.12.0'}
 
-  '@renovatebot/pep440@4.1.0':
-    resolution: {integrity: sha512-mo2RxnOSp78Njt1HmgMwjl6FapP4OyIS8HypJlymCvN7AIV2Xf5PmZfl/E3O1WWZ6IjKrfsEAaPWFMi8tnkq3g==}
-    engines: {node: ^20.9.0 || ^22.11.0, pnpm: ^9.0.0}
+  '@renovatebot/pep440@4.2.0':
+    resolution: {integrity: sha512-hT7WcjHbZdx3U9iRKuGwgm1l2wFS+FrWEdX+EQ5i+VAI6tWdcktFtdwDTNIqSwklOW1Vng55om8c4RrPHCmiIQ==}
+    engines: {node: ^20.9.0 || ^22.11.0 || ^24, pnpm: ^10.0.0}
 
   '@renovatebot/ruby-semver@4.0.0':
     resolution: {integrity: sha512-vuLfebLvwYWwQYJeZiHHs5NmydjO6cdhwS1dUHJbXMi0WD8kBa/+f7gz4WcuNJPRR+enLFQUHs89OCjfl6Os0g==}
@@ -8114,7 +8114,7 @@ snapshots:
       got: 11.8.6
       luxon: 3.7.1
 
-  '@renovatebot/pep440@4.1.0': {}
+  '@renovatebot/pep440@4.2.0': {}
 
   '@renovatebot/ruby-semver@4.0.0': {}
 
