@@ -224,6 +224,43 @@ By default, it is essentially an empty config with only the Renovate JSON schema
 
 If you configure `onboardingConfig` in either Global config or Inherited config then Renovate will use that config directly instead of the default.
 
+If you self-host Renovate in GitLab using [`renovate-runner`](https://gitlab.com/gitlab-com/gl-infra/renovate/renovate-runner), the CI will contain a default [RENOVATE_ONBOARDING_CONFIG](https://gitlab.com/renovate-bot/renovate-runner/-/blob/main/templates/renovate.gitlab-ci.yml#L5) that will merge with your own configuration settings. For example, the CI by default contains:
+
+```yml
+RENOVATE_ONBOARDING_CONFIG: '{"$$schema": "https://docs.renovatebot.com/renovate-schema.json", "extends": ["config:recommended"] }'
+```
+
+If you want to change the `extends` in your own configuration, you need to override the variable in your own `.gitlab-ci.yml`:
+
+```yml
+variables:
+  RENOVATE_ONBOARDING_CONFIG: '{"$$schema":"https://docs.renovatebot.com/renovate-schema.json","extends":["platform>organization/repo:renovate-config"]}'
+```
+
+Your `renovate.js` where you run Renovate cannot contain any `extends` definition, it will pick the `extends` from the `RENOVATE_ONBOARDING_CONFIG` variable. For example, your config can look like this:
+
+```js
+module.exports = {
+    ...
+    onboardingConfig: {
+      "argocd": {
+        "fileMatch": [
+          "application\\.yaml$"
+        ]
+      },
+    };
+```
+
+The resulting onboarding config will be:
+
+```yml
+{
+  '$schema': 'https://docs.renovatebot.com/renovate-schema.json',
+  'argocd': { 'managerFilePatterns': ["/application\\.yaml$/"] },
+  'extends': ['platform>organization/repo:renovate-config'],
+}
+```
+
 Alternatively if you follow Renovate's naming convention for shared presets then it can automatically detect those instead.
 If the repository `{{parentOrg}}/renovate-config` has a `default.json` file then this will be treated as the organization's default preset and included in the Onboarding config.
 Additionally for platforms which support nested Organization/Group hierarchies, Renovate will "hunt" up such hierarchies for a `renovate-config` repository with default config and stop when it finds the first.
