@@ -77,10 +77,6 @@ const PdmSchema = z
           registryUrls.unshift(PypiDatasource.defaultURL);
         }
 
-        if (!registryUrls.length) {
-          return undefined;
-        }
-
         return registryUrls;
       })
       .optional()
