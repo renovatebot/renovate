@@ -198,20 +198,20 @@ export async function mergeRenovateConfig(
     };
   }
   const configFileParsed = repoConfig?.configFileParsed ?? {};
-  const configFileAndEnv = await resolveStaticRepoConfig(
+  const resolvedRepoConfig = await resolveStaticRepoConfig(
     configFileParsed,
     process.env.RENOVATE_X_STATIC_REPO_CONFIG_FILE,
   );
 
   if (is.nonEmptyArray(returnConfig.extends)) {
-    configFileAndEnv.extends = [
+    resolvedRepoConfig.extends = [
       ...returnConfig.extends,
-      ...(configFileAndEnv.extends ?? []),
+      ...(resolvedRepoConfig.extends ?? []),
     ];
     delete returnConfig.extends;
   }
   checkForRepoConfigError(repoConfig);
-  const migratedConfig = await migrateAndValidate(config, configFileAndEnv);
+  const migratedConfig = await migrateAndValidate(config, resolvedRepoConfig);
   if (migratedConfig.errors?.length) {
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = repoConfig.configFileName;
