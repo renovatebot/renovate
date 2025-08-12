@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
@@ -9,6 +10,7 @@ import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags';
 import { PypiDatasource } from '../../../datasource/pypi';
 import type { UpdateArtifactsConfig } from '../../types';
+import { parsePyProject } from '../extract';
 import { depTypes } from '../utils';
 import { UvProcessor } from './uv';
 import { mockExecAll } from '~test/exec-util';
@@ -33,7 +35,10 @@ const processor = new UvProcessor();
 describe('modules/manager/pep621/processors/uv', () => {
   describe('process()', () => {
     it('returns initial dependencies if there is no tool.uv section', () => {
-      const pyproject = { tool: {} };
+      const pyproject = parsePyProject(codeBlock`
+        [tool]
+      `)!;
+
       const dependencies = [{ depName: 'dep1' }];
 
       const result = processor.process(pyproject, dependencies);
@@ -42,9 +47,11 @@ describe('modules/manager/pep621/processors/uv', () => {
     });
 
     it('includes uv dev dependencies if there is a tool.uv section', () => {
-      const pyproject = {
-        tool: { uv: { 'dev-dependencies': ['dep2==1.2.3', 'dep3==2.3.4'] } },
-      };
+      const pyproject = parsePyProject(codeBlock`
+        [tool.uv]
+        dev-dependencies = ["dep2==1.2.3", "dep3==2.3.4"]
+      `)!;
+
       const dependencies = [{ depName: 'dep1' }];
 
       const result = processor.process(pyproject, dependencies);
@@ -72,23 +79,18 @@ describe('modules/manager/pep621/processors/uv', () => {
   });
 
   it('applies git sources', () => {
-    const pyproject = {
-      tool: {
-        uv: {
-          'dev-dependencies': ['dep3', 'dep4', 'dep5'],
-          sources: {
-            dep1: { git: 'https://github.com/foo/dep1', tag: '0.1.0' },
-            dep2: { git: 'https://gitlab.com/foo/dep2', tag: '0.2.0' },
-            dep3: { git: 'https://codeberg.org/foo/dep3.git', tag: '0.3.0' },
-            dep4: {
-              git: 'https://github.com/foo/dep4',
-              rev: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
-            },
-            dep5: { git: 'https://github.com/foo/dep5', branch: 'master' },
-          },
-        },
-      },
-    };
+    const pyproject = parsePyProject(codeBlock`
+      [tool.uv]
+      dev-dependencies = ["dep3", "dep4", "dep5"]
+
+      [tool.uv.sources]
+      dep1 = { git = "https://github.com/foo/dep1", tag = "0.1.0" }
+      dep2 = { git = "https://gitlab.com/foo/dep2", tag = "0.2.0" }
+      dep3 = { git = "https://codeberg.org/foo/dep3.git", tag = "0.3.0" }
+      dep4 = { git = "https://github.com/foo/dep4", rev = "1ca7d263f0f5038b53f74c5a757f18b8106c9390" }
+      dep5 = { git = "https://github.com/foo/dep5", branch = "master" }
+    `)!;
+
     const dependencies = [
       {
         depName: 'dep1',
@@ -146,37 +148,29 @@ describe('modules/manager/pep621/processors/uv', () => {
   });
 
   it('pinned to non-default index', () => {
-    const pyproject = {
-      tool: {
-        uv: {
-          sources: {
-            dep1: { index: 'foo' },
-            dep2: { index: 'bar' },
-            dep3: { non_existent_future_source: {} } as any,
-          },
-          index: [
-            {
-              name: 'foo',
-              url: 'https://foo.com/simple',
-              default: false,
-              explicit: true,
-            },
-            {
-              name: 'bar',
-              url: 'https://bar.com/simple',
-              default: false,
-              explicit: true,
-            },
-            {
-              name: 'baz',
-              url: 'https://baz.com/simple',
-              default: false,
-              explicit: false,
-            },
-          ],
-        },
-      },
-    };
+    const pyproject = parsePyProject(codeBlock`
+      [tool.uv.sources]
+      dep1 = { index = "foo" }
+      dep2 = { index = "bar" }
+
+      [[tool.uv.index]]
+      name = "foo"
+      url = "https://foo.com/simple"
+      default = false
+      explicit = true
+
+      [[tool.uv.index]]
+      name = "bar"
+      url = "https://bar.com/simple"
+      default = false
+      explicit = true
+
+      [[tool.uv.index]]
+      name = "baz"
+      url = "https://baz.com/simple"
+      default = false
+      explicit = false
+    `)!;
 
     const dependencies = [
       {
@@ -214,9 +208,8 @@ describe('modules/manager/pep621/processors/uv', () => {
       },
       {
         depName: 'dep3',
-        depType: depTypes.uvSources,
         packageName: 'dep3',
-        skipReason: 'unknown-registry',
+        registryUrls: ['https://baz.com/simple', 'https://pypi.org/pypi/'],
       },
       {
         depName: 'dep4',
@@ -227,19 +220,12 @@ describe('modules/manager/pep621/processors/uv', () => {
   });
 
   it('index with optional name', () => {
-    const pyproject = {
-      tool: {
-        uv: {
-          index: [
-            {
-              url: 'https://foo.com/simple',
-              default: true,
-              explicit: false,
-            },
-          ],
-        },
-      },
-    };
+    const pyproject = parsePyProject(codeBlock`
+      [[tool.uv.index]]
+      url = "https://foo.com/simple"
+      default = true
+      explicit = false
+    `)!;
 
     const dependencies = [
       {
@@ -269,20 +255,13 @@ describe('modules/manager/pep621/processors/uv', () => {
   });
 
   it('override implicit default index', () => {
-    const pyproject = {
-      tool: {
-        uv: {
-          index: [
-            {
-              name: 'foo',
-              url: 'https://foo.com/simple',
-              default: true,
-              explicit: false,
-            },
-          ],
-        },
-      },
-    };
+    const pyproject = parsePyProject(codeBlock`
+      [[tool.uv.index]]
+      name = "foo"
+      url = "https://foo.com/simple"
+      default = true
+      explicit = false
+    `)!;
 
     const dependencies = [
       {
@@ -322,23 +301,16 @@ describe('modules/manager/pep621/processors/uv', () => {
   });
 
   it('override explicit default index', () => {
-    const pyproject = {
-      tool: {
-        uv: {
-          sources: {
-            dep1: { index: 'foo' },
-          },
-          index: [
-            {
-              name: 'foo',
-              url: 'https://foo.com/simple',
-              default: true,
-              explicit: true,
-            },
-          ],
-        },
-      },
-    };
+    const pyproject = parsePyProject(codeBlock`
+      [tool.uv.sources]
+      dep1 = { index = "foo" }
+
+      [[tool.uv.index]]
+      name = "foo"
+      url = "https://foo.com/simple"
+      default = true
+      explicit = true
+    `)!;
 
     const dependencies = [
       {
@@ -379,7 +351,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           config,
           updatedDeps,
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toBeNull();
     });
@@ -404,6 +376,14 @@ describe('modules/manager/pep621/processors/uv', () => {
       });
 
       const updatedDeps = [{ packageName: 'dep1' }];
+      const pyproject = parsePyProject(codeBlock`
+        [project]
+        requires-python = "==3.11.1"
+
+        [tool.uv]
+        required-version = "==0.2.35"
+      `)!;
+
       const result = await processor.updateArtifacts(
         {
           packageFileName: 'pyproject.toml',
@@ -411,16 +391,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           config: {},
           updatedDeps,
         },
-        {
-          project: {
-            'requires-python': '==3.11.1',
-          },
-          tool: {
-            uv: {
-              'required-version': '==0.2.35',
-            },
-          },
-        },
+        pyproject,
       );
       expect(result).toBeNull();
       expect(execSnapshots).toMatchObject([
@@ -465,7 +436,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           config: {},
           updatedDeps,
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toEqual([
         { artifactError: { lockFile: 'uv.lock', stderr: 'test error' } },
@@ -506,7 +477,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           },
           updatedDeps,
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toEqual([
         {
@@ -600,6 +571,22 @@ describe('modules/manager/pep621/processors/uv', () => {
           registryUrls: ['https://unnamed.com/simple'],
         },
       ];
+      const pyproject = parsePyProject(codeBlock`
+        [tool.uv.sources]
+        dep6 = { index = "pinned-index" }
+
+        [[tool.uv.index]]
+        name = "pinned-index"
+        url = "https://pinned.com/simple"
+        default = false
+        explicit = true
+
+        [[tool.uv.index]]
+        url = "https://unnamed.com/simple"
+        default = false
+        explicit = true
+      `)!;
+
       const result = await processor.updateArtifacts(
         {
           packageFileName: 'pyproject.toml',
@@ -607,28 +594,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           config: {},
           updatedDeps,
         },
-        {
-          tool: {
-            uv: {
-              sources: {
-                dep6: { index: 'pinned-index' },
-              },
-              index: [
-                {
-                  name: 'pinned-index',
-                  url: 'https://pinned.com/simple',
-                  default: false,
-                  explicit: true,
-                },
-                {
-                  url: 'https://unnamed.com/simple',
-                  default: false,
-                  explicit: true,
-                },
-              ],
-            },
-          },
-        },
+        pyproject,
       );
       expect(result).toEqual([
         {
@@ -719,6 +685,23 @@ describe('modules/manager/pep621/processors/uv', () => {
           ],
         },
       ];
+      const pyproject = parsePyProject(codeBlock`
+        [tool.uv.sources]
+        dep2 = { index = "pinned-index" }
+
+        [[tool.uv.index]]
+        name = "pinned-index"
+        url = "https://pinned.com/simple"
+        default = false
+        explicit = true
+
+        [[tool.uv.index]]
+        name = "implicit-index"
+        url = "https://implicit.com/simple"
+        default = false
+        explicit = false
+      `)!;
+
       const result = await processor.updateArtifacts(
         {
           packageFileName: 'pyproject.toml',
@@ -726,29 +709,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           config: {},
           updatedDeps,
         },
-        {
-          tool: {
-            uv: {
-              sources: {
-                dep2: { index: 'pinned-index' },
-              },
-              index: [
-                {
-                  name: 'pinned-index',
-                  url: 'https://pinned.com/simple',
-                  default: false,
-                  explicit: true,
-                },
-                {
-                  name: 'implicit-index',
-                  url: 'https://implicit.com/simple',
-                  default: false,
-                  explicit: false,
-                },
-              ],
-            },
-          },
-        },
+        pyproject,
       );
       expect(result).toEqual([
         {
@@ -812,7 +773,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           config: {},
           updatedDeps,
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toEqual([
         {
@@ -860,7 +821,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           },
           updatedDeps: [],
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toEqual([
         {

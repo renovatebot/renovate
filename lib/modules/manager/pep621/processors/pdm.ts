@@ -16,7 +16,7 @@ import type {
 } from '../../types';
 import { PdmLockfileSchema, type PyProject } from '../schema';
 import type { Pep621ManagerData } from '../types';
-import { depTypes, parseDependencyGroupRecord } from '../utils';
+import { depTypes } from '../utils';
 import type { PyProjectProcessor } from './types';
 
 const pdmUpdateCMD = 'pdm update --no-sync --update-eager';
@@ -31,12 +31,8 @@ export class PdmProcessor implements PyProjectProcessor {
       return deps;
     }
 
-    deps.push(
-      ...parseDependencyGroupRecord(
-        depTypes.pdmDevDependencies,
-        pdm['dev-dependencies'],
-      ),
-    );
+    const devDependencies = pdm['dev-dependencies'];
+    deps.push(...devDependencies);
 
     const pdmSource = pdm.source;
     if (is.nullOrUndefined(pdmSource)) {

@@ -20,7 +20,7 @@ import type {
 } from '../../types';
 import { applyGitSource } from '../../util';
 import { type PyProject, UvLockfileSchema } from '../schema';
-import { depTypes, parseDependencyList } from '../utils';
+import { depTypes } from '../utils';
 import type { PyProjectProcessor } from './types';
 
 const uvUpdateCMD = 'uv lock';
@@ -42,12 +42,10 @@ export class UvProcessor implements PyProjectProcessor {
       ?.filter((index) => !index.explicit && index.name !== defaultIndex?.name)
       ?.map(({ url }) => url);
 
-    deps.push(
-      ...parseDependencyList(
-        depTypes.uvDevDependencies,
-        uv['dev-dependencies'],
-      ),
-    );
+    const devDependencies = uv['dev-dependencies'];
+    if (devDependencies) {
+      deps.push(...devDependencies);
+    }
 
     // https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
     // Skip sources that do not make sense to handle (e.g. path).
