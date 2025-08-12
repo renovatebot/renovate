@@ -28,7 +28,7 @@ const uvUpdateCMD = 'uv lock';
 export class UvProcessor implements PyProjectProcessor {
   process(project: PyProject, deps: PackageDependency[]): PackageDependency[] {
     const uv = project.tool?.uv;
-    if (is.nullOrUndefined(uv)) {
+    if (!uv) {
       return deps;
     }
 
@@ -155,7 +155,7 @@ export class UvProcessor implements PyProjectProcessor {
     const lockFileName = getSiblingFileName(packageFileName, 'uv.lock');
     try {
       const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
-      if (is.nullOrUndefined(existingLockFileContent)) {
+      if (!existingLockFileContent) {
         logger.debug('No uv.lock found');
         return null;
       }
@@ -334,7 +334,7 @@ async function getUvIndexCredentials(
 ): Promise<NodeJS.ProcessEnv> {
   const uv_indexes = project.tool?.uv?.index;
 
-  if (is.nullOrUndefined(uv_indexes)) {
+  if (!uv_indexes) {
     return {};
   }
 

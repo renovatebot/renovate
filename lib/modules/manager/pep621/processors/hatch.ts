@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import type {
   PackageDependency,
   UpdateArtifact,
@@ -13,7 +12,7 @@ export class HatchProcessor implements PyProjectProcessor {
     deps: PackageDependency[],
   ): PackageDependency[] {
     const hatchDeps = pyproject.tool?.hatch.deps;
-    if (is.array(hatchDeps)) {
+    if (hatchDeps) {
       deps.push(...hatchDeps);
     }
     return deps;
