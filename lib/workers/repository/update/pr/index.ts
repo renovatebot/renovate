@@ -290,8 +290,7 @@ export async function ensurePr(
         }
       } else if (logJSON.error === 'MissingGithubToken') {
         upgrade.prBodyNotes ??= [];
-        upgrade.prBodyNotes = [
-          ...upgrade.prBodyNotes,
+        upgrade.prBodyNotes.push(
           [
             '> :exclamation: **Important**',
             '> ',
@@ -299,7 +298,7 @@ export async function ensurePr(
             '> If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).',
             '\n',
           ].join('\n'),
-        ];
+        );
       }
     }
 
@@ -320,8 +319,7 @@ export async function ensurePr(
       newRelease.attestation !== true
     ) {
       upgrade.prBodyNotes ??= [];
-      upgrade.prBodyNotes = [
-        ...upgrade.prBodyNotes,
+      upgrade.prBodyNotes.push(
         [
           '> :exclamation: **Warning**',
           '>',
@@ -329,7 +327,7 @@ export async function ensurePr(
           `> Verify that release ${newVersion} was published by the expected author.`,
           '\n',
         ].join('\n'),
-      ];
+      );
     }
 
     config.upgrades.push(upgrade);
