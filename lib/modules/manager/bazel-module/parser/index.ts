@@ -2,9 +2,15 @@ import { lang, query as q } from 'good-enough-parser';
 import { Ctx } from './context';
 import { extensionTags } from './extension-tags';
 import type { ResultFragment } from './fragments';
+import { dynamicFunctionCall, repoRuleAssignment } from './repo-rules';
 import { rules } from './rules';
 
-const rule = q.alt<Ctx>(rules, extensionTags);
+const rule = q.alt<Ctx>(
+  rules,
+  extensionTags,
+  repoRuleAssignment,
+  dynamicFunctionCall,
+);
 
 const query = q.tree<Ctx>({
   type: 'root-tree',

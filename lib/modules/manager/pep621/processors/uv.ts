@@ -5,7 +5,7 @@ import { logger } from '../../../../logger';
 import type { HostRule } from '../../../../types';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
-import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import { findLocalSiblingOrParent, readLocalFile } from '../../../../util/fs';
 import { getGitEnvironmentVariables } from '../../../../util/git/auth';
 import { find } from '../../../../util/host-rules';
 import { Result } from '../../../../util/result';
@@ -20,7 +20,7 @@ import type {
 } from '../../types';
 import { applyGitSource } from '../../util';
 import { type PyProject, UvLockfileSchema } from '../schema';
-import { depTypes, parseDependencyList } from '../utils';
+import { depTypes } from '../utils';
 import type { PyProjectProcessor } from './types';
 
 const uvUpdateCMD = 'uv lock';
@@ -28,7 +28,7 @@ const uvUpdateCMD = 'uv lock';
 export class UvProcessor implements PyProjectProcessor {
   process(project: PyProject, deps: PackageDependency[]): PackageDependency[] {
     const uv = project.tool?.uv;
-    if (is.nullOrUndefined(uv)) {
+    if (!uv) {
       return deps;
     }
 
@@ -42,12 +42,10 @@ export class UvProcessor implements PyProjectProcessor {
       ?.filter((index) => !index.explicit && index.name !== defaultIndex?.name)
       ?.map(({ url }) => url);
 
-    deps.push(
-      ...parseDependencyList(
-        depTypes.uvDevDependencies,
-        uv['dev-dependencies'],
-      ),
-    );
+    const devDependencies = uv['dev-dependencies'];
+    if (devDependencies) {
+      deps.push(...devDependencies);
+    }
 
     // https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
     // Skip sources that do not make sense to handle (e.g. path).
@@ -122,21 +120,25 @@ export class UvProcessor implements PyProjectProcessor {
     deps: PackageDependency[],
     packageFile: string,
   ): Promise<PackageDependency[]> {
-    const lockFileName = getSiblingFileName(packageFile, 'uv.lock');
-    const lockFileContent = await readLocalFile(lockFileName, 'utf8');
-    if (lockFileContent) {
-      const { val: lockFileMapping, err } = Result.parse(
-        lockFileContent,
-        UvLockfileSchema,
-      ).unwrap();
+    const lockFileName = await findLocalSiblingOrParent(packageFile, 'uv.lock');
+    if (lockFileName === null) {
+      logger.debug({ packageFile }, `No uv lock file found`);
+    } else {
+      const lockFileContent = await readLocalFile(lockFileName, 'utf8');
+      if (lockFileContent) {
+        const { val: lockFileMapping, err } = Result.parse(
+          lockFileContent,
+          UvLockfileSchema,
+        ).unwrap();
 
-      if (err) {
-        logger.debug({ packageFile, err }, `Error parsing uv lock file`);
-      } else {
-        for (const dep of deps) {
-          const packageName = dep.packageName;
-          if (packageName && packageName in lockFileMapping) {
-            dep.lockedVersion = lockFileMapping[packageName];
+        if (err) {
+          logger.debug({ packageFile, err }, `Error parsing uv lock file`);
+        } else {
+          for (const dep of deps) {
+            const packageName = dep.packageName;
+            if (packageName && packageName in lockFileMapping) {
+              dep.lockedVersion = lockFileMapping[packageName];
+            }
           }
         }
       }
@@ -154,10 +156,17 @@ export class UvProcessor implements PyProjectProcessor {
     const { isLockFileMaintenance } = config;
 
     // abort if no lockfile is defined
-    const lockFileName = getSiblingFileName(packageFileName, 'uv.lock');
+    const lockFileName = await findLocalSiblingOrParent(
+      packageFileName,
+      'uv.lock',
+    );
+    if (lockFileName === null) {
+      logger.debug({ packageFileName }, `No uv lock file found`);
+      return null;
+    }
     try {
       const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
-      if (is.nullOrUndefined(existingLockFileContent)) {
+      if (!existingLockFileContent) {
         logger.debug('No uv.lock found');
         return null;
       }
@@ -336,7 +345,7 @@ async function getUvIndexCredentials(
 ): Promise<NodeJS.ProcessEnv> {
   const uv_indexes = project.tool?.uv?.index;
 
-  if (is.nullOrUndefined(uv_indexes)) {
+  if (!uv_indexes) {
     return {};
   }
 
