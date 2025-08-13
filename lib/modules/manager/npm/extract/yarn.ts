@@ -66,10 +66,10 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
 export function getZeroInstallPaths(yarnrcYml: string): string[] {
   let conf: any;
   try {
-    conf = parseSyml(yarnrcYml);
-  } catch (err) /* istanbul ignore next */ {
+    conf = parseSyml(yarnrcYml); /* v8 ignore start -- needs test */
+  } catch (err) {
     logger.warn({ err }, 'Error parsing .yarnrc.yml');
-  }
+  } /* v8 ignore stop -- needs test */
   const paths = [
     conf?.cacheFolder ?? './.yarn/cache',
     '.pnp.cjs',

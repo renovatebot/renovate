@@ -1,4 +1,4 @@
-import { dirname } from 'upath';
+import upath from 'upath';
 import { logger } from '../../../logger';
 import { isNotNullOrUndefined } from '../../../util/array';
 import { LooseArray } from '../../../util/schema-utils';
@@ -8,6 +8,7 @@ import { parse } from './parser';
 import type { ResultFragment } from './parser/fragments';
 import { RuleToMavenPackageDep, fillRegistryUrls } from './parser/maven';
 import { RuleToDockerPackageDep } from './parser/oci';
+import { RulesImgPullToDockerPackageDep } from './parser/rules-img';
 import {
   GitRepositoryToPackageDep,
   RuleToBazelModulePackageDep,
@@ -24,6 +25,7 @@ export async function extractPackageFile(
     const gitRepositoryDeps = extractGitRepositoryDeps(records);
     const mavenDeps = extractMavenDeps(records);
     const dockerDeps = LooseArray(RuleToDockerPackageDep).parse(records);
+    const rulesImgDeps = extractRulesImgDeps(records);
 
     if (gitRepositoryDeps.length) {
       pfc.deps.push(...gitRepositoryDeps);
@@ -35,6 +37,10 @@ export async function extractPackageFile(
 
     if (dockerDeps.length) {
       pfc.deps.push(...dockerDeps);
+    }
+
+    if (rulesImgDeps.length) {
+      pfc.deps.push(...rulesImgDeps);
     }
 
     return pfc.deps.length ? pfc : null;
@@ -53,7 +59,7 @@ async function extractBazelPfc(
     .transform((deps) => ({ deps }))
     .parse(records);
 
-  const registryUrls = (await bazelrc.read(dirname(packageFile)))
+  const registryUrls = (await bazelrc.read(upath.dirname(packageFile)))
     // Ignore any entries for custom configurations
     .filter((ce) => ce.config === undefined)
     .map((ce) => ce.getOption('registry')?.value)
@@ -75,4 +81,8 @@ function extractMavenDeps(records: ResultFragment[]): PackageDependency[] {
   return LooseArray(RuleToMavenPackageDep)
     .transform(fillRegistryUrls)
     .parse(records);
+}
+
+function extractRulesImgDeps(records: ResultFragment[]): PackageDependency[] {
+  return LooseArray(RulesImgPullToDockerPackageDep).parse(records);
 }

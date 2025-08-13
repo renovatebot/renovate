@@ -2,7 +2,7 @@ import type { GetAuthorizationTokenCommandOutput } from '@aws-sdk/client-ecr';
 import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import { codeBlock } from 'common-tags';
-import { join } from 'upath';
+import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -25,9 +25,9 @@ vi.mock('../../../util/fs');
 const datasource = vi.mocked(_datasource);
 
 const adminConfig: RepoGlobalConfig = {
-  localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
-  cacheDir: join('/tmp/renovate/cache'),
-  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
+  localDir: upath.join('/tmp/github/some/repo'), // `join` fixes Windows CI
+  cacheDir: upath.join('/tmp/renovate/cache'),
+  containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
 };
 
 const config: UpdateArtifactsConfig = {};

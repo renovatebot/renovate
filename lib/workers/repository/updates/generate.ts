@@ -466,6 +466,25 @@ export function generateBranchConfig(
     (upgrade) => upgrade.skipInstalls !== false,
   );
 
+  // Artifact updating will only be skipped if every upgrade wants to skip it.
+  config.skipArtifactsUpdate = config.upgrades.every(
+    (upgrade) => upgrade.skipArtifactsUpdate,
+  );
+  if (
+    !config.skipArtifactsUpdate &&
+    config.upgrades.some((upgrade) => upgrade.skipArtifactsUpdate)
+  ) {
+    logger.debug(
+      {
+        upgrades: config.upgrades.map((upgrade) => ({
+          depName: upgrade.depName,
+          skipArtifactsUpdate: upgrade.skipArtifactsUpdate,
+        })),
+      },
+      'Mixed `skipArtifactsUpdate` values in upgrades. Artifacts will be updated.',
+    );
+  }
+
   const tableRows = config.upgrades
     .map(getTableValues)
     .filter((x): x is string[] => is.array(x, is.string));
