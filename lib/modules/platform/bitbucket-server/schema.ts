@@ -43,7 +43,7 @@ export const ReviewerGroup = z.object({
   }),
 });
 
-export const ReviewerGroupsSchema = z.array(ReviewerGroup);
+export const ReviewerGroups = z.array(ReviewerGroup);
 
 export type ReviewerGroups = z.infer<typeof ReviewerGroupsSchema>;
 
