@@ -67,14 +67,14 @@ function mockGenericPackage(opts: MockOpts = {}) {
       const [major, minor, patch] = latest
         .replace('-SNAPSHOT', '')
         .split('.')
-        .map((x) => parseInt(x, 10))
+        .map((x) => parseInt(x))
         .map((x) => (x < 10 ? `0${x}` : `${x}`));
       scope
         .get(
           `/${packagePath}/${latest}/${artifact}-${latest.replace(
             '-SNAPSHOT',
             '',
-          )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`,
+          )}-20200101.${major}${minor}${patch}-${parseInt(patch)}.pom`,
         )
         .reply(200, pom);
     } else {

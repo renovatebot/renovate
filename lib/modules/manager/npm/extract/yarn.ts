@@ -20,7 +20,7 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
     for (const [key, val] of Object.entries(parsed)) {
       if (key === '__metadata') {
         // yarn 2
-        lockfileVersion = parseInt(val.cacheKey, 10);
+        lockfileVersion = parseInt(val.cacheKey);
         logger.once.debug(
           `yarn.lock ${filePath} has __metadata.cacheKey=${lockfileVersion}`,
         );
