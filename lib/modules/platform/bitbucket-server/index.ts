@@ -54,7 +54,6 @@ import type {
   ReviewerGroups,
 } from './schema';
 import {
-  ReviewerGroupsSchema,
   UserSchema,
   UsersSchema,
   isEmail,
@@ -1293,7 +1292,7 @@ async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
     const reviewerGroups = await bitbucketServerHttp.getJson(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/settings/reviewer-groups`,
       { paginate: true },
-      ReviewerGroupsSchema,
+      ReviewerGroups,
     );
 
     allGroups.push(...reviewerGroups.body);
