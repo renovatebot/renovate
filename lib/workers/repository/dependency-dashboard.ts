@@ -205,16 +205,24 @@ function getListItem(branch: BranchConfig, type: string): string {
 function splitBranchesByCategory(filteredBranches: BranchConfig[]): {
   categories: Record<string, BranchConfig[]>;
   uncategorized: BranchConfig[];
+  hasCategorized: boolean;
+  hasUncategorized: boolean;
 } {
   const categories: Record<string, BranchConfig[]> = {};
   const uncategorized: BranchConfig[] = [];
+  let hasCategorized = false;
+  let hasUncategorized = false;
   for (const branch of filteredBranches) {
-    const targetArray = branch.dependencyDashboardCategory
-      ? (categories[branch.dependencyDashboardCategory] ??= [])
-      : uncategorized;
-    targetArray.push(branch);
+    if (branch.dependencyDashboardCategory) {
+      categories[branch.dependencyDashboardCategory] ??= [];
+      categories[branch.dependencyDashboardCategory].push(branch);
+      hasCategorized = true;
+      continue;
+    }
+    uncategorized.push(branch);
+    hasUncategorized = true;
   }
-  return { categories, uncategorized };
+  return { categories, uncategorized, hasCategorized, hasUncategorized };
 }
 
 function getBranchList(branches: BranchConfig[], listItemType: string): string {
@@ -242,18 +250,19 @@ function getBranchesListMd(
     return '';
   }
 
-  const { categories, uncategorized } =
+  const { categories, uncategorized, hasCategorized, hasUncategorized } =
     splitBranchesByCategory(filteredBranches);
   let result = `## ${title}\n\n${description}`;
-  if (Object.keys(categories).length > 0) {
+  if (hasCategorized) {
     for (const [category, branches] of Object.entries(categories).sort(
-      ([keyA], [keyB]) => keyA.localeCompare(keyB),
+      ([keyA], [keyB]) =>
+        keyA.localeCompare(keyB, undefined, { numeric: true }),
     )) {
       result = result.trimEnd() + '\n\n';
       result += `### ${category}\n\n`;
       result += getBranchList(branches, listItemType);
     }
-    if (uncategorized.length > 0) {
+    if (hasUncategorized) {
       result = result.trimEnd() + '\n\n';
       result += `### Others`;
     }
@@ -262,7 +271,7 @@ function getBranchesListMd(
   result += getBranchList(uncategorized, listItemType);
 
   if (bulkComment && bulkMessage && filteredBranches.length > 1) {
-    if (Object.keys(categories).length > 0) {
+    if (hasCategorized) {
       result = result.trimEnd() + '\n\n';
       result += '### All\n\n';
     }
@@ -530,6 +539,7 @@ export async function ensureDependencyDashboard(
     rebaseAllOpenPrs,
     'Click on this checkbox to rebase all open PRs at once',
   );
+
   issueBody += getBranchesListMd(
     branches,
     (branch) => branch.result === 'already-existed',

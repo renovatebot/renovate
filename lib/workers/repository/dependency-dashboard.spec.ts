@@ -575,7 +575,7 @@ describe('workers/repository/dependency-dashboard', () => {
           prTitle: 'pr2',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
           result: 'needs-approval',
-          dependencyDashboardCategory: 'Category #1',
+          dependencyDashboardCategory: 'Category #10',
           branchName: 'branchName2',
         },
         {
@@ -641,74 +641,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-      expect(platform.ensureIssue.mock.calls[0][0]).toMatchObject({
-        title: config.dependencyDashboardTitle,
-        body: `This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
-
-## Pending Approval
-
-The following branches are pending approval. To create them, click on a checkbox below.
-
-### Category #1
-
- - [ ] <!-- approve-branch=branchName2 -->pr2
-
-### Category #2
-
- - [ ] <!-- approve-branch=branchName0 -->pr0
-
-### Others
-
- - [ ] <!-- approve-branch=branchName1 -->pr1
-
-### All
-
- - [ ] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐
-
-## Awaiting Schedule
-
-The following updates are awaiting their schedule. To get an update now, click on a checkbox below.
-
-### Category #1
-
- - [ ] <!-- unschedule-branch=branchName4 -->pr4
-
-### Others
-
- - [ ] <!-- unschedule-branch=branchName3 -->pr3
-
-## Rate-Limited
-
-The following updates are currently rate-limited. To force their creation now, click on a checkbox below.
-
-### Category #3
-
- - [ ] <!-- unlimit-branch=branchName5 -->pr5
- - [ ] <!-- unlimit-branch=branchName6 -->pr6
-
-### All
-
- - [ ] <!-- create-all-rate-limited-prs -->🔐 **Create all rate-limited PRs at once** 🔐
-
-## Errored
-
-The following updates encountered an error and will be retried. To force a retry now, click on a checkbox below.
-
- - [ ] <!-- retry-branch=branchName7 -->pr7
- - [ ] <!-- retry-branch=branchName8 -->pr8
-
-## Pending Branch Automerge
-
-The following updates await pending status checks before automerging. To abort the branch automerge and create a PR instead, click on a checkbox below.
-
- - [ ] <!-- approvePr-branch=branchName9 -->pr9
-
-## Detected dependencies
-
-None detected
-
-`,
-      });
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
       // same with dry run
       await dryRun(branches, platform, 0, 1);
