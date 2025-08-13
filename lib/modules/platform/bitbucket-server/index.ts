@@ -51,13 +51,8 @@ import type {
   Comment,
   PullRequestActivity,
   PullRequestCommentActivity,
-  ReviewerGroups,
 } from './schema';
-import {
-  UserSchema,
-  UsersSchema,
-  isEmail,
-} from './schema';
+import { ReviewerGroups, UserSchema, UsersSchema, isEmail } from './schema';
 import type {
   BbsConfig,
   BbsPr,
@@ -1286,7 +1281,7 @@ export function extractRulesFromCodeOwnersLines(
 // Supports both repository-scoped and project-scoped groups following the BitBucket server logic described here:
 // https://confluence.atlassian.com/bitbucketserver/code-owners-1296171116.html#Codeowners-Whatifaprojectandrepositorycontainareviewergroupwiththesamename?
 async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
-  const allGroups: ReviewerGroups = [];
+  const allGroups = [];
 
   try {
     const reviewerGroups = await bitbucketServerHttp.getJson(
