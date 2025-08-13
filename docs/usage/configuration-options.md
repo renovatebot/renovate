@@ -2662,7 +2662,7 @@ Renovate will only add a milestone when it _creates_ the PR.
 
 ## minimumGroupSize
 
-If set to `x` branch/PR creation for that group will be postponed till `x` updates are available.
+If set to to a positive value x, and a `groupName` is present then branch creation will be postponed until x or more updates are available in the branch.
 
 Example:
 
