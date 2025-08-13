@@ -31,9 +31,9 @@ maven.artifact(
 
 ### Docker
 
-Similarly, it updates Docker / OCI images pulled with [oci_pull](https://github.com/bazel-contrib/rules_oci/blob/main/docs/pull.md).
+Similarly, it updates Docker / OCI images pulled with [oci_pull](https://github.com/bazel-contrib/rules_oci/blob/main/docs/pull.md) from rules_oci, or with [pull](https://github.com/tweag/rules_img/blob/main/docs/pull.md) from rules_img.
 
-Note that the extension must be called `oci`:
+Note that for rules_oci, the extension must be called `oci`:
 
 ```
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
@@ -43,6 +43,20 @@ oci.pull(
     digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
     image = "index.docker.io/library/nginx",
     platforms = ["linux/amd64"],
+    tag = "1.27.1",
+)
+```
+
+For rules_img, use the `pull` repo rule:
+
+```
+pull = use_repo_rule("@rules_img//img:pull.bzl", "pull")
+
+pull(
+    name = "nginx_image",
+    digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+    registry = "index.docker.io",
+    repository = "library/nginx",
     tag = "1.27.1",
 )
 ```

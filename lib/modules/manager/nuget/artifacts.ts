@@ -21,6 +21,7 @@ import type {
 } from '../types';
 import { createNuGetConfigXml } from './config-formatter';
 import {
+  GLOBAL_JSON,
   MSBUILD_CENTRAL_FILE,
   NUGET_CENTRAL_FILE,
   getDependentPackageFiles,
@@ -79,6 +80,13 @@ async function runDotnetRestore(
         )} --force-evaluate --configfile ${quote(nugetConfigFile)}`,
     ),
   ];
+
+  if (config.postUpdateOptions?.includes('dotnetWorkloadRestore')) {
+    cmds.unshift(
+      `dotnet workload restore --configfile ${quote(nugetConfigFile)}`,
+    );
+  }
+
   await exec(cmds, execOptions);
 }
 
@@ -98,8 +106,11 @@ export async function updateArtifacts({
     packageFileName.endsWith(`/${NUGET_CENTRAL_FILE}`) ||
     packageFileName.endsWith(`/${MSBUILD_CENTRAL_FILE}`);
 
+  const isGlobalJson = packageFileName === GLOBAL_JSON;
+
   if (
     !isCentralManagement &&
+    !isGlobalJson &&
     !regEx(/(?:cs|vb|fs)proj$/i).test(packageFileName)
   ) {
     // This could be implemented in the future if necessary.
@@ -116,6 +127,7 @@ export async function updateArtifacts({
   const deps = await getDependentPackageFiles(
     packageFileName,
     isCentralManagement,
+    isGlobalJson,
   );
   const packageFiles = deps.filter((d) => d.isLeaf).map((d) => d.name);
 
@@ -176,7 +188,6 @@ export async function updateArtifacts({
 
     return retArray.length > 0 ? retArray : null;
   } catch (err) {
-    // istanbul ignore if
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
