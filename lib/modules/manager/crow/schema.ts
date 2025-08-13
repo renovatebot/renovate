@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const crowStep = z.object({
+export const CrowStep = z.object({
   image: z.string().optional(),
 });
 
