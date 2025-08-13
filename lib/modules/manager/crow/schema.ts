@@ -11,5 +11,5 @@ export const CrowConfig = z.object({
   services: z.record(z.string(), CrowStep).optional(),
 });
 
-export type CrowConfigDefinition = z.infer<typeof crowConfig>;
-export type CrowStepDefinition = z.infer<typeof crowStep>;
+export type CrowConfig = z.infer<typeof CrowConfig>;
+export type CrowStep = z.infer<typeof CrowStep>;
