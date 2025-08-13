@@ -156,7 +156,7 @@ export function splitEscapedSpaces(str: string): string[] {
   let last: string | undefined;
 
   for (const part of parts) {
-    if (last?.endsWith(String.raw`\\`)) {
+    if (last?.endsWith('\\\\')) {
       result[result.length - 1] = last.slice(0, -2) + ' ' + part;
     } else {
       result.push(part);
