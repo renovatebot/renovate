@@ -11,6 +11,7 @@ This readme explains what each file is used for.
 | `replacements.json`   | Rename old packages to new replacement.   |
 | `changelog-urls.json` | Tell Renovate where to find changelogs.   |
 | `source-urls.json`    | Tell Renovate the source URL of packages. |
+| `node-schedule.json`  | Node.js versioning schedule.              |
 
 ## Group related packages (`monorepo.json`)
 
@@ -113,3 +114,8 @@ To locate the source repository, Renovate requires:
 Example:
 The source URL for the repository `cypress-io/cypress` is <https://github.com/cypress-io/cypress>.
 This will be added to the `orb` group in the `source-urls.json` file since the package's datasource is `orb`.
+
+## Node.js Versioning Schedule `node-schedule.json`
+
+This file is automatically updated by a scheduled workflow.
+It can be manually updated by running `pnpm update-static-data:node-schedule`.
