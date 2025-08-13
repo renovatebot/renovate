@@ -6,7 +6,7 @@ import { DotnetVersionDatasource } from '../../datasource/dotnet-version';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
 import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+import { fs, logger } from '~test/util';
 
 const config: ExtractConfig = {};
 
@@ -26,8 +26,34 @@ describe('modules/manager/nuget/extract', () => {
 
     it('returns null for invalid csproj', async () => {
       expect(
-        await extractPackageFile('nothing here', 'bogus', config),
+        await extractPackageFile(
+          '\uFEFF  <?xml version="1.0" encoding="utf-8" ?>invalid xml>',
+          'bogus',
+          config,
+        ),
       ).toBeNull();
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect.anything(),
+        'Failed to parse XML',
+      );
+    });
+
+    it('returns null if not xml', async () => {
+      expect(
+        await extractPackageFile(
+          codeBlock`
+          org.apache.curator:* =4.3.0
+          org.apache.hadoop:*=3.1.4
+          org.apache.hadoop.thirdparty:* =   1.1.0
+          `,
+          'versions.props',
+          config,
+        ),
+      ).toBeNull();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'NuGet: Skipping versions.props as it is not XML',
+      );
     });
 
     it('extracts package version dependency', async () => {
