@@ -165,6 +165,19 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    it('skips branch creation if minimumGroupSize is not met', async () => {
+      scm.branchExists.mockResolvedValue(false);
+      const res = await branchWorker.processBranch({
+        ...config,
+        minimumGroupSize: 3,
+      });
+      expect(res).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'minimum-group-size-not-met',
+      });
+    });
+
     it('skips branch if not scheduled and not updating out of schedule', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.updateNotScheduled = false;

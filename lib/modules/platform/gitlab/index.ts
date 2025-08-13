@@ -1,10 +1,8 @@
-import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
 import {
-  CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_CHANGED,
@@ -20,7 +18,6 @@ import { coerceArray } from '../../../util/array';
 import { noLeadingAtSymbol, parseJson } from '../../../util/common';
 import { getEnv } from '../../../util/env';
 import * as git from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import type { GitlabHttpOptions } from '../../../util/http/gitlab';
 import { setBaseUrl } from '../../../util/http/gitlab';
@@ -29,11 +26,7 @@ import { parseInteger } from '../../../util/number';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import {
-  ensureTrailingSlash,
-  getQueryString,
-  parseUrl,
-} from '../../../util/url';
+import { ensureTrailingSlash, getQueryString } from '../../../util/url';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
@@ -42,7 +35,6 @@ import type {
   EnsureCommentRemovalConfig,
   EnsureIssueConfig,
   FindPRConfig,
-  GitUrlOption,
   Issue,
   MergePRConfig,
   PlatformParams,
@@ -74,7 +66,13 @@ import type {
   MergeMethod,
   RepoResponse,
 } from './types';
-import { DRAFT_PREFIX, DRAFT_PREFIX_DEPRECATED, prInfo } from './utils';
+import {
+  DRAFT_PREFIX,
+  DRAFT_PREFIX_DEPRECATED,
+  defaults,
+  getRepoUrl,
+  prInfo,
+} from './utils';
 export { extractRulesFromCodeOwnersLines } from './code-owners';
 
 let config: {
@@ -98,12 +96,6 @@ export function resetPlatform(): void {
   defaults.version = '0.0.0';
   setBaseUrl(defaults.endpoint);
 }
-
-const defaults = {
-  hostType: 'gitlab',
-  endpoint: 'https://gitlab.com/api/v4/',
-  version: '0.0.0',
-};
 
 export const id = 'gitlab';
 
@@ -262,62 +254,6 @@ export async function getJsonFile(
 ): Promise<any> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
   return parseJson(raw, fileName);
-}
-
-function getRepoUrl(
-  repository: string,
-  gitUrl: GitUrlOption | undefined,
-  res: HttpResponse<RepoResponse>,
-): string {
-  if (gitUrl === 'ssh') {
-    if (!res.body.ssh_url_to_repo) {
-      throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
-    }
-    logger.debug(`Using ssh URL: ${res.body.ssh_url_to_repo}`);
-    return res.body.ssh_url_to_repo;
-  }
-
-  const opts = hostRules.find({
-    hostType: defaults.hostType,
-    url: defaults.endpoint,
-  });
-  const env = getEnv();
-
-  if (
-    gitUrl === 'endpoint' ||
-    is.nonEmptyString(env.GITLAB_IGNORE_REPO_URL) ||
-    res.body.http_url_to_repo === null
-  ) {
-    if (res.body.http_url_to_repo === null) {
-      logger.debug('no http_url_to_repo found. Falling back to old behavior.');
-    }
-    if (env.GITLAB_IGNORE_REPO_URL) {
-      logger.warn(
-        'GITLAB_IGNORE_REPO_URL environment variable is deprecated. Please use "gitUrl" option.',
-      );
-    }
-
-    // TODO: null check (#22198)
-    const { protocol, host, pathname } = parseUrl(defaults.endpoint)!;
-    const newPathname = pathname.slice(0, pathname.indexOf('/api'));
-    const url = URL.format({
-      protocol:
-        /* v8 ignore next: should never happen */
-        protocol.slice(0, -1) || 'https',
-      // TODO: types (#22198)
-      auth: `oauth2:${opts.token!}`,
-      host,
-      pathname: `${newPathname}/${repository}.git`,
-    });
-    logger.debug(`Using URL based on configured endpoint, url:${url}`);
-    return url;
-  }
-
-  logger.debug(`Using http URL: ${res.body.http_url_to_repo}`);
-  const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
-  // TODO: types (#22198)
-  repoUrl.auth = `oauth2:${opts.token!}`;
-  return URL.format(repoUrl);
 }
 
 // Initialize GitLab by getting base branch
