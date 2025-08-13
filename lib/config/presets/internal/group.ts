@@ -208,7 +208,7 @@ const staticGroups = {
         commitMessageTopic: 'Gradle',
         matchDatasources: ['docker', 'gradle-version'],
         matchPackageNames: [
-          '/(?:^|/)gradle/', // gradle or ends with "/gradle"
+          '/(?:^|/)gradle$/', // gradle or ends with "/gradle"
         ],
       },
     ],
