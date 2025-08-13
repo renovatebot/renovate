@@ -1,4 +1,4 @@
-import { DateTime, Settings } from 'luxon';
+import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import { DebianVersioningApi } from '.';
 
@@ -7,8 +7,16 @@ describe('modules/versioning/debian/index', () => {
 
   const debian = new DebianVersioningApi();
 
+  beforeAll(() => {
+    vi.useFakeTimers();
+  });
+
   beforeEach(() => {
-    Settings.now = () => dt.valueOf();
+    vi.setSystemTime(dt.valueOf());
+  });
+
+  it('test', () => {
+    expect(debian.isVersion('1.1')).toBe(true);
   });
 
   it.each`
@@ -34,7 +42,7 @@ describe('modules/versioning/debian/index', () => {
     ${'Buster'}       | ${false}
     ${'bullseye'}     | ${true}
     ${'bookworm'}     | ${true}
-    ${'trixie'}       | ${false}
+    ${'forky'}        | ${false}
     ${'sid'}          | ${false}
     ${'1.1'}          | ${true}
     ${'1.2'}          | ${true}
@@ -53,14 +61,13 @@ describe('modules/versioning/debian/index', () => {
     ${'10-slim'}      | ${false}
     ${'11'}           | ${true}
     ${'12'}           | ${true}
-    ${'13'}           | ${false}
+    ${'14'}           | ${false}
     ${'sid'}          | ${false}
     ${'stable'}       | ${true}
     ${'oldstable'}    | ${true}
     ${'oldoldstable'} | ${true}
     ${'experimental'} | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
-    Settings.now = () => dt.valueOf();
     expect(debian.isValid(version)).toBe(expected);
   });
 
@@ -78,7 +85,7 @@ describe('modules/versioning/debian/index', () => {
     ${'wheezy'}       | ${undefined} | ${true}
     ${'bullseye'}     | ${undefined} | ${true}
     ${'bookworm'}     | ${undefined} | ${true}
-    ${'trixie'}       | ${undefined} | ${false}
+    ${'forky'}        | ${undefined} | ${false}
   `(
     'isCompatible("$version") === $expected',
     ({ version, range, expected }) => {
@@ -144,7 +151,6 @@ describe('modules/versioning/debian/index', () => {
     ${'oldstable'}    | ${true}
     ${'oldoldstable'} | ${true}
   `('isStable("$version") === $expected', ({ version, expected }) => {
-    Settings.now = () => dt.valueOf();
     expect(debian.isStable(version)).toBe(expected);
   });
 
@@ -160,25 +166,12 @@ describe('modules/versioning/debian/index', () => {
     ${'oldstable'}
     ${'oldoldstable'}
   `(
-    'ensures that rolling release is not refreshed within frame time window',
-    ({ version, expected }) => {
+    'ensures that rolling release is not refreshed within frame time window: $version',
+    ({ version }) => {
       debian.isStable(version);
       expect(logger.debug).toHaveBeenCalledTimes(0);
     },
   );
-
-  it('checks runtime date handling & refresh rolling release data', () => {
-    const future = DateTime.now().toUTC().plus({ year: 3 }).valueOf();
-    const past = DateTime.fromISO('2019-08-06', { zone: 'UTC' }).valueOf();
-    Settings.now = () => past.valueOf();
-    expect(debian.isStable('buster')).toBeTrue();
-    Settings.now = () => future.valueOf();
-    expect(debian.isStable('buster')).toBeFalse();
-    expect(logger.debug).toHaveBeenCalledTimes(1);
-    expect(logger.debug).toHaveBeenCalledWith(
-      'RollingReleasesData - data written',
-    );
-  });
 
   it.each`
     version           | expected
@@ -208,7 +201,7 @@ describe('modules/versioning/debian/index', () => {
     ${'buster'}       | ${true}
     ${'bullseye'}     | ${true}
     ${'bookworm'}     | ${true}
-    ${'trixie'}       | ${false}
+    ${'Trixie'}       | ${false}
     ${'sid'}          | ${false}
     ${'1.1'}          | ${true}
     ${'1.2'}          | ${true}
@@ -226,7 +219,7 @@ describe('modules/versioning/debian/index', () => {
     ${'10'}           | ${true}
     ${'11'}           | ${true}
     ${'12'}           | ${true}
-    ${'13'}           | ${false}
+    ${'14'}           | ${false}
     ${'sid'}          | ${false}
     ${'experimental'} | ${false}
     ${'Bookworm'}     | ${false}
@@ -378,7 +371,6 @@ describe('modules/versioning/debian/index', () => {
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
-      Settings.now = () => dt.valueOf();
       expect(
         debian.getNewValue({
           currentValue,
@@ -421,4 +413,17 @@ describe('modules/versioning/debian/index', () => {
       expect(debian.matches(version, range)).toBe(expected);
     },
   );
+
+  it('checks runtime date handling & refresh rolling release data', () => {
+    const future = DateTime.now().toUTC().plus({ year: 3 }).valueOf();
+    const past = DateTime.fromISO('2019-08-06', { zone: 'UTC' }).valueOf();
+    vi.setSystemTime(past);
+    expect(debian.isStable('buster')).toBeTrue();
+    vi.setSystemTime(future);
+    expect(debian.isStable('buster')).toBeFalse();
+    expect(logger.debug).toHaveBeenCalledTimes(1);
+    expect(logger.debug).toHaveBeenCalledWith(
+      'RollingReleasesData - data written',
+    );
+  });
 });
