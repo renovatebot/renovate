@@ -605,7 +605,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const files = lsTree
         .trim()
         .split(newlineRegex)
-        .map((x) => x.split(/\s/))
+        .map((x) => x.split(regEx(/\s/)))
         .map(([mode, type, _hash, name]) => [mode, type, name]);
       expect(files).toContainEqual(['100644', 'blob', 'past_file']);
       expect(files).toContainEqual(['120000', 'blob', 'future_link']);
@@ -1237,7 +1237,10 @@ describe('util/git/index', { timeout: 10000 }, () => {
   describe('syncGit()', () => {
     it('should clone a specified base branch', async () => {
       tmpDir = await tmp.dir({ unsafeCleanup: true });
-      GlobalConfig.set({ baseBranches: ['develop'], localDir: tmpDir.path });
+      GlobalConfig.set({
+        baseBranchPatterns: ['develop'],
+        localDir: tmpDir.path,
+      });
       await git.initRepo({
         url: origin.path,
         defaultBranch: 'develop',

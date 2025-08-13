@@ -20,12 +20,12 @@ describe('docs/documentation', () => {
   });
 
   describe('website-documentation', () => {
-    function getConfigOptionSubHeaders(
+    async function getConfigOptionSubHeaders(
       file: string,
       configOption: string,
-    ): string[] {
+    ): Promise<string[]> {
       const subHeadings = [];
-      const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
+      const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
       const reg = regEx(`##\\s${configOption}[\\s\\S]+?\n##\\s`);
       const match = reg.exec(content);
       const subHeadersMatch = match?.[0]?.matchAll(/\n###\s(?<child>\w+)\n/g);
@@ -40,8 +40,8 @@ describe('docs/documentation', () => {
     }
 
     describe('docs/usage/configuration-options.md', () => {
-      function getConfigHeaders(file: string): string[] {
-        const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
+      async function getConfigHeaders(file: string): Promise<string[]> {
+        const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
         const matches = content.match(/\n## (.*?)\n/g) ?? [];
         return matches
           .map((match) => match.substring(4, match.length - 1))
@@ -60,20 +60,20 @@ describe('docs/documentation', () => {
           .sort();
       }
 
-      it('has doc headers sorted alphabetically', () => {
-        expect(getConfigHeaders('configuration-options.md')).toEqual(
-          getConfigHeaders('configuration-options.md').sort(),
+      it('has doc headers sorted alphabetically', async () => {
+        expect(await getConfigHeaders('configuration-options.md')).toEqual(
+          (await getConfigHeaders('configuration-options.md')).sort(),
         );
       });
 
-      it('has headers for every required option', () => {
-        expect(getConfigHeaders('configuration-options.md')).toEqual(
+      it('has headers for every required option', async () => {
+        expect(await getConfigHeaders('configuration-options.md')).toEqual(
           getRequiredConfigOptions(),
         );
       });
 
-      function getConfigSubHeaders(file: string): string[] {
-        const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
+      async function getConfigSubHeaders(file: string): Promise<string[]> {
+        const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
         const matches = content.match(/\n### (.*?)\n/g) ?? [];
         return matches
           .map((match) => match.substring(5, match.length - 1))
@@ -110,21 +110,26 @@ describe('docs/documentation', () => {
         return parentNames;
       }
 
-      it('has headers for every required sub-option', () => {
-        expect(getConfigSubHeaders('configuration-options.md')).toEqual(
+      it('has headers for every required sub-option', async () => {
+        expect(await getConfigSubHeaders('configuration-options.md')).toEqual(
           getRequiredConfigSubOptions(),
         );
       });
 
       it.each([...getParentNames()])(
         '%s has sub-headers sorted alphabetically',
-        (parentName: string) => {
+        async (parentName: string) => {
           expect(
-            getConfigOptionSubHeaders('configuration-options.md', parentName),
-          ).toEqual(
-            getConfigOptionSubHeaders(
+            await getConfigOptionSubHeaders(
               'configuration-options.md',
               parentName,
+            ),
+          ).toEqual(
+            (
+              await getConfigOptionSubHeaders(
+                'configuration-options.md',
+                parentName,
+              )
             ).sort(),
           );
         },
@@ -132,8 +137,8 @@ describe('docs/documentation', () => {
     });
 
     describe('docs/usage/self-hosted-configuration.md', () => {
-      function getSelfHostedHeaders(file: string): string[] {
-        const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
+      async function getSelfHostedHeaders(file: string): Promise<string[]> {
+        const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
         const matches = content.match(/\n## (.*?)\n/g) ?? [];
         return matches.map((match) => match.substring(4, match.length - 1));
       }
@@ -145,16 +150,18 @@ describe('docs/documentation', () => {
           .sort();
       }
 
-      it('has headers sorted alphabetically', () => {
-        expect(getSelfHostedHeaders('self-hosted-configuration.md')).toEqual(
-          getSelfHostedHeaders('self-hosted-configuration.md').sort(),
+      it('has headers sorted alphabetically', async () => {
+        expect(
+          await getSelfHostedHeaders('self-hosted-configuration.md'),
+        ).toEqual(
+          (await getSelfHostedHeaders('self-hosted-configuration.md')).sort(),
         );
       });
 
-      it('has headers for every required option', () => {
-        expect(getSelfHostedHeaders('self-hosted-configuration.md')).toEqual(
-          getRequiredSelfHostedOptions(),
-        );
+      it('has headers for every required option', async () => {
+        expect(
+          await getSelfHostedHeaders('self-hosted-configuration.md'),
+        ).toEqual(getRequiredSelfHostedOptions());
       });
 
       function getCacheNamespacesFromDocs(file: string): string[] {
@@ -194,18 +201,24 @@ describe('docs/documentation', () => {
     });
 
     describe('docs/usage/self-hosted-experimental.md', () => {
-      function getSelfHostedExperimentalConfigHeaders(file: string): string[] {
-        const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
+      async function getSelfHostedExperimentalConfigHeaders(
+        file: string,
+      ): Promise<string[]> {
+        const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
         const matches = content.match(/\n## (.*?)\n/g) ?? [];
         return matches.map((match) => match.substring(4, match.length - 1));
       }
 
-      it('has headers sorted alphabetically', () => {
+      it('has headers sorted alphabetically', async () => {
         expect(
-          getSelfHostedExperimentalConfigHeaders('self-hosted-experimental.md'),
-        ).toEqual(
-          getSelfHostedExperimentalConfigHeaders(
+          await getSelfHostedExperimentalConfigHeaders(
             'self-hosted-experimental.md',
+          ),
+        ).toEqual(
+          (
+            await getSelfHostedExperimentalConfigHeaders(
+              'self-hosted-experimental.md',
+            )
           ).sort(),
         );
       });

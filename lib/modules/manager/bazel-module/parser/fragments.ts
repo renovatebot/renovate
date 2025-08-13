@@ -57,6 +57,19 @@ export const ExtensionTagFragmentSchema = z.object({
   offset: z.number(), // start offset in the source string
   rawString: z.string().optional(), // raw source string
 });
+export const RepoRuleFunctionCallSchema = z.object({
+  type: z.literal('repoRuleFunctionCall'),
+  // The variable name used for the function call (e.g. "pull")
+  functionName: z.string(),
+  // The load path that was imported (e.g. "@rules_img//img:pull.bzl")
+  loadPath: z.string(),
+  // The original function name from use_repo_rule (e.g. "pull")
+  originalFunctionName: z.string(),
+  children: LooseRecord(ValueFragmentsSchema),
+  isComplete: z.boolean(),
+  offset: z.number(), // start offset in the source string
+  rawString: z.string().optional(), // raw source string
+});
 export const AttributeFragmentSchema = z.object({
   type: z.literal('attribute'),
   name: z.string(),
@@ -70,6 +83,7 @@ export const AllFragmentsSchema = z.discriminatedUnion('type', [
   RuleFragmentSchema,
   PreparedExtensionTagFragmentSchema,
   ExtensionTagFragmentSchema,
+  RepoRuleFunctionCallSchema,
   StringFragmentSchema,
 ]);
 
@@ -84,9 +98,15 @@ export type PreparedExtensionTagFragment = z.infer<
   typeof PreparedExtensionTagFragmentSchema
 >;
 export type ExtensionTagFragment = z.infer<typeof ExtensionTagFragmentSchema>;
+export type RepoRuleFunctionCallFragment = z.infer<
+  typeof RepoRuleFunctionCallSchema
+>;
 export type StringFragment = z.infer<typeof StringFragmentSchema>;
 export type ValueFragments = z.infer<typeof ValueFragmentsSchema>;
-export type ResultFragment = RuleFragment | ExtensionTagFragment;
+export type ResultFragment =
+  | RuleFragment
+  | ExtensionTagFragment
+  | RepoRuleFunctionCallFragment;
 
 export function string(value: string): StringFragment {
   return {
@@ -145,6 +165,27 @@ export function extensionTag(
     extension,
     rawExtension,
     tag,
+    offset,
+    rawString,
+    isComplete,
+    children,
+  };
+}
+
+export function repoRuleFunctionCall(
+  functionName: string,
+  loadPath: string,
+  originalFunctionName: string,
+  offset: number,
+  children: ChildFragments = {},
+  rawString?: string,
+  isComplete = false,
+): RepoRuleFunctionCallFragment {
+  return {
+    type: 'repoRuleFunctionCall',
+    functionName,
+    loadPath,
+    originalFunctionName,
     offset,
     rawString,
     isComplete,
