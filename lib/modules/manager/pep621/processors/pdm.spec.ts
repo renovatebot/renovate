@@ -5,6 +5,7 @@ import { logger } from '../../../../logger';
 import * as hostRules from '../../../../util/host-rules';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
+import { parsePyProject } from '../extract';
 import { depTypes } from '../utils';
 import { PdmProcessor } from './pdm';
 import { mockExecAll } from '~test/exec-util';
@@ -36,7 +37,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           config,
           updatedDeps,
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toBeNull();
     });
@@ -68,7 +69,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           config: {},
           updatedDeps,
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toBeNull();
       expect(execSnapshots).toMatchObject([
@@ -113,7 +114,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           config: {},
           updatedDeps,
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toEqual([
         { artifactError: { lockFile: 'pdm.lock', stderr: 'test error' } },
@@ -186,7 +187,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           config: {},
           updatedDeps,
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toEqual([
         {
@@ -252,7 +253,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           config: {},
           updatedDeps,
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toBeNull();
       expect(execSnapshots).toEqual([]);
@@ -283,7 +284,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           },
           updatedDeps: [],
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toEqual([
         {
@@ -333,7 +334,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           },
           updatedDeps: [],
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toEqual([
         {

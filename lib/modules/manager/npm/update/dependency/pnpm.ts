@@ -14,13 +14,13 @@ export function updatePnpmCatalogDependency({
 
   const catalogName = depType?.split('.').at(-1);
 
-  // istanbul ignore if
+  /* v8 ignore start -- needs test */
   if (!is.string(catalogName)) {
     logger.error(
       'No catalogName was found; this is likely an extraction error.',
     );
     return null;
-  }
+  } /* v8 ignore stop -- needs test */
 
   let { newValue } = upgrade;
 
@@ -28,7 +28,7 @@ export function updatePnpmCatalogDependency({
   newValue = getNewNpmAliasValue(newValue, upgrade) ?? newValue;
 
   logger.trace(
-    `npm.updatePnpmCatalogDependency(): ${depType}:${managerData?.catalogName}.${depName} = ${newValue}`,
+    `npm.updatePnpmCatalogDependency(): ${depType}:${/* v8 ignore next -- needs test */ managerData?.catalogName}.${depName} = ${newValue}`,
   );
 
   let document;
@@ -82,7 +82,7 @@ export function updatePnpmCatalogDependency({
     return null;
   }
 
-  // istanbul ignore if: this should not happen in practice, but we must satisfy th etypes
+  /* v8 ignore next 3 -- this should not happen in practice, but we must satisfy the types */
   if (!modifiedDocument.contents?.srcToken) {
     return null;
   }
@@ -118,7 +118,7 @@ function changeDependencyIn(
   }
 
   if (newName) {
-    // istanbul ignore if: the try..catch block above already throws if a key is an alias
+    /* v8 ignore next 3 -- the try..catch block above already throws if a key is an alias */
     if (!CST.isScalar(relevantNode.srcToken?.key)) {
       return null;
     }

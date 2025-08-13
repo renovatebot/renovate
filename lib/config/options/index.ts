@@ -1004,11 +1004,10 @@ const options: RenovateOptions[] = [
     type: 'string',
   },
   {
-    name: 'updateLockFiles',
-    description: 'Set to `false` to disable lock file updating.',
+    name: 'skipArtifactsUpdate',
+    description: "Skip Renovate's automatic artifact updating.",
     type: 'boolean',
-    default: true,
-    supportedManagers: ['npm'],
+    default: false,
   },
   {
     name: 'skipInstalls',
@@ -1112,6 +1111,14 @@ const options: RenovateOptions[] = [
   {
     name: 'gitPrivateKey',
     description: 'PGP key to use for signing Git commits.',
+    type: 'string',
+    cli: false,
+    globalOnly: true,
+    stage: 'global',
+  },
+  {
+    name: 'gitPrivateKeyPassphrase',
+    description: 'Passphrase for the `gitPrivateKey`',
     type: 'string',
     cli: false,
     globalOnly: true,
@@ -2507,6 +2514,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     allowedValues: [
       'bundlerConservative',
+      'dotnetWorkloadRestore',
       'gomodMassage',
       'gomodTidy',
       'gomodTidy1.17',
@@ -3160,6 +3168,14 @@ const options: RenovateOptions[] = [
     name: 'deleteConfigFile',
     description:
       'If set to `true`, Renovate tries to delete the self-hosted config file after reading it.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
+    name: 'deleteAdditionalConfigFile',
+    description:
+      'If set to `true`, Renovate tries to delete the additional self-hosted config file after reading it.',
     type: 'boolean',
     default: false,
     globalOnly: true,

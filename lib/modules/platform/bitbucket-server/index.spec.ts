@@ -186,6 +186,8 @@ describe('modules/platform/bitbucket-server/index', () => {
         name: username,
         emailAddress: 'abc@def.com',
         displayName: 'Abc Def',
+        active: true,
+        slug: 'username',
       };
 
       async function initRepo(config = {}): Promise<httpMock.Scope> {
@@ -985,6 +987,57 @@ describe('modules/platform/bitbucket-server/index', () => {
           await expect(bitbucket.addReviewers(5, ['name'])).toResolve();
         });
 
+        it('deals correctly with resolving reviewers', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+            )
+            .twice()
+            .reply(200, prMock(url, 'SOME', 'repo'));
+
+          scope
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+              (body) => {
+                const reviewers = body.reviewers.map(
+                  (r: { user: { name: any } }) => r.user.name,
+                );
+                return (
+                  Array.isArray(reviewers) &&
+                  reviewers.length === 3 &&
+                  reviewers.includes('name') &&
+                  reviewers.includes('userName2') &&
+                  reviewers.includes('usernamefoundbyemail')
+                );
+              },
+            )
+            .reply(200);
+
+          scope
+            // User by email
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'test@test.com' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .reply(200, [
+              {
+                slug: 'usernamefoundbyemail',
+                active: true,
+                displayName: 'Not relevant',
+                emailAddress: 'test@test.com',
+              },
+            ]);
+
+          await expect(
+            bitbucket.addReviewers(5, ['name', 'userName2', 'test@test.com']),
+          ).toResolve();
+        });
+
         it('throws', async () => {
           const scope = await initRepo();
           scope
@@ -999,6 +1052,135 @@ describe('modules/platform/bitbucket-server/index', () => {
           await expect(
             bitbucket.addReviewers(5, ['name']),
           ).rejects.toThrowErrorMatchingSnapshot();
+        });
+      });
+
+      describe('getUserSlugsByEmail', () => {
+        it('throws when lookup fails', async () => {
+          const scope = await initRepo();
+          scope
+            // User by email
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'e-mail@test.com' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .reply(500, []);
+
+          await expect(
+            bitbucket.getUserSlugsByEmail('e-mail@test.com'),
+          ).rejects.toThrow('Response code 500 (Internal Server Error)');
+        });
+
+        it('return empty array when no results found', async () => {
+          const scope = await initRepo();
+          scope
+            // User by email
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'e-mail@test.com' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .reply(200, []);
+
+          const actual = await bitbucket.getUserSlugsByEmail('e-mail@test.com');
+          expect(actual).toBeEmptyArray();
+        });
+
+        it('return only active users', async () => {
+          const scope = await initRepo();
+          scope
+            // User by email
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'e-mail@test.com' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .reply(200, [
+              {
+                slug: 'usernamefoundbyemail',
+                active: false,
+                displayName: 'Not relevant',
+                emailAddress: 'e-mail@test.com',
+              },
+            ]);
+
+          const actual = await bitbucket.getUserSlugsByEmail('e-mail@test.com');
+          expect(actual).toBeEmptyArray();
+        });
+
+        it('only returns exact matches', async () => {
+          const scope = await initRepo();
+          scope
+            // User by email
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'mail@test.com' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .reply(200, [
+              {
+                slug: 'usernamefoundbyemail',
+                active: true,
+                displayName: 'Not relevant',
+                emailAddress: 'e-mail@test.com',
+              },
+              {
+                slug: 'usernamefoundbyemailtoo',
+                active: true,
+                displayName: 'Not relevant',
+                emailAddress: 'e-mail@test.com',
+              },
+            ]);
+
+          const actual = await bitbucket.getUserSlugsByEmail('mail@test.com');
+          expect(actual).toBeEmptyArray();
+        });
+
+        it('returns multiple exact matches', async () => {
+          const scope = await initRepo();
+          scope
+            // User by email
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'e-mail@test.com' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .reply(200, [
+              {
+                slug: 'usernamefoundbyemail',
+                active: true,
+                displayName: 'Not relevant',
+                emailAddress: 'e-mail@test.com',
+              },
+              {
+                slug: 'usernamefoundbyemailtoo',
+                active: true,
+                displayName: 'Not relevant',
+                emailAddress: 'e-mail@test.com',
+              },
+            ]);
+
+          const actual = await bitbucket.getUserSlugsByEmail('e-mail@test.com');
+          expect(actual).toStrictEqual([
+            'usernamefoundbyemail',
+            'usernamefoundbyemailtoo',
+          ]);
         });
       });
 
