@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
+import { PypiDatasource } from '../../datasource/pypi';
 import { normalizePythonDepName } from '../../datasource/pypi/common';
 import { PixiConfigSchema } from '../pixi/schema';
 import type { PackageDependency } from '../types';
@@ -49,18 +50,44 @@ function DependencyGroup(depType: string): DependencyGroupSchema {
   ) as unknown as DependencyGroupSchema;
 }
 
-const PdmSchema = z.object({
-  'dev-dependencies': DependencyGroup(depTypes.pdmDevDependencies).catch([]),
-  source: z
-    .array(
+const PdmSchema = z
+  .object({
+    'dev-dependencies': DependencyGroup(depTypes.pdmDevDependencies).catch([]),
+    source: LooseArray(
       z.object({
         url: z.string(),
         name: z.string(),
-        verify_ssl: z.boolean().optional(),
       }),
     )
-    .optional(),
-});
+      .transform((pdmSource) => {
+        const registryUrls: string[] = [];
+
+        let containsPyPiUrl = false;
+        for (const source of pdmSource) {
+          if (source.name === 'pypi') {
+            containsPyPiUrl = true;
+          }
+
+          registryUrls.push(source.url);
+        }
+
+        // Add pypi default url, if there is no source declared with the name `pypi`
+        // @see https://daobook.github.io/pdm/pyproject/tool-pdm/#specify-other-sources-for-finding-packages
+        if (!containsPyPiUrl) {
+          registryUrls.unshift(PypiDatasource.defaultURL);
+        }
+
+        return registryUrls;
+      })
+      .optional()
+      .catch(undefined),
+  })
+  .transform(
+    ({ 'dev-dependencies': devDependencies, source: registryUrls }) => ({
+      devDependencies,
+      registryUrls,
+    }),
+  );
 
 const HatchSchema = z
   .object({
