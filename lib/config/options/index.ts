@@ -353,7 +353,7 @@ const options: RenovateOptions[] = [
   {
     name: 'minimumGroupSize',
     description:
-      'The minimum number of updates which must be in a group for updates to be triggered.',
+      'The minimum number of updates which must be in a group for branches to be created.',
     type: 'integer',
     default: 1,
   },
