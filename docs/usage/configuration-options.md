@@ -2666,7 +2666,7 @@ If set to `x` branch/PR creation for that group will be postponed till `x` updat
 
 Example:
 
-```json title="Create only a grouped update when there are 3 or more npm updates"
+```json title="Create only a grouped update when there are 3 or more node updates"
 {
   "packageRules": [
     {
