@@ -249,9 +249,9 @@ function getBranchesListMd(
   if (filteredBranches.length === 0) {
     return '';
   }
+  let result = `## ${title}\n\n${description}\n\n`;
   const { categories, uncategorized, hasCategorized, hasUncategorized } =
     splitBranchesByCategory(filteredBranches);
-  let result = `## ${title}\n\n${description}`;
   if (hasCategorized) {
     for (const [category, branches] of Object.entries(categories).sort(
       ([keyA], [keyB]) =>
