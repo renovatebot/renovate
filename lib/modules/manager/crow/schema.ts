@@ -4,11 +4,11 @@ export const CrowStep = z.object({
   image: z.string().optional(),
 });
 
-export const crowConfig = z.object({
-  pipeline: z.record(z.string(), crowStep).optional(),
-  steps: z.record(z.string(), crowStep).optional(),
-  clone: z.record(z.string(), crowStep).optional(),
-  services: z.record(z.string(), crowStep).optional(),
+export const CrowConfig = z.object({
+  pipeline: z.record(z.string(), CrowStep).optional(),
+  steps: z.record(z.string(), CrowStep).optional(),
+  clone: z.record(z.string(), CrowStep).optional(),
+  services: z.record(z.string(), CrowStep).optional(),
 });
 
 export type CrowConfigDefinition = z.infer<typeof crowConfig>;
