@@ -43,7 +43,7 @@ describe('modules/versioning/generic', () => {
         }
         const { major, minor, patch, prerelease } = matchGroups;
         return {
-          release: [major, minor, patch].map(parseInt),
+          release: [major, minor, patch].map((x) => parseInt(x)),
           prerelease,
         };
       }
