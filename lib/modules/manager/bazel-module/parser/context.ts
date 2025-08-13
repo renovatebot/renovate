@@ -3,6 +3,7 @@ import type {
   ArrayFragment,
   ExtensionTagFragment,
   PreparedExtensionTagFragment,
+  RepoRuleFunctionCallFragment,
   ResultFragment,
   RuleFragment,
 } from './fragments';
@@ -33,10 +34,22 @@ export class Ctx implements CtxCompatible {
   results: ResultFragment[];
   stack: AllFragments[];
 
+  // Track repo rule assignments and function mappings
+  private repoRuleFunctions: Map<
+    string,
+    { loadPath: string; originalFunctionName: string }
+  >;
+  private currentRepoRuleAssignment?: {
+    variableName: string;
+    loadPath?: string;
+    originalFunctionName?: string;
+  };
+
   constructor(source: string) {
     this.source = source;
     this.results = [];
     this.stack = [];
+    this.repoRuleFunctions = new Map();
   }
 
   private get safeCurrent(): AllFragments | undefined {
@@ -65,6 +78,16 @@ export class Ctx implements CtxCompatible {
       return current;
     }
     throw new Error('Requested current extension tag, but does not exist.');
+  }
+
+  private get currentRepoRuleFunctionCall(): RepoRuleFunctionCallFragment {
+    const current = this.current;
+    if (current.type === 'repoRuleFunctionCall') {
+      return current;
+    }
+    throw new Error(
+      'Requested current repo rule function call, but does not exist.',
+    );
   }
 
   private get currentArray(): ArrayFragment {
@@ -110,14 +133,20 @@ export class Ctx implements CtxCompatible {
         return true;
       }
       if (
-        (parent.type === 'rule' || parent.type === 'extensionTag') &&
+        (parent.type === 'rule' ||
+          parent.type === 'extensionTag' ||
+          parent.type === 'repoRuleFunctionCall') &&
         current.type === 'attribute' &&
         current.value !== undefined
       ) {
         parent.children[current.name] = current.value;
         return true;
       }
-    } else if (current.type === 'rule' || current.type === 'extensionTag') {
+    } else if (
+      current.type === 'rule' ||
+      current.type === 'extensionTag' ||
+      current.type === 'repoRuleFunctionCall'
+    ) {
       this.results.push(current);
       return true;
     }
@@ -201,6 +230,81 @@ export class Ctx implements CtxCompatible {
   endArray(): Ctx {
     const array = this.currentArray;
     array.isComplete = true;
+    return this.processStack();
+  }
+
+  // Repo rule assignment methods
+  startRepoRuleAssignment(variableName: string): Ctx {
+    this.currentRepoRuleAssignment = { variableName };
+    return this;
+  }
+
+  addRepoRuleLoadPath(loadPath: string): Ctx {
+    if (this.currentRepoRuleAssignment) {
+      this.currentRepoRuleAssignment.loadPath = loadPath;
+    }
+    return this;
+  }
+
+  addRepoRuleFunctionName(originalFunctionName: string): Ctx {
+    if (this.currentRepoRuleAssignment) {
+      this.currentRepoRuleAssignment.originalFunctionName =
+        originalFunctionName;
+    }
+    return this;
+  }
+
+  endRepoRuleAssignment(): Ctx {
+    if (
+      this.currentRepoRuleAssignment?.loadPath &&
+      this.currentRepoRuleAssignment?.originalFunctionName
+    ) {
+      // Only track rules_img repo rules - support both load paths used in tests
+      const rulesImgLoadPaths = [
+        '@rules_img//img:pull.bzl',
+        '@rules_img//img/private/repository_rules:pull.bzl',
+      ];
+
+      if (rulesImgLoadPaths.includes(this.currentRepoRuleAssignment.loadPath)) {
+        this.repoRuleFunctions.set(
+          this.currentRepoRuleAssignment.variableName,
+          {
+            loadPath: this.currentRepoRuleAssignment.loadPath,
+            originalFunctionName:
+              this.currentRepoRuleAssignment.originalFunctionName,
+          },
+        );
+      }
+    }
+    this.currentRepoRuleAssignment = undefined;
+    return this;
+  }
+
+  // Dynamic function call methods
+  isRulesImgFunction(functionName: string): boolean {
+    return this.repoRuleFunctions.has(functionName);
+  }
+
+  startDynamicFunctionCall(functionName: string, offset: number): Ctx {
+    const repoRuleInfo = this.repoRuleFunctions.get(functionName);
+    if (!repoRuleInfo) {
+      throw new Error(`Function ${functionName} not found in repo rules`);
+    }
+
+    const functionCall = fragments.repoRuleFunctionCall(
+      functionName,
+      repoRuleInfo.loadPath,
+      repoRuleInfo.originalFunctionName,
+      offset,
+    );
+    this.stack.push(functionCall);
+    return this;
+  }
+
+  endDynamicFunctionCall(offset: number): Ctx {
+    const functionCall = this.currentRepoRuleFunctionCall;
+    functionCall.isComplete = true;
+    functionCall.rawString = this.source.slice(functionCall.offset, offset);
     return this.processStack();
   }
 }

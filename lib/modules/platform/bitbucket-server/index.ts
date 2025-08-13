@@ -49,7 +49,7 @@ import type {
   PullRequestActivity,
   PullRequestCommentActivity,
 } from './schema';
-import { UserSchema } from './schema';
+import { UserSchema, UsersSchema, isEmail } from './schema';
 import type {
   BbsConfig,
   BbsPr,
@@ -332,6 +332,7 @@ export async function getBranchForceRebase(
     res.body?.mergeConfig?.defaultStrategy?.id.includes('ff-only'),
   );
 }
+
 // Gets details for a PR
 export async function getPr(
   prNo: number,
@@ -686,9 +687,62 @@ export async function addReviewers(
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prNo}`);
 
-  await retry(updatePRAndAddReviewers, [prNo, reviewers], 3, [
+  const reviewerSlugs = new Set<string>();
+
+  for (const entry of reviewers) {
+    // If entry is an email-address, resolve userslugs
+    if (isEmail(entry)) {
+      const slugs = await getUserSlugsByEmail(entry);
+      for (const slug of slugs) {
+        reviewerSlugs.add(slug);
+      }
+    } else {
+      reviewerSlugs.add(entry);
+    }
+  }
+
+  await retry(updatePRAndAddReviewers, [prNo, Array.from(reviewerSlugs)], 3, [
     REPOSITORY_CHANGED,
   ]);
+}
+
+/**
+ * Resolves Bitbucket users by email address,
+ * restricted to users who have REPO_READ permission on the target repository.
+ *
+ * @param emailAddress - A string that could be the user's email-address.
+ * @returns List of user slugs for active, matched users.
+ */
+export async function getUserSlugsByEmail(
+  emailAddress: string,
+): Promise<string[]> {
+  try {
+    const filterUrl =
+      `./rest/api/1.0/users?filter=${emailAddress}` +
+      `&permission.1=REPO_READ` +
+      `&permission.1.projectKey=${config.projectKey}` +
+      `&permission.1.repositorySlug=${config.repositorySlug}`;
+
+    const users = await bitbucketServerHttp.getJson(
+      filterUrl,
+      { limit: 100 },
+      UsersSchema,
+    );
+
+    if (users.body.length) {
+      return users.body
+        .filter((u) => u.active && u.emailAddress === emailAddress)
+        .map((u) => u.slug);
+    }
+  } catch (err) {
+    logger.warn(
+      { err, emailAddress },
+      `Failed to resolve email address to user slug`,
+    );
+    throw err;
+  }
+  logger.debug({ userinfo: emailAddress }, 'No users found for email-address');
+  return [];
 }
 
 async function updatePRAndAddReviewers(

@@ -1,24 +1,9 @@
 import is from '@sindresorhus/is';
-import { z } from 'zod';
 import { logger } from '../../../../logger';
 import { regEx } from '../../../../util/regex';
 import { Result } from '../../../../util/result';
 import { Yaml } from '../../../../util/schema-utils';
-
-const YarnrcYmlSchema = Yaml.pipe(
-  z.object({
-    npmRegistryServer: z.string().optional(),
-    npmScopes: z
-      .record(
-        z.object({
-          npmRegistryServer: z.string().optional(),
-        }),
-      )
-      .optional(),
-  }),
-);
-
-export type YarnConfig = z.infer<typeof YarnrcYmlSchema>;
+import { type YarnrcConfig, YarnrcSchema } from '../schema';
 
 const registryRegEx = regEx(
   /^"?(@(?<scope>[^:]+):)?registry"? "?(?<registryUrl>[^"]+)"?$/gm,
@@ -26,27 +11,29 @@ const registryRegEx = regEx(
 
 export function loadConfigFromLegacyYarnrc(
   legacyYarnrc: string,
-): YarnConfig | null {
+): YarnrcConfig | null {
   const registryMatches = [...legacyYarnrc.matchAll(registryRegEx)]
     .map((m) => m.groups)
     .filter(is.truthy);
 
-  const yarnConfig: YarnConfig = {};
+  const yarnrcConfig: YarnrcConfig = {};
   for (const registryMatch of registryMatches) {
     if (registryMatch.scope) {
-      yarnConfig.npmScopes ??= {};
-      yarnConfig.npmScopes[registryMatch.scope] ??= {};
-      yarnConfig.npmScopes[registryMatch.scope].npmRegistryServer =
+      yarnrcConfig.npmScopes ??= {};
+      yarnrcConfig.npmScopes[registryMatch.scope] ??= {};
+      yarnrcConfig.npmScopes[registryMatch.scope].npmRegistryServer =
         registryMatch.registryUrl;
     } else {
-      yarnConfig.npmRegistryServer = registryMatch.registryUrl;
+      yarnrcConfig.npmRegistryServer = registryMatch.registryUrl;
     }
   }
-  return yarnConfig;
+  return yarnrcConfig;
 }
 
-export function loadConfigFromYarnrcYml(yarnrcYml: string): YarnConfig | null {
-  return Result.parse(yarnrcYml, YarnrcYmlSchema)
+export function loadConfigFromYarnrcYml(
+  yarnrcYml: string,
+): YarnrcConfig | null {
+  return Result.parse(yarnrcYml, Yaml.pipe(YarnrcSchema))
     .onError((err) => {
       logger.warn({ yarnrcYml, err }, `Failed to load yarnrc file`);
     })
@@ -55,17 +42,17 @@ export function loadConfigFromYarnrcYml(yarnrcYml: string): YarnConfig | null {
 
 export function resolveRegistryUrl(
   packageName: string,
-  yarnConfig: YarnConfig,
+  yarnrcConfig: YarnrcConfig,
 ): string | null {
-  if (yarnConfig.npmScopes) {
-    for (const scope in yarnConfig.npmScopes) {
+  if (yarnrcConfig.npmScopes) {
+    for (const scope in yarnrcConfig.npmScopes) {
       if (packageName.startsWith(`@${scope}/`)) {
-        return yarnConfig.npmScopes[scope].npmRegistryServer ?? null;
+        return yarnrcConfig.npmScopes[scope].npmRegistryServer ?? null;
       }
     }
   }
-  if (yarnConfig.npmRegistryServer) {
-    return yarnConfig.npmRegistryServer;
+  if (yarnrcConfig.npmRegistryServer) {
+    return yarnrcConfig.npmRegistryServer;
   }
   return null;
 }
