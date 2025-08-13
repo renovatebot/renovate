@@ -50,6 +50,8 @@ function extractFromSection(
 
       if (is.object(git)) {
         gitUrl = git?.url;
+      } else if (is.string(git)) {
+        gitUrl = git;
       }
 
       if (version) {
