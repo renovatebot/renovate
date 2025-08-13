@@ -60,7 +60,7 @@ function extractFromSection(
         currentValue = '';
         skipReason = 'path-dependency';
       } else if (is.object(git) && is.string(git?.ref)) {
-        currentValue = git?.ref;
+        currentValue = git.ref;
       } else if (
         is.object(git) &&
         !is.string(git?.ref) &&
@@ -73,7 +73,7 @@ function extractFromSection(
       }
 
       if (is.object(git) && is.string(git?.tag_pattern)) {
-        tagPattern = git?.tag_pattern;
+        tagPattern = git.tag_pattern;
       }
     }
 
