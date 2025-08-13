@@ -351,6 +351,13 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'minimumGroupSize',
+    description:
+      'The minimum number of updates which must be in a group for branches to be created.',
+    type: 'integer',
+    default: 1,
+  },
+  {
     name: 'presetCachePersistence',
     description: 'Cache resolved presets in package cache.',
     type: 'boolean',
