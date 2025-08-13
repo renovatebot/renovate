@@ -243,7 +243,7 @@ function getBranchesListMd(
   listItemType = 'approvePr',
   bulkComment?: string,
   bulkMessage?: string,
-  bulkIcon?: string,
+  bulkIcon?: '🔐',
 ): string {
   const filteredBranches = branches.filter(predicate);
   if (filteredBranches.length === 0) {
@@ -276,8 +276,7 @@ function getBranchesListMd(
       result += '### All\n\n';
     }
     result += getCheckbox(bulkComment);
-    const icon = ` ${bulkIcon ?? ''} `;
-    result += `${icon}**${bulkMessage}**${icon}`.trim();
+    result += `${bulkIcon ? bulkIcon + ' ' : ''}**${bulkMessage}**${bulkIcon ? ' ' + bulkIcon : ''}`;
   }
   return result.trimEnd() + '\n\n';
 }
