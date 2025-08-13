@@ -2665,6 +2665,7 @@ Renovate will only add a milestone when it _creates_ the PR.
 If set to to a positive value x then branch creation will be postponed until x or more updates are available in the branch.
 
 This applies to both these scenarios:
+
 - Grouped updates with more than one dependency updated together, and
 - Branches with multiple updates of the same dependency (e.g. in multiple files)
 
