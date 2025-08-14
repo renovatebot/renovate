@@ -45,8 +45,6 @@ export const ReviewerGroup = z.object({
 
 export const ReviewerGroups = z.array(ReviewerGroup);
 
-export type ReviewerGroups = z.infer<typeof ReviewerGroups>;
-
 const EmailSchema = z.string().email();
 
 export const isEmail = (value: string): boolean =>

@@ -161,7 +161,7 @@ export function splitEscapedSpaces(str: string): string[] {
     } else {
       result.push(part);
     }
-    last = result[result.length - 1];
+    last = result.at(-1);
   }
 
   return result;
