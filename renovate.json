@@ -79,6 +79,12 @@
       "matchPackageNames": ["*"],
       "matchBaseBranches": ["next"],
       "dependencyDashboardApproval": true
+    },
+    {
+      "description": "require approval on next branch lockfile maintenance",
+      "matchBaseBranches": ["next"],
+      "matchUpdateTypes": ["lockFileMaintenance"],
+      "dependencyDashboardApproval": true
     }
   ],
   "customManagers": [
