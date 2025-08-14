@@ -1,8 +1,8 @@
+import { AZURE_POLICY_TYPES } from '../../constants';
 import { AllManagersListLiteral } from '../../manager-list.generated';
 import { getManagers } from '../../modules/manager';
 import { getCustomManagers } from '../../modules/manager/custom';
 import { getPlatformList } from '../../modules/platform';
-import { getAzurePolicyTypes } from '../../modules/platform/azure/types';
 import { getVersioningList } from '../../modules/versioning';
 import { supportedDatasources } from '../presets/internal/merge-confidence';
 import { type RenovateOptions, UpdateTypesOptions } from '../types';
@@ -1289,7 +1289,10 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     subType: 'string',
     allowString: true,
-    allowedValues: getAzurePolicyTypes(),
+    allowedValues: [
+      ...Object.values(AZURE_POLICY_TYPES),
+      ...Object.keys(AZURE_POLICY_TYPES),
+    ],
     default: [],
     supportedPlatforms: ['azure'],
   },

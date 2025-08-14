@@ -229,9 +229,7 @@ Define a custom reason when policies are being bypassed to perform auto-merge.
 
 Add a list of policy UUIDs which might be failing but should not block auto-merge.
 
-This is useful to bypass required reviewers, required work-items.
-
-For this to work renovate must be running with the appropriate permissions to bypass policies for a given azure repository.
+> For this to work the account that executes renovate must be allowed to `Bypass policies when completing pull requests` permission on the respective repository.
 
 Policy Types can be defined by their UUID or Name
 
