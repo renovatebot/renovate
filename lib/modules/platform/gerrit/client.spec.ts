@@ -416,6 +416,18 @@ describe('modules/platform/gerrit/client', () => {
     });
   });
 
+  describe('deleteHashtag()', () => {
+    it('deleteHashtag', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .post('/a/changes/123456/hashtags', {
+          remove: ['hashtag1'],
+        })
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
+      await expect(client.deleteHashtag(123456, 'hashtag1')).toResolve();
+    });
+  });
+
   describe('addReviewer()', () => {
     it('add', async () => {
       httpMock

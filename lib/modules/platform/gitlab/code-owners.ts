@@ -26,8 +26,17 @@ export function extractRulesFromCodeOwnersLines(
 }
 
 function changeCurrentSection(line: string): CodeOwnersSection {
-  const [name, ...usernames] = line.split(regEx(/\s+/));
-  return { name, defaultUsers: usernames };
+  // Find the last closing bracket to handle section names with approval counts
+  const lastClosingBracketIndex = line.lastIndexOf(']');
+
+  // Extract section name (including any approval counts)
+  const sectionName = line.substring(0, lastClosingBracketIndex + 1);
+  const remainingLine = line.substring(lastClosingBracketIndex + 1).trim();
+
+  // Parse any default users after the section name
+  const usernames = remainingLine ? remainingLine.split(regEx(/\s+/)) : [];
+
+  return { name: sectionName, defaultUsers: usernames };
 }
 
 function extractOwnersFromLine(

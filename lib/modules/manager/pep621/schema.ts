@@ -1,41 +1,120 @@
 import { z } from 'zod';
 import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
+import { PypiDatasource } from '../../datasource/pypi';
 import { normalizePythonDepName } from '../../datasource/pypi/common';
 import { PixiConfigSchema } from '../pixi/schema';
+import type { PackageDependency } from '../types';
+import { depTypes, pep508ToPackageDependency } from './utils';
 
 export type PyProject = z.infer<typeof PyProjectSchema>;
 
-const DependencyListSchema = z.array(z.string()).optional();
-const DependencyRecordSchema = z
-  .record(z.string(), z.array(z.string()))
-  .optional();
+type Pep508DependencySchema = z.ZodType<PackageDependency<Record<string, any>>>;
 
-const PdmSchema = z.object({
-  'dev-dependencies': DependencyRecordSchema,
-  source: z
-    .array(
+function Pep508Dependency(depType: string): Pep508DependencySchema {
+  return z.string().transform((x, ctx) => {
+    const res = pep508ToPackageDependency(depType, x);
+
+    if (!res) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'should be a valid PEP508 dependency',
+        fatal: true,
+      });
+
+      return z.NEVER;
+    }
+
+    return res;
+  }) as Pep508DependencySchema;
+}
+
+type DependencyGroupSchema = z.ZodType<
+  PackageDependency<Record<string, any>>[]
+>;
+
+function DependencyGroup(depType: string): DependencyGroupSchema {
+  return LooseRecord(LooseArray(Pep508Dependency(depType))).transform(
+    (depGroups) => {
+      const deps: PackageDependency[] = [];
+      for (const [depGroup, groupDeps] of Object.entries(depGroups)) {
+        for (const dep of groupDeps) {
+          if (dep.packageName) {
+            dep.depName = dep.packageName;
+          }
+          dep.managerData = { depGroup };
+          deps.push(dep);
+        }
+      }
+      return deps;
+    },
+  ) as unknown as DependencyGroupSchema;
+}
+
+const PdmSchema = z
+  .object({
+    'dev-dependencies': DependencyGroup(depTypes.pdmDevDependencies).catch([]),
+    source: LooseArray(
       z.object({
         url: z.string(),
         name: z.string(),
-        verify_ssl: z.boolean().optional(),
       }),
     )
-    .optional(),
-});
+      .transform((pdmSource) => {
+        const registryUrls: string[] = [];
 
-const HatchSchema = z.object({
-  envs: z
-    .record(
+        let containsPyPiUrl = false;
+        for (const source of pdmSource) {
+          if (source.name === 'pypi') {
+            containsPyPiUrl = true;
+          }
+
+          registryUrls.push(source.url);
+        }
+
+        // Add pypi default url, if there is no source declared with the name `pypi`
+        // @see https://daobook.github.io/pdm/pyproject/tool-pdm/#specify-other-sources-for-finding-packages
+        if (!containsPyPiUrl) {
+          registryUrls.unshift(PypiDatasource.defaultURL);
+        }
+
+        return registryUrls;
+      })
+      .optional()
+      .catch(undefined),
+  })
+  .transform(
+    ({ 'dev-dependencies': devDependencies, source: registryUrls }) => ({
+      devDependencies,
+      registryUrls,
+    }),
+  );
+
+const HatchSchema = z
+  .object({
+    envs: LooseRecord(
       z.string(),
-      z
-        .object({
-          dependencies: DependencyListSchema,
-          'extra-dependencies': DependencyListSchema,
-        })
-        .optional(),
-    )
-    .optional(),
-});
+      z.object({
+        dependencies: z.unknown(),
+        'extra-dependencies': z.unknown(),
+      }),
+    ),
+  })
+  .catch({ envs: {} })
+  .transform(({ envs }) => {
+    const deps: PackageDependency[] = [];
+    for (const [
+      envName,
+      { dependencies, 'extra-dependencies': extraDependencies },
+    ] of Object.entries(envs)) {
+      const depType = `tool.hatch.envs.${envName}`;
+      const HatchDependency = LooseArray(Pep508Dependency(depType)).catch([]);
+      deps.push(
+        ...HatchDependency.parse(dependencies),
+        ...HatchDependency.parse(extraDependencies),
+      );
+    }
+    return { deps };
+  });
 
 const UvIndexSource = z.object({
   index: z.string(),
@@ -71,7 +150,10 @@ const UvSource = z.union([
 ]);
 
 const UvSchema = z.object({
-  'dev-dependencies': DependencyListSchema,
+  'dev-dependencies': LooseArray(
+    Pep508Dependency(depTypes.uvDevDependencies),
+  ).catch([]),
+  'required-version': z.string().optional(),
   sources: LooseRecord(
     // uv applies the same normalization as for Python dependencies on sources
     z.string().transform((source) => normalizePythonDepName(source)),
@@ -93,32 +175,35 @@ export const PyProjectSchema = z.object({
   project: z
     .object({
       version: z.string().optional().catch(undefined),
-      'requires-python': z.string().optional(),
-      dependencies: DependencyListSchema,
-      'optional-dependencies': DependencyRecordSchema,
+      'requires-python': z.string().optional().catch(undefined),
+      dependencies: LooseArray(Pep508Dependency(depTypes.dependencies)).catch(
+        [],
+      ),
+      'optional-dependencies': DependencyGroup(
+        depTypes.optionalDependencies,
+      ).catch([]),
     })
-    .optional(),
+    .optional()
+    .catch(undefined),
   'build-system': z
     .object({
-      requires: DependencyListSchema,
-      'build-backend': z.string().optional(),
+      requires: LooseArray(
+        Pep508Dependency(depTypes.buildSystemRequires),
+      ).catch([]),
+      'build-backend': z.string().optional().catch(undefined),
     })
-    .optional(),
-  'dependency-groups': z
-    .record(
-      z.string(),
-      // Skip non-string entries, like `{include-group = "typing"}`, as they are not dependencies.
-      LooseArray(z.string()),
-    )
-    .optional(),
+    .optional()
+    .catch(undefined),
+  'dependency-groups': DependencyGroup(depTypes.dependencyGroups).catch([]),
   tool: z
     .object({
-      pixi: PixiConfigSchema.optional(),
-      pdm: PdmSchema.optional(),
-      hatch: HatchSchema.optional(),
-      uv: UvSchema.optional(),
+      pixi: PixiConfigSchema.optional().catch(undefined),
+      pdm: PdmSchema.optional().catch(undefined),
+      hatch: HatchSchema.optional().catch(undefined),
+      uv: UvSchema.optional().catch(undefined),
     })
-    .optional(),
+    .optional()
+    .catch(undefined),
 });
 
 export const PdmLockfileSchema = Toml.pipe(
