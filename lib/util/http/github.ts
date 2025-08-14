@@ -360,7 +360,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       const next = linkHeader?.next;
       const env = getEnv();
       if (next?.url && linkHeader?.last?.page) {
-        let lastPage = parseInt(linkHeader.last.page, 10);
+        let lastPage = parseInt(linkHeader.last.page);
         if (!env.RENOVATE_PAGINATE_ALL && httpOptions.paginate !== 'all') {
           lastPage = Math.min(pageLimit, lastPage);
         }
