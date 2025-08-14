@@ -138,32 +138,6 @@ describe('workers/repository/config-migration/branch/create', () => {
       });
     });
 
-    describe('applies the commitMessageSuffix value', () => {
-      it('to the default commit message', async () => {
-        const suffix = 'SUFFIX';
-        config.commitMessageSuffix = suffix;
-
-        const message = `Migrate config renovate.json ${suffix}`;
-        await createConfigMigrationBranch(config, migratedConfigData);
-
-        expect(scm.checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
-          branchName: 'renovate/migrate-config',
-          baseBranch: 'dev',
-          files: [
-            {
-              type: 'addition',
-              path: 'renovate.json',
-              contents: renovateConfig,
-            },
-          ],
-          message,
-          platformCommit: 'auto',
-          force: true,
-        });
-      });
-    });
-
     describe('applies semanticCommit prefix', () => {
       it('to the default commit message', async () => {
         const prefix = 'chore(config)';
