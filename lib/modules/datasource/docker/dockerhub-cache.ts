@@ -71,7 +71,7 @@ export class DockerHubCache {
 
     if (earliestDate && latestDate) {
       for (const [key, item] of Object.entries(this.cache.items)) {
-        const id = parseInt(key, 10);
+        const id = parseInt(key);
 
         const itemDate = DateTime.fromISO(item.last_updated);
 
