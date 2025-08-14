@@ -6,6 +6,7 @@ import { PypiDatasource } from '../../datasource/pypi';
 import * as condaVersion from '../../versioning/conda/';
 import { id as gitRefVersionID } from '../../versioning/git';
 import { id as pep440VersionID } from '../../versioning/pep440/';
+import { PyProject } from '../pep621/schema';
 import type { PackageDependency } from '../types';
 
 export type Channels = z.infer<typeof Channel>[];
@@ -188,14 +189,23 @@ const PixiProject = z.object({
 /**
  * `$` of `pixi.toml` or `$.tool.pixi` of `pyproject.toml`
  */
-export const PixiConfig = Toml.pipe(
-  z
-    .union([PixiWorkspace, PixiProject])
-    .and(z.object({ feature: Features.default({}) }))
-    .and(DependenciesMixin),
-);
+export const PixiConfig = z
+  .union([PixiWorkspace, PixiProject])
+  .and(z.object({ feature: Features.default({}) }))
+  .and(DependenciesMixin);
 
 export type PixiConfig = z.infer<typeof PixiConfig>;
+
+export const PixiFile = Toml.pipe(PixiConfig);
+
+export const PixiPyProject = Toml.pipe(
+  PyProject.extend({
+    tool: z
+      .object({ pixi: PixiConfig.optional().catch(undefined) })
+      .optional()
+      .catch(undefined),
+  }),
+);
 
 export const Lockfile = Yaml.pipe(
   z.object({

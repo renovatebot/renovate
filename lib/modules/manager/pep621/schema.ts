@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
 import { PypiDatasource } from '../../datasource/pypi';
 import { normalizePythonDepName } from '../../datasource/pypi/common';
-import { PixiConfig } from '../pixi/schema';
 import type { PackageDependency } from '../types';
 import { depTypes, pep508ToPackageDependency } from './utils';
 
@@ -193,7 +192,6 @@ export const PyProject = z.object({
   'dependency-groups': DependencyGroup(depTypes.dependencyGroups).catch([]),
   tool: z
     .object({
-      pixi: PixiConfig.optional().catch(undefined),
       pdm: PdmConfig.optional().catch(undefined),
       hatch: HatchConfig.optional().catch(undefined),
       uv: UvConfig.optional().catch(undefined),
