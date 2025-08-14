@@ -1140,6 +1140,12 @@ gpg> save
 The private key should then be added to your Renovate Bot global config (either using `privateKeyPath` or exporting it to the `RENOVATE_PRIVATE_KEY` environment variable).
 The public key can be used to replace the existing key in <https://app.renovatebot.com/encrypt> for your own use.
 
+<!-- prettier-ignore -->
+!!! note "Base64 Encoding Support"
+    Renovate supports base64-encoded private keys for easier handling in environment variables or configuration files.
+    Simply provide the base64-encoded version of your private key, and Renovate will automatically detect and decode it.
+    This works for both GPG and SSH private keys.
+
 Any PGP-encrypted secrets must have a mandatory organization/group scope, and optionally can be scoped for a single repository only.
 The reason for this is to avoid "replay" attacks where someone could learn your encrypted secret and then reuse it in their own Renovate repositories.
 Instead, with scoped secrets it means that Renovate ensures that the organization and optionally repository values encrypted with the secret match against the running repository.
