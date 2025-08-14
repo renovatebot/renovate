@@ -43,6 +43,7 @@ abstract class PrivateKey {
     if (decodedKey) {
       this.key = decodedKey;
       addSecretForSanitizing(key, 'global');
+      logger.debug('gitPrivateKey: decoded key from Base64');
     } else {
       this.key = key;
     }
