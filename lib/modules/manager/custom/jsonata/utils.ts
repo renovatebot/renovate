@@ -33,7 +33,7 @@ export async function handleMatching(
         },
         'The jsonata query returned no matches. Possible error, please check your query. Skipping',
       );
-      return [];
+      continue;
     }
 
     const parsed = QueryResultZod.safeParse(queryResult);
@@ -44,7 +44,7 @@ export async function handleMatching(
         { err: parsed.error, jsonataQuery: query, packageFile, queryResult },
         'Query results failed schema validation',
       );
-      return [];
+      continue;
     }
   }
 
