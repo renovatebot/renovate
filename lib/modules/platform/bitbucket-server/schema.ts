@@ -3,7 +3,7 @@ import { EmailAddress } from '../../../util/schema-utils';
 
 export const User = z.object({
   displayName: z.string(),
-  emailAddress: EmailAddress,
+  emailAddress: EmailAddress.nullish().catch(null),
   active: z.boolean(),
   slug: z.string(),
 });
