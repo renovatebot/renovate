@@ -13,7 +13,7 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types';
-import { PdmLockfileSchema, type PyProject } from '../schema';
+import { PdmLockfile, type PyProject } from '../schema';
 import type { Pep621ManagerData } from '../types';
 import { depTypes } from '../utils';
 import type { PyProjectProcessor } from './types';
@@ -59,7 +59,7 @@ export class PdmProcessor implements PyProjectProcessor {
     if (lockFileContent) {
       const lockFileMapping = Result.parse(
         lockFileContent,
-        PdmLockfileSchema.transform(({ lock }) => lock),
+        PdmLockfile.transform(({ lock }) => lock),
       ).unwrapOr({});
 
       for (const dep of deps) {

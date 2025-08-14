@@ -1,13 +1,13 @@
 import { z } from 'zod';
 
-export const UserSchema = z.object({
+export const User = z.object({
   displayName: z.string(),
   emailAddress: z.string(),
   active: z.boolean(),
   slug: z.string(),
 });
 
-export const UsersSchema = z.array(UserSchema);
+export const Users = z.array(User);
 
 export const Files = z.array(z.string());
 
@@ -35,7 +35,7 @@ export const PullRequestActivity = z.union([
 
 export type PullRequestActivity = z.infer<typeof PullRequestActivity>;
 
-const EmailSchema = z.string().email();
+const Email = z.string().email();
 
 export const isEmail = (value: string): boolean =>
-  EmailSchema.safeParse(value).success;
+  Email.safeParse(value).success;

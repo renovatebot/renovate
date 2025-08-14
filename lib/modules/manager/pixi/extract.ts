@@ -13,16 +13,15 @@ import {
 } from '../../../util/url';
 import type { RegistryStrategy } from '../../datasource';
 import { defaultRegistryUrl as defaultCondaRegistryApi } from '../../datasource/conda/common';
-import { PyProjectSchema } from '../pep621/schema';
+import { PyProject } from '../pep621/schema';
 import type { PackageFileContent } from '../types';
 import {
   type Channels,
-  type PixiConfig,
+  PixiConfig,
   type PixiPackageDependency,
-  PixiToml,
 } from './schema';
 
-const PyProjectToml = Toml.pipe(PyProjectSchema);
+const PyProjectToml = Toml.pipe(PyProject);
 
 export function getUserPixiConfig(
   content: string,
@@ -42,7 +41,7 @@ export function getUserPixiConfig(
   }
 
   if (packageFile === 'pixi.toml' || packageFile.endsWith('/pixi.toml')) {
-    const { val, err } = Result.parse(content, PixiToml).unwrap();
+    const { val, err } = Result.parse(content, PixiConfig).unwrap();
     if (err) {
       logger.debug({ packageFile, err }, `error parsing ${packageFile}`);
       return null;
@@ -53,7 +52,7 @@ export function getUserPixiConfig(
 
   const { val, err } = Result.parse(
     content,
-    z.union([PixiToml, PyProjectToml.transform((p) => p.tool?.pixi)]),
+    z.union([PixiConfig, PyProjectToml.transform((p) => p.tool?.pixi)]),
   ).unwrap();
 
   if (err) {

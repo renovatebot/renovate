@@ -188,16 +188,16 @@ const PixiProject = z.object({
 /**
  * `$` of `pixi.toml` or `$.tool.pixi` of `pyproject.toml`
  */
-export const PixiConfigSchema = z
-  .union([PixiWorkspace, PixiProject])
-  .and(z.object({ feature: Features.default({}) }))
-  .and(DependenciesMixin);
+export const PixiConfig = Toml.pipe(
+  z
+    .union([PixiWorkspace, PixiProject])
+    .and(z.object({ feature: Features.default({}) }))
+    .and(DependenciesMixin),
+);
 
-export type PixiConfig = z.infer<typeof PixiConfigSchema>;
+export type PixiConfig = z.infer<typeof PixiConfig>;
 
-export const PixiToml = Toml.pipe(PixiConfigSchema);
-
-export const LockfileYaml = Yaml.pipe(
+export const Lockfile = Yaml.pipe(
   z.object({
     version: z.number(),
   }),

@@ -20,7 +20,7 @@ import type {
   Release,
   ReleaseResult,
 } from '../types';
-import { ReleaseTimestampSchema } from './schema';
+import { ReleaseTimestamp } from './schema';
 import type {
   CrateMetadata,
   CrateRecord,
@@ -442,7 +442,7 @@ export class CrateDatasource extends Datasource {
     const { body: releaseTimestamp } = await this.http.getJson(
       url,
       { cacheProvider: memCacheProvider },
-      ReleaseTimestampSchema,
+      ReleaseTimestamp,
     );
     release.releaseTimestamp = releaseTimestamp;
     return release;
