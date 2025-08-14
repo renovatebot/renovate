@@ -327,4 +327,51 @@ describe('config/decrypt', () => {
       );
     });
   });
+
+  describe('setPrivateKeys (base64 support for privateKeyOld)', () => {
+    const pemKey =
+      '-----BEGIN PGP PRIVATE KEY BLOCK-----\nMIIB...END PGP PRIVATE KEY BLOCK-----';
+    const base64PemKey = Buffer.from(pemKey, 'utf-8').toString('base64');
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it('should use PEM as-is if provided for privateKeyOld', () => {
+      setPrivateKeys(undefined, pemKey);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'privateKeyOld: using value as-is (not base64 or already PEM)',
+      );
+    });
+
+    it('should decode base64 PEM and use decoded value for privateKeyOld', () => {
+      setPrivateKeys(undefined, base64PemKey);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'privateKeyOld: detected possible base64 encoding, attempting to decode',
+      );
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'privateKeyOld: base64 decoded successfully, using decoded PEM',
+      );
+    });
+
+    it('should use original value if base64 decode does not yield PEM for privateKeyOld', () => {
+      const base64Garbage = Buffer.from('not-a-pem', 'utf-8').toString(
+        'base64',
+      );
+      setPrivateKeys(undefined, base64Garbage);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'privateKeyOld: detected possible base64 encoding, attempting to decode',
+      );
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'privateKeyOld: base64 decoded but does not look like PEM, using original value',
+      );
+    });
+
+    it('should use original value if not base64 and not PEM for privateKeyOld', () => {
+      setPrivateKeys(undefined, 'not-base64-or-pem');
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'privateKeyOld: using value as-is (not base64 or already PEM)',
+      );
+    });
+  });
 });

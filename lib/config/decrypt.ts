@@ -18,45 +18,51 @@ import type { RenovateConfig } from './types';
 let privateKey: string | undefined;
 let privateKeyOld: string | undefined;
 
-export function setPrivateKeys(
-  pKey: string | undefined,
-  pKeyOld: string | undefined,
-): void {
-  // Only decode privateKey if it looks like base64 and not PEM
+function decodePemKey(
+  key: string | undefined,
+  keyName: string,
+): string | undefined {
   if (
-    typeof pKey === 'string' &&
-    !pKey.startsWith('-----BEGIN') &&
-    /^[A-Za-z0-9+/=\r\n]+$/.test(pKey.trim()) &&
-    pKey.trim().length % 4 === 0
+    typeof key === 'string' &&
+    !key.startsWith('-----BEGIN') &&
+    /^[A-Za-z0-9+/=\r\n]+$/.test(key.trim()) &&
+    key.trim().length % 4 === 0
   ) {
     logger.debug(
-      'privateKey: detected possible base64 encoding, attempting to decode',
+      `${keyName}: detected possible base64 encoding, attempting to decode`,
     );
     try {
-      const decoded = Buffer.from(pKey.trim(), 'base64').toString('utf-8');
+      const decoded = Buffer.from(key.trim(), 'base64').toString('utf-8');
       if (decoded.startsWith('-----BEGIN')) {
         logger.debug(
-          'privateKey: base64 decoded successfully, using decoded PEM',
+          `${keyName}: base64 decoded successfully, using decoded PEM`,
         );
-        privateKey = decoded;
+        return decoded;
       } else {
         logger.debug(
-          'privateKey: base64 decoded but does not look like PEM, using original value',
+          `${keyName}: base64 decoded but does not look like PEM, using original value`,
         );
-        privateKey = pKey;
+        return key;
       }
     } catch (err) {
       logger.debug(
         { err },
-        'privateKey: base64 decode failed, using original value',
+        `${keyName}: base64 decode failed, using original value`,
       );
-      privateKey = pKey;
+      return key;
     }
   } else {
-    logger.debug('privateKey: using value as-is (not base64 or already PEM)');
-    privateKey = pKey;
+    logger.debug(`${keyName}: using value as-is (not base64 or already PEM)`);
+    return key;
   }
-  privateKeyOld = pKeyOld;
+}
+
+export function setPrivateKeys(
+  pKey: string | undefined,
+  pKeyOld: string | undefined,
+): void {
+  privateKey = decodePemKey(pKey, 'privateKey');
+  privateKeyOld = decodePemKey(pKeyOld, 'privateKeyOld');
 }
 
 export async function tryDecrypt(

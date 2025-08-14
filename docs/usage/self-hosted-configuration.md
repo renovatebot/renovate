@@ -771,10 +771,10 @@ This reduces the chance of unintended consequences with global Git configs on sh
 
 <!-- prettier-ignore -->
 !!! tip
-    Renovate supports base64-encoded private keys for the `privateKey` config option. If your private key value is base64-encoded (for example, if it does not start with `-----BEGIN` and matches base64 format), Renovate will automatically decode it before use. This is useful if your configuration system or secrets manager only supports base64 values.
+    Renovate supports base64-encoded private keys for the `privateKey` and `privateKeyOld` config options. If your private key value is base64-encoded (for example, if it does not start with `-----BEGIN` and matches base64 format), Renovate will automatically decode it before use. This is useful if your configuration system or secrets manager only supports base64 values, or if configuring via environment variables.
 
-    - You can provide either a PEM-formatted key or a base64-encoded PEM key.
-    - This does **not** apply to `privateKeyOld`, `privateKeyPath`, or `privateKeyPathOld`.
+    - You can provide either a PEM-formatted key or a base64-encoded PEM key for both `privateKey` and `privateKeyOld`.
+    - This does **not** apply to `privateKeyPath` or `privateKeyPathOld`.
     - If the decoded value does not look like a PEM key, Renovate will use the original value as-is.
 
 ## gitPrivateKeyPassphrase
