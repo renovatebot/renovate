@@ -170,7 +170,7 @@ export async function initPlatform({
         )
       ).body;
 
-      if (!emailAddress.length) {
+      if (!emailAddress?.length) {
         throw new Error(`No email address configured for username ${username}`);
       }
 
@@ -1305,7 +1305,7 @@ async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
   if (repoGroup) {
     return repoGroup.users
       .filter((user) => user.active)
-      .map((user) => user.emailAddress);
+      .map((user) => user.emailAddress ?? user.slug);
   }
 
   // If no repo-level group, fall back to project-level group
@@ -1316,7 +1316,7 @@ async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
   if (projectGroup) {
     return projectGroup.users
       .filter((user) => user.active)
-      .map((user) => user.emailAddress);
+      .map((user) => user.emailAddress ?? user.slug);
   }
 
   // Group not found at either level
