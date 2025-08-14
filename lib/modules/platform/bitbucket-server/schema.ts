@@ -1,8 +1,9 @@
 import { z } from 'zod';
+import { EmailAddress } from '../../../util/schema-utils';
 
 export const User = z.object({
   displayName: z.string(),
-  emailAddress: z.string(),
+  emailAddress: EmailAddress.catch(''),
   active: z.boolean(),
   slug: z.string(),
 });
@@ -43,8 +44,3 @@ export const ReviewerGroup = z.object({
   }),
 });
 export const ReviewerGroups = z.array(ReviewerGroup);
-
-const Email = z.string().email();
-
-export const isEmail = (value: string): boolean =>
-  Email.safeParse(value).success;
