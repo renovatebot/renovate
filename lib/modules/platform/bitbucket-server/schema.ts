@@ -35,6 +35,16 @@ export const PullRequestActivity = z.union([
 
 export type PullRequestActivity = z.infer<typeof PullRequestActivity>;
 
+export const ReviewerGroup = z.object({
+  name: z.string(),
+  users: z.array(UserSchema),
+  scope: z.object({
+    type: z.union([z.literal('REPOSITORY'), z.literal('PROJECT')]),
+  }),
+});
+
+export const ReviewerGroups = z.array(ReviewerGroup);
+
 const EmailSchema = z.string().email();
 
 export const isEmail = (value: string): boolean =>

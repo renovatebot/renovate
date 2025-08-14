@@ -1,4 +1,5 @@
 import { setTimeout } from 'timers/promises';
+import ignore from 'ignore';
 import semver from 'semver';
 import type { PartialDeep } from 'type-fest';
 import {
@@ -22,6 +23,7 @@ import {
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { sampleSize } from '../../../util/sample';
 import { sanitize } from '../../../util/sanitize';
 import { ensureTrailingSlash, getQueryString } from '../../../util/url';
 import type {
@@ -31,6 +33,7 @@ import type {
   EnsureCommentRemovalConfig,
   EnsureIssueConfig,
   EnsureIssueResult,
+  FileOwnerRule,
   FindPRConfig,
   Issue,
   MergePRConfig,
@@ -49,7 +52,7 @@ import type {
   PullRequestActivity,
   PullRequestCommentActivity,
 } from './schema';
-import { UserSchema, UsersSchema, isEmail } from './schema';
+import { ReviewerGroups, UserSchema, UsersSchema, isEmail } from './schema';
 import type {
   BbsConfig,
   BbsPr,
@@ -59,7 +62,7 @@ import type {
   BbsRestUserRef,
 } from './types';
 import * as utils from './utils';
-import { getExtraCloneOpts } from './utils';
+import { getExtraCloneOpts, parseModifier, splitEscapedSpaces } from './utils';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -1212,6 +1215,115 @@ export async function mergePr({
 
   logger.debug(`PR merged, PrNo:${prNo}`);
   return true;
+}
+
+export async function expandGroupMembers(
+  reviewers: string[],
+): Promise<string[]> {
+  logger.debug(`expandGroupMembers(${reviewers.join(', ')})`);
+  const expandedUsers: string[] = [];
+  const reviewerGroupPrefix = '@reviewer-group/';
+
+  for (const reviewer of reviewers) {
+    const [baseEntry, modifier] = reviewer.split(':');
+
+    if (baseEntry.startsWith(reviewerGroupPrefix)) {
+      const groupName = baseEntry.replace(reviewerGroupPrefix, '');
+      const groupUsers = await getUsersFromReviewerGroup(groupName);
+      if (!groupUsers.length) {
+        continue;
+      }
+
+      if (modifier) {
+        const randomCount = parseModifier(modifier);
+        if (randomCount) {
+          expandedUsers.push(...sampleSize(groupUsers, randomCount));
+          continue;
+        }
+      }
+
+      expandedUsers.push(...groupUsers);
+    } else {
+      expandedUsers.push(baseEntry); // Add the user entry
+    }
+  }
+
+  return [...new Set(expandedUsers)];
+}
+
+export function extractRulesFromCodeOwnersLines(
+  cleanedLines: string[],
+): FileOwnerRule[] {
+  const results: FileOwnerRule[] = [];
+
+  const reversedLines = cleanedLines
+    .filter((line) => line.trim() !== '' && !line.trim().startsWith('#'))
+    .reverse();
+
+  for (const line of reversedLines) {
+    const [pattern, ...entries] = splitEscapedSpaces(line);
+    const matcher = ignore().add(pattern);
+    results.push({
+      pattern,
+      usernames: [...new Set(entries)],
+      score: pattern.length,
+      match: (path: string) => matcher.ignores(path),
+    });
+  }
+
+  return results;
+}
+
+// Gets active users by name, from a reviewer group
+// Returns an empty array if the group is not found or has no active users
+// As there is no direct API to get group by name, we get all reviewer groups per repo and filter them
+// This is not efficient, but it is the only way to get users from a group by name
+// Supports both repository-scoped and project-scoped groups following the BitBucket server logic described here:
+// https://confluence.atlassian.com/bitbucketserver/code-owners-1296171116.html#Codeowners-Whatifaprojectandrepositorycontainareviewergroupwiththesamename?
+async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
+  const allGroups = [];
+
+  try {
+    const reviewerGroups = await bitbucketServerHttp.getJson(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/settings/reviewer-groups`,
+      { paginate: true },
+      ReviewerGroups,
+    );
+
+    allGroups.push(...reviewerGroups.body);
+  } catch (err) {
+    logger.debug({ err, groupName }, 'Failed to get reviewer groups for repo');
+    return [];
+  }
+
+  // First, try to find a repo-scoped group with this name
+  const repoGroup = allGroups.find(
+    (group) => group.name === groupName && group.scope?.type === 'REPOSITORY',
+  );
+
+  if (repoGroup) {
+    return repoGroup.users
+      .filter((user) => user.active)
+      .map((user) => user.emailAddress);
+  }
+
+  // If no repo-level group, fall back to project-level group
+  const projectGroup = allGroups.find(
+    (group) => group.name === groupName && group.scope?.type === 'PROJECT',
+  );
+
+  if (projectGroup) {
+    return projectGroup.users
+      .filter((user) => user.active)
+      .map((user) => user.emailAddress);
+  }
+
+  // Group not found at either level
+  logger.warn(
+    { groupName },
+    'Reviewer group not found at repo or project level',
+  );
+  return [];
 }
 
 export function massageMarkdown(input: string): string {
