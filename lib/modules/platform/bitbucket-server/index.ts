@@ -1305,7 +1305,7 @@ async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
   if (repoGroup) {
     return repoGroup.users
       .filter((user) => user.active)
-      .map((user) => user.emailAddress ?? user.slug);
+      .map((user) => user.emailAddress);
   }
 
   // If no repo-level group, fall back to project-level group
@@ -1316,7 +1316,7 @@ async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
   if (projectGroup) {
     return projectGroup.users
       .filter((user) => user.active)
-      .map((user) => user.emailAddress ?? user.slug);
+      .map((user) => user.emailAddress);
   }
 
   // Group not found at either level
