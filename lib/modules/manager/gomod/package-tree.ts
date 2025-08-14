@@ -175,7 +175,7 @@ function reframeRelativePathToRootOfRepo(
  */
 async function getAllGoModFiles(): Promise<string[]> {
   const allFiles = await scm.getFileList();
-  const filteredGoModFiles = allFiles.filter((file) => file.endsWith('go.mod'));
+  const filteredGoModFiles = allFiles.filter(minimatchFilter('go.mod', { matchBase: true, nocase: true }));
 
   logger.trace({ filteredGoModFiles }, 'Found go.mod files');
 
