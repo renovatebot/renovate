@@ -14,7 +14,7 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../../types';
-import type { YarnrcConfig } from '../schema';
+import type { YarnConfig } from '../schema';
 import type { NpmLockFiles, NpmManagerData } from '../types';
 import { getExtractedConstraints } from './common/dependency';
 import { extractPackageJson } from './common/package-file';
@@ -137,7 +137,7 @@ export async function extractPackageFile(
     ? await isZeroInstall(yarnrcYmlFileName)
     : false;
 
-  let yarnrcConfig: YarnrcConfig | null = null;
+  let yarnrcConfig: YarnConfig | null = null;
   const repoYarnrcYml = yarnrcYmlFileName
     ? await readLocalFile(yarnrcYmlFileName, 'utf8')
     : null;

@@ -8,7 +8,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import { type Module, type OCBConfig, OCBConfigSchema } from './schema';
+import { type Module, OCBConfig } from './schema';
 
 export function extractPackageFile(
   content: string,
@@ -18,7 +18,7 @@ export function extractPackageFile(
   let definition: OCBConfig | null = null;
   try {
     const yaml = parseSingleYaml(content);
-    const parsed = OCBConfigSchema.safeParse(yaml);
+    const parsed = OCBConfig.safeParse(yaml);
     if (!parsed.success) {
       logger.trace(
         { packageFile, error: parsed.error },

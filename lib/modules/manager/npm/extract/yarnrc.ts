@@ -2,8 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import { regEx } from '../../../../util/regex';
 import { Result } from '../../../../util/result';
-import { Yaml } from '../../../../util/schema-utils';
-import { type YarnrcConfig, YarnrcSchema } from '../schema';
+import { YarnConfig } from '../schema';
 
 const registryRegEx = regEx(
   /^"?(@(?<scope>[^:]+):)?registry"? "?(?<registryUrl>[^"]+)"?$/gm,
@@ -11,12 +10,12 @@ const registryRegEx = regEx(
 
 export function loadConfigFromLegacyYarnrc(
   legacyYarnrc: string,
-): YarnrcConfig | null {
+): YarnConfig | null {
   const registryMatches = [...legacyYarnrc.matchAll(registryRegEx)]
     .map((m) => m.groups)
     .filter(is.truthy);
 
-  const yarnrcConfig: YarnrcConfig = {};
+  const yarnrcConfig: YarnConfig = {};
   for (const registryMatch of registryMatches) {
     if (registryMatch.scope) {
       yarnrcConfig.npmScopes ??= {};
@@ -30,10 +29,8 @@ export function loadConfigFromLegacyYarnrc(
   return yarnrcConfig;
 }
 
-export function loadConfigFromYarnrcYml(
-  yarnrcYml: string,
-): YarnrcConfig | null {
-  return Result.parse(yarnrcYml, Yaml.pipe(YarnrcSchema))
+export function loadConfigFromYarnrcYml(yarnrcYml: string): YarnConfig | null {
+  return Result.parse(yarnrcYml, YarnConfig)
     .onError((err) => {
       logger.warn({ yarnrcYml, err }, `Failed to load yarnrc file`);
     })
@@ -42,7 +39,7 @@ export function loadConfigFromYarnrcYml(
 
 export function resolveRegistryUrl(
   packageName: string,
-  yarnrcConfig: YarnrcConfig,
+  yarnrcConfig: YarnConfig,
 ): string | null {
   if (yarnrcConfig.npmScopes) {
     for (const scope in yarnrcConfig.npmScopes) {

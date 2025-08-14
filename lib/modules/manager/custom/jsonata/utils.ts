@@ -7,7 +7,7 @@ import { parseUrl } from '../../../../util/url';
 import type { PackageDependency } from '../../types';
 import type { ValidMatchFields } from '../utils';
 import { checkIsValidDependency, validMatchFields } from '../utils';
-import { QueryResultZodSchema } from './schema';
+import { QueryResultZod } from './schema';
 import type { JSONataManagerTemplates, JsonataExtractConfig } from './types';
 
 export async function handleMatching(
@@ -36,7 +36,7 @@ export async function handleMatching(
       return [];
     }
 
-    const parsed = QueryResultZodSchema.safeParse(queryResult);
+    const parsed = QueryResultZod.safeParse(queryResult);
     if (parsed.success) {
       results = results.concat(parsed.data);
     } else {

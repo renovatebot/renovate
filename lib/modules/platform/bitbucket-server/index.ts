@@ -52,7 +52,7 @@ import type {
   PullRequestActivity,
   PullRequestCommentActivity,
 } from './schema';
-import { ReviewerGroups, UserSchema, UsersSchema, isEmail } from './schema';
+import { ReviewerGroups, User, Users, isEmail } from './schema';
 import type {
   BbsConfig,
   BbsPr,
@@ -165,7 +165,7 @@ export async function initPlatform({
         await bitbucketServerHttp.getJson(
           `./rest/api/1.0/users/${username}`,
           options,
-          UserSchema,
+          User,
         )
       ).body;
 
@@ -729,7 +729,7 @@ export async function getUserSlugsByEmail(
     const users = await bitbucketServerHttp.getJson(
       filterUrl,
       { limit: 100 },
-      UsersSchema,
+      Users,
     );
 
     if (users.body.length) {

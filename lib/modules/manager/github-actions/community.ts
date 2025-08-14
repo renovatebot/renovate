@@ -16,7 +16,7 @@ function matchAction(action: string): z.Schema {
     .regex(regEx(`(?:https?://[^/]+/)?${escapeRegExp(action)}(?:@.+)?$`));
 }
 
-const SetupUVSchema = z
+const SetupUV = z
   .object({
     // https://github.com/astral-sh/setup-uv
     uses: matchAction('astral-sh/setup-uv'),
@@ -43,7 +43,7 @@ const SetupUVSchema = z
     };
   });
 
-const SetupPnpmSchema = z
+const SetupPnpm = z
   .object({
     uses: matchAction('pnpm/action-setup'),
     with: z.object({
@@ -70,7 +70,7 @@ const SetupPnpmSchema = z
     };
   });
 
-const SetupPDMSchema = z
+const SetupPDM = z
   .object({
     uses: matchAction('pdm-project/setup-pdm'),
     with: z.object({ version: z.string().optional() }),
@@ -95,7 +95,7 @@ const SetupPDMSchema = z
     };
   });
 
-const InstallBinarySchema = z
+const InstallBinary = z
   .object({
     uses: z.union([
       matchAction('jaxxstorm/action-install-gh-release'),
@@ -113,7 +113,7 @@ const InstallBinarySchema = z
     };
   });
 
-const SetupPixiSchema = z
+const SetupPixi = z
   .object({
     uses: matchAction('prefix-dev/setup-pixi'),
     with: z.object({ 'pixi-version': z.string() }),
@@ -136,9 +136,9 @@ const SetupPixiSchema = z
  * each type should return `PackageDependency | undefined`
  */
 export const CommunityActions = z.union([
-  InstallBinarySchema,
-  SetupPDMSchema,
-  SetupPixiSchema,
-  SetupPnpmSchema,
-  SetupUVSchema,
+  InstallBinary,
+  SetupPDM,
+  SetupPixi,
+  SetupPnpm,
+  SetupUV,
 ]);
