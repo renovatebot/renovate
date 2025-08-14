@@ -25,6 +25,7 @@ import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { sampleSize } from '../../../util/sample';
 import { sanitize } from '../../../util/sanitize';
+import { isEmailAdress } from '../../../util/schema-utils';
 import { ensureTrailingSlash, getQueryString } from '../../../util/url';
 import type {
   BranchStatusConfig,
@@ -52,7 +53,7 @@ import type {
   PullRequestActivity,
   PullRequestCommentActivity,
 } from './schema';
-import { ReviewerGroups, User, Users, isEmail } from './schema';
+import { ReviewerGroups, User, Users } from './schema';
 import type {
   BbsConfig,
   BbsPr,
@@ -694,7 +695,7 @@ export async function addReviewers(
 
   for (const entry of reviewers) {
     // If entry is an email-address, resolve userslugs
-    if (isEmail(entry)) {
+    if (isEmailAdress(entry)) {
       const slugs = await getUserSlugsByEmail(entry);
       for (const slug of slugs) {
         reviewerSlugs.add(slug);

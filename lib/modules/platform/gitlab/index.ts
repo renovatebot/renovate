@@ -26,6 +26,7 @@ import { parseInteger } from '../../../util/number';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
+import type { EmailAddress } from '../../../util/schema-utils';
 import { ensureTrailingSlash, getQueryString } from '../../../util/url';
 import type {
   AutodiscoverConfig,
@@ -77,7 +78,7 @@ export { extractRulesFromCodeOwnersLines } from './code-owners';
 
 let config: {
   repository: string;
-  email: string;
+  email: EmailAddress;
   issueList: GitlabIssue[] | undefined;
   mergeMethod: MergeMethod;
   mergeTrainsEnabled: boolean;
@@ -125,10 +126,10 @@ export async function initPlatform({
     if (!gitAuthor) {
       const user = (
         await gitlabApi.getJsonUnchecked<{
-          email: string;
+          email: EmailAddress;
           name: string;
           id: number;
-          commit_email?: string;
+          commit_email?: EmailAddress;
         }>(`user`, { token })
       ).body;
       platformConfig.gitAuthor = `${user.name} <${
