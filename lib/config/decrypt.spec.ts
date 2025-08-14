@@ -1,6 +1,7 @@
 import {
   decryptConfig,
   getAzureCollection,
+  setPrivateKeys,
   validateDecryptedValue,
 } from './decrypt';
 import { GlobalConfig } from './global';
@@ -277,6 +278,53 @@ describe('config/decrypt', () => {
         endpoint: 'https://dev.azure.com/aaa/bbb/',
       });
       expect(getAzureCollection()).toBe('aaa/bbb');
+    });
+  });
+
+  describe('setPrivateKeys (base64 support)', () => {
+    const pemKey =
+      '-----BEGIN PGP PRIVATE KEY BLOCK-----\nMIIB...END PGP PRIVATE KEY BLOCK-----';
+    const base64PemKey = Buffer.from(pemKey, 'utf-8').toString('base64');
+
+    beforeEach(() => {
+      vi.resetAllMocks();
+    });
+
+    it('should use PEM as-is if provided', () => {
+      setPrivateKeys(pemKey, undefined);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'privateKey: using value as-is (not base64 or already PEM)',
+      );
+    });
+
+    it('should decode base64 PEM and use decoded value', () => {
+      setPrivateKeys(base64PemKey, undefined);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'privateKey: detected possible base64 encoding, attempting to decode',
+      );
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'privateKey: base64 decoded successfully, using decoded PEM',
+      );
+    });
+
+    it('should use original value if base64 decode does not yield PEM', () => {
+      const base64Garbage = Buffer.from('not-a-pem', 'utf-8').toString(
+        'base64',
+      );
+      setPrivateKeys(base64Garbage, undefined);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'privateKey: detected possible base64 encoding, attempting to decode',
+      );
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'privateKey: base64 decoded but does not look like PEM, using original value',
+      );
+    });
+
+    it('should use original value if not base64 and not PEM', () => {
+      setPrivateKeys('not-base64-or-pem', undefined);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'privateKey: using value as-is (not base64 or already PEM)',
+      );
     });
   });
 });

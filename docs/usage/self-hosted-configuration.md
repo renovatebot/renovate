@@ -769,6 +769,14 @@ Before the first commit in a repository, Renovate will:
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
 
+<!-- prettier-ignore -->
+!!! tip
+    Renovate supports base64-encoded private keys for the `privateKey` config option. If your private key value is base64-encoded (for example, if it does not start with `-----BEGIN` and matches base64 format), Renovate will automatically decode it before use. This is useful if your configuration system or secrets manager only supports base64 values.
+
+    - You can provide either a PEM-formatted key or a base64-encoded PEM key.
+    - This does **not** apply to `privateKeyOld`, `privateKeyPath`, or `privateKeyPathOld`.
+    - If the decoded value does not look like a PEM key, Renovate will use the original value as-is.
+
 ## gitPrivateKeyPassphrase
 
 Passphrase for the `gitPrivateKey` when the private key is protected with a passphrase.

@@ -22,7 +22,40 @@ export function setPrivateKeys(
   pKey: string | undefined,
   pKeyOld: string | undefined,
 ): void {
-  privateKey = pKey;
+  // Only decode privateKey if it looks like base64 and not PEM
+  if (
+    typeof pKey === 'string' &&
+    !pKey.startsWith('-----BEGIN') &&
+    /^[A-Za-z0-9+/=\r\n]+$/.test(pKey.trim()) &&
+    pKey.trim().length % 4 === 0
+  ) {
+    logger.debug(
+      'privateKey: detected possible base64 encoding, attempting to decode',
+    );
+    try {
+      const decoded = Buffer.from(pKey.trim(), 'base64').toString('utf-8');
+      if (decoded.startsWith('-----BEGIN')) {
+        logger.debug(
+          'privateKey: base64 decoded successfully, using decoded PEM',
+        );
+        privateKey = decoded;
+      } else {
+        logger.debug(
+          'privateKey: base64 decoded but does not look like PEM, using original value',
+        );
+        privateKey = pKey;
+      }
+    } catch (err) {
+      logger.debug(
+        { err },
+        'privateKey: base64 decode failed, using original value',
+      );
+      privateKey = pKey;
+    }
+  } else {
+    logger.debug('privateKey: using value as-is (not base64 or already PEM)');
+    privateKey = pKey;
+  }
   privateKeyOld = pKeyOld;
 }
 
