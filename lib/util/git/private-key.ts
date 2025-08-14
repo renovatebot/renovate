@@ -24,11 +24,11 @@ let gitPrivateKey: PrivateKey | undefined;
 function tryBase64(value: string): string | null {
   const decodedValue = fromBase64(value);
   const encodedValue = toBase64(decodedValue);
-  if (value === encodedValue) {
-    return decodedValue;
-  } else {
-    return value;
+  if (value !== encodedValue) {
+    return null;
   }
+
+  return decodedValue;
 }
 
 abstract class PrivateKey {
