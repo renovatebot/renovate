@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -57,27 +58,28 @@ describe('modules/manager/pip-compile/extract', () => {
     });
 
     it('returns object for pyproject.toml', async () => {
-      const pyproject = `[build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+      const pyproject = codeBlock`
+        [build-system]
+        requires = ["setuptools", "wheel"]
+        build-backend = "setuptools.build_meta"
 
-[project]
-name = "test-project"
-requires-python = ">=3.11"
-version = "1.2.3"
-description = "Test project for pip-compile with setuptools"
-readme = "README.md"
-dependencies = [
-  "aiohttp",
-  "pydantic>=2.0.0",
-]
+        [project]
+        name = "test-project"
+        requires-python = ">=3.11"
+        version = "1.2.3"
+        description = "Test project for pip-compile with setuptools"
+        readme = "README.md"
+        dependencies = [
+          "aiohttp",
+          "pydantic>=2.0.0",
+        ]
 
-[project.optional-dependencies]
-dev = [
-  "black",
-  "flake8",
-]
-`;
+        [project.optional-dependencies]
+        dev = [
+          "black",
+          "flake8",
+        ]
+      `;
       const packageFile = await extractPackageFile(
         pyproject,
         'pyproject.toml',
