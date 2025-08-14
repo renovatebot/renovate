@@ -170,7 +170,7 @@ export async function initPlatform({
         )
       ).body;
 
-      if (!emailAddress?.length) {
+      if (!emailAddress.length) {
         throw new Error(`No email address configured for username ${username}`);
       }
 
