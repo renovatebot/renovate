@@ -37,7 +37,7 @@ export type PullRequestActivity = z.infer<typeof PullRequestActivity>;
 
 export const ReviewerGroup = z.object({
   name: z.string(),
-  users: z.array(UserSchema),
+  users: z.array(User),
   scope: z.object({
     type: z.union([z.literal('REPOSITORY'), z.literal('PROJECT')]),
   }),
