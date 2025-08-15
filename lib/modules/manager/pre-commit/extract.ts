@@ -164,7 +164,7 @@ function findDependencies(
       (pair: any) => pair.key && pair.key.value === 'repos',
     );
     if (reposPair?.value && isSeq(reposPair.value)) {
-      reposPair.value.items.forEach((repoItem: any, idx: number) => {
+      for (const [idx, repoItem] of reposPair.value.items.entries()) {
         if (repoItem && isMap(repoItem)) {
           const revPair = repoItem.items.find(
             (pair: any) => pair.key && pair.key.value === 'rev',
@@ -177,14 +177,14 @@ function findDependencies(
             repoComments[idx] = revPair.value.comment;
           }
         }
-      });
+      }
     }
   }
 
-  precommitFile.repos.forEach((item, idx) => {
+  for (const [idx, item] of precommitFile.repos.entries()) {
     // meta hooks is defined from pre-commit and doesn't support `additional_dependencies`
     if (item.repo !== 'meta') {
-      item.hooks?.forEach((hook) => {
+      for (const hook of item.hooks ?? []) {
         // normally language are not defined in yaml
         // only support it when it's explicitly defined.
         // this avoid to parse hooks from pre-commit-hooks.yaml from git repo
@@ -216,7 +216,7 @@ function findDependencies(
             }
           });
         }
-      });
+      }
     }
 
     if (matchesPrecommitDependencyHeuristic(item)) {
@@ -228,7 +228,7 @@ function findDependencies(
     } else {
       logger.trace(item, 'Did not find pre-commit repo spec');
     }
-  });
+  }
   return packageDependencies;
 }
 

@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { mockDeep } from 'vitest-mock-extended';
 import { NpmDatasource } from '../../datasource/npm';
 import { PypiDatasource } from '../../datasource/pypi';
@@ -21,7 +22,29 @@ const invalidRepoPrecommitConfig = Fixtures.get(
 const enterpriseGitPrecommitConfig = Fixtures.get(
   'enterprise.pre-commit-config.yaml',
 );
-const pinnedPrecommitConfig = Fixtures.get('pinned.pre-commit-config.yaml');
+const pinnedPrecommitConfig = codeBlock`
+  failfast: true
+  repos:
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.4.0
+      hooks:
+        - id: check-yaml
+
+    - repo: https://github.com/pre-commit/mirrors-prettier
+      rev: 6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e # frozen: v3.0.0-alpha.9-for-vscode
+      hooks:
+        - id: prettier
+
+    - repo: https://github.com/crate-ci/typos
+      rev: 20b36ca07fa1bfe124912287ac8502cf12f140e6 # frozen: v1.14.12
+      hooks:
+        - id: typos
+
+    - repo: https://github.com/python-jsonschema/check-jsonschema
+      rev: a00caac4f0cec045f7f67d222c3fcd0744285c51 # frozen: 0.23.1
+      hooks:
+        - id: check-renovate
+`;
 
 describe('modules/manager/pre-commit/extract', () => {
   describe('extractPackageFile()', () => {
