@@ -86,16 +86,13 @@ export async function extractPackageFile(
         continue;
       }
 
-      if (isOCIRegistry(dep.chart)) {
-        const v = dep.chart.substring(6).split('/');
-        depName = v.pop()!;
-        repoName = v.join('/');
-      } else if (dep.chart.includes('/')) {
-        const v = dep.chart.split('/');
-        repoName = v.shift()!;
-        depName = v.join('/');
-      } else {
-        repoName = dep.chart;
+      // For non-OCI charts, split "repo/chart"
+      if (!isOCIRegistry(dep.chart)) {
+        const firstSlash = dep.chart.indexOf('/');
+        if (firstSlash > 0) {
+          repoName = dep.chart.slice(0, firstSlash);
+          depName = dep.chart.slice(firstSlash + 1);
+        }
       }
 
       if (!is.string(dep.version)) {
@@ -106,36 +103,52 @@ export async function extractPackageFile(
         continue;
       }
 
+      const registryUrl = repoName ? registryData[repoName]?.url : undefined;
+      const aliasUrl = repoName
+        ? (config.registryAliases?.[repoName] as string | undefined)
+        : undefined;
+
       const res: PackageDependency = {
         depName,
         currentValue: dep.version,
-        registryUrls: [registryData[repoName]?.url]
-          .concat([config.registryAliases?.[repoName]] as string[])
-          .filter(is.string),
+        registryUrls: [registryUrl, aliasUrl].filter(is.string),
       };
+
       if (kustomizationsKeysUsed(dep)) {
         needKustomize = true;
       }
 
       if (isOCIRegistry(dep.chart)) {
+        const ociRef = dep.chart.replace(/^oci:\/\//, '');
         res.datasource = DockerDatasource.id;
-        res.packageName = `${repoName}/${depName}`;
-      } else if (registryData[repoName]?.oci) {
-        res.datasource = DockerDatasource.id;
-        const alias = registryData[repoName]?.url;
-        if (alias) {
-          res.packageName = `${alias}/${depName}`;
+        res.packageName = ociRef;
+        res.depName = ociRef;
+        if (res.registryUrls?.length) {
+          delete res.registryUrls;
+        }
+      } else if (repoName && registryData[repoName]?.oci) {
+        const base =
+          registryData[repoName]?.url ??
+          (config.registryAliases?.[repoName] as string | undefined);
+        if (base) {
+          const withoutPrefix = isOCIRegistry(base)
+            ? base.replace(/^oci:\/\//, '')
+            : base;
+          res.datasource = DockerDatasource.id;
+          res.packageName = `${withoutPrefix}/${depName}`;
+          res.depName = res.packageName;
+          if (res.registryUrls?.length) {
+            delete res.registryUrls;
+          }
         }
       }
 
       // By definition on helm the chart name should be lowercase letter + number + -
       // However helmfile support templating of that field
-      if (
-        !isValidChartName(
-          res.depName,
-          isOCIRegistry(dep.chart) || (registryData[repoName]?.oci ?? false),
-        )
-      ) {
+      const isOci =
+        isOCIRegistry(dep.chart) ||
+        (repoName ? !!registryData[repoName]?.oci : false);
+      if (!isValidChartName(res.depName, isOci)) {
         res.skipReason = 'unsupported-chart-type';
       }
 

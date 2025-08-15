@@ -344,7 +344,7 @@ describe('modules/manager/helmfile/extract', () => {
         deps: [
           {
             currentValue: '0.1.0',
-            depName: 'example',
+            depName: 'ghcr.io/example/oci-repo/example',
             datasource: 'docker',
             packageName: 'ghcr.io/example/oci-repo/example',
           },
@@ -355,7 +355,7 @@ describe('modules/manager/helmfile/extract', () => {
           },
           {
             currentValue: '0.4.2',
-            depName: 'url-example',
+            depName: 'ghcr.io/example/oci-repo/url-example',
             datasource: 'docker',
             packageName: 'ghcr.io/example/oci-repo/url-example',
           },
@@ -381,7 +381,7 @@ describe('modules/manager/helmfile/extract', () => {
         deps: [
           {
             currentValue: '1.2.3',
-            depName: 'nested/path/chart',
+            depName: 'ghcr.io/example/oci-repo/nested/path/chart',
             datasource: 'docker',
             packageName: 'ghcr.io/example/oci-repo/nested/path/chart',
           },
@@ -412,7 +412,7 @@ describe('modules/manager/helmfile/extract', () => {
         deps: [
           {
             currentValue: '0.1.0',
-            depName: 'example',
+            depName: 'ghcr.io/example/oci-repo/example',
             datasource: 'docker',
             packageName: 'ghcr.io/example/oci-repo/example',
           },
@@ -529,7 +529,7 @@ describe('modules/manager/helmfile/extract', () => {
           {
             currentValue: '0.4.2',
             datasource: 'docker',
-            depName: 'subgroup',
+            depName: 'gitlab.example.com:5000/group/subgroup',
             packageName: 'gitlab.example.com:5000/group/subgroup',
             registryUrls: [],
           },
