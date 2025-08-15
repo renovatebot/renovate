@@ -10,13 +10,13 @@ describe('util/multiple-base-branches', () => {
 
   it('returns true', () => {
     expect(expectMultipleBaseBranches()).toBeFalse();
-    setMultipleBaseBranches({ baseBranches: ['/test/'] });
+    setMultipleBaseBranches({ baseBranchPatterns: ['/test/'] });
     expect(expectMultipleBaseBranches()).toBeTrue();
   });
 
   it('returns false', () => {
     expect(expectMultipleBaseBranches()).toBeFalse();
-    setMultipleBaseBranches({ baseBranches: ['test'] });
+    setMultipleBaseBranches({ baseBranchPatterns: ['test'] });
     expect(expectMultipleBaseBranches()).toBeFalse();
   });
 });

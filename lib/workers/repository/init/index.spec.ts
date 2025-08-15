@@ -75,13 +75,13 @@ describe('workers/repository/init/index', () => {
       apis.initApis.mockResolvedValue(partial<_apis.WorkerPlatformConfig>());
       onboarding.checkOnboardingBranch.mockResolvedValue({});
       config.getRepoConfig
-        .mockResolvedValueOnce({ baseBranches: ['one'] })
-        .mockResolvedValueOnce({ baseBranches: ['/one/'] })
-        .mockResolvedValueOnce({ baseBranches: ['one', 'two'] })
+        .mockResolvedValueOnce({ baseBranchPatterns: ['one'] })
+        .mockResolvedValueOnce({ baseBranchPatterns: ['/one/'] })
+        .mockResolvedValueOnce({ baseBranchPatterns: ['one', 'two'] })
         .mockResolvedValueOnce({})
-        .mockResolvedValueOnce({ baseBranches: ['!/^rELEasE/.*$/i'] });
+        .mockResolvedValueOnce({ baseBranchPatterns: ['!/^rELEasE/.*$/i'] });
       merge.mergeRenovateConfig.mockResolvedValue({});
-      secrets.applySecretsToConfig.mockImplementation((c) => c);
+      secrets.applySecretsAndVariablesToConfig.mockResolvedValue(config);
 
       await initRepo({});
       expect(expectMultipleBaseBranches()).toBeFalse();
