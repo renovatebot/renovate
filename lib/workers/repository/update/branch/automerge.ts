@@ -3,7 +3,6 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { scm } from '../../../../modules/platform/scm';
-
 import { isScheduledNow } from './schedule';
 import { resolveBranchStatus } from './status-checks';
 
