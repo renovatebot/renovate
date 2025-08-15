@@ -16,7 +16,7 @@ export const defaultConfig = {
   ],
   prBodyDefinitions: {
     Change:
-      '[{{#if displayFrom}}{{{displayFrom}}}{{else}}{{{currentValue}}}{{/if}} -> {{#if displayTo}}{{{displayTo}}}{{else}}{{{newValue}}}{{/if}}]({{#if sourceUrl}}{{{sourceUrl}}}/compare/{{#if currentDigest}}{{{currentDigestShort}}}{{else}}{{{currentValue}}}{{/if}}...{{#if newDigest}}{{{newDigestShort}}}{{else}}{{{newValue}}}{{/if}}{{else}}{{#if depName}}https://github.com/{{replace "/" "%2F" depName}}/compare/{{#if currentDigest}}{{{currentDigestShort}}}{{else}}{{{currentValue}}}{{/if}}...{{#if newDigest}}{{{newDigestShort}}}{{else}}{{{newValue}}}{{/if}}{{/if}}{{/if}})',
+      '[{{#if displayFrom}}{{{displayFrom}}}{{else}}{{{currentValue}}}{{/if}} -> {{#if displayTo}}{{{displayTo}}}{{else}}{{{newValue}}}{{/if}}]({{#if sourceUrl}}{{{sourceUrl}}}/compare/{{#if currentDigest}}{{{currentDigestShort}}}{{else}}{{{currentValue}}}{{/if}}...{{#if newDigest}}{{{newDigestShort}}}{{else}}{{{newValue}}}{{/if}}{{else}}{{#if depName}}https://github.com/{{depName}}/compare/{{#if currentDigest}}{{{currentDigestShort}}}{{else}}{{{currentValue}}}{{/if}}...{{#if newDigest}}{{{newDigestShort}}}{{else}}{{{newValue}}}{{/if}}{{/if}}{{/if}})',
   },
 };
 
