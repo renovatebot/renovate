@@ -2660,6 +2660,30 @@ Renovate will only add a milestone when it _creates_ the PR.
 }
 ```
 
+## minimumGroupSize
+
+If set to to a positive value x then branch creation will be postponed until x or more updates are available in the branch.
+
+This applies to both these scenarios:
+
+- Grouped updates with more than one dependency updated together, and
+- Branches with multiple updates of the same dependency (e.g. in multiple files)
+
+Example:
+
+```json title="Create only a grouped update when there are 3 or more node updates"
+{
+  "packageRules": [
+    {
+      "description": "We need to update Node in two places - always wait until both upgrades are available",
+      "matchDepNames": ["node"],
+      "groupName": "Node.js",
+      "minimumGroupSize": 3
+    }
+  ]
+}
+```
+
 ## minimumReleaseAge
 
 This feature used to be called `stabilityDays`.
@@ -3794,12 +3818,11 @@ Table with options:
 
 ## postUpgradeTasks
 
-<!-- prettier-ignore -->
-!!! note
-    Post-upgrade tasks can only be used on self-hosted Renovate instances.
-
 Post-upgrade tasks are commands that are executed by Renovate after a dependency has been updated but before the commit is created.
 The intention is to run any other command line tools that would modify existing files or generate new files when a dependency changes.
+
+Post-upgrade tasks are blocked by default for security reasons, so the admin of Renovate needs to choose whether to allow specific commands or any commands to be run - it depends on how much they trust their users in repos.
+In Mend-hosted Renovate apps, commands remain blocked by default but can be allowed on-request for any paying ("Renovate Enterprise" or Mend Appsec) customers or trusted OSS repositories - please reach out if so.
 
 Each command must match at least one of the patterns defined in `allowedCommands` (a global-only configuration option) in order to be executed.
 If the list of allowed tasks is empty then no tasks will be executed.
@@ -4155,6 +4178,7 @@ This feature works with the following managers:
 - [`ansible`](modules/manager/ansible/index.md)
 - [`bitbucket-pipelines`](modules/manager/bitbucket-pipelines/index.md)
 - [`circleci`](modules/manager/circleci/index.md)
+- [`crow`](modules/manager/crow/index.md)
 - [`docker-compose`](modules/manager/docker-compose/index.md)
 - [`dockerfile`](modules/manager/dockerfile/index.md)
 - [`droneci`](modules/manager/droneci/index.md)

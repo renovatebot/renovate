@@ -19,7 +19,7 @@ import type {
   Upgrade,
 } from '../../types';
 import { applyGitSource } from '../../util';
-import { type PyProject, UvLockfileSchema } from '../schema';
+import { type PyProject, UvLockfile } from '../schema';
 import { depTypes } from '../utils';
 import type { PyProjectProcessor } from './types';
 
@@ -128,7 +128,7 @@ export class UvProcessor implements PyProjectProcessor {
       if (lockFileContent) {
         const { val: lockFileMapping, err } = Result.parse(
           lockFileContent,
-          UvLockfileSchema,
+          UvLockfile,
         ).unwrap();
 
         if (err) {
