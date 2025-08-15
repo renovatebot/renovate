@@ -33,7 +33,6 @@ describe('util/cache/package/redis', () => {
 
   describe('init', () => {
     beforeEach(() => {
-      vi.clearAllMocks();
       vi.mocked(createClient).mockReturnValue({
         connect: vi.fn(),
       } as unknown as RedisClientType);

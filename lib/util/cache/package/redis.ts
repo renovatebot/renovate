@@ -129,10 +129,8 @@ export async function init(
     }
 
     if (parsedUrl.password) {
-      clusterConfig.defaults = {
-        ...clusterConfig.defaults,
-        password: parsedUrl.password,
-      };
+      clusterConfig.defaults ??= { }
+      clusterConfig.defaults.password = parsedUrl.password;
     }
 
     client = createCluster(clusterConfig);
