@@ -360,6 +360,7 @@
   "pnpm": {
     "ignoredBuiltDependencies": [
       "core-js-pure",
+      "esbuild",
       "protobufjs",
       "unrs-resolver"
     ],
