@@ -729,7 +729,7 @@ export async function getUserSlugsByEmail(
 
     const users = await bitbucketServerHttp.getJson(
       filterUrl,
-      { limit: 100 },
+      { paginate: true, limit: 100 },
       Users,
     );
 
