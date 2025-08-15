@@ -72,6 +72,9 @@ describe('modules/manager/pub/extract', () => {
               url: https://github.com/some-url/some-package-version-extract
               tag_pattern: v
             version: ^1.1.0
+          git_package_version_git_url:
+            git: https://github.com/some-url/some-package-version-url
+            version: ^1.1.0
         dev_dependencies:
           test: ^0.1.0
           build:
@@ -152,6 +155,14 @@ describe('modules/manager/pub/extract', () => {
             depType: dependenciesDepType,
             datasource: gitRefDatasource,
             extractVersion: 'v',
+            skipReason,
+          },
+          {
+            currentValue: '^1.1.0',
+            depName: 'git_package_version_git_url',
+            packageName: 'https://github.com/some-url/some-package-version-url',
+            depType: dependenciesDepType,
+            datasource: gitRefDatasource,
             skipReason,
           },
           {
