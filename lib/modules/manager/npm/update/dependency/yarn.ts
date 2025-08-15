@@ -77,8 +77,7 @@ export function updateYarnrcCatalogDependency({
     return null;
   }
 
-  //this should not happen in practice, but we must satisfy th etypes
-  /* v8 ignore if -- @preserve */
+  /* v8 ignore next 3 -- this should not happen in practice, but we must satisfy the types */
   if (!modifiedDocument.contents?.srcToken) {
     return null;
   }
@@ -114,8 +113,7 @@ function changeDependencyIn(
   }
 
   if (newName) {
-    // the try..catch block above already throws if a key is an alias
-    /* v8 ignore if -- @preserve */
+    /* v8 ignore next 3 -- the try..catch block above already throws if a key is an alias */
     if (!CST.isScalar(relevantNode.srcToken?.key)) {
       return null;
     }
