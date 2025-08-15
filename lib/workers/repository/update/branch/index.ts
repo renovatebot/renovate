@@ -458,7 +458,6 @@ export async function processBranch(
       !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel)) &&
       !dependencyDashboardCheck
     ) {
-      config.reuseExistingBranch = true;
       logger.debug('rebaseWhen=never so skipping branch update check');
     }
     // if the base branch has been changed by user in renovate config, rebase onto the new baseBranch
