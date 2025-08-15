@@ -1,10 +1,9 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger';
-import { ReleasesSchema } from '../../../../../../modules/datasource/gitea-releases/schema';
-import type { ContentsResponse } from '../../../../../../modules/platform/gitea/schema';
+import { Releases } from '../../../../../../modules/datasource/gitea-releases/schema';
 import {
-  ContentsListResponseSchema,
-  ContentsResponseSchema,
+  ContentsListResponse,
+  ContentsResponse,
 } from '../../../../../../modules/platform/gitea/schema';
 import { GiteaHttp } from '../../../../../../util/http/gitea';
 import { fromBase64 } from '../../../../../../util/string';
@@ -34,7 +33,7 @@ export async function getReleaseNotesMd(
       {
         paginate: false, // no pagination yet
       },
-      ContentsListResponseSchema,
+      ContentsListResponse,
     )
   ).body;
   const allFiles = tree.filter((f) => f.type === 'file');
@@ -59,7 +58,7 @@ export async function getReleaseNotesMd(
 
   const fileRes = await http.getJson(
     `${apiPrefix}/${changelogFile}`,
-    ContentsResponseSchema,
+    ContentsResponse,
   );
   // istanbul ignore if: should never happen
   if (!fileRes.body.content) {
@@ -83,7 +82,7 @@ export async function getReleaseList(
     {
       paginate: true,
     },
-    ReleasesSchema,
+    Releases,
   );
   return res.body.map((release) => ({
     url: `${project.baseUrl}${project.repository}/releases/tag/${release.tag_name}`,

@@ -3,6 +3,7 @@ import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
 import { getDep } from '../dockerfile/extract';
 import type {
@@ -198,6 +199,13 @@ export async function extractPackageFile(
     return extractMsbuildGlobalManifest(content, packageFile, registries);
   }
 
+  // Simple xml validation.
+  // Should start with `<` and end with `>` after trimming all whitespace
+  if (!regEx(/^\s*<.+>$/m).test(content.trim())) {
+    logger.debug(`NuGet: Skipping ${packageFile} as it is not XML`);
+    return null;
+  }
+
   let deps: PackageDependency[] = [];
   let packageFileVersion: string | undefined;
   try {
@@ -216,7 +224,6 @@ export async function extractPackageFile(
 
   const res: PackageFileContent = { deps, packageFileVersion };
   const lockFileName = getSiblingFileName(packageFile, 'packages.lock.json');
-  // istanbul ignore if
   if (await localPathExists(lockFileName)) {
     res.lockFiles = [lockFileName];
   }
