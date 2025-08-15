@@ -105,7 +105,7 @@ export async function extractPackageFile(
 
       const registryUrl = repoName ? registryData[repoName]?.url : undefined;
       const aliasUrl = repoName
-        ? (config.registryAliases?.[repoName] as string | undefined)
+        ? config.registryAliases?.[repoName]
         : undefined;
 
       const res: PackageDependency = {
@@ -128,8 +128,7 @@ export async function extractPackageFile(
         }
       } else if (repoName && registryData[repoName]?.oci) {
         const base =
-          registryData[repoName]?.url ??
-          (config.registryAliases?.[repoName] as string | undefined);
+          registryData[repoName]?.url ?? config.registryAliases?.[repoName];
         if (base) {
           const withoutPrefix = isOCIRegistry(base)
             ? base.replace(/^oci:\/\//, '')
