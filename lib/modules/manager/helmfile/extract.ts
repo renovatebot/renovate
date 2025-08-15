@@ -12,7 +12,7 @@ import type {
   PackageFileContent,
 } from '../types';
 import type { Doc, HelmRepository } from './schema';
-import { Doc as documentSchema } from './schema';
+import { Doc as Document } from './schema';
 import {
   kustomizationsKeysUsed,
   localChartHasKustomizationsYaml,
@@ -42,7 +42,7 @@ export async function extractPackageFile(
   // Record kustomization usage for all deps, since updating artifacts is run on the helmfile.yaml as a whole.
   let needKustomize = false;
   const docs: Doc[] = parseYaml(content, {
-    customSchema: documentSchema,
+    customSchema: Document,
     failureBehaviour: 'filter',
     removeTemplates: true,
   });

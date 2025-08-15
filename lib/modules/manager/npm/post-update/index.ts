@@ -389,7 +389,7 @@ export async function getAdditionalFiles(
   if (!packageFiles.npm?.length) {
     return { artifactErrors, updatedArtifacts };
   }
-  if (!config.updateLockFiles) {
+  if (config.skipArtifactsUpdate) {
     logger.debug('Skipping lock file generation');
     return { artifactErrors, updatedArtifacts };
   }

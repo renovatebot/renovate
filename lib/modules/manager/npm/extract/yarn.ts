@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { miscUtils, structUtils } from '@yarnpkg/core';
 import { parseSyml } from '@yarnpkg/parsers';
-import { type z } from 'zod';
 import { logger } from '../../../../logger';
 import {
   getSiblingFileName,
@@ -9,7 +8,7 @@ import {
   readLocalFile,
 } from '../../../../util/fs';
 import type { PackageFileContent } from '../../types';
-import type { YarnCatalogsSchema } from '../schema';
+import type { YarnCatalogs } from '../schema';
 import type { NpmManagerData } from '../types';
 import { extractCatalogDeps } from './common/catalogs';
 import type { Catalog, LockFile } from './types';
@@ -25,7 +24,7 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
     for (const [key, val] of Object.entries(parsed)) {
       if (key === '__metadata') {
         // yarn 2
-        lockfileVersion = parseInt(val.cacheKey, 10);
+        lockfileVersion = parseInt(val.cacheKey);
         logger.once.debug(
           `yarn.lock ${filePath} has __metadata.cacheKey=${lockfileVersion}`,
         );
@@ -127,14 +126,12 @@ export function getYarnVersionFromLock(lockfile: LockFile): string {
   return '^2.0.0';
 }
 
-type YarnCatalogs = z.TypeOf<typeof YarnCatalogsSchema>;
-
-export async function extractYarnCatalogsFromYml(
+export async function extractYarnCatalogs(
   catalogs: YarnCatalogs | undefined,
   packageFile: string,
   hasPackageManager: boolean,
 ): Promise<PackageFileContent<NpmManagerData> | null> {
-  logger.trace(`yarn.extractYarnCatalogsFromYml(${packageFile})`);
+  logger.trace(`yarn.extractYarnCatalogs(${packageFile})`);
 
   const yarnCatalogs = yarnCatalogsToArray(catalogs);
 

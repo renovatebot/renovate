@@ -3,13 +3,14 @@ import type { Document } from 'yaml';
 import { CST, isCollection, isPair, isScalar, parseDocument } from 'yaml';
 import { logger } from '../../../../../logger';
 import type { UpdateDependencyConfig } from '../../../types';
-import { YarnrcYmlSchema } from '../../schema';
+import { YarnConfig } from '../../schema';
 import { getNewGitValue, getNewNpmAliasValue } from './common';
 
 export function updateYarnrcCatalogDependency({
   fileContent,
   upgrade,
 }: UpdateDependencyConfig): string | null {
+  debugger;
   const { depType, depName } = upgrade;
 
   const catalogName = depType?.split('.').at(-1);
@@ -41,7 +42,7 @@ export function updateYarnrcCatalogDependency({
     // values. Thus, we use both an annotated AST and a JS representation; the
     // former for manipulation, and the latter for querying/validation.
     document = parseDocument(fileContent, { keepSourceTokens: true });
-    parsedContents = YarnrcYmlSchema.parse(document.toJS());
+    parsedContents = YarnConfig.parse(document.toString());
   } catch (err) {
     logger.debug({ err }, 'Could not parse yarnrc YAML file.');
     return null;

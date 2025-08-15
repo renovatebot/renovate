@@ -104,10 +104,19 @@ export async function getLockedVersions(
         packageFile.extractedConstraints.npm = npm;
       }
 
+      const packageDir = upath.dirname(packageFile.packageFile);
+      const npmRootDir = upath.dirname(npmLock);
+      const relativeDir = upath.relative(npmRootDir, packageDir);
+
       for (const dep of packageFile.deps) {
         // TODO: types (#22198)
+        let lockedDepName = dep.depName!;
+        if (relativeDir && relativeDir !== '.') {
+          lockedDepName = `${relativeDir}/node_modules/${dep.depName}`;
+        }
+
         dep.lockedVersion = semver.valid(
-          lockFileCache[npmLock].lockedVersions?.[dep.depName!],
+          lockFileCache[npmLock].lockedVersions?.[lockedDepName],
         )!;
       }
     } else if (pnpmShrinkwrap) {

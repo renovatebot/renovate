@@ -2,6 +2,7 @@ import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import * as docker from '../../../util/exec/docker';
 import type { UpdateArtifactsConfig } from '../types';
 import * as util from './util';
@@ -43,6 +44,25 @@ describe('modules/manager/nuget/artifacts', () => {
 
   afterEach(() => {
     GlobalConfig.reset();
+  });
+
+  it('re-throws TEMPORARY_ERROR', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'New packages.lock.json',
+    });
+    fs.writeLocalFile.mockRejectedValueOnce(new Error(TEMPORARY_ERROR));
+    await expect(
+      nuget.updateArtifacts({
+        packageFileName: 'project.csproj',
+        updatedDeps: [{ depName: 'dep' }],
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).rejects.toThrow(TEMPORARY_ERROR);
   });
 
   it('aborts if no lock file found', async () => {
@@ -94,7 +114,7 @@ describe('modules/manager/nuget/artifacts', () => {
     ]);
   });
 
-  it('updates lock file', async () => {
+  it('runs workload restore and updates lock file', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     git.getFiles.mockResolvedValueOnce({
@@ -108,7 +128,7 @@ describe('modules/manager/nuget/artifacts', () => {
         packageFileName: 'project.csproj',
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
-        config,
+        config: { ...config, postUpdateOptions: ['dotnetWorkloadRestore'] },
       }),
     ).toEqual([
       {
@@ -120,6 +140,17 @@ describe('modules/manager/nuget/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'dotnet workload restore --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            NUGET_PACKAGES:
+              '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+            MSBUILDDISABLENODEREUSE: '1',
+          },
+        },
+      },
       {
         cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
         options: {

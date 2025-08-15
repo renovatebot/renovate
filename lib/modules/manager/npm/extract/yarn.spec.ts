@@ -1,5 +1,5 @@
 import {
-  extractYarnCatalogsFromYml,
+  extractYarnCatalogs,
   getYarnLock,
   getYarnVersionFromLock,
 } from './yarn';
@@ -79,10 +79,10 @@ describe('modules/manager/npm/extract/yarn', () => {
     );
   });
 
-  describe('.extractYarnCatalogsFromYml()', () => {
+  describe('.extractYarnCatalogs()', () => {
     it('handles empty catalog entries', async () => {
       expect(
-        await extractYarnCatalogsFromYml(undefined, 'package.json', false),
+        await extractYarnCatalogs(undefined, 'package.json', false),
       ).toMatchObject({
         deps: [],
       });
@@ -93,7 +93,7 @@ describe('modules/manager/npm/extract/yarn', () => {
       fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock);
       fs.getSiblingFileName.mockReturnValueOnce('yarn.lock');
       expect(
-        await extractYarnCatalogsFromYml(
+        await extractYarnCatalogs(
           {
             list: {
               react: '18.3.0',
@@ -135,7 +135,7 @@ describe('modules/manager/npm/extract/yarn', () => {
       fs.readLocalFile.mockResolvedValueOnce(lockfileContent);
       fs.getSiblingFileName.mockReturnValueOnce('yarn.lock');
       expect(
-        await extractYarnCatalogsFromYml(
+        await extractYarnCatalogs(
           {
             list: {
               react: '18.3.1',
