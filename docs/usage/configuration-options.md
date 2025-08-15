@@ -1417,6 +1417,21 @@ You can configure this to `true` if you prefer Renovate to close an existing Dep
 
 ## dependencyDashboardCategory
 
+You can use this to categorize updates on the Dependency Dashboard, for example, to visually distinguish between production and dev updates.
+
+To create a category for all CI/CD updates, you can configure a package rule like this:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchCategories": ["cd", "ci"],
+      "dependencyDashboardCategory": ":hammer_and_wrench: Continuous Integration & Continuous Deployment"
+    }
+  ]
+}
+```
+
 ## dependencyDashboardFooter
 
 ## dependencyDashboardHeader
