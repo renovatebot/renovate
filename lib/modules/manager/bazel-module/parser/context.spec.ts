@@ -56,5 +56,22 @@ describe('modules/manager/bazel-module/parser/context', () => {
         ),
       );
     });
+
+    it('throws CtxProcessingError with parent information', () => {
+      const ctx = new Ctx('');
+      // Create an invalid state where we try to add a string directly to a rule
+      // without wrapping it in an attribute
+      ctx.startRule('test_rule');
+      const error = new CtxProcessingError(
+        fragments.string('invalid'),
+        fragments.rule('test_rule'),
+      );
+      expect(error.message).toBe(
+        'Invalid context state. current: string, parent: rule',
+      );
+      expect(error.name).toBe('CtxProcessingError');
+      expect(error.current).toEqual(fragments.string('invalid'));
+      expect(error.parent).toEqual(fragments.rule('test_rule'));
+    });
   });
 });

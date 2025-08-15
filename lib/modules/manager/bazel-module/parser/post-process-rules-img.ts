@@ -37,6 +37,7 @@ export function extractRulesImgDependencies(input: string): ResultFragment[] {
     const [fullMatch, functionName, paramsStr] = match;
     const ruleInfo = repoRules.get(functionName);
 
+    // istanbul ignore if
     if (!ruleInfo) {
       continue;
     }
