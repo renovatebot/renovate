@@ -34,6 +34,7 @@ exports[`modules/datasource/clojure/index > falls back to next registry url 1`] 
       "version": "2.0.0",
     },
   ],
+  "respectLatest": false,
   "tags": {
     "latest": "2.0.0",
     "release": "2.0.0",
@@ -105,6 +106,7 @@ exports[`modules/datasource/clojure/index > returns releases from custom reposit
       "version": "2.0.0",
     },
   ],
+  "respectLatest": false,
   "tags": {
     "latest": "2.0.0",
     "release": "2.0.0",
@@ -146,6 +148,7 @@ exports[`modules/datasource/clojure/index > skips registry with invalid XML 1`] 
       "version": "2.0.0",
     },
   ],
+  "respectLatest": false,
   "tags": {
     "latest": "2.0.0",
     "release": "2.0.0",
@@ -187,6 +190,7 @@ exports[`modules/datasource/clojure/index > skips registry with invalid metadata
       "version": "2.0.0",
     },
   ],
+  "respectLatest": false,
   "tags": {
     "latest": "2.0.0",
     "release": "2.0.0",

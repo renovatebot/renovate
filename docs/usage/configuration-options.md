@@ -4250,6 +4250,12 @@ For `npm` manager when `replacementApproach=alias` then instead of replacing `"f
 Similar to `ignoreUnstable`, this option controls whether to update to versions that are greater than the version tagged as `latest` in the repository.
 By default, `renovate` will update to a version greater than `latest` only if the current version is itself past latest.
 
+<!-- prettier-ignore -->
+!!! note
+    By default, respectLatest will be set to `false` for Maven results if a `latest` tag is found.
+    This is because many Maven registries don't have a reliable `latest` tag - it just means whatever was last published.
+    You need to override this to `respectLatest=true` in `packageRules` in order to use it.
+
 ## reviewers
 
 Must be valid usernames.
