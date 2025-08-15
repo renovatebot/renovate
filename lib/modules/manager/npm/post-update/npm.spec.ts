@@ -65,7 +65,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     const updates = [
       { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: false },
     ];
-    const res = await npmHelper.generateLockFile(
+    await npmHelper.generateLockFile(
       'some-dir',
       {},
       'package-lock.json',
