@@ -62,8 +62,8 @@ export interface RepoResponse {
   mirror: boolean;
   default_branch: string;
   empty_repo: boolean;
-  ssh_url_to_repo: string;
-  http_url_to_repo: string;
+  ssh_url_to_repo: string | null;
+  http_url_to_repo: string | null;
   forked_from_project: boolean;
   repository_access_level: 'disabled' | 'private' | 'enabled';
   merge_requests_access_level: 'disabled' | 'private' | 'enabled';

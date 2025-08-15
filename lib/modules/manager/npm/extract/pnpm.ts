@@ -12,12 +12,12 @@ import {
 } from '../../../../util/fs';
 import { parseSingleYaml } from '../../../../util/yaml';
 import type { PackageFile, PackageFileContent } from '../../types';
-import type { PnpmDependencySchema, PnpmLockFile } from '../post-update/types';
-import type { PnpmCatalogsSchema } from '../schema';
-import { PnpmWorkspaceFileSchema } from '../schema';
+import type { PnpmDependency, PnpmLockFile } from '../post-update/types';
+import type { PnpmCatalogs } from '../schema';
+import { PnpmWorkspaceFile } from '../schema';
 import type { NpmManagerData } from '../types';
 import { extractCatalogDeps } from './common/catalogs';
-import type { Catalog, LockFile, PnpmWorkspaceFile } from './types';
+import type { Catalog, LockFile } from './types';
 
 function isPnpmLockfile(obj: any): obj is PnpmLockFile {
   return is.plainObject(obj) && 'lockfileVersion' in obj;
@@ -220,7 +220,7 @@ function getLockedVersions(
 }
 
 function getLockedDependencyVersions(
-  obj: PnpmLockFile | Record<string, PnpmDependencySchema>,
+  obj: PnpmLockFile | Record<string, PnpmDependency>,
 ): Record<string, Record<string, string>> {
   const dependencyTypes = [
     'dependencies',
@@ -257,7 +257,7 @@ export function tryParsePnpmWorkspaceYaml(content: string):
   | { success: false; data?: never } {
   try {
     const data = parseSingleYaml(content, {
-      customSchema: PnpmWorkspaceFileSchema,
+      customSchema: PnpmWorkspaceFile,
     });
     return { success: true, data };
   } catch {
@@ -265,7 +265,7 @@ export function tryParsePnpmWorkspaceYaml(content: string):
   }
 }
 
-type PnpmCatalogs = z.TypeOf<typeof PnpmCatalogsSchema>;
+type PnpmCatalogs = z.TypeOf<typeof PnpmCatalogs>;
 
 export async function extractPnpmWorkspaceFile(
   catalogs: PnpmCatalogs,

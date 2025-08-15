@@ -15,7 +15,7 @@ import {
   createSpmToolConfig,
   createUbiToolConfig,
 } from './backends';
-import type { MiseToolOptionsSchema, MiseToolSchema } from './schema';
+import type { MiseTool, MiseToolOptions } from './schema';
 import type { ToolingDefinition } from './upgradeable-tooling';
 import { asdfTooling, miseTooling } from './upgradeable-tooling';
 import { parseTomlFile } from './utils';
@@ -63,7 +63,7 @@ export function extractPackageFile(
   return deps.length ? { deps } : null;
 }
 
-function parseVersion(toolData: MiseToolSchema): string | null {
+function parseVersion(toolData: MiseTool): string | null {
   if (is.nonEmptyString(toolData)) {
     // Handle the string case
     // e.g. 'erlang = "23.3"'
@@ -84,8 +84,8 @@ function parseVersion(toolData: MiseToolSchema): string | null {
 
 function parseOptions(
   optionsInName: string,
-  toolOptions: MiseToolOptionsSchema,
-): MiseToolOptionsSchema {
+  toolOptions: MiseToolOptions,
+): MiseToolOptions {
   const options = is.nonEmptyString(optionsInName)
     ? Object.fromEntries(
         optionsInName.split(',').map((option) => option.split('=', 2)),
@@ -102,7 +102,7 @@ function getToolConfig(
   backend: string,
   toolName: string,
   version: string,
-  toolOptions: MiseToolOptionsSchema,
+  toolOptions: MiseToolOptions,
 ): ToolingConfig | BackendToolingConfig | null {
   switch (backend) {
     case '':
