@@ -13,8 +13,6 @@ export const urls = [
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['pin'];
 
-const RELEASE_PROP = 'release';
-
 export class DebianVersioningApi extends GenericVersioningApi {
   private readonly _distroInfo: DistroInfo;
   private readonly _rollingReleases: RollingReleasesData;
@@ -27,10 +25,10 @@ export class DebianVersioningApi extends GenericVersioningApi {
 
   override isValid(version: string): boolean {
     const isValid = super.isValid(version);
-    const schedule = this._distroInfo.getSchedule(
-      this._rollingReleases.getVersionByLts(version),
-    );
-    return isValid && schedule !== null && RELEASE_PROP in schedule;
+    let ver: string;
+    ver = this._rollingReleases.getVersionByLts(version);
+    ver = this._distroInfo.getVersionByCodename(ver);
+    return isValid && this._distroInfo.isCreated(ver);
   }
 
   override isStable(version: string): boolean {
@@ -82,10 +80,8 @@ export class DebianVersioningApi extends GenericVersioningApi {
     // newVersion is [oldold|old|]stable
     // current value is numeric
     if (this._rollingReleases.has(newVersion)) {
-      return (
-        this._rollingReleases.schedule(newVersion)?.version ??
-        /* istanbul ignore next: should never happen */ newVersion
-      );
+      // should never `undefined` if it exists
+      return this._rollingReleases.schedule(newVersion)!.version;
     }
 
     return this._distroInfo.getVersionByCodename(newVersion);

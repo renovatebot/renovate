@@ -446,7 +446,7 @@ export async function ensureComment(
   return true;
 }
 
-export function massageMarkdown(prBody: string): string {
+export function massageMarkdown(prBody: string, rebaseLabel: string): string {
   return (
     smartTruncate(readOnlyIssueBody(prBody), maxBodyLength())
       .replace('Branch creation', 'Change creation')
@@ -460,11 +460,11 @@ export function massageMarkdown(prBody: string): string {
       )
       .replace(
         'you tick the rebase/retry checkbox',
-        'add `rebase!` at the beginning of the commit message',
+        `you add the _${rebaseLabel}_ hashtag to this change`,
       )
       .replace(
         'checking the rebase/retry box above',
-        'adding `rebase!` at the beginning of the commit message',
+        `adding the _${rebaseLabel}_ hashtag to this change`,
       )
       .replace(regEx(/\b(?:Pull Request|PR)/g), 'change')
       // Remove HTML tags not supported in Gerrit markdown

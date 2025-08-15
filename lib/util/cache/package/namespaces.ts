@@ -11,6 +11,8 @@ export const packageCacheNamespaces = [
   'changelog-bitbucket-release',
   'changelog-bitbucket-server-notes@v2',
   'changelog-bitbucket-server-release',
+  'changelog-forgejo-notes@v2',
+  'changelog-forgejo-release',
   'changelog-gitea-notes@v2',
   'changelog-gitea-release',
   'changelog-github-notes@v2',
@@ -51,6 +53,8 @@ export const packageCacheNamespaces = [
   'datasource-git-refs',
   'datasource-git-tags',
   'datasource-git',
+  'datasource-forgejo-releases',
+  'datasource-forgejo-tags',
   'datasource-gitea-releases',
   'datasource-gitea-tags',
   'datasource-github-release-attachments',
@@ -78,7 +82,6 @@ export const packageCacheNamespaces = [
   'datasource-packagist',
   'datasource-pod',
   'datasource-python-version',
-  'datasource-releases',
   'datasource-repology',
   'datasource-rpm',
   'datasource-ruby-version',
@@ -88,6 +91,7 @@ export const packageCacheNamespaces = [
   'datasource-terraform-provider',
   'datasource-terraform',
   'datasource-unity3d',
+  'datasource-unity3d-packages',
   'github-releases-datasource-v2',
   'github-tags-datasource-v2',
   'merge-confidence',
@@ -96,7 +100,9 @@ export const packageCacheNamespaces = [
   'url-sha256',
 ] as const; /* v8 ignore stop -- BTW don't forget to update `self-hosted-configuration.md` */
 
-export type PackageCacheNamespace = (typeof packageCacheNamespaces)[number];
+export type PackageCacheNamespace =
+  | (typeof packageCacheNamespaces)[number]
+  | `datasource-releases-${string}`;
 
 export type CombinedKey =
   `datasource-mem:pkg-fetch:${PackageCacheNamespace}:${string}`;

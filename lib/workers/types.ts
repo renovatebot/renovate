@@ -86,6 +86,7 @@ export interface BranchUpgradeConfig
   sourceRepo?: string;
   sourceRepoOrg?: string;
   sourceRepoName?: string;
+  minimumGroupSize?: number;
 }
 
 export type PrBlockedBy =
@@ -111,7 +112,13 @@ export type BranchResult =
   | 'commit-limit-reached'
   | 'branch-limit-reached'
   | 'rebase'
-  | 'update-not-scheduled';
+  | 'update-not-scheduled'
+  | 'minimum-group-size-not-met';
+
+export type CacheFingerprintMatchResult =
+  | 'matched'
+  | 'no-match'
+  | 'no-fingerprint';
 
 export interface BranchConfig
   extends BranchUpgradeConfig,
@@ -135,7 +142,7 @@ export interface BranchConfig
   stopUpdating?: boolean;
   isConflicted?: boolean;
   commitFingerprint?: string;
-  skipBranchUpdate?: boolean;
+  cacheFingerprintMatch?: CacheFingerprintMatchResult;
 }
 
 export interface BranchMetadata {
