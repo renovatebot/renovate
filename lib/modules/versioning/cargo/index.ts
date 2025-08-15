@@ -91,8 +91,11 @@ function getNewValue({
   currentValue,
   rangeStrategy,
   currentVersion,
-  newVersion,
+  newVersion: rawNewVersion,
 }: NewValueConfig): string {
+  // Strip version metadata
+  const newVersion = rawNewVersion.replace(/\+.*$/, '');
+
   if (!currentValue || currentValue === '*') {
     return rangeStrategy === 'pin' ? `=${newVersion}` : currentValue;
   }
