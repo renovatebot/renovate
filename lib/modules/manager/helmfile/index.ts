@@ -16,7 +16,7 @@ export const defaultConfig = {
   commitMessageTopic: 'helm chart {{depName}}',
   managerFilePatterns: [
     '/(^|/)helmfile\\.ya?ml(?:\\.gotmpl)?$/',
-    '/(^|/)helmfile\\.d/.+\\.ya?ml$/',
+    '/(^|/)helmfile\\.d/.+\\.ya?ml(?:\\.gotmpl)?$/',
   ],
 };
 
