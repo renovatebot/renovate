@@ -200,7 +200,7 @@ export async function generateLockFile(
       logger.debug('Running npm install twice');
       // Run the install command twice to ensure the lock file is up to date
       // iterate through commands and if any command starts with `npm install`, add it again
-      let existingCommands = [...commands];
+      const existingCommands = [...commands];
       commands = [];
       for (const command of existingCommands) {
         commands.push(command);
