@@ -26,7 +26,6 @@ import { scm } from '../../../../modules/platform/scm';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedMs } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
-
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
