@@ -108,6 +108,8 @@ export async function extractPackageFile(
         ? config.registryAliases?.[repoName]
         : undefined;
 
+      const urls = [registryUrl, aliasUrl].filter(is.string);
+
       const res: PackageDependency = {
         depName,
         currentValue: dep.version,
@@ -123,23 +125,22 @@ export async function extractPackageFile(
         res.datasource = DockerDatasource.id;
         res.packageName = ociRef;
         res.depName = ociRef;
-        if (res.registryUrls?.length) {
-          delete res.registryUrls;
-        }
       } else if (repoName && registryData[repoName]?.oci) {
-        const base =
-          registryData[repoName]?.url ?? config.registryAliases?.[repoName];
+        const base = [
+          registryData[repoName]?.url,
+          config.registryAliases?.[repoName],
+        ].find(is.string);
         if (base) {
-          const withoutPrefix = isOCIRegistry(base)
-            ? base.replace(/^oci:\/\//, '')
-            : base;
+          const withoutPrefix = base.replace(/^oci:\/\//, '');
           res.datasource = DockerDatasource.id;
           res.packageName = `${withoutPrefix}/${depName}`;
           res.depName = res.packageName;
-          if (res.registryUrls?.length) {
-            delete res.registryUrls;
-          }
         }
+      }
+
+      // Only attach registry URLs for non-OCI charts
+      if (res.datasource !== DockerDatasource.id) {
+        res.registryUrls = urls;
       }
 
       // By definition on helm the chart name should be lowercase letter + number + -
@@ -152,10 +153,7 @@ export async function extractPackageFile(
       }
 
       // Skip in case we cannot locate the registry
-      if (
-        res.datasource !== DockerDatasource.id &&
-        is.emptyArray(res.registryUrls)
-      ) {
+      if (res.datasource !== DockerDatasource.id && urls.length === 0) {
         res.skipReason = 'unknown-registry';
       }
 
