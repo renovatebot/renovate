@@ -78,7 +78,7 @@ import {
 import { GithubIssueCache, GithubIssue as Issue } from './issue';
 import { massageMarkdownLinks } from './massage-markdown-links';
 import { getPrCache, updatePrCache } from './pr';
-import { VulnerabilityAlertSchema } from './schema';
+import { GithubVulnerabilityAlert } from './schema';
 import type {
   BranchProtection,
   CombinedBranchStatus,
@@ -1977,7 +1977,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
           headers: { accept: 'application/vnd.github+json' },
           cacheProvider: repoCacheProvider,
         },
-        VulnerabilityAlertSchema,
+        GithubVulnerabilityAlert,
       )
     ).body;
   } catch (err) /* v8 ignore start */ {

@@ -8,7 +8,7 @@ import type {
   PackageFileContent,
 } from '../types';
 import { processors } from './processors';
-import { type PyProject, PyProjectSchema } from './schema';
+import { PyProject } from './schema';
 
 export function parsePyProject(
   content: string,
@@ -16,7 +16,7 @@ export function parsePyProject(
 ): PyProject | null {
   try {
     const jsonMap = parseToml(massageToml(content));
-    return PyProjectSchema.parse(jsonMap);
+    return PyProject.parse(jsonMap);
   } catch (err) {
     logger.debug(
       { packageFile, err },

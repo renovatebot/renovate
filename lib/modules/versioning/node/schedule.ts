@@ -1,4 +1,5 @@
-import dataFiles from '../../../data-files.generated';
+import _nodeSchedule from '../../../data/node-js-schedule.json';
+import type { Nullish } from '../../../types';
 import semver from '../semver';
 
 interface NodeJsSchedule {
@@ -10,11 +11,7 @@ interface NodeJsSchedule {
 }
 
 export type NodeJsData = Record<string, NodeJsSchedule>;
-
-const nodeSchedule: NodeJsData = JSON.parse(
-  dataFiles.get('data/node-js-schedule.json')!,
-);
-
+const nodeSchedule: NodeJsData = _nodeSchedule;
 export type NodeJsScheduleWithVersion = { version: string } & NodeJsSchedule;
 
 const nodeCodenames = new Map<string, NodeJsScheduleWithVersion>();
@@ -30,13 +27,14 @@ for (const version of Object.keys(nodeSchedule)) {
 
 export function findScheduleForCodename(
   codename: string,
-): NodeJsScheduleWithVersion | null {
-  return nodeCodenames.get(codename?.toUpperCase()) ?? null;
+): Nullish<NodeJsScheduleWithVersion> {
+  return nodeCodenames.get(codename?.toUpperCase());
 }
 
-export function findScheduleForVersion(version: string): NodeJsSchedule | null {
+export function findScheduleForVersion(
+  version: string,
+): Nullish<NodeJsSchedule> {
   const major = semver.getMajor(version);
-  // TODO: types (#22198)
   const schedule = nodeSchedule[`v${major!}`];
   return schedule;
 }

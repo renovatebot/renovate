@@ -21,7 +21,6 @@ const supportedRules = [
   'single_version_override',
   'git_repository',
   'new_git_repository',
-  'use_repo_rule',
 ];
 const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 
