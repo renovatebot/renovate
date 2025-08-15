@@ -63,6 +63,15 @@ export const AttributeFragment = z.object({
   value: ValueFragments.optional(),
   isComplete: z.boolean(),
 });
+export const RepoRuleCallFragment = z.object({
+  type: z.literal('repoRuleCall'),
+  rule: z.string(), // The original rule name (e.g., 'pull')
+  functionName: z.string(), // The variable name used (e.g., 'pull' or 'my_pull')
+  module: z.string(), // The module path (e.g., '@rules_img//img:pull.bzl')
+  children: LooseRecord(ValueFragments),
+  isComplete: z.boolean(),
+  rawString: z.string().optional(), // Raw source string for replacements
+});
 export const AllFragments = z.discriminatedUnion('type', [
   ArrayFragment,
   AttributeFragment,
@@ -71,6 +80,7 @@ export const AllFragments = z.discriminatedUnion('type', [
   PreparedExtensionTagFragment,
   ExtensionTagFragment,
   StringFragment,
+  RepoRuleCallFragment,
 ]);
 
 export type AllFragments = z.infer<typeof AllFragments>;
@@ -86,7 +96,11 @@ export type PreparedExtensionTagFragment = z.infer<
 export type ExtensionTagFragment = z.infer<typeof ExtensionTagFragment>;
 export type StringFragment = z.infer<typeof StringFragment>;
 export type ValueFragments = z.infer<typeof ValueFragments>;
-export type ResultFragment = RuleFragment | ExtensionTagFragment;
+export type RepoRuleCallFragment = z.infer<typeof RepoRuleCallFragment>;
+export type ResultFragment =
+  | RuleFragment
+  | ExtensionTagFragment
+  | RepoRuleCallFragment;
 
 export function string(value: string): StringFragment {
   return {
@@ -184,4 +198,19 @@ export function isValue(data: unknown): data is ValueFragments {
 export function isPrimitive(data: unknown): data is PrimitiveFragments {
   const result = PrimitiveFragments.safeParse(data);
   return result.success;
+}
+
+export function repoRuleCall(
+  rule: string,
+  functionName: string,
+  module: string,
+): RepoRuleCallFragment {
+  return {
+    type: 'repoRuleCall',
+    rule,
+    functionName,
+    module,
+    children: {},
+    isComplete: false,
+  };
 }

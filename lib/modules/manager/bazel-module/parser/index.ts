@@ -2,6 +2,7 @@ import { lang, query as q } from 'good-enough-parser';
 import { Ctx } from './context';
 import { extensionTags } from './extension-tags';
 import type { ResultFragment } from './fragments';
+import { extractRulesImgDependencies } from './post-process-rules-img';
 import { rules } from './rules';
 
 const rule = q.alt<Ctx>(rules, extensionTags);
@@ -16,5 +17,10 @@ const starlarkLang = lang.createLang('starlark');
 
 export function parse(input: string): ResultFragment[] {
   const parsedResult = starlarkLang.query(input, query, new Ctx(input));
-  return parsedResult?.results ?? [];
+  const results = parsedResult?.results ?? [];
+
+  // Post-process to find rules_img dependencies
+  const rulesImgDeps = extractRulesImgDependencies(input);
+
+  return [...results, ...rulesImgDeps];
 }
