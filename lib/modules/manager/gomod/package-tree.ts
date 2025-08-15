@@ -2,7 +2,13 @@ import { Graph, hasCycle } from 'graph-data-structure';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
+import { minimatchFilter } from '../../../util/minimatch';
 import { newlineRegex, regEx } from '../../../util/regex';
+import {
+  convertTraversalMapToResults,
+  recursivelyTraverseGraph,
+  reframeRelativePathToRootOfRepo,
+} from '../../../util/tree';
 import { scm } from '../../platform/scm';
 
 export interface GoModuleFile {
@@ -52,38 +58,12 @@ export async function getTransitiveDependentModules(
   }
 
   const visitedModules = new Map<string, boolean>();
-  recursivelyGetDependentGoModFiles(packageFileName, graph, visitedModules);
+  recursivelyTraverseGraph(packageFileName, graph, visitedModules);
 
-  // deduplicate
-  return Array.from(visitedModules).map(([name, isLeaf]) => ({ name, isLeaf }));
-}
-
-/**
- * Traverse graph and find dependent go.mod files at any level of ancestry
- */
-function recursivelyGetDependentGoModFiles(
-  packageFileName: string,
-  graph: Graph,
-  visitedModules: Map<string, boolean>,
-): void {
-  if (visitedModules.has(packageFileName)) {
-    // we have already visited this package file
-    return;
-  }
-
-  const dependents = graph.adjacent(packageFileName);
-
-  if (!dependents || dependents.size === 0) {
-    visitedModules.set(packageFileName, true);
-    return;
-  }
-
-  // Add current node first, then process dependents (pre-order traversal)
-  visitedModules.set(packageFileName, false);
-
-  for (const dependent of dependents) {
-    recursivelyGetDependentGoModFiles(dependent, graph, visitedModules);
-  }
+  // Convert to the expected format
+  return convertTraversalMapToResults(visitedModules).map(
+    ({ node, isLeaf }) => ({ name: node, isLeaf }),
+  );
 }
 
 /**
@@ -147,35 +127,13 @@ async function parseLocalReplaceDirectives(
 }
 
 /**
- * Take the path relative from a go.mod file, and make it relative from the root of the repo
- */
-function reframeRelativePathToRootOfRepo(
-  dependentGoModRelativePath: string,
-  replaceReference: string,
-): string {
-  const virtualRepoRoot = '/';
-  const absoluteDependentGoModPath = upath.resolve(
-    virtualRepoRoot,
-    dependentGoModRelativePath,
-  );
-  const absoluteReplaceReferencePath = upath.resolve(
-    upath.dirname(absoluteDependentGoModPath),
-    replaceReference,
-  );
-  const relativeReplaceReferencePath = upath.relative(
-    virtualRepoRoot,
-    absoluteReplaceReferencePath,
-  );
-
-  return relativeReplaceReferencePath;
-}
-
-/**
  * Get a list of go.mod files in the repository
  */
 async function getAllGoModFiles(): Promise<string[]> {
   const allFiles = await scm.getFileList();
-  const filteredGoModFiles = allFiles.filter(minimatchFilter('go.mod', { matchBase: true, nocase: true }));
+  const filteredGoModFiles = allFiles.filter(
+    minimatchFilter('go.mod', { matchBase: true, nocase: true }),
+  );
 
   logger.trace({ filteredGoModFiles }, 'Found go.mod files');
 
