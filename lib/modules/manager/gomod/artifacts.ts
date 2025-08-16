@@ -466,105 +466,56 @@ async function tidyDependentModules(
   tidyOpts: string,
 ): Promise<UpdateArtifactsResult[]> {
   const dependentFiles = await getTransitiveDependentModules(packageFileName);
+
+  if (dependentFiles.length === 0) {
+    return [];
+  }
+
+  // Build single command string - dependentFiles is already in dependency order
+  const commands = buildGoModTidyCommands(dependentFiles, tidyOpts);
+  const combinedCommand = commands.join(' && ');
+
+  // Execute all commands in one shell execution
+  await exec(combinedCommand, execOptions);
+
+  // Collect results from all modified files using git status
+  const status = await getRepoStatus();
   const results: UpdateArtifactsResult[] = [];
-  const processed = new Set<string>();
 
-  // Process level by level until all modules are processed
-  while (processed.size < dependentFiles.length) {
-    // Find modules whose dependencies are all processed (ready for this level)
-    const currentLevel = dependentFiles.filter(
-      (file) =>
-        !processed.has(file.name) &&
-        areDependenciesProcessed(file.name, dependentFiles, processed),
-    );
+  for (const file of dependentFiles) {
+    const sumFileName = file.name.replace(regEx(/\.mod$/), '.sum');
 
-    logger.debug(`Processing ${currentLevel.length} modules in parallel`);
-
-    // Process current level in parallel
-    const levelResults = await Promise.all(
-      currentLevel.map((file) =>
-        tidyDependentModule(file.name, execOptions, tidyOpts),
-      ),
-    );
-
-    // Collect results and mark as processed
-    for (const result of levelResults) {
-      if (result) {
-        results.push(...result);
+    // Only check for .sum files that were modified
+    if (status.modified.includes(sumFileName)) {
+      const newContent = await readLocalFile(sumFileName, 'utf8');
+      if (newContent) {
+        results.push({
+          file: {
+            type: 'addition',
+            path: sumFileName,
+            contents: newContent,
+          },
+        });
       }
     }
-    currentLevel.forEach((file) => processed.add(file.name));
   }
 
   return results;
 }
 
 /**
- * Check if all dependencies of a module are already processed
+ * Build command array for running go mod tidy on all dependent modules
+ * Each command navigates from the repository root to ensure correct paths
  */
-function areDependenciesProcessed(
-  moduleName: string,
-  allModules: GoModuleFile[],
-  processed: Set<string>,
-): boolean {
-  // Since getTransitiveDependentModules() returns modules in dependency order,
-  // dependencies come first in the array
-  const moduleIndex = allModules.findIndex((m) => m.name === moduleName);
-
-  // Check if all modules before this one (dependencies) are processed
-  for (let i = 0; i < moduleIndex; i++) {
-    if (!processed.has(allModules[i].name)) {
-      return false; // Dependency not yet processed
-    }
-  }
-
-  return true;
-}
-
-/**
- * Run go mod tidy on a dependent module
- */
-async function tidyDependentModule(
-  goModFileName: string,
-  execOptions: ExecOptions,
+function buildGoModTidyCommands(
+  dependentFiles: GoModuleFile[],
   tidyOpts: string,
-): Promise<UpdateArtifactsResult[] | null> {
-  const sumFileName = goModFileName.replace(regEx(/\.mod$/), '.sum');
-  const cmd = 'go';
-  const args = `mod tidy${tidyOpts}`;
-
-  const dependentExecOptions: ExecOptions = {
-    ...execOptions,
-    cwdFile: goModFileName,
-  };
-
-  await exec([`${cmd} ${args}`], dependentExecOptions);
-  const status = await getRepoStatus();
-  const res: UpdateArtifactsResult[] = [];
-
-  if (status.modified.includes(sumFileName)) {
-    logger.debug('Returning updated go.sum');
-    res.push({
-      file: {
-        type: 'addition',
-        path: sumFileName,
-        contents: await readLocalFile(sumFileName),
-      },
-    });
-  }
-
-  if (status.modified.includes(goModFileName)) {
-    logger.debug('Returning updated go.mod');
-    res.push({
-      file: {
-        type: 'addition',
-        path: goModFileName,
-        contents: await readLocalFile(goModFileName, 'utf8'),
-      },
-    });
-  }
-
-  return res.length > 0 ? res : null;
+): string[] {
+  return dependentFiles.map((file) => {
+    const moduleDir = upath.dirname(file.name);
+    // Use parentheses to run cd && go mod tidy in a subshell, preserving working directory
+    return `(cd "${moduleDir}" && go mod tidy ${tidyOpts})`;
+  });
 }
 
 function getGoConstraints(content: string): string | undefined {

@@ -2561,19 +2561,15 @@ describe('modules/manager/gomod/artifacts', () => {
 
         const execSnapshots = setupDependencyTest(modules);
 
-        // Mock multiple getRepoStatus calls for each module
+        // Mock getRepoStatus calls - one for main module, one for all dependents
         git.getRepoStatus
           .mockResolvedValueOnce(
             partial<StatusResult>({ modified: ['go.sum'] }),
           )
           .mockResolvedValueOnce(
-            partial<StatusResult>({ modified: ['common/go.sum'] }),
-          )
-          .mockResolvedValueOnce(
-            partial<StatusResult>({ modified: ['service/go.sum'] }),
-          )
-          .mockResolvedValueOnce(
-            partial<StatusResult>({ modified: ['web/go.sum'] }),
+            partial<StatusResult>({
+              modified: ['common/go.sum', 'service/go.sum', 'web/go.sum'],
+            }),
           );
 
         fs.readLocalFile
@@ -2593,7 +2589,7 @@ describe('modules/manager/gomod/artifacts', () => {
         expect(packageTree.getTransitiveDependentModules).toHaveBeenCalledWith(
           'go.mod',
         );
-        expect(execSnapshots).toHaveLength(4); // 1 main + 3 dependents
+        expect(execSnapshots).toHaveLength(2); // 1 main + 1 batch for all dependents
         expect(result).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
