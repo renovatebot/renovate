@@ -1,5 +1,6 @@
 import type { PlatformId } from '../constants';
 import type { LogLevelRemap } from '../logger/types';
+import type { ManagerName } from '../manager-list.generated';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { RepoSortMethod, SortMethod } from '../modules/platform/types';
 import type { HostRule, SkipReason } from '../types';
@@ -37,6 +38,7 @@ export interface RenovateSharedConfig {
   automerge?: boolean;
   automergeSchedule?: string[];
   automergeStrategy?: MergeStrategy;
+  bumpVersions?: BumpVersionConfig[];
   branchName?: string;
   branchNameStrict?: boolean;
   branchPrefix?: string;
@@ -54,7 +56,7 @@ export interface RenovateSharedConfig {
   enabled?: boolean;
   enabledManagers?: string[];
   extends?: string[];
-  fileMatch?: string[];
+  managerFilePatterns?: string[];
   force?: RenovateConfig;
   gitIgnoredAuthors?: string[];
   group?: GroupConfig;
@@ -92,6 +94,7 @@ export interface RenovateSharedConfig {
   semanticCommitScope?: string | null;
   semanticCommitType?: string;
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
+  skipArtifactsUpdate?: boolean;
   stopUpdatingLabel?: string;
   suppressNotifications?: string[];
   timezone?: string;
@@ -115,11 +118,14 @@ export interface GlobalOnlyConfig {
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
+  gitPrivateKeyPassphrase?: string;
   globalExtends?: string[];
   mergeConfidenceDatasources?: string[];
   mergeConfidenceEndpoint?: string;
   platform?: PlatformId;
   prCommitsPerRunLimit?: number;
+  privateKey?: string;
+  privateKeyOld?: string;
   privateKeyPath?: string;
   privateKeyPathOld?: string;
   redisPrefix?: string;
@@ -127,6 +133,7 @@ export interface GlobalOnlyConfig {
   repositories?: RenovateRepository[];
   useCloudMetadataServices?: boolean;
   deleteConfigFile?: boolean;
+  deleteAdditionalConfigFile?: boolean;
 }
 
 // Config options used within the repository worker, but not user configurable
@@ -160,8 +167,6 @@ export interface RepoGlobalConfig {
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
   presetCachePersistence?: boolean;
-  privateKey?: string;
-  privateKeyOld?: string;
   httpCacheTtlDays?: number;
   autodiscoverRepoSort?: RepoSortMethod;
   autodiscoverRepoOrder?: SortMethod;
@@ -193,6 +198,7 @@ export type ExecutionMode = 'branch' | 'update';
 
 export interface PostUpgradeTasks {
   commands?: string[];
+  dataFileTemplate?: string;
   fileFilters?: string[];
   executionMode: ExecutionMode;
 }
@@ -206,6 +212,7 @@ export type RenovateRepository =
   | {
       repository: string;
       secrets?: Record<string, string>;
+      variables?: Record<string, string>;
     };
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
@@ -232,7 +239,8 @@ export interface RenovateConfig
   reportPath?: string;
   reportType?: 'logging' | 'file' | 's3' | null;
   depName?: string;
-  baseBranches?: string[];
+  /** user configurable base branch patterns*/
+  baseBranchPatterns?: string[];
   commitBody?: string;
   useBaseBranchConfig?: UseBaseBranchConfigType;
   baseBranch?: string;
@@ -267,6 +275,7 @@ export interface RenovateConfig
   dependencyDashboardFooter?: string;
   dependencyDashboardLabels?: string[];
   dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
+  dependencyDashboardReportAbandonment?: boolean;
   packageFile?: string;
   packageRules?: PackageRule[];
   postUpdateOptions?: string[];
@@ -294,6 +303,7 @@ export interface RenovateConfig
 
   fetchChangeLogs?: FetchChangeLogsOptions;
   secrets?: Record<string, string>;
+  variables?: Record<string, string>;
 
   constraints?: Record<string, string>;
   skipInstalls?: boolean | null;
@@ -313,9 +323,16 @@ export interface RenovateConfig
   branchTopic?: string;
   additionalBranchPrefix?: string;
   sharedVariableName?: string;
+  minimumGroupSize?: number;
 }
 
-const CustomDatasourceFormats = ['json', 'plain', 'yaml', 'html'] as const;
+const CustomDatasourceFormats = [
+  'html',
+  'json',
+  'plain',
+  'toml',
+  'yaml',
+] as const;
 export type CustomDatasourceFormats = (typeof CustomDatasourceFormats)[number];
 
 export interface CustomDatasourceConfig {
@@ -355,6 +372,21 @@ export type UpdateType =
   | 'bump'
   | 'replacement';
 
+// These are the update types which can have configuration
+export const UpdateTypesOptions = [
+  'major',
+  'minor',
+  'patch',
+  'pin',
+  'digest',
+  'pinDigest',
+  'lockFileMaintenance',
+  'rollback',
+  'replacement',
+] as const;
+
+export type UpdateTypeOptions = (typeof UpdateTypesOptions)[number];
+
 export type FetchChangeLogsOptions = 'off' | 'branch' | 'pr';
 
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
@@ -364,6 +396,7 @@ export type MergeStrategy =
   | 'fast-forward'
   | 'merge-commit'
   | 'rebase'
+  | 'rebase-merge'
   | 'squash';
 
 // TODO: Proper typings
@@ -401,13 +434,17 @@ export interface ValidationMessage {
 }
 
 export type AllowedParents =
+  | '.'
+  | 'bumpVersions'
   | 'customDatasources'
   | 'customManagers'
   | 'hostRules'
   | 'logLevelRemap'
   | 'packageRules'
   | 'postUpgradeTasks'
-  | 'vulnerabilityAlerts';
+  | 'vulnerabilityAlerts'
+  | ManagerName
+  | UpdateTypeOptions;
 export interface RenovateOptionBase {
   /**
    * If true, the option can only be configured by people with access to the Renovate instance.
@@ -585,4 +622,11 @@ export interface ManagerConfig extends RenovateConfig {
 export interface ValidationResult {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
+}
+
+export interface BumpVersionConfig {
+  bumpType?: string;
+  filePatterns: string[];
+  matchStrings: string[];
+  name?: string;
 }

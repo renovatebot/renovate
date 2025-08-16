@@ -724,4 +724,81 @@ describe('modules/manager/npm/post-update/npm', () => {
       });
     });
   });
+
+  describe('prevents injections', () => {
+    it('while performing lockfileUpdate (npm-workspaces)', async () => {
+      const execSnapshots = mockExecAll();
+      // package.json
+      fs.readLocalFile.mockResolvedValue('{}');
+      fs.readLocalFile.mockResolvedValueOnce('package-lock content');
+      const skipInstalls = true;
+      const res = await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls },
+        [
+          {
+            packageFile: 'some-dir/web/b/package.json',
+            packageName: ' && echo "hi";',
+            depType: 'dependencies',
+            newVersion: '2.2.0',
+            newValue: '^2.0.0',
+            isLockfileUpdate: true,
+            managerData: {
+              workspacesPackages: ['docs/*', 'web/*'],
+            },
+          },
+          {
+            packageFile: 'some-dir/docs/a || date; /package.json',
+            packageName: 'hello',
+            depType: 'dependencies',
+            newVersion: '1.1.1',
+            newValue: '^1.0.0',
+            isLockfileUpdate: true,
+            managerData: {
+              workspacesPackages: ['docs/*', 'web/*'],
+            },
+          },
+        ],
+      );
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+      expect(res.error).toBeFalse();
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: `npm install --package-lock-only --no-audit --ignore-scripts --workspace=web/b ' && echo "hi";@2.2.0'`,
+        },
+        {
+          cmd: `npm install --package-lock-only --no-audit --ignore-scripts --workspace='docs/a || date; ' hello@1.1.1`,
+        },
+      ]);
+    });
+
+    it('while performing lockfileUpdate (npm)', async () => {
+      const execSnapshots = mockExecAll();
+      // package.json
+      fs.readLocalFile.mockResolvedValue('{}');
+      fs.readLocalFile.mockResolvedValue('package-lock-contents');
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        {},
+        [
+          {
+            depName: 'uuid',
+            currentVersion: '^11.0.0',
+            newVersion: '11.1.0',
+            packageName: '; date; echo ',
+            isLockfileUpdate: true,
+          },
+        ],
+      );
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: "npm install --package-lock-only --no-audit --ignore-scripts '; date; echo @11.1.0'",
+        },
+      ]);
+    });
+  });
 });

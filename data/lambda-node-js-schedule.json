@@ -1,0 +1,30 @@
+{
+  "10": {
+    "cycle": "nodejs10.x",
+    "support": "2021-07-30"
+  },
+  "12": {
+    "cycle": "nodejs12.x",
+    "support": "2023-03-31"
+  },
+  "14": {
+    "cycle": "nodejs14.x",
+    "support": "2023-12-04"
+  },
+  "16": {
+    "cycle": "nodejs16.x",
+    "support": "2024-06-12"
+  },
+  "18": {
+    "cycle": "nodejs18.x",
+    "support": "2025-09-01"
+  },
+  "20": {
+    "cycle": "nodejs20.x",
+    "support": "2026-04-30"
+  },
+  "22": {
+    "cycle": "nodejs22.x",
+    "support": "2027-04-30"
+  }
+}

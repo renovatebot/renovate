@@ -10,7 +10,7 @@ export const url = 'https://git-scm.com/docs/git-submodule';
 export const defaultConfig = {
   enabled: false,
   versioning: gitVersioning.id,
-  fileMatch: ['(^|/)\\.gitmodules$'],
+  managerFilePatterns: ['/(^|/)\\.gitmodules$/'],
 };
 
 export const supportedDatasources = [GitRefsDatasource.id];

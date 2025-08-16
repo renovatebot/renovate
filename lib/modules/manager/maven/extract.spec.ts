@@ -274,6 +274,143 @@ describe('modules/manager/maven/extract', () => {
         packageFileVersion: '0.0.1-SNAPSHOT',
       });
     });
+
+    it('extracts builder and buildpack images from spring-boot plugin', () => {
+      const res = extractPackage(
+        Fixtures.get('full_cnb.pom.xml'),
+        'full_cnb.pom.xml',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '3.2.2',
+          datasource: 'maven',
+          depName: 'org.springframework.boot:spring-boot-starter-parent',
+          depType: 'parent',
+          fileReplacePosition: 404,
+          registryUrls: [],
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '0.4.316',
+          datasource: 'docker',
+          depName: 'paketobuildpacks/builder-jammy-base',
+          packageName: 'paketobuildpacks/builder-jammy-base',
+          replaceString: 'paketobuildpacks/builder-jammy-base:0.4.316',
+          fileReplacePosition: 1273,
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '0.0.28',
+          datasource: 'docker',
+          depName: 'paketobuildpacks/run-noble-full',
+          packageName: 'paketobuildpacks/run-noble-full',
+          replaceString: 'paketobuildpacks/run-noble-full:0.0.28',
+          fileReplacePosition: 1343,
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '6.1.1',
+          datasource: 'buildpacks-registry',
+          packageName: 'paketo-buildpacks/nodejs',
+          fileReplacePosition: 1430,
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.8.0',
+          datasource: 'docker',
+          depName: 'gcr.io/paketo-buildpacks/nodejs',
+          fileReplacePosition: 1566,
+          packageName: 'gcr.io/paketo-buildpacks/nodejs',
+          replaceString: 'gcr.io/paketo-buildpacks/nodejs:1.8.0',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest:
+            'sha256:2c27cd0b4482a4aa5aeb38104f6d934511cd87c1af34a10d1d6cdf2d9d16f138',
+          currentValue: '2.22.1',
+          datasource: 'docker',
+          depName: 'docker.io/paketobuildpacks/python',
+          fileReplacePosition: 1634,
+          packageName: 'docker.io/paketobuildpacks/python',
+          replaceString:
+            'docker.io/paketobuildpacks/python:2.22.1@sha256:2c27cd0b4482a4aa5aeb38104f6d934511cd87c1af34a10d1d6cdf2d9d16f138',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest:
+            'sha256:080f4cfa5c8fe43837b2b83f69ae16e320ea67c051173e4934a015590b2ca67a',
+          datasource: 'docker',
+          depName: 'docker.io/paketobuildpacks/ruby',
+          fileReplacePosition: 1795,
+          packageName: 'docker.io/paketobuildpacks/ruby',
+          replaceString:
+            'docker.io/paketobuildpacks/ruby@sha256:080f4cfa5c8fe43837b2b83f69ae16e320ea67c051173e4934a015590b2ca67a',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '12.1.0',
+          datasource: 'docker',
+          depName: 'paketobuildpacks/java',
+          packageName: 'paketobuildpacks/java',
+          replaceString: 'paketobuildpacks/java:12.1.0',
+          fileReplacePosition: 2001,
+        },
+      ]);
+    });
+
+    it('extracts only builder if defaults are used in spring-boot plugin', () => {
+      const res = extractPackage(
+        Fixtures.get('basic_cnb.pom.xml'),
+        'basic_cnb.pom.xml',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '3.2.2',
+          datasource: 'maven',
+          depName: 'org.springframework.boot:spring-boot-starter-parent',
+          depType: 'parent',
+          fileReplacePosition: 404,
+          registryUrls: [],
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '0.4.316',
+          datasource: 'docker',
+          depName: 'paketobuildpacks/builder-jammy-base',
+          packageName: 'paketobuildpacks/builder-jammy-base',
+          replaceString: 'paketobuildpacks/builder-jammy-base:0.4.316',
+          fileReplacePosition: 1273,
+        },
+      ]);
+    });
+
+    it('returns no buildpack dependencies when image tag is missing in spring boot plugin configuration', () => {
+      const res = extractPackage(
+        Fixtures.get('empty_cnb.pom.xml'),
+        'empty_cnb.pom.xml',
+        {},
+      );
+      expect(res?.deps).toEqual([]);
+    });
+
+    it('returns no buildpack dependencies when dependencies are invalid in spring boot plugin', () => {
+      const res = extractPackage(
+        Fixtures.get('invalid_cnb.pom.xml'),
+        'invalid_cnb.pom.xml',
+        {},
+      );
+      expect(res?.deps).toEqual([]);
+    });
   });
 
   describe('resolveParents', () => {

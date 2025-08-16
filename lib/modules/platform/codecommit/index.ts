@@ -13,6 +13,7 @@ import { logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
 import { coerceArray } from '../../../util/array';
 import { parseJson } from '../../../util/common';
+import { getEnv } from '../../../util/env';
 import * as git from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -62,16 +63,17 @@ export async function initPlatform({
 }: PlatformParams): Promise<PlatformResult> {
   const accessKeyId = username;
   const secretAccessKey = password;
+  const env = getEnv();
   let region: string | undefined;
 
   if (accessKeyId) {
-    process.env.AWS_ACCESS_KEY_ID = accessKeyId;
+    env.AWS_ACCESS_KEY_ID = accessKeyId;
   }
   if (secretAccessKey) {
-    process.env.AWS_SECRET_ACCESS_KEY = secretAccessKey;
+    env.AWS_SECRET_ACCESS_KEY = secretAccessKey;
   }
   if (awsToken) {
-    process.env.AWS_SESSION_TOKEN = awsToken;
+    env.AWS_SESSION_TOKEN = awsToken;
   }
 
   if (endpoint) {
@@ -79,7 +81,7 @@ export async function initPlatform({
     const codeCommitMatch = regionReg.exec(endpoint);
     region = codeCommitMatch?.groups?.region;
     if (region) {
-      process.env.AWS_REGION = region;
+      env.AWS_REGION = region;
     } else {
       logger.warn("Can't parse region, make sure your endpoint is correct");
     }
@@ -93,9 +95,7 @@ export async function initPlatform({
   const platformConfig: PlatformResult = {
     endpoint:
       endpoint ??
-      `https://git-codecommit.${
-        process.env.AWS_REGION ?? 'us-east-1'
-      }.amazonaws.com/`,
+      `https://git-codecommit.${env.AWS_REGION ?? 'us-east-1'}.amazonaws.com/`,
   };
   return Promise.resolve(platformConfig);
 }

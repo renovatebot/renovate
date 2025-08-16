@@ -1,5 +1,6 @@
 import * as memCache from './cache/memory';
 import {
+  AbandonedPackageStats,
   DatasourceCacheStats,
   HttpCacheStats,
   HttpStats,
@@ -572,6 +573,97 @@ describe('util/stats', () => {
           '/bar': { hit: 1, localMiss: 1, miss: 1 },
         },
       });
+    });
+  });
+
+  describe('AbandonmentStats', () => {
+    beforeEach(() => {
+      memCache.init();
+    });
+
+    it('returns empty report', () => {
+      const res = AbandonedPackageStats.getReport();
+      expect(res).toEqual({});
+    });
+
+    it('writes data points', () => {
+      AbandonedPackageStats.write(
+        'npm',
+        'package1',
+        '2023-01-01T00:00:00.000Z',
+      );
+      AbandonedPackageStats.write(
+        'npm',
+        'package2',
+        '2023-02-01T00:00:00.000Z',
+      );
+      AbandonedPackageStats.write(
+        'docker',
+        'image1',
+        '2023-03-01T00:00:00.000Z',
+      );
+
+      const data = AbandonedPackageStats.getData();
+      expect(data).toEqual([
+        {
+          datasource: 'npm',
+          packageName: 'package1',
+          mostRecentTimestamp: '2023-01-01T00:00:00.000Z',
+        },
+        {
+          datasource: 'npm',
+          packageName: 'package2',
+          mostRecentTimestamp: '2023-02-01T00:00:00.000Z',
+        },
+        {
+          datasource: 'docker',
+          packageName: 'image1',
+          mostRecentTimestamp: '2023-03-01T00:00:00.000Z',
+        },
+      ]);
+
+      const report = AbandonedPackageStats.getReport();
+      expect(report).toEqual({
+        npm: {
+          package1: '2023-01-01T00:00:00.000Z',
+          package2: '2023-02-01T00:00:00.000Z',
+        },
+        docker: {
+          image1: '2023-03-01T00:00:00.000Z',
+        },
+      });
+    });
+
+    it('logs report', () => {
+      AbandonedPackageStats.write(
+        'npm',
+        'package1',
+        '2023-01-01T00:00:00.000Z',
+      );
+      AbandonedPackageStats.write(
+        'docker',
+        'image1',
+        '2023-03-01T00:00:00.000Z',
+      );
+
+      AbandonedPackageStats.report();
+
+      expect(logger.logger.debug).toHaveBeenCalledTimes(1);
+      const [data, msg] = logger.logger.debug.mock.calls[0];
+      expect(msg).toBe('Abandoned package statistics');
+      expect(data).toEqual({
+        npm: {
+          package1: '2023-01-01T00:00:00.000Z',
+        },
+        docker: {
+          image1: '2023-03-01T00:00:00.000Z',
+        },
+      });
+    });
+
+    it('does not log report when no data', () => {
+      AbandonedPackageStats.report();
+      expect(logger.logger.debug).not.toHaveBeenCalled();
     });
   });
 });

@@ -1,14 +1,39 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
+import { matchRegexOrGlob } from '../../string-match';
 import type { PackageCacheNamespace } from './types';
 
+/**
+ * This MUST NOT be used outside of cache implementation
+ *
+ * @param namespace
+ */
 export function getTtlOverride(
   namespace: PackageCacheNamespace,
 ): number | undefined {
-  const ttl = GlobalConfig.get('cacheTtlOverride', {})[namespace];
+  const overrides = GlobalConfig.get('cacheTtlOverride', {});
+  let ttl: number | undefined = overrides[namespace];
   if (is.number(ttl)) {
     return ttl;
   }
+
+  let maxLen = 0;
+  for (const [key, value] of Object.entries(overrides)) {
+    if (!is.number(value)) {
+      continue;
+    }
+
+    const keyLen = key.length;
+    if (keyLen > maxLen && matchRegexOrGlob(namespace, key)) {
+      maxLen = keyLen;
+      ttl = value;
+    }
+  }
+
+  if (is.number(ttl)) {
+    return ttl;
+  }
+
   return undefined;
 }
 

@@ -1,14 +1,16 @@
 import readline from 'node:readline';
 import type { AllConfig } from '../../../../config/types';
+import { getEnv } from '../../../../util/env';
 
-// istanbul ignore next
+/* v8 ignore start */
 export async function setConfig(config: AllConfig): Promise<AllConfig> {
-  if (process.env.CODESPACES !== 'true') {
+  const env = getEnv();
+  if (env.CODESPACES !== 'true') {
     return config;
   }
 
-  if (!config.token && process.env.GITHUB_TOKEN) {
-    config.token = process.env.GITHUB_TOKEN;
+  if (!config.token && env.GITHUB_TOKEN) {
+    config.token = env.GITHUB_TOKEN;
   }
 
   if (!config.repositories?.length) {
@@ -22,3 +24,4 @@ export async function setConfig(config: AllConfig): Promise<AllConfig> {
 
   return config;
 }
+/* v8 ignore stop */

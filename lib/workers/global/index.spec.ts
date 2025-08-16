@@ -1,8 +1,6 @@
 import { ERROR, WARN } from 'bunyan';
 import fs from 'fs-extra';
 import { GlobalConfig } from '../../config/global';
-import * as _presets from '../../config/presets';
-import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { DockerDatasource } from '../../modules/datasource/docker';
 import * as platform from '../../modules/platform';
 import * as secrets from '../../util/sanitize';
@@ -15,7 +13,6 @@ import type { RenovateConfig } from '~test/util';
 
 vi.mock('../repository');
 vi.mock('../../util/fs');
-vi.mock('../../config/presets');
 
 vi.mock('fs-extra', async () => {
   const realFs = await vi.importActual<typeof fs>('fs-extra');
@@ -37,9 +34,6 @@ vi.mock('fs-extra', async () => {
 
 // TODO: why do we need git here?
 vi.unmock('../../util/git');
-
-// imports are readonly
-const presets = vi.mocked(_presets);
 
 const addSecretForSanitizing = vi.spyOn(secrets, 'addSecretForSanitizing');
 const parseConfigs = vi.spyOn(configParser, 'parseConfigs');
@@ -92,31 +86,6 @@ describe('workers/global/index', () => {
     process.env.AWS_SESSION_TOKEN = 'token';
     await expect(globalWorker.start()).resolves.toBe(0);
     expect(addSecretForSanitizing).toHaveBeenCalledTimes(2);
-  });
-
-  it('resolves global presets immediately', async () => {
-    parseConfigs.mockResolvedValueOnce({
-      repositories: [],
-      globalExtends: [':pinVersions'],
-      hostRules: [{ matchHost: 'github.com', token: 'abc123' }],
-    });
-    presets.resolveConfigPresets.mockResolvedValueOnce({});
-    await expect(globalWorker.start()).resolves.toBe(0);
-    expect(presets.resolveConfigPresets).toHaveBeenCalledWith({
-      extends: [':pinVersions'],
-    });
-    expect(parseConfigs).toHaveBeenCalledTimes(1);
-  });
-
-  it('throws if global presets could not be resolved', async () => {
-    presets.resolveConfigPresets.mockImplementationOnce(() => {
-      throw new Error('some-error');
-    });
-    await expect(
-      globalWorker.resolveGlobalExtends(['some-preset']),
-    ).rejects.toThrow(CONFIG_PRESETS_INVALID);
-    expect(presets.resolveConfigPresets).toHaveBeenCalled();
-    expect(parseConfigs).not.toHaveBeenCalled();
   });
 
   it('handles zero repos', async () => {

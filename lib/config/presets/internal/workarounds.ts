@@ -18,6 +18,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:supportRedHatImageVersion',
       'workarounds:javaLTSVersions',
       'workarounds:disableEclipseLifecycleMapping',
+      'workarounds:disableGradleReplacements',
       'workarounds:disableMavenParentRoot',
       'workarounds:containerbase',
       'workarounds:bitnamiDockerImageVersioning',
@@ -66,6 +67,16 @@ export const presets: Record<string, Preset> = {
         enabled: false,
         matchDatasources: ['maven'],
         matchPackageNames: ['org.eclipse.m2e:lifecycle-mapping'],
+      },
+    ],
+  },
+  disableGradleReplacements: {
+    description: 'Disable package replacement updates for gradle dependencies.',
+    packageRules: [
+      {
+        enabled: false,
+        matchManagers: ['gradle'],
+        matchUpdateTypes: ['replacement'],
       },
     ],
   },
@@ -133,7 +144,7 @@ export const presets: Record<string, Preset> = {
     description: 'Limit Java runtime versions to LTS releases.',
     packageRules: [
       {
-        allowedVersions: '/^(?:8|11|17|21)(?:\\.|-|$)/',
+        allowedVersions: '/^(?:8|11|17|21|25)(?:\\.|-|$)/',
         description:
           'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
         matchDatasources: ['docker', 'java-version'],

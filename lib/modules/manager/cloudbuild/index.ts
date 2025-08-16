@@ -9,7 +9,7 @@ export const url = 'https://cloud.google.com/build/docs';
 export const categories: Category[] = ['ci'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)cloudbuild\\.ya?ml'],
+  managerFilePatterns: ['/(^|/)cloudbuild\\.ya?ml/'],
 };
 
 export const supportedDatasources = [DockerDatasource.id];

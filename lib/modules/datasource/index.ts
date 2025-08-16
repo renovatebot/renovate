@@ -7,6 +7,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { coerceArray } from '../../util/array';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
+import type { PackageCacheNamespace } from '../../util/cache/package/types';
 import { clone } from '../../util/clone';
 import { filterMap } from '../../util/filter-map';
 import { AsyncResult, Result } from '../../util/result';
@@ -40,8 +41,6 @@ export { isGetPkgReleasesConfig } from './common';
 export const getDatasources = (): Map<string, DatasourceApi> => datasources;
 export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 
-const cacheNamespace = 'datasource-releases';
-
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
 // TODO: fix error Type
@@ -66,14 +65,18 @@ async function getRegistryReleases(
   config: GetReleasesConfig,
   registryUrl: string,
 ): Promise<ReleaseResult | null> {
-  const cacheKey = `${datasource.id} ${registryUrl} ${config.packageName}`;
-  if (datasource.caching) {
+  const cacheNamespace: PackageCacheNamespace = `datasource-releases-${datasource.id}`;
+  const cacheKey = `${registryUrl}:${config.packageName}`;
+
+  const cacheEnabled = !!datasource.caching; // tells if `isPrivate` flag is supported in datasource result
+  const cacheForced = GlobalConfig.get('cachePrivatePackages', false); // tells if caching is forced via admin config
+
+  if (cacheEnabled || cacheForced) {
     const cachedResult = await packageCache.get<ReleaseResult>(
       cacheNamespace,
       cacheKey,
     );
 
-    // istanbul ignore if
     if (cachedResult) {
       logger.trace({ cacheKey }, 'Returning cached datasource response');
       DatasourceCacheStats.hit(datasource.id, registryUrl, config.packageName);
@@ -88,20 +91,23 @@ async function getRegistryReleases(
     res.registryUrl ??= registryUrl;
   }
 
-  // cache non-null responses unless marked as private
-  if (datasource.caching && res) {
-    const cachePrivatePackages = GlobalConfig.get(
-      'cachePrivatePackages',
-      false,
-    );
-    if (cachePrivatePackages || !res.isPrivate) {
-      logger.trace({ cacheKey }, 'Caching datasource response');
-      const cacheMinutes = 15;
-      await packageCache.set(cacheNamespace, cacheKey, res, cacheMinutes);
-      DatasourceCacheStats.set(datasource.id, registryUrl, config.packageName);
-    } else {
-      DatasourceCacheStats.skip(datasource.id, registryUrl, config.packageName);
-    }
+  if (!res) {
+    return null;
+  }
+
+  let cache = false;
+  if (cacheForced) {
+    cache = true;
+  } else if (cacheEnabled && !res.isPrivate) {
+    cache = true;
+  }
+
+  if (cache) {
+    logger.trace({ cacheKey }, 'Caching datasource response');
+    await packageCache.set(cacheNamespace, cacheKey, res, 15);
+    DatasourceCacheStats.set(datasource.id, registryUrl, config.packageName);
+  } else {
+    DatasourceCacheStats.skip(datasource.id, registryUrl, config.packageName);
   }
 
   return res;
@@ -289,7 +295,7 @@ function resolveRegistryUrls(
         'Custom registries are not allowed for this datasource and will be ignored',
       );
     }
-    return is.function_(datasource.defaultRegistryUrls)
+    return is.function(datasource.defaultRegistryUrls)
       ? datasource.defaultRegistryUrls()
       : (datasource.defaultRegistryUrls ?? []);
   }
@@ -300,7 +306,7 @@ function resolveRegistryUrls(
   } else if (is.nonEmptyArray(defaultRegistryUrls)) {
     resolvedUrls = [...defaultRegistryUrls];
     resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
-  } else if (is.function_(datasource.defaultRegistryUrls)) {
+  } else if (is.function(datasource.defaultRegistryUrls)) {
     resolvedUrls = [...datasource.defaultRegistryUrls()];
     resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
   } else if (is.nonEmptyArray(datasource.defaultRegistryUrls)) {
@@ -388,7 +394,7 @@ function fetchCachedReleases(
   config: GetReleasesInternalConfig,
 ): Promise<ReleaseResult | null> {
   const { datasource, packageName, registryUrls } = config;
-  const cacheKey = `${cacheNamespace}${datasource}${packageName}${config.registryStrategy}${String(
+  const cacheKey = `datasource-mem:releases:${datasource}:${packageName}:${config.registryStrategy}:${String(
     registryUrls,
   )}`;
   // By returning a Promise and reusing it, we should only fetch each package at most once

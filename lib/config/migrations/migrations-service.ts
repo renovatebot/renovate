@@ -22,6 +22,7 @@ import { DryRunMigration } from './custom/dry-run-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { ExtendsMigration } from './custom/extends-migration';
 import { FetchReleaseNotesMigration } from './custom/fetch-release-notes-migration';
+import { FileMatchMigration } from './custom/file-match-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
@@ -55,6 +56,7 @@ import { StabilityDaysMigration } from './custom/stability-days-migration';
 import { SuppressNotificationsMigration } from './custom/suppress-notifications-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
 import { UnpublishSafeMigration } from './custom/unpublish-safe-migration';
+import { UpdateLockFilesMigration } from './custom/update-lock-files-migration';
 import { UpgradeInRangeMigration } from './custom/upgrade-in-range-migration';
 import { VersionStrategyMigration } from './custom/version-strategy-migration';
 import type { Migration, MigrationConstructor } from './types';
@@ -105,6 +107,7 @@ export class MigrationsService {
     ['masterIssueTitle', 'dependencyDashboardTitle'],
     ['masterIssueLabels', 'dependencyDashboardLabels'],
     ['regexManagers', 'customManagers'],
+    ['baseBranches', 'baseBranchPatterns'],
   ]);
 
   static readonly customMigrations: readonly MigrationConstructor[] = [
@@ -162,6 +165,8 @@ export class MigrationsService {
     MatchManagersMigration,
     CustomManagersMigration,
     PlatformCommitMigration,
+    FileMatchMigration,
+    UpdateLockFilesMigration,
   ];
 
   static run(
