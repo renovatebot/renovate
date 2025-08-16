@@ -111,6 +111,7 @@ export class CrateDatasource extends Datasource {
       .map((version) => {
         const release: Release = {
           version: version.vers.replace(/\+.*$/, ''),
+          versionOrig: version.vers,
         };
         if (version.yanked) {
           release.isDeprecated = true;
@@ -438,7 +439,7 @@ export class CrateDatasource extends Datasource {
       return release;
     }
 
-    const url = `https://crates.io/api/v1/crates/${packageName}/${release.version}`;
+    const url = `https://crates.io/api/v1/crates/${packageName}/${release.versionOrig ?? release.version}`;
     const { body: releaseTimestamp } = await this.http.getJson(
       url,
       { cacheProvider: memCacheProvider },

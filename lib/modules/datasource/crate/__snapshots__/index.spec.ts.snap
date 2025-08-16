@@ -7,9 +7,11 @@ exports[`modules/datasource/crate/index > getReleases > clones cloudsmith privat
   "releases": [
     {
       "version": "0.1.0",
+      "versionOrig": "0.1.0",
     },
     {
       "version": "0.1.1",
+      "versionOrig": "0.1.1",
     },
   ],
 }
@@ -22,9 +24,11 @@ exports[`modules/datasource/crate/index > getReleases > clones other private reg
   "releases": [
     {
       "version": "0.1.0",
+      "versionOrig": "0.1.0",
     },
     {
       "version": "0.1.1",
+      "versionOrig": "0.1.1",
     },
   ],
 }
@@ -38,61 +42,80 @@ exports[`modules/datasource/crate/index > getReleases > processes real data: ame
   "releases": [
     {
       "version": "0.1.0",
+      "versionOrig": "0.1.0",
     },
     {
       "version": "0.1.1",
+      "versionOrig": "0.1.1",
     },
     {
       "version": "0.1.3",
+      "versionOrig": "0.1.3",
     },
     {
       "version": "0.1.4",
+      "versionOrig": "0.1.4",
     },
     {
       "version": "0.2.1",
+      "versionOrig": "0.2.1",
     },
     {
       "version": "0.3.0",
+      "versionOrig": "0.3.0",
     },
     {
       "version": "0.3.1",
+      "versionOrig": "0.3.1",
     },
     {
       "version": "0.4.0",
+      "versionOrig": "0.4.0",
     },
     {
       "version": "0.4.1",
+      "versionOrig": "0.4.1",
     },
     {
       "version": "0.4.2",
+      "versionOrig": "0.4.2",
     },
     {
       "version": "0.4.3",
+      "versionOrig": "0.4.3",
     },
     {
       "version": "0.5.0",
+      "versionOrig": "0.5.0",
     },
     {
       "version": "0.5.1",
+      "versionOrig": "0.5.1",
     },
     {
       "version": "0.6.0",
+      "versionOrig": "0.6.0",
     },
     {
       "version": "0.7.0",
+      "versionOrig": "0.7.0",
     },
     {
       "version": "0.8.0",
+      "versionOrig": "0.8.0",
     },
     {
       "version": "0.9.0",
+      "versionOrig": "0.9.0",
     },
     {
       "version": "0.10.0",
+      "versionOrig": "0.10.0",
     },
     {
       "isDeprecated": true,
       "version": "0.10.1",
+      "versionOrig": "0.10.1",
     },
   ],
   "sourceUrl": "https://github.com/amethyst/amethyst",
@@ -106,200 +129,265 @@ exports[`modules/datasource/crate/index > getReleases > processes real data: lib
   "releases": [
     {
       "version": "0.1.0",
+      "versionOrig": "0.1.0",
     },
     {
       "version": "0.1.1",
+      "versionOrig": "0.1.1",
     },
     {
       "version": "0.1.2",
+      "versionOrig": "0.1.2",
     },
     {
       "version": "0.1.3",
+      "versionOrig": "0.1.3",
     },
     {
       "version": "0.1.4",
+      "versionOrig": "0.1.4",
     },
     {
       "version": "0.1.5",
+      "versionOrig": "0.1.5",
     },
     {
       "version": "0.1.6",
+      "versionOrig": "0.1.6",
     },
     {
       "version": "0.1.7",
+      "versionOrig": "0.1.7",
     },
     {
       "version": "0.1.8",
+      "versionOrig": "0.1.8",
     },
     {
       "isDeprecated": true,
       "version": "0.1.9",
+      "versionOrig": "0.1.9",
     },
     {
       "version": "0.1.10",
+      "versionOrig": "0.1.10",
     },
     {
       "isDeprecated": true,
       "version": "0.1.11",
+      "versionOrig": "0.1.11",
     },
     {
       "version": "0.1.12",
+      "versionOrig": "0.1.12",
     },
     {
       "version": "0.2.0",
+      "versionOrig": "0.2.0",
     },
     {
       "version": "0.2.1",
+      "versionOrig": "0.2.1",
     },
     {
       "version": "0.2.2",
+      "versionOrig": "0.2.2",
     },
     {
       "version": "0.2.3",
+      "versionOrig": "0.2.3",
     },
     {
       "version": "0.2.4",
+      "versionOrig": "0.2.4",
     },
     {
       "version": "0.2.5",
+      "versionOrig": "0.2.5",
     },
     {
       "version": "0.2.6",
+      "versionOrig": "0.2.6",
     },
     {
       "version": "0.2.7",
+      "versionOrig": "0.2.7",
     },
     {
       "version": "0.2.8",
+      "versionOrig": "0.2.8",
     },
     {
       "version": "0.2.9",
+      "versionOrig": "0.2.9",
     },
     {
       "version": "0.2.10",
+      "versionOrig": "0.2.10",
     },
     {
       "version": "0.2.11",
+      "versionOrig": "0.2.11",
     },
     {
       "version": "0.2.12",
+      "versionOrig": "0.2.12",
     },
     {
       "version": "0.2.13",
+      "versionOrig": "0.2.13",
     },
     {
       "version": "0.2.14",
+      "versionOrig": "0.2.14",
     },
     {
       "version": "0.2.15",
+      "versionOrig": "0.2.15",
     },
     {
       "version": "0.2.16",
+      "versionOrig": "0.2.16",
     },
     {
       "version": "0.2.17",
+      "versionOrig": "0.2.17",
     },
     {
       "version": "0.2.18",
+      "versionOrig": "0.2.18",
     },
     {
       "version": "0.2.19",
+      "versionOrig": "0.2.19",
     },
     {
       "version": "0.2.20",
+      "versionOrig": "0.2.20",
     },
     {
       "version": "0.2.21",
+      "versionOrig": "0.2.21",
     },
     {
       "version": "0.2.22",
+      "versionOrig": "0.2.22",
     },
     {
       "version": "0.2.23",
+      "versionOrig": "0.2.23",
     },
     {
       "version": "0.2.24",
+      "versionOrig": "0.2.24",
     },
     {
       "version": "0.2.25",
+      "versionOrig": "0.2.25",
     },
     {
       "version": "0.2.26",
+      "versionOrig": "0.2.26",
     },
     {
       "version": "0.2.27",
+      "versionOrig": "0.2.27",
     },
     {
       "version": "0.2.28",
+      "versionOrig": "0.2.28",
     },
     {
       "version": "0.2.29",
+      "versionOrig": "0.2.29",
     },
     {
       "version": "0.2.30",
+      "versionOrig": "0.2.30",
     },
     {
       "version": "0.2.31",
+      "versionOrig": "0.2.31",
     },
     {
       "version": "0.2.32",
+      "versionOrig": "0.2.32",
     },
     {
       "version": "0.2.33",
+      "versionOrig": "0.2.33",
     },
     {
       "version": "0.2.34",
+      "versionOrig": "0.2.34",
     },
     {
       "version": "0.2.35",
+      "versionOrig": "0.2.35",
     },
     {
       "version": "0.2.36",
+      "versionOrig": "0.2.36",
     },
     {
       "version": "0.2.37",
+      "versionOrig": "0.2.37",
     },
     {
       "version": "0.2.38",
+      "versionOrig": "0.2.38",
     },
     {
       "version": "0.2.39",
+      "versionOrig": "0.2.39",
     },
     {
       "version": "0.2.40",
+      "versionOrig": "0.2.40",
     },
     {
       "version": "0.2.41",
+      "versionOrig": "0.2.41",
     },
     {
       "version": "0.2.42",
+      "versionOrig": "0.2.42",
     },
     {
       "version": "0.2.43",
+      "versionOrig": "0.2.43",
     },
     {
       "version": "0.2.44",
+      "versionOrig": "0.2.44",
     },
     {
       "version": "0.2.45",
+      "versionOrig": "0.2.45",
     },
     {
       "version": "0.2.46",
+      "versionOrig": "0.2.46",
     },
     {
       "version": "0.2.47",
+      "versionOrig": "0.2.47",
     },
     {
       "version": "0.2.48",
+      "versionOrig": "0.2.48",
     },
     {
       "version": "0.2.49",
+      "versionOrig": "0.2.49",
     },
     {
       "version": "0.2.50",
+      "versionOrig": "0.2.50",
     },
     {
       "version": "0.2.51",
+      "versionOrig": "0.2.51+metadata",
     },
   ],
   "sourceUrl": "https://github.com/rust-lang/libc",
