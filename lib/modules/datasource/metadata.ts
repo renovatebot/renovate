@@ -44,7 +44,7 @@ export function massageGithubUrl(url: string): string {
     .join('/');
 }
 
-function massageGitlabUrl(url: string): string {
+export function massageGitlabUrl(url: string): string {
   const massagedUrl = massageGitAtUrl(url);
 
   return massagedUrl
@@ -52,7 +52,7 @@ function massageGitlabUrl(url: string): string {
     .replace(gitPrefix, 'https://')
     .replace(regEx(/\/tree\/.*$/i), '')
     .replace(regEx(/\/$/i), '')
-    .replace('.git', '');
+    .replace(regEx(/\.git$/i), '');
 }
 
 function massageGitAtUrl(url: string): string {

@@ -118,6 +118,13 @@
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.04.06/nunit.2.6.0.12051.json",
             "@type": "PackageDetails",
             "authors": "Charlie Poole",
+            "deprecation": {
+              "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.04.06/nunit.2.6.0.12051.json#deprecation",
+              "@type": "deprecation",
+              "reasons": [
+                "Legacy"
+              ]
+            },
             "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\nVersion 2.6 is the seventh major release of this well-known and well-tested programming tool.\n\nThis package includes only the framework assembly. You will need to install the NUnit.Runners package unless you are using a third-party runner.",
             "iconUrl": "https://api.nuget.org/v3-flatcontainer/nunit/2.6.0.12051/icon",
             "id": "NUnit",

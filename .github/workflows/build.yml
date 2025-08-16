@@ -34,7 +34,7 @@ env:
   # are we on a release branch?
   DO_REALEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
   NODE_VERSION: 22
-  PDM_VERSION: 2.24.2 # renovate: datasource=pypi depName=pdm
+  PDM_VERSION: 2.25.6 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -98,7 +98,7 @@ jobs:
         run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_OUTPUT"
 
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
@@ -137,7 +137,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
@@ -181,7 +181,7 @@ jobs:
     steps:
       - name: Checkout code
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
@@ -203,7 +203,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           show-progress: false
 
@@ -214,7 +214,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore eslint cache
-        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: .cache/eslint
           # we need to add the hash because eslint cache doesn't detect plugin changes
@@ -226,7 +226,7 @@ jobs:
 
       - name: Save eslint cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: .cache/eslint
           key: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -239,7 +239,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           show-progress: false
 
@@ -250,7 +250,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
-        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: .cache/prettier
           # we need to add the hash because prettier cache doesn't detect plugin changes
@@ -268,7 +268,7 @@ jobs:
 
       - name: Save prettier cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: .cache/prettier
           key: prettier-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -281,7 +281,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           show-progress: false
 
@@ -292,7 +292,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Lint markdown
-        uses: DavidAnson/markdownlint-cli2-action@05f32210e84442804257b2a6f20b273450ec8265 # v19.1.0
+        uses: DavidAnson/markdownlint-cli2-action@992badcdf24e3b8eb7e87ff9287fe931bcb00c6e # v20.0.0
 
       - name: Lint fenced code blocks
         run: pnpm doc-fence-check
@@ -311,7 +311,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           show-progress: false
 
@@ -353,7 +353,7 @@ jobs:
         include: ${{ fromJSON(needs.setup.outputs.test-shard-matrix) }}
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           show-progress: false
 
@@ -364,7 +364,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Cache vitest
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: .cache/vitest
           key: |
@@ -389,7 +389,7 @@ jobs:
           done
 
       - name: Move coverage files
-        if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
+        if: success() && github.event.pull_request.draft != true && matrix.coverage
         run: |
           mkdir -p ./coverage/lcov
           mkdir -p ./coverage/json
@@ -400,7 +400,7 @@ jobs:
           done
 
       - name: Save coverage artifacts
-        if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
+        if: success() && github.event.pull_request.draft != true && matrix.coverage
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ matrix.upload-artifact-name }}
@@ -412,16 +412,16 @@ jobs:
     needs: [test]
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    if: (success() || failure()) && github.event_name != 'merge_group' && github.event.pull_request.draft != true
+    if: success() && github.event_name != 'merge_group' && github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           filter: blob:none # we don't need all blobs
           show-progress: false
 
       - name: Download coverage reports
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           pattern: coverage-*
           path: coverage
@@ -441,10 +441,10 @@ jobs:
       - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    if: (success() || failure()) && github.event.pull_request.draft != true
+    if: success() && github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
@@ -457,7 +457,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download coverage reports
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           pattern: coverage-*
           path: coverage
@@ -535,7 +535,7 @@ jobs:
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           show-progress: false
 
@@ -559,15 +559,15 @@ jobs:
       - build
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: github.event.pull_request.draft != true
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           show-progress: false
 
       - name: Download dist
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: renovate-dist
           path: dist/
@@ -587,7 +587,7 @@ jobs:
         run: docker run -e LOG_LEVEL=debug --rm renovate/renovate --version
 
       - name: dry-run
-        if: github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && env.DO_REALEASE != 'true') || (github.repository == 'renovatebot/renovate' && github.event_name == 'pull_request')
+        if: github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && env.DO_REALEASE != 'true')
         run: docker run -e LOG_LEVEL=debug -e RENOVATE_TOKEN --rm renovate/renovate --dry-run=lookup ${{ github.repository }}
         env:
           RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -601,7 +601,7 @@ jobs:
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           show-progress: false
 
@@ -648,7 +648,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           show-progress: false
 
@@ -659,7 +659,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download dist
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: renovate-dist
           path: dist/
@@ -698,14 +698,14 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
           filter: blob:none # we don't need all blobs, only the full tree
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@82eae9bb384849f340bbf269d995aa7badc4aa13 # v3.10.41
+        uses: containerbase/internal-tools@516588309ad564e1d89549ba7cd9acbc22f37073 # v3.10.72
         with:
           command: docker-config
 
@@ -715,7 +715,7 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
-      - uses: sigstore/cosign-installer@3454372f43399081ed03b604cb2d021dabca52bb # v3.8.2
+      - uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159 # v3.9.2
 
       - name: Docker registry login
         run: |

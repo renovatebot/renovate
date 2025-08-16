@@ -57,21 +57,32 @@ describe('modules/manager/mise/extract', () => {
       aws-vault = "6.6.1"
       buf = "1.27.0"
       ccache = "4.11.3"
+      committed = "1.1.7"
       consul = "1.14.3"
+      dotenv-linter = "3.3.0"
       hivemind = "1.1.0"
+      hk = "1.1.2"
       jq = "1.7.1"
       kafka = "apache-3.9.0"
+      lefthook = "1.11.13"
       localstack = "4.3.0"
+      lychee = "0.19.1"
       opentofu = "1.6.1"
+      pipx = "1.7.1"
+      pkl = "0.28.2"
       protoc = "30.2"
       redis = "8.0.1"
+      ruff = "0.11.12"
       shellcheck = "0.10.0"
       skeema = "1.12.3"
       sops = "3.10.2"
+      sqlite = "3.50.1"
       stripe = "1.25.0"
+      taplo = "0.10.0"
       terragrunt = "0.72.6"
       tilt = "0.34.0"
       tusd = "2.8.0"
+      usage = "2.1.1"
     `;
       const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
@@ -118,6 +129,13 @@ describe('modules/manager/mise/extract', () => {
             packageName: 'ccache/ccache',
           },
           {
+            currentValue: '1.1.7',
+            datasource: 'github-releases',
+            depName: 'committed',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'crate-ci/committed',
+          },
+          {
             currentValue: '1.14.3',
             datasource: 'github-releases',
             depName: 'consul',
@@ -125,11 +143,25 @@ describe('modules/manager/mise/extract', () => {
             packageName: 'hashicorp/consul',
           },
           {
+            currentValue: '3.3.0',
+            datasource: 'github-releases',
+            depName: 'dotenv-linter',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'dotenv-linter/dotenv-linter',
+          },
+          {
             currentValue: '1.1.0',
             datasource: 'github-releases',
             depName: 'hivemind',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'DarthSim/hivemind',
+          },
+          {
+            currentValue: '1.1.2',
+            datasource: 'github-releases',
+            depName: 'hk',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'jdx/hk',
           },
           {
             currentValue: '1.7.1',
@@ -145,6 +177,13 @@ describe('modules/manager/mise/extract', () => {
             packageName: 'apache/kafka',
           },
           {
+            currentValue: '1.11.13',
+            datasource: 'github-releases',
+            depName: 'lefthook',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'evilmartians/lefthook',
+          },
+          {
             currentValue: '4.3.0',
             datasource: 'github-releases',
             depName: 'localstack',
@@ -152,11 +191,30 @@ describe('modules/manager/mise/extract', () => {
             packageName: 'localstack/localstack',
           },
           {
+            currentValue: '0.19.1',
+            datasource: 'github-releases',
+            depName: 'lychee',
+            extractVersion: '^lychee-v(?<version>\\S+)',
+            packageName: 'lycheeverse/lychee',
+          },
+          {
             currentValue: '1.6.1',
             datasource: 'github-releases',
             depName: 'opentofu',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'opentofu/opentofu',
+          },
+          {
+            currentValue: '1.7.1',
+            datasource: 'github-releases',
+            depName: 'pipx',
+            packageName: 'pypa/pipx',
+          },
+          {
+            currentValue: '0.28.2',
+            datasource: 'github-releases',
+            depName: 'pkl',
+            packageName: 'apple/pkl',
           },
           {
             currentValue: '30.2',
@@ -170,6 +228,12 @@ describe('modules/manager/mise/extract', () => {
             datasource: 'github-releases',
             depName: 'redis',
             packageName: 'redis/redis',
+          },
+          {
+            currentValue: '0.11.12',
+            datasource: 'github-releases',
+            depName: 'ruff',
+            packageName: 'astral-sh/ruff',
           },
           {
             currentValue: '0.10.0',
@@ -193,11 +257,24 @@ describe('modules/manager/mise/extract', () => {
             packageName: 'getsops/sops',
           },
           {
+            currentValue: '3.50.1',
+            datasource: 'github-tags',
+            depName: 'sqlite',
+            extractVersion: '^version-(?<version>\\S+)',
+            packageName: 'sqlite/sqlite',
+          },
+          {
             currentValue: '1.25.0',
             datasource: 'github-releases',
             depName: 'stripe',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'stripe/stripe-cli',
+          },
+          {
+            currentValue: '0.10.0',
+            datasource: 'github-releases',
+            depName: 'taplo',
+            packageName: 'tamasfe/taplo',
           },
           {
             currentValue: '0.72.6',
@@ -219,6 +296,13 @@ describe('modules/manager/mise/extract', () => {
             depName: 'tusd',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'tus/tusd',
+          },
+          {
+            currentValue: '2.1.1',
+            datasource: 'github-releases',
+            depName: 'usage',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'jdx/usage',
           },
         ],
       });

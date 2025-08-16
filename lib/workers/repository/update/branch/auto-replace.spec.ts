@@ -757,6 +757,33 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
+    it('updates with helm value image/repository replacement with digest', async () => {
+      const yml = codeBlock`
+        parser:
+          image:
+              repository: docker.io/securecodebox/parser-nmap
+              tag: 3.14.3@q1w2e3r4t5z6u7i8o9p0
+      `;
+      upgrade.manager = 'helm-values';
+      upgrade.depName = 'docker.io/securecodebox/parser-nmap';
+      upgrade.replaceString = '3.14.3';
+      upgrade.currentValue = '3.14.3';
+      upgrade.currentDigest = 'q1w2e3r4t5z6u7i8o9p0';
+      upgrade.depIndex = 0;
+      upgrade.updateType = 'replacement';
+      upgrade.newName = 'iteratec/juice-balancer';
+      upgrade.newValue = 'v5.1.0';
+      upgrade.newDigest = 'p0o9i8u7z6t5r4e3w2q1';
+      upgrade.packageFile = 'values.yml';
+      const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
+      expect(res).toBe(
+        yml
+          .replace(upgrade.depName, upgrade.newName)
+          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentDigest, upgrade.newDigest),
+      );
+    });
+
     it('updates with helm value image/repository wrong version', async () => {
       const yml = codeBlock`
         parser:
@@ -1149,6 +1176,32 @@ describe('workers/repository/update/branch/auto-replace', () => {
           FROM notUbuntu:18.04
           FROM alsoNotUbuntu:18.04
           FROM alpine:3.16
+        `,
+      );
+    });
+
+    it('updates with multiple same digest replacement without replaceString', async () => {
+      const dockerfile = codeBlock`
+        FROM notUbuntu:18.04@q1w2e3r4t5z6u7i8o9p0
+        FROM alsoNotUbuntu:18.05@q1w2e3r4t5z6u7i8o9p0
+        FROM ubuntu:18.04@q1w2e3r4t5z6u7i8o9p0
+      `;
+      upgrade.manager = 'dockerfile';
+      upgrade.depName = 'ubuntu';
+      upgrade.currentValue = '18.04';
+      upgrade.currentDigest = 'q1w2e3r4t5z6u7i8o9p0';
+      upgrade.depIndex = 2;
+      upgrade.updateType = 'replacement';
+      upgrade.newName = 'alpine';
+      upgrade.newValue = '3.16';
+      upgrade.newDigest = 'p0o9i8u7z6t5r4e3w2q1';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        codeBlock`
+          FROM notUbuntu:18.04@q1w2e3r4t5z6u7i8o9p0
+          FROM alsoNotUbuntu:18.05@q1w2e3r4t5z6u7i8o9p0
+          FROM alpine:3.16@p0o9i8u7z6t5r4e3w2q1
         `,
       );
     });

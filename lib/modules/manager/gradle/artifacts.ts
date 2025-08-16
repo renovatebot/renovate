@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { dirname, join } from 'upath';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -79,8 +79,8 @@ async function getSubProjectList(
 }
 
 async function getGradleVersion(gradlewFile: string): Promise<string | null> {
-  const propertiesFile = join(
-    dirname(gradlewFile),
+  const propertiesFile = upath.join(
+    upath.dirname(gradlewFile),
     'gradle/wrapper/gradle-wrapper.properties',
   );
   const properties = await readLocalFile(propertiesFile, 'utf8');
@@ -96,38 +96,41 @@ async function buildUpdateVerificationMetadataCmd(
   if (!verificationMetadataFile) {
     return null;
   }
-  const hashTypes: string[] = [];
+
   const verificationMetadata = await readLocalFile(verificationMetadataFile);
-  if (
-    verificationMetadata?.includes('<verify-metadata>true</verify-metadata>')
-  ) {
-    logger.debug('Dependency verification enabled - generating checksums');
-    for (const hashType of ['sha256', 'sha512']) {
-      if (verificationMetadata?.includes(`<${hashType}`)) {
-        hashTypes.push(hashType);
-      }
-    }
-    if (!hashTypes.length) {
-      hashTypes.push('sha256');
-    }
+  const verifiesChecksums = verificationMetadata?.includes(
+    '<verify-metadata>true</verify-metadata>',
+  );
+  const verifiesSignatures = verificationMetadata?.includes(
+    '<verify-signatures>true</verify-signatures>',
+  );
+
+  const hashTypes = ['sha256', 'sha512'].filter((type) =>
+    verificationMetadata?.includes(`<${type} `),
+  );
+
+  if (verifiesChecksums || hashTypes.length) {
+    logger.debug(
+      'Dependency metadata verification enabled or checksums present - generating checksums',
+    );
   }
-  if (
-    verificationMetadata?.includes(
-      '<verify-signatures>true</verify-signatures>',
-    )
-  ) {
+
+  if ((verifiesChecksums || verifiesSignatures) && !hashTypes.length) {
+    // fallback algorithm for pgp and in case a weak algorithm (md5, sha1) is used for checksums
+    hashTypes.push('sha256');
+  }
+
+  if (verifiesSignatures) {
     logger.debug(
       'Dependency signature verification enabled - generating PGP signatures',
     );
-    // signature verification requires at least one checksum type as fallback.
-    if (!hashTypes.length) {
-      hashTypes.push('sha256');
-    }
     hashTypes.push('pgp');
   }
+
   if (!hashTypes.length) {
     return null;
   }
+
   return `${baseCmd} --write-verification-metadata ${hashTypes.join(',')} dependencies`;
 }
 
@@ -152,7 +155,10 @@ export async function updateArtifacts({
   }
 
   const gradlewName = gradleWrapperFileName();
-  const gradlewFile = await findUpLocal(gradlewName, dirname(packageFileName));
+  const gradlewFile = await findUpLocal(
+    gradlewName,
+    upath.dirname(packageFileName),
+  );
   if (!gradlewFile) {
     logger.debug(
       'Found Gradle dependency lockfiles but no gradlew - aborting update',
@@ -163,7 +169,7 @@ export async function updateArtifacts({
   if (
     config.isLockFileMaintenance &&
     (!isGradleBuildFile(packageFileName) ||
-      dirname(packageFileName) !== dirname(gradlewFile))
+      upath.dirname(packageFileName) !== upath.dirname(gradlewFile))
   ) {
     logger.trace(
       'No build.gradle(.kts) file or not in root project - skipping lock file maintenance',

@@ -6,7 +6,7 @@ import { Result } from '../../../util/result';
 import { Datasource } from '../datasource';
 import { ReleasesConfig } from '../schema';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { BuildpacksRegistryResponseSchema } from './schema';
+import { BuildpacksRegistryResponse } from './schema';
 
 export class BuildpacksRegistryDatasource extends Datasource {
   static readonly id = 'buildpacks-registry';
@@ -42,7 +42,7 @@ export class BuildpacksRegistryDatasource extends Datasource {
           packageName,
         );
 
-        return this.http.getJsonSafe(url, BuildpacksRegistryResponseSchema);
+        return this.http.getJsonSafe(url, BuildpacksRegistryResponse);
       })
       .transform(({ versions, latest }): ReleaseResult => {
         const releases: Release[] = versions;

@@ -57,13 +57,21 @@ async function bumpVersion(
 ): Promise<void> {
   const rawBumpType = config.bumpType ?? 'patch';
 
+  // all log messages should be prefixed with this string to facilitate easier logLevelRemapping
   const bumpVersionsDescr = config.name
     ? `bumpVersions(${config.name})`
     : 'bumpVersions';
 
   const files: string[] = [];
   try {
-    files.push(...getMatchedFiles(config.filePatterns, branchConfig, fileList));
+    files.push(
+      ...getMatchedFiles(
+        bumpVersionsDescr,
+        config.filePatterns,
+        branchConfig,
+        fileList,
+      ),
+    );
   } catch (e) {
     addArtifactError(
       branchConfig,
@@ -71,11 +79,26 @@ async function bumpVersion(
     );
     return;
   }
+
+  if (!files.length) {
+    logger.debug(`${bumpVersionsDescr}: filePatterns did not match any files`);
+    return;
+  }
+
+  logger.trace(
+    { files },
+    `${bumpVersionsDescr}: Found ${files.length} files to bump versions`,
+  );
+
+  // keeping this only for logging purposes
+  const matchStrings: string[] = [];
+
   // prepare the matchStrings
   const matchStringsRegexes: RegExp[] = [];
   for (const matchString of config.matchStrings) {
     try {
       const templated = compile(matchString, branchConfig);
+      matchStrings.push(templated);
       matchStringsRegexes.push(regEx(templated));
     } catch (e) {
       addArtifactError(
@@ -86,7 +109,11 @@ async function bumpVersion(
     }
   }
 
+  logger.trace({ matchStrings }, `${bumpVersionsDescr}: Compiled matchStrings`);
+
   for (const filePath of files) {
+    let fileBumped = false;
+
     const fileContents = await getFileContent(
       bumpVersionsDescr,
       filePath,
@@ -155,17 +182,28 @@ async function bumpVersion(
           contents: newFileContents,
         });
       }
+
+      fileBumped = true;
+    }
+
+    if (!fileBumped) {
+      logger.debug(
+        { file: filePath },
+        `${bumpVersionsDescr}: No match found for bumping version`,
+      );
     }
   }
 }
 
 /**
  * Get files that match ANY of the fileMatches pattern. fileMatches are compiled with the branchConfig.
+ * @param bumpVersionsDescr log description for the bump version config
  * @param filePatternTemplates list of regex patterns
  * @param branchConfig compile metadata
  * @param fileList list of files to match against
  */
 function getMatchedFiles(
+  bumpVersionsDescr: string,
   filePatternTemplates: string[],
   branchConfig: BranchConfig,
   fileList: string[],
@@ -176,6 +214,9 @@ function getMatchedFiles(
     const filePattern = compile(filePatternTemplateElement, branchConfig);
     filePatterns.push(filePattern);
   }
+
+  logger.trace({ filePatterns }, `${bumpVersionsDescr}: Compiled filePatterns`);
+
   // get files that match the fileMatch
   const files: string[] = [];
   for (const file of fileList) {

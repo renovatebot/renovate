@@ -19,7 +19,7 @@ export class ProvidersExtractor extends TerraformProviderExtractor {
       return [];
     }
 
-    // istanbul ignore if
+    /* v8 ignore next 7 -- needs test */
     if (!is.plainObject(providerTypes)) {
       logger.debug(
         { providerTypes },

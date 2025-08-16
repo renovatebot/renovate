@@ -59,7 +59,6 @@ export default tseslint.config(
       parserOptions: {
         tsconfigRootDir: import.meta.dirname,
         projectService: true,
-        extraFileExtensions: ['.mjs'],
       },
     },
 
@@ -99,6 +98,7 @@ export default tseslint.config(
       'no-negated-condition': 'error',
       'no-param-reassign': 'error',
       'no-template-curly-in-string': 'error',
+      radix: ['error', 'as-needed'], // on ES5+ the radix defaults to 10
 
       'sort-imports': [
         'error',

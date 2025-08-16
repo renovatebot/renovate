@@ -31,7 +31,7 @@ exports[`config/migration > migrateConfig(config, parentConfig) > migrates confi
   "autodiscover": true,
   "automerge": false,
   "automergeType": "branch",
-  "baseBranches": [
+  "baseBranchPatterns": [
     "next",
   ],
   "binarySource": "global",
@@ -50,6 +50,7 @@ exports[`config/migration > migrateConfig(config, parentConfig) > migrates confi
   "exposeAllEnv": true,
   "extends": [
     ":automergeBranch",
+    ":skipArtifactsUpdate",
     "config:js-app",
     "config:js-lib",
     ":dependencyDashboard",
@@ -211,6 +212,7 @@ exports[`config/migration > migrateConfig(config, parentConfig) > migrates confi
   "separateMajorMinor": true,
   "separateMajorReleases": true,
   "separateMinorPatch": true,
+  "skipArtifactsUpdate": true,
   "suppressNotifications": [
     "lockFileErrors",
   ],

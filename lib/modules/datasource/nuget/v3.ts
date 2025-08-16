@@ -35,7 +35,7 @@ export class NugetV3Api {
     url: string,
     resourceType = 'RegistrationsBaseUrl',
   ): Promise<string | null> {
-    // https://docs.microsoft.com/en-us/nuget/api/service-index
+    // https://learn.microsoft.com/nuget/api/service-index
     const resultCacheKey = `${url}:${resourceType}`;
     const cachedResult = await packageCache.get<string>(
       NugetV3Api.cacheNamespace,
@@ -166,7 +166,14 @@ export class NugetV3Api {
     let latestStable: string | null = null;
     let nupkgUrl: string | null = null;
     const releases = catalogEntries.map(
-      ({ version, published, projectUrl, listed, packageContent }) => {
+      ({
+        version,
+        published,
+        projectUrl,
+        listed,
+        packageContent,
+        deprecation,
+      }) => {
         const release: Release = { version: removeBuildMeta(version) };
         const releaseTimestamp = asTimestamp(published);
         if (releaseTimestamp) {
@@ -177,7 +184,8 @@ export class NugetV3Api {
           homepage = projectUrl ? massageUrl(projectUrl) : homepage;
           nupkgUrl = massageUrl(packageContent);
         }
-        if (listed === false) {
+
+        if (listed === false || deprecation) {
           release.isDeprecated = true;
         }
         return release;
@@ -200,6 +208,10 @@ export class NugetV3Api {
       releases,
     };
 
+    if (releases.every((release) => release.isDeprecated === true)) {
+      dep.deprecationMessage = this.getDeprecationMessage(pkgName);
+    }
+
     try {
       const packageBaseAddress = await this.getResourceUrl(
         http,
@@ -217,6 +229,10 @@ export class NugetV3Api {
           cacheProvider: memCacheProvider,
         });
         const nuspec = new XmlDocument(metaresult.body);
+        const releaseNotes = nuspec.valueWithPath('metadata.releaseNotes');
+        if (releaseNotes) {
+          dep.changelogContent = releaseNotes;
+        }
         const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
         if (sourceUrl) {
           dep.sourceUrl = massageUrl(sourceUrl);
@@ -308,5 +324,9 @@ export class NugetV3Api {
       await fs.rmCache(nupkgFile);
       await fs.rmCache(nupkgContentsDir);
     }
+  }
+
+  getDeprecationMessage(packageName: string): string {
+    return `The package \`${packageName}\` is deprecated.`;
   }
 }

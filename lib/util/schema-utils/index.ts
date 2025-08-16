@@ -8,12 +8,12 @@ import {
   type ZodTypeDef,
   z,
 } from 'zod';
-import { logger } from '../logger';
-import type { PackageDependency } from '../modules/manager/types';
-import { parseJsonc } from './common';
-import { parse as parseToml } from './toml';
-import type { YamlOptions } from './yaml';
-import { parseSingleYaml, parseYaml } from './yaml';
+import { logger } from '../../logger';
+import type { PackageDependency } from '../../modules/manager/types';
+import { parseJsonc } from '../common';
+import { parse as parseToml } from '../toml';
+import type { YamlOptions } from '../yaml';
+import { parseSingleYaml, parseYaml } from '../yaml';
 
 interface ErrorContext<T> {
   error: z.ZodError;
@@ -362,3 +362,10 @@ export const NotCircular = z.unknown().superRefine((val, ctx) => {
     return z.NEVER;
   }
 });
+
+export const EmailAddress = z.string().email();
+export type EmailAddress = z.infer<typeof EmailAddress>;
+
+export function isEmailAdress(value: string): boolean {
+  return EmailAddress.safeParse(value).success;
+}
