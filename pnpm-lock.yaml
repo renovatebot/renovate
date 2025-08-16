@@ -83,6 +83,9 @@ importers:
       '@opentelemetry/semantic-conventions':
         specifier: 1.36.0
         version: 1.36.0
+      '@pandatix/js-cvss':
+        specifier: 0.4.4
+        version: 0.4.4
       '@pnpm/parse-overrides':
         specifier: 1001.0.2
         version: 1001.0.2
@@ -350,9 +353,6 @@ importers:
       validate-npm-package-name:
         specifier: 6.0.2
         version: 6.0.2
-      vuln-vects:
-        specifier: 1.1.0
-        version: 1.1.0
       xmldoc:
         specifier: 2.0.2
         version: 2.0.2
@@ -1451,6 +1451,9 @@ packages:
   '@opentelemetry/semantic-conventions@1.36.0':
     resolution: {integrity: sha512-TtxJSRD8Ohxp6bKkhrm27JRHAxPczQA7idtcTOMYI+wQRRrfgqxHv1cFbCApcSnNjtXkmzFozn6jQtFrOmbjPQ==}
     engines: {node: '>=14'}
+
+  '@pandatix/js-cvss@0.4.4':
+    resolution: {integrity: sha512-hhBbQ7IKfoRoV3QKTP9hLKJT166/e0FkeiVSLZZIEVsO7DjxVmIWhJlPvbp+RXaM4w215xghtnXQv13Ebdlj/w==}
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -6340,9 +6343,6 @@ packages:
       jsdom:
         optional: true
 
-  vuln-vects@1.1.0:
-    resolution: {integrity: sha512-LGDwn9nRz94YoeqOn2TZqQXzyonBc5FJppSgH34S/1U+3bgPONq/vvfiCbCQ4MeBll58xx+kDmhS73ac+EHBBw==}
-
   web-streams-polyfill@3.3.3:
     resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
     engines: {node: '>= 8'}
@@ -7943,6 +7943,8 @@ snapshots:
       '@opentelemetry/sdk-trace-base': 2.0.1(@opentelemetry/api@1.9.0)
 
   '@opentelemetry/semantic-conventions@1.36.0': {}
+
+  '@pandatix/js-cvss@0.4.4': {}
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
@@ -13523,8 +13525,6 @@ snapshots:
       - terser
       - tsx
       - yaml
-
-  vuln-vects@1.1.0: {}
 
   web-streams-polyfill@3.3.3: {}
 
