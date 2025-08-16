@@ -1,7 +1,7 @@
-import { ContentsListResponseSchema } from './schema';
+import { ContentsListResponse } from './schema';
 
 describe('modules/platform/gitea/schema', () => {
   it('ContentsResponseSchema', () => {
-    expect(ContentsListResponseSchema.parse([])).toBeEmptyArray();
+    expect(ContentsListResponse.parse([])).toBeEmptyArray();
   });
 });

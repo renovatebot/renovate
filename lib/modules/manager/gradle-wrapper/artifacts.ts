@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { lang, query as q } from 'good-enough-parser';
 import { quote } from 'shlex';
-import { dirname, join } from 'upath';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -71,9 +71,9 @@ export async function updateBuildFile(
   localGradleDir: string,
   wrapperProperties: Record<string, string | undefined | null>,
 ): Promise<string> {
-  let buildFileName = join(localGradleDir, 'build.gradle');
+  let buildFileName = upath.join(localGradleDir, 'build.gradle');
   if (!(await localPathExists(buildFileName))) {
-    buildFileName = join(localGradleDir, 'build.gradle.kts');
+    buildFileName = upath.join(localGradleDir, 'build.gradle.kts');
   }
 
   const buildFileContent = await readLocalFile(buildFileName, 'utf8');
@@ -138,8 +138,8 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
     logger.debug({ updatedDeps }, 'gradle-wrapper.updateArtifacts()');
-    const localGradleDir = join(dirname(packageFileName), '../../');
-    const gradlewFile = join(localGradleDir, gradleWrapperFileName());
+    const localGradleDir = upath.join(upath.dirname(packageFileName), '../../');
+    const gradlewFile = upath.join(localGradleDir, gradleWrapperFileName());
 
     let cmd = await prepareGradleCommand(gradlewFile);
     if (!cmd) {
@@ -206,7 +206,7 @@ export async function updateArtifacts({
       packageFileName,
       buildFileName,
       ...['gradle/wrapper/gradle-wrapper.jar', 'gradlew', 'gradlew.bat'].map(
-        (filename) => join(localGradleDir, filename),
+        (filename) => upath.join(localGradleDir, filename),
       ),
     ];
     const updateArtifactsResult = (

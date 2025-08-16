@@ -390,10 +390,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
     it('works', async () => {
       expect(
-        await getAdditionalFiles(
-          { ...updateConfig, updateLockFiles: true },
-          additionalFiles,
-        ),
+        await getAdditionalFiles({ ...updateConfig }, additionalFiles),
       ).toStrictEqual({
         artifactErrors: [],
         updatedArtifacts: [],
@@ -410,7 +407,7 @@ describe('modules/manager/npm/post-update/index', () => {
       });
       expect(
         await getAdditionalFiles(
-          { ...updateConfig, updateLockFiles: true, reuseExistingBranch: true },
+          { ...updateConfig, reuseExistingBranch: true },
           additionalFiles,
         ),
       ).toStrictEqual({
@@ -451,7 +448,6 @@ describe('modules/manager/npm/post-update/index', () => {
           await getAdditionalFiles(
             {
               ...updateConfig,
-              updateLockFiles: true,
               reuseExistingBranch: true,
             },
             additionalFiles,
@@ -480,7 +476,6 @@ describe('modules/manager/npm/post-update/index', () => {
           await getAdditionalFiles(
             {
               ...updateConfig,
-              updateLockFiles: true,
               reuseExistingBranch: false,
               baseBranch: 'base',
             },
@@ -494,7 +489,7 @@ describe('modules/manager/npm/post-update/index', () => {
       spyYarn.mockResolvedValueOnce({ error: false, lockFile: '{}' });
       expect(
         await getAdditionalFiles(
-          { ...updateConfig, updateLockFiles: true, reuseExistingBranch: true },
+          { ...updateConfig, reuseExistingBranch: true },
           additionalFiles,
         ),
       ).toStrictEqual({
@@ -519,7 +514,6 @@ describe('modules/manager/npm/post-update/index', () => {
         await getAdditionalFiles(
           {
             ...updateConfig,
-            updateLockFiles: true,
             reuseExistingBranch: true,
             upgrades: [
               {
@@ -559,6 +553,36 @@ describe('modules/manager/npm/post-update/index', () => {
       });
     });
 
+    it('skip lock file updating', async () => {
+      expect(
+        await getAdditionalFiles(
+          {
+            ...updateConfig,
+            skipArtifactsUpdate: true,
+            reuseExistingBranch: true,
+            upgrades: [
+              {
+                depName: 'postcss',
+                isRemediation: true,
+                managerData: {
+                  npmLock: 'package-lock.json',
+                },
+                rangeStrategy: 'widen',
+              },
+            ],
+          },
+          additionalFiles,
+        ),
+      ).toStrictEqual({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      expect(spyNpm).not.toHaveBeenCalled();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Skipping lock file generation',
+      );
+    });
+
     it('reuse existing up-to-date', async () => {
       expect(
         await getAdditionalFiles(
@@ -566,7 +590,6 @@ describe('modules/manager/npm/post-update/index', () => {
             ...baseConfig,
             reuseExistingBranch: true,
             upgrades: [{ isLockfileUpdate: true }],
-            updateLockFiles: true,
           },
           additionalFiles,
         ),
@@ -586,7 +609,6 @@ describe('modules/manager/npm/post-update/index', () => {
             upgrades: [{ isLockfileUpdate: false }],
             reuseExistingBranch: true,
             isLockFileMaintenance: true,
-            updateLockFiles: true,
           },
           additionalFiles,
         ),
@@ -599,10 +621,7 @@ describe('modules/manager/npm/post-update/index', () => {
     it('fails for npm', async () => {
       spyNpm.mockResolvedValueOnce({ error: true, stderr: 'some-error' });
       expect(
-        await getAdditionalFiles(
-          { ...updateConfig, updateLockFiles: true },
-          additionalFiles,
-        ),
+        await getAdditionalFiles({ ...updateConfig }, additionalFiles),
       ).toStrictEqual({
         artifactErrors: [
           { lockFile: 'package-lock.json', stderr: 'some-error' },
@@ -615,7 +634,7 @@ describe('modules/manager/npm/post-update/index', () => {
       spyYarn.mockResolvedValueOnce({ error: true, stdout: 'some-error' });
       expect(
         await getAdditionalFiles(
-          { ...updateConfig, updateLockFiles: true, reuseExistingBranch: true },
+          { ...updateConfig, reuseExistingBranch: true },
           additionalFiles,
         ),
       ).toStrictEqual({
@@ -630,7 +649,6 @@ describe('modules/manager/npm/post-update/index', () => {
         await getAdditionalFiles(
           {
             ...updateConfig,
-            updateLockFiles: true,
             upgrades: [
               {
                 isRemediation: true,
@@ -684,7 +702,6 @@ describe('modules/manager/npm/post-update/index', () => {
         await getAdditionalFiles(
           {
             ...updateConfig,
-            updateLockFiles: true,
             reuseExistingBranch: true,
           },
           additionalFiles,
@@ -721,7 +738,6 @@ describe('modules/manager/npm/post-update/index', () => {
           getAdditionalFiles(
             {
               ...updateConfig,
-              updateLockFiles: true,
               reuseExistingBranch: true,
             },
             additionalFiles,

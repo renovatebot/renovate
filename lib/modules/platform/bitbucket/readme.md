@@ -27,6 +27,7 @@ Give the bot API token the following permission scopes:
 | Permission                                                                                                               | Scope                |
 | ------------------------------------------------------------------------------------------------------------------------ | -------------------- |
 | [`read:repository:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#read-repository-bitbucket)     | Repository: Read     |
+| [`write:repository:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#write-repository-bitbucket)   | Repository: Write    |
 | [`read:pullrequest:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#read-pullrequest-bitbucket)   | Pull requests: Read  |
 | [`write:pullrequest:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#write-pullrequest-bitbucket) | Pull requests: Write |
 | [`read:user:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#read-user-bitbucket)                 | User: Read           |
