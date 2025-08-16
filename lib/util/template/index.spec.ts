@@ -48,6 +48,30 @@ describe('util/template/index', () => {
     expect(output).toContain('True');
   });
 
+  it('unless with equals - 1', () => {
+    const userTemplate =
+      '{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} -> {{{newNameLinked}}}{{/unless}}{{/if}}';
+    const input = {
+      depName: 'nodemon',
+      depNameLinked: 'nodemonLinked',
+      newName: 'nodemon-new',
+      newNameLinked: 'nodemonNewLinked',
+    };
+    const output = template.compile(userTemplate, input, false);
+    expect(output).toBe('nodemonLinked -> nodemonNewLinked');
+  });
+
+  it('unless with equals - 2', () => {
+    const userTemplate =
+      '{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} -> {{{newNameLinked}}}{{/unless}}{{/if}}';
+    const input = {
+      depName: 'nodemon',
+      depNameLinked: 'nodemonLinked',
+    };
+    const output = template.compile(userTemplate, input, false);
+    expect(output).toBe('nodemonLinked');
+  });
+
   it('not containsString', () => {
     const userTemplate =
       "{{#if (containsString platform 'hub')}}True{{else}}False{{/if}}";

@@ -108,7 +108,7 @@ const CargoWorkspace = z.object({
 
 const CargoTarget = z.record(z.string(), CargoSection);
 
-export const CargoManifestSchema = Toml.pipe(
+export const CargoManifest = Toml.pipe(
   CargoSection.extend({
     package: z
       .object({
@@ -131,25 +131,25 @@ const CargoConfigSource = z.object({
   registry: z.string().optional(),
 });
 
-export const CargoConfigSchema = Toml.pipe(
+export const CargoConfig = Toml.pipe(
   z.object({
     registries: z.record(z.string(), CargoConfigRegistry).optional(),
     source: z.record(z.string(), CargoConfigSource).optional(),
   }),
 );
 
-export type CargoConfig = z.infer<typeof CargoConfigSchema>;
+export type CargoConfig = z.infer<typeof CargoConfig>;
 
-const CargoLockPackageSchema = z.object({
+const CargoLockPackage = z.object({
   name: z.string(),
   version: z.string(),
   source: z.string().optional(),
 });
 
-export const CargoLockSchema = z.object({
-  package: z.array(CargoLockPackageSchema).optional(),
-});
+export const CargoLock = Toml.pipe(
+  z.object({
+    package: z.array(CargoLockPackage).optional(),
+  }),
+);
 
-export type CargoLockSchema = z.infer<typeof CargoLockSchema>;
-
-export const CargoLockSchemaToml = Toml.pipe(CargoLockSchema);
+export type CargoLock = z.infer<typeof CargoLock>;

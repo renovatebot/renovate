@@ -61,7 +61,7 @@ class RpmVersioningApi extends GenericVersioningApi {
     if (epochIndex !== -1) {
       const epochStr = remainingVersion.slice(0, epochIndex);
       if (epochPattern.test(epochStr)) {
-        epoch = parseInt(epochStr, 10);
+        epoch = parseInt(epochStr);
       } else {
         return null;
       }
@@ -111,7 +111,7 @@ class RpmVersioningApi extends GenericVersioningApi {
     }
 
     const release = [...remainingVersion.matchAll(regEx(/\d+/g))].map((m) =>
-      parseInt(m[0], 10),
+      parseInt(m[0]),
     );
 
     return {

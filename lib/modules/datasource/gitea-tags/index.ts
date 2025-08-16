@@ -5,7 +5,7 @@ import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { CommitsSchema, TagSchema, TagsSchema } from './schema';
+import { Commits, Tag, Tags } from './schema';
 
 export class GiteaTagsDatasource extends Datasource {
   static readonly id = 'gitea-tags';
@@ -73,7 +73,7 @@ export class GiteaTagsDatasource extends Datasource {
         {
           paginate: true,
         },
-        TagsSchema,
+        Tags,
       )
     ).body;
 
@@ -106,7 +106,7 @@ export class GiteaTagsDatasource extends Datasource {
       registryUrl,
     )}repos/${repo}/tags/${tag}`;
 
-    const { body } = await this.http.getJson(url, TagSchema);
+    const { body } = await this.http.getJson(url, Tag);
 
     return body.commit.sha;
   }
@@ -129,7 +129,7 @@ export class GiteaTagsDatasource extends Datasource {
     const url = `${GiteaTagsDatasource.getApiUrl(
       registryUrl,
     )}repos/${repo}/commits?stat=false&verification=false&files=false&page=1&limit=1`;
-    const { body } = await this.http.getJson(url, CommitsSchema);
+    const { body } = await this.http.getJson(url, Commits);
 
     if (body.length === 0) {
       return null;

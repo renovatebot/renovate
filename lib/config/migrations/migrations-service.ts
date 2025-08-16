@@ -56,6 +56,7 @@ import { StabilityDaysMigration } from './custom/stability-days-migration';
 import { SuppressNotificationsMigration } from './custom/suppress-notifications-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
 import { UnpublishSafeMigration } from './custom/unpublish-safe-migration';
+import { UpdateLockFilesMigration } from './custom/update-lock-files-migration';
 import { UpgradeInRangeMigration } from './custom/upgrade-in-range-migration';
 import { VersionStrategyMigration } from './custom/version-strategy-migration';
 import type { Migration, MigrationConstructor } from './types';
@@ -106,6 +107,7 @@ export class MigrationsService {
     ['masterIssueTitle', 'dependencyDashboardTitle'],
     ['masterIssueLabels', 'dependencyDashboardLabels'],
     ['regexManagers', 'customManagers'],
+    ['baseBranches', 'baseBranchPatterns'],
   ]);
 
   static readonly customMigrations: readonly MigrationConstructor[] = [
@@ -164,6 +166,7 @@ export class MigrationsService {
     CustomManagersMigration,
     PlatformCommitMigration,
     FileMatchMigration,
+    UpdateLockFilesMigration,
   ];
 
   static run(

@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { setPrivateKeys } from '../../../../config/decrypt';
 import * as defaultsParser from '../../../../config/defaults';
 import { resolveConfigPresets } from '../../../../config/presets';
-import { applySecretsToConfig } from '../../../../config/secrets';
+import { applySecretsAndVariablesToConfig } from '../../../../config/secrets';
 import type { AllConfig } from '../../../../config/types';
 import { mergeChildConfig } from '../../../../config/utils';
 import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages';
@@ -13,6 +13,7 @@ import { setCustomEnv } from '../../../../util/env';
 import { readSystemFile } from '../../../../util/fs';
 import { addSecretForSanitizing } from '../../../../util/sanitize';
 import { ensureTrailingSlash } from '../../../../util/url';
+import * as additionalConfigFileParser from './additional-config-file';
 import * as cliParser from './cli';
 import * as codespaces from './codespaces';
 import * as envParser from './env';
@@ -43,10 +44,16 @@ export async function parseConfigs(
   // Get configs
   const defaultConfig = defaultsParser.getConfig();
   const fileConfig = await fileParser.getConfig(env);
+  const additionalFileConfig = await additionalConfigFileParser.getConfig(env);
   const cliConfig = cliParser.getConfig(argv);
   const envConfig = await envParser.getConfig(env);
 
-  let config: AllConfig = mergeChildConfig(fileConfig, envConfig);
+  let config: AllConfig = mergeChildConfig(fileConfig, additionalFileConfig);
+  // merge extends from file config and additional file config
+  if (is.nonEmptyArray(fileConfig.extends)) {
+    config.extends = [...fileConfig.extends, ...(config.extends ?? [])];
+  }
+  config = mergeChildConfig(config, envConfig);
   config = mergeChildConfig(config, cliConfig);
 
   config = await codespaces.setConfig(config);
@@ -105,6 +112,7 @@ export async function parseConfigs(
 
   logger.trace({ config: defaultConfig }, 'Default config');
   logger.debug({ config: fileConfig }, 'File config');
+  logger.debug({ config: additionalFileConfig }, 'Additional file config');
   logger.debug({ config: cliConfig }, 'CLI config');
   logger.debug({ config: envConfig }, 'Env config');
   logger.debug({ config: resolvedGlobalExtends }, 'Resolved global extends');
@@ -139,6 +147,12 @@ export async function parseConfigs(
   // Only try deletion if RENOVATE_CONFIG_FILE is set
   await fileParser.deleteNonDefaultConfig(env, !!config.deleteConfigFile);
 
+  // Only try deletion if RENOVATE_ADDITIONAL_CONFIG_FILE is set
+  await additionalConfigFileParser.deleteNonDefaultConfig(
+    env,
+    !!config.deleteAdditionalConfigFile,
+  );
+
   // Massage onboardingNoDeps
   if (!config.autodiscover && config.onboardingNoDeps !== 'disabled') {
     logger.debug('Enabling onboardingNoDeps while in non-autodiscover mode');
@@ -146,9 +160,18 @@ export async function parseConfigs(
   }
 
   // do not add these secrets to repoSecrets and,
-  //  do not delete the secrets object after applying on global config as it needs to be re-used for repo config
-  if (is.nonEmptyObject(config.secrets)) {
-    config = applySecretsToConfig(config, undefined, false);
+  //  do not delete the secrets/variables object after applying on global config as it needs to be re-used for repo config
+  if (
+    is.nonEmptyObject(config.secrets) ||
+    is.nonEmptyObject(config.variables)
+  ) {
+    config = applySecretsAndVariablesToConfig({
+      config,
+      secrets: config.secrets,
+      variables: config.variables,
+      deleteSecrets: false,
+      deleteVariables: false,
+    });
     // adding these secrets to the globalSecrets set so that they can be redacted from logs
     for (const secret of Object.values(config.secrets!)) {
       addSecretForSanitizing(secret, 'global');

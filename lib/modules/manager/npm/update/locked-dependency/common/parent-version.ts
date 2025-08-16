@@ -35,24 +35,24 @@ export async function findFirstParentVersion(
   targetDepName: string,
   targetVersion: string,
 ): Promise<string | null> {
-  // istanbul ignore if
+  /* v8 ignore start -- needs test */
   if (!semver.isVersion(parentStartingVersion)) {
     logger.debug('parentStartingVersion is not a version - cannot remediate');
     return null;
-  }
+  } /* v8 ignore stop -- needs test */
   logger.debug(
     `Finding first version of ${parentName} starting with ${parentStartingVersion} which supports >= ${targetDepName}@${targetVersion}`,
   );
   try {
     const targetDep = await getPkgReleasesCached(targetDepName);
-    // istanbul ignore if
+    /* v8 ignore start -- needs test */
     if (!targetDep) {
       logger.info(
         { targetDepName },
         'Could not look up target dependency for remediation',
       );
       return null;
-    }
+    } /* v8 ignore stop -- needs test */
     const targetVersions = targetDep.releases
       .map((release) => release.version)
       .filter(
@@ -63,14 +63,14 @@ export async function findFirstParentVersion(
             semver.isGreaterThan(version, targetVersion)),
       );
     const parentDep = await getPkgReleasesCached(parentName);
-    // istanbul ignore if
+    /* v8 ignore start -- needs test */
     if (!parentDep) {
       logger.info(
         { parentName },
         'Could not look up parent dependency for remediation',
       );
       return null;
-    }
+    } /* v8 ignore stop -- needs test */
     const parentVersions = parentDep.releases
       .map((release) => release.version)
       .filter(
@@ -118,13 +118,14 @@ export async function findFirstParentVersion(
         return parentVersion;
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore start -- needs test */
+  } catch (err) {
     logger.warn(
       { parentName, parentStartingVersion, targetDepName, targetVersion, err },
       'findFirstParentVersion error',
     );
     return null;
-  }
+  } /* v8 ignore stop -- needs test */
   logger.debug(`Could not find a matching version`);
   return null;
 }

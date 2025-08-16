@@ -64,7 +64,7 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
       cb({
         prefix: currentPrefix,
         type: TYPE_NUMBER,
-        val: parseInt(val, 10),
+        val: parseInt(val),
         isTransition: transition,
       });
     } else {
@@ -302,7 +302,7 @@ function parseRange(rangeStr: string): Range[] | null {
     };
   }
 
-  const commaSplit = rangeStr.split(/\s*,\s*/);
+  const commaSplit = rangeStr.split(regEx(/\s*,\s*/));
   let ranges: Range[] | null = [];
   let interval = emptyInterval();
 

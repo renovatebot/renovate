@@ -6,9 +6,9 @@ import type {
 } from 'zod';
 import { NEVER, ZodError, ZodIssueCode } from 'zod';
 import { logger } from '../logger';
+import type { Nullish } from '../types';
 
 type Val = NonNullable<unknown>;
-type Nullable<T extends Val> = T | null | undefined;
 
 interface Ok<T extends Val> {
   readonly ok: true;
@@ -74,7 +74,7 @@ function fromNullable<
   ErrForNull extends Val,
   ErrForUndefined extends Val,
 >(
-  input: Nullable<T>,
+  input: Nullish<T>,
   errForNull: ErrForNull,
   errForUndefined: ErrForUndefined,
 ): Result<T, ErrForNull | ErrForUndefined> {
@@ -239,7 +239,7 @@ export class Result<T extends Val, E extends Val = Error> {
     E extends Val = Error,
     ErrForNullable extends Val = Error,
   >(
-    callback: () => Nullable<T>,
+    callback: () => Nullish<T>,
     errForNullable: ErrForNullable,
   ): Result<T, E | ErrForNullable>;
   static wrapNullable<
@@ -248,7 +248,7 @@ export class Result<T extends Val, E extends Val = Error> {
     ErrForNull extends Val = Error,
     ErrForUndefined extends Val = Error,
   >(
-    callback: () => Nullable<T>,
+    callback: () => Nullish<T>,
     errForNull: ErrForNull,
     errForUndefined: ErrForUndefined,
   ): Result<T, E | ErrForNull | ErrForUndefined>;
@@ -257,7 +257,7 @@ export class Result<T extends Val, E extends Val = Error> {
     E extends Val = Error,
     ErrForNullable extends Val = Error,
   >(
-    promise: Promise<Nullable<T>>,
+    promise: Promise<Nullish<T>>,
     errForNullable: ErrForNullable,
   ): AsyncResult<T, E | ErrForNullable>;
   static wrapNullable<
@@ -266,7 +266,7 @@ export class Result<T extends Val, E extends Val = Error> {
     ErrForNull extends Val = Error,
     ErrForUndefined extends Val = Error,
   >(
-    promise: Promise<Nullable<T>>,
+    promise: Promise<Nullish<T>>,
     errForNull: ErrForNull,
     errForUndefined: ErrForUndefined,
   ): AsyncResult<T, E | ErrForNull | ErrForUndefined>;
@@ -275,7 +275,7 @@ export class Result<T extends Val, E extends Val = Error> {
     E extends Val = Error,
     ErrForNullable extends Val = Error,
   >(
-    value: Nullable<T>,
+    value: Nullish<T>,
     errForNullable: ErrForNullable,
   ): Result<T, E | ErrForNullable>;
   static wrapNullable<
@@ -284,7 +284,7 @@ export class Result<T extends Val, E extends Val = Error> {
     ErrForNull extends Val = Error,
     ErrForUndefined extends Val = Error,
   >(
-    value: Nullable<T>,
+    value: Nullish<T>,
     errForNull: ErrForNull,
     errForUndefined: ErrForUndefined,
   ): Result<T, E | ErrForNull | ErrForUndefined>;
@@ -294,7 +294,7 @@ export class Result<T extends Val, E extends Val = Error> {
     ErrForNull extends Val = Error,
     ErrForUndefined extends Val = Error,
   >(
-    input: (() => Nullable<T>) | Promise<Nullable<T>> | Nullable<T>,
+    input: (() => Nullish<T>) | Promise<Nullish<T>> | Nullish<T>,
     arg2: ErrForNull,
     arg3?: ErrForUndefined,
   ):
@@ -685,7 +685,7 @@ export class AsyncResult<T extends Val, E extends Val>
     ErrForNull extends Val,
     ErrForUndefined extends Val,
   >(
-    promise: Promise<Nullable<T>>,
+    promise: Promise<Nullish<T>>,
     errForNull: NonNullable<ErrForNull>,
     errForUndefined: NonNullable<ErrForUndefined>,
   ): AsyncResult<T, E | ErrForNull | ErrForUndefined> {

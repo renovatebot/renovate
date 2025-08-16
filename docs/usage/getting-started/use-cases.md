@@ -178,7 +178,8 @@ You can set the time ranges during which Renovate creates updates in the `schedu
 
 You can use Renovate's "Dependency Dashboard" on platforms which support dynamic Markdown checkboxes:
 
-- Gitea and Forgejo
+- Forgejo
+- Gitea
 - GitHub
 - GitLab
 

@@ -20,7 +20,7 @@ function getDatedContainerImageVersion(version: string): null | number {
     return null;
   }
 
-  return parseInt(groups.groups.date, 10);
+  return parseInt(groups.groups.date);
 }
 
 function getDatedContainerImageSuffix(version: string): null | string {

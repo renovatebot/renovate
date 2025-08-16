@@ -103,16 +103,7 @@ function useModcacherw(goVersion: string | undefined): boolean {
     return true;
   }
 
-  const [, majorPart, minorPart] = coerceArray(
-    regEx(/(\d+)\.(\d+)/).exec(goVersion),
-  );
-  const [major, minor] = [majorPart, minorPart].map((x) => parseInt(x, 10));
-
-  return (
-    !Number.isNaN(major) &&
-    !Number.isNaN(minor) &&
-    (major > 1 || (major === 1 && minor >= 14))
-  );
+  return semver.intersects(goVersion, `>=1.14`);
 }
 
 export async function updateArtifacts({
@@ -243,7 +234,15 @@ export async function updateArtifacts({
       }
     }
 
-    let args = `get -d -t ${goGetDirs ?? './...'}`;
+    let args = `get `;
+
+    if (goConstraints && !semver.intersects(goConstraints, `>=1.18`)) {
+      // For Go versions < 1.18, we need to use the -d flag to avoid builds or installs
+      // https://go.dev/doc/go1.18#go-get
+      args += `-d `;
+    }
+
+    args += `-t ${goGetDirs ?? './...'}`;
     logger.trace({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 
@@ -428,7 +427,6 @@ export async function updateArtifacts({
     }
     return res;
   } catch (err) {
-    // istanbul ignore if
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }

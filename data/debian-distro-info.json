@@ -127,19 +127,23 @@
     "series": "bookworm",
     "created": "2021-08-14",
     "release": "2023-06-10",
-    "eol": "2026-06-10",
+    "eol": "2026-09-12",
     "eol_lts": "2028-06-30",
     "eol_elts": "2033-06-30"
   },
   "v13": {
     "codename": "Trixie",
     "series": "trixie",
-    "created": "2023-06-10"
+    "created": "2023-06-10",
+    "release": "2025-08-09",
+    "eol": "2028-08-09",
+    "eol_lts": "2030-06-30",
+    "eol_elts": "2035-06-30"
   },
   "v14": {
     "codename": "Forky",
     "series": "forky",
-    "created": "2025-08-01"
+    "created": "2025-08-09"
   },
   "v15": {
     "codename": "Duke",

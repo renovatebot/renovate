@@ -54,7 +54,7 @@ function getPrApiCache(): ApiCache<GhPr> {
 export async function getPrCache(
   http: GithubHttp,
   repo: string,
-  username: string | null,
+  username?: string,
 ): Promise<Record<number, GhPr>> {
   const prApiCache = getPrApiCache();
   const isInitial = is.emptyArray(prApiCache.getItems());

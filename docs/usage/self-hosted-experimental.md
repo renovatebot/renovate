@@ -23,13 +23,6 @@ For more information see [the OpenTelemetry docs](opentelemetry.md).
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
-## `RENOVATE_STATIC_REPO_CONFIG`
-
-If set to a _valid_ `JSON` string containing a _valid_ Renovate configuration, it will be applied to the repository config before resolving the actual configuration file within the repository.
-
-> [!warning]
-> An invalid value will result in the scan being aborted.
-
 ## `RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP`
 
 If set to any value, Renovate will skip attempting to get release labels (e.g. gitRef, sourceUrl) from manifest annotations for `https://index.docker.io`.
@@ -53,6 +46,11 @@ If set to `"true"`, a config error Issue will be raised in case repository confi
 ## `RENOVATE_X_EXEC_GPID_HANDLE`
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
+
+## `RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN`
+
+If set, when `autoApprove` is enabled, the provided token is used to authenticate GitLab approve requests instead of the default one.
+This is useful in environments where a user cannot approve its own PRs.
 
 ## `RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS`
 
@@ -99,7 +97,7 @@ If set to any value, Renovate will download `nupkg` files for determining packag
 
 ## `RENOVATE_X_PLATFORM_VERSION`
 
-Specify this string for Renovate to skip API checks and provide GitLab/Gitea and Forgejo/Bitbucket server version directly.
+Specify this string for Renovate to skip API checks and provide Bitbucket server, Forgejo or GitLab version directly.
 Particularly useful with GitLab's `CI_JOB_TOKEN` to authenticate Renovate or to reduce API calls for Bitbucket.
 
 Read [platform details](modules/platform/gitlab/index.md) to learn why we need the server version on GitLab.
@@ -120,6 +118,15 @@ If set, Renovate will persist repository cache locally after uploading to S3.
 
 If set, Renovate will use SQLite as the backend for the package cache.
 Don't combine with `redisUrl`, Redis would be preferred over SQlite.
+
+## `RENOVATE_X_STATIC_REPO_CONFIG_FILE`
+
+If set to a valid path pointing to a file containing a _valid_ Renovate configuration in `JSON` format, it will be applied to the repository config before resolving the actual configuration file within the repository.
+
+!!! warning If the file is missing or contains invalid configuration, the scan will be aborted.
+
+!!! note
+You probably **shouldn’t use this** unless you have a very specific reason to override the repository’s normal configuration resolution process.
 
 ## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
 

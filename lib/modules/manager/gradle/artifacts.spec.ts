@@ -1,5 +1,5 @@
 import os from 'node:os';
-import { join } from 'upath';
+import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -20,9 +20,9 @@ process.env.CONTAINERBASE = 'true';
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
-  localDir: join('/tmp/github/some/repo'),
-  cacheDir: join('/tmp/cache'),
-  containerbaseDir: join('/tmp/cache/containerbase'),
+  localDir: upath.join('/tmp/github/some/repo'),
+  cacheDir: upath.join('/tmp/cache'),
+  containerbaseDir: upath.join('/tmp/cache/containerbase'),
   dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
@@ -587,6 +587,59 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
     });
 
+    it('updates existing checksums also if verify-checksums is disabled', async () => {
+      const execSnapshots = mockExecAll();
+      scm.getFileList.mockResolvedValue([
+        'gradlew',
+        'build.gradle',
+        'gradle/wrapper/gradle-wrapper.properties',
+        'gradle/verification-metadata.xml',
+      ]);
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['build.gradle', 'gradle/verification-metadata.xml'],
+        }),
+      );
+      fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
+        let content = '';
+        if (fileName === 'gradle/verification-metadata.xml') {
+          content =
+            '<verify-metadata>false</verify-metadata><sha256 value="hash" origin="test data"/>';
+        }
+        return Promise.resolve(content);
+      });
+
+      const res = await updateArtifacts({
+        packageFileName: 'build.gradle',
+        updatedDeps: [
+          { depName: 'org.junit.jupiter:junit-jupiter-api' },
+          { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'gradle/verification-metadata.xml',
+            contents:
+              '<verify-metadata>false</verify-metadata><sha256 value="hash" origin="test data"/>',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
+          options: {
+            cwd: '/tmp/github/some/repo',
+            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+      ]);
+    });
+
     it('updates verification metadata and lock file', async () => {
       const execSnapshots = mockExecAll();
       scm.getFileList.mockResolvedValue([
@@ -742,7 +795,7 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
     });
 
-    it('does not exec any commands when verification metadata exists, but neither checksum nor signature verification is enabled', async () => {
+    it('does not write verification metadata, when no checksums exist and neither checksum nor signature verification is enabled', async () => {
       const execSnapshots = mockExecAll();
       scm.getFileList.mockResolvedValue([
         'gradlew',
@@ -774,7 +827,7 @@ describe('modules/manager/gradle/artifacts', () => {
         config: {},
       });
 
-      expect(execSnapshots).toMatchObject([]);
+      expect(execSnapshots).toBeEmptyArray();
     });
   });
 });

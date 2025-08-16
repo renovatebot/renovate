@@ -3,7 +3,7 @@ import { isNotNullOrUndefined } from '../../../util/array';
 import type { Http } from '../../../util/http';
 import { MaybeTimestamp } from '../../../util/timestamp';
 import type { Release, ReleaseResult } from '../types';
-import { type File, PagedResponseSchema } from './schema/prefix-dev';
+import { type File, PagedResponse } from './schema/prefix-dev';
 
 const MAX_PREFIX_DEV_GRAPHQL_PAGE = 100;
 
@@ -93,7 +93,7 @@ async function getPagedResponse(
           },
         },
       },
-      PagedResponseSchema,
+      PagedResponse,
     );
 
     const currentPage = res.body.data.package?.variants;

@@ -51,7 +51,9 @@ describe('util/common', () => {
       ${'https://bitbucket.com/some-org/some-repo'}                          | ${'bitbucket'}
       ${'https://bitbucket.example.com/some-org/some-repo'}                  | ${'bitbucket-server'}
       ${'https://gitea.com/semantic-release/gitlab'}                         | ${'gitea'}
-      ${'https://forgejo.example.com/semantic-release/gitlab'}               | ${'gitea'}
+      ${'https://forgejo.example.com/semantic-release/gitlab'}               | ${'forgejo'}
+      ${'https://codeberg.org/forgejo/forgejo'}                              | ${'forgejo'}
+      ${'https://codefloe.com/some-org/some-repo'}                           | ${'forgejo'}
       ${'https://github.com/semantic-release/gitlab'}                        | ${'github'}
       ${'https://github-enterprise.example.com/chalk/chalk'}                 | ${'github'}
       ${'https://gitlab.com/chalk/chalk'}                                    | ${'gitlab'}
@@ -68,6 +70,10 @@ describe('util/common', () => {
       hostRules.add({
         hostType: 'gitea',
         matchHost: 'gt.example.com',
+      });
+      hostRules.add({
+        hostType: 'forgejo',
+        matchHost: 'fj.example.com',
       });
       hostRules.add({
         hostType: 'github-changelog',
@@ -87,6 +93,9 @@ describe('util/common', () => {
       );
       expect(detectPlatform('https://gt.example.com/chalk/chalk')).toBe(
         'gitea',
+      );
+      expect(detectPlatform('https://fj.example.com/chalk/chalk')).toBe(
+        'forgejo',
       );
       expect(detectPlatform('https://gh.example.com/chalk/chalk')).toBe(
         'github',

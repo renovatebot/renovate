@@ -36,7 +36,7 @@ export class ModuleExtractor extends DependencyExtractor {
       return [];
     }
 
-    // istanbul ignore if
+    /* v8 ignore next 4 -- needs test */
     if (!is.plainObject(modules)) {
       logger.debug({ modules }, 'Terraform: unexpected `modules` value');
       return [];

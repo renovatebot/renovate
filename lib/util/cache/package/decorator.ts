@@ -119,7 +119,7 @@ export function cache<T>({
       let newData: unknown;
       if (oldData) {
         try {
-          newData = (await callback()) as T | undefined;
+          newData = await callback();
         } catch (err) {
           logger.debug(
             { err },
@@ -128,7 +128,7 @@ export function cache<T>({
           return oldData;
         }
       } else {
-        newData = (await callback()) as T | undefined;
+        newData = await callback();
       }
 
       if (!is.undefined(newData)) {
@@ -136,7 +136,12 @@ export function cache<T>({
           cachedAt: DateTime.local().toISO(),
           value: newData,
         };
-        await packageCache.set(finalNamespace, finalKey, newRecord, hardTtl);
+        await packageCache.setWithRawTtl(
+          finalNamespace,
+          finalKey,
+          newRecord,
+          hardTtl,
+        );
       }
 
       return newData;

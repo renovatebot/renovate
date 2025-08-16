@@ -269,7 +269,7 @@ export const PoetrySources = LooseArray(PoetrySource, {
   })
   .catch([]);
 
-export const PoetrySectionSchema = z
+export const PoetrySection = z
   .object({
     version: z.string().optional().catch(undefined),
     dependencies: withDepType(
@@ -322,7 +322,7 @@ export const PoetrySectionSchema = z
     },
   );
 
-export type PoetrySectionSchema = z.infer<typeof PoetrySectionSchema>;
+export type PoetrySection = z.infer<typeof PoetrySection>;
 
 const BuildSystemRequireVal = z
   .string()
@@ -341,40 +341,41 @@ const BuildSystemRequireVal = z
     return { depName, poetryRequirement };
   });
 
-export const PoetrySchema = z
-  .object({
-    tool: z
-      .object({ poetry: PoetrySectionSchema })
-      .transform(({ poetry }) => poetry),
-    'build-system': z
-      .object({
-        'build-backend': z.string().refine(
-          // https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
-          (buildBackend) =>
-            buildBackend === 'poetry.masonry.api' ||
-            buildBackend === 'poetry.core.masonry.api',
-        ),
-        requires: LooseArray(BuildSystemRequireVal).transform((vals) => {
-          const req = vals.find(
-            ({ depName }) => depName === 'poetry' || depName === 'poetry_core',
-          );
-          return req?.poetryRequirement;
-        }),
-      })
-      .transform(({ requires: poetryRequirement }) => poetryRequirement)
-      .optional()
-      .catch(undefined),
-  })
-  .transform(
-    ({ tool: packageFileContent, 'build-system': poetryRequirement }) => ({
-      packageFileContent,
-      poetryRequirement,
-    }),
-  );
+export const PoetryPyProject = Toml.pipe(
+  z
+    .object({
+      tool: z
+        .object({ poetry: PoetrySection })
+        .transform(({ poetry }) => poetry),
+      'build-system': z
+        .object({
+          'build-backend': z.string().refine(
+            // https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
+            (buildBackend) =>
+              buildBackend === 'poetry.masonry.api' ||
+              buildBackend === 'poetry.core.masonry.api',
+          ),
+          requires: LooseArray(BuildSystemRequireVal).transform((vals) => {
+            const req = vals.find(
+              ({ depName }) =>
+                depName === 'poetry' || depName === 'poetry_core',
+            );
+            return req?.poetryRequirement;
+          }),
+        })
+        .transform(({ requires: poetryRequirement }) => poetryRequirement)
+        .optional()
+        .catch(undefined),
+    })
+    .transform(
+      ({ tool: packageFileContent, 'build-system': poetryRequirement }) => ({
+        packageFileContent,
+        poetryRequirement,
+      }),
+    ),
+);
 
-export type PoetrySchema = z.infer<typeof PoetrySchema>;
-
-export const PoetrySchemaToml = Toml.pipe(PoetrySchema);
+export type PoetryPyProject = z.infer<typeof PoetryPyProject>;
 
 const poetryConstraint: Record<string, string> = {
   '1.0': '<1.1.0',

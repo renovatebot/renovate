@@ -1,4 +1,4 @@
-import { join } from 'upath';
+import upath from 'upath';
 import { loadModules } from '../../util/modules';
 import { getDatasourceList } from '../datasource';
 import * as customManager from './custom';
@@ -77,7 +77,7 @@ describe('modules/manager/index', () => {
 
     const loadedMgr = {
       ...(await loadModules(__dirname, validate)), // validate built-in managers
-      ...(await loadModules(join(__dirname, 'custom'), validate)), // validate custom managers
+      ...(await loadModules(upath.join(__dirname, 'custom'), validate)), // validate custom managers
     };
     delete loadedMgr.custom;
 
