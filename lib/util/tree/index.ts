@@ -9,5 +9,10 @@ export { reframeRelativePathToRootOfRepo } from './path-utils';
 export {
   recursivelyTraverseGraph,
   convertTraversalMapToResults,
+  getDependentNodes,
 } from './graph-traversal';
-export type { GraphTraversalOptions, TraversalResult } from './types';
+export type {
+  GraphTraversalOptions,
+  TraversalResult,
+  DependencyTraversalOptions,
+} from './types';

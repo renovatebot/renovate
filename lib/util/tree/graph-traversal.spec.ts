@@ -2,6 +2,7 @@ import { Graph } from 'graph-data-structure';
 import {
   recursivelyTraverseGraph,
   convertTraversalMapToResults,
+  getDependentNodes,
 } from './graph-traversal';
 
 describe('util/tree/graph-traversal', () => {
@@ -161,6 +162,81 @@ describe('util/tree/graph-traversal', () => {
         { node: 1, isLeaf: false },
         { node: 2, isLeaf: true },
       ]);
+    });
+  });
+
+  describe('getDependentNodes', () => {
+    it('returns dependent nodes in standard format', () => {
+      const graph = new Graph();
+      graph.addEdge('common', 'service');
+      graph.addEdge('service', 'api');
+
+      const results = getDependentNodes('common', graph);
+
+      expect(results).toEqual([
+        { node: 'common', isLeaf: false },
+        { node: 'service', isLeaf: false },
+        { node: 'api', isLeaf: true },
+      ]);
+    });
+
+    it('excludes start node when excludeStartNode is true', () => {
+      const graph = new Graph();
+      graph.addEdge('common', 'service');
+      graph.addEdge('service', 'api');
+
+      const results = getDependentNodes('common', graph, {
+        excludeStartNode: true,
+      });
+
+      expect(results).toEqual([
+        { node: 'service', isLeaf: false },
+        { node: 'api', isLeaf: true },
+      ]);
+    });
+
+    it('handles single node with excludeStartNode', () => {
+      const graph = new Graph();
+      graph.addNode('standalone');
+
+      const results = getDependentNodes('standalone', graph, {
+        excludeStartNode: true,
+      });
+
+      expect(results).toEqual([]);
+    });
+
+    it('handles complex dependency graph with exclusion', () => {
+      const graph = new Graph();
+      graph.addEdge('central', 'service-a');
+      graph.addEdge('central', 'service-b');
+      graph.addEdge('service-a', 'api');
+      graph.addEdge('service-b', 'api');
+
+      const results = getDependentNodes('central', graph, {
+        excludeStartNode: true,
+      });
+
+      expect(results).toEqual([
+        { node: 'service-a', isLeaf: false },
+        { node: 'api', isLeaf: true },
+        { node: 'service-b', isLeaf: false },
+      ]);
+    });
+
+    it('passes through traversal options', () => {
+      const graph = new Graph();
+      graph.addEdge('level1', 'level2');
+      graph.addEdge('level2', 'level3');
+      graph.addEdge('level3', 'level4');
+
+      const results = getDependentNodes('level1', graph, { maxDepth: 2 });
+
+      expect(results).toHaveLength(3); // level1, level2, level3 (level4 excluded by maxDepth)
+      expect(results.map((r) => r.node)).toContain('level1');
+      expect(results.map((r) => r.node)).toContain('level2');
+      expect(results.map((r) => r.node)).toContain('level3');
+      expect(results.map((r) => r.node)).not.toContain('level4');
     });
   });
 });

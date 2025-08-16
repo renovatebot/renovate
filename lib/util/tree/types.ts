@@ -13,6 +13,14 @@ export interface GraphTraversalOptions {
 }
 
 /**
+ * Options for dependency file operations
+ */
+export interface DependencyTraversalOptions extends GraphTraversalOptions {
+  /** Node to exclude from final results (useful for central management) */
+  excludeStartNode?: boolean;
+}
+
+/**
  * Result of graph traversal with metadata
  */
 export interface TraversalResult<T = string> {

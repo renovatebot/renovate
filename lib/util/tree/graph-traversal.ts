@@ -1,5 +1,9 @@
 import type { Graph } from 'graph-data-structure';
-import type { GraphTraversalOptions, TraversalResult } from './types';
+import type {
+  GraphTraversalOptions,
+  TraversalResult,
+  DependencyTraversalOptions,
+} from './types';
 
 /**
  * Recursively traverse a graph to find all dependent nodes at any level of ancestry
@@ -54,8 +58,9 @@ export function recursivelyTraverseGraph<T = string>(
       visitedNodes.set(currentNode, isLeaf);
     }
 
-    // If this node has dependents, traverse them recursively
-    if (!isLeaf) {
+    // Always traverse dependents if they exist, regardless of leaf status
+    // This matches the exact logic from both GoMod and NuGet implementations
+    if (dependents && dependents.size > 0) {
       for (const dependent of dependents) {
         traverse(dependent as T, currentDepth + 1);
       }
@@ -84,4 +89,39 @@ export function convertTraversalMapToResults<T = string>(
     node,
     isLeaf,
   }));
+}
+
+/**
+ * High-level utility for getting dependent package files in a dependency tree
+ *
+ * This function encapsulates the common pattern used by both GoMod and NuGet managers:
+ * 1. Create a graph from dependency relationships
+ * 2. Traverse to find all dependent files
+ * 3. Convert results to the expected format
+ * 4. Optionally exclude the starting node (for central management scenarios)
+ *
+ * @param startNode - The node to start traversal from
+ * @param graph - The dependency graph
+ * @param options - Traversal and filtering options
+ * @returns Array of dependent nodes with their leaf status
+ */
+export function getDependentNodes<T = string>(
+  startNode: T,
+  graph: Graph,
+  options: DependencyTraversalOptions = {},
+): TraversalResult<T>[] {
+  const { excludeStartNode = false, ...traversalOptions } = options;
+
+  const visitedNodes = new Map<T, boolean>();
+  recursivelyTraverseGraph(startNode, graph, visitedNodes, traversalOptions);
+
+  // Convert to results
+  const results = convertTraversalMapToResults(visitedNodes);
+
+  // Filter out the start node if requested (used by NuGet central management)
+  if (excludeStartNode) {
+    return results.filter(({ node }) => node !== startNode);
+  }
+
+  return results;
 }
