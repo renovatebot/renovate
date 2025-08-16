@@ -2,6 +2,7 @@ import { GitRefsDatasource } from '../../datasource/git-refs';
 
 export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
+export { getRangeStrategy } from './range';
 
 export const supportsLockFileMaintenance = true;
 
