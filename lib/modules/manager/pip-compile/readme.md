@@ -32,10 +32,11 @@ In turn `pip-compile` manager will find all source files and parse them as packa
 
 The following files are currently supported:
 
-| Source filename | Manager            |
-| --------------: | ------------------ |
-|      `setup.py` | `pip_setup`        |
-|          `*.in` | `pip_requirements` |
+|  Source filename | Manager            |
+| ---------------: | ------------------ |
+| `pyproject.toml` | `pep621`           |
+|       `setup.py` | `pip_setup`        |
+|           `*.in` | `pip_requirements` |
 
 Example header:
 
