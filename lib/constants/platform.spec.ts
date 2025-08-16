@@ -11,6 +11,7 @@ import { PodDatasource } from '../modules/datasource/pod';
 import { id as GITHUB_CHANGELOG_ID } from '../workers/repository/update/pr/changelog/github';
 import { id as GITLAB_CHANGELOG_ID } from '../workers/repository/update/pr/changelog/gitlab';
 import {
+  AZURE_POLICY_TYPES,
   BITBUCKET_API_USING_HOST_TYPES,
   BITBUCKET_SERVER_API_USING_HOST_TYPES,
   FORGEJO_API_USING_HOST_TYPES,
@@ -96,5 +97,25 @@ describe('constants/platform', () => {
     expect(
       BITBUCKET_SERVER_API_USING_HOST_TYPES.includes('bitbucket-server'),
     ).toBeTrue();
+  });
+
+  it('should be part of AZURE_POLICY_TYPES keys', () => {
+    expect(
+      Object.keys(AZURE_POLICY_TYPES).includes('RequiredReviewers'),
+    ).toBeTrue();
+  });
+
+  it('should be part of AZURE_POLICY_TYPES values', () => {
+    expect(
+      Object.values(AZURE_POLICY_TYPES).includes(
+        '40e92b44-2fe1-4dd6-b3d8-74a9c21d0c6e',
+      ),
+    ).toBeTrue();
+  });
+
+  it('should not be part of AZURE_POLICY_TYPES keys', () => {
+    expect(
+      Object.keys(AZURE_POLICY_TYPES).includes('ArbitraryPolicyName'),
+    ).toBeFalse();
   });
 });
