@@ -7,5 +7,5 @@ Extracts dependencies from files:
 
 Restrictions:
 
-- Support only nuget source (not github, gist, http, git)
-- Not support constraint on paket.dependencies
+- Only updates nuget source (github, gist, http, git not supported)
+- Constraint on paket.dependencies not supported
