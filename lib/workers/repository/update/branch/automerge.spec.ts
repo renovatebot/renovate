@@ -105,7 +105,7 @@ describe('workers/repository/update/branch/automerge', () => {
 
       expect(res).toBe('automerged');
       expect(scm.checkoutBranch).toHaveBeenCalledWith('test-branch');
-      expect(scm.mergeAndPush).toHaveBeenCalledWith(config.branchName, '--ff');
+      expect(scm.mergeAndPush).toHaveBeenCalledWith(config.branchName, true);
     });
   });
 });

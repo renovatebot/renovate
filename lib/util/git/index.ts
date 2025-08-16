@@ -977,8 +977,9 @@ export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
 
 export async function mergeBranch(
   branchName: string,
-  mergeFlag: MergeFlag,
+  allowBehindBase: boolean,
 ): Promise<void> {
+  const mergeFlag: MergeFlag = allowBehindBase ? '--ff' : '--ff-only';
   let status: StatusResult | undefined;
   try {
     await syncGit();

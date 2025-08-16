@@ -1,9 +1,5 @@
 import * as git from '../../util/git';
-import type {
-  CommitFilesConfig,
-  LongCommitSha,
-  MergeFlag,
-} from '../../util/git/types';
+import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
 import type { PlatformScm } from './types';
 
 export class DefaultGitScm implements PlatformScm {
@@ -45,8 +41,8 @@ export class DefaultGitScm implements PlatformScm {
     return git.checkoutBranch(branchName);
   }
 
-  mergeAndPush(branchName: string, mergeFlag: MergeFlag): Promise<void> {
-    return git.mergeBranch(branchName, mergeFlag);
+  mergeAndPush(branchName: string, allowBehindBase: boolean): Promise<void> {
+    return git.mergeBranch(branchName, allowBehindBase);
   }
 
   mergeToLocal(branchName: string): Promise<void> {
