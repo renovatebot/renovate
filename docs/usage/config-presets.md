@@ -80,6 +80,18 @@ If you wish to have an alternative file name, you need to specify it (e.g. `gith
 | Gitea with preset name and path with a tag | `gitea>abc/foo//path/xyz#1.2.3` | `xyz`     | `https://gitea.com/abc/foo` | `path/xyz.json` | `1.2.3`        |
 | Gitea with subpreset name and tag          | `gitea>abc/foo:xyz/sub#1.2.3`   | `sub`     | `https://gitea.com/abc/foo` | `xyz.json`      | `1.2.3`        |
 
+### Forgejo
+
+| name                                         | example use                       | preset    | resolves as                    | filename        | Git tag        |
+| -------------------------------------------- | --------------------------------- | --------- | ------------------------------ | --------------- | -------------- |
+| Forgejo default                              | `forgejo>abc/foo`                 | `default` | `https://codeberg.org/abc/foo` | `default.json`  | Default branch |
+| Forgejo with preset name                     | `forgejo>abc/foo:xyz`             | `xyz`     | `https://codeberg.org/abc/foo` | `xyz.json`      | Default branch |
+| Forgejo with preset name (JSON5)             | `forgejo>abc/foo:xyz.json5`       | `xyz`     | `https://codeberg.org/abc/foo` | `xyz.json5`     | Default branch |
+| Forgejo default with a tag                   | `forgejo>abc/foo#1.2.3`           | `default` | `https://codeberg.org/abc/foo` | `default.json`  | `1.2.3`        |
+| Forgejo with preset name with a tag          | `forgejo>abc/foo:xyz#1.2.3`       | `xyz`     | `https://codeberg.org/abc/foo` | `xyz.json`      | `1.2.3`        |
+| Forgejo with preset name and path with a tag | `forgejo>abc/foo//path/xyz#1.2.3` | `xyz`     | `https://codeberg.org/abc/foo` | `path/xyz.json` | `1.2.3`        |
+| Forgejo with subpreset name and tag          | `forgejo>abc/foo:xyz/sub#1.2.3`   | `sub`     | `https://codeberg.org/abc/foo` | `xyz.json`      | `1.2.3`        |
+
 ### Self-hosted Git
 
 | name                                       | example use                     | preset    | resolves as                          | filename        | Git tag        |
@@ -207,6 +219,14 @@ To host your preset config on Gitea:
 - Create a new repository on Gitea. Normally you'd call it `renovate-config` but you can use any name you want
 - Add a `default.json` to this new repository containing the preset config. No other files are necessary
 - In other repositories, reference it in an extends array like `"gitea>owner/name"`, e.g. `"gitea>rarkins/renovate-config"`
+
+## Forgejo-hosted Presets
+
+To host your preset config on Forgejo:
+
+- Create a new repository on Forgejo. Normally you'd call it `renovate-config` but you can use any name you want
+- Add a `default.json` to this new repository containing the preset config. No other files are necessary
+- In other repositories, reference it in an extends array like `"forgejo>owner/name"`, e.g. `"forgejo>rarkins/renovate-config"`
 
 ## Local presets
 

@@ -64,10 +64,10 @@ class DebVersioningApi extends GenericVersioningApi {
       return null;
     }
     const release = [...remainingVersion.matchAll(numericPattern)].map((m) =>
-      parseInt(m[0], 10),
+      parseInt(m[0]),
     );
     return {
-      epoch: parseInt(epochStr, 10),
+      epoch: parseInt(epochStr),
       upstreamVersion,
       debianRevision,
       release,

@@ -249,9 +249,10 @@ export class GoProxyDatasource extends Datasource {
       } catch (err) {
         const potentialHttpError =
           err instanceof ExternalHostError ? err.err : err;
+        const status = potentialHttpError.response?.statusCode;
         if (
           potentialHttpError instanceof HttpError &&
-          potentialHttpError.response?.statusCode === 404 &&
+          (status === 404 || status === 403) &&
           major !== packageMajor
         ) {
           break;

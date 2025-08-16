@@ -1,4 +1,5 @@
 import type { LongCommitSha } from '../../../util/git/types';
+import type { EmailAddress } from '../../../util/schema-utils';
 import type { Pr, PrBodyStruct } from '../types';
 
 // https://developer.github.com/v3/repos/statuses
@@ -84,7 +85,7 @@ export interface PlatformConfig {
   isGHApp?: boolean;
   existingRepos?: string[];
   userDetails?: UserDetails;
-  userEmail?: string | null;
+  userEmail?: EmailAddress | null;
 }
 
 export interface LocalRepoConfig {

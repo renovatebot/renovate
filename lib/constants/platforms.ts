@@ -3,6 +3,7 @@ export const PLATFORM_HOST_TYPES = [
   'bitbucket',
   'bitbucket-server',
   'codecommit',
+  'forgejo',
   'gerrit',
   'gitea',
   'github',
@@ -17,6 +18,13 @@ export const GITEA_API_USING_HOST_TYPES = [
   'gitea-changelog',
   'gitea-releases',
   'gitea-tags',
+];
+
+export const FORGEJO_API_USING_HOST_TYPES = [
+  'forgejo',
+  'forgejo-changelog',
+  'forgejo-releases',
+  'forgejo-tags',
 ];
 
 export const GITHUB_API_USING_HOST_TYPES = [

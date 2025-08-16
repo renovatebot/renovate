@@ -1072,7 +1072,8 @@ describe('modules/platform/gerrit/index', () => {
   describe('massageMarkdown()', () => {
     it('massageMarkdown()', () => {
       expect(
-        gerrit.massageMarkdown(codeBlock`
+        gerrit.massageMarkdown(
+          codeBlock`
           Pull Request
           PR
           Branch creation
@@ -1082,7 +1083,9 @@ describe('modules/platform/gerrit/index', () => {
           Close this PR
           you tick the rebase/retry checkbox
           checking the rebase/retry box above
-          `),
+          `,
+          'rebase',
+        ),
       ).toBe(codeBlock`
         change
         change
@@ -1091,8 +1094,8 @@ describe('modules/platform/gerrit/index', () => {
         Whenever change becomes conflicted
         abandon or vote this change with Code-Review -2
         Abandon or vote this change with Code-Review -2
-        add \`rebase!\` at the beginning of the commit message
-        adding \`rebase!\` at the beginning of the commit message
+        you add the _rebase_ hashtag to this change
+        adding the _rebase_ hashtag to this change
         `);
     });
   });

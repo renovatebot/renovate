@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { DockerDatasource } from '../../../datasource/docker';
 import type { PackageDependency } from '../../types';
-import { ExtensionTagFragmentSchema, StringFragmentSchema } from './fragments';
+import { ExtensionTagFragment, StringFragment } from './fragments';
 
 export const ociExtensionPrefix = 'oci';
 
@@ -9,14 +9,14 @@ const pullTag = 'pull';
 
 export const ociExtensionTags = ['pull'];
 
-export const RuleToDockerPackageDep = ExtensionTagFragmentSchema.extend({
+export const RuleToDockerPackageDep = ExtensionTagFragment.extend({
   extension: z.literal(ociExtensionPrefix),
   tag: z.literal(pullTag),
   children: z.object({
-    name: StringFragmentSchema,
-    image: StringFragmentSchema,
-    tag: StringFragmentSchema.optional(),
-    digest: StringFragmentSchema.optional(),
+    name: StringFragment,
+    image: StringFragment,
+    tag: StringFragment.optional(),
+    digest: StringFragment.optional(),
   }),
 }).transform(
   ({

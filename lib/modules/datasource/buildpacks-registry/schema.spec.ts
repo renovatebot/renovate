@@ -1,4 +1,4 @@
-import { BuildpacksRegistryResponseSchema } from './schema';
+import { BuildpacksRegistryResponse } from './schema';
 
 describe('modules/datasource/buildpacks-registry/schema', () => {
   it('parses buildpack-registry schema', () => {
@@ -26,7 +26,7 @@ describe('modules/datasource/buildpacks-registry/schema', () => {
         },
       ],
     };
-    expect(BuildpacksRegistryResponseSchema.parse(response)).toMatchObject({
+    expect(BuildpacksRegistryResponse.parse(response)).toMatchObject({
       latest: {
         homepage: 'https://github.com/heroku/buildpacks-python',
       },

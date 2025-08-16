@@ -32,6 +32,53 @@ const jsYamlChangelogMd = Fixtures.get('js-yaml.md');
 const yargsChangelogMd = Fixtures.get('yargs.md');
 const adapterutilsChangelogMd = Fixtures.get('adapter-utils.md');
 const gitterWebappChangelogMd = Fixtures.get('gitter-webapp.md');
+const releasePlanChangelogMd = `
+# release-plan Changelog
+
+## Release (2025-03-13)
+
+* release-plan 0.16.0 (minor)
+
+#### :rocket: Enhancement
+* \`release-plan\`
+  * [#155](https://github.com/embroider-build/release-plan/pull/155) add ability to set tag per package
+
+## Release (2025-03-03)
+
+* release-plan 0.15.0 (minor)
+
+#### :rocket: Enhancement
+* \`release-plan\`
+  * [#158](https://github.com/embroider-build/release-plan/pull/158) feat: Display new package versions as list
+
+#### :house: Internal
+* \`release-plan\`
+  * [#153](https://github.com/embroider-build/release-plan/pull/153) move publish test to mock execa
+
+## Release (2025-03-03)
+
+release-plan 0.14.0 (minor)
+
+#### :rocket: Enhancement
+* \`release-plan\`
+  * [#131](https://github.com/embroider-build/release-plan/pull/131) add skip npm option
+  * [#133](https://github.com/embroider-build/release-plan/pull/133) update execa
+  * [#124](https://github.com/embroider-build/release-plan/pull/124) support github enterprise api url via env var
+
+#### :bug: Bug Fix
+* \`release-plan\`
+  * [#138](https://github.com/embroider-build/release-plan/pull/138) fix readJSONSync import
+  * [#107](https://github.com/embroider-build/release-plan/pull/107) Bump chalk from 4.1.2 to 5.4.1
+
+#### :memo: Documentation
+* \`release-plan\`
+  * [#141](https://github.com/embroider-build/release-plan/pull/141) Add note about creating initial tag
+
+#### :house: Internal
+* \`release-plan\`
+  * [#146](https://github.com/embroider-build/release-plan/pull/146) add extra test coverage to plan
+  * [#152](https://github.com/embroider-build/release-plan/pull/152) remove conditional coverage run
+`;
 
 const bitbucketTreeResponse = {
   values: [
@@ -1480,6 +1527,38 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
             'https://gitlab.com/itentialopensource/adapter-utils/blob/HEAD/CHANGELOG.md',
           url: 'https://gitlab.com/itentialopensource/adapter-utils/blob/HEAD/CHANGELOG.md#4330-05-15-2020',
         });
+      });
+
+      it('parses when version contained in the body 0.14.0', async () => {
+        httpMock
+          .scope('https://api.github.com')
+          .get('/repos/embroider-build/release-plan')
+          .reply(200, { default_branch: 'main' })
+          .get('/repos/embroider-build/release-plan/git/trees/main')
+          .reply(200, githubTreeResponse)
+          .get('/repos/embroider-build/release-plan/git/blobs/abcd')
+          .reply(200, {
+            content: toBase64(releasePlanChangelogMd),
+          });
+        const res = await getReleaseNotesMd(
+          {
+            ...githubProject,
+            repository: 'embroider-build/release-plan',
+            packageName: 'release-plan',
+          },
+          partial<ChangeLogRelease>({
+            version: '0.14.0',
+            gitRef: '0.14.0',
+          }),
+        );
+        versionTwoNotes = res!;
+
+        expect(res?.notesSourceUrl).toStrictEqual(
+          'https://github.com/embroider-build/release-plan/blob/HEAD/CHANGELOG.md',
+        );
+        expect(res?.url).toStrictEqual(
+          'https://github.com/embroider-build/release-plan/blob/HEAD/CHANGELOG.md#Release-2025-03-03',
+        );
       });
 
       it('handles gitlab sourceDirectory', async () => {

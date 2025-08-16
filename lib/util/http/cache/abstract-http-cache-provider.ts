@@ -2,7 +2,7 @@ import { logger } from '../../../logger';
 import { HttpCacheStats } from '../../stats';
 import type { GotOptions, HttpResponse } from '../types';
 import { copyResponse } from '../util';
-import { type HttpCache, HttpCacheSchema } from './schema';
+import { HttpCache } from './schema';
 import type { HttpCacheProvider } from './types';
 
 export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
@@ -11,7 +11,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
 
   async get(url: string): Promise<HttpCache | null> {
     const cache = await this.load(url);
-    const httpCache = HttpCacheSchema.parse(cache);
+    const httpCache = HttpCache.parse(cache);
     if (!httpCache) {
       return null;
     }
@@ -59,7 +59,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       const httpResponse = copyResponse(resp, true);
       const timestamp = new Date().toISOString();
 
-      const newHttpCache = HttpCacheSchema.parse({
+      const newHttpCache = HttpCache.parse({
         etag,
         lastModified,
         httpResponse,
@@ -89,6 +89,9 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       logger.debug(
         `http cache: Using cached response: ${url} from ${timestamp}`,
       );
+      httpCache.timestamp = new Date().toISOString();
+      await this.persist(url, httpCache);
+
       HttpCacheStats.incRemoteHits(url);
       const cachedResp = copyResponse(
         httpCache.httpResponse as HttpResponse<T>,

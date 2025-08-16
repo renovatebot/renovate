@@ -1,4 +1,4 @@
-import { dirname } from 'upath';
+import upath from 'upath';
 import { logger } from '../../../logger';
 import { isNotNullOrUndefined } from '../../../util/array';
 import { LooseArray } from '../../../util/schema-utils';
@@ -53,7 +53,7 @@ async function extractBazelPfc(
     .transform((deps) => ({ deps }))
     .parse(records);
 
-  const registryUrls = (await bazelrc.read(dirname(packageFile)))
+  const registryUrls = (await bazelrc.read(upath.dirname(packageFile)))
     // Ignore any entries for custom configurations
     .filter((ce) => ce.config === undefined)
     .map((ce) => ce.getOption('registry')?.value)

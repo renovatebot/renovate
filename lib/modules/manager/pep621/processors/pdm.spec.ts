@@ -1,10 +1,11 @@
-import { join } from 'upath';
+import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import * as hostRules from '../../../../util/host-rules';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
+import { parsePyProject } from '../extract';
 import { depTypes } from '../utils';
 import { PdmProcessor } from './pdm';
 import { mockExecAll } from '~test/exec-util';
@@ -17,9 +18,9 @@ const getPkgReleases = vi.mocked(_getPkgReleases);
 
 const config: UpdateArtifactsConfig = {};
 const adminConfig: RepoGlobalConfig = {
-  localDir: join('/tmp/github/some/repo'),
-  cacheDir: join('/tmp/cache'),
-  containerbaseDir: join('/tmp/cache/containerbase'),
+  localDir: upath.join('/tmp/github/some/repo'),
+  cacheDir: upath.join('/tmp/cache'),
+  containerbaseDir: upath.join('/tmp/cache/containerbase'),
 };
 
 const processor = new PdmProcessor();
@@ -36,7 +37,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           config,
           updatedDeps,
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toBeNull();
     });
@@ -68,7 +69,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           config: {},
           updatedDeps,
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toBeNull();
       expect(execSnapshots).toMatchObject([
@@ -113,7 +114,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           config: {},
           updatedDeps,
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toEqual([
         { artifactError: { lockFile: 'pdm.lock', stderr: 'test error' } },
@@ -186,7 +187,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           config: {},
           updatedDeps,
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toEqual([
         {
@@ -252,7 +253,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           config: {},
           updatedDeps,
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toBeNull();
       expect(execSnapshots).toEqual([]);
@@ -283,7 +284,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           },
           updatedDeps: [],
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toEqual([
         {
@@ -333,7 +334,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           },
           updatedDeps: [],
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toEqual([
         {

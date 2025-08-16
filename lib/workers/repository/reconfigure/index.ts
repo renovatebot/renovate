@@ -1,5 +1,5 @@
 import { GlobalConfig } from '../../../config/global';
-import { applySecretsToConfig } from '../../../config/secrets';
+import { applySecretsAndVariablesToConfig } from '../../../config/secrets';
 import type { AllConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
@@ -99,7 +99,9 @@ export async function checkReconfigureBranch(
   // Merge it with inherited and static repo config
   // Finally, merge the reconfigure config
   let newConfig = GlobalConfig.set(
-    applySecretsToConfig(repoConfig, undefined, false),
+    applySecretsAndVariablesToConfig({
+      config: repoConfig,
+    }),
   );
   newConfig.baseBranch = config.defaultBranch;
   newConfig.repoIsOnboarded = true;

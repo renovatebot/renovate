@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const DepObjectSchema = z.object({
+const DepObject = z.object({
   currentValue: z.string().optional(),
   datasource: z.string().optional(),
   depName: z.string().optional(),
@@ -13,8 +13,8 @@ const DepObjectSchema = z.object({
   indentation: z.string().optional(),
 });
 
-export const QueryResultZodSchema = z
-  .union([z.array(DepObjectSchema), DepObjectSchema])
+export const QueryResultZod = z
+  .union([z.array(DepObject), DepObject])
   .transform((input) => {
     return Array.isArray(input) ? input : [input];
   });

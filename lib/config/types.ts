@@ -94,6 +94,7 @@ export interface RenovateSharedConfig {
   semanticCommitScope?: string | null;
   semanticCommitType?: string;
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
+  skipArtifactsUpdate?: boolean;
   stopUpdatingLabel?: string;
   suppressNotifications?: string[];
   timezone?: string;
@@ -117,6 +118,7 @@ export interface GlobalOnlyConfig {
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
+  gitPrivateKeyPassphrase?: string;
   globalExtends?: string[];
   mergeConfidenceDatasources?: string[];
   mergeConfidenceEndpoint?: string;
@@ -131,6 +133,7 @@ export interface GlobalOnlyConfig {
   repositories?: RenovateRepository[];
   useCloudMetadataServices?: boolean;
   deleteConfigFile?: boolean;
+  deleteAdditionalConfigFile?: boolean;
 }
 
 // Config options used within the repository worker, but not user configurable
@@ -209,6 +212,7 @@ export type RenovateRepository =
   | {
       repository: string;
       secrets?: Record<string, string>;
+      variables?: Record<string, string>;
     };
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
@@ -235,7 +239,8 @@ export interface RenovateConfig
   reportPath?: string;
   reportType?: 'logging' | 'file' | 's3' | null;
   depName?: string;
-  baseBranches?: string[];
+  /** user configurable base branch patterns*/
+  baseBranchPatterns?: string[];
   commitBody?: string;
   useBaseBranchConfig?: UseBaseBranchConfigType;
   baseBranch?: string;
@@ -298,6 +303,7 @@ export interface RenovateConfig
 
   fetchChangeLogs?: FetchChangeLogsOptions;
   secrets?: Record<string, string>;
+  variables?: Record<string, string>;
 
   constraints?: Record<string, string>;
   skipInstalls?: boolean | null;
@@ -317,6 +323,7 @@ export interface RenovateConfig
   branchTopic?: string;
   additionalBranchPrefix?: string;
   sharedVariableName?: string;
+  minimumGroupSize?: number;
 }
 
 const CustomDatasourceFormats = [
@@ -389,6 +396,7 @@ export type MergeStrategy =
   | 'fast-forward'
   | 'merge-commit'
   | 'rebase'
+  | 'rebase-merge'
   | 'squash';
 
 // TODO: Proper typings

@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { join } from 'upath';
+import upath from 'upath';
 import { customManagerList as customManagers } from './custom';
 
 describe('modules/manager/metadata', () => {
@@ -11,7 +11,7 @@ describe('modules/manager/metadata', () => {
     .sort();
 
   const customManagerList = fs
-    .readdirSync(join(__dirname, 'custom'), { withFileTypes: true })
+    .readdirSync(upath.join(__dirname, 'custom'), { withFileTypes: true })
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name)
     .filter((name) => !name.startsWith('__'))

@@ -10,5 +10,5 @@ await (async () => {
     console.error(`Failed to fetch ${dataUrl}`, res);
     process.exit(1);
   }
-  await updateJsonFile('./data/node-js-schedule.json', await res.text());
+  await updateJsonFile('./lib/data/node-js-schedule.json', await res.text());
 })();

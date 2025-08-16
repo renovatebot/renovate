@@ -1,4 +1,4 @@
-import { join } from 'upath';
+import upath from 'upath';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { coerceString } from '../../../util/string';
@@ -50,7 +50,7 @@ function extractDependency(dependency: Dependency): PackageDependency | null {
     return null;
   }
 
-  const depName = join(
+  const depName = upath.join(
     gitRemote.host,
     gitRemote.pathname.replace(/\.git$/, ''),
     coerceString(dependency.source.git.subdir),

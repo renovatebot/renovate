@@ -22,6 +22,7 @@ describe('modules/platform/scm', () => {
     'codecommit',
     'bitbucket',
     'bitbucket-server',
+    'forgejo',
     'gitea',
     'github',
     'gitlab',

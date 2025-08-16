@@ -5,6 +5,7 @@ import { NpmDatasource } from '../../../modules/datasource/npm';
 import type { Timestamp } from '../../../util/timestamp';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchConfig } from './generate';
+import { logger } from '~test/util';
 
 const {
   commitMessage,
@@ -47,6 +48,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.groupName).toBeUndefined();
       expect(res.releaseTimestamp).toBeDefined();
       expect(res.recreateClosed).toBe(false);
+      expect(res.minimumGroupSize).toBe(1);
     });
 
     it('handles lockFileMaintenance', () => {
@@ -72,6 +74,34 @@ describe('workers/repository/updates/generate', () => {
           },
         ],
       });
+    });
+
+    it('sets minimumGroupSize based on upgrades', () => {
+      const branch = [
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          minimumGroupSize: 1,
+        },
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          minimumGroupSize: 2,
+        },
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          minimumGroupSize: 3,
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.minimumGroupSize).toBe(3);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Multiple minimumGroupSize values found for this branch, using highest.',
+      );
     });
 
     it('handles lockFileUpdate', () => {
@@ -1652,5 +1682,169 @@ describe('workers/repository/updates/generate', () => {
         prTitle: 'I3 I2 I1 Update deps',
       });
     });
+
+    it('sets skipArtifactsUpdate to false when no upgrades specify a value', () => {
+      const commonOptions = {
+        ...requiredDefaultOptions,
+        manager: 'some-manager',
+        branchName: 'deps',
+      };
+
+      const branch = [
+        {
+          ...commonOptions,
+          depName: 'dep1',
+          newVersion: '1.2.0',
+          newValue: '1.2.0',
+          updateType: 'minor' as UpdateType,
+          fileReplacePosition: 1,
+          prBodyDefinitions: {
+            Issue: 'I1',
+          },
+        },
+        {
+          ...commonOptions,
+          depName: 'dep2',
+          newVersion: '1.0.0',
+          newValue: '1.0.0',
+          updateType: 'major' as UpdateType,
+          fileReplacePosition: 2,
+          prBodyDefinitions: {
+            Issue: 'I2',
+          },
+        },
+        {
+          ...commonOptions,
+          depName: 'dep3',
+          newVersion: '1.2.3',
+          newValue: '1.2.3',
+          updateType: 'patch' as UpdateType,
+          fileReplacePosition: 0,
+          prBodyDefinitions: {
+            Issue: 'I3',
+          },
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res).toMatchObject({
+        skipArtifactsUpdate: false,
+      });
+      expect(logger.logger.debug).not.toHaveBeenCalled();
+    });
+
+    it('sets skipArtifactsUpdate to true when all upgrades specify true', () => {
+      const commonOptions = {
+        ...requiredDefaultOptions,
+        manager: 'some-manager',
+        branchName: 'deps',
+      };
+
+      const branch = [
+        {
+          ...commonOptions,
+          depName: 'dep1',
+          newVersion: '1.2.0',
+          newValue: '1.2.0',
+          updateType: 'minor' as UpdateType,
+          skipArtifactsUpdate: true,
+          fileReplacePosition: 1,
+          prBodyDefinitions: {
+            Issue: 'I1',
+          },
+        },
+        {
+          ...commonOptions,
+          depName: 'dep2',
+          newVersion: '1.0.0',
+          newValue: '1.0.0',
+          updateType: 'major' as UpdateType,
+          skipArtifactsUpdate: true,
+          fileReplacePosition: 2,
+          prBodyDefinitions: {
+            Issue: 'I2',
+          },
+        },
+        {
+          ...commonOptions,
+          depName: 'dep3',
+          newVersion: '1.2.3',
+          newValue: '1.2.3',
+          updateType: 'patch' as UpdateType,
+          skipArtifactsUpdate: true,
+          fileReplacePosition: 0,
+          prBodyDefinitions: {
+            Issue: 'I3',
+          },
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res).toMatchObject({
+        skipArtifactsUpdate: true,
+      });
+      expect(logger.logger.debug).not.toHaveBeenCalled();
+    });
+
+    it.each([true, false])(
+      'sets skipArtifactsUpdate to false when not all upgrades specify true and first is $0',
+      (first) => {
+        const commonOptions = {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          branchName: 'deps',
+        };
+
+        const branch = [
+          {
+            ...commonOptions,
+            depName: 'dep1',
+            newVersion: '1.2.0',
+            newValue: '1.2.0',
+            updateType: 'minor' as UpdateType,
+            skipArtifactsUpdate: first,
+            fileReplacePosition: 1,
+            prBodyDefinitions: {
+              Issue: 'I1',
+            },
+          },
+          {
+            ...commonOptions,
+            depName: 'dep2',
+            newVersion: '1.0.0',
+            newValue: '1.0.0',
+            updateType: 'major' as UpdateType,
+            fileReplacePosition: 2,
+            prBodyDefinitions: {
+              Issue: 'I2',
+            },
+          },
+          {
+            ...commonOptions,
+            depName: 'dep3',
+            newVersion: '1.2.3',
+            newValue: '1.2.3',
+            updateType: 'patch' as UpdateType,
+            skipArtifactsUpdate: true,
+            fileReplacePosition: 0,
+            prBodyDefinitions: {
+              Issue: 'I3',
+            },
+          },
+        ] satisfies BranchUpgradeConfig[];
+        const res = generateBranchConfig(branch);
+        expect(res).toMatchObject({
+          skipArtifactsUpdate: false,
+        });
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          {
+            upgrades: [
+              { depName: 'dep3', skipArtifactsUpdate: true },
+              { depName: 'dep2', skipArtifactsUpdate: undefined },
+              { depName: 'dep1', skipArtifactsUpdate: first },
+            ],
+          },
+          'Mixed `skipArtifactsUpdate` values in upgrades. Artifacts will be updated.',
+        );
+      },
+    );
   });
 });

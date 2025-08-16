@@ -1,6 +1,6 @@
 import { logger, withMeta } from '../../../logger';
 import type { PackageFileContent } from '../types';
-import { DevboxSchema } from './schema';
+import { Devbox } from './schema';
 
 export function extractPackageFile(
   content: string,
@@ -8,7 +8,7 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   logger.trace('devbox.extractPackageFile()');
 
-  const deps = withMeta({ packageFile }, () => DevboxSchema.parse(content));
+  const deps = withMeta({ packageFile }, () => Devbox.parse(content));
   if (!deps.length) {
     return null;
   }

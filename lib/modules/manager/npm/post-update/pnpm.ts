@@ -80,7 +80,7 @@ export async function generateLockFile(
         pnpmToolConstraint,
       ],
     };
-    // istanbul ignore if
+    /* v8 ignore next 4 -- needs test */
     if (GlobalConfig.get('exposeAllEnv')) {
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
@@ -145,17 +145,19 @@ export async function generateLockFile(
       );
       try {
         await deleteLocalFile(lockFileName);
-      } catch (err) /* istanbul ignore next */ {
+        /* v8 ignore start -- needs test */
+      } catch (err) {
         logger.debug(
           { err, lockFileName },
           'Error removing `pnpm-lock.yaml` for lock file maintenance',
         );
-      }
+      } /* v8 ignore stop -- needs test */
     }
 
     await exec(commands, execOptions);
     lockFile = await readLocalFile(lockFileName, 'utf8');
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore start -- needs test */
+  } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
@@ -170,7 +172,7 @@ export async function generateLockFile(
       'lock file error',
     );
     return { error: true, stderr: err.stderr, stdout: err.stdout };
-  }
+  } /* v8 ignore stop -- needs test */
   return { lockFile };
 }
 

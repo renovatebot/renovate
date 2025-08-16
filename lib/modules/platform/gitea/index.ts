@@ -234,6 +234,9 @@ const platform: Platform = {
       }
       if (defaults.version?.includes('gitea-')) {
         defaults.isForgejo = true;
+        logger.info(
+          `Detected Forgejo instance, please use 'forgejo' platform instead`,
+        );
       }
       logger.debug(
         `${defaults.isForgejo ? 'Forgejo' : 'Gitea'} version: ${defaults.version}`,

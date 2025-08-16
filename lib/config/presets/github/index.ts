@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
+import type { Nullish } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import { GithubHttp } from '../../../util/http/github';
@@ -16,7 +17,7 @@ export async function fetchJSONFile(
   fileName: string,
   endpoint: string,
   tag?: string,
-): Promise<Preset> {
+): Promise<Nullish<Preset>> {
   let ref = '';
   if (is.nonEmptyString(tag)) {
     ref = `?ref=${tag}`;
@@ -32,7 +33,9 @@ export async function fetchJSONFile(
     if (err instanceof ExternalHostError) {
       throw err;
     }
-    logger.debug(`Preset file ${fileName} not found in ${repo}`);
+    logger.debug(
+      `Preset file ${fileName} not found in ${repo}: ${err.message}`,
+    );
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
@@ -45,7 +48,7 @@ export function getPresetFromEndpoint(
   presetPath?: string,
   endpoint = Endpoint,
   tag?: string,
-): Promise<Preset | undefined> {
+): Promise<Nullish<Preset>> {
   return fetchPreset({
     repo,
     filePreset,
@@ -61,6 +64,6 @@ export function getPreset({
   presetName = 'default',
   presetPath,
   tag,
-}: PresetConfig): Promise<Preset | undefined> {
+}: PresetConfig): Promise<Nullish<Preset>> {
   return getPresetFromEndpoint(repo, presetName, presetPath, Endpoint, tag);
 }

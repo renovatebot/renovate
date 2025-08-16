@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { updateJsonFile } from './utils.mjs';
 
-const RuntimesSchema = z.object({
+const Runtimes = z.object({
   cycle: z.string().describe('The ID of the Runtime'),
   support: z
     .union([z.boolean(), z.string()])
@@ -9,7 +9,7 @@ const RuntimesSchema = z.object({
       'Either `true` if in support, or a string denoting when support for this Runtime will end. 0.10.x is a sole exception which has a value of `false` and will be filtered out',
     ),
 });
-const RuntimesArraySchema = z.array(RuntimesSchema);
+const RuntimesArray = z.array(Runtimes);
 
 const lambdaDataUrl = 'https://endoflife.date/api/aws-lambda.json';
 
@@ -22,10 +22,10 @@ await (async () => {
       process.exit(1);
     }
 
-    return RuntimesArraySchema.parseAsync(await response.json());
+    return RuntimesArray.parseAsync(await response.json());
   });
 
-  /** @type {Record<string, z.infer<RuntimesSchema>>} */
+  /** @type {Record<string, z.infer<Runtimes>>} */
   const nodeRuntimes = {};
   for (let lambda of lambdas) {
     if (!lambda.cycle.startsWith('nodejs')) {

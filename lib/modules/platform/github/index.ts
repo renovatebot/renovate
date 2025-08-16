@@ -78,7 +78,7 @@ import {
 import { GithubIssueCache, GithubIssue as Issue } from './issue';
 import { massageMarkdownLinks } from './massage-markdown-links';
 import { getPrCache, updatePrCache } from './pr';
-import { VulnerabilityAlertSchema } from './schema';
+import { GithubVulnerabilityAlert } from './schema';
 import type {
   BranchProtection,
   CombinedBranchStatus,
@@ -99,7 +99,8 @@ export const id = 'github';
 let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;
 
-const GitHubMaxPrBodyLen = 60000;
+// GitHub's max is 60k but in the hosted app we've observed that content-length is ~1k longer
+const GitHubMaxPrBodyLen = 58000;
 
 export function resetConfigs(): void {
   config = {} as never;
@@ -816,10 +817,12 @@ function matchesState(state: string, desiredState: string): boolean {
 export async function getPrList(): Promise<GhPr[]> {
   if (!config.prList) {
     const repo = config.parentRepo ?? config.repository;
-    const username =
-      !config.forkToken && !config.ignorePrAuthor && config.renovateUsername
-        ? config.renovateUsername
-        : null;
+
+    let username = config.renovateUsername;
+    if (config.forkToken || config.ignorePrAuthor) {
+      username = undefined;
+    }
+
     // TODO: check null `repo` (#22198)
     const prCache = await getPrCache(githubApi, repo!, username);
     config.prList = Object.values(prCache).sort(
@@ -1970,11 +1973,11 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       await githubApi.getJson(
         `/repos/${config.repositoryOwner}/${config.repositoryName}/dependabot/alerts?state=open&direction=asc&per_page=100`,
         {
-          paginate: false,
+          paginate: true,
           headers: { accept: 'application/vnd.github+json' },
           cacheProvider: repoCacheProvider,
         },
-        VulnerabilityAlertSchema,
+        GithubVulnerabilityAlert,
       )
     ).body;
   } catch (err) /* v8 ignore start */ {

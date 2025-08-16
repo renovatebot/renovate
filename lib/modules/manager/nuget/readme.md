@@ -39,3 +39,14 @@ If you would like Renovate to disable updating of exact versions (warning: you m
   ]
 }
 ```
+
+### Workload restore
+
+Sometimes you need to run `dotnet workload restore` to ensure that all required workloads are installed before restoring the project.
+You can enable this behavior by adding `dotnetWorkloadRestore` to the `postUpdateOptions` in your Renovate configuration.
+
+```json
+{
+  "postUpdateOptions": ["dotnetWorkloadRestore"]
+}
+```

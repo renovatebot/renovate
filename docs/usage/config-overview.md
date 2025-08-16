@@ -6,11 +6,12 @@ This final config describes what Renovate will do during its run.
 The final config is internal to Renovate, and is _not_ saved or cached for a later run.
 But you can always find the final config in Renovate's logs.
 
-Renovate reads the configuration files in this order (from from top to bottom):
+Renovate reads the configuration files in this order (from top to bottom):
 
 1. Default config
 2. Global config
    - File config
+   - Additional file config
    - Environment config
    - CLI config
 3. Inherited config
@@ -65,6 +66,21 @@ If the file is found but cannot be parsed then Renovate will also error and exit
 
 Global config files can be `.js` or `.json` files.
 You may use synchronous or asynchronous methods inside a `.js` file, including even to fetch config information from remote hosts.
+
+#### Additional file config
+
+Renovate tried to read an additional config file only if the env var `RENOVATE_ADDITIONAL_CONFIG_FILE` is set, for example: `RENOVATE_ADDITIONAL_CONFIG_FILE=/tmp/my-additional-renovate-config.js`.
+
+By default Renovate allows the config file to be _missing_ and does not error if it cannot find it.
+But if you have configured `RENOVATE_ADDITIONAL_CONFIG_FILE` and the path you specified is not found then Renovate will error and exit, because it assumes you have a configuration problem.
+If the file is found but cannot be parsed then Renovate will also error and exit.
+
+Global config files can be `.js` or `.json` files.
+You may use synchronous or asynchronous methods inside a `.js` file, including even to fetch config information from remote hosts.
+
+<!-- prettier-ignore -->
+!!! warning
+    Do not name the additional config file `config.js` as it is reserved for file config.
 
 #### Environment config
 
@@ -125,6 +141,7 @@ Finally, there are some special environment variables that are loaded _before_ c
 
 - `LOG_CONTEXT`: a unique identifier used in each log message to track context
 - `LOG_FILE`: used to enable file logging and specify the log file path
+- `LOG_FILE_FORMAT`: defaults to "json", but can be changed to a "pretty" human-readable output
 - `LOG_FILE_LEVEL`: log file logging level, defaults to `debug`
 - `LOG_FORMAT`: defaults to a "pretty" human-readable output, but can be changed to "json"
 - `LOG_LEVEL`: most commonly used to change from the default `info` to `debug` logging
@@ -206,6 +223,43 @@ When Renovate creates an Onboarding PR it will propose a Repository config file 
 By default, it is essentially an empty config with only the Renovate JSON schema referenced, but you can change this behavior if desired.
 
 If you configure `onboardingConfig` in either Global config or Inherited config then Renovate will use that config directly instead of the default.
+
+If you self-host Renovate in GitLab using [`renovate-runner`](https://gitlab.com/gitlab-com/gl-infra/renovate/renovate-runner), the CI will contain a default [RENOVATE_ONBOARDING_CONFIG](https://gitlab.com/renovate-bot/renovate-runner/-/blob/main/templates/renovate.gitlab-ci.yml#L5) that will merge with your own configuration settings. For example, the CI by default contains:
+
+```yml
+RENOVATE_ONBOARDING_CONFIG: '{"$$schema": "https://docs.renovatebot.com/renovate-schema.json", "extends": ["config:recommended"] }'
+```
+
+If you want to change the `extends` in your own configuration, you need to override the variable in your own `.gitlab-ci.yml`:
+
+```yml
+variables:
+  RENOVATE_ONBOARDING_CONFIG: '{"$$schema":"https://docs.renovatebot.com/renovate-schema.json","extends":["platform>organization/repo:renovate-config"]}'
+```
+
+Your `renovate.js` where you run Renovate cannot contain any `extends` definition, it will pick the `extends` from the `RENOVATE_ONBOARDING_CONFIG` variable. For example, your config can look like this:
+
+```js
+module.exports = {
+    ...
+    onboardingConfig: {
+      "argocd": {
+        "fileMatch": [
+          "application\\.yaml$"
+        ]
+      },
+    };
+```
+
+The resulting onboarding config will be:
+
+```yml
+{
+  '$schema': 'https://docs.renovatebot.com/renovate-schema.json',
+  'argocd': { 'managerFilePatterns': ["/application\\.yaml$/"] },
+  'extends': ['platform>organization/repo:renovate-config'],
+}
+```
 
 Alternatively if you follow Renovate's naming convention for shared presets then it can automatically detect those instead.
 If the repository `{{parentOrg}}/renovate-config` has a `default.json` file then this will be treated as the organization's default preset and included in the Onboarding config.
