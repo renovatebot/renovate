@@ -97,6 +97,7 @@ export interface ReleaseResult {
   packageScope?: string;
   mostRecentTimestamp?: Timestamp;
   isAbandoned?: boolean;
+  respectLatest?: boolean;
 }
 
 export interface PostprocessReleaseConfig {

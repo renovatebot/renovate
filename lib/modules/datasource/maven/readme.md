@@ -30,9 +30,8 @@ For example:
 
 #### latest and release tags
 
-Although a package's `maven-metadata.xml` may contain `latest` and `release` tags, we do not map them to `tags.latest` or `tags.release` in Renovate internal data.
-The reason for not doing this is that Maven registries don't use these tags as an indicator of stability - `latest` essentially means "the most recent version which was published".
+When `latest` or `release` values are present in a package's `maven-metadata.xml`, Renovate will map these to its `tags` concept.
+This enables the use of Renovate's `followTag` feature.
 
-For more information on this, see the analysis done in [Discussion #36927](https://github.com/renovatebot/renovate/discussions/36927).
-
-As a result, neither `followTag` nor `respectLatest` concepts apply to Maven dependencies.
+However, Renovate will set `respectLatest=false` whenever the `latest` tag is found, because many Maven registries have been found to populate the tag unreliably.
+You should use `packageRules` to set `respectLatest=true` if you wish to use this feature.
