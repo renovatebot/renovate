@@ -1,10 +1,10 @@
-import { dequal } from 'dequal';
-import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
-import type { GitlabHttp } from '../../../util/http/gitlab';
-import { getQueryString, parseLinkHeader, parseUrl } from '../../../util/url';
+import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
+import type { GitlabHttp, GitlabHttpOptions } from '../../../util/http/gitlab';
+import { regEx } from '../../../util/regex';
+import { getQueryString } from '../../../util/url';
 import type { GitLabMergeRequest, GitlabPr, GitlabPrCacheData } from './types';
 import { prInfo } from './utils';
 
@@ -32,6 +32,13 @@ export class GitlabPrCache {
       };
     } else if (pullRequestCache.author !== author) {
       logger.debug('Resetting PR cache because authors do not match');
+      pullRequestCache = {
+        items: {},
+        updated_at: null,
+        author,
+      };
+    } else if (pullRequestCache.updated_at?.match(regEx(/\.\d\d\dZ$/))) {
+      logger.debug('Resetting PR cache of older format');
       pullRequestCache = {
         items: {},
         updated_at: null,
@@ -101,62 +108,41 @@ export class GitlabPrCache {
     prCache.setPr(item);
   }
 
-  private reconcile(rawItems: GitLabMergeRequest[]): boolean {
-    const { items: oldItems } = this.cache;
-    let { updated_at } = this.cache;
-
-    let needNextPage = true;
-
-    for (const rawItem of rawItems) {
-      const id = rawItem.iid;
-
-      const oldItem = oldItems[id];
-      const newItem = prInfo(rawItem);
-
-      const itemNewTime = DateTime.fromISO(rawItem.updated_at);
-
-      if (dequal(oldItem, newItem)) {
-        needNextPage = false;
-        continue;
-      }
-
-      oldItems[id] = newItem;
-
-      const cacheOldTime = updated_at ? DateTime.fromISO(updated_at) : null;
-      if (!cacheOldTime || itemNewTime > cacheOldTime) {
-        updated_at = rawItem.updated_at;
-      }
-    }
-
-    this.cache.updated_at = updated_at;
-    return needNextPage;
-  }
-
   private async sync(http: GitlabHttp): Promise<GitlabPrCache> {
     logger.debug('Syncing PR list');
-    const searchParams = {
-      per_page: this.items.length ? '20' : '100',
-    } as Record<string, string>;
+
+    const searchParams: Record<string, string> = {
+      per_page: '100',
+      order_by: 'updated_at',
+      sort: 'desc',
+    };
+
+    const opts: GitlabHttpOptions = { paginate: true };
+
+    const updated_after = this.cache.updated_at;
+    if (updated_after) {
+      opts.cacheProvider = repoCacheProvider;
+      searchParams.updated_after = updated_after;
+    }
+
     if (!this.ignorePrAuthor) {
       searchParams.scope = 'created_by_me';
     }
-    let query: string | null = getQueryString(searchParams);
 
-    while (query) {
-      const res = await http.getJsonUnchecked<GitLabMergeRequest[]>(
-        `/projects/${this.repo}/merge_requests?${query}`,
-        {
-          memCache: false,
-        },
-      );
+    const query: string | null = getQueryString(searchParams);
+    const { body: items } = await http.getJsonUnchecked<GitLabMergeRequest[]>(
+      `/projects/${this.repo}/merge_requests?${query}`,
+      opts,
+    );
 
-      const needNextPage = this.reconcile(res.body);
-      if (!needNextPage) {
-        break;
+    if (items.length) {
+      for (const item of items) {
+        const id = item.iid;
+        this.cache.items[id] = prInfo(item);
       }
 
-      const uri = parseUrl(parseLinkHeader(res.headers.link)?.next?.url);
-      query = uri ? uri.search : null;
+      const [{ updated_at }] = items;
+      this.cache.updated_at = updated_at.replace(regEx(/\.\d\d\dZ$/), 'Z');
     }
 
     this.updateItems();
@@ -166,9 +152,10 @@ export class GitlabPrCache {
 
   /**
    * Ensure the pr cache starts with the most recent PRs.
-   * JavaScript ensures that the cache is sorted by PR number.
    */
   private updateItems(): void {
-    this.items = Object.values(this.cache.items).reverse();
+    this.items = Object.values(this.cache.items).sort(
+      (a, b) => b.number - a.number,
+    );
   }
 }
