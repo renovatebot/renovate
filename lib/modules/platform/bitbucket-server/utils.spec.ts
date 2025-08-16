@@ -298,7 +298,7 @@ describe('modules/platform/bitbucket-server/utils', () => {
     it('should configure bearer token', () => {
       const res = getExtraCloneOpts({ token: 'abc' });
       expect(res).toEqual({
-        '-c': 'http.extraheader=Authorization: Bearer abc',
+        '-c': 'http.extraHeader=Authorization: Bearer abc',
       });
     });
   });

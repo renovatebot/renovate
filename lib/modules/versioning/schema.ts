@@ -18,7 +18,7 @@ export const Versioning = z
       return defaultVersioning.api;
     }
 
-    if (is.function_(versioning)) {
+    if (is.function(versioning)) {
       const versioningConfig = versioningRest.length
         ? versioningRest.join(':')
         : undefined;

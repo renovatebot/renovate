@@ -332,7 +332,7 @@ describe('util/http/index', () => {
   });
 
   describe('Schema support', () => {
-    const SomeSchema = z
+    const Some = z
       .object({ x: z.number(), y: z.number() })
       .transform(({ x, y }) => `${x} + ${y} = ${x + y}`);
 
@@ -403,7 +403,7 @@ describe('util/http/index', () => {
       it('parses yaml with schema validation', async () => {
         httpMock.scope(baseUrl).get('/').reply(200, 'x: 2\ny: 2');
 
-        const res = await http.getYaml('http://renovate.com', SomeSchema);
+        const res = await http.getYaml('http://renovate.com', Some);
         expect(res.body).toBe('2 + 2 = 4');
       });
 
@@ -417,7 +417,7 @@ describe('util/http/index', () => {
         const res = await http.getYaml(
           'http://renovate.com',
           { headers: { custom: 'header' } },
-          SomeSchema,
+          Some,
         );
         expect(res.body).toBe('2 + 2 = 4');
       });
@@ -425,17 +425,17 @@ describe('util/http/index', () => {
       it('throws on schema validation failure', async () => {
         httpMock.scope(baseUrl).get('/').reply(200, 'foo: bar');
 
-        await expect(
-          http.getYaml('http://renovate.com', SomeSchema),
-        ).rejects.toThrow(z.ZodError);
+        await expect(http.getYaml('http://renovate.com', Some)).rejects.toThrow(
+          z.ZodError,
+        );
       });
 
       it('throws on invalid yaml', async () => {
         httpMock.scope(baseUrl).get('/').reply(200, '!@#$%^');
 
-        await expect(
-          http.getYaml('http://renovate.com', SomeSchema),
-        ).rejects.toThrow('Failed to parse YAML file');
+        await expect(http.getYaml('http://renovate.com', Some)).rejects.toThrow(
+          'Failed to parse YAML file',
+        );
       });
     });
 
@@ -444,7 +444,7 @@ describe('util/http/index', () => {
         httpMock.scope('http://example.com').get('/').reply(200, 'x: 2\ny: 2');
 
         const { val, err } = await http
-          .getYamlSafe('http://example.com', SomeSchema)
+          .getYamlSafe('http://example.com', Some)
           .unwrap();
 
         expect(val).toBe('2 + 2 = 4');
@@ -458,7 +458,7 @@ describe('util/http/index', () => {
           .reply(200, 'x: "2"\ny: "2"');
 
         const { val, err } = await http
-          .getYamlSafe('http://example.com', SomeSchema)
+          .getYamlSafe('http://example.com', Some)
           .unwrap();
 
         expect(val).toBeUndefined();
@@ -469,7 +469,7 @@ describe('util/http/index', () => {
         httpMock.scope('http://example.com').get('/').reply(200, '!@#$%^');
 
         const { val, err } = await http
-          .getYamlSafe('http://example.com', SomeSchema)
+          .getYamlSafe('http://example.com', Some)
           .unwrap();
 
         expect(val).toBeUndefined();
@@ -483,7 +483,7 @@ describe('util/http/index', () => {
           .replyWithError('network error');
 
         const { val, err } = await http
-          .getYamlSafe('http://example.com', SomeSchema)
+          .getYamlSafe('http://example.com', Some)
           .unwrap();
 
         expect(val).toBeUndefined();
@@ -501,7 +501,7 @@ describe('util/http/index', () => {
           .getYamlSafe(
             'http://example.com',
             { headers: { custom: 'header' } },
-            SomeSchema,
+            Some,
           )
           .unwrap();
 
@@ -524,7 +524,7 @@ describe('util/http/index', () => {
         const { body }: HttpResponse<string> = await http.getJson(
           'http://renovate.com',
           { headers: { accept: 'application/json' } },
-          SomeSchema,
+          Some,
         );
 
         expect(body).toBe('2 + 2 = 4');
@@ -541,9 +541,9 @@ describe('util/http/index', () => {
           .get('/')
           .reply(200, JSON.stringify({ foo: 'bar' }));
 
-        await expect(
-          http.getJson('http://renovate.com', SomeSchema),
-        ).rejects.toThrow(z.ZodError);
+        await expect(http.getJson('http://renovate.com', Some)).rejects.toThrow(
+          z.ZodError,
+        );
       });
     });
 
@@ -555,7 +555,7 @@ describe('util/http/index', () => {
           .reply(200, JSON.stringify({ x: 2, y: 2 }));
 
         const { val, err } = await http
-          .getJsonSafe('http://example.com', SomeSchema)
+          .getJsonSafe('http://example.com', Some)
           .unwrap();
 
         expect(val).toBe('2 + 2 = 4');
@@ -569,7 +569,7 @@ describe('util/http/index', () => {
           .reply(200, JSON.stringify({ x: '2', y: '2' }));
 
         const { val, err } = await http
-          .getJsonSafe('http://example.com', SomeSchema)
+          .getJsonSafe('http://example.com', Some)
           .unwrap();
 
         expect(val).toBeUndefined();
@@ -580,7 +580,7 @@ describe('util/http/index', () => {
         httpMock.scope('http://example.com').get('/').replyWithError('unknown');
 
         const { val, err } = await http
-          .getJsonSafe('http://example.com', SomeSchema)
+          .getJsonSafe('http://example.com', Some)
           .unwrap();
 
         expect(val).toBeUndefined();
@@ -597,7 +597,7 @@ describe('util/http/index', () => {
 
         const { body }: HttpResponse<string> = await http.postJson(
           'http://renovate.com',
-          SomeSchema,
+          Some,
         );
 
         expect(body).toBe('2 + 2 = 4');
@@ -611,7 +611,7 @@ describe('util/http/index', () => {
           .reply(200, JSON.stringify({ foo: 'bar' }));
 
         await expect(
-          http.postJson('http://renovate.com', SomeSchema),
+          http.postJson('http://renovate.com', Some),
         ).rejects.toThrow(z.ZodError);
       });
     });
@@ -646,6 +646,66 @@ describe('util/http/index', () => {
       const t2 = Date.now();
 
       expect(t2 - t1).toBeGreaterThanOrEqual(4000);
+    });
+  });
+
+  describe('getToml', () => {
+    const Some = z
+      .object({ x: z.number(), y: z.number() })
+      .transform(({ x, y }) => `${x} + ${y} = ${x + y}`);
+
+    it('parses toml with schema validation', async () => {
+      httpMock.scope(baseUrl).get('/').reply(200, 'x = 2\ny = 2');
+
+      const res = await http.getToml('http://renovate.com', Some);
+      expect(res.body).toBe('2 + 2 = 4');
+    });
+
+    it('parses toml with options and schema', async () => {
+      httpMock
+        .scope(baseUrl, {
+          reqheaders: {
+            'Content-Type': 'application/toml',
+          },
+        })
+        .get('/')
+        .matchHeader('custom', 'header')
+        .reply(200, 'x = 2\ny = 2');
+
+      const res = await http.getToml(
+        'http://renovate.com',
+        { headers: { custom: 'header' } },
+        Some,
+      );
+      expect(res.body).toBe('2 + 2 = 4');
+    });
+
+    it('throws on schema validation failure', async () => {
+      httpMock
+        .scope(baseUrl, {
+          reqheaders: {
+            'Content-Type': 'application/toml',
+          },
+        })
+        .get('/')
+        .reply(200, 'foo = "bar"');
+
+      await expect(http.getToml('http://renovate.com', Some)).rejects.toThrow(
+        z.ZodError,
+      );
+    });
+
+    it('throws on invalid toml', async () => {
+      httpMock
+        .scope(baseUrl, {
+          reqheaders: {
+            'Content-Type': 'application/toml',
+          },
+        })
+        .get('/')
+        .reply(200, '!@#$%^');
+
+      await expect(http.getToml('http://renovate.com')).rejects.toThrow();
     });
   });
 });

@@ -1,4 +1,5 @@
 import { cache } from '../../../util/cache/package/decorator';
+import { regEx } from '../../../util/regex';
 import { asTimestamp } from '../../../util/timestamp';
 import * as gradleVersioning from '../../versioning/gradle';
 import { Datasource } from '../datasource';
@@ -84,7 +85,9 @@ export class GradleVersionDatasource extends Datasource {
    *   - `8.2-milestone-1` -> `v8.2.0-M1`
    */
   private static getGitRef(version: string): string {
-    const [versionPart, typePart, unstablePart] = version.split(/-([a-z]+)-/);
+    const [versionPart, typePart, unstablePart] = version.split(
+      regEx(/-([a-z]+)-/),
+    );
 
     let suffix = '';
     if (typePart === 'rc') {

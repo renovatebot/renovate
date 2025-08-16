@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
+import { getEnv } from '../../../util/env';
 import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
 import { api as versioning } from '../../versioning/cargo';
 import type {
@@ -9,11 +10,7 @@ import type {
   PackageFileContent,
 } from '../types';
 import { extractLockFileVersions } from './locked-version';
-import {
-  type CargoConfig,
-  CargoConfigSchema,
-  CargoManifestSchema,
-} from './schema';
+import { CargoConfig, CargoManifest } from './schema';
 import type {
   CargoManagerData,
   CargoRegistries,
@@ -25,7 +22,7 @@ const DEFAULT_REGISTRY_ID = 'crates-io';
 
 function getCargoIndexEnv(registryName: string): string | null {
   const registry = registryName.toUpperCase().replaceAll('-', '_');
-  return process.env[`CARGO_REGISTRIES_${registry}_INDEX`] ?? null;
+  return getEnv()[`CARGO_REGISTRIES_${registry}_INDEX`] ?? null;
 }
 
 function extractFromSection(
@@ -85,7 +82,7 @@ async function readCargoConfig(): Promise<CargoConfig | null> {
     const path = `.cargo/${configName}`;
     const payload = await readLocalFile(path, 'utf8');
     if (payload) {
-      const parsedCargoConfig = CargoConfigSchema.safeParse(payload);
+      const parsedCargoConfig = CargoConfig.safeParse(payload);
       if (parsedCargoConfig.success) {
         return parsedCargoConfig.data;
       } else {
@@ -176,7 +173,7 @@ export async function extractPackageFile(
   const cargoConfig = (await readCargoConfig()) ?? {};
   const cargoRegistries = extractCargoRegistries(cargoConfig);
 
-  const parsedCargoManifest = CargoManifestSchema.safeParse(content);
+  const parsedCargoManifest = CargoManifest.safeParse(content);
   if (!parsedCargoManifest.success) {
     logger.debug(
       { err: parsedCargoManifest.error, packageFile },

@@ -8,9 +8,9 @@ import { regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 
 export const ecrRegex = regEx(
-  /\d+\.dkr\.ecr(?:-fips)?\.([-a-z0-9]+)\.amazonaws\.com/,
+  /\d+\.(?:dkr\.ecr|dkr-ecr)(?:-fips)?\.([-a-z0-9]+)\.(?:amazonaws\.com|on\.aws)/,
 );
-export const ecrPublicRegex = regEx(/public\.ecr\.aws/);
+export const ecrPublicRegex = regEx(/public\.ecr\.aws|ecr-public\.aws\.com/);
 
 export async function getECRAuthToken(
   region: string,

@@ -6,7 +6,7 @@ export { extractPackageFile } from './extract';
 export const url = 'https://docs.crossplane.io';
 
 export const defaultConfig = {
-  fileMatch: [],
+  managerFilePatterns: [],
 };
 
 export const categories: Category[] = ['kubernetes', 'iac'];

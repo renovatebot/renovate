@@ -3,7 +3,7 @@ import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { BuildpacksRegistryDatasource } from '../../datasource/buildpacks-registry';
 import { isVersion } from '../../versioning/semver';
-import { getDep } from '../dockerfile/extract';
+import { getDep as getDockerDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -16,18 +16,18 @@ import {
   isBuildpackByURI,
 } from './schema';
 
-const dockerPrefix = regEx(/^docker:\/?\//);
+export const DOCKER_PREFIX = regEx(/^docker:\/?\//);
 const dockerRef = regEx(
   /^((?:[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?(?:\.[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?)*)(?::\d{2,5}\/)?)?[a-z\d]+((\.|_|__|-+)[a-z\d]+)*(\/[a-z\d]+((\.|_|__|-+)[a-z\d]+)*)*(?::(\w[\w.-]{0,127})(?:@sha256:[A-Fa-f\d]{32,})?|@sha256:[A-Fa-f\d]{32,})$/,
 );
 
-function isDockerRef(ref: string): boolean {
+export function isDockerRef(ref: string): boolean {
   if (ref.startsWith('docker:/') || dockerRef.test(ref)) {
     return true;
   }
   return false;
 }
-const buildpackRegistryPrefix = 'urn:cnb:registry:';
+export const BUILDPACK_REGISTRY_PREFIX = 'urn:cnb:registry:';
 const buildpackRegistryId = regEx(
   /^[a-z0-9\-.]+\/[a-z0-9\-.]+(?:@(?<version>.+))?$/,
 );
@@ -42,8 +42,10 @@ function isBuildpackRegistryId(ref: string): boolean {
   return isVersion(bpRegistryMatch.groups.version);
 }
 
-function isBuildpackRegistryRef(ref: string): boolean {
-  return isBuildpackRegistryId(ref) || ref.startsWith(buildpackRegistryPrefix);
+export function isBuildpackRegistryRef(ref: string): boolean {
+  return (
+    isBuildpackRegistryId(ref) || ref.startsWith(BUILDPACK_REGISTRY_PREFIX)
+  );
 }
 
 function parseProjectToml(
@@ -79,8 +81,8 @@ export function extractPackageFile(
     descriptor.io?.buildpacks?.builder &&
     isDockerRef(descriptor.io.buildpacks.builder)
   ) {
-    const dep = getDep(
-      descriptor.io.buildpacks.builder.replace(dockerPrefix, ''),
+    const dep = getDockerDep(
+      descriptor.io.buildpacks.builder.replace(DOCKER_PREFIX, ''),
       true,
       config.registryAliases,
     );
@@ -102,8 +104,8 @@ export function extractPackageFile(
   ) {
     for (const group of descriptor.io.buildpacks.group) {
       if (isBuildpackByURI(group) && isDockerRef(group.uri)) {
-        const dep = getDep(
-          group.uri.replace(dockerPrefix, ''),
+        const dep = getDockerDep(
+          group.uri.replace(DOCKER_PREFIX, ''),
           true,
           config.registryAliases,
         );
@@ -118,17 +120,8 @@ export function extractPackageFile(
 
         deps.push(dep);
       } else if (isBuildpackByURI(group) && isBuildpackRegistryRef(group.uri)) {
-        const dependency = group.uri.replace(buildpackRegistryPrefix, '');
-
-        if (dependency.includes('@')) {
-          const version = dependency.split('@')[1];
-          const dep: PackageDependency = {
-            datasource: BuildpacksRegistryDatasource.id,
-            currentValue: version,
-            packageName: dependency.split('@')[0],
-            autoReplaceStringTemplate:
-              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          };
+        const dep = getDep(group.uri.replace(BUILDPACK_REGISTRY_PREFIX, ''));
+        if (dep) {
           deps.push(dep);
         }
       } else if (isBuildpackByName(group)) {
@@ -150,4 +143,20 @@ export function extractPackageFile(
     return null;
   }
   return { deps };
+}
+
+export function getDep(currentFrom: string): PackageDependency | null {
+  if (currentFrom.includes('@')) {
+    const dep: PackageDependency = {
+      datasource: BuildpacksRegistryDatasource.id,
+      packageName: currentFrom.split('@')[0],
+      autoReplaceStringTemplate:
+        '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+    };
+    const version = currentFrom.split('@')[1];
+    dep.currentValue = version;
+    return dep;
+  }
+
+  return null;
 }

@@ -5,7 +5,12 @@ import { hashStream } from '../../../util/hash';
 import { Http } from '../../../util/http';
 import { map as pMap } from '../../../util/promises';
 import { regEx } from '../../../util/regex';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import type {
+  ArtifactError,
+  UpdateArtifact,
+  UpdateArtifactsResult,
+  Upgrade,
+} from '../types';
 import { findCodeFragment, patchCodeAtFragments, updateCode } from './common';
 import type { RecordFragment, StringFragment } from './types';
 
@@ -45,6 +50,21 @@ function massageUrl(url: string): string {
     result = result.replace(from, to);
   }
   return result;
+}
+
+function migrateUrl(url: string, upgrade: Upgrade): string {
+  const newValue = upgrade.newValue?.replace(regEx(/^v/), '');
+
+  // @see https://github.com/bazelbuild/rules_webtesting/releases/tag/0.3.5
+  // @see https://github.com/bazelbuild/rules_webtesting/releases/tag/0.4.0
+  if (
+    url.endsWith('/rules_webtesting.tar.gz') &&
+    !newValue?.match(regEx(/^0\.[0123]\./))
+  ) {
+    return url.replace(regEx(/\.tar\.gz$/), `-${newValue}.tar.gz`);
+  }
+
+  return url;
 }
 
 function replaceAll(input: string, from: string, to: string): string {
@@ -107,41 +127,68 @@ export async function updateArtifacts(
   updateArtifact: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName: path, updatedDeps: upgrades } = updateArtifact;
-  let { newPackageFileContent: contents } = updateArtifact;
+  const oldContents = updateArtifact.newPackageFileContent;
+  let newContents = oldContents;
+  const artifactErrors: ArtifactError[] = [];
   for (const upgrade of upgrades) {
     const { managerData } = upgrade;
     const idx = managerData?.idx as number;
 
     if (upgrade.depType === 'http_file' || upgrade.depType === 'http_archive') {
-      const rule = findCodeFragment(contents, [idx]);
-      // istanbul ignore if
+      const rule = findCodeFragment(newContents, [idx]);
+      /* v8 ignore start -- used only for type narrowing */
       if (rule?.type !== 'record') {
-        return null;
-      }
+        continue;
+      } /* v8 ignore stop */
 
       const urlFragments = getUrlFragments(rule);
       if (!urlFragments?.length) {
         logger.debug(`def: ${rule.value}, urls is empty`);
-        return null;
+        continue;
       }
 
       const updateValues = (oldUrl: string): string => {
         let url = oldUrl;
         url = replaceValues(url, upgrade.currentValue, upgrade.newValue);
         url = replaceValues(url, upgrade.currentDigest, upgrade.newDigest);
+        url = migrateUrl(url, upgrade);
         return url;
       };
 
       const urls = urlFragments.map(({ value }) => updateValues(value));
       const hash = await getHashFromUrls(urls);
       if (!hash) {
-        return null;
+        if (urlFragments.length >= 1) {
+          artifactErrors.push({
+            fileName: path,
+            stderr: `Could not calculate sha256 for ${upgrade.depName} at ${upgrade.newValue}. Checked URLs: ${urls.join(', ')}`,
+          });
+        }
+        continue;
       }
 
-      contents = patchCodeAtFragments(contents, urlFragments, updateValues);
-      contents = updateCode(contents, [idx, 'strip_prefix'], updateValues);
-      contents = updateCode(contents, [idx, 'sha256'], hash);
+      newContents = patchCodeAtFragments(
+        newContents,
+        urlFragments,
+        updateValues,
+      );
+      newContents = updateCode(
+        newContents,
+        [idx, 'strip_prefix'],
+        updateValues,
+      );
+      newContents = updateCode(newContents, [idx, 'sha256'], hash);
     }
+  }
+
+  if (oldContents === newContents) {
+    if (artifactErrors.length) {
+      // If we have artifact errors, return them even if we have file changes
+      return artifactErrors.map((error) => ({
+        artifactError: error,
+      }));
+    }
+    return null;
   }
 
   return [
@@ -149,7 +196,7 @@ export async function updateArtifacts(
       file: {
         type: 'addition',
         path,
-        contents,
+        contents: newContents,
       },
     },
   ];

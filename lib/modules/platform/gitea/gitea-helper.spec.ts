@@ -71,6 +71,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
   const mockRepo: Repo = partial<Repo>({
     id: 123,
+    allow_fast_forward_only_merge: true,
     allow_rebase: true,
     allow_rebase_explicit: true,
     allow_merge_commits: true,

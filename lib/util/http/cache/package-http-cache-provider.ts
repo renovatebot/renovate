@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
-import { get, set } from '../../cache/package'; // Import the package cache functions
+import * as packageCache from '../../cache/package';
 import { resolveTtlValues } from '../../cache/package/ttl';
 import type { PackageCacheNamespace } from '../../cache/package/types';
 import { regEx } from '../../regex';
@@ -12,9 +12,9 @@ import type { HttpCache } from './schema';
 
 export interface PackageHttpCacheProviderOptions {
   namespace: PackageCacheNamespace;
-  ttlMinutes?: number;
-  checkCacheControlHeader?: boolean;
-  checkAuthorizationHeader?: boolean;
+  softTtlMinutes?: number;
+  checkCacheControlHeader: boolean;
+  checkAuthorizationHeader: boolean;
 }
 
 export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
@@ -28,28 +28,30 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
 
   constructor({
     namespace,
-    ttlMinutes = 15,
-    checkCacheControlHeader = true,
-    checkAuthorizationHeader = true,
+    softTtlMinutes = 15,
+    checkCacheControlHeader = false,
+    checkAuthorizationHeader = false,
   }: PackageHttpCacheProviderOptions) {
     super();
     this.namespace = namespace;
-    const { softTtlMinutes, hardTtlMinutes } = resolveTtlValues(
-      this.namespace,
-      ttlMinutes,
-    );
-    this.softTtlMinutes = softTtlMinutes;
-    this.hardTtlMinutes = hardTtlMinutes;
+    const ttl = resolveTtlValues(this.namespace, softTtlMinutes);
+    this.softTtlMinutes = ttl.softTtlMinutes;
+    this.hardTtlMinutes = ttl.hardTtlMinutes;
     this.checkCacheControlHeader = checkCacheControlHeader;
     this.checkAuthorizationHeader = checkAuthorizationHeader;
   }
 
   async load(url: string): Promise<unknown> {
-    return await get(this.namespace, url);
+    return await packageCache.get(this.namespace, url);
   }
 
   async persist(url: string, data: HttpCache): Promise<void> {
-    await set(this.namespace, url, data, this.hardTtlMinutes);
+    await packageCache.setWithRawTtl(
+      this.namespace,
+      url,
+      data,
+      this.hardTtlMinutes,
+    );
   }
 
   override async bypassServer<T>(

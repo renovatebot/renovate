@@ -7,7 +7,7 @@ export const displayName = 'runtime.txt';
 export const categories: Category[] = ['python'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)runtime.txt$'],
+  managerFilePatterns: ['/(^|/)runtime.txt$/'],
   pinDigests: false,
 };
 

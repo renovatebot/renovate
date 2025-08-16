@@ -26,7 +26,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
       return Promise.resolve(res);
     });
 
-    packageCache.set.mockImplementation((_ns, k, v, _ttl) => {
+    packageCache.setWithRawTtl.mockImplementation((_ns, k, v, _ttl) => {
       cache[k] = v as HttpCache;
       return Promise.resolve(null as never);
     });
@@ -50,7 +50,9 @@ describe('util/http/cache/package-http-cache-provider', () => {
     };
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
-      ttlMinutes: 0,
+      softTtlMinutes: 0,
+      checkAuthorizationHeader: false,
+      checkCacheControlHeader: false,
     });
     httpMock.scope(url).get('').reply(200, 'new response');
 
@@ -69,12 +71,14 @@ describe('util/http/cache/package-http-cache-provider', () => {
     };
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
+      checkAuthorizationHeader: false,
+      checkCacheControlHeader: false,
     });
 
     const res = await http.getText(url, { cacheProvider });
 
     expect(res.body).toBe('cached response');
-    expect(packageCache.set).not.toHaveBeenCalled();
+    expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
 
     mockTime('2024-06-15T00:15:00.000Z');
     httpMock.scope(url).get('').reply(200, 'new response', {
@@ -84,12 +88,14 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
     const res2 = await http.getText(url, { cacheProvider });
     expect(res2.body).toBe('new response');
-    expect(packageCache.set).toHaveBeenCalled();
+    expect(packageCache.setWithRawTtl).toHaveBeenCalled();
   });
 
   it('handles cache miss', async () => {
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
+      checkAuthorizationHeader: false,
+      checkCacheControlHeader: false,
     });
     httpMock.scope(url).get('').reply(200, 'fetched response', {
       etag: 'foobar',
@@ -118,6 +124,8 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
+      checkAuthorizationHeader: false,
+      checkCacheControlHeader: true,
     });
 
     httpMock.scope(url).get('').reply(200, 'private response', {
@@ -127,7 +135,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     const res = await http.get(url, { cacheProvider });
 
     expect(res.body).toBe('private response');
-    expect(packageCache.set).not.toHaveBeenCalled();
+    expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
   });
 
   it('prevents caching when the request contains authorization header', async () => {
@@ -135,6 +143,8 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
+      checkAuthorizationHeader: true,
+      checkCacheControlHeader: false,
     });
 
     httpMock.scope(url).get('').reply(200, 'private response');
@@ -145,7 +155,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     });
 
     expect(res.body).toBe('private response');
-    expect(packageCache.set).not.toHaveBeenCalled();
+    expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
   });
 
   it('allows caching when cache-control is private but cachePrivatePackages=true', async () => {
@@ -155,6 +165,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
+      checkAuthorizationHeader: false,
       checkCacheControlHeader: false,
     });
 
@@ -166,7 +177,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     const res = await http.get(url, { cacheProvider });
 
     expect(res.body).toBe('private response');
-    expect(packageCache.set).toHaveBeenCalled();
+    expect(packageCache.setWithRawTtl).toHaveBeenCalled();
   });
 
   it('allows caching when cache-control is private but checkCacheControlHeader=false', async () => {
@@ -174,6 +185,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
+      checkAuthorizationHeader: false,
       checkCacheControlHeader: false,
     });
 
@@ -185,7 +197,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     const res = await http.get(url, { cacheProvider });
 
     expect(res.body).toBe('private response');
-    expect(packageCache.set).toHaveBeenCalled();
+    expect(packageCache.setWithRawTtl).toHaveBeenCalled();
   });
 
   it('serves stale response during revalidation error', async () => {
@@ -198,6 +210,8 @@ describe('util/http/cache/package-http-cache-provider', () => {
     };
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
+      checkAuthorizationHeader: false,
+      checkCacheControlHeader: false,
     });
     httpMock.scope(url).get('').reply(500);
 
@@ -299,6 +313,8 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
       const cacheProvider = new PackageHttpCacheProvider({
         namespace: '_test-namespace',
+        checkAuthorizationHeader: false,
+        checkCacheControlHeader: true,
       });
 
       const response = {

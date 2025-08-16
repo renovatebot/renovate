@@ -44,7 +44,7 @@ Renovate does not support:
 - Catalog versions using `reject`, and `rejectAll` constraints
 - Catalog versions using more than one of `require`, `strictly`, `prefer` in a single declaration
 - Catalogs with custom names that do not end in `.toml`
-- Catalogs outside the `gradle` folder whose names do not end in `.versions.toml` (unless overridden via [`fileMatch`](./configuration-options.md#filematch) configuration)
+- Catalogs outside the `gradle` folder, whose names do _not_ end in `.versions.toml` (unless overridden via [`managerFilePatterns`](./configuration-options.md#managerfilepatterns) configuration)
 
 ### Gradle Plugin Support
 
@@ -165,7 +165,6 @@ To avoid JSON-in-JSON wrapping, which can cause problems, encode the JSON servic
 1. Download your JSON service account and store it on your machine. Make sure that the service account has `read` (and only `read`) permissions to your artifacts
 2. Base64 encode the service account credentials by running `cat service-account.json | base64`
 3. Add the encoded service account to your configuration file
-
    1. If you want to add it to your self-hosted configuration file:
 
       ```json

@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { extractPackageFile } from '.';
+import { logger } from '~test/util';
 
 describe('modules/manager/renovate-config-presets/extract', () => {
   describe('extractPackageFile()', () => {
@@ -24,6 +25,9 @@ describe('modules/manager/renovate-config-presets/extract', () => {
           'renovate.json',
         ),
       ).toBeNull();
+      expect(logger.logger.warn).not.toHaveBeenCalled();
+      expect(logger.logger.info).not.toHaveBeenCalled();
+      expect(logger.logger.debug).not.toHaveBeenCalled();
     });
 
     it('returns null for a config file only contains built-in presets', () => {
@@ -37,6 +41,9 @@ describe('modules/manager/renovate-config-presets/extract', () => {
           'renovate.json',
         ),
       ).toBeNull();
+      expect(logger.logger.warn).not.toHaveBeenCalled();
+      expect(logger.logger.info).not.toHaveBeenCalled();
+      expect(logger.logger.debug).not.toHaveBeenCalled();
     });
 
     it('provides skipReason for unsupported preset sources', () => {

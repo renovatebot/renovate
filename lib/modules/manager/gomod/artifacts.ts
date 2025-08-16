@@ -6,6 +6,7 @@ import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
+import { getEnv } from '../../../util/env';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import { filterMap } from '../../../util/filter-map';
@@ -102,16 +103,7 @@ function useModcacherw(goVersion: string | undefined): boolean {
     return true;
   }
 
-  const [, majorPart, minorPart] = coerceArray(
-    regEx(/(\d+)\.(\d+)/).exec(goVersion),
-  );
-  const [major, minor] = [majorPart, minorPart].map((x) => parseInt(x, 10));
-
-  return (
-    !Number.isNaN(major) &&
-    !Number.isNaN(minor) &&
-    (major > 1 || (major === 1 && minor >= 14))
-  );
+  return semver.intersects(goVersion, `>=1.14`);
 }
 
 export async function updateArtifacts({
@@ -197,16 +189,17 @@ export async function updateArtifacts({
     await writeLocalFile(goModFileName, massagedGoMod);
 
     const cmd = 'go';
+    const env = getEnv();
     const execOptions: ExecOptions = {
       cwdFile: goModFileName,
       extraEnv: {
         GOPATH: await ensureCacheDir('go'),
-        GOPROXY: process.env.GOPROXY,
-        GOPRIVATE: process.env.GOPRIVATE,
-        GONOPROXY: process.env.GONOPROXY,
-        GONOSUMDB: process.env.GONOSUMDB,
-        GOSUMDB: process.env.GOSUMDB,
-        GOINSECURE: process.env.GOINSECURE,
+        GOPROXY: env.GOPROXY,
+        GOPRIVATE: env.GOPRIVATE,
+        GONOPROXY: env.GONOPROXY,
+        GONOSUMDB: env.GONOSUMDB,
+        GOSUMDB: env.GOSUMDB,
+        GOINSECURE: env.GOINSECURE,
         /* v8 ignore next -- TODO: add test */
         GOFLAGS: useModcacherw(goConstraints) ? '-modcacherw' : null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
@@ -241,7 +234,15 @@ export async function updateArtifacts({
       }
     }
 
-    let args = `get -d -t ${goGetDirs ?? './...'}`;
+    let args = `get `;
+
+    if (goConstraints && !semver.intersects(goConstraints, `>=1.18`)) {
+      // For Go versions < 1.18, we need to use the -d flag to avoid builds or installs
+      // https://go.dev/doc/go1.18#go-get
+      args += `-d `;
+    }
+
+    args += `-t ${goGetDirs ?? './...'}`;
     logger.trace({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 
@@ -426,7 +427,6 @@ export async function updateArtifacts({
     }
     return res;
   } catch (err) {
-    // istanbul ignore if
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }

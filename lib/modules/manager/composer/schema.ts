@@ -151,7 +151,7 @@ export const Repos = z
     }
 
     if (packagist && repoUrls.length) {
-      repoUrls.push('https://packagist.org');
+      repoUrls.push('https://repo.packagist.org');
     }
     const registryUrls = repoUrls.length ? repoUrls : null;
 
