@@ -513,7 +513,6 @@ function buildGoModTidyCommands(
 ): string[] {
   return dependentFiles.map((file) => {
     const moduleDir = upath.dirname(file.name);
-    // Use parentheses to run cd && go mod tidy in a subshell, preserving working directory
     return `(cd "${moduleDir}" && go mod tidy ${tidyOpts})`;
   });
 }
