@@ -101,6 +101,7 @@ describe('modules/manager/paket/index', () => {
         },
       ]);
     });
+
     it('return null if no changes', async () => {
       const toolSpy = vi.spyOn(tool, 'updateAllPackages');
       toolSpy.mockResolvedValue();
@@ -118,6 +119,7 @@ describe('modules/manager/paket/index', () => {
       expect(result).toBeNull();
     });
   });
+
   describe('updateLockedDependency()', () => {
     const lockFileName = '/app/test/paket.lock';
     const config: UpdateLockedConfig = {
@@ -156,6 +158,7 @@ describe('modules/manager/paket/index', () => {
         status: 'updated',
       });
     });
+
     it('return null if no changes', async () => {
       const toolSpy = vi.spyOn(tool, 'updatePackage');
       toolSpy.mockResolvedValue();
