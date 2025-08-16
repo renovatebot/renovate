@@ -20,7 +20,7 @@ export const url = 'https://fsprojects.github.io/Paket/';
 export const categories: Category[] = ['dotnet'];
 
 export const defaultConfig = {
-  managerFilePatterns: ['/(^|/)paket\\.dependencies$/'],
+  managerFilePatterns: ['**paket.dependencies'],
 };
 
 export const supportedDatasources = [NugetDatasource.id];
