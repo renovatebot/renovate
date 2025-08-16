@@ -317,6 +317,7 @@ You may choose from these values:
 - `fast-forward`, "fast-forwarding" the main branch reference, no new commits in the resultant tree
 - `merge-commit`, create a new merge commit
 - `rebase`, rewrite history as part of the merge, but usually keep the individual commits
+- `rebase-merge`, create a new merge commit, but rebase the commits prior merging (azure-only)
 - `squash`, flatten the commits that are being merged into a single new commit
 
 Platforms may only support _some_ of these merge strategies.
@@ -349,7 +350,7 @@ If you're not already using `bors-ng` or similar, don't worry about this option.
 
 ## azureWorkItemId
 
-When creating a PR in Azure DevOps, some branches can be protected with branch policies to [check for linked work items](https://docs.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops#check-for-linked-work-items).
+When creating a PR in Azure DevOps, some branches can be protected with branch policies to [check for linked work items](https://learn.microsoft.com/azure/devops/repos/git/branch-policies#check-for-linked-work-items).
 Creating a work item in Azure DevOps is beyond the scope of Renovate, but Renovate can link an already existing work item when creating PRs.
 
 ## baseBranchPatterns
@@ -2519,7 +2520,7 @@ With the above config, every PR raised by Renovate will have the label `dependen
 
 Behavior details:
 
-- On GitHub, GitLab and Gitea: Renovate will keep PR labels in sync with configured labels, provided that no other user or bot has made changes to the labels after PR creation. If labels are changed by any other account, Renovate will stop making further changes.
+- On Forgejo, Gitea, GitHub and GitLab: Renovate will keep PR labels in sync with configured labels, provided that no other user or bot has made changes to the labels after PR creation. If labels are changed by any other account, Renovate will stop making further changes.
 - For other platforms, Renovate will add labels only at time of PR creation and not update them after that.
 
 The `labels` array is non-mergeable, meaning if multiple `packageRules` match then Renovate uses the last value for `labels`.
@@ -2656,6 +2657,30 @@ Renovate will only add a milestone when it _creates_ the PR.
 ```json title="Example Renovate config"
 {
   "milestone": 12
+}
+```
+
+## minimumGroupSize
+
+If set to to a positive value x then branch creation will be postponed until x or more updates are available in the branch.
+
+This applies to both these scenarios:
+
+- Grouped updates with more than one dependency updated together, and
+- Branches with multiple updates of the same dependency (e.g. in multiple files)
+
+Example:
+
+```json title="Create only a grouped update when there are 3 or more node updates"
+{
+  "packageRules": [
+    {
+      "description": "We need to update Node in two places - always wait until both upgrades are available",
+      "matchDepNames": ["node"],
+      "groupName": "Node.js",
+      "minimumGroupSize": 3
+    }
+  ]
 }
 ```
 
@@ -2993,7 +3018,7 @@ To read the changelogs you must use the link.
 
 <!-- prettier-ignore -->
 !!! note
-    Renovate can fetch changelogs from Bitbucket, Bitbucket Server / Data Center, Gitea (Forgejo), GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
+    Renovate can fetch changelogs from Bitbucket, Bitbucket Server / Data Center, Forgejo, Gitea, GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
 
 For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
@@ -3742,7 +3767,7 @@ If you have enabled `automerge` and set `automergeType=pr` in the Renovate confi
 On GitHub and GitLab, Renovate re-enables the PR for platform-native automerge whenever it's rebased.
 
 `platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
-This option is available for Azure, Gitea, GitHub and GitLab.
+This option is available for Azure, Forgejo, Gitea, GitHub and GitLab.
 It falls back to Renovate-based automerge if the platform-native automerge is not available.
 
 You can also fine-tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
@@ -3775,6 +3800,8 @@ Table with options:
 | Name                         | Description                                                                                                                                                |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `bundlerConservative`        | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies. |
+| `composerWithAll`            | Run `composer update` with `--with-all-dependencies` flag instead of the default `--with-dependencies`.                                                    |
+| `dotnetWorkloadRestore`      | Run `dotnet workload restore` before `dotnet restore` commands.                                                                                            |
 | `gomodMassage`               | Enable massaging `replace` directives before calling `go` commands.                                                                                        |
 | `gomodTidy`                  | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                   |
 | `gomodTidy1.17`              | Run `go mod tidy -compat=1.17` after Go module updates.                                                                                                    |
@@ -3791,12 +3818,11 @@ Table with options:
 
 ## postUpgradeTasks
 
-<!-- prettier-ignore -->
-!!! note
-    Post-upgrade tasks can only be used on self-hosted Renovate instances.
-
 Post-upgrade tasks are commands that are executed by Renovate after a dependency has been updated but before the commit is created.
 The intention is to run any other command line tools that would modify existing files or generate new files when a dependency changes.
+
+Post-upgrade tasks are blocked by default for security reasons, so the admin of Renovate needs to choose whether to allow specific commands or any commands to be run - it depends on how much they trust their users in repos.
+In Mend-hosted Renovate apps, commands remain blocked by default but can be allowed on-request for any paying ("Renovate Enterprise" or Mend Appsec) customers or trusted OSS repositories - please reach out if so.
 
 Each command must match at least one of the patterns defined in `allowedCommands` (a global-only configuration option) in order to be executed.
 If the list of allowed tasks is empty then no tasks will be executed.
@@ -4152,6 +4178,7 @@ This feature works with the following managers:
 - [`ansible`](modules/manager/ansible/index.md)
 - [`bitbucket-pipelines`](modules/manager/bitbucket-pipelines/index.md)
 - [`circleci`](modules/manager/circleci/index.md)
+- [`crow`](modules/manager/crow/index.md)
 - [`docker-compose`](modules/manager/docker-compose/index.md)
 - [`dockerfile`](modules/manager/dockerfile/index.md)
 - [`droneci`](modules/manager/droneci/index.md)
@@ -4409,6 +4436,22 @@ By default, Renovate skips versions in between, like `python@v3.10.x`.
 
 But if you set `separateMultipleMinor=true` then you get separate PRs for each minor stream, like `python@3.9.x`, `python@v3.10.x` and `python@v3.11.x`, etc.
 
+## skipArtifactsUpdate
+
+Use this option when automatic artifact updating fails, is incorrect, or not needed.
+
+This option was formerly known as `updateLockFiles`.
+
+When this option is set, Renovate won't attempt to update artifacts such as lock files, so you will need to update them yourself, either manually or through secondary automation such as CI workflows.
+
+<!-- prettier-ignore -->
+!!! note
+    When this option is used in package rules, along with grouped upgrades, artifact updating will only be skipped if every upgrade in the grouped branch wants to skip it.
+
+<!-- prettier-ignore -->
+!!!warning
+    When artifact updates are skipped and the `packageManager` field in `package.json` is updated, the new version will not contain a hash. The hash is only applied when artifacts are updated. For example, a value of `packageManager: "yarn@3.0.0+sha224.deadbeef"` would be updated to just `packageManager: "yarn@3.1.0"` rather than `packageManager: "yarn@3.1.0+sha224.f0cacc1a"`.
+
 ## skipInstalls
 
 By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
@@ -4476,8 +4519,6 @@ In such case dependency versions won't be updated by Renovate.
 
 To opt in to letting Renovate update internal package versions normally, set this configuration option to true.
 
-## updateLockFiles
-
 ## updateNotScheduled
 
 When schedules are in use, it generally means "no updates".
@@ -4506,6 +4547,7 @@ If you want, you can change the text in the comment with the `userStrings` confi
 
 You can edit these user-facing strings:
 
+- `artifactErrorWarning`: Text of the PR comment when artifact errors occur during updates.
 - `ignoreDigest`: Text of the PR comment for digest upgrades.
 - `ignoreMajor`: Text of the PR comment for major upgrades.
 - `ignoreOther`: Text of the PR comment for other (neither digest nor major) upgrades.
@@ -4516,6 +4558,7 @@ For example:
 ```json
 {
   "userStrings": {
+    "artifactErrorWarning": "Custom text for artifact errors.",
     "ignoreTopic": "Custom topic for PR comment",
     "ignoreMajor": "Custom text for major upgrades.",
     "ignoreDigest": "Custom text for digest upgrades.",

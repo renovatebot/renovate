@@ -3,6 +3,7 @@ import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
 import { getDep } from '../dockerfile/extract';
 import type {
@@ -20,7 +21,7 @@ import {
 } from './util';
 
 /**
- * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
+ * https://learn.microsoft.com/nuget/concepts/package-versioning
  * This article mentions that  Nuget 3.x and later tries to restore the lowest possible version
  * regarding to given version range.
  * 1.3.4 equals [1.3.4,)
@@ -198,6 +199,13 @@ export async function extractPackageFile(
     return extractMsbuildGlobalManifest(content, packageFile, registries);
   }
 
+  // Simple xml validation.
+  // Should start with `<` and end with `>` after trimming all whitespace
+  if (!regEx(/^\s*<.+>$/m).test(content.trim())) {
+    logger.debug(`NuGet: Skipping ${packageFile} as it is not XML`);
+    return null;
+  }
+
   let deps: PackageDependency[] = [];
   let packageFileVersion: string | undefined;
   try {
@@ -216,7 +224,6 @@ export async function extractPackageFile(
 
   const res: PackageFileContent = { deps, packageFileVersion };
   const lockFileName = getSiblingFileName(packageFile, 'packages.lock.json');
-  // istanbul ignore if
   if (await localPathExists(lockFileName)) {
     res.lockFiles = [lockFileName];
   }

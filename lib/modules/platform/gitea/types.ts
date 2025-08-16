@@ -1,4 +1,5 @@
 import type { LongCommitSha } from '../../../util/git/types';
+import type { EmailAddress } from '../../../util/schema-utils';
 import type { Pr, RepoSortMethod, SortMethod } from '../types';
 
 export interface PrReviewersParams {
@@ -67,7 +68,7 @@ export interface Issue {
 
 export interface User {
   id: number;
-  email: string;
+  email: EmailAddress;
   full_name?: string;
   username: string;
 }
@@ -136,7 +137,7 @@ export interface Commit {
 
 export interface CommitUser {
   name: string;
-  email: string;
+  email: EmailAddress;
   username: string;
 }
 

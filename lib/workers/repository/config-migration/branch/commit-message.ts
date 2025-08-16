@@ -17,6 +17,7 @@ export class ConfigMigrationCommitMessageFactory {
       semanticCommitScope: 'config',
       commitMessageExtra: '',
       commitMessageAction: '',
+      commitMessageSuffix: '',
       commitMessageTopic,
     };
 

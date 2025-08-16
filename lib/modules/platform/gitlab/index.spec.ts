@@ -43,6 +43,7 @@ describe('modules/platform/gitlab/index', () => {
     delete process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS;
     delete process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY;
     delete process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS;
+    delete process.env.RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN;
     delete process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY;
     delete process.env.RENOVATE_X_PLATFORM_VERSION;
 
@@ -2964,6 +2965,45 @@ describe('modules/platform/gitlab/index', () => {
           description: 'the-body',
         })
         .post('/api/v4/projects/undefined/merge_requests/12345/approve')
+        .reply(200);
+      expect(
+        await gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformPrOptions: {
+            autoApprove: true,
+          },
+        }),
+      ).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
+    });
+
+    it('auto-approve with different user', async () => {
+      await initPlatform('13.3.6-ee');
+      process.env.RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN = 'some-token';
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
+        })
+        .post('/api/v4/projects/undefined/merge_requests/12345/approve')
+        .matchHeader('Authorization', 'Bearer some-token')
         .reply(200);
       expect(
         await gitlab.createPr({
