@@ -10,7 +10,7 @@ export const url = 'https://clojure.org/reference/deps_edn';
 export const categories: Category[] = ['java'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)(?:deps|bb)\\.edn$'],
+  managerFilePatterns: ['/(^|/)(?:deps|bb)\\.edn$/'],
   versioning: mavenVersioning.id,
 };
 

@@ -1,7 +1,11 @@
-# Gitea and Forgejo
+# Gitea
 
-Renovate supports [Gitea](https://gitea.io) and the [Forgejo](https://forgejo.org) fork.
-Forgejo exists since `v1.18.0` and is currently fully compatible to Gitea.
+Renovate supports [Gitea](https://gitea.io).
+
+<!-- prettier-ignore -->
+!!! note
+    Use [`forgejo`](../forgejo/index.md) as the platform if you are using Forgejo.
+    Forgejo support will be removed from `gitea` platform in a future release.
 
 ## Authentication
 
@@ -31,7 +35,7 @@ If you use Gitea packages, add the `read:packages` scope.
 ## Unsupported platform features/concepts
 
 - **Adding reviewers to PRs not supported**: Gitea versions older than `v1.14.0` do not have the required API.
-- **`platformAutomerge` (`true` by default) for platform-native automerge not supported**: Gitea versions older than v1.24.0 and Forgejo versions older than v10.0.0 don't support required branch autodelete for automerge.
+- **`platformAutomerge` (`true` by default) for platform-native automerge not supported**: Gitea versions older than v1.24.0 don't support required branch autodelete for automerge.
 - **Git upload filters**: If you're using a Gitea version older than `v1.16.0` then you must enable [clone filters](https://docs.gitea.io/en-us/clone-filters/).
 
 ## Features awaiting implementation

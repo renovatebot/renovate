@@ -499,8 +499,14 @@ describe('modules/datasource/index', () => {
         }
 
         const registries: RegistriesMock = {
-          'https://reg1.com': () => ({ releases: [{ version: '1.0.0' }] }),
-          'https://reg2.com': () => ({ releases: [{ version: '1.1.0' }] }),
+          'https://reg1.com': () => ({
+            releases: [{ version: '1.0.0' }],
+            tags: { release: '2.0.0' },
+          }),
+          'https://reg2.com': () => ({
+            releases: [{ version: '1.1.0' }],
+            tags: { latest: '1.1.0', release: '1.1.0' },
+          }),
           'https://reg3.com': () => {
             throw new ExternalHostError(new Error());
           },
@@ -513,7 +519,10 @@ describe('modules/datasource/index', () => {
           // for coverage
           'https://reg6.com': null,
           // has the same result as reg1 url, to test de-deplication of releases
-          'https://reg7.com': () => ({ releases: [{ version: '1.0.0' }] }),
+          'https://reg7.com': () => ({
+            releases: [{ version: '1.0.0' }],
+            tags: { latest: '1.2.0.0', release: '2.1.0' },
+          }),
         };
 
         beforeEach(() => {
@@ -531,6 +540,10 @@ describe('modules/datasource/index', () => {
               { registryUrl: 'https://reg1.com', version: '1.0.0' },
               { registryUrl: 'https://reg2.com', version: '1.1.0' },
             ],
+            tags: {
+              latest: '1.1.0',
+              release: '2.0.0',
+            },
           });
         });
 
@@ -575,6 +588,10 @@ describe('modules/datasource/index', () => {
               { registryUrl: 'https://reg1.com', version: '1.0.0' },
               // { registryUrl: 'https://reg2.com', version: '1.0.0' },
             ],
+            tags: {
+              latest: '1.2.0.0',
+              release: '2.1.0',
+            },
           });
         });
 
@@ -604,8 +621,8 @@ describe('modules/datasource/index', () => {
               releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
             });
             expect(packageCache.set).toHaveBeenCalledWith(
-              'datasource-releases',
-              'dummy https://reg1.com package',
+              'datasource-releases-dummy',
+              'https://reg1.com:package',
               {
                 changelogUrl: 'https://foo.bar/package/CHANGELOG.md',
                 registryUrl: 'https://reg1.com',

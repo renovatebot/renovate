@@ -183,7 +183,7 @@ describe('modules/manager/bazel/artifacts', () => {
     ]);
   });
 
-  it('returns null if no urls resolve hashes', async () => {
+  it('throws error if no urls resolve hashes', async () => {
     const inputHash =
       'eb5c57e4c12e68c0c20bc774bfbc60a568e800d025557bc4ea022c6479acc867';
     const input = codeBlock`
@@ -218,7 +218,15 @@ describe('modules/manager/bazel/artifacts', () => {
         newPackageFileContent: input,
       }),
     );
-    expect(res).toBeNull();
+    expect(res).toEqual([
+      {
+        artifactError: {
+          fileName: 'WORKSPACE',
+          stderr:
+            'Could not calculate sha256 for bazel_skylib at 0.8.0. Checked URLs: https://github.com/bazelbuild/bazel-skyfoo/archive/0.8.0.tar.gz',
+        },
+      },
+    ]);
   });
 
   it('errors for http_archive without urls', async () => {
@@ -721,6 +729,68 @@ describe('modules/manager/bazel/artifacts', () => {
         `${newValue}/rules_nodejs-core-${newValue}`,
       )
       .replace(inputHash, outputHash);
+
+    const res = await updateArtifacts(
+      partial<UpdateArtifact>({
+        packageFileName: 'WORKSPACE',
+        updatedDeps: [upgrade],
+        newPackageFileContent: input,
+      }),
+    );
+
+    expect(res).toEqual([
+      {
+        file: {
+          contents: output,
+          path: 'WORKSPACE',
+          type: 'addition',
+        },
+      },
+    ]);
+  });
+
+  it('migrates rules_webtesting URL format', async () => {
+    const inputHash =
+      'e9abb7658b6a129740c0b3ef6f5a2370864e102a5ba5ffca2cea565829ed825a';
+    const input = codeBlock`
+      http_archive(
+          name = "io_bazel_rules_webtesting",
+          sha256 = "${inputHash}",
+          urls = ["https://github.com/bazelbuild/rules_webtesting/releases/download/0.3.5/rules_webtesting.tar.gz"],
+      )
+    `;
+
+    const currentValue = '0.3.5';
+    const newValue = '0.4.1';
+    const upgrade = {
+      depName: 'io_bazel_rules_webtesting',
+      depType: 'http_archive',
+      repo: 'bazelbuild/rules_webtesting',
+      managerData: { idx: 0 },
+      currentValue,
+      newValue,
+    };
+
+    const tarContent = Buffer.from('foo');
+    const outputHash = crypto
+      .createHash('sha256')
+      .update(tarContent)
+      .digest('hex');
+
+    const output = codeBlock`
+      http_archive(
+          name = "io_bazel_rules_webtesting",
+          sha256 = "${outputHash}",
+          urls = ["https://github.com/bazelbuild/rules_webtesting/releases/download/0.4.1/rules_webtesting-0.4.1.tar.gz"],
+      )
+    `;
+
+    httpMock
+      .scope('https://github.com')
+      .get(
+        '/bazelbuild/rules_webtesting/releases/download/0.4.1/rules_webtesting-0.4.1.tar.gz',
+      )
+      .reply(200, tarContent);
 
     const res = await updateArtifacts(
       partial<UpdateArtifact>({

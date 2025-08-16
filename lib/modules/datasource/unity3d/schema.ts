@@ -12,5 +12,7 @@ const UnityRelease = z.object({
 });
 
 export const UnityReleasesJSON = z.object({
+  total: z.number(),
   results: UnityRelease.array(),
 });
+export type UnityReleasesJSON = z.infer<typeof UnityReleasesJSON>;

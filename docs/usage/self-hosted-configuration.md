@@ -11,53 +11,15 @@ Do _not_ put the self-hosted config options listed on this page in your "reposit
 
 The config options below _must_ be configured in the bot/admin config, so in either a environment variable, CLI option, or a special file like `config.js`.
 
+<!-- prettier-ignore -->
+!!! note
+     Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
+
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
 <!-- prettier-ignore -->
 !!! note
     Config options with `type=string` are always non-mergeable, so `mergeable=false`.
-
-## allowCommandTemplating
-
-Let's look at an example of configuring packages with existing Angular migrations.
-
-```javascript
-module.exports = {
-  allowedCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
-};
-```
-
-In the `renovate.json` file, define the commands and files to be included in the final commit.
-
-The command to install dependencies (`npm ci --ignore-scripts`) is needed because, by default, the installation of dependencies is skipped (see the `skipInstalls` global option).
-
-```json
-{
-  "packageRules": [
-    {
-      "matchPackageNames": ["@angular/core"],
-      "postUpgradeTasks": {
-        "commands": [
-          "npm ci --ignore-scripts",
-          "npx ng update {{{depName}}} --from={{{currentVersion}}} --to={{{newVersion}}} --migrate-only --allow-dirty --force"
-        ]
-      }
-    }
-  ]
-}
-```
-
-With this configuration, the executable command for `@angular/core` looks like this:
-
-```bash
-npm ci --ignore-scripts
-npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dirty --force
-```
-
-If you wish to disable templating because of any security or performance concern, you may set `allowCommandTemplating` to `false`.
-But before you disable templating completely, try the `allowedCommands` config option to limit what commands are allowed to run.
-
-This configuration option was previously named `allowPostUpgradeCommandTemplating`.
 
 ## allowCustomCrateRegistries
 
@@ -69,7 +31,7 @@ This configuration option was previously named `allowPostUpgradeCommandTemplatin
 
 A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
 
-If you are using a template command, the regular expression should match the template itself, not the final resolved value.
+If you are using a template command, the regular expression should match the final resolved value.
 If this list is empty then no tasks will be executed.
 
 For example:
@@ -157,7 +119,9 @@ You can limit which repositories Renovate can access by using the `autodiscoverF
 
 You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
 The pattern matches against the organization/repo path.
-It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style or regex pattern.
+
+This option supports an array of minimatch-compatible globs or RE2-compatible regex strings.
+For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 If you set multiple filters, then the matches of each filter are added to the overall result.
 
@@ -179,29 +143,20 @@ The configuration:
 
 ```json
 {
-  "autodiscoverFilter": ["my-org/*"]
+  "autodiscoverFilter": ["my-org/*", "!my-org/old-*"]
 }
 ```
 
-The search for repositories is case-insensitive.
+Glob patterns are case-insensitive.
 
 **Regex**:
 
 All text inside the start and end `/` will be treated as a regular expression.
-
-```json
-{
-  "autodiscoverFilter": ["/project/.*/"]
-}
-```
-
-You can negate the regex by putting an `!` in front.
-Only use a single negation and don't mix with other filters because all filters are combined with `or`.
 If using negations, all repositories except those who match the regex are added to the result:
 
 ```json
 {
-  "autodiscoverFilter": ["!/project/.*/"]
+  "autodiscoverFilter": ["/project/.*/", "!/project/old-/"]
 }
 ```
 
@@ -340,20 +295,54 @@ In the self-hosted setup, use option to enable caching of private packages to im
 ## cacheTtlOverride
 
 Utilize this key-value map to override the default package cache TTL values for a specific namespace. This object contains pairs of namespaces and their corresponding TTL values in minutes.
-For example, to override the default TTL of 60 minutes for the `docker` datasource "tags" namespace: `datasource-docker-tags` use the following:
+
+You can use:
+
+- **Exact matches**: Direct namespace names
+- **Glob patterns**: Wildcards like `datasource-*` or `*`
+- **Regex patterns**: Regular expressions like `/^datasource-/`
+
+Priority order:
+
+1. Exact namespace matches take highest priority
+2. If no exact match, the longest (most specific) matching pattern wins
+
+Example:
 
 ```json
 {
   "cacheTtlOverride": {
-    "datasource-docker-tags": 120
+    "datasource-rubygems": 120,
+    "datasource-*": 60,
+    "datasource-{crate,go}": 90,
+    "/^changelog-/": 45,
+    "*": 30
   }
 }
 ```
 
-Valid codes for namespaces are as follows:
+In this example:
+
+- `datasource-rubygems` gets 120 minutes (exact match - highest priority)
+- `datasource-crate` and `datasource-go` get 90 minutes (matches `datasource-{crate,go}` - longest pattern)
+- `datasource-hex` gets 60 minutes (matches `datasource-*` - shorter pattern)
+- `changelog-github-release` gets 45 minutes (matches `/^changelog-/` regex)
+- `preset` gets 30 minutes (matches `*` wildcard - shortest pattern)
+
+Namespaces of special interest follow the pattern `datasource-releases-{datasource}`.
+When releases for a datasource are fetched, they are stored in this namespace.
+Whether caching is enabled for a particular datasource depends on whether it's private or caching is forced with [`cachePrivatePackages`](./self-hosted-configuration.md#cacheprivatepackages).
+
+Other valid cache namespaces are as follows:
+
+<!-- cache-namespaces-begin -->
 
 - `changelog-bitbucket-notes@v2`
 - `changelog-bitbucket-release`
+- `changelog-bitbucket-server-notes@v2`
+- `changelog-bitbucket-server-release`
+- `changelog-forgejo-notes@v2`
+- `changelog-forgejo-release`
 - `changelog-gitea-notes@v2`
 - `changelog-gitea-release`
 - `changelog-github-notes@v2`
@@ -363,11 +352,14 @@ Valid codes for namespaces are as follows:
 - `datasource-artifactory`
 - `datasource-aws-machine-image`
 - `datasource-aws-rds`
+- `datasource-aws-eks-addon`
 - `datasource-azure-bicep-resource`
 - `datasource-azure-pipelines-tasks`
 - `datasource-bazel`
 - `datasource-bitbucket-tags`
+- `datasource-bitbucket-server-tags`
 - `datasource-bitrise`
+- `datasource-buildpacks-registry`
 - `datasource-cdnjs`
 - `datasource-conan`
 - `datasource-conda`
@@ -386,6 +378,8 @@ Valid codes for namespaces are as follows:
 - `datasource-docker-tags`
 - `datasource-dotnet-version`
 - `datasource-endoflife-date`
+- `datasource-forgejo-releases`
+- `datasource-forgejo-tags`
 - `datasource-galaxy-collection`
 - `datasource-galaxy`
 - `datasource-git-refs`
@@ -409,19 +403,17 @@ Valid codes for namespaces are as follows:
 - `datasource-hexpm-bob`
 - `datasource-java-version`
 - `datasource-jenkins-plugins`
-- `datasource-maven`
-- `datasource-maven:head-requests-timeout`
-- `datasource-maven:head-requests`
-- `datasource-maven:metadata-xml`
+- `datasource-maven:cache-provider`
+- `datasource-maven:postprocess-reject`
 - `datasource-node-version`
-- `datasource-npm:data`
+- `datasource-npm:cache-provider`
 - `datasource-nuget-v3`
 - `datasource-orb`
 - `datasource-packagist`
 - `datasource-pod`
 - `datasource-python-version`
-- `datasource-releases`
 - `datasource-repology`
+- `datasource-rpm`
 - `datasource-ruby-version`
 - `datasource-rubygems`
 - `datasource-sbt-package`
@@ -429,12 +421,15 @@ Valid codes for namespaces are as follows:
 - `datasource-terraform-provider`
 - `datasource-terraform`
 - `datasource-unity3d`
+- `datasource-unity3d-packages`
 - `github-releases-datasource-v2`
 - `github-tags-datasource-v2`
 - `merge-confidence`
 - `preset`
 - `terraform-provider-hash`
 - `url-sha256`
+
+<!-- cache-namespaces-end -->
 
 ## checkedBranches
 
@@ -479,6 +474,16 @@ The above configuration approach will mean the values are redacted in logs like 
          "secrets": {"SECRET_TOKEN": "***********"},
          "customEnvVariables": {"SECRET_TOKEN": "{{ secrets.SECRET_TOKEN }}"},
 ```
+
+## deleteAdditionalConfigFile
+
+If set to `true` Renovate tries to delete the additional self-hosted config file after reading it.
+
+The process that runs Renovate must have the correct permissions to delete the additional config file.
+
+<!-- prettier-ignore -->
+!!! tip
+    You can tell Renovate where to find your config file with the `RENOVATE_ADDITONAL_CONFIG_FILE` environment variable.
 
 ## deleteConfigFile
 
@@ -763,6 +768,21 @@ Before the first commit in a repository, Renovate will:
 
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
+
+## gitPrivateKeyPassphrase
+
+Passphrase for the `gitPrivateKey` when the private key is protected with a passphrase.
+
+Currently supported for SSH keys only.
+When provided, Renovate will automatically decrypt the SSH private key during the signing process.
+
+<!-- prettier-ignore -->
+!!! note
+    Passphrases are not yet supported for GPG keys. If you provide a passphrase for a GPG key, it will be ignored and a warning will be logged.
+
+<!-- prettier-ignore -->
+!!! warning
+    Store this value securely as it provides access to decrypt your private key. Consider using environment variables or secure secret management systems rather than storing it in plain text configuration files.
 
 ## gitTimeout
 
@@ -1120,6 +1140,12 @@ gpg> save
 The private key should then be added to your Renovate Bot global config (either using `privateKeyPath` or exporting it to the `RENOVATE_PRIVATE_KEY` environment variable).
 The public key can be used to replace the existing key in <https://app.renovatebot.com/encrypt> for your own use.
 
+<!-- prettier-ignore -->
+!!! note "Base64 Encoding Support"
+    Renovate supports base64-encoded private keys for easier handling in environment variables or configuration files.
+    Simply provide the base64-encoded version of your private key, and Renovate will automatically detect and decode it.
+    This works for both GPG and SSH private keys.
+
 Any PGP-encrypted secrets must have a mandatory organization/group scope, and optionally can be scoped for a single repository only.
 The reason for this is to avoid "replay" attacks where someone could learn your encrypted secret and then reuse it in their own Renovate repositories.
 Instead, with scoped secrets it means that Renovate ensures that the organization and optionally repository values encrypted with the secret match against the running repository.
@@ -1246,7 +1272,7 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 Renovate uses the [AWS SDK for JavaScript V3](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/welcome.html) to connect to the S3 instance.
 Therefore, Renovate supports all the authentication methods supported by the AWS SDK.
-Read more about the default credential provider chain for AWS SDK for JavaScript V3 [here](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromnodeproviderchain).
+Read more about [the default credential provider chain for AWS SDK for JavaScript V3](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromnodeproviderchain).
 
 <!-- prettier-ignore -->
 !!! tip
@@ -1358,6 +1384,48 @@ Otherwise, it will default to `RenovateBot/${renovateVersion} (https://github.co
 The only time where `username` is required is if using `username` + `password` credentials for the `bitbucket` platform.
 You don't need to configure `username` directly if you have already configured `token`.
 Renovate will use the token to discover its username on the platform, including if you're running Renovate as a GitHub App.
+
+## variables
+
+Variables may be configured by a bot admin in `config.js`, which will then make them available for templating within repository configs.
+This config option behaves exactly like [secrets](#secrets), except that it won't be masked in the logs.
+For example, to configure a `SOME_VARIABLE` to be accessible by all repositories:
+
+```js
+module.exports = {
+  variables: {
+    SOME_VARIABLE: 'abc123',
+  },
+};
+```
+
+They can also be configured per repository, e.g.
+
+```js
+module.exports = {
+  repositories: [
+    {
+      repository: 'abc/def',
+      variables: {
+        SOME_VARIABLE: 'abc123',
+      },
+    },
+  ],
+};
+```
+
+It could then be used in a repository config or preset like so:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch"],
+      "addLabels": ["{{ variables.SOME_VARIABLE }}"]
+    }
+  ]
+}
+```
 
 ## writeDiscoveredRepos
 

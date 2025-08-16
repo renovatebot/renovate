@@ -1,6 +1,10 @@
 import { newlineRegex } from '../../../util/regex';
 import type { PackageDependency, PackageFileContent } from '../types';
-import { parseLine } from './line-parser';
+import {
+  endBlockRegex,
+  excludeBlockStartRegex,
+  parseLine,
+} from './line-parser';
 
 function findMatchingModule(
   tool: PackageDependency,
@@ -25,12 +29,24 @@ function findMatchingModule(
 export function extractPackageFile(content: string): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   const tools: PackageDependency[] = [];
+  let inExcludeBlock = false;
 
   const lines = content.split(newlineRegex);
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
     const line = lines[lineNumber];
     const dep = parseLine(line);
+
+    if (inExcludeBlock) {
+      if (endBlockRegex.test(line)) {
+        inExcludeBlock = false;
+      }
+      continue;
+    }
+
     if (!dep) {
+      if (excludeBlockStartRegex.test(line)) {
+        inExcludeBlock = true;
+      }
       continue;
     }
 

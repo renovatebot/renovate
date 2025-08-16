@@ -7,7 +7,6 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
-import { getTtlOverride } from '../../util/cache/package/ttl';
 import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
@@ -17,6 +16,7 @@ import * as migration from '../migration';
 import type { AllConfig, RenovateConfig } from '../types';
 import { mergeChildConfig } from '../utils';
 import { removedPresets } from './common';
+import * as forgejo from './forgejo';
 import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
@@ -36,13 +36,14 @@ import {
 } from './util';
 
 const presetSources: Record<string, PresetApi> = {
-  github,
-  npm,
-  gitlab,
+  forgejo,
   gitea,
-  local,
-  internal,
+  github,
+  gitlab,
   http,
+  internal,
+  local,
+  npm,
 };
 
 const presetCacheNamespace = 'preset';
@@ -112,7 +113,7 @@ export async function getPreset(
   if (newPreset === null) {
     return {};
   }
-  const { presetSource, repo, presetPath, presetName, tag, params } =
+  const { presetSource, repo, presetPath, presetName, tag, params, rawParams } =
     parsePreset(preset);
   const cacheKey = `preset:${preset}`;
   const presetCachePersistence = GlobalConfig.get(
@@ -136,12 +137,7 @@ export async function getPreset(
       tag,
     });
     if (presetCachePersistence) {
-      await packageCache.set(
-        presetCacheNamespace,
-        cacheKey,
-        presetConfig,
-        getTtlOverride(presetCacheNamespace) ?? 15,
-      );
+      await packageCache.set(presetCacheNamespace, cacheKey, presetConfig, 15);
     } else {
       memCache.set(cacheKey, presetConfig);
     }
@@ -154,6 +150,9 @@ export async function getPreset(
     const argMapping: Record<string, string> = {};
     for (const [index, value] of params.entries()) {
       argMapping[`arg${index}`] = value;
+    }
+    if (rawParams) {
+      argMapping.args = rawParams;
     }
     presetConfig = replaceArgs(presetConfig, argMapping);
   }

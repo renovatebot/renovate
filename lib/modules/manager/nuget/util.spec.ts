@@ -75,6 +75,27 @@ describe('modules/manager/nuget/util', () => {
       ]);
     });
 
+    it('deduplicates registries', async () => {
+      fs.findUpLocal.mockResolvedValue('NuGet.config');
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          <?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+  </packageSources>
+</configuration>`,
+      );
+
+      const registries = await getConfiguredRegistries('NuGet.config');
+      expect(registries).toEqual([
+        {
+          name: 'nuget.org',
+          url: 'https://api.nuget.org/v3/index.json#protocolVersion=3',
+        },
+      ]);
+    });
+
     it('reads nuget config file with default registry', async () => {
       fs.findUpLocal.mockResolvedValue('NuGet.config');
       fs.readLocalFile.mockResolvedValueOnce(

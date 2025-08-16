@@ -10,7 +10,7 @@ Options:
 | option                     | default  | description                                                                                                                                                              |
 | -------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | defaultRegistryUrlTemplate | `""`     | URL used if no `registryUrl` is provided when looking up new releases                                                                                                    |
-| format                     | `"json"` | format used by the API. Available values are: `json`, `plain`, `yaml`, `html`                                                                                            |
+| format                     | `"json"` | format used by the API. Available values are: `html`, `json`, `plain`, `toml`, `yaml`                                                                                    |
 | transformTemplates         | `[]`     | [JSONata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
 
 <!-- prettier-ignore -->
@@ -27,7 +27,7 @@ Available template variables:
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["k3s.version"],
+      "managerFilePatterns": ["/k3s.version/"],
       "matchStrings": ["(?<currentValue>\\S+)"],
       "depNameTemplate": "k3s",
       "versioningTemplate": "semver-coerced",
@@ -98,7 +98,7 @@ If you use the Mend Renovate app, use the [`logLevelRemap` config option](../../
 {
   "logLevelRemap": [
     {
-      "matchMessage": "/^Custom manager fetcher/",
+      "matchMessage": "/^Custom datasource/",
       "newLogLevel": "info"
     }
   ]
@@ -185,6 +185,39 @@ When Renovate receives this response with the `yaml` format, it will convert it 
 
 After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied as usual to further process the JSON data.
 
+#### TOML
+
+If `toml` is used, response is parsed and converted into TOML for further processing.
+
+The below TOML document
+
+```toml
+[[releases]]
+version = "1.0.0"
+[[releases]]
+version = "2.0.0"
+[[releases]]
+version = "3.0.0"
+```
+
+Will convert applying any `jsonata` rules defined in the `transformTemplates` section will be applied.
+
+```json
+{
+  "releases": [
+    {
+      "version": "1.0.0"
+    },
+    {
+      "version": "2.0.0"
+    },
+    {
+      "version": "3.0.0"
+    }
+  ]
+}
+```
+
 #### HTML
 
 If the format is set to `html`, Renovate will call the HTTP endpoint with the `Accept` header value `text/html`.
@@ -248,7 +281,7 @@ You can use this configuration to request the newest versions of the Hashicorp p
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["\\.yml$"],
+      "managerFilePatterns": ["/\\.yml$/"],
       "datasourceTemplate": "custom.hashicorp",
       "matchStrings": [
         "#\\s*renovate:\\s*(datasource=(?<datasource>.*?) )?depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s*\\w*:\\s*(?<currentValue>.*)\\s"
@@ -283,7 +316,7 @@ You can use the following configuration to upgrade the Grafana Dashboards versio
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["\\.yml$"],
+      "managerFilePatterns": ["/\\.yml$/"],
       "matchStrings": [
         "#\\s+renovate:\\s+depName=\"(?<depName>.*)\"\\n\\s+gnetId:\\s+(?<packageName>.*?)\\n\\s+revision:\\s+(?<currentValue>.*)"
       ],
@@ -369,7 +402,7 @@ And the following custom manager:
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["\\.yml$"],
+      "managerFilePatterns": ["/\\.yml$/"],
       "datasourceTemplate": "custom.nexus_generic",
       "matchStrings": [
         "#\\s*renovate:\\s*(datasource=(?<datasource>.*?)\\s*)?depName=(?<depName>.*?)(\\s*versioning=(?<versioning>.*?))?\\s*\\w*:\\s*[\"']?(?<currentValue>.+?)[\"']?\\s"

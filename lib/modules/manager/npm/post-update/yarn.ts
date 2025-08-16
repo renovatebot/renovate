@@ -9,6 +9,7 @@ import {
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
+import { getEnv } from '../../../../util/env';
 import { exec } from '../../../../util/exec';
 import type {
   ExecOptions,
@@ -76,9 +77,10 @@ export async function checkYarnrc(
         );
       }
     }
-  } catch /* istanbul ignore next */ {
+    /* v8 ignore start -- needs test */
+  } catch {
     // not found
-  }
+  } /* v8 ignore stop -- needs test */
   return { offlineMirror, yarnPath };
 }
 
@@ -197,7 +199,7 @@ export async function generateLockFile(
       docker: {},
       toolConstraints,
     };
-    // istanbul ignore if
+    /* v8 ignore next 4 -- needs test */
     if (GlobalConfig.get('exposeAllEnv')) {
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
@@ -209,17 +211,18 @@ export async function generateLockFile(
       commands.push(`yarn set version ${quote(yarnUpdate.newValue!)}`);
     }
 
-    if (process.env.RENOVATE_X_YARN_PROXY) {
-      if (process.env.HTTP_PROXY && !isYarn1) {
+    const allEnv = getEnv();
+    if (allEnv.RENOVATE_X_YARN_PROXY) {
+      if (allEnv.HTTP_PROXY && !isYarn1) {
         commands.push('yarn config unset --home httpProxy');
         commands.push(
-          `yarn config set --home httpProxy ${quote(process.env.HTTP_PROXY)}`,
+          `yarn config set --home httpProxy ${quote(allEnv.HTTP_PROXY)}`,
         );
       }
-      if (process.env.HTTPS_PROXY && !isYarn1) {
+      if (allEnv.HTTPS_PROXY && !isYarn1) {
         commands.push('yarn config unset --home httpsProxy');
         commands.push(
-          `yarn config set --home httpsProxy ${quote(process.env.HTTPS_PROXY)}`,
+          `yarn config set --home httpsProxy ${quote(allEnv.HTTPS_PROXY)}`,
         );
       }
     }
@@ -288,12 +291,13 @@ export async function generateLockFile(
       // https://github.com/yarnpkg/berry/blob/20612e82d26ead5928cc27bf482bb8d62dde87d3/packages/yarnpkg-core/sources/Project.ts#L284.
       try {
         await writeLocalFile(lockFileName, '');
-      } catch (err) /* istanbul ignore next */ {
+        /* v8 ignore start -- needs test */
+      } catch (err) {
         logger.debug(
           { err, lockFileName },
           'Error clearing `yarn.lock` for lock file maintenance',
         );
-      }
+      } /* v8 ignore stop -- needs test */
     }
 
     // Run the commands
@@ -301,7 +305,8 @@ export async function generateLockFile(
 
     // Read the result
     lockFile = await readLocalFile(lockFileName, 'utf8');
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore start -- needs test */
+  } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
@@ -327,7 +332,7 @@ export async function generateLockFile(
       throw new ExternalHostError(err, NpmDatasource.id);
     }
     return { error: true, stderr: err.stderr, stdout: err.stdout };
-  }
+  } /* v8 ignore stop -- needs test */
   return { lockFile };
 }
 

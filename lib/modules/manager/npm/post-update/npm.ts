@@ -1,6 +1,7 @@
 // TODO: types (#22198)
 import is from '@sindresorhus/is';
 import semver from 'semver';
+import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import {
@@ -122,7 +123,7 @@ export async function generateLockFile(
       ],
       docker: {},
     };
-    // istanbul ignore if
+    /* v8 ignore next 4 -- needs test */
     if (GlobalConfig.get('exposeAllEnv')) {
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
@@ -149,9 +150,9 @@ export async function generateLockFile(
           .filter((packageKey) => !rootDeps.has(packageKey));
 
         if (currentWorkspaceUpdates.length) {
-          const updateCmd = `npm install ${cmdOptions} --workspace=${workspace} ${currentWorkspaceUpdates.join(
-            ' ',
-          )}`;
+          const updateCmd = `npm install ${cmdOptions} --workspace=${quote(workspace)} ${currentWorkspaceUpdates
+            .map(quote)
+            .join(' ')}`;
           commands.push(updateCmd);
         }
       }
@@ -159,11 +160,10 @@ export async function generateLockFile(
 
     if (lockRootUpdates.length) {
       logger.debug('Performing lockfileUpdate (npm)');
-      const updateCmd =
-        `npm install ${cmdOptions} ` +
-        lockRootUpdates
-          .map((update) => update.managerData?.packageKey)
-          .join(' ');
+      const updateCmd = `npm install ${cmdOptions} ${lockRootUpdates
+        .map((update) => update.managerData?.packageKey)
+        .map(quote)
+        .join(' ')}`;
       commands.push(updateCmd);
     }
 
@@ -187,12 +187,13 @@ export async function generateLockFile(
       );
       try {
         await deleteLocalFile(lockFileName);
-      } catch (err) /* istanbul ignore next */ {
+        /* v8 ignore start -- needs test */
+      } catch (err) {
         logger.debug(
           { err, lockFileName },
           'Error removing `package-lock.json` for lock file maintenance',
         );
-      }
+      } /* v8 ignore stop -- needs test */
     }
 
     // Run the commands
@@ -240,7 +241,8 @@ export async function generateLockFile(
         lockFile = composeLockFile(lockFileParsed, detectedIndent);
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore start -- needs test */
+  } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
@@ -255,7 +257,7 @@ export async function generateLockFile(
       throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     }
     return { error: true, stderr: err.stderr };
-  }
+  } /* v8 ignore stop -- needs test */
   return { error: !lockFile, lockFile };
 }
 

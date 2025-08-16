@@ -1,10 +1,12 @@
 import type { AllConfig } from '../../../config/types';
+import { getEnv } from '../../env';
 import { PackageCacheStats } from '../../stats';
 import * as memCache from '../memory';
 import * as fileCache from './file';
 import { getCombinedKey } from './key';
 import * as redisCache from './redis';
 import { SqlitePackageCache } from './sqlite';
+import { getTtlOverride } from './ttl';
 import type { PackageCache, PackageCacheNamespace } from './types';
 
 let cacheProxy: PackageCache | undefined;
@@ -36,6 +38,19 @@ export async function set(
   value: unknown,
   minutes: number,
 ): Promise<void> {
+  const rawTtl = getTtlOverride(namespace) ?? minutes;
+  await setWithRawTtl(namespace, key, value, rawTtl);
+}
+
+/**
+ * This MUST NOT be used outside of cache implementation
+ */
+export async function setWithRawTtl(
+  namespace: PackageCacheNamespace,
+  key: string,
+  value: unknown,
+  minutes: number,
+): Promise<void> {
   if (!cacheProxy) {
     return;
   }
@@ -59,7 +74,7 @@ export async function init(config: AllConfig): Promise<void> {
     return;
   }
 
-  if (process.env.RENOVATE_X_SQLITE_PACKAGE_CACHE) {
+  if (getEnv().RENOVATE_X_SQLITE_PACKAGE_CACHE) {
     cacheProxy = await SqlitePackageCache.init(config.cacheDir!);
     return;
   }
