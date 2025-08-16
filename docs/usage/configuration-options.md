@@ -1417,8 +1417,9 @@ You can configure this to `true` if you prefer Renovate to close an existing Dep
 
 ## dependencyDashboardCategory
 
-You can use this to categorize updates on the Dependency Dashboard. For example, to visually distinguish between production and dev updates or to split between teams or logical parts of a monorepo.
-In practice this means it introduces an extra, top-level of hierarchy/heading in the Dashboard's markdown.
+You can use this to categorize updates on the Dependency Dashboard.
+For example, to visually distinguish between production and dev updates, or to split between teams or logical parts of a monorepo.
+In practice this means it introduces an extra level of hierarchy/heading in the Dashboard's markdown.
 
 To create a category for all CI/CD updates, you can configure a package rule like this:
 
@@ -1432,6 +1433,12 @@ To create a category for all CI/CD updates, you can configure a package rule lik
   ]
 }
 ```
+
+When you configure categories, updates that do not match any of the configured categories will be grouped under the "Other" category.
+
+Some sections in the Dependency Dashboard also contain an action that applies to all updates in that section, such as to approve or rebase all updates.
+If there are categories in that section, the action will be put in an extra "All" category at the end of the section.
+This is to explicitly clarify that the action applies to all updates in the section, not to just a specific category.
 
 ## dependencyDashboardFooter
 
