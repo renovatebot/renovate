@@ -54,7 +54,7 @@ export function tokenize(versionStr: string): Token[] | null {
       if (regEx(/^\d+$/).test(val)) {
         result.push({
           type: TokenType.Number,
-          val: parseInt(val, 10),
+          val: parseInt(val),
         });
       } else {
         result.push({

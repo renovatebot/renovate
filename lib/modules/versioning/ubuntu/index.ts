@@ -74,7 +74,7 @@ function getMajor(version: string): null | number {
   const ver = getVersionByCodename(version);
   if (isValid(ver)) {
     const [major] = ver.split('.');
-    return parseInt(major, 10);
+    return parseInt(major);
   }
   return null;
 }
@@ -83,7 +83,7 @@ function getMinor(version: string): null | number {
   const ver = getVersionByCodename(version);
   if (isValid(ver)) {
     const [, minor] = ver.split('.');
-    return parseInt(minor, 10);
+    return parseInt(minor);
   }
   return null;
 }
@@ -92,7 +92,7 @@ function getPatch(version: string): null | number {
   const ver = getVersionByCodename(version);
   if (isValid(ver)) {
     const [, , patch] = ver.split('.');
-    return patch ? parseInt(patch, 10) : null;
+    return patch ? parseInt(patch) : null;
   }
   return null;
 }
