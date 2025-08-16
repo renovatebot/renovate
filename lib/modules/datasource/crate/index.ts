@@ -110,7 +110,7 @@ export class CrateDatasource extends Datasource {
     result.releases = lines
       .map((version) => {
         const release: Release = {
-          version: version.vers,
+          version: version.vers.replace(/\+.*$/, ''),
         };
         if (version.yanked) {
           release.isDeprecated = true;
