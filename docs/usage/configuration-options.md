@@ -1417,7 +1417,8 @@ You can configure this to `true` if you prefer Renovate to close an existing Dep
 
 ## dependencyDashboardCategory
 
-You can use this to categorize updates on the Dependency Dashboard, for example, to visually distinguish between production and dev updates.
+You can use this to categorize updates on the Dependency Dashboard. For example, to visually distinguish between production and dev updates or to split between teams or logical parts of a monorepo.
+In practice this means it introduces an extra, top-level of hierarchy/heading in the Dashboard's markdown.
 
 To create a category for all CI/CD updates, you can configure a package rule like this:
 
