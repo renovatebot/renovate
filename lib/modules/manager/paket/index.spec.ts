@@ -18,10 +18,13 @@ describe('modules/manager/paket/index', () => {
 
   beforeEach(() => {
     vi.mock('../../../util/fs');
-    fs.getParentDir.mockImplementation((fileName: string) => {
-      expect(fileName).equals(packageFileName);
-      return '/app/test';
-    });
+    fs.getSiblingFileName.mockImplementation(
+      (fileName: string, siblingName: string) => {
+        expect(fileName).equals(packageFileName);
+        expect(siblingName).equals('paket.lock');
+        return '/app/test/paket.lock';
+      },
+    );
   });
 
   describe('extractPackageFile()', () => {
