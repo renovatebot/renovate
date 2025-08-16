@@ -66,8 +66,9 @@ describe('modules/manager/paket/index', () => {
       });
     });
   });
+
   describe('updateArtifacts()', () => {
-    const command: UpdateArtifact = {
+    const updateArtifact: UpdateArtifact = {
       config: {},
       packageFileName,
       newPackageFileContent: 'Fake package content',
@@ -87,7 +88,7 @@ describe('modules/manager/paket/index', () => {
         [lockFileName]: newContentLockFile,
       });
 
-      const result = await updateArtifacts(command);
+      const result = await updateArtifacts(updateArtifact);
 
       expect(toolSpy.mock.calls).toEqual([[lockFileName]]);
       expect(result).toEqual([
@@ -112,7 +113,7 @@ describe('modules/manager/paket/index', () => {
         [lockFileName]: contentLockFile,
       });
 
-      const result = await updateArtifacts(command);
+      const result = await updateArtifacts(updateArtifact);
 
       expect(result).toBeNull();
     });

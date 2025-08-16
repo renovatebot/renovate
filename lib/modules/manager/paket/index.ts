@@ -60,12 +60,12 @@ export async function extractPackageFile(
 
 export const supportsLockFileMaintenance = true;
 export async function updateArtifacts(
-  command: UpdateArtifact,
+  updateArtifact: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
-  logger.debug(`paket.updateArtifacts(${command.packageFileName})`);
+  logger.debug(`paket.updateArtifacts(${updateArtifact.packageFileName})`);
 
   const lockFileName = getSiblingFileName(
-    command.packageFileName,
+    updateArtifact.packageFileName,
     'paket.lock',
   );
   const existingLockFileContentMap = await getFiles([lockFileName]);
