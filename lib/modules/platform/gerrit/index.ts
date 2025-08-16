@@ -446,37 +446,46 @@ export async function ensureComment(
   return true;
 }
 
-export function massageMarkdown(prBody: string): string {
-  //TODO: do more Gerrit specific replacements?
-  return smartTruncate(readOnlyIssueBody(prBody), maxBodyLength())
-    .replace(regEx(/Pull Request(s)?/g), 'Change-Request$1')
-    .replace(regEx(/\bPR(s)?\b/g), 'Change-Request$1')
-    .replace(regEx(/<\/?summary>/g), '**')
-    .replace(regEx(/<\/?details>/g), '')
-    .replace(regEx(/&#8203;/g), '') //remove zero-width-space not supported in gerrit-markdown
-    .replace(
-      'close this Change-Request unmerged.',
-      'abandon or down vote this Change-Request with -2.',
-    )
-    .replace('Branch creation', 'Change creation')
-    .replace(
-      'Close this Change-Request',
-      'Down-vote this Change-Request with -2',
-    )
-    .replace(
-      'you tick the rebase/retry checkbox',
-      'add "rebase!" at the beginning of the commit message.',
-    )
-    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
+export function massageMarkdown(prBody: string, rebaseLabel: string): string {
+  return (
+    smartTruncate(readOnlyIssueBody(prBody), maxBodyLength())
+      .replace('Branch creation', 'Change creation')
+      .replace(
+        'close this Pull Request unmerged',
+        'abandon or vote this change with Code-Review -2',
+      )
+      .replace(
+        'Close this PR',
+        'Abandon or vote this change with Code-Review -2',
+      )
+      .replace(
+        'you tick the rebase/retry checkbox',
+        `you add the _${rebaseLabel}_ hashtag to this change`,
+      )
+      .replace(
+        'checking the rebase/retry box above',
+        `adding the _${rebaseLabel}_ hashtag to this change`,
+      )
+      .replace(regEx(/\b(?:Pull Request|PR)/g), 'change')
+      // Remove HTML tags not supported in Gerrit markdown
+      .replace(regEx(/<\/?summary>/g), '**')
+      .replace(regEx(/<\/?(details|blockquote)>/g), '')
+      .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
+      .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
+      // Remove zero-width-space not supported in Gerrit markdown
+      .replace(regEx(/&#8203;/g), '')
+  );
 }
 
 export function maxBodyLength(): number {
   return 16384; //TODO: check the real gerrit limit (max. chars)
 }
 
-export function deleteLabel(number: number, label: string): Promise<void> {
-  return Promise.resolve();
+export async function deleteLabel(
+  number: number,
+  label: string,
+): Promise<void> {
+  await client.deleteHashtag(number, label);
 }
 
 export function ensureCommentRemoval(

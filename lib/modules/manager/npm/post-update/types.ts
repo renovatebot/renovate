@@ -31,15 +31,15 @@ export interface GenerateLockFileResult {
 
 // the dependencies schema is different for v6 and other lockfile versions
 // Ref: https://github.com/pnpm/spec/issues/4#issuecomment-1524059392
-export type PnpmDependencySchema = Record<string, { version: string } | string>;
+export type PnpmDependency = Record<string, { version: string } | string>;
 
 export interface PnpmLockFile {
   lockfileVersion: number | string;
   catalogs?: Record<string, Record<string, { version: string }>>;
-  importers?: Record<string, Record<string, PnpmDependencySchema>>;
-  dependencies: PnpmDependencySchema;
-  devDependencies: PnpmDependencySchema;
-  optionalDependencies: PnpmDependencySchema;
+  importers?: Record<string, Record<string, PnpmDependency>>;
+  dependencies: PnpmDependency;
+  devDependencies: PnpmDependency;
+  optionalDependencies: PnpmDependency;
 }
 
 export interface YarnRcNpmRegistry {

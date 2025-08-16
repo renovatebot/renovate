@@ -282,63 +282,23 @@ exports[`modules/manager/cargo/extract > extractPackageFile() > extracts multipl
     },
   },
   {
-    "currentValue": undefined,
-    "datasource": "git-refs",
+    "currentValue": "0.1.0",
+    "datasource": "crate",
     "depName": "git_dep_with_version",
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": true,
     },
-    "packageName": "https://github.com/foo/bar",
-    "skipReason": "unspecified-version",
+    "skipReason": "git-dependency",
   },
   {
-    "currentValue": undefined,
-    "datasource": "git-refs",
+    "currentValue": "",
+    "datasource": "crate",
     "depName": "git_dep",
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": false,
     },
-    "packageName": "https://github.com/foo/bar",
-    "skipReason": "unspecified-version",
-  },
-  {
-    "currentValue": "1.10.3",
-    "datasource": "github-tags",
-    "depName": "git_dep_with_tag",
-    "depType": "dependencies",
-    "managerData": {
-      "nestedVersion": false,
-    },
-    "packageName": "foo/bar",
-    "registryUrls": [
-      "https://github.com",
-    ],
-    "skipReason": undefined,
-  },
-  {
-    "currentDigest": "abc1234",
-    "currentValue": "",
-    "datasource": "git-refs",
-    "depName": "git_dep_with_rev",
-    "depType": "dependencies",
-    "managerData": {
-      "nestedVersion": false,
-    },
-    "packageName": "https://github.com/foo/bar",
-    "replaceString": "abc1234",
-    "skipReason": undefined,
-  },
-  {
-    "currentValue": "next",
-    "datasource": "git-refs",
-    "depName": "git_dep_with_branch",
-    "depType": "dependencies",
-    "managerData": {
-      "nestedVersion": false,
-    },
-    "packageName": "https://github.com/foo/bar",
     "skipReason": "git-dependency",
   },
   {

@@ -4,12 +4,12 @@ import { DartDatasource } from '../../datasource/dart';
 import { DartVersionDatasource } from '../../datasource/dart-version';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version';
 import type { PackageDependency, PackageFileContent } from '../types';
-import type { PubspecSchema } from './schema';
+import type { Pubspec } from './schema';
 import { parsePubspec } from './utils';
 
 function extractFromSection(
-  pubspec: PubspecSchema,
-  sectionKey: keyof Pick<PubspecSchema, 'dependencies' | 'dev_dependencies'>,
+  pubspec: Pubspec,
+  sectionKey: keyof Pick<Pubspec, 'dependencies' | 'dev_dependencies'>,
 ): PackageDependency[] {
   const sectionContent = pubspec[sectionKey];
   if (!sectionContent) {
@@ -67,7 +67,7 @@ function extractFromSection(
   return deps;
 }
 
-function extractDart(pubspec: PubspecSchema): PackageDependency[] {
+function extractDart(pubspec: Pubspec): PackageDependency[] {
   return [
     {
       depName: 'dart',
@@ -77,7 +77,7 @@ function extractDart(pubspec: PubspecSchema): PackageDependency[] {
   ];
 }
 
-function extractFlutter(pubspec: PubspecSchema): PackageDependency[] {
+function extractFlutter(pubspec: Pubspec): PackageDependency[] {
   const currentValue = pubspec.environment.flutter;
   if (!currentValue) {
     return [];

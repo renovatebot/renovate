@@ -31,7 +31,6 @@ import type {
   ValidationResult,
 } from './types';
 import { allowedStatusCheckStrings } from './types';
-import * as managerValidator from './validation-helpers/managers';
 import * as matchBaseBranchesValidator from './validation-helpers/match-base-branches';
 import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers';
 import {
@@ -75,13 +74,6 @@ const ignoredNodes = [
 ];
 const tzRe = regEx(/^:timezone\((.+)\)$/);
 const rulesRe = regEx(/p.*Rules\[\d+\]$/);
-
-function isManagerPath(parentPath: string): boolean {
-  return (
-    regEx(/^customManagers\[[0-9]+]$/).test(parentPath) ||
-    managerList.includes(parentPath)
-  );
-}
 
 function isIgnored(key: string): boolean {
   return ignoredNodes.includes(key);
@@ -218,19 +210,6 @@ export async function validateConfig(
           message: `The following managers configured in enabledManagers are not supported: "${unsupportedManagers.join(
             ', ',
           )}"`,
-        });
-      }
-    }
-    if (key === 'managerFilePatterns') {
-      if (parentPath === undefined) {
-        errors.push({
-          topic: 'Config error',
-          message: `"managerFilePatterns" may not be defined at the top level of a config and must instead be within a manager block`,
-        });
-      } else if (!isManagerPath(parentPath)) {
-        warnings.push({
-          topic: 'Config warning',
-          message: `"managerFilePatterns" must be configured in a manager block and not here: ${parentPath}`,
         });
       }
     }
@@ -414,14 +393,11 @@ export async function validateConfig(
                       ),
                     ],
                   }).migratedConfig.packageRules![0];
-                  errors.push(
-                    ...managerValidator.check({ resolvedRule, currentPath }),
-                  );
                   warnings.push(
                     ...matchBaseBranchesValidator.check({
                       resolvedRule,
                       currentPath: `${currentPath}[${subIndex}]`,
-                      baseBranches: config.baseBranches!,
+                      baseBranchPatterns: config.baseBranchPatterns!,
                     }),
                   );
                   const selectorLength = Object.keys(resolvedRule).filter(
@@ -578,15 +554,15 @@ export async function validateConfig(
                 }
               }
             }
-            if (key === 'baseBranches') {
-              for (const baseBranch of val as string[]) {
+            if (key === 'baseBranchPatterns') {
+              for (const baseBranchPattern of val as string[]) {
                 if (
-                  isRegexMatch(baseBranch) &&
-                  !getRegexPredicate(baseBranch)
+                  isRegexMatch(baseBranchPattern) &&
+                  !getRegexPredicate(baseBranchPattern)
                 ) {
                   errors.push({
                     topic: 'Configuration Error',
-                    message: `Invalid regExp for ${currentPath}: \`${baseBranch}\``,
+                    message: `Invalid regExp for ${currentPath}: \`${baseBranchPattern}\``,
                   });
                 }
               }

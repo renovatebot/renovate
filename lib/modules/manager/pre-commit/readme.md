@@ -29,12 +29,27 @@ Alternatively, add `:enablePreCommit` to your `extends` array.
 
 ### Additional Dependencies
 
-renovate has partial support for `additional_dependencies`, currently python only.
+Renovate has partial support for `additional_dependencies`, currently Node.js and Python only.
 
-for python hooks, you will need to **explicitly add language** to your hooks with `additional_dependencies`
-to let renovatebot know what kind of dependencies they are.
+You will need to **explicitly add the language** to your hooks with `additional_dependencies` to let Renovate know
+what kind of dependencies they are.
 
-For example, this work for `request`:
+Examples for the supported languages are listed below.
+
+#### Node.js
+
+```yaml
+- repo: https://github.com/pre-commit/mirrors-prettier
+  rev: v3.1.0
+  hooks:
+    - id: prettier
+      language: node
+      additional_dependencies:
+        - '@trivago/prettier-plugin-sort-imports@^5.2.2'
+        - prettier@^3.6.2
+```
+
+#### Python
 
 ```yaml
 - repo: https://github.com/psf/black
@@ -43,16 +58,5 @@ For example, this work for `request`:
     - id: black
       language: python
       additional_dependencies:
-        - 'request==1.1.1'
-```
-
-this won't work:
-
-```yaml
-- repo: https://github.com/psf/black
-  rev: 19.3b0
-  hooks:
-    - id: black
-      additional_dependencies:
-        - 'request==1.1.1'
+        - 'requests==1.1.1'
 ```

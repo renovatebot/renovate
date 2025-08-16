@@ -1,7 +1,7 @@
 import os from 'node:os';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { applySecretsToConfig } from '../../config/secrets';
+import { applySecretsAndVariablesToConfig } from '../../config/secrets';
 import type { AllConfig, RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { resetGlobalLogLevelRemaps } from '../../logger/remap';
@@ -61,7 +61,11 @@ async function checkVersions(): Promise<void> {
 function setGlobalHostRules(config: RenovateConfig): void {
   if (config.hostRules) {
     logger.debug('Setting global hostRules');
-    applySecretsToConfig(config, undefined, false);
+    applySecretsAndVariablesToConfig({
+      config,
+      deleteVariables: false,
+      deleteSecrets: false,
+    });
     config.hostRules.forEach((rule) => hostRules.add(rule));
   }
 }

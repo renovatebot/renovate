@@ -8,7 +8,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import { type Module, type OCBConfig, OCBConfigSchema } from './schema';
+import { type Module, OCBConfig } from './schema';
 
 export function extractPackageFile(
   content: string,
@@ -18,7 +18,7 @@ export function extractPackageFile(
   let definition: OCBConfig | null = null;
   try {
     const yaml = parseSingleYaml(content);
-    const parsed = OCBConfigSchema.safeParse(yaml);
+    const parsed = OCBConfig.safeParse(yaml);
     if (!parsed.success) {
       logger.trace(
         { packageFile, error: parsed.error },
@@ -51,6 +51,7 @@ export function extractPackageFile(
   deps.push(...processModule(definition.exporters, 'exports'));
   deps.push(...processModule(definition.extensions, 'extensions'));
   deps.push(...processModule(definition.processors, 'processors'));
+  deps.push(...processModule(definition.providers, 'providers'));
   deps.push(...processModule(definition.receivers, 'receivers'));
 
   return {

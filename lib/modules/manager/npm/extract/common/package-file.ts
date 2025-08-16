@@ -59,7 +59,7 @@ export function extractPackageJson(
           const match = regEx('^(?<name>.+)@(?<range>.+)$').exec(
             dependencies as string,
           );
-          // istanbul ignore next
+          /* v8 ignore next 3 -- needs test */
           if (!match?.groups) {
             break;
           }
@@ -121,14 +121,14 @@ export function extractPackageJson(
             dep.prettyDepType = depTypes[depType];
             deps.push(dep);
           }
-        }
-      } catch (err) /* istanbul ignore next */ {
+        } /* v8 ignore start -- needs test */
+      } catch (err) {
         logger.debug(
           { fileName: packageFile, depType, err },
           'Error parsing package.json',
         );
         return null;
-      }
+      } /* v8 ignore stop -- needs test */
     }
   }
 
@@ -140,9 +140,9 @@ export function extractPackageJson(
     packageFileVersion,
     managerData: {
       packageJsonName,
-      hasPackageManager: is.nonEmptyStringAndNotWhitespace(
-        packageJson.packageManager,
-      ),
+      hasPackageManager:
+        is.nonEmptyStringAndNotWhitespace(packageJson.packageManager) ||
+        is.nonEmptyObject(packageJson.devEngines?.packageManager),
       workspaces: packageJson.workspaces,
     },
   };

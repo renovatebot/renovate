@@ -48,8 +48,8 @@ export class GiteaHttp extends HttpBase<GiteaHttpOptions> {
       opts.httpOptions.memCache = false;
 
       delete opts.httpOptions.paginate;
-      const total = parseInt(res.headers['x-total-count'] as string, 10);
-      let nextPage = parseInt(resolvedUrl.searchParams.get('page') ?? '1', 10);
+      const total = parseInt(res.headers['x-total-count'] as string);
+      let nextPage = parseInt(resolvedUrl.searchParams.get('page') ?? '1');
 
       while (total && pc.length < total) {
         nextPage += 1;

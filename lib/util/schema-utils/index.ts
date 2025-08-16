@@ -362,3 +362,10 @@ export const NotCircular = z.unknown().superRefine((val, ctx) => {
     return z.NEVER;
   }
 });
+
+export const EmailAddress = z.string().email();
+export type EmailAddress = z.infer<typeof EmailAddress>;
+
+export function isEmailAdress(value: string): boolean {
+  return EmailAddress.safeParse(value).success;
+}

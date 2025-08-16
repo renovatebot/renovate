@@ -5452,5 +5452,51 @@ describe('workers/repository/process/lookup/index', () => {
         },
       ]);
     });
+
+    it('handles changelog with content', async () => {
+      config.currentValue = '8.0.0';
+      config.packageName = 'node';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            changelogContent: 'testContent',
+            changelogUrl: 'http://testChangelogUrl',
+            version: '8.1.0',
+          },
+        ],
+      });
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res).toEqual({
+        changelogContent: 'testContent',
+        changelogUrl: 'http://testChangelogUrl',
+        currentVersion: '8.0.0',
+        fixedVersion: '8.0.0',
+        isSingleVersion: true,
+        registryUrl: 'https://index.docker.io',
+        sourceUrl: 'https://github.com/nodejs/node',
+        updates: [
+          {
+            bucket: 'non-major',
+            isBreaking: false,
+            newMajor: 8,
+            newMinor: 1,
+            newPatch: 0,
+            newValue: '8.1.0',
+            newVersion: '8.1.0',
+            updateType: 'minor',
+          },
+        ],
+        versioning: 'npm',
+        warnings: [],
+      });
+    });
   });
 });
