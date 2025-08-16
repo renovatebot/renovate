@@ -1,7 +1,6 @@
-import upath from 'upath';
 import type { Category } from '../../../constants';
 import { logger } from '../../../logger';
-import { getLocalFiles, getParentDir } from '../../../util/fs';
+import { getLocalFiles, getSiblingFileName } from '../../../util/fs';
 import { getFiles } from '../../../util/git';
 import { NugetDatasource } from '../../datasource/nuget';
 import type {
@@ -24,11 +23,6 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [NugetDatasource.id];
-
-function getSiblingFileName(fileName: string, siblingName: string): string {
-  const subDirectory = getParentDir(fileName);
-  return upath.join(subDirectory, siblingName);
-}
 
 export async function extractPackageFile(
   _content: string,
