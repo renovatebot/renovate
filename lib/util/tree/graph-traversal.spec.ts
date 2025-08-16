@@ -1,8 +1,8 @@
 import { Graph } from 'graph-data-structure';
 import {
-  recursivelyTraverseGraph,
   convertTraversalMapToResults,
   getDependentNodes,
+  recursivelyTraverseGraph,
 } from './graph-traversal';
 
 describe('util/tree/graph-traversal', () => {

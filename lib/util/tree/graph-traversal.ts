@@ -1,8 +1,8 @@
 import type { Graph } from 'graph-data-structure';
 import type {
+  DependencyTraversalOptions,
   GraphTraversalOptions,
   TraversalResult,
-  DependencyTraversalOptions,
 } from './types';
 
 /**
