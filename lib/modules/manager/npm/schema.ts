@@ -6,6 +6,13 @@ export const PnpmCatalogs = z.object({
   catalogs: z.optional(z.record(z.record(z.string()))),
 });
 
+export const YarnCatalogs = z.object({
+  options: z.optional(z.union([z.string(), z.array(z.string())])),
+  list: z.record(z.union([z.string(), z.record(z.string())])),
+});
+
+export type YarnCatalogs = z.infer<typeof YarnCatalogs>;
+
 export const YarnConfig = Yaml.pipe(
   z.object({
     npmRegistryServer: z.string().optional(),
@@ -16,6 +23,7 @@ export const YarnConfig = Yaml.pipe(
         }),
       )
       .optional(),
+    catalogs: YarnCatalogs.optional(),
   }),
 );
 
@@ -26,6 +34,7 @@ export const PnpmWorkspaceFile = z
     packages: z.array(z.string()),
   })
   .and(PnpmCatalogs);
+
 export type PnpmWorkspaceFile = z.infer<typeof PnpmWorkspaceFile>;
 
 export const PackageManager = z

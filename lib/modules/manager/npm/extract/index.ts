@@ -21,10 +21,11 @@ import { extractPackageJson } from './common/package-file';
 import { extractPnpmWorkspaceFile, tryParsePnpmWorkspaceYaml } from './pnpm';
 import { postExtract } from './post';
 import type { NpmPackage } from './types';
-import { isZeroInstall } from './yarn';
+import { extractYarnCatalogs, isZeroInstall } from './yarn';
 import {
   loadConfigFromLegacyYarnrc,
   loadConfigFromYarnrcYml,
+  loadYarnRcYml,
   resolveRegistryUrl,
 } from './yarnrc';
 
@@ -261,6 +262,30 @@ export async function extractAllPackageFiles(
             ...deps,
             packageFile,
           });
+        }
+
+        if (packageFile === 'package.json') {
+          const yarnrcYmlFileName = await findLocalSiblingOrParent(
+            packageFile,
+            '.yarnrc.yml',
+          );
+
+          const yarnConfig: YarnConfig | null =
+            await loadYarnRcYml(yarnrcYmlFileName);
+
+          if (yarnConfig?.catalogs) {
+            const catalogsDeps = await extractYarnCatalogs(
+              yarnConfig.catalogs,
+              packageFile,
+              deps?.managerData?.hasPackageManager ?? false,
+            );
+            if (catalogsDeps) {
+              npmFiles.push({
+                ...catalogsDeps,
+                packageFile: '.yarnrc.yml',
+              });
+            }
+          }
         }
       }
     } else {

@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
+import { readLocalFile } from '../../../../util/fs';
 import { regEx } from '../../../../util/regex';
 import { Result } from '../../../../util/result';
 import { YarnConfig } from '../schema';
@@ -52,4 +53,17 @@ export function resolveRegistryUrl(
     return yarnrcConfig.npmRegistryServer;
   }
   return null;
+}
+
+export async function loadYarnRcYml(
+  yarnrcYmlFileName: string | null,
+): Promise<YarnConfig | null> {
+  let yarnConfig: YarnConfig | null = null;
+  const repoYarnrcYml = yarnrcYmlFileName
+    ? await readLocalFile(yarnrcYmlFileName, 'utf8')
+    : null;
+  if (is.string(repoYarnrcYml) && repoYarnrcYml.trim().length > 0) {
+    yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
+  }
+  return yarnConfig;
 }
