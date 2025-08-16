@@ -1,18 +1,34 @@
 import { z } from 'zod';
-import { Json, LooseRecord } from '../../../util/schema-utils';
+import { Json, LooseRecord, Yaml } from '../../../util/schema-utils';
 
-export const PnpmCatalogsSchema = z.object({
+export const PnpmCatalogs = z.object({
   catalog: z.optional(z.record(z.string())),
   catalogs: z.optional(z.record(z.record(z.string()))),
 });
 
-export const PnpmWorkspaceFileSchema = z
+export const YarnConfig = Yaml.pipe(
+  z.object({
+    npmRegistryServer: z.string().optional(),
+    npmScopes: z
+      .record(
+        z.object({
+          npmRegistryServer: z.string().optional(),
+        }),
+      )
+      .optional(),
+  }),
+);
+
+export type YarnConfig = z.infer<typeof YarnConfig>;
+
+export const PnpmWorkspaceFile = z
   .object({
     packages: z.array(z.string()),
   })
-  .and(PnpmCatalogsSchema);
+  .and(PnpmCatalogs);
+export type PnpmWorkspaceFile = z.infer<typeof PnpmWorkspaceFile>;
 
-export const PackageManagerSchema = z
+export const PackageManager = z
   .string()
   .transform((val) => val.split('@'))
   .transform(([name, ...version]) => ({ name, version: version.join('@') }));
@@ -22,27 +38,27 @@ const DevEngineDependency = z.object({
   version: z.string().optional(),
 });
 
-const DevEngineSchema = z.object({
+const DevEngine = z.object({
   packageManager: DevEngineDependency.or(
     z.array(DevEngineDependency),
   ).optional(),
 });
 
-export const PackageJsonSchema = z.object({
-  devEngines: DevEngineSchema.optional(),
-  engines: LooseRecord(z.string()).optional(),
-  dependencies: LooseRecord(z.string()).optional(),
-  devDependencies: LooseRecord(z.string()).optional(),
-  peerDependencies: LooseRecord(z.string()).optional(),
-  packageManager: PackageManagerSchema.optional(),
-  volta: LooseRecord(z.string()).optional(),
-});
+export const PackageJson = Json.pipe(
+  z.object({
+    devEngines: DevEngine.optional(),
+    engines: LooseRecord(z.string()).optional(),
+    dependencies: LooseRecord(z.string()).optional(),
+    devDependencies: LooseRecord(z.string()).optional(),
+    peerDependencies: LooseRecord(z.string()).optional(),
+    packageManager: PackageManager.optional(),
+    volta: LooseRecord(z.string()).optional(),
+  }),
+);
 
-export type PackageJsonSchema = z.infer<typeof PackageJsonSchema>;
+export type PackageJson = z.infer<typeof PackageJson>;
 
-export const PackageJson = Json.pipe(PackageJsonSchema);
-
-export const PackageLockV3Schema = z.object({
+export const PackageLockV3 = z.object({
   lockfileVersion: z.literal(3),
   packages: LooseRecord(
     z
@@ -53,7 +69,7 @@ export const PackageLockV3Schema = z.object({
   ),
 });
 
-export const PackageLockPreV3Schema = z
+export const PackageLockPreV3 = z
   .object({
     lockfileVersion: z.union([z.literal(2), z.literal(1)]),
     dependencies: LooseRecord(z.object({ version: z.string() })),
@@ -64,7 +80,7 @@ export const PackageLockPreV3Schema = z
   }));
 
 export const PackageLock = Json.pipe(
-  z.union([PackageLockV3Schema, PackageLockPreV3Schema]),
+  z.union([PackageLockV3, PackageLockPreV3]),
 ).transform(({ packages, lockfileVersion }) => {
   const lockedVersions: Record<string, string> = {};
   for (const [entry, val] of Object.entries(packages)) {

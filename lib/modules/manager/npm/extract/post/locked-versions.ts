@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
-import { dirname, relative } from 'upath';
+import upath from 'upath';
 import { logger } from '../../../../../logger';
 import type { PackageFile } from '../../../types';
 import type { NpmManagerData } from '../../types';
@@ -56,7 +56,7 @@ export async function getLockedVersions(
       if (!lockFileCache[npmLock]) {
         logger.trace('Retrieving/parsing ' + npmLock);
         const cache = await getNpmLock(npmLock);
-        // istanbul ignore if
+        /* v8 ignore next 4 -- needs test */
         if (!cache) {
           logger.warn({ npmLock }, 'Npm: unable to get lockfile');
           return;
@@ -104,10 +104,19 @@ export async function getLockedVersions(
         packageFile.extractedConstraints.npm = npm;
       }
 
+      const packageDir = upath.dirname(packageFile.packageFile);
+      const npmRootDir = upath.dirname(npmLock);
+      const relativeDir = upath.relative(npmRootDir, packageDir);
+
       for (const dep of packageFile.deps) {
         // TODO: types (#22198)
+        let lockedDepName = dep.depName!;
+        if (relativeDir && relativeDir !== '.') {
+          lockedDepName = `${relativeDir}/node_modules/${dep.depName}`;
+        }
+
         dep.lockedVersion = semver.valid(
-          lockFileCache[npmLock].lockedVersions?.[dep.depName!],
+          lockFileCache[npmLock].lockedVersions?.[lockedDepName],
         )!;
       }
     } else if (pnpmShrinkwrap) {
@@ -118,9 +127,9 @@ export async function getLockedVersions(
         lockFileCache[pnpmShrinkwrap] = await getPnpmLock(pnpmShrinkwrap);
       }
 
-      const packageDir = dirname(packageFile.packageFile);
-      const pnpmRootDir = dirname(pnpmShrinkwrap);
-      const relativeDir = relative(pnpmRootDir, packageDir) || '.';
+      const packageDir = upath.dirname(packageFile.packageFile);
+      const pnpmRootDir = upath.dirname(pnpmShrinkwrap);
+      const relativeDir = upath.relative(pnpmRootDir, packageDir) || '.';
 
       for (const dep of packageFile.deps) {
         const { depName, depType } = dep;

@@ -1027,18 +1027,28 @@ export async function getBranchLastCommitTime(
   }
 }
 
-export async function getBranchFiles(
-  branchName: string,
+export function getBranchFiles(branchName: string): Promise<string[] | null> {
+  return getBranchFilesFromRef(`origin/${branchName}`);
+}
+
+export function getBranchFilesFromCommit(
+  referenceCommit: LongCommitSha,
+): Promise<string[] | null> {
+  return getBranchFilesFromRef(referenceCommit);
+}
+
+async function getBranchFilesFromRef(
+  refName: string,
 ): Promise<string[] | null> {
   await syncGit();
   try {
     const diff = await gitRetry(() =>
-      git.diffSummary([`origin/${branchName}`, `origin/${branchName}^`]),
+      git.diffSummary([refName, `${refName}^`]),
     );
     return diff.files.map((file) => file.file);
     /* v8 ignore next 8 -- TODO: add test */
   } catch (err) {
-    logger.warn({ err }, 'getBranchFiles error');
+    logger.warn({ err }, 'getBranchFilesFromRef error');
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;

@@ -9,7 +9,7 @@ export const urls = [];
 export const supportsRanges = false;
 
 const pattern = regEx(
-  /^(?<major>\d+)(?:\.(?<minor>\d+))?(?:\.(?<patch>\d+))?(?:-(?<releaseMajor>\d+)(?:\.(?<releaseMinor>\d+))?)?$/,
+  /^v?(?<major>\d+)(?:\.(?<minor>\d+))?(?:\.(?<patch>\d+))?(?:-(?<releaseMajor>\d+)(?:\.(?<releaseMinor>\d+))?)?$/,
 );
 
 class RedhatVersioningApi extends GenericVersioningApi {
@@ -21,15 +21,11 @@ class RedhatVersioningApi extends GenericVersioningApi {
 
     const { major, minor, patch, releaseMajor, releaseMinor } = matches;
     const release = [
-      Number.parseInt(major, 10),
-      typeof minor === 'undefined' ? 0 : Number.parseInt(minor, 10),
-      typeof patch === 'undefined' ? 0 : Number.parseInt(patch, 10),
-      typeof releaseMajor === 'undefined'
-        ? 0
-        : Number.parseInt(releaseMajor, 10),
-      typeof releaseMinor === 'undefined'
-        ? 0
-        : Number.parseInt(releaseMinor, 10),
+      Number.parseInt(major),
+      typeof minor === 'undefined' ? 0 : Number.parseInt(minor),
+      typeof patch === 'undefined' ? 0 : Number.parseInt(patch),
+      typeof releaseMajor === 'undefined' ? 0 : Number.parseInt(releaseMajor),
+      typeof releaseMinor === 'undefined' ? 0 : Number.parseInt(releaseMinor),
     ];
 
     return { release, prerelease: '' };
