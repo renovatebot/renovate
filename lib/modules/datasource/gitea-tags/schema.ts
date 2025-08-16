@@ -1,19 +1,19 @@
 import { z } from 'zod';
 import { MaybeTimestamp } from '../../../util/timestamp';
 
-export const CommitSchema = z.object({
+export const Commit = z.object({
   sha: z.string(),
 });
 
-export const CommitsSchema = z.array(CommitSchema);
+export const Commits = z.array(Commit);
 
-const TagCommitSchema = z.object({
+const TagCommit = z.object({
   sha: z.string(),
   created: MaybeTimestamp,
 });
 
-export const TagSchema = z.object({
+export const Tag = z.object({
   name: z.string(),
-  commit: TagCommitSchema,
+  commit: TagCommit,
 });
-export const TagsSchema = z.array(TagSchema);
+export const Tags = z.array(Tag);

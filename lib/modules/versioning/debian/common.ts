@@ -59,7 +59,7 @@ export class RollingReleasesData {
     for (let i = 0; i < 3; i++) {
       const di = this.distroInfo.getNLatest(i);
 
-      // istanbul ignore if: should never happen
+      // should never happen, just for type checking
       if (!di) {
         return;
       }

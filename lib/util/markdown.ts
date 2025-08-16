@@ -41,5 +41,7 @@ export async function linkify(
     .use({ settings: { bullet: '-' } })
     .use(github, { mentionStrong: false, ...options })
     .process(content);
-  return output.toString();
+  return output
+    .toString()
+    .replace(regEx(/-\/merge\\_requests\/(\d+)/g), '-/merge_requests/$1');
 }

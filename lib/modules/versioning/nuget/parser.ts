@@ -26,19 +26,19 @@ export function parseVersion(input: string): NugetVersion | null {
 
   const res: NugetVersion = {
     type: 'nuget-version',
-    major: Number.parseInt(major, 10),
+    major: Number.parseInt(major),
   };
 
   if (minor) {
-    res.minor = Number.parseInt(minor, 10);
+    res.minor = Number.parseInt(minor);
   }
 
   if (patch) {
-    res.patch = Number.parseInt(patch, 10);
+    res.patch = Number.parseInt(patch);
   }
 
   if (revision) {
-    res.revision = Number.parseInt(revision, 10);
+    res.revision = Number.parseInt(revision);
   }
 
   if (prerelease) {
@@ -58,7 +58,7 @@ const floatingRangeRegex = regEx(
 
 function parseFloatingComponent(input: string): number {
   const [int] = input.split('*');
-  return int ? 10 * Number.parseInt(int, 10) : 0;
+  return int ? 10 * Number.parseInt(int) : 0;
 }
 
 export function parseFloatingRange(input: string): NugetFloatingRange | null {
@@ -96,7 +96,7 @@ export function parseFloatingRange(input: string): NugetFloatingRange | null {
     };
   }
 
-  const majorNum = Number.parseInt(major, 10);
+  const majorNum = Number.parseInt(major);
   if (!Number.isNaN(majorNum)) {
     res = { ...res, major: majorNum };
   }
@@ -109,7 +109,7 @@ export function parseFloatingRange(input: string): NugetFloatingRange | null {
     };
   }
 
-  const minorNum = Number.parseInt(minor, 10);
+  const minorNum = Number.parseInt(minor);
   if (!Number.isNaN(minorNum)) {
     res = { ...res, minor: minorNum };
   }
@@ -122,9 +122,9 @@ export function parseFloatingRange(input: string): NugetFloatingRange | null {
     };
   }
 
-  const patchNum = Number.parseInt(patch, 10);
+  const patchNum = Number.parseInt(patch);
   if (!Number.isNaN(patchNum)) {
-    res = { ...res, patch: Number.parseInt(patch, 10) };
+    res = { ...res, patch: patchNum };
   }
 
   if (floating_revision) {
@@ -135,9 +135,9 @@ export function parseFloatingRange(input: string): NugetFloatingRange | null {
     };
   }
 
-  const revisionNum = Number.parseInt(revision, 10);
+  const revisionNum = Number.parseInt(revision);
   if (!Number.isNaN(revisionNum)) {
-    res = { ...res, revision: Number.parseInt(revision, 10) };
+    res = { ...res, revision: revisionNum };
   }
 
   if (res.prerelease) {

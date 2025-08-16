@@ -10,6 +10,7 @@ import {
   GITLAB_API_USING_HOST_TYPES,
 } from '../constants';
 import { logger } from '../logger';
+import type { Nullish } from '../types';
 import * as hostRules from './host-rules';
 import { parseUrl } from './url';
 
@@ -91,7 +92,10 @@ export function noLeadingAtSymbol(input: string): string {
   return input.startsWith('@') ? input.slice(1) : input;
 }
 
-export function parseJson(content: string | null, filename: string): JsonValue {
+export function parseJson(
+  content: Nullish<string>,
+  filename: string,
+): JsonValue {
   if (!content) {
     return null;
   }

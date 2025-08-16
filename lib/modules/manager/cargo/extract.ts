@@ -10,11 +10,7 @@ import type {
   PackageFileContent,
 } from '../types';
 import { extractLockFileVersions } from './locked-version';
-import {
-  type CargoConfig,
-  CargoConfigSchema,
-  CargoManifestSchema,
-} from './schema';
+import { CargoConfig, CargoManifest } from './schema';
 import type {
   CargoManagerData,
   CargoRegistries,
@@ -86,7 +82,7 @@ async function readCargoConfig(): Promise<CargoConfig | null> {
     const path = `.cargo/${configName}`;
     const payload = await readLocalFile(path, 'utf8');
     if (payload) {
-      const parsedCargoConfig = CargoConfigSchema.safeParse(payload);
+      const parsedCargoConfig = CargoConfig.safeParse(payload);
       if (parsedCargoConfig.success) {
         return parsedCargoConfig.data;
       } else {
@@ -177,7 +173,7 @@ export async function extractPackageFile(
   const cargoConfig = (await readCargoConfig()) ?? {};
   const cargoRegistries = extractCargoRegistries(cargoConfig);
 
-  const parsedCargoManifest = CargoManifestSchema.safeParse(content);
+  const parsedCargoManifest = CargoManifest.safeParse(content);
   if (!parsedCargoManifest.success) {
     logger.debug(
       { err: parsedCargoManifest.error, packageFile },

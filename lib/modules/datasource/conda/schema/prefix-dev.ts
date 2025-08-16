@@ -15,7 +15,7 @@ export const File = z.object({
 
 export type File = z.infer<typeof File>;
 
-export const PagedResponseSchema = z.object({
+export const PagedResponse = z.object({
   data: z.object({
     package: z
       .object({

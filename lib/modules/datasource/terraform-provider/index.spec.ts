@@ -1,4 +1,5 @@
 import { getPkgReleases } from '..';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { TerraformProviderDatasource } from '.';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
@@ -253,7 +254,7 @@ describe('modules/datasource/terraform-provider/index', () => {
   });
 
   describe('getBuilds', () => {
-    it('returns null for empty result', async () => {
+    it('throws for empty result', async () => {
       httpMock
         .scope(primaryUrl)
         .get('/v1/providers/hashicorp/azurerm/versions')
@@ -261,12 +262,12 @@ describe('modules/datasource/terraform-provider/index', () => {
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
 
-      const result = await terraformProviderDatasource.getBuilds(
+      const result = terraformProviderDatasource.getBuilds(
         terraformProviderDatasource.defaultRegistryUrls[0],
         'hashicorp/azurerm',
         '2.50.0',
       );
-      expect(result).toBeNull();
+      await expect(result).rejects.toThrow(ExternalHostError);
     });
 
     it('returns null for non hashicorp dependency and releases.hashicorp.com registryUrl', async () => {
@@ -278,19 +279,72 @@ describe('modules/datasource/terraform-provider/index', () => {
       expect(result).toBeNull();
     });
 
-    it('returns null if a version is requested which is not available', async () => {
+    it('works for hashicorp dependency and releases.hashicorp.com', async () => {
+      httpMock
+        .scope(secondaryUrl)
+        .get('/terraform-provider-azurerm/2.50.0/index.json')
+        .reply(200, { builds: [] });
+      const result = await terraformProviderDatasource.getBuilds(
+        secondaryUrl,
+        'hashicorp/azurerm',
+        '2.50.0',
+      );
+      expect(result).toBeEmptyArray();
+    });
+
+    it('throws for hashicorp dependency and releases.hashicorp.com 500', async () => {
+      httpMock
+        .scope(secondaryUrl)
+        .get('/terraform-provider-azurerm/2.50.0/index.json')
+        .reply(500);
+      const result = terraformProviderDatasource.getBuilds(
+        secondaryUrl,
+        'hashicorp/azurerm',
+        '2.50.0',
+      );
+      await expect(result).rejects.toThrow(ExternalHostError);
+    });
+
+    it('rethrows external-host-error for hashicorp dependency and releases.hashicorp.com', async () => {
+      vi.spyOn(
+        terraformProviderDatasource,
+        'getReleaseBackendIndex',
+      ).mockRejectedValue(new ExternalHostError(new Error('Test error')));
+      const result = terraformProviderDatasource.getBuilds(
+        secondaryUrl,
+        'hashicorp/azurerm',
+        '2.50.0',
+      );
+      await expect(result).rejects.toThrow(ExternalHostError);
+    });
+
+    it('throws if service discovery error', async () => {
+      vi.spyOn(
+        terraformProviderDatasource,
+        'getTerraformServiceDiscoveryResult',
+        // @ts-expect-error - should never happen
+      ).mockResolvedValueOnce(null);
+      const result = terraformProviderDatasource.getBuilds(
+        primaryUrl,
+        'hashicorp/azurerm',
+        '2.50.0',
+      );
+      await expect(result).rejects.toThrow(ExternalHostError);
+    });
+
+    it('throws if a version is requested which is not available', async () => {
       httpMock
         .scope(primaryUrl)
         .get('/v1/providers/Telmate/proxmox/versions')
         .reply(200, telmateProxmoxVersions)
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
-      const result = await terraformProviderDatasource.getBuilds(
+      const result = terraformProviderDatasource.getBuilds(
         terraformProviderDatasource.defaultRegistryUrls[0],
         'Telmate/proxmox',
         '2.8.0',
       );
-      expect(result).toBeNull();
+      await expect(result).rejects.toThrow(ExternalHostError);
     });
 
     it('processes real data', async () => {
@@ -373,7 +427,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       ]);
     });
 
-    it('return null if the retrieval of a single build fails', async () => {
+    it('throws if the retrieval of a single build fails', async () => {
       httpMock
         .scope(primaryUrl)
         .get('/v1/providers/Telmate/proxmox/versions')
@@ -403,12 +457,12 @@ describe('modules/datasource/terraform-provider/index', () => {
         })
         .get('/v1/providers/Telmate/proxmox/2.6.1/download/windows/amd64')
         .reply(404);
-      const res = await terraformProviderDatasource.getBuilds(
+      const res = terraformProviderDatasource.getBuilds(
         terraformProviderDatasource.defaultRegistryUrls[0],
         'Telmate/proxmox',
         '2.6.1',
       );
-      expect(res).toBeNull();
+      await expect(res).rejects.toThrow(ExternalHostError);
     });
   });
 

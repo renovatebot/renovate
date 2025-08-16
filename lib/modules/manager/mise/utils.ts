@@ -1,12 +1,11 @@
 import { logger } from '../../../logger';
-import type { MiseFileSchema } from './schema';
-import { MiseFileSchemaToml } from './schema';
+import { MiseFile } from './schema';
 
 export function parseTomlFile(
   content: string,
   packageFile: string,
-): MiseFileSchema | null {
-  const res = MiseFileSchemaToml.safeParse(content);
+): MiseFile | null {
+  const res = MiseFile.safeParse(content);
   if (res.success) {
     return res.data;
   } else {

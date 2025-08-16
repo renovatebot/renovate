@@ -283,6 +283,23 @@ describe('workers/repository/dependency-dashboard', () => {
         dependencyDashboardRebaseAllOpen: false,
       });
     });
+
+    it('reads dashboard body and group size not met branches', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: `
+        - [x] <!-- approveGroup-branch=groupedBranch1 -->
+        - [ ] <!-- approveGroup-branch=groupedBranch2 -->
+        `,
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf.dependencyDashboardChecks).toMatchObject({
+        groupedBranch1: 'approveGroup',
+      });
+    });
   });
 
   describe('ensureDependencyDashboard()', () => {
@@ -679,6 +696,47 @@ describe('workers/repository/dependency-dashboard', () => {
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         Fixtures.get('dependency-dashboard-with-2-PR-closed-ignored.txt'),
+      );
+
+      // same with dry run
+      await dryRun(branches, platform, 0, 1);
+    });
+
+    it('checks an issue with group size not met branches', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
+          result: 'minimum-group-size-not-met',
+          branchName: 'groupBranch1',
+        },
+      ];
+      config.dependencyDashboard = true;
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        {},
+        { result: 'no-migration' },
+      );
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
+        config.dependencyDashboardTitle,
+      );
+      expect(platform.ensureIssue.mock.calls[0][0].body.trim()).toBe(
+        codeBlock`
+This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+## Group Size Not Met
+
+The following branches have not met their minimum group size. To create them, click on a checkbox below.
+
+ - [ ] <!-- approveGroup-branch=groupBranch1 -->undefined
+
+## Detected dependencies
+
+None detected
+`,
       );
 
       // same with dry run

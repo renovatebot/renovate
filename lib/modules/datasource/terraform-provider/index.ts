@@ -1,5 +1,4 @@
 // TODO: types (#22198)
-import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
@@ -218,7 +217,6 @@ export class TerraformProviderDatasource extends TerraformDatasource {
           version,
         );
       } catch (err) {
-        /* istanbul ignore next */
         if (err instanceof ExternalHostError) {
           throw err;
         }
@@ -226,7 +224,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
           { err, backendLookUpName, version },
           `Failed to retrieve builds for ${backendLookUpName} ${version}`,
         );
-        return null;
+        // throw an error to disable caching
+        throw new ExternalHostError(err);
       }
       return versionReleaseBackend.builds;
     }
@@ -235,8 +234,10 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     const serviceDiscovery =
       await this.getTerraformServiceDiscoveryResult(registryURL);
     if (!serviceDiscovery) {
-      logger.trace(`Failed to retrieve service discovery from ${registryURL}`);
-      return null;
+      // throw an error to disable caching
+      throw new ExternalHostError(
+        new Error(`Service discovery not found for ${registryURL}`),
+      );
     }
     const backendURL = createSDBackendURL(
       registryURL,
@@ -250,17 +251,22 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       )
     ).body;
     if (!versionsResponse.versions) {
-      logger.trace(`Failed to retrieve version list for ${backendURL}`);
-      return null;
+      // throw an error to disable caching
+      throw new ExternalHostError(
+        new Error(`Failed to retrieve version list for ${backendURL}`),
+      );
     }
     const builds = versionsResponse.versions.find(
       (value) => value.version === version,
     );
     if (!builds) {
-      logger.trace(
-        `No builds found for ${repository}:${version} on ${registryURL}`,
+      // should never happen, but just in case
+      // throw an error to disable caching
+      throw new ExternalHostError(
+        new Error(
+          `No builds found for ${repository}:${version} on ${registryURL}`,
+        ),
       );
-      return null;
     }
     const result = await p.map(
       builds.platforms,
@@ -280,19 +286,19 @@ export class TerraformProviderDatasource extends TerraformDatasource {
           };
           return newBuild;
         } catch (err) {
-          /* istanbul ignore next */
+          /* v8 ignore next 3 -- hard to test */
           if (err instanceof ExternalHostError) {
             throw err;
           }
           logger.debug({ err, url: buildURL }, 'Failed to retrieve build');
-          return null;
+          // throw an error to disable caching
+          throw new ExternalHostError(err);
         }
       },
       { concurrency: 4 },
     );
 
-    const filteredResult = result.filter(is.truthy);
-    return filteredResult.length === result.length ? filteredResult : null;
+    return result;
   }
 
   @cache({
@@ -305,7 +311,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     try {
       rawHashData = (await this.http.getText(zipHashUrl)).body;
     } catch (err) {
-      /* istanbul ignore next */
+      /* v8 ignore next 3 -- hard to test */
       if (err instanceof ExternalHostError) {
         throw err;
       }

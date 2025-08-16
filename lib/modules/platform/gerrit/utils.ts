@@ -141,7 +141,7 @@ export function mapBranchStatusToLabel(
   state: BranchStatus | 'UNKNOWN', // suppress default path code removal
   label: GerritLabelTypeInfo,
 ): number {
-  const numbers = Object.keys(label.values).map((x) => parseInt(x, 10));
+  const numbers = Object.keys(label.values).map((x) => parseInt(x));
   switch (state) {
     case 'green':
       return Math.max(...numbers);

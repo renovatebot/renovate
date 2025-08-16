@@ -2,7 +2,7 @@ import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import type { ExtractConfig, PackageFile } from '../types';
-import { BatectConfigSchema } from './schema';
+import { BatectConfig } from './schema';
 import type { ExtractionResult } from './types';
 
 export function extractPackageFile(
@@ -13,7 +13,7 @@ export function extractPackageFile(
 
   try {
     const { imageDependencies, bundleDependencies, fileIncludes } =
-      BatectConfigSchema.parse(content);
+      BatectConfig.parse(content);
     const deps = [...imageDependencies, ...bundleDependencies];
 
     const dirName = upath.dirname(packageFile);
