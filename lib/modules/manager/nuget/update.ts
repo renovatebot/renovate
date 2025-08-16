@@ -44,7 +44,7 @@ export function bumpPackageVersion(
       return { bumpedContent };
     }
 
-    const startTagPosition = versionNode.startTagPosition;
+    const startTagPosition = versionNode.startTagPosition!; // TODO: should not be null
     const versionPosition = content.indexOf(
       currentProjVersion,
       startTagPosition,

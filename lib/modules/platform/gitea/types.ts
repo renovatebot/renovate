@@ -1,4 +1,5 @@
 import type { LongCommitSha } from '../../../util/git/types';
+import type { EmailAddress } from '../../../util/schema-utils';
 import type { Pr, RepoSortMethod, SortMethod } from '../types';
 
 export interface PrReviewersParams {
@@ -67,7 +68,7 @@ export interface Issue {
 
 export interface User {
   id: number;
-  email: string;
+  email: EmailAddress;
   full_name?: string;
   username: string;
 }
@@ -81,7 +82,7 @@ export interface Repo {
   allow_squash_merge: boolean;
   archived: boolean;
   clone_url?: string;
-  default_merge_style: string;
+  default_merge_style: PRMergeMethod;
   external_tracker?: unknown;
   has_issues: boolean;
   has_pull_requests: boolean;
@@ -136,7 +137,7 @@ export interface Commit {
 
 export interface CommitUser {
   name: string;
-  email: string;
+  email: EmailAddress;
   username: string;
 }
 

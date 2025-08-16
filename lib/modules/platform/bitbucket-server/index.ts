@@ -1,4 +1,5 @@
 import { setTimeout } from 'timers/promises';
+import ignore from 'ignore';
 import semver from 'semver';
 import type { PartialDeep } from 'type-fest';
 import {
@@ -22,7 +23,9 @@ import {
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { sampleSize } from '../../../util/sample';
 import { sanitize } from '../../../util/sanitize';
+import { isEmailAdress } from '../../../util/schema-utils';
 import { ensureTrailingSlash, getQueryString } from '../../../util/url';
 import type {
   BranchStatusConfig,
@@ -31,6 +34,7 @@ import type {
   EnsureCommentRemovalConfig,
   EnsureIssueConfig,
   EnsureIssueResult,
+  FileOwnerRule,
   FindPRConfig,
   Issue,
   MergePRConfig,
@@ -49,7 +53,7 @@ import type {
   PullRequestActivity,
   PullRequestCommentActivity,
 } from './schema';
-import { UserSchema } from './schema';
+import { ReviewerGroups, User, Users } from './schema';
 import type {
   BbsConfig,
   BbsPr,
@@ -59,7 +63,7 @@ import type {
   BbsRestUserRef,
 } from './types';
 import * as utils from './utils';
-import { getExtraCloneOpts } from './utils';
+import { getExtraCloneOpts, parseModifier, splitEscapedSpaces } from './utils';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -162,11 +166,11 @@ export async function initPlatform({
         await bitbucketServerHttp.getJson(
           `./rest/api/1.0/users/${username}`,
           options,
-          UserSchema,
+          User,
         )
       ).body;
 
-      if (!emailAddress.length) {
+      if (!emailAddress?.length) {
         throw new Error(`No email address configured for username ${username}`);
       }
 
@@ -332,6 +336,7 @@ export async function getBranchForceRebase(
     res.body?.mergeConfig?.defaultStrategy?.id.includes('ff-only'),
   );
 }
+
 // Gets details for a PR
 export async function getPr(
   prNo: number,
@@ -686,9 +691,62 @@ export async function addReviewers(
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prNo}`);
 
-  await retry(updatePRAndAddReviewers, [prNo, reviewers], 3, [
+  const reviewerSlugs = new Set<string>();
+
+  for (const entry of reviewers) {
+    // If entry is an email-address, resolve userslugs
+    if (isEmailAdress(entry)) {
+      const slugs = await getUserSlugsByEmail(entry);
+      for (const slug of slugs) {
+        reviewerSlugs.add(slug);
+      }
+    } else {
+      reviewerSlugs.add(entry);
+    }
+  }
+
+  await retry(updatePRAndAddReviewers, [prNo, Array.from(reviewerSlugs)], 3, [
     REPOSITORY_CHANGED,
   ]);
+}
+
+/**
+ * Resolves Bitbucket users by email address,
+ * restricted to users who have REPO_READ permission on the target repository.
+ *
+ * @param emailAddress - A string that could be the user's email-address.
+ * @returns List of user slugs for active, matched users.
+ */
+export async function getUserSlugsByEmail(
+  emailAddress: string,
+): Promise<string[]> {
+  try {
+    const filterUrl =
+      `./rest/api/1.0/users?filter=${emailAddress}` +
+      `&permission.1=REPO_READ` +
+      `&permission.1.projectKey=${config.projectKey}` +
+      `&permission.1.repositorySlug=${config.repositorySlug}`;
+
+    const users = await bitbucketServerHttp.getJson(
+      filterUrl,
+      { paginate: true, limit: 100 },
+      Users,
+    );
+
+    if (users.body.length) {
+      return users.body
+        .filter((u) => u.active && u.emailAddress === emailAddress)
+        .map((u) => u.slug);
+    }
+  } catch (err) {
+    logger.warn(
+      { err, emailAddress },
+      `Failed to resolve email address to user slug`,
+    );
+    throw err;
+  }
+  logger.debug({ userinfo: emailAddress }, 'No users found for email-address');
+  return [];
 }
 
 async function updatePRAndAddReviewers(
@@ -721,14 +779,20 @@ async function updatePRAndAddReviewers(
     logger.warn({ err, reviewers, prNo }, `Failed to add reviewers`);
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
-    } else if (
-      err.statusCode === 409 &&
-      !utils.isInvalidReviewersResponse(err)
-    ) {
-      logger.debug(
-        '409 response to adding reviewers - has repository changed?',
-      );
-      throw new Error(REPOSITORY_CHANGED);
+    } else if (err.statusCode === 409) {
+      if (utils.isInvalidReviewersResponse(err)) {
+        // Retry again with invalid reviewers being removed
+        const invalidReviewers = utils.getInvalidReviewers(err);
+        const filteredReviewers = reviewers.filter(
+          (name) => !invalidReviewers.includes(name),
+        );
+        await updatePRAndAddReviewers(prNo, filteredReviewers);
+      } else {
+        logger.debug(
+          '409 response to adding reviewers - has repository changed?',
+        );
+        throw new Error(REPOSITORY_CHANGED);
+      }
     } else {
       throw err;
     }
@@ -1152,6 +1216,115 @@ export async function mergePr({
 
   logger.debug(`PR merged, PrNo:${prNo}`);
   return true;
+}
+
+export async function expandGroupMembers(
+  reviewers: string[],
+): Promise<string[]> {
+  logger.debug(`expandGroupMembers(${reviewers.join(', ')})`);
+  const expandedUsers: string[] = [];
+  const reviewerGroupPrefix = '@reviewer-group/';
+
+  for (const reviewer of reviewers) {
+    const [baseEntry, modifier] = reviewer.split(':');
+
+    if (baseEntry.startsWith(reviewerGroupPrefix)) {
+      const groupName = baseEntry.replace(reviewerGroupPrefix, '');
+      const groupUsers = await getUsersFromReviewerGroup(groupName);
+      if (!groupUsers.length) {
+        continue;
+      }
+
+      if (modifier) {
+        const randomCount = parseModifier(modifier);
+        if (randomCount) {
+          expandedUsers.push(...sampleSize(groupUsers, randomCount));
+          continue;
+        }
+      }
+
+      expandedUsers.push(...groupUsers);
+    } else {
+      expandedUsers.push(baseEntry); // Add the user entry
+    }
+  }
+
+  return [...new Set(expandedUsers)];
+}
+
+export function extractRulesFromCodeOwnersLines(
+  cleanedLines: string[],
+): FileOwnerRule[] {
+  const results: FileOwnerRule[] = [];
+
+  const reversedLines = cleanedLines
+    .filter((line) => line.trim() !== '' && !line.trim().startsWith('#'))
+    .reverse();
+
+  for (const line of reversedLines) {
+    const [pattern, ...entries] = splitEscapedSpaces(line);
+    const matcher = ignore().add(pattern);
+    results.push({
+      pattern,
+      usernames: [...new Set(entries)],
+      score: pattern.length,
+      match: (path: string) => matcher.ignores(path),
+    });
+  }
+
+  return results;
+}
+
+// Gets active users by name, from a reviewer group
+// Returns an empty array if the group is not found or has no active users
+// As there is no direct API to get group by name, we get all reviewer groups per repo and filter them
+// This is not efficient, but it is the only way to get users from a group by name
+// Supports both repository-scoped and project-scoped groups following the BitBucket server logic described here:
+// https://confluence.atlassian.com/bitbucketserver/code-owners-1296171116.html#Codeowners-Whatifaprojectandrepositorycontainareviewergroupwiththesamename?
+async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
+  const allGroups = [];
+
+  try {
+    const reviewerGroups = await bitbucketServerHttp.getJson(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/settings/reviewer-groups`,
+      { paginate: true },
+      ReviewerGroups,
+    );
+
+    allGroups.push(...reviewerGroups.body);
+  } catch (err) {
+    logger.debug({ err, groupName }, 'Failed to get reviewer groups for repo');
+    return [];
+  }
+
+  // First, try to find a repo-scoped group with this name
+  const repoGroup = allGroups.find(
+    (group) => group.name === groupName && group.scope?.type === 'REPOSITORY',
+  );
+
+  if (repoGroup) {
+    return repoGroup.users
+      .filter((user) => user.active)
+      .map((user) => user.slug);
+  }
+
+  // If no repo-level group, fall back to project-level group
+  const projectGroup = allGroups.find(
+    (group) => group.name === groupName && group.scope?.type === 'PROJECT',
+  );
+
+  if (projectGroup) {
+    return projectGroup.users
+      .filter((user) => user.active)
+      .map((user) => user.slug);
+  }
+
+  // Group not found at either level
+  logger.warn(
+    { groupName },
+    'Reviewer group not found at repo or project level',
+  );
+  return [];
 }
 
 export function massageMarkdown(input: string): string {

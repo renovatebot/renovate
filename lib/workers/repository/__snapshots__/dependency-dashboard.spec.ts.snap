@@ -18,23 +18,6 @@ This repository currently has no open or pending branches.
 
 ## Detected dependencies
 
-<details><summary>Branch main</summary>
-<blockquote>
-
-<details><summary>npm</summary>
-<blockquote>
-
-<details><summary>package.json</summary>
-
-
-</details>
-
-</blockquote>
-</details>
-
-</blockquote>
-</details>
-
 <details><summary>Branch dev</summary>
 <blockquote>
 
@@ -75,6 +58,23 @@ This repository currently has no open or pending branches.
 <details><summary>pyproject.toml</summary>
 
  - \`six <=1.3.0\`
+
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
+</details>
+
+<details><summary>Branch main</summary>
+<blockquote>
+
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>package.json</summary>
+
 
 </details>
 
@@ -94,7 +94,7 @@ This repository currently has no open or pending branches.
 
 ## Detected dependencies
 
-<details><summary>Branch main</summary>
+<details><summary>Branch dev</summary>
 <blockquote>
 
 <details><summary>dockerfile</summary>
@@ -143,7 +143,7 @@ This repository currently has no open or pending branches.
 </blockquote>
 </details>
 
-<details><summary>Branch dev</summary>
+<details><summary>Branch main</summary>
 <blockquote>
 
 <details><summary>dockerfile</summary>
@@ -202,14 +202,6 @@ This repository currently has no open or pending branches.
 
 ## Detected dependencies
 
-<details><summary>Branch main</summary>
-<blockquote>
-
-None detected
-
-</blockquote>
-</details>
-
 <details><summary>Branch dev</summary>
 <blockquote>
 
@@ -255,6 +247,14 @@ None detected
 
 </blockquote>
 </details>
+
+</blockquote>
+</details>
+
+<details><summary>Branch main</summary>
+<blockquote>
+
+None detected
 
 </blockquote>
 </details>
@@ -269,14 +269,6 @@ This repository currently has no open or pending branches.
 
 ## Detected dependencies
 
-<details><summary>Branch main</summary>
-<blockquote>
-
-None detected
-
-</blockquote>
-</details>
-
 <details><summary>Branch dev</summary>
 <blockquote>
 
@@ -322,6 +314,14 @@ None detected
 
 </blockquote>
 </details>
+
+</blockquote>
+</details>
+
+<details><summary>Branch main</summary>
+<blockquote>
+
+None detected
 
 </blockquote>
 </details>
@@ -416,9 +416,9 @@ This repository currently has no open or pending branches.
 <details><summary>dockerfile</summary>
 <blockquote>
 
-<details><summary>ver-and-digest/Dockerfile</summary>
+<details><summary>digest-only/Dockerfile</summary>
 
- - \`ubuntu 18.04@sha256:a7ed45c4a95fbe19f9c5fb9d1ca58b2431b2a4984754be2f50ccec99d9428b79\`
+ - \`ubuntu sha256:06b5d30fabc1fc574f2ecab87375692299d45f8f190d9b71f512deb494114e1f\`
 
 </details>
 
@@ -427,15 +427,15 @@ This repository currently has no open or pending branches.
 
 </details>
 
-<details><summary>ver-only/Dockerfile</summary>
+<details><summary>ver-and-digest/Dockerfile</summary>
 
- - \`ubuntu 20.04\`
+ - \`ubuntu 18.04@sha256:a7ed45c4a95fbe19f9c5fb9d1ca58b2431b2a4984754be2f50ccec99d9428b79\`
 
 </details>
 
-<details><summary>digest-only/Dockerfile</summary>
+<details><summary>ver-only/Dockerfile</summary>
 
- - \`ubuntu sha256:06b5d30fabc1fc574f2ecab87375692299d45f8f190d9b71f512deb494114e1f\`
+ - \`ubuntu 20.04\`
 
 </details>
 
@@ -460,7 +460,7 @@ Renovate tried to run on this repository, but found these problems.
 
 ## Pending Status Checks
 
-These updates await pending status checks. To force their creation now, click the checkbox below.
+The following updates await pending status checks. To force their creation now, click on a checkbox below.
 
  - [ ] <!-- approvePr-branch=branchName1 -->pr1
 
@@ -482,7 +482,7 @@ platform is github
 
 ## Pending Status Checks
 
-These updates await pending status checks. To force their creation now, click the checkbox below.
+The following updates await pending status checks. To force their creation now, click on a checkbox below.
 
  - [ ] <!-- approvePr-branch=branchName1 -->pr1
 
@@ -526,7 +526,7 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 
 ## Pending Approval
 
-These branches will be created by Renovate only once you click their checkbox below.
+The following branches are pending approval. To create them, click on a checkbox below.
 
  - [ ] <!-- approve-branch=branchName1 -->pr1
  - [ ] <!-- approve-branch=branchName2 -->pr2
@@ -534,7 +534,7 @@ These branches will be created by Renovate only once you click their checkbox be
 
 ## Awaiting Schedule
 
-These updates are awaiting their schedule. Click on a checkbox to get an update now.
+The following updates are awaiting their schedule. To get an update now, click on a checkbox below.
 
  - [x] <!-- unschedule-branch=branchName3 -->pr3
 

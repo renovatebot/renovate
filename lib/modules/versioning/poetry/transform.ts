@@ -51,7 +51,7 @@ export function poetry2semver(
   // trim leading zeros from valid numbers
   const releaseParts = matchGroups.release
     .split('.')
-    .map((segment) => parseInt(segment, 10));
+    .map((segment) => parseInt(segment));
   while (padRelease && releaseParts.length < 3) {
     releaseParts.push(0);
   }

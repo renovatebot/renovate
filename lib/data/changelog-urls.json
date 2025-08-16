@@ -6,7 +6,7 @@
     "flow-bin": "https://github.com/facebook/flow/blob/master/Changelog.md",
     "gatsby": "https://github.com/gatsbyjs/gatsby/blob/master/packages/gatsby/CHANGELOG.md",
     "react-native": "https://github.com/react-native-community/react-native-releases/blob/master/CHANGELOG.md",
-    "sharp": "https://github.com/lovell/sharp/blob/main/docs/changelog.md",
+    "sharp": "https://github.com/lovell/sharp/blob/main/docs/src/content/docs/changelog.md",
     "tailwindcss-classnames": "https://github.com/muhammadsammy/tailwindcss-classnames/blob/master/CHANGELOG.md",
     "zone.js": "https://github.com/angular/angular/blob/master/packages/zone.js/CHANGELOG.md"
   },

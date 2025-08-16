@@ -276,6 +276,10 @@ function containsPlaceholder(str: string): boolean {
   return regEx(/\${.*?}/g).test(str);
 }
 
+function removeKnownPlaceholders(str: string): string {
+  return str.replace(regEx(/\/tree\/\${[^}]+}/), '');
+}
+
 export function getMavenUrl(
   dependency: MavenDependency,
   repoUrl: string,
@@ -454,7 +458,10 @@ export async function getDependencyInfo(
       }
 
       const sourceUrl = pomContent.valueWithPath('scm.url');
-      if (sourceUrl && !containsPlaceholder(sourceUrl)) {
+      if (
+        sourceUrl &&
+        !containsPlaceholder(removeKnownPlaceholders(sourceUrl))
+      ) {
         result.sourceUrl = sourceUrl
           .replace(regEx(/^scm:/), '')
           .replace(regEx(/^git:/), '')
