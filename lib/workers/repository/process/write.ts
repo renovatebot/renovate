@@ -8,7 +8,11 @@ import type { BranchCache } from '../../../util/cache/repository/types';
 import { fingerprint } from '../../../util/fingerprint';
 import { setBranchNewCommit } from '../../../util/git/set-branch-commit';
 import { incCountValue, setCount } from '../../global/limits';
-import type { BranchConfig, UpgradeFingerprintConfig } from '../../types';
+import type {
+  BranchConfig,
+  CacheFingerprintMatchResult,
+  UpgradeFingerprintConfig,
+} from '../../types';
 import { processBranch } from '../update/branch';
 import { upgradeFingerprintFields } from './fingerprint-fields';
 import {
@@ -33,22 +37,22 @@ export function generateCommitFingerprintConfig(
   return res;
 }
 
-export function canSkipBranchUpdateCheck(
+export function compareCacheFingerprint(
   branchState: BranchCache,
   commitFingerprint: string,
-): boolean {
+): CacheFingerprintMatchResult {
   if (!branchState.commitFingerprint) {
     logger.trace('branch.isUpToDate(): no fingerprint');
-    return false;
+    return 'no-fingerprint';
   }
 
   if (commitFingerprint !== branchState.commitFingerprint) {
     logger.debug('branch.isUpToDate(): needs recalculation');
-    return false;
+    return 'no-match';
   }
 
   logger.debug('branch.isUpToDate(): using cached result "true"');
-  return true;
+  return 'matched';
 }
 
 export async function syncBranchState(
@@ -138,7 +142,7 @@ export async function writeUpdates(
   for (const branch of branches) {
     const { baseBranch, branchName } = branch;
     const meta: Record<string, string> = { branch: branchName };
-    if (config.baseBranches?.length && baseBranch) {
+    if (config.baseBranchPatterns?.length && baseBranch) {
       meta.baseBranch = baseBranch;
     }
     addMeta(meta);
@@ -156,7 +160,7 @@ export async function writeUpdates(
       commitFingerprintConfig: generateCommitFingerprintConfig(branch),
       managers,
     });
-    branch.skipBranchUpdate = canSkipBranchUpdateCheck(
+    branch.cacheFingerprintMatch = compareCacheFingerprint(
       branchState,
       commitFingerprint,
     );

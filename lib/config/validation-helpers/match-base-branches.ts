@@ -8,14 +8,14 @@ import type { CheckBaseBranchesArgs } from './types';
 export function check({
   resolvedRule,
   currentPath,
-  baseBranches,
+  baseBranchPatterns,
 }: CheckBaseBranchesArgs): ValidationMessage[] {
   const warnings: ValidationMessage[] = [];
   if (Array.isArray(resolvedRule.matchBaseBranches)) {
-    if (!is.nonEmptyArray(baseBranches)) {
+    if (!is.nonEmptyArray(baseBranchPatterns)) {
       warnings.push({
         topic: 'Configuration Error',
-        message: `${currentPath}: You must configure baseBranches inorder to use them inside matchBaseBranches.`,
+        message: `${currentPath}: You must configure baseBranchPatterns in order to use them inside matchBaseBranches.`,
       });
     }
   }

@@ -42,7 +42,7 @@ import type { HttpResponse } from '../../../util/http/types';
 import { coerceObject } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import { coerceString, fromBase64, looseEquals } from '../../../util/string';
+import { fromBase64, looseEquals } from '../../../util/string';
 import { ensureTrailingSlash } from '../../../util/url';
 import { incLimitedValue } from '../../../workers/global/limits';
 import type {
@@ -78,7 +78,7 @@ import {
 import { GithubIssueCache, GithubIssue as Issue } from './issue';
 import { massageMarkdownLinks } from './massage-markdown-links';
 import { getPrCache, updatePrCache } from './pr';
-import { VulnerabilityAlertSchema } from './schema';
+import { GithubVulnerabilityAlert } from './schema';
 import type {
   BranchProtection,
   CombinedBranchStatus,
@@ -99,7 +99,8 @@ export const id = 'github';
 let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;
 
-const GitHubMaxPrBodyLen = 60000;
+// GitHub's max is 60k but in the hosted app we've observed that content-length is ~1k longer
+const GitHubMaxPrBodyLen = 58000;
 
 export function resetConfigs(): void {
   config = {} as never;
@@ -510,7 +511,7 @@ export async function initRepo({
       variables: {
         owner: config.repositoryOwner,
         name: config.repositoryName,
-        user: renovateUsername,
+        ...(!ignorePrAuthor && { user: renovateUsername }),
       },
       readOnly: true,
     });
@@ -680,31 +681,6 @@ export async function initRepo({
           logger.warn({ err }, 'Could not set default branch');
         } /* v8 ignore stop */
       }
-      // This is a lovely "hack" by GitHub that lets us force update our fork's default branch
-      // with the base commit from the parent repository
-      const url = `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`;
-      const sha = repo.defaultBranchRef.target.oid;
-      try {
-        logger.debug(
-          `Updating forked repository default sha ${sha} to match upstream`,
-        );
-        await githubApi.patchJson(url, {
-          body: {
-            sha,
-            force: true,
-          },
-          token: coerceString(forkToken, opts.token),
-        });
-      } catch (err) /* v8 ignore start */ {
-        logger.warn(
-          { url, sha, err: err.err ?? err },
-          'Error updating fork from upstream - cannot continue',
-        );
-        if (err instanceof ExternalHostError) {
-          throw err;
-        }
-        throw new ExternalHostError(err);
-      } /* v8 ignore stop */
     } else if (forkCreation) {
       logger.debug('Forked repo is not found - attempting to create it');
       forkedRepo = await createFork(forkToken, repository, forkOrg);
@@ -733,9 +709,15 @@ export async function initRepo({
   );
   parsedEndpoint.pathname = `${config.repository}.git`;
   const url = URL.format(parsedEndpoint);
+  let upstreamUrl = undefined;
+  if (forkCreation && config.parentRepo) {
+    parsedEndpoint.pathname = config.parentRepo + '.git';
+    upstreamUrl = URL.format(parsedEndpoint);
+  }
   await git.initRepo({
     ...config,
     url,
+    upstreamUrl,
   });
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
@@ -835,10 +817,12 @@ function matchesState(state: string, desiredState: string): boolean {
 export async function getPrList(): Promise<GhPr[]> {
   if (!config.prList) {
     const repo = config.parentRepo ?? config.repository;
-    const username =
-      !config.forkToken && !config.ignorePrAuthor && config.renovateUsername
-        ? config.renovateUsername
-        : null;
+
+    let username = config.renovateUsername;
+    if (config.forkToken || config.ignorePrAuthor) {
+      username = undefined;
+    }
+
     // TODO: check null `repo` (#22198)
     const prCache = await getPrCache(githubApi, repo!, username);
     config.prList = Object.values(prCache).sort(
@@ -1966,10 +1950,10 @@ export function massageMarkdown(input: string): string {
       regEx(/]: https:\/\/github\.com\//g),
       ']: https://redirect.github.com/',
     )
-    .replace('> ℹ **Note**\n> \n', '> [!NOTE]\n')
-    .replace('> ⚠ **Warning**\n> \n', '> [!WARNING]\n')
-    .replace('> ⚠️ **Warning**\n> \n', '> [!WARNING]\n')
-    .replace('> ❗ **Important**\n> \n', '> [!IMPORTANT]\n');
+    .replaceAll('> ℹ **Note**\n> \n', '> [!NOTE]\n')
+    .replaceAll('> ⚠ **Warning**\n> \n', '> [!WARNING]\n')
+    .replaceAll('> ⚠️ **Warning**\n> \n', '> [!WARNING]\n')
+    .replaceAll('> ❗ **Important**\n> \n', '> [!IMPORTANT]\n');
   return smartTruncate(massagedInput, maxBodyLength());
 }
 
@@ -1989,11 +1973,11 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       await githubApi.getJson(
         `/repos/${config.repositoryOwner}/${config.repositoryName}/dependabot/alerts?state=open&direction=asc&per_page=100`,
         {
-          paginate: false,
+          paginate: true,
           headers: { accept: 'application/vnd.github+json' },
           cacheProvider: repoCacheProvider,
         },
-        VulnerabilityAlertSchema,
+        GithubVulnerabilityAlert,
       )
     ).body;
   } catch (err) /* v8 ignore start */ {

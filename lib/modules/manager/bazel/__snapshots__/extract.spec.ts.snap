@@ -47,7 +47,7 @@ exports[`modules/manager/bazel/extract > extractPackageFile() > extracts multipl
     "currentValue": "0.6.1",
     "datasource": "github-releases",
     "depName": "build_bazel_rules_typescript",
-    "depType": "git_repository",
+    "depType": "new_git_repository",
     "managerData": {
       "idx": 4,
     },

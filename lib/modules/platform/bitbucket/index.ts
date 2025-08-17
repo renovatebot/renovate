@@ -253,9 +253,15 @@ export async function initRepo({
   // TODO #22198
   const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname!)?.[1];
 
-  const auth = opts.token
-    ? `x-token-auth:${opts.token}`
-    : `${opts.username!}:${opts.password!}`;
+  let auth = '';
+  if (opts.token) {
+    auth = `x-token-auth:${opts.token}`;
+  } else if (opts.password?.startsWith('ATAT')) {
+    auth = `x-bitbucket-api-token-auth:${opts.password}`;
+  } else {
+    auth = `${opts.username!}:${opts.password!}`;
+  }
+
   const url = git.getUrl({
     protocol: 'https',
     auth,

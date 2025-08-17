@@ -37,7 +37,7 @@ function helmRepositoryArgs(
 ): string {
   switch (datasource) {
     case HelmDatasource.id:
-      return `--repo ${quote(repository)} ${depName}`;
+      return `--repo ${quote(repository)} ${quote(depName)}`;
     case DockerDatasource.id:
       return quote(`oci://${repository}`);
     /* v8 ignore next 2: should never happen */

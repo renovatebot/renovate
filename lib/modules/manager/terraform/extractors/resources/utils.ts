@@ -35,6 +35,10 @@ const KubernetesJobTemplateInit = [
   'image',
 ];
 
+export const generic_image_datasource: GenericImageResourceDef[] = [
+  { type: 'docker_registry_image', path: ['name'] },
+];
+
 export const generic_image_resource: GenericImageResourceDef[] = [
   // Docker provider: https://registry.terraform.io/providers/kreuzwerker/docker
   { type: 'docker_image', path: ['name'] },

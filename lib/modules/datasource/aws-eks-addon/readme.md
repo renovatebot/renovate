@@ -69,7 +69,8 @@ Here's an example of using the custom manager to configure this datasource:
 {
   "packageRules": [
     {
-      "matchDatasources": ["aws-eks-addon"]
+      "matchDatasources": ["aws-eks-addon"],
+      "overrideDepName": "{{replace '.*\"addonName\":\"([^\"]+)\".*' '$1' depName}}"
     }
   ],
   "customManagers": [

@@ -55,6 +55,30 @@ describe('util/host-rules', () => {
         password: 'pass1',
         username: 'user1',
       });
+      expect(find({ url: 'https://some.endpoint/' })).toEqual({
+        password: 'pass1',
+        username: 'user1',
+      });
+      expect(find({ url: 'https://some.endpoint' })).toEqual({
+        password: 'pass1',
+        username: 'user1',
+      });
+      expect(find({ url: 'https://some.endpoint:443' })).toEqual({
+        password: 'pass1',
+        username: 'user1',
+      });
+    });
+
+    it('does not match subpart of hostname', () => {
+      add({
+        matchHost: 'https://some.endpoint',
+        username: 'user1',
+        password: 'pass1',
+      });
+      expect(find({ url: 'https://some.endpoint.example.com' })).toEqual({});
+      expect(find({ url: 'https://some.endpoint:blub@example.com' })).toEqual(
+        {},
+      );
     });
 
     it('massages host url', () => {

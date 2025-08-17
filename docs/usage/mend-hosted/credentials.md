@@ -112,3 +112,13 @@ The token must be included in the request header as the `authorization` property
 
 You can use a [classic token](https://github.com/settings/tokens) or a [fine-grained token](https://github.com/settings/personal-access-tokens).
 No additional scopes or permissions are required for the token.
+
+## Known Issues
+
+### Error deleting host rule from Developer Portal
+
+Problem: When deleting a host rule from the Developer Portal, an error is shown "Error deleting host rule".
+
+Workaround:
+Update the host rule to point to a valid host that you are not using in your repo.
+This way, the host rule will have no effect.

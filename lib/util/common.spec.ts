@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { detectPlatform, parseJson } from './common';
 import * as hostRules from './host-rules';
 import { logger } from '~test/util';
@@ -50,7 +51,9 @@ describe('util/common', () => {
       ${'https://bitbucket.com/some-org/some-repo'}                          | ${'bitbucket'}
       ${'https://bitbucket.example.com/some-org/some-repo'}                  | ${'bitbucket-server'}
       ${'https://gitea.com/semantic-release/gitlab'}                         | ${'gitea'}
-      ${'https://forgejo.example.com/semantic-release/gitlab'}               | ${'gitea'}
+      ${'https://forgejo.example.com/semantic-release/gitlab'}               | ${'forgejo'}
+      ${'https://codeberg.org/forgejo/forgejo'}                              | ${'forgejo'}
+      ${'https://codefloe.com/some-org/some-repo'}                           | ${'forgejo'}
       ${'https://github.com/semantic-release/gitlab'}                        | ${'github'}
       ${'https://github-enterprise.example.com/chalk/chalk'}                 | ${'github'}
       ${'https://gitlab.com/chalk/chalk'}                                    | ${'gitlab'}
@@ -67,6 +70,10 @@ describe('util/common', () => {
       hostRules.add({
         hostType: 'gitea',
         matchHost: 'gt.example.com',
+      });
+      hostRules.add({
+        hostType: 'forgejo',
+        matchHost: 'fj.example.com',
       });
       hostRules.add({
         hostType: 'github-changelog',
@@ -86,6 +93,9 @@ describe('util/common', () => {
       );
       expect(detectPlatform('https://gt.example.com/chalk/chalk')).toBe(
         'gitea',
+      );
+      expect(detectPlatform('https://fj.example.com/chalk/chalk')).toBe(
+        'forgejo',
       );
       expect(detectPlatform('https://gh.example.com/chalk/chalk')).toBe(
         'github',
@@ -110,11 +120,29 @@ describe('util/common', () => {
       });
     });
 
+    it('supports jsonc', () => {
+      const jsoncString = codeBlock`
+      {
+        // This is a comment (valid in JSONC, invalid in JSON5 when outside object properties)
+        "name": "Alice", // inline comment is valid in JSONC but not in JSON5
+        "age": 25,       // JSON5 supports trailing commas, so this line is okay in both
+        "city": "Atlanta",
+        // JSONC allows comments here too
+      }
+      `;
+
+      expect(parseJson(jsoncString, 'renovate.json')).toEqual({
+        name: 'Alice',
+        age: 25,
+        city: 'Atlanta',
+      });
+    });
+
     it('throws error for invalid json', () => {
       expect(() => parseJson(invalidJsonString, 'renovate.json')).toThrow();
     });
 
-    it('catches and warns if content parsing failed with JSON.parse but not with JSON5.parse', () => {
+    it('catches and warns if content parsing failed with JSONC.parse but not with JSON5.parse', () => {
       expect(parseJson(onlyJson5parsableString, 'renovate.json')).toEqual({
         name: 'Bob',
         age: 35,
@@ -123,7 +151,7 @@ describe('util/common', () => {
       });
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { context: 'renovate.json' },
-        'File contents are invalid JSON but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.',
+        'File contents are invalid JSONC but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.',
       );
     });
 

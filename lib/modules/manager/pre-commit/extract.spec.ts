@@ -1,4 +1,5 @@
 import { mockDeep } from 'vitest-mock-extended';
+import { NpmDatasource } from '../../datasource/npm';
 import { PypiDatasource } from '../../datasource/pypi';
 import { extractPackageFile } from '.';
 import { Fixtures } from '~test/fixtures';
@@ -106,6 +107,21 @@ describe('modules/manager/pre-commit/extract', () => {
           { depName: 'prettier/pre-commit', currentValue: 'v2.1.2' },
           { depName: 'pre-commit/pre-commit-hooks', currentValue: 'v5.0.0' },
           { skipReason: 'invalid-url' },
+          {
+            currentValue: '^5.2.2',
+            datasource: NpmDatasource.id,
+            depName: '@trivago/prettier-plugin-sort-imports',
+            depType: 'pre-commit-node',
+            packageName: '@trivago/prettier-plugin-sort-imports',
+          },
+          {
+            currentValue: '^3.6.2',
+            datasource: NpmDatasource.id,
+            depName: 'prettier',
+            depType: 'pre-commit-node',
+            packageName: 'prettier',
+          },
+          { depName: 'pre-commit/mirrors-prettier', currentValue: 'v3.1.0' },
         ],
       });
     });

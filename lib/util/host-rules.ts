@@ -78,13 +78,14 @@ export interface HostRuleSearch {
 }
 
 export function matchesHost(url: string, matchHost: string): boolean {
-  if (isHttpUrl(url) && isHttpUrl(matchHost)) {
-    return url.startsWith(matchHost);
-  }
-
   const parsedUrl = parseUrl(url);
   if (!parsedUrl) {
     return false;
+  }
+
+  const parsedMatchHost = parseUrl(matchHost);
+  if (isHttpUrl(parsedUrl) && isHttpUrl(parsedMatchHost)) {
+    return parsedUrl.href.startsWith(parsedMatchHost!.href);
   }
 
   const { hostname } = parsedUrl;
