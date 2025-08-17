@@ -115,6 +115,7 @@ Mend recommends the use of fine-grained tokens for enhanced security.
 
 #### Scopes and permissions for tokens
 
+No additional scopes or permissions need to be added when calling APIs on _public_ repositories.
 When calling APIs on _private_ repositories, the following scopes and permissions are required:
 
 - Classic tokens require `repo` scope (Full control of private repositories)
