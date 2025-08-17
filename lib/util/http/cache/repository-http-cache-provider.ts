@@ -41,7 +41,7 @@ export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
   unflagSynced(url: string): void {
     const flags = this.getSyncFlags();
     for (const fullUrl of Object.keys(flags)) {
-      if (fullUrl.endsWith(url)) {
+      if (fullUrl.includes(url)) {
         delete flags[fullUrl];
       }
     }
