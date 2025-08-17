@@ -1533,7 +1533,9 @@ describe('workers/repository/process/vulnerabilities', () => {
       ${'CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:N/VI:L/VA:N/SC:N/SI:L/SA:N'} | ${['5.3', 'MEDIUM']}
       ${'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H'}                    | ${['9.8', 'CRITICAL']}
       ${'CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L'}                    | ${['5.3', 'MEDIUM']}
-      ${'AV:N/AC:L/Au:N/C:P/I:P/A:P'}                                      | ${['7.5', 'HIGH']}
+      ${'AV:N/AC:L/Au:N/C:P/I:P/A:P'}                                      | ${['7.5', 'UNKNOWN']}
+      ${'AV:N'}                                                            | ${['0.0', 'UNKNOWN']}
+      ${'CVSS:3.1/AV:N'}                                                   | ${['0.0', 'NONE']}
     `('$input', ({ input, output }) => {
       expect(Vulnerabilities.evaluateCvssVector(input)).toMatchObject(output);
     });

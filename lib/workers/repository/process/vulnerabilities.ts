@@ -1,8 +1,10 @@
 // TODO #22198
-import { CVSS20, CVSS30, CVSS31, CVSS40 } from '@pandatix/js-cvss';
 import type { Ecosystem, Osv } from '@renovatebot/osv-offline';
 import { OsvOffline } from '@renovatebot/osv-offline';
 import is from '@sindresorhus/is';
+import type { CvssVector } from 'ae-cvss-calculator';
+import { fromVector } from 'ae-cvss-calculator';
+import { z } from 'zod';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { PackageRule, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -504,20 +506,16 @@ export class Vulnerabilities {
   }
 
   static evaluateCvssVector(vector: string): [string, string] {
-    try {
-      let parsedCvssScore: number;
-      if (vector.startsWith('CVSS:4.0/')) {
-        parsedCvssScore = new CVSS40(vector).Score();
-      } else if (vector.startsWith('CVSS:3.1/')) {
-        parsedCvssScore = new CVSS31(vector).BaseScore();
-      } else if (vector.startsWith('CVSS:3.0/')) {
-        parsedCvssScore = new CVSS30(vector).BaseScore();
-      } else {
-        parsedCvssScore = new CVSS20(vector).BaseScore();
-      }
-      const severityLevel = CVSS40.Rating(parsedCvssScore);
+    const CvssJsonSchema = z.object({
+      baseScore: z.number().default(0.0),
+      baseSeverity: z.string().toUpperCase().default('UNKNOWN'),
+    });
 
-      return [parsedCvssScore.toFixed(1), severityLevel];
+    try {
+      const parsedCvssScore: CvssVector<any> | null = fromVector(vector);
+      const res = CvssJsonSchema.parse(parsedCvssScore?.createJsonSchema());
+
+      return [res.baseScore.toFixed(1), res.baseSeverity];
     } catch {
       logger.debug(`Error processing CVSS vector ${vector}`);
     }
