@@ -3,7 +3,7 @@ import type { Document } from 'yaml';
 import { CST, isCollection, isPair, isScalar, parseDocument } from 'yaml';
 import { logger } from '../../../../../logger';
 import type { UpdateDependencyConfig } from '../../../types';
-import { PnpmCatalogsSchema } from '../../schema';
+import { PnpmCatalogs } from '../../schema';
 import { getNewGitValue, getNewNpmAliasValue } from './common';
 
 export function updatePnpmCatalogDependency({
@@ -14,13 +14,13 @@ export function updatePnpmCatalogDependency({
 
   const catalogName = depType?.split('.').at(-1);
 
-  // istanbul ignore if
+  /* v8 ignore start -- needs test */
   if (!is.string(catalogName)) {
     logger.error(
       'No catalogName was found; this is likely an extraction error.',
     );
     return null;
-  }
+  } /* v8 ignore stop -- needs test */
 
   let { newValue } = upgrade;
 
@@ -28,7 +28,7 @@ export function updatePnpmCatalogDependency({
   newValue = getNewNpmAliasValue(newValue, upgrade) ?? newValue;
 
   logger.trace(
-    `npm.updatePnpmCatalogDependency(): ${depType}:${managerData?.catalogName}.${depName} = ${newValue}`,
+    `npm.updatePnpmCatalogDependency(): ${depType}:${/* v8 ignore next -- needs test */ managerData?.catalogName}.${depName} = ${newValue}`,
   );
 
   let document;
@@ -42,7 +42,7 @@ export function updatePnpmCatalogDependency({
     // values. Thus, we use both an annotated AST and a JS representation; the
     // former for manipulation, and the latter for querying/validation.
     document = parseDocument(fileContent, { keepSourceTokens: true });
-    parsedContents = PnpmCatalogsSchema.parse(document.toJS());
+    parsedContents = PnpmCatalogs.parse(document.toJS());
   } catch (err) {
     logger.debug({ err }, 'Could not parse pnpm-workspace YAML file.');
     return null;
@@ -82,7 +82,7 @@ export function updatePnpmCatalogDependency({
     return null;
   }
 
-  // istanbul ignore if: this should not happen in practice, but we must satisfy th etypes
+  /* v8 ignore next 3 -- this should not happen in practice, but we must satisfy the types */
   if (!modifiedDocument.contents?.srcToken) {
     return null;
   }
@@ -118,7 +118,7 @@ function changeDependencyIn(
   }
 
   if (newName) {
-    // istanbul ignore if: the try..catch block above already throws if a key is an alias
+    /* v8 ignore next 3 -- the try..catch block above already throws if a key is an alias */
     if (!CST.isScalar(relevantNode.srcToken?.key)) {
       return null;
     }

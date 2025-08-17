@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
-import { get, set } from '../../cache/package'; // Import the package cache functions
+import * as packageCache from '../../cache/package';
 import { resolveTtlValues } from '../../cache/package/ttl';
 import type { PackageCacheNamespace } from '../../cache/package/types';
 import { regEx } from '../../regex';
@@ -42,11 +42,16 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   }
 
   async load(url: string): Promise<unknown> {
-    return await get(this.namespace, url);
+    return await packageCache.get(this.namespace, url);
   }
 
   async persist(url: string, data: HttpCache): Promise<void> {
-    await set(this.namespace, url, data, this.hardTtlMinutes);
+    await packageCache.setWithRawTtl(
+      this.namespace,
+      url,
+      data,
+      this.hardTtlMinutes,
+    );
   }
 
   override async bypassServer<T>(

@@ -196,8 +196,22 @@ export class BaseGoDatasource {
       BaseGoDatasource.gitlabHttpsRegExp.exec(metadataUrl)?.groups;
     if (metadataUrlMatchGroups) {
       const { httpsRegExpUrl, httpsRegExpName } = metadataUrlMatchGroups;
-      const packageName =
-        vcsIndicatedModule ?? gitlabModuleName ?? httpsRegExpName;
+
+      let packageName = vcsIndicatedModule ?? gitlabModuleName;
+
+      // Detect submodules in monorepos by comparing metadata path and module path
+      if (!vcsIndicatedModule && httpsRegExpName && gitlabModuleName) {
+        const metadataPath = httpsRegExpName;
+        const modulePath = gitlabModuleName;
+
+        if (modulePath.startsWith(metadataPath + '/')) {
+          packageName = metadataPath;
+        }
+      }
+
+      // If we still don't have a package name, fall back to the metadata URL path
+      packageName = packageName ?? httpsRegExpName;
+
       return {
         datasource: GitlabTagsDatasource.id,
         registryUrl: httpsRegExpUrl,

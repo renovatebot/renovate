@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 import * as _fsExtra from 'fs-extra';
-import { join } from 'upath';
+import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
 import { Fixtures } from '~test/fixtures';
@@ -29,7 +29,7 @@ describe('modules/manager/pipenv/extract', () => {
   beforeEach(() => {
     Fixtures.reset();
     GlobalConfig.set({
-      localDir: join(localDir),
+      localDir: upath.join(localDir),
     });
   });
 

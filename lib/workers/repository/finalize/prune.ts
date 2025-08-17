@@ -117,7 +117,7 @@ async function cleanUpBranches(
  * @param config Renovate configuration
  */
 function calculateBaseBranchRegex(config: RenovateConfig): RegExp | null {
-  if (!config.baseBranches?.length) {
+  if (!config.baseBranchPatterns?.length) {
     return null;
   }
 
@@ -128,7 +128,7 @@ function calculateBaseBranchRegex(config: RenovateConfig): RegExp | null {
     .map(escapeRegExp);
 
   // calculate possible base branches and escape for regex
-  const baseBranches = config.baseBranches.map(escapeRegExp);
+  const baseBranches = config.baseBranchPatterns.map(escapeRegExp);
 
   // create regex to extract base branche from branch name
   const baseBranchRe = regEx(
