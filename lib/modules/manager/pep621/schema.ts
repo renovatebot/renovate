@@ -166,20 +166,17 @@ const UvConfig = z.object({
     .optional(),
 });
 
+export const ProjectSection = z.object({
+  version: z.string().optional().catch(undefined),
+  'requires-python': z.string().optional().catch(undefined),
+  dependencies: LooseArray(Pep508Dependency(depTypes.dependencies)).catch([]),
+  'optional-dependencies': DependencyGroup(depTypes.optionalDependencies).catch(
+    [],
+  ),
+});
+
 export const PyProject = z.object({
-  project: z
-    .object({
-      version: z.string().optional().catch(undefined),
-      'requires-python': z.string().optional().catch(undefined),
-      dependencies: LooseArray(Pep508Dependency(depTypes.dependencies)).catch(
-        [],
-      ),
-      'optional-dependencies': DependencyGroup(
-        depTypes.optionalDependencies,
-      ).catch([]),
-    })
-    .optional()
-    .catch(undefined),
+  project: ProjectSection.optional().catch(undefined),
   'build-system': z
     .object({
       requires: LooseArray(
