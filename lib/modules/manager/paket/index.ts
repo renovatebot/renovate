@@ -17,6 +17,7 @@ import { getAllPackages, updateAllPackages, updatePackage } from './tool';
 export const displayName = 'Paket';
 export const url = 'https://fsprojects.github.io/Paket/';
 export const categories: Category[] = ['dotnet'];
+export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {
   managerFilePatterns: ['**paket.dependencies'],
@@ -52,7 +53,6 @@ export async function extractPackageFile(
   };
 }
 
-export const supportsLockFileMaintenance = true;
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
