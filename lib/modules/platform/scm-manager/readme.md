@@ -15,8 +15,14 @@ You must set the [`platform`](../../../self-hosted-configuration.md#platform) co
 
 ## Set permissions
 
-The technical user must have permission to read and write to your repository.
-You can do this by granting the permission role "OWNER" to the technical Renovate user.
+The technical user must have the permissions to:
+
+1. read the repository
+1. pull/checkout the repository
+1. push/commit the repository
+1. create pull requests for the repository
+
+Those permissions can be granted on a repository level within the permission settings of each repository.
 
 ## Install Review Plugin
 
