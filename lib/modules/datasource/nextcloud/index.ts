@@ -1,7 +1,7 @@
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
 import { asTimestamp } from '../../../util/timestamp';
-import * as semanticVersioning from '../../versioning/semver';
+import * as semver from '../../versioning/semver';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { Applications } from './schema';
