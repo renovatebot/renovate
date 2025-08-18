@@ -1056,7 +1056,11 @@ const platform: Platform = {
   async addReviewers(number: number, reviewers: string[]): Promise<void> {
     logger.debug(`Adding reviewers '${reviewers?.join(', ')}' to #${number}`);
     try {
-      await helper.requestPrReviewers(config.repository, number, { reviewers });
+      const teamReviewers = new Set(reviewers.filter((r) => r.includes('/')));
+      await helper.requestPrReviewers(config.repository, number, {
+        reviewers: reviewers.filter((r) => !teamReviewers.has(r)),
+        ...(teamReviewers.size && { team_reviewers: [...teamReviewers] }),
+      });
     } catch (err) {
       logger.warn({ err, number, reviewers }, 'Failed to assign reviewer');
     }
