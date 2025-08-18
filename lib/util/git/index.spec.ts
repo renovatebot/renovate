@@ -459,7 +459,8 @@ describe('util/git/index', { timeout: 10000 }, () => {
   });
 
   describe('mergeBranch(branchName)', () => {
-    it('should perform a branch merge', async () => {
+    it('should perform a branch merge with allowBehindBase=false', async () => {
+      const mergeSpy = vi.spyOn(SimpleGit.prototype, 'merge');
       await git.mergeBranch('renovate/future_branch', false);
       const merged = await Git(origin.path).branch([
         '--verbose',
@@ -467,6 +468,22 @@ describe('util/git/index', { timeout: 10000 }, () => {
         defaultBranch,
       ]);
       expect(merged.all).toContain('renovate/future_branch');
+      expect(mergeSpy).toHaveBeenCalledWith([
+        '--ff-only',
+        'renovate/future_branch',
+      ]);
+    });
+
+    it('should perform a branch merge with allowBehindBase=true', async () => {
+      const mergeSpy = vi.spyOn(SimpleGit.prototype, 'merge');
+      await git.mergeBranch('renovate/future_branch', true);
+      const merged = await Git(origin.path).branch([
+        '--verbose',
+        '--merged',
+        defaultBranch,
+      ]);
+      expect(merged.all).toContain('renovate/future_branch');
+      expect(mergeSpy).toHaveBeenCalledWith(['--ff', 'renovate/future_branch']);
     });
 
     it('should throw if branch merge throws', async () => {
