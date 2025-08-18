@@ -1,6 +1,7 @@
 import type { RedisClientType, RedisClusterType } from 'redis';
 import { createClient, createCluster } from 'redis';
 import { init, normalizeRedisUrl } from './redis';
+import { partial } from '~test/util';
 
 vi.mock('redis');
 
@@ -33,12 +34,17 @@ describe('util/cache/package/redis', () => {
 
   describe('init', () => {
     beforeEach(() => {
-      vi.mocked(createClient).mockReturnValue({
-        connect: vi.fn(),
-      } as unknown as RedisClientType);
-      vi.mocked(createCluster).mockReturnValue({
-        connect: vi.fn(),
-      } as unknown as RedisClusterType);
+      vi.mocked(createClient).mockReturnValue(
+        partial<RedisClientType>({
+          connect: vi.fn(),
+        }),
+      );
+
+      vi.mocked(createCluster).mockReturnValue(
+        partial<RedisClusterType>({
+          connect: vi.fn(),
+        }),
+      );
     });
 
     it('calls createClient with url', async () => {

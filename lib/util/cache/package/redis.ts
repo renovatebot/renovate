@@ -129,7 +129,7 @@ export async function init(
     }
 
     if (parsedUrl.password) {
-      clusterConfig.defaults ??= { }
+      clusterConfig.defaults ??= {};
       clusterConfig.defaults.password = parsedUrl.password;
     }
 
