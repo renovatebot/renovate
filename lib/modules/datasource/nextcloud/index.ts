@@ -53,8 +53,11 @@ export class NextcloudDatasource extends Datasource {
       changelogUrl: sourceUrlMatches?.groups
         ? `${sourceUrlMatches.groups.prefix}-releases${sourceUrlMatches.groups.suffix}`
         : application.website,
-      sourceUrl: sourceUrlMatches != null ? application.website : null,
     };
+
+    if (sourceUrlMatches !== null) {
+      result.sourceUrl = application.website;
+    }
 
     for (const release of application.releases) {
       const changelogContent =
