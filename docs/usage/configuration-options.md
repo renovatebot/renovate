@@ -4675,7 +4675,7 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
   "vulnerabilityAlerts": {
     "labels": ["security"],
     "automerge": true,
-    "assignees": ["@rarkins"]
+    "assignees": ["@renovate-tests"]
   }
 }
 ```
