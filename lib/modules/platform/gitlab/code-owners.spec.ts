@@ -135,7 +135,7 @@ describe('modules/platform/gitlab/code-owners', () => {
       // Should match root level files (correct behavior)
       expect(match('README.md')).toBe(true);
       expect(match('package.json')).toBe(true);
-      
+
       // Should NOT match nested files according to GitLab spec, but currently does (bug)
       expect(match('src/index.js')).toBe(false);
       expect(match('docs/README.md')).toBe(false);
