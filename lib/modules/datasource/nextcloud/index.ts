@@ -11,7 +11,7 @@ export class NextcloudDatasource extends Datasource {
 
   static readonly defaultTranslationLanguage = 'en';
 
-  override readonly defaultVersioning = semanticVersioning.id;
+  override readonly defaultVersioning = semver.id;
 
   private static readonly sourceUrlRegex = regEx(
     /(?<prefix>.*github.com\/nextcloud)(?<suffix>\/.*)/,
