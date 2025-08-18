@@ -42,28 +42,29 @@ export class NextcloudDatasource extends Datasource {
       return null;
     }
 
+    const sourceUrlMatches = NextcloudDatasource.sourceUrlRegex.exec(
+      application.website,
+    );
+
     const result: ReleaseResult = {
       releases: [],
       homepage: application.website,
       registryUrl,
+      changelogUrl: sourceUrlMatches?.groups
+        ? `${sourceUrlMatches.groups.prefix}-releases${sourceUrlMatches.groups.suffix}`
+        : application.website,
     };
 
     for (const release of application.releases) {
       const changelogContent =
         release.translations[NextcloudDatasource.defaultTranslationLanguage]
           .changelog;
-      const sourceUrlMatches = NextcloudDatasource.sourceUrlRegex.exec(
-        application.website,
-      );
 
       result.releases.push({
         version: release.version,
         releaseTimestamp: asTimestamp(release.created),
         changelogContent:
           changelogContent.length > 0 ? changelogContent : undefined,
-        changelogUrl: sourceUrlMatches?.groups
-          ? `${sourceUrlMatches.groups.prefix}-releases${sourceUrlMatches.groups.suffix}`
-          : application.website,
         isStable: !release.isNightly,
         registryUrl,
       });
