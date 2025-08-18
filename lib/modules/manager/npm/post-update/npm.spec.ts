@@ -58,8 +58,9 @@ describe('modules/manager/npm/post-update/npm', () => {
       packages: {},
       lockfileVersion: 3,
     });
-    fs.readLocalFile.mockResolvedValueOnce(packageLockContents);
-    fs.readLocalFile.mockResolvedValueOnce(packageLockContents);
+    fs.readLocalFile
+       .mockResolvedValueOnce(packageLockContents)
+       .mockResolvedValueOnce(packageLockContents);
     const skipInstalls = true;
     const postUpdateOptions = ['npmInstallTwice'];
     const updates = [

@@ -196,7 +196,7 @@ export async function generateLockFile(
       } /* v8 ignore stop -- needs test */
     }
 
-    if (postUpdateOptions?.includes('npmInstallTwice') === true) {
+    if (postUpdateOptions?.includes('npmInstallTwice')) {
       logger.debug('Running npm install twice');
       // Run the install command twice to ensure the lock file is up to date
       // iterate through commands and if any command starts with `npm install`, add it again
