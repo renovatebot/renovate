@@ -20,7 +20,7 @@ For example:
   "customType": "regex",
   "managerFilePatterns": ["/(^|/)renovate.json$/"],
   "matchStrings": [
-    "https://apps.nextcloud.com/api/v1/platform/(?<currentValue>.*)/apps.json"
+    "https://apps.nextcloud.com/api/v1/platform/(?<currentValue>\\d+\\.\\d+\\.\\d+)/apps.json"
   ],
   "depNameTemplate": "nextcloud/server",
   "datasourceTemplate": "github-releases"
