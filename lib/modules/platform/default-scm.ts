@@ -44,7 +44,7 @@ export class DefaultGitScm implements PlatformScm {
 
   mergeAndPush(
     branchName: string,
-    mergeStrategy: MergeStrategy = 'auto',
+    mergeStrategy: MergeStrategy,
   ): Promise<void> {
     return git.mergeBranch(branchName, mergeStrategy);
   }

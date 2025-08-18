@@ -62,7 +62,7 @@ describe('modules/platform/default-scm', () => {
 
   it('delegate mergeAndPush to util/git', async () => {
     git.mergeBranch.mockResolvedValueOnce();
-    await defaultGitScm.mergeAndPush('branchName');
+    await defaultGitScm.mergeAndPush('branchName', 'auto');
     expect(git.mergeBranch).toHaveBeenCalledWith('branchName', 'auto');
   });
 

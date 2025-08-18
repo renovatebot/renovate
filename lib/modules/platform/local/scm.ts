@@ -55,7 +55,7 @@ export class LocalFs implements PlatformScm {
 
   mergeAndPush(
     branchName: string,
-    mergeStrategy: MergeStrategy = 'auto',
+    mergeStrategy: MergeStrategy,
   ): Promise<void> {
     return Promise.resolve();
   }
