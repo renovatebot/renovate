@@ -20,7 +20,7 @@ import type {
   Release,
   ReleaseResult,
 } from '../types';
-import { ReleaseTimestampSchema } from './schema';
+import { ReleaseTimestamp } from './schema';
 import type {
   CrateMetadata,
   CrateRecord,
@@ -319,31 +319,15 @@ export class CrateDatasource extends Datasource {
           { clonePath, registryFetchUrl },
           `Cloning private cargo registry`,
         );
-
-        const git = Git({
-          ...simpleGitConfig(),
-          maxConcurrentProcesses: 1,
-        }).env(getChildEnv());
-        const clonePromise = git.clone(registryFetchUrl, clonePath, {
-          '--depth': 1,
-        });
-
-        memCache.set(
-          cacheKey,
-          clonePromise.then(() => clonePath).catch(() => null),
+        const clonePromise = CrateDatasource.clone(
+          registryFetchUrl,
+          clonePath,
+          packageName,
+          cacheKeyForError,
         );
 
-        try {
-          await clonePromise;
-        } catch (err) {
-          logger.warn(
-            { err, packageName, registryFetchUrl },
-            'failed cloning git registry',
-          );
-          memCache.set(cacheKeyForError, err);
-
-          return null;
-        }
+        memCache.set(cacheKey, clonePromise);
+        await clonePromise;
       }
 
       if (!clonePath) {
@@ -360,6 +344,56 @@ export class CrateDatasource extends Datasource {
     }
 
     return registry;
+  }
+
+  private static async clone(
+    registryFetchUrl: string,
+    clonePath: string,
+    packageName: string,
+    cacheKeyForError: string,
+  ): Promise<string | null> {
+    const git = Git({
+      ...simpleGitConfig(),
+      maxConcurrentProcesses: 1,
+    }).env(getChildEnv());
+
+    try {
+      await git.clone(registryFetchUrl, clonePath, {
+        '--depth': 1,
+      });
+      return clonePath;
+    } catch (err) {
+      if (
+        err.message.includes(
+          'fatal: dumb http transport does not support shallow capabilities',
+        )
+      ) {
+        logger.info(
+          { packageName, registryFetchUrl },
+          'failed to shallow clone git registry, doing full clone',
+        );
+        try {
+          await git.clone(registryFetchUrl, clonePath);
+          return clonePath;
+        } catch (err) {
+          logger.warn(
+            { err, packageName, registryFetchUrl },
+            'failed cloning git registry',
+          );
+          memCache.set(cacheKeyForError, err);
+
+          return null;
+        }
+      } else {
+        logger.warn(
+          { err, packageName, registryFetchUrl },
+          'failed cloning git registry',
+        );
+        memCache.set(cacheKeyForError, err);
+
+        return null;
+      }
+    }
   }
 
   private static areReleasesCacheable(
@@ -408,7 +442,7 @@ export class CrateDatasource extends Datasource {
     const { body: releaseTimestamp } = await this.http.getJson(
       url,
       { cacheProvider: memCacheProvider },
-      ReleaseTimestampSchema,
+      ReleaseTimestamp,
     );
     release.releaseTimestamp = releaseTimestamp;
     return release;

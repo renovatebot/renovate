@@ -1,14 +1,11 @@
-import { PoetrySectionSchema, PoetrySources } from './schema';
+import { PoetrySection, PoetrySources } from './schema';
 
 describe('modules/manager/poetry/schema', () => {
   it('parses project version', () => {
-    expect(
-      PoetrySectionSchema.parse({ version: '1.2.3' }).packageFileVersion,
-    ).toBe('1.2.3');
+    expect(PoetrySection.parse({ version: '1.2.3' }).version).toBe('1.2.3');
 
     expect(
-      PoetrySectionSchema.parse({ version: { some: 'value' } })
-        .packageFileVersion,
+      PoetrySection.parse({ version: { some: 'value' } }).version,
     ).toBeUndefined();
   });
 

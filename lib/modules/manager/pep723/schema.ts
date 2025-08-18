@@ -8,7 +8,7 @@ const Pep723Dep = z
   .string()
   .transform((dep) => pep508ToPackageDependency(depTypes.dependencies, dep));
 
-export const Pep723Schema = Toml.pipe(
+export const Pep723 = Toml.pipe(
   z
     .object({
       'requires-python': z.string().optional(),

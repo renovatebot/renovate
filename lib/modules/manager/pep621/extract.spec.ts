@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { GitRefsDatasource } from '../../datasource/git-refs';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { depTypes } from './utils';
 import { extractPackageFile } from '.';
 import { Fixtures } from '~test/fixtures';
@@ -347,6 +348,7 @@ describe('modules/manager/pep621/extract', () => {
           "dep4",
           "dep5",
           "dep6",
+          "dep7",
           "dep-with_NORMALIZATION",
         ]
 
@@ -355,6 +357,7 @@ describe('modules/manager/pep621/extract', () => {
         dep3 = { path = "/local-dep.whl" }
         dep4 = { url = "https://example.com" }
         dep5 = { workspace = true }
+        dep7 = { git = "ssh://git@github.com/foo/baz", tag = "1.0.1" }
         dep_WITH-normalization = { workspace = true }
         `,
         'pyproject.toml',
@@ -391,9 +394,51 @@ describe('modules/manager/pep621/extract', () => {
           depName: 'dep6',
         },
         {
+          depName: 'dep7',
+          depType: depTypes.uvSources,
+          datasource: GithubTagsDatasource.id,
+          packageName: 'foo/baz',
+          currentValue: '1.0.1',
+          registryUrls: ['https://github.com'],
+        },
+        {
           depName: 'dep-with_NORMALIZATION',
           depType: depTypes.uvSources,
           skipReason: 'inherited-dependency',
+        },
+      ]);
+    });
+
+    it('should handle SSH git URLs correctly for GitHub sources', async () => {
+      const result = await extractPackageFile(
+        codeBlock`
+        [project]
+        dependencies = [
+          "dep1",
+          "dep2",
+        ]
+
+        [tool.uv.sources]
+        dep1 = { git = "ssh://git@github.com/foo/dep1", tag = "v1.2.3" }
+        dep2 = { git = "ssh://git@github.com/foo/dep2", rev = "abcd1234" }
+        `,
+        'pyproject.toml',
+      );
+
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'dep1',
+          depType: depTypes.uvSources,
+          datasource: GithubTagsDatasource.id,
+          packageName: 'foo/dep1',
+          currentValue: 'v1.2.3',
+          registryUrls: ['https://github.com'],
+        },
+        {
+          depName: 'dep2',
+          depType: depTypes.uvSources,
+          datasource: GitRefsDatasource.id,
+          packageName: 'ssh://git@github.com/foo/dep2',
         },
       ]);
     });
