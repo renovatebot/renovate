@@ -8,6 +8,7 @@ export interface UpdatePackage {
   group?: string;
   version?: string;
 }
+
 export async function updatePackage(command: UpdatePackage): Promise<void> {
   const execOptions: ExecOptions = {
     cwdFile: command.filePath,
