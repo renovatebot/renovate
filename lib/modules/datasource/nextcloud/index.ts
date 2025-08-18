@@ -9,7 +9,7 @@ import { Applications } from './schema';
 export class NextcloudDatasource extends Datasource {
   static readonly id = 'nextcloud';
 
-  static readonly defaultTranslationLanguage = 'en';
+  private static readonly defaultTranslationLanguage = 'en';
 
   override readonly defaultVersioning = semver.id;
 
