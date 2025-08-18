@@ -134,6 +134,7 @@ describe('modules/platform/scm-manager/index', () => {
       const repository = `${repo.namespace}/${repo.name}`;
       const expectedFingerprint = 'expectedFingerprint';
       const expectedDefaultBranch = 'expectedDefaultBranch';
+      const expectedIgnorePrAuthor = true;
 
       httpMock
         .scope(endpoint)
@@ -147,7 +148,10 @@ describe('modules/platform/scm-manager/index', () => {
       vi.mocked(util.repoFingerprint).mockReturnValueOnce(expectedFingerprint);
 
       expect(
-        await initRepo({ repository: `${repo.namespace}/${repo.name}` }),
+        await initRepo({
+          repository: `${repo.namespace}/${repo.name}`,
+          ignorePrAuthor: expectedIgnorePrAuthor,
+        }),
       ).toEqual({
         defaultBranch: expectedDefaultBranch,
         isFork: false,
@@ -158,6 +162,7 @@ describe('modules/platform/scm-manager/index', () => {
         url: `https://${user.name}:${token}@localhost:8080/scm/default/repo`,
         repository,
         defaultBranch: expectedDefaultBranch,
+        ignorePrAuthor: expectedIgnorePrAuthor,
       });
     });
   });

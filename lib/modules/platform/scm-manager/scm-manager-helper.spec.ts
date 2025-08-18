@@ -194,9 +194,28 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
           },
         });
 
-      expect(await getAllRepoPrs(`${repo.namespace}/${repo.name}`)).toEqual([
-        pullRequest,
-      ]);
+      expect(
+        await getAllRepoPrs(`${repo.namespace}/${repo.name}`, true),
+      ).toEqual([pullRequest]);
+    });
+
+    it('should return all of my PRs', async () => {
+      httpMock
+        .scope(endpoint)
+        .get(
+          `/pull-requests/${repo.namespace}/${repo.name}?status=MINE&pageSize=1000000`,
+        )
+        .reply(200, {
+          page: 0,
+          pageTotal: 1,
+          _embedded: {
+            pullRequests: [pullRequest],
+          },
+        });
+
+      expect(
+        await getAllRepoPrs(`${repo.namespace}/${repo.name}`, false),
+      ).toEqual([pullRequest]);
     });
 
     it.each`
@@ -216,7 +235,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
           .reply(expectedResponse);
 
         await expect(
-          getAllRepoPrs(`${repo.namespace}/${repo.name}`),
+          getAllRepoPrs(`${repo.namespace}/${repo.name}`, true),
         ).rejects.toThrow();
       },
     );

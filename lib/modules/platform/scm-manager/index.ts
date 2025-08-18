@@ -39,6 +39,7 @@ interface SCMMRepoConfig {
   repository: string;
   prList: Pr[] | null;
   defaultBranch: string;
+  ignorePrAuthor: boolean;
 }
 
 export const id = 'scm-manager';
@@ -79,6 +80,7 @@ export async function initPlatform({
 export async function initRepo({
   repository,
   gitUrl,
+  ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   const repo = await getRepo(repository);
   const defaultBranch = await getDefaultBranch(repo);
@@ -87,6 +89,7 @@ export async function initRepo({
   config = {} as any;
   config.repository = repository;
   config.defaultBranch = defaultBranch;
+  config.ignorePrAuthor = !!ignorePrAuthor;
 
   await git.initRepo({
     ...config,
@@ -165,9 +168,9 @@ export async function getPr(number: number): Promise<Pr | null> {
 export async function getPrList(): Promise<Pr[]> {
   if (config.prList === null) {
     try {
-      config.prList = (await getAllRepoPrs(config.repository)).map((pr) =>
-        mapPrFromScmToRenovate(pr),
-      );
+      config.prList = (
+        await getAllRepoPrs(config.repository, config.ignorePrAuthor)
+      ).map((pr) => mapPrFromScmToRenovate(pr));
     } catch (error) {
       logger.error(error);
     }

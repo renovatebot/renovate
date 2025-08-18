@@ -22,8 +22,10 @@ const URLS = {
   ALL_REPOS: 'repositories?pageSize=1000000',
   REPO: (repoPath: string) => `repositories/${repoPath}`,
   PULLREQUESTS: (repoPath: string) => `pull-requests/${repoPath}`,
-  PULLREQUESTS_WITH_PAGINATION: (repoPath: string) =>
+  ALL_PULLREQUESTS_WITH_PAGINATION: (repoPath: string) =>
     `pull-requests/${repoPath}?status=ALL&pageSize=1000000`,
+  MY_PULLREQUESTS_WITH_PAGINATION: (repoPath: string) =>
+    `pull-requests/${repoPath}?status=MINE&pageSize=1000000`,
   PULLREQUEST_BY_ID: (repoPath: string, id: number) =>
     `pull-requests/${repoPath}/${id}`,
 };
@@ -85,9 +87,14 @@ export async function getDefaultBranch(repo: Repo): Promise<string> {
   return response.body.defaultBranch;
 }
 
-export async function getAllRepoPrs(repoPath: string): Promise<PullRequest[]> {
+export async function getAllRepoPrs(
+  repoPath: string,
+  ignorePrAuthor: boolean,
+): Promise<PullRequest[]> {
   const response = await scmManagerHttp.getJson(
-    URLS.PULLREQUESTS_WITH_PAGINATION(repoPath),
+    ignorePrAuthor
+      ? URLS.ALL_PULLREQUESTS_WITH_PAGINATION(repoPath)
+      : URLS.MY_PULLREQUESTS_WITH_PAGINATION(repoPath),
     {
       headers: { accept: CONTENT_TYPES.PULLREQUESTS },
     },
