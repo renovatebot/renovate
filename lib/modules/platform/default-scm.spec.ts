@@ -60,10 +60,16 @@ describe('modules/platform/default-scm', () => {
     expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
   });
 
-  it('delegate mergeAndPush to util/git', async () => {
+  it('delegate mergeAndPush to util/git allowBehindBase=false', async () => {
     git.mergeBranch.mockResolvedValueOnce();
     await defaultGitScm.mergeAndPush('branchName', false);
     expect(git.mergeBranch).toHaveBeenCalledWith('branchName', false);
+  });
+
+  it('delegate mergeBranch to util/git allowBehindBase=true', async () => {
+    git.mergeBranch.mockResolvedValueOnce();
+    await defaultGitScm.mergeAndPush('branchName', true);
+    expect(git.mergeBranch).toHaveBeenCalledWith('branchName', true);
   });
 
   it('delegate mergeBranch to util/git', async () => {
