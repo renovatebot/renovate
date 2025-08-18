@@ -95,7 +95,7 @@ describe('modules/datasource/nextcloud/index', () => {
         registryUrls: ['https://custom.registry.com'],
       });
 
-      expect(res?.releases[0].changelogUrl).toBe(changelogUrl);
+      expect(res?.changelogUrl).toBe(changelogUrl);
     },
   );
 
@@ -126,6 +126,13 @@ describe('modules/datasource/nextcloud/index', () => {
                   "changelog": ""
                 }
               }
+            },
+            {
+              "version": "7.1.0",
+              "created": "2025-01-14T09:13:25.123456Z",
+              "isNightly": false,
+              "translations": {
+              }
             }
           ]
         }
@@ -141,11 +148,18 @@ describe('modules/datasource/nextcloud/index', () => {
     });
 
     expect(res).toStrictEqual({
+      changelogUrl: 'https://github.com/nextcloud-releases/user_oidc',
       registryUrl: 'https://custom.registry.com',
       releases: [
         {
           changelogContent: undefined,
-          changelogUrl: 'https://github.com/nextcloud-releases/user_oidc',
+          isStable: true,
+          registryUrl: 'https://custom.registry.com',
+          releaseTimestamp: '2025-01-14T09:13:25.123Z',
+          version: '7.1.0',
+        },
+        {
+          changelogContent: undefined,
           isStable: false,
           registryUrl: 'https://custom.registry.com',
           releaseTimestamp: '2025-04-24T09:24:43.232Z',
@@ -153,7 +167,6 @@ describe('modules/datasource/nextcloud/index', () => {
         },
         {
           changelogContent: 'testChangelog',
-          changelogUrl: 'https://github.com/nextcloud-releases/user_oidc',
           isStable: true,
           registryUrl: 'https://custom.registry.com',
           releaseTimestamp: '2025-07-25T09:41:26.318Z',

@@ -60,15 +60,18 @@ export class NextcloudDatasource extends Datasource {
     }
 
     for (const release of application.releases) {
-      const changelogContent =
-        release.translations[NextcloudDatasource.defaultTranslationLanguage]
-          .changelog;
+      const translation =
+        release.translations[NextcloudDatasource.defaultTranslationLanguage];
+
+      const changelogContent = translation ? translation.changelog : null;
 
       result.releases.push({
         version: release.version,
         releaseTimestamp: asTimestamp(release.created),
         changelogContent:
-          changelogContent.length > 0 ? changelogContent : undefined,
+          changelogContent !== null && changelogContent.length > 0
+            ? changelogContent
+            : undefined,
         isStable: !release.isNightly,
         registryUrl,
       });
