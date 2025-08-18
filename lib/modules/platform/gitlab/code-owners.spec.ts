@@ -127,5 +127,30 @@ describe('modules/platform/gitlab/code-owners', () => {
         },
       ]);
     });
+
+    it('should extract rules with /* pattern from root section and specific file pattern from another section', () => {
+      const lines = [
+        '[Root Section] @root-owner',
+        '/*',
+        '[Backend Team] @backend-team',
+        'src/backend.js',
+      ];
+      const rules = extractRulesFromCodeOwnersLines(lines);
+
+      expect(rules).toEqual([
+        {
+          pattern: '/*',
+          usernames: ['@root-owner'],
+          score: 2,
+          match: expect.any(Function),
+        },
+        {
+          pattern: 'src/backend.js',
+          usernames: ['@backend-team'],
+          score: 14,
+          match: expect.any(Function),
+        },
+      ]);
+    });
   });
 });
