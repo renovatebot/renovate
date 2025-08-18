@@ -35,3 +35,8 @@ Renovate supports SCM-Manager major version `2.x` and `3.x`.
 
 The minimum version for the `2.x` range is `2.48.0`.
 The minimum version for the `3.x` range is `3.0.0`.
+
+## Automerge
+
+Currently, the Renovate automerge feature is not supported by the SCM-Manager platform.
+Every pull request requires merging them manually for now.
