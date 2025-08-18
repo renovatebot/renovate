@@ -13,11 +13,13 @@ export async function updatePackage(command: UpdatePackage): Promise<void> {
   const execOptions: ExecOptions = {
     cwdFile: command.filePath,
   };
-  const groupFilter = command.group ? ` --group ${quote(command.group)}` : '';
+  const groupFilter = command.group ? ` --group ${quote(command.group)} ` : '';
   const packageFilter = command.packageName
-    ? ` ${quote(command.packageName)}`
+    ? ` ${quote(command.packageName)} `
     : '';
-  const version = command.version ? ` --version ${quote(command.version)}` : '';
+  const version = command.version
+    ? ` --version ${quote(command.version)} `
+    : '';
   await exec(
     `paket update${groupFilter}${version}${packageFilter}`,
     execOptions,
