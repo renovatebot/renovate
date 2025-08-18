@@ -51,7 +51,7 @@ export class ApiCache<T extends ApiPageItem> {
         : null;
 
       if (!dequal(oldItem, newItem)) {
-        logger.debug(`PR cache: updating item ${number}`);
+        logger.trace(`PR cache: updating item ${number}`);
         items[number] = newItem;
       }
 

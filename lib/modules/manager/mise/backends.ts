@@ -12,7 +12,7 @@ import { PypiDatasource } from '../../datasource/pypi';
 import { normalizePythonDepName } from '../../datasource/pypi/common';
 import { RubygemsDatasource } from '../../datasource/rubygems';
 import type { PackageDependency } from '../types';
-import type { MiseToolOptionsSchema } from './schema';
+import type { MiseToolOptions } from './schema';
 
 export type BackendToolingConfig = Omit<PackageDependency, 'depName'> &
   Required<
@@ -205,7 +205,7 @@ export function createSpmToolConfig(name: string): BackendToolingConfig {
 export function createUbiToolConfig(
   name: string,
   version: string,
-  toolOptions: MiseToolOptionsSchema,
+  toolOptions: MiseToolOptions,
 ): BackendToolingConfig {
   let extractVersion: string | undefined = undefined;
 

@@ -98,7 +98,7 @@ If you use the Mend Renovate app, use the [`logLevelRemap` config option](../../
 {
   "logLevelRemap": [
     {
-      "matchMessage": "/^Custom manager fetcher/",
+      "matchMessage": "/^Custom datasource/",
       "newLogLevel": "info"
     }
   ]
