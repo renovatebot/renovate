@@ -729,7 +729,7 @@ export async function getUserSlugsByEmail(
 
     const users = await bitbucketServerHttp.getJson(
       filterUrl,
-      { limit: 100 },
+      { paginate: true, limit: 100 },
       Users,
     );
 
@@ -1305,7 +1305,7 @@ async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
   if (repoGroup) {
     return repoGroup.users
       .filter((user) => user.active)
-      .map((user) => user.emailAddress);
+      .map((user) => user.slug);
   }
 
   // If no repo-level group, fall back to project-level group
@@ -1316,7 +1316,7 @@ async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
   if (projectGroup) {
     return projectGroup.users
       .filter((user) => user.active)
-      .map((user) => user.emailAddress);
+      .map((user) => user.slug);
   }
 
   // Group not found at either level
