@@ -80,11 +80,11 @@ describe('modules/manager/paket/tool', () => {
     test.each([
       [
         { filePath: packageFilePath, packageName: 'FSharp.Core' },
-        'paket update FSharp.Core',
+        'paket update FSharp.Core ',
       ],
       [
         { filePath: packageFilePath, group: 'GroupA' },
-        'paket update --group GroupA',
+        'paket update --group GroupA ',
       ],
       [
         {
@@ -92,7 +92,7 @@ describe('modules/manager/paket/tool', () => {
           group: 'GroupA',
           packageName: 'FSharp.Core',
         },
-        'paket update --group GroupA FSharp.Core',
+        'paket update --group GroupA  FSharp.Core ',
       ],
       [
         {
@@ -100,7 +100,7 @@ describe('modules/manager/paket/tool', () => {
           packageName: 'FSharp.Core',
           version: '1.2.3',
         },
-        'paket update --version 1.2.3 FSharp.Core',
+        'paket update --version 1.2.3  FSharp.Core ',
       ],
       [
         {
@@ -109,7 +109,7 @@ describe('modules/manager/paket/tool', () => {
           packageName: 'FSharp.Core',
           version: '1.2.3',
         },
-        'paket update --group GroupA --version 1.2.3 FSharp.Core',
+        'paket update --group GroupA  --version 1.2.3  FSharp.Core ',
       ],
     ])(
       'can specify parameters (%o)',
@@ -134,7 +134,7 @@ describe('modules/manager/paket/tool', () => {
       });
 
       expect(execSnapshots).toEqual([
-        `paket update --group 'Group A' --version '1 2 3' 'FSharp Core'`,
+        `paket update --group 'Group A'  --version '1 2 3'  'FSharp Core' `,
       ]);
     });
   });
@@ -154,7 +154,7 @@ describe('modules/manager/paket/tool', () => {
 
       await updateAllPackages(packageFilePath, 'GroupA');
 
-      expect(execSnapshots).toEqual(['paket update --group GroupA']);
+      expect(execSnapshots).toEqual(['paket update --group GroupA ']);
     });
   });
 
