@@ -13,10 +13,7 @@ import type {
   Release,
   ReleaseResult,
 } from '../types';
-import {
-  CdnjsAPISriResponseSchema,
-  CdnjsAPIVersionResponseSchema,
-} from './schema';
+import { CdnjsAPISriResponse, CdnjsAPIVersionResponse } from './schema';
 
 export class CdnjsDatasource extends Datasource {
   static readonly id = 'cdnjs';
@@ -50,7 +47,7 @@ export class CdnjsDatasource extends Datasource {
         return this.http.getJsonSafe(
           url,
           { cacheProvider: memCacheProvider },
-          CdnjsAPIVersionResponseSchema,
+          CdnjsAPIVersionResponse,
         );
       })
       .transform(({ versions, homepage, repository }): ReleaseResult => {
@@ -100,7 +97,7 @@ export class CdnjsDatasource extends Datasource {
       .transform(({ registryUrl }) => {
         const url = `${registryUrl}libraries/${library}/${newValue}?fields=sri`;
 
-        return this.http.getJsonSafe(url, CdnjsAPISriResponseSchema);
+        return this.http.getJsonSafe(url, CdnjsAPISriResponse);
       })
       .transform(({ sri }): string => {
         return sri?.[assetName];

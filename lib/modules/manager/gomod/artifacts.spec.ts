@@ -3,6 +3,7 @@ import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import * as _hostRules from '../../../util/host-rules';
@@ -1842,6 +1843,7 @@ describe('modules/manager/gomod/artifacts', () => {
           postUpdateOptions: ['gomodUpdateImportPaths'],
           constraints: {
             gomodMod: 'v1.2.3',
+            go: '1.17.0',
           },
         },
       }),
@@ -1900,6 +1902,7 @@ describe('modules/manager/gomod/artifacts', () => {
           postUpdateOptions: ['gomodUpdateImportPaths'],
           constraints: {
             gomodMod: 'a.b.c',
+            go: '1.17.0',
           },
         },
       }),
@@ -2026,7 +2029,7 @@ describe('modules/manager/gomod/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool golang 1.23.3' },
       {
-        cmd: 'go get -d -t ./...',
+        cmd: 'go get -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
@@ -2105,7 +2108,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ' bash -l -c "' +
           'install-tool golang 1.23.3' +
           ' && ' +
-          'go get -d -t ./...' +
+          'go get -t ./...' +
           ' && ' +
           'go install github.com/marwan-at-work/mod/cmd/mod@latest' +
           ' && ' +
@@ -2153,7 +2156,7 @@ describe('modules/manager/gomod/artifacts', () => {
         cmd: 'install-tool golang 1.23.6',
       },
       {
-        cmd: 'go get -d -t ./...',
+        cmd: 'go get -t ./...',
       },
     ]);
 
@@ -2193,7 +2196,7 @@ describe('modules/manager/gomod/artifacts', () => {
         cmd: 'install-tool golang 1.23.5',
       },
       {
-        cmd: 'go get -d -t ./...',
+        cmd: 'go get -t ./...',
       },
     ]);
 
@@ -2410,5 +2413,22 @@ describe('modules/manager/gomod/artifacts', () => {
       { artifactError: { lockFile: 'go.sum', stderr: 'Invalid goGetDirs' } },
     ]);
     expect(execSnapshots).toMatchObject([]);
+  });
+
+  it('throws temporary error', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.writeLocalFile.mockRejectedValueOnce(new Error(TEMPORARY_ERROR));
+
+    await expect(
+      gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          goGetDirs: ['/etc', '../../../'],
+        },
+      }),
+    ).rejects.toThrow(TEMPORARY_ERROR);
   });
 });

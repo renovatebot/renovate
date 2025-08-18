@@ -1,5 +1,6 @@
 import type { PlatformCommitOptions } from '../../config/types';
 import type { GitOptions } from '../../types/git';
+import type { EmailAddress } from '../schema-utils';
 
 export type { DiffResult, StatusResult } from 'simple-git';
 
@@ -35,7 +36,7 @@ export interface LocalConfig extends StorageConfig {
   commitBranches: Record<string, string[]>;
   ignoredAuthors: string[];
   gitAuthorName?: string | null;
-  gitAuthorEmail?: string;
+  gitAuthorEmail?: EmailAddress;
 
   writeGitDone?: boolean;
 }

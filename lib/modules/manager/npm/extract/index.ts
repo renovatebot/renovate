@@ -14,6 +14,7 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../../types';
+import type { YarnConfig } from '../schema';
 import type { NpmLockFiles, NpmManagerData } from '../types';
 import { getExtractedConstraints } from './common/dependency';
 import { extractPackageJson } from './common/package-file';
@@ -21,7 +22,6 @@ import { extractPnpmWorkspaceFile, tryParsePnpmWorkspaceYaml } from './pnpm';
 import { postExtract } from './post';
 import type { NpmPackage } from './types';
 import { isZeroInstall } from './yarn';
-import type { YarnConfig } from './yarnrc';
 import {
   loadConfigFromLegacyYarnrc,
   loadConfigFromYarnrcYml,
@@ -137,12 +137,12 @@ export async function extractPackageFile(
     ? await isZeroInstall(yarnrcYmlFileName)
     : false;
 
-  let yarnConfig: YarnConfig | null = null;
+  let yarnrcConfig: YarnConfig | null = null;
   const repoYarnrcYml = yarnrcYmlFileName
     ? await readLocalFile(yarnrcYmlFileName, 'utf8')
     : null;
   if (is.string(repoYarnrcYml) && repoYarnrcYml.trim().length > 0) {
-    yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
+    yarnrcConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
   }
 
   const legacyYarnrcFileName = await findLocalSiblingOrParent(
@@ -153,7 +153,7 @@ export async function extractPackageFile(
     ? await readLocalFile(legacyYarnrcFileName, 'utf8')
     : null;
   if (is.string(repoLegacyYarnrc) && repoLegacyYarnrc.trim().length > 0) {
-    yarnConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
+    yarnrcConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
   }
 
   if (res.deps.length === 0) {
@@ -192,15 +192,18 @@ export async function extractPackageFile(
 
   const extractedConstraints = getExtractedConstraints(res.deps);
 
-  if (yarnConfig) {
+  if (yarnrcConfig) {
     for (const dep of res.deps) {
       if (dep.depName) {
-        const registryUrlFromYarnConfig = resolveRegistryUrl(
+        const registryUrlFromYarnrcConfig = resolveRegistryUrl(
           dep.packageName ?? dep.depName,
-          yarnConfig,
+          yarnrcConfig,
         );
-        if (registryUrlFromYarnConfig && dep.datasource === NpmDatasource.id) {
-          dep.registryUrls = [registryUrlFromYarnConfig];
+        if (
+          registryUrlFromYarnrcConfig &&
+          dep.datasource === NpmDatasource.id
+        ) {
+          dep.registryUrls = [registryUrlFromYarnrcConfig];
         }
       }
     }
@@ -231,7 +234,6 @@ export async function extractAllPackageFiles(
   const npmFiles: PackageFile<NpmManagerData>[] = [];
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
-    // istanbul ignore else
     if (content) {
       // pnpm workspace files are their own package file, defined via managerFilePatterns.
       // We duck-type the content here, to allow users to rename the file itself.

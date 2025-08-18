@@ -4,7 +4,7 @@ import { getExpression } from '../../../util/jsonata';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { fetchers } from './formats';
-import { ReleaseResultZodSchema } from './schema';
+import { ReleaseResultZod } from './schema';
 import { getCustomConfig } from './utils';
 
 export class CustomDatasource extends Datasource {
@@ -78,7 +78,7 @@ export class CustomDatasource extends Datasource {
     }
 
     try {
-      const parsed = ReleaseResultZodSchema.parse(data);
+      const parsed = ReleaseResultZod.parse(data);
       return structuredClone(parsed);
     } catch (err) {
       logger.debug({ err }, `Response has failed validation`);
@@ -88,8 +88,8 @@ export class CustomDatasource extends Datasource {
   }
 
   override getDigest(
-    { packageName }: DigestConfig,
-    newValue?: string,
+    _cfg: DigestConfig,
+    _newValue?: string,
   ): Promise<string | null> {
     // Return null here to support setting a digest: value can be provided digest in getReleases
     return Promise.resolve(null);

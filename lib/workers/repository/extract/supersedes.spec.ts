@@ -31,6 +31,23 @@ describe('workers/repository/extract/supersedes', () => {
             },
           ],
         },
+        {
+          manager: 'pep621',
+          packageFiles: [
+            { packageFile: 'pyproject.toml', deps: [] },
+            { packageFile: 'some/pyproject.toml', deps: [] },
+          ],
+        },
+        {
+          manager: 'poetry',
+          packageFiles: [
+            {
+              packageFile: 'pyproject.toml',
+              deps: [],
+              lockFiles: ['poetry.lock'],
+            },
+          ],
+        },
       ];
       processSupersedesManagers(extractResults);
       expect(extractResults).toMatchObject([
@@ -56,6 +73,20 @@ describe('workers/repository/extract/supersedes', () => {
               deps: [],
               lockFiles: ['frontend/yarn.lock'],
               packageFile: 'frontend/package.json',
+            },
+          ],
+        },
+        {
+          manager: 'pep621',
+          packageFiles: [{ packageFile: 'some/pyproject.toml', deps: [] }],
+        },
+        {
+          manager: 'poetry',
+          packageFiles: [
+            {
+              packageFile: 'pyproject.toml',
+              deps: [],
+              lockFiles: ['poetry.lock'],
             },
           ],
         },

@@ -38,9 +38,9 @@ class PerlVersioningApi extends GenericVersioningApi {
           while (component.length < 3) {
             component += '0';
           }
-          return Number.parseInt(component, 10);
+          return Number.parseInt(component);
         }) ?? /* istanbul ignore next */ [];
-    const release = [Number.parseInt(intPart, 10), ...decimalComponents];
+    const release = [Number.parseInt(intPart), ...decimalComponents];
     return { release, prerelease };
   }
 

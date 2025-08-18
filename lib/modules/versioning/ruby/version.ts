@@ -58,7 +58,7 @@ const pgteUpperBound = (version: string): string => {
 // istanbul ignore next
 const incrementLastSegment = (version: string): string => {
   const segments = releaseSegments(version);
-  const nextLast = parseInt(segments.pop() as string, 10) + 1;
+  const nextLast = parseInt(segments.pop() as string) + 1;
 
   return [...segments, nextLast].join('.');
 };

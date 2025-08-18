@@ -110,7 +110,7 @@ export async function updateLockedDependency(
         }
       }
       // Don't return {} if we're a parent update or else the whole update will fail
-      // istanbul ignore if: too hard to replicate
+      /* v8 ignore start -- too hard to replicate */
       if (isParentUpdate) {
         const files: Record<string, string> = {};
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
@@ -118,7 +118,7 @@ export async function updateLockedDependency(
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         files[lockFile!] = lockFileContent!;
         return { status, files };
-      }
+      } /* v8 ignore stop -- too hard to replicate */
       return { status };
     }
     logger.debug(
@@ -151,9 +151,8 @@ export async function updateLockedDependency(
         logger.debug(
           `${depName} can be updated to ${newVersion} in-range with matching constraint "${constraint}" in ${
             // TODO: types (#22198)
-            parentDepName
-              ? `${parentDepName}@${parentVersion!}`
-              : /* istanbul ignore next: hard to test */ packageFile
+            /* v8 ignore next -- hard to test */
+            parentDepName ? `${parentDepName}@${parentVersion!}` : packageFile
           }`,
         );
       } else if (parentDepName && parentVersion) {
@@ -233,19 +232,19 @@ export async function updateLockedDependency(
         parentUpdateConfig,
         true,
       );
-      // istanbul ignore if: hard to test due to recursion
+      /* v8 ignore start -- hard to test due to recursion */
       if (!parentUpdateResult.files) {
         logger.debug(
           // TODO: types (#22198)
           `Update of ${depName} to ${newVersion} impossible due to failed update of parent ${parentUpdate.depName} to ${parentUpdate.newVersion}`,
         );
         return { status: 'update-failed' };
-      }
+      } /* v8 ignore stop -- needs test */
       newPackageJsonContent =
         parentUpdateResult.files[packageFile] || newPackageJsonContent;
+      /* v8 ignore next 2 -- hard to test */
       newLockFileContent =
-        parentUpdateResult.files[lockFile] ||
-        /* istanbul ignore next: hard to test */ newLockFileContent;
+        parentUpdateResult.files[lockFile] || newLockFileContent;
     }
     const files: Record<string, string> = {};
     if (newLockFileContent) {
@@ -260,8 +259,9 @@ export async function updateLockedDependency(
       return { status: 'unsupported' };
     }
     return { status: 'updated', files };
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore start -- needs test */
+  } catch (err) {
     logger.error({ err }, 'updateLockedDependency() error');
     return { status: 'update-failed' };
-  }
+  } /* v8 ignore stop -- needs test */
 }

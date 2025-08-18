@@ -6,13 +6,15 @@ import {
   withDebugMessage,
 } from '../../../util/schema-utils';
 
-const StepsSchema = z.object({
+const Steps = z.object({
   uses: z.string(),
-  with: LooseRecord(z.string()),
+  with: LooseRecord(
+    z.union([z.string(), z.number().transform((s) => s.toString())]),
+  ),
 });
-export type Steps = z.infer<typeof StepsSchema>;
+export type Steps = z.infer<typeof Steps>;
 
-const WorkFlowJobsSchema = z.object({
+const WorkFlowJobs = z.object({
   jobs: LooseRecord(
     z.object({
       container: z
@@ -33,17 +35,17 @@ const WorkFlowJobsSchema = z.object({
       'runs-on': z
         .union([z.string().transform((v) => [v]), z.array(z.string())])
         .catch([]),
-      steps: LooseArray(StepsSchema).catch([]),
+      steps: LooseArray(Steps).catch([]),
     }),
   ),
 });
 
-const ActionsSchema = z.object({
+const Actions = z.object({
   runs: z.object({
     using: z.string(),
-    steps: LooseArray(StepsSchema).optional().catch([]),
+    steps: LooseArray(Steps).optional().catch([]),
   }),
 });
-export const WorkflowSchema = Yaml.pipe(
-  z.union([WorkFlowJobsSchema, ActionsSchema, z.null()]),
+export const Workflow = Yaml.pipe(
+  z.union([WorkFlowJobs, Actions, z.null()]),
 ).catch(withDebugMessage(null, 'Does not match schema'));

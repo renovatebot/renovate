@@ -40,7 +40,7 @@ export function setPlatformApi(name: PlatformId): void {
 }
 
 export async function initPlatform(config: AllConfig): Promise<AllConfig> {
-  setPrivateKey(config.gitPrivateKey);
+  setPrivateKey(config.gitPrivateKey, config.gitPrivateKeyPassphrase);
   setNoVerify(config.gitNoVerify ?? []);
   // TODO: `platform` (#22198)
   setPlatformApi(config.platform!);

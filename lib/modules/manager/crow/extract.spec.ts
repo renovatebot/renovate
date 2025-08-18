@@ -1,0 +1,408 @@
+import { codeBlock } from 'common-tags';
+import { extractPackageFile } from '.';
+
+describe('modules/manager/crow/extract', () => {
+  describe('extractPackageFile()', () => {
+    it('returns null for empty', () => {
+      expect(extractPackageFile('', '', {})).toBeNull();
+    });
+
+    it('returns null for non-object YAML', () => {
+      expect(extractPackageFile('nothing here', '', {})).toBeNull();
+      expect(extractPackageFile('clone: null', '', {})).toBeNull();
+    });
+
+    it('returns null for malformed YAML', () => {
+      expect(extractPackageFile('nothing here\n:::::::', '', {})).toBeNull();
+    });
+
+    it('extracts multiple image lines', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          clone:
+            git:
+              image: woodpeckerci/plugin-git:2.0.3
+
+          steps:
+            redis:
+              image: quay.io/something/redis:alpine
+
+            worker:
+              image: "node:10.0.0"
+
+            db:
+              image: "postgres:9.4.0"
+
+            vote:
+              image: dockersamples/examplevotingapp_vote:before
+
+            result:
+              image: 'dockersamples/examplevotingapp_result:before'
+
+            votingworker:
+              image: dockersamples/examplevotingapp_worker
+
+            visualizer:
+              image: dockersamples/visualizer:stable
+
+            debugapp:
+              image: app-local-debug
+
+          services:
+            service-postgres:
+              image: postgres:9.5.0
+        `,
+        '',
+        {},
+      );
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'quay.io/something/redis',
+            packageName: 'quay.io/something/redis',
+            currentValue: 'alpine',
+            currentDigest: undefined,
+            replaceString: 'quay.io/something/redis:alpine',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'node',
+            packageName: 'node',
+            currentValue: '10.0.0',
+            currentDigest: undefined,
+            replaceString: 'node:10.0.0',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'postgres',
+            packageName: 'postgres',
+            currentValue: '9.4.0',
+            currentDigest: undefined,
+            replaceString: 'postgres:9.4.0',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'dockersamples/examplevotingapp_vote',
+            packageName: 'dockersamples/examplevotingapp_vote',
+            currentValue: 'before',
+            currentDigest: undefined,
+            replaceString: 'dockersamples/examplevotingapp_vote:before',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'dockersamples/examplevotingapp_result',
+            packageName: 'dockersamples/examplevotingapp_result',
+            currentValue: 'before',
+            currentDigest: undefined,
+            replaceString: 'dockersamples/examplevotingapp_result:before',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'dockersamples/examplevotingapp_worker',
+            packageName: 'dockersamples/examplevotingapp_worker',
+            currentValue: undefined,
+            currentDigest: undefined,
+            replaceString: 'dockersamples/examplevotingapp_worker',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'dockersamples/visualizer',
+            packageName: 'dockersamples/visualizer',
+            currentValue: 'stable',
+            currentDigest: undefined,
+            replaceString: 'dockersamples/visualizer:stable',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'app-local-debug',
+            packageName: 'app-local-debug',
+            currentValue: undefined,
+            currentDigest: undefined,
+            replaceString: 'app-local-debug',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'woodpeckerci/plugin-git',
+            packageName: 'woodpeckerci/plugin-git',
+            currentValue: '2.0.3',
+            currentDigest: undefined,
+            replaceString: 'woodpeckerci/plugin-git:2.0.3',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'postgres',
+            packageName: 'postgres',
+            currentValue: '9.5.0',
+            currentDigest: undefined,
+            replaceString: 'postgres:9.5.0',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+        ],
+      });
+    });
+
+    it('extracts image and replaces registry', () => {
+      const res = extractPackageFile(
+        `
+    pipeline:
+      nginx:
+        image: quay.io/nginx:0.0.1
+      `,
+        '',
+        {
+          registryAliases: {
+            'quay.io': 'my-quay-mirror.registry.com',
+          },
+        },
+      );
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'quay.io/nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '0.0.1',
+            datasource: 'docker',
+            depName: 'quay.io/nginx',
+            packageName: 'my-quay-mirror.registry.com/nginx',
+            replaceString: 'quay.io/nginx:0.0.1',
+          },
+        ],
+      });
+    });
+
+    it('extracts image but no replacement', () => {
+      const res = extractPackageFile(
+        `
+        pipeline:
+          nginx:
+            image: quay.io/nginx:0.0.1
+        `,
+        '',
+        {
+          registryAliases: {
+            'index.docker.io': 'my-docker-mirror.registry.com',
+          },
+        },
+      );
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '0.0.1',
+            datasource: 'docker',
+            depName: 'quay.io/nginx',
+            packageName: 'quay.io/nginx',
+            replaceString: 'quay.io/nginx:0.0.1',
+          },
+        ],
+      });
+    });
+
+    it('extracts image and no double replacement', () => {
+      const res = extractPackageFile(
+        `
+        pipeline:
+          nginx:
+            image: quay.io/nginx:0.0.1
+        `,
+        '',
+        {
+          registryAliases: {
+            'quay.io': 'my-quay-mirror.registry.com',
+            'my-quay-mirror.registry.com': 'quay.io',
+          },
+        },
+      );
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'quay.io/nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '0.0.1',
+            datasource: 'docker',
+            depName: 'quay.io/nginx',
+            packageName: 'my-quay-mirror.registry.com/nginx',
+            replaceString: 'quay.io/nginx:0.0.1',
+          },
+        ],
+      });
+    });
+
+    it('extracts the 1.0.0 version', () => {
+      const res = extractPackageFile(
+        `
+        steps:
+          redis:
+            image: quay.io/something/redis:1.0.0
+          `,
+        '',
+        {},
+      );
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'quay.io/something/redis',
+            packageName: 'quay.io/something/redis',
+            currentValue: '1.0.0',
+            currentDigest: undefined,
+            replaceString: 'quay.io/something/redis:1.0.0',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+        ],
+      });
+    });
+
+    it('should parse multiple sources of dependencies together', () => {
+      const res = extractPackageFile(
+        `
+        clone:
+          git:
+            image: woodpeckerci/plugin-git:latest
+        steps:
+          redis:
+            image: quay.io/something/redis:alpine
+        `,
+        '',
+        {},
+      );
+
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'quay.io/something/redis',
+            packageName: 'quay.io/something/redis',
+            currentValue: 'alpine',
+            currentDigest: undefined,
+            replaceString: 'quay.io/something/redis:alpine',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'woodpeckerci/plugin-git',
+            packageName: 'woodpeckerci/plugin-git',
+            currentValue: 'latest',
+            currentDigest: undefined,
+            replaceString: 'woodpeckerci/plugin-git:latest',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+        ],
+      });
+    });
+
+    it('return dependency when a plugin-git is cloned', () => {
+      const res = extractPackageFile(
+        `
+        clone:
+          git:
+            image: woodpeckerci/plugin-git:latest
+        `,
+        '',
+        {},
+      );
+
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'woodpeckerci/plugin-git',
+            packageName: 'woodpeckerci/plugin-git',
+            currentValue: 'latest',
+            currentDigest: undefined,
+            replaceString: 'woodpeckerci/plugin-git:latest',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+        ],
+      });
+    });
+
+    it('return null when no dependencies are provided', () => {
+      const res = extractPackageFile(
+        `
+        info:
+          version:
+            3.5
+        `,
+        '',
+        {},
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('handles empty pipeline section gracefully', () => {
+      const res = extractPackageFile(
+        `
+        pipeline: {}
+        steps:
+          redis:
+            image: quay.io/something/redis:alpine
+        `,
+        '',
+        {},
+      );
+
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'quay.io/something/redis',
+            packageName: 'quay.io/something/redis',
+            currentValue: 'alpine',
+            currentDigest: undefined,
+            replaceString: 'quay.io/something/redis:alpine',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+        ],
+      });
+    });
+
+    it('returns null when pipeline keys exist but contain no valid images', () => {
+      const res = extractPackageFile(
+        `
+        pipeline:
+          test:
+            script: echo "hello"
+        steps:
+          build:
+            commands:
+              - make build
+        `,
+        '',
+        {},
+      );
+
+      expect(res).toBeNull();
+    });
+  });
+});

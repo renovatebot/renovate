@@ -2,25 +2,25 @@ import { z } from 'zod';
 import { logger } from '../../../logger';
 import { LooseArray } from '../../../util/schema-utils';
 
-const BitbucketSourceTypeSchema = z.enum(['commit_directory', 'commit_file']);
+const BitbucketSourceType = z.enum(['commit_directory', 'commit_file']);
 
-const SourceResultsSchema = z.object({
+const SourceResults = z.object({
   path: z.string(),
-  type: BitbucketSourceTypeSchema,
+  type: BitbucketSourceType,
   commit: z.object({
     hash: z.string(),
   }),
 });
 
-const PagedSchema = z.object({
+const Paged = z.object({
   page: z.number().optional(),
   pagelen: z.number(),
   size: z.number().optional(),
   next: z.string().optional(),
 });
 
-export const PagedSourceResultsSchema = PagedSchema.extend({
-  values: z.array(SourceResultsSchema),
+export const PagedSourceResults = Paged.extend({
+  values: z.array(SourceResults),
 });
 
 export const RepoInfo = z

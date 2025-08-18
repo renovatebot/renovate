@@ -295,6 +295,56 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       ]);
     });
 
+    it('uses locked version corresponding to workspace', async () => {
+      npm.getNpmLock.mockResolvedValue({
+        lockedVersions: {
+          a: '1.0.0',
+          'workspace/node_modules/a': '2.0.0',
+          c: '3.0.0',
+        },
+        lockfileVersion: 1,
+      });
+      const packageFiles = [
+        {
+          managerData: { npmLock: 'package-lock.json' },
+          extractedConstraints: {},
+          deps: [
+            { depName: 'a', currentValue: '1.0.0' },
+            { depName: 'c', currentValue: '3.0.0' },
+          ],
+          packageFile: 'some-file',
+        },
+        {
+          managerData: { npmLock: 'package-lock.json' },
+          extractedConstraints: {},
+          deps: [{ depName: 'a', currentValue: '2.0.0' }],
+          packageFile: 'workspace/some-file',
+        },
+      ];
+      await getLockedVersions(packageFiles);
+      expect(packageFiles).toEqual([
+        {
+          extractedConstraints: { npm: '<7' },
+          deps: [
+            { currentValue: '1.0.0', depName: 'a', lockedVersion: '1.0.0' },
+            { currentValue: '3.0.0', depName: 'c', lockedVersion: '3.0.0' },
+          ],
+          lockFiles: ['package-lock.json'],
+          managerData: { npmLock: 'package-lock.json' },
+          packageFile: 'some-file',
+        },
+        {
+          extractedConstraints: { npm: '<7' },
+          deps: [
+            { currentValue: '2.0.0', depName: 'a', lockedVersion: '2.0.0' },
+          ],
+          lockFiles: ['package-lock.json'],
+          managerData: { npmLock: 'package-lock.json' },
+          packageFile: 'workspace/some-file',
+        },
+      ]);
+    });
+
     it('does nothing if managerData is not present', async () => {
       npm.getNpmLock.mockResolvedValue({
         lockedVersions: { a: '1.0.0', b: '2.0.0', c: '3.0.0' },
