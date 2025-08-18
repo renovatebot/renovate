@@ -1,6 +1,7 @@
 import { quote } from 'shlex';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
+import { newlineRegex } from '../../../util/regex';
 
 export interface UpdatePackage {
   filePath: string;
@@ -44,7 +45,7 @@ export async function getAllPackages(
     execOptions,
   );
   return result.stdout
-    .split('\n')
+    .split(newlineRegex)
     .map((line) => line.split(' - '))
     .filter((line) => line.length === 2)
     .map((line) => {
