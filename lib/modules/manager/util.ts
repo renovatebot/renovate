@@ -1,5 +1,5 @@
 import { detectPlatform } from '../../util/common';
-import { getHttpUrl, parseGitUrl } from '../../util/git/url';
+import { parseGitUrl } from '../../util/git/url';
 import { GitRefsDatasource } from '../datasource/git-refs';
 import { GitTagsDatasource } from '../datasource/git-tags';
 import { GithubTagsDatasource } from '../datasource/github-tags';
