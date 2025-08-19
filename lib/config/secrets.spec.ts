@@ -72,6 +72,25 @@ describe('config/secrets', () => {
       });
     });
 
+    it('replaces all secrets and variables', () => {
+      const config = {
+        secrets: { FOO: 'foo', BAR: 'bar', BAZ: 'baz' },
+        variables: { FOO: 'foo', BAR: 'bar', BAZ: 'baz' },
+        customEnvVariables: {
+          SECRETS: '{{ secrets.FOO }} {{ secrets.BAR }} {{ secrets.BAZ }}',
+          VARIABLES:
+            '{{ variables.FOO }} {{ variables.BAR }} {{ variables.BAZ }}',
+        },
+      };
+      const result = applySecretsAndVariablesToConfig({ config });
+      expect(result).toEqual({
+        customEnvVariables: {
+          SECRETS: 'foo bar baz',
+          VARIABLES: 'foo bar baz',
+        },
+      });
+    });
+
     it('preserves secrets and variables if delete flags are false', () => {
       const config = {
         secrets: { TOKEN: 'secret123' },
