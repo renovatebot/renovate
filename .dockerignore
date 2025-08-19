@@ -1,7 +1,0 @@
-*
-!tools/docker/bin
-!dist/
-!package.json
-!pnpm-lock.yaml
-!renovate-schema.json
-!license
