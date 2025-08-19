@@ -1,6 +1,0 @@
-# foo.bazelrc
-
-# This should be ignored, because it is registered for the ci configuration.
-build:ci --registry=https://example.com/debug_registry.git
-
-build --color=yes

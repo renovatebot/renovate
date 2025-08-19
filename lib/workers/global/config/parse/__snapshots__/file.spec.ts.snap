@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`workers/global/config/parse/file .getConfig() migrates 1`] = `
-{
-  "rangeStrategy": "bump",
-}
-`;

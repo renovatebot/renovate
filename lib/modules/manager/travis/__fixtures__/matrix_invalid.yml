@@ -1,4 +1,0 @@
-jobs:
-  include:
-    - invalid: '1.0'
-

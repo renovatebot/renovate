@@ -1,3 +1,0 @@
-[tool.black]
-line-length = 100
-py36 = true
