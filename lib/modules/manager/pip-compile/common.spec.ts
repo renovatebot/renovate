@@ -6,6 +6,7 @@ import {
   extractPythonVersion,
   getRegistryCredVarsFromPackageFiles,
   matchManager,
+  optionsWithArguments,
 } from './common';
 import { inferCommandExecDir } from './utils';
 import { hostRules } from '~test/util';
@@ -152,12 +153,27 @@ describe('modules/manager/pip-compile/common', () => {
     it.each(allowedOptions.uv)(
       'returned sourceFiles must not contain options (uv)',
       (argument: string) => {
+        const valueOrFlag = optionsWithArguments.includes(argument)
+          ? `${argument}=reqs.txt`
+          : `${argument}`;
         const sourceFiles = extractHeaderCommand(
-          getCommandInHeader(`uv pip compile ${argument}=reqs.txt reqs.in`),
+          getCommandInHeader(`uv pip compile ${valueOrFlag} reqs.in`),
           'reqs.txt',
         ).sourceFiles;
         expect(sourceFiles).not.toContainEqual(argument);
         expect(sourceFiles).toEqual(['reqs.in']);
+      },
+    );
+
+    it.each(['--fork-strategy', '--exclude-newer'])(
+      'errors when uv no-argument options are provided with a value',
+      (argument: string) => {
+        expect(() =>
+          extractHeaderCommand(
+            getCommandInHeader(`uv pip compile ${argument}=value reqs.in`),
+            'reqs.txt',
+          ),
+        ).toThrow(/must not have an argument/);
       },
     );
 

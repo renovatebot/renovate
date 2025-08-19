@@ -131,13 +131,17 @@ const uvOptionsWithArguments = [
   '--resolution',
   '--prerelease',
   '--fork-strategy',
-  '--exclude-newer',
   ...commonOptionsWithArguments,
 ];
 export const optionsWithArguments = [
   ...pipOptionsWithArguments,
   ...uvOptionsWithArguments,
 ];
+const noArgumentOptions: Record<CommandType, string[]> = {
+  'pip-compile': [],
+  uv: ['--fork-strategy', '--exclude-newer'],
+  custom: [],
+};
 const allowedCommonOptions = [
   '-v',
   '--generate-hashes',
@@ -157,6 +161,8 @@ export const allowedOptions: Record<CommandType, string[]> = {
   uv: [
     '--no-strip-extras',
     '--universal',
+    '--exclude-newer',
+    '--no-emit-index-url',
     ...allowedCommonOptions,
     ...uvOptionsWithArguments,
   ],
@@ -217,6 +223,9 @@ export function extractHeaderCommand(
 
     if (arg.includes('=')) {
       const [option, value] = arg.split('=');
+      if (noArgumentOptions[commandType].includes(option)) {
+        throw new Error(`Option ${option} must not have an argument`);
+      }
       if (option === '--extra') {
         result.extra = result.extra ?? [];
         result.extra.push(value);
@@ -310,6 +319,7 @@ function throwForDisallowedOption(arg: string): void {
     throw new Error(`Option ${arg} not allowed for this manager`);
   }
 }
+
 function throwForNoEqualSignInOptionWithArgument(arg: string): void {
   if (optionsWithArguments.includes(arg)) {
     throw new Error(
@@ -317,6 +327,7 @@ function throwForNoEqualSignInOptionWithArgument(arg: string): void {
     );
   }
 }
+
 function throwForUnknownOption(commandType: CommandType, arg: string): void {
   if (arg.includes('=')) {
     const [option] = arg.split('=');
