@@ -92,5 +92,41 @@ describe('workers/repository/update/branch/automerge', () => {
       platform.getBranchStatus.mockResolvedValueOnce('green');
       expect(await tryBranchAutomerge(config)).toBe('automerged');
     });
+
+    it('uses automergeMergeCommitMessage if automergeStrategy is merge-commit', async () => {
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.automergeStrategy = 'merge-commit';
+      config.automergeMergeCommitMessage = 'Automerged by renovate bot';
+      config.branchName = 'test-branch';
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+
+      const res = await tryBranchAutomerge(config);
+
+      expect(res).toBe('automerged');
+      expect(scm.mergeAndPush).toHaveBeenCalledWith(
+        'test-branch',
+        'merge-commit',
+        'Automerged by renovate bot',
+      );
+    });
+
+    it("doesn't use automergeMergeCommitMessage if automergeStrategy is not merge-commit", async () => {
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.automergeMergeCommitMessage = 'Automerged by renovate bot';
+      config.branchName = 'test-branch';
+
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+
+      const res = await tryBranchAutomerge(config);
+
+      expect(res).toBe('automerged');
+      expect(scm.mergeAndPush).toHaveBeenCalledWith(
+        'test-branch',
+        'auto',
+        undefined,
+      );
+    });
   });
 });
