@@ -294,7 +294,7 @@ Example use:
 
 ## automergeMergeCommitMessage
 
-Use this only if you configure `automergeType="branch"` and `automergeStrategy` is `merge-commit` or `squash`.
+Use this only if you configure `automergeType="branch"` and `automergeStrategy="merge-commit"`.
 
 When you configure branch automerge using merge commits then you can use this option to set the merge commit message.
 This can be useful if you want to differentiate between Renovate's automerge commits and other (merge) commits.
