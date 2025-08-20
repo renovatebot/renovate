@@ -12,7 +12,7 @@ describe('modules/platform/scm-manager/utils', () => {
       strategy          | method
       ${undefined}      | ${null}
       ${'auto'}         | ${null}
-      ${'fast-forward'} | ${'FAST_FORWARD_IF_POSSIBLE'}
+      ${'fast-forward'} | ${'FAST_FORWARD_ONLY'}
       ${'merge-commit'} | ${'MERGE_COMMIT'}
       ${'rebase'}       | ${'REBASE'}
       ${'squash'}       | ${'SQUASH'}

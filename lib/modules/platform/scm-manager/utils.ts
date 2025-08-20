@@ -100,7 +100,7 @@ export function getMergeMethod(
 ): PrMergeMethod | null {
   switch (strategy) {
     case 'fast-forward':
-      return 'FAST_FORWARD_IF_POSSIBLE';
+      return 'FAST_FORWARD_ONLY';
     case 'merge-commit':
       return 'MERGE_COMMIT';
     case 'rebase':

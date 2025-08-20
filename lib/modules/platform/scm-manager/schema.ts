@@ -31,6 +31,7 @@ export const PrMergeMethodSchema = z.enum([
   'MERGE_COMMIT',
   'REBASE',
   'FAST_FORWARD_IF_POSSIBLE',
+  'FAST_FORWARD_ONLY',
   'SQUASH',
 ]);
 export type PrMergeMethod = z.infer<typeof PrMergeMethodSchema>;
