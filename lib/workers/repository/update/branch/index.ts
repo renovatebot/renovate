@@ -649,10 +649,16 @@ export async function processBranch(
         platformPrOptions.usePlatformAutomerge &&
         platform.reattemptPlatformAutomerge
       ) {
-        await platform.reattemptPlatformAutomerge({
-          number: branchPr.number,
-          platformPrOptions,
-        });
+        if (GlobalConfig.get('dryRun')) {
+          logger.info(
+            `DRY-RUN: Would reattempt platform automerge for PR #${branchPr.number}`,
+          );
+        } else {
+          await platform.reattemptPlatformAutomerge({
+            number: branchPr.number,
+            platformPrOptions,
+          });
+        }
       }
       if (platform.refreshPr) {
         await platform.refreshPr(branchPr.number);
