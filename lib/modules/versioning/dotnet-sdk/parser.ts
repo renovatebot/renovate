@@ -24,15 +24,15 @@ export function parseVersion(input: string): DotnetSdkVersion | null {
 
   const res: DotnetSdkVersion = {
     type: 'dotnet-sdk-version',
-    major: Number.parseInt(major, 10),
+    major: Number.parseInt(major),
   };
 
   if (minor) {
-    res.minor = Number.parseInt(minor, 10);
+    res.minor = Number.parseInt(minor);
   }
 
   if (patch) {
-    res.patch = Number.parseInt(patch, 10);
+    res.patch = Number.parseInt(patch);
   }
 
   if (prerelease) {
@@ -48,7 +48,7 @@ const floatingRangeRegex = regEx(
 
 function parseFloatingComponent(input: string): [number, undefined | 'x'] {
   const parts = input.split('.');
-  const first = Number.parseInt(parts[0], 10);
+  const first = Number.parseInt(parts[0]);
   let second: undefined | 'x' = undefined;
   if (parts.length > 1 && parts[1] === 'x') {
     second = 'x';
@@ -101,7 +101,7 @@ export function parseFloatingRange(
     };
   }
 
-  const majorNum = Number.parseInt(major, 10);
+  const majorNum = Number.parseInt(major);
   if (!Number.isNaN(majorNum)) {
     res = { ...res, major: majorNum };
   }
@@ -116,7 +116,7 @@ export function parseFloatingRange(
     };
   }
 
-  const minorNum = Number.parseInt(minor, 10);
+  const minorNum = Number.parseInt(minor);
   if (!Number.isNaN(minorNum)) {
     res = { ...res, minor: minorNum };
   }
@@ -130,9 +130,9 @@ export function parseFloatingRange(
     };
   }
 
-  const patchNum = Number.parseInt(patch, 10);
+  const patchNum = Number.parseInt(patch);
   if (!Number.isNaN(patchNum)) {
-    res = { ...res, patch: Number.parseInt(patch, 10) };
+    res = { ...res, patch: Number.parseInt(patch) };
   }
 
   if (res.prerelease) {
