@@ -3,7 +3,11 @@ import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
-import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import {
+  getSiblingFileName,
+  localPathExists,
+  readLocalFile,
+} from '../../../../util/fs';
 import { getGitEnvironmentVariables } from '../../../../util/git/auth';
 import { Result } from '../../../../util/result';
 import { PypiDatasource } from '../../../datasource/pypi';
@@ -73,6 +77,20 @@ export class PdmProcessor implements PyProjectProcessor {
     return Promise.resolve(deps);
   }
 
+  async getLockfiles(
+    _project: PyProject,
+    lockfiles: string[],
+    packageFile: string,
+  ): Promise<string[]> {
+    const lockFileName = getSiblingFileName(packageFile, 'pdm.lock');
+    if ((await localPathExists(lockFileName)) !== true) {
+      logger.debug({ packageFile }, `No pdm.lock found`);
+      return lockfiles;
+    }
+    lockfiles.push(lockFileName);
+    return lockfiles;
+  }
+
   async updateArtifacts(
     updateArtifact: UpdateArtifact,
     project: PyProject,
@@ -138,7 +156,6 @@ export class PdmProcessor implements PyProjectProcessor {
 
       return fileChanges.length ? fileChanges : null;
     } catch (err) {
-      // istanbul ignore if
       if (err.message === TEMPORARY_ERROR) {
         throw err;
       }
