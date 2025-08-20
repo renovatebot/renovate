@@ -26,15 +26,13 @@ Those permissions can be granted on a repository level within the permission set
 
 ## Install Review Plugin
 
-To let Renovate access the Pull Request API, you must install the Review Plugin.
-Find the list of available plugins by going to to Administration -> Plugins -> Available.
+To let Renovate access the Pull Request API, you must install the Review Plugin with at least version 3.11.0.
+Find the list of available plugins by going to Administration -> Plugins -> Available.
 
 ## Supported versions of SCM-Manager
 
-Renovate supports SCM-Manager major version `2.x` and `3.x`.
-
-The minimum version for the `2.x` range is `2.48.0`.
-The minimum version for the `3.x` range is `3.0.0`.
+Renovate supports SCM-Manager major version `3.x`.
+The minimum version for the `3.x` range is `3.10.0`.
 
 ## Automerge
 
