@@ -1440,6 +1440,8 @@ Some sections in the Dependency Dashboard also contain an action that applies to
 If there are categories in that section, the action will be put in an extra "All" category at the end of the section.
 This is to explicitly clarify that the action applies to all updates in the section, not to just a specific category.
 
+The Dependency Dashboard categories are only used to visually organize updates within the Dependency Dashboard issue. They do not impact grouping of updates into a single update like how e.g. `branchName` and `groupName` do.
+
 ## dependencyDashboardFooter
 
 ## dependencyDashboardHeader
