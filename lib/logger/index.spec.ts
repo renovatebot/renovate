@@ -422,4 +422,43 @@ describe('logger/index', () => {
     expect(logged.someFn).toBe('[function]');
     expect(logged.someObject.field).toBe('**redacted**');
   });
+
+  it('sanitizes secrets in object keys', () => {
+    let logged: Record<string, any> = {};
+    vi.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
+      partial<WriteStream>({
+        writable: true,
+        write(x: string): boolean {
+          logged = JSON.parse(x);
+          return true;
+        },
+      }),
+    );
+
+    addStream({
+      name: 'logfile',
+      path: 'file.log',
+      level: 'debug',
+    });
+
+    const secret = 'https://secret@example.com';
+    const data: Record<string, any> = {
+      [secret]: { nested: secret },
+    };
+
+    logger.debug(
+      {
+        data,
+        secret,
+      },
+      'logs secrets in keys',
+    );
+
+    expect(logged.data).toStrictEqual({
+      'https://**redacted**@example.com': {
+        nested: 'https://**redacted**@example.com',
+      },
+    });
+    expect(logged.secret).toBe('https://**redacted**@example.com');
+  });
 });
