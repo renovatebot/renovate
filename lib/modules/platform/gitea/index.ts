@@ -323,28 +323,35 @@ const platform: Platform = {
       throw new Error(REPOSITORY_BLOCKED);
     }
 
-    if (repo.allow_rebase && repo.default_merge_style === 'rebase') {
-      config.mergeMethod = 'rebase';
-    } else if (
-      repo.allow_rebase_explicit &&
-      repo.default_merge_style === 'rebase-merge'
-    ) {
-      config.mergeMethod = 'rebase-merge';
-    } else if (
-      repo.allow_squash_merge &&
-      repo.default_merge_style === 'squash'
-    ) {
-      config.mergeMethod = 'squash';
-    } else if (
-      repo.allow_merge_commits &&
-      repo.default_merge_style === 'merge'
-    ) {
-      config.mergeMethod = 'merge';
-    } else if (
-      repo.allow_fast_forward_only_merge &&
-      repo.default_merge_style === 'fast-forward-only'
-    ) {
-      config.mergeMethod = 'fast-forward-only';
+    const giteaOrdering: PRMergeMethod[] = [
+      'merge',
+      'rebase',
+      'rebase-merge',
+      'squash',
+      'fast-forward-only',
+    ];
+
+    const candidateMergeStyles = Array.from(
+      new Set<PRMergeMethod>([repo.default_merge_style, ...giteaOrdering]),
+    );
+
+    let selectedMergeStyle: PRMergeMethod | undefined;
+
+    for (const s of candidateMergeStyles) {
+      if (
+        (s === 'merge' && repo.allow_merge_commits) ||
+        (s === 'rebase' && repo.allow_rebase) ||
+        (s === 'rebase-merge' && repo.allow_rebase_explicit) ||
+        (s === 'squash' && repo.allow_squash_merge) ||
+        (s === 'fast-forward-only' && repo.allow_fast_forward_only_merge)
+      ) {
+        selectedMergeStyle = s;
+        break;
+      }
+    }
+
+    if (selectedMergeStyle) {
+      config.mergeMethod = selectedMergeStyle;
     } else {
       logger.debug(
         'Repository has no allowed merge methods - aborting renovation',
