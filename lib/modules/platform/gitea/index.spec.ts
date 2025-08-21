@@ -556,13 +556,12 @@ describe('modules/platform/gitea/index', () => {
       );
     });
 
-    it('should fall back to merge method "fast-forward-only"', async () => {
+    it('should select default merge method when it is allowed', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get(`/repos/${initRepoCfg.repository}`)
         .reply(200, {
           ...mockRepo,
-          allow_rebase: false,
           allow_fast_forward_only_merge: true,
           default_merge_style: 'fast-forward-only',
         });
@@ -577,57 +576,16 @@ describe('modules/platform/gitea/index', () => {
       );
     });
 
-    it('should fall back to merge method "rebase-merge"', async () => {
+    it('should fall back to merge method as per ordered list when default not allowed', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get(`/repos/${initRepoCfg.repository}`)
         .reply(200, {
           ...mockRepo,
-          allow_rebase: false,
-          allow_rebase_explicit: true,
-          default_merge_style: 'rebase-merge',
-        });
-      await initFakePlatform(scope);
-
-      await gitea.initRepo(initRepoCfg);
-
-      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({
-          mergeMethod: 'rebase-merge',
-        }),
-      );
-    });
-
-    it('should fall back to merge method "squash"', async () => {
-      const scope = httpMock
-        .scope('https://gitea.com/api/v1')
-        .get(`/repos/${initRepoCfg.repository}`)
-        .reply(200, {
-          ...mockRepo,
-          allow_rebase: false,
-          allow_squash_merge: true,
-          default_merge_style: 'squash',
-        });
-      await initFakePlatform(scope);
-
-      await gitea.initRepo(initRepoCfg);
-
-      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({
-          mergeMethod: 'squash',
-        }),
-      );
-    });
-
-    it('should fall back to merge method "merge"', async () => {
-      const scope = httpMock
-        .scope('https://gitea.com/api/v1')
-        .get(`/repos/${initRepoCfg.repository}`)
-        .reply(200, {
-          ...mockRepo,
-          allow_rebase: false,
           allow_merge_commits: true,
-          default_merge_style: 'merge',
+          allow_rebase: false,
+          allow_squash_merge: false,
+          default_merge_style: 'squash',
         });
       await initFakePlatform(scope);
 
