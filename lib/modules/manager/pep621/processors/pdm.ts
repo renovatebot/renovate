@@ -3,11 +3,7 @@ import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
-import {
-  getSiblingFileName,
-  localPathExists,
-  readLocalFile,
-} from '../../../../util/fs';
+import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
 import { getGitEnvironmentVariables } from '../../../../util/git/auth';
 import { Result } from '../../../../util/result';
 import { PypiDatasource } from '../../../datasource/pypi';
@@ -20,11 +16,13 @@ import type {
 import { PdmLockfile, type PyProject } from '../schema';
 import type { Pep621ManagerData } from '../types';
 import { depTypes } from '../utils';
-import type { PyProjectProcessor } from './types';
+import { BasePyProjectProcessor } from './abstract';
 
 const pdmUpdateCMD = 'pdm update --no-sync --update-eager';
 
-export class PdmProcessor implements PyProjectProcessor {
+export class PdmProcessor extends BasePyProjectProcessor {
+  override lockfileName = 'pdm.lock';
+
   process(
     project: PyProject,
     deps: PackageDependency[],
@@ -77,20 +75,6 @@ export class PdmProcessor implements PyProjectProcessor {
     return Promise.resolve(deps);
   }
 
-  async getLockfiles(
-    _project: PyProject,
-    lockfiles: string[],
-    packageFile: string,
-  ): Promise<string[]> {
-    const lockFileName = getSiblingFileName(packageFile, 'pdm.lock');
-    if ((await localPathExists(lockFileName)) !== true) {
-      logger.debug({ packageFile }, `No pdm.lock found`);
-      return lockfiles;
-    }
-    lockfiles.push(lockFileName);
-    return lockfiles;
-  }
-
   async updateArtifacts(
     updateArtifact: UpdateArtifact,
     project: PyProject,
@@ -100,7 +84,7 @@ export class PdmProcessor implements PyProjectProcessor {
     const { isLockFileMaintenance } = config;
 
     // abort if no lockfile is defined
-    const lockFileName = getSiblingFileName(packageFileName, 'pdm.lock');
+    const lockFileName = getSiblingFileName(packageFileName, this.lockfileName);
     try {
       const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
       if (!existingLockFileContent) {
