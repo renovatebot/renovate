@@ -144,6 +144,10 @@ export class MavenDatasource extends Datasource {
     };
     if (metadata.tags) {
       result.tags = metadata.tags;
+      if (result.tags.latest) {
+        logger.debug(`Setting respectLatest=false for maven ${packageName}`);
+        result.respectLatest = false;
+      }
     }
 
     if (!this.defaultRegistryUrls.includes(registryUrl)) {

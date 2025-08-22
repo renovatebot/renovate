@@ -20,7 +20,7 @@ export async function parseHCL(
     } else {
       return null;
     }
-  } catch /* istanbul ignore next */ {
+  } catch {
     return null;
   }
 }

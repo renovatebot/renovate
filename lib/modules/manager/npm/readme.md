@@ -12,6 +12,17 @@ The following `depTypes` are currently supported by the npm manager :
 - `pnpm.overrides`
 - `pnpm.catalog.<name>`, such as `pnpm.catalog.default` and `pnpm.catalog.myCatalog`. [Matches any default and named pnpm catalogs](https://pnpm.io/catalogs#defining-catalogs).
 
+### npm problems and workarounds
+
+#### Invalid lock file (npm ci fails)
+
+Unfortunately, `npm` itself sometimes generates invalid lock files which fail `npm ci`.
+Try adding `"postUpdateOptions": ["npmInstallTwice"]` to tell Renovate run any `npm install` command (which is used to update lock files) twice.
+This is less efficient than running npm once, but has been known to fix most problems of this type.
+
+If this npm bug remains unfixed, and it becomes too frequent for Renovate users, then we may need to modify Renovate to do this by default.
+Please post feedback to the Renovate repository "Discussions" if you're needing to use this feature frequently or widely.
+
 ### Yarn
 
 #### Version Selection / Installation

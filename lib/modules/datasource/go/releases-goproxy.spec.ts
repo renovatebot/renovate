@@ -476,6 +476,54 @@ describe('modules/datasource/go/releases-goproxy', () => {
       },
     );
 
+    it('handles major releases with 403 status (Artifactory)', async () => {
+      process.env.GOPROXY = baseUrl;
+
+      httpMock
+        .scope(`${baseUrl}/github.com/google/btree`)
+        .get('/@v/list')
+        .reply(
+          200,
+          codeBlock`
+          v1.0.0
+          v1.0.1
+        `,
+        )
+        .get('/@v/v1.0.0.info')
+        .reply(200, { Version: 'v1.0.0', Time: '2018-08-13T15:31:12Z' })
+        .get('/@v/v1.0.1.info')
+        .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' })
+        .get('/@latest')
+        .reply(200, { Version: 'v1.0.1' })
+        .get('/v2/@v/list')
+        .reply(
+          200,
+          codeBlock`
+          v2.0.0
+        `,
+        )
+        .get('/v2/@v/v2.0.0.info')
+        .reply(200, { Version: 'v2.0.0', Time: '2020-10-16T16:15:28Z' })
+        .get('/v2/@latest')
+        .reply(200, { Version: 'v2.0.0' })
+        .get('/v3/@v/list')
+        .reply(403);
+
+      const res = await datasource.getReleases({
+        packageName: 'github.com/google/btree',
+      });
+
+      expect(res).toEqual({
+        releases: [
+          { releaseTimestamp: '2018-08-13T15:31:12.000Z', version: 'v1.0.0' },
+          { releaseTimestamp: '2019-10-16T16:15:28.000Z', version: 'v1.0.1' },
+          { releaseTimestamp: '2020-10-16T16:15:28.000Z', version: 'v2.0.0' },
+        ],
+        sourceUrl: 'https://github.com/google/btree',
+        tags: { latest: 'v2.0.0' },
+      });
+    });
+
     it('handles gopkg.in major releases', async () => {
       process.env.GOPROXY = baseUrl;
 

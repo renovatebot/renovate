@@ -1,6 +1,7 @@
 ## Rate-Limited
 
-These updates are currently rate-limited. Click on a checkbox below to force their creation now.
+The following updates are currently rate-limited. To force their creation now, click on a checkbox below.
+
  - [ ] <!-- unlimit-branch=renovate/ansi-regex-6.x -->Update dependency ansi-regex to v6
  - [ ] <!-- unlimit-branch=renovate/commander-10.x -->Update dependency commander to v10
  - [ ] <!-- unlimit-branch=renovate/graceful-fs-4.x -->Update dependency graceful-fs to v4
@@ -8,7 +9,7 @@ These updates are currently rate-limited. Click on a checkbox below to force the
 
 ## Open
 
-These updates have all been created already. Click a checkbox below to force a retry/rebase of any.
+The following updates have all been created. To force a retry/rebase of any, click on a checkbox below.
 
  - [ ] <!-- rebase-branch=branchName1 -->[pr1](../pull/1)
  - [ ] <!-- rebase-branch=branchName2 -->[pr2](../pull/2) (`dep2`, `dep3`)
@@ -17,12 +18,12 @@ These updates have all been created already. Click a checkbox below to force a r
 
 ## Edited/Blocked
 
-These updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox.
+The following updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox below.
 
 - [ ] <!-- rebase-branch=renovate/docker-renovate-renovate-16.x -->[Update renovate/renovate Docker tag to v16.13.8](../pull/2)
 
 ## Closed/Ignored
 
-These updates were closed unmerged and will not be recreated unless you click a checkbox below.
+The following updates are blocked by an existing closed PR. To recreate the PR, click on a checkbox below.
 
 - [ ] <!-- recreate-branch=renovate/docker-renovate-renovate-16.10.8 -->[Update renovate/renovate:16.10.8 Docker digest to 6f9a209](../pull/1)

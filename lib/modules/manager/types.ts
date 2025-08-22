@@ -6,6 +6,7 @@ import type {
 } from '../../config/types';
 import type { Category } from '../../constants';
 import type {
+  MaybePromise,
   ModuleApi,
   RangeStrategy,
   SkipReason,
@@ -16,8 +17,6 @@ import type { MergeConfidence } from '../../util/merge-confidence/types';
 import type { Timestamp } from '../../util/timestamp';
 import type { RegistryStrategy } from '../datasource';
 import type { CustomExtractConfig } from './custom/types';
-
-export type MaybePromise<T> = T | Promise<T>;
 
 export interface ManagerData<T> {
   managerData?: T;
@@ -45,6 +44,7 @@ export interface UpdateArtifactsConfig {
   newVersion?: string;
   newMajor?: number;
   registryAliases?: Record<string, string>;
+  skipArtifactsUpdate?: boolean;
   lockFiles?: string[];
 }
 
@@ -315,6 +315,7 @@ export interface PostUpdateConfig<T = Record<string, any>>
   constraints?: Record<string, string> | null;
   updatedPackageFiles?: FileChange[];
   postUpdateOptions?: string[];
+  skipArtifactsUpdate?: boolean;
   skipInstalls?: boolean | null;
   ignoreScripts?: boolean;
 

@@ -341,6 +341,8 @@ Other valid cache namespaces are as follows:
 - `changelog-bitbucket-release`
 - `changelog-bitbucket-server-notes@v2`
 - `changelog-bitbucket-server-release`
+- `changelog-forgejo-notes@v2`
+- `changelog-forgejo-release`
 - `changelog-gitea-notes@v2`
 - `changelog-gitea-release`
 - `changelog-github-notes@v2`
@@ -376,6 +378,8 @@ Other valid cache namespaces are as follows:
 - `datasource-docker-tags`
 - `datasource-dotnet-version`
 - `datasource-endoflife-date`
+- `datasource-forgejo-releases`
+- `datasource-forgejo-tags`
 - `datasource-galaxy-collection`
 - `datasource-galaxy`
 - `datasource-git-refs`
@@ -470,6 +474,16 @@ The above configuration approach will mean the values are redacted in logs like 
          "secrets": {"SECRET_TOKEN": "***********"},
          "customEnvVariables": {"SECRET_TOKEN": "{{ secrets.SECRET_TOKEN }}"},
 ```
+
+## deleteAdditionalConfigFile
+
+If set to `true` Renovate tries to delete the additional self-hosted config file after reading it.
+
+The process that runs Renovate must have the correct permissions to delete the additional config file.
+
+<!-- prettier-ignore -->
+!!! tip
+    You can tell Renovate where to find your config file with the `RENOVATE_ADDITONAL_CONFIG_FILE` environment variable.
 
 ## deleteConfigFile
 
@@ -754,6 +768,21 @@ Before the first commit in a repository, Renovate will:
 
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
+
+## gitPrivateKeyPassphrase
+
+Passphrase for the `gitPrivateKey` when the private key is protected with a passphrase.
+
+Currently supported for SSH keys only.
+When provided, Renovate will automatically decrypt the SSH private key during the signing process.
+
+<!-- prettier-ignore -->
+!!! note
+    Passphrases are not yet supported for GPG keys. If you provide a passphrase for a GPG key, it will be ignored and a warning will be logged.
+
+<!-- prettier-ignore -->
+!!! warning
+    Store this value securely as it provides access to decrypt your private key. Consider using environment variables or secure secret management systems rather than storing it in plain text configuration files.
 
 ## gitTimeout
 
@@ -1110,6 +1139,12 @@ gpg> save
 
 The private key should then be added to your Renovate Bot global config (either using `privateKeyPath` or exporting it to the `RENOVATE_PRIVATE_KEY` environment variable).
 The public key can be used to replace the existing key in <https://app.renovatebot.com/encrypt> for your own use.
+
+<!-- prettier-ignore -->
+!!! note "Base64 Encoding Support"
+    Renovate supports base64-encoded private keys for easier handling in environment variables or configuration files.
+    Simply provide the base64-encoded version of your private key, and Renovate will automatically detect and decode it.
+    This works for both GPG and SSH private keys.
 
 Any PGP-encrypted secrets must have a mandatory organization/group scope, and optionally can be scoped for a single repository only.
 The reason for this is to avoid "replay" attacks where someone could learn your encrypted secret and then reuse it in their own Renovate repositories.

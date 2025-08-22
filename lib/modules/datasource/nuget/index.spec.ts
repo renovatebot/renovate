@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import { join } from 'upath';
+import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { getPkgReleases } from '..';
 import { GlobalConfig } from '../../../config/global';
@@ -323,7 +323,7 @@ describe('modules/datasource/nuget/index', () => {
     describe('determine source URL from nupkg', () => {
       beforeEach(() => {
         GlobalConfig.set({
-          cacheDir: join('/tmp/cache'),
+          cacheDir: upath.join('/tmp/cache'),
         });
         process.env.RENOVATE_X_NUGET_DOWNLOAD_NUPKGS = 'true';
       });
@@ -391,7 +391,7 @@ describe('modules/datasource/nuget/index', () => {
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'Determined sourceUrl https://github.com/NLog/NLog.git from https://some-registry/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg',
         );
-        expect(packageCache.set).toHaveBeenCalledWith(
+        expect(packageCache.setWithRawTtl).toHaveBeenCalledWith(
           'datasource-nuget-v3',
           'cache-decorator:source-url:https://some-registry/v3/index.json:NLog',
           {
@@ -461,7 +461,7 @@ describe('modules/datasource/nuget/index', () => {
           packageName: 'NLog',
           registryUrls: ['https://some-registry/v3/index.json'],
         });
-        expect(packageCache.set).toHaveBeenCalledWith(
+        expect(packageCache.setWithRawTtl).toHaveBeenCalledWith(
           'datasource-nuget-v3',
           'cache-decorator:source-url:https://some-registry/v3/index.json:NLog',
           {
@@ -612,6 +612,26 @@ describe('modules/datasource/nuget/index', () => {
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res?.sourceUrl).toBeDefined();
+    });
+
+    it('captures release notes', async () => {
+      httpMock
+        .scope('https://api.nuget.org')
+        .get('/v3/index.json')
+        .twice()
+        .reply(200, nugetIndexV3)
+        .get('/v3/registration5-gz-semver2/nunit/index.json')
+        .reply(200, pkgListV3Registration)
+        .get('/v3-flatcontainer/nunit/3.12.0/nunit.nuspec')
+        .reply(200, pkgInfoV3FromNuget);
+      const res = await getPkgReleases({
+        ...configV3,
+      });
+      expect(res?.changelogContent)
+        .toBe(`This package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need
+      to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to
+      execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.
+    `);
     });
 
     it('processes real data (v3) feed is azure devops', async () => {

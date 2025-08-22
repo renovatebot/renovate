@@ -1,8 +1,7 @@
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { readLocalFile } from '../../../util/fs';
-import type { CargoLockSchema } from './schema';
-import { CargoLockSchemaToml } from './schema';
+import { CargoLock } from './schema';
 
 export async function extractLockFileVersions(
   lockFilePath: string,
@@ -30,8 +29,8 @@ export function extractLockFileContentVersions(
   return versionsByPackage;
 }
 
-export function parseLockFile(lockFile: string): CargoLockSchema | null {
-  const res = CargoLockSchemaToml.safeParse(lockFile);
+export function parseLockFile(lockFile: string): CargoLock | null {
+  const res = CargoLock.safeParse(lockFile);
   if (res.success) {
     return res.data;
   }
