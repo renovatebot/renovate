@@ -22,7 +22,7 @@ Please select one option and, if yes, briefly describe how AI was used (e.g., co
 - [ ] No — I did not use AI for this contribution.
 - [ ] Yes — minimal assistance (e.g., IDE autocomplete, small code completions, grammar fixes).
 - [ ] Yes — substantive assistance (AI generated non‑trivial portions of code, tests, or documentation).
-- [ ] Yes — other (please describe): 
+- [ ] Yes — other (please describe):
 
 ## Documentation (please check one with an [x])
 
