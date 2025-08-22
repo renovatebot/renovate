@@ -20,6 +20,24 @@ describe('modules/manager/copier/extract', () => {
         ],
       });
     });
+    it('extracts repository and version from .copier-answers.yml with ssh URL', () => {
+      const content = `
+        _commit: v1.0.0
+        _src_path: git@github.com:renovatebot/somedir/renovate.git
+      `;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'git@github.com:renovatebot/somedir/renovate.git',
+            packageName: 'git@github.com:renovatebot/somedir/renovate.git',
+            currentValue: 'v1.0.0',
+            datasource: 'git-tags',
+            depType: 'template',
+          },
+        ],
+      });
+    });
 
     it('returns null for invalid .copier-answers.yml', () => {
       const content = `
