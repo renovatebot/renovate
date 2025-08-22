@@ -235,8 +235,8 @@ export function sanitizeValue(
         }
       } else if (
         key === 'username' &&
-        val.length > 60 &&
         is.string(val) &&
+        val.length > 60 &&
         jwtRegex.test(val)
       ) {
         curValue = '***********';
