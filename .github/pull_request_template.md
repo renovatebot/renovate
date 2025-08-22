@@ -38,7 +38,7 @@ I have verified these changes via:
 - [ ] No unit tests but ran on a real repository, or
 - [ ] Both unit tests + ran on a real repository
 
-The repository:
+The public repository: <URL>
 
 <!-- Do you have any suggestions about this PR template? Edit it here: https://github.com/renovatebot/renovate/edit/main/.github/pull_request_template.md -->
 
