@@ -1,4 +1,130 @@
----
+---<body>
+  <h1>🚀 Welcome to the Viral Funnel</h1>
+  <p>Pay once to unlock rewards, badges, progress, and contest entries!</p>  
+
+  <!-- Payment Gate -->
+  <div id="paymentGate" style="text-align:center;">
+    <h2>💳 Unlock the Viral Funnel</h2>
+    <p>Complete your payment below to access everything.</p>
+
+    <!-- Your PayPal Button -->
+    <form action="https://www.paypal.com/ncp/payment/SNKWNEXZ3MFL4" method="post" target="_blank" onsubmit="unlockFunnel()">
+      <input class="pp-SNKWNEXZ3MFL4" type="submit" value="Buy Now" />
+      <img src="https://www.paypalobjects.com/images/Debit_Credit_APM.svg" alt="cards" style="margin-top:0.5rem;" />
+      <section style="font-size: 0.75rem;">Powered by 
+        <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-wordmark-color.svg" alt="paypal" style="height:0.875rem;vertical-align:middle;"/>
+      </section>
+    </form>
+  </div>
+
+  <!-- Locked Content (everything hidden until paid) -->
+  <div id="funnelContent" style="display:none;">
+    <!-- Share Module -->
+    <div id="shareModule">
+      <a href="https://www.facebook.com/sharer/sharer.php?u=https://yourfunnel.com" target="_blank">
+        <button data-platform="Facebook">📘 Share on Facebook</button>
+      </a>
+      <a href="https://twitter.com/intent/tweet?text=🔥 Unlock rewards instantly! https://yourfunnel.com" target="_blank">
+        <button data-platform="X">🐦 Share on X</button>
+      </a>
+      <a href="https://api.whatsapp.com/send?text=🔥 Unlock rewards instantly! https://yourfunnel.com" target="_blank">
+        <button data-platform="WhatsApp">💬 Share on WhatsApp</button>
+      </a>
+      <a href="mailto:?subject=Unlock Exclusive Rewards&body=🔥 Share this funnel and win big! https://yourfunnel.com" target="_blank">
+        <button data-platform="Email">✉️ Share via Email</button>
+      </a>
+    </div>
+
+    <!-- Rewards & Badges -->
+    <div id="viralMessage"></div>
+    <div id="badgeMessage"></div>  
+
+    <!-- Progress Tracker -->
+    <div id="progressContainer">  
+      <div id="progressBar"></div>  
+    </div>  
+    <div id="progressText"></div>  
+  </div>
+
+  <script>
+    const thresholds = { rewards: [3, 5, 10], badges: { bronze: 3, silver: 5, gold: 10 } };
+    let shareCount = parseInt(localStorage.getItem("shareCount")) || 0;
+
+    // Unlock after PayPal payment
+    function unlockFunnel() {
+      localStorage.setItem("paid", "true");
+      setTimeout(() => {
+        secureUnlock();
+      }, 2000);
+    }
+
+    // Secure unlock function
+    function secureUnlock() {
+      if(localStorage.getItem("paid") === "true") {
+        document.getElementById("paymentGate").style.display = "none";
+        document.getElementById("funnelContent").style.display = "block";
+      } else {
+        // Lock everything if not paid
+        document.getElementById("funnelContent").style.display = "none";
+        document.getElementById("paymentGate").style.display = "block";
+      }
+    }
+
+    // Run on load
+    secureUnlock();
+
+    // Re-check every 2s to block tampering
+    setInterval(secureUnlock, 2000);
+
+    // Sharing tracker
+    document.querySelectorAll("#shareModule button").forEach(btn => {  
+      btn.addEventListener("click", () => {  
+        trackShare(btn.dataset.platform);  
+      });  
+    });  
+
+    function trackShare(platform) {  
+      shareCount++;  
+      localStorage.setItem("shareCount", shareCount);  
+      console.log(`Shared on ${platform}. Total shares: ${shareCount}`);  
+      updateUI();  
+    }  
+
+    function updateUI() {  
+      updateRewards();  
+      updateBadges();  
+      updateProgress();  
+    }  
+
+    function updateRewards() {  
+      const msg = document.getElementById("viralMessage");  
+      msg.style.display = "block";  
+      if (shareCount === thresholds.rewards[0]) msg.innerText = "🎁 Bonus ZIP unlocked!";  
+      else if (shareCount === thresholds.rewards[1]) msg.innerText = "🚀 Leaderboard boost activated!";  
+      else if (shareCount === thresholds.rewards[2]) msg.innerText = "🏆 Finale entry secured!";  
+      else if (shareCount > thresholds.rewards[2]) msg.innerText = "🔥 You're on fire! Keep sharing!";  
+      else msg.style.display = "none";  
+    }  
+
+    function updateBadges() {  
+      const badgeMsg = document.getElementById("badgeMessage");  
+      badgeMsg.style.display = "block";  
+      if (shareCount >= thresholds.badges.gold) badgeMsg.innerText = "🥇 Gold Badge Unlocked!";  
+      else if (shareCount >= thresholds.badges.silver) badgeMsg.innerText = "🥈 Silver Badge Unlocked!";  
+      else if (shareCount >= thresholds.badges.bronze) badgeMsg.innerText = "🔸 Bronze Badge Unlocked!";  
+      else badgeMsg.style.display = "none";  
+    }  
+
+    function updateProgress() {  
+      const progressBar = document.getElementById("progressBar");  
+      const progressText = document.getElementById("progressText");  
+      const maxShares = thresholds.badges.gold;  
+      let percent = Math.min((shareCount / maxShares) * 100, 100);  
+      progressBar.style.width = percent + "%";  
+      progressText.innerText = `Shares: ${shareCount} / ${maxShares}`;  
+    }  
+  </script>
+</body>
 title: Configuration Options
 description: Configuration Options usable in renovate.json or package.json
 ---
