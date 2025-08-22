@@ -15,6 +15,7 @@ Please select one of the below:
 
 ## AI assistance disclosure
 
+<!-- We request this information to assist reviewers in identifying AI-generated errors and other issues specific to AI usage. While we typically permit the use of AI tools, we appreciate being notified when they are employed. -->
 Did you use AI tools to create any part of this pull request?
 
 Please select one option and, if yes, briefly describe how AI was used (e.g., code, tests, docs) and which tool(s) you used.
