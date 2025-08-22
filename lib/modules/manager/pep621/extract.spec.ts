@@ -555,10 +555,7 @@ describe('modules/manager/pep621/extract', () => {
 
       fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
 
-      fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
-      fs.localPathExists.mockResolvedValueOnce(true);
-      fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
-      fs.localPathExists.mockResolvedValueOnce(false);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('pdm.lock');
 
       const res = await extractPackageFile(
         Fixtures.get('pyproject_pdm_lockedversion.toml'),
@@ -623,12 +620,9 @@ describe('modules/manager/pep621/extract', () => {
         `,
       );
 
-      fs.findLocalSiblingOrParent.mockResolvedValue('uv.lock');
-
-      fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
-      fs.localPathExists.mockResolvedValueOnce(false);
-      fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
-      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
 
       const res = await extractPackageFile(
         codeBlock`

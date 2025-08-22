@@ -1,5 +1,5 @@
 import { logger } from '../../../../logger';
-import { getSiblingFileName, localPathExists } from '../../../../util/fs';
+import { findLocalSiblingOrParent } from '../../../../util/fs';
 import type {
   PackageDependency,
   UpdateArtifact,
@@ -12,7 +12,7 @@ export abstract class BasePyProjectProcessor implements PyProjectProcessor {
   // The name of the lockfiles to be searched for.
   // This should be defined in the concrete processor classes.
   // No lockfiles will be forwarded outside the manager implementation.
-  lockfileName: string | undefined;
+  protected lockfileName: string | undefined;
 
   abstract updateArtifacts(
     updateArtifact: UpdateArtifact,
@@ -42,9 +42,11 @@ export abstract class BasePyProjectProcessor implements PyProjectProcessor {
       return [];
     }
 
-    const lockfilePath = getSiblingFileName(packageFile, this.lockfileName);
-    const lockfileExists = await localPathExists(lockfilePath);
-    if (lockfileExists) {
+    const lockfilePath = await findLocalSiblingOrParent(
+      packageFile,
+      this.lockfileName,
+    );
+    if (lockfilePath) {
       return [lockfilePath];
     }
 
