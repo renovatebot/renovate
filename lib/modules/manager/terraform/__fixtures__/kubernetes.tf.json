@@ -28,30 +28,6 @@
         }
       }
     },
-    "kubernetes_cron_job": {
-      "demo": {
-        "metadata": {},
-        "spec": {
-          "job_template": {
-            "metadata": {},
-            "spec": {
-              "template": {
-                "metadata": {},
-                "spec": {
-                  "container": [
-                    {
-                      "name": "kaniko",
-                      "image": "gcr.io/kaniko-project/executor:v1.8.0@sha256:8504bde9a9a8c9c4e9a4fe659703d265697a36ff13607b7669a4caa4407baa52"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "schedule": ""
-        }
-      }
-    },
     "kubernetes_daemon_set_v1": {
       "example": {
         "metadata": {},
@@ -63,42 +39,6 @@
                 {
                   "image": "nginx:1.21.1",
                   "name": "example1"
-                }
-              ]
-            }
-          }
-        }
-      }
-    },
-    "kubernetes_daemonset": {
-      "example": {
-        "metadata": {},
-        "spec": {
-          "template": {
-            "metadata": {},
-            "spec": {
-              "container": [
-                {
-                  "image": "nginx:1.21.2",
-                  "name": "example2"
-                }
-              ]
-            }
-          }
-        }
-      }
-    },
-    "kubernetes_deployment": {
-      "example": {
-        "metadata": {},
-        "spec": {
-          "template": {
-            "metadata": {},
-            "spec": {
-              "container": [
-                {
-                  "image": "nginx:1.21.3",
-                  "name": "example3"
                 }
               ]
             }
@@ -194,19 +134,6 @@
         }
       }
     },
-    "kubernetes_pod": {
-      "test": {
-        "metadata": {},
-        "spec": {
-          "container": [
-            {
-              "image": "nginx:1.21.7",
-              "name": "example7"
-            }
-          ]
-        }
-      }
-    },
     "kubernetes_pod_v1": {
       "test": {
         "metadata": {},
@@ -217,25 +144,6 @@
               "name": "example8"
             }
           ]
-        }
-      }
-    },
-    "kubernetes_replication_controller": {
-      "example": {
-        "metadata": {},
-        "spec": {
-          "selector": {},
-          "template": {
-            "metadata": {},
-            "spec": {
-              "container": [
-                {
-                  "image": "nginx:1.21.9",
-                  "name": "example9"
-                }
-              ]
-            }
-          }
         }
       }
     },
@@ -255,32 +163,6 @@
               ]
             }
           }
-        }
-      }
-    },
-    "kubernetes_stateful_set": {
-      "prometheus": {
-        "metadata": {},
-        "spec": {
-          "template": {
-            "metadata": {},
-            "spec": {
-              "init_container": [
-                {
-                  "name": "example11",
-                  "image": "nginx:1.21.11"
-                }
-              ],
-              "container": [
-                {
-                  "name": "prometheus-server1",
-                  "image": "prom/prometheus:v2.2.1"
-                }
-              ]
-            }
-          },
-          "service_name": "",
-          "selector": {}
         }
       }
     },
