@@ -2,12 +2,17 @@ import { dir } from 'tmp-promise';
 import type { DirectoryResult } from 'tmp-promise';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
+import * as _exec from '../../../../util/exec';
 import type { StatusResult } from '../../../../util/git/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import * as postUpgradeCommands from './execute-post-upgrade-commands';
 import { fs, git, logger, partial } from '~test/util';
 
+vi.mock('../../../../util/exec');
 vi.mock('../../../../util/fs');
+vi.mock('../../../../util/git/auth');
+
+const exec = vi.mocked(_exec);
 
 describe('workers/repository/update/branch/execute-post-upgrade-commands', () => {
   describe('postUpgradeCommandsExecutor', () => {
@@ -519,6 +524,88 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           path: 'dependencies/charts/ingress-nginx-4.12.0.tgz',
         },
       ]);
+    });
+
+    it('uses workingDirTemplate when provided', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'npm',
+          branchName: 'renovate/jest-29.x',
+          depName: 'jest',
+          newVersion: '29.5.0',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            workingDirTemplate:
+              '/projects/{{manager}}/{{depName}}-{{newVersion}}',
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'npm',
+        updatedPackageFiles: [],
+        updatedArtifacts: [],
+        upgrades: [],
+        branchName: 'renovate/jest-29.x',
+        baseBranch: 'main',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: '/default/dir',
+        allowedCommands: ['some-command'],
+      });
+      exec.exec = vi.fn().mockResolvedValue({ stdout: '', stderr: '' });
+
+      await postUpgradeCommands.postUpgradeCommandsExecutor(commands, config);
+
+      expect(exec.exec).toHaveBeenCalledWith('some-command', {
+        cwd: '/projects/npm/jest-29.5.0',
+      });
+    });
+
+    it('uses default localDir when workingDirTemplate is not provided', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [],
+        updatedArtifacts: [],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: '/default/dir',
+        allowedCommands: ['some-command'],
+      });
+      exec.exec = vi.fn().mockResolvedValue({ stdout: '', stderr: '' });
+
+      await postUpgradeCommands.postUpgradeCommandsExecutor(commands, config);
+
+      expect(exec.exec).toHaveBeenCalledWith('some-command', {
+        cwd: '/default/dir',
+      });
     });
   });
 });
