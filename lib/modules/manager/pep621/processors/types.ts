@@ -24,4 +24,10 @@ export interface PyProjectProcessor {
     deps: PackageDependency[],
     packageFile: string,
   ): Promise<PackageDependency[]>;
+
+  getLockfiles?(
+    project: PyProject,
+    lockfiles: string[],
+    packageFile: string,
+  ): Promise<string[]>;
 }

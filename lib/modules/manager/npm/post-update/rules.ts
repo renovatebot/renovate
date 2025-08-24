@@ -48,7 +48,7 @@ export function processHostRules(): HostRulesResult {
 
     const matchedHost = hostRule.matchHost;
     // Should never be necessary as if we have a resolvedHost, there has to be a matchHost
-    // istanbul ignore next
+    /* v8 ignore next 4 */
     if (!matchedHost) {
       logger.debug('Skipping host rule without matchHost');
       continue;

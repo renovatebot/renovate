@@ -12,6 +12,7 @@ platformScmImpls.set('azure', DefaultGitScm);
 platformScmImpls.set('codecommit', DefaultGitScm);
 platformScmImpls.set('bitbucket', DefaultGitScm);
 platformScmImpls.set('bitbucket-server', DefaultGitScm);
+platformScmImpls.set('forgejo', DefaultGitScm);
 platformScmImpls.set('gerrit', GerritScm);
 platformScmImpls.set('gitea', DefaultGitScm);
 platformScmImpls.set('github', GithubScm);

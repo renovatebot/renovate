@@ -1193,6 +1193,7 @@ describe('modules/manager/npm/extract/index', () => {
       fs.readLocalFile.mockResolvedValueOnce(input02Content);
       const res = await extractAllPackageFiles(defaultExtractConfig, [
         'package.json',
+        'invalid.json',
       ]);
       expect(res).toEqual([
         {

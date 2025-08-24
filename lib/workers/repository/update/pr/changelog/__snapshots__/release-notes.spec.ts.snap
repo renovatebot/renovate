@@ -34,13 +34,13 @@ exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesM
 {
   "body": "##### ⚠ BREAKING CHANGES
 
-- **deps:** yargs-parser@17.0.0 no longer implicitly creates arrays out of boolean
+- **deps:** yargs-parser\\@17.0.0 no longer implicitly creates arrays out of boolean
   arguments when duplicates are provided
 
 ##### Features
 
 - **completion:** takes negated flags into account when boolean-negation is set ([#1509](https://www.github.com/yargs/yargs/issues/1509)) ([7293ad5](https://www.github.com/yargs/yargs/commit/7293ad50d20ea0fb7dd1ac9b925e90e1bd95dea8))
-- **deps:** pull in yargs-parser@17.0.0 ([#1553](https://www.github.com/yargs/yargs/issues/1553)) ([b9409da](https://www.github.com/yargs/yargs/commit/b9409da199ebca515a848489c206b807fab2e65d))
+- **deps:** pull in yargs-parser\\@17.0.0 ([#1553](https://www.github.com/yargs/yargs/issues/1553)) ([b9409da](https://www.github.com/yargs/yargs/commit/b9409da199ebca515a848489c206b807fab2e65d))
 - deprecateOption ([#1559](https://www.github.com/yargs/yargs/issues/1559)) ([8aae333](https://www.github.com/yargs/yargs/commit/8aae3332251d09fa136db17ef4a40d83fa052bc4))
 - display appropriate $0 for electron apps ([#1536](https://www.github.com/yargs/yargs/issues/1536)) ([d0e4379](https://www.github.com/yargs/yargs/commit/d0e437912917d6a66bb5128992fa2f566a5f830b))
 - introduces strictCommands() subset of strict mode ([#1540](https://www.github.com/yargs/yargs/issues/1540)) ([1d4cca3](https://www.github.com/yargs/yargs/commit/1d4cca395a98b395e6318f0505fc73bef8b01350))
@@ -224,7 +224,7 @@ exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesM
   ([#4866](https://github.com/facebook/jest/pull/4866))
 - \`[eslint-plugin-jest]\` Add \`prefer-to-have-length\` lint rule.
   ([#4771](https://github.com/facebook/jest/pull/4771))
-- \`[jest-environment-jsdom]\` \\[**BREAKING**] Upgrade to JSDOM@11
+- \`[jest-environment-jsdom]\` \\[**BREAKING**] Upgrade to JSDOM\\@11
   ([#4770](https://github.com/facebook/jest/pull/4770))
 - \`[jest-environment-*]\` \\[**BREAKING**] Add Async Test Environment APIs, dispose
   is now teardown ([#4506](https://github.com/facebook/jest/pull/4506))
