@@ -20,6 +20,12 @@ import { dump, parseSingleYaml } from '../../../../util/yaml';
 import { NpmDatasource } from '../../../datasource/npm';
 import { scm } from '../../../platform/scm';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
+import {
+  NPM_CACHE_DIR,
+  PNPM_CACHE_BASE_DIR,
+  YARN_CACHE_DIR,
+  YARN_GLOBAL_DIR,
+} from '../constants';
 import { getZeroInstallPaths } from '../extract/yarn';
 import type { NpmManagerData } from '../types';
 import {
@@ -98,7 +104,7 @@ export function determineLockFileDirs(
   for (const p of config.updatedPackageFiles!) {
     logger.trace(`Checking ${String(p.path)} for lock files`);
     const packageFile = getPackageFile(p.path);
-    // istanbul ignore if
+    /* v8 ignore next 3 -- needs test */
     if (!packageFile.managerData) {
       continue;
     }
@@ -128,7 +134,7 @@ export async function writeExistingFiles(
     'Writing package.json files',
   );
   for (const packageFile of npmFiles) {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- needs test */
     if (!packageFile.managerData) {
       continue;
     }
@@ -145,9 +151,10 @@ export async function writeExistingFiles(
     ) {
       try {
         await writeLocalFile(npmrcFilename, npmrc.replace(/\n?$/, '\n'));
-      } catch (err) /* istanbul ignore next */ {
+        /* v8 ignore start -- needs test */
+      } catch (err) {
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
-      }
+      } /* v8 ignore stop -- needs test */
     }
     const npmLock = packageFile.managerData.npmLock;
     if (npmLock) {
@@ -156,10 +163,11 @@ export async function writeExistingFiles(
       let existingNpmLock: string;
       try {
         existingNpmLock = (await getFile(npmLock)) ?? '';
-      } catch (err) /* istanbul ignore next */ {
+        /* v8 ignore start -- needs test */
+      } catch (err) {
         logger.warn({ err }, 'Error reading npm lock file');
         existingNpmLock = '';
-      }
+      } /* v8 ignore stop -- needs test */
       const { detectedIndent, lockFileParsed: npmLockParsed } =
         parseLockFile(existingNpmLock);
       if (npmLockParsed) {
@@ -208,12 +216,13 @@ export async function writeExistingFiles(
                 delete npmLockParsed.dependencies![depName];
               });
             }
-          } catch /* istanbul ignore next */ {
+            /* v8 ignore start -- needs test */
+          } catch {
             logger.warn(
               { npmLock },
               'Error massaging package-lock.json for widen',
             );
-          }
+          } /* v8 ignore stop -- needs test */
         }
         if (lockFileChanged) {
           logger.debug('Massaging npm lock file before writing to disk');
@@ -261,7 +270,7 @@ export async function writeUpdatedPackageFiles(
   }
 }
 
-// istanbul ignore next
+/* v8 ignore start -- needs test */
 async function updateYarnOffline(
   lockFileDir: string,
   updatedArtifacts: FileChange[],
@@ -312,6 +321,7 @@ async function updateYarnOffline(
     logger.error({ err }, 'Error updating yarn offline packages');
   }
 }
+/* v8 ignore stop -- needs test */
 
 // TODO: move to ./yarn.ts
 // exported for testing
@@ -361,9 +371,10 @@ export async function updateYarnBinary(
         isExecutable: true,
       },
     );
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore start -- needs test */
+  } catch (err) {
     logger.error({ err }, 'Error updating Yarn binary');
-  }
+  } /* v8 ignore stop -- needs test */
   return existingYarnrcYmlContent && yarnrcYml;
 }
 
@@ -377,7 +388,7 @@ export async function getAdditionalFiles(
   if (!packageFiles.npm?.length) {
     return { artifactErrors, updatedArtifacts };
   }
-  if (!config.updateLockFiles) {
+  if (config.skipArtifactsUpdate) {
     logger.debug('Skipping lock file generation');
     return { artifactErrors, updatedArtifacts };
   }
@@ -401,10 +412,10 @@ export async function getAdditionalFiles(
   // But pass custom env and user vars.
   const env = {
     ...getEnv(),
-    NPM_CONFIG_CACHE: await ensureCacheDir('npm'),
-    YARN_CACHE_FOLDER: await ensureCacheDir('yarn'),
-    YARN_GLOBAL_FOLDER: await ensureCacheDir('berry'),
-    npm_config_store: await ensureCacheDir('pnpm'),
+    NPM_CONFIG_CACHE: await ensureCacheDir(NPM_CACHE_DIR),
+    YARN_CACHE_FOLDER: await ensureCacheDir(YARN_CACHE_DIR),
+    YARN_GLOBAL_FOLDER: await ensureCacheDir(YARN_GLOBAL_DIR),
+    npm_config_store: await ensureCacheDir(PNPM_CACHE_BASE_DIR),
     NODE_ENV: 'dev',
   };
 
@@ -414,10 +425,11 @@ export async function getAdditionalFiles(
       hostType: 'github',
       url: 'https://api.github.com/',
     }));
-    token = token ? /* istanbul ignore next */ `${token}@` : token;
-  } catch (err) /* istanbul ignore next */ {
+    token = token ? /* v8 ignore next */ `${token}@` : token;
+    /* v8 ignore start -- needs test */
+  } catch (err) {
     logger.warn({ err }, 'Error getting token for packageFile');
-  }
+  } /* v8 ignore stop -- needs test */
   const tokenRe = regEx(`${token ?? ''}`, 'g', false);
   for (const npmLock of dirs.npmLockDirs) {
     const lockFileDir = upath.dirname(npmLock);
@@ -436,7 +448,7 @@ export async function getAdditionalFiles(
       upgrades,
     );
     if (res.error) {
-      // istanbul ignore if
+      /* v8 ignore start -- needs test */
       if (res.stderr?.includes('No matching version found for')) {
         for (const upgrade of config.upgrades) {
           if (
@@ -455,6 +467,7 @@ export async function getAdditionalFiles(
           }
         }
       }
+      /* v8 ignore stop -- needs test */
       artifactErrors.push({
         lockFile: npmLock,
         stderr: res.stderr,
@@ -518,7 +531,7 @@ export async function getAdditionalFiles(
     );
     const res = await yarn.generateLockFile(lockFileDir, env, config, upgrades);
     if (res.error) {
-      // istanbul ignore if
+      /* v8 ignore start -- needs test */
       if (res.stderr?.includes(`Couldn't find any versions for`)) {
         for (const upgrade of config.upgrades) {
           /* eslint-disable no-useless-escape */
@@ -541,6 +554,7 @@ export async function getAdditionalFiles(
           /* eslint-enable no-useless-escape */
         }
       }
+      /* v8 ignore stop -- needs test */
       artifactErrors.push({
         lockFile: yarnLock,
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
@@ -564,7 +578,7 @@ export async function getAdditionalFiles(
         await updateYarnOffline(lockFileDir, updatedArtifacts);
       }
 
-      // istanbul ignore if: already tested seperately, needs additional test?
+      /* v8 ignore next 7 -- needs test */
       if (upgrades.some(yarn.isYarnUpdate)) {
         existingYarnrcYmlContent = await updateYarnBinary(
           lockFileDir,
@@ -574,7 +588,7 @@ export async function getAdditionalFiles(
       }
     }
     await resetNpmrcContent(lockFileDir, npmrcContent);
-    // istanbul ignore if: needs test
+    /* v8 ignore next 4 -- needs test */
     if (existingYarnrcYmlContent) {
       // TODO #22198
       await writeLocalFile(yarnRcYmlFilename!, existingYarnrcYmlContent);
@@ -591,7 +605,7 @@ export async function getAdditionalFiles(
     );
     const res = await pnpm.generateLockFile(lockFileDir, env, config, upgrades);
     if (res.error) {
-      // istanbul ignore if
+      /* v8 ignore start -- needs test */
       if (res.stdout?.includes(`No compatible version found:`)) {
         for (const upgrade of config.upgrades) {
           if (
@@ -612,6 +626,7 @@ export async function getAdditionalFiles(
           }
         }
       }
+      /* v8 ignore stop -- needs test */
       artifactErrors.push({
         lockFile: pnpmShrinkwrap,
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing

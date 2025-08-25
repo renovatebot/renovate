@@ -7,6 +7,7 @@ import { regEx } from '../../../util/regex';
 import { parseSingleYaml } from '../../../util/yaml';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
+import { extractDependency as npmExtractDependency } from '../npm/extract/common/dependency';
 import { pep508ToPackageDependency } from '../pep621/utils';
 import type { PackageDependency, PackageFileContent } from '../types';
 import {
@@ -76,6 +77,8 @@ function determineDatasource(
   return { skipReason: 'unknown-registry', registryUrls: [hostname] };
 }
 
+const gitUrlRegex = regEx(/\.git$/i);
+
 function extractDependency(
   tag: string,
   repository: string,
@@ -103,7 +106,7 @@ function extractDependency(
     const match = urlMatcher.exec(repository);
     if (match?.groups) {
       const hostname = match.groups.hostname;
-      const depName = match.groups.depName.replace(regEx(/\.git$/i), ''); // TODO 12071
+      const depName = match.groups.depName.replace(gitUrlRegex, '');
       const sourceDef = determineDatasource(repository, hostname);
       return {
         ...sourceDef,
@@ -146,7 +149,27 @@ function findDependencies(precommitFile: PreCommitConfig): PackageDependency[] {
         // normally language are not defined in yaml
         // only support it when it's explicitly defined.
         // this avoid to parse hooks from pre-commit-hooks.yaml from git repo
-        if (hook.language === 'python') {
+        if (hook.language === 'node') {
+          hook.additional_dependencies?.map((req) => {
+            const match = regEx('^(?<name>.+)@(?<range>.+)$').exec(req);
+            if (!match?.groups) {
+              return;
+            }
+
+            const depType = 'pre-commit-node';
+            const dep = npmExtractDependency(
+              depType,
+              match.groups.name,
+              match.groups.range,
+            );
+            packageDependencies.push({
+              depType,
+              depName: match.groups.name,
+              packageName: match.groups.name,
+              ...dep,
+            });
+          });
+        } else if (hook.language === 'python') {
           hook.additional_dependencies?.map((req) => {
             const dep = pep508ToPackageDependency('pre-commit-python', req);
             if (dep) {

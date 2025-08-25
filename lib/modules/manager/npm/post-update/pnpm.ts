@@ -20,6 +20,7 @@ import {
 import { uniqueStrings } from '../../../../util/string';
 import { parseSingleYaml } from '../../../../util/yaml';
 import type { PostUpdateConfig, Upgrade } from '../../types';
+import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from '../constants';
 import type { PnpmWorkspaceFile } from '../extract/types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult, PnpmLockFile } from './types';
@@ -57,13 +58,18 @@ export async function generateLockFile(
         (await getConstraintFromLockFile(lockFileName)), // use lockfileVersion to find pnpm version range
     };
 
+    const pnpmConfigCacheDir = await ensureCacheDir(PNPM_CACHE_DIR);
+    const pnpmConfigStoreDir = await ensureCacheDir(PNPM_STORE_DIR);
     const extraEnv: ExtraEnv = {
       // those arwe no longer working and it's unclear if they ever worked
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
-      // these are used by pnpm v5 and above. Maybe earlier versions too
-      npm_config_cache_dir: await ensureCacheDir('pnpm-cache'),
-      npm_config_store_dir: await ensureCacheDir('pnpm-store'),
+      // these are used by pnpm v5 to v10. Maybe earlier versions too
+      npm_config_cache_dir: pnpmConfigCacheDir,
+      npm_config_store_dir: pnpmConfigStoreDir,
+      // pnpm stops reading npm_config_* env vars since v11
+      pnpm_config_cache_dir: pnpmConfigCacheDir,
+      pnpm_config_store_dir: pnpmConfigStoreDir,
     };
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
@@ -74,7 +80,7 @@ export async function generateLockFile(
         pnpmToolConstraint,
       ],
     };
-    // istanbul ignore if
+    /* v8 ignore next 4 -- needs test */
     if (GlobalConfig.get('exposeAllEnv')) {
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
@@ -139,17 +145,19 @@ export async function generateLockFile(
       );
       try {
         await deleteLocalFile(lockFileName);
-      } catch (err) /* istanbul ignore next */ {
+        /* v8 ignore start -- needs test */
+      } catch (err) {
         logger.debug(
           { err, lockFileName },
           'Error removing `pnpm-lock.yaml` for lock file maintenance',
         );
-      }
+      } /* v8 ignore stop -- needs test */
     }
 
     await exec(commands, execOptions);
     lockFile = await readLocalFile(lockFileName, 'utf8');
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore start -- needs test */
+  } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
@@ -164,7 +172,7 @@ export async function generateLockFile(
       'lock file error',
     );
     return { error: true, stderr: err.stderr, stdout: err.stdout };
-  }
+  } /* v8 ignore stop -- needs test */
   return { lockFile };
 }
 

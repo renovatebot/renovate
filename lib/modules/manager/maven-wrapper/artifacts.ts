@@ -1,7 +1,7 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
 import is from '@sindresorhus/is';
-import { dirname, join } from 'upath';
+import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -224,8 +224,8 @@ function mavenWrapperFileName(): string {
 
 function getMavenPaths(packageFileName: string): MavenWrapperPaths {
   const wrapperExecutableFileName = mavenWrapperFileName();
-  const localProjectDir = join(dirname(packageFileName), '../../');
-  const wrapperFullyQualifiedPath = join(
+  const localProjectDir = upath.join(upath.dirname(packageFileName), '../../');
+  const wrapperFullyQualifiedPath = upath.join(
     localProjectDir,
     wrapperExecutableFileName,
   );
@@ -242,18 +242,21 @@ async function prepareCommand(
   pathFileStats: Stats | null,
   args: string | null,
 ): Promise<string | null> {
-  // istanbul ignore if
+  /* v8 ignore start -- hard to test */
   if (pathFileStats?.isFile() === true) {
     // if the file is not executable by others
     if (os.platform() !== 'win32' && (pathFileStats.mode & 0o1) === 0) {
       // add the execution permission to the owner, group and others
       logger.warn('Maven wrapper is missing the executable bit');
-      await chmodLocalFile(join(cwd, fileName), pathFileStats.mode | 0o111);
+      await chmodLocalFile(
+        upath.join(cwd, fileName),
+        pathFileStats.mode | 0o111,
+      );
     }
     if (args === null) {
       return fileName;
     }
     return `${fileName} ${args}`;
-  }
+  } /* v8 ignore stop */
   return null;
 }

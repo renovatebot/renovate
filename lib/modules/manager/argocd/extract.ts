@@ -16,7 +16,7 @@ import type {
 } from '../types';
 import {
   type ApplicationDefinition,
-  ApplicationDefinitionSchema,
+  ApplicationDefinitions,
   type ApplicationSource,
   type ApplicationSpec,
 } from './schema';
@@ -37,7 +37,7 @@ export function extractPackageFile(
     return null;
   }
 
-  const definitions = ApplicationDefinitionSchema.catch(
+  const definitions = ApplicationDefinitions.catch(
     withDebugMessage([], `${packageFile} does not match schema`),
   ).parse(content);
 

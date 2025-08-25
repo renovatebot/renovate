@@ -5,14 +5,14 @@ import { regEx } from '../../../util/regex';
 import { parseYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
-import { isOCIRegistry } from '../helmv3/oci';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types';
 import type { Doc, HelmRepository } from './schema';
-import { Doc as documentSchema } from './schema';
+import { Doc as Document } from './schema';
 import {
   kustomizationsKeysUsed,
   localChartHasKustomizationsYaml,
@@ -42,7 +42,7 @@ export async function extractPackageFile(
   // Record kustomization usage for all deps, since updating artifacts is run on the helmfile.yaml as a whole.
   let needKustomize = false;
   const docs: Doc[] = parseYaml(content, {
-    customSchema: documentSchema,
+    customSchema: Document,
     failureBehaviour: 'filter',
     removeTemplates: true,
   });
@@ -69,6 +69,7 @@ export async function extractPackageFile(
 
     for (const dep of coerceArray(doc.releases)) {
       let depName = dep.chart;
+      let packageName: string | null = null;
       let repoName: string | null = null;
 
       // If it starts with ./ ../ or / then it's a local path
@@ -87,15 +88,22 @@ export async function extractPackageFile(
       }
 
       if (isOCIRegistry(dep.chart)) {
-        const v = dep.chart.substring(6).split('/');
-        depName = v.pop()!;
-        repoName = v.join('/');
-      } else if (dep.chart.includes('/')) {
-        const v = dep.chart.split('/');
-        repoName = v.shift()!;
-        depName = v.join('/');
+        packageName = depName = removeOCIPrefix(dep.chart);
       } else {
-        repoName = dep.chart;
+        if (dep.chart.includes('/')) {
+          const v = dep.chart.split('/');
+          repoName = v.shift()!;
+          depName = v.join('/');
+        } else {
+          repoName = dep.chart;
+        }
+        if (registryData[repoName]?.oci) {
+          const alias = registryData[repoName]?.url;
+          if (alias) {
+            packageName = `${alias}/${depName}`;
+          }
+          repoName = null;
+        }
       }
 
       if (!is.string(dep.version)) {
@@ -109,31 +117,27 @@ export async function extractPackageFile(
       const res: PackageDependency = {
         depName,
         currentValue: dep.version,
-        registryUrls: [registryData[repoName]?.url]
-          .concat([config.registryAliases?.[repoName]] as string[])
-          .filter(is.string),
       };
       if (kustomizationsKeysUsed(dep)) {
         needKustomize = true;
       }
-
-      if (isOCIRegistry(dep.chart)) {
+      if (packageName) {
         res.datasource = DockerDatasource.id;
-        res.packageName = `${repoName}/${depName}`;
-      } else if (registryData[repoName]?.oci) {
-        res.datasource = DockerDatasource.id;
-        const alias = registryData[repoName]?.url;
-        if (alias) {
-          res.packageName = `${alias}/${depName}`;
-        }
+        res.packageName = packageName;
+      } else if (repoName) {
+        res.registryUrls = [registryData[repoName]?.url]
+          .concat([config.registryAliases?.[repoName]] as string[])
+          .filter(is.string);
       }
 
       // By definition on helm the chart name should be lowercase letter + number + -
       // However helmfile support templating of that field
       if (
         !isValidChartName(
-          res.depName,
-          isOCIRegistry(dep.chart) || (registryData[repoName]?.oci ?? false),
+          isOCIRegistry(dep.chart)
+            ? depName.slice(depName.lastIndexOf('/') + 1)
+            : depName,
+          !!packageName,
         )
       ) {
         res.skipReason = 'unsupported-chart-type';
