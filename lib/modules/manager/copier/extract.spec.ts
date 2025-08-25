@@ -20,6 +20,7 @@ describe('modules/manager/copier/extract', () => {
         ],
       });
     });
+
     it('extracts repository and version from .copier-answers.yml with ssh URL', () => {
       const content = `
         _commit: v1.0.0
