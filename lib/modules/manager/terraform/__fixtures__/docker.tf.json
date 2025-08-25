@@ -1,5 +1,25 @@
 {
+  "data": {
+    "docker_registry_image": {
+      "ubuntu": {
+        "name": "ubuntu:precise"
+      }
+    }
+  },
   "resource": {
+    "docker_image": {
+      "nginx": {
+        "name": "nginx:1.7.8"
+      },
+      "invalid": {},
+      "ignore_variable": {
+        "name": "${data.docker_registry_image.ubuntu.name}",
+        "pull_triggers": ["${data.docker_registry_image.ubuntu.sha256_digest}"]
+      },
+      "proxy": {
+        "name": "hub.proxy.test/bitnami/nginx:1.24.0"
+      }
+    },
     "docker_container": {
       "foo": {
         "name": "foo",
@@ -30,6 +50,14 @@
             ]
           }
         ]
+      },
+      "invalid": {}
+    },
+    "not_supported_resource": {
+      "foo": {
+        "name": "foo",
+        "image": "nginx:1.7.8",
+        "dummy": "true"
       }
     }
   }
