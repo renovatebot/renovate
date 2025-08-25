@@ -1,7 +1,8 @@
 import { z } from 'zod';
+import { EmailAddress } from '../../../util/schema-utils';
 
 export const UserSchema = z.object({
-  mail: z.string().optional().nullable(),
+  mail: EmailAddress,
   displayName: z.string(),
   name: z.string(),
 });
