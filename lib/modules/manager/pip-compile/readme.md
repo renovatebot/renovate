@@ -1,5 +1,4 @@
-Due to limited functionality, the `pip-compile` manager should be considered in an "alpha" stage, which means it's not ready for production use for the majority of end users.
-We welcome feedback and bug reports!
+The `pip-compile` manager does not support all use cases for `pip-compile`, so if you find any areas lacking and without an existing Issue then please "Suggest an Idea" in the Discussions forum with your use case.
 
 The `uv pip compile` command is also supported through this manager in the same fashion as `pip-compile`.
 
@@ -33,10 +32,11 @@ In turn `pip-compile` manager will find all source files and parse them as packa
 
 The following files are currently supported:
 
-| Source filename | Manager            |
-| --------------: | ------------------ |
-|      `setup.py` | `pip_setup`        |
-|          `*.in` | `pip_requirements` |
+|  Source filename | Manager            |
+| ---------------: | ------------------ |
+| `pyproject.toml` | `pep621`           |
+|       `setup.py` | `pip_setup`        |
+|           `*.in` | `pip_requirements` |
 
 Example header:
 

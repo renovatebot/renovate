@@ -4,6 +4,7 @@ import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { RequestError as HttpError } from 'got';
 import { ZodError } from 'zod';
+import { ExecError } from '../util/exec/exec-error';
 import { regEx } from '../util/regex';
 import { redactedFields, sanitize } from '../util/sanitize';
 import type { BunyanRecord, BunyanStream } from './types';
@@ -132,6 +133,12 @@ export default function prepareError(err: Error): Record<string, unknown> {
     response.errors = err.errors.map((error) => prepareError(error));
   }
 
+  // handle rawExec error
+  if (err instanceof ExecError && is.nonEmptyObject(err.options?.env)) {
+    const env = Object.keys(err.options.env);
+    response.options = { ...err.options, env };
+  }
+
   // handle got error
   if (err instanceof HttpError) {
     const options: Record<string, unknown> = {
@@ -234,7 +241,8 @@ export function sanitizeValue(
         curValue = seen.has(val) ? seen.get(val) : sanitizeValue(val, seen);
       }
 
-      objectResult[key] = curValue;
+      const sanitizedKey = sanitizeValue(key, seen);
+      objectResult[sanitizedKey] = curValue;
     }
 
     return objectResult;
@@ -259,7 +267,10 @@ export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
       const result =
         streamConfig.type === 'raw'
           ? raw
-          : JSON.stringify(raw, bunyan.safeCycles()).replace(/\n?$/, '\n'); // TODO #12874
+          : JSON.stringify(raw, bunyan.safeCycles()).replace(
+              regEx(/\n?$/),
+              '\n',
+            );
       stream.write(result, enc, cb);
     };
 

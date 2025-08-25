@@ -3,6 +3,7 @@ import type { RenovateConfig } from '../config/types';
 import {
   CONFIG_SECRETS_INVALID,
   CONFIG_VALIDATION,
+  CONFIG_VARIABLES_INVALID,
 } from '../constants/error-messages';
 import { logger } from '../logger';
 import { capitalize } from './string';
@@ -43,7 +44,9 @@ export function validateInterpolatedValues(
 
   if (validationErrors.length) {
     logger.error({ validationErrors }, `Invalid ${name}s configured`);
-    throw new Error(CONFIG_SECRETS_INVALID);
+    throw new Error(
+      name === 'secrets' ? CONFIG_SECRETS_INVALID : CONFIG_VARIABLES_INVALID,
+    );
   }
 }
 
@@ -54,6 +57,9 @@ function replaceInterpolatedValuesInString(
   options: InterpolatorOptions,
 ): string {
   const { name, templateRegex } = options;
+  // Reset regex lastIndex for global regexes to ensure consistent behavior
+  templateRegex.lastIndex = 0;
+
   // do nothing if no interpolator template found
   if (!templateRegex.test(value)) {
     return value;
@@ -85,7 +91,7 @@ export function replaceInterpolatedValuesInObject(
   config_: RenovateConfig,
   input: Record<string, string>,
   options: InterpolatorOptions,
-  deleteValues: boolean,
+  deleteValues = true,
 ): RenovateConfig {
   const config = { ...config_ };
   const { name } = options;

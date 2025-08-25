@@ -44,7 +44,7 @@ resources:
     - container: linux
       image: ubuntu:24.04
     - container: python
-      image: python:3.13@sha256:5f69d22a88dd4cc4ee1576def19aef48c8faa1b566054c44291183831cbad13b
+      image: python:3.13@sha256:18634e45b29c0dd1a9a3a3d0781f9f8a221fe32ee7a853db01e9120c710ef535
 
 stages:
   - stage: StageOne
@@ -75,5 +75,5 @@ The `azure-pipelines` manager can process these files:
     Renovate can't update (root) container-element in containers jobs, see [issue #21987](https://github.com/renovatebot/renovate/issues/21987).
     Renovate can't read Azure repositories defined in resource blocks, see [issue #15028](https://github.com/renovatebot/renovate/issues/15028).
 
-[resources-docs]: https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/resources?view=azure-pipelines
-[tasks-docs]: https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/steps-task?view=azure-pipelines
+[resources-docs]: https://learn.microsoft.com/azure/devops/pipelines/yaml-schema/resources
+[tasks-docs]: https://learn.microsoft.com/azure/devops/pipelines/yaml-schema/steps-task

@@ -54,6 +54,7 @@ describe('modules/platform/gitea/index', () => {
 
   const mockRepo = mockedRepo({
     allow_rebase: true,
+    default_merge_style: 'rebase',
     clone_url: 'https://gitea.renovatebot.com/some/repo.git',
     ssh_url: 'git@gitea.renovatebot.com/some/repo.git',
     default_branch: 'master',
@@ -563,6 +564,7 @@ describe('modules/platform/gitea/index', () => {
           ...mockRepo,
           allow_rebase: false,
           allow_fast_forward_only_merge: true,
+          default_merge_style: 'fast-forward-only',
         });
       await initFakePlatform(scope);
 
@@ -583,6 +585,7 @@ describe('modules/platform/gitea/index', () => {
           ...mockRepo,
           allow_rebase: false,
           allow_rebase_explicit: true,
+          default_merge_style: 'rebase-merge',
         });
       await initFakePlatform(scope);
 
@@ -603,6 +606,7 @@ describe('modules/platform/gitea/index', () => {
           ...mockRepo,
           allow_rebase: false,
           allow_squash_merge: true,
+          default_merge_style: 'squash',
         });
       await initFakePlatform(scope);
 
@@ -623,6 +627,7 @@ describe('modules/platform/gitea/index', () => {
           ...mockRepo,
           allow_rebase: false,
           allow_merge_commits: true,
+          default_merge_style: 'merge',
         });
       await initFakePlatform(scope);
 

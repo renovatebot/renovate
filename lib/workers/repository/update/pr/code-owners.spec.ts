@@ -1,7 +1,9 @@
 import { codeBlock } from 'common-tags';
 import { mock } from 'vitest-mock-extended';
 import type { Pr } from '../../../../modules/platform';
+import * as bitbucketserver from '../../../../modules/platform/bitbucket-server';
 import * as gitlab from '../../../../modules/platform/gitlab';
+import type { LongCommitSha } from '../../../../util/git/types';
 import { codeOwnersForPr } from './code-owners';
 import { fs, git, platform } from '~test/util';
 
@@ -20,11 +22,20 @@ describe('workers/repository/update/pr/code-owners', () => {
 
     beforeEach(() => {
       pr = mock<Pr>();
+      pr.sha = undefined;
     });
 
     it('returns global code owner', async () => {
       fs.readLocalFile.mockResolvedValueOnce(['* @jimmy'].join('\n'));
       git.getBranchFiles.mockResolvedValueOnce(['README.md']);
+      const codeOwners = await codeOwnersForPr(pr);
+      expect(codeOwners).toEqual(['@jimmy']);
+    });
+
+    it('returns global code owner for commit with sha set', async () => {
+      pr.sha = 'f7374c2de8a4c95a7fd7182ab24044e3896aac02' as LongCommitSha;
+      fs.readLocalFile.mockResolvedValueOnce('* @jimmy');
+      git.getBranchFilesFromCommit.mockResolvedValueOnce(['README.md']);
       const codeOwners = await codeOwnersForPr(pr);
       expect(codeOwners).toEqual(['@jimmy']);
     });
@@ -271,6 +282,82 @@ describe('workers/repository/update/pr/code-owners', () => {
           '@optional-team',
           '@docs-team',
           '@general-approvers',
+        ]);
+      });
+    });
+
+    describe('Bitbucket Server CODEOWNERS integration', () => {
+      beforeAll(() => {
+        Object.defineProperty(platform, 'extractRulesFromCodeOwnersLines', {
+          value: bitbucketserver.extractRulesFromCodeOwnersLines,
+          writable: true,
+        });
+      });
+
+      it('returns code owners for matching file using escaped spaces', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          String.raw`src/** @Jane\\ Doe @john@example.com`,
+        );
+        git.getBranchFiles.mockResolvedValueOnce(['src/index.ts']);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual(['@Jane Doe', '@john@example.com']);
+      });
+
+      it('returns code owners from reviewer group with random selection', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          'docs/** @reviewer-group/content-designers:random',
+        );
+        git.getBranchFiles.mockResolvedValueOnce(['docs/readme.md']);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        // Since we don't simulate the actual group resolution, this will just include the literal string
+        expect(codeOwners).toEqual([
+          '@reviewer-group/content-designers:random',
+        ]);
+      });
+
+      it('does not return owners when an empty rule overrides a broader rule', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          [
+            'docs/images/**', // empty rule
+            'docs/** @content-designer',
+          ].join('\n'),
+        );
+        git.getBranchFiles.mockResolvedValueOnce(['docs/images/logo.png']);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual([]);
+      });
+
+      it('matches the most specific rule (bottom takes precedence)', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          [
+            'docs/** @team1',
+            'docs/backend/** @team2', // higher precedence
+          ].join('\n'),
+        );
+        git.getBranchFiles.mockResolvedValueOnce(['docs/backend/service.md']);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual(['@team2', '@team1']);
+      });
+
+      it('handles multiple owners with mix of usernames and groups', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          'docs/** @Alice @reviewer-group/devs:random(2)',
+        );
+        git.getBranchFiles.mockResolvedValueOnce(['docs/manual.md']);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual([
+          '@Alice',
+          '@reviewer-group/devs:random(2)',
         ]);
       });
     });

@@ -23,7 +23,7 @@ To turn on the Dashboard manually, add the `:dependencyDashboard` preset to your
 
 ```json
 {
-  "extends": ["config:recommended", ":dependencyDashboard"]
+  "extends": ["schedule:automergeDaily", ":dependencyDashboard"]
 }
 ```
 

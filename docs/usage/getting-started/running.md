@@ -129,6 +129,7 @@ Forking Renovate needs only `read` level access to the code of any repository it
 If you use Forking Renovate, you'll miss out on these features of the regular Renovate app:
 
 - Automerge
+- The `baseBranchPatterns` config option
 
 ### Hosting Renovate
 
@@ -147,11 +148,15 @@ Mend Renovate On-Premises and Mend Remediate both run as long-lived containers, 
 Renovate's server-side/admin config is referred to as its "global" config, and can be set by using either:
 
 - a config file, or
+- an additional config file, or
 - environment variables, or
 - CLI parameters
 
 By default Renovate checks if a file named `config.js` is present.
 Any other (`*.js`, `*.json`, `*.json5`, `*.yaml` or `*.yml`) file is supported, when you reference it with the `RENOVATE_CONFIG_FILE` environment variable (for example: `RENOVATE_CONFIG_FILE=config.yaml`).
+
+Renovate checks for the additional config file only if the `RENOVATE_ADDITIONAL_CONFIG_FILE` is set.
+Behaviour wise this config is similar to the file config, except that it has higher priority than the default config file.
 
 Some config is global-only, meaning that either it is only applicable to the bot administrator or it can only be controlled by the administrator and not repository users.
 Those are documented in [Self-hosted Configuration](../self-hosted-configuration.md).
@@ -204,7 +209,8 @@ Read the platform-specific docs to learn how to setup authentication on your pla
 - [Azure DevOps](../modules/platform/azure/index.md)
 - [Bitbucket Cloud](../modules/platform/bitbucket/index.md)
 - [Bitbucket Server](../modules/platform/bitbucket-server/index.md)
-- [Gitea and Forgejo](../modules/platform/gitea/index.md)
+- [Forgejo](../modules/platform/forgejo/index.md)
+- [Gitea](../modules/platform/gitea/index.md)
 - [github.com and GitHub Enterprise Server](../modules/platform/github/index.md)
 - [GitLab](../modules/platform/gitlab/index.md)
 

@@ -1,34 +1,20 @@
-import is from '@sindresorhus/is';
 import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
 } from '../../types';
 import type { PyProject } from '../schema';
-import { parseDependencyList } from '../utils';
-import type { PyProjectProcessor } from './types';
+import { BasePyProjectProcessor } from './abstract';
 
-export class HatchProcessor implements PyProjectProcessor {
+export class HatchProcessor extends BasePyProjectProcessor {
   process(
     pyproject: PyProject,
     deps: PackageDependency[],
   ): PackageDependency[] {
-    const hatch_envs = pyproject.tool?.hatch?.envs;
-    if (is.nullOrUndefined(hatch_envs)) {
-      return deps;
+    const hatchDeps = pyproject.tool?.hatch?.deps;
+    if (hatchDeps) {
+      deps.push(...hatchDeps);
     }
-
-    for (const [envName, env] of Object.entries(hatch_envs)) {
-      const depType = `tool.hatch.envs.${envName}`;
-      const envDeps = parseDependencyList(depType, env?.dependencies);
-      deps.push(...envDeps);
-      const extraDeps = parseDependencyList(
-        depType,
-        env?.['extra-dependencies'],
-      );
-      deps.push(...extraDeps);
-    }
-
     return deps;
   }
 

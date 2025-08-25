@@ -551,7 +551,7 @@ export function branchExists(branchName: string): boolean {
 
 // Return the commit SHA for a branch
 export function getBranchCommit(branchName: string): LongCommitSha | null {
-  return config.branchCommits[branchName] || null;
+  return config.branchCommits?.[branchName] || null;
 }
 
 export async function getCommitMessages(): Promise<string[]> {
@@ -1027,18 +1027,28 @@ export async function getBranchLastCommitTime(
   }
 }
 
-export async function getBranchFiles(
-  branchName: string,
+export function getBranchFiles(branchName: string): Promise<string[] | null> {
+  return getBranchFilesFromRef(`origin/${branchName}`);
+}
+
+export function getBranchFilesFromCommit(
+  referenceCommit: LongCommitSha,
+): Promise<string[] | null> {
+  return getBranchFilesFromRef(referenceCommit);
+}
+
+async function getBranchFilesFromRef(
+  refName: string,
 ): Promise<string[] | null> {
   await syncGit();
   try {
     const diff = await gitRetry(() =>
-      git.diffSummary([`origin/${branchName}`, `origin/${branchName}^`]),
+      git.diffSummary([refName, `${refName}^`]),
     );
     return diff.files.map((file) => file.file);
     /* v8 ignore next 8 -- TODO: add test */
   } catch (err) {
-    logger.warn({ err }, 'getBranchFiles error');
+    logger.warn({ err }, 'getBranchFilesFromRef error');
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -1249,21 +1259,25 @@ export async function pushCommit({
   sourceRef,
   targetRef,
   files,
+  pushOptions,
 }: PushFilesConfig): Promise<boolean> {
   await syncGit();
   logger.debug(`Pushing refSpec ${sourceRef}:${targetRef ?? sourceRef}`);
   let result = false;
   try {
-    const pushOptions: TaskOptions = {
+    const gitOptions: TaskOptions = {
       '--force-with-lease': null,
       '-u': null,
     };
     if (getNoVerify().includes('push')) {
-      pushOptions['--no-verify'] = null;
+      gitOptions['--no-verify'] = null;
+    }
+    if (pushOptions) {
+      gitOptions['--push-option'] = pushOptions;
     }
 
     const pushRes = await gitRetry(() =>
-      git.push('origin', `${sourceRef}:${targetRef ?? sourceRef}`, pushOptions),
+      git.push('origin', `${sourceRef}:${targetRef ?? sourceRef}`, gitOptions),
     );
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');

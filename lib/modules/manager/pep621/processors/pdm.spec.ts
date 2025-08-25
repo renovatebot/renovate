@@ -1,14 +1,16 @@
-import { join } from 'upath';
+import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
+import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import * as hostRules from '../../../../util/host-rules';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
-import type { UpdateArtifactsConfig } from '../../types';
+import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types';
+import { parsePyProject } from '../extract';
 import { depTypes } from '../utils';
 import { PdmProcessor } from './pdm';
 import { mockExecAll } from '~test/exec-util';
-import { fs } from '~test/util';
+import { fs, partial } from '~test/util';
 
 vi.mock('../../../../util/fs');
 vi.mock('../../../datasource');
@@ -17,15 +19,24 @@ const getPkgReleases = vi.mocked(_getPkgReleases);
 
 const config: UpdateArtifactsConfig = {};
 const adminConfig: RepoGlobalConfig = {
-  localDir: join('/tmp/github/some/repo'),
-  cacheDir: join('/tmp/cache'),
-  containerbaseDir: join('/tmp/cache/containerbase'),
+  localDir: upath.join('/tmp/github/some/repo'),
+  cacheDir: upath.join('/tmp/cache'),
+  containerbaseDir: upath.join('/tmp/cache/containerbase'),
 };
 
 const processor = new PdmProcessor();
 
 describe('modules/manager/pep621/processors/pdm', () => {
   describe('updateArtifacts()', () => {
+    it('throws TEMPORARY_ERROR', async () => {
+      fs.readLocalFile.mockRejectedValueOnce(new Error(TEMPORARY_ERROR));
+      const result = processor.updateArtifacts(
+        partial<UpdateArtifact>({ config: {} }),
+        partial(),
+      );
+      await expect(result).rejects.toThrow(TEMPORARY_ERROR);
+    });
+
     it('return null if there is no lock file', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
       const updatedDeps = [{ packageName: 'dep1' }];
@@ -36,7 +47,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           config,
           updatedDeps,
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toBeNull();
     });
@@ -65,10 +76,10 @@ describe('modules/manager/pep621/processors/pdm', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config: { constraints: {} },
           updatedDeps,
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toBeNull();
       expect(execSnapshots).toMatchObject([
@@ -113,7 +124,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           config: {},
           updatedDeps,
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toEqual([
         { artifactError: { lockFile: 'pdm.lock', stderr: 'test error' } },
@@ -186,7 +197,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           config: {},
           updatedDeps,
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toEqual([
         {
@@ -252,7 +263,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           config: {},
           updatedDeps,
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toBeNull();
       expect(execSnapshots).toEqual([]);
@@ -283,7 +294,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           },
           updatedDeps: [],
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toEqual([
         {
@@ -333,7 +344,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           },
           updatedDeps: [],
         },
-        {},
+        parsePyProject('')!,
       );
       expect(result).toEqual([
         {

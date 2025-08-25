@@ -15,7 +15,7 @@ import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import * as _branchWorker from '../update/branch';
 import * as _limits from './limits';
 import {
-  canSkipBranchUpdateCheck,
+  compareCacheFingerprint,
   generateCommitFingerprintConfig,
   syncBranchState,
   writeUpdates,
@@ -129,7 +129,7 @@ describe('workers/repository/process/write', () => {
 
       scm.branchExists.mockResolvedValueOnce(false).mockResolvedValue(true);
       GlobalConfig.set({ dryRun: 'full' });
-      config.baseBranches = ['main', 'dev'];
+      config.baseBranchPatterns = ['main', 'dev'];
       await writeUpdates(config, branches);
       expect(counts.get('Branches')).toBe(1);
       expect(addMeta).toHaveBeenCalledWith({
@@ -358,7 +358,9 @@ describe('workers/repository/process/write', () => {
         branchName: 'new/some-branch',
         sha: '111',
       };
-      expect(canSkipBranchUpdateCheck(branchCache, '222')).toBe(false);
+      expect(compareCacheFingerprint(branchCache, '222')).toBe(
+        'no-fingerprint',
+      );
     });
 
     it('returns false when fingerprints are not same', () => {
@@ -368,7 +370,7 @@ describe('workers/repository/process/write', () => {
         sha: '111',
         commitFingerprint: '211',
       };
-      expect(canSkipBranchUpdateCheck(branchCache, '222')).toBe(false);
+      expect(compareCacheFingerprint(branchCache, '222')).toBe('no-match');
     });
 
     it('returns true', () => {
@@ -378,7 +380,7 @@ describe('workers/repository/process/write', () => {
         sha: '111',
         commitFingerprint: '222',
       };
-      expect(canSkipBranchUpdateCheck(branchCache, '222')).toBe(true);
+      expect(compareCacheFingerprint(branchCache, '222')).toBe('matched');
     });
   });
 

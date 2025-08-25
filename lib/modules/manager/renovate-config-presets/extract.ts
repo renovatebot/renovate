@@ -5,7 +5,7 @@ import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import type { PackageDependency, PackageFileContent } from '../types';
-import { RenovateJsonSchema } from './schema';
+import { RenovateJson } from './schema';
 
 const supportedPresetSources: Record<string, string> = {
   github: GithubTagsDatasource.id,
@@ -18,7 +18,7 @@ export function extractPackageFile(
   packageFile: string,
 ): PackageFileContent | null {
   logger.trace(`renovate-config-presets.extractPackageFile(${packageFile})`);
-  const config = RenovateJsonSchema.safeParse(content);
+  const config = RenovateJson.safeParse(content);
   if (!config.success) {
     logger.debug({ packageFile, err: config.error }, 'Invalid Renovate Config');
     return null;

@@ -515,4 +515,58 @@ describe('modules/manager/poetry/extract', () => {
       expect(res?.deps[1].depName).toBe('dep1');
     });
   });
+
+  describe('Poetry v2', () => {
+    it('extract dependencies from the project section', async () => {
+      const src = codeBlock`
+        [project]
+        name = "poetry-v2-support-reproduction"
+        version = "1.0.0"
+        description = "This is a minimal reproduction for the renovate bot discussion."
+        readme = "README.md"
+        requires-python = ">=3.11,<4.0"
+        dependencies = [
+            "algoliasearch==4.11.2",
+        ]
+
+        [project.optional-dependencies]
+        decouple = ["python-decouple==3.6"]
+
+        [[tool.poetry.packages]]
+        include = "minimal_reproduction"
+
+        [build-system]
+        requires = ["poetry-core==2.0.0"]
+        build-backend = "poetry.core.masonry.api"
+      `;
+
+      const res = await extractPackageFile(src, 'pyproject.toml');
+
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '==4.11.2',
+            currentVersion: '4.11.2',
+            datasource: 'pypi',
+            depName: 'algoliasearch',
+            depType: 'project.dependencies',
+            packageName: 'algoliasearch',
+          },
+          {
+            currentValue: '==3.6',
+            currentVersion: '3.6',
+            datasource: 'pypi',
+            depName: 'python-decouple',
+            depType: 'project.optional-dependencies',
+            managerData: {
+              depGroup: 'decouple',
+            },
+            packageName: 'python-decouple',
+          },
+        ],
+        extractedConstraints: {},
+        packageFileVersion: undefined,
+      });
+    });
+  });
 });

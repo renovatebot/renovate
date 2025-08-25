@@ -111,7 +111,36 @@ Calls to the APIs require authentication with a personal access token from the G
 The token must be included in the request header as the `authorization` property.
 
 You can use a [classic token](https://github.com/settings/tokens) or a [fine-grained token](https://github.com/settings/personal-access-tokens).
-No additional scopes or permissions are required for the token.
+Mend recommends the use of fine-grained tokens for enhanced security.
+
+#### Scopes and permissions for tokens
+
+No additional scopes or permissions need to be added when calling APIs on _public_ repositories.
+When calling APIs on _private_ repositories, the following scopes and permissions are required:
+
+- Classic tokens require `repo` scope (Full control of private repositories)
+- Fine-grained tokens must set the "Resource owner" as the org that the API is being called on, and must have a minimum of `metadata:read-only` permission on the selected repositories.
+
+##### Fine-grained token example
+
+To create a fine-grained token for the APIs, follow these steps:
+
+- Provide a name for the token in the "Token name" field.
+- [Optional] Provide a description for the token.
+
+![Fine-grained token settings](../assets/images/app-settings/fine-grained-token.png)
+
+- Set the "Resource owner" to be the User or Org for the APIs that will be called.
+
+![Select resource owner for fine-grained token](../assets/images/app-settings/fine-grained-token-resources.png)
+
+- Choose an expiry date in the "Expiration" field.
+
+- Choose the "Repository access" setting. If using APIs to update secrets on a private-repository, choose "All repositories" or "Only selected repositories".
+
+- In the "Permissions" section, add permissions for "Metadata" (read-only).
+
+![Select permissions for fine-grained token](../assets/images/app-settings/fine-grained-token-permissions.png)
 
 ## Known Issues
 

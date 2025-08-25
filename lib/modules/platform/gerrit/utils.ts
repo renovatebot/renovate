@@ -89,6 +89,7 @@ export function mapGerritChangeToPr(
     targetBranch: change.branch,
     title: change.subject,
     createdAt: change.created?.replace(' ', 'T'),
+    labels: change.hashtags,
     reviewers:
       change.reviewers?.REVIEWER?.map((reviewer) => reviewer.username!) ?? [],
     bodyStruct: {
@@ -140,7 +141,7 @@ export function mapBranchStatusToLabel(
   state: BranchStatus | 'UNKNOWN', // suppress default path code removal
   label: GerritLabelTypeInfo,
 ): number {
-  const numbers = Object.keys(label.values).map((x) => parseInt(x, 10));
+  const numbers = Object.keys(label.values).map((x) => parseInt(x));
   switch (state) {
     case 'green':
       return Math.max(...numbers);

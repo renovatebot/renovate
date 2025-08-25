@@ -8,44 +8,81 @@ import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
 import type { AllConfig, RenovateConfig } from './types';
 
-const secretNamePattern = '[A-Za-z][A-Za-z0-9_]*';
+const namePattern = '[A-Za-z][A-Za-z0-9_]*';
+const nameRegex = regEx(`^${namePattern}$`);
+const secretTemplateRegex = regEx(`{{ secrets\\.(${namePattern}) }}`, 'g');
+const variableTemplateRegex = regEx(`{{ variables\\.(${namePattern}) }}`, 'g');
 
-const secretNameRegex = regEx(`^${secretNamePattern}$`);
-const secretTemplateRegex = regEx(`{{ secrets\\.(${secretNamePattern}) }}`);
-
-export const options: InterpolatorOptions = {
-  name: 'secrets',
-  nameRegex: secretNameRegex,
-  templateRegex: secretTemplateRegex,
+export const options: Record<'secrets' | 'variables', InterpolatorOptions> = {
+  secrets: {
+    name: 'secrets',
+    nameRegex,
+    templateRegex: secretTemplateRegex,
+  },
+  variables: {
+    name: 'variables',
+    nameRegex,
+    templateRegex: variableTemplateRegex,
+  },
 };
 
-export function validateConfigSecrets(config: AllConfig): void {
-  validateInterpolatedValues(config.secrets, options);
+function validateNestedInterpolatedValues<T extends 'secrets' | 'variables'>(
+  config: AllConfig,
+  key: T,
+): void {
+  validateInterpolatedValues(config[key], options[key]);
   if (config.repositories) {
     for (const repository of config.repositories) {
       if (is.plainObject(repository)) {
-        validateInterpolatedValues(repository.secrets, options);
+        validateInterpolatedValues(repository[key], options[key]);
       }
     }
   }
 }
 
-export function applySecretsToConfig(
+export function validateConfigSecretsAndVariables(
   config: RenovateConfig,
-  secrets = config.secrets,
-  deleteSecrets = true,
+): void {
+  validateNestedInterpolatedValues(config, 'secrets');
+  validateNestedInterpolatedValues(config, 'variables');
+}
+
+interface ApplySecretsAndVariablesConfig {
+  config: RenovateConfig;
+  secrets?: RenovateConfig['secrets'];
+  variables?: RenovateConfig['variables'];
+  deleteSecrets?: boolean;
+  deleteVariables?: boolean;
+}
+
+/**
+ * Applies both variables and secrets to the Renovate config by interpolating values
+ */
+export function applySecretsAndVariablesToConfig(
+  applyConfig: ApplySecretsAndVariablesConfig,
 ): RenovateConfig {
+  const { config, deleteSecrets, deleteVariables } = applyConfig;
+  const secrets = applyConfig.secrets ?? config.secrets;
+  const variables = applyConfig.variables ?? config.variables;
+
   // Add all secrets to be sanitized
   if (is.plainObject(secrets)) {
     for (const secret of Object.values(secrets)) {
       addSecretForSanitizing(secret);
     }
   }
-  // TODO: fix types (#9610)
-  return replaceInterpolatedValuesInObject(
+
+  const configWithVars = replaceInterpolatedValuesInObject(
     config,
-    secrets!,
-    options,
+    variables ?? {},
+    options.variables,
+    deleteVariables,
+  );
+
+  return replaceInterpolatedValuesInObject(
+    configWithVars,
+    secrets ?? {},
+    options.secrets,
     deleteSecrets,
   );
 }
