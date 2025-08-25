@@ -1,7 +1,6 @@
 import { codeBlock } from 'common-tags';
 import * as npmUpdater from '../..';
 import { updateYarnrcCatalogDependency } from './yarn';
-
 import { logger } from '~test/util';
 
 describe('modules/manager/npm/update/dependency/yarn', () => {

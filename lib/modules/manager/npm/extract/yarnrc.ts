@@ -55,12 +55,12 @@ export function resolveRegistryUrl(
   return null;
 }
 
-export async function loadYarnRcYml(
-  yarnrcYmlFileName: string | null,
+export async function loadYarnRc(
+  yarnrcFileName: string | null,
 ): Promise<YarnConfig | null> {
   let yarnConfig: YarnConfig | null = null;
-  const repoYarnrcYml = yarnrcYmlFileName
-    ? await readLocalFile(yarnrcYmlFileName, 'utf8')
+  const repoYarnrcYml = yarnrcFileName
+    ? await readLocalFile(yarnrcFileName, 'utf8')
     : null;
   if (is.string(repoYarnrcYml) && repoYarnrcYml.trim().length > 0) {
     yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);

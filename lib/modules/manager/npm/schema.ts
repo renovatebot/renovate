@@ -10,7 +10,6 @@ export const YarnCatalogs = z.object({
   options: z.optional(z.union([z.string(), z.array(z.string())])),
   list: z.record(z.union([z.string(), z.record(z.string())])),
 });
-
 export type YarnCatalogs = z.infer<typeof YarnCatalogs>;
 
 export const YarnConfig = Yaml.pipe(
@@ -23,10 +22,9 @@ export const YarnConfig = Yaml.pipe(
         }),
       )
       .optional(),
-    catalogs: YarnCatalogs.optional(),
+    catalogs: YarnCatalogs.optional().catch(undefined),
   }),
 );
-
 export type YarnConfig = z.infer<typeof YarnConfig>;
 
 export const PnpmWorkspaceFile = z
@@ -34,7 +32,6 @@ export const PnpmWorkspaceFile = z
     packages: z.array(z.string()),
   })
   .and(PnpmCatalogs);
-
 export type PnpmWorkspaceFile = z.infer<typeof PnpmWorkspaceFile>;
 
 export const PackageManager = z

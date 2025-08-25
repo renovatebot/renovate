@@ -137,7 +137,7 @@ export async function extractYarnCatalogs(
 
   const deps = extractCatalogDeps(yarnCatalogs, 'yarn');
 
-  let yarnLock;
+  let yarnLock: string | undefined;
   const filePath = getSiblingFileName(packageFile, 'yarn.lock');
 
   if (await readLocalFile(filePath, 'utf8')) {

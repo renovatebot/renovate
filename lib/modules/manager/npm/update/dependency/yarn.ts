@@ -30,8 +30,8 @@ export function updateYarnrcCatalogDependency({
     `npm.updateYarnrcCatalogDependency(): ${depType}::${catalogName}.${depName} = ${newValue}`,
   );
 
-  let document;
-  let parsedContents;
+  let document: ReturnType<typeof parseDocument>;
+  let parsedContents: YarnConfig;
 
   try {
     // In order to preserve the original formatting as much as possible, we want
@@ -77,12 +77,7 @@ export function updateYarnrcCatalogDependency({
     return null;
   }
 
-  /* v8 ignore next 3 -- this should not happen in practice, but we must satisfy the types */
-  if (!modifiedDocument.contents?.srcToken) {
-    return null;
-  }
-
-  return CST.stringify(modifiedDocument.contents.srcToken);
+  return CST.stringify(modifiedDocument.contents!.srcToken!);
 }
 
 /**
@@ -113,11 +108,8 @@ function changeDependencyIn(
   }
 
   if (newName) {
-    /* v8 ignore next 3 -- the try..catch block above already throws if a key is an alias */
-    if (!CST.isScalar(relevantNode.srcToken?.key)) {
-      return null;
-    }
-    CST.setScalarValue(relevantNode.srcToken.key, newName);
+    /* the try..catch block above already throws if a key is an alias */
+    CST.setScalarValue(relevantNode.srcToken!.key!, newName);
   }
 
   if (newValue) {
