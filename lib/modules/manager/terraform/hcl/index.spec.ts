@@ -10,6 +10,13 @@ const resourcesTFJSON = Fixtures.get('resources.tf.json');
 const lockedVersionJSON = Fixtures.get('lockedVersion.tf.json');
 
 describe('modules/manager/terraform/hcl/index', () => {
+  describe('null for invalid name', () => {
+    it('should return null', async () => {
+      const res = await parseHCL(modulesTF, 'file');
+      expect(res).toBeNil();
+    });
+  });
+
   describe('parseHCL() for .tf', () => {
     it('should return flat modules', async () => {
       const res = await parseHCL(modulesTF, 'file.tf');
