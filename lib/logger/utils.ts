@@ -217,7 +217,7 @@ export function sanitizeValue(
   }
 
   // Define a regular expression to detect the JWT format (header.payload.signature)
-  const jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$/;
+  const jwtRegex = regEx(/^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$/);
 
   if (is.object(value)) {
     const objectResult: Record<string, any> = {};
