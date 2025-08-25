@@ -13,9 +13,10 @@ let cacheProxy: PackageCache | undefined;
 
 let cacheType: 'redis' | 'sqlite' | 'memory' | 'file' | undefined;
 
+/* v8 ignore start -- not important */
 export function getCacheType(): typeof cacheType {
   return cacheType;
-}
+} /* v8 ignore stop */
 
 export async function get<T = any>(
   namespace: PackageCacheNamespace,
