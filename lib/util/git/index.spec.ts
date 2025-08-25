@@ -9,13 +9,13 @@ import {
   UNKNOWN_ERROR,
 } from '../../constants/error-messages';
 import { newlineRegex, regEx } from '../regex';
-import * as _modifiedAuth from './auth';
+import * as _auth from './auth';
 import * as _behindBaseCache from './behind-base-branch-cache';
 import * as _conflictsCache from './conflicts-cache';
 import * as _modifiedCache from './modified-cache';
 import type { FileChange } from './types';
-import { setNoVerify } from '.';
 import * as git from '.';
+import { setNoVerify } from '.';
 import { logger } from '~test/util';
 
 vi.mock('./conflicts-cache');
@@ -29,7 +29,7 @@ vi.unmock('.');
 const behindBaseCache = vi.mocked(_behindBaseCache);
 const conflictsCache = vi.mocked(_conflictsCache);
 const modifiedCache = vi.mocked(_modifiedCache);
-const modifiedAuth = vi.mocked(_modifiedAuth);
+const auth = vi.mocked(_auth);
 // Class is no longer exported
 const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
 
@@ -211,7 +211,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       beforeEach(async () => {
         const repo = Git(base.path);
 
-        modifiedAuth.getGitEnvironmentVariables.mockReturnValue({
+        auth.getGitEnvironmentVariables.mockReturnValue({
           GIT_ALLOW_PROTOCOL: 'file',
         });
 
