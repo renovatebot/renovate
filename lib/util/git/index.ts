@@ -551,7 +551,7 @@ export function branchExists(branchName: string): boolean {
 
 // Return the commit SHA for a branch
 export function getBranchCommit(branchName: string): LongCommitSha | null {
-  return config.branchCommits[branchName] || null;
+  return config.branchCommits?.[branchName] || null;
 }
 
 export async function getCommitMessages(): Promise<string[]> {
