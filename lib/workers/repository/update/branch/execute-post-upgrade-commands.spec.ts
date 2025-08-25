@@ -2,12 +2,19 @@ import { dir } from 'tmp-promise';
 import type { DirectoryResult } from 'tmp-promise';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
+import * as _exec from '../../../../util/exec';
+import * as _gitAuth from '../../../../util/git/auth';
 import type { StatusResult } from '../../../../util/git/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import * as postUpgradeCommands from './execute-post-upgrade-commands';
 import { fs, git, logger, partial } from '~test/util';
 
+vi.mock('../../../../util/exec');
 vi.mock('../../../../util/fs');
+vi.mock('../../../../util/git/auth');
+
+const exec = vi.mocked(_exec);
+const gitAuth = vi.mocked(_gitAuth);
 
 describe('workers/repository/update/branch/execute-post-upgrade-commands', () => {
   describe('postUpgradeCommandsExecutor', () => {
@@ -519,6 +526,66 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           path: 'dependencies/charts/ingress-nginx-4.12.0.tgz',
         },
       ]);
+    });
+
+    it('passes git environment variables to exec', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
+        ],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      const gitEnvVars = {
+        GIT_CONFIG_COUNT: '1',
+        GIT_CONFIG_KEY_0: 'url.https://token@github.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
+      };
+      gitAuth.getGitEnvironmentVariables.mockReturnValue(gitEnvVars);
+      exec.exec.mockResolvedValueOnce({
+        stdout: 'success',
+        stderr: '',
+      });
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      const localDir = upath.join(tmpDir.path, 'local');
+      GlobalConfig.set({
+        localDir,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile.mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(exec.exec).toHaveBeenCalledWith('some-command', {
+        cwd: localDir,
+        extraEnv: gitEnvVars,
+      });
+      expect(res.artifactErrors).toHaveLength(0);
     });
   });
 });
