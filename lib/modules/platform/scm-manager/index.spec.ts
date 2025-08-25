@@ -34,7 +34,7 @@ import {
   mergePr,
   setBranchStatus,
   updatePr,
-} from './index';
+} from '.';
 import { git } from '~test/util';
 
 vi.mock('../util');
