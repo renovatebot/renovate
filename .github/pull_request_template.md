@@ -8,9 +8,23 @@
 
 ## Context
 
-<!-- Describe why you're making these changes if it's not already explained in a corresponding issue. -->
-<!-- If you're closing an existing issue with this pull request, use the keyword Closes #issue_number. -->
-<!-- If you're referencing an issue with this pull request, put it in a Markdown list like this: - #issue_number. -->
+Please select one of the below:
+
+- [ ] This closes an existing Issue: #
+- [ ] This doesn't close an Issue, but I accept the risk that this PR may be closed if maintainers disagree with its opening or implementation
+
+## AI assistance disclosure
+
+<!-- We request this information to assist reviewers in identifying AI-generated errors and other issues specific to AI usage. While we typically permit the use of AI tools, we appreciate being notified when they are employed. -->
+
+Did you use AI tools to create any part of this pull request?
+
+Please select one option and, if yes, briefly describe how AI was used (e.g., code, tests, docs) and which tool(s) you used.
+
+- [ ] No — I did not use AI for this contribution.
+- [ ] Yes — minimal assistance (e.g., IDE autocomplete, small code completions, grammar fixes).
+- [ ] Yes — substantive assistance (AI generated non‑trivial portions of code, tests, or documentation).
+- [ ] Yes — other (please describe):
 
 ## Documentation (please check one with an [x])
 
@@ -25,6 +39,8 @@ I have verified these changes via:
 - [ ] Newly added/modified unit tests, or
 - [ ] No unit tests but ran on a real repository, or
 - [ ] Both unit tests + ran on a real repository
+
+The public repository: <URL>
 
 <!-- Do you have any suggestions about this PR template? Edit it here: https://github.com/renovatebot/renovate/edit/main/.github/pull_request_template.md -->
 
