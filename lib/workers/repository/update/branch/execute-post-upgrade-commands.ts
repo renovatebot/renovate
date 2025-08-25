@@ -115,9 +115,7 @@ export async function postUpgradeCommandsExecutor(
 
             const execOpts: ExecOptions = {
               cwd: GlobalConfig.get('localDir'),
-              extraEnv: {
-                ...getGitEnvironmentVariables(),
-              },
+              extraEnv: getGitEnvironmentVariables(),
             };
             if (dataFilePath) {
               execOpts.env = {
