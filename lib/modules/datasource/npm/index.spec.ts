@@ -140,6 +140,58 @@ describe('modules/datasource/npm/index', () => {
     expect(res?.deprecationMessage).toMatchSnapshot();
   });
 
+  it('should return attestation', async () => {
+    const deprecatedPackage = {
+      name: 'foobar',
+      versions: {
+        '0.0.1': {
+          foo: 1,
+          dist: {
+            attestations: {
+              url: 'https://registry.npmjs.org/-/npm/v1/attestations/foobar@0.0.1',
+            },
+          },
+        },
+        '0.0.2': {
+          foo: 2,
+          dist: {
+            attestations: {
+              url: 'https://registry.npmjs.org/-/npm/v1/attestations/foobar@0.0.2',
+            },
+          },
+        },
+      },
+      repository: {
+        type: 'git',
+        url: 'git://github.com/renovateapp/dummy.git',
+      },
+      'dist-tags': {
+        latest: '0.0.2',
+      },
+      time: {
+        '0.0.1': '2018-05-06T07:21:53+02:00',
+        '0.0.2': '2018-05-07T07:21:53+02:00',
+      },
+    };
+    httpMock
+      .scope('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, deprecatedPackage);
+    const res = await getPkgReleases({ datasource, packageName: 'foobar' });
+    expect(res).toMatchObject({
+      releases: [
+        {
+          version: '0.0.1',
+          attestation: true,
+        },
+        {
+          version: '0.0.2',
+          attestation: true,
+        },
+      ],
+    });
+  });
+
   it('should handle foobar', async () => {
     httpMock
       .scope('https://registry.npmjs.org')
