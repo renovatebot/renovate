@@ -51,7 +51,7 @@ export class UvProcessor implements PyProjectProcessor {
     // Skip sources that do not make sense to handle (e.g. path).
     if (uv.sources || defaultIndex || implicitIndexUrls) {
       for (const dep of deps) {
-        // istanbul ignore if
+        /* v8 ignore next 3 -- needs test */
         if (!dep.packageName) {
           continue;
         }
@@ -87,6 +87,7 @@ export class UvProcessor implements PyProjectProcessor {
             dep.skipReason = 'path-dependency';
           } else if ('workspace' in depSource) {
             dep.skipReason = 'inherited-dependency';
+            /* v8 ignore next 3 -- needs test */
           } else {
             dep.skipReason = 'unknown-registry';
           }
@@ -145,6 +146,20 @@ export class UvProcessor implements PyProjectProcessor {
     }
 
     return Promise.resolve(deps);
+  }
+
+  async getLockfiles(
+    _project: PyProject,
+    lockfiles: string[],
+    packageFile: string,
+  ): Promise<string[]> {
+    const lockFileName = await findLocalSiblingOrParent(packageFile, 'uv.lock');
+    if (!lockFileName) {
+      logger.debug({ packageFile }, `No uv lock file found`);
+      return lockfiles;
+    }
+    lockfiles.push(lockFileName);
+    return lockfiles;
   }
 
   async updateArtifacts(
@@ -222,7 +237,6 @@ export class UvProcessor implements PyProjectProcessor {
 
       return fileChanges.length ? fileChanges : null;
     } catch (err) {
-      // istanbul ignore if
       if (err.message === TEMPORARY_ERROR) {
         throw err;
       }
@@ -353,7 +367,7 @@ async function getUvIndexCredentials(
 
   for (const { name, url } of uv_indexes) {
     const parsedUrl = parseUrl(url);
-    // istanbul ignore if
+    /* v8 ignore next 3 -- needs test */
     if (!parsedUrl) {
       continue;
     }

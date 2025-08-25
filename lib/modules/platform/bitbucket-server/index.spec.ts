@@ -2885,7 +2885,7 @@ Followed by some information.
           const users = await bitbucket.expandGroupMembers([
             '@reviewer-group/my-reviewer-group',
           ]);
-          expect(users).toEqual(['alice@alice.com', 'carol@carol.com']);
+          expect(users).toEqual(['alice', 'carol']);
         });
         it('returns empty array if group is not found', async () => {
           const scope = await initRepo();
@@ -2946,13 +2946,11 @@ Followed by some information.
                     {
                       slug: 'user1',
                       active: false,
-                      emailAddress: 'user1@user1.com',
                       displayName: 'user1',
                     },
                     {
                       slug: 'user2',
                       active: false,
-                      emailAddress: 'user2@user2.com',
                       displayName: 'user2',
                     },
                   ],
@@ -3009,7 +3007,7 @@ Followed by some information.
           const users = await bitbucket.expandGroupMembers([
             '@reviewer-group/my-group',
           ]);
-          expect(users).toEqual(['zoe@repo.com']);
+          expect(users).toEqual(['zoe']);
         });
 
         it('uses project-level group when repository-level group is not available', async () => {
@@ -3042,7 +3040,7 @@ Followed by some information.
           const users = await bitbucket.expandGroupMembers([
             '@reviewer-group/my-group',
           ]);
-          expect(users).toEqual(['jane@project.com']);
+          expect(users).toEqual(['jane']);
         });
 
         it('deals with not found groups correctly', async () => {
@@ -3116,7 +3114,7 @@ Followed by some information.
             '@reviewer-group/my-reviewer-group:random',
           ]);
           expect(users).toHaveLength(1);
-          expect(userArray.map((u) => u.emailAddress)).toContain(users[0]);
+          expect(userArray.map((u) => u.slug)).toContain(users[0]);
         });
         it('handles random with number correctly', async () => {
           const scope = await initRepo();
@@ -3163,7 +3161,7 @@ Followed by some information.
           ]);
           expect(users).toHaveLength(2);
           users.forEach((user) => {
-            expect(userArray.map((u) => u.emailAddress)).toContain(user);
+            expect(userArray.map((u) => u.slug)).toContain(user);
           });
         });
 
@@ -3212,7 +3210,7 @@ Followed by some information.
           ]);
           expect(users).toHaveLength(3);
           users.forEach((user) => {
-            expect(userArray.map((u) => u.emailAddress)).toContain(user);
+            expect(userArray.map((u) => u.slug)).toContain(user);
           });
         });
 
@@ -3276,7 +3274,7 @@ Followed by some information.
           const users = await bitbucket.expandGroupMembers([
             '@reviewer-group/my-reviewer-group',
           ]);
-          expect(users).toEqual(['alice@alice.com', 'bob@bob.com']);
+          expect(users).toEqual(['alice', 'bob']);
         });
       });
     });
