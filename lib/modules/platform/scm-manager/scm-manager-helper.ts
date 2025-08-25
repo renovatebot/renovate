@@ -10,11 +10,6 @@ import {
 import type { Link, PullRequest, Repo, User } from './schema';
 import type { PullRequestCreateParams, PullRequestUpdateParams } from './types';
 
-/*let token: string;
-export const setToken = (newToken: string): void => {
-  token = newToken;
-};*/
-
 export const scmManagerHttp = new ScmManagerHttp();
 
 const URLS = {
