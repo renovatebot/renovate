@@ -1,5 +1,6 @@
 import { execSync } from 'node:child_process';
 import { glob } from 'glob';
+import type { MergeStrategy } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
 import type { PlatformScm } from '../types';
@@ -53,7 +54,11 @@ export class LocalFs implements PlatformScm {
     return Promise.resolve('' as LongCommitSha);
   }
 
-  mergeAndPush(branchName: string): Promise<void> {
+  mergeAndPush(
+    branchName: string,
+    mergeStrategy: MergeStrategy = 'auto',
+    commitMessage: string | null = null,
+  ): Promise<void> {
     return Promise.resolve();
   }
 
