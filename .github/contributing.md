@@ -141,7 +141,7 @@ The codebase can be difficult to navigate, especially for a first-time contribut
 We don't want you spending an hour trying to work out something that would take us only a minute to explain.
 
 For that reason, we have a Slack channel dedicated to helping anyone who's working on or considering Pull Requests for Renovate.
-Please email <rhys@arkins.net> and simply mention that you need an invitation to the channel and you'll be added ASAP.
+Please email <renovate@mend.io> and simply mention that you need an invitation to the channel and you should receive an invite from Slack within 1-2 working days.
 
 Important: this Slack group is restricted to development questions only in order to keep the volume of messages lower - all technical support questions should still be posted to this repository's Discussions instead.
 
