@@ -569,7 +569,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
     });
 
-    it('uses default localDir when workingDirTemplate is not provided', async () => {
+    it('uses localDir when workingDirTemplate is not provided', async () => {
       const commands = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
