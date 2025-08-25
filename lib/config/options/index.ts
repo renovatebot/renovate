@@ -351,6 +351,13 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'minimumGroupSize',
+    description:
+      'The minimum number of updates which must be in a group for branches to be created.',
+    type: 'integer',
+    default: 1,
+  },
+  {
     name: 'presetCachePersistence',
     description: 'Cache resolved presets in package cache.',
     type: 'boolean',
@@ -1016,11 +1023,10 @@ const options: RenovateOptions[] = [
     type: 'string',
   },
   {
-    name: 'updateLockFiles',
-    description: 'Set to `false` to disable lock file updating.',
+    name: 'skipArtifactsUpdate',
+    description: "Skip Renovate's automatic artifact updating.",
     type: 'boolean',
-    default: true,
-    supportedManagers: ['npm'],
+    default: false,
   },
   {
     name: 'skipInstalls',
@@ -1130,6 +1136,14 @@ const options: RenovateOptions[] = [
     stage: 'global',
   },
   {
+    name: 'gitPrivateKeyPassphrase',
+    description: 'Passphrase for the `gitPrivateKey`',
+    type: 'string',
+    cli: false,
+    globalOnly: true,
+    stage: 'global',
+  },
+  {
     name: 'gitIgnoredAuthors',
     description:
       'Git authors which are ignored by Renovate. Must conform to [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322).',
@@ -1203,6 +1217,7 @@ const options: RenovateOptions[] = [
       'bitbucket-pipelines',
       'buildpacks',
       'crossplane',
+      'crow',
       'devcontainer',
       'docker-compose',
       'dockerfile',
@@ -2519,6 +2534,8 @@ const options: RenovateOptions[] = [
     subType: 'string',
     allowedValues: [
       'bundlerConservative',
+      'composerWithAll',
+      'dotnetWorkloadRestore',
       'gomodMassage',
       'gomodTidy',
       'gomodTidy1.17',
@@ -2529,6 +2546,7 @@ const options: RenovateOptions[] = [
       'helmUpdateSubChartArchives',
       'kustomizeInflateHelmCharts',
       'npmDedupe',
+      'npmInstallTwice',
       'pnpmDedupe',
       'yarnDedupeFewer',
       'yarnDedupeHighest',
@@ -3178,6 +3196,14 @@ const options: RenovateOptions[] = [
     name: 'deleteConfigFile',
     description:
       'If set to `true`, Renovate tries to delete the self-hosted config file after reading it.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
+    name: 'deleteAdditionalConfigFile',
+    description:
+      'If set to `true`, Renovate tries to delete the additional self-hosted config file after reading it.',
     type: 'boolean',
     default: false,
     globalOnly: true,

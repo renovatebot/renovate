@@ -61,19 +61,19 @@ exports[`modules/platform/azure/util > getRenovatePRFormat > should be formated 
 
 exports[`modules/platform/azure/util > getStorageExtraCloneOpts > should configure basic auth 1`] = `
 {
-  "-c": "http.extraheader=AUTHORIZATION: basic dXNlcjpwYXNz",
+  "-c": "http.extraHeader=AUTHORIZATION: basic dXNlcjpwYXNz",
 }
 `;
 
 exports[`modules/platform/azure/util > getStorageExtraCloneOpts > should configure bearer token 1`] = `
 {
-  "-c": "http.extraheader=AUTHORIZATION: bearer token",
+  "-c": "http.extraHeader=AUTHORIZATION: bearer token",
 }
 `;
 
 exports[`modules/platform/azure/util > getStorageExtraCloneOpts > should configure personal access token 1`] = `
 {
-  "-c": "http.extraheader=AUTHORIZATION: basic OjEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3OHRlc3Q=",
+  "-c": "http.extraHeader=AUTHORIZATION: basic OjEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3OHRlc3Q=",
 }
 `;
 

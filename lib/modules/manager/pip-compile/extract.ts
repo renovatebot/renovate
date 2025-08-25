@@ -3,6 +3,7 @@ import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { readLocalFile } from '../../../util/fs';
 import { ensureLocalPath } from '../../../util/fs/util';
+import { extractPackageFile as extractPep621File } from '../pep621/extract';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
 import type {
@@ -19,11 +20,11 @@ import {
   sortPackageFiles,
 } from './utils';
 
-export function extractPackageFile(
+export async function extractPackageFile(
   content: string,
   packageFile: string,
   _config: ExtractConfig,
-): PackageFileContent | null {
+): Promise<PackageFileContent | null> {
   logger.trace('pip-compile.extractPackageFile()');
   const manager = matchManager(packageFile);
   switch (manager) {
@@ -31,6 +32,8 @@ export function extractPackageFile(
       return extractSetupPyFile(content, packageFile, _config);
     case 'pip_requirements':
       return extractRequirementsFile(content);
+    case 'pep621':
+      return await extractPep621File(content, packageFile, _config);
     case 'unknown':
       logger.warn(
         { packageFile },
@@ -134,7 +137,7 @@ export async function extractAllPackageFiles(
         continue;
       }
 
-      const packageFileContent = extractPackageFile(
+      const packageFileContent = await extractPackageFile(
         content,
         packageFile,
         config,

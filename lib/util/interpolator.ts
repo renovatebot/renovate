@@ -57,6 +57,9 @@ function replaceInterpolatedValuesInString(
   options: InterpolatorOptions,
 ): string {
   const { name, templateRegex } = options;
+  // Reset regex lastIndex for global regexes to ensure consistent behavior
+  templateRegex.lastIndex = 0;
+
   // do nothing if no interpolator template found
   if (!templateRegex.test(value)) {
     return value;

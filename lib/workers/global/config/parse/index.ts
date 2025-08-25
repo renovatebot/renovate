@@ -13,6 +13,7 @@ import { setCustomEnv } from '../../../../util/env';
 import { readSystemFile } from '../../../../util/fs';
 import { addSecretForSanitizing } from '../../../../util/sanitize';
 import { ensureTrailingSlash } from '../../../../util/url';
+import * as additionalConfigFileParser from './additional-config-file';
 import * as cliParser from './cli';
 import * as codespaces from './codespaces';
 import * as envParser from './env';
@@ -43,10 +44,16 @@ export async function parseConfigs(
   // Get configs
   const defaultConfig = defaultsParser.getConfig();
   const fileConfig = await fileParser.getConfig(env);
+  const additionalFileConfig = await additionalConfigFileParser.getConfig(env);
   const cliConfig = cliParser.getConfig(argv);
   const envConfig = await envParser.getConfig(env);
 
-  let config: AllConfig = mergeChildConfig(fileConfig, envConfig);
+  let config: AllConfig = mergeChildConfig(fileConfig, additionalFileConfig);
+  // merge extends from file config and additional file config
+  if (is.nonEmptyArray(fileConfig.extends)) {
+    config.extends = [...fileConfig.extends, ...(config.extends ?? [])];
+  }
+  config = mergeChildConfig(config, envConfig);
   config = mergeChildConfig(config, cliConfig);
 
   config = await codespaces.setConfig(config);
@@ -105,6 +112,7 @@ export async function parseConfigs(
 
   logger.trace({ config: defaultConfig }, 'Default config');
   logger.debug({ config: fileConfig }, 'File config');
+  logger.debug({ config: additionalFileConfig }, 'Additional file config');
   logger.debug({ config: cliConfig }, 'CLI config');
   logger.debug({ config: envConfig }, 'Env config');
   logger.debug({ config: resolvedGlobalExtends }, 'Resolved global extends');
@@ -138,6 +146,12 @@ export async function parseConfigs(
 
   // Only try deletion if RENOVATE_CONFIG_FILE is set
   await fileParser.deleteNonDefaultConfig(env, !!config.deleteConfigFile);
+
+  // Only try deletion if RENOVATE_ADDITIONAL_CONFIG_FILE is set
+  await additionalConfigFileParser.deleteNonDefaultConfig(
+    env,
+    !!config.deleteAdditionalConfigFile,
+  );
 
   // Massage onboardingNoDeps
   if (!config.autodiscover && config.onboardingNoDeps !== 'disabled') {
