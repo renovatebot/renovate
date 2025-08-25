@@ -11,6 +11,12 @@ import type { PackageCache, PackageCacheNamespace } from './types';
 
 let cacheProxy: PackageCache | undefined;
 
+let cacheType: 'redis' | 'sqlite' | 'memory' | 'file' | undefined;
+
+export function getCacheType(): typeof cacheType {
+  return cacheType;
+}
+
 export async function get<T = any>(
   namespace: PackageCacheNamespace,
   key: string,
@@ -65,17 +71,21 @@ export async function setWithRawTtl(
 }
 
 export async function init(config: AllConfig): Promise<void> {
+  cacheType = undefined;
+
   if (config.redisUrl) {
     await redisCache.init(config.redisUrl, config.redisPrefix);
     cacheProxy = {
       get: redisCache.get,
       set: redisCache.set,
     };
+    cacheType = 'redis';
     return;
   }
 
   if (getEnv().RENOVATE_X_SQLITE_PACKAGE_CACHE) {
     cacheProxy = await SqlitePackageCache.init(config.cacheDir!);
+    cacheType = 'sqlite';
     return;
   }
 
@@ -86,11 +96,13 @@ export async function init(config: AllConfig): Promise<void> {
       set: fileCache.set,
       cleanup: fileCache.cleanup,
     };
+    cacheType = 'file';
     return;
   }
 }
 
 export async function cleanup(config: AllConfig): Promise<void> {
+  cacheType = undefined;
   if (config?.redisUrl) {
     await redisCache.end();
   }
