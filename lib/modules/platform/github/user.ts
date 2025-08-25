@@ -1,5 +1,6 @@
 import { logger } from '../../../logger';
 import * as githubHttp from '../../../util/http/github';
+import type { EmailAddress } from '../../../util/schema-utils';
 import type { UserDetails } from './types';
 
 const githubApi = new githubHttp.GithubHttp();
@@ -54,10 +55,10 @@ export async function getUserDetails(
 export async function getUserEmail(
   endpoint: string,
   token: string,
-): Promise<string | null> {
+): Promise<EmailAddress | null> {
   try {
     const emails = (
-      await githubApi.getJsonUnchecked<{ email: string }[]>(
+      await githubApi.getJsonUnchecked<{ email: EmailAddress }[]>(
         endpoint + 'user/emails',
         {
           token,

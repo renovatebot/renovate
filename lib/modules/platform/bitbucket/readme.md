@@ -21,27 +21,31 @@ After you installed the hosted app, please read the [reading list](../../../read
 
 ## Authentication
 
-First, [create an app password](https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/) for the bot account.
-Give the bot app password the following permission scopes:
+First, [create an API token](https://support.atlassian.com/bitbucket-cloud/docs/create-an-api-token/) for the bot account.
+Give the bot API token the following permission scopes:
 
-| Permission                                                                                           | Scope                      |
-| ---------------------------------------------------------------------------------------------------- | -------------------------- |
-| [`account`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#account)                     | Account: Read              |
-| [`team`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#team)                           | Workspace membership: Read |
-| [`issue:write`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#issue-write)             | Issues: Write              |
-| [`pullrequest:write`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#pullrequest-write) | Pull requests: Write       |
+| Permission                                                                                                               | Scope                |
+| ------------------------------------------------------------------------------------------------------------------------ | -------------------- |
+| [`read:repository:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#read-repository-bitbucket)     | Repository: Read     |
+| [`write:repository:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#write-repository-bitbucket)   | Repository: Write    |
+| [`read:pullrequest:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#read-pullrequest-bitbucket)   | Pull requests: Read  |
+| [`write:pullrequest:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#write-pullrequest-bitbucket) | Pull requests: Write |
+| [`read:user:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#read-user-bitbucket)                 | User: Read           |
+| [`read:issue:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#read-issue-bitbucket)               | Issues: Read         |
+| [`write:issue:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#write-issue-bitbucket)             | Issues: Write        |
+| [`read:workspace:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#read-workspace-bitbucket)       | Workspace: Read      |
 
 The bot also needs to validate the workspace membership status of pull-request reviewers, for that, [create a new user group](https://support.atlassian.com/bitbucket-cloud/docs/organize-workspace-members-into-groups/) in the workspace with the **Create repositories** permission and add the bot user to it.
 
-Let Renovate use your app password by doing _one_ of the following:
+Let Renovate use your API token by doing _one_ of the following:
 
-- Set your app password as a `password` in your `config.js` file
-- Set your app password as an environment variable `RENOVATE_PASSWORD`
-- Set your app password when you run Renovate in the CLI with `--password=`
+- Set your API token as a `password` in your `config.js` file
+- Set your API token as an environment variable `RENOVATE_PASSWORD`
+- Set your API token when you run Renovate in the CLI with `--password=`
 
 Remember to:
 
-- Set the `username` for the bot account (which is _not_ your email address). You can find your username through "Personal Bitbucket settings" on the "Account settings" page for your account
+- Set the `username` for the bot account, which is your Atlassian account email. You can find your email through "Personal Bitbucket settings" on the "Email aliases" page for your account
 - Set `platform=bitbucket` somewhere in your Renovate config file
 
 ## Unsupported platform features/concepts

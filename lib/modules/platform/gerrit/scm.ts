@@ -156,10 +156,16 @@ export class GerritScm extends DefaultGitScm {
         if (commit.autoApprove) {
           pushOptions.push('label=Code-Review+2');
         }
+        if (commit.labels) {
+          for (const label of commit.labels) {
+            pushOptions.push(`hashtag=${label}`);
+          }
+        }
         const pushResult = await git.pushCommit({
           sourceRef: commit.branchName,
-          targetRef: `refs/for/${commit.baseBranch!}%${pushOptions.join(',')}`,
+          targetRef: `refs/for/${commit.baseBranch!}`,
           files: commit.files,
+          pushOptions,
         });
         if (pushResult) {
           return commitSha;

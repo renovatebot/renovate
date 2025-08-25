@@ -1,7 +1,7 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
 import type { StatusResult } from 'simple-git';
-import { join } from 'upath';
+import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import { resetPrefetchedImages } from '../../../util/exec/docker';
@@ -29,7 +29,7 @@ function mockMavenFileChangedInGit(fileName = 'maven-wrapper.properties') {
 describe('modules/manager/maven-wrapper/artifacts', () => {
   beforeEach(() => {
     osPlatformSpy.mockImplementation(() => 'linux');
-    GlobalConfig.set({ localDir: join('/tmp/github/some/repo') });
+    GlobalConfig.set({ localDir: upath.join('/tmp/github/some/repo') });
     fs.statLocalFile.mockResolvedValue(
       partial<Stats>({
         isFile: () => true,
@@ -271,7 +271,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     mockMavenFileChangedInGit();
     GlobalConfig.set({
-      localDir: join('/tmp/github/some/repo'),
+      localDir: upath.join('/tmp/github/some/repo'),
       binarySource: 'install',
     });
     const updatedDeps = await updateArtifacts({

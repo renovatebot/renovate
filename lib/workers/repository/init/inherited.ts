@@ -4,7 +4,7 @@ import { mergeChildConfig, removeGlobalConfig } from '../../../config';
 import { decryptConfig } from '../../../config/decrypt';
 import { parseFileConfig } from '../../../config/parse';
 import { resolveConfigPresets } from '../../../config/presets';
-import { applySecretsToConfig } from '../../../config/secrets';
+import { applySecretsAndVariablesToConfig } from '../../../config/secrets';
 import type { RenovateConfig } from '../../../config/types';
 import { validateConfig } from '../../../config/validation';
 import {
@@ -110,7 +110,11 @@ export async function mergeInheritedConfig(
   }
 
   if (is.nullOrUndefined(filteredConfig.extends)) {
-    filteredConfig = applySecretsToConfig(filteredConfig, config.secrets ?? {});
+    filteredConfig = applySecretsAndVariablesToConfig({
+      config: filteredConfig,
+      secrets: config.secrets ?? {},
+      variables: config.variables ?? {},
+    });
     setInheritedHostRules(filteredConfig);
     return mergeChildConfig(config, filteredConfig);
   }
@@ -150,7 +154,11 @@ export async function mergeInheritedConfig(
     );
   }
 
-  filteredConfig = applySecretsToConfig(filteredConfig, config.secrets ?? {});
+  filteredConfig = applySecretsAndVariablesToConfig({
+    config: filteredConfig,
+    secrets: config.secrets ?? {},
+    variables: config.variables ?? {},
+  });
   setInheritedHostRules(filteredConfig);
   return mergeChildConfig(config, filteredConfig);
 }

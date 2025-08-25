@@ -1,24 +1,24 @@
 import {
-  ArrayFragmentSchema,
-  AttributeFragmentSchema,
-  BooleanFragmentSchema,
-  ExtensionTagFragmentSchema,
-  PreparedExtensionTagFragmentSchema,
-  RuleFragmentSchema,
-  StringFragmentSchema,
+  ArrayFragment,
+  AttributeFragment,
+  BooleanFragment,
+  ExtensionTagFragment,
+  PreparedExtensionTagFragment,
+  RuleFragment,
+  StringFragment,
 } from './fragments';
 import * as fragments from './fragments';
 
 describe('modules/manager/bazel-module/parser/fragments', () => {
   it('.string()', () => {
     const result = fragments.string('hello');
-    expect(() => StringFragmentSchema.parse(result)).not.toThrow();
+    expect(() => StringFragment.parse(result)).not.toThrow();
     expect(result.value).toBe('hello');
   });
 
   it('.boolean()', () => {
     const result = fragments.boolean(true);
-    expect(() => BooleanFragmentSchema.parse(result)).not.toThrow();
+    expect(() => BooleanFragment.parse(result)).not.toThrow();
     expect(result.value).toBe(true);
   });
 
@@ -28,7 +28,7 @@ describe('modules/manager/bazel-module/parser/fragments', () => {
       { name: fragments.string('bar') },
       true,
     );
-    expect(() => RuleFragmentSchema.parse(result)).not.toThrow();
+    expect(() => RuleFragment.parse(result)).not.toThrow();
     expect(result.rule).toBe('foo');
     expect(result.children).toEqual({ name: fragments.string('bar') });
     expect(result.isComplete).toBe(true);
@@ -45,7 +45,7 @@ describe('modules/manager/bazel-module/parser/fragments', () => {
       true,
     );
 
-    expect(() => ExtensionTagFragmentSchema.parse(result)).not.toThrow();
+    expect(() => ExtensionTagFragment.parse(result)).not.toThrow();
     expect(result.extension).toBe('ext');
     expect(result.rawExtension).toBe('ext_01');
     expect(result.tag).toBe('tag');
@@ -56,9 +56,7 @@ describe('modules/manager/bazel-module/parser/fragments', () => {
   it('.preparedExtensionTag()', () => {
     const result = fragments.preparedExtensionTag('ext', 'ext_01', 0);
 
-    expect(() =>
-      PreparedExtensionTagFragmentSchema.parse(result),
-    ).not.toThrow();
+    expect(() => PreparedExtensionTagFragment.parse(result)).not.toThrow();
     expect(result.extension).toBe('ext');
     expect(result.rawExtension).toBe('ext_01');
     expect(result.isComplete).toBe(false);
@@ -66,7 +64,7 @@ describe('modules/manager/bazel-module/parser/fragments', () => {
 
   it('.attribute()', () => {
     const result = fragments.attribute('name', fragments.string('foo'), true);
-    expect(() => AttributeFragmentSchema.parse(result)).not.toThrow();
+    expect(() => AttributeFragment.parse(result)).not.toThrow();
     expect(result.name).toBe('name');
     expect(result.value).toEqual(fragments.string('foo'));
     expect(result.isComplete).toBe(true);
@@ -74,7 +72,7 @@ describe('modules/manager/bazel-module/parser/fragments', () => {
 
   it('.array()', () => {
     const result = fragments.array([fragments.string('foo')], true);
-    expect(() => ArrayFragmentSchema.parse(result)).not.toThrow();
+    expect(() => ArrayFragment.parse(result)).not.toThrow();
     expect(result.items).toEqual([fragments.string('foo')]);
     expect(result.isComplete).toBe(true);
   });

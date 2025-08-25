@@ -6,7 +6,7 @@ import type { CpanRelease } from './types';
 /**
  * https://fastapi.metacpan.org/v1/file/_mapping
  */
-const MetaCpanApiFileSchema = z
+const MetaCpanApiFile = z
   .object({
     module: LooseArray(
       z.object({
@@ -52,7 +52,7 @@ export const MetaCpanApiFileSearchResponse = z
     hits: z.object({
       hits: LooseArray(
         z.object({
-          _source: MetaCpanApiFileSchema,
+          _source: MetaCpanApiFile,
         }),
       ),
     }),

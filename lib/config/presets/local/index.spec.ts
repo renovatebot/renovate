@@ -1,14 +1,17 @@
 import { GlobalConfig } from '../../global';
+import * as _forgejo from '../forgejo';
 import * as _gitea from '../gitea';
 import * as _github from '../github';
 import * as _gitlab from '../gitlab';
 import * as local from '.';
 import { platform } from '~test/util';
 
+vi.mock('../forgejo');
 vi.mock('../gitea');
 vi.mock('../github');
 vi.mock('../gitlab');
 
+const forgejo = vi.mocked(_forgejo);
 const gitea = vi.mocked(_gitea);
 const github = vi.mocked(_github);
 const gitlab = vi.mocked(_gitlab);
@@ -18,6 +21,7 @@ describe('config/presets/local/index', () => {
     const preset = { resolved: 'preset' };
     platform.getRawFile.mockResolvedValue('{ resolved: "preset" }');
     gitea.getPresetFromEndpoint.mockResolvedValueOnce(preset);
+    forgejo.getPresetFromEndpoint.mockResolvedValueOnce(preset);
     github.getPresetFromEndpoint.mockResolvedValueOnce(preset);
     gitlab.getPresetFromEndpoint.mockResolvedValueOnce(preset);
   });
@@ -127,6 +131,25 @@ describe('config/presets/local/index', () => {
       expect(content).toEqual({ resolved: 'preset' });
     });
 
+    it('forwards to forgejo', async () => {
+      GlobalConfig.set({
+        platform: 'forgejo',
+      });
+      const content = await local.getPreset({
+        repo: 'some/repo',
+      });
+
+      expect(forgejo.getPresetFromEndpoint).toHaveBeenCalledOnce();
+      expect(forgejo.getPresetFromEndpoint).toHaveBeenCalledWith(
+        'some/repo',
+        'default',
+        undefined,
+        undefined,
+        undefined,
+      );
+      expect(content).toEqual({ resolved: 'preset' });
+    });
+
     it('forwards to custom gitea', async () => {
       GlobalConfig.set({
         platform: 'gitea',
@@ -142,6 +165,26 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         'https://api.gitea.example.com',
+        undefined,
+      );
+      expect(content).toEqual({ resolved: 'preset' });
+    });
+
+    it('forwards to custom forgejo', async () => {
+      GlobalConfig.set({
+        platform: 'forgejo',
+        endpoint: 'https://api.forgejo.example.com',
+      });
+      const content = await local.getPreset({
+        repo: 'some/repo',
+        presetName: 'default',
+      });
+      expect(forgejo.getPresetFromEndpoint).toHaveBeenCalledOnce();
+      expect(forgejo.getPresetFromEndpoint).toHaveBeenCalledWith(
+        'some/repo',
+        'default',
+        undefined,
+        'https://api.forgejo.example.com',
         undefined,
       );
       expect(content).toEqual({ resolved: 'preset' });

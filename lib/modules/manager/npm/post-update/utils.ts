@@ -4,12 +4,11 @@ import upath from 'upath';
 import { logger } from '../../../../logger';
 import { readLocalFile } from '../../../../util/fs';
 import { Lazy } from '../../../../util/lazy';
-import type { PackageJsonSchema } from '../schema';
 import { PackageJson } from '../schema';
 
 export function lazyLoadPackageJson(
   lockFileDir: string,
-): Lazy<Promise<PackageJsonSchema>> {
+): Lazy<Promise<PackageJson>> {
   return new Lazy(() => loadPackageJson(lockFileDir));
 }
 
@@ -17,7 +16,7 @@ export type LazyPackageJson = ReturnType<typeof lazyLoadPackageJson>;
 
 export async function loadPackageJson(
   lockFileDir: string,
-): Promise<PackageJsonSchema> {
+): Promise<PackageJson> {
   const json = await readLocalFile(
     upath.join(lockFileDir, 'package.json'),
     'utf8',
@@ -31,7 +30,7 @@ export async function loadPackageJson(
 
 export function getPackageManagerVersion(
   name: string,
-  pkg: PackageJsonSchema,
+  pkg: PackageJson,
 ): string | null {
   if (pkg.volta?.[name]) {
     const version = pkg.volta[name];

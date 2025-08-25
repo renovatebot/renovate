@@ -621,8 +621,8 @@ describe('modules/datasource/index', () => {
               releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
             });
             expect(packageCache.set).toHaveBeenCalledWith(
-              'datasource-releases',
-              'dummy https://reg1.com package',
+              'datasource-releases-dummy',
+              'https://reg1.com:package',
               {
                 changelogUrl: 'https://foo.bar/package/CHANGELOG.md',
                 registryUrl: 'https://reg1.com',

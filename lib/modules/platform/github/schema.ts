@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { logger } from '../../../logger';
 import { LooseArray } from '../../../util/schema-utils';
 
-const PackageSchema = z.object({
+const Package = z.object({
   ecosystem: z.union([
     z.literal('maven'),
     z.literal('npm'),
@@ -16,15 +16,15 @@ const PackageSchema = z.object({
   name: z.string(),
 });
 
-const SecurityVulnerabilitySchema = z
+const SecurityVulnerability = z
   .object({
     first_patched_version: z.object({ identifier: z.string() }).nullish(),
-    package: PackageSchema,
+    package: Package,
     vulnerable_version_range: z.string(),
   })
   .nullable();
 
-const SecurityAdvisorySchema = z.object({
+const SecurityAdvisory = z.object({
   description: z.string(),
   identifiers: z.array(
     z.object({
@@ -35,11 +35,11 @@ const SecurityAdvisorySchema = z.object({
   references: z.array(z.object({ url: z.string() })).optional(),
 });
 
-export const VulnerabilityAlertSchema = LooseArray(
+export const GithubVulnerabilityAlert = LooseArray(
   z.object({
     dismissed_reason: z.string().nullish(),
-    security_advisory: SecurityAdvisorySchema,
-    security_vulnerability: SecurityVulnerabilitySchema,
+    security_advisory: SecurityAdvisory,
+    security_vulnerability: SecurityVulnerability,
     dependency: z.object({
       manifest_path: z.string(),
     }),
@@ -55,6 +55,7 @@ export const VulnerabilityAlertSchema = LooseArray(
     /* v8 ignore stop */
   },
 );
+export type GithubVulnerabilityAlert = z.infer<typeof GithubVulnerabilityAlert>;
 
 // https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#get-repository-content
 const GithubResponseMetadata = z.object({
