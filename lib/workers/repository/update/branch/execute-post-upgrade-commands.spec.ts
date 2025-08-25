@@ -560,7 +560,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         localDir: '/default/dir',
         allowedCommands: ['some-command'],
       });
-      exec.exec = vi.fn().mockResolvedValue({ stdout: '', stderr: '' });
+      exec.exec.mockResolvedValue({ stdout: '', stderr: '' });
 
       await postUpgradeCommands.postUpgradeCommandsExecutor(commands, config);
 
