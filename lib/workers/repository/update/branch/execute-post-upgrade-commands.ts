@@ -11,7 +11,6 @@ import { exec } from '../../../../util/exec';
 import type { ExecOptions } from '../../../../util/exec/types';
 import {
   ensureLocalDir,
-  localPathExists,
   localPathIsFile,
   outputCacheFile,
   privateCacheDir,
