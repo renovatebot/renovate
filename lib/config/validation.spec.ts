@@ -1,11 +1,8 @@
-import { getManagerList } from '../modules/manager';
 import { configFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
 import { partial } from '~test/util';
-
-const managerList = getManagerList().sort();
 
 describe('config/validation', () => {
   describe('validateConfig(config)', () => {
