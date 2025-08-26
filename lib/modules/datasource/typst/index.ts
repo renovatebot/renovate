@@ -52,6 +52,7 @@ export class TypstDatasource extends Datasource {
   @cache({
     namespace: `datasource-${TypstDatasource.id}:releases`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
+    ttlMinutes: 180,
   })
   override async getReleases({
     packageName,
@@ -68,6 +69,7 @@ export class TypstDatasource extends Datasource {
       namespace: 'datasource-typst:cache-provider',
       checkAuthorizationHeader: false,
       checkCacheControlHeader: false,
+      softTtlMinutes: 180,
     });
 
     const { body: versions } = await this.githubHttp.getJson(
