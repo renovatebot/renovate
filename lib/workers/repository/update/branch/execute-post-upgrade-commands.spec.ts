@@ -536,7 +536,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           postUpgradeTasks: {
             commands: ['some-command'],
             workingDirTemplate:
-              '/projects/{{manager}}/{{depName}}-{{newVersion}}',
+              'projects/{{manager}}/{{depName}}-{{newVersion}}',
             executionMode: 'update',
           },
         },
@@ -565,7 +565,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       await postUpgradeCommands.postUpgradeCommandsExecutor(commands, config);
 
       expect(exec.exec).toHaveBeenCalledWith('some-command', {
-        cwd: '/projects/npm/jest-29.5.0',
+        cwd: 'projects/npm/jest-29.5.0',
       });
     });
 

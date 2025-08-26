@@ -10,6 +10,8 @@ import { coerceArray } from '../../../../util/array';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions } from '../../../../util/exec/types';
 import {
+  ensureLocalDir,
+  localPathExists,
   localPathIsFile,
   outputCacheFile,
   privateCacheDir,
@@ -105,6 +107,7 @@ export async function postUpgradeCommandsExecutor(
         workingDir = sanitize(
           compile(workingDirTemplate, mergeChildConfig(config, upgrade)),
         );
+        await ensureLocalDir(workingDir);
         logger.debug(
           { workingDirTemplate },
           'Processed post-upgrade commands working directory template.',
