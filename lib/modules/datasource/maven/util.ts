@@ -137,7 +137,7 @@ export async function downloadHttpProtocol(
             } else {
               logger.warn(
                 { failedUrl },
-                'Maven Central rate limiting detected. Consider configuring persistent caching.',
+                'Maven Central rate limiting detected. Persistent caching required.',
               );
             }
           }
