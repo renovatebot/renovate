@@ -25,6 +25,7 @@ describe('modules/manager/typst/extract', () => {
         deps: [
           {
             datasource: 'typst',
+            depName: 'example',
             packageName: 'preview/example',
             currentValue: '1.0.0',
           },
@@ -43,11 +44,13 @@ describe('modules/manager/typst/extract', () => {
         deps: [
           {
             datasource: 'typst',
+            depName: 'tablex',
             packageName: 'preview/tablex',
             currentValue: '0.0.8',
           },
           {
             datasource: 'typst',
+            depName: 'cetz',
             packageName: 'preview/cetz',
             currentValue: '0.2.2',
           },
@@ -72,16 +75,19 @@ describe('modules/manager/typst/extract', () => {
         deps: [
           {
             datasource: 'typst',
+            depName: 'pkg1',
             packageName: 'preview/pkg1',
             currentValue: '1.0.0',
           },
           {
             datasource: 'typst',
+            depName: 'pkg2',
             packageName: 'preview/pkg2',
             currentValue: '0.1.0-beta.1',
           },
           {
             datasource: 'typst',
+            depName: 'pkg3',
             packageName: 'preview/pkg3',
             currentValue: '2.1.0-alpha',
           },
@@ -102,11 +108,13 @@ describe('modules/manager/typst/extract', () => {
         deps: [
           {
             datasource: 'typst',
+            depName: 'example',
             packageName: 'preview/example',
             currentValue: '1.0.0',
           },
           {
             datasource: 'typst',
+            depName: 'another',
             packageName: 'preview/another',
             currentValue: '2.0.0',
           },
@@ -122,11 +130,13 @@ describe('modules/manager/typst/extract', () => {
         deps: [
           {
             datasource: 'typst',
+            depName: 'pkg1',
             packageName: 'preview/pkg1',
             currentValue: '1.0.0',
           },
           {
             datasource: 'typst',
+            depName: 'pkg2',
             packageName: 'preview/pkg2',
             currentValue: '2.0.0',
           },
@@ -146,6 +156,7 @@ describe('modules/manager/typst/extract', () => {
         deps: [
           {
             datasource: 'typst',
+            depName: 'valid',
             packageName: 'preview/valid',
             currentValue: '1.0.0',
           },
@@ -164,6 +175,7 @@ describe('modules/manager/typst/extract', () => {
         deps: [
           {
             datasource: 'typst',
+            depName: 'valid',
             packageName: 'preview/valid',
             currentValue: '1.0.0',
           },
