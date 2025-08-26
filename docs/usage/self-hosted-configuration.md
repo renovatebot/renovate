@@ -368,6 +368,7 @@ Other valid cache namespaces are as follows:
 - `datasource-crate`
 - `datasource-deb`
 - `datasource-deno`
+- `datasource-devbox-version`
 - `datasource-docker-architecture`
 - `datasource-docker-hub-cache`
 - `datasource-docker-digest`
