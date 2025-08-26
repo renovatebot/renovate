@@ -155,19 +155,6 @@ exports[`config/validation > validateConfig(config) > errors if manager objects 
 ]
 `;
 
-exports[`config/validation > validateConfig(config) > errors if managerFilePatterns has wrong parent 1`] = `
-[
-  {
-    "message": ""managerFilePatterns" can't be used in ".". Allowed objects: ansible, ansible-galaxy, argocd, asdf, azure-pipelines, batect, batect-wrapper, bazel, bazel-module, bazelisk, bicep, bitbucket-pipelines, bitrise, buildkite, buildpacks, bun, bun-version, bundler, cake, cargo, cdnurl, circleci, cloudbuild, cocoapods, composer, conan, copier, cpanfile, crossplane, crow, customManagers, deps-edn, devbox, devcontainer, docker-compose, dockerfile, droneci, fleet, flux, fvm, git-submodules, github-actions, gitlabci, gitlabci-include, glasskube, gleam, gomod, gradle, gradle-wrapper, haskell-cabal, helm-requirements, helm-values, helmfile, helmsman, helmv3, hermit, homebrew, html, jenkins, jsonnet-bundler, kotlin-script, kubernetes, kustomize, leiningen, maven, maven-wrapper, meteor, mint, mise, mix, nix, nodenv, npm, nuget, nvm, ocb, osgi, pep621, pep723, pip-compile, pip_requirements, pip_setup, pipenv, pixi, poetry, pre-commit, pub, puppet, pyenv, renovate-config-presets, ruby-version, runtime-version, sbt, scalafmt, setup-cfg, sveltos, swift, tekton, terraform, terraform-version, terragrunt, terragrunt-version, tflint-plugin, travis, typst, unity3d, velaci, vendir, woodpecker.",
-    "topic": "managerFilePatterns",
-  },
-  {
-    "message": ""managerFilePatterns" can't be used in "minor". Allowed objects: ansible, ansible-galaxy, argocd, asdf, azure-pipelines, batect, batect-wrapper, bazel, bazel-module, bazelisk, bicep, bitbucket-pipelines, bitrise, buildkite, buildpacks, bun, bun-version, bundler, cake, cargo, cdnurl, circleci, cloudbuild, cocoapods, composer, conan, copier, cpanfile, crossplane, crow, customManagers, deps-edn, devbox, devcontainer, docker-compose, dockerfile, droneci, fleet, flux, fvm, git-submodules, github-actions, gitlabci, gitlabci-include, glasskube, gleam, gomod, gradle, gradle-wrapper, haskell-cabal, helm-requirements, helm-values, helmfile, helmsman, helmv3, hermit, homebrew, html, jenkins, jsonnet-bundler, kotlin-script, kubernetes, kustomize, leiningen, maven, maven-wrapper, meteor, mint, mise, mix, nix, nodenv, npm, nuget, nvm, ocb, osgi, pep621, pep723, pip-compile, pip_requirements, pip_setup, pipenv, pixi, poetry, pre-commit, pub, puppet, pyenv, renovate-config-presets, ruby-version, runtime-version, sbt, scalafmt, setup-cfg, sveltos, swift, tekton, terraform, terraform-version, terragrunt, terragrunt-version, tflint-plugin, travis, typst, unity3d, velaci, vendir, woodpecker.",
-    "topic": "npm.minor.managerFilePatterns",
-  },
-]
-`;
-
 exports[`config/validation > validateConfig(config) > ignore packageRule nesting validation for presets 1`] = `[]`;
 
 exports[`config/validation > validateConfig(config) > included managers of the wrong type 1`] = `
