@@ -19,6 +19,10 @@ export function extractPackageFile(content: string): PackageFileContent {
         currentValue: version,
       };
 
+      if (namespace === 'preview') {
+        dep.depName = pkg;
+      }
+
       if (namespace !== 'preview') {
         dep.skipReason = namespace === 'local' ? 'local' : 'unsupported';
       }
