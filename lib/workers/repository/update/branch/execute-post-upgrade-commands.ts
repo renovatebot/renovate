@@ -126,8 +126,9 @@ export async function postUpgradeCommandsExecutor(
             logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
 
             const execOpts: ExecOptions = {
-              // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-              cwd: workingDir || GlobalConfig.get('localDir'),
+              cwd: is.nonEmptyString(workingDir)
+                ? workingDir
+                : GlobalConfig.get('localDir'),
             };
             if (dataFilePath) {
               execOpts.env = {
