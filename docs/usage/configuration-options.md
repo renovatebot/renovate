@@ -3893,7 +3893,7 @@ Specify a custom value for this if you wish to exclude certain files which are m
 
 ### workingDirTemplate
 
-A template describing the working directory in which the commands should be executed. If the template evaluates to a false value, then the command will be executed from the root of the repository.
+A template describing the working directory in which the commands should be executed, relative to the repository root. If the template evaluates to a false value, then the command will be executed from the root of the repository.
 Example:
 
 ```json
