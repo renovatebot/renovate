@@ -70,8 +70,8 @@ import { SbtPackageDatasource } from './sbt-package';
 import { SbtPluginDatasource } from './sbt-plugin';
 import { TerraformModuleDatasource } from './terraform-module';
 import { TerraformProviderDatasource } from './terraform-provider';
-import { TypstDatasource } from './typst';
 import type { DatasourceApi } from './types';
+import { TypstDatasource } from './typst';
 import { Unity3dDatasource } from './unity3d';
 import { Unity3dPackagesDatasource } from './unity3d-packages';
 
