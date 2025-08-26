@@ -38,6 +38,8 @@ const SourceUrl = z
 export class TypstDatasource extends Datasource {
   static readonly id = 'typst';
 
+  override readonly defaultRegistryUrls = ['https://github.com'];
+
   githubHttp: GithubHttp;
 
   constructor() {

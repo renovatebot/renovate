@@ -53,6 +53,7 @@ describe('modules/datasource/typst/index', () => {
           { version: '1.0.0' },
         ],
         sourceUrl: 'https://github.com/example/repo',
+        registryUrl: 'https://github.com',
       });
     });
 
@@ -116,6 +117,7 @@ describe('modules/datasource/typst/index', () => {
       expect(res).toEqual({
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
         sourceUrl: 'https://github.com/example/repo',
+        registryUrl: 'https://github.com',
       });
     });
 
@@ -142,6 +144,7 @@ describe('modules/datasource/typst/index', () => {
 
       expect(res).toEqual({
         releases: [{ version: '1.0.0' }],
+        registryUrl: 'https://github.com',
       });
     });
 
