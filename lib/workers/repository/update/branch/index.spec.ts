@@ -2950,5 +2950,31 @@ describe('workers/repository/update/branch/index', () => {
         ],
       );
     });
+
+    it('should not reattempt platform automerge in dry run', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 123,
+          state: 'open',
+        }),
+      );
+      prWorker.getPlatformPrOptions.mockReturnValue({
+        usePlatformAutomerge: true,
+      });
+      GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
+      await branchWorker.processBranch(config);
+      expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would reattempt platform automerge for PR #123',
+      );
+    });
   });
 });
