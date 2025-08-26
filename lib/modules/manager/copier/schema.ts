@@ -1,9 +1,12 @@
 import { z } from 'zod';
+import { regEx } from '../../../util/regex';
 import { Yaml } from '../../../util/schema-utils';
 
-const GitSshUrl = z.string().regex(/^git@[^:]*:(?<repository>.+).git$/, {
-  message: 'Invalid Git SSH URL format',
-});
+const GitSshUrl = z
+  .string()
+  .regex(regEx(/^(?<username>[^@]+)@[^:]*:(?<repository>.+)$/), {
+    message: 'Invalid Git SSH URL format',
+  });
 export const CopierAnswersFile = Yaml.pipe(
   z.object({
     _commit: z.string(),
