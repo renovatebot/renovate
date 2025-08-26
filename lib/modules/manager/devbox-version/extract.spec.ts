@@ -1,10 +1,13 @@
+import { codeBlock } from 'common-tags';
 import { extractPackageFile } from './extract';
-import { Fixtures } from '~test/fixtures';
 
 describe('modules/manager/devbox-version/extract', () => {
   describe('extractPackageFile()', () => {
     it('extracts version', () => {
-      const res = extractPackageFile(Fixtures.get('.devbox-version'));
+      const content = codeBlock`
+        0.16.0
+      `;
+      const res = extractPackageFile(content);
       expect(res.deps).toEqual([
         {
           depName: 'devbox',
@@ -15,9 +18,8 @@ describe('modules/manager/devbox-version/extract', () => {
     });
 
     it('extracts version with extra whitespace', () => {
-      const res = extractPackageFile(
-        Fixtures.get('.devbox-version-with-whitespace'),
-      );
+      const content = '  0.16.0  \n';
+      const res = extractPackageFile(content);
       expect(res.deps).toEqual([
         {
           depName: 'devbox',
@@ -28,9 +30,10 @@ describe('modules/manager/devbox-version/extract', () => {
     });
 
     it('extracts pre-release version', () => {
-      const res = extractPackageFile(
-        Fixtures.get('.devbox-version-prerelease'),
-      );
+      const content = codeBlock`
+        0.17.0-beta.1
+      `;
+      const res = extractPackageFile(content);
       expect(res.deps).toEqual([
         {
           depName: 'devbox',
@@ -41,7 +44,8 @@ describe('modules/manager/devbox-version/extract', () => {
     });
 
     it('extracts empty file', () => {
-      const res = extractPackageFile(Fixtures.get('.devbox-version-empty'));
+      const content = '';
+      const res = extractPackageFile(content);
       expect(res.deps).toEqual([
         {
           depName: 'devbox',
