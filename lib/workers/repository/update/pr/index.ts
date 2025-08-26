@@ -117,6 +117,38 @@ function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
   return is.nonEmptyArray(pr.reviewers);
 }
 
+function addPullRequestNoteIfAttestationHasBeenLost(
+  upgrade: BranchUpgradeConfig,
+): void {
+  const { packageName, depName, currentVersion, newVersion } = upgrade;
+  const name = packageName ?? depName;
+
+  const currentRelease = upgrade.releases?.find(
+    (release) => release.version === currentVersion,
+  );
+  const newRelease = upgrade.releases?.find(
+    (release) => release.version === newVersion,
+  );
+
+  if (
+    currentRelease &&
+    newRelease &&
+    currentRelease.attestation === true &&
+    newRelease.attestation !== true
+  ) {
+    upgrade.prBodyNotes ??= [];
+    upgrade.prBodyNotes.push(
+      [
+        '> :exclamation: **Warning**',
+        '>',
+        `> ${name} ${currentVersion} was released with an attestation, but ${newVersion} has no attestation.`,
+        `> Verify that release ${newVersion} was published by the expected author.`,
+        '\n',
+      ].join('\n'),
+    );
+  }
+}
+
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
   prConfig: BranchConfig,
@@ -302,33 +334,7 @@ export async function ensurePr(
       }
     }
 
-    const { packageName, depName, currentVersion, newVersion } = upgrade;
-    const name = packageName ?? depName;
-
-    const currentRelease = upgrade.releases?.find(
-      (release) => release.version === currentVersion,
-    );
-    const newRelease = upgrade.releases?.find(
-      (release) => release.version === newVersion,
-    );
-
-    if (
-      currentRelease &&
-      newRelease &&
-      currentRelease.attestation === true &&
-      newRelease.attestation !== true
-    ) {
-      upgrade.prBodyNotes ??= [];
-      upgrade.prBodyNotes.push(
-        [
-          '> :exclamation: **Warning**',
-          '>',
-          `> ${name} ${currentVersion} was released with an attestation, but ${newVersion} has no attestation.`,
-          `> Verify that release ${newVersion} was published by the expected author.`,
-          '\n',
-        ].join('\n'),
-      );
-    }
+    addPullRequestNoteIfAttestationHasBeenLost(upgrade);
 
     config.upgrades.push(upgrade);
   }
