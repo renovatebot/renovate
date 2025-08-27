@@ -49,11 +49,6 @@ export class DevboxVersionDatasource extends Datasource {
       }
 
       res.releases.push({ version });
-
-      if (!res.releases.length) {
-        logger.warn({ registryUrl }, 'Missing devbox version');
-        return null;
-      }
     } catch (err) {
       if (err instanceof HttpError) {
         if (err.response?.statusCode !== 404) {

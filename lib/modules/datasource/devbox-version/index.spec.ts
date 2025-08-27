@@ -79,5 +79,28 @@ describe('modules/datasource/devbox-version/index', () => {
         releases: [{ version: '0.16.0' }],
       });
     });
+
+    it('handles generic errors', async () => {
+      httpMock.scope(baseUrl).get(apiPath).replyWithError('network error');
+      const res = getPkgReleases({
+        datasource,
+        packageName: 'devbox',
+        registryUrls: [registryUrl],
+      });
+      await expect(res).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('handles non-HttpError exceptions', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(apiPath)
+        .replyWithError(new Error('Generic error'));
+      const res = getPkgReleases({
+        datasource,
+        packageName: 'devbox',
+        registryUrls: [registryUrl],
+      });
+      await expect(res).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
   });
 });
