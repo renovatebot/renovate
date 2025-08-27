@@ -146,9 +146,9 @@ describe('modules/datasource/maven/util', () => {
         await expect(
           downloadHttpProtocol(http, MAVEN_REPO + '/some/path'),
         ).rejects.toThrow(ExternalHostError);
-        expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
           { failedUrl: MAVEN_REPO + '/some/path' },
-          'Maven Central rate limiting detected, persisten caching is enabled.',
+          'Maven Central rate limiting detected despite Redis caching.',
         );
       });
 
@@ -166,7 +166,7 @@ describe('modules/datasource/maven/util', () => {
         await expect(
           downloadHttpProtocol(http, MAVEN_REPO + '/some/path'),
         ).rejects.toThrow(ExternalHostError);
-        expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
           { failedUrl: MAVEN_REPO + '/some/path' },
           'Maven Central rate limiting detected. Persistent caching required.',
         );

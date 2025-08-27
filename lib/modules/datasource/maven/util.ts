@@ -130,12 +130,12 @@ export async function downloadHttpProtocol(
           const statusCode = err?.response?.statusCode;
           if (statusCode === 429) {
             if (getCacheType() === 'redis') {
-              logger.warn(
+              logger.once.warn(
                 { failedUrl },
-                'Maven Central rate limiting detected, persisten caching is enabled.',
+                'Maven Central rate limiting detected despite Redis caching.',
               );
             } else {
-              logger.warn(
+              logger.once.warn(
                 { failedUrl },
                 'Maven Central rate limiting detected. Persistent caching required.',
               );
