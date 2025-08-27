@@ -2,35 +2,43 @@ import is from '@sindresorhus/is';
 import { get } from '../../../modules/manager';
 import type { ExtractResults } from './types';
 
-export function processSupersedesManagers(
-  extractResults: ExtractResults[],
-): void {
-  for (const { manager, packageFiles } of extractResults) {
-    if (!packageFiles) {
+export function processSupersedesManagers(extracts: ExtractResults[]): void {
+  for (const primaryExtract of extracts) {
+    const secondaryManagers = get(primaryExtract.manager, 'supersedesManagers');
+    if (!is.nonEmptyArray(secondaryManagers)) {
       continue;
     }
-    const supersedesManagers = get(manager, 'supersedesManagers');
-    if (is.nonEmptyArray(supersedesManagers)) {
-      const supercedingPackageFileNames = packageFiles.map(
-        (packageFile) => packageFile.packageFile,
+
+    if (!primaryExtract.packageFiles) {
+      continue;
+    }
+
+    const primaryPackageFiles = primaryExtract.packageFiles.map(
+      ({ packageFile }) => packageFile,
+    );
+
+    for (const secondaryManager of secondaryManagers) {
+      const secondaryExtract = extracts.find(
+        ({ manager }) => manager === secondaryManager,
       );
-      for (const supercededManager of supersedesManagers) {
-        const supercededManagerResults = extractResults.find(
-          (result) => result.manager === supercededManager,
-        );
-        if (supercededManagerResults?.packageFiles) {
-          supercededManagerResults.packageFiles =
-            supercededManagerResults.packageFiles.filter((packageFile) => {
-              if (
-                !packageFile.lockFiles?.length &&
-                supercedingPackageFileNames.includes(packageFile.packageFile)
-              ) {
-                return false;
-              }
-              return true;
-            });
-        }
+
+      if (!secondaryExtract?.packageFiles) {
+        continue;
       }
+
+      secondaryExtract.packageFiles = secondaryExtract.packageFiles.filter(
+        ({ packageFile, lockFiles }) => {
+          if (is.nonEmptyArray(lockFiles)) {
+            return true;
+          }
+
+          if (!primaryPackageFiles.includes(packageFile)) {
+            return true;
+          }
+
+          return false;
+        },
+      );
     }
   }
 }
