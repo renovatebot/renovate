@@ -75,19 +75,8 @@ export async function getReleaseNotesMd(
   let changelogFile = files
     .sort((a, b) => compareChangelogFilePath(a.relativePath, b.relativePath))
     .shift()?.relativePath;
-  /* istanbul ignore if */
-  if (!changelogFile) {
-    logger.trace('no changelog file found');
-    return null;
-  }
 
   changelogFile = `${sourceDirectory ? ensureTrailingSlash(sourceDirectory) : ''}${changelogFile}`;
-  /* istanbul ignore if */
-  if (files.length !== 0) {
-    logger.debug(
-      `Multiple candidates for changelog file, using ${changelogFile}`,
-    );
-  }
 
   const fileRes = await http.get(
     `${apiPrefix}items?path=${changelogFile}&includeContent=true&api-version=7.0`,
