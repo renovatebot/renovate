@@ -143,7 +143,7 @@
   },
   "volta": {
     "node": "22.18.0",
-    "pnpm": "10.14.0"
+    "pnpm": "10.15.0"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.858.0",
@@ -178,7 +178,7 @@
     "@renovatebot/pep440": "4.2.0",
     "@renovatebot/ruby-semver": "4.1.0",
     "@sindresorhus/is": "7.0.2",
-    "@yarnpkg/core": "4.4.2",
+    "@yarnpkg/core": "4.4.3",
     "@yarnpkg/parsers": "3.0.3",
     "agentkeepalive": "4.6.0",
     "async-mutex": "0.5.0",
@@ -353,7 +353,7 @@
     "vitest": "3.2.4",
     "vitest-mock-extended": "3.1.0"
   },
-  "packageManager": "pnpm@10.14.0",
+  "packageManager": "pnpm@10.15.0",
   "files": [
     "dist",
     "renovate-schema.json"
