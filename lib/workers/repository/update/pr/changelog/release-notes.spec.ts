@@ -80,6 +80,33 @@ release-plan 0.14.0 (minor)
   * [#152](https://github.com/embroider-build/release-plan/pull/152) remove conditional coverage run
 `;
 
+const azureItemsResponse = {
+  count: 1,
+  value: [{ objectId: '123abc', path: '/' }],
+};
+
+const azureItemsResponseWithSourceDirectory = {
+  count: 1,
+  value: [{ objectId: '123abc', path: '/packages/foo' }],
+};
+
+const azureTreeResponse = {
+  objectId: 'tree-id',
+  treeEntries: [
+    { relativePath: 'lib', gitObjectType: 'tree', objectId: 'lib-object-id' },
+    {
+      relativePath: 'CHANGELOG.md',
+      gitObjectType: 'blob',
+      objectId: 'changelog-object-id',
+    },
+    {
+      relativePath: 'README.md',
+      gitObjectType: 'blob',
+      objectId: 'readme-object-id',
+    },
+  ],
+};
+
 const bitbucketTreeResponse = {
   values: [
     {
@@ -160,6 +187,12 @@ const gitlabProject = partial<ChangeLogProject>({
   type: 'gitlab',
   apiBaseUrl: 'https://gitlab.com/api/v4/',
   baseUrl: 'https://gitlab.com/',
+});
+
+const azureProject = partial<ChangeLogProject>({
+  type: 'azure',
+  apiBaseUrl: 'https://dev.azure.com/some-org/some-project/_apis/',
+  baseUrl: 'https://dev.azure.com/some-org/some-project/',
 });
 
 describe('workers/repository/update/pr/changelog/release-notes', () => {
@@ -422,6 +455,16 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           repository: 'some/yet-other-repository',
         },
         partial<ChangeLogRelease>(),
+      );
+      expect(res).toBeEmptyArray();
+    });
+
+    it('should return empty array for dev.azure.com project', async () => {
+      const res = await getReleaseList(
+        partial<ChangeLogProject>({
+          ...azureProject,
+        }),
+        partial<ChangeLogRelease>({}),
       );
       expect(res).toBeEmptyArray();
     });
@@ -1140,6 +1183,35 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       );
       expect(res).toBeNull();
     });
+    it('handles files mismatch for Azure', async () => {
+      httpMock
+        .scope('https://dev.azure.com/')
+        .get(
+          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=%2F&api-version=7.0&%24top=100`,
+        )
+        .reply(200, azureItemsResponse)
+        .get(
+          `/some-org/some-project/_apis/git/repositories/some-repo/trees/123abc?api-version=7.0`,
+        )
+        .reply(200, {
+          treeEntries: [
+            { name: 'lib', gitObjectType: 'tree' },
+            { name: 'README.md', gitObjectType: 'blob' },
+          ],
+        });
+
+      const res = await getReleaseNotesMd(
+        {
+          ...azureProject,
+          repository: 'some-repo',
+        },
+        partial<ChangeLogRelease>({
+          version: '2.0.0',
+          gitRef: '2.0.0',
+        }),
+      );
+      expect(res).toBeNull();
+    });
 
     it('handles wrong format', async () => {
       httpMock
@@ -1390,6 +1462,42 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         notesSourceUrl:
           'https://github.com/nodeca/js-yaml/blob/HEAD/packages/foo/CHANGELOG.md',
         url: 'https://github.com/nodeca/js-yaml/blob/HEAD/packages/foo/CHANGELOG.md#3100--2017-09-10',
+      });
+    });
+
+    it('handles azure sourceDirectory', async () => {
+      const sourceDirectory = '/packages/foo';
+      const sourceDirectoryUrlEncoded = encodeURIComponent(sourceDirectory);
+      httpMock
+        .scope('https://dev.azure.com/')
+        .get(
+          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=${sourceDirectoryUrlEncoded}&api-version=7.0&%24top=100`,
+        )
+        .reply(200, azureItemsResponseWithSourceDirectory)
+        .get(
+          `/some-org/some-project/_apis/git/repositories/some-repo/trees/123abc?api-version=7.0`,
+        )
+        .reply(200, azureTreeResponse)
+        .get(
+          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=${sourceDirectory}/CHANGELOG.md&includeContent=true&api-version=7.0`,
+        )
+        .reply(200, adapterutilsChangelogMd);
+      // t/_apis/git/repositories/some-repo/items?path=CHANGELOG.md&includeContent=true&api-version=7.0
+      const res = await getReleaseNotesMd(
+        {
+          ...azureProject,
+          repository: 'some-repo',
+          sourceDirectory,
+        },
+        partial<ChangeLogRelease>({
+          version: '4.33.0',
+          gitRef: '4.33.0',
+        }),
+      );
+
+      expect(res).toMatchObject({
+        notesSourceUrl: `https://dev.azure.com/some-org/some-project/_git/some-repo?path=${sourceDirectory}/CHANGELOG.md`,
+        url: `https://dev.azure.com/some-org/some-project/_git/some-repo?path=${sourceDirectory}/CHANGELOG.md&anchor=4.33.0-%5B05-15-2020%5D`,
       });
     });
 
