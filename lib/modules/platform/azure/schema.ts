@@ -18,17 +18,9 @@ const _WrappedException: z.ZodSchema<_WrappedException> = z.lazy(() =>
 
 export const WrappedException = Json.pipe(_WrappedException);
 
-const item = z.object({
+export const ItemResponse = z.object({
   objectId: z.string(),
   path: z.string(),
-});
-
-const Paged = z.object({
-  count: z.number(),
-});
-
-export const PagedItemResponse = Paged.extend({
-  value: z.array(item),
 });
 
 export const AzureTreeNode = z.object({

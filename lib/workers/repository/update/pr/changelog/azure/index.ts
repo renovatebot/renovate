@@ -4,7 +4,7 @@ import { logger } from '../../../../../../logger';
 import type { AzureTreeNode } from '../../../../../../modules/platform/azure/schema';
 import {
   AzureTree,
-  PagedItemResponse,
+  ItemResponse,
 } from '../../../../../../modules/platform/azure/schema';
 import { AzureHttp } from '../../../../../../util/http/azure';
 import { ensureTrailingSlash } from '../../../../../../util/url';
@@ -40,19 +40,15 @@ export async function getReleaseNotesMd(
     apiBaseUrl,
   )}git/repositories/${urlEncodedRepo}/`;
 
-  const items = (
+  const sourceDirectoryId = (
     await http.getJson(
       `${apiPrefix}items?path=${sourceDirectory}&api-version=7.0`,
       {
-        paginate: true,
+        paginate: false,
       },
-      PagedItemResponse,
+      ItemResponse,
     )
-  ).body.value;
-
-  const sourceDirectoryId = items.find(
-    (item) => item.path === sourceDirectory,
-  )?.objectId;
+  ).body.objectId;
 
   const tree = (
     await http.getJson(

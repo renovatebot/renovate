@@ -245,21 +245,13 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
         Fixtures.get('jest.md', '..'),
         'utf8',
       );
-      //git/repositories/some-repo/items?path=&api-version=7.0&%24top=100
 
       httpMock
         .scope(apiBaseUrl)
-        .get(
-          '/git/repositories/some-repo/items?path=/&api-version=7.0&%24top=100',
-        )
+        .get('/git/repositories/some-repo/items?path=/&api-version=7.0')
         .reply(200, {
-          count: 1,
-          value: [
-            {
-              objectId: 'some-object-id',
-              path: '/',
-            },
-          ],
+          objectId: 'some-object-id',
+          path: '/',
         })
         .get('/git/repositories/some-repo/trees/some-object-id?api-version=7.0')
         .reply(200, {
@@ -294,16 +286,11 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
       httpMock
         .scope(apiBaseUrl)
         .get(
-          '/git/repositories/some-repo/items?path=%2Fsrc%2Fdocs&api-version=7.0&%24top=100',
+          '/git/repositories/some-repo/items?path=%2Fsrc%2Fdocs&api-version=7.0',
         )
         .reply(200, {
-          count: 1,
-          value: [
-            {
-              objectId: 'some-object-id',
-              path: '/src/docs',
-            },
-          ],
+          objectId: 'some-object-id',
+          path: '/src/docs',
         })
         .get('/git/repositories/some-repo/trees/some-object-id?api-version=7.0')
         .reply(200, {
@@ -335,13 +322,8 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
     it('handles missing items', async () => {
       httpMock
         .scope(apiBaseUrl)
-        .get(
-          '/git/repositories/some-repo/items?path=%2F&api-version=7.0&%24top=100',
-        )
-        .reply(200, {
-          count: 0,
-          value: [],
-        });
+        .get('/git/repositories/some-repo/items?path=%2F&api-version=7.0')
+        .reply(200, {});
 
       const res = await getReleaseNotesMdFile(azureProject);
       expect(res).toBeNull();
@@ -350,13 +332,8 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
     it('handles missing release notes', async () => {
       httpMock
         .scope(apiBaseUrl)
-        .get(
-          '/git/repositories/some-repo/items?path=%2F&api-version=7.0&%24top=100',
-        )
-        .reply(200, {
-          count: 0,
-          value: [],
-        })
+        .get('/git/repositories/some-repo/items?path=%2F&api-version=7.0')
+        .reply(200, {})
         .get('/git/repositories/some-repo/trees/some-object-id?api-version=7.0')
         .reply(200, {
           objectId: 'some-object-id',

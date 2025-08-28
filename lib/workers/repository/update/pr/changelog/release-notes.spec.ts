@@ -80,14 +80,11 @@ release-plan 0.14.0 (minor)
   * [#152](https://github.com/embroider-build/release-plan/pull/152) remove conditional coverage run
 `;
 
-const azureItemsResponse = {
-  count: 1,
-  value: [{ objectId: '123abc', path: '/' }],
-};
+const azureItemsResponse = { objectId: '123abc', path: '/' };
 
 const azureItemsResponseWithSourceDirectory = {
-  count: 1,
-  value: [{ objectId: '123abc', path: '/packages/foo' }],
+  objectId: '123abc',
+  path: '/packages/foo',
 };
 
 const azureTreeResponse = {
@@ -1187,7 +1184,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       httpMock
         .scope('https://dev.azure.com/')
         .get(
-          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=%2F&api-version=7.0&%24top=100`,
+          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=%2F&api-version=7.0`,
         )
         .reply(200, azureItemsResponse)
         .get(
@@ -1471,7 +1468,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       httpMock
         .scope('https://dev.azure.com/')
         .get(
-          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=${sourceDirectoryUrlEncoded}&api-version=7.0&%24top=100`,
+          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=${sourceDirectoryUrlEncoded}&api-version=7.0`,
         )
         .reply(200, azureItemsResponseWithSourceDirectory)
         .get(
