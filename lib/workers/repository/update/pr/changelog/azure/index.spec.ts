@@ -329,6 +329,24 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
       expect(res).toBeNull();
     });
 
+    it('handles missing files', async () => {
+      httpMock
+        .scope(apiBaseUrl)
+        .get('/git/repositories/some-repo/items?path=%2F&api-version=7.0')
+        .reply(200, {
+          objectId: 'some-object-id',
+          path: '/',
+        })
+        .get('/git/repositories/some-repo/trees/some-object-id?api-version=7.0')
+        .reply(200, {
+          objectId: 'some-object-id',
+          treeEntries: [],
+        });
+
+      const res = await getReleaseNotesMdFile(azureProject);
+      expect(res).toBeNull();
+    });
+
     it('handles missing release notes', async () => {
       httpMock
         .scope(apiBaseUrl)
