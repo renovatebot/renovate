@@ -5,6 +5,7 @@ import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
+import * as semver from '../../versioning/semver';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -186,6 +187,10 @@ export async function extractPackageFile(
         currentValue,
         datasource: NugetDatasource.id,
       };
+      if (is.string(currentValue) && semver.isVersion(currentValue)) {
+        // This is to avoid nuget versioning pinning to [1.2.3]
+        dep.versioning = 'semver';
+      }
 
       applyRegistries(dep, registries);
 
