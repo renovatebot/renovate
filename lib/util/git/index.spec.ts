@@ -459,7 +459,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
   });
 
   describe('mergeBranch(branchName)', () => {
-    it('should perform a branch merge with allowBehindBase=false', async () => {
+    it('merges branch when branch is behind base', async () => {
       const mergeSpy = vi.spyOn(SimpleGit.prototype, 'merge');
       await git.mergeBranch('renovate/future_branch', false);
       const merged = await Git(origin.path).branch([
@@ -474,7 +474,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       ]);
     });
 
-    it('should perform a branch merge with allowBehindBase=true', async () => {
+    it('merges branch when branch is upto date with base', async () => {
       const mergeSpy = vi.spyOn(SimpleGit.prototype, 'merge');
       await git.mergeBranch('renovate/future_branch', true);
       const merged = await Git(origin.path).branch([
@@ -488,6 +488,32 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     it('should throw if branch merge throws', async () => {
       await expect(git.mergeBranch('not_found', false)).rejects.toThrow();
+    });
+
+    it('should throw when auto merge is enabled but branch is conflicted', async () => {
+      const workingRepo = Git(tmpDir.path);
+
+      await workingRepo.checkout(['-b', 'renovate/test_conflict']);
+      await fs.writeFile(
+        tmpDir.path + '/conflict_file.txt',
+        'content from test branch',
+      );
+      await workingRepo.add(['conflict_file.txt']);
+      await workingRepo.commit('test branch commit');
+      await workingRepo.push('origin', 'renovate/test_conflict');
+
+      await workingRepo.checkout(defaultBranch);
+      await fs.writeFile(
+        tmpDir.path + '/conflict_file.txt',
+        'content from main branch',
+      );
+      await workingRepo.add(['conflict_file.txt']);
+      await workingRepo.commit('main branch commit');
+      await workingRepo.push('origin', defaultBranch);
+
+      await expect(
+        git.mergeBranch('renovate/test_conflict', true),
+      ).rejects.toThrow();
     });
   });
 
