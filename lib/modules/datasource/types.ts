@@ -75,6 +75,7 @@ export interface Release {
   sourceDirectory?: string;
   currentAge?: string;
   isLatest?: boolean;
+  attestation?: boolean;
 }
 
 export interface ReleaseResult {
