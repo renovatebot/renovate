@@ -2898,12 +2898,15 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .post('/repos/some/repo/pulls/1/requested_reviewers', {
           reviewers: ['me', 'you'],
+          team_reviewers: ['org/team'],
         })
         .reply(200);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
-      await expect(forgejo.addReviewers(1, ['me', 'you'])).toResolve();
+      await expect(
+        forgejo.addReviewers(1, ['me', 'you', 'org/team']),
+      ).toResolve();
 
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });

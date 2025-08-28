@@ -553,6 +553,10 @@ describe('modules/manager/pep621/extract', () => {
         Fixtures.get('pyproject_pdm_lockedversion.lock'),
       );
 
+      fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
+
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('pdm.lock');
+
       const res = await extractPackageFile(
         Fixtures.get('pyproject_pdm_lockedversion.toml'),
         'pyproject.toml',
@@ -584,6 +588,7 @@ describe('modules/manager/pep621/extract', () => {
             skipReason: 'unspecified-version',
           },
         ],
+        lockFiles: ['pdm.lock'],
       });
     });
 
@@ -615,6 +620,10 @@ describe('modules/manager/pep621/extract', () => {
         `,
       );
 
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+
       const res = await extractPackageFile(
         codeBlock`
           [project]
@@ -645,6 +654,7 @@ describe('modules/manager/pep621/extract', () => {
             lockedVersion: '24.2.0',
           },
         ],
+        lockFiles: ['uv.lock'],
       });
     });
 
