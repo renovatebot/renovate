@@ -562,6 +562,7 @@ describe('modules/platform/gitea/index', () => {
         .get(`/repos/${initRepoCfg.repository}`)
         .reply(200, {
           ...mockRepo,
+          allow_rebase: false,
           allow_fast_forward_only_merge: true,
           default_merge_style: 'fast-forward-only',
         });
@@ -595,6 +596,21 @@ describe('modules/platform/gitea/index', () => {
         expect.objectContaining({
           mergeMethod: 'merge',
         }),
+      );
+    });
+
+    it('should throw if unknown default merge style is configured', async () => {
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .get(`/repos/${initRepoCfg.repository}`)
+        .reply(200, {
+          ...mockRepo,
+          default_merge_style: 'unknown',
+        });
+      await initFakePlatform(scope);
+
+      await expect(gitea.initRepo(initRepoCfg)).rejects.toThrow(
+        REPOSITORY_BLOCKED,
       );
     });
 
