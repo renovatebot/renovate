@@ -273,13 +273,13 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
           ],
         })
         .get(
-          '/git/repositories/some-repo/items?path=CHANGELOG.md&includeContent=true&api-version=7.0',
+          '/git/repositories/some-repo/items?path=/CHANGELOG.md&includeContent=true&api-version=7.0',
         )
         .reply(200, changelogMdFile);
 
       const res = await getReleaseNotesMdFile(azureProject);
       expect(res).toStrictEqual({
-        changelogFile: 'CHANGELOG.md',
+        changelogFile: '/CHANGELOG.md',
         changelogMd: changelogMd + '\n#\n##',
       });
     });
@@ -312,7 +312,7 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
             {
               objectId: 'some-other-object-id',
               gitObjectType: 'blob',
-              relativePath: '/src/docs/CHANGELOG.md',
+              relativePath: 'CHANGELOG.md',
             },
           ],
         })
