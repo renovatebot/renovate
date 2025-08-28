@@ -107,7 +107,7 @@ export async function postUpgradeCommandsExecutor(
           compile(workingDirTemplate, mergeChildConfig(config, upgrade)),
         );
         await ensureLocalDir(workingDir);
-        logger.debug(
+        logger.trace(
           { workingDirTemplate },
           'Processed post-upgrade commands working directory template.',
         );
