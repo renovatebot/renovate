@@ -3,7 +3,10 @@ import { get } from '../../../modules/manager';
 import type { ExtractResults } from './types';
 
 export function processSupersedesManagers(extracts: ExtractResults[]): void {
+  const rejected: Record<string, string[]> = {};
+
   for (const primaryExtract of extracts) {
+    const primaryManager = primaryExtract.manager;
     const secondaryManagers = get(primaryExtract.manager, 'supersedesManagers');
     if (!is.nonEmptyArray(secondaryManagers)) {
       continue;
@@ -26,19 +29,29 @@ export function processSupersedesManagers(extracts: ExtractResults[]): void {
         continue;
       }
 
-      secondaryExtract.packageFiles = secondaryExtract.packageFiles.filter(
-        ({ packageFile, lockFiles }) => {
-          if (is.nonEmptyArray(lockFiles)) {
-            return true;
-          }
+      for (const { packageFile, lockFiles } of secondaryExtract.packageFiles) {
+        if (is.nonEmptyArray(lockFiles)) {
+          rejected[primaryManager] ??= [];
+          rejected[primaryManager].push(packageFile);
+          continue;
+        }
 
-          if (!primaryPackageFiles.includes(packageFile)) {
-            return true;
-          }
-
-          return false;
-        },
-      );
+        if (primaryPackageFiles.includes(packageFile)) {
+          rejected[secondaryManager] ??= [];
+          rejected[secondaryManager].push(packageFile);
+        }
+      }
     }
+  }
+
+  for (const extract of extracts) {
+    const rejectedFiles = rejected[extract.manager];
+    if (!is.nonEmptyArray(rejectedFiles) || !extract.packageFiles) {
+      continue;
+    }
+
+    extract.packageFiles = extract.packageFiles.filter(
+      ({ packageFile }) => !rejectedFiles.includes(packageFile),
+    );
   }
 }
