@@ -41,7 +41,7 @@ const CargoDep = z.union([
         workspace,
       }): PackageDependency<CargoManagerData> => {
         let skipReason: SkipReason | undefined;
-        let currentValue: string | undefined;
+        let currentValue: string;
         let nestedVersion = false;
 
         if (version) {

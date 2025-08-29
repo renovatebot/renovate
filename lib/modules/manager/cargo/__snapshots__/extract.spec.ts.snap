@@ -304,6 +304,16 @@ exports[`modules/manager/cargo/extract > extractPackageFile() > extracts multipl
     "skipReason": "unspecified-version",
   },
   {
+    "currentValue": "",
+    "datasource": "crate",
+    "depName": "path_dep_without_version",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": false,
+    },
+    "skipReason": "path-dependency",
+  },
+  {
     "currentValue": "1.10.3",
     "datasource": "github-tags",
     "depName": "git_dep_with_tag",
