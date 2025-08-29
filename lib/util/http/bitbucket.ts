@@ -48,10 +48,6 @@ export class BitbucketHttp extends HttpBase<BitbucketHttpOptions> {
     );
 
     if (paginate && isPagedResult(result.body)) {
-      if (opts.httpOptions) {
-        delete opts.httpOptions.cacheProvider;
-        opts.httpOptions.memCache = false;
-      }
       const resultBody = result.body;
       let nextURL = result.body.next;
       let page = 1;
