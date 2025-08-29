@@ -323,14 +323,12 @@ const platform: Platform = {
       throw new Error(REPOSITORY_BLOCKED);
     }
 
-    function assertNever(_: never): never {
-      logger.debug(
-        'Repo has unknown default merge style - aborting renovation',
-      );
+    function throwUnknownMergeStyle(_: never): never {
+      logger.debug('Repo has unknown merge style - aborting renovation');
       throw new Error(REPOSITORY_BLOCKED);
     }
 
-    function isAllowed(style: PRMergeMethod, repo: any): boolean {
+    function isAllowed(style: PRMergeMethod): boolean {
       switch (style) {
         case 'rebase':
           return repo.allow_rebase;
@@ -343,10 +341,13 @@ const platform: Platform = {
         case 'fast-forward-only':
           return repo.allow_fast_forward_only_merge;
       }
-      return assertNever(style); // ensures changes to PRMergeMethod updated here
+      return throwUnknownMergeStyle(style); // ensures changes to PRMergeMethod updated here
     }
 
+    // mirror behaviour of gitea - if default merge style is allowed, use this;
+    // else fall back to predefined order
     const preferredOrder: PRMergeMethod[] = [
+      repo.default_merge_style as PRMergeMethod,
       'rebase',
       'squash',
       'merge',
@@ -354,22 +355,15 @@ const platform: Platform = {
       'fast-forward-only',
     ];
 
-    // if default merge style is allowed, use this; else fall back to order
-    // as per preferredOrder
-    const def = repo.default_merge_style as PRMergeMethod;
-    if (isAllowed(def, repo)) {
-      config.mergeMethod = def;
-    } else {
-      const fallback = preferredOrder.find((style) => isAllowed(style, repo));
+    const mergeStyle = preferredOrder.find((style) => isAllowed(style));
 
-      if (fallback) {
-        config.mergeMethod = fallback;
-      } else {
-        logger.debug(
-          'Repository has no allowed merge methods - aborting renovation',
-        );
-        throw new Error(REPOSITORY_BLOCKED);
-      }
+    if (mergeStyle) {
+      config.mergeMethod = mergeStyle;
+    } else {
+      logger.debug(
+        'Repository has no allowed merge methods - aborting renovation',
+      );
+      throw new Error(REPOSITORY_BLOCKED);
     }
 
     // Determine author email and branches
