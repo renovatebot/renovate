@@ -337,5 +337,16 @@ describe('workers/global/config/parse/index', () => {
         'customManagers:azurePipelinesVersions',
       ]);
     });
+
+    it('adds extends from fileConfig only', async () => {
+      fileConfigParser.getConfig.mockResolvedValueOnce({
+        extends: [':pinDigests'],
+      });
+      const parsedConfig = await configParser.parseConfigs(
+        defaultEnv,
+        defaultArgv,
+      );
+      expect(parsedConfig.extends).toMatchObject([':pinDigests']);
+    });
   });
 });

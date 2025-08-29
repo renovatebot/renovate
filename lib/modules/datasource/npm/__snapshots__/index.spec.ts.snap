@@ -6,6 +6,7 @@ exports[`modules/datasource/npm/index > should fetch package info from custom re
   "registryUrl": "https://npm.mycustomregistry.com",
   "releases": [
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -13,6 +14,7 @@ exports[`modules/datasource/npm/index > should fetch package info from custom re
       "version": "0.0.1",
     },
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -33,6 +35,7 @@ exports[`modules/datasource/npm/index > should fetch package info from npm 1`] =
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -40,6 +43,7 @@ exports[`modules/datasource/npm/index > should fetch package info from npm 1`] =
       "version": "0.0.1",
     },
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -61,6 +65,7 @@ exports[`modules/datasource/npm/index > should handle foobar 1`] = `
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -68,6 +73,7 @@ exports[`modules/datasource/npm/index > should handle foobar 1`] = `
       "version": "0.0.1",
     },
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -89,6 +95,7 @@ exports[`modules/datasource/npm/index > should handle no time 1`] = `
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -96,6 +103,7 @@ exports[`modules/datasource/npm/index > should handle no time 1`] = `
       "version": "0.0.1",
     },
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -116,6 +124,7 @@ exports[`modules/datasource/npm/index > should not send an authorization header 
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -123,6 +132,7 @@ exports[`modules/datasource/npm/index > should not send an authorization header 
       "version": "0.0.1",
     },
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -144,6 +154,7 @@ exports[`modules/datasource/npm/index > should parse repo url (string) 1`] = `
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -164,6 +175,7 @@ exports[`modules/datasource/npm/index > should parse repo url 1`] = `
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -184,6 +196,7 @@ exports[`modules/datasource/npm/index > should replace any environment variable 
   "registryUrl": "https://registry.from-env.com",
   "releases": [
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -191,6 +204,7 @@ exports[`modules/datasource/npm/index > should replace any environment variable 
       "version": "0.0.1",
     },
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -217,6 +231,7 @@ Marking the latest version of an npm package as deprecated results in the entire
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -225,6 +240,7 @@ Marking the latest version of an npm package as deprecated results in the entire
       "version": "0.0.1",
     },
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -254,6 +270,7 @@ exports[`modules/datasource/npm/index > should send an authorization header if p
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -261,6 +278,7 @@ exports[`modules/datasource/npm/index > should send an authorization header if p
       "version": "0.0.1",
     },
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -282,6 +300,7 @@ exports[`modules/datasource/npm/index > should use default registry if missing f
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -289,6 +308,7 @@ exports[`modules/datasource/npm/index > should use default registry if missing f
       "version": "0.0.1",
     },
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -310,6 +330,7 @@ exports[`modules/datasource/npm/index > should use host rules by baseUrl if prov
   "registryUrl": "https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry",
   "releases": [
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -317,6 +338,7 @@ exports[`modules/datasource/npm/index > should use host rules by baseUrl if prov
       "version": "0.0.1",
     },
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -338,6 +360,7 @@ exports[`modules/datasource/npm/index > should use host rules by hostName if pro
   "registryUrl": "https://npm.mycustomregistry.com",
   "releases": [
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
@@ -345,6 +368,7 @@ exports[`modules/datasource/npm/index > should use host rules by hostName if pro
       "version": "0.0.1",
     },
     {
+      "attestation": false,
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
