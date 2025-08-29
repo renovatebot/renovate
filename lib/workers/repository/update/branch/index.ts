@@ -726,7 +726,7 @@ export async function processBranch(
       }
       if (
         mergeStatus === 'stale' &&
-        ['conflicted', 'never'].includes(config.rebaseWhen!) &&
+        ['never'].includes(config.rebaseWhen!) &&
         /* v8 ignore next -- needs test */
         !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel))
       ) {
@@ -735,6 +735,12 @@ export async function processBranch(
         );
         config.forcePr = true;
         config.branchAutomergeFailureMessage = mergeStatus;
+      }
+      if (mergeStatus === 'stale' && config.rebaseWhen === 'conflicted') {
+        logger.debug(
+          'Branch is stale and rebaseWhen is conflicted - rebase requested',
+        );
+        config.rebaseRequested = true;
       }
       if (
         mergeStatus === 'automerge aborted - PR exists' ||
