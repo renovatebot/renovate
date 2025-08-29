@@ -4,9 +4,9 @@ import type {
   UpdateArtifactsResult,
 } from '../../types';
 import type { PyProject } from '../schema';
-import type { PyProjectProcessor } from './types';
+import { BasePyProjectProcessor } from './abstract';
 
-export class HatchProcessor implements PyProjectProcessor {
+export class HatchProcessor extends BasePyProjectProcessor {
   process(
     pyproject: PyProject,
     deps: PackageDependency[],

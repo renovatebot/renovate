@@ -3,6 +3,12 @@ import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import { AbstractMigration } from '../base/abstract-migration';
 
+const shortHoursRegex = regEx(/( \d?\d)((a|p)m)/g);
+const afterBeforeRegex = regEx(
+  /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/,
+);
+const dayRegex1 = regEx(/every (mon|tues|wednes|thurs|fri|satur|sun)day$/);
+const dayRegex2 = regEx(/every ([a-z]*day)$/);
 export class ScheduleMigration extends AbstractMigration {
   override readonly propertyName = 'schedule';
 
@@ -26,7 +32,7 @@ export class ScheduleMigration extends AbstractMigration {
         ) {
           const parsedSchedule = later.parse.text(
             // We need to massage short hours first before we can parse it
-            schedules[i].replace(regEx(/( \d?\d)((a|p)m)/g), '$1:00$2'), // TODO #12071
+            schedules[i].replace(shortHoursRegex, '$1:00$2'),
           ).schedules[0];
           // Only migrate if the after time is greater than before, e.g. "after 10pm and before 5am"
           if (!parsedSchedule?.t_a || !parsedSchedule.t_b) {
@@ -36,22 +42,10 @@ export class ScheduleMigration extends AbstractMigration {
           if (parsedSchedule.t_a[0] > parsedSchedule.t_b[0]) {
             const toSplit = schedules[i];
             schedules[i] = toSplit
-              .replace(
-                regEx(
-                  /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/,
-                ), // TODO #12071
-                '$1$2 $3 $7',
-              )
+              .replace(afterBeforeRegex, '$1$2 $3 $7')
               .trim();
             schedules.push(
-              toSplit
-                .replace(
-                  regEx(
-                    /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/,
-                  ), // TODO #12071
-                  '$1$4 $5 $7',
-                )
-                .trim(),
+              toSplit.replace(afterBeforeRegex, '$1$4 $5 $7').trim(),
             );
           }
         }
@@ -72,15 +66,8 @@ export class ScheduleMigration extends AbstractMigration {
         if (schedules[i].endsWith(' every day')) {
           schedules[i] = schedules[i].replace(' every day', '');
         }
-        if (
-          regEx(/every (mon|tues|wednes|thurs|fri|satur|sun)day$/).test(
-            schedules[i],
-          ) // TODO #12071
-        ) {
-          schedules[i] = schedules[i].replace(
-            regEx(/every ([a-z]*day)$/), // TODO #12071
-            'on $1',
-          );
+        if (dayRegex1.test(schedules[i])) {
+          schedules[i] = schedules[i].replace(dayRegex2, 'on $1');
         }
         if (schedules[i].endsWith('days')) {
           schedules[i] = schedules[i].replace('days', 'day');
