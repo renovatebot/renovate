@@ -347,7 +347,7 @@ const platform: Platform = {
     // mirror behaviour of gitea - if default merge style is allowed, use this;
     // else fall back to predefined order
     const preferredOrder: PRMergeMethod[] = [
-      repo.default_merge_style as PRMergeMethod,
+      repo.default_merge_style,
       'rebase',
       'squash',
       'merge',
