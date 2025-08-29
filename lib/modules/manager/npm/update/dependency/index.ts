@@ -123,10 +123,10 @@ function replaceAsString(
 
 export function updateDependency(
   { fileContent, upgrade }: UpdateDependencyConfig,
-  fileFormat?: string,
+  fileName?: string,
 ): string | null {
-  const isYaml = fileFormat
-    ? fileFormat.endsWith('.yaml') || fileFormat.endsWith('.yml')
+  const isYaml = fileName
+    ? fileName.endsWith('.yaml') || fileName.endsWith('.yml')
     : false;
   if (upgrade.depType?.startsWith('pnpm.catalog')) {
     return updatePnpmCatalogDependency({ fileContent, upgrade });
