@@ -1,5 +1,5 @@
 import { regEx } from '../../../util/regex';
-import type { NugetVersion } from './types';
+import type { DotnetSdkVersion } from './types';
 
 // We can't just use `Number.parseInt()` because it parses `123abc` as `123`,
 // which leads to incorrect version comparison.
@@ -35,18 +35,15 @@ function comparePrereleases(x: string, y: string): number {
   return 0;
 }
 
-export function compare(x: NugetVersion, y: NugetVersion): number {
+export function compare(x: DotnetSdkVersion, y: DotnetSdkVersion): number {
   const xMajor = x.major;
   const yMajor = y.major;
 
   const xMinor = x.minor ?? 0;
   const yMinor = y.minor ?? 0;
 
-  const xPatch = x.patch ?? 0;
-  const yPatch = y.patch ?? 0;
-
-  const xRevision = x.revision ?? 0;
-  const yRevision = y.revision ?? 0;
+  const xPatch = x.patch ?? 100;
+  const yPatch = y.patch ?? 100;
 
   if (xMajor !== yMajor) {
     return Math.sign(xMajor - yMajor);
@@ -54,8 +51,6 @@ export function compare(x: NugetVersion, y: NugetVersion): number {
     return Math.sign(xMinor - yMinor);
   } else if (xPatch !== yPatch) {
     return Math.sign(xPatch - yPatch);
-  } else if (xRevision !== yRevision) {
-    return Math.sign(xRevision - yRevision);
   } else if (x.prerelease && !y.prerelease) {
     return -1;
   } else if (!x.prerelease && y.prerelease) {
@@ -67,27 +62,15 @@ export function compare(x: NugetVersion, y: NugetVersion): number {
   return 0;
 }
 
-export function versionToString(version: NugetVersion): string {
+export function versionToString(version: DotnetSdkVersion): string {
   let res = `${version.major}`;
 
-  if (version.minor !== undefined) {
-    res += `.${version.minor}`;
-  }
+  res += `.${version.minor ?? 0}`;
 
-  if (version.patch !== undefined) {
-    res += `.${version.patch}`;
-  }
-
-  if (version.revision !== undefined) {
-    res += `.${version.revision}`;
-  }
+  res += `.${version.patch ?? 100}`;
 
   if (version.prerelease) {
     res += `-${version.prerelease}`;
-  }
-
-  if (version.metadata) {
-    res += `+${version.metadata}`;
   }
 
   return res;
