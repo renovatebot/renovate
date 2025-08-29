@@ -3,9 +3,10 @@ import { GlobalConfig } from '../../../config/global';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { addMeta } from '../../../logger';
 import { getCache } from '../../../util/cache/repository';
+import { setMultipleBaseBranches } from '../../../util/multiple-base-branches';
 import * as _extractUpdate from './extract-update';
 import { lookup } from './extract-update';
-import { extractDependencies, updateRepo } from '.';
+import { extractDependencies, getBaseBranchConfig, updateRepo } from '.';
 import { git, logger, platform, scm } from '~test/util';
 import type { RenovateConfig } from '~test/util';
 
@@ -172,6 +173,16 @@ describe('workers/repository/process/index', () => {
         packageFiles: undefined,
       });
       expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'master' });
+    });
+  });
+
+  describe('getBaseBranchConfig', () => {
+    it('adds branchPrefix if multiple baseBranches expected', async () => {
+      setMultipleBaseBranches({ baseBranches: ['/test/'] });
+      const res = await getBaseBranchConfig('main', config);
+      expect(res.baseBranch).toBe('main');
+      expect(res.hasBaseBranches).toBeTrue();
+      expect(res.branchPrefix).toBe('renovate/main-');
     });
   });
 });
