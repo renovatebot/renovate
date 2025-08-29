@@ -188,8 +188,8 @@ const gitlabProject = partial<ChangeLogProject>({
 
 const azureProject = partial<ChangeLogProject>({
   type: 'azure',
-  apiBaseUrl: 'https://dev\\.azure\\.com/some-org/some-project/_apis/',
-  baseUrl: 'https://dev\\.azure\\.com/some-org/some-project/',
+  apiBaseUrl: 'https://dev.azure.com/some-org/some-project/_apis/',
+  baseUrl: 'https://dev.azure.com/some-org/some-project/',
 });
 
 describe('workers/repository/update/pr/changelog/release-notes', () => {
