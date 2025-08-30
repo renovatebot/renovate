@@ -9,7 +9,9 @@ import { generic_image_datasource, generic_image_resource } from './utils';
 
 export class GenericDockerImageRefExtractor extends DependencyExtractor {
   getCheckList(): string[] {
-    return generic_image_resource.map((value) => `"${value.type}"`);
+    return [...generic_image_resource, ...generic_image_datasource].map(
+      (value) => `"${value.type}"`,
+    );
   }
 
   extract(
