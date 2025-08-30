@@ -328,10 +328,10 @@ const platform: Platform = {
     // else fall back to predefined order
     const preferredOrder: PRMergeMethod[] = [
       repo.default_merge_style,
-      'rebase',
-      'squash',
       'merge',
+      'rebase',
       'rebase-merge',
+      'squash',
       'fast-forward-only',
     ];
 
