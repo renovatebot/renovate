@@ -91,6 +91,7 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
     });
 
     expect(result).toEqual({
+      registryUrl: 'https://raw.githubusercontent.com',
       releases: [
         {
           version: '2015-05-01-preview',
@@ -138,6 +139,7 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
     });
 
     expect(result).toEqual({
+      registryUrl: 'https://raw.githubusercontent.com',
       releases: [
         {
           version: '2023-09-01',
