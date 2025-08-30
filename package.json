@@ -236,7 +236,7 @@
     "p-all": "5.0.0",
     "p-map": "7.0.3",
     "p-queue": "8.1.0",
-    "p-throttle": "7.0.0",
+    "p-throttle": "8.0.0",
     "parse-link-header": "2.0.0",
     "prettier": "3.6.2",
     "protobufjs": "7.5.4",
