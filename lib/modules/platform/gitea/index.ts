@@ -57,6 +57,7 @@ import {
   DRAFT_PREFIX,
   getMergeMethod,
   getRepoUrl,
+  isAllowed,
   smartLinks,
   toRenovatePR,
   trimTrailingApiPath,
@@ -323,27 +324,6 @@ const platform: Platform = {
       throw new Error(REPOSITORY_BLOCKED);
     }
 
-    function throwUnknownMergeStyle(_: never): never {
-      logger.debug('Repo has unknown merge style - aborting renovation');
-      throw new Error(REPOSITORY_BLOCKED);
-    }
-
-    function isAllowed(style: PRMergeMethod): boolean {
-      switch (style) {
-        case 'rebase':
-          return repo.allow_rebase;
-        case 'rebase-merge':
-          return repo.allow_rebase_explicit;
-        case 'squash':
-          return repo.allow_squash_merge;
-        case 'merge':
-          return repo.allow_merge_commits;
-        case 'fast-forward-only':
-          return repo.allow_fast_forward_only_merge;
-      }
-      return throwUnknownMergeStyle(style); // ensures changes to PRMergeMethod updated here
-    }
-
     // mirror behaviour of gitea - if default merge style is allowed, use this;
     // else fall back to predefined order
     const preferredOrder: PRMergeMethod[] = [
@@ -355,7 +335,7 @@ const platform: Platform = {
       'fast-forward-only',
     ];
 
-    const mergeStyle = preferredOrder.find((style) => isAllowed(style));
+    const mergeStyle = preferredOrder.find((style) => isAllowed(style, repo));
 
     if (mergeStyle) {
       config.mergeMethod = mergeStyle;
