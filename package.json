@@ -180,6 +180,7 @@
     "@sindresorhus/is": "7.0.2",
     "@yarnpkg/core": "4.4.3",
     "@yarnpkg/parsers": "3.0.3",
+    "ae-cvss-calculator": "1.0.8",
     "agentkeepalive": "4.6.0",
     "async-mutex": "0.5.0",
     "auth-header": "1.0.0",
@@ -260,7 +261,6 @@
     "upath": "2.0.1",
     "url-join": "5.0.0",
     "validate-npm-package-name": "6.0.2",
-    "vuln-vects": "1.1.0",
     "xmldoc": "2.0.2",
     "yaml": "2.8.1",
     "zod": "3.25.76"
