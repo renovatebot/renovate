@@ -2,6 +2,7 @@ import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
+import { DateTime } from 'luxon';
 import semver from 'semver';
 import type { Options, SimpleGit, TaskOptions } from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
@@ -22,7 +23,7 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
-import { incLimitedValue } from '../../workers/global/limits';
+import { incCountValue, incLimitedValue } from '../../workers/global/limits';
 import { getCache } from '../cache/repository';
 import { getEnv } from '../env';
 import { newlineRegex, regEx } from '../regex';
@@ -221,6 +222,7 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
       .forEach(([sha, ref]) => {
         config.branchCommits[ref.replace('refs/heads/', '')] =
           sha as LongCommitSha;
+        // TODO: branchUpdateDate cannot be set withou fetching the commit, check if this is needed
       });
     logger.trace({ branchCommits: config.branchCommits }, 'branch commits');
     /* v8 ignore next 11 -- TODO: add test */
@@ -246,6 +248,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
+  config.branchUpdateDate = {};
   // TODO: safe to pass all env variables? use `getChildEnv` instead?
   git = simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env({
     ...getEnv(),
@@ -554,6 +557,11 @@ export function getBranchCommit(branchName: string): LongCommitSha | null {
   return config.branchCommits?.[branchName] || null;
 }
 
+// Return the date of the latest commit for a branch
+export function getBranchUpdateDate(branchName: string): DateTime | null {
+  return config.branchUpdateDate[branchName] || null;
+}
+
 export async function getCommitMessages(): Promise<string[]> {
   logger.debug('getCommitMessages');
   if (GlobalConfig.get('platform') !== 'local') {
@@ -588,7 +596,7 @@ export async function checkoutBranch(
     config.currentBranchSha = (
       await git.raw(['rev-parse', 'HEAD'])
     ).trim() as LongCommitSha;
-    const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
+    const latestCommitDate = await getCommitDate(config.currentBranchSha);
     if (latestCommitDate) {
       logger.debug(
         { branchName, latestCommitDate, sha: config.currentBranchSha },
@@ -627,6 +635,9 @@ export async function checkoutBranchFromRemote(
     ).trim() as LongCommitSha;
     logger.debug(`Checked out branch ${branchName} from remote ${remoteName}`);
     config.branchCommits[branchName] = config.currentBranchSha;
+    config.branchUpdateDate[branchName] = await getCommitDate(
+      config.currentBranchSha,
+    );
     return config.currentBranchSha;
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
@@ -941,6 +952,7 @@ export async function deleteBranch(branchName: string): Promise<void> {
     logger.debug(`No local branch to delete with name: ${branchName}`);
   }
   delete config.branchCommits[branchName];
+  // deleting branchUpdateDate may cause getCommitsHourlyCount to show inaccurate results
 }
 
 export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
@@ -1010,13 +1022,19 @@ export async function mergeBranch(branchName: string): Promise<void> {
   }
 }
 
+async function getCommitDate(ref: LongCommitSha | string): Promise<DateTime> {
+  const output = await git.show(['-s', '--format=%ci', ref]);
+  // output is like 2025-05-29 01:28:16 +0000
+  return DateTime.fromMillis(Date.parse(output));
+}
+
 export async function getBranchLastCommitTime(
   branchName: string,
 ): Promise<Date> {
   await syncGit();
   try {
-    const time = await git.show(['-s', '--format=%ai', 'origin/' + branchName]);
-    return new Date(Date.parse(time));
+    const time = await getCommitDate('origin/' + branchName);
+    return time.toJSDate();
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
     /* v8 ignore next 3 -- TODO: add test */
@@ -1282,6 +1300,7 @@ export async function pushCommit({
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
     incLimitedValue('Commits');
+    incCountValue('HourlyCommits');
     result = true;
     /* v8 ignore next 3 -- TODO: add test */
   } catch (err) {
@@ -1301,6 +1320,7 @@ export async function fetchBranch(
     const commit = (await git.revparse([branchName])).trim() as LongCommitSha;
     config.branchCommits[branchName] = commit;
     config.branchIsModified[branchName] = false;
+    config.branchUpdateDate[branchName] = await getCommitDate(commit);
     return commit;
     /* v8 ignore next 3 -- TODO: add test */
   } catch (err) {
@@ -1323,6 +1343,7 @@ export async function commitFiles(
         const { commitSha } = commitResult;
         config.branchCommits[branchName] = commitSha;
         config.branchIsModified[branchName] = false;
+        config.branchUpdateDate[branchName] = await getCommitDate(commitSha);
         return commitSha;
       }
     }

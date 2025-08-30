@@ -230,7 +230,7 @@ export async function processBranch(
     }
 
     logger.debug(
-      `Open PR Count: ${getCount('ConcurrentPRs')}, Existing Branch Count: ${getCount('Branches')}, Hourly PR Count: ${getCount('HourlyPRs')}`,
+      `Open PR Count: ${getCount('ConcurrentPRs')}, Existing Branch Count: ${getCount('Branches')}, Hourly PR Count: ${getCount('HourlyPRs')}, Hourly Commit Count: ${getCount('HourlyCommits')}`,
     );
 
     if (
@@ -246,7 +246,9 @@ export async function processBranch(
       };
     }
     if (
-      isLimitReached('Commits') &&
+      (isLimitReached('Commits') ||
+        (!branchConfig.rebaseRequested &&
+          isLimitReached('HourlyCommits', branchConfig))) &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
     ) {
