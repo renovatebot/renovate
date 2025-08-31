@@ -973,6 +973,87 @@ describe('workers/repository/update/pr/index', () => {
       });
     });
 
+    describe('Warnings', () => {
+      describe('Attestations', () => {
+        describe('when attestation is not removed', () => {
+          describe.each([
+            [true, true],
+            [false, true],
+            [false, false],
+          ])(
+            'current attestation %s, new attestation %s',
+            (currentAttestation, newAttestation) => {
+              const dummyUpgrade = partial<BranchUpgradeConfig>({
+                branchName: sourceBranch,
+                depType: 'foo',
+                depName: 'bar',
+                manager: 'npm',
+                currentVersion: '1.2.3',
+                newVersion: '2.3.4',
+                releases: [
+                  { version: '1.2.3', attestation: currentAttestation },
+                  { version: '2.3.4', attestation: newAttestation },
+                ],
+              });
+
+              it('does not warn the user', async () => {
+                platform.createPr.mockResolvedValueOnce(pr);
+
+                const res = await ensurePr({
+                  ...config,
+                  upgrades: [dummyUpgrade],
+                });
+
+                expect(res).toEqual({ type: 'with-pr', pr });
+                const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+                expect(bodyConfig.upgrades[0].prBodyNotes).toBeUndefined();
+              });
+            },
+          );
+        });
+        describe('when attestation is removed', () => {
+          const dummyUpgrade = partial<BranchUpgradeConfig>({
+            branchName: sourceBranch,
+            depType: 'foo',
+            depName: 'bar',
+            manager: 'npm',
+            currentVersion: '1.2.3',
+            newVersion: '2.3.4',
+            releases: [
+              { version: '1.2.3', attestation: true },
+              { version: '2.3.4', attestation: false },
+            ],
+          });
+
+          it('warns the user', async () => {
+            platform.createPr.mockResolvedValueOnce(pr);
+
+            const res = await ensurePr({
+              ...config,
+              upgrades: [dummyUpgrade],
+            });
+
+            expect(res).toEqual({ type: 'with-pr', pr });
+            const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+            expect(bodyConfig).toMatchObject({
+              upgrades: [
+                {
+                  prBodyNotes: [
+                    `> :exclamation: **Warning**
+>
+> bar 1.2.3 was released with an attestation, but 2.3.4 has no attestation.
+> Verify that release 2.3.4 was published by the expected author.
+
+`,
+                  ],
+                },
+              ],
+            });
+          });
+        });
+      });
+    });
+
     describe('prCache', () => {
       const existingPr: Pr = {
         ...pr,

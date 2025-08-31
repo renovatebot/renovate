@@ -1,11 +1,8 @@
-import { getManagerList } from '../modules/manager';
 import { configFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
 import { partial } from '~test/util';
-
-const managerList = getManagerList().sort();
 
 describe('config/validation', () => {
   describe('validateConfig(config)', () => {
@@ -1098,7 +1095,20 @@ describe('config/validation', () => {
 
       expect(errors).toHaveLength(0);
       expect(warnings).toHaveLength(2);
-      expect(warnings).toMatchSnapshot();
+      expect(warnings).toEqual([
+        {
+          topic: 'managerFilePatterns',
+          message: expect.toStartWith(
+            `"managerFilePatterns" can't be used in ".". Allowed objects: `,
+          ),
+        },
+        {
+          topic: 'npm.minor.managerFilePatterns',
+          message: expect.toStartWith(
+            `"managerFilePatterns" can't be used in "minor". Allowed objects: `,
+          ),
+        },
+      ]);
     });
 
     it('errors if manager objects are nested', async () => {
@@ -1763,7 +1773,9 @@ describe('config/validation', () => {
           },
           {
             topic: 'managerFilePatterns',
-            message: `managerFilePatterns should only be configured within one of "${managerList.join(' or ')} or customManagers" objects. Was found in .`,
+            message: expect.toStartWith(
+              `"managerFilePatterns" can't be used in ".". Allowed objects: `,
+            ),
           },
         ]);
       });
@@ -1786,7 +1798,9 @@ describe('config/validation', () => {
         expect(warnings).toEqual([
           {
             topic: 'managerFilePatterns',
-            message: `managerFilePatterns should only be configured within one of "${managerList.join(' or ')} or customManagers" objects. Was found in .`,
+            message: expect.toStartWith(
+              `"managerFilePatterns" can't be used in ".". Allowed objects: `,
+            ),
           },
         ]);
       });
