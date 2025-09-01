@@ -191,5 +191,6 @@ export function isAllowed(style: PRMergeMethod, repo: Repo): boolean {
     case 'fast-forward-only':
       return repo.allow_fast_forward_only_merge;
   }
-  return throwUnknownMergeStyle(style); // ensures changes to PRMergeMethod updated here
+  logger.debug('Repo has unknown merge style - aborting renovation');
+  throw new Error(REPOSITORY_BLOCKED);
 }
