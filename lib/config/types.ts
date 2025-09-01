@@ -134,6 +134,9 @@ export interface GlobalOnlyConfig {
   useCloudMetadataServices?: boolean;
   deleteConfigFile?: boolean;
   deleteAdditionalConfigFile?: boolean;
+  autodiscoverShardCount?: number;
+  autodiscoverShardSelector?: string;
+  autodiscoverShardSalt?: string;
 }
 
 // Config options used within the repository worker, but not user configurable
@@ -176,6 +179,9 @@ export interface RepoGlobalConfig {
   s3PathStyle?: boolean;
   cachePrivatePackages?: boolean;
   ignorePrAuthor?: boolean;
+  autodiscoverShardCount?: number;
+  autodiscoverShardSelector?: string;
+  autodiscoverShardSalt?: string;
 }
 
 export interface LegacyAdminConfig {

@@ -39,6 +39,9 @@ export class GlobalConfig {
     's3PathStyle',
     'cachePrivatePackages',
     'ignorePrAuthor',
+    'autodiscoverShardCount',
+    'autodiscoverShardSelector',
+    'autodiscoverShardSalt',
   ];
 
   private static config: RepoGlobalConfig = {};

@@ -459,5 +459,32 @@ describe('workers/global/config/parse/env', () => {
       const config = await env.getConfig(envParam);
       expect(config.platformCommit).toBe('disabled');
     });
+
+    it('parses autodiscoverShardCount from env', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_AUTODISCOVER_SHARD_COUNT: '8',
+      };
+      expect(await env.getConfig(envParam)).toMatchObject({
+        autodiscoverShardCount: 8,
+      });
+    });
+
+    it('parses autodiscoverShardSelector from env', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_AUTODISCOVER_SHARD_SELECTOR: '0-3',
+      };
+      expect(await env.getConfig(envParam)).toMatchObject({
+        autodiscoverShardSelector: '0-3',
+      });
+    });
+
+    it('parses autodiscoverShardSalt from env', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_AUTODISCOVER_SHARD_SALT: 'mysalt',
+      };
+      expect(await env.getConfig(envParam)).toMatchObject({
+        autodiscoverShardSalt: 'mysalt',
+      });
+    });
   });
 });

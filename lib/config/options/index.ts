@@ -3242,6 +3242,30 @@ const options: RenovateOptions[] = [
     default: false,
     globalOnly: true,
   },
+  {
+    name: 'autodiscoverShardCount',
+    description: 'Number of shards to use for autodiscover sharding.',
+    type: 'integer',
+    default: null,
+    globalOnly: true,
+    stage: 'global',
+  },
+  {
+    name: 'autodiscoverShardSelector',
+    description: 'Which shard(s) to run for autodiscover sharding.',
+    type: 'string',
+    default: null,
+    globalOnly: true,
+    stage: 'global',
+  },
+  {
+    name: 'autodiscoverShardSalt',
+    description: 'Salt to use for autodiscover sharding hash.',
+    type: 'string',
+    default: '',
+    globalOnly: true,
+    stage: 'global',
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

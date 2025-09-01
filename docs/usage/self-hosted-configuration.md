@@ -206,6 +206,61 @@ The sort method for autodiscover server side repository search.
 
 > If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
 
+## autodiscoverShardCount
+
+Number of shards to use for autodiscover sharding. This allows you to split the set of autodiscovered repositories into multiple logical groups (shards) for parallel or distributed processing.
+
+For example, if you want to split your repositories into 8 shards:
+
+```json
+{
+  "autodiscoverShardCount": 8
+}
+```
+
+## autodiscoverShardSalt
+
+Salt to use for autodiscover sharding hash. This string is added to the hash function used to assign repositories to shards. Changing the salt will change the shard assignment for all repositories, which can be useful to rebalance workloads or avoid collisions.
+
+**Example:**
+
+```json
+{
+  "autodiscoverShardSalt": "my-salt-value"
+}
+```
+
+## autodiscoverShardSelector
+
+Which shard(s) to run for autodiscover sharding. This determines which subset of repositories will be processed in the current run. The value is a string expression that supports various syntax patterns for selecting shards.
+
+**Examples:**
+
+- To process only shard 0:
+
+  ```json
+  { "autodiscoverShardSelector": "0" }
+  ```
+
+- To process shards 0, 1, 2, and 3:
+
+  ```json
+  { "autodiscoverShardSelector": "0-3" }
+  ```
+
+- To process every 4th shard starting from 1:
+
+  ```json
+  { "autodiscoverShardSelector": "*/4+1" }
+  ```
+
+**Syntax:**
+
+- `n` — single shard
+- `a-b` — range from a to b (inclusive)
+- `*/k+o` — modular class: all i where i % k == o % k
+- Multiple selectors can be combined with commas: `"0-3,8-9,*/4+1"`
+
 ## autodiscoverTopics
 
 Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those
