@@ -173,11 +173,6 @@ export function usableRepo(repo: Repo): boolean {
   return true;
 }
 
-function throwUnknownMergeStyle(_: never): never {
-  logger.debug('Repo has unknown merge style - aborting renovation');
-  throw new Error(REPOSITORY_BLOCKED);
-}
-
 export function isAllowed(style: PRMergeMethod, repo: Repo): boolean {
   switch (style) {
     case 'merge':
