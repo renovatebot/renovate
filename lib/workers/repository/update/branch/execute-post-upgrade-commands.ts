@@ -17,6 +17,7 @@ import {
   writeLocalFile,
 } from '../../../../util/fs';
 import { getRepoStatus } from '../../../../util/git';
+import { getGitEnvironmentVariables } from '../../../../util/git/auth';
 import type { FileChange } from '../../../../util/git/types';
 import { minimatch } from '../../../../util/minimatch';
 import { regEx } from '../../../../util/regex';
@@ -114,6 +115,7 @@ export async function postUpgradeCommandsExecutor(
 
             const execOpts: ExecOptions = {
               cwd: GlobalConfig.get('localDir'),
+              extraEnv: getGitEnvironmentVariables(),
             };
             if (dataFilePath) {
               execOpts.env = {
