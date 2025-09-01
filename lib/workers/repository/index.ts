@@ -156,6 +156,7 @@ export async function renovateRepository(
   ObsoleteCacheHitLogger.report();
   AbandonedPackageStats.report();
   const cloned = isCloned();
+  // istanbul ignore next
   logger.info({
     cloned,
     durationMs: splits.total,
