@@ -156,7 +156,11 @@ export async function renovateRepository(
   ObsoleteCacheHitLogger.report();
   AbandonedPackageStats.report();
   const cloned = isCloned();
-  logger.info({ cloned, durationMs: splits.total }, 'Repository finished');
+  logger.info({
+    cloned,
+    durationMs: splits.total,
+    result: repoResult?.res,
+  }, 'Repository finished');
   resetRepositoryLogLevelRemaps();
   return repoResult;
 }
