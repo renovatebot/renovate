@@ -160,6 +160,9 @@ export async function renovateRepository(
     cloned,
     durationMs: splits.total,
     result: repoResult?.res,
+    status: repoResult?.status,
+    enabled: repoResult?.enabled,
+    onboarded: repoResult?.onboarded,
   }, 'Repository finished');
   resetRepositoryLogLevelRemaps();
   return repoResult;
