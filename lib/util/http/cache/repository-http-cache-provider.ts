@@ -6,6 +6,10 @@ import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
 import { HttpCache } from './schema';
 
 export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
+  constructor(private aggressive = false) {
+    super();
+  }
+
   override load(url: string): Promise<unknown> {
     const cache = getCache();
     cache.httpCache ??= {};
@@ -29,22 +33,17 @@ export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
   }
 
   private isSynced(url: string): boolean {
+    if (!this.aggressive) {
+      return false;
+    }
+
     const flags = this.getSyncFlags();
     return !!flags[url];
   }
 
-  private flagSynced(url: string): void {
+  private markSynced(url: string): void {
     const flags = this.getSyncFlags();
     flags[url] = true;
-  }
-
-  unflagSynced(url: string): void {
-    const flags = this.getSyncFlags();
-    for (const fullUrl of Object.keys(flags)) {
-      if (fullUrl.includes(url)) {
-        delete flags[fullUrl];
-      }
-    }
   }
 
   override wrapServerResponse<T>(
@@ -52,7 +51,7 @@ export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
     const res = super.wrapServerResponse(url, resp);
-    this.flagSynced(url);
+    this.markSynced(url);
     return res;
   }
 
@@ -75,3 +74,11 @@ export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
 }
 
 export const repoCacheProvider = new RepositoryHttpCacheProvider();
+
+/**
+ * This is useful when you use `memCacheProvider`,
+ * but want the values be persisted for longer time.
+ */
+export const aggressiveRepoCacheProvider = new RepositoryHttpCacheProvider(
+  true,
+);
