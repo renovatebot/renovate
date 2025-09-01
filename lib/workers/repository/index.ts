@@ -157,14 +157,17 @@ export async function renovateRepository(
   AbandonedPackageStats.report();
   const cloned = isCloned();
   // istanbul ignore next
-  logger.info({
-    cloned,
-    durationMs: splits.total,
-    result: repoResult?.res,
-    status: repoResult?.status,
-    enabled: repoResult?.enabled,
-    onboarded: repoResult?.onboarded,
-  }, 'Repository finished');
+  logger.info(
+    {
+      cloned,
+      durationMs: splits.total,
+      result: repoResult?.res,
+      status: repoResult?.status,
+      enabled: repoResult?.enabled,
+      onboarded: repoResult?.onboarded,
+    },
+    'Repository finished',
+  );
   resetRepositoryLogLevelRemaps();
   return repoResult;
 }
