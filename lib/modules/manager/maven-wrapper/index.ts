@@ -11,7 +11,7 @@ export const categories: Category[] = ['java'];
 export const defaultConfig = {
   managerFilePatterns: [
     '/(^|\\/).mvn/wrapper/maven-wrapper.properties$/',
-    '/^mvnw(.cmd)?/',
+    '/(^|\\/)mvnw(.cmd)?$/',
   ],
   versioning,
 };

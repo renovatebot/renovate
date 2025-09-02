@@ -6,7 +6,7 @@ const onlyMavenProperties =
   'distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.5.4/apache-maven-3.5.4-bin.zip';
 
 const wrapperAndMavenProperties = `distributionUrl=https://internal.artifactory.acme.org/artifactory/maven-bol/org/apache/maven/apache-maven/3.8.4/apache-maven-3.8.4-bin.zip\nwrapperUrl=https://internal.artifactory.acme.org/artifactory/maven-bol/org/apache/maven/wrapper/maven-wrapper/3.1.0/maven-wrapper-3.1.0.jar`;
-const mvwnWrapperString =
+const mvnwWrapperString =
   'Apache Maven Wrapper startup batch script, version 3.3.0';
 
 describe('modules/manager/maven-wrapper/extract', () => {
@@ -65,8 +65,8 @@ describe('modules/manager/maven-wrapper/extract', () => {
       ]);
     });
 
-    it('extracts maven warapper version from mvwn file', () => {
-      const res = extractPackageFile(`# ${mvwnWrapperString}`);
+    it('extracts maven warapper version from mvnw file', () => {
+      const res = extractPackageFile(`# ${mvnwWrapperString}`);
       expect(res?.deps).toEqual([
         {
           currentValue: '3.3.0',
@@ -79,8 +79,8 @@ describe('modules/manager/maven-wrapper/extract', () => {
       ]);
     });
 
-    it('extracts maven warapper version from mvwn file - REM', () => {
-      const res = extractPackageFile(`@REM ${mvwnWrapperString}`);
+    it('extracts maven warapper version from mvnw file - Windows', () => {
+      const res = extractPackageFile(`@REM ${mvnwWrapperString}`);
       expect(res?.deps).toEqual([
         {
           currentValue: '3.3.0',
@@ -93,8 +93,8 @@ describe('modules/manager/maven-wrapper/extract', () => {
       ]);
     });
 
-    it('returns null for invalid wrapper version string in from mvwn file', () => {
-      const res = extractPackageFile(`invalid ${mvwnWrapperString}`);
+    it('returns null for invalid wrapper version string in from mvnw file', () => {
+      const res = extractPackageFile(`invalid ${mvnwWrapperString}`);
       expect(res).toBeNull();
     });
 
