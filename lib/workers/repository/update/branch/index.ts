@@ -726,7 +726,7 @@ export async function processBranch(
       }
       if (
         mergeStatus === 'stale' &&
-        ['never'].includes(config.rebaseWhen!) &&
+        config.rebaseWhen === 'never' &&
         /* v8 ignore next -- needs test */
         !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel))
       ) {
