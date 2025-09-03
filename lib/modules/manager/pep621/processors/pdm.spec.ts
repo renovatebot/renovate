@@ -1,15 +1,16 @@
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
+import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import * as hostRules from '../../../../util/host-rules';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
-import type { UpdateArtifactsConfig } from '../../types';
+import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types';
 import { parsePyProject } from '../extract';
 import { depTypes } from '../utils';
 import { PdmProcessor } from './pdm';
 import { mockExecAll } from '~test/exec-util';
-import { fs } from '~test/util';
+import { fs, partial } from '~test/util';
 
 vi.mock('../../../../util/fs');
 vi.mock('../../../datasource');
@@ -27,6 +28,15 @@ const processor = new PdmProcessor();
 
 describe('modules/manager/pep621/processors/pdm', () => {
   describe('updateArtifacts()', () => {
+    it('throws TEMPORARY_ERROR', async () => {
+      fs.readLocalFile.mockRejectedValueOnce(new Error(TEMPORARY_ERROR));
+      const result = processor.updateArtifacts(
+        partial<UpdateArtifact>({ config: {} }),
+        partial(),
+      );
+      await expect(result).rejects.toThrow(TEMPORARY_ERROR);
+    });
+
     it('return null if there is no lock file', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
       const updatedDeps = [{ packageName: 'dep1' }];
@@ -66,7 +76,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config: { constraints: {} },
           updatedDeps,
         },
         parsePyProject('')!,

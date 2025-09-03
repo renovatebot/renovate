@@ -3812,6 +3812,7 @@ Table with options:
 | `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                          |
 | `kustomizeInflateHelmCharts` | Inflate updated helm charts referenced in the kustomization.                                                                                               |
 | `npmDedupe`                  | Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.                                       |
+| `npmInstallTwice`            | Run `npm install` commands _twice_ to work around bugs where `npm` generates invalid lock files if run only once                                           |
 | `pnpmDedupe`                 | Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.                                                                                         |
 | `yarnDedupeFewer`            | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
 | `yarnDedupeHighest`          | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
@@ -3889,6 +3890,20 @@ Dotfiles are included.
 
 Optional field which defaults to any non-ignored file in the repo (`**/*` glob pattern).
 Specify a custom value for this if you wish to exclude certain files which are modified by your `postUpgradeTasks` and you don't want committed.
+
+### workingDirTemplate
+
+A template describing the working directory in which the commands should be executed, relative to the repository root. If the template evaluates to a false value, then the command will be executed from the root of the repository.
+Example:
+
+```json
+{
+  "postUpgradeTasks": {
+    "commands": ["my-script.py"],
+    "workingDirTemplate": "{{{packageFileDir}}}"
+  }
+}
+```
 
 ## prBodyColumns
 
@@ -4249,6 +4264,12 @@ For `npm` manager when `replacementApproach=alias` then instead of replacing `"f
 
 Similar to `ignoreUnstable`, this option controls whether to update to versions that are greater than the version tagged as `latest` in the repository.
 By default, `renovate` will update to a version greater than `latest` only if the current version is itself past latest.
+
+<!-- prettier-ignore -->
+!!! note
+    By default, respectLatest will be set to `false` for Maven results if a `latest` tag is found.
+    This is because many Maven registries don't have a reliable `latest` tag - it just means whatever was last published.
+    You need to override this to `respectLatest=true` in `packageRules` in order to use it.
 
 ## reviewers
 
@@ -4675,7 +4696,7 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
   "vulnerabilityAlerts": {
     "labels": ["security"],
     "automerge": true,
-    "assignees": ["@rarkins"]
+    "assignees": ["@renovate-tests"]
   }
 }
 ```
