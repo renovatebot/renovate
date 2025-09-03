@@ -2,7 +2,6 @@ import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
-import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { NixFlakeLock } from './schema';
 
@@ -13,10 +12,7 @@ const lockableHTTPTarballProtocol = regEx(
 );
 
 const lockableChannelOriginalUrl = regEx(
-  '^https://nixos.org/channels/(?<channel>[^/]+)/nixexprs.tar.xz$',
-);
-const lockableChannelLockedUrl = regEx(
-  '^https://releases.nixos.org/nixpkgs/(?<channel>[^/-]+)-(?<release>[^/]+)pre[0-9]+.(?<ref>[^/]+)/nixexprs.tar.xz$',
+  '^https://channels.nixos.org/(?<channel>[^/]+)/nixexprs.tar.xz$',
 );
 
 export async function extractPackageFile(
@@ -86,11 +82,8 @@ export async function extractPackageFile(
       continue;
     }
 
-    const isLockableTarball =
-      flakeOriginal.url && lockableChannelOriginalUrl.test(flakeOriginal.url);
-
     // if no rev is being tracked, we cannot update this input
-    if (flakeLocked.rev === undefined && !isLockableTarball) {
+    if (flakeLocked.rev === undefined) {
       continue;
     }
 
@@ -121,17 +114,6 @@ export async function extractPackageFile(
 
     switch (flakeLocked.type) {
       case 'github':
-        // special case for the main nixpkgs repo to use the dedicated versioning scheme
-        if (
-          flakeOriginal.owner === 'NixOS' &&
-          flakeOriginal.repo === 'nixpkgs'
-        ) {
-          dep.packageName = 'https://github.com/NixOS/nixpkgs';
-          dep.depName = 'nixpkgs';
-          dep.versioning = nixpkgsVersioning;
-          break;
-        }
-
         dep.packageName = `https://${flakeOriginal.host ?? 'github.com'}/${flakeOriginal.owner}/${flakeOriginal.repo}`;
         break;
 
@@ -148,14 +130,12 @@ export async function extractPackageFile(
         break;
 
       case 'tarball':
-        if (isLockableTarball) {
+        // set to nixpkgs if it is a channel URL
+        if (
+          flakeOriginal.url &&
+          lockableChannelOriginalUrl.test(flakeOriginal.url)
+        ) {
           dep.packageName = 'https://github.com/NixOS/nixpkgs';
-
-          // lockable tarballs do not have a flakeLocked.rev, but we can extract it from the URL
-          dep.lockedVersion = flakeLocked.url!.replace(
-            lockableChannelLockedUrl,
-            '$<ref>',
-          );
           break;
         }
 
