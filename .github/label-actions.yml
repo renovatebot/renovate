@@ -16,9 +16,11 @@
      1. Read our guide on creating a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md).
      2. Go to our [minimal reproduction template repository](https://github.com/renovatebot/minimal-reproduction-template).
      3. Select the _Use this template_ button to create a new repository based on the template.
-     4. Work on the minimal reproduction in your own repository.
-     5. Fill out the information in your repository's `README.md`.
+     4. Work on the reproduction in your own repository. Ensure it's actually minimal (no unnecesary dependencies or config), or it will be rejected by maintainers.
+     5. Install [the Renovate app](https://github.com/apps/renovate) to verify that what you say happens (or doesn't happen) reproduces.
+     5. Fill out the information in your repository's `README.md`. What you describe there should reflect what you see in this repo, with the hosted app, and not what you saw in your original repo/environment.
      6. Add the link to your reproduction to the first post of your Discussion. If you are not the original author, you can post a new comment with the link.
+     7. Add a Discussion comment mentioning that the reproduction repo is now available and linked.
 
     If you need help with running Renovate on your minimal reproduction repository, please refer to our [Running Renovate guide](https://docs.renovatebot.com/getting-started/running/).
 
@@ -26,6 +28,20 @@
 
 
     The Renovate team
+
+'auto:reproduction-acknowledged':
+  comment: >
+    Hi there,
+
+
+    This message is to acknowledge that the reproduction provided seems sufficient for a maintainer to look at.
+
+
+    However, please note that debugging repositories can take a lot of time, so unless this is a widespread problem impacting many users then it may take weeks before reaching the top of a maintainer's priority list.
+    Please do not pester anybody with "Any update on this?" type messages.
+
+
+    Thanks, the Renovate team
 
 'auto:not-minimal-reproduction':
   comment: >
@@ -443,7 +459,7 @@
     Hi there,
 
 
-    This is intended as a polite, automated _request_ that users avoid `@` mentioning repository maintainers like `@rarkins` or `@viceice`. Doing so causes annoying mobile notifications and makes it harder to maintain this repository.
+    This is intended as a polite, automated _request_ that users avoid `@` mentioning repository maintainers like `@viceice`. Doing so causes annoying mobile notifications and makes it harder to maintain this repository.
 
 
     We know it might be common elsewhere but we participate in hundreds of discussions a week and would need to turn off GitHub mobile notifications if we were mentioned in every one.
@@ -668,6 +684,19 @@
 
 
     Your discussion can remain open indefinitely, but please be patient and do not nudge or bump this discussion just to get attention. Please also read [Getting more help](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md#getting-more-help) in our Code of Conduct.
+
+
+    Thanks, the Renovate team
+
+'auto:more-specific':
+  comment: >
+    Hi there,
+
+
+    To the Discussion creator: please edit and improve the title and/or description of this Discussion to narrow the description to the specific problem you're having.
+
+
+    Try to describe your problem as specifically as possible, and not like "Renovate doesn't work", "npm upgrades failing", "PR not created", etc. Titles like these pollute the repo and make searches by future users less useful and the answers we give harder for them to find.
 
 
     Thanks, the Renovate team

@@ -1,13 +1,17 @@
 import type Request from 'got/dist/source/core';
+import { vi } from 'vitest';
 import { HOST_DISABLED } from '../../../constants/error-messages';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
+import * as packageCache from '../../../util/cache/package';
 import { Http, HttpError } from '../../../util/http';
+import { MAVEN_REPO } from './common';
 import type { MavenFetchError } from './types';
 import {
   downloadHttpProtocol,
   downloadMavenXml,
   downloadS3Protocol,
 } from './util';
-import { partial } from '~test/util';
+import { logger, partial } from '~test/util';
 
 const http = new Http('test');
 
@@ -114,6 +118,71 @@ describe('modules/datasource/maven/util', () => {
       expect(res.unwrap()).toEqual({
         ok: false,
         err: { type: 'temporary-error' } satisfies MavenFetchError,
+      });
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect.any(Object),
+        'Temporary error',
+      );
+    });
+
+    describe('429 logging', () => {
+      const getCacheTypeSpy = vi.spyOn(packageCache, 'getCacheType');
+
+      afterAll(() => {
+        getCacheTypeSpy.mockRestore();
+      });
+
+      it('throws ExternalHostError for 429 status with redis cache', async () => {
+        getCacheTypeSpy.mockReturnValue('redis');
+        const http = partial<Http>({
+          getText: () =>
+            Promise.reject(
+              httpError({
+                code: 'ECONNRESET',
+                response: { statusCode: 429 } as never,
+              }),
+            ),
+        });
+        await expect(
+          downloadHttpProtocol(http, MAVEN_REPO + '/some/path'),
+        ).rejects.toThrow(ExternalHostError);
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          { failedUrl: MAVEN_REPO + '/some/path' },
+          'Maven Central rate limiting detected despite Redis caching.',
+        );
+      });
+
+      it('throws ExternalHostError for 429 status without redis cache', async () => {
+        getCacheTypeSpy.mockReturnValue('file');
+        const http = partial<Http>({
+          getText: () =>
+            Promise.reject(
+              httpError({
+                code: 'ECONNRESET',
+                response: { statusCode: 429 } as never,
+              }),
+            ),
+        });
+        await expect(
+          downloadHttpProtocol(http, MAVEN_REPO + '/some/path'),
+        ).rejects.toThrow(ExternalHostError);
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          { failedUrl: MAVEN_REPO + '/some/path' },
+          'Maven Central rate limiting detected. Persistent caching required.',
+        );
+      });
+
+      it('throws ExternalHostError for non-429 temporary error on maven central', async () => {
+        const http = partial<Http>({
+          getText: () => Promise.reject(httpError({ code: 'ECONNRESET' })),
+        });
+        await expect(
+          downloadHttpProtocol(http, MAVEN_REPO + '/some/path'),
+        ).rejects.toThrow(ExternalHostError);
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { failedUrl: MAVEN_REPO + '/some/path', err: expect.any(HttpError) },
+          'Temporary error',
+        );
       });
     });
 

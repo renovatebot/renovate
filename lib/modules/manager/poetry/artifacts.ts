@@ -21,7 +21,7 @@ import { parseUrl } from '../../../util/url';
 import { PypiDatasource } from '../../datasource/pypi';
 import { getGoogleAuthHostRule } from '../../datasource/util';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { Lockfile, PoetrySchemaToml } from './schema';
+import { Lockfile, PoetryPyProject } from './schema';
 import type { PoetryFile, PoetrySource } from './types';
 
 export function getPythonConstraint(
@@ -31,7 +31,7 @@ export function getPythonConstraint(
   // Read Python version from `pyproject.toml` first as it could have been updated
   const pyprojectPythonConstraint = Result.parse(
     massageToml(pyProjectContent),
-    PoetrySchemaToml.transform(
+    PoetryPyProject.transform(
       ({ packageFileContent }) =>
         packageFileContent.deps.find((dep) => dep.depName === 'python')
           ?.currentValue,
@@ -82,7 +82,7 @@ export function getPoetryRequirement(
 
   const { val: pyprojectPoetryConstraint } = Result.parse(
     massageToml(pyProjectContent),
-    PoetrySchemaToml.transform(({ poetryRequirement }) => poetryRequirement),
+    PoetryPyProject.transform(({ poetryRequirement }) => poetryRequirement),
   ).unwrap();
   if (pyprojectPoetryConstraint) {
     logger.debug(

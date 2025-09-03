@@ -94,6 +94,7 @@ export interface RenovateSharedConfig {
   semanticCommitScope?: string | null;
   semanticCommitType?: string;
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
+  skipArtifactsUpdate?: boolean;
   stopUpdatingLabel?: string;
   suppressNotifications?: string[];
   timezone?: string;
@@ -117,6 +118,7 @@ export interface GlobalOnlyConfig {
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
+  gitPrivateKeyPassphrase?: string;
   globalExtends?: string[];
   mergeConfidenceDatasources?: string[];
   mergeConfidenceEndpoint?: string;
@@ -131,6 +133,7 @@ export interface GlobalOnlyConfig {
   repositories?: RenovateRepository[];
   useCloudMetadataServices?: boolean;
   deleteConfigFile?: boolean;
+  deleteAdditionalConfigFile?: boolean;
 }
 
 // Config options used within the repository worker, but not user configurable
@@ -195,6 +198,7 @@ export type ExecutionMode = 'branch' | 'update';
 
 export interface PostUpgradeTasks {
   commands?: string[];
+  workingDirTemplate?: string;
   dataFileTemplate?: string;
   fileFilters?: string[];
   executionMode: ExecutionMode;
@@ -320,6 +324,7 @@ export interface RenovateConfig
   branchTopic?: string;
   additionalBranchPrefix?: string;
   sharedVariableName?: string;
+  minimumGroupSize?: number;
 }
 
 const CustomDatasourceFormats = [
