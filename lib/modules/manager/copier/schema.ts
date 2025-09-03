@@ -4,7 +4,7 @@ import { Yaml } from '../../../util/schema-utils';
 
 const GitSshUrl = z
   .string()
-  .regex(regEx(/^(?<username>[^@]+)@[^:]*:(?<repository>.+)$/), {
+  .regex(regEx(/^[^@]+@[^:]*:.+$/), {
     message: 'Invalid Git SSH URL format',
   });
 export const CopierAnswersFile = Yaml.pipe(
