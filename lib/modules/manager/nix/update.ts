@@ -47,63 +47,133 @@ export function updateDependency({
 
   const parsedUrl = parseUrl(oldUrl);
   if (!parsedUrl) {
-    logger.debug(`Could not parse URL for dependency ${depName}`);
+    logger.debug(`Could not parse URL for dependency ${depName}: ${oldUrl}`);
     return null;
   }
 
-  let urlModified = false;
+  logger.trace(
+    {
+      depName,
+      oldUrl,
+      protocol: parsedUrl.protocol,
+      pathname: parsedUrl.pathname,
+      currentDigest,
+      newDigest,
+      currentValue,
+      newValue,
+    },
+    'Parsed URL for update',
+  );
 
-  // Handle ref updates (version updates)
-  if (currentValue && newValue && currentValue !== newValue) {
-    const refParam = parsedUrl.searchParams.get('ref');
+  // Special handling for github: protocol URLs where the URL object
+  // doesn't properly serialize changes to non-standard protocols
+  if (parsedUrl.protocol === 'github:') {
+    // Handle version updates
+    if (
+      currentValue &&
+      newValue &&
+      currentValue !== newValue &&
+      oldUrl.includes(currentValue)
+    ) {
+      newUrl = oldUrl.replace(currentValue, newValue);
+      logger.trace(
+        { depName, oldUrl, newUrl, currentValue, newValue },
+        'Updated version in github: URL',
+      );
+    }
 
-    if (refParam) {
-      // Update refs/tags/X.Y.Z or refs/heads/branch patterns
-      const refMatch = /^refs\/(tags|heads)\/(.+)$/.exec(refParam);
-      if (refMatch) {
-        const newRef = `refs/${refMatch[1]}/${newValue}`;
-        parsedUrl.searchParams.set('ref', newRef);
+    // Handle digest updates
+    if (
+      currentDigest &&
+      newDigest &&
+      currentDigest !== newDigest &&
+      oldUrl.includes(currentDigest)
+    ) {
+      newUrl = (newUrl || oldUrl).replace(currentDigest, newDigest);
+      logger.trace(
+        {
+          depName,
+          oldUrl: newUrl || oldUrl,
+          newUrl: (newUrl || oldUrl).replace(currentDigest, newDigest),
+          currentDigest,
+          newDigest,
+        },
+        'Updated digest in github: URL',
+      );
+    }
+  } else {
+    // Standard URL handling for other protocols
+    let urlModified = false;
+
+    // Handle ref updates (version updates)
+    if (currentValue && newValue && currentValue !== newValue) {
+      const refParam = parsedUrl.searchParams.get('ref');
+
+      if (refParam) {
+        // Update refs/tags/X.Y.Z or refs/heads/branch patterns
+        const refMatch = /^refs\/(tags|heads)\/(.+)$/.exec(refParam);
+        if (refMatch) {
+          const newRef = `refs/${refMatch[1]}/${newValue}`;
+          parsedUrl.searchParams.set('ref', newRef);
+          urlModified = true;
+          logger.trace(
+            { depName, oldRef: refParam, newRef },
+            'Updating ref parameter in URL',
+          );
+        }
+      } else if (currentValue && parsedUrl.pathname.includes(currentValue)) {
+        // Fallback: direct replacement if the version is in the URL path
+        parsedUrl.pathname = parsedUrl.pathname.replace(currentValue, newValue);
+        urlModified = true;
+      }
+    }
+
+    // Handle rev updates (digest updates)
+    if (currentDigest && newDigest && currentDigest !== newDigest) {
+      const revParam = parsedUrl.searchParams.get('rev');
+
+      if (revParam && revParam === currentDigest) {
+        parsedUrl.searchParams.set('rev', newDigest);
         urlModified = true;
         logger.trace(
-          { depName, oldRef: refParam, newRef },
-          'Updating ref parameter in URL',
+          { depName, oldRev: currentDigest, newDigest },
+          'Updating rev parameter in URL',
+        );
+      } else if (currentDigest && parsedUrl.pathname.includes(currentDigest)) {
+        // Fallback: direct replacement if the digest is in the URL path
+        parsedUrl.pathname = parsedUrl.pathname.replace(
+          currentDigest,
+          newDigest,
+        );
+        urlModified = true;
+        logger.trace(
+          {
+            depName,
+            oldPathname: parsedUrl.pathname.replace(newDigest, currentDigest),
+            newPathname: parsedUrl.pathname,
+            currentDigest,
+            newDigest,
+          },
+          'Updated digest in pathname',
         );
       }
-    } else if (currentValue && oldUrl.includes(currentValue)) {
-      // Fallback: direct replacement if the version is in the URL path
-      parsedUrl.pathname = parsedUrl.pathname.replace(currentValue, newValue);
-      urlModified = true;
     }
-  }
 
-  // Handle rev updates (digest updates)
-  if (currentDigest && newDigest && currentDigest !== newDigest) {
-    const revParam = parsedUrl.searchParams.get('rev');
-
-    if (revParam && revParam === currentDigest) {
-      parsedUrl.searchParams.set('rev', newDigest);
-      urlModified = true;
+    // Convert back to string, preserving the unencoded forward slashes in query params
+    if (urlModified) {
+      newUrl = parsedUrl.toString();
       logger.trace(
-        { depName, oldRev: currentDigest, newDigest },
-        'Updating rev parameter in URL',
+        { depName, oldUrl, newUrlFromParsed: newUrl },
+        'Converted URL back to string',
       );
-    } else if (currentDigest && parsedUrl.pathname.includes(currentDigest)) {
-      // Fallback: direct replacement if the digest is in the URL path
-      parsedUrl.pathname = parsedUrl.pathname.replace(currentDigest, newDigest);
-      urlModified = true;
-    }
-  }
 
-  // Convert back to string, preserving the unencoded forward slashes in query params
-  if (urlModified) {
-    newUrl = parsedUrl.toString();
-
-    // URL constructor encodes forward slashes in query params but Nix URLs expect them unencoded
-    const queryStart = newUrl.indexOf('?');
-    if (queryStart !== -1) {
-      newUrl =
-        newUrl.substring(0, queryStart) +
-        newUrl.substring(queryStart).replace(/%2F/g, '/');
+      // URL constructor encodes forward slashes in query params but Nix URLs expect them unencoded
+      const queryStart = newUrl.indexOf('?');
+      if (queryStart !== -1) {
+        newUrl =
+          newUrl.substring(0, queryStart) +
+          newUrl.substring(queryStart).replace(/%2F/g, '/');
+      }
     }
   }
 
