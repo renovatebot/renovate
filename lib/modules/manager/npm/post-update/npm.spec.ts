@@ -50,6 +50,39 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('runs npm install twice', async () => {
+    const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const packageLockContents = JSON.stringify({
+      packages: {},
+      lockfileVersion: 3,
+    });
+    fs.readLocalFile
+      .mockResolvedValueOnce(packageLockContents)
+      .mockResolvedValueOnce(packageLockContents);
+    const skipInstalls = true;
+    const postUpdateOptions = ['npmInstallTwice'];
+    const updates = [
+      { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: false },
+    ];
+    await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { skipInstalls, postUpdateOptions },
+      updates,
+    );
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
+  });
+
   it('performs lock file updates', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
@@ -722,6 +755,83 @@ describe('modules/manager/npm/post-update/npm', () => {
         workspaces: new Set(['docs/a', 'web/b', 'docs/dir.has.period']),
         rootDeps: new Set(['chalk@9.4.8', 'postcss@8.4.8']),
       });
+    });
+  });
+
+  describe('prevents injections', () => {
+    it('while performing lockfileUpdate (npm-workspaces)', async () => {
+      const execSnapshots = mockExecAll();
+      // package.json
+      fs.readLocalFile.mockResolvedValue('{}');
+      fs.readLocalFile.mockResolvedValueOnce('package-lock content');
+      const skipInstalls = true;
+      const res = await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls },
+        [
+          {
+            packageFile: 'some-dir/web/b/package.json',
+            packageName: ' && echo "hi";',
+            depType: 'dependencies',
+            newVersion: '2.2.0',
+            newValue: '^2.0.0',
+            isLockfileUpdate: true,
+            managerData: {
+              workspacesPackages: ['docs/*', 'web/*'],
+            },
+          },
+          {
+            packageFile: 'some-dir/docs/a || date; /package.json',
+            packageName: 'hello',
+            depType: 'dependencies',
+            newVersion: '1.1.1',
+            newValue: '^1.0.0',
+            isLockfileUpdate: true,
+            managerData: {
+              workspacesPackages: ['docs/*', 'web/*'],
+            },
+          },
+        ],
+      );
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+      expect(res.error).toBeFalse();
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: `npm install --package-lock-only --no-audit --ignore-scripts --workspace=web/b ' && echo "hi";@2.2.0'`,
+        },
+        {
+          cmd: `npm install --package-lock-only --no-audit --ignore-scripts --workspace='docs/a || date; ' hello@1.1.1`,
+        },
+      ]);
+    });
+
+    it('while performing lockfileUpdate (npm)', async () => {
+      const execSnapshots = mockExecAll();
+      // package.json
+      fs.readLocalFile.mockResolvedValue('{}');
+      fs.readLocalFile.mockResolvedValue('package-lock-contents');
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        {},
+        [
+          {
+            depName: 'uuid',
+            currentVersion: '^11.0.0',
+            newVersion: '11.1.0',
+            packageName: '; date; echo ',
+            isLockfileUpdate: true,
+          },
+        ],
+      );
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: "npm install --package-lock-only --no-audit --ignore-scripts '; date; echo @11.1.0'",
+        },
+      ]);
     });
   });
 });

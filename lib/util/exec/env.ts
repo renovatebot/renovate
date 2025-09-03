@@ -1,6 +1,7 @@
 import { GlobalConfig } from '../../config/global';
 
 const basicEnvVars = [
+  'CI',
   'HTTP_PROXY',
   'HTTPS_PROXY',
   'NO_PROXY',

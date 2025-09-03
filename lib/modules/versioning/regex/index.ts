@@ -64,15 +64,15 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     const { major, minor, patch, build, revision, prerelease, compatibility } =
       groups;
     const release = [
-      typeof major === 'undefined' ? 0 : Number.parseInt(major, 10),
-      typeof minor === 'undefined' ? 0 : Number.parseInt(minor, 10),
-      typeof patch === 'undefined' ? 0 : Number.parseInt(patch, 10),
+      typeof major === 'undefined' ? 0 : Number.parseInt(major),
+      typeof minor === 'undefined' ? 0 : Number.parseInt(minor),
+      typeof patch === 'undefined' ? 0 : Number.parseInt(patch),
     ];
 
     if (build) {
-      release.push(Number.parseInt(build, 10));
+      release.push(Number.parseInt(build));
       if (revision) {
-        release.push(Number.parseInt(revision, 10));
+        release.push(Number.parseInt(revision));
       }
     }
 

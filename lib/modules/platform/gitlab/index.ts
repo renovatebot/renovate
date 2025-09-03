@@ -1,11 +1,8 @@
-import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
 import {
-  CONFIG_GIT_URL_UNAVAILABLE,
-  PLATFORM_AUTHENTICATION_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_CHANGED,
@@ -19,8 +16,8 @@ import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { coerceArray } from '../../../util/array';
 import { noLeadingAtSymbol, parseJson } from '../../../util/common';
+import { getEnv } from '../../../util/env';
 import * as git from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import type { GitlabHttpOptions } from '../../../util/http/gitlab';
 import { setBaseUrl } from '../../../util/http/gitlab';
@@ -29,11 +26,8 @@ import { parseInteger } from '../../../util/number';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import {
-  ensureTrailingSlash,
-  getQueryString,
-  parseUrl,
-} from '../../../util/url';
+import type { EmailAddress } from '../../../util/schema-utils';
+import { ensureTrailingSlash, getQueryString } from '../../../util/url';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
@@ -42,7 +36,6 @@ import type {
   EnsureCommentRemovalConfig,
   EnsureIssueConfig,
   FindPRConfig,
-  GitUrlOption,
   Issue,
   MergePRConfig,
   PlatformParams,
@@ -64,6 +57,7 @@ import {
   isUserBusy,
 } from './http';
 import { getMR, updateMR } from './merge-request';
+import { GitlabPrCache } from './pr-cache';
 import { LastPipelineId } from './schema';
 import type {
   GitLabMergeRequest,
@@ -73,14 +67,21 @@ import type {
   MergeMethod,
   RepoResponse,
 } from './types';
-import { DRAFT_PREFIX, DRAFT_PREFIX_DEPRECATED, prInfo } from './utils';
+import {
+  DRAFT_PREFIX,
+  DRAFT_PREFIX_DEPRECATED,
+  defaults,
+  getRepoUrl,
+  prInfo,
+} from './utils';
+export { extractRulesFromCodeOwnersLines } from './code-owners';
 
 let config: {
   repository: string;
-  email: string;
-  prList: GitlabPr[] | undefined;
+  email: EmailAddress;
   issueList: GitlabIssue[] | undefined;
   mergeMethod: MergeMethod;
+  mergeTrainsEnabled: boolean;
   defaultBranch: string;
   cloneSubmodules: boolean | undefined;
   cloneSubmodulesFilter: string[] | undefined;
@@ -97,18 +98,14 @@ export function resetPlatform(): void {
   setBaseUrl(defaults.endpoint);
 }
 
-const defaults = {
-  hostType: 'gitlab',
-  endpoint: 'https://gitlab.com/api/v4/',
-  version: '0.0.0',
-};
-
 export const id = 'gitlab';
 
 let draftPrefix = DRAFT_PREFIX;
+let botUserName: string;
 
 export async function initPlatform({
   endpoint,
+  username,
   token,
   gitAuthor,
 }: PlatformParams): Promise<PlatformResult> {
@@ -129,19 +126,21 @@ export async function initPlatform({
     if (!gitAuthor) {
       const user = (
         await gitlabApi.getJsonUnchecked<{
-          email: string;
+          email: EmailAddress;
           name: string;
           id: number;
-          commit_email?: string;
+          commit_email?: EmailAddress;
         }>(`user`, { token })
       ).body;
       platformConfig.gitAuthor = `${user.name} <${
         user.commit_email ?? user.email
       }>`;
+      botUserName = user.name;
     }
+    const env = getEnv();
     /* v8 ignore start: experimental feature */
-    if (process.env.RENOVATE_X_PLATFORM_VERSION) {
-      gitlabVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
+    if (env.RENOVATE_X_PLATFORM_VERSION) {
+      gitlabVersion = env.RENOVATE_X_PLATFORM_VERSION;
     } /* v8 ignore stop */ else {
       const version = (
         await gitlabApi.getJsonUnchecked<{ version: string }>('version', {
@@ -164,6 +163,8 @@ export async function initPlatform({
   draftPrefix = semver.lt(defaults.version, '13.2.0')
     ? DRAFT_PREFIX_DEPRECATED
     : DRAFT_PREFIX;
+
+  botUserName ??= username!;
 
   return platformConfig;
 }
@@ -256,61 +257,6 @@ export async function getJsonFile(
   return parseJson(raw, fileName);
 }
 
-function getRepoUrl(
-  repository: string,
-  gitUrl: GitUrlOption | undefined,
-  res: HttpResponse<RepoResponse>,
-): string {
-  if (gitUrl === 'ssh') {
-    if (!res.body.ssh_url_to_repo) {
-      throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
-    }
-    logger.debug(`Using ssh URL: ${res.body.ssh_url_to_repo}`);
-    return res.body.ssh_url_to_repo;
-  }
-
-  const opts = hostRules.find({
-    hostType: defaults.hostType,
-    url: defaults.endpoint,
-  });
-
-  if (
-    gitUrl === 'endpoint' ||
-    is.nonEmptyString(process.env.GITLAB_IGNORE_REPO_URL) ||
-    res.body.http_url_to_repo === null
-  ) {
-    if (res.body.http_url_to_repo === null) {
-      logger.debug('no http_url_to_repo found. Falling back to old behavior.');
-    }
-    if (process.env.GITLAB_IGNORE_REPO_URL) {
-      logger.warn(
-        'GITLAB_IGNORE_REPO_URL environment variable is deprecated. Please use "gitUrl" option.',
-      );
-    }
-
-    // TODO: null check (#22198)
-    const { protocol, host, pathname } = parseUrl(defaults.endpoint)!;
-    const newPathname = pathname.slice(0, pathname.indexOf('/api'));
-    const url = URL.format({
-      protocol:
-        /* v8 ignore next: should never happen */
-        protocol.slice(0, -1) || 'https',
-      // TODO: types (#22198)
-      auth: `oauth2:${opts.token!}`,
-      host,
-      pathname: `${newPathname}/${repository}.git`,
-    });
-    logger.debug(`Using URL based on configured endpoint, url:${url}`);
-    return url;
-  }
-
-  logger.debug(`Using http URL: ${res.body.http_url_to_repo}`);
-  const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
-  // TODO: types (#22198)
-  repoUrl.auth = `oauth2:${opts.token!}`;
-  return URL.format(repoUrl);
-}
-
 // Initialize GitLab by getting base branch
 export async function initRepo({
   repository,
@@ -367,13 +313,13 @@ export async function initRepo({
       throw new Error(TEMPORARY_ERROR);
     } /* v8 ignore stop */
     config.mergeMethod = res.body.merge_method || 'merge';
+    config.mergeTrainsEnabled = res.body.merge_trains_enabled ?? false;
     if (res.body.squash_option) {
       config.squash =
         res.body.squash_option === 'always' ||
         res.body.squash_option === 'default_on';
     }
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
-    delete config.prList;
     logger.debug('Enabling Git FS');
     const url = getRepoUrl(repository, gitUrl, res);
     await git.initRepo({
@@ -409,7 +355,8 @@ export async function initRepo({
 }
 
 export function getBranchForceRebase(): Promise<boolean> {
-  const forceRebase = config?.mergeMethod !== 'merge';
+  const forceRebase =
+    config?.mergeMethod !== 'merge' && !config.mergeTrainsEnabled;
   if (forceRebase) {
     logger.once.debug(
       `mergeMethod is ${config.mergeMethod} so PRs will be kept up-to-date with base branch`,
@@ -554,37 +501,13 @@ export async function getBranchStatus(
 }
 
 // Pull Request
-
-async function fetchPrList(): Promise<Pr[]> {
-  const searchParams = {
-    per_page: '100',
-  } as any;
-  /* v8 ignore start */
-  if (!config.ignorePrAuthor) {
-    searchParams.scope = 'created_by_me';
-  } /* v8 ignore stop */
-  const query = getQueryString(searchParams);
-  const urlString = `projects/${config.repository}/merge_requests?${query}`;
-  try {
-    const res = await gitlabApi.getJsonUnchecked<GitLabMergeRequest[]>(
-      urlString,
-      {
-        paginate: true,
-      },
-    );
-    return res.body.map((pr) => prInfo(pr));
-  } catch (err) /* v8 ignore start */ {
-    logger.debug({ err }, 'Error fetching PR list');
-    if (err.statusCode === 403) {
-      throw new Error(PLATFORM_AUTHENTICATION_ERROR);
-    }
-    throw err;
-  } /* v8 ignore stop */
-}
-
 export async function getPrList(): Promise<Pr[]> {
-  config.prList ??= await fetchPrList();
-  return config.prList;
+  return await GitlabPrCache.getPrs(
+    gitlabApi,
+    config.repository,
+    botUserName,
+    !!config.ignorePrAuthor,
+  );
 }
 
 async function ignoreApprovals(pr: number): Promise<void> {
@@ -661,14 +584,15 @@ async function tryPrAutomerge(
         'running', // pipeline is running, no need to wait for it
       ];
       const desiredStatus = 'can_be_merged';
+      const env = getEnv();
       // The default value of 5 attempts results in max. 13.75 seconds timeout if no pipeline created.
       const retryTimes = parseInteger(
-        process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS,
+        env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS,
         5,
       );
 
       const mergeDelay = parseInteger(
-        process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY,
+        env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY,
         250,
       );
 
@@ -732,10 +656,17 @@ async function tryPrAutomerge(
   } /* v8 ignore stop */
 }
 
-async function approvePr(pr: number): Promise<void> {
+async function approveMr(mrNumber: number): Promise<void> {
+  const env = getEnv();
+  const opts: GitlabHttpOptions = {};
+  if (env.RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN) {
+    opts.token = env.RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN;
+  }
+  logger.debug(`approveMr(${mrNumber})`);
   try {
     await gitlabApi.postJson(
-      `projects/${config.repository}/merge_requests/${pr}/approve`,
+      `projects/${config.repository}/merge_requests/${mrNumber}/approve`,
+      opts,
     );
   } catch (err) {
     logger.warn({ err }, 'GitLab: Error approving merge request');
@@ -773,14 +704,16 @@ export async function createPr({
   );
 
   const pr = prInfo(res.body);
-
-  /* v8 ignore start */
-  if (config.prList) {
-    config.prList.push(pr);
-  } /* v8 ignore stop */
+  await GitlabPrCache.setPr(
+    gitlabApi,
+    config.repository,
+    botUserName,
+    pr,
+    !!config.ignorePrAuthor,
+  );
 
   if (platformPrOptions?.autoApprove) {
-    await approvePr(pr.number);
+    await approveMr(pr.number);
   }
 
   await tryPrAutomerge(pr.number, platformPrOptions);
@@ -841,25 +774,16 @@ export async function updatePr({
   ).body;
 
   const updatedPr = prInfo(updatedPrInfo);
-
-  if (config.prList) {
-    const existingIndex = config.prList.findIndex(
-      (pr) => pr.number === updatedPr.number,
-    );
-    /* v8 ignore start: should not happen */
-    if (existingIndex === -1) {
-      logger.warn(
-        { pr: updatedPr },
-        'Possible error: Updated PR was not found in the PRs that were returned from getPrList().',
-      );
-      config.prList.push(updatedPr);
-    } /* v8 ignore stop */ else {
-      config.prList[existingIndex] = updatedPr;
-    }
-  }
+  await GitlabPrCache.setPr(
+    gitlabApi,
+    config.repository,
+    botUserName,
+    updatedPr,
+    !!config.ignorePrAuthor,
+  );
 
   if (platformPrOptions?.autoApprove) {
-    await approvePr(iid);
+    await approveMr(iid);
   }
 }
 
@@ -1031,8 +955,9 @@ export async function setBranchStatus({
     options.target_url = targetUrl;
   }
 
+  const env = getEnv();
   const retryTimes = parseInteger(
-    process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS,
+    env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS,
     2,
   );
 
@@ -1054,7 +979,7 @@ export async function setBranchStatus({
       }
       // give gitlab some time to create pipelines for the sha
       await setTimeout(
-        parseInteger(process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 1000),
+        parseInteger(env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 1000),
       );
     }
   } catch (err) {

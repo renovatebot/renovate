@@ -1,5 +1,5 @@
 import { diffLines } from 'diff';
-import markdownTable from 'markdown-table';
+import { markdownTable } from 'markdown-table';
 import { parseLine } from './line-parser';
 import type { ExtraDep } from './types';
 

@@ -10,7 +10,7 @@ export const categories: Category[] = ['terraform'];
 
 export const defaultConfig = {
   commitMessageTopic: 'TFLint plugin {{depName}}',
-  fileMatch: ['\\.tflint\\.hcl$'],
+  managerFilePatterns: ['/\\.tflint\\.hcl$/'],
   extractVersion: '^v(?<version>.*)$',
 };
 

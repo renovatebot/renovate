@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import mdTable from 'markdown-table';
+import { markdownTable } from 'markdown-table';
 import semver from 'semver';
 import { mergeChildConfig } from '../../../config';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages';
@@ -158,6 +158,28 @@ function compilePrTitle(
   // Compile again to allow for nested templates
   upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
   logger.trace(`prTitle: ` + JSON.stringify(upgrade.prTitle));
+}
+
+function getMinimumGroupSize(upgrades: BranchUpgradeConfig[]): number {
+  let minimumGroupSize = 1;
+  const groupSizes = new Set<number>();
+
+  for (const upg of upgrades) {
+    if (upg.minimumGroupSize) {
+      groupSizes.add(upg.minimumGroupSize);
+      if (minimumGroupSize < upg.minimumGroupSize) {
+        minimumGroupSize = upg.minimumGroupSize;
+      }
+    }
+  }
+
+  if (groupSizes.size > 1) {
+    logger.debug(
+      'Multiple minimumGroupSize values found for this branch, using highest.',
+    );
+  }
+
+  return minimumGroupSize;
 }
 
 // Sorted by priority, from low to high
@@ -440,6 +462,8 @@ export function generateBranchConfig(
     config.updateType = 'major';
   }
 
+  config.isBreaking = config.upgrades.some((upgrade) => upgrade.isBreaking);
+
   // explicit set `isLockFileMaintenance` for the branch for groups
   if (config.upgrades.some((upgrade) => upgrade.isLockFileMaintenance)) {
     config.isLockFileMaintenance = true;
@@ -459,10 +483,30 @@ export function generateBranchConfig(
     }
   }
 
+  config.minimumGroupSize = getMinimumGroupSize(config.upgrades);
   // Set skipInstalls to false if any upgrade in the branch has it false
   config.skipInstalls = config.upgrades.every(
     (upgrade) => upgrade.skipInstalls !== false,
   );
+
+  // Artifact updating will only be skipped if every upgrade wants to skip it.
+  config.skipArtifactsUpdate = config.upgrades.every(
+    (upgrade) => upgrade.skipArtifactsUpdate,
+  );
+  if (
+    !config.skipArtifactsUpdate &&
+    config.upgrades.some((upgrade) => upgrade.skipArtifactsUpdate)
+  ) {
+    logger.debug(
+      {
+        upgrades: config.upgrades.map((upgrade) => ({
+          depName: upgrade.depName,
+          skipArtifactsUpdate: upgrade.skipArtifactsUpdate,
+        })),
+      },
+      'Mixed `skipArtifactsUpdate` values in upgrades. Artifacts will be updated.',
+    );
+  }
 
   const tableRows = config.upgrades
     .map(getTableValues)
@@ -482,7 +526,7 @@ export function generateBranchConfig(
       seenRows.add(key);
       table.push(row);
     }
-    config.commitMessage += '\n\n' + mdTable(table) + '\n';
+    config.commitMessage += '\n\n' + markdownTable(table) + '\n';
   }
   const additionalReviewers = uniq(
     config.upgrades

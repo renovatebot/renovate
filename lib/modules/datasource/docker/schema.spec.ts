@@ -152,6 +152,61 @@ describe('modules/datasource/docker/schema', () => {
     });
   });
 
+  it('parses OCI image index and ignores unknown sub manifests', () => {
+    const manifest = {
+      schemaVersion: 2,
+      mediaType: 'application/vnd.oci.image.index.v1+json',
+      manifests: [
+        {
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          size: 7143,
+          digest:
+            'sha256:e692418e4cbaf90ca69d05a66403747baa33ee08806650b51fab815ad7fc331f',
+          platform: {
+            architecture: 'ppc64le',
+            os: 'linux',
+          },
+        },
+        {
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          size: 7682,
+          digest:
+            'sha256:5b0bcabd1ed22e9fb1310cf6c2dec7cdef19f0ad69efa1f392e94a4333501270',
+          platform: {
+            architecture: 'amd64',
+            os: 'linux',
+          },
+        },
+        {
+          annotations: {
+            'com.docker.official-images.bashbrew.arch': 'windows-amd64',
+          },
+          digest:
+            'sha256:68b622deabed02180f6c985925143b02076942a3d5390e7bae36c037d646eee2',
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          platform: {
+            architecture: 'amd64',
+            os: 'windows',
+            'os.version': '10.0.17763.7314',
+          },
+          size: 3042,
+        },
+      ],
+      annotations: {
+        'com.example.key1': 'value1',
+        'com.example.key2': 'value2',
+      },
+    };
+    const parsedManifest = OciImageIndexManifest.parse(manifest);
+
+    expect(parsedManifest).toMatchObject({
+      schemaVersion: 2,
+      mediaType: 'application/vnd.oci.image.index.v1+json',
+    });
+
+    expect(parsedManifest.manifests).toHaveLength(2);
+  });
+
   it('parses OCI flux artifact', () => {
     const manifest = {
       schemaVersion: 2,

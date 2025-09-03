@@ -19,11 +19,11 @@ describe('other/validate-schemas', () => {
 
     for (const schemaFile of schemaFiles) {
       const correspondingDataFileName = schemaFile.replace('-schema', '');
-      const schemaName = `${schemaFile
+      const schemaName = correspondingDataFileName
         .replace('.json', '')
         .split('-')
         .map(capitalize)
-        .join('')}` as keyof typeof Schemas;
+        .join('') as keyof typeof Schemas;
       schemasAndJsonFiles.push({
         schemaName,
         dataFileName: correspondingDataFileName,
@@ -38,7 +38,7 @@ describe('other/validate-schemas', () => {
 
         // validate json data against schema: using parse here instead of safeParse so we throw
         // this leads to a better error message when the assertion fails
-        // eslint-disable-next-line import/namespace
+        // eslint-disable-next-line import-x/namespace
         Schemas[schemaName].parse(data);
       }),
     );

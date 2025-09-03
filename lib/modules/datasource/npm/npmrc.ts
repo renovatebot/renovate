@@ -5,6 +5,7 @@ import { GlobalConfig } from '../../../config/global';
 import type { PackageRule } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
+import { getEnv } from '../../../util/env';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { fromBase64 } from '../../../util/string';
@@ -16,7 +17,7 @@ let npmrc: Record<string, any> = {};
 let npmrcRaw = '';
 let packageRules: PackageRule[] = [];
 
-function envReplace(value: any, env = process.env): any {
+function envReplace(value: any, env = getEnv()): any {
   /* v8 ignore next 3 -- TODO: add test */
   if (!is.string(value)) {
     return value;

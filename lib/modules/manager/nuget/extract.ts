@@ -1,9 +1,11 @@
 import is from '@sindresorhus/is';
-import type { XmlNode } from 'xmldoc';
-import { XmlDocument, XmlElement } from 'xmldoc';
+import type { XmlElement } from 'xmldoc';
+import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
+import * as semver from '../../versioning/semver';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -12,10 +14,15 @@ import type {
 } from '../types';
 import { extractMsbuildGlobalManifest } from './extract/global-manifest';
 import type { DotnetToolsManifest, NugetPackageDependency } from './types';
-import { applyRegistries, findVersion, getConfiguredRegistries } from './util';
+import {
+  applyRegistries,
+  findVersion,
+  getConfiguredRegistries,
+  isXmlElement,
+} from './util';
 
 /**
- * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
+ * https://learn.microsoft.com/nuget/concepts/package-versioning
  * This article mentions that  Nuget 3.x and later tries to restore the lowest possible version
  * regarding to given version range.
  * 1.3.4 equals [1.3.4,)
@@ -26,10 +33,6 @@ const elemNames = new Set([
   'DotNetCliToolReference',
   'GlobalPackageReference',
 ]);
-
-function isXmlElem(node: XmlNode): node is XmlElement {
-  return node instanceof XmlElement;
-}
 
 function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
   const results: NugetPackageDependency[] = [];
@@ -134,7 +137,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
         const propertyGroup = child.childNamed('PropertyGroup');
         if (propertyGroup) {
           for (const propChild of propertyGroup.children) {
-            if (isXmlElem(propChild)) {
+            if (isXmlElement(propChild)) {
               const { name, val } = propChild;
               if (!['Version', 'TargetFramework'].includes(name)) {
                 vars.set(name, val);
@@ -144,7 +147,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
         }
       }
 
-      todo.push(...child.children.filter(isXmlElem));
+      todo.push(...child.children.filter(isXmlElement));
     }
   }
   return results;
@@ -184,6 +187,10 @@ export async function extractPackageFile(
         currentValue,
         datasource: NugetDatasource.id,
       };
+      if (is.string(currentValue) && semver.isVersion(currentValue)) {
+        // This is to avoid nuget versioning pinning to [1.2.3]
+        dep.versioning = 'semver';
+      }
 
       applyRegistries(dep, registries);
 
@@ -195,6 +202,13 @@ export async function extractPackageFile(
 
   if (packageFile.endsWith('global.json')) {
     return extractMsbuildGlobalManifest(content, packageFile, registries);
+  }
+
+  // Simple xml validation.
+  // Should start with `<` and end with `>` after trimming all whitespace
+  if (!regEx(/^\s*<.+>$/m).test(content.trim())) {
+    logger.debug(`NuGet: Skipping ${packageFile} as it is not XML`);
+    return null;
   }
 
   let deps: PackageDependency[] = [];
@@ -215,7 +229,6 @@ export async function extractPackageFile(
 
   const res: PackageFileContent = { deps, packageFileVersion };
   const lockFileName = getSiblingFileName(packageFile, 'packages.lock.json');
-  // istanbul ignore if
   if (await localPathExists(lockFileName)) {
     res.lockFiles = [lockFileName];
   }

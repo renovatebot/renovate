@@ -1,22 +1,41 @@
 import { codeBlock } from 'common-tags';
 import { mock } from 'vitest-mock-extended';
 import type { Pr } from '../../../../modules/platform';
+import * as bitbucketserver from '../../../../modules/platform/bitbucket-server';
+import * as gitlab from '../../../../modules/platform/gitlab';
+import type { LongCommitSha } from '../../../../util/git/types';
 import { codeOwnersForPr } from './code-owners';
-import { fs, git } from '~test/util';
+import { fs, git, platform } from '~test/util';
 
 vi.mock('../../../../util/fs');
 
 describe('workers/repository/update/pr/code-owners', () => {
+  beforeAll(() => {
+    Object.defineProperty(platform, 'extractRulesFromCodeOwnersLines', {
+      value: undefined,
+      writable: true,
+    });
+  });
+
   describe('codeOwnersForPr', () => {
     let pr: Pr;
 
     beforeEach(() => {
       pr = mock<Pr>();
+      pr.sha = undefined;
     });
 
     it('returns global code owner', async () => {
       fs.readLocalFile.mockResolvedValueOnce(['* @jimmy'].join('\n'));
       git.getBranchFiles.mockResolvedValueOnce(['README.md']);
+      const codeOwners = await codeOwnersForPr(pr);
+      expect(codeOwners).toEqual(['@jimmy']);
+    });
+
+    it('returns global code owner for commit with sha set', async () => {
+      pr.sha = 'f7374c2de8a4c95a7fd7182ab24044e3896aac02' as LongCommitSha;
+      fs.readLocalFile.mockResolvedValueOnce('* @jimmy');
+      git.getBranchFilesFromCommit.mockResolvedValueOnce(['README.md']);
       const codeOwners = await codeOwnersForPr(pr);
       expect(codeOwners).toEqual(['@jimmy']);
     });
@@ -167,6 +186,201 @@ describe('workers/repository/update/pr/code-owners', () => {
         const codeOwners = await codeOwnersForPr(pr);
         expect(codeOwners).toEqual(['@jimmy', '@maria', '@john']);
       });
+    });
+
+    describe('supports Gitlab sections', () => {
+      beforeAll(() => {
+        Object.defineProperty(platform, 'extractRulesFromCodeOwnersLines', {
+          value: gitlab.extractRulesFromCodeOwnersLines,
+          writable: true,
+        });
+      });
+
+      it('returns section code owner', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          ['[team] @jimmy', '*'].join('\n'),
+        );
+        git.getBranchFiles.mockResolvedValueOnce(['README.md']);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual(['@jimmy']);
+      });
+
+      const codeOwnerFileWithDefaultApproval = codeBlock`
+            # Required for all files
+            * @general-approvers
+
+            [Documentation] @docs-team
+            docs/
+            README.md
+            *.txt
+
+            # Invalid section
+            Something before [Tests] @tests-team
+            tests/
+
+            # Optional section
+            ^[Optional] @optional-team
+            optional/
+
+            [Database] @database-team
+            model/db/
+            config/db/database-setup.md @docs-team
+          `;
+
+      it('returns code owners of multiple sections', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          codeOwnerFileWithDefaultApproval,
+        );
+        git.getBranchFiles.mockResolvedValueOnce([
+          'config/db/database-setup.md',
+        ]);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual(['@docs-team', '@general-approvers']);
+      });
+
+      it('returns default owners when none is explicitly set', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          codeOwnerFileWithDefaultApproval,
+        );
+        git.getBranchFiles.mockResolvedValueOnce(['model/db/CHANGELOG.txt']);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual([
+          '@database-team',
+          '@docs-team',
+          '@general-approvers',
+        ]);
+      });
+
+      it('parses only sections that start at the beginning of a line', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          codeOwnerFileWithDefaultApproval,
+        );
+        git.getBranchFiles.mockResolvedValueOnce(['tests/setup.ts']);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).not.toInclude('@tests-team');
+      });
+
+      it('returns code owners for optional sections', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          codeOwnerFileWithDefaultApproval,
+        );
+        git.getBranchFiles.mockResolvedValueOnce([
+          'optional/optional-file.txt',
+        ]);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual([
+          '@optional-team',
+          '@docs-team',
+          '@general-approvers',
+        ]);
+      });
+    });
+
+    describe('Bitbucket Server CODEOWNERS integration', () => {
+      beforeAll(() => {
+        Object.defineProperty(platform, 'extractRulesFromCodeOwnersLines', {
+          value: bitbucketserver.extractRulesFromCodeOwnersLines,
+          writable: true,
+        });
+      });
+
+      it('returns code owners for matching file using escaped spaces', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          String.raw`src/** @Jane\\ Doe @john@example.com`,
+        );
+        git.getBranchFiles.mockResolvedValueOnce(['src/index.ts']);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual(['@Jane Doe', '@john@example.com']);
+      });
+
+      it('returns code owners from reviewer group with random selection', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          'docs/** @reviewer-group/content-designers:random',
+        );
+        git.getBranchFiles.mockResolvedValueOnce(['docs/readme.md']);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        // Since we don't simulate the actual group resolution, this will just include the literal string
+        expect(codeOwners).toEqual([
+          '@reviewer-group/content-designers:random',
+        ]);
+      });
+
+      it('does not return owners when an empty rule overrides a broader rule', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          [
+            'docs/images/**', // empty rule
+            'docs/** @content-designer',
+          ].join('\n'),
+        );
+        git.getBranchFiles.mockResolvedValueOnce(['docs/images/logo.png']);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual([]);
+      });
+
+      it('matches the most specific rule (bottom takes precedence)', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          [
+            'docs/** @team1',
+            'docs/backend/** @team2', // higher precedence
+          ].join('\n'),
+        );
+        git.getBranchFiles.mockResolvedValueOnce(['docs/backend/service.md']);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual(['@team2', '@team1']);
+      });
+
+      it('handles multiple owners with mix of usernames and groups', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          'docs/** @Alice @reviewer-group/devs:random(2)',
+        );
+        git.getBranchFiles.mockResolvedValueOnce(['docs/manual.md']);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual([
+          '@Alice',
+          '@reviewer-group/devs:random(2)',
+        ]);
+      });
+    });
+
+    it.fails('does not parse Gitea regex as Gitlab sections', async () => {
+      Object.defineProperty(platform, 'extractRulesFromCodeOwnersLines', {
+        value: undefined,
+        writable: true,
+      });
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          # This is a regex, not a Gitlab section, so 002-file.md should be assigned to @reviewer-03
+          [0-3].*/*.md$ @reviewer-03
+          002-file.md
+
+          [4-9].*/*.md$ @reviewer-49
+        `,
+      );
+      git.getBranchFiles.mockResolvedValueOnce(['001-file.md', '002-file.md']);
+
+      const codeOwners = await codeOwnersForPr(pr);
+
+      expect(codeOwners).toEqual(['@reviewer-03']);
     });
 
     it('does not require all files to match a single rule, regression test for #12611', async () => {

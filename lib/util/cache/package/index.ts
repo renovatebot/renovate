@@ -1,13 +1,22 @@
 import type { AllConfig } from '../../../config/types';
+import { getEnv } from '../../env';
 import { PackageCacheStats } from '../../stats';
 import * as memCache from '../memory';
 import * as fileCache from './file';
 import { getCombinedKey } from './key';
 import * as redisCache from './redis';
 import { SqlitePackageCache } from './sqlite';
+import { getTtlOverride } from './ttl';
 import type { PackageCache, PackageCacheNamespace } from './types';
 
 let cacheProxy: PackageCache | undefined;
+
+let cacheType: 'redis' | 'sqlite' | 'memory' | 'file' | undefined;
+
+/* v8 ignore start -- not important */
+export function getCacheType(): typeof cacheType {
+  return cacheType;
+} /* v8 ignore stop */
 
 export async function get<T = any>(
   namespace: PackageCacheNamespace,
@@ -36,6 +45,19 @@ export async function set(
   value: unknown,
   minutes: number,
 ): Promise<void> {
+  const rawTtl = getTtlOverride(namespace) ?? minutes;
+  await setWithRawTtl(namespace, key, value, rawTtl);
+}
+
+/**
+ * This MUST NOT be used outside of cache implementation
+ */
+export async function setWithRawTtl(
+  namespace: PackageCacheNamespace,
+  key: string,
+  value: unknown,
+  minutes: number,
+): Promise<void> {
   if (!cacheProxy) {
     return;
   }
@@ -50,17 +72,21 @@ export async function set(
 }
 
 export async function init(config: AllConfig): Promise<void> {
+  cacheType = undefined;
+
   if (config.redisUrl) {
     await redisCache.init(config.redisUrl, config.redisPrefix);
     cacheProxy = {
       get: redisCache.get,
       set: redisCache.set,
     };
+    cacheType = 'redis';
     return;
   }
 
-  if (process.env.RENOVATE_X_SQLITE_PACKAGE_CACHE) {
+  if (getEnv().RENOVATE_X_SQLITE_PACKAGE_CACHE) {
     cacheProxy = await SqlitePackageCache.init(config.cacheDir!);
+    cacheType = 'sqlite';
     return;
   }
 
@@ -71,11 +97,13 @@ export async function init(config: AllConfig): Promise<void> {
       set: fileCache.set,
       cleanup: fileCache.cleanup,
     };
+    cacheType = 'file';
     return;
   }
 }
 
 export async function cleanup(config: AllConfig): Promise<void> {
+  cacheType = undefined;
   if (config?.redisUrl) {
     await redisCache.end();
   }

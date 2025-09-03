@@ -101,7 +101,7 @@ describe('workers/repository/updates/branch-name', () => {
         isPatch: true,
         newMinor: 17,
         branchTopic:
-          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
         depName: 'dep',
         group: {},
       };
@@ -167,7 +167,7 @@ describe('workers/repository/updates/branch-name', () => {
         isPatch: true,
         newMinor: 17,
         branchTopic:
-          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
         depName: 'dep',
         group: {},
       };
@@ -187,7 +187,7 @@ describe('workers/repository/updates/branch-name', () => {
         isPatch: true,
         newMinor: 17,
         branchTopic:
-          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
         depName: 'dep',
         group: {},
       };
@@ -200,7 +200,7 @@ describe('workers/repository/updates/branch-name', () => {
         branchName:
           '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
         branchTopic:
-          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
         branchPrefix: 'renovate/',
         depNameSanitized: 'jest',
         newMajor: '42',
@@ -216,7 +216,7 @@ describe('workers/repository/updates/branch-name', () => {
         branchName:
           '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
         branchTopic:
-          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
         branchPrefix: 'renovate/',
         depNameSanitized: 'jest',
         newMajor: '42',
@@ -232,7 +232,7 @@ describe('workers/repository/updates/branch-name', () => {
         branchName:
           '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
         branchTopic:
-          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
         branchPrefix: 'renovate/',
         depNameSanitized: '@foo/jest',
         newMajor: '42',
@@ -247,7 +247,7 @@ describe('workers/repository/updates/branch-name', () => {
         branchName:
           '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
         branchTopic:
-          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
         hashedBranchLength: 14,
         branchPrefix: 'dep-',
         depNameSanitized: 'jest',
@@ -269,7 +269,7 @@ describe('workers/repository/updates/branch-name', () => {
           branchName:
             '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
           branchTopic:
-            '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+            '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
         },
       };
       generateBranchName(upgrade);
@@ -287,7 +287,7 @@ describe('workers/repository/updates/branch-name', () => {
           branchName:
             '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
           branchTopic:
-            '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+            '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
         },
       };
       generateBranchName(upgrade);
@@ -305,11 +305,30 @@ describe('workers/repository/updates/branch-name', () => {
           branchName:
             '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
           additionalBranchPrefix:
-            '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+            '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
         },
       };
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe('dep-cf83e1');
+    });
+
+    it('hashedBranchLength separates minor when separateMultipleMinor=true', () => {
+      const upgrade: RenovateConfig = {
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        hashedBranchLength: 14,
+        branchPrefix: 'dep-',
+        depNameSanitized: 'jest',
+        newMajor: '42',
+        separateMultipleMinor: true,
+        isMinor: true,
+        newMinor: '3',
+        group: {},
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('dep-2e27927800');
     });
 
     it('enforces valid git branch name', () => {

@@ -5,7 +5,7 @@ import { id as semverVersioning } from '../../versioning/semver';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency } from '../types';
 
-export const BatectConfigSchema = Yaml.pipe(
+export const BatectConfig = Yaml.pipe(
   z.object({
     containers: LooseRecord(
       z.string(),
@@ -56,4 +56,4 @@ export const BatectConfigSchema = Yaml.pipe(
   };
 });
 
-export type BatectConfig = z.infer<typeof BatectConfigSchema>;
+export type BatectConfig = z.infer<typeof BatectConfig>;

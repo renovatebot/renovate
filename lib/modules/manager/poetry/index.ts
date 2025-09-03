@@ -11,13 +11,14 @@ export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
 export { updateLockedDependency } from './update-locked';
 
+export const supersedesManagers = ['pep621'];
 export const supportsLockFileMaintenance = true;
 
 export const url = 'https://python-poetry.org/docs';
 export const categories: Category[] = ['python'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)pyproject\\.toml$'],
+  managerFilePatterns: ['/(^|/)pyproject\\.toml$/'],
 };
 
 export const supportedDatasources = [

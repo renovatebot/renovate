@@ -1,4 +1,5 @@
-import { join } from 'upath';
+import { codeBlock } from 'common-tags';
+import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -10,9 +11,9 @@ vi.mock('../../../util/fs');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
-  localDir: join('/tmp/github/some/repo'),
-  cacheDir: join('/tmp/renovate/cache'),
-  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
+  localDir: upath.join('/tmp/github/some/repo'),
+  cacheDir: upath.join('/tmp/renovate/cache'),
+  containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
 };
 
 function getSimpleRequirementsFile(command: string, deps: string[] = []) {
@@ -36,8 +37,8 @@ describe('modules/manager/pip-compile/extract', () => {
   });
 
   describe('extractPackageFile()', () => {
-    it('returns object for requirements.in', () => {
-      const packageFile = extractPackageFile(
+    it('returns object for requirements.in', async () => {
+      const packageFile = await extractPackageFile(
         Fixtures.get('requirementsWithHashes.txt'),
         'requirements.in',
         {},
@@ -46,8 +47,8 @@ describe('modules/manager/pip-compile/extract', () => {
       expect(packageFile?.deps[0]).toHaveProperty('depName', 'attrs');
     });
 
-    it('returns object for setup.py', () => {
-      const packageFile = extractPackageFile(
+    it('returns object for setup.py', async () => {
+      const packageFile = await extractPackageFile(
         Fixtures.get('setup.py', '../pip_setup'),
         'lib/setup.py',
         {},
@@ -56,15 +57,47 @@ describe('modules/manager/pip-compile/extract', () => {
       expect(packageFile?.deps[0]).toHaveProperty('depName', 'celery');
     });
 
+    it('returns object for pyproject.toml', async () => {
+      const pyproject = codeBlock`
+        [build-system]
+        requires = ["setuptools", "wheel"]
+        build-backend = "setuptools.build_meta"
+
+        [project]
+        name = "test-project"
+        requires-python = ">=3.11"
+        version = "1.2.3"
+        description = "Test project for pip-compile with setuptools"
+        readme = "README.md"
+        dependencies = [
+          "aiohttp",
+          "pydantic>=2.0.0",
+        ]
+
+        [project.optional-dependencies]
+        dev = [
+          "black",
+          "flake8",
+        ]
+      `;
+      const packageFile = await extractPackageFile(
+        pyproject,
+        'pyproject.toml',
+        {},
+      );
+      expect(packageFile).toHaveProperty('deps');
+      expect(packageFile?.deps[0]).toHaveProperty('depType', 'requires-python');
+      expect(packageFile?.deps[1]).toHaveProperty('depName', 'aiohttp');
+    });
+
     it.each([
       'random.py',
       'app.cfg',
       'already_locked.txt',
       // TODO(not7cd)
-      'pyproject.toml',
       'setup.cfg',
-    ])('returns null on not supported package files', (file: string) => {
-      expect(extractPackageFile('some content', file, {})).toBeNull();
+    ])('returns null on not supported package files', async (file: string) => {
+      expect(await extractPackageFile('some content', file, {})).toBeNull();
     });
   });
 

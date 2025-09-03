@@ -13,9 +13,7 @@ Thank you for your time and effort!
 
 Renovate is maintained by:
 
-- [@rarkins](https://github.com/rarkins)
 - [@viceice](https://github.com/viceice)
-- [@JamieMagee](https://github.com/JamieMagee)
 - [@secustor](https://github.com/secustor)
 
 ### Maintainers for features
@@ -26,7 +24,6 @@ Next up, we have these people who help maintain parts of Renovate:
 - [@secustor](https://github.com/secustor) worked on Terraform and Helm
 - [@fgreinacher](https://github.com/fgreinacher) worked on NuGet
 - [@Turbo87](https://github.com/Turbo87) has helped in multiple areas, especially Cargo
-- [@HonkingGoose](https://github.com/HonkingGoose) works on the documentation and helps manage the community
 - [@Churro](https://github.com/Churro) worked on the `gradle` manager and added support for OSV vulnerabilities
 
 ### Valuable contributions
@@ -34,6 +31,9 @@ Next up, we have these people who help maintain parts of Renovate:
 We want to highlight these valuable contributions, even if they are one-offs.
 Some features made a lot of people happy, and efficient!
 
+- [@rarkins](https://github.com/rarkins) created Renovate and maintained it through to August 2025
+- [@JamieMagee](https://github.com/JamieMagee) was an active maintainer for years, contributing many features
+- [@HonkingGoose](https://github.com/HonkingGoose) worked on the documentation and helped manage the community
 - [@ikesyo](https://github.com/ikesyo) regularly helpful
 - [@astellingwerf](https://github.com/astellingwerf) reviews PRs
 - [@danports](https://github.com/danports) worked on the Flux manager, and other managers. Feel free to ping `@danports` for any Flux-related issue or PR

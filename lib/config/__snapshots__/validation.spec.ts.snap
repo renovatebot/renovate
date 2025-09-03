@@ -88,14 +88,14 @@ exports[`config/validation > validateConfig(config) > errors for all types 1`] =
 ]
 `;
 
-exports[`config/validation > validateConfig(config) > errors for unsafe fileMatches 1`] = `
+exports[`config/validation > validateConfig(config) > errors for unsafe managerFilePatterns 1`] = `
 [
   {
-    "message": "Invalid regExp for dockerfile.fileMatch: \`x?+\`",
+    "message": "Failed to parse regex pattern for dockerfile.managerFilePatterns: /x?+/",
     "topic": "Configuration Error",
   },
   {
-    "message": "Invalid regExp for npm.fileMatch: \`abc ([a-z]+) ([a-z]+))\`",
+    "message": "Failed to parse regex pattern for npm.managerFilePatterns: /abc ([a-z]+) ([a-z]+))/",
     "topic": "Configuration Error",
   },
 ]
@@ -106,24 +106,6 @@ exports[`config/validation > validateConfig(config) > errors if customManager fi
   {
     "message": "Regex Managers must contain currentValueTemplate configuration or regex group named currentValue",
     "topic": "Configuration Error",
-  },
-]
-`;
-
-exports[`config/validation > validateConfig(config) > errors if fileMatch has wrong parent 1`] = `
-[
-  {
-    "message": ""fileMatch" may not be defined at the top level of a config and must instead be within a manager block",
-    "topic": "Config error",
-  },
-]
-`;
-
-exports[`config/validation > validateConfig(config) > errors if fileMatch has wrong parent 2`] = `
-[
-  {
-    "message": ""fileMatch" must be configured in a manager block and not here: npm.minor",
-    "topic": "Config warning",
   },
 ]
 `;
@@ -181,10 +163,6 @@ exports[`config/validation > validateConfig(config) > included managers of the w
     "message": "Configuration option \`packageRules[0].matchManagers\` should be a list (Array)",
     "topic": "Configuration Error",
   },
-  {
-    "message": "packageRules: Managers should be type of List. You have included string.",
-    "topic": "Configuration Error",
-  },
 ]
 `;
 
@@ -239,10 +217,10 @@ exports[`config/validation > validateConfig(config) > selectors outside packageR
 ]
 `;
 
-exports[`config/validation > validateConfig(config) > validates regEx for each fileMatch 1`] = `
+exports[`config/validation > validateConfig(config) > validates regEx for each managerFilePatterns of format regex 1`] = `
 [
   {
-    "message": "Invalid regExp for customManagers[0].fileMatch: \`***$}{]][\`",
+    "message": "Failed to parse regex pattern for customManagers[0].managerFilePatterns: /***$}{]][/",
     "topic": "Configuration Error",
   },
 ]
@@ -251,7 +229,7 @@ exports[`config/validation > validateConfig(config) > validates regEx for each f
 exports[`config/validation > validateConfig(config) > warns if hostType has the wrong parent 1`] = `
 [
   {
-    "message": "hostType should only be configured within one of "hostRules" objects. Was found in .",
+    "message": ""hostType" can't be used in ".". Allowed objects: hostRules.",
     "topic": "hostType",
   },
 ]

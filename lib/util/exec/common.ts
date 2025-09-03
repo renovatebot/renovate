@@ -2,6 +2,7 @@ import type { ChildProcess } from 'node:child_process';
 import { spawn } from 'node:child_process';
 import type { Readable } from 'node:stream';
 import is from '@sindresorhus/is';
+import { getEnv } from '../env';
 import type { ExecErrorData } from './exec-error';
 import { ExecError } from './exec-error';
 import type { DataListener, ExecResult, RawExecOptions } from './types';
@@ -142,7 +143,7 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
 
 function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
   try {
-    if (cp.pid && process.env.RENOVATE_X_EXEC_GPID_HANDLE) {
+    if (cp.pid && getEnv().RENOVATE_X_EXEC_GPID_HANDLE) {
       /**
        * If `pid` is negative, but not `-1`, signal shall be sent to all processes
        * (excluding an unspecified set of system processes),

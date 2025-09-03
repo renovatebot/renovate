@@ -492,7 +492,6 @@ export class HttpCacheStats {
 type ObsoleteCacheStats = Record<
   string,
   {
-    callsite?: string;
     count: number;
   }
 >;
@@ -503,38 +502,10 @@ export class ObsoleteCacheHitLogger {
     return memCache.get<ObsoleteCacheStats>('obsolete-cache-stats') ?? {};
   }
 
-  private static getCallsite(): string | undefined {
-    const _prepareStackTrace = Error.prepareStackTrace;
-    try {
-      let result: string | undefined;
-      Error.prepareStackTrace = (_, stack) => {
-        result = stack
-          .find((frame) => {
-            const callsite = frame.toString();
-            return (
-              !callsite.includes('lib/util/http') &&
-              !callsite.includes('lib/util/stats') &&
-              !callsite.includes('(node:')
-            );
-          })
-          ?.toString()
-          ?.replace(/:\d+(?::\d+)?\)$/, ')');
-      };
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      new Error().stack;
-
-      return result;
-    } finally {
-      Error.prepareStackTrace = _prepareStackTrace;
-    }
-  }
-
   static write(url: string): void {
     const data = this.getData();
     if (!data[url]) {
-      const callsite = this.getCallsite();
-      data[url] = { callsite, count: 0 };
+      data[url] = { count: 0 };
     }
     data[url].count++;
     memCache.set('obsolete-cache-stats', data);
@@ -549,3 +520,58 @@ export class ObsoleteCacheHitLogger {
   }
 }
 /* v8 ignore stop: temporary code */
+
+interface AbandonedPackage {
+  datasource: string;
+  packageName: string;
+  mostRecentTimestamp: string;
+}
+
+type AbandonedPackageReport = Record<string, Record<string, string>>;
+
+export class AbandonedPackageStats {
+  static getData(): AbandonedPackage[] {
+    return memCache.get<AbandonedPackage[]>('abandonment-stats') ?? [];
+  }
+
+  private static setData(data: AbandonedPackage[]): void {
+    memCache.set('abandonment-stats', data);
+  }
+
+  static write(
+    datasource: string,
+    packageName: string,
+    mostRecentTimestamp: string,
+  ): void {
+    const data = this.getData();
+    data.push({ datasource, packageName, mostRecentTimestamp });
+    this.setData(data);
+  }
+
+  static getReport(): AbandonedPackageReport {
+    const data = this.getData();
+    const result: AbandonedPackageReport = {};
+
+    for (const { datasource, packageName, mostRecentTimestamp } of data) {
+      result[datasource] ??= {};
+      result[datasource][packageName] = mostRecentTimestamp;
+    }
+
+    const sortedResult: AbandonedPackageReport = {};
+    for (const datasource of Object.keys(result).sort()) {
+      sortedResult[datasource] = {};
+      for (const packageName of Object.keys(result[datasource]).sort()) {
+        sortedResult[datasource][packageName] = result[datasource][packageName];
+      }
+    }
+
+    return sortedResult;
+  }
+
+  static report(): void {
+    const report = this.getReport();
+    if (Object.keys(report).length > 0) {
+      logger.debug(report, 'Abandoned package statistics');
+    }
+  }
+}

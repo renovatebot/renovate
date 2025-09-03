@@ -1,4 +1,6 @@
-import remark from 'remark';
+import { remark } from 'remark';
+import gfm from 'remark-gfm';
+import type { Options as RemarkGithubOptions } from 'remark-github';
 import github from 'remark-github';
 import { regEx } from './regex';
 
@@ -33,11 +35,12 @@ export function sanitizeMarkdown(markdown: string): string {
  */
 export async function linkify(
   content: string,
-  options: github.RemarkGithubOptions,
+  options: RemarkGithubOptions,
 ): Promise<string> {
   // https://github.com/syntax-tree/mdast-util-to-markdown#optionsbullet
   const output = await remark()
     .use({ settings: { bullet: '-' } })
+    .use(gfm)
     .use(github, { mentionStrong: false, ...options })
     .process(content);
   return output.toString();

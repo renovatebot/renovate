@@ -16,7 +16,7 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 
 ## How It Works
 
-1. Renovate searches in each repository for any files matching each manager's configured `fileMatch` pattern(s)
+1. Renovate searches in each repository for any files matching each manager's configured `managerFilePatterns`
 1. Matching files are parsed, Renovate checks if the file(s) has any Docker image references (e.g. `FROM` lines in a `Dockerfile`)
 1. If the image tag in use "looks" like a version (e.g. `myimage:1`, `myimage:1.1`, `myimage:1.1.0`, `myimage:1-onbuild`) then Renovate checks the Docker registry for upgrades (e.g. from `myimage:1.1.0` to `myimage:1.2.0`)
 
@@ -197,9 +197,9 @@ If you want Renovate to commit directly to your base branch without opening a PR
 There are many different registries, and many ways to authenticate to those registries.
 We will explain how to authenticate for the most common registries.
 
-#### DockerHub
+#### Docker Hub
 
-Here is an example of configuring a default Docker username/password in `config.js`.
+Here is an example of configuring a Docker username/password for Docker Hub in `config.js`.
 The Docker Hub password is stored in a process environment variable.
 
 ```js title="config.js"
@@ -207,6 +207,7 @@ module.exports = {
   hostRules: [
     {
       hostType: 'docker',
+      matchHost: 'docker.io',
       username: '<your-username>',
       password: process.env.DOCKER_HUB_PASSWORD,
     },
@@ -300,14 +301,14 @@ Renovate will get the credentials with the [`google-auth-library`](https://www.n
 ```yaml title="Example for Workload Identity plus Renovate host rules"
 - name: authenticate to google cloud
   id: auth
-  uses: google-github-actions/auth@v2.1.10
+  uses: google-github-actions/auth@v3.0.0
   with:
     token_format: 'access_token'
     workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
     service_account: ${{ env.SERVICE_ACCOUNT }}
 
 - name: renovate
-  uses: renovatebot/github-action@v41.0.22
+  uses: renovatebot/github-action@v43.0.10
   env:
     RENOVATE_HOST_RULES: |
       [
@@ -478,7 +479,7 @@ Make sure to install the Google Cloud SDK into the custom image, as you need the
 For example:
 
 ```Dockerfile
-FROM renovate/renovate:39.261.4
+FROM renovate/renovate:41.91.2
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

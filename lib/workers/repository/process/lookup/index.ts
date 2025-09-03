@@ -30,13 +30,14 @@ import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
 import { Result } from '../../../../util/result';
 import type { Timestamp } from '../../../../util/timestamp';
+import { calculateAbandonment } from './abandonment';
 import { getBucket } from './bucket';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
 import { filterInternalChecks } from './filter-checks';
 import { generateUpdate } from './generate';
 import { getRollbackUpdate } from './rollback';
-import { calculateLatestReleaseBump } from './timestamps';
+import { calculateMostRecentTimestamp } from './timestamps';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 import {
   addReplacementUpdateIfValid,
@@ -157,7 +158,8 @@ export async function lookupUpdates(
       const { val: releaseResult, err: lookupError } = await getRawPkgReleases(
         config,
       )
-        .transform((res) => calculateLatestReleaseBump(versioningApi, res))
+        .transform((res) => calculateMostRecentTimestamp(versioningApi, res))
+        .transform((res) => calculateAbandonment(res, config))
         .transform((res) => applyDatasourceFilters(res, config))
         .unwrap();
 
@@ -201,6 +203,9 @@ export async function lookupUpdates(
         'dependencyUrl',
         'lookupName',
         'packageScope',
+        'mostRecentTimestamp',
+        'isAbandoned',
+        'respectLatest',
       ]);
 
       const latestVersion = dependency.tags?.latest;
@@ -294,6 +299,8 @@ export async function lookupUpdates(
       let currentVersion: string;
       if (rangeStrategy === 'update-lockfile') {
         currentVersion = config.lockedVersion!;
+      } else if (allVersions.find((v) => v.version === compareValue)) {
+        currentVersion = compareValue!;
       }
       // TODO #22198
       currentVersion ??=
@@ -516,9 +523,8 @@ export async function lookupUpdates(
           update.pendingChecks = pendingChecks;
         }
 
-        // TODO #22198
-        if (pendingReleases!.length) {
-          update.pendingVersions = pendingReleases!.map((r) => r.version);
+        if (pendingReleases.length) {
+          update.pendingVersions = pendingReleases.map((r) => r.version);
         }
         if (!update.newValue || update.newValue === compareValue) {
           if (!config.lockedVersion) {
@@ -753,6 +759,18 @@ export async function lookupUpdates(
           res.updates.length === 1 ||
           /* istanbul ignore next */ update.updateType !== 'rollback',
       );
+    }
+
+    const release =
+      res.updates.length > 0
+        ? dependency?.releases.find(
+            (r) => r.version === res.updates[0].newValue,
+          )
+        : null;
+
+    if (release?.changelogContent) {
+      res.changelogContent = release.changelogContent;
+      res.changelogUrl = release.changelogUrl;
     }
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError) {

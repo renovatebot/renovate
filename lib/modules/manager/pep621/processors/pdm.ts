@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
@@ -14,47 +13,31 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types';
-import { PdmLockfileSchema, type PyProject } from '../schema';
+import { PdmLockfile, type PyProject } from '../schema';
 import type { Pep621ManagerData } from '../types';
-import { depTypes, parseDependencyGroupRecord } from '../utils';
-import type { PyProjectProcessor } from './types';
+import { depTypes } from '../utils';
+import { BasePyProjectProcessor } from './abstract';
 
 const pdmUpdateCMD = 'pdm update --no-sync --update-eager';
 
-export class PdmProcessor implements PyProjectProcessor {
+export class PdmProcessor extends BasePyProjectProcessor {
+  override lockfileName = 'pdm.lock';
+
   process(
     project: PyProject,
     deps: PackageDependency[],
   ): PackageDependency<Pep621ManagerData>[] {
-    const pdm = project.tool?.pdm;
-    if (is.nullOrUndefined(pdm)) {
-      return deps;
+    const devDependencies = project.tool?.pdm?.devDependencies;
+    if (devDependencies) {
+      deps.push(...devDependencies);
     }
 
-    deps.push(
-      ...parseDependencyGroupRecord(
-        depTypes.pdmDevDependencies,
-        pdm['dev-dependencies'],
-      ),
-    );
-
-    const pdmSource = pdm.source;
-    if (is.nullOrUndefined(pdmSource)) {
-      return deps;
-    }
-
-    // add pypi default url, if there is no source declared with the name `pypi`. https://daobook.github.io/pdm/pyproject/tool-pdm/#specify-other-sources-for-finding-packages
-    const containsPyPiUrl = pdmSource.some((value) => value.name === 'pypi');
-    const registryUrls: string[] = [];
-    if (!containsPyPiUrl) {
-      registryUrls.push(PypiDatasource.defaultURL);
-    }
-    for (const source of pdmSource) {
-      registryUrls.push(source.url);
-    }
-    for (const dep of deps) {
-      if (dep.datasource === PypiDatasource.id) {
-        dep.registryUrls = [...registryUrls];
+    const registryUrls = project.tool?.pdm?.registryUrls;
+    if (registryUrls) {
+      for (const dep of deps) {
+        if (dep.datasource === PypiDatasource.id) {
+          dep.registryUrls = registryUrls;
+        }
       }
     }
 
@@ -67,7 +50,7 @@ export class PdmProcessor implements PyProjectProcessor {
     packageFile: string,
   ): Promise<PackageDependency[]> {
     if (
-      is.nullOrUndefined(project.tool?.pdm) &&
+      !project.tool?.pdm &&
       project['build-system']?.['build-backend'] !== 'pdm.backend'
     ) {
       return Promise.resolve(deps);
@@ -78,7 +61,7 @@ export class PdmProcessor implements PyProjectProcessor {
     if (lockFileContent) {
       const lockFileMapping = Result.parse(
         lockFileContent,
-        PdmLockfileSchema.transform(({ lock }) => lock),
+        PdmLockfile.transform(({ lock }) => lock),
       ).unwrapOr({});
 
       for (const dep of deps) {
@@ -101,10 +84,10 @@ export class PdmProcessor implements PyProjectProcessor {
     const { isLockFileMaintenance } = config;
 
     // abort if no lockfile is defined
-    const lockFileName = getSiblingFileName(packageFileName, 'pdm.lock');
+    const lockFileName = getSiblingFileName(packageFileName, this.lockfileName);
     try {
       const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
-      if (is.nullOrUndefined(existingLockFileContent)) {
+      if (!existingLockFileContent) {
         logger.debug('No pdm.lock found');
         return null;
       }
@@ -157,7 +140,6 @@ export class PdmProcessor implements PyProjectProcessor {
 
       return fileChanges.length ? fileChanges : null;
     } catch (err) {
-      // istanbul ignore if
       if (err.message === TEMPORARY_ERROR) {
         throw err;
       }
@@ -180,7 +162,7 @@ function generateCMDs(updatedDeps: Upgrade<Pep621ManagerData>[]): string[] {
   for (const dep of updatedDeps) {
     switch (dep.depType) {
       case depTypes.optionalDependencies: {
-        if (is.nullOrUndefined(dep.managerData?.depGroup)) {
+        if (!dep.managerData?.depGroup) {
           logger.once.warn(
             { dep: dep.depName },
             'Unexpected optional dependency without group',
@@ -196,7 +178,7 @@ function generateCMDs(updatedDeps: Upgrade<Pep621ManagerData>[]): string[] {
       }
       case depTypes.dependencyGroups:
       case depTypes.pdmDevDependencies: {
-        if (is.nullOrUndefined(dep.managerData?.depGroup)) {
+        if (!dep.managerData?.depGroup) {
           logger.once.warn(
             { dep: dep.depName },
             'Unexpected dev dependency without group',
@@ -234,7 +216,7 @@ function addPackageToCMDRecord(
   commandPrefix: string,
   packageName: string,
 ): void {
-  if (is.nullOrUndefined(packagesByCMD[commandPrefix])) {
+  if (!packagesByCMD[commandPrefix]) {
     packagesByCMD[commandPrefix] = [];
   }
   packagesByCMD[commandPrefix].push(packageName);

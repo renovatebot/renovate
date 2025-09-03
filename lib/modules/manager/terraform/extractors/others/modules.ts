@@ -16,7 +16,7 @@ export const bitbucketRefMatchRegex = regEx(
   /(?:git::)?(?<url>(?:http|https|ssh)?(?::\/\/)?(?:.*@)?(?<path>bitbucket\.org\/(?<workspace>.*)\/(?<project>.*)\.git\/?(?<subfolder>.*)))\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
 );
 export const gitTagsRefMatchRegex = regEx(
-  /(?:git::)?(?<url>(?:(?:http|https|ssh):\/\/)?(?:.*@)?(?<path>.*\/(?<project>.*\/.*)))\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
+  /(?:git::)?(?<url>(?:(?:http|https|ssh):\/\/)?(?:.*@)?(?<path>[^:/]+[:/](?<project>[^/]+(?:\/[^/]+)*))(?:\.git)?)((\/\/)?(?<subfolder>[^?]*))?\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
 );
 export const azureDevOpsSshRefMatchRegex = regEx(
   /(?:git::)?(?<url>git@ssh\.dev\.azure\.com:v3\/(?<organization>[^/]*)\/(?<project>[^/]*)\/(?<repository>[^/]*))(?<modulepath>.*)?\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
@@ -36,7 +36,7 @@ export class ModuleExtractor extends DependencyExtractor {
       return [];
     }
 
-    // istanbul ignore if
+    /* v8 ignore next 4 -- needs test */
     if (!is.plainObject(modules)) {
       logger.debug({ modules }, 'Terraform: unexpected `modules` value');
       return [];
@@ -90,15 +90,11 @@ export class ModuleExtractor extends DependencyExtractor {
       dep.currentValue = azureDevOpsSshRefMatch.groups.tag;
       dep.datasource = GitTagsDatasource.id;
     } else if (gitTagsRefMatch?.groups) {
-      if (gitTagsRefMatch.groups.path.includes('//')) {
+      if (gitTagsRefMatch.groups.subfolder) {
         logger.debug('Terraform module contains subdirectory');
-        dep.depName = gitTagsRefMatch.groups.path.split('//')[0];
-        const tempLookupName = gitTagsRefMatch.groups.url.split('//');
-        dep.packageName = tempLookupName[0] + '//' + tempLookupName[1];
-      } else {
-        dep.depName = gitTagsRefMatch.groups.path.replace('.git', '');
-        dep.packageName = gitTagsRefMatch.groups.url;
       }
+      dep.depName = gitTagsRefMatch.groups.path.replace('.git', '');
+      dep.packageName = gitTagsRefMatch.groups.url.replace('.git', '');
       dep.currentValue = gitTagsRefMatch.groups.tag;
       dep.datasource = GitTagsDatasource.id;
     } else if (source) {

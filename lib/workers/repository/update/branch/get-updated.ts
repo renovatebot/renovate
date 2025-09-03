@@ -9,6 +9,7 @@ import type {
   PackageDependency,
   PackageFile,
   UpdateArtifact,
+  UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../../../../modules/manager/types';
 import { getFile } from '../../../../util/git';
@@ -451,19 +452,16 @@ function patchConfigForArtifactsUpdate(
   config: BranchConfig,
   manager: string,
   packageFileName: string,
-): BranchConfig {
-  const updatedConfig = { ...config };
+): UpdateArtifactsConfig {
+  // drop any lockFiles that happen to be defined on the branch config
+  const { lockFiles, ...updatedConfig } = config;
   if (is.nonEmptyArray(updatedConfig.packageFiles?.[manager])) {
     const managerPackageFiles: PackageFile[] =
       updatedConfig.packageFiles?.[manager];
     const packageFile = managerPackageFiles.find(
       (p) => p.packageFile === packageFileName,
     );
-    if (
-      packageFile &&
-      is.nonEmptyArray(updatedConfig.lockFiles) &&
-      is.nonEmptyArray(packageFile.lockFiles)
-    ) {
+    if (packageFile && is.nonEmptyArray(packageFile.lockFiles)) {
       updatedConfig.lockFiles = packageFile.lockFiles;
     }
   }
@@ -475,10 +473,19 @@ async function managerUpdateArtifacts(
   updateArtifact: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
   const updateArtifacts = get(manager, 'updateArtifacts');
-  if (updateArtifacts) {
-    return await updateArtifacts(updateArtifact);
+  if (!updateArtifacts) {
+    return null;
   }
-  return null;
+
+  if (updateArtifact.config.skipArtifactsUpdate) {
+    logger.debug(
+      { manager, packageFileName: updateArtifact.packageFileName },
+      'Skipping artifact update',
+    );
+    return null;
+  }
+
+  return await updateArtifacts(updateArtifact);
 }
 
 function processUpdateArtifactResults(

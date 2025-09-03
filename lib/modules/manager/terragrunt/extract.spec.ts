@@ -37,6 +37,13 @@ describe('modules/manager/terragrunt/extract', () => {
             depType: 'terragrunt',
             registryUrls: ['https://registry.domain.com'],
           },
+          {
+            currentValue: '1.0.0',
+            datasource: 'terraform-module',
+            depName: 'abc/helloworld/aws',
+            depType: 'terragrunt',
+            registryUrls: ['https://registry.domain.com'],
+          },
         ],
       });
     });
@@ -695,6 +702,15 @@ describe('modules/manager/terragrunt/extract', () => {
       }
       `),
       ).toBeNull();
+    });
+
+    it('returns empty deps if only local terragrunt includes', () => {
+      expect(
+        extractPackageFile(`include "root" {
+        path = find_in_parent_folders("root.hcl")
+      }
+      `),
+      ).toStrictEqual({ deps: [] });
     });
   });
 });
