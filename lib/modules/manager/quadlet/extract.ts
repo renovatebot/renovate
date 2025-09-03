@@ -37,21 +37,15 @@ export function extractPackageFile(
     );
     return null;
   }
-  try {
-    const deps: PackageDependency<Record<string, any>>[] = [];
 
-    getQuadletImage(parsedContent?.Container?.Image, deps, config);
-    getQuadletImage(parsedContent?.Image?.Image, deps, config);
-    getQuadletImage(parsedContent?.Volume?.Image, deps, config);
+  const deps: PackageDependency<Record<string, any>>[] = [];
 
-    if (deps.length) {
-      return { deps };
-    }
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug(
-      { err, packageFile },
-      'Error parsing quadlet container parsed content',
-    );
+  getQuadletImage(parsedContent?.Container?.Image, deps, config);
+  getQuadletImage(parsedContent?.Image?.Image, deps, config);
+  getQuadletImage(parsedContent?.Volume?.Image, deps, config);
+
+  if (deps.length) {
+    return { deps };
   }
   return null;
 }
