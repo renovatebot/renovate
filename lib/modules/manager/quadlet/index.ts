@@ -7,7 +7,7 @@ export const url =
 export const categories: Category[] = ['docker'];
 
 export const defaultConfig = {
-  fileMatch: ['.+\\.container$', '.+\\.image$', '.+\\.volume$'],
+  managerFilePatterns: ['/.+\\.container$/', '/.+\\.image$/', '/.+\\.volume$/'],
 };
 
 export const supportedDatasources = [DockerDatasource.id];

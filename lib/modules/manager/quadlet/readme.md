@@ -1,4 +1,4 @@
-Renovate supports updating of Podman Quadlet `.container`, `.image`, or `.volume` files or other files that use the same systemd format (via `fileMatch` configuration).
+Renovate supports updating of Podman Quadlet `.container`, `.image`, or `.volume` files or other files that use the same systemd format (via `managerFilePatterns` configuration).
 Updates are performed if there is an Image option in Container, Image, or Volume units:
 
 ```ini
