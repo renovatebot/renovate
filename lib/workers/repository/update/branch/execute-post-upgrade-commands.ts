@@ -10,6 +10,7 @@ import { coerceArray } from '../../../../util/array';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions } from '../../../../util/exec/types';
 import {
+  ensureLocalDir,
   localPathIsFile,
   outputCacheFile,
   privateCacheDir,
@@ -99,6 +100,20 @@ export async function postUpgradeCommandsExecutor(
         }
       }
 
+      const workingDirTemplate = upgrade.postUpgradeTasks?.workingDirTemplate;
+      let workingDir: string | null = null;
+
+      if (workingDirTemplate) {
+        workingDir = sanitize(
+          compile(workingDirTemplate, mergeChildConfig(config, upgrade)),
+        );
+        await ensureLocalDir(workingDir);
+        logger.trace(
+          { workingDirTemplate },
+          'Processed post-upgrade commands working directory template.',
+        );
+      }
+
       for (const cmd of commands) {
         const compiledCmd = compile(cmd, mergeChildConfig(config, upgrade));
         if (compiledCmd !== cmd) {
@@ -114,7 +129,9 @@ export async function postUpgradeCommandsExecutor(
             logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
 
             const execOpts: ExecOptions = {
-              cwd: GlobalConfig.get('localDir'),
+              cwd: is.nonEmptyString(workingDir)
+                ? workingDir
+                : GlobalConfig.get('localDir'),
               extraEnv: getGitEnvironmentVariables(),
             };
             if (dataFilePath) {
