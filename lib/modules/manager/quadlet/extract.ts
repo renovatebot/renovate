@@ -11,7 +11,7 @@ function getQuadletImage(
   image: string | null,
   deps: PackageDependency<Record<string, any>>[],
   config: ExtractConfig,
-) {
+): void {
   if (image) {
     const dep = getDep(image, false, config.registryAliases);
     if (dep) {

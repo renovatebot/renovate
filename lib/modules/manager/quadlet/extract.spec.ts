@@ -1,6 +1,7 @@
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
 import { partial } from '~test/util';
+import { DockerDatasource } from '../../datasource/docker';
 
 const config = partial<ExtractConfig>({});
 
@@ -34,6 +35,7 @@ Image=docker.io/library/alpine:3.22`;
           {
             currentValue: '3.22',
             depName: 'docker.io/library/alpine',
+            datasource: DockerDatasource.id,
           },
         ],
       });
@@ -49,6 +51,7 @@ Image=docker.io/library/alpine:3.22`;
           {
             currentValue: '3.22',
             depName: 'docker.io/library/alpine',
+            datasource: DockerDatasource.id,
           },
         ],
       });
@@ -64,6 +67,7 @@ Image=docker.io/library/alpine:3.22`;
           {
             currentValue: '3.22',
             depName: 'docker.io/library/alpine',
+            datasource: DockerDatasource.id,
           },
         ],
       });
@@ -80,7 +84,7 @@ Image=quay.io/metallb/controller:v0.13.10`;
             currentValue: 'v0.13.10',
             depName: 'quay.io/metallb/controller',
             packageName: 'registry.internal/mirror/quay.io/metallb/controller',
-            datasource: 'docker',
+            datasource: DockerDatasource.id,
           },
         ],
       });
