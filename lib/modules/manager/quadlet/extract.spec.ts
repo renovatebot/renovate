@@ -31,8 +31,8 @@ describe('modules/manager/quadlet/extract', () => {
       expect(result).toMatchSnapshot({
         deps: [
           {
-            currentValue: '1.21',
-            depName: 'docker.io/alpine',
+            currentValue: '3.22',
+            depName: 'docker.io/library/alpine',
           },
         ],
       });
@@ -44,8 +44,8 @@ describe('modules/manager/quadlet/extract', () => {
       expect(result).toMatchSnapshot({
         deps: [
           {
-            currentValue: '1.21',
-            depName: 'docker.io/alpine',
+            currentValue: '3.22',
+            depName: 'docker.io/library/alpine',
           },
         ],
       });
@@ -57,8 +57,8 @@ describe('modules/manager/quadlet/extract', () => {
       expect(result).toMatchSnapshot({
         deps: [
           {
-            currentValue: '1.21',
-            depName: 'docker.io/alpine',
+            currentValue: '3.22',
+            depName: 'docker.io/library/alpine',
           },
         ],
       });

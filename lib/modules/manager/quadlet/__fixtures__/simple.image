@@ -1,2 +1,2 @@
 [Image]
-Image=docker.io/alpine:1.21
+Image=docker.io/library/alpine:3.22

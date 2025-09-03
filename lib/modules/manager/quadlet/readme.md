@@ -3,7 +3,7 @@ Updates are performed if there is an Image option in Container, Image, or Volume
 
 ```ini
 [Container]
-Image=docker.io/alpine:1.21
+Image=docker.io/library/alpine:3.22
 ```
 
 If you need to change the versioning format, read the [versioning](../../versioning/index.md) documentation to learn more.
