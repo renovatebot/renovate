@@ -3891,6 +3891,20 @@ Dotfiles are included.
 Optional field which defaults to any non-ignored file in the repo (`**/*` glob pattern).
 Specify a custom value for this if you wish to exclude certain files which are modified by your `postUpgradeTasks` and you don't want committed.
 
+### workingDirTemplate
+
+A template describing the working directory in which the commands should be executed, relative to the repository root. If the template evaluates to a false value, then the command will be executed from the root of the repository.
+Example:
+
+```json
+{
+  "postUpgradeTasks": {
+    "commands": ["my-script.py"],
+    "workingDirTemplate": "{{{packageFileDir}}}"
+  }
+}
+```
+
 ## prBodyColumns
 
 Use this array to provide a list of column names you wish to include in the PR tables.
@@ -4682,7 +4696,7 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
   "vulnerabilityAlerts": {
     "labels": ["security"],
     "automerge": true,
-    "assignees": ["@rarkins"]
+    "assignees": ["@renovate-tests"]
   }
 }
 ```
