@@ -156,7 +156,7 @@ export async function renovateRepository(
   ObsoleteCacheHitLogger.report();
   AbandonedPackageStats.report();
   const cloned = isCloned();
-  // istanbul ignore next
+  // v8 ignore next -- coverage not required of `undefined` checks
   logger.info(
     {
       cloned,
