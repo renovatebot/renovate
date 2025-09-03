@@ -1,6 +1,5 @@
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
 import { partial } from '~test/util';
 
 const config = partial<ExtractConfig>({});
@@ -26,9 +25,11 @@ describe('modules/manager/quadlet/extract', () => {
     });
 
     it('extracts from quadlet container unit', () => {
-      const simple = Fixtures.get('simple.container');
+      const simple = `[Container]
+Image=docker.io/library/alpine:3.22`;
+
       const result = extractPackageFile(simple, packageFile, config);
-      expect(result).toMatchSnapshot({
+      expect(result).toMatchObject({
         deps: [
           {
             currentValue: '3.22',
@@ -39,9 +40,11 @@ describe('modules/manager/quadlet/extract', () => {
     });
 
     it('extracts from quadlet image unit', () => {
-      const simple = Fixtures.get('simple.image');
+      const simple = `[Image]
+Image=docker.io/library/alpine:3.22`;
+
       const result = extractPackageFile(simple, packageFile, config);
-      expect(result).toMatchSnapshot({
+      expect(result).toMatchObject({
         deps: [
           {
             currentValue: '3.22',
@@ -52,9 +55,11 @@ describe('modules/manager/quadlet/extract', () => {
     });
 
     it('extracts from quadlet volume unit', () => {
-      const simple = Fixtures.get('simple.volume');
+      const simple = `[Volume]
+Image=docker.io/library/alpine:3.22`;
+
       const result = extractPackageFile(simple, packageFile, config);
-      expect(result).toMatchSnapshot({
+      expect(result).toMatchObject({
         deps: [
           {
             currentValue: '3.22',
@@ -65,7 +70,9 @@ describe('modules/manager/quadlet/extract', () => {
     });
 
     it('extract data from file with registry aliases', () => {
-      const aliasFile = Fixtures.get('registry-alias.container');
+      const aliasFile = `[Container]
+Image=quay.io/metallb/controller:v0.13.10`;
+
       const result = extractPackageFile(aliasFile, packageFile, configAliases);
       expect(result).toMatchObject({
         deps: [
