@@ -788,7 +788,6 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
       deps: [
         {
-          currentValue: 'nixpkgs-unstable',
           datasource: 'git-refs',
           depName: 'nixpkgs',
           packageName: 'https://github.com/NixOS/nixpkgs',
@@ -876,12 +875,10 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
       deps: [
         {
-          currentValue: 'nixpkgs-unstable',
           datasource: 'git-refs',
           depName: 'nixpkgs',
           packageName: 'https://github.com/NixOS/nixpkgs',
-          lockedVersion:
-            'https://nixos.org/channels/nixpkgs-unstable/nixexprs.tar.xz',
+          lockedVersion: 'b62d2a95c72f',
         },
       ],
     });
