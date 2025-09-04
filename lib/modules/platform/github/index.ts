@@ -1328,7 +1328,7 @@ export async function ensureIssue({
         logger.debug('Issue is open and up to date - nothing to do');
         return null;
       }
-      if (shouldReOpen) {
+      if (shouldReOpen || issue.state === 'open') {
         logger.debug('Patching issue');
         const data: Record<string, unknown> = { body, state: 'open', title };
         if (labels) {
