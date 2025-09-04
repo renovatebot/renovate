@@ -47,10 +47,6 @@ export async function extractPackageFile(
       { flakeLockFile, error: flakeLockParsed.error },
       `flake.lock is missing "root" node`,
     );
-
-    if (deps.length) {
-      return { deps };
-    }
     return null;
   }
 
@@ -70,7 +66,7 @@ export async function extractPackageFile(
     // flakeOriginal example: { owner: 'NuschtOS', repo: 'search', type: 'github' }
     const flakeOriginal = flakeInput.original;
 
-    // istanbul ignore if: if we are not in a root node then original and locked always exist which cannot be easily expressed in the type
+    // if we are not in a root node then original and locked should always exist
     if (flakeLocked === undefined || flakeOriginal === undefined) {
       logger.debug(
         { flakeLockFile, flakeInput },
@@ -89,7 +85,7 @@ export async function extractPackageFile(
       continue;
     }
 
-    // istanbul ignore if: if there's a new digest, set the corresponding digest in the lockfile so confirmations pass
+    // if there's a new digest, set the corresponding digest in the lockfile so confirmations pass
     const currentDigest = config?.currentDigest;
     const newDigest = config?.newDigest;
     if (
@@ -167,7 +163,6 @@ export async function extractPackageFile(
         );
         break;
 
-      // istanbul ignore next: just a safeguard
       default:
         logger.debug(
           { flakeLockFile },
