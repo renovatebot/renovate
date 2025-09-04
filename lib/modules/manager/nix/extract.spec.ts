@@ -116,7 +116,7 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
   });
 
-  it('returns null when inputs are not yet supported', async () => {
+  it('returns null when inputs are from local path', async () => {
     const flakeLock = codeBlock`{
       "nodes": {
         "nixpkgs": {
