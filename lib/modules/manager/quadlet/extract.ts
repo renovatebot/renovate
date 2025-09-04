@@ -1,4 +1,3 @@
-import { logger } from '../../../logger';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -53,17 +52,9 @@ export function extractPackageFile(
   packageFile: string,
   config: ExtractConfig,
 ): PackageFileContent | null {
-  let quadletFile: QuadletFile;
-  try {
-    quadletFile = Ini.pipe(QuadletFile).parse(content);
-  } catch (err) {
-    logger.debug(
-      { err, packageFile },
-      'Failed to parse quadlet container file',
-    );
-    return null;
-  }
   const deps: PackageDependency<Record<string, any>>[] = [];
+
+  const quadletFile: QuadletFile = Ini.pipe(QuadletFile).parse(content);
 
   getQuadletImage(
     quadletFile?.Container?.Image,
