@@ -4,7 +4,11 @@ import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { id as gitRefVersionID } from '../../versioning/git';
 import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
-import type { PackageDependency, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import { NixFlakeLock } from './schema';
 
 // as documented upstream
@@ -20,7 +24,7 @@ const lockableChannelOriginalUrl = regEx(
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  config?: Record<string, any>,
+  config?: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   // flake.lock
   const flakeLockFile = getSiblingFileName(packageFile, 'flake.lock');
