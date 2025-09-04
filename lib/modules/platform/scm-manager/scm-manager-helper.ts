@@ -5,9 +5,9 @@ import {
   PagedRepoSchema,
   PullRequestSchema,
   RepoSchema,
-  UserSchema,
+  User,
 } from './schema';
-import type { Link, PullRequest, Repo, User } from './schema';
+import type { Link, PullRequest, Repo } from './schema';
 import type { PullRequestCreateParams, PullRequestUpdateParams } from './types';
 
 export const scmManagerHttp = new ScmManagerHttp();
@@ -41,7 +41,7 @@ export async function getCurrentUser(token: string): Promise<User> {
       headers: { accept: CONTENT_TYPES.ME },
       token,
     },
-    UserSchema,
+    User,
   );
   return response.body;
 }

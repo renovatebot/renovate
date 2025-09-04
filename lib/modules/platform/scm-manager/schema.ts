@@ -1,12 +1,12 @@
 import { z } from 'zod';
 import { EmailAddress } from '../../../util/schema-utils';
 
-export const UserSchema = z.object({
+export const User = z.object({
   mail: EmailAddress,
   displayName: z.string(),
   name: z.string(),
 });
-export type User = z.infer<typeof UserSchema>;
+export type User = z.infer<typeof User>;
 
 export const DefaultBranchSchema = z.object({
   defaultBranch: z.string(),
