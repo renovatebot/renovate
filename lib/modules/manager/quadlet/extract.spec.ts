@@ -73,6 +73,54 @@ Image=docker.io/library/alpine:3.22`;
       });
     });
 
+    it('handles docker prefix', () => {
+      const simple = `[Volume]
+Image=docker://docker.io/library/alpine:3.22`;
+
+      const result = extractPackageFile(simple, packageFile, config);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            currentValue: '3.22',
+            depName: 'docker.io/library/alpine',
+            datasource: DockerDatasource.id,
+          },
+        ],
+      });
+    });
+
+    it('handles docker-daemon prefix', () => {
+      const simple = `[Volume]
+Image=docker-daemon:docker.io/library/alpine:3.22`;
+
+      const result = extractPackageFile(simple, packageFile, config);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            currentValue: '3.22',
+            depName: 'docker.io/library/alpine',
+            datasource: DockerDatasource.id,
+          },
+        ],
+      });
+    });
+
+    it('does not extract an image file reference', () => {
+      const simple = `[Container]
+Image=foo.image`;
+
+      const result = extractPackageFile(simple, packageFile, config);
+      expect(result).toBeNull();
+    });
+
+    it('does not extract an build file reference', () => {
+      const simple = `[Container]
+Image=foo.build`;
+
+      const result = extractPackageFile(simple, packageFile, config);
+      expect(result).toBeNull();
+    });
+
     it('extract data from file with registry aliases', () => {
       const aliasFile = `[Container]
 Image=quay.io/metallb/controller:v0.13.10`;
