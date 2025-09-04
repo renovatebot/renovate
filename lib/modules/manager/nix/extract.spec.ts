@@ -83,8 +83,9 @@ describe('modules/manager/nix/extract', () => {
           "inputs": {
             "nixpkgs": "nixpkgs"
           }
-        },
+        }
       },
+      "root": "root",
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
@@ -108,8 +109,9 @@ describe('modules/manager/nix/extract', () => {
           "inputs": {
             "nixpkgs": "nixpkgs"
           }
-        },
+        }
       },
+      "root": "root",
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
@@ -139,8 +141,9 @@ describe('modules/manager/nix/extract', () => {
           "inputs": {
             "nixpkgs": "nixpkgs"
           }
-        },
+        }
       },
+      "root": "root",
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
@@ -170,8 +173,9 @@ describe('modules/manager/nix/extract', () => {
           "inputs": {
             "nixpkgs": "nixpkgs"
           }
-        },
+        }
       },
+      "root": "root",
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
@@ -201,8 +205,9 @@ describe('modules/manager/nix/extract', () => {
           "inputs": {
             "nixpkgs": "nixpkgs"
           }
-        },
+        }
       },
+      "root": "root",
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
