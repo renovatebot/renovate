@@ -2261,6 +2261,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       expect(exec.exec).toHaveBeenCalledWith('echo semver', {
         cwd: '/localDir',
+        extraEnv: {},
       });
     });
 
@@ -2388,9 +2389,11 @@ describe('workers/repository/update/branch/index', () => {
       });
       expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo some-dep-name-1', {
         cwd: '/localDir',
+        extraEnv: {},
       });
       expect(exec.exec).toHaveBeenNthCalledWith(2, 'echo some-dep-name-2', {
         cwd: '/localDir',
+        extraEnv: {},
       });
       expect(exec.exec).toHaveBeenCalledTimes(2);
       const calledWithConfig = commit.commitFilesToBranch.mock.calls[0][0];
@@ -2536,6 +2539,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
         cwd: '/localDir',
+        extraEnv: {},
       });
       expect(exec.exec).toHaveBeenCalledTimes(1);
       expect(
@@ -2742,6 +2746,7 @@ describe('workers/repository/update/branch/index', () => {
         });
         expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
           cwd: '/localDir',
+          extraEnv: {},
         });
         expect(exec.exec).toHaveBeenCalledTimes(1);
         expect(
