@@ -35,7 +35,7 @@ export interface ExtractConfig extends CustomExtractConfig {
   skipInstalls?: boolean | null;
   repository?: string;
   currentDigest?: string;
-  newDigest?: string | null;
+  newDigest?: string;
 }
 
 export interface UpdateArtifactsConfig {
