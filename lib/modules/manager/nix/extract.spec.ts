@@ -68,10 +68,42 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
   });
 
-  it('returns null when inputs are missing locked & original', async () => {
+  it('returns null when inputs are missing locked', async () => {
     const flakeLock = codeBlock`{
       "nodes": {
-        "nixpkgs": {},
+        "nixpkgs": {
+          "original": {
+            "owner": "NixOS",
+            "ref": "nixos-unstable",
+            "repo": "nixpkgs",
+            "type": "github"
+          }
+        },
+        "root": {
+          "inputs": {
+            "nixpkgs": "nixpkgs"
+          }
+        },
+      },
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
+  it('returns null when inputs are missing original', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "nixpkgs": {
+          "locked": {
+            "lastModified": 1720031269,
+            "narHash": "sha256-rwz8NJZV+387rnWpTYcXaRNvzUSnnF9aHONoJIYmiUQ=",
+            "owner": "NixOS",
+            "repo": "nixpkgs",
+            "rev": "9f4128e00b0ae8ec65918efeba59db998750ead6",
+            "type": "github"
+          }
+        },
         "root": {
           "inputs": {
             "nixpkgs": "nixpkgs"
