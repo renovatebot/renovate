@@ -70,22 +70,28 @@ export async function extractPackageFile(
     // flakeOriginal example: { owner: 'NuschtOS', repo: 'search', type: 'github' }
     const flakeOriginal = flakeInput.original;
 
-    // if we are not in a root node then original and locked should always exist
-    if (!flakeLocked || !flakeOriginal) {
+    if (flakeLocked === undefined) {
       logger.debug(
         { flakeLockFile, flakeInput },
-        `Found empty flake input, skipping`,
+        `input is missing locked, skipping`,
       );
       continue;
     }
 
-    // indirect inputs cannot be reliably updated because they depend on the flake registry
-    if (flakeOriginal.type === 'indirect') {
+    if (flakeOriginal === undefined) {
+      logger.debug(
+        { flakeLockFile, flakeInput },
+        `input is missing original, skipping`,
+      );
       continue;
     }
 
     // if no rev is being tracked, we cannot update this input
     if (flakeLocked.rev === undefined) {
+      logger.debug(
+        { flakeLockFile, flakeInput },
+        `input is not tracking a rev, skipping`,
+      );
       continue;
     }
 
@@ -99,6 +105,10 @@ export async function extractPackageFile(
       flakeOriginal.rev === currentDigest && // currentDigest is the old digest
       content.includes(newDigest) // flake.nix contains the new digest
     ) {
+      logger.debug(
+        { flakeLockFile, flakeInput },
+        `overriding rev ${flakeOriginal.rev} with new digest ${newDigest}`,
+      );
       flakeOriginal.rev = newDigest;
     }
 
@@ -167,12 +177,12 @@ export async function extractPackageFile(
         );
         break;
 
-      default:
+      case 'path': // cannot update local path inputs
+      case 'indirect': // indirect inputs cannot be reliably updated because they depend on the flake registry
         logger.debug(
-          { flakeLockFile },
-          `Flake type "${flakeLocked.type} not yet supported", skipping`,
+          { flakeLockFile, flakeInput },
+          `input is type ${flakeLocked.type}, skipping`,
         );
-
         continue;
     }
 
