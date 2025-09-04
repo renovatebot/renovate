@@ -1,0 +1,10 @@
+{
+  "name": "root",
+  "version": "0.0.1",
+  "dependencies": {
+    "dep1": "1.0.0"
+  },
+  "workspaces": [
+    "sub"
+  ]
+}

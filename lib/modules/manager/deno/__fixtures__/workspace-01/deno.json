@@ -1,0 +1,14 @@
+{
+  "lock": {
+    "path": "packages/pkg1/deno.lock"
+  },
+  "imports": {
+    "@luca/cases": "jsr:@luca/cases"
+  },
+  "workspace":{
+    "members": [
+      "packages/*",
+      "docs"
+    ]
+  }
+}

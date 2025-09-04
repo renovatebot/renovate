@@ -1,0 +1,12 @@
+{
+  "name": "docs",
+  "version": "1.0.2",
+  "imports": {
+    "dep3": "jsr:@scope/dep3@~1.0.1"
+  },
+  "scopes": {
+    "https://deno.land/x/": {
+      "dep4": "jsr:@scope/dep4@~1.0.1"
+    }
+  }
+}

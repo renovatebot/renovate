@@ -1,0 +1,34 @@
+{
+  "version": "5",
+  "specifiers": {
+    "npm:dep1@1.0.0": "1.0.0",
+    "npm:dep2@2.0.0": "2.0.0"
+  },
+  "npm": {
+    "dep1@1.0.0": {
+      "integrity": "sha512-9lJQ1hrR4kKGGEdh9tJk1nUQJ8Y67KA/vdq1f4WnmG0RMeyfl0h3/2Y7m9CEpA/4O7UHp7KwaJyYo7ehrB/K6w=="
+    },
+    "dep2@2.0.0": {
+      "integrity": "sha512-jgCVkO7JeovWbWd2scZb03as7ly7mDzhN4x5bcmigsMn/vyIXHSPF8hD+WgapfI+KUG7eyuOsTyiiYRwHjT2lQ==",
+      "dependencies": [
+        "dep1"
+      ]
+    }
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:dep1@1.0.0"
+      ]
+    },
+    "members": {
+      "sub": {
+        "packageJson": {
+          "dependencies": [
+            "npm:dep2@2.0.0"
+          ]
+        }
+      }
+    }
+  }
+}

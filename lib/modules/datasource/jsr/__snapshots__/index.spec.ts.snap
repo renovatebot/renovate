@@ -1,0 +1,39 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`modules/datasource/jsr/index > contains yanked versions 1`] = `
+{
+  "homepage": "https://jsr.io/@scope/package-name",
+  "registryUrl": "https://jsr.io/",
+  "releases": [
+    {
+      "isDeprecated": true,
+      "isLatest": false,
+      "version": "0.0.1",
+    },
+    {
+      "isDeprecated": undefined,
+      "isLatest": true,
+      "version": "0.0.2",
+    },
+  ],
+}
+`;
+
+exports[`modules/datasource/jsr/index > should fetch package info from jsr 1`] = `
+{
+  "homepage": "https://jsr.io/@scope/package-name",
+  "registryUrl": "https://jsr.io/",
+  "releases": [
+    {
+      "isDeprecated": undefined,
+      "isLatest": false,
+      "version": "0.0.1",
+    },
+    {
+      "isDeprecated": undefined,
+      "isLatest": true,
+      "version": "0.0.2",
+    },
+  ],
+}
+`;

@@ -1,0 +1,13 @@
+{
+  "name": "pkg1",
+  "version": "0.1.0",
+  "imports": {
+    "dep2": "jsr:@luca/flag@^1.0.0"
+  },
+  "tasks": {
+    "dev": "deno run -A npm:vite & deno run server:start",
+    "build": "deno run -A npm:vite build",
+    "server:start": "deno run -A --watch ./api/main.ts",
+    "serve": "deno run build && deno run server:start"
+  }
+}
