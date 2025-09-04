@@ -1,7 +1,0 @@
-{
-  "name": "docs",
-  "version": "1.0.2",
-  "imports": {
-    "dep2": "npm:dep2@2"
-  }
-}

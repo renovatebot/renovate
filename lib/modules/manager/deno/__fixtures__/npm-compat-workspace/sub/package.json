@@ -1,7 +1,0 @@
-{
-  "name": "sub",
-  "version": "0.0.2",
-  "dependencies": {
-    "dep2": "2.0.0"
-  }
-}

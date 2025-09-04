@@ -1,4 +1,6 @@
-import { fs, getFixturePath } from '../../../../test/util';
+import { codeBlock } from 'common-tags';
+import upath from 'upath';
+import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import {
   collectPackageJson,
@@ -13,6 +15,10 @@ import {
 } from './extract';
 
 vi.mock('../../../util/fs');
+// used in detectNodeCompatWorkspaces()
+vi.mock('find-packages', () => ({
+  findPackages: vi.fn(),
+}));
 
 describe('modules/manager/deno/extract', () => {
   describe('getDenoLock()', () => {
@@ -475,8 +481,12 @@ describe('modules/manager/deno/extract', () => {
   });
 
   describe('collectPackageJson()', () => {
-    it('detects npm-compatible deno', async () => {
+    it('node-compat package.json', async () => {
       GlobalConfig.set({ localDir: '' });
+      const { findPackages } = await import('find-packages');
+      vi.mocked(findPackages).mockResolvedValue([
+        { dir: '.', manifest: {}, writeProjectManifest: Promise.resolve },
+      ]);
       fs.getSiblingFileName.mockReturnValueOnce('package.json');
       fs.readLocalFile.mockResolvedValueOnce(
         JSON.stringify({
@@ -682,21 +692,62 @@ describe('modules/manager/deno/extract', () => {
 
     // workspace tests
     describe('workspaces', () => {
-      beforeEach(async () => {
-        vi.restoreAllMocks();
-        const realFs =
-          await vi.importActual<typeof import('../../../util/fs')>(
-            '../../../util/fs',
-          );
-
-        fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);
-        fs.readLocalFile.mockImplementation(realFs.readLocalFile);
-        fs.localPathIsFile.mockImplementation(realFs.localPathIsFile);
-      });
-
       it('npm workspace compatible', async () => {
-        GlobalConfig.set({
-          localDir: getFixturePath('npm-compat-workspace/', './'),
+        GlobalConfig.set({ localDir: '' });
+        const { findPackages } = await import('find-packages');
+        vi.mocked(findPackages).mockResolvedValue([
+          {
+            dir: 'sub',
+            manifest: { name: 'sub' },
+            writeProjectManifest: Promise.resolve,
+          },
+        ]);
+        fs.getSiblingFileName.mockReturnValue('package.json');
+        fs.readLocalFile.mockImplementation((fileName) => {
+          if (fileName === 'package.json') {
+            return Promise.resolve(codeBlock`
+              {
+                "name": "root",
+                "version": "0.0.1",
+                "dependencies": {
+                  "dep1": "1.0.0"
+                },
+                "workspaces": [
+                  "sub"
+                ]
+              }
+            `);
+          }
+          if (fileName === 'sub/package.json') {
+            return Promise.resolve(codeBlock`
+              {
+                "name": "sub",
+                "version": "0.0.2",
+                "dependencies": {
+                  "dep2": "2.0.0"
+                }
+              }
+            `);
+          }
+          if (fileName === 'deno.lock') {
+            return Promise.resolve(codeBlock`
+              {
+                "version": "5",
+                "specifiers": {
+                  "npm:dep1@1.0.0": "1.0.0",
+                  "npm:dep2@2.0.0": "2.0.0"
+                }
+              }
+            `);
+          }
+          return Promise.resolve(null);
+        });
+        fs.localPathIsFile.mockImplementation((fileName) => {
+          return Promise.resolve(
+            fileName === 'package.json' ||
+              fileName === 'sub/package.json' ||
+              fileName === 'deno.lock',
+          );
         });
 
         expect(await extractAllPackageFiles({}, ['deno.lock'])).toStrictEqual([
@@ -744,8 +795,93 @@ describe('modules/manager/deno/extract', () => {
       });
 
       it('deno workspace', async () => {
-        GlobalConfig.set({
-          localDir: getFixturePath('workspace-01/', './'),
+        GlobalConfig.set({ localDir: '' });
+        const { findPackages } = await import('find-packages');
+        vi.mocked(findPackages).mockResolvedValue([]);
+        fs.getSiblingFileName.mockReturnValue('packages/pkg1/deno.lock');
+        fs.readLocalFile.mockImplementation((fileName) => {
+          if (fileName === 'deno.json') {
+            return Promise.resolve(codeBlock`
+              {
+                "lock": {
+                  "path": "packages/pkg1/deno.lock"
+                },
+                "imports": {
+                  "@luca/cases": "jsr:@luca/cases"
+                },
+                "workspace":{
+                  "members": [
+                    "packages/*",
+                    "docs"
+                  ]
+                }
+              }
+            `);
+          }
+          if (fileName === 'docs/deno.json') {
+            return Promise.resolve(codeBlock`
+              {
+                "name": "docs",
+                "version": "1.0.2",
+                "imports": {
+                  "dep2": "npm:dep2@2"
+                }
+              }
+            `);
+          }
+          if (fileName === 'packages/pkg1/deno.jsonc') {
+            return Promise.resolve(codeBlock`
+              {
+                "name": "pkg1",
+                "version": "0.1.0",
+                "imports": {
+                  "dep2": "jsr:@luca/flag@^1.0.0"
+                },
+                "tasks": {
+                  "dev": "deno run -A npm:vite & deno run server:start",
+                  "build": "deno run -A npm:vite build",
+                  "server:start": "deno run -A --watch ./api/main.ts",
+                  "serve": "deno run build && deno run server:start"
+                }
+              }
+            `);
+          }
+          if (fileName === 'packages/pkg1/deno.lock') {
+            return Promise.resolve(codeBlock`
+              {
+                "version": "5",
+                "specifiers": {
+                  "jsr:@luca/cases@*": "1.0.0",
+                  "jsr:@luca/flag@1": "1.0.1",
+                  "npm:dep2@2": "2.0.0",
+                  "npm:vite@*": "7.1.3_picomatch@4.0.3"
+                }
+              }
+            `);
+          }
+          return Promise.resolve(null);
+        });
+        fs.getSiblingFileName.mockImplementation((lockFile, siblingName) => {
+          if (lockFile === 'deno.lock' && siblingName === 'package.json') {
+            return 'package.json';
+          }
+          if (
+            lockFile === 'packages/pkg1/deno.lock' &&
+            siblingName === 'package.json'
+          ) {
+            return 'packages/pkg1/package.json';
+          }
+          return `${upath.dirname(lockFile)}/${siblingName}`;
+        });
+        fs.localPathIsFile.mockImplementation((fileName) => {
+          return Promise.resolve(
+            [
+              'deno.json',
+              'docs/deno.json',
+              'packages/pkg1/deno.jsonc',
+              'packages/pkg1/deno.lock',
+            ].includes(fileName),
+          );
         });
 
         expect(
@@ -835,8 +971,96 @@ describe('modules/manager/deno/extract', () => {
       });
 
       it('imports and scopes field is ignored when importMap is specified in the root config file', async () => {
-        GlobalConfig.set({
-          localDir: getFixturePath('workspace-02/', './'),
+        GlobalConfig.set({ localDir: '' });
+        const { findPackages } = await import('find-packages');
+        vi.mocked(findPackages).mockResolvedValue([]);
+        fs.getSiblingFileName.mockImplementation((lockFile, siblingName) => {
+          if (lockFile === 'deno.lock' && siblingName === 'package.json') {
+            return 'package.json';
+          }
+          return `${upath.dirname(lockFile)}/${siblingName}`;
+        });
+        fs.readLocalFile.mockImplementation((fileName) => {
+          if (fileName === 'deno.json') {
+            return Promise.resolve(codeBlock`
+              {
+                "importMap": "import_map.json",
+                "workspace": ["docs"]
+              }
+            `);
+          }
+          if (fileName === 'import_map.json') {
+            return Promise.resolve(codeBlock`
+              {
+                "imports": {
+                  "dep1": "jsr:@scope/dep1@^2.1.3",
+                  "test": "https://deno.land/std@0.222.0/front_matter/test.ts",
+                  "copy": "https://deno.land/std/fs/copy.ts"
+                }
+              }
+            `);
+          }
+          if (fileName === 'docs/deno.json') {
+            return Promise.resolve(codeBlock`
+              {
+                "name": "docs",
+                "version": "1.0.2",
+                "imports": {
+                  "dep3": "jsr:@scope/dep3@~1.0.1"
+                },
+                "scopes": {
+                  "https://deno.land/x/": {
+                    "dep4": "jsr:@scope/dep4@~1.0.1"
+                  }
+                }
+              }
+            `);
+          }
+          if (fileName === 'deno.lock') {
+            return Promise.resolve(codeBlock`
+              {
+                "version": "5",
+                "redirects": {
+                  "https://deno.land/std/fs/copy.ts": "https://deno.land/std@0.224.0/fs/copy.ts"
+                },
+                "remote": {
+                  "https://deno.land/std@0.222.0/front_matter/test.ts": "6a72a690ef9bd606411e3e78dfd44f382fce58f722ed6e56ce57d65140368822",
+                  "https://deno.land/std@0.224.0/fs/copy.ts": "7ab12a16adb65d155d4943c88081ca16ce3b0b5acada64c1ce93800653678039"
+                },
+                "workspace": {
+                  "dependencies": [
+                    "jsr:@scope/dep1@^2.1.3"
+                  ],
+                  "members": {
+                    "docs": {
+                      "dependencies": [
+                        "jsr:@scope/dep3@~1.0.1",
+                        "jsr:@scope/dep4@~1.0.1"
+                      ]
+                    }
+                  }
+                }
+              }
+            `);
+          }
+          return Promise.resolve(null);
+        });
+        fs.getSiblingFileName.mockImplementation((lockFile, siblingName) => {
+          if (lockFile === 'deno.lock' && siblingName === 'package.json') {
+            return 'package.json';
+          }
+          const dir = upath.dirname(lockFile);
+          return dir === '.' ? siblingName : `${dir}/${siblingName}`;
+        });
+        fs.localPathIsFile.mockImplementation((fileName) => {
+          return Promise.resolve(
+            [
+              'deno.json',
+              'import_map.json',
+              'docs/deno.json',
+              'deno.lock',
+            ].includes(fileName),
+          );
         });
 
         expect(
@@ -893,8 +1117,54 @@ describe('modules/manager/deno/extract', () => {
       });
 
       it('deno workspace with package.json', async () => {
-        GlobalConfig.set({
-          localDir: getFixturePath('workspace-03/', './'),
+        GlobalConfig.set({ localDir: '' });
+        const { findPackages } = await import('find-packages');
+        vi.mocked(findPackages).mockResolvedValue([
+          { dir: 'node', manifest: {}, writeProjectManifest: Promise.resolve },
+        ]);
+        fs.getSiblingFileName.mockImplementation((basePath, fileName) => {
+          if (basePath === 'deno.lock' && fileName === 'package.json') {
+            return 'package.json';
+          }
+          return 'deno.lock';
+        });
+        fs.readLocalFile.mockImplementation((fileName) => {
+          if (fileName === 'deno.json') {
+            return Promise.resolve(codeBlock`
+              {
+                "workspace":{
+                  "members": [
+                    "node"
+                  ]
+                }
+              }
+            `);
+          }
+          if (fileName === 'node/package.json') {
+            return Promise.resolve(codeBlock`
+              {
+                "dependencies": {
+                  "hono": "^4.2.1"
+                }
+              }
+            `);
+          }
+          if (fileName === 'deno.lock') {
+            return Promise.resolve(codeBlock`
+              {
+                "version": "5",
+                "specifiers": {
+                  "npm:hono@^4.2.1": "4.9.5"
+                }
+              }
+            `);
+          }
+          return Promise.resolve(null);
+        });
+        fs.localPathIsFile.mockImplementation((fileName) => {
+          return Promise.resolve(
+            ['deno.json', 'node/package.json', 'deno.lock'].includes(fileName),
+          );
         });
 
         expect(

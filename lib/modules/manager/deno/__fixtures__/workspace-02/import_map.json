@@ -1,7 +1,0 @@
-{
-  "imports": {
-    "dep1": "jsr:@scope/dep1@^2.1.3",
-    "test": "https://deno.land/std@0.222.0/front_matter/test.ts",
-    "copy": "https://deno.land/std/fs/copy.ts"
-  }
-}
