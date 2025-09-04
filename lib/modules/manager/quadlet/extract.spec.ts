@@ -1,7 +1,7 @@
+import { DockerDatasource } from '../../datasource/docker';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
 import { partial } from '~test/util';
-import { DockerDatasource } from '../../datasource/docker';
 
 const config = partial<ExtractConfig>({});
 

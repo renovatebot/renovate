@@ -5,7 +5,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import { QuadletFile, Ini } from './schema';
+import { Ini, QuadletFile } from './schema';
 
 function startsWithAny(image: string, prefixes: string[]): boolean {
   return !!prefixes.find((prefix) => image.startsWith(prefix));
@@ -36,8 +36,10 @@ function getQuadletImage(
     !endsWithAny(image, ignoredSuffixes)
   ) {
     // Remove the docker:// or docker-daemon: transport prefix, if present
-    image = image.replace(/^docker:\/\//, '').replace(/^docker-daemon:/, '');
-    const dep = getDep(image, false, config.registryAliases);
+    const cleanedImage = image
+      .replace(/^docker:\/\//, '')
+      .replace(/^docker-daemon:/, '');
+    const dep = getDep(cleanedImage, false, config.registryAliases);
     if (dep) {
       dep.depType = 'image';
 

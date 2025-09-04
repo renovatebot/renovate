@@ -1,21 +1,14 @@
-import { z } from 'zod';
 import ini from 'ini';
+import { z } from 'zod';
 
-export const Ini = z.string().transform(
-  (
-    str,
-    ctx,
-  ): {
-    [key: string]: any;
-  } => {
-    try {
-      return ini.parse(str);
-    } catch {
-      ctx.addIssue({ code: 'custom', message: 'Invalid INI' });
-      return z.NEVER;
-    }
-  },
-);
+export const Ini = z.string().transform((str, ctx): Record<string, any> => {
+  try {
+    return ini.parse(str);
+  } catch {
+    ctx.addIssue({ code: 'custom', message: 'Invalid INI' });
+    return z.NEVER;
+  }
+});
 
 export const QuadletFile = z.object({
   Container: z
