@@ -324,15 +324,16 @@ const platform: Platform = {
       throw new Error(REPOSITORY_BLOCKED);
     }
 
-    // mirror behaviour of gitea - if default merge style is allowed, use this;
-    // else fall back to predefined order
+    // similar to gitea behaviour- if default merge style is allowed, use this;
+    // else fall back to predefined order. Order chosen to minimize commits - see
+    // https://github.com/renovatebot/renovate/pull/37768 for discussion.
     const preferredOrder: PRMergeMethod[] = [
       repo.default_merge_style,
+      'fast-forward-only',
+      'squash',
       'merge',
       'rebase',
       'rebase-merge',
-      'squash',
-      'fast-forward-only',
     ];
 
     const mergeStyle = preferredOrder.find((style) => isAllowed(style, repo));
