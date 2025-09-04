@@ -86,11 +86,29 @@ export async function extractPackageFile(
       continue;
     }
 
+    // indirect inputs cannot be reliably updated because they depend on the flake registry
+    if (flakeOriginal.type === 'indirect' || flakeLocked.type === 'indirect') {
+      logger.debug(
+        { flakeLockFile, flakeInput },
+        `input is type ${flakeOriginal.type}, skipping`,
+      );
+      continue;
+    }
+
+    // cannot update local path inputs
+    if (flakeOriginal.type === 'path' || flakeLocked.type === 'path') {
+      logger.debug(
+        { flakeLockFile, flakeInput },
+        `input is type ${flakeOriginal.type}, skipping`,
+      );
+      continue;
+    }
+
     // if no rev is being tracked, we cannot update this input
     if (flakeLocked.rev === undefined) {
       logger.debug(
         { flakeLockFile, flakeInput },
-        `input is not tracking a rev, skipping`,
+        `locked input is not tracking a rev, skipping`,
       );
       continue;
     }
@@ -176,14 +194,6 @@ export async function extractPackageFile(
           'https://$<domain>/$<owner>/$<repo>',
         );
         break;
-
-      case 'path': // cannot update local path inputs
-      case 'indirect': // indirect inputs cannot be reliably updated because they depend on the flake registry
-        logger.debug(
-          { flakeLockFile, flakeInput },
-          `input is type ${flakeLocked.type}, skipping`,
-        );
-        continue;
     }
 
     deps.push(dep);
