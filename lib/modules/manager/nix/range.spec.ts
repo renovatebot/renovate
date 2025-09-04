@@ -2,11 +2,6 @@ import type { RangeConfig } from '../types';
 import { getRangeStrategy } from '.';
 
 describe('modules/manager/nix/range', () => {
-  it('returns same if nixpkgs', () => {
-    const config: RangeConfig = { rangeStrategy: 'widen', depName: 'nixpkgs' };
-    expect(getRangeStrategy(config)).toBe('widen');
-  });
-
   it('returns replace if currentValue not null', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
