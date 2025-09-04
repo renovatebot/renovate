@@ -68,6 +68,53 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
   });
 
+  it('returns null when inputs are missing locked & original', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "nixpkgs": {},
+        "root": {
+          "inputs": {
+            "nixpkgs": "nixpkgs"
+          }
+        },
+      },
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
+  it('returns null when inputs are not a valid type', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "nixpkgs": {
+          "locked": {
+            "lastModified": 1720031269,
+            "narHash": "sha256-rwz8NJZV+387rnWpTYcXaRNvzUSnnF9aHONoJIYmiUQ=",
+            "owner": "NixOS",
+            "repo": "nixpkgs",
+            "rev": "9f4128e00b0ae8ec65918efeba59db998750ead6",
+            "type": "gobbledegook"
+          },
+          "original": {
+            "owner": "NixOS",
+            "ref": "nixos-unstable",
+            "repo": "nixpkgs",
+            "type": "gobbledegook"
+          }
+        },
+        "root": {
+          "inputs": {
+            "nixpkgs": "nixpkgs"
+          }
+        },
+      },
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
   it('returns nixpkgs input', async () => {
     const flakeLock = codeBlock`{
       "nodes": {
