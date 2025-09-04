@@ -2,6 +2,8 @@ import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
+import { id as gitRefVersionID } from '../../versioning/git';
+import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { NixFlakeLock } from './schema';
 
@@ -103,17 +105,32 @@ export async function extractPackageFile(
     const dep: PackageDependency = {
       depName,
       datasource: GitRefsDatasource.id,
-      currentDigest: flakeOriginal.rev,
-      replaceString: flakeOriginal.rev,
-
-      // if rev is set, the dep contains a digest and can be updated directly
-      currentValue: flakeOriginal.rev ? flakeOriginal.ref : undefined,
-      // otherwise, set lockedVersion so it is updated during lock file maintenance
-      lockedVersion: flakeOriginal.rev ? undefined : flakeLocked.rev,
+      versioning: gitRefVersionID,
     };
+
+    // if rev is set, the flake contains a digest and can be updated directly
+    // otherwise set lockedVersion so it is updated during lock file maintenance
+    if (flakeOriginal.rev) {
+      dep.currentValue = flakeOriginal.ref;
+      dep.currentDigest = flakeOriginal.rev;
+      dep.replaceString = flakeOriginal.rev;
+    } else {
+      dep.lockedVersion = flakeLocked.rev;
+    }
 
     switch (flakeLocked.type) {
       case 'github':
+        // set to nixpkgs if it is a nixpkgs reference
+        if (
+          flakeOriginal.owner?.toLowerCase() === 'nixos' &&
+          flakeOriginal.repo?.toLowerCase() === 'nixpkgs'
+        ) {
+          dep.packageName = 'https://github.com/NixOS/nixpkgs';
+          dep.currentValue = flakeOriginal.ref;
+          dep.versioning = nixpkgsVersioning;
+          break;
+        }
+
         dep.packageName = `https://${flakeOriginal.host ?? 'github.com'}/${flakeOriginal.owner}/${flakeOriginal.repo}`;
         break;
 
@@ -130,12 +147,17 @@ export async function extractPackageFile(
         break;
 
       case 'tarball':
-        // set to nixpkgs if it is a channel URL
+        // set to nixpkgs if it is a lockable channel URL
         if (
           flakeOriginal.url &&
           lockableChannelOriginalUrl.test(flakeOriginal.url)
         ) {
           dep.packageName = 'https://github.com/NixOS/nixpkgs';
+          dep.currentValue = flakeOriginal.url.replace(
+            lockableChannelOriginalUrl,
+            '$<channel>',
+          );
+          dep.versioning = nixpkgsVersioning;
           break;
         }
 
