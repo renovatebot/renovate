@@ -116,7 +116,7 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
   });
 
-  it('returns null when inputs are not a valid type', async () => {
+  it('returns null when inputs are not yet supported', async () => {
     const flakeLock = codeBlock`{
       "nodes": {
         "nixpkgs": {
@@ -126,13 +126,13 @@ describe('modules/manager/nix/extract', () => {
             "owner": "NixOS",
             "repo": "nixpkgs",
             "rev": "9f4128e00b0ae8ec65918efeba59db998750ead6",
-            "type": "gobbledegook"
+            "type": "path"
           },
           "original": {
             "owner": "NixOS",
             "ref": "nixos-unstable",
             "repo": "nixpkgs",
-            "type": "gobbledegook"
+            "type": "path"
           }
         },
         "root": {

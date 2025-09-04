@@ -71,7 +71,7 @@ export async function extractPackageFile(
     const flakeOriginal = flakeInput.original;
 
     // if we are not in a root node then original and locked should always exist
-    if (flakeLocked === undefined || flakeOriginal === undefined) {
+    if (!flakeLocked || !flakeOriginal) {
       logger.debug(
         { flakeLockFile, flakeInput },
         `Found empty flake input, skipping`,
@@ -170,7 +170,7 @@ export async function extractPackageFile(
       default:
         logger.debug(
           { flakeLockFile },
-          `Unknown flake.lock type "${flakeLocked.type}", skipping`,
+          `Flake type "${flakeLocked.type} not yet supported", skipping`,
         );
 
         continue;
