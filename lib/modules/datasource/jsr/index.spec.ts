@@ -55,7 +55,22 @@ describe('modules/datasource/jsr/index', () => {
       packageName: '@scope/package-name',
       registryUrl: jsr.defaultRegistryUrls[0],
     });
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      homepage: 'https://jsr.io/@scope/package-name',
+      registryUrl: 'https://jsr.io/',
+      releases: [
+        {
+          isDeprecated: undefined,
+          isLatest: false,
+          version: '0.0.1',
+        },
+        {
+          isDeprecated: undefined,
+          isLatest: true,
+          version: '0.0.2',
+        },
+      ],
+    });
   });
 
   it('contains yanked versions', async () => {
@@ -68,7 +83,22 @@ describe('modules/datasource/jsr/index', () => {
       packageName: '@scope/package-name',
       registryUrl: jsr.defaultRegistryUrls[0],
     });
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      homepage: 'https://jsr.io/@scope/package-name',
+      registryUrl: 'https://jsr.io/',
+      releases: [
+        {
+          isDeprecated: true,
+          isLatest: false,
+          version: '0.0.1',
+        },
+        {
+          isDeprecated: undefined,
+          isLatest: true,
+          version: '0.0.2',
+        },
+      ],
+    });
   });
 
   it('should return null if lookup fails', async () => {
