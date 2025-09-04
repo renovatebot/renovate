@@ -172,6 +172,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'workingDirTemplate',
+    description:
+      'A template describing the working directory in which post-upgrade tasks should be executed.',
+    type: 'string',
+    parents: ['postUpgradeTasks'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'dataFileTemplate',
     description: 'A template to create post-upgrade command data file from.',
     type: 'string',

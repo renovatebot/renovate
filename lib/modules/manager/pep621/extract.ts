@@ -76,7 +76,7 @@ export async function extractPackageFile(
 
   // process specific tool sets
   let processedDeps = deps;
-  let lockFiles: string[] = [];
+  const lockFiles: string[] = [];
   for (const processor of processors) {
     processedDeps = processor.process(def, processedDeps);
     processedDeps = await processor.extractLockedVersions(
@@ -84,9 +84,9 @@ export async function extractPackageFile(
       processedDeps,
       packageFile,
     );
-    if (processor.getLockfiles) {
-      lockFiles = await processor.getLockfiles(def, lockFiles, packageFile);
-    }
+
+    const processedLockFiles = await processor.getLockfiles(def, packageFile);
+    lockFiles.push(...processedLockFiles);
   }
 
   const packageFileVersion = def.project?.version;
