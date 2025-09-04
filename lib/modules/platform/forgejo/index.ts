@@ -47,7 +47,6 @@ import { ForgejoPrCache } from './pr-cache';
 import type {
   CombinedCommitStatus,
   Comment,
-  IssueState,
   Label,
   PRMergeMethod,
   PRUpdateParams,
@@ -882,41 +881,42 @@ const platform: Platform = {
           return null;
         }
 
-        // Update issue body and re-open if enabled
-        // TODO: types (#22198)
-        logger.debug(`Updating Issue #${activeIssue.number!}`);
-        const existingIssue = await helper.updateIssue(
-          config.repository,
-          // TODO #22198
-          activeIssue.number!,
-          {
-            body,
-            title,
-            state: shouldReOpen ? 'open' : (activeIssue.state as IssueState),
-          },
-        );
-
-        // Test whether the issues need to be updated
-        const existingLabelIds = (existingIssue.labels ?? []).map(
-          (label) => label.id,
-        );
-        if (
-          labels &&
-          (labels.length !== existingLabelIds.length ||
-            labels.filter((labelId) => !existingLabelIds.includes(labelId))
-              .length !== 0)
-        ) {
-          await helper.updateIssueLabels(
+        if (shouldReOpen || activeIssue.state === 'open') {
+          // Update issue body and re-open
+          logger.debug(`Updating Issue #${activeIssue.number}`);
+          const existingIssue = await helper.updateIssue(
             config.repository,
             // TODO #22198
             activeIssue.number!,
             {
-              labels,
+              body,
+              title,
+              state: 'open',
             },
           );
-        }
 
-        return 'updated';
+          // Test whether the issues need to be updated
+          const existingLabelIds = (existingIssue.labels ?? []).map(
+            (label) => label.id,
+          );
+          if (
+            labels &&
+            (labels.length !== existingLabelIds.length ||
+              labels.filter((labelId) => !existingLabelIds.includes(labelId))
+                .length !== 0)
+          ) {
+            await helper.updateIssueLabels(
+              config.repository,
+              // TODO #22198
+              activeIssue.number!,
+              {
+                labels,
+              },
+            );
+          }
+
+          return 'updated';
+        }
       }
 
       // Create new issue and reset cache
