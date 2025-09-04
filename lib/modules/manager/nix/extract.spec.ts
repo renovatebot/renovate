@@ -116,7 +116,69 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
   });
 
-  it('returns null when inputs are from local path', async () => {
+  it('returns null when original inputs are from local path', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "nixpkgs": {
+          "locked": {
+            "lastModified": 1720031269,
+            "narHash": "sha256-rwz8NJZV+387rnWpTYcXaRNvzUSnnF9aHONoJIYmiUQ=",
+            "owner": "NixOS",
+            "repo": "nixpkgs",
+            "rev": "9f4128e00b0ae8ec65918efeba59db998750ead6",
+            "type": "github"
+          },
+          "original": {
+            "owner": "NixOS",
+            "ref": "nixos-unstable",
+            "repo": "nixpkgs",
+            "type": "path"
+          }
+        },
+        "root": {
+          "inputs": {
+            "nixpkgs": "nixpkgs"
+          }
+        },
+      },
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
+  it('returns null when locked inputs are indirect', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "nixpkgs": {
+          "locked": {
+            "lastModified": 1720031269,
+            "narHash": "sha256-rwz8NJZV+387rnWpTYcXaRNvzUSnnF9aHONoJIYmiUQ=",
+            "owner": "NixOS",
+            "repo": "nixpkgs",
+            "rev": "9f4128e00b0ae8ec65918efeba59db998750ead6",
+            "type": "indirect"
+          },
+          "original": {
+            "owner": "NixOS",
+            "ref": "nixos-unstable",
+            "repo": "nixpkgs",
+            "type": "github"
+          }
+        },
+        "root": {
+          "inputs": {
+            "nixpkgs": "nixpkgs"
+          }
+        },
+      },
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
+  it('returns null when locked inputs are from local path', async () => {
     const flakeLock = codeBlock`{
       "nodes": {
         "nixpkgs": {
@@ -132,7 +194,7 @@ describe('modules/manager/nix/extract', () => {
             "owner": "NixOS",
             "ref": "nixos-unstable",
             "repo": "nixpkgs",
-            "type": "path"
+            "type": "github"
           }
         },
         "root": {
