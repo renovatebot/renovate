@@ -3,14 +3,31 @@ import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
 import type { HttpCache } from './schema';
 
 export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
-  override load(url: string): Promise<unknown> {
+  override load(method: string, url: string): Promise<unknown> {
     const cache = getCache();
+
+    if (method === 'head') {
+      cache.httpCacheHead ??= {};
+      return Promise.resolve(cache.httpCacheHead[url]);
+    }
+
     cache.httpCache ??= {};
     return Promise.resolve(cache.httpCache[url]);
   }
 
-  override persist(url: string, data: HttpCache): Promise<void> {
+  override persist(
+    method: string,
+    url: string,
+    data: HttpCache,
+  ): Promise<void> {
     const cache = getCache();
+
+    if (method === 'head') {
+      cache.httpCacheHead ??= {};
+      cache.httpCacheHead[url] = data;
+      return Promise.resolve();
+    }
+
     cache.httpCache ??= {};
     cache.httpCache[url] = data;
     return Promise.resolve();
