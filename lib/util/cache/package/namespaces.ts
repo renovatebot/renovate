@@ -7,6 +7,8 @@
 /* v8 ignore start -- BTW don't forget to update `self-hosted-configuration.md` */
 export const packageCacheNamespaces = [
   '_test-namespace',
+  'changelog-azure-release',
+  'changelog-azure-notes@v2',
   'changelog-bitbucket-notes@v2',
   'changelog-bitbucket-release',
   'changelog-bitbucket-server-notes@v2',
@@ -25,6 +27,7 @@ export const packageCacheNamespaces = [
   'datasource-aws-eks-addon',
   'datasource-azure-bicep-resource',
   'datasource-azure-pipelines-tasks',
+  'datasource-azure-tags',
   'datasource-bazel',
   'datasource-bitbucket-tags',
   'datasource-bitbucket-server-tags',
