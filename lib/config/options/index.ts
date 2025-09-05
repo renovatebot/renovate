@@ -793,6 +793,15 @@ const options: RenovateOptions[] = [
     default: `Dependency Dashboard`,
   },
   {
+    name: 'dependencyDashboardCategory',
+    description:
+      'The category to group branches on the Dependency Dashboard issue.',
+    type: 'string',
+    default: null,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'dependencyDashboardHeader',
     description:
       'Any text added here will be placed first in the Dependency Dashboard issue body.',
