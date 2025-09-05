@@ -1,0 +1,28 @@
+{
+  "nodes": {
+    "nixpkgs-extra-pkgs": {
+      "locked": {
+        "host": "github.corp.example.com",
+        "lastModified": 1728666512,
+        "narHash": "sha256-p+l16Zzyl2DXG695yks6KQP7NkjsnEksu5GBvtL1QYg=",
+        "owner": "my-org",
+        "repo": "nixpkgs-extra-pkgs",
+        "rev": "6bf2706348447df6f8b86b1c3e54f87b0afda84f",
+        "type": "github"
+      },
+      "original": {
+        "host": "github.corp.example.com",
+        "owner": "my-org",
+        "repo": "nixpkgs-extra-pkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs-extra-pkgs": "nixpkgs-extra-pkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
