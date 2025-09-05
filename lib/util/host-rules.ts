@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../logger';
 import type { CombinedHostRule, HostRule } from '../types';
 import { clone } from './clone';
+import { regEx } from './regex';
 import * as sanitize from './sanitize';
 import { toBase64 } from './string';
 import { isHttpUrl, massageHostUrl, parseUrl } from './url';
@@ -38,7 +39,7 @@ export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
   return result;
 }
 
-const jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$/;
+const jwtRegex = regEx('^[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]*$');
 
 export function add(params: HostRule): void {
   const rule = migrateRule(params);
