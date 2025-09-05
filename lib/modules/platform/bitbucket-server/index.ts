@@ -241,6 +241,7 @@ export async function getJsonFile(
 export async function initRepo({
   repository,
   cloneSubmodules,
+  cloneSubmodulesRecursive,
   cloneSubmodulesFilter,
   ignorePrAuthor,
   gitUrl,
@@ -293,6 +294,7 @@ export async function initRepo({
       url,
       extraCloneOpts: getExtraCloneOpts(opts),
       cloneSubmodules,
+      cloneSubmodulesRecursive,
       cloneSubmodulesFilter,
       fullClone: semver.lte(defaults.version, '8.0.0'),
     });

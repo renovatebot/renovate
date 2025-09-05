@@ -364,6 +364,7 @@ export async function getSubmodules(): Promise<string[]> {
 
 export async function cloneSubmodules(
   shouldClone: boolean,
+  cloneSubmodulesRecursive: boolean | undefined,
   cloneSubmodulesFilter: string[] | undefined,
 ): Promise<void> {
   if (!shouldClone || submodulesInitizialized) {
@@ -382,9 +383,16 @@ export async function cloneSubmodules(
       continue;
     }
     try {
-      logger.debug(`Cloning git submodule at ${submodule}`);
+      if (cloneSubmodulesRecursive) {
+        logger.debug(`Recursively cloning git submodule at ${submodule}`);
+      } else {
+        logger.debug(`Cloning git submodule at ${submodule}`);
+      }
+
       await gitRetry(() =>
-        git.env(gitEnv).submoduleUpdate(['--init', '--recursive', submodule]),
+        cloneSubmodulesRecursive
+          ? git.env(gitEnv).submoduleUpdate(['--init', '--recursive', submodule])
+          : git.env(gitEnv).submoduleUpdate(['--init', submodule])
       );
     } catch (err) {
       logger.warn({ err, submodule }, `Unable to initialise git submodule`);
@@ -487,7 +495,11 @@ export async function syncGit(): Promise<void> {
     throw err;
   }
   // This will only happen now if set in global config
-  await cloneSubmodules(!!config.cloneSubmodules, config.cloneSubmodulesFilter);
+  await cloneSubmodules(
+    !!config.cloneSubmodules,
+    config.cloneSubmodulesRecursive,
+    config.cloneSubmodulesFilter,
+  );
   try {
     const latestCommit = (await git.log({ n: 1 })).latest;
     logger.debug({ latestCommit }, 'latest repository commit');
