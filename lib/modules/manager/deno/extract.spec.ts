@@ -221,14 +221,16 @@ describe('modules/manager/deno/extract', () => {
         },
         'deno.json',
       );
-      expect(result).toEqual({
-        deps: [],
-        lockFiles: [],
-        managerData: {
-          workspaces: [],
+      expect(result).toEqual([
+        {
+          deps: [],
+          lockFiles: [],
+          managerData: {
+            workspaces: [],
+          },
+          packageFile: 'deno.json',
         },
-        packageFile: 'deno.json',
-      });
+      ]);
     });
 
     it('lock is string', async () => {
@@ -239,11 +241,13 @@ describe('modules/manager/deno/extract', () => {
         },
         'deno.json',
       );
-      expect(result).toEqual({
-        deps: [],
-        lockFiles: ['deno.lock'],
-        packageFile: 'deno.json',
-      });
+      expect(result).toEqual([
+        {
+          deps: [],
+          lockFiles: ['deno.lock'],
+          packageFile: 'deno.json',
+        },
+      ]);
     });
 
     it('lock is object', async () => {
@@ -256,11 +260,13 @@ describe('modules/manager/deno/extract', () => {
         },
         'deno.json',
       );
-      expect(result).toEqual({
-        deps: [],
-        lockFiles: ['genuine-deno.lock'],
-        packageFile: 'deno.json',
-      });
+      expect(result).toEqual([
+        {
+          deps: [],
+          lockFiles: ['genuine-deno.lock'],
+          packageFile: 'deno.json',
+        },
+      ]);
     });
 
     it('importMap', async () => {
@@ -286,32 +292,39 @@ describe('modules/manager/deno/extract', () => {
         },
         'deno.json',
       );
-      expect(result).toStrictEqual({
-        deps: [
-          {
-            currentRawValue: 'jsr:@scope/name@3.0.0',
-            currentValue: '3.0.0',
-            datasource: 'jsr',
-            depName: '@scope/name',
-            depType: 'imports',
-            versioning: 'deno',
+      expect(result).toStrictEqual([
+        {
+          deps: [],
+          lockFiles: ['deno.lock'],
+          managerData: {
+            packageName: 'test',
           },
-          {
-            currentRawValue: 'jsr:@scope/name@0.2.0',
-            currentValue: '0.2.0',
-            datasource: 'jsr',
-            depName: '@scope/name',
-            depType: 'scopes',
-            versioning: 'deno',
-          },
-        ],
-        lockFiles: ['deno.lock'],
-        managerData: {
-          packageName: 'test',
+          packageFile: 'deno.json',
+          packageFileVersion: '0.0.1',
         },
-        packageFile: 'import_map.json',
-        packageFileVersion: '0.0.1',
-      });
+        {
+          deps: [
+            {
+              currentRawValue: 'jsr:@scope/name@3.0.0',
+              currentValue: '3.0.0',
+              datasource: 'jsr',
+              depName: '@scope/name',
+              depType: 'imports',
+              versioning: 'deno',
+            },
+            {
+              currentRawValue: 'jsr:@scope/name@0.2.0',
+              currentValue: '0.2.0',
+              datasource: 'jsr',
+              depName: '@scope/name',
+              depType: 'scopes',
+              versioning: 'deno',
+            },
+          ],
+          lockFiles: ['deno.lock'],
+          packageFile: 'import_map.json',
+        },
+      ]);
     });
 
     it('remote importMap', async () => {
@@ -321,11 +334,13 @@ describe('modules/manager/deno/extract', () => {
         },
         'deno.json',
       );
-      expect(result).toEqual({
-        deps: [],
-        lockFiles: [],
-        packageFile: 'deno.json',
-      });
+      expect(result).toEqual([
+        {
+          deps: [],
+          lockFiles: [],
+          packageFile: 'deno.json',
+        },
+      ]);
     });
 
     it('importMap path specified but not exists', async () => {
@@ -336,11 +351,13 @@ describe('modules/manager/deno/extract', () => {
         },
         'deno.json',
       );
-      expect(result).toEqual({
-        deps: [],
-        lockFiles: [],
-        packageFile: 'deno.json',
-      });
+      expect(result).toEqual([
+        {
+          deps: [],
+          lockFiles: [],
+          packageFile: 'deno.json',
+        },
+      ]);
     });
 
     it('importMap field is ignored when imports or scopes are specified in the config file', async () => {
@@ -366,24 +383,26 @@ describe('modules/manager/deno/extract', () => {
         },
         'deno.json',
       );
-      expect(result).toStrictEqual({
-        deps: [
-          {
-            currentRawValue: 'jsr:@scope/name@0.2.0',
-            currentValue: '0.2.0',
-            datasource: 'jsr',
-            depName: '@scope/name',
-            depType: 'scopes',
-            versioning: 'deno',
+      expect(result).toStrictEqual([
+        {
+          deps: [
+            {
+              currentRawValue: 'jsr:@scope/name@0.2.0',
+              currentValue: '0.2.0',
+              datasource: 'jsr',
+              depName: '@scope/name',
+              depType: 'scopes',
+              versioning: 'deno',
+            },
+          ],
+          lockFiles: ['deno.lock'],
+          managerData: {
+            packageName: 'test',
           },
-        ],
-        lockFiles: ['deno.lock'],
-        managerData: {
-          packageName: 'test',
+          packageFile: 'deno.json',
+          packageFileVersion: '0.0.1',
         },
-        packageFile: 'deno.json',
-        packageFileVersion: '0.0.1',
-      });
+      ]);
     });
   });
 
@@ -1053,6 +1072,14 @@ describe('modules/manager/deno/extract', () => {
           ]),
         ).toStrictEqual([
           {
+            deps: [],
+            lockFiles: ['deno.lock'],
+            managerData: {
+              workspaces: ['docs'],
+            },
+            packageFile: 'deno.json',
+          },
+          {
             deps: [
               {
                 currentRawValue: 'jsr:@scope/dep1@^2.1.3',
@@ -1081,9 +1108,6 @@ describe('modules/manager/deno/extract', () => {
               },
             ],
             lockFiles: ['deno.lock'],
-            managerData: {
-              workspaces: ['docs'],
-            },
             packageFile: 'import_map.json',
           },
           {

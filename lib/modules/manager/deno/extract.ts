@@ -296,19 +296,19 @@ export function getDenoDependency(
 export async function extractDenoJsonFile(
   denoJson: DenoJsonFile,
   matchedFile: string,
-): Promise<PackageFile<DenoManagerData>> {
+): Promise<PackageFile<DenoManagerData>[]> {
   logger.trace(`deno.extractDenoJsonFile(${matchedFile})`);
-  const result: PackageFile<DenoManagerData> = {
+  const packageFile: PackageFile<DenoManagerData> = {
     deps: [],
     packageFile: matchedFile,
   };
-  const { deps } = result;
+  const { deps } = packageFile;
 
   if (denoJson.version) {
-    result.packageFileVersion = denoJson.version;
+    packageFile.packageFileVersion = denoJson.version;
   }
   if (denoJson.name) {
-    result.managerData = {
+    packageFile.managerData = {
       packageName: denoJson.name,
     };
   }
@@ -321,7 +321,7 @@ export async function extractDenoJsonFile(
         'No workspace members found',
       );
     }
-    result.managerData = {
+    packageFile.managerData = {
       workspaces: workspace,
     };
   }
@@ -375,9 +375,11 @@ export async function extractDenoJsonFile(
     }
   }
 
+  let importMapPackageFile: PackageFile<DenoManagerData> | null = null;
+
   // importMap field is ignored when imports or scopes are specified in the config file
   // https://github.com/denoland/deno/blob/b7061b0f64b3c79b312de5a59122b7184b2fdef2/libs/config/workspace/mod.rs#L150
-  const hasImportsOrScopes = result.deps.some(
+  const hasImportsOrScopes = packageFile.deps.some(
     (d) => d.depType === 'imports' || d.depType === 'scopes',
   );
   if (!hasImportsOrScopes && denoJson.importMap) {
@@ -397,7 +399,10 @@ export async function extractDenoJsonFile(
       try {
         importMapJson = ImportMapJsonFile.parse(importMap);
         // set importMap path as packageFile
-        result.packageFile = importMapPath;
+        importMapPackageFile = {
+          deps: [],
+          packageFile: importMapPath,
+        };
       } catch (err) {
         logger.error({ err }, `Error parsing ${importMapPath}`);
       }
@@ -409,7 +414,8 @@ export async function extractDenoJsonFile(
           const depValue = imports[depKey];
           const dep = getDenoDependency(depValue, 'imports');
           if (dep) {
-            deps.push(dep);
+            // SAFETY: initialized above
+            importMapPackageFile!.deps.push(dep);
           }
         }
       }
@@ -423,7 +429,8 @@ export async function extractDenoJsonFile(
             const depValue = scopeDependencies[depKey];
             const dep = getDenoDependency(depValue, 'scopes');
             if (dep) {
-              deps.push(dep);
+              // SAFETY: initialized above
+              importMapPackageFile!.deps.push(dep);
             }
           }
         }
@@ -503,10 +510,21 @@ export async function extractDenoJsonFile(
     }
   }
 
-  return {
-    ...result,
-    lockFiles: lockFile ? [lockFile] : [],
-  };
+  const lockFiles = lockFile ? [lockFile] : [];
+  const packageFiles: PackageFile<DenoManagerData>[] = [
+    {
+      ...packageFile,
+      lockFiles,
+    },
+  ];
+  if (importMapPackageFile) {
+    packageFiles.push({
+      ...importMapPackageFile,
+      lockFiles,
+    });
+  }
+
+  return packageFiles;
 }
 
 export async function extractDenoCompatiblePackageJson(
@@ -632,7 +650,7 @@ export async function extractAllPackageFiles(
       }
 
       const extracted = await extractDenoJsonFile(denoJson, matchedFile);
-      packageFiles.push(extracted);
+      packageFiles.push(...extracted);
     }
   }
 
@@ -642,7 +660,6 @@ export async function extractAllPackageFiles(
   // Find a deno workspace root that has importMap
   const workspaceRootsWithImportMap = packageFiles.filter(
     (pkg) =>
-      is.nonEmptyArray(pkg.managerData?.workspaces) &&
       !upath.basename(pkg.packageFile).startsWith('deno.json') &&
       pkg.deps.some((d) => d.depType === 'imports' || d.depType === 'scopes'),
   );
