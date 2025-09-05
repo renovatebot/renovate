@@ -242,10 +242,6 @@ describe('modules/manager/deno/extract', () => {
       expect(result).toEqual({
         deps: [],
         lockFiles: ['deno.lock'],
-        managerData: {
-          packageName: undefined,
-        },
-        packageFileVersion: undefined,
         packageFile: 'deno.json',
       });
     });
@@ -263,10 +259,6 @@ describe('modules/manager/deno/extract', () => {
       expect(result).toEqual({
         deps: [],
         lockFiles: ['genuine-deno.lock'],
-        managerData: {
-          packageName: undefined,
-        },
-        packageFileVersion: undefined,
         packageFile: 'deno.json',
       });
     });
@@ -332,11 +324,7 @@ describe('modules/manager/deno/extract', () => {
       expect(result).toEqual({
         deps: [],
         lockFiles: [],
-        managerData: {
-          packageName: undefined,
-        },
         packageFile: 'deno.json',
-        packageFileVersion: undefined,
       });
     });
 
@@ -351,11 +339,7 @@ describe('modules/manager/deno/extract', () => {
       expect(result).toEqual({
         deps: [],
         lockFiles: [],
-        managerData: {
-          packageName: undefined,
-        },
         packageFile: 'deno.json',
-        packageFileVersion: undefined,
       });
     });
 
@@ -763,13 +747,11 @@ describe('modules/manager/deno/extract', () => {
               },
             ],
             managerData: {
-              packageName: 'root',
               workspaces: ['sub'],
             },
             extractedConstraints: {},
             lockFiles: ['deno.lock'],
             packageFile: 'package.json',
-            packageFileVersion: '0.0.1',
           },
           {
             deps: [

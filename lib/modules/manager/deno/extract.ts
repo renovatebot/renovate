@@ -304,11 +304,16 @@ export async function extractDenoJsonFile(
   };
   const { deps } = result;
 
-  let isWorkspacePackage = false;
-  // https://docs.deno.com/runtime/fundamentals/workspaces/
-  const dependencies = denoJson.workspace;
-  if (dependencies) {
-    const ws = dependencies as NonNullable<DenoJsonFile['workspace']>;
+  if (denoJson.version) {
+    result.packageFileVersion = denoJson.version;
+  }
+  if (denoJson.name) {
+    result.managerData = {
+      packageName: denoJson.name,
+    };
+  }
+  if (denoJson.workspace) {
+    const ws = denoJson.workspace;
     const workspace = 'members' in ws ? ws.members : ws;
     if (is.emptyArray(workspace)) {
       logger.debug(
@@ -318,14 +323,6 @@ export async function extractDenoJsonFile(
     }
     result.managerData = {
       workspaces: workspace,
-    };
-    isWorkspacePackage = true;
-  }
-
-  if (!isWorkspacePackage) {
-    result.packageFileVersion = denoJson.version;
-    result.managerData = {
-      packageName: denoJson.name,
     };
   }
 
@@ -720,6 +717,10 @@ export async function extractAllPackageFiles(
       is.nonEmptyArray(workspaces) &&
       is.nonEmptyArray(pkg.lockFiles)
     ) {
+      // remove version and name if it is a workspace root
+      // https://docs.deno.com/runtime/fundamentals/workspaces/#configuring-built-in-deno-tools
+      delete pkg.packageFileVersion;
+      delete pkg.managerData?.packageName;
       continue;
     }
 
