@@ -18,8 +18,16 @@ libc = "=0.2.43"
 bitflags = "1.0.4"
 pcap-sys = { version = "=0.1", path = "pcap-sys" }
 pnet = { version = "0.21.0", optional = true, default-features = false}
+
+# Git dependencies should always have one of tag, rev or branch defined.
+# If not, they should be skipped, even if version is defined.
 git_dep_with_version = { version = "0.1.0", git = "https://github.com/foo/bar" }
 git_dep = { git = "https://github.com/foo/bar" }
+
+path_dep_without_version = { path = "foo" }
+git_dep_with_tag = { git = "https://github.com/foo/bar", tag = "1.10.3" }
+git_dep_with_rev = { git = "https://github.com/foo/bar", rev = "abc1234" }
+git_dep_with_branch = { git = "https://github.com/foo/bar", branch = "next" }
 same_version_1__ = "0.0.0"
 same_version_1_ = "0.0.0"
 same_version_1 = "0.0.0"
