@@ -2536,6 +2536,7 @@ const options: RenovateOptions[] = [
       'gomodMassage',
       'gomodTidy',
       'gomodTidy1.17',
+      'gomodTidyAll',
       'gomodTidyE',
       'gomodUpdateImportPaths',
       'gomodSkipVendor',

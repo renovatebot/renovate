@@ -28,6 +28,10 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 import { getExtraDepsNotice } from './artifacts-extra';
+import {
+  type GoModuleFile,
+  getTransitiveDependentModules,
+} from './package-tree';
 
 const { major, valid } = semver;
 
@@ -277,12 +281,13 @@ export async function updateArtifacts({
 
     const isGoModTidyRequired =
       !mustSkipGoModTidy &&
+      !config.postUpdateOptions?.includes('gomodTidyAll') &&
       (config.postUpdateOptions?.includes('gomodTidy') === true ||
         config.postUpdateOptions?.includes('gomodTidy1.17') === true ||
         config.postUpdateOptions?.includes('gomodTidyE') === true ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
-      args = 'mod tidy' + tidyOpts;
+      args = `mod tidy${tidyOpts}`;
       logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
@@ -310,7 +315,7 @@ export async function updateArtifacts({
       }
 
       if (isGoModTidyRequired) {
-        args = 'mod tidy' + tidyOpts;
+        args = `mod tidy${tidyOpts}`;
         logger.debug('go mod tidy command included');
         execCommands.push(`${cmd} ${args}`);
       }
@@ -318,7 +323,7 @@ export async function updateArtifacts({
 
     // We tidy one more time as a solution for #6795
     if (isGoModTidyRequired) {
-      args = 'mod tidy' + tidyOpts;
+      args = `mod tidy${tidyOpts}`;
       logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
@@ -425,6 +430,18 @@ export async function updateArtifacts({
       logger.debug('Found updated go.mod after go.sum update');
       res.push(artifactResult);
     }
+
+    if (config.postUpdateOptions?.includes('gomodTidyAll')) {
+      const dependentResults = await tidyDependentModules(
+        goModFileName,
+        execOptions,
+        tidyOpts,
+      );
+      if (dependentResults.length > 0) {
+        res.push(...dependentResults);
+      }
+    }
+
     return res;
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
@@ -440,6 +457,66 @@ export async function updateArtifacts({
       },
     ];
   }
+}
+
+/**
+ * Update dependent go.mod files when gomodTidyAll is enabled
+ */
+async function tidyDependentModules(
+  packageFileName: string,
+  execOptions: ExecOptions,
+  tidyOpts: string,
+): Promise<UpdateArtifactsResult[]> {
+  const dependentFiles = await getTransitiveDependentModules(packageFileName);
+
+  if (dependentFiles.length === 0) {
+    return [];
+  }
+
+  // Build single command string - dependentFiles is already in dependency order
+  const commands = buildGoModTidyCommands(dependentFiles, tidyOpts);
+  const combinedCommand = commands.join(' && ');
+
+  // Execute all commands in one shell execution
+  await exec(combinedCommand, execOptions);
+
+  // Collect results from all modified files using git status
+  const status = await getRepoStatus();
+  const results: UpdateArtifactsResult[] = [];
+
+  for (const file of dependentFiles) {
+    const sumFileName = file.name.replace(regEx(/\.mod$/), '.sum');
+
+    // Only check for .sum files that were modified
+    if (status.modified.includes(sumFileName)) {
+      const newContent = await readLocalFile(sumFileName, 'utf8');
+      if (newContent) {
+        results.push({
+          file: {
+            type: 'addition',
+            path: sumFileName,
+            contents: newContent,
+          },
+        });
+      }
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Build command array for running go mod tidy on all dependent modules
+ * Each command navigates from the repository root to ensure correct paths
+ */
+function buildGoModTidyCommands(
+  dependentFiles: GoModuleFile[],
+  tidyOpts: string,
+): string[] {
+  return dependentFiles.map((file) => {
+    const moduleDir = upath.dirname(file.name);
+    return `(cd "${moduleDir}" && go mod tidy ${tidyOpts})`;
+  });
 }
 
 function getGoConstraints(content: string): string | undefined {
