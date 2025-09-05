@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../logger';
 import type { CombinedHostRule, HostRule } from '../types';
 import { clone } from './clone';
+import { regEx } from './regex';
 import * as sanitize from './sanitize';
 import { toBase64 } from './string';
 import { isHttpUrl, massageHostUrl, parseUrl } from './url';
@@ -38,6 +39,8 @@ export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
   return result;
 }
 
+const jwtRegex = regEx('^[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]*$');
+
 export function add(params: HostRule): void {
   const rule = migrateRule(params);
 
@@ -63,6 +66,16 @@ export function add(params: HostRule): void {
       sanitize.addSecretForSanitizing(secret);
     }
   });
+
+  // Sanitize username if it looks like a JWT token
+  if (
+    is.string(rule.username) &&
+    rule.username.length > 60 &&
+    jwtRegex.test(rule.username)
+  ) {
+    sanitize.addSecretForSanitizing(rule.username);
+  }
+
   if (rule.username && rule.password) {
     sanitize.addSecretForSanitizing(
       toBase64(`${rule.username}:${rule.password}`),
