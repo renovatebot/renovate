@@ -1,10 +1,6 @@
 import { Http } from '..';
 import { getCache, resetCache } from '../../cache/repository';
-import {
-  RepositoryHttpCacheProvider,
-  repoCacheProvider,
-} from './repository-http-cache-provider';
-import type { HttpCache } from './schema';
+import { repoCacheProvider } from './repository-http-cache-provider';
 import * as httpMock from '~test/http-mock';
 
 describe('util/http/cache/repository-http-cache-provider', () => {
