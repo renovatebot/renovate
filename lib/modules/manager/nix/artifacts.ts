@@ -41,9 +41,9 @@ export async function updateArtifacts({
     const inputs = updatedDeps
       .map(({ depName }) => depName)
       .filter(is.nonEmptyStringAndNotWhitespace)
-      .map((depName) => `--update-input ${quote(depName)}`)
+      .map((depName) => quote(depName))
       .join(' ');
-    cmd += `flake lock ${inputs}`;
+    cmd += `flake update ${inputs}`;
   }
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
