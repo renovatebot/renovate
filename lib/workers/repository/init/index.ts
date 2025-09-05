@@ -8,6 +8,7 @@ import * as memCache from '../../../util/cache/memory';
 import { clone } from '../../../util/clone';
 import { cloneSubmodules, setUserRepoConfig } from '../../../util/git';
 import { getAll } from '../../../util/host-rules';
+import { setMultipleBaseBranches } from '../../../util/multiple-base-branches';
 import { checkIfConfigured } from '../configured';
 import { PackageFiles } from '../package-files';
 import type { WorkerPlatformConfig } from './apis';
@@ -56,6 +57,7 @@ export async function initRepo(
   config = await initApis(config);
   await initializeCaches(config as WorkerPlatformConfig);
   config = await getRepoConfig(config);
+  setMultipleBaseBranches(config);
   setRepositoryLogLevelRemaps(config.logLevelRemap);
   if (config.mode === 'silent') {
     logger.info(
