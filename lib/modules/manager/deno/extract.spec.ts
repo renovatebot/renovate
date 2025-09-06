@@ -862,18 +862,9 @@ describe('modules/manager/deno/extract', () => {
           }
           return Promise.resolve(null);
         });
-        fs.getSiblingFileName.mockImplementation((lockFile, siblingName) => {
-          if (lockFile === 'deno.lock' && siblingName === 'package.json') {
-            return 'package.json';
-          }
-          if (
-            lockFile === 'packages/pkg1/deno.lock' &&
-            siblingName === 'package.json'
-          ) {
-            return 'packages/pkg1/package.json';
-          }
-          return `${upath.dirname(lockFile)}/${siblingName}`;
-        });
+        fs.getSiblingFileName.mockImplementation((fileName, siblingName) =>
+          upath.join(upath.dirname(fileName), siblingName),
+        );
         fs.localPathIsFile.mockImplementation((fileName) => {
           return Promise.resolve(
             [
@@ -975,12 +966,9 @@ describe('modules/manager/deno/extract', () => {
         GlobalConfig.set({ localDir: '' });
         const { findPackages } = await import('find-packages');
         vi.mocked(findPackages).mockResolvedValue([]);
-        fs.getSiblingFileName.mockImplementation((lockFile, siblingName) => {
-          if (lockFile === 'deno.lock' && siblingName === 'package.json') {
-            return 'package.json';
-          }
-          return `${upath.dirname(lockFile)}/${siblingName}`;
-        });
+        fs.getSiblingFileName.mockImplementation((fileName, siblingName) =>
+          upath.join(upath.dirname(fileName), siblingName),
+        );
         fs.readLocalFile.mockImplementation((fileName) => {
           if (fileName === 'deno.json') {
             return Promise.resolve(codeBlock`
@@ -1027,31 +1015,11 @@ describe('modules/manager/deno/extract', () => {
                 "remote": {
                   "https://deno.land/std@0.222.0/front_matter/test.ts": "6a72a690ef9bd606411e3e78dfd44f382fce58f722ed6e56ce57d65140368822",
                   "https://deno.land/std@0.224.0/fs/copy.ts": "7ab12a16adb65d155d4943c88081ca16ce3b0b5acada64c1ce93800653678039"
-                },
-                "workspace": {
-                  "dependencies": [
-                    "jsr:@scope/dep1@^2.1.3"
-                  ],
-                  "members": {
-                    "docs": {
-                      "dependencies": [
-                        "jsr:@scope/dep3@~1.0.1",
-                        "jsr:@scope/dep4@~1.0.1"
-                      ]
-                    }
-                  }
                 }
               }
             `);
           }
           return Promise.resolve(null);
-        });
-        fs.getSiblingFileName.mockImplementation((lockFile, siblingName) => {
-          if (lockFile === 'deno.lock' && siblingName === 'package.json') {
-            return 'package.json';
-          }
-          const dir = upath.dirname(lockFile);
-          return dir === '.' ? siblingName : `${dir}/${siblingName}`;
         });
         fs.localPathIsFile.mockImplementation((fileName) => {
           return Promise.resolve(
@@ -1128,12 +1096,9 @@ describe('modules/manager/deno/extract', () => {
         vi.mocked(findPackages).mockResolvedValue([
           { dir: 'node', manifest: {}, writeProjectManifest: Promise.resolve },
         ]);
-        fs.getSiblingFileName.mockImplementation((basePath, fileName) => {
-          if (basePath === 'deno.lock' && fileName === 'package.json') {
-            return 'package.json';
-          }
-          return 'deno.lock';
-        });
+        fs.getSiblingFileName.mockImplementation((fileName, siblingName) =>
+          upath.join(upath.dirname(fileName), siblingName),
+        );
         fs.readLocalFile.mockImplementation((fileName) => {
           if (fileName === 'deno.json') {
             return Promise.resolve(codeBlock`
