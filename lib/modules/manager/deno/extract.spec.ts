@@ -962,6 +962,151 @@ describe('modules/manager/deno/extract', () => {
         ]);
       });
 
+      it('nested workspace is invalid', async () => {
+        GlobalConfig.set({ localDir: '' });
+        const { findPackages } = await import('find-packages');
+        vi.mocked(findPackages).mockResolvedValue([
+          {
+            dir: 'sub',
+            manifest: { name: 'sub' },
+            writeProjectManifest: Promise.resolve,
+          },
+          {
+            dir: 'sub/nested',
+            manifest: { name: 'nested' },
+            writeProjectManifest: Promise.resolve,
+          },
+        ]);
+        fs.getSiblingFileName.mockImplementation((fileName, siblingName) =>
+          upath.join(upath.dirname(fileName), siblingName),
+        );
+        fs.readLocalFile.mockImplementation((fileName) => {
+          if (fileName === 'deno.json') {
+            return Promise.resolve(codeBlock`
+              {
+                "imports": {
+                  "dep1": "jsr:@scope/dep1@^3.4.6"
+                },
+                "workspace":{
+                  "members": [
+                    "./sub/*"
+                  ]
+                }
+              }
+            `);
+          }
+          if (fileName === 'deno.lock') {
+            return Promise.resolve(codeBlock`
+              {
+                "version": "5",
+                "specifiers": {
+                  "jsr:@scope/dep1@3": "3.8.0",
+                  "npm:dep2@1.2.4": "1.2.4",
+                  "jsr:@scope/dep3@1": "1.12.1"
+                }
+              }
+            `);
+          }
+          if (fileName === 'sub/deno.json') {
+            return Promise.resolve(codeBlock`
+              {
+                "imports": {
+                  "dep2": "npm:dep2@1.2.4"
+                },
+                "workspace":{
+                  "members": [
+                    "nested"
+                  ]
+                }
+              }
+            `);
+          }
+          if (fileName === 'sub/nested/deno.json') {
+            return Promise.resolve(codeBlock`
+              {
+                "name": "nested",
+                "imports": {
+                  "dep3": "jsr:@scope/dep3@^1.0.0"
+                }
+              }
+            `);
+          }
+          return Promise.resolve(null);
+        });
+        fs.localPathIsFile.mockImplementation((fileName) => {
+          return Promise.resolve(
+            [
+              'deno.json',
+              'deno.lock',
+              'sub/deno.json',
+              'sub/nested/deno.json',
+            ].includes(fileName),
+          );
+        });
+
+        expect(
+          await extractAllPackageFiles({}, [
+            'deno.json',
+            'deno.lock',
+            'sub/deno.json',
+            'sub/nested/deno.json',
+          ]),
+        ).toStrictEqual([
+          {
+            deps: [
+              {
+                currentRawValue: 'jsr:@scope/dep1@^3.4.6',
+                currentValue: '^3.4.6',
+                datasource: 'jsr',
+                depName: '@scope/dep1',
+                depType: 'imports',
+                lockedVersion: '3.8.0',
+                versioning: 'deno',
+              },
+            ],
+            lockFiles: ['deno.lock'],
+            managerData: {
+              workspaces: ['./sub/*'],
+            },
+            packageFile: 'deno.json',
+          },
+          {
+            deps: [
+              {
+                currentRawValue: 'npm:dep2@1.2.4',
+                currentValue: '1.2.4',
+                datasource: 'npm',
+                depName: 'dep2',
+                depType: 'imports',
+                lockedVersion: '1.2.4',
+                versioning: 'deno',
+              },
+            ],
+            managerData: {},
+            lockFiles: ['deno.lock'],
+            packageFile: 'sub/deno.json',
+          },
+          {
+            deps: [
+              {
+                currentRawValue: 'jsr:@scope/dep3@^1.0.0',
+                currentValue: '^1.0.0',
+                datasource: 'jsr',
+                depName: '@scope/dep3',
+                depType: 'imports',
+                lockedVersion: '1.12.1',
+                versioning: 'deno',
+              },
+            ],
+            lockFiles: ['deno.lock'],
+            managerData: {
+              packageName: 'nested',
+            },
+            packageFile: 'sub/nested/deno.json',
+          },
+        ]);
+      });
+
       it('imports and scopes field is ignored when importMap is specified in the root config file', async () => {
         GlobalConfig.set({ localDir: '' });
         const { findPackages } = await import('find-packages');

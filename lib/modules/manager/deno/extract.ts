@@ -701,58 +701,92 @@ export async function extractAllPackageFiles(
 
   // determine workspace root to collect lock files of workspace members
   const workspaceContexts: {
-    workspaces: string[];
     lockFiles?: string[];
     rootDir: string;
-    matchers?: { pattern: string; matcher: Minimatch }[];
+    packageFile: string;
+    matchers: Minimatch[];
   }[] = [];
+  const packageMap = new Map<string, PackageFile<DenoManagerData>>();
+  for (const pkg of packageFiles) {
+    packageMap.set(pkg.packageFile, pkg);
+  }
   for (const pkg of packageFiles) {
     const workspaces = pkg.managerData?.workspaces;
-    if (
-      workspaces &&
-      is.nonEmptyArray(workspaces) &&
-      is.nonEmptyArray(pkg.lockFiles)
-    ) {
+    if (is.nonEmptyArray(workspaces)) {
       const rootDir = upath.dirname(pkg.packageFile);
-      const matchers = workspaces.map((pattern) => ({
-        pattern,
-        matcher: new Minimatch(pattern, { dot: true }),
-      }));
+      const matchers = workspaces.map(
+        (pattern) =>
+          // allow ./sub/* to match sub
+          new Minimatch(upath.normalize(pattern), { dot: true, partial: true }),
+      );
       workspaceContexts.push({
-        workspaces,
         lockFiles: pkg.lockFiles,
         rootDir,
+        packageFile: pkg.packageFile,
         matchers,
       });
     }
   }
+
+  // remove nested workspace
+  // if the workspace is a subdirectory of another workspace, the nested is invalid
+  const validContexts: typeof workspaceContexts = [];
+  const invalidPackageFiles = new Set<string>();
+  for (const [i, currentContext] of workspaceContexts.entries()) {
+    let isNested = false;
+
+    for (const [j, otherContext] of workspaceContexts.entries()) {
+      if (i === j) {
+        continue;
+      }
+
+      const found = otherContext.matchers.some((matcher) =>
+        matcher.match(currentContext.rootDir),
+      );
+
+      if (found) {
+        isNested = true;
+        invalidPackageFiles.add(currentContext.packageFile);
+        break;
+      }
+    }
+
+    if (!isNested) {
+      validContexts.push(currentContext);
+    }
+  }
+  for (const packageFile of invalidPackageFiles) {
+    const pkg = packageMap.get(packageFile);
+    if (pkg) {
+      delete pkg.managerData?.workspaces;
+    }
+  }
+
   // apply lock files to workspace members from their root
+  const workspaceRootFiles = new Set<string>();
   for (const pkg of packageFiles) {
     const workspaces = pkg.managerData?.workspaces;
-    if (
-      workspaces &&
-      is.nonEmptyArray(workspaces) &&
-      is.nonEmptyArray(pkg.lockFiles)
-    ) {
+    if (is.nonEmptyArray(workspaces)) {
       // remove version and name if it is a workspace root
       // https://docs.deno.com/runtime/fundamentals/workspaces/#configuring-built-in-deno-tools
       delete pkg.packageFileVersion;
       delete pkg.managerData?.packageName;
+      workspaceRootFiles.add(pkg.packageFile);
+    }
+  }
+
+  for (const pkg of packageFiles) {
+    if (workspaceRootFiles.has(pkg.packageFile)) {
       continue;
     }
 
-    for (const context of workspaceContexts) {
+    for (const context of validContexts) {
       const { rootDir, matchers, lockFiles } = context;
       const pkgRelativePath = upath.relative(rootDir, pkg.packageFile);
       const pkgDir = upath.dirname(pkgRelativePath);
-      for (const { matcher } of matchers!) {
-        if (matcher.match(pkgDir)) {
-          pkg.lockFiles = lockFiles;
-          break;
-        }
-      }
-
-      if (pkg.lockFiles) {
+      const isMatch = matchers.some((matcher) => matcher.match(pkgDir));
+      if (isMatch) {
+        pkg.lockFiles = lockFiles;
         break;
       }
     }
