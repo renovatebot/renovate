@@ -37,7 +37,7 @@ describe('modules/manager/nvm/extract', () => {
 
     it('supports code comments', () => {
       const res = extractPackageFile(
-        '# This is a comment\nv20.19.3\n# This is another comment',
+        '# This is a comment\nv20.19.3 # This is an inline comment\n# This is another comment',
       );
       expect(res.deps).toEqual([
         {

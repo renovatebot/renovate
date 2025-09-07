@@ -6,8 +6,10 @@ export function extractPackageFile(content: string): PackageFileContent {
     depName: 'node',
     currentValue: content
       .split('\n')
-      // Exclude code comments
-      .filter((str) => !str.startsWith('#'))
+      // Remove code comments
+      .map((line) => line.replace(/#.*$/, '').trim())
+      // Filter empty lines
+      .filter(Boolean)
       .join('\n')
       .trim(),
     datasource: NodeVersionDatasource.id,
