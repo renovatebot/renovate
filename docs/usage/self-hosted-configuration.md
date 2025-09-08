@@ -403,6 +403,7 @@ Other valid cache namespaces are as follows:
 - `datasource-hexpm-bob`
 - `datasource-java-version`
 - `datasource-jenkins-plugins`
+- `datasource-jsr`
 - `datasource-maven:cache-provider`
 - `datasource-maven:postprocess-reject`
 - `datasource-node-version`
