@@ -211,6 +211,8 @@ export async function extractPackageFile(
           dep.packageName = 'https://github.com/NixOS/nixpkgs';
           dep.currentValue = flakeOriginal.ref;
           dep.versioning = nixpkgsVersioning;
+          // Clear replaceString for nixpkgs as it uses special handling
+          delete dep.replaceString;
           break;
         }
 
@@ -241,6 +243,8 @@ export async function extractPackageFile(
             '$<channel>',
           );
           dep.versioning = nixpkgsVersioning;
+          // Clear replaceString for nixpkgs as it uses special handling
+          delete dep.replaceString;
           break;
         }
 
