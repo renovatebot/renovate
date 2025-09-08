@@ -2,8 +2,8 @@ import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
-import { id as semverCoercedVersioning } from '../../versioning/semver-coerced';
 import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
+import { id as semverCoercedVersioning } from '../../versioning/semver-coerced';
 import type {
   ExtractConfig,
   PackageDependency,
