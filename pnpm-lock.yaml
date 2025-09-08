@@ -553,8 +553,8 @@ importers:
         specifier: 6.0.0
         version: 6.0.0(typescript@5.8.3)
       lint-staged:
-        specifier: 16.1.5
-        version: 16.1.5
+        specifier: 16.1.6
+        version: 16.1.6
       markdownlint-cli2:
         specifier: 0.18.1
         version: 0.18.1
@@ -4413,8 +4413,8 @@ packages:
   linkify-it@5.0.0:
     resolution: {integrity: sha512-5aHCbzQRADcdP+ATqnDuhhJ/MRIqDkZX5pyjFHRRysS8vZ5AbqGEoFIb6pYHPZ+L/OC2Lc+xT8uHVVR5CAK/wQ==}
 
-  lint-staged@16.1.5:
-    resolution: {integrity: sha512-uAeQQwByI6dfV7wpt/gVqg+jAPaSp8WwOA8kKC/dv1qw14oGpnpAisY65ibGHUGDUv0rYaZ8CAJZ/1U8hUvC2A==}
+  lint-staged@16.1.6:
+    resolution: {integrity: sha512-U4kuulU3CKIytlkLlaHcGgKscNfJPNTiDF2avIUGFCv7K95/DCYQ7Ra62ydeRWmgQGg9zJYw2dzdbztwJlqrow==}
     engines: {node: '>=20.17'}
     hasBin: true
 
@@ -5107,6 +5107,7 @@ packages:
   openpgp@6.2.1:
     resolution: {integrity: sha512-5vkqxQWgyrfY0shygqJTaCoa4SbPdjrpmtfREyXBBDrXjoRT25edEMQbdKH5/WxDXlLVn9TxPsVrKP72Jjuz2A==}
     engines: {node: '>= 18.0.0'}
+    deprecated: This version has a bug affecting zlib compression if manually enabled as part of encryption or signing (see https://github.com/openpgpjs/openpgpjs/pull/1894). Please update to v6.2.2 or later.
 
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
@@ -11346,7 +11347,7 @@ snapshots:
     dependencies:
       uc.micro: 2.1.0
 
-  lint-staged@16.1.5:
+  lint-staged@16.1.6:
     dependencies:
       chalk: 5.6.0
       commander: 14.0.0
