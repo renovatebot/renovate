@@ -980,6 +980,234 @@ describe('modules/manager/nix/extract', () => {
     });
   });
 
+  it('parses GitHub shorthand URL from flake.nix with branch', async () => {
+    const flakeNix = codeBlock`{
+      inputs = {
+        flake-utils.url = "github:numtide/flake-utils/main";
+      };
+    }`;
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "flake-utils": {
+          "locked": {
+            "lastModified": 1726560853,
+            "narHash": "sha256-X6rJYSESBVr3hBoH0WbKE5KvhPU5bloyZ2L4K60/fPQ=",
+            "owner": "numtide",
+            "repo": "flake-utils",
+            "rev": "c1dfcf08411b08f6b8615f7d8971a2bfa81d5e8a",
+            "type": "github"
+          },
+          "original": {
+            "owner": "numtide",
+            "repo": "flake-utils",
+            "type": "github"
+          }
+        },
+        "root": {
+          "inputs": {
+            "flake-utils": "flake-utils"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          currentValue: 'main',
+          replaceString: 'main',
+          datasource: 'git-refs',
+          depName: 'flake-utils',
+          packageName: 'https://github.com/numtide/flake-utils',
+          lockedVersion: 'c1dfcf08411b08f6b8615f7d8971a2bfa81d5e8a',
+          versioning: 'semver-coerced',
+        },
+      ],
+    });
+  });
+
+  it('parses git URL with refs/tags prefix and strips it', async () => {
+    const flakeNix = codeBlock`{
+      inputs = {
+        cachix.url = "git+https://github.com/cachix/cachix.git?ref=refs/tags/v1.7.2";
+      };
+    }`;
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "cachix": {
+          "locked": {
+            "lastModified": 1709700175,
+            "narHash": "sha256-A0/6ZjLmT9qdYzKHmevnEIC7G+GiZ4UCr8v0poRPzds=",
+            "ref": "refs/tags/v1.7.2",
+            "rev": "be97b37989f11b724197b5f4c7ffd78f12c8c4bf",
+            "type": "git",
+            "url": "https://github.com/cachix/cachix.git"
+          },
+          "original": {
+            "ref": "refs/tags/v1.7.2",
+            "type": "git",
+            "url": "https://github.com/cachix/cachix.git"
+          }
+        },
+        "root": {
+          "inputs": {
+            "cachix": "cachix"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          currentValue: 'v1.7.2',
+          replaceString: 'refs/tags/v1.7.2',
+          datasource: 'git-refs',
+          depName: 'cachix',
+          packageName: 'https://github.com/cachix/cachix.git',
+          lockedVersion: 'be97b37989f11b724197b5f4c7ffd78f12c8c4bf',
+          versioning: 'semver-coerced',
+        },
+      ],
+    });
+  });
+
+  it('parses git URL with refs/heads prefix and strips it', async () => {
+    const flakeNix = codeBlock`{
+      inputs = {
+        patchelf.url = "git+https://github.com/NixOS/patchelf.git?ref=refs/heads/master";
+      };
+    }`;
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "patchelf": {
+          "locked": {
+            "lastModified": 1718457448,
+            "narHash": "sha256-FSoxTcRZMGHNJh8dNtKOkcUtjhmhU6yQXcZZfUPLhQM=",
+            "ref": "refs/heads/master",
+            "rev": "a0f54334df36770b335c051e540ba40afcbf8378",
+            "type": "git",
+            "url": "https://github.com/NixOS/patchelf.git"
+          },
+          "original": {
+            "ref": "refs/heads/master",
+            "type": "git",
+            "url": "https://github.com/NixOS/patchelf.git"
+          }
+        },
+        "root": {
+          "inputs": {
+            "patchelf": "patchelf"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          currentValue: 'master',
+          replaceString: 'refs/heads/master',
+          datasource: 'git-refs',
+          depName: 'patchelf',
+          packageName: 'https://github.com/NixOS/patchelf.git',
+          lockedVersion: 'a0f54334df36770b335c051e540ba40afcbf8378',
+          versioning: 'semver-coerced',
+        },
+      ],
+    });
+  });
+
+  it('uses semver-coerced versioning for all non-nixpkgs dependencies', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "flake-utils": {
+          "locked": {
+            "lastModified": 1726560853,
+            "narHash": "sha256-X6rJYSESBVr3hBoH0WbKE5KvhPU5bloyZ2L4K60/fPQ=",
+            "owner": "numtide",
+            "repo": "flake-utils",
+            "rev": "c1dfcf08411b08f6b8615f7d8971a2bfa81d5e8a",
+            "type": "github"
+          },
+          "original": {
+            "owner": "numtide",
+            "repo": "flake-utils",
+            "type": "github"
+          }
+        },
+        "root": {
+          "inputs": {
+            "flake-utils": "flake-utils"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    const result = await extractPackageFile('', 'flake.nix');
+    expect(result?.deps[0]).toMatchObject({
+      depName: 'flake-utils',
+      versioning: 'semver-coerced',
+    });
+  });
+
+  it('handles both rev and ref from flake.nix URL parameters', async () => {
+    const flakeNix = codeBlock`{
+      inputs = {
+        example.url = "git+ssh://git@github.com/example/repo.git?ref=refs/tags/v2.0.0&rev=deadbeef";
+      };
+    }`;
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "example": {
+          "locked": {
+            "lastModified": 1718457448,
+            "narHash": "sha256-FSoxTcRZMGHNJh8dNtKOkcUtjhmhU6yQXcZZfUPLhQM=",
+            "ref": "refs/tags/v2.0.0",
+            "rev": "deadbeef",
+            "type": "git",
+            "url": "ssh://git@github.com/example/repo.git"
+          },
+          "original": {
+            "ref": "refs/tags/v2.0.0",
+            "rev": "deadbeef",
+            "type": "git",
+            "url": "ssh://git@github.com/example/repo.git"
+          }
+        },
+        "root": {
+          "inputs": {
+            "example": "example"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          currentValue: 'v2.0.0',
+          currentDigest: 'deadbeef',
+          replaceString: 'deadbeef',
+          datasource: 'git-refs',
+          depName: 'example',
+          packageName: 'ssh://git@github.com/example/repo.git',
+          versioning: 'semver-coerced',
+        },
+      ],
+    });
+  });
+
   it('does not duplicate nixpkgs dependency', async () => {
     const flakeLock = codeBlock`{
       "nodes": {
