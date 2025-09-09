@@ -921,6 +921,26 @@ describe('modules/platform/github/index', () => {
         github.getBranchForceRebase('main'),
       ).rejects.toThrowErrorMatchingSnapshot();
     });
+
+    it('should return empty object when parentRepo is set', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, 'some/repo', false);
+      scope.get('/user').reply(200, {
+        login: 'forked',
+      });
+      scope.post('/repos/some/repo/forks').reply(200, {
+        full_name: 'forked/repo',
+        default_branch: 'master',
+      });
+      await github.initRepo({
+        repository: 'some/repo',
+        forkToken: 'fork-token',
+        forkCreation: true,
+      });
+
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeFalse();
+    });
   });
 
   describe('getPrList()', () => {

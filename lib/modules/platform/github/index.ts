@@ -78,9 +78,8 @@ import {
 import { GithubIssueCache, GithubIssue as Issue } from './issue';
 import { massageMarkdownLinks } from './massage-markdown-links';
 import { getPrCache, updatePrCache } from './pr';
-import { GithubVulnerabilityAlert } from './schema';
+import { GithubBranchProtection, GithubVulnerabilityAlert } from './schema';
 import type {
-  BranchProtection,
   CombinedBranchStatus,
   Comment,
   GhAutomergeResponse,
@@ -311,14 +310,15 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
 
 async function getBranchProtection(
   branchName: string,
-): Promise<BranchProtection> {
-  /* v8 ignore start */
+): Promise<GithubBranchProtection> {
   if (config.parentRepo) {
     return {};
-  } /* v8 ignore stop */
-  const res = await githubApi.getJsonUnchecked<BranchProtection>(
+  }
+
+  const res = await githubApi.getJson(
     `repos/${config.repository}/branches/${escapeHash(branchName)}/protection`,
     { cacheProvider: repoCacheProvider },
+    GithubBranchProtection,
   );
   return res.body;
 }
@@ -731,33 +731,50 @@ export async function getBranchForceRebase(
   branchName: string,
 ): Promise<boolean> {
   config.branchForceRebase ??= {};
-  if (config.branchForceRebase[branchName] === undefined) {
-    try {
-      config.branchForceRebase[branchName] = false;
-      const branchProtection = await getBranchProtection(branchName);
-      logger.debug(`Found branch protection for branch ${branchName}`);
-      if (branchProtection?.required_status_checks?.strict) {
-        logger.debug(
-          `Branch protection: PRs must be up-to-date before merging for ${branchName}`,
-        );
-        config.branchForceRebase[branchName] = true;
-      }
-    } catch (err) {
-      if (err.statusCode === 404) {
-        logger.debug(`No branch protection found for ${branchName}`);
-      } else if (
-        err.message === PLATFORM_INTEGRATION_UNAUTHORIZED ||
-        err.statusCode === 403
-      ) {
-        logger.once.debug(
-          'Branch protection: Do not have permissions to detect branch protection',
-        );
-      } else {
-        throw err;
-      }
-    }
+
+  const cachedResult = config.branchForceRebase[branchName];
+  if (cachedResult !== undefined) {
+    return cachedResult;
   }
-  return !!config.branchForceRebase[branchName];
+
+  // Initialize to false before checking branch protection
+  config.branchForceRebase[branchName] = false;
+
+  try {
+    const branchProtection = await getBranchProtection(branchName);
+    logger.debug(`Found branch protection for branch ${branchName}`);
+
+    const strictStatusChecks = branchProtection?.required_status_checks?.strict;
+    if (strictStatusChecks) {
+      logger.debug(
+        `Branch protection: PRs must be up-to-date before merging for ${branchName}`,
+      );
+      config.branchForceRebase[branchName] = true;
+    }
+  } catch (err) {
+    handleBranchProtectionError(err, branchName);
+  }
+
+  return config.branchForceRebase[branchName];
+}
+
+function handleBranchProtectionError(err: any, branchName: string): void {
+  if (err.statusCode === 404) {
+    logger.debug(`No branch protection found for ${branchName}`);
+    return;
+  }
+
+  const isUnauthorized =
+    err.message === PLATFORM_INTEGRATION_UNAUTHORIZED || err.statusCode === 403;
+
+  if (isUnauthorized) {
+    logger.once.debug(
+      'Branch protection: Do not have permissions to detect branch protection',
+    );
+    return;
+  }
+
+  throw err;
 }
 
 function cachePr(pr?: GhPr | null): void {
