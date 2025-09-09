@@ -10,7 +10,9 @@ vi.mock('../../../util/fs');
 
 describe('modules/manager/nix/extract', () => {
   beforeEach(() => {
-    fs.getSiblingFileName.mockReturnValueOnce('flake.lock');
+    fs.getSiblingFileName.mockImplementation(
+      (fileName, siblingName) => siblingName,
+    );
   });
 
   it('returns null when flake.lock file cannot be read', async () => {
@@ -309,7 +311,6 @@ describe('modules/manager/nix/extract', () => {
             depName: 'cachix',
             lockedVersion: 'be97b37989f11b724197b5f4c7ffd78f12c8c4bf',
             packageName: 'https://github.com/cachix/cachix.git',
-            replaceString: 'refs/tags/v1.7.2',
             versioning: semverCoercedVersioning,
           },
         ],
@@ -355,7 +356,6 @@ describe('modules/manager/nix/extract', () => {
             datasource: GitRefsDatasource.id,
             depName: 'cachix',
             packageName: 'https://github.com/cachix/cachix.git',
-            replaceString: 'be97b37989f11b724197b5f4c7ffd78f12c8c4bf',
             versioning: semverCoercedVersioning,
           },
         ],
@@ -496,7 +496,6 @@ describe('modules/manager/nix/extract', () => {
             datasource: GitRefsDatasource.id,
             depName: 'flake-parts',
             packageName: 'https://github.com/hercules-ci/flake-parts',
-            replaceString: '4524271976b625a4a605beefd893f270620fd751',
             versioning: semverCoercedVersioning,
           },
         ],
