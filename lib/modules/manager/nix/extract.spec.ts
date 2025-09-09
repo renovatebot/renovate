@@ -44,7 +44,6 @@ describe('modules/manager/nix/extract', () => {
   });
 
   it('skips transitive dependencies', async () => {
-    const flakeNix = codeBlock``;
     const flakeLock = codeBlock`{
       "nodes": {
         "nixpkgs": {
@@ -299,6 +298,120 @@ describe('modules/manager/nix/extract', () => {
         },
       },
       'input is of type path, skipping',
+    );
+  });
+
+  it('ignores locked inputs not tracking a rev', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "nixpkgs-lib": {
+          "locked": {
+            "lastModified": 1733096140,
+            "narHash": "sha256-1qRH7uAUsyQI7R1Uwl4T+XvdNv778H0Nb5njNrqvylY=",
+            "type": "tarball",
+            "url": "https://github.com/NixOS/nixpkgs/archive/5487e69da40cbd611ab2cadee0b4637225f7cfae.tar.gz"
+          },
+          "original": {
+            "type": "tarball",
+            "url": "https://github.com/NixOS/nixpkgs/archive/5487e69da40cbd611ab2cadee0b4637225f7cfae.tar.gz"
+          }
+        },
+        "root": {
+          "inputs": {
+            "nixpkgs-lib": "nixpkgs-lib"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      {
+        flakeLockFile: 'flake.lock',
+        flakeInput: {
+          locked: {
+            type: 'tarball',
+            url: 'https://github.com/NixOS/nixpkgs/archive/5487e69da40cbd611ab2cadee0b4637225f7cfae.tar.gz',
+          },
+          original: {
+            type: 'tarball',
+            url: 'https://github.com/NixOS/nixpkgs/archive/5487e69da40cbd611ab2cadee0b4637225f7cfae.tar.gz',
+          },
+        },
+      },
+      'locked input is not tracking a rev, skipping',
+    );
+  });
+
+  it('handles currentDigest replacement when config provided', async () => {
+    const flakeNix = codeBlock`{
+      inputs = {
+        disko.url = "github:nix-community/disko/newdigest123";
+      };
+    }`;
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "disko": {
+          "locked": {
+            "lastModified": 1744145203,
+            "narHash": "sha256-I2oILRiJ6G+BOSjY+0dGrTPe080L3pbKpc+gCV3Nmyk=",
+            "owner": "nix-community",
+            "repo": "disko",
+            "rev": "76c0a6dba345490508f36c1aa3c7ba5b6b460989",
+            "type": "github"
+          },
+          "original": {
+            "owner": "nix-community",
+            "repo": "disko",
+            "rev": "olddigest123",
+            "type": "github"
+          }
+        },
+        "root": {
+          "inputs": {
+            "disko": "disko"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    const config = {
+      currentDigest: 'olddigest123',
+      newDigest: 'newdigest123',
+    };
+
+    expect(
+      await extractPackageFile(flakeNix, 'flake.nix', config),
+    ).toMatchObject({
+      deps: [
+        {
+          currentDigest: config.newDigest,
+          depName: 'disko',
+          packageName: 'https://github.com/nix-community/disko',
+        },
+      ],
+    });
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      {
+        flakeLockFile: 'flake.lock',
+        flakeInput: {
+          locked: {
+            rev: '76c0a6dba345490508f36c1aa3c7ba5b6b460989',
+            type: 'github',
+          },
+          original: {
+            owner: 'nix-community',
+            repo: 'disko',
+            rev: config.newDigest,
+            type: 'github',
+          },
+        },
+      },
+      `overriding rev ${config.currentDigest} with new digest ${config.newDigest}`,
     );
   });
 
@@ -915,50 +1028,6 @@ describe('modules/manager/nix/extract', () => {
           },
         ],
       });
-    });
-
-    it('ignores locked inputs not tracking a rev', async () => {
-      const flakeLock = codeBlock`{
-        "nodes": {
-          "nixpkgs-lib": {
-            "locked": {
-              "lastModified": 1733096140,
-              "narHash": "sha256-1qRH7uAUsyQI7R1Uwl4T+XvdNv778H0Nb5njNrqvylY=",
-              "type": "tarball",
-              "url": "https://github.com/NixOS/nixpkgs/archive/5487e69da40cbd611ab2cadee0b4637225f7cfae.tar.gz"
-            },
-            "original": {
-              "type": "tarball",
-              "url": "https://github.com/NixOS/nixpkgs/archive/5487e69da40cbd611ab2cadee0b4637225f7cfae.tar.gz"
-            }
-          },
-          "root": {
-            "inputs": {
-              "nixpkgs-lib": "nixpkgs-lib"
-            }
-          }
-        },
-        "root": "root",
-        "version": 7
-      }`;
-      fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-      expect(await extractPackageFile('', 'flake.nix')).toBeNull();
-      expect(logger.logger.debug).toHaveBeenCalledWith(
-        {
-          flakeLockFile: 'flake.lock',
-          flakeInput: {
-            locked: {
-              type: 'tarball',
-              url: 'https://github.com/NixOS/nixpkgs/archive/5487e69da40cbd611ab2cadee0b4637225f7cfae.tar.gz',
-            },
-            original: {
-              type: 'tarball',
-              url: 'https://github.com/NixOS/nixpkgs/archive/5487e69da40cbd611ab2cadee0b4637225f7cfae.tar.gz',
-            },
-          },
-        },
-        'locked input is not tracking a rev, skipping',
-      );
     });
   });
 
