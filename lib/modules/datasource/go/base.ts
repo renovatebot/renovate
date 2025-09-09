@@ -11,6 +11,7 @@ import {
   trimTrailingSlash,
 } from '../../../util/url';
 import { BitbucketTagsDatasource } from '../bitbucket-tags';
+import { ForgejoTagsDatasource } from '../forgejo-tags';
 import { GitTagsDatasource } from '../git-tags';
 import { GiteaTagsDatasource } from '../gitea-tags';
 import { GithubTagsDatasource } from '../github-tags';
@@ -110,7 +111,7 @@ export class BaseGoDatasource {
       const split = goModule.split('/');
       const packageName = `${split[1]}/${split[2]}`;
       return {
-        datasource: GiteaTagsDatasource.id,
+        datasource: ForgejoTagsDatasource.id,
         packageName,
         registryUrl: 'https://code.forgejo.org',
       };
@@ -120,7 +121,7 @@ export class BaseGoDatasource {
       const split = goModule.split('/');
       const packageName = `${split[1]}/${split[2]}`;
       return {
-        datasource: GiteaTagsDatasource.id,
+        datasource: ForgejoTagsDatasource.id,
         packageName,
         registryUrl: 'https://codeberg.org',
       };
