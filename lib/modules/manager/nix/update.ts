@@ -81,17 +81,11 @@ export function updateDependency({
       const refParam = parsedUrl.searchParams.get('ref');
 
       if (refParam) {
-        // Update refs/tags/X.Y.Z or refs/heads/branch patterns
         const refMatch = /^refs\/(tags|heads)\/(.+)$/.exec(refParam);
         if (refMatch) {
-          const newRef = `refs/${refMatch[1]}/${newValue}`;
-          parsedUrl.searchParams.set('ref', newRef);
+          parsedUrl.searchParams.set('ref', `refs/${refMatch[1]}/${newValue}`);
           urlModified = true;
         }
-      } else if (currentValue && parsedUrl.pathname.includes(currentValue)) {
-        // Fallback: direct replacement if the version is in the URL path
-        parsedUrl.pathname = parsedUrl.pathname.replace(currentValue, newValue);
-        urlModified = true;
       }
     }
 
@@ -101,13 +95,6 @@ export function updateDependency({
 
       if (revParam && revParam === currentDigest) {
         parsedUrl.searchParams.set('rev', newDigest);
-        urlModified = true;
-      } else if (currentDigest && parsedUrl.pathname.includes(currentDigest)) {
-        // Fallback: direct replacement if the digest is in the URL path
-        parsedUrl.pathname = parsedUrl.pathname.replace(
-          currentDigest,
-          newDigest,
-        );
         urlModified = true;
       }
     }
@@ -133,14 +120,12 @@ export function updateDependency({
 
   // Replace the old URL with the new URL in the file content
   if (isAttrSet) {
-    // For attribute set syntax (`depName = { url = "..."; }`)
     const fullLinePattern = regEx(
       `(^\\s*${escapeRegExp(depName)}\\s*=\\s*\\{[^}]*url\\s*=\\s*")${escapeRegExp(oldUrl)}(")`,
       'gms',
     );
     updatedContent = updatedContent.replace(fullLinePattern, `$1${newUrl}$2`);
   } else {
-    // For direct assignment (`depName.url = "..."`)
     const fullLinePattern = regEx(
       `(^\\s*${escapeRegExp(depName)}\\.url\\s*=\\s*")${escapeRegExp(oldUrl)}(".*$)`,
       'gm',
