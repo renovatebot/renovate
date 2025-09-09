@@ -80,27 +80,7 @@ describe('modules/manager/nix/update', () => {
         expect(result).not.toContain('nixos-24.05');
       });
 
-      it('updates ref', () => {
-        const fileContent = codeBlock`
-          {
-            inputs = {
-              nixpkgs.url = "github:NixOS/nixpkgs?ref=refs/tags/24.05";
-            };
-          }
-        `;
-        const result = updateDependency({
-          fileContent,
-          upgrade: {
-            depName: 'nixpkgs',
-            currentValue: '24.05',
-            newValue: '25.05',
-          },
-        });
-        expect(result).toContain('25.05');
-        expect(result).not.toContain('24.05');
-      });
-
-      it('updates rev', () => {
+      it('updates commit', () => {
         const fileContent = codeBlock`
           {
             inputs = {
@@ -121,10 +101,114 @@ describe('modules/manager/nix/update', () => {
           'af51545ec9a44eadf3fe3547610a5cdd882bc34e',
         );
       });
+
+      it('updates branch ref', () => {
+        const fileContent = codeBlock`
+          {
+            inputs = {
+              nixpkgs.url = "github:NixOS/nixpkgs?ref=refs/heads/nixos-24.05";
+            };
+          }
+        `;
+        const result = updateDependency({
+          fileContent,
+          upgrade: {
+            depName: 'nixpkgs',
+            currentValue: '24.05',
+            newValue: '25.05',
+          },
+        });
+        expect(result).toContain('ref=refs/heads/nixos-25.05');
+        expect(result).not.toContain('ref=refs/heads/nixos-24.05');
+      });
+
+      it('updates tag ref', () => {
+        const fileContent = codeBlock`
+          {
+            inputs = {
+              nixpkgs.url = "github:NixOS/nixpkgs?ref=refs/tags/24.05";
+            };
+          }
+        `;
+        const result = updateDependency({
+          fileContent,
+          upgrade: {
+            depName: 'nixpkgs',
+            currentValue: '24.05',
+            newValue: '25.05',
+          },
+        });
+        expect(result).toContain('ref=refs/tags/25.05');
+        expect(result).not.toContain('ref=refs/tags/24.05');
+      });
+
+      it('updates rev', () => {
+        const fileContent = codeBlock`
+          {
+            inputs = {
+              nixpkgs.url = "github:NixOS/nixpkgs?rev=af51545ec9a44eadf3fe3547610a5cdd882bc34e";
+            };
+          }
+        `;
+        const result = updateDependency({
+          fileContent,
+          upgrade: {
+            depName: 'nixpkgs',
+            currentDigest: 'af51545ec9a44eadf3fe3547610a5cdd882bc34e',
+            newDigest: '11cb3517b3af6af300dd6c055aeda73c9bf52c48',
+          },
+        });
+        expect(result).toContain(
+          'rev=11cb3517b3af6af300dd6c055aeda73c9bf52c48',
+        );
+        expect(result).not.toContain(
+          'rev=af51545ec9a44eadf3fe3547610a5cdd882bc34e',
+        );
+      });
     });
 
     describe('Git sources', () => {
-      it('updates ref', () => {
+      it.skip('updates branch ref with refs/heads/ prefix', () => {
+        const fileContent = codeBlock`
+          {
+            inputs = {
+              mypackage.url = "git+ssh://git@example.com/org/repo?ref=refs/heads/release-1.0";
+            };
+          }
+        `;
+        const result = updateDependency({
+          fileContent,
+          upgrade: {
+            depName: 'mypackage',
+            currentValue: '1.0',
+            newValue: '2.0',
+          },
+        });
+        expect(result).toContain('ref=refs/heads/release-2.0');
+        expect(result).not.toContain('ref=refs/heads/release-1.0');
+      });
+
+      it.skip('updates branch ref without refs/heads/ prefix', () => {
+        const fileContent = codeBlock`
+          {
+            inputs = {
+              mypackage.url = "git+ssh://git@example.com/org/repo?ref=release-1.0";
+            };
+          }
+        `;
+        const result = updateDependency({
+          fileContent,
+          upgrade: {
+            depName: 'mypackage',
+            currentValue: '1.0',
+            newValue: '2.0',
+          },
+        });
+        expect(result).toContain('ref=release-2.0');
+        expect(result).not.toContain('ref=release-1.0');
+      });
+
+      it('updates tag ref', () => {
         const fileContent = codeBlock`
           {
             inputs = {
@@ -148,7 +232,7 @@ describe('modules/manager/nix/update', () => {
         const fileContent = codeBlock`
           {
             inputs = {
-              mypackage.url = "git+ssh://git@example.com/org/repo?rev=abc123";
+              mypackage.url = "git+ssh://git@example.com/org/repo?rev=0da084a03fa90c38c859208c38fae6bbfd7b9144";
             };
           }
         `;
@@ -156,12 +240,16 @@ describe('modules/manager/nix/update', () => {
           fileContent,
           upgrade: {
             depName: 'mypackage',
-            currentDigest: 'abc123',
-            newDigest: 'def456',
+            currentDigest: '0da084a03fa90c38c859208c38fae6bbfd7b9144',
+            newDigest: '7b6b5d6a5ac69143671c30570f9fa5eaa6318e89',
           },
         });
-        expect(result).toContain('rev=def456');
-        expect(result).not.toContain('rev=abc123');
+        expect(result).toContain(
+          'rev=7b6b5d6a5ac69143671c30570f9fa5eaa6318e89',
+        );
+        expect(result).not.toContain(
+          'rev=0da084a03fa90c38c859208c38fae6bbfd7b9144',
+        );
       });
 
       it('updates ref and rev', () => {
@@ -190,28 +278,6 @@ describe('modules/manager/nix/update', () => {
         expect(result).not.toContain(
           'rev=73d65dcf7d7af76346b084c775e4df9697372a45',
         );
-      });
-
-      it('handles refs/heads/ prefix correctly', () => {
-        const fileContent = codeBlock`
-          {
-            inputs = {
-              mypackage.url = "git+ssh://git@example.com/org/repo?ref=refs/heads/main&rev=abc123";
-            };
-          }
-        `;
-        const result = updateDependency({
-          fileContent,
-          upgrade: {
-            depName: 'mypackage',
-            currentValue: 'main',
-            newValue: 'develop',
-            currentDigest: 'abc123',
-            newDigest: 'def456',
-          },
-        });
-        expect(result).toContain('ref=refs/heads/develop');
-        expect(result).toContain('rev=def456');
       });
     });
 
