@@ -26,13 +26,11 @@ export async function extractPackageFile(
   packageFile: string,
   config?: ExtractConfig,
 ): Promise<PackageFileContent | null> {
-  // flake.lock
   const flakeLockFile = getSiblingFileName(packageFile, 'flake.lock');
   const flakeLockContents = await readLocalFile(flakeLockFile, 'utf8');
-
-  logger.trace(`nix.extractPackageFile(${flakeLockContents})`);
-
   const deps: PackageDependency[] = [];
+
+  logger.trace({ flakeLockFile }, 'nix.extractPackageFile()');
 
   const flakeLockParsed = NixFlakeLock.safeParse(flakeLockContents);
   if (!flakeLockParsed.success) {
