@@ -127,55 +127,6 @@ export async function extractPackageFile(
       flakeOriginal.rev = newDigest;
     }
 
-    // Try to get the actual ref/rev values from flake.nix content if available
-    let actualRef = flakeOriginal.ref;
-    let actualRev = flakeOriginal.rev;
-
-    // Parse flake.nix to find the actual URL and extract ref/rev
-    if (content && depName) {
-      // Look for the dependency URL in flake.nix
-      // Match patterns like: depName.url = "...?ref=<ref>&rev=<rev>..."
-      const depUrlPattern = new RegExp(
-        `${depName}\\.url\\s*=\\s*"([^"]+)"`,
-        'm',
-      );
-      const urlMatch = content.match(depUrlPattern);
-      if (urlMatch) {
-        const url = urlMatch[1];
-
-        // Handle GitHub shorthand format: github:owner/repo/ref_or_commit
-        const githubShorthandMatch = /^github:[^/]+\/[^/]+\/(.+)$/.exec(url);
-        if (githubShorthandMatch) {
-          const refOrCommit = githubShorthandMatch[1];
-          // Check if it's a commit hash (40 char hex) or a branch/tag ref
-          if (/^[0-9a-f]{40}$/i.test(refOrCommit)) {
-            actualRev = refOrCommit;
-          } else {
-            actualRef = refOrCommit;
-          }
-        }
-
-        // Extract ref from URL query parameters
-        const refMatch = /[?&]ref=([^&]+)/.exec(url);
-        if (refMatch) {
-          actualRef = refMatch[1];
-        }
-        // Extract rev from URL query parameters
-        const revMatch = /[?&]rev=([^&]+)/.exec(url);
-        if (revMatch) {
-          actualRev = revMatch[1];
-        }
-      }
-    }
-
-    // Strip refs/tags/ or refs/heads/ prefix from ref if present
-    let strippedRef = actualRef;
-    if (actualRef?.startsWith('refs/tags/')) {
-      strippedRef = actualRef.replace('refs/tags/', '');
-    } else if (actualRef?.startsWith('refs/heads/')) {
-      strippedRef = actualRef.replace('refs/heads/', '');
-    }
-
     const dep: PackageDependency = {
       depName,
       datasource: GitRefsDatasource.id,
@@ -183,22 +134,23 @@ export async function extractPackageFile(
     };
 
     // if rev is set, the flake contains a digest and can be updated directly
-    // if ref is set without rev, set currentValue to the ref for branch tracking
     // otherwise set lockedVersion so it is updated during lock file maintenance
-    if (actualRev) {
-      dep.currentValue = strippedRef;
-      dep.currentDigest = actualRev;
-      dep.replaceString = actualRev;
-    } else if (strippedRef) {
-      // Branch or tag tracking - set currentValue and replaceString
-      dep.currentValue = strippedRef;
-      dep.replaceString = actualRef || strippedRef;
-      dep.lockedVersion = flakeLocked.rev;
+    if (flakeOriginal.rev || flakeOriginal.ref) {
+      dep.currentValue = flakeOriginal.ref?.replace(
+        /^refs\/(heads|tags)\//,
+        '',
+      );
+      dep.currentDigest = flakeOriginal.rev;
+      dep.lockedVersion = flakeOriginal.ref ? flakeLocked.rev : undefined;
     } else {
       dep.lockedVersion = flakeLocked.rev;
     }
 
     switch (flakeLocked.type) {
+      case 'git':
+        dep.packageName = flakeOriginal.url;
+        break;
+
       case 'github':
         // set to nixpkgs if it is a nixpkgs reference
         if (
@@ -208,7 +160,6 @@ export async function extractPackageFile(
           dep.packageName = 'https://github.com/NixOS/nixpkgs';
           dep.currentValue = flakeOriginal.ref;
           dep.versioning = nixpkgsVersioning;
-          // Clear replaceString for nixpkgs as it uses special handling
           delete dep.replaceString;
           break;
         }
@@ -218,10 +169,6 @@ export async function extractPackageFile(
 
       case 'gitlab':
         dep.packageName = `https://${flakeOriginal.host ?? 'gitlab.com'}/${decodeURIComponent(flakeOriginal.owner!)}/${flakeOriginal.repo}`;
-        break;
-
-      case 'git':
-        dep.packageName = flakeOriginal.url;
         break;
 
       case 'sourcehut':
@@ -240,8 +187,6 @@ export async function extractPackageFile(
             '$<channel>',
           );
           dep.versioning = nixpkgsVersioning;
-          // Clear replaceString for nixpkgs as it uses special handling
-          delete dep.replaceString;
           break;
         }
 
@@ -255,9 +200,9 @@ export async function extractPackageFile(
     deps.push(dep);
   }
 
-  if (deps.length) {
-    return { deps };
+  if (deps.length === 0) {
+    return null;
   }
 
-  return null;
+  return { deps };
 }
