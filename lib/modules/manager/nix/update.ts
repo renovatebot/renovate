@@ -83,7 +83,12 @@ export function updateDependency({
       if (refParam) {
         const refMatch = /^refs\/(tags|heads)\/(.+)$/.exec(refParam);
         if (refMatch) {
-          parsedUrl.searchParams.set('ref', `refs/${refMatch[1]}/${newValue}`);
+          const updatedRef = `refs/${refMatch[1]}/${refMatch[2].replace(currentValue, newValue)}`;
+          parsedUrl.searchParams.set('ref', updatedRef);
+          urlModified = true;
+        } else if (refParam.includes(currentValue)) {
+          const updatedRef = refParam.replace(currentValue, newValue);
+          parsedUrl.searchParams.set('ref', updatedRef);
           urlModified = true;
         }
       }
