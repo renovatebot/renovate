@@ -108,6 +108,8 @@ export async function extractPackageFile(
       continue;
     }
 
+    // UP TO HERE
+
     // if there's a new digest, set the corresponding digest in the lockfile so confirmations pass
     const currentDigest = config?.currentDigest;
     const newDigest = config?.newDigest;
