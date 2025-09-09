@@ -18,7 +18,7 @@ const lockableHTTPTarballProtocol = regEx(
 );
 
 const lockableChannelOriginalUrl = regEx(
-  '^https://channels.nixos.org/(?<channel>[^/]+)/nixexprs.tar.xz$',
+  '^https://(?:channels\.nixos\.org|nixos\.org/channels)/(?<channel>[^/]+)/nixexprs.tar.xz$',
 );
 
 export async function extractPackageFile(
@@ -107,8 +107,6 @@ export async function extractPackageFile(
       );
       continue;
     }
-
-    // UP TO HERE
 
     // if there's a new digest, set the corresponding digest in the lockfile so confirmations pass
     const currentDigest = config?.currentDigest;
