@@ -3,13 +3,14 @@
 // Copyright 2024 the JSR authors. All rights reserved. MIT license.
 
 import is from '@sindresorhus/is';
+import { regEx } from '../../../util/regex';
 
 export function extractJsrPackageName(packageName: string): {
   scope: string;
   name: string;
 } | null {
   // trim first @
-  const validatePackageName = packageName.replace(/^@/, '');
+  const validatePackageName = packageName.replace(regEx(/^@/), '');
   const parts = validatePackageName.split('/');
   if (parts.length !== 2) {
     return null;
@@ -31,7 +32,7 @@ function parseJsrScopeName(name: string): string | null {
   if (name.length < 3) {
     return null;
   }
-  if (!/^[a-zA-Z0-9-_]+$/.test(name)) {
+  if (!regEx(/^[a-zA-Z0-9-_]+$/).test(name)) {
     return null;
   }
   return name;
@@ -44,7 +45,7 @@ function parseJsrPackageName(name: string): string | null {
   if (name.length > 58) {
     return null;
   }
-  if (!/^[a-z0-9-]+$/.test(name)) {
+  if (!regEx(/^[a-z0-9-]+$/).test(name)) {
     return null;
   }
   if (name.startsWith('-')) {
