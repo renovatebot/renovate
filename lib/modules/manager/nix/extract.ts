@@ -36,19 +36,16 @@ export async function extractPackageFile(
   if (!flakeLockParsed.success) {
     logger.debug(
       { flakeLockFile, error: flakeLockParsed.error },
-      `invalid flake.lock file`,
+      'invalid flake.lock file',
     );
     return null;
   }
 
   const flakeLock = flakeLockParsed.data;
-  const rootInputs = flakeLock.nodes.root.inputs;
+  const rootInputs = flakeLock.nodes.root?.inputs;
 
   if (!rootInputs) {
-    logger.debug(
-      { flakeLockFile, error: flakeLockParsed.error },
-      `flake.lock is missing "root" node`,
-    );
+    logger.debug({ flakeLockFile }, 'flake.lock is missing "root" node');
     return null;
   }
 
@@ -58,7 +55,7 @@ export async function extractPackageFile(
       continue;
     }
 
-    // skip all locked and transitivie nodes as they cannot be updated by regular means
+    // skip all locked and transitive nodes as they cannot be updated by regular means
     if (!(depName in rootInputs)) {
       continue;
     }
@@ -71,7 +68,7 @@ export async function extractPackageFile(
     if (flakeLocked === undefined) {
       logger.debug(
         { flakeLockFile, flakeInput },
-        `input is missing locked, skipping`,
+        'input is missing locked, skipping',
       );
       continue;
     }
@@ -79,7 +76,7 @@ export async function extractPackageFile(
     if (flakeOriginal === undefined) {
       logger.debug(
         { flakeLockFile, flakeInput },
-        `input is missing original, skipping`,
+        'input is missing original, skipping',
       );
       continue;
     }
@@ -88,7 +85,7 @@ export async function extractPackageFile(
     if (flakeOriginal.type === 'indirect' || flakeLocked.type === 'indirect') {
       logger.debug(
         { flakeLockFile, flakeInput },
-        `input is type ${flakeOriginal.type}, skipping`,
+        'input is of type indirect, skipping',
       );
       continue;
     }
@@ -97,7 +94,7 @@ export async function extractPackageFile(
     if (flakeOriginal.type === 'path' || flakeLocked.type === 'path') {
       logger.debug(
         { flakeLockFile, flakeInput },
-        `input is type ${flakeOriginal.type}, skipping`,
+        'input is of type path, skipping',
       );
       continue;
     }
@@ -106,7 +103,7 @@ export async function extractPackageFile(
     if (flakeLocked.rev === undefined) {
       logger.debug(
         { flakeLockFile, flakeInput },
-        `locked input is not tracking a rev, skipping`,
+        'locked input is not tracking a rev, skipping',
       );
       continue;
     }
@@ -118,8 +115,8 @@ export async function extractPackageFile(
       currentDigest &&
       newDigest &&
       flakeOriginal.rev &&
-      flakeOriginal.rev === currentDigest && // currentDigest is the old digest
-      content.includes(newDigest) // flake.nix contains the new digest
+      flakeOriginal.rev === currentDigest &&
+      content.includes(newDigest)
     ) {
       logger.debug(
         { flakeLockFile, flakeInput },
