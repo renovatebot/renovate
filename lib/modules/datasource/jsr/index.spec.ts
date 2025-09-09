@@ -1,6 +1,4 @@
 import * as httpMock from '../../../../test/http-mock';
-import { GlobalConfig } from '../../../config/global';
-import * as hostRules from '../../../util/host-rules';
 import { JsrDatasource } from '.';
 
 let jsrPackageMetadataResponse: any;
@@ -9,8 +7,6 @@ describe('modules/datasource/jsr/index', () => {
   const jsr = new JsrDatasource();
 
   beforeEach(() => {
-    GlobalConfig.reset();
-    hostRules.clear();
     jsrPackageMetadataResponse = {
       scope: 'scope',
       name: 'package-name',
