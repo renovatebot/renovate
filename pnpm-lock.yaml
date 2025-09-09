@@ -614,8 +614,8 @@ importers:
         specifier: 12.2.0
         version: 12.2.0
       openpgp:
-        specifier: 6.2.1
-        version: 6.2.1
+        specifier: 6.2.2
+        version: 6.2.2
       re2:
         specifier: 1.22.1
         version: 1.22.1
@@ -5067,10 +5067,9 @@ packages:
     resolution: {integrity: sha512-VXJjc87FScF88uafS3JllDgvAm+c/Slfz06lorj2uAY34rlUu0Nt+v8wreiImcrgAjjIHp1rXpTDlLOGw29WwQ==}
     engines: {node: '>=18'}
 
-  openpgp@6.2.1:
-    resolution: {integrity: sha512-5vkqxQWgyrfY0shygqJTaCoa4SbPdjrpmtfREyXBBDrXjoRT25edEMQbdKH5/WxDXlLVn9TxPsVrKP72Jjuz2A==}
+  openpgp@6.2.2:
+    resolution: {integrity: sha512-P/dyEqQ3gfwOCo+xsqffzXjmUhGn4AZTOJ1LCcN21S23vAk+EAvMJOQTsb/C8krL6GjOSBxqGYckhik7+hneNw==}
     engines: {node: '>= 18.0.0'}
-    deprecated: This version has a bug affecting zlib compression if manually enabled as part of encryption or signing (see https://github.com/openpgpjs/openpgpjs/pull/1894). Please update to v6.2.2 or later.
 
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
@@ -12155,7 +12154,7 @@ snapshots:
     dependencies:
       mimic-function: 5.0.1
 
-  openpgp@6.2.1:
+  openpgp@6.2.2:
     optional: true
 
   optionator@0.9.4:
