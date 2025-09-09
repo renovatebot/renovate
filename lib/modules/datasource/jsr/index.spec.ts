@@ -1,22 +1,16 @@
 import * as httpMock from '../../../../test/http-mock';
 import { JsrDatasource } from '.';
 
-let jsrPackageMetadataResponse: any;
+const jsrPackageMetadataResponse = {
+  latest: '0.0.2',
+  versions: {
+    '0.0.1': {},
+    '0.0.2': {},
+  },
+} as { latest: string; versions: Record<string, { yanked?: boolean }> };
 
 describe('modules/datasource/jsr/index', () => {
   const jsr = new JsrDatasource();
-
-  beforeEach(() => {
-    jsrPackageMetadataResponse = {
-      scope: 'scope',
-      name: 'package-name',
-      latest: '0.0.2',
-      versions: {
-        '0.0.1': {},
-        '0.0.2': {},
-      },
-    };
-  });
 
   it('should return null for invalid package name', async () => {
     const res = await jsr.getReleases({
