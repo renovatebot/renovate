@@ -50,12 +50,9 @@ describe('modules/datasource/jsr/index', () => {
       registryUrl: 'https://jsr.io/',
       releases: [
         {
-          isDeprecated: undefined,
-          isLatest: false,
           version: '0.0.1',
         },
         {
-          isDeprecated: undefined,
           isLatest: true,
           version: '0.0.2',
         },
@@ -79,11 +76,9 @@ describe('modules/datasource/jsr/index', () => {
       releases: [
         {
           isDeprecated: true,
-          isLatest: false,
           version: '0.0.1',
         },
         {
-          isDeprecated: undefined,
           isLatest: true,
           version: '0.0.2',
         },
