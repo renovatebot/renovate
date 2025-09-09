@@ -78,7 +78,11 @@ import {
 import { GithubIssueCache, GithubIssue as Issue } from './issue';
 import { massageMarkdownLinks } from './massage-markdown-links';
 import { getPrCache, updatePrCache } from './pr';
-import { GithubBranchProtection, GithubVulnerabilityAlert } from './schema';
+import {
+  GithubBranchProtection,
+  GithubBranchRulesets,
+  GithubVulnerabilityAlert,
+} from './schema';
 import type {
   CombinedBranchStatus,
   Comment,
@@ -321,6 +325,29 @@ async function getBranchProtection(
     GithubBranchProtection,
   );
   return res.body;
+}
+
+async function getBranchRulesets(
+  branchName: string,
+): Promise<GithubBranchRulesets> {
+  if (config.parentRepo) {
+    return [];
+  }
+
+  try {
+    const res = await githubApi.getJson(
+      `repos/${config.repository}/rules/branches/${escapeHash(branchName)}`,
+      { cacheProvider: repoCacheProvider },
+      GithubBranchRulesets,
+    );
+    return res.body;
+  } catch (err) {
+    if (err.statusCode === 404) {
+      logger.debug(`No branch rulesets found for ${branchName}`);
+      return [];
+    }
+    throw err;
+  }
 }
 
 export async function getRawFile(
@@ -740,6 +767,40 @@ export async function getBranchForceRebase(
   // Initialize to false before checking branch protection
   config.branchForceRebase[branchName] = false;
 
+  // Check rulesets first (newer API)
+  try {
+    const rulesets = await getBranchRulesets(branchName);
+    logger.trace(`Found ${rulesets.length} rulesets for branch ${branchName}`);
+
+    const hasForceRebaseRule = rulesets.some((rule) => {
+      if (rule.type === 'non_fast_forward') {
+        logger.debug(`Ruleset: non_fast_forward rule found for ${branchName}`);
+        return true;
+      }
+
+      if (
+        rule.type === 'required_status_checks' &&
+        rule.parameters.strict_required_status_checks_policy === true
+      ) {
+        logger.debug(
+          `Ruleset: strict required status checks found for ${branchName}`,
+        );
+        return true;
+      }
+
+      return false;
+    });
+
+    if (hasForceRebaseRule) {
+      config.branchForceRebase[branchName] = true;
+      return true;
+    }
+  } catch (err) {
+    // If rulesets API fails, log and continue to legacy branch protection
+    logger.warn(`Rulesets check failed for ${branchName}: ${err.message}`);
+  }
+
+  // Fall back to legacy branch protection
   try {
     const branchProtection = await getBranchProtection(branchName);
     logger.debug(`Found branch protection for branch ${branchName}`);
