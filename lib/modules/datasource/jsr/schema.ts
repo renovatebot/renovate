@@ -13,9 +13,9 @@ export const JsrPackageMetadata = z
     ),
   })
   .transform(({ versions, latest }): Release[] => {
-    return Object.entries(versions).map(([version]) => ({
+    return Object.entries(versions).map(([version, val]) => ({
       version,
-      isDeprecated: versions[version]?.yanked,
-      isLatest: latest === version,
+      ...(val.yanked&& {isDeprecated: true}),
+      ...(latest === version && { isLatest: true }),
     }));
   });
