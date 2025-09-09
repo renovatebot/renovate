@@ -754,6 +754,58 @@ export async function initRepo({
   return repoConfig;
 }
 
+async function checkRulesetsForForceRebase(
+  branchName: string,
+): Promise<boolean> {
+  try {
+    const rulesets = await getBranchRulesets(branchName);
+    logger.debug(`Found ${rulesets.length} rulesets for branch ${branchName}`);
+
+    return rulesets.some((rule) => {
+      if (rule.type === 'non_fast_forward') {
+        logger.debug(`Ruleset: non_fast_forward rule found for ${branchName}`);
+        return true;
+      }
+
+      if (
+        rule.type === 'required_status_checks' &&
+        rule.parameters?.strict_required_status_checks_policy === true
+      ) {
+        logger.debug(
+          `Ruleset: strict required status checks found for ${branchName}`,
+        );
+        return true;
+      }
+
+      return false;
+    });
+  } catch (err) {
+    handleBranchProtectionError('rulesets', err, branchName);
+    return false;
+  }
+}
+
+async function checkBranchProtectionForForceRebase(
+  branchName: string,
+): Promise<boolean> {
+  try {
+    const branchProtection = await getBranchProtection(branchName);
+    logger.debug(`Found branch protection for branch ${branchName}`);
+
+    const strictStatusChecks = branchProtection?.required_status_checks?.strict;
+    if (strictStatusChecks) {
+      logger.debug(
+        `Branch protection: PRs must be up-to-date before merging for ${branchName}`,
+      );
+      return true;
+    }
+    return false;
+  } catch (err) {
+    handleBranchProtectionError('branch-protection', err, branchName);
+    return false;
+  }
+}
+
 export async function getBranchForceRebase(
   branchName: string,
 ): Promise<boolean> {
@@ -768,60 +820,29 @@ export async function getBranchForceRebase(
   config.branchForceRebase[branchName] = false;
 
   // Check rulesets first (newer API)
-  try {
-    const rulesets = await getBranchRulesets(branchName);
-    logger.trace(`Found ${rulesets.length} rulesets for branch ${branchName}`);
-
-    const hasForceRebaseRule = rulesets.some((rule) => {
-      if (rule.type === 'non_fast_forward') {
-        logger.debug(`Ruleset: non_fast_forward rule found for ${branchName}`);
-        return true;
-      }
-
-      if (
-        rule.type === 'required_status_checks' &&
-        rule.parameters.strict_required_status_checks_policy === true
-      ) {
-        logger.debug(
-          `Ruleset: strict required status checks found for ${branchName}`,
-        );
-        return true;
-      }
-
-      return false;
-    });
-
-    if (hasForceRebaseRule) {
-      config.branchForceRebase[branchName] = true;
-      return true;
-    }
-  } catch (err) {
-    // If rulesets API fails, log and continue to legacy branch protection
-    logger.warn(`Rulesets check failed for ${branchName}: ${err.message}`);
+  const hasRulesetForceRebase = await checkRulesetsForForceRebase(branchName);
+  if (hasRulesetForceRebase) {
+    config.branchForceRebase[branchName] = true;
+    return true;
   }
 
   // Fall back to legacy branch protection
-  try {
-    const branchProtection = await getBranchProtection(branchName);
-    logger.debug(`Found branch protection for branch ${branchName}`);
-
-    const strictStatusChecks = branchProtection?.required_status_checks?.strict;
-    if (strictStatusChecks) {
-      logger.debug(
-        `Branch protection: PRs must be up-to-date before merging for ${branchName}`,
-      );
-      config.branchForceRebase[branchName] = true;
-    }
-  } catch (err) {
-    handleBranchProtectionError(err, branchName);
+  const hasBranchProtectionForceRebase =
+    await checkBranchProtectionForForceRebase(branchName);
+  if (hasBranchProtectionForceRebase) {
+    config.branchForceRebase[branchName] = true;
   }
 
   return config.branchForceRebase[branchName];
 }
 
-function handleBranchProtectionError(err: any, branchName: string): void {
+function handleBranchProtectionError(
+  protection: 'branch-protection' | 'rulesets',
+  err: any,
+  branchName: string,
+): void {
   if (err.statusCode === 404) {
-    logger.debug(`No branch protection found for ${branchName}`);
+    logger.debug(`No ${protection} found for ${branchName}`);
     return;
   }
 
@@ -830,7 +851,7 @@ function handleBranchProtectionError(err: any, branchName: string): void {
 
   if (isUnauthorized) {
     logger.once.debug(
-      'Branch protection: Do not have permissions to detect branch protection',
+      `Branch protection: Do not have permissions to detect ${protection} for ${branchName}`,
     );
     return;
   }

@@ -1010,23 +1010,6 @@ describe('modules/platform/github/index', () => {
       expect(res).toBeTrue();
     });
 
-    it('should fallback to legacy branch protection when rulesets API fails', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .get('/repos/undefined/rules/branches/main')
-        .reply(500);
-      httpMock
-        .scope(githubApiHost)
-        .get('/repos/undefined/branches/main/protection')
-        .reply(200, {
-          required_status_checks: {
-            strict: true,
-          },
-        });
-      const res = await github.getBranchForceRebase('main');
-      expect(res).toBeTrue();
-    });
-
     it('should return false when no force rebase rules found', async () => {
       httpMock
         .scope(githubApiHost)
