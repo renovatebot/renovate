@@ -168,7 +168,7 @@ describe('modules/manager/nix/update', () => {
     });
 
     describe('Git sources', () => {
-      it.skip('updates branch ref with refs/heads/ prefix', () => {
+      it('updates branch ref with refs/heads/ prefix', () => {
         const fileContent = codeBlock`
           {
             inputs = {
@@ -188,7 +188,7 @@ describe('modules/manager/nix/update', () => {
         expect(result).not.toContain('ref=refs/heads/release-1.0');
       });
 
-      it.skip('updates branch ref without refs/heads/ prefix', () => {
+      it('updates branch ref without refs/heads/ prefix', () => {
         const fileContent = codeBlock`
           {
             inputs = {
