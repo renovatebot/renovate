@@ -308,7 +308,6 @@ describe('modules/manager/nix/artifacts', () => {
 
   it('returns updated flake.lock when doing lockfile maintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
-    fs.writeLocalFile.mockResolvedValueOnce();
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
