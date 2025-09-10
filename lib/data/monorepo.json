@@ -17,6 +17,10 @@
     "angular-eslint": "https://github.com/angular-eslint/angular-eslint",
     "angularfire": "https://github.com/angular/angularfire",
     "angularjs": "https://github.com/angular/angular.js",
+    "apache-lucene": [
+      "https://gitbox.apache.org/repos/asf?p=lucene.git",
+      "https://github.com/apache/lucene"
+    ],
     "apollo-server": "https://github.com/apollographql/apollo-server",
     "apolloclient": "https://github.com/apollographql/apollo-client",
     "applicationinsights-dotnet": "https://github.com/Microsoft/ApplicationInsights-dotnet",
@@ -436,6 +440,7 @@
     "ml-dotnet": "https://github.com/dotnet/machinelearning",
     "mockito": "https://github.com/mockito/mockito",
     "mongo-csharp-driver": "https://github.com/mongodb/mongo-csharp-driver",
+    "mongo-java-driver": "https://github.com/mongodb/mongo-java-driver",
     "mstest": "https://github.com/microsoft/testfx",
     "mutation-testing-elements": "https://github.com/stryker-mutator/mutation-testing-elements",
     "nest": [
