@@ -941,6 +941,50 @@ describe('modules/platform/github/index', () => {
       const res = await github.getBranchForceRebase('main');
       expect(res).toBeFalse();
     });
+
+    it('should return cached result on subsequent calls', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/main/protection')
+        .reply(200, {
+          required_status_checks: {
+            strict: true,
+            contexts: [],
+          },
+        });
+
+      // First call should make HTTP request and cache the result
+      const firstResult = await github.getBranchForceRebase('main');
+      expect(firstResult).toBeTrue();
+
+      // Second call should return cached result without making HTTP request
+      // If cache is working, no additional HTTP requests should be made
+      const secondResult = await github.getBranchForceRebase('main');
+      expect(secondResult).toBeTrue();
+      expect(secondResult).toBe(firstResult);
+
+      // Verify only one HTTP request was made
+      expect(httpMock.allUsed()).toBeTrue();
+    });
+
+    it('should return cached false result on subsequent calls', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/dev/protection')
+        .reply(404);
+
+      // First call should make HTTP request and cache the result
+      const firstResult = await github.getBranchForceRebase('dev');
+      expect(firstResult).toBeFalse();
+
+      // Second call should return cached result without making HTTP request
+      const secondResult = await github.getBranchForceRebase('dev');
+      expect(secondResult).toBeFalse();
+      expect(secondResult).toBe(firstResult);
+
+      // Verify only one HTTP request was made
+      expect(httpMock.allUsed()).toBeTrue();
+    });
   });
 
   describe('getPrList()', () => {
