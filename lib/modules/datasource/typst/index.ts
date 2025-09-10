@@ -2,7 +2,10 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider';
 import { GithubHttp } from '../../../util/http/github';
-import { api as semver } from '../../versioning/semver-coerced';
+import {
+  id as semver,
+  api as semverApi,
+} from '../../versioning/semver-coerced';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { SourceUrl, Versions } from './schema';
@@ -11,6 +14,8 @@ export class TypstDatasource extends Datasource {
   static readonly id = 'typst';
 
   override readonly defaultRegistryUrls = ['https://github.com'];
+
+  override defaultVersioning = semver;
 
   githubHttp: GithubHttp;
 
@@ -51,7 +56,7 @@ export class TypstDatasource extends Datasource {
     );
 
     const latestRelease = versions
-      .sort((x, y) => semver.sortVersions(x, y))
+      .sort((x, y) => semverApi.sortVersions(x, y))
       .at(-1);
 
     if (!latestRelease) {
