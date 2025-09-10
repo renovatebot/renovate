@@ -2700,7 +2700,7 @@ When the time passed since the release is _less_ than the set `minimumReleaseAge
 After enough days have passed: Renovate replaces the "pending" status with a "passing" status check.
 
 The datasource that Renovate uses must have a release timestamp for the `minimumReleaseAge` config option to work.
-Some datasources may have a release timestamp, but in a format that's Renovate does not support.
+Some datasources may have a release timestamp, but in a format Renovate does not support.
 In those cases a feature request needs to be implemented.
 
 <!-- prettier-ignore -->
