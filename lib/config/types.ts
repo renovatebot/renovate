@@ -176,6 +176,7 @@ export interface RepoGlobalConfig {
   s3PathStyle?: boolean;
   cachePrivatePackages?: boolean;
   ignorePrAuthor?: boolean;
+  tfcToken?: string;
 }
 
 export interface LegacyAdminConfig {

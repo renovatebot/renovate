@@ -1372,6 +1372,13 @@ It could then be used in a repository config or preset like so:
 
 Secret names must start with an upper or lower case character and can have only characters, digits, or underscores.
 
+## tfcToken
+
+API token for authenticating with Terraform Cloud/Enterprise private module registry.
+
+This token is used when Renovate needs to access private modules from `app.terraform.io`.
+You can also set this using the `RENOVATE_TFC_TOKEN` environment variable.
+
 ## token
 
 ## unicodeEmoji

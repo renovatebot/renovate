@@ -1,5 +1,7 @@
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { coerceString } from '../../../util/string';
 import { asTimestamp } from '../../../util/timestamp';
@@ -104,6 +106,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
         serviceDiscovery,
         repository,
       );
+      this.ensureTfcHostRule(registryUrl);
       res = (await this.http.getJsonUnchecked<TerraformRelease>(pkgUrl)).body;
       const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
       if (returnedName !== repository) {
@@ -153,6 +156,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
         serviceDiscovery,
         `${repository}/versions`,
       );
+      this.ensureTfcHostRule(registryUrl);
       res = (await this.http.getJsonUnchecked<TerraformModuleVersions>(pkgUrl))
         .body;
       if (res.modules.length < 1) {
@@ -207,5 +211,51 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     const { registry, repository } =
       TerraformModuleDatasource.getRegistryRepository(packageName, registryUrl);
     return `${registry}/${repository}`;
+  }
+
+  /**
+   * Ensure Renovate hostRules contains TFC/TFE auth for the target registry host.
+   * No-ops if a rule already exists or no token is configured.
+   */
+  private ensureTfcHostRule(registryUrl: string): void {
+    try {
+      const url = new URL(registryUrl);
+      const host = url.host;
+      const origin = url.origin;
+
+      // Skip public OSS registry
+      if (host === 'registry.terraform.io') return;
+
+      // Only add if token is available and no hostRule for this hostType+host yet
+      const tfcToken =
+        GlobalConfig.get('tfcToken') ?? process.env.RENOVATE_TFC_TOKEN;
+      if (!tfcToken) {
+        logger.debug('No TFC token configured; skipping hostRules add');
+        return;
+      }
+
+      const existing = hostRules.find({ url: origin });
+      if (
+        existing?.token ||
+        existing?.headers?.authorization ||
+        (existing?.username && existing?.password)
+      ) {
+        return;
+      }
+
+      hostRules.add({
+        hostType: 'terraform-module',
+        matchHost: origin,
+        authType: 'Bearer',
+        token: tfcToken,
+      });
+
+      logger.debug({ host }, 'Added TFC/TFE auth via hostRules');
+    } catch (e) {
+      logger.debug(
+        { registryUrl },
+        'Could not parse registryUrl for hostRules',
+      );
+    }
   }
 }

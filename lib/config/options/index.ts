@@ -983,6 +983,14 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'tfcToken',
+    description:
+      'Terraform Cloud/Enterprise API token for accessing private module registry.',
+    stage: 'repository',
+    type: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'username',
     description: 'Username for authentication.',
     stage: 'repository',
