@@ -49,38 +49,40 @@ export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
     return flags;
   }
 
-  private isSynced(url: string): boolean {
+  private isSynced(method: string, url: string): boolean {
     if (!this.aggressive) {
       return false;
     }
 
     const flags = this.getSyncFlags();
-    return !!flags[url];
+    return !!flags[`${method}:${url}`];
   }
 
-  private markSynced(url: string): void {
+  private markSynced(method: string, url: string): void {
     const flags = this.getSyncFlags();
-    flags[url] = true;
+    flags[`${method}:${url}`] = true;
   }
 
   override wrapServerResponse<T>(
+    method: string,
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
-    const res = super.wrapServerResponse(url, resp);
-    this.markSynced(url);
+    const res = super.wrapServerResponse(method, url, resp);
+    this.markSynced(method, url);
     return res;
   }
 
   override async bypassServer<T>(
+    method: string,
     url: string,
     _ignoreSoftTtl: boolean,
   ): Promise<HttpResponse<T> | null> {
-    if (!this.isSynced(url)) {
+    if (!this.isSynced(method, url)) {
       return null;
     }
 
-    const cache = await this.load(url);
+    const cache = await this.load(method, url);
     const httpCache = HttpCache.parse(cache);
     if (!httpCache) {
       return null;
