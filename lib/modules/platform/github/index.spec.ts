@@ -961,7 +961,6 @@ describe('modules/platform/github/index', () => {
       // If cache is working, no additional HTTP requests should be made
       const secondResult = await github.getBranchForceRebase('main');
       expect(secondResult).toBeTrue();
-      expect(secondResult).toBe(firstResult);
 
       // Verify only one HTTP request was made
       expect(httpMock.allUsed()).toBeTrue();
@@ -980,7 +979,6 @@ describe('modules/platform/github/index', () => {
       // Second call should return cached result without making HTTP request
       const secondResult = await github.getBranchForceRebase('dev');
       expect(secondResult).toBeFalse();
-      expect(secondResult).toBe(firstResult);
 
       // Verify only one HTTP request was made
       expect(httpMock.allUsed()).toBeTrue();
