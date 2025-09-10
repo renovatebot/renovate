@@ -1,5 +1,5 @@
 import { Http } from '..';
-import { resetCache } from '../../cache/repository';
+import { getCache, resetCache } from '../../cache/repository';
 import { repoCacheProvider } from './repository-http-cache-provider';
 import * as httpMock from '~test/http-mock';
 
@@ -112,6 +112,50 @@ describe('util/http/cache/repository-http-cache-provider', () => {
       statusCode: 200,
       body: { msg: 'Hello, world!' },
       authorization: true,
+    });
+  });
+
+  describe('HEAD requests', () => {
+    it('caches HEAD requests separately from GET requests', async () => {
+      const scope = httpMock.scope('https://example.com');
+
+      scope
+        .get('/foo/bar')
+        .reply(200, { msg: 'GET response' }, { etag: 'get-123' });
+      scope.head('/foo/bar').reply(200, '', { etag: 'head-123' });
+
+      const getRes = await http.getJsonUnchecked('https://example.com/foo/bar');
+      const headRes = await http.head('https://example.com/foo/bar');
+
+      expect(getRes).toMatchObject({
+        statusCode: 200,
+        body: { msg: 'GET response' },
+      });
+      expect(headRes).toMatchObject({
+        statusCode: 200,
+      });
+
+      const cache = getCache();
+      expect(cache.httpCache?.['https://example.com/foo/bar']).toBeDefined();
+      expect(
+        cache.httpCacheHead?.['https://example.com/foo/bar'],
+      ).toBeDefined();
+    });
+
+    it('reuses HEAD data with etag', async () => {
+      const scope = httpMock.scope('https://example.com');
+
+      scope.head('/foo/bar').reply(200, '', { etag: 'head-123' });
+      const res1 = await http.head('https://example.com/foo/bar');
+      expect(res1).toMatchObject({
+        statusCode: 200,
+      });
+
+      scope.head('/foo/bar').reply(304);
+      const res2 = await http.head('https://example.com/foo/bar');
+      expect(res2).toMatchObject({
+        statusCode: 200,
+      });
     });
   });
 });
