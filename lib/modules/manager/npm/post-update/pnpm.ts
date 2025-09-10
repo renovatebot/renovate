@@ -108,10 +108,15 @@ export async function generateLockFile(
         args += ' --recursive';
       }
     }
-    if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
+    if (!GlobalConfig.get('allowScripts')) {
+      // If the admin disallows scripts, then neither scripts nor the pnpmfile should be run
       args += ' --ignore-scripts';
       args += ' --ignore-pnpmfile';
+    } else if (config.ignoreScripts) {
+      // If the admin allows scripts then always allow the pnpmfile
+      args += ' --ignore-scripts';
     }
+
     logger.trace({ args }, 'pnpm command options');
 
     const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
