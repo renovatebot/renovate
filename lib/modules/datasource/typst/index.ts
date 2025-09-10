@@ -1,39 +1,11 @@
-import { z } from 'zod';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider';
 import { GithubHttp } from '../../../util/http/github';
-import { LooseArray, Toml } from '../../../util/schema-utils';
-import { fromBase64 } from '../../../util/string';
 import { api as semver } from '../../versioning/semver-coerced';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-
-const Versions = LooseArray(
-  z
-    .object({
-      type: z.literal('dir'),
-      name: z.string(),
-    })
-    .transform(({ name }) => name)
-    .refine((version) => semver.isValid(version)),
-);
-
-const SourceUrl = z
-  .object({ content: z.string() })
-  .transform(({ content }) => fromBase64(content))
-  .pipe(Toml)
-  .pipe(
-    z
-      .object({
-        package: z.object({
-          repository: z.string(),
-        }),
-      })
-      .transform((data) => data.package.repository),
-  )
-  .optional()
-  .catch(undefined);
+import { SourceUrl, Versions } from './schema';
 
 export class TypstDatasource extends Datasource {
   static readonly id = 'typst';
