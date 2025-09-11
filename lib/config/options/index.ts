@@ -3035,6 +3035,7 @@ const options: RenovateOptions[] = [
     description:
       'Set to `true` to fetch the entire list of PRs instead of only those authored by the Renovate user.',
     type: 'boolean',
+    globalOnly: true,
     default: false,
   },
   {
