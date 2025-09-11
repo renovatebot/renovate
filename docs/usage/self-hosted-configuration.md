@@ -827,6 +827,16 @@ Value of `0` means no caching.
 !!! warning
     When you set `httpCacheTtlDays` to `0`, Renovate will remove the cached HTTP data.
 
+## ignorePrAuthor
+
+This is usually needed if someone needs to migrate bot accounts, including from the Mend Renovate App to self-hosted.
+An additional use case is for GitLab users of project or group access tokens who need to rotate them.
+
+If `ignorePrAuthor` is configured to true, it means Renovate will fetch the entire list of repository PRs instead of optimizing to fetch only those PRs which it created itself.
+You should only want to enable this if you are changing the bot account (e.g. from `@old-bot` to `@new-bot`) and want `@new-bot` to find and update any existing PRs created by `@old-bot`.
+
+Setting this field to `true` in Github or GitLab will also mean that all Issues will be fetched instead of only those by the bot itself.
+
 ## includeMirrors
 
 By default, Renovate does not autodiscover repositories that are mirrors.
