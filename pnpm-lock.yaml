@@ -385,8 +385,8 @@ importers:
         specifier: 7.1.0
         version: 7.1.0(semantic-release@24.2.7(typescript@5.8.3))
       '@smithy/util-stream':
-        specifier: 4.2.4
-        version: 4.2.4
+        specifier: 4.3.0
+        version: 4.3.0
       '@types/auth-header':
         specifier: 1.0.6
         version: 1.0.6
@@ -2000,10 +2000,6 @@ packages:
 
   '@smithy/util-retry@4.1.0':
     resolution: {integrity: sha512-5AGoBHb207xAKSVwaUnaER+L55WFY8o2RhlafELZR3mB0J91fpL+Qn+zgRkPzns3kccGaF2vy0HmNVBMWmN6dA==}
-    engines: {node: '>=18.0.0'}
-
-  '@smithy/util-stream@4.2.4':
-    resolution: {integrity: sha512-vSKnvNZX2BXzl0U2RgCLOwWaAP9x/ddd/XobPK02pCbzRm5s55M53uwb1rl/Ts7RXZvdJZerPkA+en2FDghLuQ==}
     engines: {node: '>=18.0.0'}
 
   '@smithy/util-stream@4.3.0':
@@ -6919,7 +6915,7 @@ snapshots:
       '@smithy/util-endpoints': 3.1.0
       '@smithy/util-middleware': 4.1.0
       '@smithy/util-retry': 4.1.0
-      '@smithy/util-stream': 4.2.4
+      '@smithy/util-stream': 4.3.0
       '@smithy/util-utf8': 4.1.0
       '@smithy/util-waiter': 4.1.0
       '@types/uuid': 9.0.8
@@ -7017,7 +7013,7 @@ snapshots:
       '@smithy/protocol-http': 5.2.0
       '@smithy/smithy-client': 4.6.0
       '@smithy/types': 4.4.0
-      '@smithy/util-stream': 4.2.4
+      '@smithy/util-stream': 4.3.0
       tslib: 2.8.1
 
   '@aws-sdk/credential-provider-ini@3.879.0':
@@ -7141,7 +7137,7 @@ snapshots:
       '@smithy/protocol-http': 5.2.0
       '@smithy/types': 4.4.0
       '@smithy/util-middleware': 4.1.0
-      '@smithy/util-stream': 4.2.4
+      '@smithy/util-stream': 4.3.0
       '@smithy/util-utf8': 4.1.0
       tslib: 2.8.1
 
@@ -7205,7 +7201,7 @@ snapshots:
       '@smithy/types': 4.4.0
       '@smithy/util-config-provider': 4.1.0
       '@smithy/util-middleware': 4.1.0
-      '@smithy/util-stream': 4.2.4
+      '@smithy/util-stream': 4.3.0
       '@smithy/util-utf8': 4.1.0
       tslib: 2.8.1
 
@@ -8651,17 +8647,6 @@ snapshots:
     dependencies:
       '@smithy/service-error-classification': 4.1.0
       '@smithy/types': 4.4.0
-      tslib: 2.8.1
-
-  '@smithy/util-stream@4.2.4':
-    dependencies:
-      '@smithy/fetch-http-handler': 5.2.0
-      '@smithy/node-http-handler': 4.2.0
-      '@smithy/types': 4.4.0
-      '@smithy/util-base64': 4.1.0
-      '@smithy/util-buffer-from': 4.1.0
-      '@smithy/util-hex-encoding': 4.1.0
-      '@smithy/util-utf8': 4.1.0
       tslib: 2.8.1
 
   '@smithy/util-stream@4.3.0':

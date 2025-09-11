@@ -4654,7 +4654,7 @@ In the below `renovate.json` extract example, Renovate will use the `docker` ver
 {
   "packageRules": [
     {
-      "matchPackageFileNames": [".gitlab-ci.yml"],
+      "matchFileNames": [".gitlab-ci.yml"],
       "versioning": "docker"
     }
   ]
