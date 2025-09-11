@@ -2372,16 +2372,6 @@ If you are extending from the popular `config:recommended` preset then it adds i
 Set this to `true` if running plugins causes problems.
 Applicable for Composer only for now.
 
-## ignorePrAuthor
-
-This is usually needed if someone needs to migrate bot accounts, including from the Mend Renovate App to self-hosted.
-An additional use case is for GitLab users of project or group access tokens who need to rotate them.
-
-If `ignorePrAuthor` is configured to true, it means Renovate will fetch the entire list of repository PRs instead of optimizing to fetch only those PRs which it created itself.
-You should only want to enable this if you are changing the bot account (e.g. from `@old-bot` to `@new-bot`) and want `@new-bot` to find and update any existing PRs created by `@old-bot`.
-
-Setting this field to `true` in Github or GitLab will also mean that all Issues will be fetched instead of only those by the bot itself.
-
 ## ignorePresets
 
 Use this if you are extending a complex preset but don't want to use every "sub preset" that it includes.
@@ -2700,7 +2690,7 @@ When the time passed since the release is _less_ than the set `minimumReleaseAge
 After enough days have passed: Renovate replaces the "pending" status with a "passing" status check.
 
 The datasource that Renovate uses must have a release timestamp for the `minimumReleaseAge` config option to work.
-Some datasources may have a release timestamp, but in a format that's Renovate does not support.
+Some datasources may have a release timestamp, but in a format Renovate does not support.
 In those cases a feature request needs to be implemented.
 
 <!-- prettier-ignore -->
@@ -4664,7 +4654,7 @@ In the below `renovate.json` extract example, Renovate will use the `docker` ver
 {
   "packageRules": [
     {
-      "matchPackageFileNames": [".gitlab-ci.yml"],
+      "matchFileNames": [".gitlab-ci.yml"],
       "versioning": "docker"
     }
   ]
