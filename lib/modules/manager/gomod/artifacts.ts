@@ -28,8 +28,20 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 import { getExtraDepsNotice } from './artifacts-extra';
+import {
+  getGoModulesInDependencyOrder,
+  getTransitiveDependentModules,
+} from './package-tree';
 
 const { major, valid } = semver;
+
+/**
+ * Quote a path for shell execution
+ */
+function quotePath(path: string): string {
+  // Simple path quoting - use single quotes and escape any existing single quotes
+  return `'${path.replace(/'/g, "'\\''")}'`;
+}
 
 function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
@@ -328,6 +340,50 @@ export async function updateArtifacts({
       args = 'mod tidy' + tidyOpts;
       logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
+    }
+
+    // Handle gomodTidyAll - run go mod tidy on all dependent modules in correct order
+    if (config.postUpdateOptions?.includes('gomodTidyAll')) {
+      logger.debug('gomodTidyAll enabled - processing dependent modules');
+
+      try {
+        // Get all modules that depend on the current module
+        const dependentModules =
+          await getTransitiveDependentModules(goModFileName);
+
+        if (dependentModules.length > 0) {
+          logger.debug(
+            { dependentModules },
+            'Found dependent modules for gomodTidyAll',
+          );
+
+          // Get modules in dependency order
+          const modulesByLevel = await getGoModulesInDependencyOrder();
+
+          // Filter to only include modules that need tidying (dependents + current module)
+          const modulesToTidy = new Set([goModFileName, ...dependentModules]);
+
+          // Execute go mod tidy in dependency order (sequential)
+          for (const levelModules of modulesByLevel) {
+            const modulesInThisLevel = levelModules.filter((module) =>
+              modulesToTidy.has(module),
+            );
+
+            for (const modulePath of modulesInThisLevel) {
+              const moduleDir = upath.dirname(modulePath);
+              const tidyCommand = `go mod tidy${tidyOpts}`;
+              logger.debug(`Running go mod tidy in ${moduleDir}`);
+              execCommands.push(
+                `(cd ${quotePath(moduleDir)} && ${tidyCommand})`,
+              );
+            }
+          }
+        } else {
+          logger.debug('No dependent modules found for gomodTidyAll');
+        }
+      } catch (error) {
+        logger.warn({ error }, 'Failed to process gomodTidyAll - skipping');
+      }
     }
 
     await exec(execCommands, execOptions);
