@@ -9,7 +9,10 @@ export const url = 'https://maven.apache.org/tools/wrapper';
 export const categories: Category[] = ['java'];
 
 export const defaultConfig = {
-  managerFilePatterns: ['/(^|\\/).mvn/wrapper/maven-wrapper.properties$/'],
+  managerFilePatterns: [
+    '/(^|\\/).mvn/wrapper/maven-wrapper.properties$/',
+    '/(^|\\/)mvnw(.cmd)?$/',
+  ],
   versioning,
 };
 
