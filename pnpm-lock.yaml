@@ -113,6 +113,9 @@ importers:
       '@yarnpkg/parsers':
         specifier: 3.0.3
         version: 3.0.3
+      ae-cvss-calculator:
+        specifier: 1.0.8
+        version: 1.0.8
       agentkeepalive:
         specifier: 4.6.0
         version: 4.6.0
@@ -353,9 +356,6 @@ importers:
       validate-npm-package-name:
         specifier: 6.0.2
         version: 6.0.2
-      vuln-vects:
-        specifier: 1.1.0
-        version: 1.1.0
       xmldoc:
         specifier: 2.0.2
         version: 2.0.2
@@ -2492,6 +2492,9 @@ packages:
   adm-zip@0.5.16:
     resolution: {integrity: sha512-TGw5yVi4saajsSEgz25grObGHEUaDrniwvA2qwSC060KfqGPdglhvPMA2lPIoxs3PQIItj2iag35fONcQqgUaQ==}
     engines: {node: '>=12.0'}
+
+  ae-cvss-calculator@1.0.8:
+    resolution: {integrity: sha512-ud8g+BQTSJoeuB4nOnbhu/Fd7TnGEnnr1AYOA+uFaEDQB0IOgjxHA2ds5iOmLh5Os6ziGCJJqjEFOFeWMOVQ4Q==}
 
   agent-base@7.1.4:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
@@ -6362,9 +6365,6 @@ packages:
       jsdom:
         optional: true
 
-  vuln-vects@1.1.0:
-    resolution: {integrity: sha512-LGDwn9nRz94YoeqOn2TZqQXzyonBc5FJppSgH34S/1U+3bgPONq/vvfiCbCQ4MeBll58xx+kDmhS73ac+EHBBw==}
-
   web-streams-polyfill@3.3.3:
     resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
     engines: {node: '>= 8'}
@@ -9194,6 +9194,8 @@ snapshots:
   acorn@8.15.0: {}
 
   adm-zip@0.5.16: {}
+
+  ae-cvss-calculator@1.0.8: {}
 
   agent-base@7.1.4: {}
 
@@ -13618,8 +13620,6 @@ snapshots:
       - terser
       - tsx
       - yaml
-
-  vuln-vects@1.1.0: {}
 
   web-streams-polyfill@3.3.3: {}
 
