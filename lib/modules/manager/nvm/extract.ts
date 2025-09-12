@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { NodeVersionDatasource } from '../../datasource/node-version';
 import type { PackageDependency, PackageFileContent } from '../types';
 
@@ -9,7 +9,7 @@ export function extractPackageFile(content: string): PackageFileContent {
       .split('\n')
       // Remove code comments
       .map((line) => line.replace(/#.*$/, '').trim())
-      .filter(is.nonEmptyStringAndNotWhitespace)
+      .filter(isNonEmptyStringAndNotWhitespace)
       .join('\n')
       .trim(),
     datasource: NodeVersionDatasource.id,
