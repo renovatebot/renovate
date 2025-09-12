@@ -29,7 +29,6 @@ describe('modules/platform/gerrit/scm', () => {
         state: 'open',
         targetBranch: 'baseBranch',
         limit: 1,
-        refreshCache: true,
         requestDetails: ['CURRENT_REVISION', 'CURRENT_ACTIONS'],
       });
     });
@@ -82,7 +81,6 @@ describe('modules/platform/gerrit/scm', () => {
         state: 'open',
         targetBranch: 'master',
         limit: 1,
-        refreshCache: true,
         requestDetails: ['CURRENT_REVISION', 'DETAILED_ACCOUNTS'],
       });
     });
@@ -168,7 +166,6 @@ describe('modules/platform/gerrit/scm', () => {
         branchName: 'myBranchName',
         state: 'open',
         limit: 1,
-        refreshCache: true,
       });
       expect(git.branchExists).toHaveBeenCalledWith('myBranchName');
     });
@@ -192,7 +189,6 @@ describe('modules/platform/gerrit/scm', () => {
         branchName: 'myBranchName',
         state: 'open',
         limit: 1,
-        refreshCache: true,
         requestDetails: ['CURRENT_REVISION'],
       });
     });
@@ -221,7 +217,6 @@ describe('modules/platform/gerrit/scm', () => {
         branchName: 'nonExistingChange',
         state: 'open',
         limit: 1,
-        refreshCache: true,
         requestDetails: ['CURRENT_REVISION'],
       });
       expect(git.mergeToLocal).toHaveBeenCalledWith('nonExistingChange');
@@ -245,7 +240,6 @@ describe('modules/platform/gerrit/scm', () => {
         branchName: 'existingChange',
         state: 'open',
         limit: 1,
-        refreshCache: true,
         requestDetails: ['CURRENT_REVISION'],
       });
       expect(git.mergeToLocal).toHaveBeenCalledWith('refs/changes/34/1234/1');
@@ -271,7 +265,6 @@ describe('modules/platform/gerrit/scm', () => {
         state: 'open',
         targetBranch: 'main',
         limit: 1,
-        refreshCache: true,
         requestDetails: ['CURRENT_REVISION'],
       });
     });
