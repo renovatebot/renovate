@@ -570,6 +570,100 @@ describe('workers/repository/dependency-dashboard', () => {
       await dryRun(branches, platform, 0, 1);
     });
 
+    it('checks an issue with dependency dashboard categories', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr0',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep0' }],
+          result: 'needs-approval',
+          dependencyDashboardCategory: 'Category #2',
+          branchName: 'branchName0',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
+          result: 'needs-approval',
+          branchName: 'branchName1',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr2',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
+          result: 'needs-approval',
+          dependencyDashboardCategory: 'Category #10',
+          branchName: 'branchName2',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr3',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
+          result: 'not-scheduled',
+          branchName: 'branchName3',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr4',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
+          result: 'not-scheduled',
+          branchName: 'branchName4',
+          dependencyDashboardCategory: 'Category #1',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr5',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep5' }],
+          result: 'pr-limit-reached',
+          branchName: 'branchName5',
+          dependencyDashboardCategory: 'Category #3',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr6',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep6' }],
+          result: 'pr-limit-reached',
+          branchName: 'branchName6',
+          dependencyDashboardCategory: 'Category #3',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr7',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep7' }],
+          result: 'error',
+          branchName: 'branchName7',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr8',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep8' }],
+          result: 'error',
+          branchName: 'branchName8',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr9',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep9' }],
+          result: 'done',
+          prBlockedBy: 'BranchAutomerge',
+          branchName: 'branchName9',
+        },
+      ];
+      config.dependencyDashboard = true;
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        {},
+        { result: 'no-migration' },
+      );
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+
+      // same with dry run
+      await dryRun(branches, platform, 0, 1);
+    });
+
     it('checks an issue with 2 PR pr-edited', async () => {
       const branches: BranchConfig[] = [
         {

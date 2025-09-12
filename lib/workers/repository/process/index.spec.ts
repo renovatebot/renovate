@@ -84,6 +84,21 @@ describe('workers/repository/process/index', () => {
       expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });
     });
 
+    it('throws if base branch config is invalid', async () => {
+      scm.branchExists.mockResolvedValue(true);
+      platform.getJsonFile = vi.fn().mockResolvedValue({
+        extends: [':approveMajorUpdates'],
+        labels: '123',
+        invalidKey: 'invalidValue',
+      });
+      config.baseBranchPatterns = ['master', 'dev'];
+      config.useBaseBranchConfig = 'merge';
+      getCache().configFileName = 'renovate.json';
+      await expect(extractDependencies(config)).rejects.toThrowError(
+        CONFIG_VALIDATION,
+      );
+    });
+
     it('handles config name mismatch between baseBranches if useBaseBranchConfig specified', async () => {
       scm.branchExists.mockResolvedValue(true);
       platform.getJsonFile = vi

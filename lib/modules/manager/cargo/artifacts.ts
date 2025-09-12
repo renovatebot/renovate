@@ -41,13 +41,9 @@ async function cargoUpdatePrecise(
   updatedDeps: Upgrade[],
   constraint: string | undefined,
 ): Promise<void> {
-  // First update all dependencies that have been bumped in `Cargo.toml`.
-  const cmds = [
-    'cargo update --config net.git-fetch-with-cli=true' +
-      ` --manifest-path ${quote(manifestPath)} --workspace`,
-  ];
+  const cmds = [];
 
-  // Update individual dependencies to their `newVersion`. Necessary when
+  // First update individual dependencies to their `newVersion`. Necessary when
   // using the `update-lockfile` rangeStrategy which doesn't touch Cargo.toml.
   for (const dep of updatedDeps) {
     cmds.push(
@@ -57,6 +53,11 @@ async function cargoUpdatePrecise(
         ` --precise ${quote(dep.newVersion!)}`,
     );
   }
+
+  // Then update all dependencies that have been bumped in `Cargo.toml`.
+  cmds.push(
+    `cargo update --config net.git-fetch-with-cli=true --manifest-path ${quote(manifestPath)} --workspace`,
+  );
 
   const execOptions: ExecOptions = {
     extraEnv: { ...getGitEnvironmentVariables(['cargo']) },
