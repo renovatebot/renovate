@@ -28,6 +28,8 @@ export interface ExtractConfig extends CustomExtractConfig {
   npmrcMerge?: boolean;
   skipInstalls?: boolean | null;
   repository?: string;
+  currentDigest?: string;
+  newDigest?: string;
 }
 
 export interface UpdateArtifactsConfig {
