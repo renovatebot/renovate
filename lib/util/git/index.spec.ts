@@ -68,6 +68,9 @@ describe('util/git/index', { timeout: 10000 }, () => {
     await fs.writeFile(base.path + '/future_file', 'future');
     await repo.add(['future_file']);
     await repo.commit('future message');
+    await fs.writeFile(base.path + '/future_file2', 'future2');
+    await repo.add(['future_file2']);
+    await repo.commit('future message2');
 
     await repo.checkoutBranch('renovate/modified_branch', defaultBranch);
     await fs.writeFile(base.path + '/base_file', 'base');
@@ -465,9 +468,9 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
   });
 
-  describe('mergeBranch(branchName)', () => {
-    it('should perform a branch merge', async () => {
-      await git.mergeBranch('renovate/future_branch');
+  describe('mergeBranch(branchName, fast-forward)', () => {
+    it('should perform a branch merge with fast-forward', async () => {
+      await git.mergeBranch('renovate/future_branch', 'auto', null);
       const merged = await Git(origin.path).branch([
         '--verbose',
         '--merged',
@@ -477,7 +480,109 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('should throw if branch merge throws', async () => {
-      await expect(git.mergeBranch('not_found')).rejects.toThrow();
+      await expect(
+        git.mergeBranch('not_found', 'auto', null),
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('mergeBranch(branchName, merge-commit)', () => {
+    it('should perform a branch merge with merge commit and the default message', async () => {
+      await git.mergeBranch('renovate/future_branch', 'merge-commit', null);
+      const merged = await Git(origin.path).branch([
+        '--verbose',
+        '--merged',
+        defaultBranch,
+      ]);
+      expect(merged.all).toContain('renovate/future_branch');
+      const commits = await Git(origin.path).log();
+      expect(commits.latest?.message).toStartWith('Merge branch');
+    });
+
+    it('should throw if branch merge throws', async () => {
+      await expect(
+        git.mergeBranch('not_found', 'merge-commit', null),
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('mergeBranch(branchName, merge-commit, "Merge commit by Renovate Bot")', () => {
+    const mergeCommitMessage = 'Merged by Renovate Bot';
+    it('should perform a branch merge with merge commit and a custom merge commit message', async () => {
+      await git.mergeBranch(
+        'renovate/future_branch',
+        'merge-commit',
+        mergeCommitMessage,
+      );
+      const merged = await Git(origin.path).branch([
+        '--verbose',
+        '--merged',
+        defaultBranch,
+      ]);
+      expect(merged.all).toContain('renovate/future_branch');
+      const commits = await Git(origin.path).log();
+      expect(commits.latest?.message).equals(mergeCommitMessage);
+    });
+
+    it('should throw if branch merge throws', async () => {
+      await expect(
+        git.mergeBranch('not_found', 'merge-commit', mergeCommitMessage),
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('mergeBranch(branchName, squash, null)', () => {
+    it('should perform a branch merge with squash', async () => {
+      await git.mergeBranch('renovate/future_branch', 'squash', null);
+      const unmerged = await Git(origin.path).branch([
+        '--verbose',
+        '--no-merged',
+        defaultBranch,
+      ]);
+      expect(unmerged.all).toContain('renovate/future_branch');
+      const commits = await Git(origin.path).log();
+      // Check for default squash commit message
+      expect(commits.latest?.message).toStartWith('Squashed commit');
+      // Show that the commit contains the files future_file and future_file2
+      const files = await Git(origin.path).show(['--name-only', 'HEAD']);
+      expect(files).toContain('future_file');
+      expect(files).toContain('future_file2');
+    });
+
+    it('should throw if branch merge throws', async () => {
+      await expect(
+        git.mergeBranch('not_found', 'squash', null),
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('mergeBranch(branchName, squash, "Squash merge commit by Renovate Bot")', () => {
+    const mergeCommitMessage = 'Squash merge commit by Renovate Bot';
+    it('should perform a branch merge with squash', async () => {
+      await git.mergeBranch(
+        'renovate/future_branch',
+        'squash',
+        mergeCommitMessage,
+      );
+      const unmerged = await Git(origin.path).branch([
+        '--verbose',
+        '--no-merged',
+        defaultBranch,
+      ]);
+      expect(unmerged.all).toContain('renovate/future_branch');
+      const commits = await Git(origin.path).log();
+      // Check for custom merge commit message
+      expect(commits.latest?.message).equals(mergeCommitMessage);
+      // Show that the commit contains the files future_file and future_file2
+      const files = await Git(origin.path).show(['--name-only', 'HEAD']);
+      expect(files).toContain('future_file');
+      expect(files).toContain('future_file2');
+    });
+
+    it('should throw if branch merge throws', async () => {
+      await expect(
+        git.mergeBranch('not_found', 'squash', null),
+      ).rejects.toThrow();
     });
   });
 
@@ -698,6 +803,11 @@ describe('util/git/index', { timeout: 10000 }, () => {
           type: 'addition',
           path: 'future_file',
           contents: 'future',
+        },
+        {
+          type: 'addition',
+          path: 'future_file2',
+          contents: 'future2',
         },
       ];
       const commit = await git.commitFiles({
