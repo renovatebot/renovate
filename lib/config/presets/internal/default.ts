@@ -583,6 +583,10 @@ export const presets: Record<string, Preset> = {
         matchManagers: ['poetry'],
         semanticCommitType: 'fix',
       },
+      {
+        matchJsonata: ['isLockfileUpdate = true'],
+        semanticCommitType: 'chore',
+      },
     ],
   },
   separateMajorReleases: {
