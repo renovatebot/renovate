@@ -13,14 +13,14 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 const gunzipAsync = promisify(gunzip);
 const zstdDecompressAsync = zstdDecompress ? promisify(zstdDecompress) : null;
 
-function getDecompressor(
-  contentType: string | undefined,
-): (buf: Buffer) => Promise<Buffer> {
-  if (zstdDecompressAsync && contentType === 'application/zstd') {
-    return zstdDecompressAsync;
+const zstdMagic = 0xfd2fb528;
+
+async function decompressAsync(buf: Buffer): Promise<Buffer> {
+  if (zstdDecompressAsync && buf.readUInt32LE() === zstdMagic) {
+    return await zstdDecompressAsync(buf);
   }
 
-  return gunzipAsync;
+  return await gunzipAsync(buf);
 }
 
 export class RpmDatasource extends Datasource {
@@ -138,7 +138,6 @@ export class RpmDatasource extends Datasource {
         throw new Error(`Empty response body from getting ${primaryGzipUrl}.`);
       }
       // decompress the gzipped file
-      const decompressAsync = getDecompressor(response.headers['content-type']);
       decompressedBuffer = await decompressAsync(response.body);
     } catch (err) {
       logger.debug(
