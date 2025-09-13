@@ -1,0 +1,105 @@
+import is from '@sindresorhus/is';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages';
+import { logger } from '../../../logger';
+import { exec } from '../../../util/exec';
+import type { ExecOptions } from '../../../util/exec/types';
+import {
+  deleteLocalFile,
+  readLocalFile,
+  writeLocalFile,
+} from '../../../util/fs';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import type { DenoManagerData } from './types';
+
+export async function updateArtifacts(
+  updateArtifact: UpdateArtifact<DenoManagerData>,
+): Promise<UpdateArtifactsResult[] | null> {
+  const { packageFileName, updatedDeps, newPackageFileContent, config } =
+    updateArtifact;
+  logger.debug(`deno.updateArtifacts(${packageFileName})`);
+  const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+
+  if (is.emptyArray(updatedDeps) && !isLockFileMaintenance) {
+    logger.debug('No updated deno deps - returning null');
+    return null;
+  }
+
+  // Find the first deno dependency in order to handle mixed manager updates
+  const lockFileName = updatedDeps.find((dep) => dep.manager === 'deno')
+    ?.lockFiles?.[0];
+
+  if (!lockFileName) {
+    logger.debug('No lock file found. Skipping artifact update.');
+    return null;
+  }
+
+  const oldLockFileContent = await readLocalFile(lockFileName);
+  if (!oldLockFileContent) {
+    logger.debug(`Failed to read ${lockFileName}. Skipping artifact update.`);
+    return null;
+  }
+
+  for (const updateDep of updatedDeps) {
+    if (updateDep.depType === 'tasks') {
+      logger.warn(
+        `depType "task" can't be updated with a lock file: ${updateDep.depName}`,
+      );
+      return null;
+    }
+  }
+
+  try {
+    await writeLocalFile(packageFileName, newPackageFileContent);
+    if (isLockFileMaintenance) {
+      await deleteLocalFile(lockFileName);
+    }
+
+    const execOptions: ExecOptions = {
+      cwdFile: packageFileName,
+      docker: {},
+      toolConstraints: [
+        {
+          toolName: 'deno',
+          constraint: updateArtifact?.config?.constraints?.deno,
+        },
+      ],
+    };
+
+    // "deno install" don't execute lifecycle scripts of package.json by default
+    // https://docs.deno.com/runtime/reference/cli/install/#native-node.js-addons
+    // NOTE: Specifying individual packages e.g. "deno install <datasource>:<package>@<version>"
+    // could be better to reduce registry queries, but does not support the http import module
+    // https://docs.deno.com/runtime/reference/cli/install/#deno-install-%5Bpackages%5D
+    await exec('deno install', execOptions);
+
+    const newLockFileContent = await readLocalFile(lockFileName);
+    if (
+      !newLockFileContent ||
+      Buffer.compare(oldLockFileContent, newLockFileContent) === 0
+    ) {
+      return null;
+    }
+    return [
+      {
+        file: {
+          type: 'addition',
+          path: lockFileName,
+          contents: newLockFileContent,
+        },
+      },
+    ];
+  } catch (err) {
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
+    logger.warn({ lockfile: lockFileName, err }, `Failed to update lock file`);
+    return [
+      {
+        artifactError: {
+          lockFile: lockFileName,
+          stderr: err.message,
+        },
+      },
+    ];
+  }
+}
