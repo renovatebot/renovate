@@ -36,4 +36,14 @@ export const presets: Record<string, Preset> = {
     },
     osvVulnerabilityAlerts: true,
   },
+  minimumReleaseAge: {
+    description:
+      'Provide defaults to reduce the risk of Renovate updating to a compromised/malicious package by using `minimumReleaseAge` with a set of defaults for package managers that support `minimumReleaseAge`. At this time, this only affects npm.',
+    extends: ['security:minimumReleaseAgeNpm'],
+  },
+  minimumReleaseAgeNpm: {
+    description:
+      'Provide defaults to reduce the risk of Renovate updating to a compromised/malicious package by providing a default `minimumReleaseAge` for npm package updates.',
+    extends: ['npm:unpublishSafe'],
+  },
 };
