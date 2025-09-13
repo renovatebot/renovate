@@ -143,8 +143,10 @@ describe('modules/datasource/rpm/index', () => {
         compress: zstdCompressSync,
       },
     ].forEach(({ primaryXmlUrl, contentType, compress }) =>
-      it(`returns the correct releases with compression ${contentType}`, async () => {
-        const primaryXml = `<?xml version="1.0" encoding="UTF-8"?>
+      it.skipIf(!compress)(
+        `returns the correct releases with compression ${contentType}`,
+        async () => {
+          const primaryXml = `<?xml version="1.0" encoding="UTF-8"?>
 <metadata xmlns="http://linux.duke.edu/metadata/common">
   <package type="rpm">
     <name>example-package</name>
@@ -168,35 +170,36 @@ describe('modules/datasource/rpm/index', () => {
   </package>
 </metadata>
 `;
-        // gzip the primaryXml content
-        const compressedPrimaryXml = compress(primaryXml);
-        httpMock
-          .scope(primaryXmlUrl.replace(/\/[^/]+$/, ''))
-          .get(primaryXmlUrl.replace(/^.*\//, '/'))
-          .reply(200, compressedPrimaryXml, {
-            'Content-Type': contentType,
+          // gzip the primaryXml content
+          const compressedPrimaryXml = compress(primaryXml);
+          httpMock
+            .scope(primaryXmlUrl.replace(/\/[^/]+$/, ''))
+            .get(primaryXmlUrl.replace(/^.*\//, '/'))
+            .reply(200, compressedPrimaryXml, {
+              'Content-Type': contentType,
+            });
+          const releases = await rpmDatasource.getReleasesByPackageName(
+            primaryXmlUrl,
+            packageName,
+          );
+          expect(releases).toEqual({
+            releases: [
+              {
+                version: '1.0-2.azl3',
+              },
+              {
+                version: '1.1-1.azl3',
+              },
+              {
+                version: '1.1-2.azl3',
+              },
+              {
+                version: '1.2',
+              },
+            ],
           });
-        const releases = await rpmDatasource.getReleasesByPackageName(
-          primaryXmlUrl,
-          packageName,
-        );
-        expect(releases).toEqual({
-          releases: [
-            {
-              version: '1.0-2.azl3',
-            },
-            {
-              version: '1.1-1.azl3',
-            },
-            {
-              version: '1.1-2.azl3',
-            },
-            {
-              version: '1.2',
-            },
-          ],
-        });
-      }),
+        },
+      ),
     );
 
     it('throws an error if somesha256-primary.xml.gz is not found', async () => {

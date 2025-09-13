@@ -11,12 +11,12 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 
 const gunzipAsync = promisify(gunzip);
-const zstdDecompressAsync = promisify(zstdDecompress);
+const zstdDecompressAsync = zstdDecompress ? promisify(zstdDecompress) : null;
 
 function getDecompressor(
   contentType: string | undefined,
 ): (buf: Buffer) => Promise<Buffer> {
-  if (contentType === 'application/zstd') {
+  if (zstdDecompressAsync && contentType === 'application/zstd') {
     return zstdDecompressAsync;
   }
 
