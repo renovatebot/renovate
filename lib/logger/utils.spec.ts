@@ -84,6 +84,31 @@ describe('logger/utils', () => {
     expect(sanitizeValue(input)).toEqual(expected);
   });
 
+  it('redacts username field if it contains a JWT', () => {
+    const input = {
+      password: 'none',
+      username:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+    };
+    const expected = {
+      password: '***********',
+      username: '***********',
+    };
+    expect(sanitizeValue(input)).toEqual(expected);
+  });
+
+  it('does not redact username field if it is not a JWT', () => {
+    const input = {
+      password: 'a-normal-password',
+      username: 'a.user.name',
+    };
+    const expected = {
+      password: '***********',
+      username: 'a.user.name',
+    };
+    expect(sanitizeValue(input)).toEqual(expected);
+  });
+
   describe('prepareError', () => {
     function getError<T extends z.ZodType>(
       schema: T,
