@@ -1,5 +1,5 @@
 import { Readable } from 'node:stream';
-import { gunzip } from 'node:zlib';
+import { gunzip, zstdDecompress } from 'node:zlib';
 import { promisify } from 'util';
 import sax from 'sax';
 import { XmlDocument } from 'xmldoc';
@@ -11,6 +11,17 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 
 const gunzipAsync = promisify(gunzip);
+const zstdDecompressAsync = promisify(zstdDecompress);
+
+function getDecompressor(
+  contentType: string | undefined,
+): (buf: Buffer) => Promise<Buffer> {
+  if (contentType === 'application/zstd') {
+    return zstdDecompressAsync;
+  }
+
+  return gunzipAsync;
+}
 
 export class RpmDatasource extends Datasource {
   static readonly id = 'rpm';
@@ -127,7 +138,8 @@ export class RpmDatasource extends Datasource {
         throw new Error(`Empty response body from getting ${primaryGzipUrl}.`);
       }
       // decompress the gzipped file
-      decompressedBuffer = await gunzipAsync(response.body);
+      const decompressAsync = getDecompressor(response.headers['content-type']);
+      decompressedBuffer = await decompressAsync(response.body);
     } catch (err) {
       logger.debug(
         `Failed to fetch or decompress ${primaryGzipUrl}: ${
