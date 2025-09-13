@@ -57,6 +57,21 @@ export const ExtensionTagFragment = z.object({
   offset: z.number(), // start offset in the source string
   rawString: z.string().optional(), // raw source string
 });
+export const UseRepoRuleFragment = z.object({
+  type: z.literal('useRepoRule'),
+  variableName: z.string(),
+  bzlFile: z.string(),
+  ruleName: z.string(),
+  isComplete: z.boolean(),
+});
+export const RepoRuleCallFragment = z.object({
+  type: z.literal('repoRuleCall'),
+  functionName: z.string(),
+  children: LooseRecord(ValueFragments),
+  isComplete: z.boolean(),
+  offset: z.number(),
+  rawString: z.string().optional(),
+});
 export const AttributeFragment = z.object({
   type: z.literal('attribute'),
   name: z.string(),
@@ -70,6 +85,8 @@ export const AllFragments = z.discriminatedUnion('type', [
   RuleFragment,
   PreparedExtensionTagFragment,
   ExtensionTagFragment,
+  UseRepoRuleFragment,
+  RepoRuleCallFragment,
   StringFragment,
 ]);
 
@@ -84,9 +101,15 @@ export type PreparedExtensionTagFragment = z.infer<
   typeof PreparedExtensionTagFragment
 >;
 export type ExtensionTagFragment = z.infer<typeof ExtensionTagFragment>;
+export type UseRepoRuleFragment = z.infer<typeof UseRepoRuleFragment>;
+export type RepoRuleCallFragment = z.infer<typeof RepoRuleCallFragment>;
 export type StringFragment = z.infer<typeof StringFragment>;
 export type ValueFragments = z.infer<typeof ValueFragments>;
-export type ResultFragment = RuleFragment | ExtensionTagFragment;
+export type ResultFragment =
+  | RuleFragment
+  | ExtensionTagFragment
+  | UseRepoRuleFragment
+  | RepoRuleCallFragment;
 
 export function string(value: string): StringFragment {
   return {
@@ -145,6 +168,38 @@ export function extensionTag(
     extension,
     rawExtension,
     tag,
+    offset,
+    rawString,
+    isComplete,
+    children,
+  };
+}
+
+export function useRepoRule(
+  variableName: string,
+  bzlFile: string,
+  ruleName: string,
+  isComplete = false,
+): UseRepoRuleFragment {
+  return {
+    type: 'useRepoRule',
+    variableName,
+    bzlFile,
+    ruleName,
+    isComplete,
+  };
+}
+
+export function repoRuleCall(
+  functionName: string,
+  offset: number,
+  children: ChildFragments = {},
+  rawString?: string,
+  isComplete = false,
+): RepoRuleCallFragment {
+  return {
+    type: 'repoRuleCall',
+    functionName,
     offset,
     rawString,
     isComplete,
