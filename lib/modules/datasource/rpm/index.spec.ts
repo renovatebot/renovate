@@ -1,6 +1,7 @@
 import { gzipSync } from 'node:zlib';
 import { RpmDatasource } from '.';
 import * as httpMock from '~test/http-mock';
+import { logger } from '~test/util';
 
 describe('modules/datasource/rpm/index', () => {
   describe('getPrimaryGzipUrl', () => {
@@ -182,6 +183,19 @@ describe('modules/datasource/rpm/index', () => {
           },
         ],
       });
+
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.stringMatching(/^Empty response body/),
+      );
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.stringMatching(/^Failed to fetch/),
+      );
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.stringMatching(/^Failed to decompress/),
+      );
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.stringMatching(/^SAX parsing error/),
+      );
     });
 
     it('throws an error if somesha256-primary.xml.gz is not found', async () => {
@@ -193,6 +207,19 @@ describe('modules/datasource/rpm/index', () => {
       await expect(
         rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
       ).rejects.toThrow(`Response code 404 (Not Found)`);
+
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.stringMatching(/^Empty response body/),
+      );
+      expect(logger.logger.debug).toHaveBeenLastCalledWith(
+        `Failed to fetch ${primaryXmlUrl}: Response code 404 (Not Found)`,
+      );
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.stringMatching(/^Failed to decompress/),
+      );
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.stringMatching(/^SAX parsing error/),
+      );
     });
 
     it('throws an error if response.body is empty', async () => {
@@ -205,6 +232,19 @@ describe('modules/datasource/rpm/index', () => {
         rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
       ).rejects.toThrowError(
         'Empty response body from getting ' + primaryXmlUrl + '.',
+      );
+
+      expect(logger.logger.debug).toHaveBeenLastCalledWith(
+        `Empty response body from getting ${primaryXmlUrl}.`,
+      );
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.stringMatching(/^Failed to fetch/),
+      );
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.stringMatching(/^Failed to decompress/),
+      );
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.stringMatching(/^SAX parsing error/),
       );
     });
 
@@ -343,6 +383,72 @@ describe('modules/datasource/rpm/index', () => {
       await expect(
         rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
       ).rejects.toThrowError('Unencoded <');
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.stringMatching(/^Empty response body/),
+      );
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.stringMatching(/^Failed to fetch/),
+      );
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.stringMatching(/^Failed to decompress/),
+      );
+      expect(logger.logger.debug).toHaveBeenLastCalledWith(
+        expect.stringMatching(/^SAX parsing error/),
+      );
+    });
+
+    it('handles compression error event in getReleasesByPackageName', async () => {
+      const primaryXml = `<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://linux.duke.edu/metadata/common">
+  <package type="rpm">
+    <name>example-package</name>
+    <arch>x86_64</arch>
+    <version epoch="0" ver="1.0" rel="2.azl3"/>
+  </package>
+  <package type="rpm">
+    <name>example-package</name>
+    <arch>x86_64</arch>
+    <version epoch="0" ver="1.1" rel="1.azl3"/>
+  </package>
+  <package type="rpm">
+    <name>example-package</name>
+    <arch>x86_64</arch>
+    <version epoch="0" ver="1.1" rel="2.azl3"/>
+  </package>
+  <package type="rpm">
+    <name>example-package</name>
+    <arch>x86_64</arch>
+    <version epoch="0" ver="1.2"/>
+  </package>
+</metadata>
+`;
+      // gzip the primaryXml content
+      const gzippedprimaryXml = gzipSync(primaryXml);
+      httpMock
+        .scope(primaryXmlUrl.replace(/\/[^/]+$/, ''))
+        .get('/somesha256-primary.xml.gz')
+        .reply(
+          200,
+          gzippedprimaryXml.subarray(0, gzippedprimaryXml.length - 1),
+          {
+            'Content-Type': 'application/gzip',
+          },
+        );
+      await expect(
+        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+      ).rejects.toThrowError('unexpected end of file');
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.stringMatching(/^Empty response body/),
+      );
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.stringMatching(/^Failed to fetch/),
+      );
+      expect(logger.logger.debug).toHaveBeenLastCalledWith(
+        `Failed to decompress ${primaryXmlUrl}: unexpected end of file`,
+      );
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.stringMatching(/^SAX parsing error/),
+      );
     });
   });
 
