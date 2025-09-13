@@ -12,6 +12,7 @@ import { scm } from '../../../modules/platform/scm';
 import { getCache } from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
 import { getBranchList } from '../../../util/git';
+import { expectMultipleBaseBranches } from '../../../util/multiple-base-branches';
 import { addSplit } from '../../../util/split';
 import { getRegexPredicate } from '../../../util/string-match';
 import type { BranchConfig } from '../../types';
@@ -20,7 +21,7 @@ import type { ExtractResult } from './extract-update';
 import { extract, lookup, update } from './extract-update';
 import type { WriteUpdateResult } from './write';
 
-async function getBaseBranchConfig(
+export async function getBaseBranchConfig(
   baseBranch: string,
   config: RenovateConfig,
 ): Promise<RenovateConfig> {
@@ -88,7 +89,7 @@ async function getBaseBranchConfig(
     baseBranchConfig.baseBranchPatterns = config.baseBranchPatterns;
   }
 
-  if (config.baseBranchPatterns!.length > 1) {
+  if (expectMultipleBaseBranches()) {
     baseBranchConfig.branchPrefix += `${baseBranch}-`;
     baseBranchConfig.hasBaseBranches = true;
   }
