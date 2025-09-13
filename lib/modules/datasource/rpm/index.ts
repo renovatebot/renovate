@@ -1,6 +1,5 @@
 import { Readable } from 'node:stream';
-import { gunzip } from 'node:zlib';
-import { promisify } from 'util';
+import { createGunzip } from 'node:zlib';
 import sax from 'sax';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
@@ -9,8 +8,6 @@ import type { HttpResponse } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-
-const gunzipAsync = promisify(gunzip);
 
 export class RpmDatasource extends Datasource {
   static readonly id = 'rpm';
@@ -118,7 +115,7 @@ export class RpmDatasource extends Datasource {
     packageName: string,
   ): Promise<ReleaseResult | null> {
     let response: HttpResponse<Buffer>;
-    let decompressedBuffer: Buffer;
+    let decompressStream: Readable;
     try {
       // primaryGzipUrl is a .gz file, need to extract it before parsing
       response = await this.http.getBuffer(primaryGzipUrl);
@@ -127,7 +124,7 @@ export class RpmDatasource extends Datasource {
         throw new Error(`Empty response body from getting ${primaryGzipUrl}.`);
       }
       // decompress the gzipped file
-      decompressedBuffer = await gunzipAsync(response.body);
+      decompressStream = Readable.from(response.body).pipe(createGunzip());
     } catch (err) {
       logger.debug(
         `Failed to fetch or decompress ${primaryGzipUrl}: ${
@@ -202,7 +199,7 @@ export class RpmDatasource extends Datasource {
         setImmediate(() => saxParser.removeAllListeners());
         resolve();
       });
-      Readable.from(decompressedBuffer).pipe(saxParser);
+      decompressStream.pipe(saxParser);
     });
 
     if (Object.keys(releases).length === 0) {
