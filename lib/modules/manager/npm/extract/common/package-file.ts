@@ -147,3 +147,24 @@ export function extractPackageJson(
     },
   };
 }
+
+export function hasPackageManager(content: string) {
+  let packageJson: NpmPackage;
+  try {
+    logger.trace(`npm.hasPackageManager from package.json`);
+
+    packageJson = JSON.parse(content);
+    if (packageJson.packageManager) {
+      const match = regEx('^(?<name>.+)@(?<range>.+)$').exec(
+        packageJson.packageManager,
+      );
+
+      if (match?.groups) {
+        return true;
+      }
+    }
+  } catch {
+    logger.debug(`Invalid JSON`);
+  }
+  return false;
+}

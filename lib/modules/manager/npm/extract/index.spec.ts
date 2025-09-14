@@ -894,7 +894,7 @@ describe('modules/manager/npm/extract/index', () => {
       const pJsonStr = JSON.stringify(pJson);
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
-        'package.json',
+        '.yarnrc.yml',
         defaultExtractConfig,
       );
       expect(res).toMatchSnapshot({
@@ -931,7 +931,7 @@ describe('modules/manager/npm/extract/index', () => {
       const pJsonStr = JSON.stringify(pJson);
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
-        'package.json',
+        '.yarnrc.yml',
         defaultExtractConfig,
       );
       expect(res).toMatchObject({
@@ -1286,58 +1286,15 @@ describe('modules/manager/npm/extract/index', () => {
           list:
             is-positive: 1.0.0
       `;
-      fs.findLocalSiblingOrParent.mockResolvedValue('.yarnrc.yml');
+      fs.readLocalFile.mockResolvedValueOnce(yarnrc);
 
       fs.readLocalFile.mockResolvedValueOnce(input02Content);
-      fs.readLocalFile.mockResolvedValue(yarnrc);
 
       const res = await extractAllPackageFiles(defaultExtractConfig, [
-        'package.json',
+        '.yarnrc.yml',
       ]);
 
       expect(res).toEqual([
-        {
-          deps: [
-            {
-              currentValue: '7.0.0',
-              datasource: 'npm',
-              depName: '@babel/core',
-              depType: 'dependencies',
-              prettyDepType: 'dependency',
-            },
-            {
-              currentValue: '1.21.0',
-              datasource: 'npm',
-              depName: 'config',
-              depType: 'dependencies',
-              prettyDepType: 'dependency',
-            },
-            {
-              currentValue: '0.7.0',
-              datasource: 'npm',
-              depName: 'express>cookie',
-              packageName: 'cookie',
-              depType: 'pnpm.overrides',
-              prettyDepType: 'overrides',
-            },
-          ],
-          extractedConstraints: {},
-          managerData: {
-            hasPackageManager: false,
-            npmLock: undefined,
-            packageJsonName: 'renovate',
-            pnpmShrinkwrap: undefined,
-            workspacesPackages: undefined,
-            workspaces: undefined,
-            yarnLock: undefined,
-            npmrcFileName: '.yarnrc.yml',
-            yarnZeroInstall: false,
-          },
-          npmrc: yarnrc,
-          packageFile: 'package.json',
-          packageFileVersion: '1.0.0',
-          skipInstalls: true,
-        },
         {
           deps: [
             {
@@ -1372,18 +1329,19 @@ describe('modules/manager/npm/extract/index', () => {
       fs.findLocalSiblingOrParent.mockImplementation(
         async (_, name) =>
           await new Promise((resolve) =>
-            resolve(name === '.yarnrc.yml' ? '.yarnrc.yml' : null),
+            resolve(name === 'package.json' ? 'package.json' : null),
           ),
       );
+      fs.findLocalSiblingOrParent.mockResolvedValue('package.json');
 
+      fs.readLocalFile.mockResolvedValueOnce(yarnrc);
       fs.readLocalFile.mockResolvedValueOnce(input01PackageManager);
-      fs.readLocalFile.mockResolvedValue(yarnrc);
 
       const res = await extractAllPackageFiles(defaultExtractConfig, [
-        'package.json',
+        '.yarnrc.yml',
       ]);
 
-      expect(res[1]).toEqual({
+      expect(res[0]).toEqual({
         deps: [
           {
             currentValue: '1.0.0',
@@ -1399,10 +1357,9 @@ describe('modules/manager/npm/extract/index', () => {
         packageFile: '.yarnrc.yml',
       });
     });
-  });
 
-  it('extracts yarnrc.yml and adds it as packageFile and packageManager to false if no deps', async () => {
-    const yarnrc = codeBlock`
+    it('extracts yarnrc.yml and adds it as packageFile and packageManager to false if no deps', async () => {
+      const yarnrc = codeBlock`
         nodeLinker: node-modules
 
         plugins:
@@ -1415,36 +1372,37 @@ describe('modules/manager/npm/extract/index', () => {
             is-positive: 1.0.0
       `;
 
-    fs.findLocalSiblingOrParent.mockImplementation(
-      async (_, name) =>
-        await new Promise((resolve) =>
-          resolve(name === '.yarnrc.yml' ? '.yarnrc.yml' : null),
-        ),
-    );
+      fs.findLocalSiblingOrParent.mockImplementation(
+        async (_, name) =>
+          await new Promise((resolve) =>
+            resolve(name === 'package.json' ? 'package.json' : null),
+          ),
+      );
+      fs.readLocalFile.mockResolvedValueOnce(yarnrc);
 
-    fs.readLocalFile.mockResolvedValueOnce(
-      '{"name": "simulate deps to be null", brokenJsonHere: }',
-    );
-    fs.readLocalFile.mockResolvedValue(yarnrc);
+      fs.readLocalFile.mockResolvedValueOnce(
+        '{"name": "simulate deps to be null", brokenJsonHere: }',
+      );
 
-    const res = await extractAllPackageFiles(defaultExtractConfig, [
-      'package.json',
-    ]);
+      const res = await extractAllPackageFiles(defaultExtractConfig, [
+        '.yarnrc.yml',
+      ]);
 
-    expect(res[0]).toEqual({
-      deps: [
-        {
-          currentValue: '1.0.0',
-          datasource: 'npm',
-          depName: 'is-positive',
-          depType: 'yarn.catalog.default',
-          prettyDepType: 'yarn.catalog.default',
+      expect(res[0]).toEqual({
+        deps: [
+          {
+            currentValue: '1.0.0',
+            datasource: 'npm',
+            depName: 'is-positive',
+            depType: 'yarn.catalog.default',
+            prettyDepType: 'yarn.catalog.default',
+          },
+        ],
+        managerData: {
+          hasPackageManager: false,
         },
-      ],
-      managerData: {
-        hasPackageManager: false,
-      },
-      packageFile: '.yarnrc.yml',
+        packageFile: '.yarnrc.yml',
+      });
     });
   });
 

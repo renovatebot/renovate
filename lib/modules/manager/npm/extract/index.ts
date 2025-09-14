@@ -17,7 +17,7 @@ import type {
 import type { YarnConfig } from '../schema';
 import type { NpmLockFiles, NpmManagerData } from '../types';
 import { getExtractedConstraints } from './common/dependency';
-import { extractPackageJson } from './common/package-file';
+import { extractPackageJson, hasPackageManager } from './common/package-file';
 import { extractPnpmWorkspaceFile, tryParsePnpmWorkspaceYaml } from './pnpm';
 import { postExtract } from './post';
 import type { NpmPackage } from './types';
@@ -255,33 +255,33 @@ export async function extractAllPackageFiles(
           });
         }
       } else {
-        logger.trace({ packageFile }, `Extracting as a package.json file`);
-        const deps = await extractPackageFile(content, packageFile, config);
-        if (deps) {
-          npmFiles.push({
-            ...deps,
-            packageFile,
-          });
-        }
+        if (packageFile.endsWith('json')) {
+          logger.trace({ packageFile }, `Extracting as a package.json file`);
 
-        if (packageFile === 'package.json') {
-          const yarnrcYmlFileName = await findLocalSiblingOrParent(
-            packageFile,
-            '.yarnrc.yml',
-          );
+          const deps = await extractPackageFile(content, packageFile, config);
+          if (deps) {
+            npmFiles.push({
+              ...deps,
+              packageFile,
+            });
+          }
+        } else {
+          logger.trace({ packageFile }, `Extracting as a .yarnrc.yml file`);
 
-          const yarnConfig = await loadYarnRc(yarnrcYmlFileName);
+          const yarnConfig = loadConfigFromYarnrcYml(content);
 
           if (yarnConfig?.catalogs) {
+            debugger;
+            const hasPackageManager = await resolvePackageManager(packageFile);
             const catalogsDeps = await extractYarnCatalogs(
               yarnConfig.catalogs,
               packageFile,
-              deps?.managerData?.hasPackageManager ?? false,
+              hasPackageManager,
             );
             if (catalogsDeps) {
               npmFiles.push({
                 ...catalogsDeps,
-                packageFile: '.yarnrc.yml',
+                packageFile,
               });
             }
           }
@@ -294,4 +294,20 @@ export async function extractAllPackageFiles(
 
   await postExtract(npmFiles);
   return npmFiles;
+}
+
+async function resolvePackageManager(packageFile: string): Promise<boolean> {
+  let hasPkgManager = false;
+  const packageJson = await findLocalSiblingOrParent(
+    packageFile,
+    'package.json',
+  );
+
+  if (packageJson) {
+    const content = await readLocalFile(packageJson, 'utf8');
+
+    hasPkgManager = content ? hasPackageManager(content) : false;
+  }
+
+  return hasPkgManager;
 }
