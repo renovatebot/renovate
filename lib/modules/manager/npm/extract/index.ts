@@ -25,7 +25,6 @@ import { extractYarnCatalogs, isZeroInstall } from './yarn';
 import {
   loadConfigFromLegacyYarnrc,
   loadConfigFromYarnrcYml,
-  loadYarnRc,
   resolveRegistryUrl,
 } from './yarnrc';
 
@@ -271,7 +270,6 @@ export async function extractAllPackageFiles(
           const yarnConfig = loadConfigFromYarnrcYml(content);
 
           if (yarnConfig?.catalogs) {
-            debugger;
             const hasPackageManager = await resolvePackageManager(packageFile);
             const catalogsDeps = await extractYarnCatalogs(
               yarnConfig.catalogs,
