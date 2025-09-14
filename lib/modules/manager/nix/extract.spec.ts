@@ -589,6 +589,8 @@ describe('modules/manager/nix/extract', () => {
       expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
         deps: [
           {
+            currentValue: 'master',
+            currentDigest: 'be97b37989f11b724197b5f4c7ffd78f12c8c4bf',
             datasource: GitRefsDatasource.id,
             depName: 'cachix',
             lockedVersion: 'be97b37989f11b724197b5f4c7ffd78f12c8c4bf',
