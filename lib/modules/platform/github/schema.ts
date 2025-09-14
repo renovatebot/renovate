@@ -92,3 +92,13 @@ export const GithubElement = GithubFile.or(GithubFileMeta)
 export type GithubElement = z.infer<typeof GithubElement>;
 
 export const GithubContentResponse = z.array(GithubElement).or(GithubElement);
+
+export const GithubBranchProtection = z.object({
+  required_status_checks: z
+    .object({
+      strict: z.boolean(),
+    })
+    .nullish()
+    .optional(),
+});
+export type GithubBranchProtection = z.infer<typeof GithubBranchProtection>;

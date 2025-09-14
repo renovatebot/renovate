@@ -921,6 +921,62 @@ describe('modules/platform/github/index', () => {
         github.getBranchForceRebase('main'),
       ).rejects.toThrowErrorMatchingSnapshot();
     });
+
+    it('should return empty object when parentRepo is set', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, 'some/repo', false);
+      scope.get('/user').reply(200, {
+        login: 'forked',
+      });
+      scope.post('/repos/some/repo/forks').reply(200, {
+        full_name: 'forked/repo',
+        default_branch: 'master',
+      });
+      await github.initRepo({
+        repository: 'some/repo',
+        forkToken: 'fork-token',
+        forkCreation: true,
+      });
+
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeFalse();
+    });
+
+    it('should return cached result on subsequent calls', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/main/protection')
+        .reply(200, {
+          required_status_checks: {
+            strict: true,
+            contexts: [],
+          },
+        });
+
+      // First call should make HTTP request and cache the result
+      const firstResult = await github.getBranchForceRebase('main');
+      expect(firstResult).toBeTrue();
+
+      // Second call should return cached result without making HTTP request
+      // If cache is working, no additional HTTP requests should be made
+      const secondResult = await github.getBranchForceRebase('main');
+      expect(secondResult).toBeTrue();
+    });
+
+    it('should return cached false result on subsequent calls', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/dev/protection')
+        .reply(404);
+
+      // First call should make HTTP request and cache the result
+      const firstResult = await github.getBranchForceRebase('dev');
+      expect(firstResult).toBeFalse();
+
+      // Second call should return cached result without making HTTP request
+      const secondResult = await github.getBranchForceRebase('dev');
+      expect(secondResult).toBeFalse();
+    });
   });
 
   describe('getPrList()', () => {
