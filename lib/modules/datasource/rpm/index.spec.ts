@@ -1,4 +1,5 @@
 import { gzipSync } from 'node:zlib';
+import { setTimeout } from 'timers/promises';
 import { RpmDatasource } from '.';
 import * as httpMock from '~test/http-mock';
 import { logger } from '~test/util';
@@ -184,6 +185,7 @@ describe('modules/datasource/rpm/index', () => {
         ],
       });
 
+      await setTimeout();
       expect(logger.logger.debug).not.toHaveBeenCalledWith(
         expect.stringMatching(/^Empty response body/),
       );
@@ -208,6 +210,7 @@ describe('modules/datasource/rpm/index', () => {
         rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
       ).rejects.toThrow(`Response code 404 (Not Found)`);
 
+      await setTimeout();
       expect(logger.logger.debug).not.toHaveBeenCalledWith(
         expect.stringMatching(/^Empty response body/),
       );
@@ -234,6 +237,7 @@ describe('modules/datasource/rpm/index', () => {
         'Empty response body from getting ' + primaryXmlUrl + '.',
       );
 
+      await setTimeout();
       expect(logger.logger.debug).toHaveBeenLastCalledWith(
         `Empty response body from getting ${primaryXmlUrl}.`,
       );
@@ -383,6 +387,7 @@ describe('modules/datasource/rpm/index', () => {
       await expect(
         rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
       ).rejects.toThrowError('Unencoded <');
+      await setTimeout();
       expect(logger.logger.debug).not.toHaveBeenCalledWith(
         expect.stringMatching(/^Empty response body/),
       );
@@ -437,6 +442,7 @@ describe('modules/datasource/rpm/index', () => {
       await expect(
         rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
       ).rejects.toThrowError('unexpected end of file');
+      await setTimeout();
       expect(logger.logger.debug).not.toHaveBeenCalledWith(
         expect.stringMatching(/^Empty response body/),
       );
