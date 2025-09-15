@@ -1,9 +1,7 @@
 import { parsePkgAndParentSelector } from '@pnpm/parse-overrides';
 import is from '@sindresorhus/is';
-import type { JsonValue } from 'type-fest';
 import { CONFIG_VALIDATION } from '../../../../../constants/error-messages';
 import { logger } from '../../../../../logger';
-import { parseJson } from '../../../../../util/common';
 import { regEx } from '../../../../../util/regex';
 import type { PackageDependency, PackageFileContent } from '../../../types';
 import { PackageJson } from '../../schema';
