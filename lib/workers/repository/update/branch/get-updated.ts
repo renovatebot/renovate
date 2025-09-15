@@ -300,12 +300,20 @@ export async function getUpdatedPackageFiles(
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
       }
-      if (
-        newContent === packageFileContent &&
-        upgrade.manager === 'git-submodules'
-      ) {
-        updatedFileContents[packageFile] = newContent;
-        delete nonUpdatedFileContents[packageFile];
+      if (newContent === packageFileContent) {
+        if (upgrade.manager === 'git-submodules') {
+          updatedFileContents[packageFile] = newContent;
+          delete nonUpdatedFileContents[packageFile];
+        }
+        // Nix digest-only updates don't change the source file but need artifact updates
+        if (upgrade.manager === 'nix' && upgrade.updateType === 'digest') {
+          logger.debug(
+            { packageFile, depName },
+            'Nix digest-only update, marking file for artifact update',
+          );
+          updatedFileContents[packageFile] = newContent;
+          delete nonUpdatedFileContents[packageFile];
+        }
       }
     }
   }
