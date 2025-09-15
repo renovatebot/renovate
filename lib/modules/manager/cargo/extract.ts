@@ -280,10 +280,15 @@ export async function extractPackageFile(
     for (const dep of deps) {
       const packageName = dep.packageName ?? dep.depName!;
       const versions = coerceArray(versionsByPackage.get(packageName));
-      const lockedVersion = versioning.getSatisfyingVersion(
-        versions,
-        dep.currentValue!,
-      );
+
+      let lockedVersion: string | null = null;
+      if (dep.currentValue) {
+        lockedVersion = versioning.getSatisfyingVersion(
+          versions,
+          dep.currentValue,
+        );
+      }
+
       if (lockedVersion) {
         dep.lockedVersion = lockedVersion;
       } else {

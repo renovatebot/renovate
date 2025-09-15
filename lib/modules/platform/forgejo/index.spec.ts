@@ -2331,12 +2331,11 @@ describe('modules/platform/forgejo/index', () => {
         .get('/repos/some/repo/issues')
         .query({ state: 'all', type: 'issues' })
         .reply(200, mockIssues)
-        .patch('/repos/some/repo/issues/2', {
+        .post('/repos/some/repo/issues', {
           body: closedIssue.body,
-          state: closedIssue.state,
-          title: 'closed-issue',
+          title: closedIssue.title,
         })
-        .reply(200, closedIssue);
+        .reply(200, { number: 42 });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2347,7 +2346,7 @@ describe('modules/platform/forgejo/index', () => {
         once: false,
       });
 
-      expect(res).toBe('updated');
+      expect(res).toBe('created');
     });
 
     it('should not update labels when not necessary', async () => {
