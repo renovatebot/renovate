@@ -202,22 +202,6 @@ exports[`workers/repository/update/branch/get-updated > getUpdatedPackageFiles()
 }
 `;
 
-exports[`workers/repository/update/branch/get-updated > getUpdatedPackageFiles() > handles nix digest-only updates 1`] = `
-{
-  "artifactErrors": [],
-  "artifactNotices": [],
-  "reuseExistingBranch": undefined,
-  "updatedArtifacts": [],
-  "updatedPackageFiles": [
-    {
-      "contents": "existing content",
-      "path": "flake.nix",
-      "type": "addition",
-    },
-  ],
-}
-`;
-
 exports[`workers/repository/update/branch/get-updated > getUpdatedPackageFiles() > update artifacts on update-lockfile strategy 1`] = `
 {
   "artifactErrors": [],
