@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { DockerDatasource } from '../../datasource/docker';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
@@ -26,8 +27,10 @@ describe('modules/manager/quadlet/extract', () => {
     });
 
     it('extracts from quadlet container unit', () => {
-      const simple = `[Container]
-Image=docker.io/library/alpine:3.22`;
+      const simple = codeBlock`
+      [Container]
+      Image=docker.io/library/alpine:3.22
+      `;
 
       const result = extractPackageFile(simple, packageFile, config);
       expect(result).toMatchObject({
@@ -42,8 +45,10 @@ Image=docker.io/library/alpine:3.22`;
     });
 
     it('extracts from quadlet image unit', () => {
-      const simple = `[Image]
-Image=docker.io/library/alpine:3.22`;
+      const simple = codeBlock`
+      [Image]
+      Image=docker.io/library/alpine:3.22
+      `;
 
       const result = extractPackageFile(simple, packageFile, config);
       expect(result).toMatchObject({
@@ -58,8 +63,10 @@ Image=docker.io/library/alpine:3.22`;
     });
 
     it('extracts from quadlet volume unit', () => {
-      const simple = `[Volume]
-Image=docker.io/library/alpine:3.22`;
+      const simple = codeBlock`
+      [Volume]
+      Image=docker.io/library/alpine:3.22
+      `;
 
       const result = extractPackageFile(simple, packageFile, config);
       expect(result).toMatchObject({
@@ -74,8 +81,10 @@ Image=docker.io/library/alpine:3.22`;
     });
 
     it('handles docker prefix', () => {
-      const simple = `[Volume]
-Image=docker://docker.io/library/alpine:3.22`;
+      const simple = codeBlock`
+      [Volume]
+      Image=docker://docker.io/library/alpine:3.22
+      `;
 
       const result = extractPackageFile(simple, packageFile, config);
       expect(result).toMatchObject({
@@ -90,8 +99,10 @@ Image=docker://docker.io/library/alpine:3.22`;
     });
 
     it('handles docker-daemon prefix', () => {
-      const simple = `[Volume]
-Image=docker-daemon:docker.io/library/alpine:3.22`;
+      const simple = codeBlock`
+      [Volume]
+      Image=docker-daemon:docker.io/library/alpine:3.22
+      `;
 
       const result = extractPackageFile(simple, packageFile, config);
       expect(result).toMatchObject({
@@ -106,24 +117,30 @@ Image=docker-daemon:docker.io/library/alpine:3.22`;
     });
 
     it('does not extract an image file reference', () => {
-      const simple = `[Container]
-Image=foo.image`;
+      const simple = codeBlock`
+      [Container]
+      Image=foo.image
+      `;
 
       const result = extractPackageFile(simple, packageFile, config);
       expect(result).toBeNull();
     });
 
     it('does not extract an build file reference', () => {
-      const simple = `[Container]
-Image=foo.build`;
+      const simple = codeBlock`
+      [Container]
+      Image=foo.build
+      `;
 
       const result = extractPackageFile(simple, packageFile, config);
       expect(result).toBeNull();
     });
 
     it('extract data from file with registry aliases', () => {
-      const aliasFile = `[Container]
-Image=quay.io/metallb/controller:v0.13.10`;
+      const aliasFile = codeBlock`
+      [Container]
+      Image=quay.io/metallb/controller:v0.13.10
+      `;
 
       const result = extractPackageFile(aliasFile, packageFile, configAliases);
       expect(result).toMatchObject({

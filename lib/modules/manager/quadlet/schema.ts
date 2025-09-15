@@ -1,25 +1,23 @@
-import ini from 'ini';
 import { z } from 'zod';
+import { Ini } from '../../../util/schema-utils';
 
-export const Ini = z.string().transform((str, ctx): Record<string, any> => {
-  return ini.parse(str);
-});
-
-export const QuadletFile = z.object({
-  Container: z
-    .object({
-      Image: z.string(),
-    })
-    .optional(),
-  Image: z
-    .object({
-      Image: z.string(),
-    })
-    .optional(),
-  Volume: z
-    .object({
-      Image: z.string(),
-    })
-    .optional(),
-});
+export const QuadletFile = Ini.pipe(
+  z.object({
+    Container: z
+      .object({
+        Image: z.string(),
+      })
+      .optional(),
+    Image: z
+      .object({
+        Image: z.string(),
+      })
+      .optional(),
+    Volume: z
+      .object({
+        Image: z.string(),
+      })
+      .optional(),
+  }),
+);
 export type QuadletFile = z.infer<typeof QuadletFile>;

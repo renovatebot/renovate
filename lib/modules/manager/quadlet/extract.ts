@@ -1,10 +1,11 @@
+import { logger } from '../../../logger';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import { Ini, QuadletFile } from './schema';
+import { QuadletFile } from './schema';
 
 function startsWithAny(image: string, prefixes: string[]): boolean {
   return !!prefixes.find((prefix) => image.startsWith(prefix));
@@ -54,7 +55,13 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   const deps: PackageDependency<Record<string, any>>[] = [];
 
-  const quadletFile: QuadletFile = Ini.pipe(QuadletFile).parse(content);
+  const res = QuadletFile.safeParse(content);
+  if (!res.success) {
+    logger.debug({ err: res.error }, 'Error parsing Quadlet file.');
+    return null;
+  }
+
+  const quadletFile: QuadletFile = res.data;
 
   getQuadletImage(
     quadletFile?.Container?.Image,
