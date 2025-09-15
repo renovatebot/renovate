@@ -119,6 +119,21 @@ export function updateDependency({
   }
 
   if (newUrl === oldUrl) {
+    // Check if this is a digest-only update (version doesn't change, only digest changes)
+    if (
+      currentValue === newValue &&
+      currentDigest &&
+      newDigest &&
+      currentDigest !== newDigest
+    ) {
+      logger.debug(
+        { depName, currentDigest, newDigest, currentValue },
+        'Digest-only update detected, returning unchanged content for lock file update',
+      );
+      // Return the unchanged content - the lock file will be updated via artifacts
+      // This is handled specially in get-updated.ts similar to git-submodules
+      return fileContent;
+    }
     logger.trace({ depName, url: oldUrl }, 'No changes made to URL');
     return null;
   }
