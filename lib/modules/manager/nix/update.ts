@@ -131,7 +131,6 @@ export function updateDependency({
         'Digest-only update detected, returning unchanged content for lock file update',
       );
       // Return the unchanged content - the lock file will be updated via artifacts
-      // This is handled specially in get-updated.ts similar to git-submodules
       return fileContent;
     }
     logger.trace({ depName, url: oldUrl }, 'No changes made to URL');
