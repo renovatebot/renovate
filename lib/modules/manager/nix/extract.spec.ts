@@ -2,7 +2,6 @@ import { codeBlock } from 'common-tags';
 import { ZodError } from 'zod';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
-import { id as semverCoercedVersioning } from '../../versioning/semver-coerced';
 import { extractPackageFile } from '.';
 import { fs, logger } from '~test/util';
 
@@ -457,7 +456,6 @@ describe('modules/manager/nix/extract', () => {
             depName: 'cachix',
             lockedVersion: 'be97b37989f11b724197b5f4c7ffd78f12c8c4bf',
             packageName: 'https://github.com/cachix/cachix.git',
-            versioning: semverCoercedVersioning,
           },
         ],
       });
@@ -502,7 +500,6 @@ describe('modules/manager/nix/extract', () => {
             datasource: GitRefsDatasource.id,
             depName: 'cachix',
             packageName: 'https://github.com/cachix/cachix.git',
-            versioning: semverCoercedVersioning,
           },
         ],
       });
@@ -548,7 +545,6 @@ describe('modules/manager/nix/extract', () => {
             datasource: GitRefsDatasource.id,
             depName: 'cachix',
             packageName: 'ssh://git@github.com/cachix/cachix.git',
-            versioning: semverCoercedVersioning,
           },
         ],
       });
@@ -595,7 +591,6 @@ describe('modules/manager/nix/extract', () => {
             depName: 'cachix',
             lockedVersion: 'be97b37989f11b724197b5f4c7ffd78f12c8c4bf',
             packageName: 'https://github.com/cachix/cachix.git',
-            versioning: semverCoercedVersioning,
           },
         ],
       });
@@ -644,7 +639,6 @@ describe('modules/manager/nix/extract', () => {
             datasource: GitRefsDatasource.id,
             depName: 'flake-parts',
             packageName: 'https://github.com/hercules-ci/flake-parts',
-            versioning: semverCoercedVersioning,
           },
         ],
       });
@@ -691,7 +685,6 @@ describe('modules/manager/nix/extract', () => {
             depName: 'flake-parts',
             lockedVersion: '4524271976b625a4a605beefd893f270620fd751',
             packageName: 'https://github.com/hercules-ci/flake-parts',
-            versioning: semverCoercedVersioning,
           },
         ],
       });
@@ -882,7 +875,6 @@ describe('modules/manager/nix/extract', () => {
             depName: 'home-manager',
             lockedVersion: '26993d87fd0d3b14f7667b74ad82235f120d986e',
             packageName: 'https://gitlab.com/rycee/home-manager',
-            versioning: semverCoercedVersioning,
           },
         ],
       });
@@ -932,7 +924,6 @@ describe('modules/manager/nix/extract', () => {
             depName: 'firefox-addons',
             lockedVersion: '2dcb371b407ba4009e27a8e8adf88e6f93d40bfb',
             packageName: 'https://git.sr.ht/~rycee/nur-expressions',
-            versioning: semverCoercedVersioning,
           },
         ],
       });
@@ -982,7 +973,6 @@ describe('modules/manager/nix/extract', () => {
             depName: 'lix',
             lockedVersion: 'f4bdddf0fdaabc68546cf561c5343b83d95d2466',
             packageName: 'https://git.lix.systems/lix-project/lix',
-            versioning: semverCoercedVersioning,
           },
         ],
       });
