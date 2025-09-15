@@ -148,7 +148,7 @@ export function extractPackageJson(
   };
 }
 
-export function hasPackageManager(content: string) {
+export function hasPackageManager(content: string): boolean {
   let packageJson: NpmPackage;
   try {
     logger.trace(`npm.hasPackageManager from package.json`);
