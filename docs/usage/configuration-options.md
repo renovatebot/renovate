@@ -1765,6 +1765,7 @@ But if you're embedding changelogs in commit information, you may use `fetchChan
 
 Renovate can fetch changelogs when they are hosted on one of these platforms:
 
+- Azure DevOps (.com)
 - Bitbucket Cloud
 - Bitbucket Server / Data Center
 - GitHub (.com and Enterprise Server)
