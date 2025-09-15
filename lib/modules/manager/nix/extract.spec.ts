@@ -686,6 +686,7 @@ describe('modules/manager/nix/extract', () => {
       expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
         deps: [
           {
+            currentDigest: '4524271976b625a4a605beefd893f270620fd751',
             datasource: GitRefsDatasource.id,
             depName: 'flake-parts',
             lockedVersion: '4524271976b625a4a605beefd893f270620fd751',
