@@ -1,10 +1,10 @@
-import { mockDeep } from 'vitest-mock-extended';
 import { codeBlock } from 'common-tags';
+import { mockDeep } from 'vitest-mock-extended';
+import * as _hostRules from '../../../util/host-rules';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
 import { Fixtures } from '~test/fixtures';
 import { fs } from '~test/util';
-import * as _hostRules from '../../../util/host-rules';
 
 vi.mock('../../../util/fs');
 vi.mock('../../../util/host-rules', () => mockDeep());

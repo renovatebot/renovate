@@ -21,7 +21,6 @@ export function applyGitSource(
           ? GithubTagsDatasource.id
           : GitlabTagsDatasource.id;
       const { host, full_name } = parseGitUrl(git);
-      console.log({ host, full_name });
 
       // Always use HTTPS for GitHub/GitLab API endpoints, even if the git URL protocol is SSH.
       dep.registryUrls = [`https://${host}`];
