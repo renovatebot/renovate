@@ -52,4 +52,19 @@ export const presets: Record<string, Preset> = {
     },
     separateMajorMinor: false,
   },
+  semverAllWeekly: {
+    description:
+      'Preserve SemVer ranges and update everything together once a week.',
+    extends: [
+      ':preserveSemverRanges',
+      'group:all',
+      'schedule:weekly',
+      ':maintainLockFilesWeekly',
+    ],
+    lockFileMaintenance: {
+      commitMessageAction: 'Update',
+      extends: ['group:all'],
+    },
+    separateMajorMinor: false,
+  },
 };

@@ -205,6 +205,7 @@ export async function lookupUpdates(
         'packageScope',
         'mostRecentTimestamp',
         'isAbandoned',
+        'respectLatest',
       ]);
 
       const latestVersion = dependency.tags?.latest;

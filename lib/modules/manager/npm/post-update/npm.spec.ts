@@ -50,6 +50,39 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('runs npm install twice', async () => {
+    const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const packageLockContents = JSON.stringify({
+      packages: {},
+      lockfileVersion: 3,
+    });
+    fs.readLocalFile
+      .mockResolvedValueOnce(packageLockContents)
+      .mockResolvedValueOnce(packageLockContents);
+    const skipInstalls = true;
+    const postUpdateOptions = ['npmInstallTwice'];
+    const updates = [
+      { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: false },
+    ];
+    await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { skipInstalls, postUpdateOptions },
+      updates,
+    );
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
+  });
+
   it('performs lock file updates', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
