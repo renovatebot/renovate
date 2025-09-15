@@ -1,9 +1,15 @@
+import { mockDeep } from 'vitest-mock-extended';
+import * as _hostRules from '../../util/host-rules';
 import { GitRefsDatasource } from '../datasource/git-refs';
 import { GitTagsDatasource } from '../datasource/git-tags';
 import { GithubTagsDatasource } from '../datasource/github-tags';
 import { GitlabTagsDatasource } from '../datasource/gitlab-tags';
 import { type PackageDependency } from './types';
 import { applyGitSource } from './util';
+
+vi.mock('../../util/host-rules', () => mockDeep());
+
+const hostRules = vi.mocked(_hostRules);
 
 describe('modules/manager/util', () => {
   it('applies GitHub source for tag', () => {
@@ -49,6 +55,23 @@ describe('modules/manager/util', () => {
       datasource: GitTagsDatasource.id,
       packageName: git,
       currentValue: tag,
+      skipReason: undefined,
+    });
+  });
+
+  it('applies git source with subdomain', () => {
+    const dependency: PackageDependency = {};
+    const git = 'https://git.example.com/foo/bar';
+    const tag = 'v1.2.3';
+
+    hostRules.hostType.mockReturnValue('github');
+    applyGitSource(dependency, git, undefined, tag, undefined);
+
+    expect(dependency).toStrictEqual({
+      datasource: GithubTagsDatasource.id,
+      packageName: 'foo/bar',
+      currentValue: tag,
+      registryUrls: ['https://git.example.com'],
       skipReason: undefined,
     });
   });
