@@ -527,15 +527,21 @@ describe('workers/repository/update/branch/get-updated', () => {
       } satisfies BranchUpgradeConfig);
       nix.updateDependency.mockResolvedValueOnce(fileContent);
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
-        updatedPackageFiles: [
-          {
-            type: 'addition',
-            path: 'flake.nix',
-            contents: fileContent,
-          },
-        ],
-      });
+      expect(res).toMatchInlineSnapshot(`
+        {
+          "artifactErrors": [],
+          "artifactNotices": [],
+          "reuseExistingBranch": undefined,
+          "updatedArtifacts": [],
+          "updatedPackageFiles": [
+            {
+              "contents": "existing content",
+              "path": "flake.nix",
+              "type": "addition",
+            },
+          ],
+        }
+      `);
     });
 
     /*
