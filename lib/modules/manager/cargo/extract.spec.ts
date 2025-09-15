@@ -1,10 +1,13 @@
+import { mockDeep } from 'vitest-mock-extended';
 import { codeBlock } from 'common-tags';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
 import { Fixtures } from '~test/fixtures';
 import { fs } from '~test/util';
+import * as _hostRules from '../../../util/host-rules';
 
 vi.mock('../../../util/fs');
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 function mockReadLocalFile(files: Record<string, string | null>) {
   fs.readLocalFile.mockImplementation((file): Promise<any> => {
@@ -27,6 +30,8 @@ const cargo7toml = Fixtures.get('Cargo.7.toml');
 
 const lockfileUpdateCargotoml = Fixtures.get('lockfile-update/Cargo.toml');
 
+const hostRules = vi.mocked(_hostRules);
+
 describe('modules/manager/cargo/extract', () => {
   describe('extractPackageFile()', () => {
     const config: ExtractConfig = {};
@@ -34,6 +39,7 @@ describe('modules/manager/cargo/extract', () => {
     beforeEach(() => {
       delete process.env.CARGO_REGISTRIES_PRIVATE_CRATES_INDEX;
       delete process.env.CARGO_REGISTRIES_MCORBIN_INDEX;
+      hostRules.hostType.mockReturnValue('github');
     });
 
     it('returns null for invalid toml', async () => {
@@ -66,7 +72,7 @@ describe('modules/manager/cargo/extract', () => {
     it('extracts multiple dependencies simple', async () => {
       const res = await extractPackageFile(cargo1toml, 'Cargo.toml', config);
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(19);
+      expect(res?.deps).toHaveLength(20);
     });
 
     it('extracts multiple dependencies advanced', async () => {
