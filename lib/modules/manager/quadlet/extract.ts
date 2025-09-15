@@ -1,4 +1,5 @@
 import { logger } from '../../../logger';
+import { regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -18,7 +19,7 @@ function endsWithAny(image: string, suffixes: string[]): boolean {
 function getQuadletImage(
   image: string | null | undefined,
   ignoredSuffixes: string[],
-  deps: PackageDependency<Record<string, any>>[],
+  deps: PackageDependency[],
   config: ExtractConfig,
 ): void {
   if (
@@ -37,8 +38,8 @@ function getQuadletImage(
   ) {
     // Remove the docker:// or docker-daemon: transport prefix, if present
     const cleanedImage = image
-      .replace(/^docker:\/\//, '')
-      .replace(/^docker-daemon:/, '');
+      .replace(regEx(/^docker:\/\//), '')
+      .replace(regEx(/^docker-daemon:/), '');
     const dep = getDep(cleanedImage, false, config.registryAliases);
     if (dep) {
       dep.depType = 'image';
@@ -53,11 +54,14 @@ export function extractPackageFile(
   packageFile: string,
   config: ExtractConfig,
 ): PackageFileContent | null {
-  const deps: PackageDependency<Record<string, any>>[] = [];
+  const deps: PackageDependency[] = [];
 
   const res = QuadletFile.safeParse(content);
   if (!res.success) {
-    logger.debug({ err: res.error }, 'Error parsing Quadlet file.');
+    logger.debug(
+      { err: res.error, packageFile },
+      'Error parsing Quadlet file.',
+    );
     return null;
   }
 

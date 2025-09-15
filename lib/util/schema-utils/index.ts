@@ -286,7 +286,7 @@ export const Toml = z.string().transform((str, ctx) => {
   }
 });
 
-export const Ini = z.string().transform((str, ctx): Record<string, any> => {
+export const Ini = z.string().transform((str, ctx): Record<string, unknown> => {
   try {
     return ini.parse(str);
   } catch {
