@@ -11,7 +11,7 @@ import {
 } from './compat';
 import { DenoLock } from './schema';
 import type { DenoManagerData, LockFile } from './types';
-import { DENO_LAND_REGEX, DEP_VALUE_REGEX } from './util';
+import { denoLandRegex, depValueRegex } from './utils';
 
 export async function getDenoLock(filePath: string): Promise<LockFile> {
   const lockfileContent = await readLocalFile(filePath, 'utf8');
@@ -58,7 +58,7 @@ export function getLockedVersion(
       currentRawValue &&
       lockFileContent.remoteVersions.has(currentRawValue)
     ) {
-      const match = DENO_LAND_REGEX.exec(currentRawValue);
+      const match = denoLandRegex.exec(currentRawValue);
       return match?.groups?.currentValue;
     }
 
@@ -73,7 +73,7 @@ export function getLockedVersion(
       key &&
       lockFileContent.redirectVersions.has(key)
     ) {
-      const match = DENO_LAND_REGEX.exec(
+      const match = denoLandRegex.exec(
         // SAFETY: checked above
         lockFileContent.redirectVersions.get(key)!,
       );
@@ -104,7 +104,7 @@ export function getLockedVersion(
     }
 
     for (const [key, value] of Object.entries(lockFileContent.lockedVersions)) {
-      const match = DEP_VALUE_REGEX.exec(key);
+      const match = depValueRegex.exec(key);
       // find "jsr:@scope/name@1" intersects "jsr:@scope/name@^1.0.0"
       if (
         typeof depName === 'string' &&

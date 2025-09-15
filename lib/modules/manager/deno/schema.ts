@@ -18,7 +18,7 @@ import { extractJsrPackageName } from '../../datasource/jsr/util';
 import { id as denoVersioningId, isValid } from '../../versioning/deno';
 import type { PackageDependency, PackageFile } from '../types';
 import type { DenoManagerData } from './types';
-import { DENO_LAND_REGEX, DEP_VALUE_REGEX } from './util';
+import { denoLandRegex, depValueRegex } from './utils';
 
 // https://github.com/denoland/deno/blob/410c66ad0d1ce8a5a3b1a2f06c932fb66f25a3c6/cli/schemas/config-file.v1.json
 export interface DenoJsonFile {
@@ -209,7 +209,7 @@ export const DenoDependency = z
   .transform(({ depValue, depType }): PackageDependency<DenoManagerData> => {
     // deno datasource
     // Check for https://deno.land/x/ URLs first
-    const denoLandMatch = DENO_LAND_REGEX.exec(depValue);
+    const denoLandMatch = denoLandRegex.exec(depValue);
     if (denoLandMatch?.groups?.rawPackageName) {
       return {
         datasource: 'deno',
@@ -226,7 +226,7 @@ export const DenoDependency = z
 
     // other datasources
 
-    const match = DEP_VALUE_REGEX.exec(depValue);
+    const match = depValueRegex.exec(depValue);
     if (match?.groups?.datasource && match?.groups.depName) {
       const datasource = match.groups.datasource;
       const depName = match.groups.depName;
