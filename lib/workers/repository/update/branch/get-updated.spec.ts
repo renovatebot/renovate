@@ -1,17 +1,17 @@
 import { isArray } from '@sindresorhus/is';
 import { mockDeep } from 'vitest-mock-extended';
-import { git, logger } from '~test/util.ts';
-import { GitRefsDatasource } from '../../../../modules/datasource/git-refs/index.ts';
-import * as _batectWrapper from '../../../../modules/manager/batect-wrapper/index.ts';
-import * as _bundler from '../../../../modules/manager/bundler/index.ts';
-import * as _composer from '../../../../modules/manager/composer/index.ts';
-import * as _gitSubmodules from '../../../../modules/manager/git-submodules/index.ts';
-import * as _gomod from '../../../../modules/manager/gomod/index.ts';
-import * as _helmv3 from '../../../../modules/manager/helmv3/index.ts';
-import * as _npm from '../../../../modules/manager/npm/index.ts';
-import * as _pep621 from '../../../../modules/manager/pep621/index.ts';
-import * as _pipCompile from '../../../../modules/manager/pip-compile/index.ts';
-import * as _poetry from '../../../../modules/manager/poetry/index.ts';
+import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
+import * as _batectWrapper from '../../../../modules/manager/batect-wrapper';
+import * as _bundler from '../../../../modules/manager/bundler';
+import * as _composer from '../../../../modules/manager/composer';
+import * as _gitSubmodules from '../../../../modules/manager/git-submodules';
+import * as _gomod from '../../../../modules/manager/gomod';
+import * as _helmv3 from '../../../../modules/manager/helmv3';
+import * as _nix from '../../../../modules/manager/nix';
+import * as _npm from '../../../../modules/manager/npm';
+import * as _pep621 from '../../../../modules/manager/pep621';
+import * as _pipCompile from '../../../../modules/manager/pip-compile';
+import * as _poetry from '../../../../modules/manager/poetry';
 import type {
   LookupUpdate,
   PackageDependency,
@@ -27,6 +27,7 @@ const composer = vi.mocked(_composer);
 const gitSubmodules = vi.mocked(_gitSubmodules);
 const gomod = vi.mocked(_gomod);
 const helmv3 = vi.mocked(_helmv3);
+const nix = vi.mocked(_nix);
 const npm = vi.mocked(_npm);
 const batectWrapper = vi.mocked(_batectWrapper);
 const autoReplace = vi.mocked(_autoReplace);
@@ -34,39 +35,18 @@ const pep621 = vi.mocked(_pep621);
 const pipCompile = vi.mocked(_pipCompile);
 const poetry = vi.mocked(_poetry);
 
-vi.mock('../../../../modules/manager/bundler/index.ts');
-vi.mock('../../../../modules/manager/composer/index.ts');
-vi.mock('../../../../modules/manager/helmv3/index.ts');
-vi.mock('../../../../modules/manager/npm/index.ts');
-vi.mock('../../../../modules/manager/git-submodules/index.ts');
-vi.mock('../../../../modules/manager/gomod/index.ts', () => mockDeep());
-vi.mock('../../../../modules/manager/batect-wrapper/index.ts');
-vi.mock('../../../../modules/manager/pep621/index.ts');
-vi.mock('../../../../modules/manager/pip-compile/index.ts');
-vi.mock('../../../../modules/manager/poetry/index.ts');
-vi.mock('./auto-replace.ts');
-
-function expectPipCompilePackageAndLockFile(
-  expectedPackageFileName: string,
-  expectedLockFileName: string,
-) {
-  expect(pipCompile.updateArtifacts).toSatisfy(
-    (updateArtifactsSpy) => {
-      return updateArtifactsSpy.mock.calls.some((args: any[]) => {
-        const updateArtifact: UpdateArtifact = args[0];
-        const updateArtifactLockfiles = updateArtifact?.config?.lockFiles;
-        return (
-          updateArtifact?.packageFileName === expectedPackageFileName &&
-          isArray(updateArtifactLockfiles) &&
-          updateArtifactLockfiles?.length === 1 &&
-          updateArtifactLockfiles?.[0] === expectedLockFileName
-        );
-      });
-    },
-    `pipCompile.updateArtifacts() must be called for package file ${expectedPackageFileName}` +
-      ` and with lock file ${expectedLockFileName}`,
-  );
-}
+vi.mock('../../../../modules/manager/bundler');
+vi.mock('../../../../modules/manager/composer');
+vi.mock('../../../../modules/manager/helmv3');
+vi.mock('../../../../modules/manager/npm');
+vi.mock('../../../../modules/manager/git-submodules');
+vi.mock('../../../../modules/manager/gomod', () => mockDeep());
+vi.mock('../../../../modules/manager/nix');
+vi.mock('../../../../modules/manager/batect-wrapper');
+vi.mock('../../../../modules/manager/pep621');
+vi.mock('../../../../modules/manager/pip-compile');
+vi.mock('../../../../modules/manager/poetry');
+vi.mock('./auto-replace');
 
 describe('workers/repository/update/branch/get-updated', () => {
   describe('getUpdatedPackageFiles()', () => {
@@ -530,6 +510,33 @@ describe('workers/repository/update/branch/get-updated', () => {
             type: 'addition',
             path: '.gitmodules',
             contents: 'existing content',
+          },
+        ],
+      });
+    });
+
+    it('handles nix digest-only updates', async () => {
+      const fileContent = 'existing content';
+      config.upgrades.push({
+        packageFile: 'flake.nix',
+        manager: 'nix',
+        datasource: GitRefsDatasource.id,
+        branchName: 'renovate/nixpkgs-tar-digest',
+        depName: 'nixpkgs-tar',
+        currentValue: 'nixpkgs-unstable',
+        newValue: 'nixpkgs-unstable',
+        currentDigest: '58dcbf1ec551914c3756c267b8b9c8c86baa1b2f',
+        newDigest: '88cef159e47c0dc56f151593e044453a39a6e547',
+        updateType: 'digest',
+      } satisfies BranchUpgradeConfig);
+      nix.updateDependency.mockResolvedValueOnce(fileContent);
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot({
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'flake.nix',
+            contents: fileContent,
           },
         ],
       });

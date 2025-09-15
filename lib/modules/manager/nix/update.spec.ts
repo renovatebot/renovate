@@ -342,5 +342,63 @@ describe('modules/manager/nix/update', () => {
         'url = "git+https://github.com/cachix/cachix.git?ref=refs/tags/v1.8.0"',
       );
     });
+
+    it('returns unchanged content for digest-only updates', () => {
+      const fileContent = codeBlock`
+        {
+          inputs = {
+            nixpkgs-tar.url = "https://nixos.org/channels/nixpkgs-unstable/nixexprs.tar.xz";
+          };
+        }
+      `;
+      const result = updateDependency({
+        fileContent,
+        upgrade: {
+          depName: 'nixpkgs-tar',
+          currentValue: 'nixpkgs-unstable',
+          newValue: 'nixpkgs-unstable',
+          currentDigest: '58dcbf1ec551914c3756c267b8b9c8c86baa1b2f',
+          newDigest: '88cef159e47c0dc56f151593e044453a39a6e547',
+        },
+      });
+      expect(result).toBe(fileContent);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          depName: 'nixpkgs-tar',
+          currentDigest: '58dcbf1ec551914c3756c267b8b9c8c86baa1b2f',
+          newDigest: '88cef159e47c0dc56f151593e044453a39a6e547',
+          currentValue: 'nixpkgs-unstable',
+        },
+        'Digest-only update detected, returning unchanged content for lock file update',
+      );
+    });
+
+    it('returns null for digest-only updates when digests are the same', () => {
+      const fileContent = codeBlock`
+        {
+          inputs = {
+            nixpkgs-tar.url = "https://nixos.org/channels/nixpkgs-unstable/nixexprs.tar.xz";
+          };
+        }
+      `;
+      const result = updateDependency({
+        fileContent,
+        upgrade: {
+          depName: 'nixpkgs-tar',
+          currentValue: 'nixpkgs-unstable',
+          newValue: 'nixpkgs-unstable',
+          currentDigest: '58dcbf1ec551914c3756c267b8b9c8c86baa1b2f',
+          newDigest: '58dcbf1ec551914c3756c267b8b9c8c86baa1b2f',
+        },
+      });
+      expect(result).toBeNull();
+      expect(logger.logger.trace).toHaveBeenCalledWith(
+        {
+          depName: 'nixpkgs-tar',
+          url: 'https://nixos.org/channels/nixpkgs-unstable/nixexprs.tar.xz',
+        },
+        'No changes made to URL',
+      );
+    });
   });
 });
