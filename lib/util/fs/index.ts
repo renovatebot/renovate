@@ -113,10 +113,7 @@ export function privateCacheDir(): string {
   return upath.join(cacheDir, '__renovate-private-cache');
 }
 
-export async function localPathExists(
-  pathName: string,
-  p0: string,
-): Promise<boolean> {
+export async function localPathExists(pathName: string): Promise<boolean> {
   // Works for both files as well as directories
   const path = ensureLocalPath(pathName);
   try {
