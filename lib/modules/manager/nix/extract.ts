@@ -139,11 +139,6 @@ export async function extractPackageFile(
       dep.currentDigest = flakeOriginal.rev;
       dep.lockedVersion = flakeOriginal.ref ? flakeLocked.rev : undefined;
     } else {
-      // For bare URLs without ref/rev, use the ref from the locked section if available
-      // This is typically the default branch that Nix resolved
-      if (flakeLocked.ref) {
-        dep.currentValue = flakeLocked.ref.replace(/^refs\/(heads|tags)\//, '');
-      }
       dep.currentDigest = flakeLocked.rev;
       dep.lockedVersion = flakeLocked.rev;
     }
