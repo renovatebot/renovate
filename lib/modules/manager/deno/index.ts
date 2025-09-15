@@ -1,10 +1,10 @@
 import type { Category } from '../../../constants';
+import { DenoDatasource } from '../../datasource/deno';
+import { JsrDatasource } from '../../datasource/jsr';
+import { NpmDatasource } from '../../datasource/npm';
 
 export { updateArtifacts } from './artifacts';
-export {
-  extractAllPackageFiles,
-  supportedDatasources as supportedDatasources,
-} from './extract';
+export { extractAllPackageFiles } from './extract';
 export { updateDependency } from './update';
 export { getRangeStrategy } from '../npm'; // for node-compat
 
@@ -14,6 +14,11 @@ export const categories: Category[] = ['js'];
 
 export const supersedesManagers = ['npm'];
 export const supportsLockFileMaintenance = true;
+export const supportedDatasources = [
+  NpmDatasource.id,
+  JsrDatasource.id,
+  DenoDatasource.id,
+];
 
 export const defaultConfig = {
   managerFilePatterns: [

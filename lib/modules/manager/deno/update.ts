@@ -6,8 +6,7 @@ import { parseJsonc } from '../../../util/common';
 import { matchAt, replaceAt } from '../../../util/string';
 import { updateDependency as npmUpdateDependency } from '../npm';
 import type { UpdateDependencyConfig } from '../types';
-import { type DepTypes } from './extract';
-import type { DenoJsonFile, ImportMapJsonFile } from './schema';
+import type { DenoJsonFile, DepTypes, ImportMapJsonFile } from './schema';
 import type { DenoManagerData } from './types';
 
 function getValueByDatasource(

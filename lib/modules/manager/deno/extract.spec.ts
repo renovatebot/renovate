@@ -1,14 +1,8 @@
 import { codeBlock } from 'common-tags';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
-import {
-  collectPackageJson,
-  extractAllPackageFiles,
-  extractDenoJsonFile,
-  extractJsrDatasource,
-  extractNpmDatasource,
-  getDenoDependency,
-} from './extract';
+import { collectPackageJson, extractAllPackageFiles } from './extract';
+import { DenoExtract } from './schema';
 
 vi.mock('../../../util/fs');
 // used in detectNodeCompatWorkspaces()
@@ -17,199 +11,56 @@ vi.mock('find-packages', () => ({
 }));
 
 describe('modules/manager/deno/extract', () => {
-  describe('extractNpmDatasource()', () => {
-    it('extracts valid npm datasource', () => {
-      const result = extractNpmDatasource(
-        'npm',
-        // @ts-expect-error testing purpose
-        'dependencies',
-        'dep1',
-        '1.0.0',
-      );
-      expect(result).toEqual({
-        datasource: 'npm',
-        versioning: 'deno',
-        depName: 'dep1',
-        currentValue: '1.0.0',
-        depType: 'dependencies',
-      });
-    });
-
-    it('skips invalid npm package names', () => {
-      const result = extractNpmDatasource(
-        'npm',
-        // @ts-expect-error testing purpose
-        'dependencies',
-        '_test',
-        '1.0.0',
-      );
-      expect(result).toEqual({
-        datasource: 'npm',
-        versioning: 'deno',
-        skipReason: 'invalid-name',
-      });
-    });
-
-    it('skips invalid npm package versions', () => {
-      const result = extractNpmDatasource(
-        'npm',
-        // @ts-expect-error testing purpose
-        'dependencies',
-        'dep1',
-        'INVALID',
-      );
-      expect(result).toEqual({
-        datasource: 'npm',
-        versioning: 'deno',
-        skipReason: 'invalid-version',
-      });
-    });
-  });
-
-  describe('extractJsrDatasource()', () => {
-    it('extracts valid jsr datasource', () => {
-      const result = extractJsrDatasource(
-        'jsr',
-        'imports',
-        '@scope/name',
-        '1.0.0',
-      );
-      expect(result).toEqual({
-        datasource: 'jsr',
-        versioning: 'deno',
-        depName: '@scope/name',
-        currentValue: '1.0.0',
-        depType: 'imports',
-      });
-    });
-
-    it('skips invalid jsr package names', () => {
-      const result = extractJsrDatasource(
-        'jsr',
-        'imports',
-        '@@scope/name',
-        '1.0.0',
-      );
-      expect(result).toEqual({
-        datasource: 'jsr',
-        versioning: 'deno',
-        skipReason: 'invalid-name',
-      });
-    });
-
-    it('skips invalid jsr package versions', () => {
-      const result = extractJsrDatasource(
-        'jsr',
-        'imports',
-        '@scope/name',
-        'INVALID',
-      );
-      expect(result).toEqual({
-        datasource: 'jsr',
-        versioning: 'deno',
-        skipReason: 'invalid-version',
-      });
-    });
-  });
-
-  describe('getDenoDependency()', () => {
-    it('unsupported data source', () => {
-      const result = getDenoDependency(
-        'jsr:@scope/name',
-        'imports',
-        new Set(['foo']),
-      );
-      expect(result).toBeNull();
-    });
-    it('unsupported depType', () => {
-      const result = getDenoDependency(
-        'jsr:@scope/name',
-        // @ts-expect-error testing purpose
-        'unsupported',
-      );
-      expect(result).toBeNull();
-    });
-  });
-
-  describe('extractDenoJsonFile()', () => {
-    it('empty workspace', async () => {
-      const result = await extractDenoJsonFile(
-        {
-          workspace: [],
-        },
-        'deno.json',
-      );
-      expect(result).toEqual([
-        {
-          deps: [],
-          lockFiles: [],
-          managerData: {
-            workspaces: [],
-          },
-          packageFile: 'deno.json',
-        },
-      ]);
-    });
-
+  describe('DenoExtract() with I/O', () => {
     it('lock is string', async () => {
       fs.localPathIsFile.mockResolvedValue(true);
-      const result = await extractDenoJsonFile(
-        {
+      const result = await DenoExtract.parseAsync({
+        content: JSON.stringify({
           lock: 'deno.lock',
-        },
-        'deno.json',
-      );
+        }),
+        fileName: 'deno.json',
+      });
       expect(result).toEqual([
         {
           deps: [],
           lockFiles: ['deno.lock'],
+          managerData: {
+            packageName: undefined,
+            workspaces: undefined,
+          },
           packageFile: 'deno.json',
+          packageFileVersion: undefined,
         },
       ]);
     });
 
     it('lock is object', async () => {
       fs.localPathIsFile.mockResolvedValue(true);
-      const result = await extractDenoJsonFile(
-        {
+      const result = await DenoExtract.parseAsync({
+        content: JSON.stringify({
           lock: {
             path: 'genuine-deno.lock',
           },
-        },
-        'deno.json',
-      );
+        }),
+        fileName: 'deno.json',
+      });
       expect(result).toEqual([
         {
           deps: [],
           lockFiles: ['genuine-deno.lock'],
-          packageFile: 'deno.json',
-        },
-      ]);
-    });
-
-    it('workspace has members field', async () => {
-      fs.readLocalFile.mockResolvedValueOnce(null);
-      const result = await extractDenoJsonFile(
-        {
-          workspace: {
-            members: ['member1', 'member2'],
-          },
-        },
-        'deno.json',
-      );
-      expect(result).toEqual([
-        {
-          deps: [],
-          lockFiles: [],
           managerData: {
-            workspaces: ['member1', 'member2'],
+            packageName: undefined,
+            workspaces: undefined,
           },
           packageFile: 'deno.json',
+          packageFileVersion: undefined,
         },
       ]);
     });
 
     it('importMap', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('deno.lock');
+      fs.localPathIsFile.mockResolvedValue(true);
       fs.readLocalFile.mockResolvedValueOnce(
         JSON.stringify({
           imports: {
@@ -222,22 +73,21 @@ describe('modules/manager/deno/extract', () => {
           },
         }),
       );
-      fs.getSiblingFileName.mockReturnValueOnce('deno.lock');
-      fs.localPathIsFile.mockResolvedValue(true);
-      const result = await extractDenoJsonFile(
-        {
+      const result = await DenoExtract.parseAsync({
+        content: JSON.stringify({
           name: 'test',
           version: '0.0.1',
           importMap: 'import_map.json',
-        },
-        'deno.json',
-      );
+        }),
+        fileName: 'deno.json',
+      });
       expect(result).toStrictEqual([
         {
           deps: [],
           lockFiles: ['deno.lock'],
           managerData: {
             packageName: 'test',
+            workspaces: undefined,
           },
           packageFile: 'deno.json',
           packageFileVersion: '0.0.1',
@@ -268,34 +118,66 @@ describe('modules/manager/deno/extract', () => {
     });
 
     it('remote importMap', async () => {
-      const result = await extractDenoJsonFile(
-        {
+      const result = await DenoExtract.parseAsync({
+        content: JSON.stringify({
           importMap: 'https://deno.land/x/import_map.json',
-        },
-        'deno.json',
-      );
+        }),
+        fileName: 'deno.json',
+      });
       expect(result).toEqual([
         {
           deps: [],
           lockFiles: [],
+          managerData: {
+            packageName: undefined,
+            workspaces: undefined,
+          },
           packageFile: 'deno.json',
+          packageFileVersion: undefined,
         },
       ]);
     });
 
     it('importMap path specified but not exists', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
-      const result = await extractDenoJsonFile(
-        {
+      const result = await DenoExtract.parseAsync({
+        content: JSON.stringify({
           importMap: 'import_map.json',
-        },
-        'deno.json',
-      );
+        }),
+        fileName: 'deno.json',
+      });
       expect(result).toEqual([
         {
           deps: [],
           lockFiles: [],
+          managerData: {
+            packageName: undefined,
+            workspaces: undefined,
+          },
           packageFile: 'deno.json',
+          packageFileVersion: undefined,
+        },
+      ]);
+    });
+
+    it('invalid importMap file', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('invalid');
+      const result = await DenoExtract.parseAsync({
+        content: JSON.stringify({
+          importMap: 'import_map.json',
+        }),
+        fileName: 'deno.json',
+      });
+      expect(result).toEqual([
+        {
+          deps: [],
+          lockFiles: [],
+          managerData: {
+            packageName: undefined,
+            workspaces: undefined,
+          },
+          packageFile: 'deno.json',
+          packageFileVersion: undefined,
         },
       ]);
     });
@@ -310,8 +192,8 @@ describe('modules/manager/deno/extract', () => {
       );
       fs.getSiblingFileName.mockReturnValueOnce('deno.lock');
       fs.localPathIsFile.mockResolvedValue(true);
-      const result = await extractDenoJsonFile(
-        {
+      const result = await DenoExtract.parseAsync({
+        content: JSON.stringify({
           name: 'test',
           version: '0.0.1',
           scopes: {
@@ -320,9 +202,9 @@ describe('modules/manager/deno/extract', () => {
             },
           },
           importMap: 'import_map.json',
-        },
-        'deno.json',
-      );
+        }),
+        fileName: 'deno.json',
+      });
       expect(result).toStrictEqual([
         {
           deps: [
@@ -338,6 +220,7 @@ describe('modules/manager/deno/extract', () => {
           lockFiles: ['deno.lock'],
           managerData: {
             packageName: 'test',
+            workspaces: undefined,
           },
           packageFile: 'deno.json',
           packageFileVersion: '0.0.1',
@@ -514,6 +397,24 @@ describe('modules/manager/deno/extract', () => {
               versioning: 'deno',
             },
             {
+              depName: 'deno task npm:example',
+              depType: 'tasks',
+              skipReason: 'unsupported',
+              skipStage: 'extract',
+            },
+            {
+              depName: 'deno task jsr:@scope/task',
+              depType: 'tasks',
+              skipReason: 'unsupported',
+              skipStage: 'extract',
+            },
+            {
+              depName: 'curl http://example.com',
+              depType: 'tasks',
+              skipReason: 'unsupported',
+              skipStage: 'extract',
+            },
+            {
               currentRawValue: 'npm:@types/dep1@1.0.0',
               currentValue: '1.0.0',
               datasource: 'npm',
@@ -545,10 +446,17 @@ describe('modules/manager/deno/extract', () => {
               depType: 'lint',
               versioning: 'deno',
             },
+            {
+              depName: './local_dep.js',
+              depType: 'lint',
+              skipReason: 'unsupported',
+              skipStage: 'extract',
+            },
           ],
           lockFiles: ['deno.lock'],
           managerData: {
             packageName: 'test',
+            workspaces: undefined,
           },
           packageFile: 'deno.jsonc',
           packageFileVersion: '0.0.1',

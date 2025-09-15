@@ -5,11 +5,13 @@ import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { api as semver } from '../../versioning/deno';
 import type { PackageDependency, PackageFile } from '../types';
-import { extractDenoCompatiblePackageJson } from './compat';
+import {
+  detectNodeCompatWorkspaces,
+  extractDenoCompatiblePackageJson,
+} from './compat';
 import { DenoLock } from './schema';
 import type { DenoManagerData, LockFile } from './types';
 import { DENO_LAND_REGEX, DEP_VALUE_REGEX } from './util';
-import { detectNodeCompatWorkspaces } from './workspace';
 
 export async function getDenoLock(filePath: string): Promise<LockFile> {
   const lockfileContent = await readLocalFile(filePath, 'utf8');
