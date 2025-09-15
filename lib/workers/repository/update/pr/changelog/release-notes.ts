@@ -1,22 +1,23 @@
 import { isDate, isUndefined } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
-import { logger } from '../../../../../logger/index.ts';
-import * as memCache from '../../../../../util/cache/memory/index.ts';
-import * as packageCache from '../../../../../util/cache/package/index.ts';
-import type { PackageCacheNamespace } from '../../../../../util/cache/package/types.ts';
-import { detectPlatform } from '../../../../../util/common.ts';
-import { linkify } from '../../../../../util/markdown.ts';
-import { newlineRegex, regEx } from '../../../../../util/regex.ts';
-import { coerceString } from '../../../../../util/string.ts';
-import { isHttpUrl, joinUrlParts } from '../../../../../util/url.ts';
-import type { BranchUpgradeConfig } from '../../../../types.ts';
-import * as bitbucket from './bitbucket/index.ts';
-import * as bitbucketServer from './bitbucket-server/index.ts';
-import * as forgejo from './forgejo/index.ts';
-import * as gitea from './gitea/index.ts';
-import * as github from './github/index.ts';
-import * as gitlab from './gitlab/index.ts';
+import { logger } from '../../../../../logger';
+import * as memCache from '../../../../../util/cache/memory';
+import * as packageCache from '../../../../../util/cache/package';
+import type { PackageCacheNamespace } from '../../../../../util/cache/package/types';
+import { detectPlatform } from '../../../../../util/common';
+import { linkify } from '../../../../../util/markdown';
+import { newlineRegex, regEx } from '../../../../../util/regex';
+import { coerceString } from '../../../../../util/string';
+import { isHttpUrl, joinUrlParts } from '../../../../../util/url';
+import type { BranchUpgradeConfig } from '../../../../types';
+import * as azure from './azure';
+import * as bitbucket from './bitbucket';
+import * as bitbucketServer from './bitbucket-server';
+import * as forgejo from './forgejo';
+import * as gitea from './gitea';
+import * as github from './github';
+import * as gitlab from './gitlab';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
@@ -38,6 +39,8 @@ export async function getReleaseList(
   const { apiBaseUrl, repository, type } = project;
   try {
     switch (type) {
+      case 'azure':
+        return azure.getReleaseList(project, release);
       case 'bitbucket':
         return bitbucket.getReleaseList(project, release);
       case 'bitbucket-server':
@@ -272,6 +275,12 @@ export async function getReleaseNotesMdFileInner(
   const sourceDirectory = project.sourceDirectory!;
   try {
     switch (type) {
+      case 'azure':
+        return await azure.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory,
+        );
       case 'bitbucket':
         return await bitbucket.getReleaseNotesMd(
           repository,
@@ -372,13 +381,13 @@ export async function getReleaseNotesMd(
     if (changelogParsed.length >= 2) {
       for (const section of changelogParsed) {
         try {
+          const [heading] = section.split(newlineRegex);
           // replace brackets and parenthesis with space
-          const deParenthesizedSection = section.replace(
+          const deParenthesizedHeading = heading.replace(
             regEx(/[[\]()]/g),
             ' ',
           );
-          const [heading] = deParenthesizedSection.split(newlineRegex);
-          const title = heading
+          const title = deParenthesizedHeading
             .replace(regEx(/^\s*#*\s*/), '')
             .split(' ')
             .filter(Boolean);
@@ -389,11 +398,22 @@ export async function getReleaseNotesMd(
             project,
             changelogFile,
           );
-          const mdHeadingLink = title
-            .filter((word) => !isHttpUrl(word))
-            .join('-')
-            .replace(regEx(/[^A-Za-z0-9-]/g), '');
-          const url = `${notesSourceUrl}#${mdHeadingLink}`;
+          const mdHeadingLink =
+            project.type === 'azure'
+              ? encodeURIComponent(
+                  heading
+                    .replace(regEx(/^\s*#*\s*/), '')
+                    .toLowerCase()
+                    .replace(regEx(/\s+/), '-'),
+                )
+              : title
+                  .filter((word) => !isHttpUrl(word))
+                  .join('-')
+                  .replace(regEx(/[^A-Za-z0-9-]/g), '');
+          const url =
+            project.type === 'azure'
+              ? `${notesSourceUrl}&anchor=${mdHeadingLink}`
+              : `${notesSourceUrl}#${mdHeadingLink}`;
           // Look for version in title
           for (const word of title) {
             if (word.includes(version) && !isHttpUrl(word)) {
@@ -542,6 +562,10 @@ function getNotesSourceUrl(
       changelogFile,
       '?at=HEAD',
     );
+  }
+
+  if (project.type === 'azure') {
+    return joinUrlParts(baseUrl, '_git', repository, '?path=', changelogFile);
   }
 
   return joinUrlParts(
