@@ -1,9 +1,12 @@
 import { parsePkgAndParentSelector } from '@pnpm/parse-overrides';
 import is from '@sindresorhus/is';
+import type { JsonValue } from 'type-fest';
 import { CONFIG_VALIDATION } from '../../../../../constants/error-messages';
 import { logger } from '../../../../../logger';
+import { parseJson } from '../../../../../util/common';
 import { regEx } from '../../../../../util/regex';
 import type { PackageDependency, PackageFileContent } from '../../../types';
+import { PackageJson } from '../../schema';
 import type { NpmManagerData } from '../../types';
 import type { NpmPackage, NpmPackageDependency } from '../types';
 import {
@@ -149,20 +152,14 @@ export function extractPackageJson(
 }
 
 export function hasPackageManager(content: string): boolean {
-  let packageJson: NpmPackage;
+  logger.trace(`npm.hasPackageManager from package.json`);
   try {
-    logger.trace(`npm.hasPackageManager from package.json`);
+    const packageJsonResult = PackageJson.parse(content);
 
-    packageJson = JSON.parse(content);
-    if (packageJson.packageManager) {
-      const match = regEx('^(?<name>.+)@(?<range>.+)$').exec(
-        packageJson.packageManager,
-      );
-
-      if (match?.groups) {
-        return true;
-      }
-    }
+    return (
+      is.nonEmptyString(packageJsonResult?.packageManager?.name) &&
+      is.nonEmptyString(packageJsonResult?.packageManager?.version)
+    );
   } catch {
     logger.debug(`Invalid JSON`);
   }

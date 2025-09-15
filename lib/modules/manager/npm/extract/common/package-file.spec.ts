@@ -1,19 +1,5 @@
-// hasPackageManager.test.ts
 import { logger } from '../../../../../logger';
-import { regEx } from '../../../../../util/regex';
 import { hasPackageManager } from './package-file';
-
-// Mock logger + regEx dependencies used by hasPackageManager
-vitest.mock('../../../../../logger', () => ({
-  logger: {
-    trace: vitest.fn(),
-    debug: vitest.fn(),
-  },
-}));
-vitest.mock('../../../../../util/regex', () => ({
-  // make regEx return a real RegExp so exec() behaves naturally
-  regEx: vitest.fn((pattern: string) => new RegExp(pattern)),
-}));
 
 describe('modules/manager/npm/extract/common/package-file', () => {
   beforeEach(() => {
@@ -27,7 +13,6 @@ describe('modules/manager/npm/extract/common/package-file', () => {
     expect(logger.trace).toHaveBeenCalledWith(
       'npm.hasPackageManager from package.json',
     );
-    expect(regEx).toHaveBeenCalledWith('^(?<name>.+)@(?<range>.+)$');
     expect(logger.debug).not.toHaveBeenCalled();
   });
 

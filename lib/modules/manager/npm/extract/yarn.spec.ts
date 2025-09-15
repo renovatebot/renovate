@@ -88,9 +88,8 @@ describe('modules/manager/npm/extract/yarn', () => {
       });
     });
 
-    it('parses valid pnpm-workspace.yaml file', async () => {
-      const plocktest1Lock = Fixtures.get('yarn2/yarn.lock', '..');
-      fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock);
+    it('parses valid .yarnrc.yml file', async () => {
+      fs.localPathExists.mockResolvedValueOnce(true);
       fs.getSiblingFileName.mockReturnValueOnce('yarn.lock');
       expect(
         await extractYarnCatalogs(
@@ -130,9 +129,7 @@ describe('modules/manager/npm/extract/yarn', () => {
     });
 
     it('finds relevant lockfile', async () => {
-      const lockfileContent = Fixtures.get('yarn2/yarn.lock', '..');
-
-      fs.readLocalFile.mockResolvedValueOnce(lockfileContent);
+      fs.localPathExists.mockResolvedValueOnce(true);
       fs.getSiblingFileName.mockReturnValueOnce('yarn.lock');
       expect(
         await extractYarnCatalogs(
