@@ -154,5 +154,14 @@ describe('modules/manager/quadlet/extract', () => {
         ],
       });
     });
+
+    it('handles an unsuccessful parse', () => {
+      const simple = codeBlock`
+      [Container]
+      `;
+
+      const result = extractPackageFile(simple, packageFile, config);
+      expect(result).toBeNull();
+    });
   });
 });
