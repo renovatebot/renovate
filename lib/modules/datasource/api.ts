@@ -72,6 +72,7 @@ import { SbtPluginDatasource } from './sbt-plugin';
 import { TerraformModuleDatasource } from './terraform-module';
 import { TerraformProviderDatasource } from './terraform-provider';
 import type { DatasourceApi } from './types';
+import { TypstDatasource } from './typst';
 import { Unity3dDatasource } from './unity3d';
 import { Unity3dPackagesDatasource } from './unity3d-packages';
 
@@ -154,5 +155,6 @@ api.set(SbtPackageDatasource.id, new SbtPackageDatasource());
 api.set(SbtPluginDatasource.id, new SbtPluginDatasource());
 api.set(TerraformModuleDatasource.id, new TerraformModuleDatasource());
 api.set(TerraformProviderDatasource.id, new TerraformProviderDatasource());
+api.set(TypstDatasource.id, new TypstDatasource());
 api.set(Unity3dDatasource.id, new Unity3dDatasource());
 api.set(Unity3dPackagesDatasource.id, new Unity3dPackagesDatasource());

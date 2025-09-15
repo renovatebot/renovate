@@ -421,6 +421,8 @@ Other valid cache namespaces are as follows:
 - `datasource-terraform-module`
 - `datasource-terraform-provider`
 - `datasource-terraform`
+- `datasource-typst:cache-provider`
+- `datasource-typst:releases`
 - `datasource-unity3d`
 - `datasource-unity3d-packages`
 - `github-releases-datasource-v2`

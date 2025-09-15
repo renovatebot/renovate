@@ -111,8 +111,6 @@ export interface LocalRepoConfig {
   hasVulnerabilityAlertsEnabled: boolean;
 }
 
-export type BranchProtection = any;
-
 export interface GhRepo {
   id: string;
   isFork: boolean;
