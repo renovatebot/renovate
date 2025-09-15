@@ -73,7 +73,6 @@ export class NextcloudDatasource extends Datasource {
             ? changelogContent
             : undefined,
         isStable: !release.isNightly,
-        registryUrl,
       });
     }
 

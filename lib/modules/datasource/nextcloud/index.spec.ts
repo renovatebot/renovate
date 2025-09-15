@@ -154,21 +154,18 @@ describe('modules/datasource/nextcloud/index', () => {
         {
           changelogContent: undefined,
           isStable: true,
-          registryUrl: 'https://custom.registry.com',
           releaseTimestamp: '2025-01-14T09:13:25.123Z',
           version: '7.1.0',
         },
         {
           changelogContent: undefined,
           isStable: false,
-          registryUrl: 'https://custom.registry.com',
           releaseTimestamp: '2025-04-24T09:24:43.232Z',
           version: '7.2.0',
         },
         {
           changelogContent: 'testChangelog',
           isStable: true,
-          registryUrl: 'https://custom.registry.com',
           releaseTimestamp: '2025-07-25T09:41:26.318Z',
           version: '7.3.0',
         },

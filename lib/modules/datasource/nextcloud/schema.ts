@@ -1,3 +1,4 @@
+import { LooseArray, LooseRecord } from '../../../util/schema-utils';
 import { z } from 'zod';
 
 const Translation = z.object({
@@ -7,13 +8,13 @@ const Translation = z.object({
 export const ApplicationRelease = z.object({
   created: z.string(),
   isNightly: z.boolean(),
-  translations: z.record(z.string(), Translation),
+  translations: LooseRecord(z.string(), Translation),
   version: z.string(),
 });
 
 export const Application = z.object({
   id: z.string(),
-  releases: z.array(ApplicationRelease),
+  releases: LooseArray(ApplicationRelease),
   website: z.string(),
 });
 
