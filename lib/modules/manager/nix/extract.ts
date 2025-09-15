@@ -3,7 +3,6 @@ import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
-import { id as semverCoercedVersioning } from '../../versioning/semver-coerced';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -128,7 +127,6 @@ export async function extractPackageFile(
     const dep: PackageDependency = {
       depName,
       datasource: GitRefsDatasource.id,
-      versioning: semverCoercedVersioning,
     };
 
     // if rev is set, the flake contains a digest and can be updated directly
