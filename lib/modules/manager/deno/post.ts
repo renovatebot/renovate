@@ -69,13 +69,13 @@ export function getLockedVersion(
       currentValue && depName ? `${depName}@${currentValue}` : depName;
     if (
       lockFileContent.redirectVersions &&
-      lockFileContent.redirectVersions.size > 0 &&
+      is.nonEmptyObject(lockFileContent.redirectVersions) &&
       key &&
-      lockFileContent.redirectVersions.has(key)
+      lockFileContent.redirectVersions[key]
     ) {
       const match = denoLandRegex.exec(
         // SAFETY: checked above
-        lockFileContent.redirectVersions.get(key)!,
+        lockFileContent.redirectVersions[key],
       );
       return match?.groups?.currentValue;
     }

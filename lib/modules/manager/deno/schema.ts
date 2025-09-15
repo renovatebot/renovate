@@ -49,48 +49,41 @@ export interface DepTypes
 export interface ImportMapJsonFile
   extends Pick<DenoJsonFile, 'imports' | 'scopes'> {}
 
-// https://github.com/denoland/vscode_deno/blob/7e125c6ffcdcdebd587f97be5341d404f5335b87/schemas/lockfile.schema.json
-const DenoLockV5 = z.object({
-  version: z.string(),
-  specifiers: z.record(z.string(), z.string()).optional(),
-  redirects: z.record(z.string(), z.string()).optional(),
-  remote: z.record(z.string(), z.string()).optional(),
+export const DenoLock = Json.pipe(
+  // this schema is version 5
+  // https://github.com/denoland/vscode_deno/blob/7e125c6ffcdcdebd587f97be5341d404f5335b87/schemas/lockfile.schema.json
+  z.object({
+    version: z.string(),
+    specifiers: LooseRecord(z.string()).catch({}),
+    redirects: LooseRecord(z.string()).catch({}),
+    remote: LooseRecord(z.string()).catch({}),
+  }),
+).transform(({ version, specifiers, redirects, remote }) => {
+  const lockedVersions: Record<string, string> = {};
+  for (const [key, val] of Object.entries(specifiers)) {
+    // pick "7.1.3" from "7.1.3_pkgname@4.0.3_@types+pkgname@1.0.1"
+    const match = regEx(/^(?<lockedVersion>[^_\s]+)/).exec(val);
+    if (match?.groups?.lockedVersion) {
+      lockedVersions[key] = match?.groups?.lockedVersion;
+    }
+  }
+
+  const redirectVersions: Record<string, string> = {};
+  for (const [key, val] of Object.entries(redirects)) {
+    redirectVersions[key] = val;
+  }
+
+  const remoteVersions = new Set<string>();
+  for (const key of Object.keys(remote)) {
+    remoteVersions.add(key);
+  }
+  return {
+    lockedVersions,
+    redirectVersions,
+    remoteVersions,
+    lockfileVersion: Number(version),
+  };
 });
-
-export const DenoLock = Json.pipe(DenoLockV5).transform(
-  ({ version, specifiers, redirects, remote }) => {
-    const lockedVersions: Record<string, string> = {};
-    if (specifiers) {
-      for (const [key, val] of Object.entries(specifiers)) {
-        // pick "7.1.3" from "7.1.3_pkgname@4.0.3_@types+pkgname@1.0.1"
-        const match = regEx(/^(?<lockedVersion>[^_\s]+)/).exec(val);
-        if (match?.groups?.lockedVersion) {
-          lockedVersions[key] = match?.groups?.lockedVersion;
-        }
-      }
-    }
-
-    const redirectVersions = new Map<string, string>();
-    if (redirects) {
-      for (const [key, val] of Object.entries(redirects)) {
-        redirectVersions.set(key, val);
-      }
-    }
-
-    const remoteVersions = new Set<string>();
-    if (remote) {
-      for (const key of Object.keys(remote)) {
-        remoteVersions.add(key);
-      }
-    }
-    return {
-      lockedVersions,
-      redirectVersions,
-      remoteVersions,
-      lockfileVersion: Number(version),
-    };
-  },
-);
 
 export const Workspace = z
   .union([

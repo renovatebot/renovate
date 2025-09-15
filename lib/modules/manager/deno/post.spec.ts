@@ -49,12 +49,9 @@ describe('modules/manager/deno/post', () => {
       const result = await getDenoLock('deno.lock');
       expect(result).toMatchObject({
         lockfileVersion: 5,
-        redirectVersions: new Map<string, string>([
-          [
-            'https://deno.land/dep1',
-            'https://deno.land/dep1@0.223.0/fs/mod.ts',
-          ],
-        ]),
+        redirectVersions: {
+          'https://deno.land/dep1': 'https://deno.land/dep1@0.223.0/fs/mod.ts',
+        },
       });
     });
 
@@ -127,12 +124,10 @@ describe('modules/manager/deno/post', () => {
           depName: 'https://deno.land/dep1',
         },
         {
-          redirectVersions: new Map<string, string>([
-            [
-              'https://deno.land/dep1',
+          redirectVersions: {
+            'https://deno.land/dep1':
               'https://deno.land/dep1@0.223.0/fs/mod.ts',
-            ],
-          ]),
+          },
         },
       );
       expect(result).toBe('0.223.0');
