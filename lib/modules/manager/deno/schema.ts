@@ -343,9 +343,11 @@ export const DenoExtract = z
     content: Jsonc.pipe(DenoPackageFile),
     fileName: z.string(),
   })
-  .transform(async ({ content, fileName }) => {
-    let lockFile: string | undefined;
+  .transform(async (data) => {
+    // handle lock file
+    const { content, fileName } = data;
 
+    let lockFile: string | undefined;
     if (content.lock) {
       const lock = content.lock;
       if (typeof lock === 'string' && (await localPathIsFile(lock))) {
@@ -368,14 +370,12 @@ export const DenoExtract = z
       }
     }
 
-    return { content, fileName, lockFile };
+    const lockFiles = lockFile ? [lockFile] : [];
+    return { ...data, lockFiles };
   })
-  .transform(async ({ content, fileName, lockFile }) => {
-    const packageFile: PackageFile<DenoManagerData> = {
-      deps: content.dependencies,
-      packageFile: fileName,
-      managerData: content.managerData,
-    };
+  .transform(async (data) => {
+    // handle import map
+    const { content, fileName, lockFiles } = data;
 
     let importMapPackageFile: PackageFile<DenoManagerData> | null = null;
     if (content.importMap) {
@@ -396,6 +396,7 @@ export const DenoExtract = z
               managerData: {
                 importMapReferrer: fileName,
               },
+              lockFiles,
             };
           } catch (err) {
             logger.error({ err }, `Error parsing ${importMapPath}`);
@@ -404,12 +405,25 @@ export const DenoExtract = z
       }
     }
 
-    const lockFiles = lockFile ? [lockFile] : [];
-    const packageFiles = [{ ...packageFile, lockFiles }];
-    if (importMapPackageFile) {
-      packageFiles.push({ ...importMapPackageFile, lockFiles });
-    }
+    return { ...data, importMapPackageFile };
+  })
+  .transform(
+    ({
+      content,
+      fileName,
+      lockFiles,
+      importMapPackageFile,
+    }): PackageFile<DenoManagerData>[] => {
+      const packageFile: PackageFile<DenoManagerData> = {
+        deps: content.dependencies,
+        packageFile: fileName,
+        managerData: content.managerData,
+        lockFiles,
+      } satisfies PackageFile<DenoManagerData>;
 
-    return packageFiles;
-  });
+      return [packageFile, importMapPackageFile].filter(
+        Boolean,
+      ) as PackageFile<DenoManagerData>[];
+    },
+  );
 export type DenoExtract = z.infer<typeof DenoExtract>;
