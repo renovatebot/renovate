@@ -294,6 +294,75 @@ describe('config/presets/internal/custom-managers', () => {
     });
   });
 
+  describe('Update `devEngines` runtime version in package.json', () => {
+    const customManager = presets.devEnginesRuntimeVersions.customManagers?.[0];
+
+    it(`find dependencies in file`, async () => {
+      const fileContent = codeBlock`
+        {
+          "devEngines": {
+            "runtime": [
+                {
+                    "name": "node",
+                    "version": "24.7.0",
+                    "onFail": "ignore"
+                },
+                {
+                    "name": "bun",
+                    "version": "1.2.0",
+                    "onFail": "ignore"
+                },
+                {
+                    "name": "deno",
+                    "version": "2.4.0",
+                    "onFail": "ignore"
+                }
+            ]
+          }
+        }`;
+
+      const res = await extractPackageFile(
+        'jsonata',
+        fileContent,
+        'package.json',
+        customManager!,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '24.7.0',
+          datasource: 'npm',
+          depName: 'node',
+        },
+        {
+          currentValue: '1.2.0',
+          datasource: 'npm',
+          depName: 'bun',
+        },
+        {
+          currentValue: '2.4.0',
+          datasource: 'npm',
+          depName: 'deno',
+        },
+      ]);
+    });
+
+    describe('matches regexes patterns', () => {
+      it.each`
+        path                   | expected
+        ${'package.json'}      | ${true}
+        ${'package.jsonc'}     | ${false}
+        ${'foo/package.json'}  | ${true}
+        ${'foo/package.jsonc'} | ${false}
+        ${'package.yml'}       | ${false}
+      `('$path', ({ path, expected }) => {
+        expect(
+          matchRegexOrGlobList(path, customManager!.managerFilePatterns),
+        ).toBe(expected);
+      });
+    });
+  });
+
   describe('Update `_VERSION` variables in Dockerfiles', () => {
     const customManager = presets.dockerfileVersions.customManagers?.[0];
 
