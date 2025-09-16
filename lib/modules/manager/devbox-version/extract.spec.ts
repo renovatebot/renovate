@@ -12,7 +12,7 @@ describe('modules/manager/devbox-version/extract', () => {
         {
           depName: 'devbox',
           currentValue: '0.16.0',
-          datasource: 'devbox-version',
+          datasource: 'github-releases',
         },
       ]);
     });
@@ -24,7 +24,7 @@ describe('modules/manager/devbox-version/extract', () => {
         {
           depName: 'devbox',
           currentValue: '0.16.0',
-          datasource: 'devbox-version',
+          datasource: 'github-releases',
         },
       ]);
     });
@@ -38,7 +38,7 @@ describe('modules/manager/devbox-version/extract', () => {
         {
           depName: 'devbox',
           currentValue: '0.17.0-beta.1',
-          datasource: 'devbox-version',
+          datasource: 'github-releases',
         },
       ]);
     });
@@ -50,7 +50,7 @@ describe('modules/manager/devbox-version/extract', () => {
         {
           depName: 'devbox',
           currentValue: '',
-          datasource: 'devbox-version',
+          datasource: 'github-releases',
         },
       ]);
     });
