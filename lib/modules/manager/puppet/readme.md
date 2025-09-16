@@ -1,5 +1,7 @@
 Renovate can update Puppetfiles.
 
+For updating dependencies declared inside a Puppet module's `metadata.json` file (i.e. the `dependencies` array within a module), use the separate `puppet-module` manager.
+
 ### How it works
 
 Renovate:
