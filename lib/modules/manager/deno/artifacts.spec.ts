@@ -1,6 +1,5 @@
 import _fs from 'fs-extra';
 import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { exec as _exec } from '../../../util/exec';
 import { ExecError } from '../../../util/exec/exec-error';
@@ -13,24 +12,21 @@ vi.mock('fs-extra');
 const exec = vi.mocked(_exec);
 const fs = vi.mocked(_fs);
 
-const globalConfig: RepoGlobalConfig = {
-  localDir: '',
+const updateArtifact: UpdateArtifact = {
+  config: {
+    constraints: { deno: '2.4.5' },
+  },
+  newPackageFileContent: '',
+  packageFileName: '',
+  updatedDeps: [],
 };
 
 describe('modules/manager/deno/artifacts', () => {
   describe('updateArtifacts()', () => {
-    let updateArtifact: UpdateArtifact;
-
     beforeEach(() => {
-      GlobalConfig.set(globalConfig);
-      updateArtifact = {
-        config: {
-          constraints: { deno: '2.4.5' },
-        },
-        newPackageFileContent: '',
-        packageFileName: '',
-        updatedDeps: [],
-      };
+      GlobalConfig.set({
+        localDir: '',
+      });
     });
 
     it('skips if no updatedDeps and no lockFileMaintenance', async () => {
@@ -160,7 +156,6 @@ describe('modules/manager/deno/artifacts', () => {
   });
 
   it('depType tasks returns null', async () => {
-    GlobalConfig.set(globalConfig);
     const updateArtifact: UpdateArtifact = {
       config: {},
       newPackageFileContent: '',
@@ -178,7 +173,6 @@ describe('modules/manager/deno/artifacts', () => {
   });
 
   it('deno command execution', async () => {
-    GlobalConfig.set(globalConfig);
     const updateArtifact: UpdateArtifact = {
       config: {},
       newPackageFileContent: '',
@@ -203,8 +197,5 @@ describe('modules/manager/deno/artifacts', () => {
       ],
       userConfiguredEnv: undefined,
     });
-
-    exec.mockClear();
-    GlobalConfig.reset();
   });
 });
