@@ -1,4 +1,5 @@
 import type { UpdateDependencyConfig } from '../types';
+import type { DenoManagerData } from './types';
 import { updateDependency } from './update';
 import { Fixtures } from '~test/fixtures';
 
@@ -472,13 +473,16 @@ describe('modules/manager/deno/update', () => {
           },
         });
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: UpdateDependencyConfig<DenoManagerData>['upgrade'] = {
           depName: '@scope/dep1',
           depType: 'imports',
           currentValue: '1.0.0',
           newValue: '2.0.0',
           datasource: 'jsr',
           packageFile: 'import_map.json',
+          managerData: {
+            importMapReferrer: 'deno.json',
+          },
         };
 
         const result = updateDependency({ fileContent, upgrade });
@@ -489,13 +493,16 @@ describe('modules/manager/deno/update', () => {
       it('handles error during update gracefully', () => {
         const fileContent = 'invalid json';
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: UpdateDependencyConfig<DenoManagerData>['upgrade'] = {
           depName: 'dep1',
           depType: 'imports',
           currentValue: '1.0.0',
           newValue: '2.0.0',
           datasource: 'npm',
           packageFile: 'import_map.json',
+          managerData: {
+            importMapReferrer: 'deno.json',
+          },
         };
 
         const result = updateDependency({ fileContent, upgrade });
@@ -513,13 +520,16 @@ describe('modules/manager/deno/update', () => {
           2,
         );
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: UpdateDependencyConfig<DenoManagerData>['upgrade'] = {
           depName: 'dep1',
           depType: 'imports',
           currentValue: '1.0.0',
           newValue: '2.0.0',
           datasource: 'unknown',
           packageFile: 'import_map.json',
+          managerData: {
+            importMapReferrer: 'deno.json',
+          },
         };
 
         const result = updateDependency({ fileContent, upgrade });
@@ -533,13 +543,16 @@ describe('modules/manager/deno/update', () => {
           },
         });
 
-        const upgrade: UpdateDependencyConfig['upgrade'] = {
+        const upgrade: UpdateDependencyConfig<DenoManagerData>['upgrade'] = {
           depName: undefined,
           depType: 'imports',
           currentValue: '1.0.0',
           newValue: '2.0.0',
           datasource: 'invalid',
           packageFile: 'import_map.json',
+          managerData: {
+            importMapReferrer: 'deno.json',
+          },
         };
 
         const result = updateDependency({ fileContent, upgrade });

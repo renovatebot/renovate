@@ -78,6 +78,30 @@ describe('modules/manager/deno/artifacts', () => {
       ]);
     });
 
+    it('change directory if import map is used', async () => {
+      updateArtifact.updatedDeps = [
+        {
+          manager: 'deno',
+          lockFiles: ['sub/deno.lock'],
+          packageFile: 'import_map.json',
+          managerData: { importMapReferrer: 'sub/deno.json' },
+        },
+      ];
+      const oldLock = Buffer.from('old');
+      fs.readFile.mockResolvedValueOnce(oldLock as never);
+      const newLock = Buffer.from('new');
+      fs.readFile.mockResolvedValueOnce(newLock as never);
+      expect(await updateArtifacts(updateArtifact)).toEqual([
+        {
+          file: {
+            path: 'sub/deno.lock',
+            type: 'addition',
+            contents: newLock,
+          },
+        },
+      ]);
+    });
+
     it('supports lockFileMaintenance', async () => {
       updateArtifact.updatedDeps = [
         { manager: 'deno', lockFiles: ['deno.lock'] },

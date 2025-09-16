@@ -54,8 +54,13 @@ export async function updateArtifacts(
       await deleteLocalFile(lockFileName);
     }
 
+    // run from its referred deno.json/deno.jsonc location if import map is used
+    const cwdFile =
+      updatedDeps.find((dep) => dep.managerData?.importMapReferrer)?.managerData
+        ?.importMapReferrer ?? packageFileName;
+
     const execOptions: ExecOptions = {
-      cwdFile: packageFileName,
+      cwdFile,
       docker: {},
       toolConstraints: [
         {

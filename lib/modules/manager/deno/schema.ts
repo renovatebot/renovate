@@ -405,6 +405,9 @@ export const DenoExtract = z
             importMapPackageFile = {
               deps: importMapDeps,
               packageFile: importMapPath,
+              managerData: {
+                importMapReferrer: fileName,
+              },
             };
           } catch (err) {
             logger.error({ err }, `Error parsing ${importMapPath}`);

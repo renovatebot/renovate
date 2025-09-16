@@ -112,6 +112,9 @@ describe('modules/manager/deno/extract', () => {
             },
           ],
           lockFiles: ['deno.lock'],
+          managerData: {
+            importMapReferrer: 'deno.json',
+          },
           packageFile: 'import_map.json',
         },
       ]);

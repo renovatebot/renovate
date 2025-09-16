@@ -121,20 +121,21 @@ export function updateDependency(
   config: UpdateDependencyConfig<DenoManagerData>,
 ): string | null {
   const { fileContent, upgrade } = config;
-  const { depName, currentValue, newValue, datasource, packageFile } = upgrade;
+  const {
+    depName,
+    currentValue,
+    newValue,
+    datasource,
+    packageFile,
+    managerData,
+  } = upgrade;
   if (!packageFile) {
     logger.debug('deno.updateDependency(): No package file found');
     return null;
   }
 
   // <importMap>.json
-  if (
-    depName === 'imports' ||
-    depName === 'scopes' ||
-    (upath.basename(packageFile).endsWith('.json') &&
-      !upath.basename(packageFile).startsWith('deno.json') &&
-      upath.basename(packageFile) !== 'package.json')
-  ) {
+  if (managerData?.importMapReferrer) {
     if (!depName || !newValue || !datasource || !upgrade.depType) {
       logger.debug({ depName, currentValue, newValue }, 'Unknown value');
       return null;
