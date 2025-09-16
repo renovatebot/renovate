@@ -453,7 +453,6 @@
       "https://github.com/nestjs/terminus"
     ],
     "nest-graphql": "https://github.com/nestjs/graphql",
-    "netty": "https://github.com/netty/netty",
     "neutrino": [
       "https://github.com/neutrinojs/neutrino",
       "https://github.com/mozilla-neutrino/neutrino-dev"
@@ -698,6 +697,7 @@
     "forge": "/^@forge//",
     "fullcalendar": "/^@fullcalendar//",
     "hotchocolate": "/^HotChocolate\\./",
+    "netty": "/^io.netty:/",
     "oracle-database": [
       "/^com.oracle.database.jdbc:/",
       "/^com.oracle.database.nls:/"
