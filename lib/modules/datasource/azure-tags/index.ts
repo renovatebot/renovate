@@ -1,6 +1,5 @@
 import { cache } from '../../../util/cache/package/decorator';
 import type { PackageCacheNamespace } from '../../../util/cache/package/namespaces';
-import { AzureHttp } from '../../../util/http/azure';
 import { ensureTrailingSlash } from '../../../util/url';
 import * as azureHelper from '../../platform/azure/azure-helper';
 import { Datasource } from '../datasource';
@@ -8,8 +7,6 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export class AzureTagsDatasource extends Datasource {
   static readonly id = 'azure-tags';
-
-  override http = new AzureHttp(AzureTagsDatasource.id);
 
   static readonly cacheNamespace: PackageCacheNamespace = `datasource-${AzureTagsDatasource.id}`;
 
