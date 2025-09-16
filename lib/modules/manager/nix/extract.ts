@@ -1,5 +1,6 @@
 import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
+import { parseGitUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
@@ -9,7 +10,6 @@ import type {
   PackageFileContent,
 } from '../types';
 import { NixFlakeLock } from './schema';
-import { parseGitUrl } from '../../../util/git/url';
 
 // as documented upstream
 // https://github.com/NixOS/nix/blob/master/doc/manual/source/protocols/tarball-fetcher.md#gitea-and-forgejo-support
@@ -145,8 +145,8 @@ export async function extractPackageFile(
     }
 
     switch (flakeLocked.type) {
-      case 'git':
-        const url = parseGitUrl(flakeOriginal.url);
+      case 'git': {
+        const url = parseGitUrl(flakeOriginal.url!);
 
         switch (url.protocol) {
           case 'ssh':
@@ -158,6 +158,7 @@ export async function extractPackageFile(
             break;
         }
         break;
+      }
 
       case 'github':
         // set to nixpkgs if it is a nixpkgs reference
