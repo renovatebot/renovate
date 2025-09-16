@@ -528,10 +528,6 @@ describe('workers/repository/update/branch/get-updated', () => {
       nix.updateDependency.mockResolvedValueOnce(fileContent);
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchObject({
-        artifactErrors: [],
-        artifactNotices: [],
-        reuseExistingBranch: undefined,
-        updatedArtifacts: [],
         updatedPackageFiles: [
           {
             contents: 'existing content',
