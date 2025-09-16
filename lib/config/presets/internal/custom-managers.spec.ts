@@ -294,8 +294,8 @@ describe('config/presets/internal/custom-managers', () => {
     });
   });
 
-  describe('Update `devEngines` runtime version in package.json', () => {
-    const customManager = presets.devEnginesRuntimeVersions.customManagers?.[0];
+  describe('Update `devEngines` versions in package.json', () => {
+    const customManager = presets.devEnginesVersions.customManagers?.[0];
 
     it(`find dependencies in file`, async () => {
       const fileContent = codeBlock`
@@ -303,21 +303,26 @@ describe('config/presets/internal/custom-managers', () => {
           "devEngines": {
             "runtime": [
                 {
-                    "name": "node",
-                    "version": "24.7.0",
-                    "onFail": "ignore"
+                  "name": "node",
+                  "version": "24.7.0",
+                  "onFail": "ignore"
                 },
                 {
-                    "name": "bun",
-                    "version": "1.2.0",
-                    "onFail": "ignore"
+                  "name": "bun",
+                  "version": "1.2.0",
+                  "onFail": "ignore"
                 },
                 {
-                    "name": "deno",
-                    "version": "2.4.0",
-                    "onFail": "ignore"
+                  "name": "deno",
+                  "version": "2.4.0",
+                  "onFail": "ignore"
                 }
-            ]
+            ],
+            "packageManager": {
+              "name": "npm",
+              "version": "11.2.0",
+              "onFail": "ignore"
+            }
           }
         }`;
 
@@ -343,6 +348,11 @@ describe('config/presets/internal/custom-managers', () => {
           currentValue: '2.4.0',
           datasource: 'npm',
           depName: 'deno',
+        },
+        {
+          currentValue: '11.2.0',
+          datasource: 'npm',
+          depName: 'npm',
         },
       ]);
     });
