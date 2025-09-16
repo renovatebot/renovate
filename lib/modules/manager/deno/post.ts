@@ -233,10 +233,6 @@ export function normalizeWorkspace(
   for (const pkg of packageFiles) {
     const workspaces = pkg.managerData?.workspaces;
     if (is.nonEmptyArray(workspaces)) {
-      // remove version and name if it is a workspace root
-      // https://docs.deno.com/runtime/fundamentals/workspaces/#configuring-built-in-deno-tools
-      delete pkg.packageFileVersion;
-      delete pkg.managerData?.packageName;
       workspaceRootFiles.add(pkg.packageFile);
     }
   }
@@ -255,29 +251,6 @@ export function normalizeWorkspace(
         pkg.lockFiles = lockFiles;
         break;
       }
-    }
-  }
-}
-
-export function filterWorkspaceRootsWithImportMap(
-  packageFiles: PackageFile<DenoManagerData>[],
-): void {
-  // imports and scopes field is ignored when importMap is specified in the root config file
-  // https://github.com/denoland/deno/blob/b7061b0f64b3c79b312de5a59122b7184b2fdef2/libs/config/workspace/mod.rs#L154
-  // Find a deno workspace root that has importMap
-  const workspaceRootsWithImportMap = packageFiles.filter(
-    (pkg) =>
-      !upath.basename(pkg.packageFile).startsWith('deno.json') &&
-      pkg.deps.some((d) => d.depType === 'imports' || d.depType === 'scopes'),
-  );
-  for (const workspaceRootWithImportMap of workspaceRootsWithImportMap) {
-    for (const pkg of packageFiles) {
-      if (workspaceRootWithImportMap.packageFile === pkg.packageFile) {
-        continue;
-      }
-      pkg.deps = pkg.deps.filter(
-        (dep) => dep.depType !== 'imports' && dep.depType !== 'scopes',
-      );
     }
   }
 }
@@ -320,6 +293,5 @@ export async function postExtract(
 ): Promise<void> {
   await collectPackageJsonAsWorkspaceMember(packageFiles);
   normalizeWorkspace(packageFiles);
-  filterWorkspaceRootsWithImportMap(packageFiles);
   await applyLockedVersion(packageFiles);
 }

@@ -294,8 +294,6 @@ export type ImportMap = z.infer<typeof ImportMap>;
 // https://github.com/denoland/deno/blob/410c66ad0d1ce8a5a3b1a2f06c932fb66f25a3c6/cli/schemas/config-file.v1.json
 export const DenoPackageFile = z
   .object({
-    name: z.string().optional(),
-    version: z.string().optional(),
     lock: z
       .union([
         z.string(),
@@ -315,8 +313,6 @@ export const DenoPackageFile = z
   })
   .transform(
     ({
-      name,
-      version,
       lock,
       imports,
       scopes,
@@ -326,12 +322,10 @@ export const DenoPackageFile = z
       importMap,
       workspace,
     }) => ({
-      version,
       lock,
       importMap,
       managerData: {
         workspaces: workspace?.workspaces,
-        packageName: name,
       },
       dependencies: [
         ...imports,
@@ -380,17 +374,11 @@ export const DenoExtract = z
     const packageFile: PackageFile<DenoManagerData> = {
       deps: content.dependencies,
       packageFile: fileName,
-      packageFileVersion: content.version,
       managerData: content.managerData,
     };
 
     let importMapPackageFile: PackageFile<DenoManagerData> | null = null;
-    // importMap field is ignored when imports or scopes are specified in the config file
-    // https://github.com/denoland/deno/blob/b7061b0f64b3c79b312de5a59122b7184b2fdef2/libs/config/workspace/mod.rs#L150
-    const hasImportsOrScopes = content.dependencies.some(
-      (d) => d.depType === 'imports' || d.depType === 'scopes',
-    );
-    if (!hasImportsOrScopes && content.importMap) {
+    if (content.importMap) {
       const importMapPath = content.importMap;
       if (!importMapPath.startsWith('http')) {
         const importMap = await readLocalFile(importMapPath, 'utf8');

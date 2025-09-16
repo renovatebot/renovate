@@ -3,7 +3,6 @@ import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import {
   collectPackageJsonAsWorkspaceMember,
-  filterWorkspaceRootsWithImportMap,
   getDenoLock,
   getLockedVersion,
   normalizeWorkspace,
@@ -354,86 +353,6 @@ describe('modules/manager/deno/post', () => {
           packageFile: 'sub/nested/deno.json',
         },
       ]);
-    });
-
-    describe('filterWorkspaceRootsWithImportMap()', () => {
-      it("workspace member's imports and scopes field is ignored when importMap is specified in the root config file", () => {
-        const packageFiles = [
-          {
-            deps: [],
-            lockFiles: ['deno.lock'],
-            managerData: {
-              workspaces: ['docs'],
-            },
-            packageFile: 'deno.json',
-          },
-          {
-            deps: [
-              {
-                currentValue: '^2.1.3',
-                datasource: 'jsr',
-                depName: '@scope/dep1',
-                depType: 'imports',
-              },
-            ],
-            lockFiles: ['deno.lock'],
-            packageFile: 'import_map.json',
-          },
-          {
-            deps: [
-              {
-                currentValue: '~1.0.1',
-                datasource: 'npm',
-                depName: 'dep2',
-                depType: 'imports',
-              },
-              {
-                currentValue: '~1.0.1',
-                datasource: 'jsr',
-                depName: '@scope/dep4',
-                depType: 'scopes',
-              },
-            ],
-            lockFiles: ['deno.lock'],
-            managerData: {
-              packageName: 'docs',
-            },
-            packageFile: 'docs/deno.json',
-          },
-        ];
-
-        filterWorkspaceRootsWithImportMap(packageFiles);
-        expect(packageFiles).toStrictEqual([
-          {
-            deps: [],
-            lockFiles: ['deno.lock'],
-            managerData: {
-              workspaces: ['docs'],
-            },
-            packageFile: 'deno.json',
-          },
-          {
-            deps: [
-              {
-                currentValue: '^2.1.3',
-                datasource: 'jsr',
-                depName: '@scope/dep1',
-                depType: 'imports',
-              },
-            ],
-            lockFiles: ['deno.lock'],
-            packageFile: 'import_map.json',
-          },
-          {
-            deps: [],
-            lockFiles: ['deno.lock'],
-            managerData: {
-              packageName: 'docs',
-            },
-            packageFile: 'docs/deno.json',
-          },
-        ]);
-      });
     });
   });
 });

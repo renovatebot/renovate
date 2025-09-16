@@ -31,23 +31,6 @@ export async function extractDenoCompatiblePackageJson(
     return null;
   }
 
-  for (const dep of extracted.deps) {
-    if (!dep.currentRawValue) {
-      continue;
-    }
-
-    // https://github.com/denoland/deno_npm/blob/722fbecb5bdbd93241e5fc774cc1deaebd40365b/src/registry.rs#L289-L297
-    if (
-      dep.currentRawValue?.startsWith('https://') ||
-      dep.currentRawValue?.startsWith('http://') ||
-      dep.currentRawValue?.startsWith('git:') ||
-      dep.currentRawValue?.startsWith('github:') ||
-      dep.currentRawValue?.startsWith('git+')
-    ) {
-      dep.skipReason = 'unsupported-remote';
-    }
-  }
-
   const res: PackageFile<DenoManagerData> = {
     ...extracted,
     managerData: {

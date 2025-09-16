@@ -75,8 +75,6 @@ describe('modules/manager/deno/extract', () => {
       );
       const result = await DenoExtract.parseAsync({
         content: JSON.stringify({
-          name: 'test',
-          version: '0.0.1',
           importMap: 'import_map.json',
         }),
         fileName: 'deno.json',
@@ -86,11 +84,9 @@ describe('modules/manager/deno/extract', () => {
           deps: [],
           lockFiles: ['deno.lock'],
           managerData: {
-            packageName: 'test',
             workspaces: undefined,
           },
           packageFile: 'deno.json',
-          packageFileVersion: '0.0.1',
         },
         {
           deps: [
@@ -184,52 +180,6 @@ describe('modules/manager/deno/extract', () => {
         },
       ]);
     });
-
-    it('importMap field is ignored when imports or scopes are specified in the config file', async () => {
-      fs.readLocalFile.mockResolvedValueOnce(
-        JSON.stringify({
-          imports: {
-            dep1: 'jsr:@scope/name@3.0.0',
-          },
-        }),
-      );
-      fs.getSiblingFileName.mockReturnValueOnce('deno.lock');
-      fs.localPathIsFile.mockResolvedValue(true);
-      const result = await DenoExtract.parseAsync({
-        content: JSON.stringify({
-          name: 'test',
-          version: '0.0.1',
-          scopes: {
-            'https://deno.land/x/name/mod.ts': {
-              '@scope/name': 'jsr:@scope/name@0.2.0',
-            },
-          },
-          importMap: 'import_map.json',
-        }),
-        fileName: 'deno.json',
-      });
-      expect(result).toStrictEqual([
-        {
-          deps: [
-            {
-              currentRawValue: 'jsr:@scope/name@0.2.0',
-              currentValue: '0.2.0',
-              datasource: 'jsr',
-              depName: '@scope/name',
-              depType: 'scopes',
-              versioning: 'deno',
-            },
-          ],
-          lockFiles: ['deno.lock'],
-          managerData: {
-            packageName: 'test',
-            workspaces: undefined,
-          },
-          packageFile: 'deno.json',
-          packageFileVersion: '0.0.1',
-        },
-      ]);
-    });
   });
 
   describe('collectPackageJson()', () => {
@@ -242,8 +192,6 @@ describe('modules/manager/deno/extract', () => {
       fs.getSiblingFileName.mockReturnValueOnce('package.json');
       fs.readLocalFile.mockResolvedValueOnce(
         JSON.stringify({
-          name: 'test',
-          version: '0.0.1',
           dependencies: {
             dep1: '1.0.0',
           },
@@ -263,11 +211,9 @@ describe('modules/manager/deno/extract', () => {
           extractedConstraints: {},
           lockFiles: ['deno.lock'],
           managerData: {
-            packageName: 'test',
             workspaces: undefined,
           },
           packageFile: 'package.json',
-          packageFileVersion: '0.0.1',
         },
       ]);
     });
@@ -283,8 +229,6 @@ describe('modules/manager/deno/extract', () => {
     it('complex config with imports, scopes, tasks and lint', async () => {
       fs.readLocalFile.mockResolvedValueOnce(
         JSON.stringify({
-          name: 'test',
-          version: '0.0.1',
           imports: {
             dep1: 'npm:dep1@1.0.0',
             dep10: 'https://deno.land/x/dep10@v0.1.12/mod.ts',
@@ -458,11 +402,9 @@ describe('modules/manager/deno/extract', () => {
           ],
           lockFiles: ['deno.lock'],
           managerData: {
-            packageName: 'test',
             workspaces: undefined,
           },
           packageFile: 'deno.jsonc',
-          packageFileVersion: '0.0.1',
         },
       ]);
     });
@@ -540,11 +482,13 @@ describe('modules/manager/deno/extract', () => {
               },
             ],
             managerData: {
+              packageName: 'root',
               workspaces: ['sub'],
             },
             extractedConstraints: {},
             lockFiles: ['deno.lock'],
             packageFile: 'package.json',
+            packageFileVersion: '0.0.1',
           },
           {
             deps: [
