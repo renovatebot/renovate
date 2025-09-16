@@ -45,6 +45,20 @@ export const presets: Record<string, Preset> = {
     ],
     description: 'Update `_VERSION` variables in Bitbucket Pipelines',
   },
+  devEnginesRuntimeVersions: {
+    customManagers: [
+      {
+        customType: 'jsonata',
+        datasourceTemplate: 'npm',
+        fileFormat: 'json',
+        managerFilePatterns: ['/(^|/)package.json$/'],
+        matchStrings: [
+          'devEngines.runtime.{ "depName": name, "currentValue": version, "depType": "devDependencies" }',
+        ],
+      },
+    ],
+    description: 'Update `devEngines` runtime version in `package.json` files.',
+  },
   dockerfileVersions: {
     customManagers: [
       {

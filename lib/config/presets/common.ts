@@ -37,6 +37,8 @@ export const removedPresets: Record<string, string | null> = {
   'regexManagers:biomeVersions': 'customManagers:biomeVersions',
   'regexManagers:bitbucketPipelinesVersions':
     'customManagers:bitbucketPipelinesVersions',
+  'regexManagers:devEnginesRuntimeVersions':
+    'customManagers:devEnginesRuntimeVersions',
   'regexManagers:dockerfileVersions': 'customManagers:dockerfileVersions',
   'regexManagers:githubActionsVersions': 'customManagers:githubActionsVersions',
   'regexManagers:gitlabPipelineVersions':
