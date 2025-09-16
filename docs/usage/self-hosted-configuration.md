@@ -349,6 +349,7 @@ Other valid cache namespaces are as follows:
 - `changelog-github-release`
 - `changelog-gitlab-notes@v2`
 - `changelog-gitlab-release`
+- `datasource-azure-tags`
 - `datasource-artifactory`
 - `datasource-aws-machine-image`
 - `datasource-aws-rds`
