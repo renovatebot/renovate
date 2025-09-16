@@ -64,10 +64,6 @@ describe('util/common', () => {
 
     it('uses host rules', () => {
       hostRules.add({
-        hostType: 'azure-changelog',
-        matchHost: 'az.example.com',
-      });
-      hostRules.add({
         hostType: 'bitbucket',
         matchHost: 'bb.example.com',
       });
@@ -91,9 +87,6 @@ describe('util/common', () => {
         hostType: 'unknown',
         matchHost: 'f.example.com',
       });
-      expect(detectPlatform('https://az.example.com/chalk/chalk')).toBe(
-        'azure',
-      );
       expect(detectPlatform('https://bb.example.com/chalk/chalk')).toBe(
         'bitbucket',
       );
