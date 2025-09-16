@@ -508,7 +508,7 @@ describe('modules/manager/nix/extract', () => {
     it('supports input with ref and rev', async () => {
       const flakeNix = codeBlock`{
         inputs = {
-          cachix.url = "git+https://github.com/cachix/cachix.git?ref=refs/tags/v1.7.2&rev=be97b37989f11b724197b5f4c7ffd78f12c8c4bf";
+          cachix.url = "git+ssh://github.com/cachix/cachix.git?ref=refs/tags/v1.7.2&rev=be97b37989f11b724197b5f4c7ffd78f12c8c4bf";
         };
       }`;
       const flakeLock = codeBlock`{
@@ -590,6 +590,75 @@ describe('modules/manager/nix/extract', () => {
             depName: 'cachix',
             lockedVersion: 'be97b37989f11b724197b5f4c7ffd78f12c8c4bf',
             packageName: 'https://github.com/cachix/cachix.git',
+          },
+        ],
+      });
+    });
+
+    it('supports shallow clone', async () => {
+      const flakeNix = codeBlock`{
+        inputs = {
+          nixpkgs-https.url = "git+https://github.com/NixOS/nixpkgs.git?rev=64334fda8d632bec7c80c9bef668ad9633a8dd64&depth=1";
+          nixpkgs-ssh.url = "git+ssh://git@github.com/NixOS/nixpkgs.git?rev=64334fda8d632bec7c80c9bef668ad9633a8dd64&depth=1";
+        };
+      }`;
+      const flakeLock = codeBlock`{
+        "nodes": {
+          "nixpkgs-https": {
+            "locked": {
+              "lastModified": 1758007619,
+              "narHash": "sha256-ADv63t4pEj5zhTAggwzyCbSpQosDtxKy0qg9cB9a1Eo=",
+              "ref": "refs/heads/master",
+              "rev": "64334fda8d632bec7c80c9bef668ad9633a8dd64",
+              "revCount": 862499,
+              "type": "git",
+              "url": "https://github.com/NixOS/nixpkgs.git?depth=1"
+            },
+            "original": {
+              "rev": "64334fda8d632bec7c80c9bef668ad9633a8dd64",
+              "type": "git",
+              "url": "https://github.com/NixOS/nixpkgs.git?depth=1"
+            }
+          },
+          "nixpkgs-ssh": {
+            "locked": {
+              "lastModified": 1758007619,
+              "narHash": "sha256-ADv63t4pEj5zhTAggwzyCbSpQosDtxKy0qg9cB9a1Eo=",
+              "rev": "64334fda8d632bec7c80c9bef668ad9633a8dd64",
+              "revCount": 862499,
+              "type": "git",
+              "url": "ssh://git@github.com/NixOS/nixpkgs.git?depth=1"
+            },
+            "original": {
+              "rev": "64334fda8d632bec7c80c9bef668ad9633a8dd64",
+              "type": "git",
+              "url": "ssh://git@github.com/NixOS/nixpkgs.git?depth=1"
+            }
+          },
+          "root": {
+            "inputs": {
+              "nixpkgs-https": "nixpkgs-https",
+              "nixpkgs-ssh": "nixpkgs-ssh"
+            }
+          }
+        },
+        "root": "root",
+        "version": 7
+      }`;
+      fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+      expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
+        deps: [
+          {
+            currentDigest: '64334fda8d632bec7c80c9bef668ad9633a8dd64',
+            datasource: GitRefsDatasource.id,
+            depName: 'nixpkgs-https',
+            packageName: 'https://github.com/NixOS/nixpkgs.git',
+          },
+          {
+            currentDigest: '64334fda8d632bec7c80c9bef668ad9633a8dd64',
+            datasource: GitRefsDatasource.id,
+            depName: 'nixpkgs-ssh',
+            packageName: 'ssh://git@github.com/NixOS/nixpkgs.git',
           },
         ],
       });

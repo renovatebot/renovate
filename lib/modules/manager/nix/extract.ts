@@ -9,6 +9,7 @@ import type {
   PackageFileContent,
 } from '../types';
 import { NixFlakeLock } from './schema';
+import { parseGitUrl } from '../../../util/git/url';
 
 // as documented upstream
 // https://github.com/NixOS/nix/blob/master/doc/manual/source/protocols/tarball-fetcher.md#gitea-and-forgejo-support
@@ -145,7 +146,17 @@ export async function extractPackageFile(
 
     switch (flakeLocked.type) {
       case 'git':
-        dep.packageName = flakeOriginal.url;
+        const url = parseGitUrl(flakeOriginal.url);
+
+        switch (url.protocol) {
+          case 'ssh':
+            dep.packageName = url.toString('git+ssh').replace(/^git\+/, '');
+            break;
+
+          default:
+            dep.packageName = url.toString();
+            break;
+        }
         break;
 
       case 'github':
