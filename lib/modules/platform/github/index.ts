@@ -759,7 +759,9 @@ async function checkRulesetsForForceRebase(
 ): Promise<boolean> {
   try {
     const rulesets = await getBranchRulesets(branchName);
-    logger.debug(`Found ${rulesets.length} rulesets for branch ${branchName}`);
+    logger.trace(
+      `Ruleset: Found ${rulesets.length} rulesets for branch ${branchName}`,
+    );
 
     return rulesets.some((rule) => {
       if (rule.type === 'non_fast_forward') {
@@ -790,7 +792,7 @@ async function checkBranchProtectionForForceRebase(
 ): Promise<boolean> {
   try {
     const branchProtection = await getBranchProtection(branchName);
-    logger.debug(`Found branch protection for branch ${branchName}`);
+    logger.trace(`Found branch protection for branch ${branchName}`);
 
     const strictStatusChecks = branchProtection?.required_status_checks?.strict;
     if (strictStatusChecks) {
