@@ -145,20 +145,10 @@ export async function extractPackageFile(
     }
 
     switch (flakeLocked.type) {
-      case 'git': {
+      case 'git':
         const url = parseGitUrl(flakeOriginal.url!);
-
-        switch (url.protocol) {
-          case 'ssh':
-            dep.packageName = url.toString('git+ssh').replace(/^git\+/, '');
-            break;
-
-          default:
-            dep.packageName = url.toString();
-            break;
-        }
+        dep.packageName = url.toString();
         break;
-      }
 
       case 'github':
         // set to nixpkgs if it is a nixpkgs reference
