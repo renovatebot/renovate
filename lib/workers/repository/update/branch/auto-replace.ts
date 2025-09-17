@@ -224,11 +224,29 @@ export async function doAutoReplace(
   if (reuseExistingBranch) {
     return await checkExistingBranch(upgrade, existingContent);
   }
+
+  // check if current !== newString and return 1 if it does or 0 if it doesn't
+  const updatedToInt = (
+    current: string | undefined,
+    newString: string | undefined,
+  ): number => (current && newString && newString !== current ? 1 : 0);
+  // count how many strings need to be updated
+  const changedCount =
+    updatedToInt(depName, newName) +
+    updatedToInt(currentValue, newValue) +
+    updatedToInt(currentDigest, newDigest) +
+    updatedToInt(currentDigestShort, newDigest);
+  logger.debug(
+    { packageFile, depName, changedCount },
+    'N values changed and need to be updated',
+  );
+
   const replaceWithoutReplaceString =
-    is.string(newName) &&
-    newName !== depName &&
-    (is.undefined(upgrade.replaceString) ||
-      !upgrade.replaceString?.includes(depName!));
+    (is.string(newName) &&
+      newName !== depName &&
+      (is.undefined(upgrade.replaceString) ||
+        !upgrade.replaceString?.includes(depName!))) ||
+    (is.undefined(upgrade.replaceString) && changedCount > 1);
   const replaceString = upgrade.replaceString ?? currentValue ?? currentDigest;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex: number;
