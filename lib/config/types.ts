@@ -175,6 +175,7 @@ export interface RepoGlobalConfig {
   s3Endpoint?: string;
   s3PathStyle?: boolean;
   cachePrivatePackages?: boolean;
+  ignorePrAuthor?: boolean;
 }
 
 export interface LegacyAdminConfig {
@@ -198,6 +199,7 @@ export type ExecutionMode = 'branch' | 'update';
 
 export interface PostUpgradeTasks {
   commands?: string[];
+  workingDirTemplate?: string;
   dataFileTemplate?: string;
   fileFilters?: string[];
   executionMode: ExecutionMode;
