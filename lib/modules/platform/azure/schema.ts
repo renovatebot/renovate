@@ -17,26 +17,3 @@ const _WrappedException: z.ZodSchema<_WrappedException> = z.lazy(() =>
 );
 
 export const WrappedException = Json.pipe(_WrappedException);
-
-export const ItemResponse = z.object({
-  objectId: z.string(),
-  path: z.string(),
-});
-
-export const AzureTreeNode = z.object({
-  objectId: z.string(),
-  relativePath: z.string(),
-  gitObjectType: z.union([z.literal('tree'), z.literal('blob')]),
-});
-
-export type AzureTreeNode = z.infer<typeof AzureTreeNode>;
-
-export const AzureTree = z.object({
-  objectId: z.string(),
-  treeEntries: z.array(AzureTreeNode),
-});
-
-export const AzureTag = z.object({
-  name: z.string(),
-  value: z.string(),
-});

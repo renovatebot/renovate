@@ -1,12 +1,9 @@
 import path from 'node:path';
+import type { GitTreeEntryRef } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import { GitObjectType } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger';
-import type { AzureTreeNode } from '../../../../../../modules/platform/azure/schema';
-import {
-  AzureTree,
-  ItemResponse,
-} from '../../../../../../modules/platform/azure/schema';
-import { AzureHttp } from '../../../../../../util/http/azure';
+import * as azureHelper from '../../../../../../modules/platform/azure/azure-helper';
 import { ensureTrailingSlash } from '../../../../../../util/url';
 import { compareChangelogFilePath } from '../common';
 import type {
@@ -17,7 +14,6 @@ import type {
 } from '../types';
 
 export const id = 'azure-changelog';
-const http = new AzureHttp(id);
 
 export function getReleaseList(
   _project: ChangeLogProject,
@@ -36,34 +32,30 @@ export async function getReleaseNotesMd(
   logger.trace('azure.getReleaseNotesMd()');
 
   const urlEncodedRepo = encodeURIComponent(repository);
-  const apiPrefix = `${ensureTrailingSlash(
-    apiBaseUrl,
-  )}git/repositories/${urlEncodedRepo}/`;
 
-  const sourceDirectoryId = (
-    await http.getJson(
-      `${apiPrefix}items?path=${sourceDirectory}&api-version=7.0`,
-      {
-        paginate: false,
-      },
-      ItemResponse,
-    )
-  ).body.objectId;
+  const sourceDirectoryId = await azureHelper.getItem(
+    urlEncodedRepo,
+    sourceDirectory,
+  );
 
-  const tree = (
-    await http.getJson(
-      `${apiPrefix}trees/${sourceDirectoryId}?api-version=7.0`,
-      {},
-      AzureTree,
-    )
-  ).body.treeEntries;
+  const tree = await azureHelper.getTrees(
+    urlEncodedRepo,
+    sourceDirectoryId.objectId!,
+  );
 
-  const allFiles = tree.filter((f) => f.gitObjectType === 'blob');
+  const allFiles = tree.treeEntries?.filter(
+    (f) => f.gitObjectType === GitObjectType.Blob,
+  );
 
-  let files: AzureTreeNode[] = [];
+  if (!allFiles?.length) {
+    logger.trace('no files found in repository');
+    return null;
+  }
+
+  let files: GitTreeEntryRef[] = [];
   if (!files.length) {
     files = allFiles.filter((f) =>
-      changelogFilenameRegex.test(path.basename(f.relativePath)),
+      changelogFilenameRegex.test(path.basename(f.relativePath ?? '')),
     );
   }
 
@@ -73,15 +65,22 @@ export async function getReleaseNotesMd(
   }
 
   let changelogFile = files
-    .sort((a, b) => compareChangelogFilePath(a.relativePath, b.relativePath))
+    .sort((a, b) => compareChangelogFilePath(a.relativePath!, b.relativePath!))
     .shift()?.relativePath;
 
   changelogFile = `${sourceDirectory ? ensureTrailingSlash(sourceDirectory) : ''}${changelogFile}`;
 
-  const fileRes = await http.get(
-    `${apiPrefix}items?path=${changelogFile}&includeContent=true&api-version=7.0`,
+  const fileRes = await azureHelper.getItem(
+    urlEncodedRepo,
+    changelogFile,
+    true,
   );
 
-  const changelogMd = fileRes.body.toString('utf8') + '\n#\n##';
+  if (!fileRes?.content) {
+    logger.trace('no changelog file found');
+    return null;
+  }
+
+  const changelogMd = fileRes.content + '\n#\n##';
   return { changelogFile, changelogMd };
 }
