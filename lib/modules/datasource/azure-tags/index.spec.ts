@@ -29,5 +29,18 @@ describe('modules/datasource/azure-tags/index', () => {
         ],
       });
     });
+
+    it('uses empty string fallback if name is undefined', async () => {
+      vi.spyOn(azureHelper, 'getTags').mockResolvedValue([{ name: undefined }]);
+      const result = await azureTags.getReleases({
+        registryUrl: 'https://dev.azure.com/organization/',
+        packageName: 'repo',
+      });
+      expect(result).toEqual({
+        sourceUrl: 'https://dev.azure.com/organization/_git/repo',
+        registryUrl: 'https://dev.azure.com/organization/',
+        releases: [{ version: '', gitRef: '', releaseTimestamp: null }],
+      });
+    });
   });
 });
