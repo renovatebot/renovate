@@ -1,6 +1,7 @@
 // TODO #22198
 import { mergeChildConfig } from '../../../config';
 import { GlobalConfig } from '../../../config/global';
+import { migrateAndValidate } from '../../../config/migrate-validate';
 import { resolveConfigPresets } from '../../../config/presets';
 import type { RenovateConfig } from '../../../config/types';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
@@ -58,6 +59,17 @@ async function getBaseBranchConfig(
       error.validationSource = 'config';
       error.validationError = 'Error fetching config file';
       error.validationMessage = `Error fetching config file \`${configFileName}\` from branch \`${baseBranch}\``;
+      throw error;
+    }
+
+    baseBranchConfig = await migrateAndValidate(config, baseBranchConfig);
+    if (baseBranchConfig.errors?.length) {
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationSource = configFileName;
+      error.validationError = `The renovate configuration file of branch ${baseBranch} contains some invalid settings`;
+      error.validationMessage = baseBranchConfig.errors
+        .map((e) => e.message)
+        .join(', ');
       throw error;
     }
 

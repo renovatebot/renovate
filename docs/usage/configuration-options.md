@@ -1419,6 +1419,33 @@ If you want to approve _specific_ packages, set `dependencyDashboardApproval` to
 
 You can configure this to `true` if you prefer Renovate to close an existing Dependency Dashboard whenever there are no outstanding PRs left.
 
+## dependencyDashboardCategory
+
+You can use this to categorize updates on the Dependency Dashboard.
+For example, to visually distinguish between production and dev updates, or to split between teams or logical parts of a monorepo.
+In practice this means it introduces an extra level of hierarchy/heading in the Dashboard's markdown.
+
+To create a category for all CI/CD updates, you can configure a package rule like this:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchCategories": ["cd", "ci"],
+      "dependencyDashboardCategory": ":hammer_and_wrench: Continuous Integration & Continuous Deployment"
+    }
+  ]
+}
+```
+
+When you configure categories, updates that do not match any of the configured categories will be grouped under the "Other" category.
+
+Some sections in the Dependency Dashboard also contain an action that applies to all updates in that section, such as to approve or rebase all updates.
+If there are categories in that section, the action will be put in an extra "All" category at the end of the section.
+This is to explicitly clarify that the action applies to all updates in the section, not to just a specific category.
+
+The Dependency Dashboard categories are only used to visually organize updates within the Dependency Dashboard issue. They do not impact grouping of updates into a single update like how e.g. `branchName` and `groupName` do.
+
 ## dependencyDashboardFooter
 
 ## dependencyDashboardHeader
@@ -2376,16 +2403,6 @@ If you are extending from the popular `config:recommended` preset then it adds i
 Set this to `true` if running plugins causes problems.
 Applicable for Composer only for now.
 
-## ignorePrAuthor
-
-This is usually needed if someone needs to migrate bot accounts, including from the Mend Renovate App to self-hosted.
-An additional use case is for GitLab users of project or group access tokens who need to rotate them.
-
-If `ignorePrAuthor` is configured to true, it means Renovate will fetch the entire list of repository PRs instead of optimizing to fetch only those PRs which it created itself.
-You should only want to enable this if you are changing the bot account (e.g. from `@old-bot` to `@new-bot`) and want `@new-bot` to find and update any existing PRs created by `@old-bot`.
-
-Setting this field to `true` in Github or GitLab will also mean that all Issues will be fetched instead of only those by the bot itself.
-
 ## ignorePresets
 
 Use this if you are extending a complex preset but don't want to use every "sub preset" that it includes.
@@ -2704,7 +2721,7 @@ When the time passed since the release is _less_ than the set `minimumReleaseAge
 After enough days have passed: Renovate replaces the "pending" status with a "passing" status check.
 
 The datasource that Renovate uses must have a release timestamp for the `minimumReleaseAge` config option to work.
-Some datasources may have a release timestamp, but in a format that's Renovate does not support.
+Some datasources may have a release timestamp, but in a format Renovate does not support.
 In those cases a feature request needs to be implemented.
 
 <!-- prettier-ignore -->
@@ -3816,6 +3833,7 @@ Table with options:
 | `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                          |
 | `kustomizeInflateHelmCharts` | Inflate updated helm charts referenced in the kustomization.                                                                                               |
 | `npmDedupe`                  | Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.                                       |
+| `npmInstallTwice`            | Run `npm install` commands _twice_ to work around bugs where `npm` generates invalid lock files if run only once                                           |
 | `pnpmDedupe`                 | Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.                                                                                         |
 | `yarnDedupeFewer`            | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
 | `yarnDedupeHighest`          | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
@@ -3893,6 +3911,20 @@ Dotfiles are included.
 
 Optional field which defaults to any non-ignored file in the repo (`**/*` glob pattern).
 Specify a custom value for this if you wish to exclude certain files which are modified by your `postUpgradeTasks` and you don't want committed.
+
+### workingDirTemplate
+
+A template describing the working directory in which the commands should be executed, relative to the repository root. If the template evaluates to a false value, then the command will be executed from the root of the repository.
+Example:
+
+```json
+{
+  "postUpgradeTasks": {
+    "commands": ["my-script.py"],
+    "workingDirTemplate": "{{{packageFileDir}}}"
+  }
+}
+```
 
 ## prBodyColumns
 
@@ -4253,6 +4285,12 @@ For `npm` manager when `replacementApproach=alias` then instead of replacing `"f
 
 Similar to `ignoreUnstable`, this option controls whether to update to versions that are greater than the version tagged as `latest` in the repository.
 By default, `renovate` will update to a version greater than `latest` only if the current version is itself past latest.
+
+<!-- prettier-ignore -->
+!!! note
+    By default, respectLatest will be set to `false` for Maven results if a `latest` tag is found.
+    This is because many Maven registries don't have a reliable `latest` tag - it just means whatever was last published.
+    You need to override this to `respectLatest=true` in `packageRules` in order to use it.
 
 ## reviewers
 
@@ -4647,7 +4685,7 @@ In the below `renovate.json` extract example, Renovate will use the `docker` ver
 {
   "packageRules": [
     {
-      "matchPackageFileNames": [".gitlab-ci.yml"],
+      "matchFileNames": [".gitlab-ci.yml"],
       "versioning": "docker"
     }
   ]
@@ -4679,7 +4717,7 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
   "vulnerabilityAlerts": {
     "labels": ["security"],
     "automerge": true,
-    "assignees": ["@rarkins"]
+    "assignees": ["@renovate-tests"]
   }
 }
 ```

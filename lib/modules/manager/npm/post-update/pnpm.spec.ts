@@ -555,6 +555,32 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     ]);
   });
 
+  it('allows pnpmfile even if ignoring scripts', async () => {
+    GlobalConfig.set({
+      localDir: '',
+      cacheDir: '/tmp',
+      binarySource: 'install',
+      allowScripts: true,
+    });
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const res = await pnpmHelper.generateLockFile(
+      'some-dir',
+      {},
+      { ...config, constraints: { pnpm: '6.0.0' }, ignoreScripts: true },
+      upgrades,
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0' },
+      { cmd: 'install-tool pnpm 6.0.0' },
+      {
+        cmd: 'pnpm install --lockfile-only --ignore-scripts',
+      },
+    ]);
+  });
+
   describe('getConstraintsFromLockFile()', () => {
     it('returns null if no lock file', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);

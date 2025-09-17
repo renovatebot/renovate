@@ -2331,12 +2331,11 @@ describe('modules/platform/forgejo/index', () => {
         .get('/repos/some/repo/issues')
         .query({ state: 'all', type: 'issues' })
         .reply(200, mockIssues)
-        .patch('/repos/some/repo/issues/2', {
+        .post('/repos/some/repo/issues', {
           body: closedIssue.body,
-          state: closedIssue.state,
-          title: 'closed-issue',
+          title: closedIssue.title,
         })
-        .reply(200, closedIssue);
+        .reply(200, { number: 42 });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2347,7 +2346,7 @@ describe('modules/platform/forgejo/index', () => {
         once: false,
       });
 
-      expect(res).toBe('updated');
+      expect(res).toBe('created');
     });
 
     it('should not update labels when not necessary', async () => {
@@ -2898,12 +2897,15 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .post('/repos/some/repo/pulls/1/requested_reviewers', {
           reviewers: ['me', 'you'],
+          team_reviewers: ['org/team'],
         })
         .reply(200);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
-      await expect(forgejo.addReviewers(1, ['me', 'you'])).toResolve();
+      await expect(
+        forgejo.addReviewers(1, ['me', 'you', 'org/team']),
+      ).toResolve();
 
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });

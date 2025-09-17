@@ -16,11 +16,13 @@ import type {
 import { PdmLockfile, type PyProject } from '../schema';
 import type { Pep621ManagerData } from '../types';
 import { depTypes } from '../utils';
-import type { PyProjectProcessor } from './types';
+import { BasePyProjectProcessor } from './abstract';
 
 const pdmUpdateCMD = 'pdm update --no-sync --update-eager';
 
-export class PdmProcessor implements PyProjectProcessor {
+export class PdmProcessor extends BasePyProjectProcessor {
+  override lockfileName = 'pdm.lock';
+
   process(
     project: PyProject,
     deps: PackageDependency[],
@@ -82,7 +84,7 @@ export class PdmProcessor implements PyProjectProcessor {
     const { isLockFileMaintenance } = config;
 
     // abort if no lockfile is defined
-    const lockFileName = getSiblingFileName(packageFileName, 'pdm.lock');
+    const lockFileName = getSiblingFileName(packageFileName, this.lockfileName);
     try {
       const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
       if (!existingLockFileContent) {
@@ -138,7 +140,6 @@ export class PdmProcessor implements PyProjectProcessor {
 
       return fileChanges.length ? fileChanges : null;
     } catch (err) {
-      // istanbul ignore if
       if (err.message === TEMPORARY_ERROR) {
         throw err;
       }

@@ -8,6 +8,7 @@ import { parseUrl } from '../../../util/url';
 import { id as semverId } from '../../versioning/semver';
 import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
+import { ForgejoTagsDatasource } from '../forgejo-tags';
 import { GitTagsDatasource } from '../git-tags';
 import { GiteaTagsDatasource } from '../gitea-tags';
 import { GithubTagsDatasource } from '../github-tags';
@@ -97,6 +98,9 @@ export class GoDatasource extends Datasource {
         : undefined;
 
     switch (source.datasource) {
+      case ForgejoTagsDatasource.id: {
+        return this.direct.forgejo.getDigest(source, tag);
+      }
       case GitTagsDatasource.id: {
         return this.direct.git.getDigest(source, tag);
       }
@@ -112,7 +116,7 @@ export class GoDatasource extends Datasource {
       case GitlabTagsDatasource.id: {
         return this.direct.gitlab.getDigest(source, tag);
       }
-      /* istanbul ignore next: can never happen, makes lint happy */
+      /* v8 ignore next 3: can never happen, makes lint happy */
       default: {
         return null;
       }
@@ -121,7 +125,7 @@ export class GoDatasource extends Datasource {
 }
 
 const env = getEnv();
-/* v8 ignore next 3 -- hard to test */
+/* v8 ignore start -- hard to test */
 if (is.string(env.GOPROXY)) {
   const uri = parseUrl(env.GOPROXY);
   if (uri?.password) {
@@ -130,3 +134,4 @@ if (is.string(env.GOPROXY)) {
     addSecretForSanitizing(uri.username, 'global');
   }
 }
+/* v8 ignore stop -- hard to test */

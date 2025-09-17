@@ -41,7 +41,7 @@ describe('util/markdown', () => {
         { repository: 'some/repo' },
       );
       expect(res.toString()).toEqual(
-        `(https://company.gitlab.local/shared/scanner/-/merge_requests/1177)\n`,
+        `(<https://company.gitlab.local/shared/scanner/-/merge_requests/1177>)\n`,
       );
     });
 
