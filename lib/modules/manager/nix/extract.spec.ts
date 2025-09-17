@@ -544,7 +544,7 @@ describe('modules/manager/nix/extract', () => {
           {
             datasource: GitRefsDatasource.id,
             depName: 'cachix',
-            packageName: 'ssh://git@github.com/cachix/cachix.git',
+            packageName: 'git@github.com:cachix/cachix.git',
           },
         ],
       });
@@ -658,7 +658,7 @@ describe('modules/manager/nix/extract', () => {
             currentDigest: '64334fda8d632bec7c80c9bef668ad9633a8dd64',
             datasource: GitRefsDatasource.id,
             depName: 'nixpkgs-ssh',
-            packageName: 'ssh://git@github.com/NixOS/nixpkgs.git',
+            packageName: 'git@github.com:NixOS/nixpkgs.git',
           },
         ],
       });
