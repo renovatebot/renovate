@@ -29,8 +29,8 @@ process.env.CONTAINERBASE = 'true';
 
 const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
-const updateInputCmd = `nix --extra-experimental-features 'nix-command flakes' flake lock --update-input nixpkgs`;
-const updateInputTokenCmd = `nix --extra-experimental-features 'nix-command flakes' --extra-access-tokens github.com=token flake lock --update-input nixpkgs`;
+const updateInputCmd = `nix --extra-experimental-features 'nix-command flakes' flake update nixpkgs`;
+const updateInputTokenCmd = `nix --extra-experimental-features 'nix-command flakes' --extra-access-tokens github.com=token flake update nixpkgs`;
 const lockfileMaintenanceCmd = `nix --extra-experimental-features 'nix-command flakes' flake update`;
 
 describe('modules/manager/nix/artifacts', () => {
