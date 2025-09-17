@@ -315,21 +315,6 @@ describe('modules/platform/bitbucket/index', () => {
               state: 'SUCCESSFUL',
             },
           ],
-        })
-        .get(
-          '/2.0/repositories/some/repo/commit/main_hash/statuses?pagelen=100',
-        )
-        .reply(200, {
-          values: [
-            {
-              key: 'Some other status',
-              state: 'SUCCESSFUL',
-            },
-            {
-              key: 'Mend.io Dashboard',
-              state: 'SUCCESSFUL',
-            },
-          ],
         });
 
       expect(
@@ -382,6 +367,132 @@ describe('modules/platform/bitbucket/index', () => {
         isFork: false,
         repoFingerprint: expect.any(String),
       });
+    });
+
+    it('enabled: should create status with correct URL format', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/test/project')
+        .reply(200, {
+          mainbranch: { name: 'develop' },
+          uuid: '456',
+          full_name: 'test/project',
+        })
+        .get('/2.0/repositories/test/project/refs/branches/develop')
+        .reply(200, {
+          name: 'develop',
+          target: {
+            hash: 'develop_hash',
+          },
+        })
+        .get(
+          '/2.0/repositories/test/project/commit/develop_hash/statuses?pagelen=100',
+        )
+        .reply(200, {
+          values: [],
+        })
+        .post(
+          '/2.0/repositories/test/project/commit/develop_hash/statuses/build',
+          {
+            name: 'Mend.io Dashboard',
+            state: 'SUCCESSFUL',
+            key: 'Mend.io Dashboard',
+            description: '',
+            url: 'https://developer.mend.io/bitbucket/test/project',
+          },
+        )
+        .reply(200);
+
+      const result = await bitbucket.initRepo({
+        repository: 'test/project',
+        bbMendAppDashboardStatus: true,
+      });
+
+      expect(result).toMatchObject({
+        defaultBranch: 'develop',
+        isFork: false,
+        repoFingerprint: expect.any(String),
+      });
+    });
+
+    it('enabled: should not create status when getBranchStatusCheck returns existing status', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, {
+          mainbranch: { name: 'master' },
+          uuid: '123',
+          full_name: 'some/repo',
+        })
+        .get('/2.0/repositories/some/repo/refs/branches/master')
+        .reply(200, {
+          name: 'master',
+          target: {
+            hash: 'master_hash',
+          },
+        })
+        .get(
+          '/2.0/repositories/some/repo/commit/master_hash/statuses?pagelen=100',
+        )
+        .reply(200, {
+          values: [
+            {
+              key: 'Mend.io Dashboard',
+              state: 'SUCCESSFUL',
+            },
+          ],
+        });
+
+      const result = await bitbucket.initRepo({
+        repository: 'some/repo',
+        bbMendAppDashboardStatus: true,
+      });
+
+      expect(result).toMatchObject({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: expect.any(String),
+      });
+
+      // Verify no POST request was made to create status (since it already exists)
+      const trace = httpMock.getTrace();
+      const postRequests = trace.filter((req) => req.method === 'POST');
+      expect(postRequests).toHaveLength(0);
+    });
+
+    it('enabled: should log debug message when creating new status', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, {
+          mainbranch: { name: 'main' },
+          uuid: '123',
+          full_name: 'some/repo',
+        })
+        .get('/2.0/repositories/some/repo/refs/branches/main')
+        .reply(200, {
+          name: 'main',
+          target: {
+            hash: 'main_hash',
+          },
+        })
+        .get(
+          '/2.0/repositories/some/repo/commit/main_hash/statuses?pagelen=100',
+        )
+        .reply(200, {
+          values: [],
+        })
+        .post('/2.0/repositories/some/repo/commit/main_hash/statuses/build')
+        .reply(200);
+
+      await bitbucket.initRepo({
+        repository: 'some/repo',
+        bbMendAppDashboardStatus: true,
+      });
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Creating branch status for Mend.io Dashboard',
+      );
     });
   });
 
