@@ -993,6 +993,38 @@ describe('modules/platform/github/index', () => {
       expect(res).toBeTrue();
     });
 
+    it('should continue if no expected rulesets have been found', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(200, [
+          {
+            type: 'deletion',
+          },
+        ]);
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/main/protection')
+        .reply(200, {
+          required_status_checks: {
+            strict: true,
+          },
+        });
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeTrue();
+    });
+
+    it('should abort and throws on internal error', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(500);
+
+      await expect(github.getBranchForceRebase('main')).rejects.toThrow(
+        ExternalHostError,
+      );
+    });
+
     it('should fallback to legacy branch protection when rulesets not found', async () => {
       httpMock
         .scope(githubApiHost)
