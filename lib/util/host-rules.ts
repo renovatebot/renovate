@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { logger } from '../logger';
 import type { CombinedHostRule, HostRule } from '../types';
 import { clone } from './clone';
-import { regEx } from './regex';
 import * as sanitize from './sanitize';
 import { toBase64 } from './string';
 import { isHttpUrl, massageHostUrl, parseUrl } from './url';
