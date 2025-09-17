@@ -39,12 +39,14 @@ export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
   return result;
 }
 
-const jwtRegex = regEx('^[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]*$');
-
 export function add(params: HostRule): void {
   const rule = migrateRule(params);
 
-  const confidentialFields: (keyof HostRule)[] = ['password', 'token'];
+  const confidentialFields: (keyof HostRule)[] = [
+    'password',
+    'token',
+    'username',
+  ];
   if (rule.matchHost) {
     rule.matchHost = massageHostUrl(rule.matchHost);
     const parsedUrl = parseUrl(rule.matchHost);
@@ -66,16 +68,6 @@ export function add(params: HostRule): void {
       sanitize.addSecretForSanitizing(secret);
     }
   });
-
-  // Sanitize username if it looks like a JWT token
-  if (
-    is.string(rule.username) &&
-    rule.username.length > 60 &&
-    jwtRegex.test(rule.username)
-  ) {
-    sanitize.addSecretForSanitizing(rule.username);
-  }
-
   if (rule.username && rule.password) {
     sanitize.addSecretForSanitizing(
       toBase64(`${rule.username}:${rule.password}`),
