@@ -1036,6 +1036,10 @@ describe('modules/platform/github/index', () => {
     it('should return cached result on subsequent calls', async () => {
       httpMock
         .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(404);
+      httpMock
+        .scope(githubApiHost)
         .get('/repos/undefined/branches/main/protection')
         .reply(200, {
           required_status_checks: {
@@ -1055,6 +1059,10 @@ describe('modules/platform/github/index', () => {
     });
 
     it('should return cached false result on subsequent calls', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/dev')
+        .reply(404);
       httpMock
         .scope(githubApiHost)
         .get('/repos/undefined/branches/dev/protection')
