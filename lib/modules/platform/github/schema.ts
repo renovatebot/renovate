@@ -113,6 +113,10 @@ const GithubRulesetRule = z.discriminatedUnion('type', [
       strict_required_status_checks_policy: z.boolean().optional(),
     }),
   }),
+  // prevents deletion
+  z.object({
+    type: z.literal('deletion'),
+  }),
 ]);
 
 export const GithubBranchRulesets = LooseArray(GithubRulesetRule);
