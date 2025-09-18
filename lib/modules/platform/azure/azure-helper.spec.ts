@@ -469,7 +469,7 @@ describe('modules/platform/azure/azure-helper', () => {
           }) as any,
       );
       const res = await azureHelper.getTags('123');
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual([{ name: 'refs/tags/1.0.0' }]);
     });
   });
 
@@ -482,7 +482,7 @@ describe('modules/platform/azure/azure-helper', () => {
           }) as any,
       );
       const res = await azureHelper.getItem('123', 'path', true);
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({ objectId: '132' });
     });
   });
 
@@ -495,7 +495,7 @@ describe('modules/platform/azure/azure-helper', () => {
           }) as any,
       );
       const res = await azureHelper.getTrees('123', 'sha1');
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({ objectId: '132' });
     });
   });
 });

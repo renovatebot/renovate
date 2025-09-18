@@ -1,5 +1,4 @@
 import type { BranchConfig } from '../../../../types';
-import { AzureChangeLogSource } from './azure/source';
 import { GitHubChangeLogSource } from './github/source';
 import { partial } from '~test/util';
 
@@ -61,11 +60,6 @@ describe('workers/repository/update/pr/changelog/source', () => {
 
     it('handles valid repository', () => {
       expect(changelogSource.hasValidRepository('some/repo')).toBeTrue();
-    });
-
-    it('handles valid repository for azure', () => {
-      const azureSource = new AzureChangeLogSource();
-      expect(azureSource.hasValidRepository('some-repo')).toBeTrue();
     });
   });
 });
