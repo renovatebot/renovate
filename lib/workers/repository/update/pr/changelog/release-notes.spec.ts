@@ -1,5 +1,7 @@
+import { GitObjectType } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import { DateTime } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
+import * as azureHelper from '../../../../../modules/platform/azure/azure-helper';
 import { clone } from '../../../../../util/clone';
 import * as githubGraphql from '../../../../../util/github/graphql';
 import type { GithubReleaseItem } from '../../../../../util/github/graphql/types';
@@ -90,15 +92,19 @@ const azureItemsResponseWithSourceDirectory = {
 const azureTreeResponse = {
   objectId: 'tree-id',
   treeEntries: [
-    { relativePath: 'lib', gitObjectType: 'tree', objectId: 'lib-object-id' },
+    {
+      relativePath: 'lib',
+      gitObjectType: GitObjectType.Tree,
+      objectId: 'lib-object-id',
+    },
     {
       relativePath: 'CHANGELOG.md',
-      gitObjectType: 'blob',
+      gitObjectType: GitObjectType.Blob,
       objectId: 'changelog-object-id',
     },
     {
       relativePath: 'README.md',
-      gitObjectType: 'blob',
+      gitObjectType: GitObjectType.Blob,
       objectId: 'readme-object-id',
     },
   ],
@@ -1181,21 +1187,14 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     });
 
     it('handles files mismatch for Azure', async () => {
-      httpMock
-        .scope('https://dev.azure.com/')
-        .get(
-          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=%2F&api-version=7.0`,
-        )
-        .reply(200, azureItemsResponse)
-        .get(
-          `/some-org/some-project/_apis/git/repositories/some-repo/trees/123abc?api-version=7.0`,
-        )
-        .reply(200, {
-          treeEntries: [
-            { name: 'lib', gitObjectType: 'tree' },
-            { name: 'README.md', gitObjectType: 'blob' },
-          ],
-        });
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValue(azureItemsResponse);
+
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValue({
+        treeEntries: [
+          { relativePath: 'lib', gitObjectType: GitObjectType.Tree },
+          { relativePath: 'README.md', gitObjectType: GitObjectType.Blob },
+        ],
+      });
 
       const res = await getReleaseNotesMd(
         {
@@ -1464,21 +1463,17 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
     it('handles azure sourceDirectory', async () => {
       const sourceDirectory = '/packages/foo';
-      const sourceDirectoryUrlEncoded = encodeURIComponent(sourceDirectory);
-      httpMock
-        .scope('https://dev.azure.com/')
-        .get(
-          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=${sourceDirectoryUrlEncoded}&api-version=7.0`,
-        )
-        .reply(200, azureItemsResponseWithSourceDirectory)
-        .get(
-          `/some-org/some-project/_apis/git/repositories/some-repo/trees/123abc?api-version=7.0`,
-        )
-        .reply(200, azureTreeResponse)
-        .get(
-          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=${sourceDirectory}/CHANGELOG.md&includeContent=true&api-version=7.0`,
-        )
-        .reply(200, adapterutilsChangelogMd);
+
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValue(
+        azureItemsResponseWithSourceDirectory,
+      );
+
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValue(azureTreeResponse);
+
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValue({
+        content: adapterutilsChangelogMd,
+      });
+
       // t/_apis/git/repositories/some-repo/items?path=CHANGELOG.md&includeContent=true&api-version=7.0
       const res = await getReleaseNotesMd(
         {

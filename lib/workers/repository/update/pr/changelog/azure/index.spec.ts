@@ -6,7 +6,6 @@ import type { BranchUpgradeConfig } from '../../../../../types';
 import { getReleaseNotesMdFile } from '../release-notes';
 import { AzureChangeLogSource } from './source';
 import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
 import { partial } from '~test/util';
 
 const baseUrl = 'https://dev.azure.com/some-org/some-project/';
