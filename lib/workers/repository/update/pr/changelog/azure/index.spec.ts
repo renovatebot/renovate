@@ -150,6 +150,90 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
       const res = await getReleaseNotesMdFile(azureProject);
       expect(res).toBeNull();
     });
+
+    it('handles missing tree blob entries', async () => {
+      vi.spyOn(azureHelper, 'getItem').mockRejectedValue({
+        objectId: 'some-object-id',
+        path: '/',
+      });
+
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValue({
+        objectId: 'some-object-id',
+        treeEntries: [
+          {
+            objectId: 'some-other-object-id',
+            gitObjectType: GitObjectType.Tree,
+            relativePath: 'some-dir',
+          },
+        ],
+      });
+
+      const res = await getReleaseNotesMdFile(azureProject);
+      expect(res).toBeNull();
+    });
+
+    it('handles no changelog content', async () => {
+      vi.spyOn(azureHelper, 'getItem').mockRejectedValue({
+        objectId: 'some-object-id',
+      });
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValue({
+        objectId: 'some-object-id',
+        treeEntries: [
+          {
+            objectId: 'some-other-object-id',
+            gitObjectType: GitObjectType.Blob,
+            relativePath: 'CHANGELOG.md',
+          },
+        ],
+      });
+
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValue({
+        objectId: 'some-other-object-id',
+        content: undefined,
+      });
+      const res = await getReleaseNotesMdFile(azureProject);
+      expect(res).toBeNull();
+    });
+
+    it('handles alternate changelog file names', async () => {
+      const changelogMd = Fixtures.get('jest.md', '..');
+
+      vi.spyOn(azureHelper, 'getItem').mockRejectedValue({
+        objectId: 'some-object-id',
+      });
+
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValue({
+        objectId: 'some-object-id',
+        treeEntries: [
+          {
+            objectId: 'some-other-object-id',
+            gitObjectType: GitObjectType.Blob,
+            relativePath: 'changelog.md',
+          },
+          {
+            objectId: 'some-other-object-id-2',
+            gitObjectType: GitObjectType.Blob,
+            relativePath: 'HISTORY.md',
+          },
+          {
+            objectId: 'some-other-object-id-3',
+            gitObjectType: GitObjectType.Blob,
+            relativePath: 'RELEASES.md',
+          },
+        ],
+      });
+
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValue({
+        objectId: 'some-other-object-id',
+        content: changelogMd,
+      });
+
+      const res = await getReleaseNotesMdFile(azureProject);
+      expect(res).toStrictEqual({
+        changelogFile: '/changelog.md',
+        changelogMd: changelogMd + '\n#\n##',
+      });
+    });
   });
 
   describe('source', () => {
