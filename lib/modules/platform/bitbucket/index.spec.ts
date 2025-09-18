@@ -520,18 +520,7 @@ describe('modules/platform/bitbucket/index', () => {
           },
         })
         .post('/2.0/repositories/some/repo/commit/branch_hash/statuses/build')
-        .reply(200)
-        .get(
-          '/2.0/repositories/some/repo/commit/branch_hash/statuses?pagelen=100',
-        )
-        .reply(200, {
-          values: [
-            {
-              key: 'foo',
-              state: 'SUCCESSFUL',
-            },
-          ],
-        });
+        .reply(200);
       await expect(
         bitbucket.setBranchStatus({
           branchName: 'branch',
