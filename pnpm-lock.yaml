@@ -102,8 +102,8 @@ importers:
         specifier: 4.2.0
         version: 4.2.0
       '@renovatebot/ruby-semver':
-        specifier: 4.1.0
-        version: 4.1.0
+        specifier: 4.1.2
+        version: 4.1.2
       '@sindresorhus/is':
         specifier: 7.0.2
         version: 7.0.2
@@ -1611,9 +1611,9 @@ packages:
     resolution: {integrity: sha512-hT7WcjHbZdx3U9iRKuGwgm1l2wFS+FrWEdX+EQ5i+VAI6tWdcktFtdwDTNIqSwklOW1Vng55om8c4RrPHCmiIQ==}
     engines: {node: ^20.9.0 || ^22.11.0 || ^24, pnpm: ^10.0.0}
 
-  '@renovatebot/ruby-semver@4.1.0':
-    resolution: {integrity: sha512-7yee1ceXSLy/fAyQtNgdqjrajMz66UyXypMfdsJGAJQf2nzr8UgXUpcnV5pZmE4MeKGWI9jKL1GFFwadBBQnEw==}
-    engines: {node: ^20.9.0 || ^22.11.0 || ^24, pnpm: ^9.0.0}
+  '@renovatebot/ruby-semver@4.1.2':
+    resolution: {integrity: sha512-zTK2X2r6fQTgQ1lqM0jaF/MgxmXCp0UrfiE1Ks3rQOBQjci4Xez1Zzsy4MgtjhMiHcdDi4lbBvtlPnksvEU8GQ==}
+    engines: {node: ^20.9.0 || ^22.11.0 || ^24, pnpm: ^10.0.0}
 
   '@rollup/rollup-android-arm-eabi@4.50.1':
     resolution: {integrity: sha512-HJXwzoZN4eYTdD8bVV22DN8gsPCAj3V20NHKOs8ezfXanGpmVPR7kalUHd+Y31IJp9stdB87VKPFbsGY3H/2ag==}
@@ -8132,7 +8132,7 @@ snapshots:
 
   '@renovatebot/pep440@4.2.0': {}
 
-  '@renovatebot/ruby-semver@4.1.0': {}
+  '@renovatebot/ruby-semver@4.1.2': {}
 
   '@rollup/rollup-android-arm-eabi@4.50.1':
     optional: true
