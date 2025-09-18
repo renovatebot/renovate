@@ -459,4 +459,43 @@ describe('modules/platform/azure/azure-helper', () => {
       expect(res).toEqual(allTeams);
     });
   });
+
+  describe('getTags', () => {
+    it('should get tags', async () => {
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getRefs: vi.fn(() => [{ name: 'refs/tags/1.0.0' }]),
+          }) as any,
+      );
+      const res = await azureHelper.getTags('123');
+      expect(res).toMatchSnapshot();
+    });
+  });
+
+  describe('getItem', () => {
+    it('should get item', async () => {
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getItem: vi.fn(() => ({ objectId: '132' })),
+          }) as any,
+      );
+      const res = await azureHelper.getItem('123', 'path', true);
+      expect(res).toMatchSnapshot();
+    });
+  });
+
+  describe('getTrees', () => {
+    it('should get trees', async () => {
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getTree: vi.fn(() => ({ objectId: '132' })),
+          }) as any,
+      );
+      const res = await azureHelper.getTrees('123', 'sha1');
+      expect(res).toMatchSnapshot();
+    });
+  });
 });
