@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { parseHCL } from './index';
 import { Fixtures } from '~test/fixtures';
 
@@ -105,7 +106,8 @@ describe('modules/manager/terraform/hcl/index', () => {
 
   describe('parseHCL() for .tf.json', () => {
     it('should return flat modules', async () => {
-      const modulesTFJSON = JSON.stringify({
+      const modulesTFJSON = codeBlock`
+      {
         module: {
           foo: {
             source: 'github.com/hashicorp/example?ref=v1.0.0',
@@ -128,7 +130,8 @@ describe('modules/manager/terraform/hcl/index', () => {
             version: '0.1.0',
           },
         },
-      });
+      }
+      `;
       const res = await parseHCL(modulesTFJSON, 'file.tf.json');
       expect(res?.module).toBeDefined();
       expect(Object.keys(res!.module!)).toBeArrayOfSize(6);
@@ -171,7 +174,8 @@ describe('modules/manager/terraform/hcl/index', () => {
     });
 
     it('should return nested terraform block', async () => {
-      const lockedVersionJSON = JSON.stringify({
+      const lockedVersionJSON = codeBlock`
+      {
         terraform: {
           required_providers: {
             aws: {
@@ -187,7 +191,8 @@ describe('modules/manager/terraform/hcl/index', () => {
             },
           },
         },
-      });
+      }
+      `;
       const res = await parseHCL(lockedVersionJSON, 'file.tf.json');
       expect(res).toMatchObject({
         terraform: [
@@ -205,7 +210,8 @@ describe('modules/manager/terraform/hcl/index', () => {
     });
 
     it('should return resource blocks', async () => {
-      const resourcesTFJSON = JSON.stringify({
+      const resourcesTFJSON = codeBlock`
+      {
         resource: {
           docker_container: {
             foo: {
@@ -240,7 +246,8 @@ describe('modules/manager/terraform/hcl/index', () => {
             },
           },
         },
-      });
+      }
+      `;
       const res = await parseHCL(resourcesTFJSON, 'file.tf.json');
       expect(res).toMatchObject({
         resource: {
