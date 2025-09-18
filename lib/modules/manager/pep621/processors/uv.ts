@@ -21,11 +21,14 @@ import type {
 import { applyGitSource } from '../../util';
 import { type PyProject, UvLockfile } from '../schema';
 import { depTypes } from '../utils';
-import type { PyProjectProcessor } from './types';
+
+import { BasePyProjectProcessor } from './abstract';
 
 const uvUpdateCMD = 'uv lock';
 
-export class UvProcessor implements PyProjectProcessor {
+export class UvProcessor extends BasePyProjectProcessor {
+  override lockfileName = 'uv.lock';
+
   process(project: PyProject, deps: PackageDependency[]): PackageDependency[] {
     const uv = project.tool?.uv;
     if (!uv) {
@@ -121,7 +124,10 @@ export class UvProcessor implements PyProjectProcessor {
     deps: PackageDependency[],
     packageFile: string,
   ): Promise<PackageDependency[]> {
-    const lockFileName = await findLocalSiblingOrParent(packageFile, 'uv.lock');
+    const lockFileName = await findLocalSiblingOrParent(
+      packageFile,
+      this.lockfileName,
+    );
     if (lockFileName === null) {
       logger.debug({ packageFile }, `No uv lock file found`);
     } else {
@@ -146,20 +152,6 @@ export class UvProcessor implements PyProjectProcessor {
     }
 
     return Promise.resolve(deps);
-  }
-
-  async getLockfiles(
-    _project: PyProject,
-    lockfiles: string[],
-    packageFile: string,
-  ): Promise<string[]> {
-    const lockFileName = await findLocalSiblingOrParent(packageFile, 'uv.lock');
-    if (!lockFileName) {
-      logger.debug({ packageFile }, `No uv lock file found`);
-      return lockfiles;
-    }
-    lockfiles.push(lockFileName);
-    return lockfiles;
   }
 
   async updateArtifacts(

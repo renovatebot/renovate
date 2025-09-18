@@ -2,35 +2,56 @@ import is from '@sindresorhus/is';
 import { get } from '../../../modules/manager';
 import type { ExtractResults } from './types';
 
-export function processSupersedesManagers(
-  extractResults: ExtractResults[],
-): void {
-  for (const { manager, packageFiles } of extractResults) {
-    if (!packageFiles) {
+export function processSupersedesManagers(extracts: ExtractResults[]): void {
+  const rejected: Record<string, string[]> = {};
+
+  for (const primaryExtract of extracts) {
+    const primaryManager = primaryExtract.manager;
+    const secondaryManagers = get(primaryExtract.manager, 'supersedesManagers');
+    if (!is.nonEmptyArray(secondaryManagers)) {
       continue;
     }
-    const supersedesManagers = get(manager, 'supersedesManagers');
-    if (is.nonEmptyArray(supersedesManagers)) {
-      const supercedingPackageFileNames = packageFiles.map(
-        (packageFile) => packageFile.packageFile,
+
+    if (!primaryExtract.packageFiles) {
+      continue;
+    }
+
+    const primaryPackageFiles = primaryExtract.packageFiles.map(
+      ({ packageFile }) => packageFile,
+    );
+
+    for (const secondaryManager of secondaryManagers) {
+      const secondaryExtract = extracts.find(
+        ({ manager }) => manager === secondaryManager,
       );
-      for (const supercededManager of supersedesManagers) {
-        const supercededManagerResults = extractResults.find(
-          (result) => result.manager === supercededManager,
-        );
-        if (supercededManagerResults?.packageFiles) {
-          supercededManagerResults.packageFiles =
-            supercededManagerResults.packageFiles.filter((packageFile) => {
-              if (
-                !packageFile.lockFiles?.length &&
-                supercedingPackageFileNames.includes(packageFile.packageFile)
-              ) {
-                return false;
-              }
-              return true;
-            });
+
+      if (!secondaryExtract?.packageFiles) {
+        continue;
+      }
+
+      for (const { packageFile, lockFiles } of secondaryExtract.packageFiles) {
+        if (is.nonEmptyArray(lockFiles)) {
+          rejected[primaryManager] ??= [];
+          rejected[primaryManager].push(packageFile);
+          continue;
+        }
+
+        if (primaryPackageFiles.includes(packageFile)) {
+          rejected[secondaryManager] ??= [];
+          rejected[secondaryManager].push(packageFile);
         }
       }
     }
+  }
+
+  for (const extract of extracts) {
+    const rejectedFiles = rejected[extract.manager];
+    if (!is.nonEmptyArray(rejectedFiles) || !extract.packageFiles) {
+      continue;
+    }
+
+    extract.packageFiles = extract.packageFiles.filter(
+      ({ packageFile }) => !rejectedFiles.includes(packageFile),
+    );
   }
 }
