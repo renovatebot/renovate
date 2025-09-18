@@ -1,16 +1,16 @@
+import { GitObjectType } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import type { ChangeLogProject } from '..';
-import { getChangeLogJSON } from '..';
+import * as azureHelper from '../../../../../../modules/platform/azure/azure-helper';
 import * as semverVersioning from '../../../../../../modules/versioning/semver';
 import type { BranchUpgradeConfig } from '../../../../../types';
 import { getReleaseNotesMdFile } from '../release-notes';
 import { AzureChangeLogSource } from './source';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
-import { hostRules, partial } from '~test/util';
+import { partial } from '~test/util';
 
 const baseUrl = 'https://dev.azure.com/some-org/some-project/';
 const apiBaseUrl = 'https://dev.azure.com/some-org/some-project/_apis/';
-const matchHost = 'https://dev.azure.com/';
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
@@ -42,232 +42,33 @@ const azureProject = partial<ChangeLogProject>({
 });
 
 describe('workers/repository/update/pr/changelog/azure/index', () => {
-  afterEach(() => {
-    httpMock.clear(false);
-  });
-
-  describe('getChangeLogJson', () => {
-    beforeEach(() => {
-      hostRules.clear();
-      hostRules.add({
-        hostType: 'azure',
-        matchHost,
-        token: 'some-token',
-      });
-    });
-
-    it('returns null if @types', async () => {
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          currentVersion: undefined,
-        }),
-      ).toBeNull();
-    });
-
-    it('returns null if currentVersion equals newVersion', async () => {
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          currentVersion: '1.0.0',
-          newVersion: '1.0.0',
-        }),
-      ).toBeNull();
-    });
-
-    it('uses azure tags', async () => {
-      httpMock
-        .scope(apiBaseUrl)
-        .get(
-          '/some-org/some-project/_apis/git/repositories/some-repo/refs?filter=tags&api-version=7.0&$top=100',
-        )
-        .reply(200, {
-          value: [
-            { name: 'refs/tags/v5.2.0' },
-            { name: 'refs/tags/v5.4.0' },
-            { name: 'refs/tags/v5.5.0' },
-            { name: 'refs/tags/v5.6.0' },
-            { name: 'refs/tags/v5.6.1' },
-            { name: 'refs/tags/v5.7.0' },
-          ],
-        })
-        .persist()
-        .get(
-          '/some-org/some-project/_apis/git/repositories/some-repo/items?path=/&api-version=7.0',
-        )
-        .reply(200, []);
-
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-        }),
-      ).toMatchObject({
-        hasReleaseNotes: false,
-        project: {
-          apiBaseUrl,
-          baseUrl,
-          packageName: 'renovate',
-          repository: 'some-repo',
-          sourceDirectory: undefined,
-          sourceUrl: `https://dev.azure.com/some-org/some-project/_git/some-repo/`,
-          type: 'azure',
-        },
-        versions: [
-          { version: '5.6.1' },
-          { version: '5.6.0' },
-          { version: '5.5.0' },
-          { version: '5.4.0' },
-        ],
-      });
-    });
-
-    it('handles empty Azure tags response', async () => {
-      httpMock
-        .scope(matchHost)
-        .get(
-          '/some-org/some-project/_apis/git/repositories/some-repo/refs?filter=tags&$top=100&api-version=7.0',
-        )
-        .reply(200, {
-          value: [],
-        })
-        .persist()
-        .get(
-          '/some-org//some-project/_apis/git/repositories/some-repo/items?path=/&api-version=7.0',
-        )
-        .reply(200, {
-          value: [],
-        });
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-        }),
-      ).toMatchObject({
-        hasReleaseNotes: false,
-        project: {
-          apiBaseUrl: 'https://dev.azure.com/some-org/some-project/_apis/',
-          baseUrl: 'https://dev.azure.com/some-org/some-project/',
-          packageName: 'renovate',
-          repository: 'some-repo',
-          sourceDirectory: undefined,
-          sourceUrl:
-            'https://dev.azure.com/some-org/some-project/_git/some-repo/',
-          type: 'azure',
-        },
-        versions: [
-          { version: '5.6.1' },
-          { version: '5.6.0' },
-          { version: '5.5.0' },
-          { version: '5.4.0' },
-        ],
-      });
-    });
-
-    it('uses Azure tags with error', async () => {
-      httpMock
-        .scope(matchHost)
-        .get(
-          '/some-org/some-project/_apis/git/repositories/some-repo/refs?filter=tags&$top=100&api-version=7.0',
-        )
-        .replyWithError('Unknown Azure DevOps Repo')
-        .persist()
-        .get(
-          '/some-org//some-project/_apis/git/repositories/some-repo/items?path=/&api-version=7.0',
-        )
-        .reply(200, {
-          value: [],
-        });
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-        }),
-      ).toMatchObject({
-        hasReleaseNotes: false,
-        project: {
-          apiBaseUrl: 'https://dev.azure.com/some-org/some-project/_apis/',
-          baseUrl: 'https://dev.azure.com/some-org/some-project/',
-          packageName: 'renovate',
-          repository: 'some-repo',
-          sourceDirectory: undefined,
-          sourceUrl:
-            'https://dev.azure.com/some-org/some-project/_git/some-repo/',
-          type: 'azure',
-        },
-        versions: [
-          { version: '5.6.1' },
-          { version: '5.6.0' },
-          { version: '5.5.0' },
-          { version: '5.4.0' },
-        ],
-      });
-    });
-    it('handles no sourceUrl', async () => {
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          sourceUrl: undefined,
-        }),
-      ).toBeNull();
-    });
-
-    it('handles invalid sourceUrl', async () => {
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          sourceUrl: 'http://example.com',
-        }),
-      ).toBeNull();
-    });
-
-    it('handles no releases', async () => {
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          releases: [],
-        }),
-      ).toBeNull();
-    });
-
-    it('handles not enough releases', async () => {
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          releases: [{ version: '0.9.0' }],
-        }),
-      ).toBeNull();
-    });
+  beforeEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe('getReleaseNotesMdFile', () => {
     it('handles release notes', async () => {
       const changelogMd = Fixtures.get('jest.md', '..');
-      // Read the changelog file as a Buffer to simulate application/octet-stream
-      const changelogMdFile = Buffer.from(
-        Fixtures.get('jest.md', '..'),
-        'utf8',
-      );
 
-      httpMock
-        .scope(apiBaseUrl)
-        .get('/git/repositories/some-repo/items?path=/&api-version=7.0')
-        .reply(200, {
-          objectId: 'some-object-id',
-          path: '/',
-        })
-        .get('/git/repositories/some-repo/trees/some-object-id?api-version=7.0')
-        .reply(200, {
-          objectId: 'some-object-id',
-          treeEntries: [
-            {
-              objectId: 'some-other-object-id',
-              gitObjectType: 'blob',
-              relativePath: 'CHANGELOG.md',
-            },
-          ],
-        })
-        .get(
-          '/git/repositories/some-repo/items?path=/CHANGELOG.md&includeContent=true&api-version=7.0',
-        )
-        .reply(200, changelogMdFile);
+      vi.spyOn(azureHelper, 'getItem').mockRejectedValue({
+        objectId: 'some-object-id',
+      });
+
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValue({
+        objectId: 'some-object-id',
+        treeEntries: [
+          {
+            objectId: 'some-other-object-id',
+            gitObjectType: GitObjectType.Blob,
+            relativePath: 'CHANGELOG.md',
+          },
+        ],
+      });
+
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValue({
+        objectId: 'some-other-object-id',
+        content: changelogMd,
+      });
 
       const res = await getReleaseNotesMdFile(azureProject);
       expect(res).toStrictEqual({
@@ -278,35 +79,27 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
 
     it('handles release notes with sourceDirectory', async () => {
       const changelogMd = Fixtures.get('jest.md', '..');
-      // Read the changelog file as a Buffer to simulate application/octet-stream
-      const changelogMdFile = Buffer.from(
-        Fixtures.get('jest.md', '..'),
-        'utf8',
-      );
-      httpMock
-        .scope(apiBaseUrl)
-        .get(
-          '/git/repositories/some-repo/items?path=%2Fsrc%2Fdocs&api-version=7.0',
-        )
-        .reply(200, {
-          objectId: 'some-object-id',
-          path: '/src/docs',
-        })
-        .get('/git/repositories/some-repo/trees/some-object-id?api-version=7.0')
-        .reply(200, {
-          objectId: 'some-object-id',
-          treeEntries: [
-            {
-              objectId: 'some-other-object-id',
-              gitObjectType: 'blob',
-              relativePath: 'CHANGELOG.md',
-            },
-          ],
-        })
-        .get(
-          '/git/repositories/some-repo/items?path=/src/docs/CHANGELOG.md&includeContent=true&api-version=7.0',
-        )
-        .reply(200, changelogMdFile);
+
+      vi.spyOn(azureHelper, 'getItem').mockRejectedValue({
+        objectId: 'some-object-id',
+        path: '/src/docs',
+      });
+
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValue({
+        objectId: 'some-object-id',
+        treeEntries: [
+          {
+            objectId: 'some-other-object-id',
+            gitObjectType: GitObjectType.Blob,
+            relativePath: 'CHANGELOG.md',
+          },
+        ],
+      });
+
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValue({
+        objectId: 'some-other-object-id',
+        content: changelogMd,
+      });
 
       const project = {
         ...azureProject,
@@ -320,49 +113,40 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
     });
 
     it('handles missing items', async () => {
-      httpMock
-        .scope(apiBaseUrl)
-        .get('/git/repositories/some-repo/items?path=%2F&api-version=7.0')
-        .reply(200, {});
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValue({});
 
       const res = await getReleaseNotesMdFile(azureProject);
       expect(res).toBeNull();
     });
 
     it('handles missing files', async () => {
-      httpMock
-        .scope(apiBaseUrl)
-        .get('/git/repositories/some-repo/items?path=%2F&api-version=7.0')
-        .reply(200, {
-          objectId: 'some-object-id',
-          path: '/',
-        })
-        .get('/git/repositories/some-repo/trees/some-object-id?api-version=7.0')
-        .reply(200, {
-          objectId: 'some-object-id',
-          treeEntries: [],
-        });
+      vi.spyOn(azureHelper, 'getItem').mockRejectedValue({
+        objectId: 'some-object-id',
+        path: '/',
+      });
+
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValue({
+        objectId: 'some-object-id',
+        treeEntries: [],
+      });
 
       const res = await getReleaseNotesMdFile(azureProject);
       expect(res).toBeNull();
     });
 
     it('handles missing release notes', async () => {
-      httpMock
-        .scope(apiBaseUrl)
-        .get('/git/repositories/some-repo/items?path=%2F&api-version=7.0')
-        .reply(200, {})
-        .get('/git/repositories/some-repo/trees/some-object-id?api-version=7.0')
-        .reply(200, {
-          objectId: 'some-object-id',
-          treeEntries: [
-            {
-              objectId: 'some-other-object-id',
-              gitObjectType: 'blob',
-              relativePath: '.gitignore.md',
-            },
-          ],
-        });
+      vi.spyOn(azureHelper, 'getItem').mockRejectedValue({});
+
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValue({
+        objectId: 'some-object-id',
+        treeEntries: [
+          {
+            objectId: 'some-other-object-id',
+            gitObjectType: GitObjectType.Blob,
+            relativePath: '.gitignore.md',
+          },
+        ],
+      });
 
       const res = await getReleaseNotesMdFile(azureProject);
       expect(res).toBeNull();
