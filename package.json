@@ -164,7 +164,7 @@
     "@opentelemetry/instrumentation-http": "0.205.0",
     "@opentelemetry/resource-detector-aws": "2.5.0",
     "@opentelemetry/resource-detector-azure": "0.12.0",
-    "@opentelemetry/resource-detector-gcp": "0.39.0",
+    "@opentelemetry/resource-detector-gcp": "0.40.0",
     "@opentelemetry/resource-detector-github": "0.31.0",
     "@opentelemetry/resources": "2.1.0",
     "@opentelemetry/sdk-trace-base": "2.1.0",
