@@ -234,6 +234,133 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
         changelogMd: changelogMd + '\n#\n##',
       });
     });
+
+    it('handles empty tree entries', async () => {
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValueOnce({
+        objectId: 'some-object-id',
+        path: '/',
+      });
+
+      // Mock getTrees to return an empty tree or a tree with no entries
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValueOnce({
+        objectId: 'some-object-id',
+        treeEntries: [], // Empty array of files
+      });
+
+      const res = await getReleaseNotesMdFile(azureProject);
+      expect(res).toBeNull();
+    });
+
+    it('handles null tree entries', async () => {
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValueOnce({
+        objectId: 'some-object-id',
+        path: '/',
+      });
+
+      // Mock getTrees to return null tree entries
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValueOnce({
+        objectId: 'some-object-id',
+        treeEntries: [], // Null entries
+      });
+
+      const res = await getReleaseNotesMdFile(azureProject);
+      expect(res).toBeNull();
+    });
+
+    it('handles various changelog filename patterns', async () => {
+      const changelogMd = Fixtures.get('jest.md', '..');
+
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValueOnce({
+        objectId: 'some-object-id',
+        path: '/',
+      });
+
+      // Mock getTrees to return different filename patterns
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValueOnce({
+        objectId: 'some-object-id',
+        treeEntries: [
+          {
+            objectId: 'id-1',
+            gitObjectType: GitObjectType.Blob,
+            relativePath: 'README.md',
+          },
+          {
+            objectId: 'id-2',
+            gitObjectType: GitObjectType.Blob,
+            relativePath: 'UPDATES', // Should match
+          },
+          {
+            objectId: 'id-3',
+            gitObjectType: GitObjectType.Blob,
+            relativePath: 'docs/changes.md', // Should match
+          },
+          {
+            objectId: 'id-4',
+            gitObjectType: GitObjectType.Blob,
+            relativePath: 'NEWS.md',
+          },
+          {
+            objectId: 'id-5',
+            gitObjectType: GitObjectType.Tree,
+            relativePath: 'src',
+          },
+          {
+            objectId: 'id-6',
+            gitObjectType: GitObjectType.Blob,
+            relativePath: 'LICENSE.md',
+          },
+        ],
+      });
+
+      // .md file is preferred over others
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValue({
+        objectId: 'id-3',
+        content: changelogMd,
+      });
+
+      const res = await getReleaseNotesMdFile(azureProject);
+
+      expect(res).toStrictEqual({
+        changelogFile: '/docs/changes.md',
+        changelogMd: changelogMd + '\n#\n##',
+      });
+    });
+
+    it('handles filenames with no extensions or missing paths', async () => {
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValueOnce({
+        objectId: 'some-object-id',
+        path: '/',
+      });
+
+      // Test files with missing paths or no extensions
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValueOnce({
+        objectId: 'some-object-id',
+        treeEntries: [
+          {
+            objectId: 'id-1',
+            gitObjectType: GitObjectType.Blob,
+            relativePath: null, // Missing path
+          },
+          {
+            objectId: 'id-2',
+            gitObjectType: GitObjectType.Blob,
+            relativePath: 'CHANGELOG', // No extension but should match
+          },
+        ],
+      });
+
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValueOnce({
+        objectId: 'id-2',
+        content: 'changelog content',
+      });
+
+      const res = await getReleaseNotesMdFile(azureProject);
+
+      expect(res).toStrictEqual({
+        changelogFile: '/CHANGELOG',
+        changelogMd: 'changelog content\n#\n##',
+      });
+    });
   });
 
   describe('source', () => {
@@ -266,6 +393,19 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
       expect(res).toBe(
         `${baseUrl}_git/some-org/some-repo/branchCompare?baseVersion=GTabc&targetVersion=GTxyz`,
       );
+    });
+
+    describe('hasValidRepository', () => {
+      it('validates Azure repository names correctly', () => {
+        // Valid Azure repository (single segment name)
+        expect(changelogSource.hasValidRepository('some-repo')).toBe(true);
+
+        // Invalid Azure repository (contains slashes)
+        expect(changelogSource.hasValidRepository('org/some-repo')).toBe(false);
+        expect(
+          changelogSource.hasValidRepository('org/project/some-repo'),
+        ).toBe(false);
+      });
     });
   });
 });
