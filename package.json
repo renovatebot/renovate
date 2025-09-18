@@ -173,7 +173,7 @@
     "@pnpm/parse-overrides": "1001.0.2",
     "@qnighy/marshal": "0.1.3",
     "@renovatebot/detect-tools": "1.1.0",
-    "@renovatebot/kbpgp": "4.0.2",
+    "@renovatebot/kbpgp": "4.0.3",
     "@renovatebot/osv-offline": "1.6.10",
     "@renovatebot/pep440": "4.2.1",
     "@renovatebot/ruby-semver": "4.1.2",
