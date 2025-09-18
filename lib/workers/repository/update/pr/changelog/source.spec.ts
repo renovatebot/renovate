@@ -1,6 +1,7 @@
-import { partial } from '~test/util.ts';
-import type { BranchConfig } from '../../../../types.ts';
-import { GitHubChangeLogSource } from './github/source.ts';
+import type { BranchConfig } from '../../../../types';
+import { AzureChangeLogSource } from './azure/source';
+import { GitHubChangeLogSource } from './github/source';
+import { partial } from '~test/util';
 
 const changelogSource = new GitHubChangeLogSource();
 const upgrade = partial<BranchConfig>({
@@ -39,6 +40,16 @@ describe('workers/repository/update/pr/changelog/source', () => {
         'renovatebot/renovate',
       );
     });
+
+    it('handles azure sourceUrl', () => {
+      expect(
+        changelogSource.getRepositoryFromUrl({
+          ...upgrade,
+          sourceUrl:
+            'https://dev.azure.com/some-org/some-project/_git/some-repo',
+        }),
+      ).toBe('some-org/some-project/_git/some-repo');
+    });
   });
 
   describe('hasValidRepository', () => {
@@ -49,6 +60,11 @@ describe('workers/repository/update/pr/changelog/source', () => {
 
     it('handles valid repository', () => {
       expect(changelogSource.hasValidRepository('some/repo')).toBeTrue();
+    });
+
+    it('handles valid repository for azure', () => {
+      const azureSource = new AzureChangeLogSource();
+      expect(azureSource.hasValidRepository('some-repo')).toBeTrue();
     });
   });
 });
