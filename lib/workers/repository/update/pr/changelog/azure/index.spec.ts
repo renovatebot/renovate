@@ -339,7 +339,7 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
           {
             objectId: 'id-1',
             gitObjectType: GitObjectType.Blob,
-            relativePath: null, // Missing path
+            relativePath: undefined, // Missing path
           },
           {
             objectId: 'id-2',
@@ -349,7 +349,7 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
         ],
       });
 
-      vi.spyOn(azureHelper, 'getItem').mockResolvedValueOnce({
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValue({
         objectId: 'id-2',
         content: 'changelog content',
       });
