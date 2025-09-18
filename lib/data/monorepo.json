@@ -17,6 +17,10 @@
     "angular-eslint": "https://github.com/angular-eslint/angular-eslint",
     "angularfire": "https://github.com/angular/angularfire",
     "angularjs": "https://github.com/angular/angular.js",
+    "apache-lucene": [
+      "https://gitbox.apache.org/repos/asf?p=lucene.git",
+      "https://github.com/apache/lucene"
+    ],
     "apollo-server": "https://github.com/apollographql/apollo-server",
     "apolloclient": "https://github.com/apollographql/apollo-client",
     "applicationinsights-dotnet": "https://github.com/Microsoft/ApplicationInsights-dotnet",
@@ -291,6 +295,7 @@
     "dotnet-azure-ad-identitymodel-extensions": "https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet",
     "dotnet-azure-ad-microsoft-identity-web": "https://github.com/AzureAD/microsoft-identity-web",
     "dotnet-wcf": "https://github.com/dotnet/wcf",
+    "dotnetcore-cap": "https://github.com/dotnetcore/CAP",
     "dropwizard": "https://github.com/dropwizard/dropwizard",
     "duende-identityserver": "https://github.com/DuendeSoftware/IdentityServer",
     "elastic-apm-agent-rum-js": "https://github.com/elastic/apm-agent-rum-js",
@@ -357,6 +362,10 @@
     "guava": "https://github.com/google/guava",
     "happy-dom": "https://github.com/capricorn86/happy-dom",
     "Hangfire": "https://github.com/HangfireIO/Hangfire",
+    "hibernate-models": "https://github.com/hibernate/hibernate-models",
+    "hibernate-orm": "https://github.com/hibernate/hibernate-orm",
+    "hibernate-search": "https://github.com/hibernate/hibernate-search",
+    "hibernate-tools": "https://github.com/hibernate/hibernate-tools",
     "hickory-dns": "https://github.com/hickory-dns/hickory-dns",
     "html-eslint": "https://github.com/yeonjuan/html-eslint",
     "humanizer": "https://github.com/Humanizr/Humanizer",
@@ -400,6 +409,7 @@
     "ksp": "https://github.com/google/ksp",
     "ktor": "https://github.com/ktorio/ktor",
     "lamar": "https://github.com/JasperFx/lamar",
+    "langchain4j": "https://github.com/langchain4j/langchain4j",
     "lerna": "https://github.com/lerna/lerna",
     "lerna-lite": "https://github.com/lerna-lite/lerna-lite",
     "lexical": "https://github.com/facebook/lexical",
@@ -431,6 +441,7 @@
     "ml-dotnet": "https://github.com/dotnet/machinelearning",
     "mockito": "https://github.com/mockito/mockito",
     "mongo-csharp-driver": "https://github.com/mongodb/mongo-csharp-driver",
+    "mongo-java-driver": "https://github.com/mongodb/mongo-java-driver",
     "mstest": "https://github.com/microsoft/testfx",
     "mutation-testing-elements": "https://github.com/stryker-mutator/mutation-testing-elements",
     "nest": [
@@ -626,6 +637,11 @@
     "typefaces": "https://github.com/KyleAMathews/typefaces",
     "typescript-eslint": "https://github.com/typescript-eslint/typescript-eslint",
     "typography-js": "https://github.com/KyleAMathews/typography.js",
+    "ui5-webcomponents": [
+      "https://github.com/SAP/ui5-webcomponents",
+      "https://github.com/SAP/ui5-webcomponents-react",
+      "https://github.com/SAP/ui5-webcomponents-ngx"
+    ],
     "unhead": "https://github.com/unjs/unhead",
     "unocss": "https://github.com/unocss/unocss",
     "uppy": "https://github.com/transloadit/uppy",

@@ -27,11 +27,11 @@ export class NixPkgsVersioning extends RegExpVersioningApi {
     const release = [];
 
     if (major) {
-      release.push(Number.parseInt(major, 10));
+      release.push(Number.parseInt(major));
     }
 
     if (minor) {
-      release.push(Number.parseInt(minor, 10));
+      release.push(Number.parseInt(minor));
     }
 
     const compatibility = is.nonEmptyStringAndNotWhitespace(suffix)

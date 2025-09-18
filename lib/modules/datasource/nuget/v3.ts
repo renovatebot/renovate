@@ -35,7 +35,7 @@ export class NugetV3Api {
     url: string,
     resourceType = 'RegistrationsBaseUrl',
   ): Promise<string | null> {
-    // https://docs.microsoft.com/en-us/nuget/api/service-index
+    // https://learn.microsoft.com/nuget/api/service-index
     const resultCacheKey = `${url}:${resourceType}`;
     const cachedResult = await packageCache.get<string>(
       NugetV3Api.cacheNamespace,
@@ -229,6 +229,10 @@ export class NugetV3Api {
           cacheProvider: memCacheProvider,
         });
         const nuspec = new XmlDocument(metaresult.body);
+        const releaseNotes = nuspec.valueWithPath('metadata.releaseNotes');
+        if (releaseNotes) {
+          dep.changelogContent = releaseNotes;
+        }
         const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
         if (sourceUrl) {
           dep.sourceUrl = massageUrl(sourceUrl);

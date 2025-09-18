@@ -11,6 +11,7 @@ import {
   trimTrailingSlash,
 } from '../../../util/url';
 import { BitbucketTagsDatasource } from '../bitbucket-tags';
+import { ForgejoTagsDatasource } from '../forgejo-tags';
 import { GitTagsDatasource } from '../git-tags';
 import { GiteaTagsDatasource } from '../gitea-tags';
 import { GithubTagsDatasource } from '../github-tags';
@@ -110,7 +111,7 @@ export class BaseGoDatasource {
       const split = goModule.split('/');
       const packageName = `${split[1]}/${split[2]}`;
       return {
-        datasource: GiteaTagsDatasource.id,
+        datasource: ForgejoTagsDatasource.id,
         packageName,
         registryUrl: 'https://code.forgejo.org',
       };
@@ -120,7 +121,7 @@ export class BaseGoDatasource {
       const split = goModule.split('/');
       const packageName = `${split[1]}/${split[2]}`;
       return {
-        datasource: GiteaTagsDatasource.id,
+        datasource: ForgejoTagsDatasource.id,
         packageName,
         registryUrl: 'https://codeberg.org',
       };
@@ -196,8 +197,22 @@ export class BaseGoDatasource {
       BaseGoDatasource.gitlabHttpsRegExp.exec(metadataUrl)?.groups;
     if (metadataUrlMatchGroups) {
       const { httpsRegExpUrl, httpsRegExpName } = metadataUrlMatchGroups;
-      const packageName =
-        vcsIndicatedModule ?? gitlabModuleName ?? httpsRegExpName;
+
+      let packageName = vcsIndicatedModule ?? gitlabModuleName;
+
+      // Detect submodules in monorepos by comparing metadata path and module path
+      if (!vcsIndicatedModule && httpsRegExpName && gitlabModuleName) {
+        const metadataPath = httpsRegExpName;
+        const modulePath = gitlabModuleName;
+
+        if (modulePath.startsWith(metadataPath + '/')) {
+          packageName = metadataPath;
+        }
+      }
+
+      // If we still don't have a package name, fall back to the metadata URL path
+      packageName = packageName ?? httpsRegExpName;
+
       return {
         datasource: GitlabTagsDatasource.id,
         registryUrl: httpsRegExpUrl,

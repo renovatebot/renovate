@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import is, { isString } from '@sindresorhus/is';
 import { z } from 'zod';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -138,6 +138,7 @@ export async function getDependency(
         gitRef: res.versions?.[version].gitHead,
         dependencies: res.versions?.[version].dependencies,
         devDependencies: res.versions?.[version].devDependencies,
+        attestation: isString(res.versions?.[version].dist?.attestations?.url),
       };
       const releaseTimestamp = asTimestamp(res.time?.[version]);
       if (releaseTimestamp) {

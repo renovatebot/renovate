@@ -147,34 +147,44 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
   ): Promise<string | null> {
     const current = digestAsset.currentVersion.replace(regEx(/^v/), '');
     const next = release.tag_name.replace(regEx(/^v/), '');
-    const releaseChecksumAssetName = digestAsset.assetName.replace(
-      current,
-      next,
+
+    if (digestAsset.digestedFileName) {
+      const checksumAssetName = digestAsset.assetName.replace(current, next);
+      const checksumAsset = release.assets.find(
+        (a: GithubRestAsset) => a.name === checksumAssetName,
+      );
+
+      // If the checksum asset is not found in the new release, fall back to the download method
+      if (checksumAsset) {
+        const releaseFilename = digestAsset.digestedFileName.replace(
+          current,
+          next,
+        );
+        const res = await this.http.getText(checksumAsset.browser_download_url);
+        for (const line of res.body.split(newlineRegex)) {
+          const [lineDigest, lineFn] = line.split(regEx(/\s+/), 2);
+          if (lineFn === releaseFilename) {
+            return lineDigest;
+          }
+        }
+        return null;
+      }
+    }
+
+    const oldFileName = digestAsset.digestedFileName ?? digestAsset.assetName;
+    const fileName = oldFileName.replace(current, next);
+
+    const asset = release.assets.find(
+      (a: GithubRestAsset) => a.name === fileName,
     );
-    const releaseAsset = release.assets.find(
-      (a: GithubRestAsset) => a.name === releaseChecksumAssetName,
-    );
-    if (!releaseAsset) {
+
+    if (!asset) {
       return null;
     }
-    if (digestAsset.digestedFileName) {
-      const releaseFilename = digestAsset.digestedFileName.replace(
-        current,
-        next,
-      );
-      const res = await this.http.getText(releaseAsset.browser_download_url);
-      for (const line of res.body.split(newlineRegex)) {
-        const [lineDigest, lineFn] = line.split(regEx(/\s+/), 2);
-        if (lineFn === releaseFilename) {
-          return lineDigest;
-        }
-      }
-    } else {
-      const algorithm = inferHashAlg(digestAsset.currentDigest);
-      const newDigest = await this.downloadAndDigest(releaseAsset, algorithm);
-      return newDigest;
-    }
-    return null;
+
+    const algorithm = inferHashAlg(digestAsset.currentDigest);
+    const newDigest = await this.downloadAndDigest(asset, algorithm);
+    return newDigest;
   }
 
   /**

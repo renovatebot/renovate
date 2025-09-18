@@ -173,10 +173,6 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
-  disableLockFiles: {
-    description: 'Disable lock file updates.',
-    updateLockFiles: false,
-  },
   disableMajorUpdates: {
     description: 'Disable `major` updates.',
     major: {
@@ -587,6 +583,10 @@ export const presets: Record<string, Preset> = {
         matchManagers: ['poetry'],
         semanticCommitType: 'fix',
       },
+      {
+        matchJsonata: ['isLockfileUpdate = true'],
+        semanticCommitType: 'chore',
+      },
     ],
   },
   separateMajorReleases: {
@@ -609,6 +609,10 @@ export const presets: Record<string, Preset> = {
     description:
       'Separate `patch` and `minor` releases of dependencies into separate PRs.',
     separateMinorPatch: true,
+  },
+  skipArtifactsUpdate: {
+    description: 'Skips artifact updates.',
+    skipArtifactsUpdate: true,
   },
   skipStatusChecks: {
     description: 'Skip status checks and automerge right away.',

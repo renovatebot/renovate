@@ -52,6 +52,7 @@ export interface BranchUpgradeConfig
   group?: GroupConfig;
   groupName?: string;
   groupSlug?: string;
+  dependencyDashboardCategory?: string;
   manager: string;
   packageFile?: string;
   lockFile?: string;
@@ -86,6 +87,7 @@ export interface BranchUpgradeConfig
   sourceRepo?: string;
   sourceRepoOrg?: string;
   sourceRepoName?: string;
+  minimumGroupSize?: number;
 }
 
 export type PrBlockedBy =
@@ -111,7 +113,8 @@ export type BranchResult =
   | 'commit-limit-reached'
   | 'branch-limit-reached'
   | 'rebase'
-  | 'update-not-scheduled';
+  | 'update-not-scheduled'
+  | 'minimum-group-size-not-met';
 
 export type CacheFingerprintMatchResult =
   | 'matched'
