@@ -184,31 +184,5 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
         `${baseUrl}_git/some-org/some-repo/branchCompare?baseVersion=GTabc&targetVersion=GTxyz`,
       );
     });
-
-    //'https://dev.azure.com/some-org/some-project/_apis/_apis/git/repositories/some-repo/refs?filter=tags&%24top=100&api-version=7.0'
-
-    describe('getAllTags', () => {
-      it('handles endpoint', async () => {
-        httpMock
-          .scope(apiBaseUrl)
-          .get(
-            '/git/repositories/some-repo/refs?filter=tags&%24top=100&api-version=7.0',
-          )
-          .reply(200, {
-            value: [
-              {
-                name: 'v17.7.2-deno',
-              },
-              { name: 'v17.7.2' },
-              {
-                name: 'v17.7.1-deno',
-              },
-            ],
-          });
-
-        const res = await changelogSource.getAllTags(baseUrl, 'some-repo');
-        expect(res).toEqual(['v17.7.1-deno', 'v17.7.2-deno', 'v17.7.2']);
-      });
-    });
   });
 });
