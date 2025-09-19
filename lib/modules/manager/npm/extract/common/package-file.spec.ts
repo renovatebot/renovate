@@ -13,7 +13,6 @@ describe('modules/manager/npm/extract/common/package-file', () => {
   beforeEach(() => {
     Fixtures.reset();
     GlobalConfig.set({ localDir: '/', cacheDir: '/tmp/cache' });
-    vitest.clearAllMocks();
   });
 
   it('returns true for a valid packageManager with name@range (e.g. pnpm@8.15.4)', async () => {
