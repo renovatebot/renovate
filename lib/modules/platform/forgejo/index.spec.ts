@@ -556,7 +556,7 @@ describe('modules/platform/forgejo/index', () => {
       );
     });
 
-    it('should fall back to fast-forward-only merge method', async () => {
+    it('should select default merge method when it is allowed', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .get(`/repos/${initRepoCfg.repository}`)
@@ -577,57 +577,15 @@ describe('modules/platform/forgejo/index', () => {
       );
     });
 
-    it('should fall back to rebase-merge method', async () => {
+    it('should fall back to merge method as per ordered list when default not allowed', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .get(`/repos/${initRepoCfg.repository}`)
         .reply(200, {
           ...mockRepo,
-          allow_rebase: false,
-          allow_rebase_explicit: true,
-          default_merge_style: 'rebase-merge',
-        });
-      await initFakePlatform(scope);
-
-      await forgejo.initRepo(initRepoCfg);
-
-      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({
-          mergeMethod: 'rebase-merge',
-        }),
-      );
-    });
-
-    it('should fall back to squash merge method', async () => {
-      const scope = httpMock
-        .scope('https://code.forgejo.org/api/v1')
-        .get(`/repos/${initRepoCfg.repository}`)
-        .reply(200, {
-          ...mockRepo,
-          allow_rebase: false,
-          allow_squash_merge: true,
-          default_merge_style: 'squash',
-        });
-      await initFakePlatform(scope);
-
-      await forgejo.initRepo(initRepoCfg);
-
-      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({
-          mergeMethod: 'squash',
-        }),
-      );
-    });
-
-    it('should fall back to standard merge method', async () => {
-      const scope = httpMock
-        .scope('https://code.forgejo.org/api/v1')
-        .get(`/repos/${initRepoCfg.repository}`)
-        .reply(200, {
-          ...mockRepo,
-          allow_rebase: false,
           allow_merge_commits: true,
-          default_merge_style: 'merge',
+          allow_squash_merge: false,
+          default_merge_style: 'squash',
         });
       await initFakePlatform(scope);
 
@@ -637,6 +595,21 @@ describe('modules/platform/forgejo/index', () => {
         expect.objectContaining({
           mergeMethod: 'merge',
         }),
+      );
+    });
+
+    it('should throw if unknown default merge style is configured', async () => {
+      const scope = httpMock
+        .scope('https://code.forgejo.org/api/v1')
+        .get(`/repos/${initRepoCfg.repository}`)
+        .reply(200, {
+          ...mockRepo,
+          default_merge_style: 'unknown',
+        });
+      await initFakePlatform(scope);
+
+      await expect(forgejo.initRepo(initRepoCfg)).rejects.toThrow(
+        REPOSITORY_BLOCKED,
       );
     });
 
