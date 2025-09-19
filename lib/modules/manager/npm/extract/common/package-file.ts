@@ -4,8 +4,8 @@ import { CONFIG_VALIDATION } from '../../../../../constants/error-messages';
 import { logger } from '../../../../../logger';
 import { regEx } from '../../../../../util/regex';
 import type { PackageDependency, PackageFileContent } from '../../../types';
-import { PackageJson } from '../../schema';
 import type { NpmManagerData } from '../../types';
+import { loadPackageJson } from '../../utils';
 import type { NpmPackage, NpmPackageDependency } from '../types';
 import {
   extractDependency,
@@ -149,17 +149,15 @@ export function extractPackageJson(
   };
 }
 
-export function hasPackageManager(content: string): boolean {
+export async function hasPackageManager(
+  packageJsonDir: string,
+): Promise<boolean> {
   logger.trace(`npm.hasPackageManager from package.json`);
-  try {
-    const packageJsonResult = PackageJson.parse(content);
 
-    return (
-      is.nonEmptyString(packageJsonResult?.packageManager?.name) &&
-      is.nonEmptyString(packageJsonResult?.packageManager?.version)
-    );
-  } catch {
-    logger.debug(`Invalid JSON`);
-  }
-  return false;
+  const packageJsonResult = await loadPackageJson(packageJsonDir);
+
+  return (
+    is.nonEmptyString(packageJsonResult?.packageManager?.name) &&
+    is.nonEmptyString(packageJsonResult?.packageManager?.version)
+  );
 }

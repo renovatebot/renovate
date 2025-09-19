@@ -3,9 +3,11 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import {
   findLocalSiblingOrParent,
+  getParentDir,
   getSiblingFileName,
   readLocalFile,
 } from '../../../../util/fs';
+import { ensureLocalPath } from '../../../../util/fs/util';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { NpmDatasource } from '../../../datasource/npm';
 
@@ -270,11 +272,13 @@ export async function extractAllPackageFiles(
           const yarnConfig = loadConfigFromYarnrcYml(content);
 
           if (yarnConfig?.catalogs) {
-            const hasPackageManager = await resolvePackageManager(packageFile);
+            const hasPackageManagerResult = await hasPackageManager(
+              getParentDir(ensureLocalPath(packageFile)),
+            );
             const catalogsDeps = await extractYarnCatalogs(
               yarnConfig.catalogs,
               packageFile,
-              hasPackageManager,
+              hasPackageManagerResult,
             );
             if (catalogsDeps) {
               npmFiles.push({
@@ -292,20 +296,4 @@ export async function extractAllPackageFiles(
 
   await postExtract(npmFiles);
   return npmFiles;
-}
-
-async function resolvePackageManager(packageFile: string): Promise<boolean> {
-  let hasPkgManager = false;
-  const packageJson = await findLocalSiblingOrParent(
-    packageFile,
-    'package.json',
-  );
-
-  if (packageJson) {
-    const content = await readLocalFile(packageJson, 'utf8');
-
-    hasPkgManager = content ? hasPackageManager(content) : false;
-  }
-
-  return hasPkgManager;
 }

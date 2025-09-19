@@ -1,49 +1,67 @@
+vi.mock('fs-extra', async () =>
+  (
+    await vi.importActual<typeof import('~test/fixtures')>('~test/fixtures')
+  ).fsExtra(),
+);
+
+import { GlobalConfig } from '../../../../../config/global';
 import { logger } from '../../../../../logger';
 import { hasPackageManager } from './package-file';
+import { Fixtures } from '~test/fixtures';
 
 describe('modules/manager/npm/extract/common/package-file', () => {
   beforeEach(() => {
+    Fixtures.reset();
+    GlobalConfig.set({ localDir: '/', cacheDir: '/tmp/cache' });
     vitest.clearAllMocks();
   });
 
-  it('returns true for a valid packageManager with name@range (e.g. pnpm@8.15.4)', () => {
-    const content = JSON.stringify({ packageManager: 'pnpm@8.15.4' });
-    expect(hasPackageManager(content)).toBe(true);
+  it('returns true for a valid packageManager with name@range (e.g. pnpm@8.15.4)', async () => {
+    Fixtures.mock({
+      '/repo/package.json': JSON.stringify({ packageManager: 'pnpm@8.15.4' }),
+    });
+    await expect(hasPackageManager('/repo')).resolves.toBe(true);
 
     expect(logger.trace).toHaveBeenCalledWith(
       'npm.hasPackageManager from package.json',
     );
-    expect(logger.debug).not.toHaveBeenCalled();
   });
 
-  it('returns true for a valid range like npm@^9', () => {
-    const content = JSON.stringify({ packageManager: 'npm@^9' });
-    expect(hasPackageManager(content)).toBe(true);
+  it('returns true for a valid range like npm@^9', async () => {
+    Fixtures.mock({
+      '/repo/package.json': JSON.stringify({ packageManager: 'npm@^9' }),
+    });
+    await expect(hasPackageManager('/repo')).resolves.toBe(true);
   });
 
-  it('returns true for yarn classic pin yarn@1.22.19', () => {
-    const content = JSON.stringify({ packageManager: 'yarn@1.22.19' });
-    expect(hasPackageManager(content)).toBe(true);
+  it('returns true for yarn classic pin yarn@1.22.19', async () => {
+    Fixtures.mock({
+      '/repo/package.json': JSON.stringify({ packageManager: 'yarn@1.22.19' }),
+    });
+    await expect(hasPackageManager('/repo')).resolves.toBe(true);
   });
 
-  it("returns false when packageManager does not contain '@' (e.g. 'npm')", () => {
-    const content = JSON.stringify({ packageManager: 'npm' });
-    expect(hasPackageManager(content)).toBe(false);
+  it("returns false when packageManager does not contain '@' (e.g. 'npm')", async () => {
+    Fixtures.mock({
+      '/repo/package.json': JSON.stringify({ packageManager: 'npm' }),
+    });
+    await expect(hasPackageManager('/repo')).resolves.toBe(false);
   });
 
-  it('returns false when packageManager is missing', () => {
-    const content = JSON.stringify({ name: 'demo' });
-    expect(hasPackageManager(content)).toBe(false);
+  it('returns false when packageManager is missing', async () => {
+    Fixtures.mock({ '/repo/package.json': JSON.stringify({ name: 'demo' }) });
+    await expect(hasPackageManager('/repo')).resolves.toBe(false);
   });
 
-  it("returns false and logs 'Invalid JSON' when content is not valid JSON", () => {
-    const bad = '{ not: valid json';
-    expect(hasPackageManager(bad)).toBe(false);
-    expect(logger.debug).toHaveBeenCalledWith('Invalid JSON');
+  it('returns false when package.json is invalid', async () => {
+    Fixtures.mock({ '/repo/package.json': '{ not: valid json' });
+    await expect(hasPackageManager('/repo')).resolves.toBe(false);
   });
 
-  it('returns false if packageManager is an empty string', () => {
-    const content = JSON.stringify({ packageManager: '' });
-    expect(hasPackageManager(content)).toBe(false);
+  it('returns false if packageManager is an empty string', async () => {
+    Fixtures.mock({
+      '/repo/package.json': JSON.stringify({ packageManager: '' }),
+    });
+    await expect(hasPackageManager('/repo')).resolves.toBe(false);
   });
 });

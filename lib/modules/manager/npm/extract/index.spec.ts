@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { extractAllPackageFiles } from '..';
 import { logger } from '../../../../logger';
+import * as fsUtil from '../../../../util/fs/util';
 import type { ExtractConfig } from '../../types';
 import { postExtract } from './post';
 import * as npmExtract from '.';
@@ -1288,6 +1289,12 @@ describe('modules/manager/npm/extract/index', () => {
       `;
       fs.readLocalFile.mockResolvedValueOnce(yarnrc);
 
+      fs.getParentDir.mockReturnValue('./');
+
+      vi.spyOn(fsUtil, 'ensureLocalPath').mockImplementation(
+        (p) => './.yarnrc.yml',
+      );
+
       fs.readLocalFile.mockResolvedValueOnce(input02Content);
 
       const res = await extractAllPackageFiles(defaultExtractConfig, [
@@ -1326,13 +1333,11 @@ describe('modules/manager/npm/extract/index', () => {
           list:
             is-positive: 1.0.0
       `;
-      fs.findLocalSiblingOrParent.mockImplementation(
-        async (_, name) =>
-          await new Promise((resolve) =>
-            resolve(name === 'package.json' ? 'package.json' : null),
-          ),
+      fs.getParentDir.mockReturnValue('./');
+
+      vi.spyOn(fsUtil, 'ensureLocalPath').mockImplementation(
+        (p) => './.yarnrc.yml',
       );
-      fs.findLocalSiblingOrParent.mockResolvedValue('package.json');
 
       fs.readLocalFile.mockResolvedValueOnce(yarnrc);
       fs.readLocalFile.mockResolvedValueOnce(input01PackageManager);
@@ -1372,12 +1377,12 @@ describe('modules/manager/npm/extract/index', () => {
             is-positive: 1.0.0
       `;
 
-      fs.findLocalSiblingOrParent.mockImplementation(
-        async (_, name) =>
-          await new Promise((resolve) =>
-            resolve(name === 'package.json' ? 'package.json' : null),
-          ),
+      fs.getParentDir.mockReturnValue('./');
+
+      vi.spyOn(fsUtil, 'ensureLocalPath').mockImplementation(
+        (p) => './.yarnrc.yml',
       );
+
       fs.readLocalFile.mockResolvedValueOnce(yarnrc);
 
       fs.readLocalFile.mockResolvedValueOnce(
