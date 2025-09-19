@@ -2574,6 +2574,7 @@ Supported lock files:
 | `nix`             | `flake.lock`                                       |
 | `npm`             | `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock` |
 | `nuget`           | `packages.lock.json`                               |
+| `paket`           | `paket.lock`                                       |
 | `pep621`          | `pdm.lock`, `uv.lock`                              |
 | `pip-compile`     | `requirements.txt`                                 |
 | `pipenv`          | `Pipfile.lock`                                     |
