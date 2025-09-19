@@ -196,7 +196,17 @@ async function checkExistingBranch(
   return existingContent;
 }
 
-// check if current !== newString and return 1 if it does or 0 if it doesn't
+/**
+ * Check if an update from `current` to `newString` should be performed and return 1 if so.
+ *
+ * @remarks
+ * Useful for counting the number of updates to do.
+ *
+ * @param {string|undefined} current The current value (if undefined then no update is required)
+ * @param {string|undefined} newString The new value (if undefined then no update is required)
+ *
+ * @returns 1 if `current !== newString` and 0 if they are equal or at least one is undefined.
+ */
 function updatedToInt(
   current: string | undefined,
   newString: string | undefined,
