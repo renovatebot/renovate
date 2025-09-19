@@ -196,6 +196,18 @@ async function checkExistingBranch(
   return existingContent;
 }
 
+// check if current !== newString and return 1 if it does or 0 if it doesn't
+function updatedToInt(
+  current: string | undefined,
+  newString: string | undefined,
+): number {
+  if (current && newString && newString !== current) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
 export async function doAutoReplace(
   upgrade: BranchUpgradeConfig,
   existingContent: string,
@@ -225,11 +237,6 @@ export async function doAutoReplace(
     return await checkExistingBranch(upgrade, existingContent);
   }
 
-  // check if current !== newString and return 1 if it does or 0 if it doesn't
-  const updatedToInt = (
-    current: string | undefined,
-    newString: string | undefined,
-  ): number => (current && newString && newString !== current ? 1 : 0);
   // count how many strings need to be updated
   const changedCount =
     updatedToInt(depName, newName) +
