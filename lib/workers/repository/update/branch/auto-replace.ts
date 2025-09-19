@@ -202,8 +202,8 @@ async function checkExistingBranch(
  * @remarks
  * Useful for counting the number of updates to do.
  *
- * @param {string|undefined} current The current value (if undefined then no update is required)
- * @param {string|undefined} newString The new value (if undefined then no update is required)
+ * @param current The current value (if undefined then no update is required)
+ * @param newString The new value (if undefined then no update is required)
  *
  * @returns 1 if `current !== newString` and 0 if they are equal or at least one is undefined.
  */
