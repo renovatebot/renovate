@@ -459,4 +459,29 @@ describe('modules/platform/azure/azure-helper', () => {
       expect(res).toEqual(allTeams);
     });
   });
+
+  describe('getTags', () => {
+    it('should get tags', async () => {
+      const tags = [{ name: 'tag1' }, { name: 'tag2' }];
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getRefs: vi.fn(() => tags),
+          }) as any,
+      );
+      const res = await azureHelper.getTags('repoId');
+      expect(res).toEqual(tags);
+    });
+
+    it('should not get tags', async () => {
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getRefs: vi.fn(() => []),
+          }) as any,
+      );
+      const res = await azureHelper.getTags('branch');
+      expect(res).toHaveLength(0);
+    });
+  });
 });
