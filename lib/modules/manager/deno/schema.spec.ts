@@ -1,14 +1,37 @@
 import {
-  CompilerOptions,
+  CompilerOptionsTypes,
+  CompilerOptionsJsxImportSource,
+  CompilerOptionsJsxImportSourceTypes,
   DenoDependency,
   Imports,
   Lint,
+  Lock,
   Scopes,
   Tasks,
   Workspace,
 } from './schema';
 
 describe('modules/manager/deno/schema', () => {
+  describe('Lock', () => {
+    it('parses lock as string', () => {
+      expect(Lock.parse('deno.lock')).toEqual('deno.lock');
+    });
+
+    it('parses lock as object', () => {
+      expect(Lock.parse({ path: 'genuine-deno.lock' })).toEqual(
+        'genuine-deno.lock',
+      );
+    });
+
+    it('parses lock as boolean true', () => {
+      expect(Lock.parse(true)).toEqual('deno.lock');
+    });
+
+    it('parses lock as boolean false', () => {
+      expect(Lock.parse(false)).toEqual(false);
+    });
+  });
+
   describe('Imports', () => {
     it('parses default values', () => {
       expect(Imports.parse({})).toEqual([]);
@@ -91,17 +114,9 @@ describe('modules/manager/deno/schema', () => {
     });
   });
 
-  describe('CompilerOptions', () => {
-    it('parses default values', () => {
-      expect(CompilerOptions.parse({})).toEqual([]);
-    });
-
+  describe('CompilerOptionsTypes', () => {
     it('parses compilerOptions.types', () => {
-      expect(
-        CompilerOptions.parse({
-          types: ['npm:@types/dep1'],
-        }),
-      ).toEqual([
+      expect(CompilerOptionsTypes.parse(['npm:@types/dep1'])).toEqual([
         {
           currentRawValue: 'npm:@types/dep1',
           currentValue: undefined,
@@ -112,13 +127,11 @@ describe('modules/manager/deno/schema', () => {
         },
       ]);
     });
+  });
 
+  describe('CompilerOptionsJsxImportSource', () => {
     it('parses compilerOptions.jsxImportSource', () => {
-      expect(
-        CompilerOptions.parse({
-          jsxImportSource: 'npm:dep1',
-        }),
-      ).toEqual([
+      expect(CompilerOptionsJsxImportSource.parse('npm:dep1')).toEqual([
         {
           currentRawValue: 'npm:dep1',
           currentValue: undefined,
@@ -129,12 +142,12 @@ describe('modules/manager/deno/schema', () => {
         },
       ]);
     });
+  });
 
+  describe('CompilerOptionsJsxImportSourceTypes', () => {
     it('parses compilerOptions.jsxImportSourceTypes', () => {
       expect(
-        CompilerOptions.parse({
-          jsxImportSourceTypes: 'npm:@types/dep1',
-        }),
+        CompilerOptionsJsxImportSourceTypes.parse('npm:@types/dep1'),
       ).toEqual([
         {
           currentRawValue: 'npm:@types/dep1',
@@ -173,9 +186,10 @@ describe('modules/manager/deno/schema', () => {
 
   describe('Workspace', () => {
     it('parses workspace array', () => {
-      expect(Workspace.parse(['packages/*', 'libs/*'])).toEqual({
-        workspaces: ['packages/*', 'libs/*'],
-      });
+      expect(Workspace.parse(['packages/*', 'libs/*'])).toEqual([
+        'packages/*',
+        'libs/*',
+      ]);
     });
 
     it('parses workspace object', () => {
@@ -183,9 +197,7 @@ describe('modules/manager/deno/schema', () => {
         Workspace.parse({
           members: ['packages/*', 'libs/*'],
         }),
-      ).toEqual({
-        workspaces: ['packages/*', 'libs/*'],
-      });
+      ).toEqual(['packages/*', 'libs/*']);
     });
   });
 

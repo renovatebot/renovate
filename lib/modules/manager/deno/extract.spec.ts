@@ -1,8 +1,13 @@
 import { codeBlock } from 'common-tags';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
-import { collectPackageJson, extractAllPackageFiles } from './extract';
-import { DenoExtract } from './schema';
+import {
+  collectPackageJson,
+  extractAllPackageFiles,
+  getLockFiles,
+  processDenoExtract,
+  processImportMap,
+} from './extract';
 
 vi.mock('../../../util/fs');
 // used in detectNodeCompatWorkspaces()
@@ -11,56 +16,23 @@ vi.mock('find-packages', () => ({
 }));
 
 describe('modules/manager/deno/extract', () => {
-  describe('DenoExtract() with I/O', () => {
-    it('lock is string', async () => {
-      fs.localPathIsFile.mockResolvedValue(true);
-      const result = await DenoExtract.parseAsync({
-        content: JSON.stringify({
-          lock: 'deno.lock',
-        }),
-        fileName: 'deno.json',
-      });
-      expect(result).toEqual([
-        {
-          deps: [],
-          lockFiles: ['deno.lock'],
-          managerData: {
-            packageName: undefined,
-            workspaces: undefined,
-          },
-          packageFile: 'deno.json',
-          packageFileVersion: undefined,
-        },
-      ]);
-    });
-
-    it('lock is object', async () => {
-      fs.localPathIsFile.mockResolvedValue(true);
-      const result = await DenoExtract.parseAsync({
-        content: JSON.stringify({
-          lock: {
-            path: 'genuine-deno.lock',
-          },
-        }),
-        fileName: 'deno.json',
-      });
-      expect(result).toEqual([
-        {
-          deps: [],
-          lockFiles: ['genuine-deno.lock'],
-          managerData: {
-            packageName: undefined,
-            workspaces: undefined,
-          },
-          packageFile: 'deno.json',
-          packageFileVersion: undefined,
-        },
-      ]);
-    });
-
-    it('importMap', async () => {
+  describe('getLockFiles()', () => {
+    it('found lock file', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('deno.lock');
       fs.localPathIsFile.mockResolvedValue(true);
+      const result = await getLockFiles('deno.lock', 'deno.json');
+      expect(result).toEqual(['deno.lock']);
+    });
+
+    it('not found lock file', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('package-lock.json');
+      const result = await getLockFiles(false, 'deno.json');
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('processImportMap()', () => {
+    it('importMap', async () => {
       fs.readLocalFile.mockResolvedValueOnce(
         JSON.stringify({
           imports: {
@@ -73,110 +45,83 @@ describe('modules/manager/deno/extract', () => {
           },
         }),
       );
-      const result = await DenoExtract.parseAsync({
-        content: JSON.stringify({
+      const result = await processImportMap('import_map.json', 'deno.json', [
+        'deno.lock',
+      ]);
+
+      expect(result).toStrictEqual({
+        deps: [
+          {
+            currentRawValue: 'jsr:@scope/name@3.0.0',
+            currentValue: '3.0.0',
+            datasource: 'jsr',
+            depName: '@scope/name',
+            depType: 'imports',
+            versioning: 'deno',
+          },
+          {
+            currentRawValue: 'jsr:@scope/name@0.2.0',
+            currentValue: '0.2.0',
+            datasource: 'jsr',
+            depName: '@scope/name',
+            depType: 'scopes',
+            versioning: 'deno',
+          },
+        ],
+        lockFiles: ['deno.lock'],
+        managerData: {
+          importMapReferrer: 'deno.json',
+        },
+        packageFile: 'import_map.json',
+      });
+    });
+
+    it('remote importMap', async () => {
+      const result = await processImportMap(
+        'https://deno.land/x/import_map.json',
+        'demo.json',
+        [],
+      );
+
+      expect(result).toBeNull();
+    });
+
+    it('importMap path specified but not exists', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      const result = await processImportMap('import_map.json', 'demo.json', []);
+
+      expect(result).toBeNull();
+    });
+
+    it('invalid importMap file', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('invalid');
+      const result = await processImportMap('import_map.json', 'demo.json', []);
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('processDenoExtract()', () => {
+    it('importMap', async () => {
+      const result = await processDenoExtract({
+        content: {
+          lock: undefined,
+          dependencies: [],
           importMap: 'import_map.json',
-        }),
+          managerData: {
+            workspaces: undefined,
+          },
+        },
         fileName: 'deno.json',
       });
       expect(result).toStrictEqual([
         {
           deps: [],
-          lockFiles: ['deno.lock'],
-          managerData: {
-            workspaces: undefined,
-          },
-          packageFile: 'deno.json',
-        },
-        {
-          deps: [
-            {
-              currentRawValue: 'jsr:@scope/name@3.0.0',
-              currentValue: '3.0.0',
-              datasource: 'jsr',
-              depName: '@scope/name',
-              depType: 'imports',
-              versioning: 'deno',
-            },
-            {
-              currentRawValue: 'jsr:@scope/name@0.2.0',
-              currentValue: '0.2.0',
-              datasource: 'jsr',
-              depName: '@scope/name',
-              depType: 'scopes',
-              versioning: 'deno',
-            },
-          ],
-          lockFiles: ['deno.lock'],
-          managerData: {
-            importMapReferrer: 'deno.json',
-          },
-          packageFile: 'import_map.json',
-        },
-      ]);
-    });
-
-    it('remote importMap', async () => {
-      const result = await DenoExtract.parseAsync({
-        content: JSON.stringify({
-          importMap: 'https://deno.land/x/import_map.json',
-        }),
-        fileName: 'deno.json',
-      });
-      expect(result).toEqual([
-        {
-          deps: [],
           lockFiles: [],
           managerData: {
-            packageName: undefined,
             workspaces: undefined,
           },
           packageFile: 'deno.json',
-          packageFileVersion: undefined,
-        },
-      ]);
-    });
-
-    it('importMap path specified but not exists', async () => {
-      fs.readLocalFile.mockResolvedValueOnce(null);
-      const result = await DenoExtract.parseAsync({
-        content: JSON.stringify({
-          importMap: 'import_map.json',
-        }),
-        fileName: 'deno.json',
-      });
-      expect(result).toEqual([
-        {
-          deps: [],
-          lockFiles: [],
-          managerData: {
-            packageName: undefined,
-            workspaces: undefined,
-          },
-          packageFile: 'deno.json',
-          packageFileVersion: undefined,
-        },
-      ]);
-    });
-
-    it('invalid importMap file', async () => {
-      fs.readLocalFile.mockResolvedValueOnce('invalid');
-      const result = await DenoExtract.parseAsync({
-        content: JSON.stringify({
-          importMap: 'import_map.json',
-        }),
-        fileName: 'deno.json',
-      });
-      expect(result).toEqual([
-        {
-          deps: [],
-          lockFiles: [],
-          managerData: {
-            packageName: undefined,
-            workspaces: undefined,
-          },
-          packageFile: 'deno.json',
-          packageFileVersion: undefined,
         },
       ]);
     });

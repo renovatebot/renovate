@@ -1,11 +1,5 @@
 import validateNpmPackageName from 'validate-npm-package-name';
 import { z } from 'zod';
-import { logger } from '../../../logger';
-import {
-  getSiblingFileName,
-  localPathIsFile,
-  readLocalFile,
-} from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import {
   Json,
@@ -16,7 +10,7 @@ import {
 import { joinUrlParts } from '../../../util/url';
 import { extractJsrPackageName } from '../../datasource/jsr/util';
 import { id as denoVersioningId, isValid } from '../../versioning/deno';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency } from '../types';
 import type { DenoManagerData } from './types';
 import { denoLandRegex, depValueRegex } from './utils';
 
@@ -84,115 +78,6 @@ export const DenoLock = Json.pipe(
     lockfileVersion: Number(version),
   };
 });
-
-export const Workspace = z
-  .union([
-    z.array(z.string()),
-    z.object({
-      members: z.array(z.string()),
-    }),
-  ])
-  .optional()
-  .transform((workspaces): string[] | undefined => {
-    if (!workspaces) {
-      return undefined;
-    }
-    return 'members' in workspaces ? workspaces.members : workspaces;
-  })
-  .transform((workspaces): DenoManagerData => ({ workspaces }));
-
-export const Imports = LooseRecord(z.string())
-  .catch({})
-  .transform((imports): PackageDependency<DenoManagerData>[] => {
-    const deps = [];
-    for (const depValue of Object.values(imports)) {
-      const dep = DenoDependency.parse({ depValue, depType: 'imports' });
-      deps.push(dep);
-    }
-    return deps;
-  });
-
-export const Scopes = LooseRecord(LooseRecord(z.string()).catch({}))
-  .catch({})
-  .transform((scopes): PackageDependency<DenoManagerData>[] => {
-    const deps = [];
-    for (const scopeDependencies of Object.values(scopes)) {
-      for (const depValue of Object.values(scopeDependencies)) {
-        const dep = DenoDependency.parse({ depValue, depType: 'scopes' });
-        deps.push(dep);
-      }
-    }
-    return deps;
-  });
-
-/**
- * dependency in `tasks` can't sync lock file updating due to `deno install` is not supported
- */
-export const Tasks = LooseRecord(
-  z.union([z.string(), z.object({ command: z.string().optional() })]),
-)
-  .catch({})
-  .transform((tasks): PackageDependency<DenoManagerData>[] => {
-    const deps = [];
-    for (const taskValue of Object.values(tasks)) {
-      const depValue =
-        typeof taskValue === 'string' ? taskValue : taskValue.command;
-      if (depValue) {
-        const dep = DenoDependency.parse({ depValue, depType: 'tasks' });
-        deps.push(dep);
-      }
-    }
-    return deps;
-  });
-
-export const CompilerOptions = z
-  .object({
-    types: LooseArray(z.string()).catch([]),
-    jsxImportSource: z.string().optional(),
-    jsxImportSourceTypes: z.string().optional(),
-  })
-  .transform((compilerOptions): PackageDependency<DenoManagerData>[] => {
-    const deps = [];
-
-    for (const depValue of compilerOptions.types) {
-      const dep = DenoDependency.parse({
-        depValue,
-        depType: 'compilerOptions',
-      });
-      deps.push(dep);
-    }
-
-    if (compilerOptions.jsxImportSource) {
-      const dep = DenoDependency.parse({
-        depValue: compilerOptions.jsxImportSource,
-        depType: 'compilerOptions',
-      });
-      deps.push(dep);
-    }
-
-    if (compilerOptions.jsxImportSourceTypes) {
-      const dep = DenoDependency.parse({
-        depValue: compilerOptions.jsxImportSourceTypes,
-        depType: 'compilerOptions',
-      });
-      deps.push(dep);
-    }
-
-    return deps;
-  });
-
-export const Lint = z
-  .object({
-    plugins: LooseArray(z.string()).catch([]),
-  })
-  .transform((lint): PackageDependency<DenoManagerData>[] => {
-    const deps = [];
-    for (const depValue of lint.plugins) {
-      const dep = DenoDependency.parse({ depValue, depType: 'lint' });
-      deps.push(dep);
-    }
-    return deps;
-  });
 
 export const DenoDependency = z
   .object({
@@ -283,33 +168,119 @@ export const DenoDependency = z
     };
   });
 
-export const ImportMap = Json.pipe(
-  z.object({
-    imports: z.optional(Imports).default({}),
-    scopes: z.optional(Scopes).default({}),
-  }),
-);
-export type ImportMap = z.infer<typeof ImportMap>;
+export const Imports = LooseRecord(z.string())
+  .catch({})
+  .transform((imports) =>
+    Object.values(imports).map((depValue) => ({
+      depValue,
+      depType: 'imports',
+    })),
+  )
+  .pipe(z.array(DenoDependency));
 
-// https://github.com/denoland/deno/blob/410c66ad0d1ce8a5a3b1a2f06c932fb66f25a3c6/cli/schemas/config-file.v1.json
-export const DenoPackageFile = z
+export const Scopes = LooseRecord(LooseRecord(z.string()))
+  .catch({})
+  .transform((scopes) => {
+    const deps = [];
+    for (const scopeDependencies of Object.values(scopes)) {
+      for (const depValue of Object.values(scopeDependencies)) {
+        deps.push({ depValue, depType: 'scopes' });
+      }
+    }
+    return deps;
+  })
+  .pipe(z.array(DenoDependency));
+
+/**
+ * dependency in `tasks` can't sync lock file updating due to `deno install` is not supported
+ */
+export const Tasks = LooseRecord(
+  z.union([
+    z.string().transform((command) => command),
+    z.object({ command: z.string() }).transform((obj) => obj.command),
+  ]),
+)
+  .catch({})
+  .transform((tasks) => {
+    const deps = [];
+    for (const depValue of Object.values(tasks)) {
+      deps.push({ depValue, depType: 'tasks' });
+    }
+    return deps;
+  })
+  .pipe(z.array(DenoDependency));
+
+export const CompilerOptionsTypes = LooseArray(z.string())
+  .catch([])
+  .transform((types) =>
+    types.map((depValue) => ({ depValue, depType: 'compilerOptions' })),
+  )
+  .pipe(z.array(DenoDependency));
+
+export const CompilerOptionsJsxImportSource = z
+  .union([
+    z
+      .string()
+      .transform((depValue) => [{ depValue, depType: 'compilerOptions' }]),
+    z.undefined().transform(() => []),
+  ])
+  .pipe(z.array(DenoDependency));
+
+export const CompilerOptionsJsxImportSourceTypes = z
+  .union([
+    z
+      .string()
+      .transform((depValue) => [{ depValue, depType: 'compilerOptions' }]),
+    z.undefined().transform(() => []),
+  ])
+  .pipe(z.array(DenoDependency));
+
+export const Lint = z
   .object({
-    lock: z
-      .union([
-        z.string(),
-        z.boolean(),
-        z.object({
-          path: z.string().optional(),
-        }),
-      ])
-      .optional(),
+    plugins: LooseArray(z.string()).catch([]),
+  })
+  .transform((lint) =>
+    lint.plugins.map((depValue) => ({ depValue, depType: 'lint' })),
+  )
+  .pipe(z.array(DenoDependency));
+
+export const Lock = z.union([
+  z.string().transform((path) => path),
+  z.boolean().transform((enabled) => enabled && 'deno.lock'),
+  z
+    .object({
+      path: z.string().optional(),
+    })
+    .transform((obj) => obj.path),
+]);
+
+export const Workspace = z.union([
+  z.array(z.string()).transform((workspaces) => workspaces),
+  z
+    .object({
+      members: z.array(z.string()),
+    })
+    .transform((workspace) => workspace.members),
+]);
+
+const DenoPackageFile = z
+  .object({
+    lock: z.optional(Lock),
+    workspace: z.optional(Workspace),
+    importMap: z.string().optional(),
     imports: z.optional(Imports).default({}),
     scopes: z.optional(Scopes).default({}),
-    importMap: z.string().optional(),
     tasks: z.optional(Tasks).default({}),
-    compilerOptions: z.optional(CompilerOptions).default({}),
+    compilerOptions: z
+      .optional(
+        z.object({
+          types: CompilerOptionsTypes,
+          jsxImportSource: CompilerOptionsJsxImportSource,
+          jsxImportSourceTypes: CompilerOptionsJsxImportSourceTypes,
+        }),
+      )
+      .default({}),
     lint: z.optional(Lint).default({}),
-    workspace: Workspace,
   })
   .transform(
     ({
@@ -325,105 +296,30 @@ export const DenoPackageFile = z
       lock,
       importMap,
       managerData: {
-        workspaces: workspace?.workspaces,
+        workspaces: workspace,
       },
       dependencies: [
         ...imports,
         ...scopes,
         ...tasks,
-        ...compilerOptions,
+        ...compilerOptions.types,
+        ...compilerOptions.jsxImportSource,
+        ...compilerOptions.jsxImportSourceTypes,
         ...lint,
       ],
     }),
   );
-export type DenoPackageFile = z.infer<typeof DenoPackageFile>;
 
-export const DenoExtract = z
-  .object({
-    content: Jsonc.pipe(DenoPackageFile),
-    fileName: z.string(),
-  })
-  .transform(async (data) => {
-    // handle lock file
-    const { content, fileName } = data;
-
-    let lockFile: string | undefined;
-    if (content.lock) {
-      const lock = content.lock;
-      if (typeof lock === 'string' && (await localPathIsFile(lock))) {
-        lockFile = lock;
-      } else if (
-        typeof lock !== 'string' &&
-        typeof lock !== 'boolean' &&
-        'path' in lock &&
-        lock.path &&
-        (await localPathIsFile(lock.path))
-      ) {
-        lockFile = lock.path;
-      }
-    }
-
-    if (!lockFile) {
-      const siblingLockFile = getSiblingFileName(fileName, 'deno.lock');
-      if (await localPathIsFile(siblingLockFile)) {
-        lockFile = siblingLockFile;
-      }
-    }
-
-    const lockFiles = lockFile ? [lockFile] : [];
-    return { ...data, lockFiles };
-  })
-  .transform(async (data) => {
-    // handle import map
-    const { content, fileName, lockFiles } = data;
-
-    let importMapPackageFile: PackageFile<DenoManagerData> | null = null;
-    if (content.importMap) {
-      const importMapPath = content.importMap;
-      if (!importMapPath.startsWith('http')) {
-        const importMap = await readLocalFile(importMapPath, 'utf8');
-        if (importMap) {
-          try {
-            const importMapJson = ImportMap.parse(importMap);
-            const importMapDeps: PackageDependency[] = [];
-
-            importMapDeps.push(...importMapJson.imports);
-            importMapDeps.push(...importMapJson.scopes);
-
-            importMapPackageFile = {
-              deps: importMapDeps,
-              packageFile: importMapPath,
-              managerData: {
-                importMapReferrer: fileName,
-              },
-              lockFiles,
-            };
-          } catch (err) {
-            logger.error({ err }, `Error parsing ${importMapPath}`);
-          }
-        }
-      }
-    }
-
-    return { ...data, importMapPackageFile };
-  })
-  .transform(
-    ({
-      content,
-      fileName,
-      lockFiles,
-      importMapPackageFile,
-    }): PackageFile<DenoManagerData>[] => {
-      const packageFile: PackageFile<DenoManagerData> = {
-        deps: content.dependencies,
-        packageFile: fileName,
-        managerData: content.managerData,
-        lockFiles,
-      } satisfies PackageFile<DenoManagerData>;
-
-      return [packageFile, importMapPackageFile].filter(
-        Boolean,
-      ) as PackageFile<DenoManagerData>[];
-    },
-  );
+export const DenoExtract = z.object({
+  content: Jsonc.pipe(DenoPackageFile),
+  fileName: z.string(),
+});
 export type DenoExtract = z.infer<typeof DenoExtract>;
+
+export const ImportMap = Json.pipe(
+  z.object({
+    imports: z.optional(Imports).default({}),
+    scopes: z.optional(Scopes).default({}),
+  }),
+);
+export type ImportMap = z.infer<typeof ImportMap>;
