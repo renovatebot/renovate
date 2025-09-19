@@ -4,9 +4,9 @@ vi.mock('fs-extra', async () =>
   ).fsExtra(),
 );
 
+import { GlobalConfig } from '../../../config/global';
 import type { LockFile } from './types';
 import { composeLockFile, loadPackageJson, parseLockFile } from './utils';
-import { GlobalConfig } from '../../../config/global';
 import { Fixtures } from '~test/fixtures';
 
 describe('modules/manager/npm/utils', () => {
