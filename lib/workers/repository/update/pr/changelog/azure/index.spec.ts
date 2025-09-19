@@ -407,5 +407,31 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
         ).toBe(false);
       });
     });
+
+    describe('getRepositoryFromUrl', () => {
+      it('extracts repository name from Azure URLs correctly', () => {
+        const testCases = [
+          // Format: [sourceUrl, expectedRepoName]
+          ['https://dev.azure.com/org/project/_git/repo', 'repo'],
+          [
+            'https://dev.azure.com/org/project/_git/complex-repo-name',
+            'complex-repo-name',
+          ],
+          ['https://dev.azure.com/org/project/_git/nested/repo', 'repo'],
+          ['https://dev.azure.com/org/multi/level/project/_git/repo', 'repo'],
+          ['https://dev.azure.com/org/project/_git/repo/', 'repo'],
+        ];
+
+        for (const [sourceUrl, expectedRepo] of testCases) {
+          const config = partial<BranchUpgradeConfig>({
+            sourceUrl,
+          });
+
+          expect(changelogSource.getRepositoryFromUrl(config)).toBe(
+            expectedRepo,
+          );
+        }
+      });
+    });
   });
 });
