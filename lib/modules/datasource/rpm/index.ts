@@ -1,16 +1,11 @@
-import { Readable } from 'node:stream';
-import { gunzip } from 'node:zlib';
-import { promisify } from 'util';
+import { createGunzip } from 'node:zlib';
 import sax from 'sax';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
-import type { HttpResponse } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-
-const gunzipAsync = promisify(gunzip);
 
 export class RpmDatasource extends Datasource {
   static readonly id = 'rpm';
@@ -125,25 +120,9 @@ export class RpmDatasource extends Datasource {
     primaryGzipUrl: string,
     packageName: string,
   ): Promise<ReleaseResult | null> {
-    let response: HttpResponse<Buffer>;
-    let decompressedBuffer: Buffer;
-    try {
-      // primaryGzipUrl is a .gz file, need to extract it before parsing
-      response = await this.http.getBuffer(primaryGzipUrl);
-      if (response.body.length === 0) {
-        logger.debug(`Empty response body from getting ${primaryGzipUrl}.`);
-        throw new Error(`Empty response body from getting ${primaryGzipUrl}.`);
-      }
-      // decompress the gzipped file
-      decompressedBuffer = await gunzipAsync(response.body);
-    } catch (err) {
-      logger.debug(
-        `Failed to fetch or decompress ${primaryGzipUrl}: ${
-          err instanceof Error ? err.message : err
-        }`,
-      );
-      throw err;
-    }
+    const request = this.http.stream(primaryGzipUrl);
+    // primaryGzipUrl is a .gz file, need to extract it before parsing
+    const decompress = createGunzip();
 
     // Use sax streaming parser to handle large XML files efficiently
     // This allows us to parse the XML file without loading the entire file into memory.
@@ -195,22 +174,37 @@ export class RpmDatasource extends Datasource {
     });
 
     await new Promise<void>((resolve, reject) => {
-      let settled = false;
+      const emptyCheck = (): void => {
+        logger.debug(`Empty response body from getting ${primaryGzipUrl}.`);
+        reject(
+          new Error(`Empty response body from getting ${primaryGzipUrl}.`),
+        );
+      };
+      request.once('data', () => {
+        request.removeListener('end', emptyCheck);
+      });
+      request.on('end', emptyCheck);
+      request.on('error', (err: Error) => {
+        logger.debug(`Failed to fetch ${primaryGzipUrl}: ${err.message}`);
+        reject(err);
+      });
+      decompress.on('error', (err: Error) => {
+        logger.debug(`Failed to decompress ${primaryGzipUrl}: ${err.message}`);
+        reject(err);
+      });
       saxParser.on('error', (err: Error) => {
-        if (settled) {
-          return;
-        }
-        settled = true;
         logger.debug(`SAX parsing error in ${primaryGzipUrl}: ${err.message}`);
-        setImmediate(() => saxParser.removeAllListeners());
         reject(err);
       });
       saxParser.on('end', () => {
-        settled = true;
-        setImmediate(() => saxParser.removeAllListeners());
         resolve();
       });
-      Readable.from(decompressedBuffer).pipe(saxParser);
+
+      decompress.pipe(saxParser);
+      request.pipe(decompress);
+    }).finally(() => {
+      saxParser.removeAllListeners();
+      decompress.destroy();
     });
 
     if (Object.keys(releases).length === 0) {
