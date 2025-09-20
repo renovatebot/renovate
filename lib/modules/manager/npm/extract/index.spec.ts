@@ -1289,12 +1289,6 @@ describe('modules/manager/npm/extract/index', () => {
       `;
       fs.readLocalFile.mockResolvedValueOnce(yarnrc);
 
-      fs.getParentDir.mockReturnValue('./');
-
-      vi.spyOn(fsUtil, 'ensureLocalPath').mockImplementation(
-        (p) => './.yarnrc.yml',
-      );
-
       fs.readLocalFile.mockResolvedValueOnce(input02Content);
 
       const res = await extractAllPackageFiles(defaultExtractConfig, [
@@ -1333,11 +1327,6 @@ describe('modules/manager/npm/extract/index', () => {
           list:
             is-positive: 1.0.0
       `;
-      fs.getParentDir.mockReturnValue('./');
-
-      vi.spyOn(fsUtil, 'ensureLocalPath').mockImplementation(
-        (p) => './.yarnrc.yml',
-      );
 
       fs.readLocalFile.mockResolvedValueOnce(yarnrc);
       fs.readLocalFile.mockResolvedValueOnce(input01PackageManager);
@@ -1376,12 +1365,6 @@ describe('modules/manager/npm/extract/index', () => {
           list:
             is-positive: 1.0.0
       `;
-
-      fs.getParentDir.mockReturnValue('./');
-
-      vi.spyOn(fsUtil, 'ensureLocalPath').mockImplementation(
-        (p) => './.yarnrc.yml',
-      );
 
       fs.readLocalFile.mockResolvedValueOnce(yarnrc);
 

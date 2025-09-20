@@ -1,13 +1,13 @@
+import { GlobalConfig } from '../../../../../config/global';
+import { logger } from '../../../../../logger';
+import { hasPackageManager } from './package-file';
+import { Fixtures } from '~test/fixtures';
+
 vi.mock('fs-extra', async () =>
   (
     await vi.importActual<typeof import('~test/fixtures')>('~test/fixtures')
   ).fsExtra(),
 );
-
-import { GlobalConfig } from '../../../../../config/global';
-import { logger } from '../../../../../logger';
-import { hasPackageManager } from './package-file';
-import { Fixtures } from '~test/fixtures';
 
 describe('modules/manager/npm/extract/common/package-file', () => {
   beforeEach(() => {

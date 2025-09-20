@@ -1,13 +1,12 @@
 import is from '@sindresorhus/is';
+import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import {
   findLocalSiblingOrParent,
-  getParentDir,
   getSiblingFileName,
   readLocalFile,
 } from '../../../../util/fs';
-import { ensureLocalPath } from '../../../../util/fs/util';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { NpmDatasource } from '../../../datasource/npm';
 
@@ -273,7 +272,7 @@ export async function extractAllPackageFiles(
 
           if (yarnConfig?.catalogs) {
             const hasPackageManagerResult = await hasPackageManager(
-              getParentDir(ensureLocalPath(packageFile)),
+              upath.dirname(packageFile),
             );
             const catalogsDeps = await extractYarnCatalogs(
               yarnConfig.catalogs,
