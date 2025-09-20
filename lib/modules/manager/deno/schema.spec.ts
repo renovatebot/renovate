@@ -8,9 +8,9 @@ import {
   Lock,
   Scopes,
   Tasks,
-  Workspace,
   UpdateDenoJsonFile,
   UpdateImportMapJsonFile,
+  Workspace,
 } from './schema';
 
 describe('modules/manager/deno/schema', () => {
