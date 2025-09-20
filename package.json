@@ -170,7 +170,7 @@
     "@opentelemetry/sdk-trace-base": "2.1.0",
     "@opentelemetry/sdk-trace-node": "2.1.0",
     "@opentelemetry/semantic-conventions": "1.37.0",
-    "@pnpm/parse-overrides": "1001.0.2",
+    "@pnpm/parse-overrides": "1001.0.3",
     "@qnighy/marshal": "0.1.3",
     "@renovatebot/detect-tools": "1.1.0",
     "@renovatebot/kbpgp": "4.0.3",
