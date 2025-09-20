@@ -10,6 +10,8 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
 import * as nodeVersioning from '../../versioning/node';
 import * as npmVersioning from '../../versioning/npm';
+import * as rubyVersioning from '../../versioning/ruby';
+import * as semanticVersioning from '../../versioning/semver';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -176,9 +178,13 @@ function extractRunner(runner: string): PackageDependency | null {
 }
 
 const versionedActions: Record<string, string> = {
+  bun: npmVersioning.id,
+  deno: semanticVersioning.id,
   go: npmVersioning.id,
   node: nodeVersioning.id,
   python: npmVersioning.id,
+  ruby: rubyVersioning.id,
+
   // Not covered yet because they use different datasources/packageNames:
   // - dotnet
   // - java

@@ -605,7 +605,19 @@ describe('modules/manager/github-actions/extract', () => {
             - name: "Setup Node.js with latest"
               uses: actions/setup-node@v3
               with:
-                node-version: 'latest'`;
+                node-version: 'latest'
+            - name: "Setup Deno"
+              uses: actions/setup-deno@v2
+              with:
+                deno-version: '2.4.0'
+            - name: "Setup Bun"
+              uses: actions/setup-bun@v2
+              with:
+                bun-version: '1.2.0'
+            - name: "Setup Ruby"
+              uses: actions/setup-ruby@v1
+              with:
+                ruby-version: '3.4'`;
 
       const res = extractPackageFile(yamlContent, 'workflow.yml');
       expect(res?.deps).toMatchObject([
@@ -709,8 +721,34 @@ describe('modules/manager/github-actions/extract', () => {
           extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
           depType: 'uses-with',
         },
-      ]);
-    });
+        {
+          currentValue: "2.4.0",
+          datasource: "github-releases",
+          depName: "deno",
+          depType: "uses-with",
+          extractVersion: "^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$",
+          packageName: "actions/deno-versions",
+          versioning: "semver",
+        },
+        {
+          currentValue: "1.2.0",
+          datasource: "github-releases",
+          depName: "bun",
+          depType: "uses-with",
+          extractVersion: "^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$",
+          packageName: "actions/bun-versions",
+          versioning: "npm",
+        },
+        {
+          currentValue: "3.4",
+          datasource: "github-releases",
+          depName: "ruby",
+          depType: "uses-with",
+          extractVersion: "^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$",
+          packageName: "actions/ruby-versions",
+          versioning: "ruby",
+        },
+    ]);
 
     it('extracts x-version from actions/setup-x in composite action', () => {
       const yamlContent = codeBlock`
