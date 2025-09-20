@@ -1,7 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { extractAllPackageFiles } from '..';
 import { logger } from '../../../../logger';
-import * as fsUtil from '../../../../util/fs/util';
 import type { ExtractConfig } from '../../types';
 import { postExtract } from './post';
 import * as npmExtract from '.';
