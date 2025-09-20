@@ -337,6 +337,8 @@ Other valid cache namespaces are as follows:
 
 <!-- cache-namespaces-begin -->
 
+- `changelog-azure-notes@v2`
+- `changelog-azure-release`
 - `changelog-bitbucket-notes@v2`
 - `changelog-bitbucket-release`
 - `changelog-bitbucket-server-notes@v2`

@@ -1,7 +1,9 @@
 import type { WebApiTeam } from 'azure-devops-node-api/interfaces/CoreInterfaces.js';
 import type {
   GitCommit,
+  GitItem,
   GitRef,
+  GitTreeRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { logger } from '../../../logger';
@@ -198,4 +200,42 @@ export async function getAllProjectTeams(
   } while (top <= length);
 
   return allTeams;
+}
+
+export async function getTags(repoId: string): Promise<GitRef[]> {
+  logger.debug(`getTags(${repoId})`);
+  const azureApiGit = await azureApi.gitApi();
+  return await azureApiGit.getRefs(repoId, undefined, 'tags');
+}
+
+export async function getItem(
+  repoId: string,
+  path: string,
+  includeContent?: boolean,
+): Promise<GitItem> {
+  logger.debug(`getItem(${repoId}, ${path})`);
+  const azureApiGit = await azureApi.gitApi();
+  return await azureApiGit.getItem(
+    repoId,
+    path,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    includeContent,
+    undefined,
+    undefined,
+  );
+}
+
+export async function getTrees(
+  repoId: string,
+  sha1: string,
+): Promise<GitTreeRef> {
+  logger.debug(`getTrees(${repoId}, ${sha1})`);
+  const azureApiGit = await azureApi.gitApi();
+  return await azureApiGit.getTree(repoId, sha1);
 }
