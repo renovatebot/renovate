@@ -2,7 +2,6 @@ import { codeBlock } from 'common-tags';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import {
-  collectPackageJson,
   extractAllPackageFiles,
   getLockFiles,
   processDenoExtract,
@@ -127,43 +126,6 @@ describe('modules/manager/deno/extract', () => {
     });
   });
 
-  describe('collectPackageJson()', () => {
-    it('node-compat package.json', async () => {
-      GlobalConfig.set({ localDir: '' });
-      const { findPackages } = await import('find-packages');
-      vi.mocked(findPackages).mockResolvedValue([
-        { dir: '.', manifest: {}, writeProjectManifest: Promise.resolve },
-      ]);
-      fs.getSiblingFileName.mockReturnValueOnce('package.json');
-      fs.readLocalFile.mockResolvedValueOnce(
-        JSON.stringify({
-          dependencies: {
-            dep1: '1.0.0',
-          },
-        }),
-      );
-      expect(await collectPackageJson('deno.lock')).toEqual([
-        {
-          deps: [
-            {
-              currentValue: '1.0.0',
-              datasource: 'npm',
-              depName: 'dep1',
-              depType: 'dependencies',
-              prettyDepType: 'dependency',
-            },
-          ],
-          extractedConstraints: {},
-          lockFiles: ['deno.lock'],
-          managerData: {
-            workspaces: undefined,
-          },
-          packageFile: 'package.json',
-        },
-      ]);
-    });
-  });
-
   describe('extractAllPackageFiles()', () => {
     it('invalid deno.json file', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('deno.json');
@@ -262,7 +224,7 @@ describe('modules/manager/deno/extract', () => {
               currentValue: '6.0.0',
               datasource: 'npm',
               depName: 'dep5',
-              depType: 'tasks',
+              depType: 'tasks.command',
               versioning: 'deno',
             },
             {
@@ -278,7 +240,7 @@ describe('modules/manager/deno/extract', () => {
               currentValue: 'v1.0.1',
               datasource: 'deno',
               depName: 'https://deno.land/x/dep',
-              depType: 'tasks',
+              depType: 'tasks.command',
             },
             {
               currentRawValue: 'npm:dep7',
@@ -311,7 +273,7 @@ describe('modules/manager/deno/extract', () => {
               currentValue: '1.0.0',
               datasource: 'npm',
               depName: '@types/dep1',
-              depType: 'compilerOptions',
+              depType: 'compilerOptions.types',
               versioning: 'deno',
             },
             {
@@ -319,7 +281,7 @@ describe('modules/manager/deno/extract', () => {
               currentValue: '1.0.0',
               datasource: 'npm',
               depName: 'dep2',
-              depType: 'compilerOptions',
+              depType: 'compilerOptions.jsxImportSource',
               versioning: 'deno',
             },
             {
@@ -327,7 +289,7 @@ describe('modules/manager/deno/extract', () => {
               currentValue: '1.0.0',
               datasource: 'npm',
               depName: '@types/dep2',
-              depType: 'compilerOptions',
+              depType: 'compilerOptions.jsxImportSourceTypes',
               versioning: 'deno',
             },
             {
@@ -335,12 +297,12 @@ describe('modules/manager/deno/extract', () => {
               currentValue: '1.0.0',
               datasource: 'npm',
               depName: 'dep3',
-              depType: 'lint',
+              depType: 'lint.plugins',
               versioning: 'deno',
             },
             {
               depName: './local_dep.js',
-              depType: 'lint',
+              depType: 'lint.plugins',
               skipReason: 'unsupported',
               skipStage: 'extract',
             },

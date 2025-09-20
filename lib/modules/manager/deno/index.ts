@@ -5,6 +5,8 @@ import { NpmDatasource } from '../../datasource/npm';
 
 export { updateArtifacts } from './artifacts';
 export { extractAllPackageFiles } from './extract';
+// The reason updateDependency is necessary is that extractPackageFile cannot retrieve the correct lock file
+// See: normalizeWorkspace in lib/modules/manager/deno/post.ts
 export { updateDependency } from './update';
 export { getRangeStrategy } from '../npm'; // for node-compat
 

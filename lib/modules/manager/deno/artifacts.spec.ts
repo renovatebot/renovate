@@ -172,6 +172,23 @@ describe('modules/manager/deno/artifacts', () => {
     expect(await updateArtifacts(updateArtifact)).toBeNull();
   });
 
+  it('depType tasks.command returns null', async () => {
+    const updateArtifact: UpdateArtifact = {
+      config: {},
+      newPackageFileContent: '',
+      packageFileName: '',
+      updatedDeps: [
+        { manager: 'deno', lockFiles: ['deno.lock'], depType: 'tasks.command' },
+      ],
+    };
+    const oldLock = Buffer.from('old');
+    fs.readFile.mockResolvedValueOnce(oldLock as never);
+    const newLock = Buffer.from('new');
+    fs.readFile.mockResolvedValueOnce(newLock as never);
+
+    expect(await updateArtifacts(updateArtifact)).toBeNull();
+  });
+
   it('deno command execution', async () => {
     const updateArtifact: UpdateArtifact = {
       config: {},

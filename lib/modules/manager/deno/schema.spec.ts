@@ -1,7 +1,7 @@
 import {
-  CompilerOptionsTypes,
   CompilerOptionsJsxImportSource,
   CompilerOptionsJsxImportSourceTypes,
+  CompilerOptionsTypes,
   DenoDependency,
   Imports,
   Lint,
@@ -89,9 +89,6 @@ describe('modules/manager/deno/schema', () => {
       expect(
         Tasks.parse({
           task1: 'deno run jsr:@scope/package-name@^1.0.0',
-          task2: {
-            command: 'deno run npm:dep1',
-          },
         }),
       ).toEqual([
         {
@@ -102,12 +99,23 @@ describe('modules/manager/deno/schema', () => {
           depType: 'tasks',
           versioning: 'deno',
         },
+      ]);
+    });
+
+    it('parses tasks.command', () => {
+      expect(
+        Tasks.parse({
+          task1: {
+            command: 'deno run npm:dep1',
+          },
+        }),
+      ).toEqual([
         {
           currentRawValue: 'npm:dep1',
           currentValue: undefined,
           datasource: 'npm',
           depName: 'dep1',
-          depType: 'tasks',
+          depType: 'tasks.command',
           versioning: 'deno',
         },
       ]);
@@ -122,7 +130,7 @@ describe('modules/manager/deno/schema', () => {
           currentValue: undefined,
           datasource: 'npm',
           depName: '@types/dep1',
-          depType: 'compilerOptions',
+          depType: 'compilerOptions.types',
           versioning: 'deno',
         },
       ]);
@@ -137,7 +145,7 @@ describe('modules/manager/deno/schema', () => {
           currentValue: undefined,
           datasource: 'npm',
           depName: 'dep1',
-          depType: 'compilerOptions',
+          depType: 'compilerOptions.jsxImportSource',
           versioning: 'deno',
         },
       ]);
@@ -154,7 +162,7 @@ describe('modules/manager/deno/schema', () => {
           currentValue: undefined,
           datasource: 'npm',
           depName: '@types/dep1',
-          depType: 'compilerOptions',
+          depType: 'compilerOptions.jsxImportSourceTypes',
           versioning: 'deno',
         },
       ]);
@@ -166,7 +174,7 @@ describe('modules/manager/deno/schema', () => {
       expect(Lint.parse({})).toEqual([]);
     });
 
-    it('parses lint.rules', () => {
+    it('parses lint.plugins', () => {
       expect(
         Lint.parse({
           plugins: ['npm:dep1'],
@@ -177,7 +185,7 @@ describe('modules/manager/deno/schema', () => {
           currentValue: undefined,
           datasource: 'npm',
           depName: 'dep1',
-          depType: 'lint',
+          depType: 'lint.plugins',
           versioning: 'deno',
         },
       ]);

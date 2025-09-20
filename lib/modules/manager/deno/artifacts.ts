@@ -40,9 +40,12 @@ export async function updateArtifacts(
   }
 
   for (const updateDep of updatedDeps) {
-    if (updateDep.depType === 'tasks') {
+    if (
+      updateDep.depType === 'tasks' ||
+      updateDep.depType === 'tasks.command'
+    ) {
       logger.warn(
-        `depType "task" can't be updated with a lock file: ${updateDep.depName}`,
+        `depType "${updateDep.depType}" can't be updated with a lock file: ${updateDep.depName}`,
       );
       return null;
     }

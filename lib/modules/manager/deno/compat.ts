@@ -3,30 +3,37 @@ import { findPackages } from 'find-packages';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { extractPackageJson } from '../npm/extract/common/package-file';
 import type { NpmPackage } from '../npm/extract/types';
 import type { PackageFile } from '../types';
 import type { DenoManagerData } from './types';
 
-export async function extractDenoCompatiblePackageJson(
-  matchedFile: string,
+export async function processDenoCompatiblePackageJson(
+  packageFile: string,
 ): Promise<PackageFile<DenoManagerData> | null> {
-  const packageFileContent = await readLocalFile(matchedFile, 'utf8');
+  const packageFileContent = await readLocalFile(packageFile, 'utf8');
   if (!packageFileContent) {
-    logger.debug({ packageFile: matchedFile }, 'Deno: No package.json found');
+    logger.debug({ packageFile }, 'Deno: No package.json found');
     return null;
   }
 
+  return extractDenoCompatiblePackageJson(packageFileContent, packageFile);
+}
+
+export function extractDenoCompatiblePackageJson(
+  content: string,
+  packageFile: string,
+): PackageFile<DenoManagerData> | null {
   let packageJson: NpmPackage;
   try {
-    packageJson = JSON.parse(packageFileContent);
+    packageJson = JSON.parse(content);
   } catch (err) {
     logger.error({ err }, 'Error parsing package.json');
     return null;
   }
 
-  const extracted = extractPackageJson(packageJson, matchedFile);
+  const extracted = extractPackageJson(packageJson, packageFile);
   if (!extracted) {
     return null;
   }
@@ -37,7 +44,7 @@ export async function extractDenoCompatiblePackageJson(
       packageName: extracted.managerData?.packageJsonName,
       workspaces: extracted.managerData?.workspaces,
     },
-    packageFile: matchedFile,
+    packageFile,
   };
   return res;
 }
@@ -81,4 +88,46 @@ export async function detectNodeCompatWorkspaces({
     workspaces: filters,
     packagePaths,
   };
+}
+
+export async function collectPackageJson(
+  lockFile: string,
+): Promise<PackageFile<DenoManagerData>[] | null> {
+  const lockFiles = [lockFile];
+  const packageFiles: PackageFile<DenoManagerData>[] = [];
+  const rootPackageJson = getSiblingFileName(lockFile, 'package.json');
+  const rootPackageFile =
+    await processDenoCompatiblePackageJson(rootPackageJson);
+  if (rootPackageFile) {
+    const pkg = {
+      ...rootPackageFile,
+      lockFiles,
+    };
+
+    // detect node compat workspaces
+    const result = await detectNodeCompatWorkspaces(pkg);
+    if (!result) {
+      return null;
+    }
+    const { workspaces, packagePaths } = result;
+    pkg.managerData = {
+      ...pkg.managerData,
+      // override workspace
+      workspaces,
+    };
+    packageFiles.push(pkg);
+
+    for (const packagePath of packagePaths) {
+      const packageFile = await processDenoCompatiblePackageJson(packagePath);
+      if (packageFile) {
+        const pkg = {
+          ...packageFile,
+          lockFiles,
+        };
+        packageFiles.push(pkg);
+      }
+    }
+  }
+
+  return packageFiles;
 }

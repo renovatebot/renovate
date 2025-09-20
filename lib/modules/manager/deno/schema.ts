@@ -14,35 +14,6 @@ import type { PackageDependency } from '../types';
 import type { DenoManagerData } from './types';
 import { denoLandRegex, depValueRegex } from './utils';
 
-// https://github.com/denoland/deno/blob/410c66ad0d1ce8a5a3b1a2f06c932fb66f25a3c6/cli/schemas/config-file.v1.json
-export interface DenoJsonFile {
-  name?: string;
-  version?: string;
-  lock?: string | boolean | { path?: string };
-  imports?: Record<string, string>;
-  scopes?: Record<string, Record<string, string>>;
-  importMap?: string;
-  tasks?: Record<string, string | { command?: string }>;
-  compilerOptions?: {
-    types?: string[];
-    jsxImportSource?: string;
-    jsxImportSourceTypes?: string;
-  };
-  lint?: {
-    plugins?: string[];
-  };
-  workspace?: string[] | { members: string[] };
-}
-
-export interface DepTypes
-  extends Omit<
-    Record<keyof DenoJsonFile, string>,
-    'name' | 'version' | 'workspace'
-  > {}
-
-export interface ImportMapJsonFile
-  extends Pick<DenoJsonFile, 'imports' | 'scopes'> {}
-
 export const DenoLock = Json.pipe(
   // this schema is version 5
   // https://github.com/denoland/vscode_deno/blob/7e125c6ffcdcdebd587f97be5341d404f5335b87/schemas/lockfile.schema.json
@@ -180,15 +151,14 @@ export const Imports = LooseRecord(z.string())
 
 export const Scopes = LooseRecord(LooseRecord(z.string()))
   .catch({})
-  .transform((scopes) => {
-    const deps = [];
-    for (const scopeDependencies of Object.values(scopes)) {
-      for (const depValue of Object.values(scopeDependencies)) {
-        deps.push({ depValue, depType: 'scopes' });
-      }
-    }
-    return deps;
-  })
+  .transform((scopes) =>
+    Object.values(scopes).flatMap((scopeDependencies) =>
+      Object.values(scopeDependencies).map((depValue) => ({
+        depValue,
+        depType: 'scopes',
+      })),
+    ),
+  )
   .pipe(z.array(DenoDependency));
 
 /**
@@ -196,24 +166,26 @@ export const Scopes = LooseRecord(LooseRecord(z.string()))
  */
 export const Tasks = LooseRecord(
   z.union([
-    z.string().transform((command) => command),
-    z.object({ command: z.string() }).transform((obj) => obj.command),
+    z.string().transform((depValue) => ({ depValue, depType: 'tasks' })),
+    z.object({ command: z.string() }).transform(({ command }) => ({
+      depValue: command,
+      depType: 'tasks.command',
+    })),
   ]),
 )
   .catch({})
-  .transform((tasks) => {
-    const deps = [];
-    for (const depValue of Object.values(tasks)) {
-      deps.push({ depValue, depType: 'tasks' });
-    }
-    return deps;
-  })
+  .transform((tasks) =>
+    Object.values(tasks).map(({ depValue, depType }) => ({
+      depValue,
+      depType,
+    })),
+  )
   .pipe(z.array(DenoDependency));
 
 export const CompilerOptionsTypes = LooseArray(z.string())
   .catch([])
   .transform((types) =>
-    types.map((depValue) => ({ depValue, depType: 'compilerOptions' })),
+    types.map((depValue) => ({ depValue, depType: 'compilerOptions.types' })),
   )
   .pipe(z.array(DenoDependency));
 
@@ -221,7 +193,9 @@ export const CompilerOptionsJsxImportSource = z
   .union([
     z
       .string()
-      .transform((depValue) => [{ depValue, depType: 'compilerOptions' }]),
+      .transform((depValue) => [
+        { depValue, depType: 'compilerOptions.jsxImportSource' },
+      ]),
     z.undefined().transform(() => []),
   ])
   .pipe(z.array(DenoDependency));
@@ -230,7 +204,9 @@ export const CompilerOptionsJsxImportSourceTypes = z
   .union([
     z
       .string()
-      .transform((depValue) => [{ depValue, depType: 'compilerOptions' }]),
+      .transform((depValue) => [
+        { depValue, depType: 'compilerOptions.jsxImportSourceTypes' },
+      ]),
     z.undefined().transform(() => []),
   ])
   .pipe(z.array(DenoDependency));
@@ -240,7 +216,7 @@ export const Lint = z
     plugins: LooseArray(z.string()).catch([]),
   })
   .transform((lint) =>
-    lint.plugins.map((depValue) => ({ depValue, depType: 'lint' })),
+    lint.plugins.map((depValue) => ({ depValue, depType: 'lint.plugins' })),
   )
   .pipe(z.array(DenoDependency));
 
@@ -316,10 +292,12 @@ export const DenoExtract = z.object({
 });
 export type DenoExtract = z.infer<typeof DenoExtract>;
 
-export const ImportMap = Json.pipe(
+export const ImportMapExtract = Json.pipe(
   z.object({
     imports: z.optional(Imports).default({}),
     scopes: z.optional(Scopes).default({}),
   }),
-);
-export type ImportMap = z.infer<typeof ImportMap>;
+).transform(({ imports, scopes }) => ({
+  dependencies: [...imports, ...scopes],
+}));
+export type ImportMapExtract = z.infer<typeof ImportMapExtract>;

@@ -7,7 +7,7 @@ import { api as semver } from '../../versioning/deno';
 import type { PackageDependency, PackageFile } from '../types';
 import {
   detectNodeCompatWorkspaces,
-  extractDenoCompatiblePackageJson,
+  processDenoCompatiblePackageJson,
 } from './compat';
 import { DenoLock } from './schema';
 import type { DenoManagerData, LockFile } from './types';
@@ -142,7 +142,7 @@ export async function collectPackageJsonAsWorkspaceMember(
     }
     const { packagePaths } = result;
     for (const packagePath of packagePaths) {
-      const packageFile = await extractDenoCompatiblePackageJson(packagePath);
+      const packageFile = await processDenoCompatiblePackageJson(packagePath);
       if (packageFile) {
         const pkg = {
           ...packageFile,
