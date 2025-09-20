@@ -11,6 +11,7 @@ The following `depTypes` are currently supported by the npm manager :
 - `resolutions`
 - `pnpm.overrides`
 - `pnpm.catalog.<name>`, such as `pnpm.catalog.default` and `pnpm.catalog.myCatalog`. [Matches any default and named pnpm catalogs](https://pnpm.io/catalogs#defining-catalogs).
+- `yarn.catalogs.list.<name>` if you are using the [yarn-plugin-catalogs](https://github.com/toss/yarn-plugin-catalogs)
 
 ### npm problems and workarounds
 
