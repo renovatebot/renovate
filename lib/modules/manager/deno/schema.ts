@@ -29,7 +29,7 @@ export const DenoLock = Json.pipe(
     // pick "7.1.3" from "7.1.3_pkgname@4.0.3_@types+pkgname@1.0.1"
     const match = regEx(/^(?<lockedVersion>[^_\s]+)/).exec(val);
     if (match?.groups?.lockedVersion) {
-      lockedVersions[key] = match?.groups?.lockedVersion;
+      lockedVersions[key] = match.groups.lockedVersion;
     }
   }
 
