@@ -46,6 +46,7 @@
     ],
     "avalonia": "https://github.com/AvaloniaUI/Avalonia",
     "aws-cdk": "https://github.com/aws/aws-cdk",
+    "aws-lambda-dotnet": "https://github.com/aws/aws-lambda-dotnet",
     "aws-lambda-powertools-typescript": [
       "https://github.com/awslabs/aws-lambda-powertools-typescript",
       "https://github.com/aws-powertools/powertools-lambda-typescript"
