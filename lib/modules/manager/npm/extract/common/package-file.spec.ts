@@ -15,7 +15,7 @@ describe('modules/manager/npm/extract/common/package-file', () => {
     GlobalConfig.set({ localDir: '/', cacheDir: '/tmp/cache' });
   });
 
-  it('returns true for a valid packageManager with name@range (e.g. pnpm@8.15.4)', async () => {
+  it('returns true for a valid packageManager with name@version(e.g. pnpm@8.15.4)', async () => {
     Fixtures.mock({
       '/repo/package.json': JSON.stringify({ packageManager: 'pnpm@8.15.4' }),
     });
