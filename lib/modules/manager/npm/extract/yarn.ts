@@ -130,7 +130,7 @@ export async function extractYarnCatalogs(
   catalogs: YarnCatalogs | undefined,
   packageFile: string,
   hasPackageManager: boolean,
-): Promise<PackageFileContent<NpmManagerData> | null> {
+): Promise<PackageFileContent<NpmManagerData>> {
   logger.trace(`yarn.extractYarnCatalogs(${packageFile})`);
 
   const yarnCatalogs = yarnCatalogsToArray(catalogs);

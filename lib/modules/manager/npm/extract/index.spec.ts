@@ -931,7 +931,7 @@ describe('modules/manager/npm/extract/index', () => {
       const pJsonStr = JSON.stringify(pJson);
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
-        '.yarnrc.yml',
+        'package.json',
         defaultExtractConfig,
       );
       expect(res).toMatchObject({
