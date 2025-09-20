@@ -9,6 +9,8 @@ import {
   Scopes,
   Tasks,
   Workspace,
+  UpdateDenoJsonFile,
+  UpdateImportMapJsonFile,
 } from './schema';
 
 describe('modules/manager/deno/schema', () => {
@@ -259,6 +261,46 @@ describe('modules/manager/deno/schema', () => {
         datasource: 'jsr',
         versioning: 'deno',
         skipReason: 'invalid-version',
+      });
+    });
+  });
+
+  describe('UpdateDenoJsonFile', () => {
+    it('keep original field that is irrelevant for schema', () => {
+      expect(
+        UpdateDenoJsonFile.parse(
+          JSON.stringify({
+            name: 'package',
+            version: '1.0.0',
+            unknownFiled: 'should keep',
+          }),
+        ),
+      ).toEqual({
+        name: 'package',
+        version: '1.0.0',
+        unknownFiled: 'should keep',
+      });
+    });
+  });
+
+  describe('UpdateImportMapJsonFile', () => {
+    it('keep original field that is irrelevant for schema', () => {
+      expect(
+        UpdateImportMapJsonFile.parse(
+          JSON.stringify({
+            integrity: {
+              './modules/shapes/square.js':
+                'sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC',
+            },
+            unknownFiled: 'should keep',
+          }),
+        ),
+      ).toEqual({
+        integrity: {
+          './modules/shapes/square.js':
+            'sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC',
+        },
+        unknownFiled: 'should keep',
       });
     });
   });

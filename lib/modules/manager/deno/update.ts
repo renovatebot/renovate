@@ -6,7 +6,7 @@ import { parseJsonc } from '../../../util/common';
 import { matchAt, replaceAt } from '../../../util/string';
 import { updateDependency as npmUpdateDependency } from '../npm';
 import type { UpdateDependencyConfig } from '../types';
-import type { DenoJsonFile, DepTypes, ImportMapJsonFile } from './schema';
+import { UpdateDenoJsonFile, UpdateImportMapJsonFile } from './schema';
 import type { DenoManagerData } from './types';
 
 function getValueByDatasource(
@@ -25,13 +25,14 @@ function getValueByDatasource(
   return null;
 }
 
+// ported from lib/modules/manager/npm/update/dependency/index.ts
 function replaceAsString(
-  parsedContents: DenoJsonFile,
+  parsedContents: UpdateDenoJsonFile | UpdateImportMapJsonFile,
   fileContent: string,
-  depType: keyof DepTypes,
+  depType: string,
   searchString: string,
   newString: string,
-): string | null {
+): string {
   // Skip ahead to depType section
   let searchIndex = fileContent.indexOf(`"${depType}"`) + depType.length;
   logger.trace(`Starting search at index ${searchIndex}`);
@@ -52,18 +53,15 @@ function replaceAsString(
         return testContent;
       }
     }
+    /* v8 ignore next 3 -- needs test */
   }
-  // this string searching could match more than once
-  // when the test case in "updates dependency in compilerOptions"
-  // so we returns null instead of throwing an error like
-  // the same name function in lib/modules/manager/npm/update/dependency/index.ts
-  return null;
+  throw new Error();
 }
 
 function updateImportMapLikeDepTypes(
-  parsedContents: ImportMapJsonFile | DenoJsonFile,
+  parsedContents: UpdateDenoJsonFile | UpdateImportMapJsonFile,
   fileContent: string,
-  depType: keyof ImportMapJsonFile | DenoJsonFile,
+  depType: string,
   searchString: string,
   newString: string,
 ): string | null {
@@ -78,38 +76,33 @@ function updateImportMapLikeDepTypes(
         searchString,
         newString,
       );
-      const result = replaceAsString(
+      newFileContent = replaceAsString(
         parsedContents,
         fileContent,
         depType,
         searchString,
         newString,
       );
-      if (result) {
-        newFileContent = result;
-      }
     }
   }
 
   if (depType === 'scopes' && parsedContents.scopes) {
     for (const scopeName of Object.keys(parsedContents.scopes)) {
-      const matches = Object.entries(parsedContents.scopes[scopeName]).filter(
-        ([, value]) => value.includes(searchString),
+      const scope = parsedContents.scopes[scopeName];
+      const matches = Object.entries(scope).filter(([, value]) =>
+        value.includes(searchString),
       );
       for (const [key] of matches) {
         parsedContents.scopes[scopeName][key] = parsedContents.scopes[
           scopeName
         ][key].replace(searchString, newString);
-        const result = replaceAsString(
+        newFileContent = replaceAsString(
           parsedContents,
           newFileContent ?? fileContent,
           depType,
           searchString,
           newString,
         );
-        if (result) {
-          newFileContent = result;
-        }
       }
     }
   }
@@ -140,18 +133,20 @@ export function updateDependency(
       logger.debug({ depName, currentValue, newValue }, 'Unknown value');
       return null;
     }
-    const depType = upgrade.depType as keyof ImportMapJsonFile;
+    const depType = upgrade.depType;
     logger.debug(
       `deno.updateDependency(): ${packageFile}:${depType}.${depName} = ${newValue}`,
     );
 
-    let parsedContents: ImportMapJsonFile;
-    try {
-      parsedContents = JSON.parse(fileContent) as ImportMapJsonFile;
-    } catch (err) {
-      logger.debug({ err }, `Invalid packageFile: ${packageFile} detected`);
+    const parsedResult = UpdateImportMapJsonFile.safeParse(fileContent);
+    if (!parsedResult.success) {
+      logger.debug(
+        { err: parsedResult.error },
+        `Invalid packageFile: ${packageFile} detected`,
+      );
       return null;
     }
+    const parsedContents = parsedResult.data;
 
     const searchCurrentValue = getValueByDatasource(
       datasource,
@@ -181,18 +176,20 @@ export function updateDependency(
       logger.debug({ depName, currentValue, newValue }, 'Unknown value');
       return null;
     }
-    const depType = upgrade.depType as keyof DepTypes;
+    const depType = upgrade.depType;
     logger.debug(
       `deno.updateDependency(): ${packageFile}:${depType}.${depName} = ${newValue}`,
     );
 
-    let parsedContents: DenoJsonFile;
-    try {
-      parsedContents = parseJsonc(fileContent) as DenoJsonFile;
-    } catch (err) {
-      logger.debug({ err }, `Invalid packageFile: ${packageFile} detected`);
+    const parsedResult = UpdateDenoJsonFile.safeParse(fileContent);
+    if (!parsedResult.success) {
+      logger.debug(
+        { err: parsedResult.error },
+        `Invalid packageFile: ${packageFile} detected`,
+      );
       return null;
     }
+    const parsedContents = parsedResult.data;
 
     let newFileContent: string | null = null;
 
@@ -212,7 +209,7 @@ export function updateDependency(
     newFileContent = updateImportMapLikeDepTypes(
       parsedContents,
       fileContent,
-      depType as ImportMapJsonFile, // down cast
+      depType,
       searchCurrentValue,
       newString,
     );
@@ -222,128 +219,125 @@ export function updateDependency(
         ([, value]) => {
           if (typeof value === 'string') {
             return value.includes(searchCurrentValue);
-          } else {
-            return (
-              'command' in value && value.command?.includes(searchCurrentValue)
-            );
           }
+          return false;
         },
       );
       for (const [key, value] of matches) {
         if (typeof value === 'string') {
           // prettier-ignore
-          parsedContents.tasks[key] = (parsedContents.tasks[key] as string).replace(
-              searchCurrentValue,
-              newString,
-            );
-        } else {
+          parsedContents.tasks[key] = (parsedContents.tasks[key] as string).replace(searchCurrentValue, newString);
+        }
+        newFileContent = replaceAsString(
+          parsedContents,
+          newFileContent ?? fileContent,
+          depType,
+          searchCurrentValue,
+          newString,
+        );
+      }
+    }
+
+    if (depType === 'tasks.command' && parsedContents.tasks) {
+      const matches = Object.entries(parsedContents.tasks).filter(
+        ([, value]) => {
+          if (value && typeof value === 'object' && 'command' in value) {
+            return value.command?.includes(searchCurrentValue);
+          }
+          return false;
+        },
+      );
+      for (const [key, value] of matches) {
+        if (value && typeof value === 'object' && 'command' in value) {
           // prettier-ignore
-          (parsedContents.tasks[key] as { command: string }).command = (parsedContents.tasks[key] as { command: string })
-              .command.replace(searchCurrentValue, newString);
+          (parsedContents.tasks[key] as { command: string }).command =
+            (parsedContents.tasks[key] as { command: string }).command.replace(searchCurrentValue, newString);
         }
-        const result = replaceAsString(
+        newFileContent = replaceAsString(
           parsedContents,
           newFileContent ?? fileContent,
           depType,
           searchCurrentValue,
           newString,
         );
-        if (result) {
-          newFileContent = result;
-        }
       }
     }
 
-    if (depType === 'compilerOptions' && parsedContents.compilerOptions) {
-      if (
-        'types' in parsedContents.compilerOptions &&
-        is.nonEmptyArray(parsedContents.compilerOptions.types)
-      ) {
-        const index = parsedContents.compilerOptions.types.findIndex(
-          (value) => value === searchCurrentValue,
-        );
-        if (index !== -1) {
-          parsedContents.compilerOptions.types[index] =
-            parsedContents.compilerOptions.types[index].replace(
-              searchCurrentValue,
-              newString,
-            );
-          const result = replaceAsString(
-            parsedContents,
-            newFileContent ?? fileContent,
-            depType,
-            searchCurrentValue,
-            newString,
-          );
-          if (result) {
-            newFileContent = result;
-          }
-        }
-      }
-
-      if (
-        'jsxImportSource' in parsedContents.compilerOptions &&
-        parsedContents.compilerOptions.jsxImportSource
-      ) {
-        parsedContents.compilerOptions.jsxImportSource =
-          parsedContents.compilerOptions.jsxImportSource.replace(
-            searchCurrentValue,
-            newString,
-          );
-        const result = replaceAsString(
+    if (
+      depType === 'compilerOptions.types' &&
+      is.nonEmptyArray(parsedContents.compilerOptions?.types)
+    ) {
+      const index = parsedContents.compilerOptions.types.findIndex(
+        (value: string) => value === searchCurrentValue,
+      );
+      if (index !== -1) {
+        parsedContents.compilerOptions.types[index] =
+          // prettier-ignore
+          parsedContents.compilerOptions.types[index].replace(searchCurrentValue, newString);
+        newFileContent = replaceAsString(
           parsedContents,
           newFileContent ?? fileContent,
           depType,
           searchCurrentValue,
           newString,
         );
-        if (result) {
-          newFileContent = result;
-        }
-      }
-
-      if (
-        'jsxImportSourceTypes' in parsedContents.compilerOptions &&
-        parsedContents.compilerOptions.jsxImportSourceTypes
-      ) {
-        parsedContents.compilerOptions.jsxImportSourceTypes =
-          parsedContents.compilerOptions.jsxImportSourceTypes.replace(
-            searchCurrentValue,
-            newString,
-          );
-        const result = replaceAsString(
-          parsedContents,
-          newFileContent ?? fileContent,
-          depType,
-          searchCurrentValue,
-          newString,
-        );
-        if (result) {
-          newFileContent = result;
-        }
       }
     }
 
-    if (depType === 'lint' && parsedContents.lint) {
-      if ('plugins' in parsedContents.lint && parsedContents.lint.plugins) {
-        const index = parsedContents.lint.plugins.findIndex(
-          (value) => value === searchCurrentValue,
+    if (
+      depType === 'compilerOptions.jsxImportSource' &&
+      parsedContents.compilerOptions?.jsxImportSource
+    ) {
+      parsedContents.compilerOptions.jsxImportSource =
+        parsedContents.compilerOptions.jsxImportSource.replace(
+          searchCurrentValue,
+          newString,
         );
-        if (index !== -1) {
-          parsedContents.lint.plugins[index] = parsedContents.lint.plugins[
-            index
-          ].replace(searchCurrentValue, newString);
-          const result = replaceAsString(
-            parsedContents,
-            newFileContent ?? fileContent,
-            depType,
-            searchCurrentValue,
-            newString,
-          );
-          if (result) {
-            newFileContent = result;
-          }
-        }
+      newFileContent = replaceAsString(
+        parsedContents,
+        newFileContent ?? fileContent,
+        depType,
+        searchCurrentValue,
+        newString,
+      );
+    }
+
+    if (
+      depType === 'compilerOptions.jsxImportSourceTypes' &&
+      parsedContents.compilerOptions?.jsxImportSourceTypes
+    ) {
+      parsedContents.compilerOptions.jsxImportSourceTypes =
+        parsedContents.compilerOptions.jsxImportSourceTypes.replace(
+          searchCurrentValue,
+          newString,
+        );
+      newFileContent = replaceAsString(
+        parsedContents,
+        newFileContent ?? fileContent,
+        depType,
+        searchCurrentValue,
+        newString,
+      );
+    }
+
+    if (
+      depType === 'lint.plugins' &&
+      is.nonEmptyArray(parsedContents.lint?.plugins)
+    ) {
+      const index = parsedContents.lint.plugins.findIndex(
+        (value: string) => value === searchCurrentValue,
+      );
+      if (index !== -1) {
+        parsedContents.lint.plugins[index] = parsedContents.lint.plugins[
+          index
+        ].replace(searchCurrentValue, newString);
+        newFileContent = replaceAsString(
+          parsedContents,
+          newFileContent ?? fileContent,
+          depType,
+          searchCurrentValue,
+          newString,
+        );
       }
     }
 

@@ -87,32 +87,69 @@ describe('modules/manager/deno/update', () => {
           packageFile: 'deno.json',
         };
 
-        const resul1 = updateDependency({ fileContent, upgrade });
-        const parsed = JSON.parse(resul1!);
+        const result = updateDependency({ fileContent, upgrade });
+        const parsed = JSON.parse(result!);
         expect(parsed.tasks.build).toBe('deno run -A npm:dep1@4.1.0');
-
-        {
-          const upgrade: UpdateDependencyConfig['upgrade'] = {
-            depName: 'dep2',
-            depType: 'tasks',
-            currentValue: '14.0.1',
-            newValue: '16.0.0',
-            datasource: 'npm',
-            packageFile: 'deno.json',
-          };
-
-          const result = updateDependency({
-            fileContent: resul1!,
-            upgrade,
-          });
-          const parsed = JSON.parse(result!);
-          expect(parsed.tasks.dev.command).toBe(
-            'deno run --allow-net npm:dep2@16.0.0',
-          );
-        }
       });
 
-      it('updates dependency in compilerOptions', () => {
+      it('updates dependency in tasks.command', () => {
+        const fileContent = JSON.stringify(
+          {
+            tasks: {
+              build: 'deno run -A npm:dep1@4.0.0',
+              dev: {
+                command: 'deno run --allow-net npm:dep2@14.0.1',
+              },
+            },
+          },
+          null,
+          2,
+        );
+
+        const upgrade: UpdateDependencyConfig['upgrade'] = {
+          depName: 'dep2',
+          depType: 'tasks.command',
+          currentValue: '14.0.1',
+          newValue: '16.0.0',
+          datasource: 'npm',
+          packageFile: 'deno.json',
+        };
+
+        const resul = updateDependency({ fileContent, upgrade });
+        const parsed = JSON.parse(resul!);
+        expect(parsed.tasks.dev.command).toBe(
+          'deno run --allow-net npm:dep2@16.0.0',
+        );
+      });
+
+      it('updates dependency in compilerOptions.types', () => {
+        const fileContent = JSON.stringify(
+          {
+            compilerOptions: {
+              types: ['npm:@types/dep2@18.0.0'],
+              jsxImportSource: 'https://deno.land/x/dep2@18.0.0',
+              jsxImportSourceTypes: 'npm:@types/dep2@18.0.0',
+            },
+          },
+          null,
+          2,
+        );
+
+        const upgrade: UpdateDependencyConfig['upgrade'] = {
+          depName: '@types/dep2',
+          depType: 'compilerOptions.types',
+          currentValue: '18.0.0',
+          newValue: '19.0.0',
+          datasource: 'npm',
+          packageFile: 'deno.json',
+        };
+
+        const result = updateDependency({ fileContent, upgrade });
+        const parsed = JSON.parse(result!);
+        expect(parsed.compilerOptions.types[0]).toBe('npm:@types/dep2@19.0.0');
+      });
+
+      it('updates dependency in compilerOptions.jsxImportSource', () => {
         const fileContent = JSON.stringify(
           {
             compilerOptions: {
@@ -127,47 +164,26 @@ describe('modules/manager/deno/update', () => {
 
         const upgrade: UpdateDependencyConfig['upgrade'] = {
           depName: 'https://deno.land/x/dep2',
-          depType: 'compilerOptions',
+          depType: 'compilerOptions.jsxImportSource',
           currentValue: '18.0.0',
           newValue: '19.0.0',
           datasource: 'deno',
           packageFile: 'deno.json',
         };
 
-        const result1 = updateDependency({ fileContent, upgrade });
-        const parsed = JSON.parse(result1!);
+        const result = updateDependency({ fileContent, upgrade });
+        const parsed = JSON.parse(result!);
         expect(parsed.compilerOptions.jsxImportSource).toBe(
           'https://deno.land/x/dep2@19.0.0',
         );
-
-        {
-          const upgrade: UpdateDependencyConfig['upgrade'] = {
-            depName: '@types/dep2',
-            depType: 'compilerOptions',
-            currentValue: '18.0.0',
-            newValue: '19.0.0',
-            datasource: 'npm',
-            packageFile: 'deno.json',
-          };
-
-          const result = updateDependency({
-            fileContent: result1!,
-            upgrade,
-          });
-          const parsed = JSON.parse(result!);
-          expect(parsed.compilerOptions.types[0]).toContain(
-            'npm:@types/dep2@19.0.0',
-          );
-          expect(parsed.compilerOptions.jsxImportSourceTypes).toBe(
-            'npm:@types/dep2@19.0.0',
-          );
-        }
       });
 
       it('updates dependency in compilerOptions.jsxImportSourceTypes', () => {
         const fileContent = JSON.stringify(
           {
             compilerOptions: {
+              types: ['npm:@types/dep2@18.0.0'],
+              jsxImportSource: 'https://deno.land/x/dep2@18.0.0',
               jsxImportSourceTypes: 'npm:@types/dep2@18.0.0',
             },
           },
@@ -177,7 +193,7 @@ describe('modules/manager/deno/update', () => {
 
         const upgrade: UpdateDependencyConfig['upgrade'] = {
           depName: '@types/dep2',
-          depType: 'compilerOptions',
+          depType: 'compilerOptions.jsxImportSourceTypes',
           currentValue: '18.0.0',
           newValue: '19.0.0',
           datasource: 'npm',
@@ -207,7 +223,7 @@ describe('modules/manager/deno/update', () => {
 
         const upgrade: UpdateDependencyConfig['upgrade'] = {
           depName: 'dep1',
-          depType: 'lint',
+          depType: 'lint.plugins',
           currentValue: '5.0.0',
           newValue: '6.0.0',
           datasource: 'npm',

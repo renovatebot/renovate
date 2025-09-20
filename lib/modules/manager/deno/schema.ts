@@ -301,3 +301,48 @@ export const ImportMapExtract = Json.pipe(
   dependencies: [...imports, ...scopes],
 }));
 export type ImportMapExtract = z.infer<typeof ImportMapExtract>;
+
+// All object needs passthrough to keep original field of package file and all field should be optional
+export const UpdateDenoJsonFile = Jsonc.pipe(
+  z
+    .object({
+      imports: z.record(z.string(), z.string()).optional(),
+      scopes: z.record(z.string(), z.record(z.string(), z.string())).optional(),
+      tasks: z
+        .record(
+          z.string(),
+          z.union([
+            z.string(),
+            z.object({ command: z.string().optional() }).passthrough(),
+          ]),
+        )
+        .optional(),
+      compilerOptions: z
+        .object({
+          types: z.array(z.string()).optional(),
+          jsxImportSource: z.string().optional(),
+          jsxImportSourceTypes: z.string().optional(),
+        })
+        .passthrough()
+        .optional(),
+      lint: z
+        .object({
+          plugins: z.array(z.string()).optional(),
+        })
+        .passthrough()
+        .optional(),
+    })
+    .passthrough(),
+);
+export type UpdateDenoJsonFile = z.infer<typeof UpdateDenoJsonFile>;
+
+// All object needs passthrough to keep original field of package file and all field should be optional
+export const UpdateImportMapJsonFile = Json.pipe(
+  z
+    .object({
+      imports: z.record(z.string(), z.string()).optional(),
+      scopes: z.record(z.string(), z.record(z.string(), z.string())).optional(),
+    })
+    .passthrough(),
+);
+export type UpdateImportMapJsonFile = z.infer<typeof UpdateImportMapJsonFile>;
