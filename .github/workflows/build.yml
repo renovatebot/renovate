@@ -213,6 +213,9 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
+      - name: Build
+        run: pnpm build
+
       - name: Restore eslint cache
         uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
@@ -294,6 +297,9 @@ jobs:
       - name: Lint markdown
         uses: DavidAnson/markdownlint-cli2-action@992badcdf24e3b8eb7e87ff9287fe931bcb00c6e # v20.0.0
 
+      - name: Build
+        run: pnpm build
+
       - name: Lint fenced code blocks
         run: pnpm doc-fence-check
 
@@ -320,6 +326,9 @@ jobs:
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
+
+      - name: Build
+        run: pnpm build
 
       - name: Type check
         run: pnpm type-check

@@ -1,4 +1,4 @@
-import Ajv from 'ajv';
+import AjvConstructor from 'ajv';
 import fs from 'fs-extra';
 import { glob } from 'glob';
 import MarkdownIt from 'markdown-it';
@@ -23,7 +23,7 @@ async function readAsJson(path) {
   return JSON.parse(await fs.readFile(path, 'utf-8'));
 }
 
-const validate = new Ajv({
+const validate = new AjvConstructor({
   extendRefs: true,
   meta: false,
   schemaId: 'id',
