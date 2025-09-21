@@ -13,3 +13,6 @@ For example, the package `acme/foo` would need an entry in [repositories](https:
 
 By default, Renovate will invoke `composer update` with the `--with-dependencies` flag.
 Add `composerWithAll` to your `postUpdateOptions` array to use the `--with-all-dependencies` flag instead.
+
+Add `composerBump` to your `postUpdateOptions` array to run `composer bump` after dependency updates.
+This updates requirement constraints in your `composer.json` to match currently installed versions.

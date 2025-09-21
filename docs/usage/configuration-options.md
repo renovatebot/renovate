@@ -3817,6 +3817,7 @@ Table with options:
 | Name                         | Description                                                                                                                                                |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `bundlerConservative`        | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies. |
+| `composerBump`               | Run `composer bump` after `composer update` or `composer require` to update requirement constraints to currently installed versions.                       |
 | `composerWithAll`            | Run `composer update` with `--with-all-dependencies` flag instead of the default `--with-dependencies`.                                                    |
 | `dotnetWorkloadRestore`      | Run `dotnet workload restore` before `dotnet restore` commands.                                                                                            |
 | `gomodMassage`               | Enable massaging `replace` directives before calling `go` commands.                                                                                        |

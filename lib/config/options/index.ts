@@ -2540,6 +2540,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     allowedValues: [
       'bundlerConservative',
+      'composerBump',
       'composerWithAll',
       'dotnetWorkloadRestore',
       'gomodMassage',
