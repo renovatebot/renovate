@@ -1,13 +1,12 @@
 import { codeBlock } from 'common-tags';
 import { mockDeep } from 'vitest-mock-extended';
-import * as _hostRules from '../../../util/host-rules';
+import * as hostRules from '../../../util/host-rules';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
 import { Fixtures } from '~test/fixtures';
 import { fs } from '~test/util';
 
 vi.mock('../../../util/fs');
-vi.mock('../../../util/host-rules', () => mockDeep());
 
 function mockReadLocalFile(files: Record<string, string | null>) {
   fs.readLocalFile.mockImplementation((file): Promise<any> => {
@@ -30,8 +29,6 @@ const cargo7toml = Fixtures.get('Cargo.7.toml');
 
 const lockfileUpdateCargotoml = Fixtures.get('lockfile-update/Cargo.toml');
 
-const hostRules = vi.mocked(_hostRules);
-
 describe('modules/manager/cargo/extract', () => {
   describe('extractPackageFile()', () => {
     const config: ExtractConfig = {};
@@ -39,7 +36,15 @@ describe('modules/manager/cargo/extract', () => {
     beforeEach(() => {
       delete process.env.CARGO_REGISTRIES_PRIVATE_CRATES_INDEX;
       delete process.env.CARGO_REGISTRIES_MCORBIN_INDEX;
-      hostRules.hostType.mockReturnValue('github');
+
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'git.example.com',
+      });
+    });
+
+    afterEach(() => {
+      hostRules.clear();
     });
 
     it('returns null for invalid toml', async () => {

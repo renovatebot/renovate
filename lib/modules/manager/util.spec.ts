@@ -1,5 +1,4 @@
-import { mockDeep } from 'vitest-mock-extended';
-import * as _hostRules from '../../util/host-rules';
+import * as hostRules from '../../util/host-rules';
 import { GitRefsDatasource } from '../datasource/git-refs';
 import { GitTagsDatasource } from '../datasource/git-tags';
 import { GithubTagsDatasource } from '../datasource/github-tags';
@@ -7,11 +6,11 @@ import { GitlabTagsDatasource } from '../datasource/gitlab-tags';
 import { type PackageDependency } from './types';
 import { applyGitSource } from './util';
 
-vi.mock('../../util/host-rules', () => mockDeep());
-
-const hostRules = vi.mocked(_hostRules);
-
 describe('modules/manager/util', () => {
+  beforeEach(() => {
+    hostRules.clear();
+  });
+
   it('applies GitHub source for tag', () => {
     const dependency: PackageDependency = {};
     const git = 'https://github.com/foo/bar';
@@ -64,7 +63,10 @@ describe('modules/manager/util', () => {
     const git = 'https://git.example.com/foo/bar';
     const tag = 'v1.2.3';
 
-    hostRules.hostType.mockReturnValue('github');
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'git.example.com',
+    });
     applyGitSource(dependency, git, undefined, tag, undefined);
 
     expect(dependency).toStrictEqual({
