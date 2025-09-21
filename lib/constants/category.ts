@@ -1,5 +1,6 @@
 export const Categories = [
   'ansible',
+  'alpine',
   'batect',
   'bazel',
   'c',

@@ -1,5 +1,6 @@
 import * as ansible from './ansible';
 import * as ansibleGalaxy from './ansible-galaxy';
+import * as apko from './apko';
 import * as argoCD from './argocd';
 import * as asdf from './asdf';
 import * as azurePipelines from './azure-pipelines';
@@ -114,6 +115,7 @@ export default api;
 
 api.set('ansible', ansible);
 api.set('ansible-galaxy', ansibleGalaxy);
+api.set('apko', apko);
 api.set('argocd', argoCD);
 api.set('asdf', asdf);
 api.set('azure-pipelines', azurePipelines);
