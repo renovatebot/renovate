@@ -1,6 +1,8 @@
+import Ajv from 'ajv';
 import fs from 'fs-extra';
 import { glob } from 'glob';
 import MarkdownIt from 'markdown-it';
+import { MigrationsService } from '../dist/config/migrations/migrations-service.js';
 
 const errorTitle = 'Invalid JSON in fenced code block';
 const errorBody =
@@ -12,28 +14,79 @@ let issues = 0;
 
 markdown.enable(['fence']);
 
+async function readAsJson(path) {
+  return JSON.parse(await fs.readFile(path, 'utf-8'));
+}
+
+const validate = new Ajv({
+  extendRefs: true,
+  meta: false,
+  schemaId: 'id',
+})
+  .addMetaSchema(
+    await readAsJson('node_modules/ajv/lib/refs/json-schema-draft-04.json'),
+  )
+  .compile(await readAsJson('renovate-schema.json'));
+
+function reportErrorDetails(file, start, end, errorMessage) {
+  issues += 1;
+  if (process.env.CI) {
+    console.log(
+      `::error file=${file},line=${start},endLine=${end},title=${errorTitle}::${errorMessage}. ${errorBody}`,
+    );
+  } else {
+    console.log(
+      `${errorTitle} (${file} lines ${start}-${end}): ${errorMessage}`,
+    );
+  }
+}
+
+/**
+ * This callback type is called `requestCallback` and is displayed as a global symbol.
+ *
+ * @callback reporterCallback
+ * @param {string} message
+ * @returns {void}
+ */
+
 /**
  *
- * @param {string} file
+ * @param {reporterCallback} reporter
  * @param {import('markdown-it/lib/token.mjs').default} token
  */
-function checkValidJson(file, token) {
-  const start = token.map ? token.map[0] + 1 : 0;
-  const end = token.map ? token.map[1] + 1 : 0;
-
+function checkValidJson(reporter, token) {
   try {
-    JSON.parse(token.content);
+    return JSON.parse(token.content);
   } catch (err) {
-    issues += 1;
-    if (process.env.CI) {
-      console.log(
-        `::error file=${file},line=${start},endLine=${end},title=${errorTitle}::${err.message}. ${errorBody}`,
-      );
-    } else {
-      console.log(
-        `${errorTitle} (${file} lines ${start}-${end}): ${err.message}`,
-      );
-    }
+    reporter(err.message);
+  }
+}
+
+/**
+ *
+ * @param {reporterCallback} reporter
+ * @param {Object} value
+ */
+function checkSchemaCompliantJson(reporter, value) {
+  const isValid = validate(value);
+  if (!isValid) {
+    validate.errors.forEach((error) => {
+      reporter(error.dataPath + ' ' + error.message);
+    });
+  }
+}
+/**
+ *
+ * @param {reporterCallback} reporter
+ * @param {Object} original
+ */
+function checkMigrationStatus(reporter, original) {
+  const migrated = MigrationsService.run(original);
+  if (MigrationsService.isMigrated(original, migrated)) {
+    reporter(
+      'The JSON is contains unmigrated configuration. Migrated JSON: ' +
+        JSON.stringify(migrated),
+    );
   }
 }
 
@@ -45,9 +98,25 @@ async function processFile(file) {
   const text = await fs.readFile(file, 'utf8');
   const tokens = markdown.parse(text, undefined);
 
-  tokens.forEach((token) => {
-    if (token.type === 'fence' && token.info === 'json') {
-      checkValidJson(file, token);
+  tokens.forEach((token, index) => {
+    if (
+      token.type === 'fence' &&
+      (token.info === 'json' || token.info.startsWith('json '))
+    ) {
+      const reporter = (message) => {
+        const [start, end] = token.map ?? [-1, -1];
+        reportErrorDetails(file, start + 1, end + 1, message);
+      };
+      const validJson = checkValidJson(reporter, token);
+
+      if (
+        validJson !== undefined &&
+        (index - 2 < 0 ||
+          tokens[index - 2].content !== '<!-- schema-validation-ignore -->')
+      ) {
+        checkSchemaCompliantJson(reporter, validJson);
+        checkMigrationStatus(reporter, validJson);
+      }
     }
   });
 }

@@ -156,7 +156,7 @@ If you browse the "default" presets, you will see some that have parameters, e.g
 
 ```json
 {
-  "labels": {
+  "label": {
     "description": "Apply labels <code>{{arg0}}</code> and <code>{{arg1}}</code> to PRs",
     "labels": ["{{arg0}}", "{{arg1}}"]
   },
@@ -171,7 +171,7 @@ Here is how you would use these in your Renovate config:
 
 ```json
 {
-  "extends": [":labels(dependencies,devops)", ":assignee(renovate-tests)"]
+  "extends": [":label(dependencies,devops)", ":assignee(renovate-tests)"]
 }
 ```
 
