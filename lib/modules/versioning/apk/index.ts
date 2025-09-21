@@ -22,10 +22,6 @@ export interface ApkVersion extends GenericVersion {
    * same upstream version.
    */
   releaseString: string;
-  /**
-   * prerelease identifier if present (e.g., "rc1" from "2.39.0_rc1-r0")
-   */
-  prerelease?: string;
 }
 
 class ApkVersioningApi extends GenericVersioningApi {
@@ -33,77 +29,68 @@ class ApkVersioningApi extends GenericVersioningApi {
    * Parse APK version format using apko's version parsing patterns
    * Based on: https://github.com/chainguard-dev/apko/blob/main/pkg/apk/apk/version.go
    *
-   * versionRegex: ^v?(\d+(\.\d+)*)(_[a-z]+\d*)?(-r\d+)?$
-   *
-   * Examples:
-   * - 2.39.0-r0
-   * - 2.39.0_rc1-r0
-   * - 6.5_p20250503-r0
-   * - v1.2.3_alpha1-r5
    */
   protected _parse(version: string): ApkVersion | null {
-    // Use apko's version regex pattern: ^v?(\d+(\.\d+)*)(_[a-z]+\d*)?(-r\d+)?$
-    // But also handle cases like 2.39.0-rc1 (without release string) and 2.39.0~beta
-    // Updated to handle complex prerelease identifiers like _alpha_pre2
+    // Enhanced regex based on Go pattern but more flexible for complex prerelease identifiers
+    // Groups: 1=major, 2=minor.patch, 3=letter, 4=prerelease_full, 5=package_fix_full, 6=release_full, 7=release_num
+    // Regex from https://github.com/chainguard-dev/apko/blob/main/pkg/apk/apk/version.go
     const versionRegex = regEx(
-      /^v?(\d+(?:\.\d+)*)(_[a-z]+(?:_[a-z]+)*\d*)?(-r\d+)?$/,
+      /^v?([0-9]+)((\.[0-9]+)*)([a-z]?)((_[a-z]+(?:_[a-z]+)*[0-9]*))?((_cvs|_svn|_git|_hg|_p)([0-9]*))?((-r)([0-9]+))?$/,
     );
     const match = versionRegex.exec(version);
 
     if (!match) {
-      // Try to handle cases like 2.39.0-rc1 or 2.39.0~beta
-      const altMatch = regEx(/^v?(\d+(?:\.\d+)*)([-_~][a-z]+\d*)$/).exec(
-        version,
-      );
-      if (altMatch) {
-        const [, mainVersion, prereleasePart] = altMatch;
-        const prerelease =
-          prereleasePart.startsWith('_') || prereleasePart.startsWith('-')
-            ? prereleasePart.substring(1)
-            : prereleasePart;
-
-        const release = [...mainVersion.matchAll(regEx(/\d+/g))].map((m) =>
-          parseInt(m[0]),
-        );
-
-        return {
-          version: mainVersion,
-          releaseString: '',
-          release,
-          prerelease,
-        };
-      }
       return null;
     }
 
-    const [, mainVersion, suffix, releaseString] = match;
-    let prerelease: string | undefined;
+    const [
+      ,
+      major,
+      minorPatch,
+      ,
+      letter,
+      prereleaseFull,
+      packageFixFull, //packageType
+      //packageNum
+      //releaseFull
+      ,
+      ,
+      ,
+      releaseNum,
+    ] = match;
 
-    // Extract prerelease identifier from suffix (e.g., _rc1, _alpha1, _beta2, _alpha_pre2)
-    // Note: _p patterns are package fixes, not prerelease identifiers
-    if (suffix) {
-      const prereleaseMatch = regEx(/^_([a-z]+(?:_[a-z]+)*\d*)$/).exec(suffix);
-      if (prereleaseMatch) {
-        const identifier = prereleaseMatch[1];
-        // Only treat as prerelease if it's not a package fix (_p) or other special patterns
-        if (
-          !identifier.startsWith('p') &&
-          !identifier.startsWith('cvs') &&
-          !identifier.startsWith('git')
-        ) {
-          prerelease = identifier;
-        }
+    // Build the full version string
+    const versionStr =
+      major +
+      (minorPatch || '') +
+      (letter || '') +
+      (prereleaseFull || '') +
+      (packageFixFull || '');
+
+    // Extract prerelease identifier if present
+    let prerelease: string | undefined;
+    if (prereleaseFull) {
+      const identifier = prereleaseFull.substring(1); // Remove leading _
+      // Only treat as prerelease if it's not a package fix or special pattern
+      if (
+        !['p', 'cvs', 'git', 'svn', 'hg'].some((prefix) =>
+          identifier.startsWith(prefix),
+        )
+      ) {
+        prerelease = identifier;
       }
     }
 
-    // Extract numeric parts from the main version for major/minor/patch
-    const release = [...mainVersion.matchAll(regEx(/\d+/g))].map((m) =>
-      parseInt(m[0]),
-    );
+    // Extract numeric parts for major/minor/patch
+    const release = [parseInt(major)];
+    if (minorPatch) {
+      const minorPatchParts = minorPatch.substring(1).split('.').map(Number);
+      release.push(...minorPatchParts);
+    }
 
     return {
-      version: mainVersion + (suffix || ''),
-      releaseString: releaseString ? releaseString.substring(1) : '', // Remove the leading '-'
+      version: versionStr,
+      releaseString: releaseNum || '',
       release,
       prerelease,
     };
@@ -157,14 +144,14 @@ class ApkVersioningApi extends GenericVersioningApi {
 
   /**
    * Compare version parts using APK's version comparison rules
-   * This follows the same logic as RPM version comparison
+   * Simplified version that handles APK-specific patterns
    */
   private _compareVersionParts(v1: string, v2: string): number {
     if (v1 === v2) {
       return 0;
     }
 
-    const alphaNumPattern = regEx(/([a-zA-Z]+)|(\d+)|(~)/g);
+    const alphaNumPattern = regEx(/([a-zA-Z]+)|(\d+)/g);
     const matchesv1 = v1.match(alphaNumPattern) ?? [];
     const matchesv2 = v2.match(alphaNumPattern) ?? [];
     const matches = Math.min(matchesv1.length, matchesv2.length);
@@ -172,16 +159,6 @@ class ApkVersioningApi extends GenericVersioningApi {
     for (let i = 0; i < matches; i++) {
       const matchv1 = matchesv1[i];
       const matchv2 = matchesv2[i];
-
-      // Compare tildes (pre-release versions)
-      if (matchv1?.startsWith('~') || matchv2?.startsWith('~')) {
-        if (!matchv1?.startsWith('~')) {
-          return 1;
-        }
-        if (!matchv2?.startsWith('~')) {
-          return -1;
-        }
-      }
 
       // Compare numbers vs strings
       if (matchv1 && /^\d+$/.test(matchv1)) {
@@ -201,20 +178,6 @@ class ApkVersioningApi extends GenericVersioningApi {
           return matchv1.localeCompare(matchv2);
         }
       }
-    }
-
-    // segments were all the same, but separators were different
-    if (matchesv1.length === matchesv2.length) {
-      return 0;
-    }
-
-    // If there is a tilde in a segment past the minimum number of segments, find it
-    if (matchesv1.length > matches && matchesv1[matches].startsWith('~')) {
-      return -1;
-    }
-
-    if (matchesv2.length > matches && matchesv2[matches].startsWith('~')) {
-      return 1;
     }
 
     // whichever has the most segments wins
@@ -343,27 +306,20 @@ class ApkVersioningApi extends GenericVersioningApi {
 
   override getMajor(version: string): number | null {
     const parsed = this._parse(version);
-    return parsed && parsed.release.length > 0 ? parsed.release[0] : null;
+    return parsed?.release[0] ?? null;
   }
 
   override getMinor(version: string): number | null {
     const parsed = this._parse(version);
-    return parsed && parsed.release.length > 1 ? parsed.release[1] : null;
+    return parsed?.release[1] ?? null;
   }
 
   override getPatch(version: string): number | null {
     const parsed = this._parse(version);
-    if (!parsed) {
+    if (!parsed || parsed.prerelease?.startsWith('p')) {
       return null;
     }
-
-    // For cases like 6.5_p20250503-r0, don't treat _p patterns as patch versions
-    // The _p pattern is a package fix, not a prerelease identifier
-    if (parsed.prerelease?.startsWith('p')) {
-      return null;
-    }
-
-    return parsed.release.length > 2 ? parsed.release[2] : null;
+    return parsed.release[2] ?? null;
   }
 }
 
