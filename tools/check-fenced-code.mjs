@@ -96,7 +96,7 @@ function checkMigrationStatus(reporter, original) {
   const migrated = MigrationsService.run(original);
   if (MigrationsService.isMigrated(original, migrated)) {
     reporter(
-      'The JSON is contains unmigrated configuration. Migrated JSON: ' +
+      'The JSON contains unmigrated configuration. Migrated JSON: ' +
         JSON.stringify(migrated),
     );
   }
