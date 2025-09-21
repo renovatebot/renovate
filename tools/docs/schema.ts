@@ -1,5 +1,8 @@
 import { getOptions } from '../../lib/config/options';
-import type { RenovateOptions } from '../../lib/config/types';
+import type {
+  RenovateOptions,
+  RenovateRequiredOption,
+} from '../../lib/config/types';
 import { hasKey } from '../../lib/util/object';
 import { updateFile } from '../utils';
 
@@ -134,12 +137,39 @@ function addChildrenArrayInParents(): void {
   }
 }
 
+function toRequiredPropertiesRule(
+  prop: RenovateRequiredOption,
+  option: RenovateOptions,
+): Record<string, unknown> {
+  return {
+    if: {
+      properties: prop.siblingProperties.reduce<Record<string, unknown>>(
+        (acc, { property, value }) => {
+          acc[property] = { const: value };
+          return acc;
+        },
+        {},
+      ),
+      required: prop.siblingProperties.map((prop) => prop.property),
+    },
+    then: {
+      required: [option.name],
+    },
+  };
+}
+
 function createSchemaForChildConfigs(): void {
   for (const option of options) {
     if (option.parents) {
       for (const parent of option.parents.filter((parent) => parent !== '.')) {
         properties[parent].items.allOf[0].properties[option.name] =
           createSingleConfig(option);
+
+        option.requiredIf?.forEach((prop) => {
+          properties[parent].items.allOf.push(
+            toRequiredPropertiesRule(prop, option),
+          );
+        });
       }
     }
   }
