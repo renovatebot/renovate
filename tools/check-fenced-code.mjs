@@ -14,6 +14,11 @@ let issues = 0;
 
 markdown.enable(['fence']);
 
+/**
+ *
+ * @param {string} path
+ * @returns {Promise<any>}
+ */
 async function readAsJson(path) {
   return JSON.parse(await fs.readFile(path, 'utf-8'));
 }
@@ -28,6 +33,13 @@ const validate = new Ajv({
   )
   .compile(await readAsJson('renovate-schema.json'));
 
+/**
+ *
+ * @param {string} file
+ * @param {number} start
+ * @param {number} end
+ * @param {string} errorMessage
+ */
 function reportErrorDetails(file, start, end, errorMessage) {
   issues += 1;
   if (process.env.CI) {
@@ -65,12 +77,12 @@ function checkValidJson(reporter, token) {
 /**
  *
  * @param {reporterCallback} reporter
- * @param {Object} value
+ * @param {import("../dist/config/types.js").RenovateConfig} value
  */
 function checkSchemaCompliantJson(reporter, value) {
   const isValid = validate(value);
   if (!isValid) {
-    validate.errors.forEach((error) => {
+    validate.errors?.forEach((error) => {
       reporter(error.dataPath + ' ' + error.message);
     });
   }
@@ -78,7 +90,7 @@ function checkSchemaCompliantJson(reporter, value) {
 /**
  *
  * @param {reporterCallback} reporter
- * @param {Object} original
+ * @param {import("../dist/config/types.js").RenovateConfig} original
  */
 function checkMigrationStatus(reporter, original) {
   const migrated = MigrationsService.run(original);
@@ -103,6 +115,7 @@ async function processFile(file) {
       token.type === 'fence' &&
       (token.info === 'json' || token.info.startsWith('json '))
     ) {
+      /** @type {(message: string) => void} */
       const reporter = (message) => {
         const [start, end] = token.map ?? [-1, -1];
         reportErrorDetails(file, start + 1, end + 1, message);
