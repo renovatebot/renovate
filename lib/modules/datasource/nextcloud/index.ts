@@ -63,7 +63,7 @@ export class NextcloudDatasource extends Datasource {
       const translation =
         release.translations[NextcloudDatasource.defaultTranslationLanguage];
 
-      const changelogContent = translation ? translation.changelog : null;
+      const changelogContent = translation?.changelog ?? null;
 
       result.releases.push({
         version: release.version,
