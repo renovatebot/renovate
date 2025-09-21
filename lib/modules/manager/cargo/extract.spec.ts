@@ -1,5 +1,4 @@
 import { codeBlock } from 'common-tags';
-import { mockDeep } from 'vitest-mock-extended';
 import * as hostRules from '../../../util/host-rules';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
