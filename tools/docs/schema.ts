@@ -141,15 +141,13 @@ function toRequiredPropertiesRule(
   prop: RenovateRequiredOption,
   option: RenovateOptions,
 ): Record<string, unknown> {
+  const properties = {} as Record<string, any>;
+  for (const { property, value } of prop.siblingProperties) {
+    properties[property] = { const: value };
+  }
   return {
     if: {
-      properties: prop.siblingProperties.reduce<Record<string, unknown>>(
-        (acc, { property, value }) => {
-          acc[property] = { const: value };
-          return acc;
-        },
-        {},
-      ),
+      properties,
       required: prop.siblingProperties.map((prop) => prop.property),
     },
     then: {
