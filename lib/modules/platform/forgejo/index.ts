@@ -56,6 +56,7 @@ import {
   DRAFT_PREFIX,
   getMergeMethod,
   getRepoUrl,
+  isAllowed,
   smartLinks,
   toRenovatePR,
   trimTrailingApiPath,
@@ -315,28 +316,22 @@ const platform: Platform = {
       throw new Error(REPOSITORY_BLOCKED);
     }
 
-    if (repo.allow_rebase && repo.default_merge_style === 'rebase') {
-      config.mergeMethod = 'rebase';
-    } else if (
-      repo.allow_rebase_explicit &&
-      repo.default_merge_style === 'rebase-merge'
-    ) {
-      config.mergeMethod = 'rebase-merge';
-    } else if (
-      repo.allow_squash_merge &&
-      repo.default_merge_style === 'squash'
-    ) {
-      config.mergeMethod = 'squash';
-    } else if (
-      repo.allow_merge_commits &&
-      repo.default_merge_style === 'merge'
-    ) {
-      config.mergeMethod = 'merge';
-    } else if (
-      repo.allow_fast_forward_only_merge &&
-      repo.default_merge_style === 'fast-forward-only'
-    ) {
-      config.mergeMethod = 'fast-forward-only';
+    // similar to forgejo behaviour- if default merge style is allowed, use this;
+    // else fall back to predefined order. Order chosen to minimize commits - see
+    // https://github.com/renovatebot/renovate/pull/37768 for discussion.
+    const preferredOrder: PRMergeMethod[] = [
+      repo.default_merge_style,
+      'fast-forward-only',
+      'squash',
+      'merge',
+      'rebase',
+      'rebase-merge',
+    ];
+
+    const mergeStyle = preferredOrder.find((style) => isAllowed(style, repo));
+
+    if (mergeStyle) {
+      config.mergeMethod = mergeStyle;
     } else {
       logger.debug(
         'Repository has no allowed merge methods - aborting renovation',
