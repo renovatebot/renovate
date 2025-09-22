@@ -8,7 +8,7 @@ import { ResetMode, simpleGit } from 'simple-git';
 import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
-import type { RenovateConfig } from '../../config/types';
+import type { MergeStrategy, RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
   INVALID_PATH,
@@ -977,7 +977,11 @@ export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
   }
 }
 
-export async function mergeBranch(branchName: string): Promise<void> {
+export async function mergeBranch(
+  branchName: string,
+  mergeStrategy: MergeStrategy,
+  commitMessage: string | null,
+): Promise<void> {
   let status: StatusResult | undefined;
   try {
     await syncGit();
@@ -994,7 +998,30 @@ export async function mergeBranch(branchName: string): Promise<void> {
       ]),
     );
     status = await git.status();
-    await gitRetry(() => git.merge(['--ff-only', branchName]));
+    if (
+      mergeStrategy === 'fast-forward' ||
+      mergeStrategy === 'rebase' ||
+      mergeStrategy === 'auto'
+    ) {
+      await gitRetry(() => git.merge(['--ff-only', branchName]));
+    } else if (mergeStrategy === 'merge-commit') {
+      let commandOptions = ['--no-ff', '--no-edit'];
+      if (commitMessage) {
+        commandOptions = commandOptions.concat(['-m', commitMessage]);
+      }
+      commandOptions.push(branchName);
+      await gitRetry(() => git.merge(commandOptions));
+    } else if (mergeStrategy === 'squash') {
+      // Create a squash commit
+      await gitRetry(() => git.merge(['--squash', branchName]));
+      // Commit the squash commit
+      if (commitMessage) {
+        await gitRetry(() => git.commit(commitMessage));
+      } else {
+        // Use the default commit message for the squash commit from git
+        await gitRetry(() => git.raw(['commit', '--no-edit']));
+      }
+    }
     await gitRetry(() => git.push('origin', config.currentBranch));
     incLimitedValue('Commits');
   } catch (err) {
