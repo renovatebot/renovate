@@ -323,6 +323,7 @@ export async function doAutoReplace(
           newDigest,
         );
       } else if (
+        !currentDigest &&
         currentDigestShort &&
         newDigest &&
         currentDigestShort !== newDigest
