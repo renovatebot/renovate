@@ -21,6 +21,13 @@ export function extractMatches(
   return keys.map((key) => m.getMatch(key)!);
 }
 
+/**
+ * Extract multiple matches from a node.
+ *
+ * Marking the ROOT_NODE will help with precision by ensuring matches are within the specified scope.
+ * For example, in `foo(bar(baz))`, using ROOT_NODE prevents unintended matches like interpreting `foo(baz)`
+ * when we only want matches within the correct nested structure.
+ */
 export function extractAllMatches(
   rootNode: SgNode,
   rule: NapiConfig,
