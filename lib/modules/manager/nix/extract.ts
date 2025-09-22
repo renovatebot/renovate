@@ -90,7 +90,7 @@ export async function extractPackageFile(
     if (flakeOriginal.type === 'indirect' || flakeLocked.type === 'indirect') {
       logger.debug(
         { flakeLockFile, flakeInput },
-        `input is type ${flakeOriginal.type}, skipping`,
+        `input is type indirect, skipping`,
       );
       continue;
     }
@@ -99,7 +99,7 @@ export async function extractPackageFile(
     if (flakeOriginal.type === 'path' || flakeLocked.type === 'path') {
       logger.debug(
         { flakeLockFile, flakeInput },
-        `input is type ${flakeOriginal.type}, skipping`,
+        `input is type path, skipping`,
       );
       continue;
     }
