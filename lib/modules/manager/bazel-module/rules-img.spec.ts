@@ -66,6 +66,7 @@ describe('modules/manager/bazel-module/rules-img', () => {
         depName: 'ubuntu',
         packageName: 'library/ubuntu',
         currentValue: '24.04',
+        registryUrls: ['https://index.docker.io'],
       });
     });
 

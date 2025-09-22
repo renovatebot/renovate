@@ -32,6 +32,9 @@ export const RulesImgPullCallToDep = RepoRuleCallFragment.extend({
       packageName,
       currentValue: tag?.value,
       currentDigest: digest?.value,
+      registryUrls: registry?.value
+        ? [`https://${registry.value}`]
+        : [`https://index.docker.io`],
       replaceString: rawString,
     };
   },

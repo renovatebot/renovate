@@ -763,6 +763,7 @@ describe('modules/manager/bazel-module/extract', () => {
             currentValue: '24.04',
             currentDigest:
               'sha256:1e622c5f9ac0c0144d577702ba5f2cce79fc8e3cf89ec88291739cd4eee3b7b9',
+            registryUrls: ['https://index.docker.io'],
             replaceString: codeBlock`
               pull(
                   name = "ubuntu",
@@ -808,6 +809,7 @@ describe('modules/manager/bazel-module/extract', () => {
             currentValue: '24.04',
             currentDigest:
               'sha256:1e622c5f9ac0c0144d577702ba5f2cce79fc8e3cf89ec88291739cd4eee3b7b9',
+            registryUrls: ['https://index.docker.io'],
             replaceString: codeBlock`
               pull(
                   name = "ubuntu",
@@ -843,6 +845,7 @@ describe('modules/manager/bazel-module/extract', () => {
             depName: 'my_image',
             packageName: 'my.registry.com/myorg/myimage',
             currentValue: 'v1.2.3',
+            registryUrls: ['https://my.registry.com'],
             replaceString: codeBlock`
               pull(
                   name = "my_image",
@@ -882,6 +885,7 @@ describe('modules/manager/bazel-module/extract', () => {
             depName: 'ubuntu',
             packageName: 'library/ubuntu',
             currentValue: '24.04',
+            registryUrls: ['https://index.docker.io'],
             replaceString: codeBlock`
               pull(
                   name = "ubuntu",
@@ -898,6 +902,7 @@ describe('modules/manager/bazel-module/extract', () => {
             currentValue: '1.27.1',
             currentDigest:
               'sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720',
+            registryUrls: ['https://index.docker.io'],
             replaceString: codeBlock`
               pull(
                   name = "nginx",
@@ -951,6 +956,7 @@ describe('modules/manager/bazel-module/extract', () => {
             depName: 'ubuntu',
             packageName: 'library/ubuntu',
             currentValue: '24.04',
+            registryUrls: ['https://index.docker.io'],
             replaceString: codeBlock`
               my_pull(
                   name = "ubuntu",
