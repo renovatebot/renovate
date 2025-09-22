@@ -30,7 +30,7 @@ export async function extractPackageFile(
   const flakeLockFile = getSiblingFileName(packageFile, 'flake.lock');
   const flakeLockContents = await readLocalFile(flakeLockFile, 'utf8');
 
-  logger.trace(`nix.extractPackageFile(${flakeLockContents})`);
+  logger.trace(`nix.extractPackageFile(${flakeLockFile})`);
 
   const deps: PackageDependency[] = [];
 
