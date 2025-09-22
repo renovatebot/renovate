@@ -72,7 +72,7 @@ export const kvArgsPattern = astGrep.rule`
       kind: argument_list
       inside:
         kind: call
-        pattern: $CALL
+        pattern: $ROOT_NODE
     kind: pair
     all:
       - has:
@@ -91,14 +91,9 @@ export function extractKvArgs(argsListNode: SgNode): KvArgs {
   const pairs = astGrep.extractAllMatches(argsListNode, kvArgsPattern, [
     'KEY',
     'VAL',
-    'CALL',
   ]);
 
-  for (const [keyNode, valNode, anchorNode] of pairs) {
-    if (anchorNode.id() !== argsListNode.id()) {
-      continue;
-    }
-
+  for (const [keyNode, valNode] of pairs) {
     const key = coerceToString(keyNode);
     if (!key) {
       continue;

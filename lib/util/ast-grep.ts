@@ -22,15 +22,23 @@ export function extractMatches(
 }
 
 export function extractAllMatches(
-  node: SgNode,
+  rootNode: SgNode,
   rule: NapiConfig,
   keys: string[],
 ): SgNode[][] {
-  const ms = node.findAll(rule);
+  const ms = rootNode.findAll(rule);
   const result: SgNode[][] = [];
+
+  const rootNodeId = rootNode.id();
   for (const m of ms) {
+    const anchorNode = m.getMatch('ROOT_NODE');
+    if (anchorNode && anchorNode.id() !== rootNodeId) {
+      continue;
+    }
+
     result.push(keys.map((key) => m.getMatch(key)!));
   }
+
   return result;
 }
 
