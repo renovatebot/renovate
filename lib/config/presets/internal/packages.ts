@@ -46,7 +46,11 @@ export const presets: Record<string, Preset> = {
   googleapis: {
     description: 'All `googleapis` packages.',
     matchDatasources: ['npm'],
-    matchPackageNames: ['google-auth-library', '@google-cloud/**'],
+    matchPackageNames: [
+      '@google-cloud/**',
+      'google-auth-library',
+      'googleapis',
+    ],
   },
   jsTest: {
     description: 'JavaScript test packages.',

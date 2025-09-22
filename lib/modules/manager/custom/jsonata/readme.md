@@ -243,6 +243,7 @@ $map($map(packages, function ($v) { $split($v, "@") }), function ($v) { { "depNa
 ```json title="JSONata manager config to extract deps from a package.json file in the Renovate repository"
 {
   "customType": "jsonata",
+  "fileFormat": "json",
   "managerFilePatterns": ["/package.json/"],
   "matchStrings": [
     "$each(dependencies, function($v, $k) { {\"depName\":$k, \"currentValue\": $v, \"depType\": \"dependencies\"}})",
