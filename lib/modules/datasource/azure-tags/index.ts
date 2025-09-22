@@ -37,7 +37,7 @@ export class AzureTagsDatasource extends Datasource {
     const azureTags = await azureApiGit.getRefs(repo, undefined, 'tags');
 
     // Filter out tags that do not have a name
-    const filteredTags = azureTags.filter((tag) => tag.name !== undefined);
+    const filteredTags = azureTags.filter((tag) => tag.name);
 
     const dependency: ReleaseResult = {
       sourceUrl: AzureTagsDatasource.getSourceUrl(repo, registryUrl!),
