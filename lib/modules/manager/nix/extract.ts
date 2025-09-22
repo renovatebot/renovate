@@ -132,6 +132,7 @@ export async function extractPackageFile(
     const dep: PackageDependency = {
       depName,
       datasource: GitRefsDatasource.id,
+      versioning: gitRefVersioning,
     };
 
     // if rev is set, the flake contains a digest and can be updated directly
