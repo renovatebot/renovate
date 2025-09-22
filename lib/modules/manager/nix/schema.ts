@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { Json } from '../../../util/schema-utils';
 
 const InputType = z.enum([
+  'file',
   'git',
   'github',
   'gitlab',

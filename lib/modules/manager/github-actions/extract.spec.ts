@@ -583,29 +583,42 @@ describe('modules/manager/github-actions/extract', () => {
 
     it('extracts x-version from actions/setup-x', () => {
       const yamlContent = codeBlock`
-      jobs:
-        build:
-          steps:
-            - name: "Setup Node.js"
-              uses: actions/setup-node@v3
-              with:
-                node-version: '16.x'
-            - name: "Setup Node.js with exact version"
-              uses: actions/setup-node@v3
-              with:
-                node-version: '20.0.0'
-            - name: "Setup Go"
-              uses: actions/setup-go@v5
-              with:
-                go-version: '1.23'
-            - name: "Setup Python with range"
-              uses: actions/setup-python@v3
-              with:
-                python-version: '>=3.8.0 <3.10.0'
-            - name: "Setup Node.js with latest"
-              uses: actions/setup-node@v3
-              with:
-                node-version: 'latest'`;
+        jobs:
+          build:
+            steps:
+              - name: "Setup Node.js"
+                uses: actions/setup-node@v3
+                with:
+                  node-version: '16.x'
+              - name: "Setup Node.js with exact version"
+                uses: actions/setup-node@v3
+                with:
+                  node-version: '20.0.0'
+              - name: "Setup Go"
+                uses: actions/setup-go@v5
+                with:
+                  go-version: '1.23'
+              - name: "Setup Python with range"
+                uses: actions/setup-python@v3
+                with:
+                  python-version: '>=3.8.0 <3.10.0'
+              - name: "Setup Node.js with latest"
+                uses: actions/setup-node@v3
+                with:
+                  node-version: 'latest'
+              - name: "Setup Deno"
+                uses: actions/setup-deno@v2
+                with:
+                  deno-version: '2.4.0'
+              - name: "Setup Bun"
+                uses: actions/setup-bun@v2
+                with:
+                  bun-version: '1.2.0'
+              - name: "Setup Ruby"
+                uses: actions/setup-ruby@v1
+                with:
+                  ruby-version: '3.4'
+        `;
 
       const res = extractPackageFile(yamlContent, 'workflow.yml');
       expect(res?.deps).toMatchObject([
@@ -665,6 +678,39 @@ describe('modules/manager/github-actions/extract', () => {
           versioning: 'docker',
         },
         {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v2',
+          datasource: 'github-tags',
+          depName: 'actions/setup-deno',
+          depType: 'action',
+          replaceString: 'actions/setup-deno@v2',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v2',
+          datasource: 'github-tags',
+          depName: 'actions/setup-bun',
+          depType: 'action',
+          replaceString: 'actions/setup-bun@v2',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v1',
+          datasource: 'github-tags',
+          depName: 'actions/setup-ruby',
+          depType: 'action',
+          replaceString: 'actions/setup-ruby@v1',
+          versioning: 'docker',
+        },
+        {
           depName: 'node',
           packageName: 'actions/node-versions',
           currentValue: '16.x',
@@ -709,6 +755,33 @@ describe('modules/manager/github-actions/extract', () => {
           extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
           depType: 'uses-with',
         },
+        {
+          currentValue: '2.4.0',
+          datasource: 'github-releases',
+          depName: 'deno',
+          depType: 'uses-with',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          packageName: 'actions/deno-versions',
+          versioning: 'semver',
+        },
+        {
+          currentValue: '1.2.0',
+          datasource: 'github-releases',
+          depName: 'bun',
+          depType: 'uses-with',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          packageName: 'actions/bun-versions',
+          versioning: 'npm',
+        },
+        {
+          currentValue: '3.4',
+          datasource: 'github-releases',
+          depName: 'ruby',
+          depType: 'uses-with',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          packageName: 'actions/ruby-versions',
+          versioning: 'ruby',
+        },
       ]);
     });
 
@@ -737,6 +810,18 @@ describe('modules/manager/github-actions/extract', () => {
               uses: actions/setup-node@v3
               with:
                 node-version: 'latest'
+            - name: "Setup Deno"
+              uses: actions/setup-deno@v2
+              with:
+                deno-version: '2.4.0'
+            - name: "Setup Bun"
+              uses: actions/setup-bun@v2
+              with:
+                bun-version: '1.2.0'
+            - name: "Setup Ruby"
+              uses: actions/setup-ruby@v1
+              with:
+                ruby-version: '3.4'
         `;
 
       const res = extractPackageFile(yamlContent, 'action.yml');
@@ -797,6 +882,39 @@ describe('modules/manager/github-actions/extract', () => {
           versioning: 'docker',
         },
         {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v2',
+          datasource: 'github-tags',
+          depName: 'actions/setup-deno',
+          depType: 'action',
+          replaceString: 'actions/setup-deno@v2',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v2',
+          datasource: 'github-tags',
+          depName: 'actions/setup-bun',
+          depType: 'action',
+          replaceString: 'actions/setup-bun@v2',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v1',
+          datasource: 'github-tags',
+          depName: 'actions/setup-ruby',
+          depType: 'action',
+          replaceString: 'actions/setup-ruby@v1',
+          versioning: 'docker',
+        },
+        {
           depName: 'node',
           packageName: 'actions/node-versions',
           currentValue: '16.x',
@@ -840,6 +958,33 @@ describe('modules/manager/github-actions/extract', () => {
           versioning: 'node',
           extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
           depType: 'uses-with',
+        },
+        {
+          currentValue: '2.4.0',
+          datasource: 'github-releases',
+          depName: 'deno',
+          depType: 'uses-with',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          packageName: 'actions/deno-versions',
+          versioning: 'semver',
+        },
+        {
+          currentValue: '1.2.0',
+          datasource: 'github-releases',
+          depName: 'bun',
+          depType: 'uses-with',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          packageName: 'actions/bun-versions',
+          versioning: 'npm',
+        },
+        {
+          currentValue: '3.4',
+          datasource: 'github-releases',
+          depName: 'ruby',
+          depType: 'uses-with',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          packageName: 'actions/ruby-versions',
+          versioning: 'ruby',
         },
       ]);
     });

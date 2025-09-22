@@ -83,7 +83,7 @@ async function raiseWarningIssue(
     shouldReOpen: config.configWarningReuseIssue,
     confidential: config.confidential,
   });
-  if (res === 'created') {
+  if (res === 'updated' || res === 'created') {
     logger.warn({ configError: error, res }, 'Configuration Warning');
   }
 }

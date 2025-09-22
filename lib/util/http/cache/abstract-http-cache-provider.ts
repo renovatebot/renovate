@@ -6,11 +6,15 @@ import { HttpCache } from './schema';
 import type { HttpCacheProvider } from './types';
 
 export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
-  protected abstract load(url: string): Promise<unknown>;
-  protected abstract persist(url: string, data: HttpCache): Promise<void>;
+  protected abstract load(method: string, url: string): Promise<unknown>;
+  protected abstract persist(
+    method: string,
+    url: string,
+    data: HttpCache,
+  ): Promise<void>;
 
-  async get(url: string): Promise<HttpCache | null> {
-    const cache = await this.load(url);
+  async get(method: string, url: string): Promise<HttpCache | null> {
+    const cache = await this.load(method, url);
     const httpCache = HttpCache.parse(cache);
     if (!httpCache) {
       return null;
@@ -20,10 +24,11 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
   }
 
   async setCacheHeaders<T extends Pick<GotOptions, 'headers'>>(
+    method: string,
     url: string,
     opts: T,
   ): Promise<void> {
-    const httpCache = await this.get(url);
+    const httpCache = await this.get(method, url);
     if (!httpCache) {
       return;
     }
@@ -40,6 +45,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
   }
 
   bypassServer<T>(
+    _method: string,
     _url: string,
     _ignoreSoftTtl: boolean,
   ): Promise<HttpResponse<T> | null> {
@@ -47,6 +53,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
   }
 
   async wrapServerResponse<T>(
+    method: string,
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
@@ -75,12 +82,12 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       logger.debug(
         `http cache: saving ${url} (etag=${etag}, lastModified=${lastModified})`,
       );
-      await this.persist(url, newHttpCache as HttpCache);
+      await this.persist(method, url, newHttpCache as HttpCache);
       return resp;
     }
 
     if (resp.statusCode === 304) {
-      const httpCache = await this.get(url);
+      const httpCache = await this.get(method, url);
       if (!httpCache) {
         return resp;
       }
@@ -90,7 +97,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
         `http cache: Using cached response: ${url} from ${timestamp}`,
       );
       httpCache.timestamp = new Date().toISOString();
-      await this.persist(url, httpCache);
+      await this.persist(method, url, httpCache);
 
       HttpCacheStats.incRemoteHits(url);
       const cachedResp = copyResponse(

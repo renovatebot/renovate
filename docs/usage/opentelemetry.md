@@ -39,10 +39,10 @@ You can also set the following environment variables:
 The following resource detectors are used:
 
 - `EnvDetector` from @opentelemetry/resources to allow users to add the custom attributes
-- `GithubDetector` from [@opentelemetry/resource-detector-github](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/detectors/node/opentelemetry-resource-detector-github) for the Github Action
-- `AWSDetector` from [@opentelemetry/resource-detector-aws](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/detectors/node/opentelemetry-resource-detector-aws) Users hosting on AWS
-- `GcpDetector` from [@opentelemetry/resource-detector-gcp](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/detectors/node/opentelemetry-resource-detector-gcp) Users hosting on GCP
-- `AzureDetector` from [@opentelemetry/resource-detector-azure](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/detectors/node/opentelemetry-resource-detector-azure) Users hosting on Azure
+- `GithubDetector` from [@opentelemetry/resource-detector-github](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/packages/resource-detector-github) for the Github Action
+- `AWSDetector` from [@opentelemetry/resource-detector-aws](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/packages/resource-detector-aws) Users hosting on AWS
+- `GcpDetector` from [@opentelemetry/resource-detector-gcp](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/packages/resource-detector-gcp) Users hosting on GCP
+- `AzureDetector` from [@opentelemetry/resource-detector-azure](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/packages/resource-detector-azure) Users hosting on Azure
 
 ## Debugging
 

@@ -867,6 +867,10 @@ describe('modules/platform/github/index', () => {
     it('should detect repoForceRebase', async () => {
       httpMock
         .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(404);
+      httpMock
+        .scope(githubApiHost)
         .get('/repos/undefined/branches/main/protection')
         .reply(200, {
           required_pull_request_reviews: {
@@ -897,6 +901,10 @@ describe('modules/platform/github/index', () => {
     it('should handle 404', async () => {
       httpMock
         .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/dev')
+        .reply(404);
+      httpMock
+        .scope(githubApiHost)
         .get('/repos/undefined/branches/dev/protection')
         .reply(404);
       const res = await github.getBranchForceRebase('dev');
@@ -904,6 +912,10 @@ describe('modules/platform/github/index', () => {
     });
 
     it('should handle 403', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(404);
       httpMock
         .scope(githubApiHost)
         .get('/repos/undefined/branches/main/protection')
@@ -915,11 +927,186 @@ describe('modules/platform/github/index', () => {
     it('should throw 401', async () => {
       httpMock
         .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(404);
+      httpMock
+        .scope(githubApiHost)
         .get('/repos/undefined/branches/main/protection')
         .reply(401);
       await expect(
         github.getBranchForceRebase('main'),
       ).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    it('should return empty object when parentRepo is set', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, 'some/repo', false);
+      scope.get('/user').reply(200, {
+        login: 'forked',
+      });
+      scope.post('/repos/some/repo/forks').reply(200, {
+        full_name: 'forked/repo',
+        default_branch: 'master',
+      });
+      await github.initRepo({
+        repository: 'some/repo',
+        forkToken: 'fork-token',
+        forkCreation: true,
+      });
+
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeFalse();
+    });
+
+    it('should detect non_fast_forward ruleset', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(200, [
+          {
+            type: 'non_fast_forward',
+            ruleset_source_type: 'Repository',
+            ruleset_source: 'owner/repo',
+            ruleset_id: 12345,
+          },
+        ]);
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeTrue();
+    });
+
+    it('should detect strict required status checks ruleset', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(200, [
+          {
+            type: 'required_status_checks',
+            parameters: {
+              strict_required_status_checks_policy: true,
+            },
+            ruleset_source_type: 'Repository',
+            ruleset_source: 'owner/repo',
+            ruleset_id: 12345,
+          },
+        ]);
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeTrue();
+    });
+
+    it('should continue if no expected rulesets have been found', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(200, [
+          {
+            type: 'deletion',
+          },
+        ]);
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/main/protection')
+        .reply(200, {
+          required_status_checks: {
+            strict: true,
+          },
+        });
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeTrue();
+    });
+
+    it('should abort and throws on internal error', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(500);
+
+      await expect(github.getBranchForceRebase('main')).rejects.toThrow(
+        ExternalHostError,
+      );
+    });
+
+    it('should fallback to legacy branch protection when rulesets not found', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(404);
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/main/protection')
+        .reply(200, {
+          required_status_checks: {
+            strict: true,
+          },
+        });
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeTrue();
+    });
+
+    it('should return false when no force rebase rules found', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(200, [
+          {
+            type: 'pull_request',
+            parameters: {
+              required_approving_review_count: 1,
+            },
+            ruleset_source_type: 'Repository',
+            ruleset_source: 'owner/repo',
+            ruleset_id: 12345,
+          },
+        ]);
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/main/protection')
+        .reply(404);
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeFalse();
+    });
+
+    it('should return cached result on subsequent calls', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(404);
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/main/protection')
+        .reply(200, {
+          required_status_checks: {
+            strict: true,
+            contexts: [],
+          },
+        });
+
+      // First call should make HTTP request and cache the result
+      const firstResult = await github.getBranchForceRebase('main');
+      expect(firstResult).toBeTrue();
+
+      // Second call should return cached result without making HTTP request
+      // If cache is working, no additional HTTP requests should be made
+      const secondResult = await github.getBranchForceRebase('main');
+      expect(secondResult).toBeTrue();
+    });
+
+    it('should return cached false result on subsequent calls', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/dev')
+        .reply(404);
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/dev/protection')
+        .reply(404);
+
+      // First call should make HTTP request and cache the result
+      const firstResult = await github.getBranchForceRebase('dev');
+      expect(firstResult).toBeFalse();
+
+      // Second call should return cached result without making HTTP request
+      const secondResult = await github.getBranchForceRebase('dev');
+      expect(secondResult).toBeFalse();
     });
   });
 
