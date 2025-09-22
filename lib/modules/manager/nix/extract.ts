@@ -108,23 +108,6 @@ export async function extractPackageFile(
       continue;
     }
 
-    // if there's a new digest, set the corresponding digest in the lockfile so confirmations pass
-    const currentDigest = config?.currentDigest;
-    const newDigest = config?.newDigest;
-    if (
-      currentDigest &&
-      newDigest &&
-      flakeOriginal.rev &&
-      flakeOriginal.rev === currentDigest &&
-      content.includes(newDigest)
-    ) {
-      logger.debug(
-        { flakeLockFile, flakeInput },
-        `overriding rev ${flakeOriginal.rev} with new digest ${newDigest}`,
-      );
-      flakeOriginal.rev = newDigest;
-    }
-
     const dep: PackageDependency = {
       depName,
       datasource: GitRefsDatasource.id,
