@@ -885,7 +885,6 @@ describe('modules/manager/bazel-module/extract', () => {
             depName: 'ubuntu',
             packageName: 'library/ubuntu',
             currentValue: '24.04',
-            registryUrls: ['https://index.docker.io'],
             replaceString: codeBlock`
               pull(
                   name = "ubuntu",
@@ -902,7 +901,6 @@ describe('modules/manager/bazel-module/extract', () => {
             currentValue: '1.27.1',
             currentDigest:
               'sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720',
-            registryUrls: ['https://index.docker.io'],
             replaceString: codeBlock`
               pull(
                   name = "nginx",
@@ -956,7 +954,6 @@ describe('modules/manager/bazel-module/extract', () => {
             depName: 'ubuntu',
             packageName: 'library/ubuntu',
             currentValue: '24.04',
-            registryUrls: ['https://index.docker.io'],
             replaceString: codeBlock`
               my_pull(
                   name = "ubuntu",
@@ -972,9 +969,9 @@ describe('modules/manager/bazel-module/extract', () => {
     it('ignores non-rules_img repo rules', async () => {
       const input = codeBlock`
         bazel_dep(name = "some_rules", version = "0.1.0")
-        
+
         other_rule = use_repo_rule("@some_rules//some:rule.bzl", "other")
-        
+
         other_rule(
             name = "test",
             value = "something",

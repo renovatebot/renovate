@@ -25,18 +25,20 @@ export const RulesImgPullCallToDep = RepoRuleCallFragment.extend({
       packageName = `${registry.value}/${repository.value}`;
     }
 
-    return {
+    const result: PackageDependency = {
       datasource: DockerDatasource.id,
       depType: 'rules_img_pull',
       depName: name.value,
       packageName,
       currentValue: tag?.value,
       currentDigest: digest?.value,
-      registryUrls: registry?.value
-        ? [`https://${registry.value}`]
-        : [`https://index.docker.io`],
       replaceString: rawString,
     };
+    if (registry?.value) {
+      result.registryUrls = [`https://${registry.value}`];
+    }
+
+    return result;
   },
 );
 
