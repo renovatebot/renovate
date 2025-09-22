@@ -3,6 +3,7 @@ import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { parseGitUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
+import { id as gitRefVersioning } from '../../versioning/git';
 import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
 import type {
   ExtractConfig,
