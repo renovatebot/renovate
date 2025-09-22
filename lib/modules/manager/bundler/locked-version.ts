@@ -1,8 +1,8 @@
 import { logger } from '../../../logger';
-import { newlineRegex } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { isVersion } from '../../versioning/ruby';
 
-const DEP_REGEX = /(?<=\().*(?=\))/;
+const DEP_REGEX = regEx(/\((?<version>.*)\)/);
 
 function stripPlatformSuffix(version: string, platforms: string[]): string {
   for (const platform of platforms) {
@@ -53,7 +53,7 @@ export function extractLockFileEntries(
       } else if (indent === 4 && inGemSection) {
         const match = DEP_REGEX.exec(line);
         if (match) {
-          const version = match[0];
+          const version = match?.groups?.version;
           const name = line.replace(`(${version})`, '').trim();
           const cleanedVersion = stripPlatformSuffix(version, platforms);
 
