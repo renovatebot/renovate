@@ -1,7 +1,7 @@
 import { cache } from '../../../util/cache/package/decorator';
 import type { PackageCacheNamespace } from '../../../util/cache/package/namespaces';
 import { ensureTrailingSlash } from '../../../util/url';
-import * as azureHelper from '../../platform/azure/azure-helper';
+import * as azureApi from '../../platform/azure/azure-got-wrapper';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
@@ -32,14 +32,19 @@ export class AzureTagsDatasource extends Datasource {
     registryUrl,
     packageName: repo,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const azureTags = await azureHelper.getTags(repo);
+    const azureApiGit = await azureApi.gitApi();
+
+    const azureTags = await azureApiGit.getRefs(repo, undefined, 'tags');
+
+    // Filter out tags that do not have a name
+    const filteredTags = azureTags.filter((tag) => tag.name !== undefined);
 
     const dependency: ReleaseResult = {
       sourceUrl: AzureTagsDatasource.getSourceUrl(repo, registryUrl!),
       registryUrl,
-      releases: azureTags.map((tag) => ({
-        version: tag.name ?? '',
-        gitRef: tag.name ?? '',
+      releases: filteredTags.map((tag) => ({
+        version: tag.name!,
+        gitRef: tag.name!,
         releaseTimestamp: null,
       })),
     };

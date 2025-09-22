@@ -199,9 +199,3 @@ export async function getAllProjectTeams(
 
   return allTeams;
 }
-
-export async function getTags(repoId: string): Promise<GitRef[]> {
-  logger.debug(`getTags(${repoId})`);
-  const azureApiGit = await azureApi.gitApi();
-  return await azureApiGit.getRefs(repoId, undefined, 'tags');
-}
