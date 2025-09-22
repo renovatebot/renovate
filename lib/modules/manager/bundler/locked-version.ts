@@ -51,9 +51,8 @@ export function extractLockFileEntries(
       } else if (indent === 0 && trimmed && inGemSection) {
         inGemSection = false;
       } else if (indent === 4 && inGemSection) {
-        const match = DEP_REGEX.exec(line);
-        if (match) {
-          const version = match?.groups?.version;
+        const version = line.match(DEP_REGEX)?.groups?.version;
+        if (version) {
           const name = line.replace(`(${version})`, '').trim();
           const cleanedVersion = stripPlatformSuffix(version, platforms);
 
