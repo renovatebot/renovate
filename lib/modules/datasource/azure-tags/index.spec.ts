@@ -1,4 +1,3 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as azureApi from '../../platform/azure/azure-got-wrapper';
 import { AzureTagsDatasource } from '.';
 
