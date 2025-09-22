@@ -26,7 +26,6 @@ export async function extractPackageFile(
   packageFile: string,
   config?: ExtractConfig,
 ): Promise<PackageFileContent | null> {
-  // flake.lock
   const flakeLockFile = getSiblingFileName(packageFile, 'flake.lock');
   const flakeLockContents = await readLocalFile(flakeLockFile, 'utf8');
 
