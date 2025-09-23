@@ -514,6 +514,9 @@ export interface RenovateOptionBase {
    */
   supportedPlatforms?: PlatformId[];
 
+  /**
+   * Conditions that must be met for this option to be required.
+   */
   requiredIf?: RenovateRequiredOption[];
 }
 
