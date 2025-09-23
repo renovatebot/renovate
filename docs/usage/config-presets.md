@@ -154,9 +154,11 @@ You put `schedule:nonOfficeHours` in the `extends` array of your `renovate.json`
 
 If you browse the "default" presets, you will see some that have parameters, e.g.:
 
+<!-- schema-validation-ignore -->
+
 ```json
 {
-  "label": {
+  "labels": {
     "description": "Apply labels <code>{{arg0}}</code> and <code>{{arg1}}</code> to PRs",
     "labels": ["{{arg0}}", "{{arg1}}"]
   },
@@ -171,7 +173,7 @@ Here is how you would use these in your Renovate config:
 
 ```json
 {
-  "extends": [":label(dependencies,devops)", ":assignee(renovate-tests)"]
+  "extends": [":labels(dependencies,devops)", ":assignee(renovate-tests)"]
 }
 ```
 
