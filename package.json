@@ -19,7 +19,7 @@
     "debug": "tsx --inspect-brk lib/renovate.ts",
     "doc-fix": "run-s markdown-lint-fix prettier-fix",
     "doc-fix-everything": "run-s doc-fix doc-fence-check lint-documentation",
-    "doc-fence-check": "node tools/check-fenced-code.mjs",
+    "doc-fence-check": "tsx tools/check-fenced-code.ts",
     "lint-documentation": "vitest run --coverage false test/docs/**.spec.ts",
     "lint-other": "vitest run --coverage false test/other/**.spec.ts",
     "eslint": "eslint . --cache --cache-location .cache/eslint",
