@@ -33,10 +33,6 @@ function checkValidJson(file: string, token: Token): void {
   }
 }
 
-/**
- *
- * @param {string} file
- */
 function processFile(file: string): void {
   const text = fs.readFileSync(file, { encoding: 'utf8' });
   const tokens = markdown.parse(text, undefined);
