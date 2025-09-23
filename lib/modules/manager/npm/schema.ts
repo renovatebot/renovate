@@ -10,7 +10,7 @@ export const YarnCatalog = z.optional(z.record(z.string()));
 export type YarnCatalog = z.infer<typeof YarnCatalog>;
 
 export const YarnCatalogs = z.union([
-  z.optional(z.record(z.record(z.string()))), // yarn build-in implementation
+  z.optional(z.record(z.record(z.string()))), // yarn built-in implementation
   z.object({
     options: z.optional(z.union([z.string(), z.array(z.string())])),
     list: z.record(z.union([z.string(), z.record(z.string())])),

@@ -150,7 +150,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('handles implicit default catalog dependency', () => {
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'react',
           newValue: '19.0.0',
         };
@@ -186,7 +186,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('handles explicit named catalog dependency', () => {
         const upgrade = {
-          depType: 'yarn.catalog.react17',
+          depType: 'yarn.catalog.list.react17',
           depName: 'react',
           newValue: '19.0.0',
         };
@@ -224,7 +224,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('does nothing if the new and old values match', () => {
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'react',
           newValue: '19.0.0',
         };
@@ -249,7 +249,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('replaces package', () => {
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'config',
           newName: 'abc',
           newValue: '2.0.0',
@@ -287,7 +287,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('replaces a github dependency value', () => {
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'gulp',
           currentValue: 'v4.0.0-alpha.2',
           currentRawValue: 'gulpjs/gulp#v4.0.0-alpha.2',
@@ -325,7 +325,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('replaces a npm package alias', () => {
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'hapi',
           npmPackageAlias: true,
           packageName: '@hapi/hapi',
@@ -364,7 +364,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('replaces a github short hash', () => {
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'gulp',
           currentDigest: 'abcdef7',
           currentRawValue: 'gulpjs/gulp#abcdef7',
@@ -402,7 +402,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('replaces a github fully specified version', () => {
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'n',
           currentValue: 'v1.0.0',
           currentRawValue: 'git+https://github.com/owner/n#v1.0.0',
@@ -440,7 +440,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('returns null if the dependency is not present in the target catalog', () => {
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'react-not',
           newValue: '19.0.0',
         };
@@ -467,7 +467,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('returns null if catalogs are missing', () => {
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'react',
           newValue: '19.0.0',
         };
@@ -489,7 +489,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('returns null if empty file', () => {
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'react',
           newValue: '19.0.0',
         };
@@ -502,7 +502,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('preserves literal whitespace', () => {
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'react',
           newValue: '19.0.0',
         };
@@ -539,7 +539,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('preserves single quote style', () => {
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'react',
           newValue: '19.0.0',
         };
@@ -575,7 +575,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('preserves comments', () => {
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'react',
           newValue: '19.0.0',
         };
@@ -615,7 +615,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('preserves double quote style', () => {
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'react',
           newValue: '19.0.0',
         };
@@ -654,7 +654,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
         // dependencies in catalogs.
         // @see https://github.com/pnpm/pnpm/issues/8245#issuecomment-2371335323
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'react',
           newValue: '19.0.0',
         };
@@ -692,7 +692,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('preserves whitespace with anchors', () => {
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'react',
           newValue: '19.0.0',
         };
@@ -728,7 +728,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('preserves quotation style with anchors', () => {
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'react',
           newValue: '19.0.0',
         };
@@ -764,7 +764,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('preserves formatting in flow style syntax', () => {
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'react',
           newValue: '19.0.0',
         };
@@ -804,7 +804,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('does not replace aliases in the value position', () => {
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'react',
           newValue: '19.0.0',
         };
@@ -836,7 +836,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       it('does not replace aliases in the key position', () => {
         const upgrade = {
-          depType: 'yarn.catalog.default',
+          depType: 'yarn.catalog.list.default',
           depName: 'react',
           newName: 'react-x',
         };
@@ -864,7 +864,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     });
   });
 
-  describe('yarn catalogs (build-in)', () => {
+  describe('yarn catalogs (built-in)', () => {
     describe('updateYarnrcCatalogDependency', () => {
       it('returns null if catalogName is missing and logs error', () => {
         const upgrade = {

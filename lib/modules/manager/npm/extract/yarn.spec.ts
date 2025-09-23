@@ -153,7 +153,7 @@ describe('modules/manager/npm/extract/yarn', () => {
       });
     });
 
-    describe('yarn build-in', () => {
+    describe('yarn catalogs (built-in)', () => {
       it('parses valid .yarnrc.yml file', async () => {
         fs.localPathExists.mockResolvedValueOnce(true);
         fs.getSiblingFileName.mockReturnValueOnce('yarn.lock');

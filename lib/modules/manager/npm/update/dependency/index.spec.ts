@@ -421,7 +421,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       expect(testContent).toEqual(expected);
     });
 
-    it('handles yarn catalogs (build-in) dependencies', () => {
+    it('handles yarn catalogs (built-in) dependencies', () => {
       const upgrade = {
         depType: 'yarn.catalogs.default',
         depName: 'typescript',

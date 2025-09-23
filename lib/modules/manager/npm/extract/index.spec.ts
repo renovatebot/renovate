@@ -1394,7 +1394,7 @@ describe('modules/manager/npm/extract/index', () => {
       });
     });
 
-    describe('yarn build-in catalogs', () => {
+    describe('yarn catalogs (built-in)', () => {
       it('extracts yarnrc.yml and adds it as packageFile', async () => {
         const yarnrc = codeBlock`
         nodeLinker: node-modules
