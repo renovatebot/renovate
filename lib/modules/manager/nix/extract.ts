@@ -115,28 +115,11 @@ export async function extractPackageFile(
 
     // if rev is set, the flake contains a digest and can be updated directly
     // otherwise set lockedVersion so it is updated during lock file maintenance
-    /*
-    if (flakeOriginal.rev || flakeOriginal.ref) {
-      dep.currentValue = flakeOriginal.ref?.replace(
-        /^refs\/(heads|tags)\//,
-        '',
-      );
-     
-      //dep.currentValue = flakeOriginal.ref;
-      dep.currentDigest = flakeOriginal.rev;
-      //dep.lockedVersion = flakeOriginal.ref ? flakeLocked.rev : undefined;
-    } else {
-      //dep.currentDigest = flakeLocked.rev;
+    dep.currentValue = flakeOriginal.ref?.replace(/^refs\/(heads|tags)\//, '');
+    dep.currentDigest = flakeLocked.rev;
+    if (flakeOriginal.ref || !flakeOriginal.rev) {
       dep.lockedVersion = flakeLocked.rev;
     }
-    */
-    //if (flakeLocked.ref) {
-    dep.currentValue = flakeLocked.ref?.replace(/^refs\/(heads|tags)\//, '');
-    //} else {
-    //  dep.currentValue = flakeLocked.rev;
-    //}
-    dep.currentDigest = flakeLocked.rev;
-    //dep.lockedVersion = flakeLocked.rev;
 
     switch (flakeLocked.type) {
       case 'git': {
