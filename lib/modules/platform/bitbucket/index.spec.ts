@@ -327,6 +327,10 @@ describe('modules/platform/bitbucket/index', () => {
         isFork: false,
         repoFingerprint: expect.any(String),
       });
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Creating branch status for Mend.io Dashboard',
+      );
     });
 
     it('enabled: should skip creating main branch status if already exist', async () => {
@@ -413,6 +417,10 @@ describe('modules/platform/bitbucket/index', () => {
         isFork: false,
         repoFingerprint: expect.any(String),
       });
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Creating branch status for Mend.io Dashboard',
+      );
     });
 
     it('enabled: should not create status when getBranchStatusCheck returns existing status', async () => {
@@ -458,41 +466,6 @@ describe('modules/platform/bitbucket/index', () => {
       const trace = httpMock.getTrace();
       const postRequests = trace.filter((req) => req.method === 'POST');
       expect(postRequests).toHaveLength(0);
-    });
-
-    it('enabled: should log debug message when creating new status', async () => {
-      httpMock
-        .scope(baseUrl)
-        .get('/2.0/repositories/some/repo')
-        .reply(200, {
-          mainbranch: { name: 'main' },
-          uuid: '123',
-          full_name: 'some/repo',
-        })
-        .get('/2.0/repositories/some/repo/refs/branches/main')
-        .reply(200, {
-          name: 'main',
-          target: {
-            hash: 'main_hash',
-          },
-        })
-        .get(
-          '/2.0/repositories/some/repo/commit/main_hash/statuses?pagelen=100',
-        )
-        .reply(200, {
-          values: [],
-        })
-        .post('/2.0/repositories/some/repo/commit/main_hash/statuses/build')
-        .reply(200);
-
-      await bitbucket.initRepo({
-        repository: 'some/repo',
-        bbMendAppDashboardStatus: true,
-      });
-
-      expect(logger.logger.debug).toHaveBeenCalledWith(
-        'Creating branch status for Mend.io Dashboard',
-      );
     });
   });
 
