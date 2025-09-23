@@ -42,7 +42,7 @@ export async function checkReconfigureBranch(
   if (!branchExists) {
     logger.debug(
       { reconfigureBranch: reconfigureBranch },
-      'No reconfigure branch found'
+      'No reconfigure branch found',
     );
     deleteReconfigureBranchCache(); // in order to remove cache when the branch has been deleted
     return;
