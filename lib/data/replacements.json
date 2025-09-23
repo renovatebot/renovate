@@ -135,6 +135,17 @@
       }
     ]
   },
+  "clang-format-to-maintenance-fork": {
+    "description": "Maintenance fork of `clang-format`",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["clang-format"],
+        "replacementName": "clang-format-node",
+        "replacementVersion": "2.0.0"
+      }
+    ]
+  },
   "containerbase": {
     "description": "Replace containerbase dependencies.",
     "packageRules": [

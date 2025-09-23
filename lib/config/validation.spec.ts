@@ -2136,7 +2136,7 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(2);
     });
 
-    it('allow bumpVersion ', async () => {
+    it('allow bumpVersion', async () => {
       const config = partial<RenovateConfig>({
         bumpVersion: {
           filePatterns: ['foo'],
