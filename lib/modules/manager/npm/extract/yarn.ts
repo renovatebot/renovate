@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { miscUtils, structUtils } from '@yarnpkg/core';
 import { parseSyml } from '@yarnpkg/parsers';
-import { list } from 'tar';
 import { logger } from '../../../../logger';
 import {
   getSiblingFileName,
