@@ -165,11 +165,11 @@ function createSchemaForChildConfigs(): void {
         properties[parent].items.allOf[0].properties[option.name] =
           createSingleConfig(option);
 
-        option.requiredIf?.forEach((prop) => {
+        for (const prop of option.requiredIf ?? []) {
           properties[parent].items.allOf.push(
             toRequiredPropertiesRule(prop, option),
           );
-        });
+        }
       }
     }
   }
