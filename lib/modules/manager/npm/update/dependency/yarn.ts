@@ -11,7 +11,6 @@ export function updateYarnrcCatalogDependency({
   upgrade,
 }: UpdateDependencyConfig): string | null {
   const { depType, depName } = upgrade;
-
   const catalogName = depType?.split('.').at(-1);
 
   if (!is.string(catalogName)) {
@@ -47,24 +46,47 @@ export function updateYarnrcCatalogDependency({
     return null;
   }
 
-  const oldVersion =
-    catalogName === 'default'
-      ? parsedContents.catalogs?.list?.[depName!]
-      : is.object(parsedContents.catalogs?.list?.[catalogName]) &&
-          is.string(depName)
-        ? parsedContents.catalogs?.list?.[catalogName][depName]
-        : undefined;
+  let oldVersion;
+  let path;
+
+  if (
+    parsedContents.catalogs &&
+    typeof parsedContents.catalogs === 'object' &&
+    'list' in parsedContents.catalogs
+  ) {
+    oldVersion =
+      catalogName === 'default'
+        ? parsedContents.catalogs?.list?.[depName!]
+        : is.object(parsedContents.catalogs?.list?.[catalogName]) &&
+            is.string(depName)
+          ? parsedContents.catalogs?.list?.[catalogName][depName]
+          : undefined;
+
+    // Update the value
+    path = getDepPathCommunityPlugin({
+      depName: depName!,
+      catalogName,
+    });
+  } else {
+    oldVersion =
+      catalogName === 'default'
+        ? parsedContents.catalog?.[depName!]
+        : is.object(parsedContents.catalogs?.[catalogName]) &&
+            is.string(depName)
+          ? parsedContents.catalogs?.[catalogName][depName]
+          : undefined;
+
+    // Update the value
+    path = getDepPath({
+      depName: depName!,
+      catalogName,
+    });
+  }
 
   if (oldVersion === newValue) {
     logger.trace('Version is already updated');
     return fileContent;
   }
-
-  // Update the value
-  const path = getDepPath({
-    depName: depName!,
-    catalogName,
-  });
 
   const modifiedDocument = changeDependencyIn(document, path, {
     newValue,
@@ -128,6 +150,20 @@ function changeDependencyIn(
 }
 
 function getDepPath({
+  catalogName,
+  depName,
+}: {
+  catalogName: string;
+  depName: string;
+}): string[] {
+  if (catalogName === 'default') {
+    return ['catalog', depName];
+  } else {
+    return ['catalogs', catalogName, depName];
+  }
+}
+
+function getDepPathCommunityPlugin({
   catalogName,
   depName,
 }: {

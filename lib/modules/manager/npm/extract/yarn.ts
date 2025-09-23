@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { miscUtils, structUtils } from '@yarnpkg/core';
 import { parseSyml } from '@yarnpkg/parsers';
+import { list } from 'tar';
 import { logger } from '../../../../logger';
 import {
   getSiblingFileName,
@@ -8,7 +9,7 @@ import {
   readLocalFile,
 } from '../../../../util/fs';
 import type { PackageFileContent } from '../../types';
-import type { YarnCatalogs } from '../schema';
+import type { YarnCatalog, YarnCatalogs } from '../schema';
 import type { NpmManagerData } from '../types';
 import { extractCatalogDeps } from './common/catalogs';
 import type { Catalog, LockFile } from './types';
@@ -127,13 +128,14 @@ export function getYarnVersionFromLock(lockfile: LockFile): string {
 }
 
 export async function extractYarnCatalogs(
+  catalog: YarnCatalog | undefined,
   catalogs: YarnCatalogs | undefined,
   packageFile: string,
   hasPackageManager: boolean,
 ): Promise<PackageFileContent<NpmManagerData>> {
   logger.trace(`yarn.extractYarnCatalogs(${packageFile})`);
 
-  const yarnCatalogs = yarnCatalogsToArray(catalogs);
+  const yarnCatalogs = yarnCatalogsToArray(catalog, catalogs);
 
   const deps = extractCatalogDeps(yarnCatalogs, 'yarn');
 
@@ -153,22 +155,38 @@ export async function extractYarnCatalogs(
   };
 }
 
-function yarnCatalogsToArray(catalogs: YarnCatalogs | undefined): Catalog[] {
+function yarnCatalogsToArray(
+  catalog: YarnCatalog | undefined,
+  catalogs: YarnCatalogs | undefined,
+): Catalog[] {
   const result: Catalog[] = [];
 
-  if (catalogs?.list !== undefined) {
+  if (catalog) {
+    for (const [depName, depsVersion] of Object.entries(catalog)) {
+      result.push({
+        name: 'default',
+        dependencies: { [depName]: depsVersion },
+      });
+    }
+  }
+
+  const communityPluginPrefix = catalog ? '' : catalogs?.list ? 'list.' : '';
+
+  const resolvedCatalogs = catalogs ? (catalogs?.list ?? catalogs) : undefined;
+
+  if (resolvedCatalogs) {
     for (const [
       depNameOrCatalogName,
       depsVersionOrNamedCatalog,
-    ] of Object.entries(catalogs.list)) {
+    ] of Object.entries(resolvedCatalogs)) {
       if (is.object(depsVersionOrNamedCatalog)) {
         result.push({
-          name: depNameOrCatalogName,
+          name: `${communityPluginPrefix}${depNameOrCatalogName}`,
           dependencies: depsVersionOrNamedCatalog,
         });
       } else {
         result.push({
-          name: 'default',
+          name: `${communityPluginPrefix}default`,
           dependencies: { [depNameOrCatalogName]: depsVersionOrNamedCatalog },
         });
       }

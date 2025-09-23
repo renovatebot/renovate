@@ -6,10 +6,16 @@ export const PnpmCatalogs = z.object({
   catalogs: z.optional(z.record(z.record(z.string()))),
 });
 
-export const YarnCatalogs = z.object({
-  options: z.optional(z.union([z.string(), z.array(z.string())])),
-  list: z.record(z.union([z.string(), z.record(z.string())])),
-});
+export const YarnCatalog = z.optional(z.record(z.string()));
+export type YarnCatalog = z.infer<typeof YarnCatalog>;
+
+export const YarnCatalogs = z.union([
+  z.optional(z.record(z.record(z.string()))), // yarn build-in implementation
+  z.object({
+    options: z.optional(z.union([z.string(), z.array(z.string())])),
+    list: z.record(z.union([z.string(), z.record(z.string())])),
+  }), // yarn-catalog-plugin (community implementation)
+]);
 export type YarnCatalogs = z.infer<typeof YarnCatalogs>;
 
 export const YarnConfig = Yaml.pipe(
@@ -22,6 +28,7 @@ export const YarnConfig = Yaml.pipe(
         }),
       )
       .optional(),
+    catalog: YarnCatalog.optional().catch(undefined),
     catalogs: YarnCatalogs.optional().catch(undefined),
   }),
 );

@@ -82,70 +82,136 @@ describe('modules/manager/npm/extract/yarn', () => {
   describe('.extractYarnCatalogs()', () => {
     it('handles empty catalog entries', async () => {
       expect(
-        await extractYarnCatalogs(undefined, 'package.json', false),
+        await extractYarnCatalogs(undefined, undefined, 'package.json', false),
       ).toMatchObject({
         deps: [],
       });
     });
 
-    it('parses valid .yarnrc.yml file', async () => {
-      fs.localPathExists.mockResolvedValueOnce(true);
-      fs.getSiblingFileName.mockReturnValueOnce('yarn.lock');
-      expect(
-        await extractYarnCatalogs(
-          {
-            list: {
+    describe('yarn-catalogs-plugin', () => {
+      it('parses valid .yarnrc.yml file', async () => {
+        fs.localPathExists.mockResolvedValueOnce(true);
+        fs.getSiblingFileName.mockReturnValueOnce('yarn.lock');
+        expect(
+          await extractYarnCatalogs(
+            undefined,
+            {
+              list: {
+                react: '18.3.0',
+                react17: {
+                  react: '17.0.2',
+                },
+              },
+            },
+            'package.json',
+            true,
+          ),
+        ).toMatchObject({
+          deps: [
+            {
+              currentValue: '18.3.0',
+              datasource: 'npm',
+              depName: 'react',
+              depType: 'yarn.catalog.list.default',
+              prettyDepType: 'yarn.catalog.list.default',
+            },
+            {
+              currentValue: '17.0.2',
+              datasource: 'npm',
+              depName: 'react',
+              depType: 'yarn.catalog.list.react17',
+              prettyDepType: 'yarn.catalog.list.react17',
+            },
+          ],
+          managerData: {
+            yarnLock: 'yarn.lock',
+            hasPackageManager: true,
+          },
+        });
+      });
+
+      it('finds relevant lockfile', async () => {
+        fs.localPathExists.mockResolvedValueOnce(true);
+        fs.getSiblingFileName.mockReturnValueOnce('yarn.lock');
+        expect(
+          await extractYarnCatalogs(
+            undefined,
+            {
+              list: {
+                react: '18.3.1',
+              },
+            },
+            'package.json',
+            false,
+          ),
+        ).toMatchObject({
+          managerData: {
+            yarnLock: 'yarn.lock',
+            hasPackageManager: false,
+          },
+        });
+      });
+    });
+
+    describe('yarn build-in', () => {
+      it('parses valid .yarnrc.yml file', async () => {
+        fs.localPathExists.mockResolvedValueOnce(true);
+        fs.getSiblingFileName.mockReturnValueOnce('yarn.lock');
+        expect(
+          await extractYarnCatalogs(
+            {
               react: '18.3.0',
+            },
+            {
               react17: {
                 react: '17.0.2',
               },
             },
+            'package.json',
+            true,
+          ),
+        ).toMatchObject({
+          deps: [
+            {
+              currentValue: '18.3.0',
+              datasource: 'npm',
+              depName: 'react',
+              depType: 'yarn.catalog.default',
+              prettyDepType: 'yarn.catalog.default',
+            },
+            {
+              currentValue: '17.0.2',
+              datasource: 'npm',
+              depName: 'react',
+              depType: 'yarn.catalog.react17',
+              prettyDepType: 'yarn.catalog.react17',
+            },
+          ],
+          managerData: {
+            yarnLock: 'yarn.lock',
+            hasPackageManager: true,
           },
-          'package.json',
-          true,
-        ),
-      ).toMatchObject({
-        deps: [
-          {
-            currentValue: '18.3.0',
-            datasource: 'npm',
-            depName: 'react',
-            depType: 'yarn.catalog.default',
-            prettyDepType: 'yarn.catalog.default',
-          },
-          {
-            currentValue: '17.0.2',
-            datasource: 'npm',
-            depName: 'react',
-            depType: 'yarn.catalog.react17',
-            prettyDepType: 'yarn.catalog.react17',
-          },
-        ],
-        managerData: {
-          yarnLock: 'yarn.lock',
-          hasPackageManager: true,
-        },
+        });
       });
-    });
 
-    it('finds relevant lockfile', async () => {
-      fs.localPathExists.mockResolvedValueOnce(true);
-      fs.getSiblingFileName.mockReturnValueOnce('yarn.lock');
-      expect(
-        await extractYarnCatalogs(
-          {
-            list: {
+      it('finds relevant lockfile', async () => {
+        fs.localPathExists.mockResolvedValueOnce(true);
+        fs.getSiblingFileName.mockReturnValueOnce('yarn.lock');
+        expect(
+          await extractYarnCatalogs(
+            {
               react: '18.3.1',
             },
+            undefined,
+            'package.json',
+            false,
+          ),
+        ).toMatchObject({
+          managerData: {
+            yarnLock: 'yarn.lock',
+            hasPackageManager: false,
           },
-          'package.json',
-          false,
-        ),
-      ).toMatchObject({
-        managerData: {
-          yarnLock: 'yarn.lock',
-          hasPackageManager: false,
-        },
+        });
       });
     });
   });
