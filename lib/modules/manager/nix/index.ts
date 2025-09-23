@@ -2,7 +2,7 @@ import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 
 export { updateArtifacts } from './artifacts';
 export { extractPackageFile } from './extract';
-export { getRangeStrategy } from './range';
+//export { getRangeStrategy } from './range';
 export { updateDependency } from './update';
 
 export const supportedDatasources = [GitRefsDatasource.id];
