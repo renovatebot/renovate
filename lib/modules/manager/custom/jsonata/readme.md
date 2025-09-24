@@ -69,7 +69,7 @@ When you configure a JSONata manager, use the following syntax:
 Overwrite the `<query>` placeholder text with your [JSONata](https://docs.jsonata.org/overview.html) query.
 The JSONata query transforms the content to a JSON object, similar to this:
 
-```javascript title="dependencies information extracted using jsonata query"
+```javascript title="dependencies information extracted using a JSONata query"
 [
   {
     depName: 'some_dep',
