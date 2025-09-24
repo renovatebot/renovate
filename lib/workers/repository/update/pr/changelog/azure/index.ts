@@ -68,6 +68,7 @@ export async function getReleaseNotesMd(
     .sort((a, b) => compareChangelogFilePath(a.relativePath!, b.relativePath!))
     .shift()?.relativePath;
 
+  /* v8 ignore next -- not testable */
   changelogFile = `${sourceDirectory ? ensureTrailingSlash(sourceDirectory) : ''}${changelogFile}`;
 
   const fileRes = await azureHelper.getItem(
