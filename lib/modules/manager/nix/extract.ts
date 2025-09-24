@@ -5,11 +5,7 @@ import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { id as gitRefVersioning } from '../../versioning/git';
 import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
-import type {
-  ExtractConfig,
-  PackageDependency,
-  PackageFileContent,
-} from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { NixFlakeLock } from './schema';
 
 // as documented upstream
@@ -25,7 +21,6 @@ const lockableChannelOriginalUrl = regEx(
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  config?: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   const flakeLockFile = getSiblingFileName(packageFile, 'flake.lock');
   const flakeLockContents = await readLocalFile(flakeLockFile, 'utf8');
@@ -64,9 +59,7 @@ export async function extractPackageFile(
       continue;
     }
 
-    // flakeLocked example: { rev: '56a49ffef2908dad1e9a8adef1f18802bc760962', type: 'github' }
     const flakeLocked = flakeInput.locked;
-    // flakeOriginal example: { owner: 'NuschtOS', repo: 'search', type: 'github' }
     const flakeOriginal = flakeInput.original;
 
     if (flakeLocked === undefined) {
