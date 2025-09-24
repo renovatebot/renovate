@@ -42,6 +42,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       managerFilePatterns: [
         '/(^|/)package\\.json$/',
         '/(^|/)pnpm-workspace\\.yaml$/',
+        '/(^|/)\\.yarnrc\\.yml$/',
         '/hero.json/',
       ],
       ignorePaths: ['ignore-path-2'],
@@ -92,6 +93,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       managerFilePatterns: [
         '/(^|/)package\\.json$/',
         '/(^|/)pnpm-workspace\\.yaml$/',
+        '/(^|/)\\.yarnrc\\.yml$/',
         '/hero.json/',
       ],
       ignorePaths: ['**/node_modules/**', '**/bower_components/**'],
