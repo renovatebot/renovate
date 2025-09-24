@@ -124,7 +124,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.yaml',
         defaultExtractConfig,
       );
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         deps: [
           { depName: 'autoprefixer', currentValue: '6.5.0' },
           { depName: 'bower', currentValue: '~1.6.0' },
