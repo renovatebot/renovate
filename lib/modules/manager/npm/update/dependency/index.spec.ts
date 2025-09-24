@@ -76,6 +76,48 @@ describe('modules/manager/npm/update/dependency/index', () => {
       expect(testContent).toEqual(expectedOutput + '\n');
     });
 
+    it('replaces a dependency of a yaml value in resolutions', () => {
+      const input = codeBlock`
+        name: renovate-repro
+        dependencies:
+          lodash: "^4.16.0"
+          mermaid: 8.8.1
+        resolutions:
+          lodash: patch:lodash@npm:4.16.0#patches/lodash.patch
+        dependenciesMeta:
+          lodash@4.16.0:
+            unplugged: true
+          mermaid@8.8.1:
+            optional: true
+        `;
+      const expectedOutput = codeBlock`
+        name: renovate-repro
+        dependencies:
+          lodash: "^4.16.0"
+          mermaid: 8.8.1
+        resolutions:
+          lodash: patch:lodash@npm:4.17.0#patches/lodash.patch
+        dependenciesMeta:
+          lodash@4.17.0:
+            unplugged: true
+          mermaid@8.8.1:
+            optional: true
+        `;
+      const upgrade = {
+        depType: 'resolutions',
+        depName: 'lodash',
+        newValue: '4.17.0',
+      };
+      const testContent = npmUpdater.updateDependency(
+        {
+          fileContent: input,
+          upgrade,
+        },
+        'outputs/011.yml',
+      );
+      expect(testContent).toEqual(expectedOutput);
+    });
+
     it('replaces a dependency of a yaml value when the source do not have quotes', () => {
       const expectedOutput = codeBlock`
         name: renovate
