@@ -43,6 +43,15 @@ describe('modules/manager/npm/extract/index', () => {
       expect(res).toBeNull();
     });
 
+    it('returns null if cannot parse the yaml', async () => {
+      const res = await npmExtract.extractPackageFile(
+        'invalid: yaml :',
+        'package.yaml',
+        defaultExtractConfig,
+      );
+      expect(res).toBeNull();
+    });
+
     it('catches invalid names', async () => {
       const res = await npmExtract.extractPackageFile(
         invalidNameContent,
