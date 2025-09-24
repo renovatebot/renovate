@@ -910,7 +910,7 @@ exports[`modules/manager/npm/extract/index > .extractPackageFile() > returns an 
 }
 `;
 
-exports[`modules/manager/npm/extract/index > .extractPackageFile() > returns an array of dependencies when is a yaml version too 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > returns an array of dependencies in yaml 1`] = `
 {
   "deps": [
     {

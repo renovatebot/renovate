@@ -118,7 +118,7 @@ describe('modules/manager/npm/extract/index', () => {
       });
     });
 
-    it('returns an array of dependencies when is a yaml version too', async () => {
+    it('returns an array of dependencies in yaml', async () => {
       const res = await npmExtract.extractPackageFile(
         input01YamlContent,
         'package.yaml',

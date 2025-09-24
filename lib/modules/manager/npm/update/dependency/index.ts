@@ -3,6 +3,7 @@ import { dequal } from 'dequal';
 import { logger } from '../../../../../logger';
 import { escapeRegExp, regEx } from '../../../../../util/regex';
 import { matchAt, replaceAt } from '../../../../../util/string';
+import { parseSingleYaml } from '../../../../../util/yaml';
 import type { UpdateDependencyConfig, Upgrade } from '../../../types';
 import type {
   DependenciesMeta,
@@ -13,7 +14,6 @@ import type {
 import type { NpmDepType, NpmManagerData } from '../../types';
 import { getNewGitValue, getNewNpmAliasValue } from './common';
 import { updatePnpmCatalogDependency } from './pnpm';
-import { parseSingleYaml } from '../../../../../util/yaml';
 import { updateYarnrcCatalogDependency } from './yarn';
 
 function renameObjKey(
@@ -146,7 +146,7 @@ export function updateDependency(
   logger.debug(`npm.updateDependency(): ${depType}.${depName} = ${newValue}`);
 
   try {
-    let parsedContents: NpmPackage = isYaml
+    const parsedContents: NpmPackage = isYaml
       ? parseSingleYaml(fileContent)
       : JSON.parse(fileContent);
     let overrideDepParents: string[] | undefined = undefined;

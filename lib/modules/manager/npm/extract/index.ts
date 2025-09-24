@@ -8,6 +8,7 @@ import {
   readLocalFile,
 } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
+import { parseSingleYaml } from '../../../../util/yaml';
 import { NpmDatasource } from '../../../datasource/npm';
 
 import type {
@@ -28,7 +29,6 @@ import {
   loadConfigFromYarnrcYml,
   resolveRegistryUrl,
 } from './yarnrc';
-import { parseSingleYaml } from '../../../../util/yaml';
 
 function hasMultipleLockFiles(lockFiles: NpmLockFiles): boolean {
   return Object.values(lockFiles).filter(is.string).length > 1;
