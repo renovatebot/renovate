@@ -111,6 +111,41 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
       });
     });
 
+    it('handles release notes with sourceDirectory that has trailing slash', async () => {
+      const changelogMd = Fixtures.get('jest.md', '..');
+
+      vi.spyOn(azureHelper, 'getItem').mockRejectedValue({
+        objectId: 'some-object-id',
+        path: '/src/docs/',
+      });
+
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValue({
+        objectId: 'some-object-id',
+        treeEntries: [
+          {
+            objectId: 'some-other-object-id',
+            gitObjectType: GitObjectType.Blob,
+            relativePath: 'CHANGELOG.md',
+          },
+        ],
+      });
+
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValue({
+        objectId: 'some-other-object-id',
+        content: changelogMd,
+      });
+
+      const project = {
+        ...azureProject,
+        sourceDirectory: '/src/docs/',
+      };
+      const res = await getReleaseNotesMdFile(project);
+      expect(res).toStrictEqual({
+        changelogFile: '/src/docs/CHANGELOG.md',
+        changelogMd: changelogMd + '\n#\n##',
+      });
+    });
+
     it('handles missing items', async () => {
       vi.spyOn(azureHelper, 'getItem').mockResolvedValue({});
 
