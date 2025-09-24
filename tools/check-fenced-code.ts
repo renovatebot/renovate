@@ -1,7 +1,7 @@
+import { format } from 'node:util';
 import type { ValidateFunction } from 'ajv';
-// eslint-disable-next-line import-x/no-unresolved
+// eslint-disable-next-line import-x/no-named-as-default
 import Ajv from 'ajv';
-// eslint-disable-next-line import-x/no-unresolved
 import * as draft04 from 'ajv/lib/refs/json-schema-draft-04.json';
 import fs from 'fs-extra';
 import { glob } from 'glob';
@@ -10,9 +10,15 @@ import MarkdownIt from 'markdown-it';
 import { MigrationsService } from '../lib/config/migrations';
 import type { RenovateConfig } from '../lib/config/types';
 
+type ReporterCallback = (message: string) => void;
+
 const errorTitle = 'Invalid JSON in fenced code block';
 const errorBody =
   'Fix this manually by ensuring each block is a valid, complete JSON document.';
+const errorLogFormat = process.env.CI
+  ? `::error file=%s,line=%d,endLine=%d,title=${errorTitle}::%s. ${errorBody}`
+  : `${errorTitle} (%s lines %d-%d): %s`;
+
 const markdownGlob = '{docs,lib}/**/*.md';
 const markdown = new MarkdownIt('zero');
 
@@ -21,33 +27,6 @@ let issues = 0;
 markdown.enable(['fence']);
 
 let validate: ValidateFunction;
-
-/**
- *
- * @param {string} file
- * @param {number} start
- * @param {number} end
- * @param {string} errorMessage
- */
-function reportErrorDetails(
-  file: string,
-  start: number,
-  end: number,
-  errorMessage: string,
-): void {
-  issues += 1;
-  if (process.env.CI) {
-    console.log(
-      `::error file=${file},line=${start},endLine=${end},title=${errorTitle}::${errorMessage}. ${errorBody}`,
-    );
-  } else {
-    console.log(
-      `${errorTitle} (${file} lines ${start}-${end}): ${errorMessage}`,
-    );
-  }
-}
-
-type ReporterCallback = (message: string) => void;
 
 function checkValidJson(
   reporter: ReporterCallback,
@@ -100,7 +79,8 @@ async function processFile(file: string): Promise<void> {
 
     const reporter: ReporterCallback = (message) => {
       const [start, end] = token.map ?? [-1, -1];
-      reportErrorDetails(file, start + 1, end + 1, message);
+      issues += 1;
+      console.log(format(errorLogFormat, file, start + 1, end + 1, message));
     };
     const validJson = checkValidJson(reporter, token);
     if (
