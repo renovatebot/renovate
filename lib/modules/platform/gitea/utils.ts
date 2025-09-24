@@ -1,6 +1,9 @@
 import is from '@sindresorhus/is';
 import type { MergeStrategy } from '../../../config/types';
-import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
+import {
+  CONFIG_GIT_URL_UNAVAILABLE,
+  REPOSITORY_BLOCKED,
+} from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
@@ -168,4 +171,21 @@ export function usableRepo(repo: Repo): boolean {
     return false;
   }
   return true;
+}
+
+export function isAllowed(style: PRMergeMethod, repo: Repo): boolean {
+  switch (style) {
+    case 'merge':
+      return repo.allow_merge_commits;
+    case 'rebase':
+      return repo.allow_rebase;
+    case 'rebase-merge':
+      return repo.allow_rebase_explicit;
+    case 'squash':
+      return repo.allow_squash_merge;
+    case 'fast-forward-only':
+      return repo.allow_fast_forward_only_merge;
+  }
+  logger.debug('Repo has unknown merge style - aborting renovation');
+  throw new Error(REPOSITORY_BLOCKED);
 }

@@ -24,9 +24,9 @@ export class GerritHttp extends HttpBase {
     super('gerrit', options);
   }
 
-  protected override resolveUrl(
+  override resolveUrl(
     requestUrl: string | URL,
-    options: HttpOptions | undefined,
+    options: HttpOptions | undefined = undefined,
   ): URL {
     // ensure trailing slash for gerrit
     return super.resolveUrl(
