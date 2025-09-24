@@ -321,7 +321,7 @@
     "common-tags": "1.8.2",
     "conventional-changelog-conventionalcommits": "9.1.0",
     "emojibase-data": "16.0.3",
-    "esbuild": "0.25.9",
+    "esbuild": "0.25.10",
     "eslint": "9.35.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-formatter-gha": "1.6.0",
@@ -376,7 +376,7 @@
       "re2"
     ],
     "overrides": {
-      "esbuild": "0.25.9"
+      "esbuild": "0.25.10"
     }
   }
 }
