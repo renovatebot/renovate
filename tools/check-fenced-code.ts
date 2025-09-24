@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import fs from 'fs-extra';
 import { glob } from 'glob';
 import type { Token } from 'markdown-it';
 import MarkdownIt from 'markdown-it';
@@ -33,8 +33,8 @@ function checkValidJson(file: string, token: Token): void {
   }
 }
 
-function processFile(file: string): void {
-  const text = fs.readFileSync(file, { encoding: 'utf8' });
+async function processFile(file: string): Promise<void> {
+  const text = await fs.readFile(file, 'utf8');
   const tokens = markdown.parse(text, undefined);
 
   tokens.forEach((token) => {
@@ -48,7 +48,7 @@ void (async () => {
   const files = await glob(markdownGlob);
 
   for (const file of files) {
-    processFile(file);
+    await processFile(file);
   }
 
   if (issues) {
