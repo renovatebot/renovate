@@ -71,7 +71,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
           fileContent: input01YamlContent,
           upgrade,
         },
-        'outputs/011.yaml',
+        'outputs/011.yml',
       );
       expect(testContent).toEqual(expectedOutput + '\n');
     });
