@@ -343,7 +343,7 @@ describe('modules/manager/nix/update', () => {
       );
     });
 
-    it('returns null for digest-only updates', () => {
+    it('returns unchanged content for digest-only updates', () => {
       const fileContent = codeBlock`
         {
           inputs = {
@@ -361,7 +361,7 @@ describe('modules/manager/nix/update', () => {
           newDigest: '88cef159e47c0dc56f151593e044453a39a6e547',
         },
       });
-      expect(result).toBeNull();
+      expect(result).toBe(fileContent);
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           depName: 'nixpkgs-tar',
@@ -369,7 +369,7 @@ describe('modules/manager/nix/update', () => {
           newDigest: '88cef159e47c0dc56f151593e044453a39a6e547',
           currentValue: 'nixpkgs-unstable',
         },
-        'Digest-only update detected, returning null for lock file update via artifacts',
+        'Digest-only update detected, returning unchanged content for lock file update',
       );
     });
 
