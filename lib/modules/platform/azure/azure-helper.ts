@@ -235,7 +235,7 @@ export async function getTrees(
   repoId: string,
   sha1: string,
 ): Promise<GitTreeRef> {
-  logger.debug(`getTrees(${repoId}, ${sha1})`);
+  logger.trace(`getTrees(${repoId}, ${sha1})`);
   const azureApiGit = await azureApi.gitApi();
   return await azureApiGit.getTree(repoId, sha1);
 }
