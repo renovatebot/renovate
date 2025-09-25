@@ -41,10 +41,6 @@ const azureProject = partial<ChangeLogProject>({
 });
 
 describe('workers/repository/update/pr/changelog/azure/index', () => {
-  beforeEach(() => {
-    vi.restoreAllMocks();
-  });
-
   describe('getReleaseNotesMdFile', () => {
     it('handles release notes', async () => {
       const changelogMd = Fixtures.get('jest.md', '..');
