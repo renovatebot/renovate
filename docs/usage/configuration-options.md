@@ -2565,6 +2565,7 @@ Supported lock files:
 | `cargo`           | `Cargo.lock`                                       |
 | `composer`        | `composer.lock`                                    |
 | `conan`           | `conan.lock`                                       |
+| `deno`            | `deno.lock`                                        |
 | `devbox`          | `devbox.lock`                                      |
 | `gleam`           | `manifest.toml`                                    |
 | `gradle`          | `gradle.lockfile`                                  |
