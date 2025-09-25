@@ -43,7 +43,8 @@ Configuration/conversion of `NO_PROXY` to Yarn config is not supported.
 
 ### pnpm
 
-When using yaml as package format, you need to modify your renovate.json to add a regex to your yaml to `managerFilePatterns`
+Renovate supports updating the dependencies in your `package.yaml` file.
+To enable it you need to extend the `managerFilePatterns` for the npm manager as shown below:
 
 Example:
 
