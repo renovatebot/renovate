@@ -106,13 +106,8 @@ export async function extractPackageFile(
       datasource: GitRefsDatasource.id,
     };
 
-    // if rev is set, the flake contains a digest and can be updated directly
-    // otherwise set lockedVersion so it is updated during lock file maintenance
     dep.currentValue = flakeOriginal.ref?.replace(/^refs\/(heads|tags)\//, '');
     dep.currentDigest = flakeLocked.rev;
-    if (flakeOriginal.ref || !flakeOriginal.rev) {
-      dep.lockedVersion = flakeLocked.rev;
-    }
 
     switch (flakeLocked.type) {
       case 'git': {

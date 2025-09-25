@@ -384,7 +384,6 @@ describe('modules/manager/nix/extract', () => {
             currentValue: 'v1.7.2',
             datasource: GitRefsDatasource.id,
             depName: 'cachix',
-            lockedVersion: 'be97b37989f11b724197b5f4c7ffd78f12c8c4bf',
             packageName: 'https://github.com/cachix/cachix.git',
           },
         ],
@@ -518,7 +517,6 @@ describe('modules/manager/nix/extract', () => {
             currentDigest: 'be97b37989f11b724197b5f4c7ffd78f12c8c4bf',
             datasource: GitRefsDatasource.id,
             depName: 'cachix',
-            lockedVersion: 'be97b37989f11b724197b5f4c7ffd78f12c8c4bf',
             packageName: 'https://github.com/cachix/cachix.git',
           },
         ],
@@ -681,7 +679,6 @@ describe('modules/manager/nix/extract', () => {
             currentDigest: '4524271976b625a4a605beefd893f270620fd751',
             datasource: GitRefsDatasource.id,
             depName: 'flake-parts',
-            lockedVersion: '4524271976b625a4a605beefd893f270620fd751',
             packageName: 'https://github.com/hercules-ci/flake-parts',
           },
         ],
@@ -730,7 +727,6 @@ describe('modules/manager/nix/extract', () => {
             datasource: GitRefsDatasource.id,
             depName: 'nixpkgs',
             packageName: 'https://github.com/NixOS/nixpkgs',
-            lockedVersion: '9f4128e00b0ae8ec65918efeba59db998750ead6',
             versioning: nixpkgsVersioning,
           },
         ],
@@ -775,7 +771,6 @@ describe('modules/manager/nix/extract', () => {
           {
             datasource: GitRefsDatasource.id,
             depName: 'nixpkgs',
-            lockedVersion: '612ee628421ba2c1abca4c99684862f76cb3b089',
             packageName: 'https://github.com/NixOS/nixpkgs',
           },
         ],
@@ -824,7 +819,6 @@ describe('modules/manager/nix/extract', () => {
           {
             datasource: GitRefsDatasource.id,
             depName: 'nixpkgs-extra-pkgs',
-            lockedVersion: '6bf2706348447df6f8b86b1c3e54f87b0afda84f',
             packageName:
               'https://github.corp.example.com/my-org/nixpkgs-extra-pkgs',
           },
@@ -872,7 +866,6 @@ describe('modules/manager/nix/extract', () => {
           {
             datasource: GitRefsDatasource.id,
             depName: 'home-manager',
-            lockedVersion: '26993d87fd0d3b14f7667b74ad82235f120d986e',
             packageName: 'https://gitlab.com/rycee/home-manager',
           },
         ],
@@ -921,7 +914,6 @@ describe('modules/manager/nix/extract', () => {
           {
             datasource: GitRefsDatasource.id,
             depName: 'firefox-addons',
-            lockedVersion: '2dcb371b407ba4009e27a8e8adf88e6f93d40bfb',
             packageName: 'https://git.sr.ht/~rycee/nur-expressions',
           },
         ],
@@ -970,7 +962,6 @@ describe('modules/manager/nix/extract', () => {
           {
             datasource: GitRefsDatasource.id,
             depName: 'lix',
-            lockedVersion: 'f4bdddf0fdaabc68546cf561c5343b83d95d2466',
             packageName: 'https://git.lix.systems/lix-project/lix',
           },
         ],
@@ -1011,10 +1002,10 @@ describe('modules/manager/nix/extract', () => {
       expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
         deps: [
           {
+            currentDigest: '0e6684e6c5755325f801bda1751a8a4038145d7d',
             currentValue: 'nixpkgs-unstable',
             datasource: GitRefsDatasource.id,
             depName: 'nixpkgs',
-            lockedVersion: '0e6684e6c5755325f801bda1751a8a4038145d7d',
             packageName: 'https://github.com/NixOS/nixpkgs',
             versioning: nixpkgsVersioning,
           },
