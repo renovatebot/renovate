@@ -1,7 +1,7 @@
-import path from 'node:path';
 import type { GitTreeEntryRef } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import { GitObjectType } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import changelogFilenameRegex from 'changelog-filename-regex';
+import upath from 'upath';
 import { logger } from '../../../../../../logger';
 import * as azureHelper from '../../../../../../modules/platform/azure/azure-helper';
 import { ensureTrailingSlash } from '../../../../../../util/url';
@@ -20,7 +20,7 @@ export function getReleaseList(
   _release: ChangeLogRelease,
 ): ChangeLogNotes[] {
   logger.trace('azure.getReleaseList()');
-  logger.info('Unsupported Azure DevOps feature.  Skipping release fetching.');
+  logger.debug('Unsupported Azure DevOps feature.  Skipping release fetching.');
   return [];
 }
 
@@ -55,7 +55,7 @@ export async function getReleaseNotesMd(
   let files: GitTreeEntryRef[] = [];
   if (!files.length) {
     files = allFiles.filter((f) =>
-      changelogFilenameRegex.test(path.basename(f.relativePath ?? '')),
+      changelogFilenameRegex.test(upath.basename(f.relativePath ?? '')),
     );
   }
 
