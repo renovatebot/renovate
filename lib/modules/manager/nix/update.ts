@@ -29,12 +29,7 @@ export function updateDependency({
   );
 
   let match = directPattern.exec(fileContent);
-  let isAttrSet = false;
-
-  if (!match) {
-    match = attrSetPattern.exec(fileContent);
-    isAttrSet = true;
-  }
+  match ??= attrSetPattern.exec(fileContent);
 
   if (!match) {
     logger.debug(`Could not find URL for dependency ${depName}`);
