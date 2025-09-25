@@ -234,7 +234,7 @@
     "nanoid": "5.1.5",
     "neotraverse": "0.6.18",
     "node-html-parser": "7.0.1",
-    "p-all": "5.0.0",
+    "p-all": "5.0.1",
     "p-map": "7.0.3",
     "p-queue": "8.1.1",
     "p-throttle": "8.0.0",
