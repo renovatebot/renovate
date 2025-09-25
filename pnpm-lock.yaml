@@ -276,8 +276,8 @@ importers:
         specifier: 7.0.1
         version: 7.0.1
       p-all:
-        specifier: 5.0.0
-        version: 5.0.0
+        specifier: 5.0.1
+        version: 5.0.1
       p-map:
         specifier: 7.0.3
         version: 7.0.3
@@ -5075,8 +5075,8 @@ packages:
     resolution: {integrity: sha512-qFOyK5PjiWZd+QQIh+1jhdb9LpxTF0qs7Pm8o5QHYZ0M3vKqSqzsZaEB6oWlxZ+q2sJBMI/Ktgd2N5ZwQoRHfg==}
     engines: {node: '>= 0.4'}
 
-  p-all@5.0.0:
-    resolution: {integrity: sha512-pofqu/1FhCVa+78xNAptCGc9V45exFz2pvBRyIvgXkNM0Rh18Py7j8pQuSjA+zpabI46v9hRjNWmL9EAFcEbpw==}
+  p-all@5.0.1:
+    resolution: {integrity: sha512-LMT7WX9ZSaq3J1zjloApkIVmtz0ZdMFSIqbuiEa3txGYPLjUPOvgOPOx3nFjo+f37ZYL+1aY666I2SG7GVwLOA==}
     engines: {node: '>=16'}
 
   p-cancelable@2.1.1:
@@ -12151,7 +12151,7 @@ snapshots:
       object-keys: 1.1.1
       safe-push-apply: 1.0.0
 
-  p-all@5.0.0:
+  p-all@5.0.1:
     dependencies:
       p-map: 6.0.0
 
