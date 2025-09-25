@@ -42,6 +42,8 @@ export function updateDependency({
   }
 
   const oldUrl = match[1];
+  const matchIndex = match.index;
+  const matchedString = match[0];
   let newUrl = oldUrl;
 
   const parsedUrl = parseUrl(oldUrl);
@@ -137,20 +139,12 @@ export function updateDependency({
     return null;
   }
 
-  // Replace the old URL with the new URL in the file content
-  if (isAttrSet) {
-    const fullLinePattern = regEx(
-      `(^\\s*${escapeRegExp(depName)}\\s*=\\s*\\{[^}]*url\\s*=\\s*")${escapeRegExp(oldUrl)}(")`,
-      'gms',
-    );
-    updatedContent = updatedContent.replace(fullLinePattern, `$1${newUrl}$2`);
-  } else {
-    const fullLinePattern = regEx(
-      `(^\\s*${escapeRegExp(depName)}\\.url\\s*=\\s*")${escapeRegExp(oldUrl)}(".*$)`,
-      'gm',
-    );
-    updatedContent = updatedContent.replace(fullLinePattern, `$1${newUrl}$2`);
-  }
+  // Replace the old URL with the new URL at the specific match position
+  const replacedMatch = matchedString.replace(oldUrl, newUrl);
+  updatedContent =
+    fileContent.substring(0, matchIndex) +
+    replacedMatch +
+    fileContent.substring(matchIndex + matchedString.length);
 
   if (updatedContent === fileContent) {
     logger.debug({ depName }, 'Failed to update file content');
