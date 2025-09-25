@@ -29,13 +29,13 @@ export class AzureChangeLogSource extends ChangeLogSource {
     }
     const protocol = parsedUrl.protocol;
     const host = parsedUrl.host;
-    const pathname = parsedUrl.pathname;
-    const organization = pathname.slice(1).split('/')[0];
-    const projectName = pathname.slice(1).split('/')[1];
+    const pathname = parsedUrl.pathname.slice(1).split('/');
+    const organization = pathname[0];
+    const projectName = pathname[1];
     return `${protocol}//${host}/${organization}/${projectName}/`;
   }
 
   override getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    return this.getBaseUrl(config) + '_apis/';
+    return `${this.getBaseUrl(config)}_apis/`;
   }
 }
