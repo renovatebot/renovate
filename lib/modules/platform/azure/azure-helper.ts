@@ -203,7 +203,7 @@ export async function getAllProjectTeams(
 }
 
 export async function getTags(repoId: string): Promise<GitRef[]> {
-  logger.debug(`getTags(${repoId})`);
+  logger.trace(`getTags(${repoId})`);
   const azureApiGit = await azureApi.gitApi();
   return await azureApiGit.getRefs(repoId, undefined, 'tags');
 }
@@ -213,7 +213,7 @@ export async function getItem(
   path: string,
   includeContent?: boolean,
 ): Promise<GitItem> {
-  logger.debug(`getItem(${repoId}, ${path})`);
+  logger.trace(`getItem(${repoId}, ${path})`);
   const azureApiGit = await azureApi.gitApi();
   return await azureApiGit.getItem(
     repoId,

@@ -1,5 +1,7 @@
 import { Readable } from 'node:stream';
+import type { IGitApi } from 'azure-devops-node-api/GitApi';
 import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
+import type { GitRef } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
 import type { MockedObject } from 'vitest';
@@ -462,11 +464,16 @@ describe('modules/platform/azure/azure-helper', () => {
 
   describe('getTags', () => {
     it('should get tags', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getRefs: vi.fn(() => [{ name: 'refs/tags/1.0.0' }]),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getRefs: vi.fn(() =>
+            Promise.resolve([
+              partial<GitRef>({
+                name: 'refs/tags/1.0.0',
+              }),
+            ]),
+          ),
+        }),
       );
       const res = await azureHelper.getTags('123');
       expect(res).toEqual([{ name: 'refs/tags/1.0.0' }]);
@@ -475,12 +482,12 @@ describe('modules/platform/azure/azure-helper', () => {
 
   describe('getItem', () => {
     it('should get item', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItem: vi.fn(() => ({ objectId: '132' })),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getItem: vi.fn(() => Promise.resolve({ objectId: '123' })),
+        }),
       );
+
       const res = await azureHelper.getItem('123', 'path', true);
       expect(res).toEqual({ objectId: '132' });
     });
@@ -488,12 +495,12 @@ describe('modules/platform/azure/azure-helper', () => {
 
   describe('getTrees', () => {
     it('should get trees', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getTree: vi.fn(() => ({ objectId: '132' })),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getTree: vi.fn(() => Promise.resolve({ objectId: '132' })),
+        }),
       );
+
       const res = await azureHelper.getTrees('123', 'sha1');
       expect(res).toEqual({ objectId: '132' });
     });
