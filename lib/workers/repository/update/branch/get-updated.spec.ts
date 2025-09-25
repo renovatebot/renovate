@@ -511,7 +511,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
     });
 
-    it('handles nix digest-only updates', async () => {
+    it('handles nix digest-only updates without including unchanged files in commit', async () => {
       const fileContent = 'existing content';
       config.upgrades.push({
         packageFile: 'flake.nix',
@@ -525,12 +525,51 @@ describe('workers/repository/update/branch/get-updated', () => {
         newDigest: '88cef159e47c0dc56f151593e044453a39a6e547',
         updateType: 'digest',
       } satisfies BranchUpgradeConfig);
+      // For digest-only updates, Nix returns unchanged content
       nix.updateDependency.mockResolvedValueOnce(fileContent);
+
+      // Mock the artifact update to return a lock file update
+      nix.updateArtifacts.mockResolvedValueOnce([
+        {
+          file: {
+            type: 'addition',
+            path: 'flake.lock',
+            contents: 'updated lock file content',
+          },
+        },
+      ]);
+
+      const res = await getUpdatedPackageFiles(config);
+      // The unchanged flake.nix should not be in updatedPackageFiles
+      expect(res.updatedPackageFiles).toEqual([]);
+      // But the lock file should be updated via artifacts
+      expect(res.updatedArtifacts).toEqual([
+        {
+          type: 'addition',
+          path: 'flake.lock',
+          contents: 'updated lock file content',
+        },
+      ]);
+    });
+
+    it('handles nix non-digest updates normally', async () => {
+      const updatedContent = 'updated content';
+      config.upgrades.push({
+        packageFile: 'flake.nix',
+        manager: 'nix',
+        datasource: GitRefsDatasource.id,
+        branchName: 'renovate/nixpkgs-branch',
+        depName: 'nixpkgs-branch',
+        currentValue: 'nixos-24.05',
+        newValue: 'nixos-24.11',
+        updateType: 'minor',
+      } satisfies BranchUpgradeConfig);
+      nix.updateDependency.mockResolvedValueOnce(updatedContent);
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchObject({
         updatedPackageFiles: [
           {
-            contents: 'existing content',
+            contents: updatedContent,
             path: 'flake.nix',
             type: 'addition',
           },

@@ -103,6 +103,7 @@ export async function getUpdatedPackageFiles(
   );
   let updatedFileContents: Record<string, string> = {};
   const nonUpdatedFileContents: Record<string, string> = {};
+  const artifactUpdateNeeded: Record<string, string> = {};
   const managerPackageFiles: Record<string, Set<string>> = {};
   const packageFileUpdatedDeps: Record<string, PackageDependency[]> = {};
   const lockFileMaintenanceFiles: string[] = [];
@@ -299,12 +300,22 @@ export async function getUpdatedPackageFiles(
         );
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
+      } else if (
+        manager === 'nix' &&
+        upgrade.currentValue === upgrade.newValue &&
+        upgrade.currentDigest &&
+        upgrade.newDigest &&
+        upgrade.currentDigest !== upgrade.newDigest
+      ) {
+        // For Nix digest-only updates, track for artifact updates without committing the unchanged file
+        logger.debug(
+          { packageFile, depName },
+          'Nix digest-only update - tracking for artifact update',
+        );
+        artifactUpdateNeeded[packageFile] = newContent;
       }
       if (newContent === packageFileContent) {
-        if (
-          upgrade.manager === 'git-submodules' ||
-          (upgrade.manager === 'nix' && upgrade.updateType === 'digest')
-        ) {
+        if (upgrade.manager === 'git-submodules') {
           updatedFileContents[packageFile] = newContent;
           delete nonUpdatedFileContents[packageFile];
         }
@@ -318,18 +329,27 @@ export async function getUpdatedPackageFiles(
     path: name,
     contents: updatedFileContents[name],
   }));
+  // For artifact processing, include both updated files and files needing artifact updates
+  const filesForArtifacts: FileAddition[] = [
+    ...updatedPackageFiles,
+    ...Object.keys(artifactUpdateNeeded).map((name) => ({
+      type: 'addition' as const,
+      path: name,
+      contents: artifactUpdateNeeded[name],
+    })),
+  ];
   const updatedArtifacts: FileChange[] = [];
   const artifactErrors: ArtifactError[] = [];
   const artifactNotices: ArtifactNotice[] = [];
-  if (is.nonEmptyArray(updatedPackageFiles)) {
+  if (is.nonEmptyArray(filesForArtifacts)) {
     logger.debug('updateArtifacts for updatedPackageFiles');
     const updatedPackageFileManagers = getManagersForPackageFiles(
-      updatedPackageFiles,
+      filesForArtifacts,
       managerPackageFiles,
     );
     for (const manager of updatedPackageFileManagers) {
       const packageFilesForManager = getPackageFilesForManager(
-        updatedPackageFiles,
+        filesForArtifacts,
         managerPackageFiles[manager],
       );
       sortPackageFiles(config, manager, packageFilesForManager);

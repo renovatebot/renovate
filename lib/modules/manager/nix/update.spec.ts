@@ -373,6 +373,48 @@ describe('modules/manager/nix/update', () => {
       );
     });
 
+    it('updates only the specific matched occurrence when multiple exist', () => {
+      const fileContent = codeBlock`
+        {
+          inputs = {
+            nixpkgs-branch.url = "github:NixOS/nixpkgs/nixos-24.05";
+            nixpkgs-ref.url = "github:NixOS/nixpkgs?ref=nixos-24.05";
+          };
+        }
+      `;
+      // Update the first occurrence (nixpkgs-branch)
+      const result1 = updateDependency({
+        fileContent,
+        upgrade: {
+          depName: 'nixpkgs-branch',
+          currentValue: 'nixos-24.05',
+          newValue: 'nixos-24.11',
+        },
+      });
+      expect(result1).toContain(
+        'nixpkgs-branch.url = "github:NixOS/nixpkgs/nixos-24.11"',
+      );
+      expect(result1).toContain(
+        'nixpkgs-ref.url = "github:NixOS/nixpkgs?ref=nixos-24.05"',
+      ); // Second unchanged
+
+      // Update the second occurrence (nixpkgs-ref)
+      const result2 = updateDependency({
+        fileContent,
+        upgrade: {
+          depName: 'nixpkgs-ref',
+          currentValue: 'nixos-24.05',
+          newValue: 'nixos-24.11',
+        },
+      });
+      expect(result2).toContain(
+        'nixpkgs-branch.url = "github:NixOS/nixpkgs/nixos-24.05"',
+      ); // First unchanged
+      expect(result2).toContain(
+        'nixpkgs-ref.url = "github:NixOS/nixpkgs?ref=nixos-24.11"',
+      );
+    });
+
     it('returns null for digest-only updates when digests are the same', () => {
       const fileContent = codeBlock`
         {
