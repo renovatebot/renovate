@@ -21,9 +21,10 @@ export const GitLabMergeRequestSchema = z.object({
   title: z.string(),
   description: z.string(),
   state: z.string(),
-  created_at: z.string(),
   source_branch: z.string(),
-  target_branch: z.string().optional(),
+  target_branch: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
   diverged_commits_count: z.number().optional(),
   merge_status: z.string().optional(),
   assignee: GitlabUserSchema.optional(),
@@ -37,7 +38,6 @@ export const GitLabMergeRequestSchema = z.object({
       sha: z.string(),
     })
     .optional(),
-  updated_at: z.string().optional(),
 });
 
 export const GitLabMergeRequestsSchema = z.array(GitLabMergeRequestSchema);
