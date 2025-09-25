@@ -113,6 +113,7 @@ export async function extractPackageFile(
 
     // if rev is set, the flake contains a digest and can be updated directly
     // otherwise set lockedVersion so it is updated during lock file maintenance
+    // FIXME
     dep.currentValue = flakeOriginal.ref?.replace(/^refs\/(heads|tags)\//, '');
     dep.currentDigest = flakeLocked.rev;
     if (flakeOriginal.ref || !flakeOriginal.rev) {
@@ -121,8 +122,7 @@ export async function extractPackageFile(
 
     switch (flakeLocked.type) {
       case 'git': {
-        const url = parseGitUrl(flakeOriginal.url!);
-        dep.packageName = url.toString();
+        dep.packageName = parseGitUrl(flakeOriginal.url!).toString();
         break;
       }
 
@@ -133,9 +133,7 @@ export async function extractPackageFile(
           flakeOriginal.repo?.toLowerCase() === 'nixpkgs'
         ) {
           dep.packageName = 'https://github.com/NixOS/nixpkgs';
-          dep.currentValue = flakeOriginal.ref;
           dep.versioning = nixpkgsVersioning;
-          delete dep.replaceString;
           break;
         }
 

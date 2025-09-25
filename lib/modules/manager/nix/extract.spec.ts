@@ -725,6 +725,7 @@ describe('modules/manager/nix/extract', () => {
       expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
         deps: [
           {
+            currentDigest: '9f4128e00b0ae8ec65918efeba59db998750ead6',
             currentValue: 'nixos-unstable',
             datasource: GitRefsDatasource.id,
             depName: 'nixpkgs',
