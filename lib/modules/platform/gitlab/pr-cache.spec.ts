@@ -7,7 +7,8 @@ import {
 import type { LongCommitSha } from '../../../util/git/types';
 import { GitlabHttp, setBaseUrl } from '../../../util/http/gitlab';
 import { GitlabPrCache } from './pr-cache';
-import type { GitLabMergeRequest, GitlabPrCacheData } from './types';
+import type { GitLabMergeRequest } from './schema';
+import type { GitlabPrCacheData } from './types';
 import { prInfo } from './utils';
 
 const http = new GitlabHttp();

@@ -8,8 +8,8 @@ import type { HttpResponse } from '../../../util/http/types';
 import { parseUrl } from '../../../util/url';
 import { getPrBodyStruct } from '../pr-body';
 import type { GitUrlOption } from '../types';
+import type { GitLabMergeRequest } from './schema';
 import type { GitlabPr, RepoResponse } from './types';
-import { GitLabMergeRequest } from './schema';
 
 export const DRAFT_PREFIX = 'Draft: ';
 export const DRAFT_PREFIX_DEPRECATED = 'WIP: ';

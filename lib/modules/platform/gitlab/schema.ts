@@ -14,33 +14,30 @@ const GitlabUserSchema = z.object({
   username: z.string(),
 });
 
-const LongCommitShaSchema = z
-  .string()
-  .length(40)
-  .transform((val) => val as LongCommitSha);
+const LongCommitShaSchema = z.string().transform((val) => val as LongCommitSha);
 
 export const GitLabMergeRequestSchema = z.object({
   iid: z.number(),
   title: z.string(),
+  description: z.string(),
   state: z.string(),
   created_at: z.string(),
   source_branch: z.string(),
-  target_branch: z.string(),
-  description: z.string(),
-  diverged_commits_count: z.number(),
-  merge_status: z.string(),
+  target_branch: z.string().optional(),
+  diverged_commits_count: z.number().optional(),
+  merge_status: z.string().optional(),
   assignee: GitlabUserSchema.optional(),
   assignees: z.array(GitlabUserSchema).optional(),
   reviewers: z.array(GitlabUserSchema).optional(),
-  labels: z.array(z.string()),
-  sha: LongCommitShaSchema,
+  labels: z.array(z.string()).optional(),
+  sha: LongCommitShaSchema.optional(),
   head_pipeline: z
     .object({
       status: z.string(),
       sha: z.string(),
     })
     .optional(),
-  updated_at: z.string(),
+  updated_at: z.string().optional(),
 });
 
 export const GitLabMergeRequestsSchema = z.array(GitLabMergeRequestSchema);
