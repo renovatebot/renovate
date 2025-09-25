@@ -144,7 +144,6 @@ export function updateDependency(
   newValue = getNewNpmAliasValue(newValue, upgrade) ?? newValue;
 
   logger.debug(`npm.updateDependency(): ${depType}.${depName} = ${newValue}`);
-
   try {
     const parsedContents: NpmPackage = isYaml
       ? parseSingleYaml(fileContent)

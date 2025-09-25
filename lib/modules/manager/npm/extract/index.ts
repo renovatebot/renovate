@@ -265,7 +265,7 @@ export async function extractAllPackageFiles(
           });
         }
       } else {
-        if (packageFile.endsWith('json')) {
+        if (packageFile.startsWith('package.')) {
           logger.trace({ packageFile }, `Extracting as a package.json file`);
 
           const deps = await extractPackageFile(content, packageFile, config);
