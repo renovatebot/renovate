@@ -489,7 +489,7 @@ describe('modules/platform/azure/azure-helper', () => {
       );
 
       const res = await azureHelper.getItem('123', 'path', true);
-      expect(res).toEqual({ objectId: '132' });
+      expect(res).toEqual({ objectId: '123' });
     });
   });
 
