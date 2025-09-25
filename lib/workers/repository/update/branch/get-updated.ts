@@ -301,17 +301,10 @@ export async function getUpdatedPackageFiles(
         delete nonUpdatedFileContents[packageFile];
       }
       if (newContent === packageFileContent) {
-        if (upgrade.manager === 'git-submodules') {
-          updatedFileContents[packageFile] = newContent;
-          delete nonUpdatedFileContents[packageFile];
-        }
-
-        // Nix digest-only updates don't change the source file but need artifact updates
-        if (upgrade.manager === 'nix' && upgrade.updateType === 'digest') {
-          logger.debug(
-            { packageFile, depName },
-            'Nix digest-only update, marking file for artifact update',
-          );
+        if (
+          upgrade.manager === 'git-submodules' ||
+          (upgrade.manager === 'nix' && upgrade.updateType === 'digest')
+        ) {
           updatedFileContents[packageFile] = newContent;
           delete nonUpdatedFileContents[packageFile];
         }
