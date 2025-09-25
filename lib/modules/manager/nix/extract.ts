@@ -108,7 +108,6 @@ export async function extractPackageFile(
 
     // if rev is set, the flake contains a digest and can be updated directly
     // otherwise set lockedVersion so it is updated during lock file maintenance
-    // FIXME
     dep.currentValue = flakeOriginal.ref?.replace(/^refs\/(heads|tags)\//, '');
     dep.currentDigest = flakeLocked.rev;
     if (flakeOriginal.ref || !flakeOriginal.rev) {
