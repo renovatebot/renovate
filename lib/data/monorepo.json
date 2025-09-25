@@ -315,6 +315,11 @@
     "eslint-config-globex": "https://github.com/GlobexDesignsInc/eslint-config-globex",
     "eslint-stylistic": "https://github.com/eslint-stylistic/eslint-stylistic",
     "expo": "https://github.com/expo/expo",
+    "excel-dna":  [
+      "https://github.com/Excel-DNA/ExcelDna",
+      "https://github.com/Excel-DNA/IntelliSense",
+      "https://github.com/Excel-DNA/Registration"
+    ],
     "fabric-chaincode-node": "https://github.com/hyperledger/fabric-chaincode-node",
     "fabric8-kubernetes-client": "https://github.com/fabric8io/kubernetes-client",
     "faro-web-sdk": "https://github.com/grafana/faro-web-sdk",
