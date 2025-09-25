@@ -40,3 +40,18 @@ If set, and Renovate detects Yarn 2+, and one or both of those variables are pre
 This will result in the `~/.yarnrc.yml` file being created or modified with these settings, and the settings are not removed afterwards.
 
 Configuration/conversion of `NO_PROXY` to Yarn config is not supported.
+
+### pnpm
+
+When using yaml as package format, you need to modify your renovate.json to add a regex to your yaml to `managerFilePatterns`
+
+Example:
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "npm": {
+    "managerFilePatterns": ["/(^|/)package\\.yaml$/"]
+  }
+}
+```
