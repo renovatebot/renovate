@@ -24,12 +24,6 @@ exports[`modules/platform/azure/azure-helper > getCommitDetails > should get com
 
 exports[`modules/platform/azure/azure-helper > getFile > should return the file content because it is not a json 1`] = `"{"hello"= "test"}"`;
 
-exports[`modules/platform/azure/azure-helper > getItem > should get item 1`] = `
-{
-  "objectId": "132",
-}
-`;
-
 exports[`modules/platform/azure/azure-helper > getRef > should get the ref with full ref name 1`] = `
 [
   {
@@ -44,18 +38,4 @@ exports[`modules/platform/azure/azure-helper > getRef > should get the ref with 
     "objectId": 132,
   },
 ]
-`;
-
-exports[`modules/platform/azure/azure-helper > getTags > should get tags 1`] = `
-[
-  {
-    "name": "refs/tags/1.0.0",
-  },
-]
-`;
-
-exports[`modules/platform/azure/azure-helper > getTrees > should get trees 1`] = `
-{
-  "objectId": "132",
-}
 `;
