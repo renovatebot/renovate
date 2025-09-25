@@ -50,7 +50,6 @@ Example:
 
 ```json
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "npm": {
     "managerFilePatterns": ["/(^|/)package\\.yaml$/"]
   }
