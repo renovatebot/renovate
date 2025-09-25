@@ -378,9 +378,10 @@ describe('modules/manager/nix/extract', () => {
         "version": 7
       }`;
       fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-      expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
+      expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
         deps: [
           {
+            currentDigest: 'be97b37989f11b724197b5f4c7ffd78f12c8c4bf',
             currentValue: 'v1.7.2',
             datasource: GitRefsDatasource.id,
             depName: 'cachix',
@@ -423,9 +424,10 @@ describe('modules/manager/nix/extract', () => {
         "version": 7
       }`;
       fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-      expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
+      expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
         deps: [
           {
+            currentDigest: 'be97b37989f11b724197b5f4c7ffd78f12c8c4bf',
             datasource: GitRefsDatasource.id,
             depName: 'cachix',
             packageName: 'https://github.com/cachix/cachix.git',
@@ -468,9 +470,11 @@ describe('modules/manager/nix/extract', () => {
         "version": 7
       }`;
       fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-      expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
+      expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
         deps: [
           {
+            currentDigest: 'be97b37989f11b724197b5f4c7ffd78f12c8c4bf',
+            currentValue: 'v1.7.2',
             datasource: GitRefsDatasource.id,
             depName: 'cachix',
             packageName: 'git@github.com:cachix/cachix.git',
@@ -511,7 +515,7 @@ describe('modules/manager/nix/extract', () => {
         "version": 7
       }`;
       fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-      expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
+      expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
         deps: [
           {
             currentDigest: 'be97b37989f11b724197b5f4c7ffd78f12c8c4bf',
@@ -574,7 +578,7 @@ describe('modules/manager/nix/extract', () => {
         "version": 7
       }`;
       fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-      expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
+      expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
         deps: [
           {
             currentDigest: '64334fda8d632bec7c80c9bef668ad9633a8dd64',
@@ -766,12 +770,14 @@ describe('modules/manager/nix/extract', () => {
         "version": 7
       }`;
       fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-      expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
+      expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
         deps: [
           {
+            currentDigest: '612ee628421ba2c1abca4c99684862f76cb3b089',
             datasource: GitRefsDatasource.id,
             depName: 'nixpkgs',
             packageName: 'https://github.com/NixOS/nixpkgs',
+            versioning: 'nixpkgs',
           },
         ],
       });
@@ -814,9 +820,10 @@ describe('modules/manager/nix/extract', () => {
         "version": 7
       }`;
       fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-      expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
+      expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
         deps: [
           {
+            currentDigest: '6bf2706348447df6f8b86b1c3e54f87b0afda84f',
             datasource: GitRefsDatasource.id,
             depName: 'nixpkgs-extra-pkgs',
             packageName:
@@ -861,9 +868,10 @@ describe('modules/manager/nix/extract', () => {
         "version": 7
       }`;
       fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-      expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
+      expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
         deps: [
           {
+            currentDigest: '26993d87fd0d3b14f7667b74ad82235f120d986e',
             datasource: GitRefsDatasource.id,
             depName: 'home-manager',
             packageName: 'https://gitlab.com/rycee/home-manager',
@@ -909,9 +917,10 @@ describe('modules/manager/nix/extract', () => {
         "version": 7
       }`;
       fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-      expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
+      expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
         deps: [
           {
+            currentDigest: '2dcb371b407ba4009e27a8e8adf88e6f93d40bfb',
             datasource: GitRefsDatasource.id,
             depName: 'firefox-addons',
             packageName: 'https://git.sr.ht/~rycee/nur-expressions',
@@ -957,9 +966,10 @@ describe('modules/manager/nix/extract', () => {
         "version": 7
       }`;
       fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-      expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
+      expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
         deps: [
           {
+            currentDigest: 'f4bdddf0fdaabc68546cf561c5343b83d95d2466',
             datasource: GitRefsDatasource.id,
             depName: 'lix',
             packageName: 'https://git.lix.systems/lix-project/lix',
@@ -999,7 +1009,7 @@ describe('modules/manager/nix/extract', () => {
         "version": 7
       }`;
       fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-      expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
+      expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
         deps: [
           {
             currentDigest: '0e6684e6c5755325f801bda1751a8a4038145d7d',
