@@ -128,10 +128,10 @@ export function updateDependency({
     ) {
       logger.debug(
         { depName, currentDigest, newDigest, currentValue },
-        'Digest-only update detected, returning unchanged content for lock file update',
+        'Digest-only update detected, returning null for lock file update via artifacts',
       );
-      // Return the unchanged content - the lock file will be updated via artifacts
-      return fileContent;
+      // The lock file will be updated via artifacts
+      return null;
     }
     logger.trace({ depName, url: oldUrl }, 'No changes made to URL');
     return null;
