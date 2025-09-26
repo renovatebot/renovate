@@ -154,7 +154,7 @@ You put `schedule:nonOfficeHours` in the `extends` array of your `renovate.json`
 
 If you browse the "default" presets, you will see some that have parameters, e.g.:
 
-<!-- schema-validation-ignore -->
+<!-- schema-validation-disable-next-block -->
 
 ```json
 {

@@ -69,15 +69,17 @@ When you configure a JSONata manager, use the following syntax:
 Overwrite the `<query>` placeholder text with your [JSONata](https://docs.jsonata.org/overview.html) query.
 The JSONata query transforms the content to a JSON object, similar to this:
 
-```javascript title="dependencies information extracted using a JSONata query"
+<!-- schema-validation-disable-next-block -->
+
+```json title="dependencies information extracted using a JSONata query"
 [
   {
-    depName: 'some_dep',
-    currentValue: '1.0.0',
-    datasource: 'docker',
-    versioning: 'semver',
-  },
-];
+    "depName": "some_dep",
+    "currentValue": "1.0.0",
+    "datasource": "docker",
+    "versioning": "semver"
+  }
+]
 ```
 
 Creating your Renovate JSONata manager config is easier if you understand JSONata queries.
@@ -113,7 +115,7 @@ development:
 
 JSON:
 
-<!-- schema-validation-ignore -->
+<!-- schema-validation-disable-next-block -->
 
 ```json title="Example JSON parsing"
 [
@@ -146,7 +148,7 @@ JSON:
 Below are some example queries for the generic JSON manager.
 You can also use the [JSONata test website](https://try.jsonata.org) to experiment with queries.
 
-<!-- schema-validation-ignore -->
+<!-- schema-validation-disable-next-block -->
 
 ```json title="Dependencies spread in different nodes, and we want to limit the extraction to a particular node"
 {
@@ -171,7 +173,7 @@ Query:
 production.{ "depName": package, "currentValue": version }
 ```
 
-<!-- schema-validation-ignore -->
+<!-- schema-validation-disable-next-block -->
 
 ```json title="Dependencies spread in different nodes, and we want to extract all of them as if they were in the same node"
 {
@@ -196,7 +198,7 @@ Query:
 *.{ "depName": package, "currentValue": version }
 ```
 
-<!-- schema-validation-ignore -->
+<!-- schema-validation-disable-next-block -->
 
 ```json title="The dependency name is in a JSON node name, and the version is in a child leaf to that node"
 {
@@ -215,7 +217,7 @@ Query:
 $each(function($v, $n) { { "depName": $n, "currentValue": $v.version } })
 ```
 
-<!-- schema-validation-ignore -->
+<!-- schema-validation-disable-next-block -->
 
 ```json title="The dependency name and its version are both value nodes of the same parent node"
 {
@@ -238,7 +240,7 @@ Query:
 packages.{ "depName": package, "currentValue": version }
 ```
 
-<!-- schema-validation-ignore -->
+<!-- schema-validation-disable-next-block -->
 
 ```json title="The dependency name and version are part of the same string"
 {

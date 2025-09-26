@@ -1450,7 +1450,7 @@ See [Scaling Renovate Bot on self-hosted GitLab](https://github.com/renovatebot/
 
 Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
 
-<!-- schema-validation-ignore -->
+<!-- schema-validation-disable-next-block -->
 
 ```json
 ["myOrg/myRepo", "myOrg/anotherRepo"]

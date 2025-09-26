@@ -1,16 +1,14 @@
 import { format } from 'node:util';
 import type { ValidateFunction } from 'ajv';
-// eslint-disable-next-line import-x/no-named-as-default
 import Ajv from 'ajv';
-import * as draft04 from 'ajv/lib/refs/json-schema-draft-04.json';
+import draft04 from 'ajv/lib/refs/json-schema-draft-04.json';
 import fs from 'fs-extra';
 import { glob } from 'glob';
 import type { Token } from 'markdown-it';
 import MarkdownIt from 'markdown-it';
 import { MigrationsService } from '../lib/config/migrations';
 import type { RenovateConfig } from '../lib/config/types';
-
-type ReporterCallback = (message: string) => void;
+import schema from '../renovate-schema.json';
 
 const errorTitle = 'Invalid JSON in fenced code block';
 const errorBody =
@@ -18,6 +16,12 @@ const errorBody =
 const errorLogFormat = process.env.CI
   ? `::error file=%s,line=%d,endLine=%d,title=${errorTitle}::%s. ${errorBody}`
   : `${errorTitle} (%s lines %d-%d): %s`;
+
+function reportIssue(file: string, token: Token, message: string): void {
+  const [start, end] = token.map ?? [-1, -1];
+  issues += 1;
+  console.log(format(errorLogFormat, file, start + 1, end + 1, message));
+}
 
 const markdownGlob = '{docs,lib}/**/*.md';
 const markdown = new MarkdownIt('zero');
@@ -28,39 +32,39 @@ markdown.enable(['fence']);
 
 let validate: ValidateFunction;
 
-function checkValidJson(
-  reporter: ReporterCallback,
-  token: Token,
-): object | undefined {
+function checkValidJson(file: string, token: Token): object | undefined {
   try {
     return JSON.parse(token.content);
   } catch (err) {
-    reporter(err.message);
+    reportIssue(file, token, err.message);
   }
 }
 
 function checkSchemaCompliantJson(
-  reporter: ReporterCallback,
+  file: string,
+  token: Token,
   value: object,
 ): RenovateConfig | undefined {
   const isValid = validate(value);
   if (isValid) {
     return value as RenovateConfig;
   }
-  validate.errors?.forEach((error) => {
-    reporter(error.dataPath + ' ' + error.message);
-  });
+  for (const error of validate.errors ?? []) {
+    reportIssue(file, token, `${error.dataPath} ${error.message}`);
+  }
 }
 
 function checkMigrationStatus(
-  reporter: ReporterCallback,
+  file: string,
+  token: Token,
   original: RenovateConfig,
 ): void {
   const migrated = MigrationsService.run(original);
   if (MigrationsService.isMigrated(original, migrated)) {
-    reporter(
-      'The JSON contains unmigrated configuration. Migrated JSON: ' +
-        JSON.stringify(migrated),
+    reportIssue(
+      file,
+      token,
+      `The JSON contains unmigrated configuration. Migrated JSON: ${JSON.stringify(migrated)}`,
     );
   }
 }
@@ -77,21 +81,17 @@ async function processFile(file: string): Promise<void> {
       continue;
     }
 
-    const reporter: ReporterCallback = (message) => {
-      const [start, end] = token.map ?? [-1, -1];
-      issues += 1;
-      console.log(format(errorLogFormat, file, start + 1, end + 1, message));
-    };
-    const validJson = checkValidJson(reporter, token);
+    const validJson = checkValidJson(file, token);
     if (
       validJson === undefined ||
-      tokens[index - 2]?.content === '<!-- schema-validation-ignore -->'
+      tokens[index - 2]?.content ===
+        '<!-- schema-validation-disable-next-block -->'
     ) {
       continue;
     }
-    const configuration = checkSchemaCompliantJson(reporter, validJson);
+    const configuration = checkSchemaCompliantJson(file, token, validJson);
     if (configuration !== undefined) {
-      checkMigrationStatus(reporter, configuration);
+      checkMigrationStatus(file, token, configuration);
     }
   }
 }
@@ -103,7 +103,7 @@ void (async () => {
     schemaId: 'id',
   })
     .addMetaSchema(draft04)
-    .compile(await fs.readJson('renovate-schema.json'));
+    .compile(schema);
 
   const files = await glob(markdownGlob);
 
