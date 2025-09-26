@@ -8,7 +8,6 @@ import { GlobalConfig } from '../../../config/global';
 import { hashStream, toSha256 } from '../../../util/hash';
 import type { GetPkgReleasesConfig } from '../types';
 import { cacheSubDir } from './common';
-import * as fileUtils from './file';
 import { getBaseSuiteUrl } from './url';
 import { DebDatasource } from '.';
 import { Fixtures } from '~test/fixtures';
@@ -347,108 +346,6 @@ describe('modules/datasource/deb/index', () => {
       });
     });
   });
-
-  describe('downloadAndExtractPackage', () => {
-    it('should ignore error when fetching the InRelease content fails', async () => {
-      const packageArgs: [release: string, component: string, arch: string] = [
-        'stable',
-        'non-free',
-        'amd64',
-      ];
-
-      httpMock
-        .scope(debBaseUrl)
-        .get(getPackageUrl('', ...packageArgs))
-        .replyWithFile(200, fixturePackagesArchivePath2);
-      mockFetchInReleaseContent('wrong-hash', ...packageArgs, true);
-
-      await expect(
-        // TODO: method is private, so needs better testing
-        // eslint-disable-next-line @typescript-eslint/dot-notation
-        debDatasource['downloadAndExtractPackage'](
-          getComponentUrl(debBaseUrl, ...packageArgs),
-        ),
-      ).resolves.toEqual(
-        expect.objectContaining({
-          extractedFile: extractedPackageFile,
-          lastTimestamp: expect.anything(),
-        }),
-      );
-    });
-
-    it('should throw error when checksum validation fails', async () => {
-      httpMock
-        .scope(debBaseUrl)
-        .get(getPackageUrl('', 'bullseye', 'main', 'amd64'))
-        .replyWithFile(200, fixturePackagesArchivePath2);
-      mockFetchInReleaseContent('wrong-hash', 'bullseye', 'main', 'amd64');
-
-      await expect(
-        // TODO: method is private, so needs better testing
-        // eslint-disable-next-line @typescript-eslint/dot-notation
-        debDatasource['downloadAndExtractPackage'](
-          getComponentUrl(debBaseUrl, 'bullseye', 'main', 'amd64'),
-        ),
-      ).rejects.toThrow(`SHA256 checksum validation failed`);
-    });
-
-    it('should throw error for when extracting fails', async () => {
-      vi.spyOn(fileUtils, 'extract').mockRejectedValueOnce(new Error());
-
-      httpMock
-        .scope(debBaseUrl)
-        .get(getPackageUrl('', 'bullseye', 'main', 'amd64'))
-        .replyWithFile(200, fixturePackagesArchivePath2);
-      mockFetchInReleaseContent(
-        fixturePackagesArchiveHash2,
-        'bullseye',
-        'main',
-        'amd64',
-      );
-
-      await expect(
-        // TODO: method is private, so needs better testing
-        // eslint-disable-next-line @typescript-eslint/dot-notation
-        debDatasource['downloadAndExtractPackage'](
-          getComponentUrl(debBaseUrl, 'bullseye', 'main', 'amd64'),
-        ),
-      ).rejects.toThrow(`Missing metadata in extracted package index file!`);
-    });
-  });
-
-  describe('checkIfModified', () => {
-    it('should return true for different status code', async () => {
-      httpMock
-        .scope(debBaseUrl)
-        .head(getPackageUrl('', 'stable', 'non-free', 'amd64'))
-        .reply(200);
-
-      await expect(
-        // TODO: method is private, so needs better testing
-        // eslint-disable-next-line @typescript-eslint/dot-notation
-        debDatasource['checkIfModified'](
-          getPackageUrl(debBaseUrl, 'stable', 'non-free', 'amd64'),
-          new Date(),
-        ),
-      ).resolves.toBe(true);
-    });
-
-    it('should return true if request failed', async () => {
-      httpMock
-        .scope(debBaseUrl)
-        .head(getPackageUrl('', 'stable', 'non-free', 'amd64'))
-        .replyWithError('Unexpected Error');
-
-      await expect(
-        // TODO: method is private, so needs better testing
-        // eslint-disable-next-line @typescript-eslint/dot-notation
-        debDatasource['checkIfModified'](
-          getPackageUrl(debBaseUrl, 'stable', 'non-free', 'amd64'),
-          new Date(),
-        ),
-      ).resolves.toBe(true);
-    });
-  });
 });
 
 /**
@@ -500,7 +397,7 @@ function mockHttpCalls(
  * @param arch - The architecture (e.g., 'amd64').
  * @param error - Optional flag to simulate an error response (default is false).
  */
-function mockFetchInReleaseContent(
+export function mockFetchInReleaseContent(
   packageIndexHash: string,
   release: string,
   component: string,
@@ -537,7 +434,7 @@ function mockFetchInReleaseContent(
  * @param arch - The architecture name (e.g., 'amd64', 'i386').
  * @returns The complete URL to the component directory.
  */
-function getComponentUrl(
+export function getComponentUrl(
   baseUrl: string,
   release: string,
   component: string,
@@ -555,7 +452,7 @@ function getComponentUrl(
  * @param arch - The architecture name (e.g., 'amd64', 'i386').
  * @returns The complete URL to the Packages.gz file.
  */
-function getPackageUrl(
+export function getPackageUrl(
   baseUrl: string,
   release: string,
   component: string,
@@ -573,7 +470,7 @@ function getPackageUrl(
  * @param arch - The architecture name (e.g., 'amd64', 'i386').
  * @returns The complete URL to the package registry.
  */
-function getRegistryUrl(
+export function getRegistryUrl(
   baseUrl: string,
   release: string,
   components: string[],
@@ -588,7 +485,7 @@ function getRegistryUrl(
  * @param filePath - path of the file
  * @returns resolves to the SHA256 checksum
  */
-function computeFileChecksum(filePath: string): Promise<string> {
+export function computeFileChecksum(filePath: string): Promise<string> {
   const stream = createReadStream(filePath);
   return hashStream(stream, 'sha256');
 }
