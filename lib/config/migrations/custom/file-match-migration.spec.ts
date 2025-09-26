@@ -30,7 +30,7 @@ describe('config/migrations/custom/file-match-migration', () => {
         managerFilePatterns: ['filename3'],
       },
       {
-        managerFilePatterns: ['/filename1/', '/filename2/', 'filename3'],
+        managerFilePatterns: ['filename3', '/filename1/', '/filename2/'],
       },
     );
   });
