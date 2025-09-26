@@ -110,10 +110,9 @@ export async function extractPackageFile(
     dep.currentDigest = flakeLocked.rev;
 
     switch (flakeLocked.type) {
-      case 'git': {
+      case 'git':
         dep.packageName = parseGitUrl(flakeOriginal.url!).toString();
         break;
-      }
 
       case 'github':
         // set to nixpkgs if it is a nixpkgs reference
