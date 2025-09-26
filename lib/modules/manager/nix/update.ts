@@ -15,8 +15,6 @@ export function updateDependency({
     return null;
   }
 
-  let updatedContent = fileContent;
-
   // Find the input line for this dependency
   // Support both direct assignment (`depName.url = "..."`) and attribute set syntax (`depName = { url = "..."; }`)
   const directPattern = regEx(
@@ -27,21 +25,19 @@ export function updateDependency({
     `^\\s*${escapeRegExp(depName)}\\s*=\\s*\\{[^}]*url\\s*=\\s*"([^"]+)"`,
     'gms',
   );
-
-  let match = directPattern.exec(fileContent);
-  match ??= attrSetPattern.exec(fileContent);
+  const match =
+    directPattern.exec(fileContent) ?? attrSetPattern.exec(fileContent);
 
   if (!match) {
     logger.debug(`Could not find URL for dependency ${depName}`);
     return null;
   }
 
-  const oldUrl = match[1];
-  const matchIndex = match.index;
   const matchedString = match[0];
+  const oldUrl = match[1];
+  const parsedUrl = parseUrl(oldUrl);
   let newUrl = oldUrl;
 
-  const parsedUrl = parseUrl(oldUrl);
   if (!parsedUrl) {
     logger.debug(`Could not parse URL for dependency ${depName}: ${oldUrl}`);
     return null;
@@ -127,26 +123,27 @@ export function updateDependency({
         { depName, currentDigest, newDigest, currentValue },
         'Digest-only update detected, returning unchanged content for lock file update',
       );
+
       // Return the unchanged content - the lock file will be updated via artifacts
       return fileContent;
     }
+
     logger.trace({ depName, url: oldUrl }, 'No changes made to URL');
     return null;
   }
 
   // Replace the old URL with the new URL at the specific match position
   const replacedMatch = matchedString.replace(oldUrl, newUrl);
-  updatedContent =
-    fileContent.substring(0, matchIndex) +
+  const updatedContent =
+    fileContent.substring(0, match.index) +
     replacedMatch +
-    fileContent.substring(matchIndex + matchedString.length);
+    fileContent.substring(match.index + matchedString.length);
 
-  /* v8 ignore start -- should never happen */
+  /* v8 ignore next 4 -- should never happen */
   if (updatedContent === fileContent) {
     logger.debug({ depName }, 'Failed to update file content');
     return null;
   }
-  /* v8 ignore stop */
 
   logger.debug({ depName, oldUrl, newUrl }, 'Successfully updated Nix flake');
   return updatedContent;
