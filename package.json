@@ -180,7 +180,7 @@
     "@sindresorhus/is": "7.1.0",
     "@yarnpkg/core": "4.4.4",
     "@yarnpkg/parsers": "3.0.3",
-    "ae-cvss-calculator": "1.0.8",
+    "ae-cvss-calculator": "1.0.9",
     "agentkeepalive": "4.6.0",
     "async-mutex": "0.5.0",
     "auth-header": "1.0.0",
