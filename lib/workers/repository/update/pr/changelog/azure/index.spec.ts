@@ -394,6 +394,125 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
     });
   });
 
+  describe('project extraction from API URL', () => {
+    it('extracts project name from standard Azure DevOps URL', async () => {
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValue({
+        objectId: 'test-id',
+      });
+
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValue({
+        treeEntries: [
+          {
+            gitObjectType: GitObjectType.Blob,
+            relativePath: 'CHANGELOG.md',
+          },
+        ],
+      });
+
+      const apiUrl =
+        'https://dev.azure.com/organization/project-name/_apis/git/repositories';
+      await getReleaseNotesMdFile({
+        ...azureProject,
+        apiBaseUrl: apiUrl,
+      });
+
+      // Check that the extracted project was passed to getItem
+      expect(azureHelper.getItem).toHaveBeenCalledTimes(2);
+      expect(azureHelper.getItem).toHaveBeenNthCalledWith(
+        1,
+        'some-repo',
+        '/',
+        'project-name',
+      );
+    });
+
+    it('extracts project name with special characters', async () => {
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValue({
+        objectId: 'test-id',
+      });
+
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValue({
+        treeEntries: [
+          {
+            gitObjectType: GitObjectType.Blob,
+            relativePath: 'CHANGELOG.md',
+          },
+        ],
+      });
+
+      const apiUrl =
+        'https://dev.azure.com/organization/project-name/_apis/git/repositories';
+      await getReleaseNotesMdFile({
+        ...azureProject,
+        apiBaseUrl: apiUrl,
+      });
+
+      expect(azureHelper.getItem).toHaveBeenNthCalledWith(
+        1,
+        'some-repo',
+        '/',
+        'project-name',
+      );
+    });
+
+    it('handles URL with multi-level path before _apis', async () => {
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValue({
+        objectId: 'test-id',
+      });
+
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValue({
+        treeEntries: [
+          {
+            gitObjectType: GitObjectType.Blob,
+            relativePath: 'CHANGELOG.md',
+          },
+        ],
+      });
+
+      const apiUrl =
+        'https://customdomain.com/org/subgroup/project/_apis/git/repositories';
+      await getReleaseNotesMdFile({
+        ...azureProject,
+        apiBaseUrl: apiUrl,
+      });
+
+      expect(azureHelper.getItem).toHaveBeenNthCalledWith(
+        1,
+        'some-repo',
+        '/',
+        'project',
+      );
+    });
+
+    it('defaults to empty string when no project found in URL', async () => {
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValue({
+        objectId: 'test-id',
+      });
+
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValue({
+        treeEntries: [
+          {
+            gitObjectType: GitObjectType.Blob,
+            relativePath: 'CHANGELOG.md',
+          },
+        ],
+      });
+
+      const apiUrl = 'https://dev.azure.com/invalid-url-without-project/';
+      await getReleaseNotesMdFile({
+        ...azureProject,
+        apiBaseUrl: apiUrl,
+      });
+
+      expect(azureHelper.getItem).toHaveBeenNthCalledWith(
+        1,
+        'some-repo',
+        '/',
+        '', // Should default to empty string
+      );
+    });
+  });
+
   describe('source', () => {
     describe('getBaseUrl', () => {
       it.each`
