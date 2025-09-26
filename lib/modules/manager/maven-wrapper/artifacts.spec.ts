@@ -315,7 +315,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     expect(git.getRepoStatus).toHaveBeenCalledOnce();
   });
 
-  it('updates with binarySource install after detecting from mnvw script file', async () => {
+  it('updates with binarySource install after detecting wrapper version from mvnw script', async () => {
     const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     mockMavenFileChangedInGit();
     GlobalConfig.set({
