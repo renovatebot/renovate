@@ -382,7 +382,7 @@ describe('modules/manager/nix/update', () => {
           };
         }
       `;
-      // Update the first occurrence (nixpkgs-branch)
+
       const result1 = updateDependency({
         fileContent,
         upgrade: {
@@ -396,9 +396,8 @@ describe('modules/manager/nix/update', () => {
       );
       expect(result1).toContain(
         'nixpkgs-ref.url = "github:NixOS/nixpkgs?ref=nixos-24.05"',
-      ); // Second unchanged
+      );
 
-      // Update the second occurrence (nixpkgs-ref)
       const result2 = updateDependency({
         fileContent,
         upgrade: {
@@ -409,7 +408,7 @@ describe('modules/manager/nix/update', () => {
       });
       expect(result2).toContain(
         'nixpkgs-branch.url = "github:NixOS/nixpkgs/nixos-24.05"',
-      ); // First unchanged
+      );
       expect(result2).toContain(
         'nixpkgs-ref.url = "github:NixOS/nixpkgs?ref=nixos-24.11"',
       );
