@@ -33,14 +33,20 @@ export async function getReleaseNotesMd(
 
   const urlEncodedRepo = encodeURIComponent(repository);
 
+  // Extract project name from API base URL (last path segment before "_apis/")
+  const projectMatch = /\/([^/]+)\/_apis\//.exec(apiBaseUrl);
+  const project = projectMatch?.[1] ?? '';
+
   const sourceDirectoryId = await azureHelper.getItem(
     urlEncodedRepo,
     sourceDirectory,
+    project,
   );
 
   const tree = await azureHelper.getTrees(
     urlEncodedRepo,
     sourceDirectoryId.objectId!,
+    project,
   );
 
   const allFiles = tree.treeEntries?.filter(
@@ -74,6 +80,7 @@ export async function getReleaseNotesMd(
   const fileRes = await azureHelper.getItem(
     urlEncodedRepo,
     changelogFile,
+    project,
     true,
   );
 

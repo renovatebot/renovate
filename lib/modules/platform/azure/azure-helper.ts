@@ -211,6 +211,7 @@ export async function getTags(repoId: string): Promise<GitRef[]> {
 export async function getItem(
   repoId: string,
   path: string,
+  project?: string,
   includeContent?: boolean,
 ): Promise<GitItem> {
   logger.trace(`getItem(${repoId}, ${path})`);
@@ -218,7 +219,7 @@ export async function getItem(
   return await azureApiGit.getItem(
     repoId,
     path,
-    undefined,
+    project,
     undefined,
     undefined,
     undefined,
@@ -234,8 +235,9 @@ export async function getItem(
 export async function getTrees(
   repoId: string,
   sha1: string,
+  project?: string,
 ): Promise<GitTreeRef> {
   logger.trace(`getTrees(${repoId}, ${sha1})`);
   const azureApiGit = await azureApi.gitApi();
-  return await azureApiGit.getTree(repoId, sha1);
+  return await azureApiGit.getTree(repoId, sha1, project);
 }
