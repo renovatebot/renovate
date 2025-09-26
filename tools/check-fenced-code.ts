@@ -8,7 +8,6 @@ import type { Token } from 'markdown-it';
 import MarkdownIt from 'markdown-it';
 import { MigrationsService } from '../lib/config/migrations';
 import type { RenovateConfig } from '../lib/config/types';
-import schema from '../renovate-schema.json';
 
 const errorTitle = 'Invalid JSON in fenced code block';
 const errorBody =
@@ -103,7 +102,7 @@ void (async () => {
     schemaId: 'id',
   })
     .addMetaSchema(draft04)
-    .compile(schema);
+    .compile(await fs.readJson('renovate-schema.json'));
 
   const files = await glob(markdownGlob);
 
