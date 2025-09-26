@@ -141,10 +141,12 @@ export function updateDependency({
     replacedMatch +
     fileContent.substring(matchIndex + matchedString.length);
 
+  /* v8 ignore start -- should never happen */
   if (updatedContent === fileContent) {
     logger.debug({ depName }, 'Failed to update file content');
     return null;
   }
+  /* v8 ignore stop */
 
   logger.debug({ depName, oldUrl, newUrl }, 'Successfully updated Nix flake');
   return updatedContent;

@@ -300,24 +300,25 @@ export async function getUpdatedPackageFiles(
         );
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
-      } else if (
-        manager === 'nix' &&
-        upgrade.currentValue === upgrade.newValue &&
-        upgrade.currentDigest &&
-        upgrade.newDigest &&
-        upgrade.currentDigest !== upgrade.newDigest
-      ) {
-        // For Nix digest-only updates, track for artifact updates without committing the unchanged file
-        logger.debug(
-          { packageFile, depName },
-          'Nix digest-only update - tracking for artifact update',
-        );
-        artifactUpdateNeeded[packageFile] = newContent;
       }
       if (newContent === packageFileContent) {
         if (upgrade.manager === 'git-submodules') {
           updatedFileContents[packageFile] = newContent;
           delete nonUpdatedFileContents[packageFile];
+        }
+        if (
+          manager === 'nix' &&
+          upgrade.currentValue === upgrade.newValue &&
+          upgrade.currentDigest &&
+          upgrade.newDigest &&
+          upgrade.currentDigest !== upgrade.newDigest
+        ) {
+          // For Nix digest-only updates, track for artifact updates without committing the unchanged file
+          logger.debug(
+            { packageFile, depName },
+            'Nix digest-only update - tracking for artifact update',
+          );
+          artifactUpdateNeeded[packageFile] = newContent;
         }
       }
     }
