@@ -488,7 +488,7 @@ describe('modules/platform/azure/azure-helper', () => {
         }),
       );
 
-      const res = await azureHelper.getItem('123', 'path', true);
+      const res = await azureHelper.getItem('123', 'path', 'project', true);
       expect(res).toEqual({ objectId: '123' });
     });
   });
