@@ -114,8 +114,8 @@ importers:
         specifier: 3.0.3
         version: 3.0.3
       ae-cvss-calculator:
-        specifier: 1.0.8
-        version: 1.0.8
+        specifier: 1.0.9
+        version: 1.0.9
       agentkeepalive:
         specifier: 4.6.0
         version: 4.6.0
@@ -2483,8 +2483,8 @@ packages:
     resolution: {integrity: sha512-TGw5yVi4saajsSEgz25grObGHEUaDrniwvA2qwSC060KfqGPdglhvPMA2lPIoxs3PQIItj2iag35fONcQqgUaQ==}
     engines: {node: '>=12.0'}
 
-  ae-cvss-calculator@1.0.8:
-    resolution: {integrity: sha512-ud8g+BQTSJoeuB4nOnbhu/Fd7TnGEnnr1AYOA+uFaEDQB0IOgjxHA2ds5iOmLh5Os6ziGCJJqjEFOFeWMOVQ4Q==}
+  ae-cvss-calculator@1.0.9:
+    resolution: {integrity: sha512-CTeSR6Cm/cOJQLRNIw3wvRnNUMp9du+qKwH6IAf/DHwgGFsVeoCiuvtH6BWl5gaYVn1RTMBdQmT2D5Ul31Mh5Q==}
 
   agent-base@7.1.4:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
@@ -9172,7 +9172,7 @@ snapshots:
 
   adm-zip@0.5.16: {}
 
-  ae-cvss-calculator@1.0.8: {}
+  ae-cvss-calculator@1.0.9: {}
 
   agent-base@7.1.4: {}
 
