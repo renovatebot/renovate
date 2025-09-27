@@ -30,10 +30,10 @@ import {
 const hostConfigVariablePrefix = 'BUNDLE_';
 
 function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
-  // istanbul ignore if: doesn't happen in practice
+  /* v8 ignore start -- doesn't happen in practice */
   if (!hostRule.resolvedHost) {
     return {};
-  }
+  } /* v8 ignore stop */
   const varName = hostConfigVariablePrefix.concat(
     hostRule.resolvedHost
       .toUpperCase()
@@ -73,11 +73,11 @@ export async function updateArtifacts(
     updateArtifact;
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
   const existingError = memCache.get<string>('bundlerArtifactsError');
-  // istanbul ignore if
+  /* v8 ignore start -- should not happen */
   if (existingError) {
     logger.debug('Aborting Bundler artifacts due to previous failed attempt');
     throw new Error(existingError);
-  }
+  } /* v8 ignore stop */
   const lockFileName = await getLockFilePath(packageFileName);
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
