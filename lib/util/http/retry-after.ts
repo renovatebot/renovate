@@ -57,7 +57,7 @@ export async function wrapWithRetry<T>(
       );
 
       const delay = Promise.all([
-        hostDelays.get(key),
+        hostDelays.get(key) ?? Promise.resolve(),
         setTimeout(1000 * delaySeconds),
       ]);
       hostDelays.set(key, delay);
