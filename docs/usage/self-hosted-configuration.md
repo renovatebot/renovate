@@ -350,6 +350,7 @@ Other valid cache namespaces are as follows:
 - `changelog-gitlab-notes@v2`
 - `changelog-gitlab-release`
 - `datasource-artifactory`
+- `datasource-apk`
 - `datasource-aws-machine-image`
 - `datasource-aws-rds`
 - `datasource-aws-eks-addon`
