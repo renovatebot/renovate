@@ -5,7 +5,7 @@ export class UnpublishSafeMigration extends AbstractMigration {
   private static readonly SUPPORTED_VALUES = [
     ':unpublishSafe',
     'default:unpublishSafe',
-    'npm:unpublishSafe',
+    'security:minimumReleaseAgeNpm',
   ];
 
   override readonly deprecated = true;
@@ -21,14 +21,14 @@ export class UnpublishSafeMigration extends AbstractMigration {
       }
 
       if (newExtendsValue.every((item) => !this.isSupportedValue(item))) {
-        newExtendsValue.push('npm:unpublishSafe');
+        newExtendsValue.push('security:minimumReleaseAgeNpm');
       }
 
       this.setHard(
         'extends',
         newExtendsValue.map((item) => {
           if (this.isSupportedValue(item)) {
-            return 'npm:unpublishSafe';
+            return 'security:minimumReleaseAgeNpm';
           }
 
           return item;
