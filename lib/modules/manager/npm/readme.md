@@ -40,3 +40,18 @@ If set, and Renovate detects Yarn 2+, and one or both of those variables are pre
 This will result in the `~/.yarnrc.yml` file being created or modified with these settings, and the settings are not removed afterwards.
 
 Configuration/conversion of `NO_PROXY` to Yarn config is not supported.
+
+### pnpm
+
+Renovate supports updating the dependencies in your `package.yaml` file.
+To enable it you need to extend the `managerFilePatterns` for the npm manager as shown below:
+
+Example:
+
+```json
+{
+  "npm": {
+    "managerFilePatterns": ["/(^|/)package\\.yaml$/"]
+  }
+}
+```
