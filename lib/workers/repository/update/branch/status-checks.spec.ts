@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { ConfidenceConfig, StabilityConfig } from './status-checks';
 import {
@@ -19,6 +20,7 @@ describe('workers/repository/update/branch/status-checks', () => {
           minimumReleaseAge: 'renovate/stability-days',
         }),
       });
+      GlobalConfig.reset();
     });
 
     it('returns if not configured', async () => {
@@ -87,6 +89,16 @@ describe('workers/repository/update/branch/status-checks', () => {
       );
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
+
+    it('does not set status in dry mode', async () => {
+      GlobalConfig.set({ dryRun: 'full' });
+      config.stabilityStatus = 'green';
+      await setStability(config);
+      expect(logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would update renovate/stability-days status check state to green',
+      );
+      expect(platform.setBranchStatus).not.toHaveBeenCalled();
+    });
   });
 
   describe('setConfidence', () => {
@@ -99,6 +111,7 @@ describe('workers/repository/update/branch/status-checks', () => {
           mergeConfidence: 'renovate/merge-confidence',
         }),
       };
+      GlobalConfig.reset();
     });
 
     it('returns if not configured', async () => {
@@ -170,6 +183,17 @@ describe('workers/repository/update/branch/status-checks', () => {
       });
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
+      );
+      expect(platform.setBranchStatus).not.toHaveBeenCalled();
+    });
+
+    it('does not set status in dry mode', async () => {
+      GlobalConfig.set({ dryRun: 'full' });
+      config.minimumConfidence = 'high';
+      config.confidenceStatus = 'yellow';
+      await setConfidence(config);
+      expect(logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would update renovate/merge-confidence status check state to yellow',
       );
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });

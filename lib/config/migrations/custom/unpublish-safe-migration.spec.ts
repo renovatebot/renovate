@@ -1,8 +1,8 @@
 import { UnpublishSafeMigration } from './unpublish-safe-migration';
 
 describe('config/migrations/custom/unpublish-safe-migration', () => {
-  it('should migrate true', () => {
-    expect(UnpublishSafeMigration).toMigrate(
+  it('should migrate true', async () => {
+    await expect(UnpublishSafeMigration).toMigrate(
       {
         unpublishSafe: true,
       },
@@ -12,8 +12,8 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
     );
   });
 
-  it('should migrate true and handle extends field', () => {
-    expect(UnpublishSafeMigration).toMigrate(
+  it('should migrate true and handle extends field', async () => {
+    await expect(UnpublishSafeMigration).toMigrate(
       {
         extends: 'test',
         unpublishSafe: true,
@@ -24,8 +24,8 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
     );
   });
 
-  it('should migrate true and handle empty extends field', () => {
-    expect(UnpublishSafeMigration).toMigrate(
+  it('should migrate true and handle empty extends field', async () => {
+    await expect(UnpublishSafeMigration).toMigrate(
       {
         extends: [],
         unpublishSafe: true,
@@ -36,8 +36,8 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
     );
   });
 
-  it('should migrate true and save order of items inside extends field', () => {
-    expect(UnpublishSafeMigration).toMigrate(
+  it('should migrate true and save order of items inside extends field', async () => {
+    await expect(UnpublishSafeMigration).toMigrate(
       {
         extends: ['foo', ':unpublishSafe', 'bar'],
         unpublishSafe: true,
@@ -47,7 +47,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
       },
     );
 
-    expect(UnpublishSafeMigration).toMigrate(
+    await expect(UnpublishSafeMigration).toMigrate(
       {
         extends: ['foo', 'default:unpublishSafe', 'bar'],
         unpublishSafe: true,
@@ -57,7 +57,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
       },
     );
 
-    expect(UnpublishSafeMigration).toMigrate(
+    await expect(UnpublishSafeMigration).toMigrate(
       {
         extends: ['foo', 'npm:unpublishSafe', 'bar'],
         unpublishSafe: true,
@@ -68,8 +68,8 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
     );
   });
 
-  it('should migrate false and save order of items inside extends field', () => {
-    expect(UnpublishSafeMigration).toMigrate(
+  it('should migrate false and save order of items inside extends field', async () => {
+    await expect(UnpublishSafeMigration).toMigrate(
       {
         extends: ['foo', 'bar'],
         unpublishSafe: false,
@@ -80,8 +80,8 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
     );
   });
 
-  it('prevent duplicates', () => {
-    expect(UnpublishSafeMigration).toMigrate(
+  it('prevent duplicates', async () => {
+    await expect(UnpublishSafeMigration).toMigrate(
       {
         extends: ['npm:unpublishSafe'],
         unpublishSafe: true,

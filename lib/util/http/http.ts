@@ -273,9 +273,9 @@ export abstract class HttpBase<
     throw err;
   }
 
-  protected resolveUrl(
+  resolveUrl(
     requestUrl: string | URL,
-    options: HttpOptions | undefined,
+    options: HttpOptions | undefined = undefined,
   ): URL {
     let url = requestUrl;
 
