@@ -1,8 +1,8 @@
 import { RebaseStalePrsMigration } from './rebase-stale-prs-migration';
 
 describe('config/migrations/custom/rebase-stale-prs-migration', () => {
-  it('should migrate true', () => {
-    expect(RebaseStalePrsMigration).toMigrate(
+  it('should migrate true', async () => {
+    await expect(RebaseStalePrsMigration).toMigrate(
       {
         rebaseStalePrs: true,
       },
@@ -12,8 +12,8 @@ describe('config/migrations/custom/rebase-stale-prs-migration', () => {
     );
   });
 
-  it('should migrate false', () => {
-    expect(RebaseStalePrsMigration).toMigrate(
+  it('should migrate false', async () => {
+    await expect(RebaseStalePrsMigration).toMigrate(
       {
         rebaseStalePrs: false,
       },
@@ -23,8 +23,8 @@ describe('config/migrations/custom/rebase-stale-prs-migration', () => {
     );
   });
 
-  it('should migrate null', () => {
-    expect(RebaseStalePrsMigration).toMigrate(
+  it('should migrate null', async () => {
+    await expect(RebaseStalePrsMigration).toMigrate(
       {
         rebaseStalePrs: null,
       },
