@@ -190,6 +190,8 @@ Avoid adding a `hostRule` with `hostType=github` because:
 The repository in `composer.json` should have the `vcs` type with a `https` URL.
 For example:
 
+<!-- schema-validation-disable-next-block -->
+
 ```json
 {
   "repositories": [
