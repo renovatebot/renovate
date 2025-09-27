@@ -618,5 +618,378 @@ describe('modules/manager/bazel-module/extract', () => {
         ],
       });
     });
+
+    it('handles a real-world MODULE.bazel file (rules_sh)', async () => {
+      const input = codeBlock`
+        module(
+            name = "rules_sh",
+            version = "0.5.0",
+            compatibility_level = 0,
+        )
+        bazel_dep(name = "bazel_skylib", version = "1.2.1")
+        bazel_dep(name = "platforms", version = "0.0.8")
+        bazel_dep(name = "stardoc", version = "0.6.2", dev_dependency = True, repo_name = "io_bazel_stardoc")
+        sh_configure = use_extension("//bzlmod:extensions.bzl", "sh_configure")
+        use_repo(sh_configure, "local_posix_config", "rules_sh_shim_exe")
+        register_toolchains("@local_posix_config//...")
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: BazelDatasource.id,
+            depType: 'bazel_dep',
+            depName: 'bazel_skylib',
+            currentValue: '1.2.1',
+          },
+          {
+            datasource: BazelDatasource.id,
+            depType: 'bazel_dep',
+            depName: 'platforms',
+            currentValue: '0.0.8',
+          },
+          {
+            datasource: BazelDatasource.id,
+            depType: 'bazel_dep',
+            depName: 'stardoc',
+            currentValue: '0.6.2',
+          },
+        ],
+      });
+    });
+
+    it('handles every method available in MODULE.bazel files', async () => {
+      const input = codeBlock`
+        module(
+            name = "module_name",
+            version = "1.2.3",
+            compatibility_level = 0,
+            repo_name = "io_bazel_module_name",
+            bazel_compatibility = ["<=6.0.0", ">=8.2.0"],
+        )
+        bazel_dep(name = "bazel_skylib", version = "1.2.1")
+        bazel_dep(name = "platforms", version = "0.0.8")
+        bazel_dep(name = "rules_img", version = "0.1.5")
+        bazel_dep(name = "stardoc", version = "0.6.2", dev_dependency = True, repo_name = "io_bazel_stardoc")
+        pull = use_repo_rule("@rules_img//img:pull.bzl", "pull")
+        pull(
+            name = "ubuntu",
+            digest = "sha256:1e622c5f9ac0c0144d577702ba5f2cce79fc8e3cf89ec88291739cd4eee3b7b9",
+            registry = "index.docker.io",
+            repository = "library/ubuntu",
+            tag = "24.04",
+        )
+        multiple_version_override(
+            module_name = "overriden_module_a",
+            versions = ["1.2.3", "1.2.4"],
+            registry = "https://example.com/custom_registry",
+        )
+        git_override(
+            module_name = "overriden_module_c",
+            commit = "850cb49c8649e463b80ef7984e7c744279746170",
+            remote = "https://github.com/example/overriden_module_b.git",
+        )
+        archive_override(
+            module_name = "overriden_module_d",
+            urls = [
+                "https://example.com/archive.tar.gz",
+            ],
+        )
+        include("//:extra.MODULE.bazel")
+        sh_configure = use_extension("//bzlmod:extensions.bzl", "sh_configure")
+        use_repo(sh_configure, "local_posix_config", "rules_sh_shim_exe")
+        override_repo(
+            sh_configure,
+            com_github_foo_bar = "overriden_module_a",
+        )
+        register_execution_platforms(
+            "@overriden_module_a//:some_execution_platform",
+            dev_dependency = True,
+        )
+        register_toolchains(
+            "@overriden_module_a//:some_toolchain",
+            dev_dependency = True,
+        )
+        single_version_override(
+            module_name = "overriden_module_c",
+            version = "1.2.5",
+            registry = "https://example.com/custom_registry",
+            patch_cmds = [],
+            patch_strip = 8,
+        )
+        my_repo_rule = use_repo_rule("@my_repo//:my_repo.bzl", "my_repo_rule")
+        my_repo_rule(
+            name = "my_custom_repo",
+            url = "https://example.com/my_custom_repo.tar.gz",
+            sha256 = "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: BazelDatasource.id,
+            depType: 'bazel_dep',
+            depName: 'bazel_skylib',
+            currentValue: '1.2.1',
+          },
+          {
+            datasource: BazelDatasource.id,
+            depType: 'bazel_dep',
+            depName: 'platforms',
+            currentValue: '0.0.8',
+          },
+          {
+            datasource: BazelDatasource.id,
+            depType: 'bazel_dep',
+            depName: 'rules_img',
+            currentValue: '0.1.5',
+          },
+          {
+            datasource: BazelDatasource.id,
+            depType: 'bazel_dep',
+            depName: 'stardoc',
+            currentValue: '0.6.2',
+          },
+          {
+            datasource: DockerDatasource.id,
+            depType: 'rules_img_pull',
+            depName: 'ubuntu',
+            packageName: 'index.docker.io/library/ubuntu',
+            currentValue: '24.04',
+            currentDigest:
+              'sha256:1e622c5f9ac0c0144d577702ba5f2cce79fc8e3cf89ec88291739cd4eee3b7b9',
+            registryUrls: ['https://index.docker.io'],
+            replaceString: codeBlock`
+              pull(
+                  name = "ubuntu",
+                  digest = "sha256:1e622c5f9ac0c0144d577702ba5f2cce79fc8e3cf89ec88291739cd4eee3b7b9",
+                  registry = "index.docker.io",
+                  repository = "library/ubuntu",
+                  tag = "24.04",
+              )
+            `,
+          },
+        ],
+      });
+    });
+
+    it('returns rules_img pull dependencies', async () => {
+      const input = codeBlock`
+        bazel_dep(name = "rules_img", version = "0.1.0")
+        pull = use_repo_rule("@rules_img//img:pull.bzl", "pull")
+        pull(
+            name = "ubuntu",
+            digest = "sha256:1e622c5f9ac0c0144d577702ba5f2cce79fc8e3cf89ec88291739cd4eee3b7b9",
+            registry = "index.docker.io",
+            repository = "library/ubuntu",
+            tag = "24.04",
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: BazelDatasource.id,
+            depType: 'bazel_dep',
+            depName: 'rules_img',
+            currentValue: '0.1.0',
+          },
+          {
+            datasource: DockerDatasource.id,
+            depType: 'rules_img_pull',
+            depName: 'ubuntu',
+            packageName: 'index.docker.io/library/ubuntu',
+            currentValue: '24.04',
+            currentDigest:
+              'sha256:1e622c5f9ac0c0144d577702ba5f2cce79fc8e3cf89ec88291739cd4eee3b7b9',
+            registryUrls: ['https://index.docker.io'],
+            replaceString: codeBlock`
+              pull(
+                  name = "ubuntu",
+                  digest = "sha256:1e622c5f9ac0c0144d577702ba5f2cce79fc8e3cf89ec88291739cd4eee3b7b9",
+                  registry = "index.docker.io",
+                  repository = "library/ubuntu",
+                  tag = "24.04",
+              )
+            `,
+          },
+        ],
+      });
+    });
+
+    it('returns rules_img pull dependencies with custom registry', async () => {
+      const input = codeBlock`
+        pull = use_repo_rule("@rules_img//img:pull.bzl", "pull")
+        pull(
+            name = "my_image",
+            registry = "my.registry.com",
+            repository = "myorg/myimage",
+            tag = "v1.2.3",
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: DockerDatasource.id,
+            depType: 'rules_img_pull',
+            depName: 'my_image',
+            packageName: 'my.registry.com/myorg/myimage',
+            currentValue: 'v1.2.3',
+            registryUrls: ['https://my.registry.com'],
+            replaceString: codeBlock`
+              pull(
+                  name = "my_image",
+                  registry = "my.registry.com",
+                  repository = "myorg/myimage",
+                  tag = "v1.2.3",
+              )
+            `,
+          },
+        ],
+      });
+    });
+
+    it('returns rules_img pull dependencies with multiple pulls', async () => {
+      const input = codeBlock`
+        pull = use_repo_rule("@rules_img//img:pull.bzl", "pull")
+        pull(
+            name = "ubuntu",
+            repository = "library/ubuntu",
+            tag = "24.04",
+        )
+        pull(
+            name = "nginx",
+            repository = "library/nginx",
+            tag = "1.27.1",
+            digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: DockerDatasource.id,
+            depType: 'rules_img_pull',
+            depName: 'ubuntu',
+            packageName: 'library/ubuntu',
+            currentValue: '24.04',
+            replaceString: codeBlock`
+              pull(
+                  name = "ubuntu",
+                  repository = "library/ubuntu",
+                  tag = "24.04",
+              )
+            `,
+          },
+          {
+            datasource: DockerDatasource.id,
+            depType: 'rules_img_pull',
+            depName: 'nginx',
+            packageName: 'library/nginx',
+            currentValue: '1.27.1',
+            currentDigest:
+              'sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720',
+            replaceString: codeBlock`
+              pull(
+                  name = "nginx",
+                  repository = "library/nginx",
+                  tag = "1.27.1",
+                  digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+              )
+            `,
+          },
+        ],
+      });
+    });
+
+    it('ignores rules_img pull without required fields', async () => {
+      const input = codeBlock`
+        pull = use_repo_rule("@rules_img//img:pull.bzl", "pull")
+        # Missing repository
+        pull(
+            name = "missing_repo",
+            tag = "1.0.0",
+        )
+        # Missing name
+        pull(
+            repository = "library/ubuntu",
+            tag = "24.04",
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toBeNull();
+    });
+
+    it('handles rules_img with renamed variable', async () => {
+      const input = codeBlock`
+        my_pull = use_repo_rule("@rules_img//img:pull.bzl", "pull")
+        my_pull(
+            name = "ubuntu",
+            repository = "library/ubuntu",
+            tag = "24.04",
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: DockerDatasource.id,
+            depType: 'rules_img_pull',
+            depName: 'ubuntu',
+            packageName: 'library/ubuntu',
+            currentValue: '24.04',
+            replaceString: codeBlock`
+              my_pull(
+                  name = "ubuntu",
+                  repository = "library/ubuntu",
+                  tag = "24.04",
+              )
+            `,
+          },
+        ],
+      });
+    });
+
+    it('ignores non-rules_img repo rules', async () => {
+      const input = codeBlock`
+        bazel_dep(name = "some_rules", version = "0.1.0")
+
+        other_rule = use_repo_rule("@some_rules//some:rule.bzl", "other")
+
+        other_rule(
+            name = "test",
+            value = "something",
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: BazelDatasource.id,
+            depType: 'bazel_dep',
+            depName: 'some_rules',
+            currentValue: '0.1.0',
+          },
+        ],
+      });
+    });
   });
 });
