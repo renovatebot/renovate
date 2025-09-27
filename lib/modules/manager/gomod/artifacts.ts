@@ -120,14 +120,16 @@ export async function updateArtifacts({
     logger.debug('No go.sum found');
     return null;
   }
-
   const goModDir = upath.dirname(goModFileName);
 
-  const vendorDir = upath.join(goModDir, 'vendor/');
-  const vendorModulesFileName = upath.join(vendorDir, 'modules.txt');
+  // The "vendor" directory can be next to the go.mod, but also in the parent directory in case
+  // the go workspaces are used.
+  const vendorDir = await findLocalSiblingOrParent(goModFileName, 'vendor');
+  const vendorModulesFileName = upath.join(vendorDir ?? '', 'modules.txt');
   const useVendor =
     !!config.postUpdateOptions?.includes('gomodVendor') ||
     (!config.postUpdateOptions?.includes('gomodSkipVendor') &&
+      vendorDir &&
       (await readLocalFile(vendorModulesFileName)) !== null);
   let massagedGoMod = newGoModContent;
 
@@ -287,7 +289,7 @@ export async function updateArtifacts({
       execCommands.push(`${cmd} ${args}`);
     }
 
-    const goWorkSumFileName = upath.join(goModDir, 'go.work.sum');
+    let goWorkSumFileName = upath.join(goModDir, 'go.work.sum');
     if (useVendor) {
       // If we find a go.work, then use go workspace vendoring.
       const goWorkFile = await findLocalSiblingOrParent(
@@ -296,6 +298,11 @@ export async function updateArtifacts({
       );
 
       if (goWorkFile) {
+        goWorkSumFileName = upath.join(
+          upath.dirname(goWorkFile),
+          'go.work.sum',
+        );
+
         args = 'work vendor';
         logger.debug('using go work vendor');
         execCommands.push(`${cmd} ${args}`);
@@ -375,7 +382,7 @@ export async function updateArtifacts({
 
     if (useVendor) {
       for (const f of status.modified.concat(status.not_added)) {
-        if (f.startsWith(vendorDir)) {
+        if (vendorDir && f.startsWith(vendorDir)) {
           res.push({
             file: {
               type: 'addition',
