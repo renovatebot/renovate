@@ -1648,6 +1648,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'allowedMinimumReleaseAge',
+    description: 'Time required before a new release is considered stable.',
+    type: 'string',
+    parents: ['packageRules'],
+    stage: 'package',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'changelogUrl',
     description:
       'Set a custom URL for the changelog. Renovate will put this URL in the PR body text.',

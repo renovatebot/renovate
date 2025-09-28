@@ -423,6 +423,7 @@ export async function validateConfig(
                   // It's too late to apply any of these options once you already have updates determined
                   const preLookupOptions = [
                     'allowedVersions',
+                    'allowedMinimumReleaseAge',
                     'extractVersion',
                     'followTag',
                     'ignoreDeps',

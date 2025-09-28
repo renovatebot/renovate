@@ -12,6 +12,7 @@ import type { Timestamp } from '../../../../util/timestamp';
 
 export interface FilterConfig {
   allowedVersions?: string;
+  allowedMinimumReleaseAge?: string;
   depName?: string;
   followTag?: string;
   ignoreDeprecated?: boolean;
