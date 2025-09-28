@@ -46,7 +46,6 @@ Configuration/conversion of `NO_PROXY` to Yarn config is not supported.
 Renovate supports updating the dependencies in your `package.yaml` file.
 To enable it you need to extend the `managerFilePatterns` for the npm manager as shown below:
 
-Example:
 
 ```json
 {
