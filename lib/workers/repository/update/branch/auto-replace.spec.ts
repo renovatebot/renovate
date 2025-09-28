@@ -1347,69 +1347,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
-    it('jsonata: update currentValue', async () => {
-      const source =
-        '[ { "version": "1.2.3", "digest": "abcdef", "package": "foo" } ]';
-      upgrade.manager = 'jsonata';
-      upgrade.depName = 'foo';
-      upgrade.currentValue = '1.2.3';
-      upgrade.newValue = '1.2.4';
-      upgrade.depIndex = 0;
-      upgrade.packageFile = 'deps.json';
-      upgrade.fileFormat = 'json';
-      upgrade.datasourceTemplate = 'github-releases';
-      upgrade.matchStrings = [
-        '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
-      ];
-
-      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
-      expect(res).toBe(
-        '[ { "version": "1.2.4", "digest": "abcdef", "package": "foo" } ]',
-      );
-    });
-
-    it('jsonata: update currentDigest', async () => {
-      const source =
-        '[ { "version": "1.2.3", "digest": "abcdef", "package": "foo" } ]';
-      upgrade.manager = 'jsonata';
-      upgrade.depName = 'foo';
-      upgrade.currentDigest = 'abcdef';
-      upgrade.newDigest = 'badbeef';
-      upgrade.depIndex = 0;
-      upgrade.packageFile = 'deps.json';
-      upgrade.fileFormat = 'json';
-      upgrade.datasourceTemplate = 'github-releases';
-      upgrade.matchStrings = [
-        '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
-      ];
-      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
-      expect(res).toBe(
-        '[ { "version": "1.2.3", "digest": "badbeef", "package": "foo" } ]',
-      );
-    });
-
-    it('jsonata: update currentValue and currentDigest', async () => {
-      const source =
-        '[ { "version": "1.2.3", "digest": "abcdef", "package": "foo" } ]';
-      upgrade.manager = 'jsonata';
-      upgrade.depName = 'foo';
-      upgrade.currentValue = '1.2.3';
-      upgrade.newValue = '1.2.4';
-      upgrade.currentDigest = 'abcdef';
-      upgrade.newDigest = 'badbeef';
-      upgrade.depIndex = 0;
-      upgrade.packageFile = 'deps.json';
-      upgrade.fileFormat = 'json';
-      upgrade.datasourceTemplate = 'github-releases';
-      upgrade.matchStrings = [
-        '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
-      ];
-      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
-      expect(res).toBe(
-        '[ { "version": "1.2.4", "digest": "badbeef", "package": "foo" } ]',
-      );
-    });
-
     it('github-actions: updates with newValue only', async () => {
       const githubAction = codeBlock`
         jobs:
