@@ -54,3 +54,5 @@ To enable it you need to extend the `managerFilePatterns` for the npm manager as
   }
 }
 ```
+
+This is the sample repo: [package.yaml test repo](https://github.com/Dracks/renovate-tests)
