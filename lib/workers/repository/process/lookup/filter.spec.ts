@@ -1,3 +1,4 @@
+import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import type { Release } from '../../../../modules/datasource/types';
 import * as allVersioning from '../../../../modules/versioning';
 import type { Timestamp } from '../../../../util/timestamp';
@@ -103,6 +104,38 @@ describe('workers/repository/process/lookup/filter', () => {
           releaseTimestamp: lastWeek.toISOString() as Timestamp,
         },
       ]);
+    });
+
+    it('throws if allowedMinimumReleaseAge has an invalid value', () => {
+      const releases = [
+        {
+          version: '1.0.1',
+          releaseTimestamp: '2021-01-01T00:00:01.000Z' as Timestamp,
+        },
+        {
+          version: '1.2.0',
+          releaseTimestamp: '2021-01-03T00:00:00.000Z' as Timestamp,
+        },
+      ] satisfies Release[];
+
+      const config = partial<FilterConfig>({
+        ignoreUnstable: false,
+        ignoreDeprecated: false,
+        respectLatest: false,
+        allowedMinimumReleaseAge: 'not a duration',
+      });
+      const currentVersion = '1.0.0';
+      const latestVersion = '1.2.0';
+
+      expect(() =>
+        filterVersions(
+          config,
+          currentVersion,
+          latestVersion,
+          releases,
+          versioning,
+        ),
+      ).toThrow(CONFIG_VALIDATION);
     });
 
     it('allows unstable major upgrades', () => {
