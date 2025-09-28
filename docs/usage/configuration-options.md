@@ -2720,7 +2720,7 @@ The datasource that Renovate uses must have a release timestamp for the `minimum
 Some datasources may have a release timestamp, but in a format Renovate does not support.
 In those cases a feature request needs to be implemented.
 
-You might alsow want to look into the [`allowedMinimumReleaseAge`](#allowedminimumeeleaseage) packageRule that will only open with versions that are older than the specified duration.
+You might alsow want to look into the [`allowedMinimumReleaseAge`](#allowedminimumreleaseage) packageRule that will only open with versions that are older than the specified duration.
 
 <!-- prettier-ignore -->
 !!! warning "Warning for Maven users"
@@ -2943,6 +2943,34 @@ For example you have multiple `package.json` and want to use `dependencyDashboar
 !!! warning
     Avoid nesting any `object`-type configuration in a `packageRules` array, such as a `major` or `minor` block.
 
+### allowedMinimumReleaseAge
+
+You can use `allowedMinimumReleaseAge` - usually within a `packageRules` entry - to limit the allowed versions.
+
+For example if you only want NPM versions that are at least three days old at the moment of the Pull Request:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "allowedMinimumReleaseAge": "3 days"
+    }
+  ]
+}
+```
+
+This option is similar to `minimumReleaseAge`. Here is an example to illustrate the difference.
+
+Your application currently has a dependency on `@ctrl/tinycolor` at version `4.1.0`
+On the 15th of september 2025, version `4.1.1` was released.
+We're the 16th of september.
+
+Here's what happens with each setting;
+
+- `allowedMinimumReleaseAge: "3 days"` Will wait two more days to open a Pull Request.
+- `minimumReleaseAge: "3 days"` Will open a Pull Request as soon as it sees the new version but adds a "renovate/stability-days" pending status check.
+
 ### allowedVersions
 
 You can use `allowedVersions` - usually within a `packageRules` entry - to limit how far to upgrade a dependency.
@@ -2965,33 +2993,6 @@ Renovate calculates the valid syntax for this at runtime, because it depends on 
 <!-- prettier-ignore -->
 !!! warning
     `allowedVersions` and `matchUpdateTypes` cannot be used in the same package rule.
-
-### allowedMinimumReleaseAge
-
-You can use `allowedMinimumReleaseAge` - usually within a `packageRules` entry - to limit the allowed versions.
-
-For example if you only want NPM versions that are at least three days old at the moment of the Pull Request: 
-
-```json
-{
-  "packageRules": [
-    {
-      "matchDatasources": ["npm"],
-      "allowedMinimumReleaseAge": "3 days"
-    }
-  ]
-}
-```
-
-This option is similar to `minimumReleaseAge`. Here is an example to illustrate the difference.
-
-Your application currently has a dependency on `@ctrl/tinycolor` at version `4.1.0`
-On the 15th of september 2025, version `4.1.1` was released.
-We're the 16th of september. 
-
-Here's what happens with each setting;
-* `allowedMinimumReleaseAge: "3 days"` Will wait two more days to open a Pull Request.
-* `minimumReleaseAge: "3 days"` Will open a Pull Request as soon as it sees the new version but adds a "renovate/stability-days" pending status check.
 
 #### Using regular expressions
 

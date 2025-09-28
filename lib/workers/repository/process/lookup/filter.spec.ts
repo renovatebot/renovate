@@ -66,17 +66,17 @@ describe('workers/repository/process/lookup/filter', () => {
 
       const releases = [
         {
-          version: '1.0.0'
+          version: '1.0.1',
           // No releaseTimestamp means we cannot filter it out
         },
         {
-          version: '1.0.1',
+          version: '1.0.2',
           releaseTimestamp: lastWeek.toISOString() as Timestamp,
         },
         {
           version: '1.2.0',
           releaseTimestamp: yesterday.toISOString() as Timestamp,
-        }
+        },
       ] satisfies Release[];
 
       const config = partial<FilterConfig>({
@@ -97,8 +97,11 @@ describe('workers/repository/process/lookup/filter', () => {
       );
 
       expect(filteredVersions).toEqual([
-        { version: '1.0.0' },
-        { version: '1.0.1', releaseTimestamp: lastWeek.toISOString() as Timestamp },
+        { version: '1.0.1' },
+        {
+          version: '1.0.2',
+          releaseTimestamp: lastWeek.toISOString() as Timestamp,
+        },
       ]);
     });
 
