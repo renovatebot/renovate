@@ -271,7 +271,7 @@
     "re2": "1.22.1"
   },
   "devDependencies": {
-    "@containerbase/eslint-plugin": "1.1.11",
+    "@containerbase/eslint-plugin": "1.1.12",
     "@eslint/js": "9.35.0",
     "@hyrious/marshal": "0.3.3",
     "@ls-lint/ls-lint": "2.3.1",
