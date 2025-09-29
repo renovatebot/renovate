@@ -2720,7 +2720,7 @@ The datasource that Renovate uses must have a release timestamp for the `minimum
 Some datasources may have a release timestamp, but in a format Renovate does not support.
 In those cases a feature request needs to be implemented.
 
-You might also want to look into the [`allowedMinimumReleaseAge`](#allowedminimumreleaseage) packageRule that will only create updates with versions that are older than the specified duration.
+You might also want to look into the [`allowedMinimumReleaseAge`](#allowedminimumreleaseage) configuration that will only create updates with versions that are older than the specified duration.
 
 <!-- prettier-ignore -->
 !!! warning "Warning for Maven users"
