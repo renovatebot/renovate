@@ -477,7 +477,7 @@ Make sure to install the Google Cloud SDK into the custom image, as you need the
 For example:
 
 ```Dockerfile
-FROM renovate/renovate:41.113.3
+FROM renovate/renovate:41.131.9
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...
