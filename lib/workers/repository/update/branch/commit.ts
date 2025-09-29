@@ -64,5 +64,6 @@ export function commitFilesToBranch(
     prTitle: config.prTitle,
     // Only needed by Gerrit platform
     autoApprove: config.autoApprove,
+    labels: config.labels,
   });
 }
