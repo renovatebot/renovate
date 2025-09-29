@@ -260,7 +260,8 @@ export async function writeUpdatedPackageFiles(
     if (
       !(
         packageFile.path.endsWith('package.json') ||
-        packageFile.path.endsWith('pnpm-workspace.yaml')
+        packageFile.path.endsWith('pnpm-workspace.yaml') ||
+        packageFile.path.endsWith('.yarnrc.yml')
       )
     ) {
       continue;

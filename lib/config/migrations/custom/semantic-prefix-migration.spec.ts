@@ -1,8 +1,8 @@
 import { SemanticPrefixMigration } from './semantic-prefix-migration';
 
 describe('config/migrations/custom/semantic-prefix-migration', () => {
-  it('should work', () => {
-    expect(SemanticPrefixMigration).toMigrate(
+  it('should work', async () => {
+    await expect(SemanticPrefixMigration).toMigrate(
       {
         semanticPrefix: 'fix(deps): ',
       } as any,
@@ -10,8 +10,8 @@ describe('config/migrations/custom/semantic-prefix-migration', () => {
     );
   });
 
-  it('should remove non-string values', () => {
-    expect(SemanticPrefixMigration).toMigrate(
+  it('should remove non-string values', async () => {
+    await expect(SemanticPrefixMigration).toMigrate(
       {
         semanticPrefix: true,
       } as any,
@@ -19,8 +19,8 @@ describe('config/migrations/custom/semantic-prefix-migration', () => {
     );
   });
 
-  it('should migrate prefix with no-scope to null', () => {
-    expect(SemanticPrefixMigration).toMigrate(
+  it('should migrate prefix with no-scope to null', async () => {
+    await expect(SemanticPrefixMigration).toMigrate(
       {
         semanticPrefix: 'fix: ',
       } as any,
@@ -28,8 +28,8 @@ describe('config/migrations/custom/semantic-prefix-migration', () => {
     );
   });
 
-  it('works for random string', () => {
-    expect(SemanticPrefixMigration).toMigrate(
+  it('works for random string', async () => {
+    await expect(SemanticPrefixMigration).toMigrate(
       {
         semanticPrefix: 'test',
       } as any,

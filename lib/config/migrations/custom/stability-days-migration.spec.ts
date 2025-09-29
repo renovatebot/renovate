@@ -1,8 +1,8 @@
 import { StabilityDaysMigration } from './stability-days-migration';
 
 describe('config/migrations/custom/stability-days-migration', () => {
-  it('migrates', () => {
-    expect(StabilityDaysMigration).toMigrate(
+  it('migrates', async () => {
+    await expect(StabilityDaysMigration).toMigrate(
       {
         stabilityDays: 0,
       },
@@ -10,7 +10,7 @@ describe('config/migrations/custom/stability-days-migration', () => {
         minimumReleaseAge: null,
       },
     );
-    expect(StabilityDaysMigration).toMigrate(
+    await expect(StabilityDaysMigration).toMigrate(
       {
         stabilityDays: 2,
       },
@@ -18,7 +18,7 @@ describe('config/migrations/custom/stability-days-migration', () => {
         minimumReleaseAge: '2 days',
       },
     );
-    expect(StabilityDaysMigration).toMigrate(
+    await expect(StabilityDaysMigration).toMigrate(
       {
         stabilityDays: 1,
       },

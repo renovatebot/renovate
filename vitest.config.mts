@@ -117,7 +117,11 @@ export default defineConfig(() =>
     } satisfies ViteUserConfig,
     configureShardingOrFallbackTo({
       test: {
-        exclude: [...defaultExclude, 'tools/docs/test/**/*.test.mjs'],
+        exclude: [
+          ...defaultExclude,
+          'tools/docs/test/**/*.test.mjs',
+          '.worktrees/**/*',
+        ],
       },
     }),
   ),

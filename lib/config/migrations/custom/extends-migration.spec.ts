@@ -2,8 +2,8 @@ import { GlobalConfig } from '../../global';
 import { ExtendsMigration } from './extends-migration';
 
 describe('config/migrations/custom/extends-migration', () => {
-  it('migrates preset strings to array', () => {
-    expect(ExtendsMigration).toMigrate(
+  it('migrates preset strings to array', async () => {
+    await expect(ExtendsMigration).toMigrate(
       {
         extends: ':js-app',
       } as any,
@@ -12,7 +12,7 @@ describe('config/migrations/custom/extends-migration', () => {
       },
     );
 
-    expect(ExtendsMigration).toMigrate(
+    await expect(ExtendsMigration).toMigrate(
       {
         extends: 'foo',
       } as any,
@@ -22,8 +22,8 @@ describe('config/migrations/custom/extends-migration', () => {
     );
   });
 
-  it('migrates presets array', () => {
-    expect(ExtendsMigration).toMigrate(
+  it('migrates presets array', async () => {
+    await expect(ExtendsMigration).toMigrate(
       {
         extends: ['foo', ':js-app', 'bar'],
       },
@@ -33,8 +33,8 @@ describe('config/migrations/custom/extends-migration', () => {
     );
   });
 
-  it('should remove non string values', () => {
-    expect(ExtendsMigration).toMigrate(
+  it('should remove non string values', async () => {
+    await expect(ExtendsMigration).toMigrate(
       {
         extends: [{}],
       } as any,
@@ -44,8 +44,8 @@ describe('config/migrations/custom/extends-migration', () => {
     );
   });
 
-  it('should remove removed presets', () => {
-    expect(ExtendsMigration).toMigrate(
+  it('should remove removed presets', async () => {
+    await expect(ExtendsMigration).toMigrate(
       {
         extends: ['helpers:oddIsUnstable'],
       },
@@ -55,14 +55,14 @@ describe('config/migrations/custom/extends-migration', () => {
     );
   });
 
-  it('migrates presets', () => {
+  it('migrates presets', async () => {
     GlobalConfig.set({
       migratePresets: {
         '@org': 'local>org/renovate-config',
         '@org2/foo': '',
       },
     });
-    expect(ExtendsMigration).toMigrate(
+    await expect(ExtendsMigration).toMigrate(
       {
         extends: ['@org', '@org2/foo'],
       },
@@ -73,8 +73,8 @@ describe('config/migrations/custom/extends-migration', () => {
     GlobalConfig.reset();
   });
 
-  it('migrate merge confidence config preset to internal preset', () => {
-    expect(ExtendsMigration).toMigrate(
+  it('migrate merge confidence config preset to internal preset', async () => {
+    await expect(ExtendsMigration).toMigrate(
       {
         extends: ['github>whitesource/merge-confidence:beta'],
       },

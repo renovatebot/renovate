@@ -12,7 +12,7 @@ declare global {
         originalConfig: RenovateConfig,
         expectedConfig: RenovateConfig,
         isMigrated?: boolean,
-      ): R;
+      ): Promise<R>;
     }
   }
 }
