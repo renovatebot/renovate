@@ -26,8 +26,13 @@ export class ApkDatasource extends Datasource {
 
   override readonly defaultVersioning = looseVersioning;
 
+  // Alpine APK repository URL structure:
+  // https://dl-cdn.alpinelinux.org/alpine/{version}/{repository}/{architecture}/
+  // - version: latest-stable, v3.19, etc.
+  // - repository: main, community, testing
+  // - architecture: x86_64, aarch64, armv7, etc.
   override readonly defaultRegistryUrls = [
-    'https://dl-cdn.alpinelinux.org/alpine/latest-stable/main',
+    'https://dl-cdn.alpinelinux.org/alpine/latest-stable/main/x86_64',
   ];
 
   override readonly defaultConfig = defaultConfig;
@@ -42,7 +47,7 @@ export class ApkDatasource extends Datasource {
    * Fetches the APK index file from the repository
    */
   private async getApkIndex(registryUrl: string): Promise<string> {
-    const indexUrl = joinUrlParts(registryUrl, 'x86_64', 'APKINDEX.tar.gz');
+    const indexUrl = joinUrlParts(registryUrl, 'APKINDEX.tar.gz');
 
     try {
       logger.debug({ indexUrl }, 'Attempting to download APKINDEX.tar.gz');

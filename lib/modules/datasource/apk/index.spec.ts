@@ -18,7 +18,7 @@ describe('modules/datasource/apk/index', () => {
 
   it('should have default registry URLs', () => {
     expect(apkDatasource.defaultRegistryUrls).toEqual([
-      'https://dl-cdn.alpinelinux.org/alpine/latest-stable/main',
+      'https://dl-cdn.alpinelinux.org/alpine/latest-stable/main/x86_64',
     ]);
   });
 
@@ -55,7 +55,8 @@ describe('modules/datasource/apk/index', () => {
       const res = await getPkgReleases(config);
       expect(res).toEqual({
         homepage: 'https://www.nginx.org/',
-        registryUrl: 'https://dl-cdn.alpinelinux.org/alpine/latest-stable/main',
+        registryUrl:
+          'https://dl-cdn.alpinelinux.org/alpine/latest-stable/main/x86_64',
         releases: [{ version: '1.24.0-r16' }],
       });
     });
@@ -64,7 +65,9 @@ describe('modules/datasource/apk/index', () => {
       const config: GetPkgReleasesConfig = {
         datasource: 'apk',
         packageName: 'nginx',
-        registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/v3.19/main'],
+        registryUrls: [
+          'https://dl-cdn.alpinelinux.org/alpine/v3.19/main/x86_64',
+        ],
       };
 
       httpMock
@@ -75,7 +78,7 @@ describe('modules/datasource/apk/index', () => {
       const res = await getPkgReleases(config);
       expect(res).toEqual({
         homepage: 'https://www.nginx.org/',
-        registryUrl: 'https://dl-cdn.alpinelinux.org/alpine/v3.19/main',
+        registryUrl: 'https://dl-cdn.alpinelinux.org/alpine/v3.19/main/x86_64',
         releases: [{ version: '1.24.0-r16' }],
       });
     });
