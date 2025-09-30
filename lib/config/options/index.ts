@@ -955,6 +955,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'allowHelmPassCredentials',
+    description:
+      'Set this to `true` to allow helm to use --pass-credentials flag.',
+    globalOnly: true,
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'ignorePlugins',
     description:
       'Set this to `true` if `allowPlugins=true` but you wish to skip running plugins when updating lock files.',

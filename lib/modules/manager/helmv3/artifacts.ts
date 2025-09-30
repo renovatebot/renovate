@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import pMap from 'p-map';
+import { GlobalConfig } from '../../../config/global';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -76,6 +77,10 @@ async function helmCommands(
     if (isPrivateRepo) {
       parameters.push(`--username ${quote(username)}`);
       parameters.push(`--password ${quote(password)}`);
+
+      if (GlobalConfig.get('allowHelmPassCredentials')) {
+        parameters.push('--pass-credentials');
+      }
     }
 
     cmd.push(`helm repo add ${quote(value.name)} ${parameters.join(' ')}`);

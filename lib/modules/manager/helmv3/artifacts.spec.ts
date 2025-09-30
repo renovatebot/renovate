@@ -1174,4 +1174,50 @@ describe('modules/manager/helmv3/artifacts', () => {
       },
     ]);
   });
+
+  it('support --pass-credentials option', async () => {
+    GlobalConfig.set({
+      ...adminConfig,
+      allowHelmPassCredentials: true,
+    });
+    const username = 'user';
+    const password = 'password';
+
+    hostRules.add({
+      username,
+      password,
+      hostType: 'helm',
+      matchHost: 'gitlab.com',
+    });
+
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    const execMocks = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache',
+    );
+    fs.getParentDir.mockReturnValue('');
+    const updatedDeps = [{ depName: 'dep1' }];
+    expect(
+      await helmv3.updateArtifacts({
+        packageFileName: 'Chart.yaml',
+        updatedDeps,
+        newPackageFileContent: chartFile,
+        config,
+      }),
+    ).toMatchObject([
+      {
+        file: {
+          type: 'addition',
+          path: 'Chart.lock',
+          contents: ociLockFile2,
+        },
+      },
+    ]);
+    expect(execMocks).toBeArrayOfSize(2);
+    expect(execMocks[0].cmd).toBe(
+      'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update --username user --password password --pass-credentials',
+    );
+  });
 });
