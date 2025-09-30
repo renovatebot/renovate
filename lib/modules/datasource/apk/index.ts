@@ -39,6 +39,8 @@ export class ApkDatasource extends Datasource {
 
   override readonly customRegistrySupport = true;
 
+  override readonly registryStrategy = 'merge';
+
   constructor() {
     super(ApkDatasource.id);
   }
@@ -219,7 +221,7 @@ export class ApkDatasource extends Datasource {
           : undefined,
       }));
 
-      logger.debug(
+      logger.trace(
         { packageName, registryUrl, releaseCount: releases.length, releases },
         'Found APK releases',
       );

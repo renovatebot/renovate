@@ -23,11 +23,42 @@ describe('modules/manager/apko/extract', () => {
       expect(result).toBeNull();
     });
 
+    it('returns the translated registryURLs for arch aliases', async () => {
+      const apkoYaml = codeBlock`
+        contents:
+          repositories:
+            - https://dl-cdn.alpinelinux.org/alpine/edge/main
+          packages:
+            - nginx
+        archs:
+          - amd64
+          - arm64
+        `;
+      const result = await extractPackageFile(apkoYaml, 'apko.yaml');
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: 'apk',
+            depName: 'nginx',
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
+            skipReason: 'not-a-version',
+          },
+        ],
+        lockFiles: undefined,
+      });
+    });
+
     it('returns null when the apko YAML file has no packages', async () => {
       const apkoYaml = codeBlock`
         contents:
           repositories:
             - https://dl-cdn.alpinelinux.org/alpine/edge/main
+        archs:
+          - x86_64
+          - aarch64
       `;
       const result = await extractPackageFile(apkoYaml, 'apko.yaml');
       expect(result).toBeNull();
@@ -40,6 +71,9 @@ describe('modules/manager/apko/extract', () => {
             - https://dl-cdn.alpinelinux.org/alpine/edge/main
           packages:
             - nginx=1.24.0
+        archs:
+            - x86_64
+            - aarch64
       `;
       const result = await extractPackageFile(apkoYaml, 'apko.yaml');
       expect(result).toEqual({
@@ -47,7 +81,10 @@ describe('modules/manager/apko/extract', () => {
           {
             datasource: 'apk',
             depName: 'nginx',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
             currentValue: '1.24.0',
             versioning: 'apk',
           },
@@ -63,6 +100,9 @@ describe('modules/manager/apko/extract', () => {
             - https://dl-cdn.alpinelinux.org/alpine/edge/main
           packages:
             - nginx
+        archs:
+            - x86_64
+            - aarch64
       `;
       const result = await extractPackageFile(apkoYaml, 'apko.yaml');
       expect(result).toEqual({
@@ -70,7 +110,10 @@ describe('modules/manager/apko/extract', () => {
           {
             datasource: 'apk',
             depName: 'nginx',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
             skipReason: 'not-a-version',
           },
         ],
@@ -86,6 +129,9 @@ describe('modules/manager/apko/extract', () => {
           packages:
             - nginx=1.24.0
             - nodejs=20.10.0
+        archs:
+            - x86_64
+            - aarch64
       `;
       const result = await extractPackageFile(apkoYaml, 'apko.yaml');
       expect(result).toEqual({
@@ -93,14 +139,20 @@ describe('modules/manager/apko/extract', () => {
           {
             datasource: 'apk',
             depName: 'nginx',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
             currentValue: '1.24.0',
             versioning: 'apk',
           },
           {
             datasource: 'apk',
             depName: 'nodejs',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
             currentValue: '20.10.0',
             versioning: 'apk',
           },
@@ -119,6 +171,9 @@ describe('modules/manager/apko/extract', () => {
             - nginx=1.24.0
             - base
             - nodejs=20.10.0
+        archs:
+            - x86_64
+            - aarch64
       `;
       const result = await extractPackageFile(apkoYaml, 'apko.yaml');
       expect(result).toEqual({
@@ -126,26 +181,38 @@ describe('modules/manager/apko/extract', () => {
           {
             datasource: 'apk',
             depName: 'alpine-base',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
             skipReason: 'not-a-version',
           },
           {
             datasource: 'apk',
             depName: 'nginx',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
             currentValue: '1.24.0',
             versioning: 'apk',
           },
           {
             datasource: 'apk',
             depName: 'base',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
             skipReason: 'not-a-version',
           },
           {
             datasource: 'apk',
             depName: 'nodejs',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
             currentValue: '20.10.0',
             versioning: 'apk',
           },
@@ -162,6 +229,9 @@ describe('modules/manager/apko/extract', () => {
           packages:
             - nginx=1.24.0-r0
             - nodejs=20.10.0-r1
+        archs:
+            - x86_64
+            - aarch64
       `;
       const result = await extractPackageFile(apkoYaml, 'apko.yaml');
       expect(result).toEqual({
@@ -169,14 +239,20 @@ describe('modules/manager/apko/extract', () => {
           {
             datasource: 'apk',
             depName: 'nginx',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
             currentValue: '1.24.0-r0',
             versioning: 'apk',
           },
           {
             datasource: 'apk',
             depName: 'nodejs',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
             currentValue: '20.10.0-r1',
             versioning: 'apk',
           },
@@ -194,6 +270,9 @@ describe('modules/manager/apko/extract', () => {
             - nginx=1.24.0
             - nodejs
             - python=3.11.0
+        archs:
+            - x86_64
+            - aarch64
       `;
       const result = await extractPackageFile(apkoYaml, 'apko.yaml');
       expect(result).toEqual({
@@ -201,20 +280,29 @@ describe('modules/manager/apko/extract', () => {
           {
             datasource: 'apk',
             depName: 'nginx',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
             currentValue: '1.24.0',
             versioning: 'apk',
           },
           {
             datasource: 'apk',
             depName: 'nodejs',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
             skipReason: 'not-a-version',
           },
           {
             datasource: 'apk',
             depName: 'python',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
             currentValue: '3.11.0',
             versioning: 'apk',
           },
@@ -232,13 +320,13 @@ describe('modules/manager/apko/extract', () => {
             - nginx=1.24.0
             - nodejs=20.10.0
 
-        cmd: /bin/sh -l
+          cmd: /bin/sh -l
 
         environment:
           PATH: /usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin
 
         archs:
-          - amd64
+          - x86_64
       `;
       const result = await extractPackageFile(apkoYaml, 'apko.yaml');
       expect(result).toEqual({
@@ -246,14 +334,18 @@ describe('modules/manager/apko/extract', () => {
           {
             datasource: 'apk',
             depName: 'nginx',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+            ],
             currentValue: '1.24.0',
             versioning: 'apk',
           },
           {
             datasource: 'apk',
             depName: 'nodejs',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+            ],
             currentValue: '20.10.0',
             versioning: 'apk',
           },
@@ -270,6 +362,9 @@ describe('modules/manager/apko/extract', () => {
           packages:
             - python-pip=23.0.0
             - nodejs-npm=10.0.0
+        archs:
+            - x86_64
+            - aarch64
       `;
       const result = await extractPackageFile(apkoYaml, 'apko.yaml');
       expect(result).toEqual({
@@ -277,14 +372,20 @@ describe('modules/manager/apko/extract', () => {
           {
             datasource: 'apk',
             depName: 'python-pip',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
             currentValue: '23.0.0',
             versioning: 'apk',
           },
           {
             datasource: 'apk',
             depName: 'nodejs-npm',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
             currentValue: '10.0.0',
             versioning: 'apk',
           },
@@ -301,31 +402,63 @@ describe('modules/manager/apko/extract', () => {
           packages:
             - nginx=1.24.0
             - nodejs=20.10.0
+        archs:
+            - x86_64
+            - aarch64
       `;
 
       const lockFileContent = JSON.stringify({
-        schema_version: 1,
-        archs: {
-          amd64: {
-            packages: [
-              {
-                name: 'nginx',
-                version: '1.24.0-r0',
-                origin: 'nginx',
-                arch: 'x86_64',
-                size: 67890,
-                checksum: 'sha256:fedcba0987654321',
-              },
-              {
-                name: 'nodejs',
-                version: '20.10.0-r0',
-                origin: 'nodejs',
-                arch: 'x86_64',
-                size: 54321,
-                checksum: 'sha256:1234567890abcdef',
-              },
-            ],
-          },
+        version: 'v1',
+        config: {
+          name: 'apko.yaml',
+          checksum: 'sha256-gSjHFFSIirhjchHLAvMWZmCrcWCR3Bjq32O+uVZQNus=',
+        },
+        contents: {
+          keyring: [],
+          build_repositories: [],
+          runtime_repositories: [],
+          repositories: [
+            {
+              name: 'dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              url: 'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64/APKINDEX.tar.gz',
+              architecture: 'x86_64',
+            },
+            {
+              name: 'dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+              url: 'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64/APKINDEX.tar.gz',
+              architecture: 'aarch64',
+            },
+          ],
+          packages: [
+            {
+              name: 'nginx',
+              url: 'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64/nginx-1.24.0-r0.apk',
+              version: '1.24.0-r0',
+              architecture: 'x86_64',
+              checksum: 'Q1+bndUK+WxWGwuQbMpatu8UAZO6c=',
+            },
+            {
+              name: 'nodejs',
+              url: 'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64/nodejs-20.10.0-r0.apk',
+              version: '20.10.0-r0',
+              architecture: 'x86_64',
+              checksum: 'Q1NodeJS1234567890abcdef=',
+            },
+            {
+              name: 'nginx',
+              url: 'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64/nginx-1.24.0-r0.apk',
+              version: '1.24.0-r0',
+              architecture: 'aarch64',
+              checksum: 'Q1NginxAarch641234567890=',
+            },
+            {
+              name: 'nodejs',
+              url: 'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64/nodejs-20.10.0-r0.apk',
+              version: '20.10.0-r0',
+              architecture: 'aarch64',
+              checksum: 'Q1NodeJSAarch641234567890=',
+            },
+          ],
         },
       });
 
@@ -338,7 +471,10 @@ describe('modules/manager/apko/extract', () => {
           {
             datasource: 'apk',
             depName: 'nginx',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
             currentValue: '1.24.0',
             versioning: 'apk',
             lockedVersion: '1.24.0-r0',
@@ -349,7 +485,10 @@ describe('modules/manager/apko/extract', () => {
             currentValue: '20.10.0',
             versioning: 'apk',
             lockedVersion: '20.10.0-r0',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
           },
         ],
         lockFiles: ['apko.lock.json'],
@@ -363,6 +502,9 @@ describe('modules/manager/apko/extract', () => {
             - https://dl-cdn.alpinelinux.org/alpine/edge/main
           packages:
             - nginx=1.24.0
+        archs:
+            - x86_64
+            - aarch64
       `;
 
       vi.mocked(getSiblingFileName).mockReturnValue('apko.lock.json');
@@ -374,7 +516,10 @@ describe('modules/manager/apko/extract', () => {
           {
             datasource: 'apk',
             depName: 'nginx',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
             currentValue: '1.24.0',
             versioning: 'apk',
           },
@@ -390,10 +535,12 @@ describe('modules/manager/apko/extract', () => {
             - https://dl-cdn.alpinelinux.org/alpine/edge/main
           packages:
             - nginx=1.24.0
+        archs:
+            - x86_64
+            - aarch64
       `;
 
       vi.mocked(getSiblingFileName).mockReturnValue('apko.lock.json');
-      // vi.mocked(readLocalFile).mockResolvedValue(null);
       vi.mocked(readLocalFile).mockResolvedValue('invalid json');
 
       const result = await extractPackageFile(apkoYaml, 'apko.yaml');
@@ -402,7 +549,10 @@ describe('modules/manager/apko/extract', () => {
           {
             datasource: 'apk',
             depName: 'nginx',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
             currentValue: '1.24.0',
             versioning: 'apk',
           },
@@ -419,31 +569,63 @@ describe('modules/manager/apko/extract', () => {
           packages:
             - nginx=1.24.0
             - nodejs=20.10.0
+        archs:
+            - x86_64
+            - aarch64
       `;
 
       const lockFileContent = JSON.stringify({
-        schema_version: 1,
-        archs: {
-          amd64: {
-            packages: [
-              {
-                name: 'nginx',
-                version: '1.24.0-r0',
-                origin: 'nginx',
-                arch: 'x86_64',
-                size: 67890,
-                checksum: 'sha256:fedcba0987654321',
-              },
-              {
-                name: 'nodejs',
-                version: '20.10.0-r0',
-                origin: 'nodejs',
-                arch: 'x86_64',
-                size: 54321,
-                checksum: 'sha256:1234567890abcdef',
-              },
-            ],
-          },
+        version: 'v1',
+        config: {
+          name: 'image.yaml',
+          checksum: 'sha256-gSjHFFSIirhjchHLAvMWZmCrcWCR3Bjq32O+uVZQNus=',
+        },
+        contents: {
+          keyring: [],
+          build_repositories: [],
+          runtime_repositories: [],
+          repositories: [
+            {
+              name: 'dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              url: 'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64/APKINDEX.tar.gz',
+              architecture: 'x86_64',
+            },
+            {
+              name: 'dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+              url: 'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64/APKINDEX.tar.gz',
+              architecture: 'aarch64',
+            },
+          ],
+          packages: [
+            {
+              name: 'nginx',
+              url: 'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64/nginx-1.24.0-r0.apk',
+              version: '1.24.0-r0',
+              architecture: 'x86_64',
+              checksum: 'Q1+bndUK+WxWGwuQbMpatu8UAZO6c=',
+            },
+            {
+              name: 'nodejs',
+              url: 'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64/nodejs-20.10.0-r0.apk',
+              version: '20.10.0-r0',
+              architecture: 'x86_64',
+              checksum: 'Q1NodeJS1234567890abcdef=',
+            },
+            {
+              name: 'nginx',
+              url: 'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64/nginx-1.24.0-r0.apk',
+              version: '1.24.0-r0',
+              architecture: 'aarch64',
+              checksum: 'Q1NginxAarch641234567890=',
+            },
+            {
+              name: 'nodejs',
+              url: 'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64/nodejs-20.10.0-r0.apk',
+              version: '20.10.0-r0',
+              architecture: 'aarch64',
+              checksum: 'Q1NodeJSAarch641234567890=',
+            },
+          ],
         },
       });
 
@@ -456,7 +638,10 @@ describe('modules/manager/apko/extract', () => {
           {
             datasource: 'apk',
             depName: 'nginx',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
             currentValue: '1.24.0',
             versioning: 'apk',
             lockedVersion: '1.24.0-r0',
@@ -467,7 +652,10 @@ describe('modules/manager/apko/extract', () => {
             currentValue: '20.10.0',
             versioning: 'apk',
             lockedVersion: '20.10.0-r0',
-            registryUrls: ['https://dl-cdn.alpinelinux.org/alpine/edge/main'],
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
           },
         ],
         lockFiles: ['image.lock.json'],
@@ -489,6 +677,9 @@ describe('modules/manager/apko/extract', () => {
             - wolfi-base
             - glibc=2.36-r3
             - binutils=2.39-r4
+        archs:
+            - x86_64
+            - aarch64
       `;
       const result = await extractPackageFile(apkoYaml, 'apko.yaml');
       expect(result).toEqual({
@@ -496,20 +687,29 @@ describe('modules/manager/apko/extract', () => {
           {
             datasource: 'apk',
             depName: 'wolfi-base',
-            registryUrls: ['https://packages.wolfi.dev/os'],
+            registryUrls: [
+              'https://packages.wolfi.dev/os/x86_64',
+              'https://packages.wolfi.dev/os/aarch64',
+            ],
             skipReason: 'not-a-version',
           },
           {
             datasource: 'apk',
             depName: 'glibc',
-            registryUrls: ['https://packages.wolfi.dev/os'],
+            registryUrls: [
+              'https://packages.wolfi.dev/os/x86_64',
+              'https://packages.wolfi.dev/os/aarch64',
+            ],
             currentValue: '2.36-r3',
             versioning: 'apk',
           },
           {
             datasource: 'apk',
             depName: 'binutils',
-            registryUrls: ['https://packages.wolfi.dev/os'],
+            registryUrls: [
+              'https://packages.wolfi.dev/os/x86_64',
+              'https://packages.wolfi.dev/os/aarch64',
+            ],
             currentValue: '2.39-r4',
             versioning: 'apk',
           },

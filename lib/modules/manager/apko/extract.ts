@@ -18,20 +18,47 @@ interface ApkoConfig {
 
 // Schema for apko lock file
 interface ApkoLockFile {
-  schema_version: number;
-  archs: Record<
-    string,
-    {
-      packages: {
-        name: string;
-        version: string;
-        origin: string;
-        arch: string;
-        size: number;
-        checksum: string;
-      }[];
-    }
-  >;
+  version: string;
+  config: {
+    name: string;
+    checksum: string;
+  };
+  contents: {
+    keyring: string[];
+    build_repositories: string[];
+    runtime_repositories: string[];
+    repositories: {
+      name: string;
+      url: string;
+      architecture: string;
+    }[];
+    packages: {
+      name: string;
+      url: string;
+      version: string;
+      architecture: string;
+      checksum: string;
+    }[];
+  };
+}
+
+// apko allows arch alias, see https://github.com/chainguard-dev/apko/blob/5244a17ae460bb053b7d13302d48fd0046aeb387/pkg/apk/apk/arch.go
+function translateArch(arch: string): string {
+  switch (arch) {
+    case 'i386':
+    case '386':
+      return 'x86';
+    case 'amd64':
+      return 'x86_64';
+    case 'arm64':
+      return 'aarch64';
+    case 'arm/v6':
+      return 'armhf';
+    case 'arm/v7':
+      return 'armv7';
+    default:
+      return arch;
+  }
 }
 
 export async function extractPackageFile(
@@ -44,11 +71,22 @@ export async function extractPackageFile(
     const parsed = parseSingleYaml<ApkoConfig>(content);
     const deps: PackageDependency[] = [];
 
+    // Check if archs is specified
+    if (!parsed.archs) {
+      throw new Error('archs must be specified');
+    }
+
     // Extract packages from the contents.packages array
     if (parsed.contents?.packages) {
+      // determine the registry URLs based on the archs
+      const registryUrls = parsed.archs.map((arch) => {
+        const translatedArch = translateArch(arch);
+        return `${parsed.contents?.repositories?.[0]}/${translatedArch}`;
+      });
+
       for (const pkg of parsed.contents.packages) {
         // Try to extract version from package.
-        // format is name{@tag}{[<>~=]version} - from https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper#Add_a_Package
+        // format is name{@tag}{[<>~=]version} - from https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper#World
         const versionMatch = /^(.+)[=><~^][=]?(.+)$/.exec(pkg);
 
         if (versionMatch) {
@@ -58,7 +96,7 @@ export async function extractPackageFile(
             depName,
             currentValue,
             versioning: apkVersioning,
-            registryUrls: parsed.contents?.repositories,
+            registryUrls,
           });
         } else {
           // Package without version - add as unversioned
@@ -66,7 +104,7 @@ export async function extractPackageFile(
             datasource: ApkDatasource.id,
             depName: pkg,
             skipReason: 'not-a-version',
-            registryUrls: parsed.contents?.repositories,
+            registryUrls,
           });
         }
       }
@@ -96,18 +134,17 @@ export async function extractPackageFile(
         const lockedVersions = new Map<string, string>();
         const lockedPackages = new Set<string>();
 
-        // Process all architectures (usually just one, but apko supports multiple)
-        for (const archData of Object.values(lockFile.archs || {})) {
-          for (const pkg of archData.packages || []) {
-            lockedVersions.set(pkg.name, pkg.version);
-            lockedPackages.add(pkg.name);
-          }
+        // Process all packages from the lock file
+        for (const pkg of lockFile.contents?.packages || []) {
+          lockedVersions.set(pkg.name, pkg.version);
+          lockedPackages.add(pkg.name);
         }
 
         // Add locked versions to dependencies and mark packages that are in both files
         for (const dep of deps) {
           if (dep.depName && lockedVersions.has(dep.depName)) {
             dep.lockedVersion = lockedVersions.get(dep.depName);
+            // Keep architecture-specific URLs for locked packages
           }
         }
 
@@ -116,13 +153,20 @@ export async function extractPackageFile(
         for (const [pkgName, pkgVersion] of lockedVersions) {
           const existingDep = deps.find((dep) => dep.depName === pkgName);
           if (!existingDep) {
+            // Use the same architecture-specific registry URLs as direct dependencies
+            const registryUrls =
+              parsed.archs?.map((arch) => {
+                const translatedArch = translateArch(arch);
+                return `${parsed.contents?.repositories?.[0]}/${translatedArch}`;
+              }) || parsed.contents?.repositories;
+
             deps.push({
               datasource: ApkDatasource.id,
               depName: pkgName,
               currentValue: pkgVersion,
               lockedVersion: pkgVersion,
               versioning: apkVersioning,
-              registryUrls: parsed.contents?.repositories,
+              registryUrls,
             });
           }
         }
@@ -134,7 +178,16 @@ export async function extractPackageFile(
         lockFiles = [lockFileName];
       } catch (err) {
         logger.debug({ err, lockFileName }, 'Error parsing apko.lock.json');
-        // Don't include lockFiles if parsing failed
+        // Use architecture-specific repository URLs when lock file parsing fails
+        const registryUrls =
+          parsed.archs?.map((arch) => {
+            const translatedArch = translateArch(arch);
+            return `${parsed.contents?.repositories?.[0]}/${translatedArch}`;
+          }) || parsed.contents?.repositories;
+
+        for (const dep of deps) {
+          dep.registryUrls = registryUrls;
+        }
         lockFiles = ['not here'];
       }
     }
