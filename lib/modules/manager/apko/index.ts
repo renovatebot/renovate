@@ -7,6 +7,7 @@ export { getRangeStrategy } from './range';
 
 export const supportsLockFileMaintenance = true;
 
+export const categories: Category[] = ['apk'];
 export const defaultConfig = {
   managerFilePatterns: ['/(^|/)apko\\.ya?ml$/'],
   lockFiles: ['apko.lock.json'],
