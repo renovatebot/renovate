@@ -39,31 +39,35 @@ export async function get<T = any>(
   return result;
 }
 
+/**
+ * Set cache value with user-defined TTL overrides.
+ */
 export async function set(
   namespace: PackageCacheNamespace,
   key: string,
   value: unknown,
-  minutes: number,
+  hardTtlMinutes: number,
 ): Promise<void> {
-  const rawTtl = getTtlOverride(namespace) ?? minutes;
+  const rawTtl = getTtlOverride(namespace) ?? hardTtlMinutes;
   await setWithRawTtl(namespace, key, value, rawTtl);
 }
 
 /**
+ * Set cache value ignoring user-defined TTL overrides.
  * This MUST NOT be used outside of cache implementation
  */
 export async function setWithRawTtl(
   namespace: PackageCacheNamespace,
   key: string,
   value: unknown,
-  minutes: number,
+  hardTtlMinutes: number,
 ): Promise<void> {
   if (!cacheProxy) {
     return;
   }
 
   await PackageCacheStats.wrapSet(() =>
-    cacheProxy!.set(namespace, key, value, minutes),
+    cacheProxy!.set(namespace, key, value, hardTtlMinutes),
   );
 
   const combinedKey = getCombinedKey(namespace, key);
