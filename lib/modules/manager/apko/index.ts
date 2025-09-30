@@ -1,3 +1,4 @@
+import type { Category } from '../../../constants';
 import { ApkDatasource } from '../../datasource/apk';
 
 export { extractPackageFile } from './extract';
@@ -7,7 +8,7 @@ export { getRangeStrategy } from './range';
 
 export const supportsLockFileMaintenance = true;
 
-export const categories: Category[] = ['apk'];
+export const categories: Category[] = ['alpine'];
 export const defaultConfig = {
   managerFilePatterns: ['/(^|/)apko\\.ya?ml$/'],
   lockFiles: ['apko.lock.json'],
