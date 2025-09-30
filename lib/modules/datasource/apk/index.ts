@@ -47,6 +47,8 @@ export class ApkDatasource extends Datasource {
 
   /**
    * Fetches the APK index file from the repository
+   * @param {string} registryUrl - The URL of the APK repository
+   * @returns {string} The uncompressed APKINDEX content of the APK index file
    */
   private async getApkIndex(registryUrl: string): Promise<string> {
     const indexUrl = joinUrlParts(registryUrl, 'APKINDEX.tar.gz');

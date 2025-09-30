@@ -3,7 +3,10 @@ import type { ApkPackage } from './types';
 
 /**
  * Parses an APK index file content and extracts package information
- * APK index files are gzipped tar files containing package metadata
+ *
+ * @param indexContent - The extracted text content from APKINDEX.tar.gz file
+ *                       (tar.gz extraction is handled upstream)
+ * @returns Array of parsed APK package objects
  */
 export function parseApkIndex(indexContent: string): ApkPackage[] {
   logger.debug('Parsing APK index content');
@@ -11,10 +14,6 @@ export function parseApkIndex(indexContent: string): ApkPackage[] {
   const packages: ApkPackage[] = [];
 
   try {
-    // For now, we'll implement a basic parser that handles the text format
-    // In a real implementation, you'd need to handle the gzipped tar format
-    // This is a simplified version for demonstration
-
     logger.debug(`APK index content length: ${indexContent.length}`);
     logger.debug(
       `APK index content preview: ${indexContent.substring(0, 200)}`,
