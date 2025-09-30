@@ -1077,7 +1077,7 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
-        uses: 'over-sh/setup-bun@v2',
+        uses: 'oven-sh/setup-bun@v2',
         with: {},
       },
       expected: [
@@ -1094,7 +1094,7 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
-        uses: 'over-sh/setup-bun@v2',
+        uses: 'oven-sh/setup-bun@v2',
         with: { 'bun-version': '1.2.0' },
       },
       expected: [
@@ -1150,7 +1150,7 @@ describe('modules/manager/github-actions/extract', () => {
         {
           skipStage: 'extract',
           skipReason: 'unspecified-version',
-          datasource: 'ruby',
+          datasource: 'ruby-version',
           depName: 'ruby',
           depType: 'uses-with',
           packageName: 'ruby',
@@ -1166,7 +1166,7 @@ describe('modules/manager/github-actions/extract', () => {
       expected: [
         {
           currentValue: '3.4',
-          datasource: 'ruby',
+          datasource: 'ruby-version',
           depName: 'ruby',
           depType: 'uses-with',
           packageName: 'ruby',
