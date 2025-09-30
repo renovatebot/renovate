@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
 import { getPkgReleases } from '..';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import type { GetPkgReleasesConfig } from '../types';
 import { ApkDatasource } from '.';
 import { Fixtures } from '~test/fixtures';
@@ -315,6 +316,115 @@ c:abc123def456`;
         ],
       });
 
+      extractSpy.mockRestore();
+    });
+  });
+
+  describe('error handling', () => {
+    it('should throw ExternalHostError for 429', async () => {
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get('/os/x86_64/APKINDEX.tar.gz')
+        .reply(429);
+
+      await expect(
+        apkDatasource.getReleases({
+          packageName: 'bash',
+          registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+        }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('should throw ExternalHostError for 5xx', async () => {
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get('/os/x86_64/APKINDEX.tar.gz')
+        .reply(502);
+
+      await expect(
+        apkDatasource.getReleases({
+          packageName: 'bash',
+          registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+        }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('should return null for 404', async () => {
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get('/os/x86_64/APKINDEX.tar.gz')
+        .reply(404);
+
+      const result = await apkDatasource.getReleases({
+        packageName: 'bash',
+        registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null for 401', async () => {
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get('/os/x86_64/APKINDEX.tar.gz')
+        .reply(401);
+
+      const result = await apkDatasource.getReleases({
+        packageName: 'bash',
+        registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('should throw ExternalHostError for 503', async () => {
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get('/os/x86_64/APKINDEX.tar.gz')
+        .reply(503);
+
+      await expect(
+        apkDatasource.getReleases({
+          packageName: 'bash',
+          registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+        }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('should throw ExternalHostError for 500', async () => {
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get('/os/x86_64/APKINDEX.tar.gz')
+        .reply(500);
+
+      await expect(
+        apkDatasource.getReleases({
+          packageName: 'bash',
+          registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+        }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('should handle extraction errors gracefully', async () => {
+      // Mock HTTP request
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get('/os/x86_64/APKINDEX.tar.gz')
+        .reply(200, Buffer.from('mock-tar-gz-data'));
+
+      const apkDatasource = new ApkDatasource();
+      const extractSpy = vi.spyOn(
+        apkDatasource as any,
+        'extractApkIndexFromTarGz',
+      );
+      extractSpy.mockRejectedValue(new Error('Extraction failed'));
+
+      const result = await apkDatasource.getReleases({
+        packageName: 'bash',
+        registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+      });
+
+      expect(result).toBeNull();
       extractSpy.mockRestore();
     });
   });

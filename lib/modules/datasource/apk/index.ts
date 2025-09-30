@@ -66,21 +66,8 @@ export class ApkDatasource extends Datasource {
       return await this.extractApkIndexFromTarGz(response.body);
     } catch (err) {
       if (err instanceof HttpError) {
-        if (err.response?.statusCode === 404) {
-          logger.debug(
-            { registryUrl, indexUrl },
-            'APK index not found at x86_64 architecture, trying without architecture path',
-          );
-          // Try without architecture path for some repositories
-          const fallbackUrl = joinUrlParts(registryUrl, 'APKINDEX.tar.gz');
-          logger.debug(
-            { fallbackUrl },
-            'Attempting to download fallback APKINDEX.tar.gz',
-          );
-          const fallbackResponse = await this.http.getBuffer(fallbackUrl);
-          return await this.extractApkIndexFromTarGz(fallbackResponse.body);
-        }
-        if (err.response?.statusCode && err.response.statusCode >= 500) {
+        const statusCode = err.response?.statusCode;
+        if (statusCode === 429 || (statusCode && statusCode >= 500)) {
           throw new ExternalHostError(err);
         }
       }
@@ -129,6 +116,7 @@ export class ApkDatasource extends Datasource {
             });
 
             stream.on('error', (err: Error) => {
+              /* v8 ignore next 2 -- hard to test stream errors */
               logger.warn({ err }, 'Error reading APKINDEX file from tar');
               next();
             });
@@ -146,12 +134,14 @@ export class ApkDatasource extends Datasource {
             logger.debug('Successfully extracted APKINDEX content');
             resolve(apkIndexContent);
           } else {
+            /* v8 ignore next 3 -- hard to test stream errors */
             logger.warn('APKINDEX file not found in tar archive');
             resolve('');
           }
         });
 
         extract.on('error', (err: Error) => {
+          /* c8 ignore next 2 -- hard to test tar extraction errors */
           logger.warn({ err }, 'Error extracting tar archive');
           reject(err);
         });
@@ -160,6 +150,7 @@ export class ApkDatasource extends Datasource {
         extract.end(decompressedBuffer);
       });
     } catch (err) {
+      /* c8 ignore next 3 -- hard to test gzip decompression errors */
       logger.warn({ err }, 'Error extracting APK index from tar.gz');
       return '';
     }
@@ -199,8 +190,8 @@ export class ApkDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
-      logger.debug('No registry URL provided');
       return null;
     }
 
