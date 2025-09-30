@@ -15,7 +15,7 @@ export function parseApkIndex(indexContent: string): ApkPackage[] {
 
   try {
     logger.debug(`APK index content length: ${indexContent.length}`);
-    logger.debug(
+    logger.trace(
       `APK index content preview: ${indexContent.substring(0, 200)}`,
     );
 
@@ -36,6 +36,7 @@ export function parseApkIndex(indexContent: string): ApkPackage[] {
           continue;
         }
 
+        // get fields based on the PKGINFO spec - https://wiki.alpinelinux.org/wiki/Apk_spec
         const key = line.substring(0, colonIndex);
         const value = line.substring(colonIndex + 1).trim();
 
@@ -46,38 +47,11 @@ export function parseApkIndex(indexContent: string): ApkPackage[] {
           case 'V':
             packageInfo.version = value;
             break;
-          case 'T':
-            packageInfo.description = value;
-            break;
           case 'U':
             packageInfo.url = value;
             break;
-          case 'S':
-            packageInfo.size = parseInt(value);
-            break;
-          case 'I':
+          case 't':
             packageInfo.buildDate = parseInt(value);
-            break;
-          case 'o':
-            packageInfo.origin = value;
-            break;
-          case 'A':
-            packageInfo.arch = value;
-            break;
-          case 'L':
-            packageInfo.license = value;
-            break;
-          case 'D':
-            packageInfo.depends = value ? value.split(' ') : [];
-            break;
-          case 'p':
-            packageInfo.provides = value ? value.split(' ') : [];
-            break;
-          case 'c':
-            packageInfo.conflicts = value ? value.split(' ') : [];
-            break;
-          case 'r':
-            packageInfo.replaces = value ? value.split(' ') : [];
             break;
         }
       }
