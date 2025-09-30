@@ -84,6 +84,11 @@ export function parseApkIndex(indexContent: string): ApkPackage[] {
 
       if (packageInfo.name && packageInfo.version) {
         packages.push(packageInfo as ApkPackage);
+      } else {
+        logger.warn(
+          { packageInfo },
+          'Skipping package entry due to missing required fields',
+        );
       }
     }
 
