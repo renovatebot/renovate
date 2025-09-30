@@ -50,12 +50,7 @@ class ApkVersioningApi extends GenericVersioningApi {
       ,
       letter,
       prereleaseFull,
-      packageFixFull, //packageType
-      //packageNum
-      //releaseFull
-      ,
-      ,
-      ,
+      packageFixFull,
       releaseNum,
     ] = match;
 
