@@ -32,11 +32,27 @@ class ApkVersioningApi extends GenericVersioningApi {
    */
   protected _parse(version: string): ApkVersion | null {
     // Enhanced regex based on Go pattern but more flexible for complex prerelease identifiers
-    // Groups: 1=major, 2=minor.patch, 3=letter, 4=prerelease_full, 5=package_fix_full, 6=release_full, 7=release_num
+    // Groups: 1=major, 2=minor.patch, 3=unused, 4=letter, 5=prerelease_full, 6=package_fix_full, 7=release_full, 8=release_num
     // Regex from https://github.com/chainguard-dev/apko/blob/main/pkg/apk/apk/version.go
     const versionRegex = regEx(
-      /^v?([0-9]+)((\.[0-9]+)*)([a-z]?)((_[a-z]+(?:_[a-z]+)*[0-9]*))?((_cvs|_svn|_git|_hg|_p)([0-9]*))?((-r)([0-9]+))?$/,
+      /^v?([0-9]+)((\.[0-9]+)*)([a-z]?)((_[a-z]+(?:_[a-z]+)*[0-9]*))?((_cvs|_svn|_git|_hg|_p)[0-9]*)?(-r([0-9]+))?$/,
     );
+
+    // /^v?([0-9]+)((\.[0-9]+)*)([a-z]?)((_[a-z]+(?:_[a-z]+)*[0-9]*))?((_cvs|_svn|_git|_hg|_p)[0-9]*)?(-r([0-9]+))?$/
+    //  ^1^    ^2^^^^^^^^^^^ ^3^      ^4^                    ^5^                    ^6^              ^7^^^^^ ^8^
+    //  |      |             |        |                      |                      |                |       |
+    //  |      |             |        |                      |                      |                |       └─ Release number (used)
+    //  |      |             |        |                      |                      |                └─ Full release group (unused - needed for ? quantifier)
+    //  |      |             |        |                      |                      └─ Package fix (used)
+    //  |      |             |        |                      └─ Prerelease (used)
+    //  |      |             |        └─ Letter (used)
+    //  |      |             └─ Inner repetition group (unused - needed for * quantifier)
+    //  |      └─ Minor.patch (used)
+    //  └─ Major (used)
+    //
+    // Note: Groups 3 and 7 are "unused" in destructuring but required for the regex to work:
+    // - Group 3: Inner group needed for the * quantifier to repeat the full \.[0-9]+ pattern
+    // - Group 7: Outer group needed for the ? quantifier to make the entire -r[0-9]+ optional
     const match = versionRegex.exec(version);
 
     if (!match) {
@@ -51,10 +67,12 @@ class ApkVersioningApi extends GenericVersioningApi {
       letter,
       prereleaseFull,
       packageFixFull,
+      ,
+      ,
       releaseNum,
     ] = match;
 
-    // Build the full version string
+    // Build the full version string (without release number)
     const versionStr =
       major +
       (minorPatch || '') +
@@ -83,9 +101,12 @@ class ApkVersioningApi extends GenericVersioningApi {
       release.push(...minorPatchParts);
     }
 
+    // Extract just the number part from release number (e.g., "-r1" -> "1")
+    const releaseString = releaseNum ? releaseNum.substring(2) : '';
+
     return {
       version: versionStr,
-      releaseString: releaseNum || '',
+      releaseString,
       release,
       prerelease,
     };
@@ -93,8 +114,9 @@ class ApkVersioningApi extends GenericVersioningApi {
 
   /**
    * Compare two APK versions according to Alpine Linux rules
-   * 1. Compare version parts
-   * 2. Compare release parts
+   * 1. Compare version parts (without release number)
+   * 2. Compare prerelease identifiers
+   * 3. Compare release numbers
    */
   protected override _compare(version: string, other: string): number {
     const parsed1 = this._parse(version);
@@ -104,7 +126,7 @@ class ApkVersioningApi extends GenericVersioningApi {
       return 1;
     }
 
-    // Compare version parts
+    // Compare version parts (without release number)
     const versionCompare = this._compareVersionParts(
       parsed1.version,
       parsed2.version,
@@ -130,11 +152,20 @@ class ApkVersioningApi extends GenericVersioningApi {
       }
     }
 
-    // Compare release parts
-    return this._compareVersionParts(
-      parsed1.releaseString,
-      parsed2.releaseString,
-    );
+    // Compare release numbers
+    const release1 = parsed1.releaseString || '';
+    const release2 = parsed2.releaseString || '';
+
+    // If one has a release number and the other doesn't, the one with release number is greater
+    if (release1 && !release2) {
+      return 1;
+    }
+    if (!release1 && release2) {
+      return -1;
+    }
+
+    // If both have release numbers or neither has release numbers, compare them
+    return this._compareVersionParts(release1 || '0', release2 || '0');
   }
 
   /**
