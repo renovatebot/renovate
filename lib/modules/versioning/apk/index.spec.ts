@@ -228,7 +228,7 @@ describe('modules/versioning/apk/index', () => {
     `(
       'isLessThanRange($version, $range) === $expected',
       ({ version, range, expected }) => {
-        expect(apk.isLessThanRange(version, range)).toBe(expected);
+        expect(apk.isLessThanRange!(version, range)).toBe(expected);
       },
     );
   });
