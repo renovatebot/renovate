@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import pMap from 'p-map';
-import { GlobalConfig } from '../../../config/global';
 import { quote } from 'shlex';
+import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
