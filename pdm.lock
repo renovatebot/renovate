@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:3ee61e284d724b11cc368270a83fcce7ca398ca81d4c226d6fccaae8ea6be343"
+content_hash = "sha256:c2fe5113b8f7c4da2911dc8e37c94cee8cdcf7c15522198c7533aa8868ccf2c4"
 
 [[metadata.targets]]
 requires_python = ">=3.11"
@@ -117,7 +117,7 @@ files = [
 
 [[package]]
 name = "click"
-version = "8.2.1"
+version = "8.3.0"
 requires_python = ">=3.10"
 summary = "Composable command line interface toolkit"
 groups = ["default"]
@@ -125,8 +125,8 @@ dependencies = [
     "colorama; platform_system == \"Windows\"",
 ]
 files = [
-    {file = "click-8.2.1-py3-none-any.whl", hash = "sha256:61a3265b914e850b85317d0b3109c7f8cd35a670f963866005d6ef1d5175a12b"},
-    {file = "click-8.2.1.tar.gz", hash = "sha256:27c491cc05d968d271d5a1db13e3b5a184636d9d930f148c50b038f0d0646202"},
+    {file = "click-8.3.0-py3-none-any.whl", hash = "sha256:9b9f285302c6e3064f4330c05f05b81945b2a39544279343e6e7c5f27a9baddc"},
+    {file = "click-8.3.0.tar.gz", hash = "sha256:e7b8232224eba16f4ebe410c25ced9f7875cb5f3263ffc93cc3e8da705e229c4"},
 ]
 
 [[package]]
@@ -341,14 +341,13 @@ files = [
 
 [[package]]
 name = "mkdocs-material"
-version = "9.6.20"
+version = "9.6.21"
 requires_python = ">=3.8"
 summary = "Documentation that simply works"
 groups = ["default"]
 dependencies = [
     "babel~=2.10",
     "backrefs~=5.7.post1",
-    "click<8.2.2",
     "colorama~=0.4",
     "jinja2~=3.1",
     "markdown~=3.2",
@@ -360,8 +359,8 @@ dependencies = [
     "requests~=2.26",
 ]
 files = [
-    {file = "mkdocs_material-9.6.20-py3-none-any.whl", hash = "sha256:b8d8c8b0444c7c06dd984b55ba456ce731f0035c5a1533cc86793618eb1e6c82"},
-    {file = "mkdocs_material-9.6.20.tar.gz", hash = "sha256:e1f84d21ec5fb730673c4259b2e0d39f8d32a3fef613e3a8e7094b012d43e790"},
+    {file = "mkdocs_material-9.6.21-py3-none-any.whl", hash = "sha256:aa6a5ab6fb4f6d381588ac51da8782a4d3757cb3d1b174f81a2ec126e1f22c92"},
+    {file = "mkdocs_material-9.6.21.tar.gz", hash = "sha256:b01aa6d2731322438056f360f0e623d3faae981f8f2d8c68b1b973f4f2657870"},
 ]
 
 [[package]]
