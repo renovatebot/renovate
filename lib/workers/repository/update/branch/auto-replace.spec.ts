@@ -1347,69 +1347,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
-    it('jsonata: update currentValue', async () => {
-      const source =
-        '[ { "version": "1.2.3", "digest": "abcdef", "package": "foo" } ]';
-      upgrade.manager = 'jsonata';
-      upgrade.depName = 'foo';
-      upgrade.currentValue = '1.2.3';
-      upgrade.newValue = '1.2.4';
-      upgrade.depIndex = 0;
-      upgrade.packageFile = 'deps.json';
-      upgrade.fileFormat = 'json';
-      upgrade.datasourceTemplate = 'github-releases';
-      upgrade.matchStrings = [
-        '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
-      ];
-
-      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
-      expect(res).toBe(
-        '[ { "version": "1.2.4", "digest": "abcdef", "package": "foo" } ]',
-      );
-    });
-
-    it('jsonata: update currentDigest', async () => {
-      const source =
-        '[ { "version": "1.2.3", "digest": "abcdef", "package": "foo" } ]';
-      upgrade.manager = 'jsonata';
-      upgrade.depName = 'foo';
-      upgrade.currentDigest = 'abcdef';
-      upgrade.newDigest = 'badbeef';
-      upgrade.depIndex = 0;
-      upgrade.packageFile = 'deps.json';
-      upgrade.fileFormat = 'json';
-      upgrade.datasourceTemplate = 'github-releases';
-      upgrade.matchStrings = [
-        '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
-      ];
-      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
-      expect(res).toBe(
-        '[ { "version": "1.2.3", "digest": "badbeef", "package": "foo" } ]',
-      );
-    });
-
-    it('jsonata: update currentValue and currentDigest', async () => {
-      const source =
-        '[ { "version": "1.2.3", "digest": "abcdef", "package": "foo" } ]';
-      upgrade.manager = 'jsonata';
-      upgrade.depName = 'foo';
-      upgrade.currentValue = '1.2.3';
-      upgrade.newValue = '1.2.4';
-      upgrade.currentDigest = 'abcdef';
-      upgrade.newDigest = 'badbeef';
-      upgrade.depIndex = 0;
-      upgrade.packageFile = 'deps.json';
-      upgrade.fileFormat = 'json';
-      upgrade.datasourceTemplate = 'github-releases';
-      upgrade.matchStrings = [
-        '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
-      ];
-      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
-      expect(res).toBe(
-        '[ { "version": "1.2.4", "digest": "badbeef", "package": "foo" } ]',
-      );
-    });
-
     it('github-actions: updates with newValue only', async () => {
       const githubAction = codeBlock`
         jobs:
@@ -1595,6 +1532,57 @@ describe('workers/repository/update/branch/auto-replace', () => {
               runs-on: ubuntu-latest
               steps:
                 - uses: some-other-action/checkout@2485f4 # tag=v2.0.0
+        `,
+      );
+    });
+
+    it('updates only digest', async () => {
+      const githubAction = codeBlock`
+        """Rules/toolchains for angular with Bazel."""
+    module(
+        name = "angular-cli",
+    )
+
+    bazel_dep(name = "rules_angular")
+    git_override(
+        module_name = "rules_angular",
+        commit = "17eac47ea99057f7473a7d93292e76327c894ed9",
+        remote = "https://github.com/devversion/rules_angular.git",
+    )
+      `;
+      upgrade.manager = 'bazel-module';
+      upgrade.updateType = 'digest';
+      upgrade.pinDigests = false;
+      upgrade.autoReplaceStringTemplate = undefined;
+      upgrade.depName = 'rules_angular';
+      upgrade.currentValue = undefined;
+      upgrade.currentDigestShort = '17eac47';
+      upgrade.currentDigest = '17eac47ea99057f7473a7d93292e76327c894ed9';
+      upgrade.depIndex = 1;
+      upgrade.replaceString = undefined;
+      upgrade.newName = undefined;
+      upgrade.newValue = undefined;
+      upgrade.newDigest = '84f4bf185682d841c7e7b369f498e68c742229cc';
+      upgrade.packageFile = 'MODULE.bazel';
+      upgrade.autoReplaceGlobalMatch = true;
+      const res = await doAutoReplace(
+        upgrade,
+        githubAction,
+        reuseExistingBranch,
+      );
+      expect(res).toBe(
+        codeBlock`
+          """Rules/toolchains for angular with Bazel."""
+    module(
+        name = "angular-cli",
+    )
+
+    bazel_dep(name = "rules_angular")
+    git_override(
+        module_name = "rules_angular",
+        commit = "84f4bf185682d841c7e7b369f498e68c742229cc",
+        remote = "https://github.com/devversion/rules_angular.git",
+    )
         `,
       );
     });

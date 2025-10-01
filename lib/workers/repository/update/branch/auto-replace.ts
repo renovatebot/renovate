@@ -196,28 +196,6 @@ async function checkExistingBranch(
   return existingContent;
 }
 
-/**
- * Check if an update from `current` to `newString` should be performed and return 1 if so.
- *
- * @remarks
- * Useful for counting the number of updates to do.
- *
- * @param current The current value (if undefined then no update is required)
- * @param newString The new value (if undefined then no update is required)
- *
- * @returns 1 if `current !== newString` and 0 if they are equal or at least one is undefined.
- */
-function updatedToInt(
-  current: string | undefined,
-  newString: string | undefined,
-): number {
-  if (current && newString && newString !== current) {
-    return 1;
-  } else {
-    return 0;
-  }
-}
-
 export async function doAutoReplace(
   upgrade: BranchUpgradeConfig,
   existingContent: string,
@@ -246,24 +224,11 @@ export async function doAutoReplace(
   if (reuseExistingBranch) {
     return await checkExistingBranch(upgrade, existingContent);
   }
-
-  // count how many strings need to be updated
-  const changedCount =
-    updatedToInt(depName, newName) +
-    updatedToInt(currentValue, newValue) +
-    updatedToInt(currentDigest, newDigest) +
-    updatedToInt(currentDigestShort, newDigest);
-  logger.debug(
-    { packageFile, depName, changedCount },
-    'N values changed and need to be updated',
-  );
-
   const replaceWithoutReplaceString =
-    (is.string(newName) &&
-      newName !== depName &&
-      (is.undefined(upgrade.replaceString) ||
-        !upgrade.replaceString?.includes(depName!))) ||
-    (is.undefined(upgrade.replaceString) && changedCount > 1);
+    is.string(newName) &&
+    newName !== depName &&
+    (is.undefined(upgrade.replaceString) ||
+      !upgrade.replaceString?.includes(depName!));
   const replaceString = upgrade.replaceString ?? currentValue ?? currentDigest;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex: number;
