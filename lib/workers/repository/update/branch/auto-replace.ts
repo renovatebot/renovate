@@ -252,16 +252,19 @@ export async function doAutoReplace(
     updatedToInt(depName, newName) +
     updatedToInt(currentValue, newValue) +
     updatedToInt(currentDigest, newDigest);
-  logger.debug(
-    { packageFile, depName, changedCount },
-    'N values changed and need to be updated',
-  );
+  if (changedCount > 1) {
+    logger.debug(
+      { packageFile, depName, changedCount },
+      'Multiple changed values, might need special handling (#36461)',
+    );
+  }
 
   const replaceWithoutReplaceString =
     (is.string(newName) &&
       newName !== depName &&
       (is.undefined(upgrade.replaceString) ||
         !upgrade.replaceString?.includes(depName!))) ||
+    // for jsonata manager, fixes #36461
     (is.undefined(upgrade.replaceString) && changedCount > 1);
   const replaceString = upgrade.replaceString ?? currentValue ?? currentDigest;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
