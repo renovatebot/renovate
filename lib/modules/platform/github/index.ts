@@ -764,11 +764,6 @@ async function checkRulesetsForForceRebase(
     );
 
     return rulesets.some((rule) => {
-      if (rule.type === 'non_fast_forward') {
-        logger.debug(`Ruleset: non_fast_forward rule found for ${branchName}`);
-        return true;
-      }
-
       if (
         rule.type === 'required_status_checks' &&
         rule.parameters?.strict_required_status_checks_policy === true
