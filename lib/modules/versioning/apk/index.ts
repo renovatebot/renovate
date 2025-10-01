@@ -200,9 +200,8 @@ class ApkVersioningApi extends GenericVersioningApi {
         if (matchv1 !== matchv2) {
           return matchv1.localeCompare(matchv2);
         }
-      } else {
+      } /* v8 ignore next 3 -- unreachable in practice due to regex matching behavior */ else {
         // One is undefined, the other exists
-        /* v8 ignore next 2 -- unreachable in practice due to regex matching behavior */
         return matchv1 ? 1 : -1;
       }
     }
@@ -318,8 +317,8 @@ class ApkVersioningApi extends GenericVersioningApi {
           // Caret range: allow changes that do not modify the left-most non-zero digit
           const targetMajor = this.getMajor(targetVersion);
           const versionMajor = this.getMajor(version);
+          /* v8 ignore next 3 -- unreachable defensive code, isValid filters out invalid versions */
           if (targetMajor === null || versionMajor === null) {
-            /* v8 ignore next 2 -- unreachable defensive code, isValid filters out invalid versions */
             return false;
           }
 
@@ -345,8 +344,8 @@ class ApkVersioningApi extends GenericVersioningApi {
             );
           }
         }
+        /* v8 ignore next 2 -- unreachable defensive code for unknown range operators */
         default:
-          /* v8 ignore next -- unreachable defensive code for unknown range operators */
           return false;
       }
     });

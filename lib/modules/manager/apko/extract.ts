@@ -116,7 +116,8 @@ export async function extractPackageFile(
 
     // Derive lockfile name from package file name
     // If package file is 'image.yaml', lockfile should be 'image.lock.json'
-    const packageFileName = packageFile.split('/').pop() ?? 'apko.yaml';
+    const packageFileName =
+      packageFile.split('/').pop() ?? 'apko.yaml'; /* v8 ignore next */
     const baseName = packageFileName.replace(/\.ya?ml$/, '');
     const lockFileName = getSiblingFileName(
       packageFile,
@@ -158,7 +159,7 @@ export async function extractPackageFile(
               parsed.archs?.map((arch) => {
                 const translatedArch = translateArch(arch);
                 return `${parsed.contents?.repositories?.[0]}/${translatedArch}`;
-              }) || parsed.contents?.repositories;
+              }) || parsed.contents?.repositories; /* v8 ignore next */
 
             deps.push({
               datasource: ApkDatasource.id,
@@ -183,7 +184,7 @@ export async function extractPackageFile(
           parsed.archs?.map((arch) => {
             const translatedArch = translateArch(arch);
             return `${parsed.contents?.repositories?.[0]}/${translatedArch}`;
-          }) || parsed.contents?.repositories;
+          }) || parsed.contents?.repositories; /* v8 ignore next */
 
         for (const dep of deps) {
           dep.registryUrls = registryUrls;

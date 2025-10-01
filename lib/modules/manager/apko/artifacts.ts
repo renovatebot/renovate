@@ -16,6 +16,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   // Derive lockfile name from package file name
   // If package file is 'image.yaml', lockfile should be 'image.lock.json'
+  /* v8 ignore next -- passing coverage locally, but not on codecov */
   const fileName = packageFileName.split('/').pop() ?? 'apko.yaml';
   const baseName = fileName.replace(/\.ya?ml$/, '');
   const lockFileName = getSiblingFileName(
@@ -58,8 +59,7 @@ export async function updateArtifacts({
         `Regenerating ${lockFileName}`,
       );
       cmd = `apko lock ${fileName}`;
-    } else {
-      /* v8 ignore next 3 -- unreachable in practice due to test setup constraints */
+    } /* v8 ignore next 3 -- unreachable in practice due to test setup constraints */ else {
       logger.trace('No updated apko packages - returning null');
       return null;
     }

@@ -133,8 +133,7 @@ export class ApkDatasource extends Datasource {
           if (apkIndexContent) {
             logger.debug('Successfully extracted APKINDEX content');
             resolve(apkIndexContent);
-          } else {
-            /* v8 ignore next 3 -- hard to test stream errors */
+          } /* v8 ignore next 3 -- hard to test stream errors */ else {
             logger.warn('APKINDEX file not found in tar archive');
             resolve('');
           }
@@ -149,8 +148,7 @@ export class ApkDatasource extends Datasource {
         // Write the decompressed buffer to the extract stream
         extract.end(decompressedBuffer);
       });
-    } catch (err) {
-      /* v8 ignore next 3 -- hard to test gzip decompression errors */
+    } /* v8 ignore next 3 -- hard to test gzip decompression errors */ catch (err) {
       logger.warn({ err }, 'Error extracting APK index from tar.gz');
       return '';
     }
