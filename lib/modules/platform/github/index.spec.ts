@@ -958,7 +958,7 @@ describe('modules/platform/github/index', () => {
       expect(res).toBeFalse();
     });
 
-    it('should detect non_fast_forward ruleset', async () => {
+    it('should ignore non_fast_forward ruleset for determining rebase', async () => {
       httpMock
         .scope(githubApiHost)
         .get('/repos/undefined/rules/branches/main')
@@ -970,8 +970,16 @@ describe('modules/platform/github/index', () => {
             ruleset_id: 12345,
           },
         ]);
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/main/protection')
+        .reply(200, {
+          required_status_checks: {
+            strict: false,
+          },
+        });
       const res = await github.getBranchForceRebase('main');
-      expect(res).toBeTrue();
+      expect(res).toBeFalse();
     });
 
     it('should detect strict required status checks ruleset', async () => {
