@@ -279,14 +279,32 @@ For example:
 
 ## cacheHardTtlMinutes
 
-This experimental feature is used to implement the concept of a "soft" cache expiry for datasources, starting with `npm`.
-It should be set to a non-zero value, recommended to be at least 60 (i.e. one hour).
+This experimental feature configures the physical lifetime of cache entries.
+Renovate internally uses two types of Time-to-Live (TTL) for its cache:
 
-When this value is set, the `npm` datasource will use the `cacheHardTtlMinutes` value for cache expiry, instead of its default expiry of 15 minutes, which becomes the "soft" expiry value.
-Results which are soft expired are reused in the following manner:
+- **Soft TTL (logical):** When a cache entry's soft TTL expires, Renovate tries to refresh the data from the upstream source.
+- **Hard TTL (physical):** When a cache entry's hard TTL expires, Renovate permanently removes the data from the cache.
 
-- The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
-- If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
+This two-level cache expiry is used for:
+
+1. [HTTP caching](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching) with `ETag`, `Last-Modified`, and `If-Modified-Since` headers
+2. `getReleases` and `getDigest` datasource methods, i.e. the package release data
+
+If an upstream request fails, Renovate can still use stale data from the cache as long as its hard TTL has not expired.
+
+The `cacheHardTtlMinutes` option lets you configure the hard TTL.
+Set this to a non-zero value, the recommended minimum is 60 (one hour).
+
+If the soft TTL for a cache entry is longer than the hard TTL, Renovate uses the soft TTL value for both.
+The soft TTL is hard-coded but can be overridden with [`cacheTtlOverride`](./self-hosted-configuration.md#cachettloverride).
+
+**Example:**
+
+The `npm` datasource has a default soft TTL of 15 minutes.
+When `cacheHardTtlMinutes` is set, for example to 60, Renovate will use the stale `npm` data in the following ways:
+
+- The `ETag` from the cached result is used in new requests. If the upstream server returns a `304 Not Modified` response, the cached data is revalidated and used.
+- If an error occurs when querying the `npmjs` registry, Renovate will use the stale data from the cache as long as it has been cached for less than 60 minutes.
 
 ## cachePrivatePackages
 
@@ -294,7 +312,12 @@ In the self-hosted setup, use option to enable caching of private packages to im
 
 ## cacheTtlOverride
 
-Utilize this key-value map to override the default package cache TTL values for a specific namespace. This object contains pairs of namespaces and their corresponding TTL values in minutes.
+Use this key-value map to override the default package cache TTL values for a specific namespace.
+This object contains pairs of namespaces and their corresponding TTL values in minutes.
+
+Internally, Renovate has the notion of soft TTL and hard TTL.
+In some contexts they are equal, but when they differ, this option overrides the soft TTL.
+See [`cacheHardTtlMinutes`](./self-hosted-configuration.md#cachehardttlminutes) for more information.
 
 You can use:
 
