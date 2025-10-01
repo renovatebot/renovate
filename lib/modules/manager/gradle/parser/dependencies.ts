@@ -190,29 +190,27 @@ const qImplicitGradlePlugin = q
   .handler(handleImplicitDep)
   .handler(cleanupTempVars);
 
+// Match the use* method call with version parameter
+const qTestSuiteMethod = q
+  .sym(
+    regEx(`^(?:${Object.keys(GRADLE_TEST_SUITES).join('|')})$`),
+    storeVarToken,
+  )
+  .handler((ctx) => storeInTokenMap(ctx, 'implicitDepName'))
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    maxMatches: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q.begin<Ctx>().join(qVersion).end(),
+  });
+
 // testing { suites { test { useSpock("1.2.3") } } }
+// testing.suites.test { useJunit("1.2.3") }
 const qImplicitTestSuites = qDotOrBraceExpr(
   'testing',
-  qDotOrBraceExpr(
-    'suites',
-    qDotOrBraceExpr(
-      'test',
-      q
-        .sym(
-          regEx(`^(?:${Object.keys(GRADLE_TEST_SUITES).join('|')})$`),
-          storeVarToken,
-        )
-        .handler((ctx) => storeInTokenMap(ctx, 'implicitDepName'))
-        .tree({
-          type: 'wrapped-tree',
-          maxDepth: 1,
-          maxMatches: 1,
-          startsWith: '(',
-          endsWith: ')',
-          search: q.begin<Ctx>().join(qVersion).end(),
-        }),
-    ),
-  ),
+  qDotOrBraceExpr('suites', qDotOrBraceExpr('test', qTestSuiteMethod)),
 )
   .handler(handleImplicitDep)
   .handler(cleanupTempVars);
@@ -243,20 +241,7 @@ const qImplicitTestSuitesWithType = q
         maxDepth: 1,
         startsWith: '{',
         endsWith: '}',
-        search: q
-          .sym(
-            regEx(`^(?:${Object.keys(GRADLE_TEST_SUITES).join('|')})$`),
-            storeVarToken,
-          )
-          .handler((ctx) => storeInTokenMap(ctx, 'implicitDepName'))
-          .tree({
-            type: 'wrapped-tree',
-            maxDepth: 1,
-            maxMatches: 1,
-            startsWith: '(',
-            endsWith: ')',
-            search: q.begin<Ctx>().join(qVersion).end(),
-          }),
+        search: qTestSuiteMethod,
       }),
   })
   .handler(handleImplicitDep)
