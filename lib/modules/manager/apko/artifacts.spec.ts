@@ -49,8 +49,75 @@ describe('modules/manager/apko/artifacts', () => {
       expect(await updateArtifacts(updateArtifact)).toBeNull();
     });
 
+    it('skips if no updated dependencies and not lock file maintenance', async () => {
+      const testArtifact = {
+        config: { isLockFileMaintenance: false },
+        updatedDeps: [],
+        packageFileName: 'apko.yaml',
+        newPackageFileContent: apkoYaml,
+      };
+      fs.getSiblingFileName.mockReturnValueOnce('apko.lock.json');
+      fs.readLocalFile.mockResolvedValueOnce(`{}`); // Mock existing lock file content
+      const result = await updateArtifacts(testArtifact);
+      expect(result).toBeNull();
+    });
+
+    it('explicitly tests the else branch with empty updatedDeps', async () => {
+      // This test should hit the else branch: isLockFileMaintenance=false AND updatedDeps.length=0
+      const testArtifact = {
+        config: { isLockFileMaintenance: false },
+        updatedDeps: [], // Empty array
+        packageFileName: 'apko.yaml',
+        newPackageFileContent: apkoYaml,
+      };
+      fs.getSiblingFileName.mockReturnValueOnce('apko.lock.json');
+      fs.readLocalFile.mockResolvedValueOnce(`{}`); // Mock existing lock file content
+      const result = await updateArtifacts(testArtifact);
+      expect(result).toBeNull();
+    });
+
+    it('handles regular updates with updated dependencies', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('apko.lock.json');
+      fs.readLocalFile.mockResolvedValueOnce(`{}`);
+      const execSnapshots = mockExecAll();
+      const oldLockFileContent = Buffer.from('Old apko.lock.json');
+      const newLockFileContent = Buffer.from('New apko.lock.json');
+      fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
+      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
+      expect(
+        await updateArtifacts({
+          packageFileName: 'apko.yaml',
+          newPackageFileContent: apkoYaml,
+          updatedDeps: [{ depName: 'nginx', newValue: '1.24.1' }],
+          config: { isLockFileMaintenance: false },
+        }),
+      ).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'apko.lock.json',
+            contents: newLockFileContent,
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'apko lock apko.yaml',
+          options: {
+            cwd: '.',
+            encoding: 'utf-8',
+            env: {},
+            maxBuffer: 10485760,
+            timeout: 900000,
+          },
+        },
+      ]);
+    });
+
     it('skips if no lock file exists', async () => {
       updateArtifact.config = { isLockFileMaintenance: true };
+      fs.getSiblingFileName.mockReturnValueOnce('apko.lock.json');
+      fs.readLocalFile.mockResolvedValueOnce(null as never);
       expect(await updateArtifacts(updateArtifact)).toBeNull();
     });
 

@@ -717,5 +717,141 @@ describe('modules/manager/apko/extract', () => {
         lockFiles: undefined, // No lock file mocked, so will be undefined
       });
     });
+
+    it('handles case where dependency exists only in lock file', async () => {
+      const apkoYaml = codeBlock`
+        contents:
+          repositories:
+            - https://dl-cdn.alpinelinux.org/alpine/edge/main
+          packages:
+            - nginx=1.24.0
+        archs:
+          - x86_64
+          - aarch64
+      `;
+
+      // Mock lock file content that contains nginx and a transitive dependency
+      const lockFileContent = JSON.stringify({
+        contents: {
+          packages: [
+            { name: 'nginx', version: '1.24.0-r0' },
+            { name: 'transitive-package', version: '2.0.0-r0' },
+          ],
+        },
+      });
+
+      // Mock getSiblingFileName to return the lock file name
+      vi.mocked(getSiblingFileName).mockReturnValueOnce('apko.lock.json');
+      vi.mocked(readLocalFile).mockResolvedValueOnce(lockFileContent);
+
+      const result = await extractPackageFile(apkoYaml, 'apko.yaml');
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: 'apk',
+            depName: 'nginx',
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
+            currentValue: '1.24.0',
+            lockedVersion: '1.24.0-r0',
+            versioning: 'apk',
+          },
+          {
+            datasource: 'apk',
+            depName: 'transitive-package',
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
+            currentValue: '2.0.0-r0',
+            lockedVersion: '2.0.0-r0',
+            versioning: 'apk',
+          },
+        ],
+        lockFiles: ['apko.lock.json'],
+      });
+    });
+
+    it('handles lock file parsing error and falls back to architecture-specific URLs', async () => {
+      const apkoYaml = codeBlock`
+        contents:
+          repositories:
+            - https://dl-cdn.alpinelinux.org/alpine/edge/main
+          packages:
+            - nginx=1.24.0
+        archs:
+          - x86_64
+          - aarch64
+      `;
+
+      // Mock getSiblingFileName to return the lock file name
+      vi.mocked(getSiblingFileName).mockReturnValueOnce('apko.lock.json');
+      // Mock lock file content that will cause a parsing error
+      vi.mocked(readLocalFile).mockResolvedValueOnce('invalid yaml content: [');
+
+      const result = await extractPackageFile(apkoYaml, 'apko.yaml');
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: 'apk',
+            depName: 'nginx',
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/aarch64',
+            ],
+            currentValue: '1.24.0',
+            versioning: 'apk',
+          },
+        ],
+        lockFiles: ['not here'],
+      });
+    });
+
+    it('handles different architecture translations', async () => {
+      const apkoYaml = codeBlock`
+        contents:
+          repositories:
+            - https://dl-cdn.alpinelinux.org/alpine/edge/main
+          packages:
+            - nginx=1.24.0
+        archs:
+          - i386
+          - arm/v6
+          - arm/v7
+      `;
+
+      const result = await extractPackageFile(apkoYaml, 'apko.yaml');
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: 'apk',
+            depName: 'nginx',
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/armhf',
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/armv7',
+            ],
+            currentValue: '1.24.0',
+            versioning: 'apk',
+          },
+        ],
+        lockFiles: undefined,
+      });
+    });
+
+    it('throws error when archs is not specified', async () => {
+      const apkoYaml = codeBlock`
+        contents:
+          repositories:
+            - https://dl-cdn.alpinelinux.org/alpine/edge/main
+          packages:
+            - nginx=1.24.0
+      `;
+
+      const result = await extractPackageFile(apkoYaml, 'apko.yaml');
+      expect(result).toBeNull();
+    });
   });
 });

@@ -141,7 +141,7 @@ export class ApkDatasource extends Datasource {
         });
 
         extract.on('error', (err: Error) => {
-          /* c8 ignore next 2 -- hard to test tar extraction errors */
+          /* v8 ignore next 2 -- hard to test tar extraction errors */
           logger.warn({ err }, 'Error extracting tar archive');
           reject(err);
         });
@@ -150,7 +150,7 @@ export class ApkDatasource extends Datasource {
         extract.end(decompressedBuffer);
       });
     } catch (err) {
-      /* c8 ignore next 3 -- hard to test gzip decompression errors */
+      /* v8 ignore next 3 -- hard to test gzip decompression errors */
       logger.warn({ err }, 'Error extracting APK index from tar.gz');
       return '';
     }

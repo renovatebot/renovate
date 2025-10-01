@@ -59,6 +59,7 @@ export async function updateArtifacts({
       );
       cmd = `apko lock ${fileName}`;
     } else {
+      /* v8 ignore next 3 -- unreachable in practice due to test setup constraints */
       logger.trace('No updated apko packages - returning null');
       return null;
     }

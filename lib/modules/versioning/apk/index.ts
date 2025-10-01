@@ -202,7 +202,7 @@ class ApkVersioningApi extends GenericVersioningApi {
         }
       } else {
         // One is undefined, the other exists
-        /* c8 ignore next 2 -- unreachable in practice due to regex matching behavior */
+        /* v8 ignore next 2 -- unreachable in practice due to regex matching behavior */
         return matchv1 ? 1 : -1;
       }
     }
@@ -222,7 +222,7 @@ class ApkVersioningApi extends GenericVersioningApi {
           return -1;
         } else if (matchv1 && matchv2) {
           // Both have non-numeric parts, compare lexicographically
-          /* c8 ignore next -- unreachable in practice due to early returns in remaining segments logic */
+          /* v8 ignore next -- unreachable in practice due to early returns in remaining segments logic */
           return matchv1.localeCompare(matchv2);
         } else if (matchv1) {
           // v1 has a non-numeric part, v2 doesn't (implicit empty), letters are less than empty
@@ -232,11 +232,11 @@ class ApkVersioningApi extends GenericVersioningApi {
           return 1;
         }
       }
-      /* c8 ignore next -- unreachable in practice due to early returns in loop */
+      /* v8 ignore next -- unreachable in practice due to early returns in loop */
     }
 
     // All parts compared successfully, versions are equal
-    /* c8 ignore next -- unreachable in practice due to early returns in comparison logic */
+    /* v8 ignore next -- unreachable in practice due to early returns in comparison logic */
     return 0;
   }
 
@@ -296,7 +296,7 @@ class ApkVersioningApi extends GenericVersioningApi {
           const targetParsed = this._parse(targetVersion);
           const versionParsed = this._parse(version);
           if (!targetParsed || !versionParsed) {
-            /* c8 ignore next 2 -- unreachable defensive code, isValid filters out invalid versions */
+            /* v8 ignore next 2 -- unreachable defensive code, isValid filters out invalid versions */
             return false;
           }
 
@@ -319,7 +319,7 @@ class ApkVersioningApi extends GenericVersioningApi {
           const targetMajor = this.getMajor(targetVersion);
           const versionMajor = this.getMajor(version);
           if (targetMajor === null || versionMajor === null) {
-            /* c8 ignore next 2 -- unreachable defensive code, isValid filters out invalid versions */
+            /* v8 ignore next 2 -- unreachable defensive code, isValid filters out invalid versions */
             return false;
           }
 
@@ -346,7 +346,7 @@ class ApkVersioningApi extends GenericVersioningApi {
           }
         }
         default:
-          /* c8 ignore next -- unreachable defensive code for unknown range operators */
+          /* v8 ignore next -- unreachable defensive code for unknown range operators */
           return false;
       }
     });
