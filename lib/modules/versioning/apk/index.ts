@@ -28,33 +28,33 @@ class ApkVersioningApi extends GenericVersioningApi {
   /**
    * Parse APK version format using apko's version parsing patterns
    * Based on: https://github.com/chainguard-dev/apko/blob/main/pkg/apk/apk/version.go
-   *
    */
   protected _parse(version: string): ApkVersion | null {
-    // Enhanced regex based on Go pattern but more flexible for complex prerelease identifiers
-    // Groups: 1=major, 2=minor.patch, 3=unused, 4=letter, 5=prerelease_full, 6=package_fix_full, 7=release_full, 8=release_num
+    // Original Go regex pattern from apko
+    // Groups: 1=major, 2=minor.patch, 3=unused, 4=letter, 5=prerelease_type, 6=prerelease_num, 7=package_fix_type, 8=package_fix_num, 9=release_prefix, 10=release_num
     // Regex from https://github.com/chainguard-dev/apko/blob/main/pkg/apk/apk/version.go
     const versionRegex = regEx(
-      /^v?([0-9]+)((\.[0-9]+)*)([a-z]?)((_[a-z]+(?:_[a-z]+)*[0-9]*))?((_cvs|_svn|_git|_hg|_p)[0-9]*)?(-r([0-9]+))?$/,
+      /^v?([0-9]+)((\.[0-9]+)*)([a-z]?)((_alpha|_beta|_pre|_rc)([0-9]*))?((_cvs|_svn|_git|_hg|_p)([0-9]*))?((-r)([0-9]+))?$/,
     );
 
-    // /^v?([0-9]+)((\.[0-9]+)*)([a-z]?)((_[a-z]+(?:_[a-z]+)*[0-9]*))?((_cvs|_svn|_git|_hg|_p)[0-9]*)?(-r([0-9]+))?$/
-    //  ^1^    ^2^^^^^^^^^^^ ^3^      ^4^                    ^5^                    ^6^              ^7^^^^^ ^8^
-    //  |      |             |        |                      |                      |                |       |
-    //  |      |             |        |                      |                      |                |       └─ Release number (used)
-    //  |      |             |        |                      |                      |                └─ Full release group (unused - needed for ? quantifier)
-    //  |      |             |        |                      |                      └─ Package fix (used)
-    //  |      |             |        |                      └─ Prerelease (used)
+    // /^v?([0-9]+)((\.[0-9]+)*)([a-z]?)((_alpha|_beta|_pre|_rc)([0-9]*))?((_cvs|_svn|_git|_hg|_p)([0-9]*))?((-r)([0-9]+))?$/
+    //  ^1^    ^2^^^^^^^^^^^ ^3^      ^4^      ^5^              ^6^        ^7^              ^8^        ^9^^ ^10^
+    //  |      |             |        |        |                |          |                |          |    |
+    //  |      |             |        |        |                |          |                |          |    └─ Release number (used)
+    //  |      |             |        |        |                |          |                |          └─ Release prefix (unused - needed for ? quantifier)
+    //  |      |             |        |        |                |          |                └─ Package fix number (used)
+    //  |      |             |        |        |                |          └─ Package fix type (used)
+    //  |      |             |        |        |                └─ Prerelease number (used)
+    //  |      |             |        |        └─ Prerelease type (used)
     //  |      |             |        └─ Letter (used)
     //  |      |             └─ Inner repetition group (unused - needed for * quantifier)
     //  |      └─ Minor.patch (used)
     //  └─ Major (used)
     //
-    // Note: Groups 3 and 7 are "unused" in destructuring but required for the regex to work:
+    // Note: Groups 3 and 9 are "unused" in destructuring but required for the regex to work:
     // - Group 3: Inner group needed for the * quantifier to repeat the full \.[0-9]+ pattern
-    // - Group 7: Outer group needed for the ? quantifier to make the entire -r[0-9]+ optional
+    // - Group 9: Outer group needed for the ? quantifier to make the entire -r[0-9]+ optional
     const match = versionRegex.exec(version);
-
     if (!match) {
       return null;
     }
@@ -65,33 +65,30 @@ class ApkVersioningApi extends GenericVersioningApi {
       minorPatch,
       ,
       letter,
-      prereleaseFull,
-      packageFixFull,
+      ,
+      prereleaseType,
+      prereleaseNum,
+      packageFixType,
+      packageFixNum,
+      ,
       ,
       ,
       releaseNum,
     ] = match;
 
-    // Build the full version string (without release number)
+    // Build the full version string (without release number and prerelease)
+    const packageFixFull = packageFixType
+      ? packageFixType + (packageFixNum || '')
+      : '';
+
+    // For version comparison, we only include the base version + package fix, not prerelease
     const versionStr =
-      major +
-      (minorPatch || '') +
-      (letter || '') +
-      (prereleaseFull || '') +
-      (packageFixFull || '');
+      major + (minorPatch || '') + (letter || '') + (packageFixFull || '');
 
     // Extract prerelease identifier if present
     let prerelease: string | undefined;
-    if (prereleaseFull) {
-      const identifier = prereleaseFull.substring(1); // Remove leading _
-      // Only treat as prerelease if it's not a package fix or special pattern
-      if (
-        !['p', 'cvs', 'git', 'svn', 'hg'].some((prefix) =>
-          identifier.startsWith(prefix),
-        )
-      ) {
-        prerelease = identifier;
-      }
+    if (prereleaseType) {
+      prerelease = prereleaseType.substring(1) + (prereleaseNum || '');
     }
 
     // Extract numeric parts for major/minor/patch
@@ -101,8 +98,8 @@ class ApkVersioningApi extends GenericVersioningApi {
       release.push(...minorPatchParts);
     }
 
-    // Extract just the number part from release number (e.g., "-r1" -> "1")
-    const releaseString = releaseNum ? releaseNum.substring(2) : '';
+    // Extract release string (just the number part)
+    const releaseString = releaseNum || '';
 
     return {
       version: versionStr,
@@ -114,9 +111,6 @@ class ApkVersioningApi extends GenericVersioningApi {
 
   /**
    * Compare two APK versions according to Alpine Linux rules
-   * 1. Compare version parts (without release number)
-   * 2. Compare prerelease identifiers
-   * 3. Compare release numbers
    */
   protected override _compare(version: string, other: string): number {
     const parsed1 = this._parse(version);
@@ -135,18 +129,19 @@ class ApkVersioningApi extends GenericVersioningApi {
       return versionCompare;
     }
 
-    // If version parts are the same, compare prerelease identifiers
-    if (parsed1.prerelease || parsed2.prerelease) {
-      if (!parsed1.prerelease) {
-        return 1; // Stable version is greater than prerelease
+    // Compare prerelease identifiers
+    const prerelease1 = parsed1.prerelease;
+    const prerelease2 = parsed2.prerelease;
+
+    if (prerelease1 || prerelease2) {
+      if (!prerelease1) {
+        return -1; // Stable version is less than prerelease
       }
-      if (!parsed2.prerelease) {
-        return -1; // Prerelease version is less than stable
+      if (!prerelease2) {
+        return 1; // Prerelease version is greater than stable
       }
       // Both have prerelease identifiers, compare them
-      const prereleaseCompare = parsed1.prerelease.localeCompare(
-        parsed2.prerelease,
-      );
+      const prereleaseCompare = prerelease1.localeCompare(prerelease2);
       if (prereleaseCompare !== 0) {
         return prereleaseCompare;
       }
@@ -165,12 +160,15 @@ class ApkVersioningApi extends GenericVersioningApi {
     }
 
     // If both have release numbers or neither has release numbers, compare them
-    return this._compareVersionParts(release1 || '0', release2 || '0');
+    const releaseCompare = this._compareVersionParts(
+      release1 || '0',
+      release2 || '0',
+    );
+    return releaseCompare;
   }
 
   /**
    * Compare version parts using APK's version comparison rules
-   * Simplified version that handles APK-specific patterns
    */
   private _compareVersionParts(v1: string, v2: string): number {
     if (v1 === v2) {
@@ -198,25 +196,49 @@ class ApkVersioningApi extends GenericVersioningApi {
         }
       } else if (matchv2 && /^\d+$/.test(matchv2)) {
         return -1; // letters are less than numbers
-      } else {
+      } else if (matchv1 && matchv2) {
         // Both are strings, compare lexicographically
         if (matchv1 !== matchv2) {
           return matchv1.localeCompare(matchv2);
         }
+      } else {
+        // One is undefined, the other exists
+        return matchv1 ? 1 : -1;
       }
     }
 
-    // whichever has the most segments wins
-    return matchesv1.length > matchesv2.length ? 1 : -1;
+    // Handle remaining segments when one version has more parts
+    if (matchesv1.length !== matchesv2.length) {
+      const maxLength = Math.max(matchesv1.length, matchesv2.length);
+      for (let i = matches; i < maxLength; i++) {
+        const matchv1 = matchesv1[i];
+        const matchv2 = matchesv2[i];
+
+        if (matchv1 && /^\d+$/.test(matchv1)) {
+          // v1 has a number, v2 doesn't (implicit 0), numbers are greater
+          return 1;
+        } else if (matchv2 && /^\d+$/.test(matchv2)) {
+          // v2 has a number, v1 doesn't (implicit 0), numbers are greater
+          return -1;
+        } else if (matchv1 && matchv2) {
+          // Both have non-numeric parts, compare lexicographically
+          return matchv1.localeCompare(matchv2);
+        } else if (matchv1) {
+          // v1 has a non-numeric part, v2 doesn't (implicit empty), letters are less than empty
+          return -1;
+        } else if (matchv2) {
+          // v2 has a non-numeric part, v1 doesn't (implicit empty), letters are less than empty
+          return 1;
+        }
+      }
+    }
+
+    return 0;
   }
 
   override isValid(version: string): boolean {
     const parsed = this._parse(version);
-    if (!parsed) {
-      return false;
-    }
-    // APK versions must start with a number
-    return /^\d/.test(parsed.version);
+    return parsed !== null;
   }
 
   override isStable(version: string): boolean {
@@ -342,7 +364,7 @@ class ApkVersioningApi extends GenericVersioningApi {
 
   override getPatch(version: string): number | null {
     const parsed = this._parse(version);
-    if (!parsed || parsed.prerelease?.startsWith('p')) {
+    if (!parsed) {
       return null;
     }
     return parsed.release[2] ?? null;

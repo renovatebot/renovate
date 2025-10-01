@@ -54,7 +54,7 @@ V:1.24.0-r0`;
     it('should skip packages missing required fields', () => {
       const loggerWarnSpy = vi
         .spyOn(logger, 'warn')
-        .mockImplementation(() => {});
+        .mockImplementation(() => undefined);
 
       const indexContent = `P:bash
 V:5.2.15-r0
@@ -100,7 +100,7 @@ t:1700000001`;
     it('should handle parsing errors gracefully', () => {
       const loggerWarnSpy = vi
         .spyOn(logger, 'warn')
-        .mockImplementation(() => {});
+        .mockImplementation(() => undefined);
 
       // Mock an error by providing invalid content that would cause parsing to fail
       const indexContent = null as any;
