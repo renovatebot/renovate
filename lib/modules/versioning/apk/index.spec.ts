@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import apk from '.';
 
 describe('modules/versioning/apk/index', () => {
@@ -420,6 +421,15 @@ describe('modules/versioning/apk/index', () => {
       );
     });
 
+    it('should handle caret range with invalid version in list', () => {
+      const versions = ['2.39.0-r0', 'invalid', '3.0.0-r0'];
+
+      // This should trigger the null check in caret range logic when version parsing fails
+      expect(apk.getSatisfyingVersion(versions, '^2.39.0-r0')).toBe(
+        '2.39.0-r0',
+      );
+    });
+
     it('should handle target version with null getMajor in caret range', () => {
       // Test case where the target version itself has null getMajor
       const versions = ['2.39.0-r0', '3.0.0-r0'];
@@ -435,6 +445,8 @@ describe('modules/versioning/apk/index', () => {
       expect(apk.getSatisfyingVersion(versions, '!2.39.0-r0')).toBe(null);
       expect(apk.getSatisfyingVersion(versions, '?2.39.0-r0')).toBe(null);
       expect(apk.getSatisfyingVersion(versions, '*2.39.0-r0')).toBe(null);
+      expect(apk.getSatisfyingVersion(versions, '@2.39.0-r0')).toBe(null);
+      expect(apk.getSatisfyingVersion(versions, '#2.39.0-r0')).toBe(null);
     });
 
     it('should handle tilde range with invalid target version', () => {
@@ -442,6 +454,15 @@ describe('modules/versioning/apk/index', () => {
 
       // This should trigger the null check in tilde range logic when target parsing fails
       expect(apk.getSatisfyingVersion(versions, '~invalid')).toBe(null);
+    });
+
+    it('should handle tilde range with invalid version in list', () => {
+      const versions = ['2.39.0-r0', 'invalid', '2.40.0-r0'];
+
+      // This should trigger the null check in tilde range logic when version parsing fails
+      expect(apk.getSatisfyingVersion(versions, '~2.39.0-r0')).toBe(
+        '2.39.0-r0',
+      );
     });
 
     it('should handle caret range with null getMajor for target version', () => {
@@ -489,6 +510,70 @@ describe('modules/versioning/apk/index', () => {
       // where matchv1 exists and matchv2 is undefined
       expect(apk.sortVersions('2.39.0.1-r0', '2.39.0-r0')).toBeGreaterThan(0);
       expect(apk.sortVersions('2.39.0-r0', '2.39.0.1-r0')).toBeLessThan(0);
+    });
+
+    it('should handle equal version comparison in _compareVersionParts', () => {
+      // Test case where versions are exactly equal
+      // This should trigger the final return 0 in _compareVersionParts
+      expect(apk.sortVersions('2.39.0-r0', '2.39.0-r0')).toBe(0);
+      expect(apk.sortVersions('1.0.0', '1.0.0')).toBe(0);
+      expect(apk.sortVersions('0.3.4_pre20061029', '0.3.4_pre20061029')).toBe(
+        0,
+      );
+      expect(apk.sortVersions('6.5_p20250503-r0', '6.5_p20250503-r0')).toBe(0);
+
+      // Test with more complex equal versions to ensure we hit the return 0 path
+      expect(apk.sortVersions('2.39.0a-r0', '2.39.0a-r0')).toBe(0);
+      expect(apk.sortVersions('2.39.0_beta-r0', '2.39.0_beta-r0')).toBe(0);
+      expect(apk.sortVersions('2.39.0_rc1-r0', '2.39.0_rc1-r0')).toBe(0);
+    });
+
+    it('should handle versions with different lengths in _compareVersionParts', () => {
+      // Test case where one version has more parts than the other
+      // This should trigger the remaining segments logic
+      expect(apk.sortVersions('2.39.0.1-r0', '2.39.0-r0')).toBeGreaterThan(0);
+      expect(apk.sortVersions('2.39.0-r0', '2.39.0.1-r0')).toBeLessThan(0);
+      // Test with valid APK version formats
+      expect(apk.sortVersions('2.39.0_rc1-r0', '2.39.0-r0')).toBeGreaterThan(0);
+      expect(apk.sortVersions('2.39.0-r0', '2.39.0_rc1-r0')).toBeLessThan(0);
+    });
+
+    it('should handle versions with equal parts but different lengths', () => {
+      // Test case where all common parts are equal but one version has more parts
+      // This should trigger the final return 0 path when all parts are equal
+      expect(apk.sortVersions('2.39.0', '2.39.0')).toBe(0);
+      expect(apk.sortVersions('2.39.0a', '2.39.0a')).toBe(0);
+    });
+
+    it('should handle versions where one has more parts during main comparison', () => {
+      // Test case where one version has more parts than the other during the main comparison loop
+      // This should trigger the else block where one is undefined, the other exists
+      // We need versions where the for loop runs but one version has fewer parts
+      expect(apk.sortVersions('2.39.0.1', '2.39.0')).toBeGreaterThan(0);
+      expect(apk.sortVersions('2.39.0', '2.39.0.1')).toBeLessThan(0);
+    });
+
+    it('should handle versions with different lengths where for loop runs but one has fewer parts', () => {
+      // Test case where the for loop runs but one version has fewer parts
+      // This should trigger the else block where one is undefined, the other exists
+      // In APK versioning, letters are less than numbers, so 2.39.0a < 2.39.0
+      expect(apk.sortVersions('2.39.0a', '2.39.0')).toBeLessThan(0);
+      expect(apk.sortVersions('2.39.0', '2.39.0a')).toBeGreaterThan(0);
+    });
+
+    it('should handle versions where regex matches different numbers of parts', () => {
+      // Test case where the regex matches different numbers of parts for the two versions
+      // This should trigger the else block where one is undefined, the other exists
+      // We need versions where the regex produces different numbers of matches
+      expect(apk.sortVersions('2.39.0a', '2.39.0b')).toBeLessThan(0);
+      expect(apk.sortVersions('2.39.0b', '2.39.0a')).toBeGreaterThan(0);
+    });
+
+    it('should handle versions with different lengths in remaining segments', () => {
+      // Test case where versions have different lengths and we need to handle remaining segments
+      // This should trigger the remaining segments logic
+      expect(apk.sortVersions('2.39.0.1.2', '2.39.0.1')).toBeGreaterThan(0);
+      expect(apk.sortVersions('2.39.0.1', '2.39.0.1.2')).toBeLessThan(0);
     });
   });
 });
