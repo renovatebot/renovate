@@ -141,34 +141,11 @@ export async function extractPackageFile(
           lockedPackages.add(pkg.name);
         }
 
-        // Add locked versions to dependencies and mark packages that are in both files
+        // Add locked versions to dependencies that are in both files
         for (const dep of deps) {
           if (dep.depName && lockedVersions.has(dep.depName)) {
             dep.lockedVersion = lockedVersions.get(dep.depName);
             // Keep architecture-specific URLs for locked packages
-          }
-        }
-
-        // Also add dependencies for packages that are only in the lock file
-        // but not in the apko.yaml (transitive dependencies)
-        for (const [pkgName, pkgVersion] of lockedVersions) {
-          const existingDep = deps.find((dep) => dep.depName === pkgName);
-          if (!existingDep) {
-            // Use the same architecture-specific registry URLs as direct dependencies
-            const registryUrls =
-              parsed.archs?.map((arch) => {
-                const translatedArch = translateArch(arch);
-                return `${parsed.contents?.repositories?.[0]}/${translatedArch}`;
-              }) || parsed.contents?.repositories; /* v8 ignore next */
-
-            deps.push({
-              datasource: ApkDatasource.id,
-              depName: pkgName,
-              currentValue: pkgVersion,
-              lockedVersion: pkgVersion,
-              versioning: apkVersioning,
-              registryUrls,
-            });
           }
         }
 
