@@ -217,6 +217,51 @@ const qImplicitTestSuites = qDotOrBraceExpr(
   .handler(handleImplicitDep)
   .handler(cleanupTempVars);
 
+// testing { suites.withType(JvmTestSuite).configureEach { useJUnitJupiter("5.13.4") } }
+// testing { suites.withType(JvmTestSuite::class).configureEach { useSpock("2.3") } }
+const qImplicitTestSuitesWithType = q
+  .sym<Ctx>('testing')
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    startsWith: '{',
+    endsWith: '}',
+    search: q
+      .sym<Ctx>('suites')
+      .op('.')
+      .sym('withType')
+      .tree({
+        type: 'wrapped-tree',
+        maxDepth: 2,
+        startsWith: '(',
+        endsWith: ')',
+      })
+      .op('.')
+      .sym('configureEach')
+      .tree({
+        type: 'wrapped-tree',
+        maxDepth: 1,
+        startsWith: '{',
+        endsWith: '}',
+        search: q
+          .sym(
+            regEx(`^(?:${Object.keys(GRADLE_TEST_SUITES).join('|')})$`),
+            storeVarToken,
+          )
+          .handler((ctx) => storeInTokenMap(ctx, 'implicitDepName'))
+          .tree({
+            type: 'wrapped-tree',
+            maxDepth: 1,
+            maxMatches: 1,
+            startsWith: '(',
+            endsWith: ')',
+            search: q.begin<Ctx>().join(qVersion).end(),
+          }),
+      }),
+  })
+  .handler(handleImplicitDep)
+  .handler(cleanupTempVars);
+
 export const qDependencies = q.alt(
   qDependencyStrings,
   qDependencySet,
@@ -225,6 +270,7 @@ export const qDependencies = q.alt(
   qKotlinMapNotationDependencies,
   qImplicitGradlePlugin,
   qImplicitTestSuites,
+  qImplicitTestSuitesWithType,
   // avoid heuristic matching of gradle feature variant capabilities
   qDotOrBraceExpr('java', q.sym<Ctx>('registerFeature').tree()),
 );
