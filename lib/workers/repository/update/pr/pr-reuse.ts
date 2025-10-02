@@ -8,11 +8,8 @@ const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
 export async function tryReuseAutoclosedPr(
   branchName: string,
+  newTitle: string,
 ): Promise<Pr | null> {
-  if (!platform.tryReuseAutoclosedPr) {
-    return null;
-  }
-
   const autoclosedPr = await platform.findPr({ branchName, state: 'closed' });
   if (!autoclosedPr) {
     return null;
@@ -39,6 +36,10 @@ export async function tryReuseAutoclosedPr(
   }
 
   logger.debug(
+    `Found autoclosed PR ${autoclosedPr.number} but checking if it can be reopened`,
+  );
+
+  logger.debug(
     { number: autoclosedPr.number },
     'Found autoclosed PR for branch',
   );
@@ -49,7 +50,7 @@ export async function tryReuseAutoclosedPr(
   }
 
   try {
-    const pr = await platform.tryReuseAutoclosedPr(autoclosedPr);
+    const pr = await platform.tryReuseAutoclosedPr(autoclosedPr, newTitle);
     return pr;
   } catch (err) {
     logger.debug(
