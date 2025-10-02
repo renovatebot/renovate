@@ -1,0 +1,8 @@
+# General
+
+- This project uses `pnpm`, use it instead of `npm`, `yarn`, `npx`, etc.
+
+# Running tests
+
+Run `pnpm vitest path/to/file.spec.ts`.
+This is alias for `pnpm run vitest` defined in `package.json`.
