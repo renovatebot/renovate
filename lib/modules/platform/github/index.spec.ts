@@ -1479,7 +1479,11 @@ describe('modules/platform/github/index', () => {
         sha: '1234' as LongCommitSha,
       });
 
-      expect(pr).toMatchObject({ number: 91, sourceBranch: 'somebranch' });
+      expect(pr).toMatchObject({
+        number: 91,
+        sourceBranch: 'somebranch',
+        sha: '5678',
+      });
       expect(git.forcePushToRemote).toHaveBeenCalledWith(
         'somebranch',
         'origin',
