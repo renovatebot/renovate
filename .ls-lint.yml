@@ -14,6 +14,7 @@ ignore:
   - .github/pull_request_template.md
   - .venv
   - .worktrees
+  - AGENTS.md
   - CLAUDE.md
   - CODE_OF_CONDUCT.md
   - SECURITY.md
