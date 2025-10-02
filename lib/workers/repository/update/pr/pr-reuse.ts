@@ -10,6 +10,10 @@ export async function tryReuseAutoclosedPr(
   branchName: string,
   newTitle: string,
 ): Promise<Pr | null> {
+  if (!platform.tryReuseAutoclosedPr) {
+    return null;
+  }
+
   const autoclosedPr = await platform.findPr({ branchName, state: 'closed' });
   if (!autoclosedPr) {
     return null;
@@ -34,10 +38,6 @@ export async function tryReuseAutoclosedPr(
     );
     return null;
   }
-
-  logger.debug(
-    `Found autoclosed PR ${autoclosedPr.number} but checking if it can be reopened`,
-  );
 
   logger.debug(
     { number: autoclosedPr.number },
