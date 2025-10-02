@@ -8,7 +8,6 @@ const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
 export async function tryReuseAutoclosedPr(
   branchName: string,
-  newTitle: string,
 ): Promise<Pr | null> {
   if (!platform.tryReuseAutoclosedPr) {
     return null;
@@ -50,7 +49,7 @@ export async function tryReuseAutoclosedPr(
   }
 
   try {
-    const pr = await platform.tryReuseAutoclosedPr(autoclosedPr, newTitle);
+    const pr = await platform.tryReuseAutoclosedPr(autoclosedPr);
     return pr;
   } catch (err) {
     logger.debug(

@@ -173,7 +173,7 @@ export async function ensurePr(
   // Check if PR already exists
   const existingPr =
     (await platform.getBranchPr(branchName, config.baseBranch)) ??
-    (await tryReuseAutoclosedPr(branchName, prTitle));
+    (await tryReuseAutoclosedPr(branchName));
   const prCache = getPrCache(branchName);
   if (existingPr) {
     logger.debug('Found existing PR');
