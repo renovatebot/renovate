@@ -13,14 +13,15 @@ ignore:
   - .github/ISSUE_TEMPLATE
   - .github/pull_request_template.md
   - .venv
+  - .worktrees
+  - CLAUDE.md
   - CODE_OF_CONDUCT.md
-  - dist
-  - vitest.config.ts
-  - node_modules
   - SECURITY.md
+  - dist
+  - node_modules
   - test/e2e/node_modules
   - tmp
+  - tools/mkdocs/.cache
   - tools/mkdocs/docs
   - tools/mkdocs/site
-  - tools/mkdocs/.cache
-  - .worktrees
+  - vitest.config.ts
