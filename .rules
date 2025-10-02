@@ -6,3 +6,7 @@
 
 Run `pnpm vitest path/to/file.spec.ts`.
 This is alias for `pnpm run vitest` defined in `package.json`.
+
+# Code style
+
+- Avoid excessive nesting by using "early exit" style of functions (`return`) and loops (`break` and `continue`).
