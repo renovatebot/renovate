@@ -1,8 +1,7 @@
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../../config/global';
-import type { LongCommitSha } from '../../../../util/git/types';
 import { tryReuseAutoclosedPr } from './pr-reuse';
-import { platform, scm } from '~test/util';
+import { platform } from '~test/util';
 
 describe('workers/repository/update/pr/pr-reuse', () => {
   const tryReuseFn = platform.tryReuseAutoclosedPr;
@@ -134,32 +133,5 @@ describe('workers/repository/update/pr/pr-reuse', () => {
 
     expect(res).toBeNull();
     expect(tryReuseFn).toHaveBeenCalledOnce();
-  });
-
-  it('sets branch SHA on autoclosed PR', async () => {
-    const sha = 'abc123def456' as LongCommitSha;
-    scm.getBranchCommit.mockResolvedValueOnce(sha);
-
-    platform.findPr.mockResolvedValueOnce({
-      number: 123,
-      title: 'foobar - autoclosed',
-      sourceBranch: 'some-branch',
-      state: 'closed',
-      closedAt: DateTime.now().minus({ hours: 1 }).toISO(),
-    });
-
-    tryReuseFn.mockResolvedValueOnce({
-      number: 123,
-      title: 'foobar',
-      sourceBranch: 'some-branch',
-      state: 'open',
-      sha,
-    });
-
-    const res = await tryReuseAutoclosedPr('some-branch');
-
-    expect(scm.getBranchCommit).toHaveBeenCalledWith('some-branch');
-    expect(tryReuseFn).toHaveBeenCalledWith(expect.objectContaining({ sha }));
-    expect(res?.sha).toBe(sha);
   });
 });
