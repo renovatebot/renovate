@@ -2,6 +2,7 @@ import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
+import { scm } from '../../../../modules/platform/scm';
 import type { Pr } from '../../../../modules/platform/types';
 
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
@@ -16,6 +17,11 @@ export async function tryReuseAutoclosedPr(
   const autoclosedPr = await platform.findPr({ branchName, state: 'closed' });
   if (!autoclosedPr) {
     return null;
+  }
+
+  const branchSha = await scm.getBranchCommit(branchName);
+  if (branchSha) {
+    autoclosedPr.sha = branchSha;
   }
 
   if (!autoclosedPr.title.endsWith(' - autoclosed')) {
