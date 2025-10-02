@@ -1,4 +1,4 @@
-FROM ghcr.io/containerbase/devcontainer:13.14.5
+FROM ghcr.io/containerbase/devcontainer:13.14.6
 
 # https://github.com/pnpm/pnpm/issues/8971
 # renovate: datasource=npm
