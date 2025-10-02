@@ -191,6 +191,7 @@ export function generateBranchConfig(
   let branchUpgrades = upgrades;
   if (!branchUpgrades.every((upgrade) => upgrade.pendingChecks)) {
     // If the branch isn't pending, then remove any upgrades within which *are*
+    logger.debug('Branch is not pending, removing pending upgrades');
     branchUpgrades = branchUpgrades.filter((upgrade) => !upgrade.pendingChecks);
   }
   logger.trace({ config: branchUpgrades }, 'generateBranchConfig');
