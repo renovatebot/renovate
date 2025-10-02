@@ -1064,7 +1064,15 @@ export async function tryReuseAutoclosedPr(
       { branchName, title, number },
       'Successfully reopened autoclosed PR',
     );
+
     const result = coerceRestPr(ghPr);
+
+    const localSha = git.getBranchCommit(branchName);
+    if (localSha && localSha !== sha) {
+      await git.forcePushToRemote(branchName, 'origin');
+      result.sha = localSha;
+    }
+
     cachePr(result);
     return result;
   } catch {
