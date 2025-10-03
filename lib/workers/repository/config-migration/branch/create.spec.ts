@@ -49,6 +49,7 @@ describe('workers/repository/config-migration/branch/create', () => {
         message: 'Migrate config renovate.json',
         platformCommit: 'auto',
         force: true,
+        labels: [],
       });
     });
 
@@ -73,6 +74,7 @@ describe('workers/repository/config-migration/branch/create', () => {
         message,
         platformCommit: 'auto',
         force: true,
+        labels: [],
       });
     });
 
@@ -109,6 +111,7 @@ describe('workers/repository/config-migration/branch/create', () => {
         message: 'Migrate config renovate.json',
         platformCommit: 'auto',
         force: true,
+        labels: [],
       });
     });
 
@@ -134,6 +137,7 @@ describe('workers/repository/config-migration/branch/create', () => {
           message,
           platformCommit: 'auto',
           force: true,
+          labels: [],
         });
       });
     });
@@ -161,6 +165,7 @@ describe('workers/repository/config-migration/branch/create', () => {
           message,
           platformCommit: 'auto',
           force: true,
+          labels: [],
         });
       });
 
@@ -187,6 +192,7 @@ describe('workers/repository/config-migration/branch/create', () => {
           message,
           platformCommit: 'auto',
           force: true,
+          labels: [],
         });
       });
     });
