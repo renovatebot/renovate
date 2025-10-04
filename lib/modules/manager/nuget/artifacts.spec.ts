@@ -114,6 +114,55 @@ describe('modules/manager/nuget/artifacts', () => {
     ]);
   });
 
+  it('properly appends additional commands options when requested', async () => {
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'New packages.lock.json',
+    });
+    expect(
+      await nuget.updateArtifacts({
+        packageFileName: 'project.csproj',
+        updatedDeps: [{ depName: 'dep' }],
+        newPackageFileContent: '{}',
+        config: { ...config, postUpdateOptions: ['dotnetEnableWindowsTargeting'] },
+      }),
+    ).toEqual([
+      {
+        file: {
+          contents: 'New packages.lock.json',
+          path: 'packages.lock.json',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'dotnet workload restore --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            NUGET_PACKAGES: '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+            MSBUILDDISABLENODEREUSE: '1',
+          },
+        },
+      },
+      {
+        cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config -p:EnableWindowsTargeting=true',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            NUGET_PACKAGES: '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+            MSBUILDDISABLENODEREUSE: '1',
+          },
+        },
+      },
+    ]);
+  });
+
   it('runs workload restore and updates lock file', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
