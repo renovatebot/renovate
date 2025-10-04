@@ -72,7 +72,7 @@ async function runDotnetRestore(
     toolConstraints: [{ toolName: 'dotnet', constraint: dotnetVersion }],
   };
 
-  let dotnetRestoreOpts = [''];
+  const dotnetRestoreOpts = [''];
   if (config.postUpdateOptions?.includes('dotnetEnableWindowsTargeting')) {
     dotnetRestoreOpts.push('-p:EnableWindowsTargeting=true')
   }
