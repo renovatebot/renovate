@@ -128,7 +128,10 @@ describe('modules/manager/nuget/artifacts', () => {
         packageFileName: 'project.csproj',
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
-        config: { ...config, postUpdateOptions: ['dotnetEnableWindowsTargeting'] },
+        config: {
+          ...config,
+          postUpdateOptions: ['dotnetEnableWindowsTargeting'],
+        },
       }),
     ).toEqual([
       {
@@ -141,21 +144,12 @@ describe('modules/manager/nuget/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'dotnet workload restore --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          env: {
-            NUGET_PACKAGES: '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
-            MSBUILDDISABLENODEREUSE: '1',
-          },
-        },
-      },
-      {
         cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config -p:EnableWindowsTargeting=true',
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
-            NUGET_PACKAGES: '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+            NUGET_PACKAGES:
+              '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
             MSBUILDDISABLENODEREUSE: '1',
           },
         },
