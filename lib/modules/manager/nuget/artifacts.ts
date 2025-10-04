@@ -74,7 +74,7 @@ async function runDotnetRestore(
 
   const dotnetRestoreOpts = [''];
   if (config.postUpdateOptions?.includes('dotnetEnableWindowsTargeting')) {
-    dotnetRestoreOpts.push('-p:EnableWindowsTargeting=true')
+    dotnetRestoreOpts.push('-p:EnableWindowsTargeting=true');
   }
 
   const cmds = [
