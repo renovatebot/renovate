@@ -72,7 +72,7 @@ async function runDotnetRestore(
     toolConstraints: [{ toolName: 'dotnet', constraint: dotnetVersion }],
   };
 
-  let dotnetRestoreOpts = [];
+  let dotnetRestoreOpts = [''];
   if (config.postUpdateOptions?.includes('dotnetEnableWindowsTargeting')) {
     dotnetRestoreOpts.push('-p:EnableWindowsTargeting=true')
   }
@@ -82,7 +82,7 @@ async function runDotnetRestore(
       (fileName) =>
         `dotnet restore ${quote(
           fileName,
-        )} --force-evaluate --configfile ${quote(nugetConfigFile)} ${dotnetRestoreOpts.join(' ')}`,
+        )} --force-evaluate --configfile ${quote(nugetConfigFile)}${dotnetRestoreOpts.join(' ')}`,
     ),
   ];
 
