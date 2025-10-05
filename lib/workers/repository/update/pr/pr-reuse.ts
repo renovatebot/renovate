@@ -4,7 +4,7 @@ import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import type { Pr } from '../../../../modules/platform/types';
 
-const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7; // 7 days
+const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
 export async function tryReuseAutoclosedPr(
   branchName: string,
