@@ -160,8 +160,8 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       expect(res.release?.version).toBe('1.0.2');
     });
 
-    it('returns non-latest release if internalChecksFilter=strict and some pass checks', async () => {
-      config.internalChecksFilter = 'strict';
+    it('returns non-latest release if internalChecksFilter=flexible and some pass checks', async () => {
+      config.internalChecksFilter = 'flexible';
       config.minimumReleaseAge = '6 days';
       const res = await filterInternalChecks(
         config,
