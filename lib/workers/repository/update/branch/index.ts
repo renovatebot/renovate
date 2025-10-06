@@ -1,7 +1,11 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
+import {
+  type MinimumReleaseAgeTimestamp,
+  type RenovateConfig,
+  isMinimumReleaseAgeTimestamp,
+} from '../../../../config/types';
 import {
   CONFIG_VALIDATION,
   MANAGER_LOCKFILE_ERROR,
@@ -371,34 +375,60 @@ export async function processBranch(
     if (
       config.upgrades.some(
         (upgrade) =>
-          (is.nonEmptyString(upgrade.minimumReleaseAge) &&
-            is.nonEmptyString(upgrade.releaseTimestamp)) ||
+          is.nonEmptyString(upgrade.minimumReleaseAge) ||
           isActiveConfidenceLevel(upgrade.minimumConfidence!),
       )
     ) {
+      const depNamesWithoutReleaseTimestamp: Record<
+        MinimumReleaseAgeTimestamp,
+        string[]
+      > = {
+        required: [],
+        optional: [],
+      };
+
       // Only set a stability status check if one or more of the updates contain
       // both a minimumReleaseAge setting and a releaseTimestamp
       config.stabilityStatus = 'green';
       // Default to 'success' but set 'pending' if any update is pending
       for (const upgrade of config.upgrades) {
-        if (
-          is.nonEmptyString(upgrade.minimumReleaseAge) &&
-          upgrade.releaseTimestamp
-        ) {
-          const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
-          if (timeElapsed < coerceNumber(toMs(upgrade.minimumReleaseAge))) {
-            logger.debug(
-              {
-                depName: upgrade.depName,
-                timeElapsed,
-                minimumReleaseAge: upgrade.minimumReleaseAge,
-              },
-              'Update has not passed minimum release age',
-            );
-            config.stabilityStatus = 'yellow';
-            continue;
+        if (is.nonEmptyString(upgrade.minimumReleaseAge)) {
+          let minimumReleaseAgeTimestamp: MinimumReleaseAgeTimestamp =
+            'optional';
+          if (
+            isMinimumReleaseAgeTimestamp(upgrade.minimumReleaseAgeTimestamp)
+          ) {
+            minimumReleaseAgeTimestamp = upgrade.minimumReleaseAgeTimestamp;
+          }
+
+          // regardless of the value of `minimumReleaseAgeTimestamp`, if there is a timestamp, we will process it according to `minimumReleaseAge`
+          if (upgrade.releaseTimestamp) {
+            const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
+            if (timeElapsed < coerceNumber(toMs(upgrade.minimumReleaseAge))) {
+              logger.debug(
+                {
+                  depName: upgrade.depName,
+                  timeElapsed,
+                  minimumReleaseAge: upgrade.minimumReleaseAge,
+                },
+                'Update has not passed minimum release age',
+              );
+              config.stabilityStatus = 'yellow';
+              continue;
+            }
+          } else {
+            // if we're set to `minimumReleaseAgeTimestamp=required`, and there isn't a timestamp, always mark the update as pending
+            if (minimumReleaseAgeTimestamp === 'required') {
+              depNamesWithoutReleaseTimestamp.required.push(upgrade.depName!);
+              config.stabilityStatus = 'yellow';
+              continue;
+            } else {
+              // if there is no timestamp, and we're running in `optional` mode, we can allow it, but make sure to warn the user
+              depNamesWithoutReleaseTimestamp.optional.push(upgrade.depName!);
+            }
           }
         }
+
         const datasource = upgrade.datasource!;
         const depName = upgrade.depName!;
         const packageName = upgrade.packageName!;
@@ -427,6 +457,20 @@ export async function processBranch(
           }
         }
       }
+
+      if (depNamesWithoutReleaseTimestamp.required.length) {
+        logger.debug(
+          { depNames: depNamesWithoutReleaseTimestamp.required },
+          `${depNamesWithoutReleaseTimestamp.required.length} upgrade(s) did not have a releaseTimestamp, and as we're running with minimumReleaseAgeTimestamp=required, these upgrades(s) will be marked as pending status checks`,
+        );
+      }
+      if (depNamesWithoutReleaseTimestamp.optional.length) {
+        logger.warn(
+          { depNames: depNamesWithoutReleaseTimestamp.optional },
+          `${depNamesWithoutReleaseTimestamp.optional.length} upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeTimestamp=optional, proceeding`,
+        );
+      }
+
       // Don't create a branch if we know it will be status 'pending'
       if (
         !dependencyDashboardCheck &&
