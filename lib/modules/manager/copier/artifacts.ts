@@ -68,7 +68,7 @@ export async function updateArtifacts({
   if (!newValue) {
     return artifactError(
       packageFileName,
-      'Missing copier template VCS ref to update to',
+      'Missing copier template version to update to',
     );
   }
 
