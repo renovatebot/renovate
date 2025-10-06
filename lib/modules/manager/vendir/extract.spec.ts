@@ -12,6 +12,15 @@ vi.mock('../../../util/fs');
 
 describe('modules/manager/vendir/extract', () => {
   describe('extractPackageFile()', () => {
+    beforeEach(() => {
+      // Default: no lockfile found
+      fs.findLocalSiblingOrParent.mockResolvedValue(null);
+    });
+
+    afterEach(() => {
+      vi.clearAllMocks();
+    });
+
     it('returns null for invalid yaml file content', async () => {
       const result = await extractPackageFile('nothing here: [', 'vendir.yml', {});
       expect(result).toBeNull();
