@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { z } from 'zod';
 import {
+  Ini,
   Json,
   Json5,
   Jsonc,
@@ -512,6 +513,37 @@ describe('util/schema-utils/index', () => {
               message: 'Invalid TOML',
               code: 'custom',
               path: [],
+            },
+          ],
+        },
+        success: false,
+      });
+    });
+  });
+
+  describe('Ini', () => {
+    const Schema = Ini.pipe(
+      z.object({ foo: z.object({ bar: z.literal('baz') }) }),
+    );
+
+    it('parses valid ini', () => {
+      const content = codeBlock`
+        [foo]
+        bar = "baz"
+      `;
+      expect(Schema.parse(content)).toEqual({
+        foo: { bar: 'baz' },
+      });
+    });
+
+    it('throws error for invalid schema', () => {
+      expect(Schema.safeParse('clearly_invalid')).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Required',
+              code: 'invalid_type',
+              path: ['foo'],
             },
           ],
         },

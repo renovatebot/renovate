@@ -75,6 +75,7 @@ describe('workers/repository/reconfigure/index', () => {
     scm.branchExists.mockResolvedValueOnce(false);
     await checkReconfigureBranch(config, repoConfig);
     expect(logger.logger.debug).toHaveBeenCalledWith(
+      { reconfigureBranch: 'prefix/reconfigure' },
       'No reconfigure branch found',
     );
   });

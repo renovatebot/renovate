@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import { glob } from 'glob';
+import type { Token } from 'markdown-it';
 import MarkdownIt from 'markdown-it';
 
 const errorTitle = 'Invalid JSON in fenced code block';
@@ -12,12 +13,7 @@ let issues = 0;
 
 markdown.enable(['fence']);
 
-/**
- *
- * @param {string} file
- * @param {import('markdown-it/lib/token.mjs').default} token
- */
-function checkValidJson(file, token) {
+function checkValidJson(file: string, token: Token): void {
   const start = token.map ? token.map[0] + 1 : 0;
   const end = token.map ? token.map[1] + 1 : 0;
 
@@ -37,11 +33,7 @@ function checkValidJson(file, token) {
   }
 }
 
-/**
- *
- * @param {string} file
- */
-async function processFile(file) {
+async function processFile(file: string): Promise<void> {
   const text = await fs.readFile(file, 'utf8');
   const tokens = markdown.parse(text, undefined);
 
@@ -52,7 +44,7 @@ async function processFile(file) {
   });
 }
 
-await (async () => {
+void (async () => {
   const files = await glob(markdownGlob);
 
   for (const file of files) {

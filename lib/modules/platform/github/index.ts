@@ -78,7 +78,11 @@ import {
 import { GithubIssueCache, GithubIssue as Issue } from './issue';
 import { massageMarkdownLinks } from './massage-markdown-links';
 import { getPrCache, updatePrCache } from './pr';
-import { GithubBranchProtection, GithubVulnerabilityAlert } from './schema';
+import {
+  GithubBranchProtection,
+  GithubBranchRulesets,
+  GithubVulnerabilityAlert,
+} from './schema';
 import type {
   CombinedBranchStatus,
   Comment,
@@ -321,6 +325,29 @@ async function getBranchProtection(
     GithubBranchProtection,
   );
   return res.body;
+}
+
+async function getBranchRulesets(
+  branchName: string,
+): Promise<GithubBranchRulesets> {
+  if (config.parentRepo) {
+    return [];
+  }
+
+  try {
+    const res = await githubApi.getJson(
+      `repos/${config.repository}/rules/branches/${escapeHash(branchName)}`,
+      { cacheProvider: repoCacheProvider },
+      GithubBranchRulesets,
+    );
+    return res.body;
+  } catch (err) {
+    if (err.statusCode === 404) {
+      logger.debug(`No branch rulesets found for ${branchName}`);
+      return [];
+    }
+    throw err;
+  }
 }
 
 export async function getRawFile(
@@ -727,6 +754,55 @@ export async function initRepo({
   return repoConfig;
 }
 
+async function checkRulesetsForForceRebase(
+  branchName: string,
+): Promise<boolean> {
+  try {
+    const rulesets = await getBranchRulesets(branchName);
+    logger.trace(
+      `Ruleset: Found ${rulesets.length} rulesets for branch ${branchName}`,
+    );
+
+    return rulesets.some((rule) => {
+      if (
+        rule.type === 'required_status_checks' &&
+        rule.parameters?.strict_required_status_checks_policy === true
+      ) {
+        logger.debug(
+          `Ruleset: strict required status checks found for ${branchName}`,
+        );
+        return true;
+      }
+
+      return false;
+    });
+  } catch (err) {
+    handleBranchProtectionError('rulesets', err, branchName);
+    return false;
+  }
+}
+
+async function checkBranchProtectionForForceRebase(
+  branchName: string,
+): Promise<boolean> {
+  try {
+    const branchProtection = await getBranchProtection(branchName);
+    logger.trace(`Found branch protection for branch ${branchName}`);
+
+    const strictStatusChecks = branchProtection?.required_status_checks?.strict;
+    if (strictStatusChecks) {
+      logger.debug(
+        `Branch protection: PRs must be up-to-date before merging for ${branchName}`,
+      );
+      return true;
+    }
+    return false;
+  } catch (err) {
+    handleBranchProtectionError('branch-protection', err, branchName);
+    return false;
+  }
+}
+
 export async function getBranchForceRebase(
   branchName: string,
 ): Promise<boolean> {
@@ -740,27 +816,30 @@ export async function getBranchForceRebase(
   // Initialize to false before checking branch protection
   config.branchForceRebase[branchName] = false;
 
-  try {
-    const branchProtection = await getBranchProtection(branchName);
-    logger.debug(`Found branch protection for branch ${branchName}`);
+  // Check rulesets first (newer API)
+  const hasRulesetForceRebase = await checkRulesetsForForceRebase(branchName);
+  if (hasRulesetForceRebase) {
+    config.branchForceRebase[branchName] = true;
+    return true;
+  }
 
-    const strictStatusChecks = branchProtection?.required_status_checks?.strict;
-    if (strictStatusChecks) {
-      logger.debug(
-        `Branch protection: PRs must be up-to-date before merging for ${branchName}`,
-      );
-      config.branchForceRebase[branchName] = true;
-    }
-  } catch (err) {
-    handleBranchProtectionError(err, branchName);
+  // Fall back to legacy branch protection
+  const hasBranchProtectionForceRebase =
+    await checkBranchProtectionForForceRebase(branchName);
+  if (hasBranchProtectionForceRebase) {
+    config.branchForceRebase[branchName] = true;
   }
 
   return config.branchForceRebase[branchName];
 }
 
-function handleBranchProtectionError(err: any, branchName: string): void {
+function handleBranchProtectionError(
+  protection: 'branch-protection' | 'rulesets',
+  err: any,
+  branchName: string,
+): void {
   if (err.statusCode === 404) {
-    logger.debug(`No branch protection found for ${branchName}`);
+    logger.debug(`No ${protection} found for ${branchName}`);
     return;
   }
 
@@ -769,7 +848,7 @@ function handleBranchProtectionError(err: any, branchName: string): void {
 
   if (isUnauthorized) {
     logger.once.debug(
-      'Branch protection: Do not have permissions to detect branch protection',
+      `Branch protection: Do not have permissions to detect ${protection} for ${branchName}`,
     );
     return;
   }
@@ -957,6 +1036,7 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
 
 export async function tryReuseAutoclosedPr(
   autoclosedPr: Pr,
+  newTitle: string,
 ): Promise<Pr | null> {
   const { sha, number, sourceBranch: branchName } = autoclosedPr;
   try {
@@ -971,21 +1051,28 @@ export async function tryReuseAutoclosedPr(
   }
 
   try {
-    const title = autoclosedPr.title.replace(regEx(/ - autoclosed$/), '');
     const { body: ghPr } = await githubApi.patchJson<GhRestPr>(
       `repos/${config.repository}/pulls/${number}`,
       {
         body: {
           state: 'open',
-          title,
+          title: newTitle,
         },
       },
     );
     logger.info(
-      { branchName, title, number },
+      { branchName, oldTitle: autoclosedPr.title, newTitle, number },
       'Successfully reopened autoclosed PR',
     );
+
     const result = coerceRestPr(ghPr);
+
+    const localSha = git.getBranchCommit(branchName);
+    if (localSha && localSha !== sha) {
+      await git.forcePushToRemote(branchName, 'origin');
+      result.sha = localSha;
+    }
+
     cachePr(result);
     return result;
   } catch {

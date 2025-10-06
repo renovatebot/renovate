@@ -47,3 +47,10 @@ Repositories are ignored when one of the following conditions is met:
 You can change the default server-side sort method and order for autodiscover API.
 Set those via [`autodiscoverRepoSort`](../../../self-hosted-configuration.md#autodiscoverreposort) and [`autodiscoverRepoOrder`](../../../self-hosted-configuration.md#autodiscoverrepoorder).
 Read the [Forgejo swagger docs](https://code.forgejo.org/api/swagger#/repository/repoSearch) for more details.
+
+## Merge style
+
+Renovate uses the repository's default merge style if allowed; if the default
+merge style is not an allowed merge style, renovate falls back to an allowed
+merge style as per an order chosen to minimize commits. If no merge style is
+allowed, the repository is blocked.

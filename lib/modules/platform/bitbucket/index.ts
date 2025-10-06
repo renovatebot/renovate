@@ -533,8 +533,12 @@ export async function setBranchStatus({
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses/build`,
     { body },
   );
-  // update status cache
-  await getStatus(branchName, false);
+
+  // invalidate status cache
+  const branchStatusesUrl = bitbucketHttp
+    .resolveUrl(`/2.0/repositories/${config.repository}/commit/${sha}/statuses`)
+    .toString();
+  aggressiveRepoCacheProvider.markSynced('get', branchStatusesUrl, false);
 }
 
 interface BbIssue {

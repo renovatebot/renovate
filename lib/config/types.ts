@@ -490,7 +490,7 @@ export interface RenovateOptionBase {
   advancedUse?: boolean;
 
   /**
-   * This is used to add depreciation message in the docs
+   * This is used to add a deprecation message in the docs
    */
   deprecationMsg?: string;
 
@@ -513,6 +513,15 @@ export interface RenovateOptionBase {
    * Platforms which support this option, leave undefined if all platforms support it.
    */
   supportedPlatforms?: PlatformId[];
+
+  /**
+   * Conditions that must be met for this option to be required.
+   */
+  requiredIf?: RenovateRequiredOption[];
+}
+
+export interface RenovateRequiredOption {
+  siblingProperties: { property: string; value: string }[];
 }
 
 export interface RenovateArrayOption<
