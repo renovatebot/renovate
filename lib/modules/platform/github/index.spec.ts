@@ -1437,16 +1437,63 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
-      const pr = await github.tryReuseAutoclosedPr({
-        number: 91,
-        title: 'old title - autoclosed',
-        state: 'closed',
-        closedAt: DateTime.now().minus({ days: 6 }).toISO(),
-        sourceBranch: 'somebranch',
-        sha: '1234' as LongCommitSha,
-      });
+      const pr = await github.tryReuseAutoclosedPr(
+        {
+          number: 91,
+          title: 'old title - autoclosed',
+          state: 'closed',
+          closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+          sourceBranch: 'somebranch',
+          sha: '1234' as LongCommitSha,
+        },
+        'new title',
+      );
 
       expect(pr).toMatchObject({ number: 91, sourceBranch: 'somebranch' });
+    });
+
+    it('force pushes when local SHA differs from PR SHA', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .head('/repos/some/repo/git/commits/1234')
+        .reply(200)
+        .post('/repos/some/repo/git/refs')
+        .reply(201)
+        .patch('/repos/some/repo/pulls/91')
+        .reply(200, {
+          number: 91,
+          base: { sha: '1234' },
+          head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+          state: 'open',
+          title: 'old title',
+          updated_at: '01-09-2022',
+        });
+      await github.initRepo({ repository: 'some/repo' });
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
+      git.getBranchCommit.mockReturnValueOnce('5678' as LongCommitSha);
+
+      const pr = await github.tryReuseAutoclosedPr(
+        {
+          number: 91,
+          title: 'old title - autoclosed',
+          state: 'closed',
+          closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+          sourceBranch: 'somebranch',
+          sha: '1234' as LongCommitSha,
+        },
+        'new title',
+      );
+
+      expect(pr).toMatchObject({
+        number: 91,
+        sourceBranch: 'somebranch',
+        sha: '5678',
+      });
+      expect(git.forcePushToRemote).toHaveBeenCalledWith(
+        'somebranch',
+        'origin',
+      );
     });
 
     it('aborts reopening if branch recreation fails', async () => {
@@ -1463,14 +1510,17 @@ describe('modules/platform/github/index', () => {
 
       await github.initRepo({ repository: 'some/repo' });
 
-      const pr = await github.tryReuseAutoclosedPr({
-        number: 91,
-        title: 'old title - autoclosed',
-        state: 'closed',
-        closedAt: DateTime.now().minus({ days: 6 }).toISO(),
-        sourceBranch: 'somebranch',
-        sha: '1234' as LongCommitSha,
-      });
+      const pr = await github.tryReuseAutoclosedPr(
+        {
+          number: 91,
+          title: 'old title - autoclosed',
+          state: 'closed',
+          closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+          sourceBranch: 'somebranch',
+          sha: '1234' as LongCommitSha,
+        },
+        'new title',
+      );
 
       expect(pr).toBeNull();
     });
@@ -1482,14 +1532,17 @@ describe('modules/platform/github/index', () => {
 
       await github.initRepo({ repository: 'some/repo' });
 
-      const pr = await github.tryReuseAutoclosedPr({
-        number: 91,
-        title: 'old title - autoclosed',
-        state: 'closed',
-        closedAt: DateTime.now().minus({ days: 6 }).toISO(),
-        sourceBranch: 'somebranch',
-        sha: '1234' as LongCommitSha,
-      });
+      const pr = await github.tryReuseAutoclosedPr(
+        {
+          number: 91,
+          title: 'old title - autoclosed',
+          state: 'closed',
+          closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+          sourceBranch: 'somebranch',
+          sha: '1234' as LongCommitSha,
+        },
+        'new title',
+      );
 
       expect(pr).toBeNull();
     });
