@@ -1,5 +1,6 @@
 import { logger } from '../../../logger';
 import { getHttpUrl } from '../../../util/git/url';
+import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
 import { parseSingleYaml } from '../../../util/yaml';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
@@ -16,8 +17,9 @@ import type {
   GithubReleaseDefinition,
   HelmChartDefinition,
   VendirDefinition,
+  VendirLockDefinition,
 } from './schema';
-import { Vendir } from './schema';
+import { Vendir, VendirLock } from './schema';
 
 export function extractHelmChart(
   helmChart: HelmChartDefinition,
@@ -88,11 +90,50 @@ export function parseVendir(
   }
 }
 
-export function extractPackageFile(
+export function parseVendirLock(
+  content: string,
+  lockFile?: string,
+): VendirLockDefinition | null {
+  try {
+    return parseSingleYaml(content, {
+      customSchema: VendirLock,
+      removeTemplates: true,
+    });
+  } catch {
+    logger.debug({ lockFile }, 'Error parsing vendir.lock.yml file');
+    return null;
+  }
+}
+
+export async function readVendirLock(
+  packageFile: string,
+): Promise<VendirLockDefinition | null> {
+  const lockFileName = await findLocalSiblingOrParent(
+    packageFile,
+    'vendir.lock.yml',
+  );
+  if (!lockFileName) {
+    logger.debug(
+      { packageFile },
+      'No vendir.lock.yml found for vendir.yml file',
+    );
+    return null;
+  }
+
+  const lockFileContent = await readLocalFile(lockFileName, 'utf8');
+  if (!lockFileContent) {
+    logger.debug({ lockFileName }, 'Empty vendir.lock.yml file');
+    return null;
+  }
+
+  return parseVendirLock(lockFileContent, lockFileName);
+}
+
+export async function extractPackageFile(
   content: string,
   packageFile: string,
   config: ExtractConfig,
-): PackageFileContent | null {
+): Promise<PackageFileContent | null> {
   logger.trace(`vendir.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];
 
@@ -101,23 +142,50 @@ export function extractPackageFile(
     return null;
   }
 
-  // grab the helm charts
-  const contents = pkg.directories.flatMap((directory) => directory.contents);
-  for (const content of contents) {
-    if ('helmChart' in content && content.helmChart) {
-      const dep = extractHelmChart(content.helmChart, config.registryAliases);
-      if (dep) {
-        deps.push(dep);
+  // Read lockfile to get locked versions
+  const lockFile = await readVendirLock(packageFile);
+  const lockMap = new Map<string, any>();
+
+  if (lockFile) {
+    // Build a map of directory.path -> content.path -> locked data
+    for (const directory of lockFile.directories) {
+      for (const lockedContent of directory.contents) {
+        const key = `${directory.path}:${lockedContent.path}`;
+        lockMap.set(key, lockedContent);
       }
-    } else if ('git' in content && content.git) {
-      const dep = extractGitSource(content.git);
-      if (dep) {
-        deps.push(dep);
-      }
-    } else if ('githubRelease' in content && content.githubRelease) {
-      const dep = extractGithubReleaseSource(content.githubRelease);
-      if (dep) {
-        deps.push(dep);
+    }
+  }
+
+  // Extract dependencies from manifest
+  for (const directory of pkg.directories) {
+    for (const content of directory.contents) {
+      const lockKey = `${directory.path}:${content.path}`;
+      const lockedContent = lockMap.get(lockKey);
+
+      if ('helmChart' in content && content.helmChart) {
+        const dep = extractHelmChart(content.helmChart, config.registryAliases);
+        if (dep && lockedContent && 'helmChart' in lockedContent) {
+          dep.lockedVersion = lockedContent.helmChart.version;
+        }
+        if (dep) {
+          deps.push(dep);
+        }
+      } else if ('git' in content && content.git) {
+        const dep = extractGitSource(content.git);
+        if (dep && lockedContent && 'git' in lockedContent) {
+          dep.lockedVersion = lockedContent.git.sha;
+        }
+        if (dep) {
+          deps.push(dep);
+        }
+      } else if ('githubRelease' in content && content.githubRelease) {
+        const dep = extractGithubReleaseSource(content.githubRelease);
+        if (dep && lockedContent && 'githubRelease' in lockedContent) {
+          dep.lockedVersion = lockedContent.githubRelease.tag ?? lockedContent.githubRelease.url;
+        }
+        if (dep) {
+          deps.push(dep);
+        }
       }
     }
   }
@@ -125,5 +193,11 @@ export function extractPackageFile(
   if (!deps.length) {
     return null;
   }
-  return { deps };
+
+  const result: PackageFileContent = { deps };
+  if (lockFile) {
+    result.lockFiles = ['vendir.lock.yml'];
+  }
+
+  return result;
 }

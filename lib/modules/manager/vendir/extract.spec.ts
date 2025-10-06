@@ -1,39 +1,44 @@
 import { codeBlock } from 'common-tags';
 import { extractPackageFile } from '.';
 import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
 const validContents = Fixtures.get('valid-contents.yaml');
 const invalidContents = Fixtures.get('invalid-contents.yaml');
+const vendirYml = Fixtures.get('vendir.yml');
+const vendirLock1 = Fixtures.get('vendir_1.lock');
+
+vi.mock('../../../util/fs');
 
 describe('modules/manager/vendir/extract', () => {
   describe('extractPackageFile()', () => {
-    it('returns null for invalid yaml file content', () => {
-      const result = extractPackageFile('nothing here: [', 'vendir.yml', {});
+    it('returns null for invalid yaml file content', async () => {
+      const result = await extractPackageFile('nothing here: [', 'vendir.yml', {});
       expect(result).toBeNull();
     });
 
-    it('returns null for empty yaml file content', () => {
-      const result = extractPackageFile('', 'vendir.yml', {});
+    it('returns null for empty yaml file content', async () => {
+      const result = await extractPackageFile('', 'vendir.yml', {});
       expect(result).toBeNull();
     });
 
-    it('returns null for empty directories key', () => {
+    it('returns null for empty directories key', async () => {
       const emptyDirectories = codeBlock`
         apiVersion: vendir.k14s.io/v1alpha1
         kind: Config
         directories: []
       `;
-      const result = extractPackageFile(emptyDirectories, 'vendir.yml', {});
+      const result = await extractPackageFile(emptyDirectories, 'vendir.yml', {});
       expect(result).toBeNull();
     });
 
-    it('returns null for nonHelmChart key', () => {
-      const result = extractPackageFile(invalidContents, 'vendir.yml', {});
+    it('returns null for nonHelmChart key', async () => {
+      const result = await extractPackageFile(invalidContents, 'vendir.yml', {});
       expect(result).toBeNull();
     });
 
-    it('multiple charts - extracts helm-chart from vendir.yml correctly', () => {
-      const result = extractPackageFile(validContents, 'vendir.yml', {
+    it('multiple charts - extracts helm-chart from vendir.yml correctly', async () => {
+      const result = await extractPackageFile(validContents, 'vendir.yml', {
         registryAliases: {
           test: 'quay.example.com/organization',
         },
@@ -86,6 +91,47 @@ describe('modules/manager/vendir/extract', () => {
           },
         ],
       });
+    });
+
+    it('extracts locked versions from vendir.lock.yml', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendir.lock.yml');
+      fs.readLocalFile.mockResolvedValueOnce(vendirLock1);
+
+      const result = await extractPackageFile(vendirYml, 'vendir.yml', {});
+
+      expect(result).toMatchObject({
+        deps: [
+          {
+            currentValue: '36.109.4',
+            lockedVersion: '36.109.4',
+            depName: 'renovate',
+            datasource: 'helm',
+            depType: 'HelmChart',
+            registryUrls: ['https://docs.renovatebot.com/helm-charts'],
+          },
+        ],
+        lockFiles: ['vendir.lock.yml'],
+      });
+    });
+
+    it('extracts without lockfile when vendir.lock.yml is missing', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+
+      const result = await extractPackageFile(vendirYml, 'vendir.yml', {});
+
+      expect(result).toMatchObject({
+        deps: [
+          {
+            currentValue: '36.109.4',
+            lockedVersion: undefined,
+            depName: 'renovate',
+            datasource: 'helm',
+            depType: 'HelmChart',
+            registryUrls: ['https://docs.renovatebot.com/helm-charts'],
+          },
+        ],
+      });
+      expect(result?.lockFiles).toBeUndefined();
     });
   });
 });
