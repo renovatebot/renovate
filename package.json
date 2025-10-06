@@ -65,7 +65,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/renovatebot/renovate.git"
+    "url": "git+https://github.com/renovatebot/renovate.git"
   },
   "keywords": [
     "automated",
@@ -160,12 +160,12 @@
     "@opentelemetry/context-async-hooks": "2.1.0",
     "@opentelemetry/exporter-trace-otlp-http": "0.205.0",
     "@opentelemetry/instrumentation": "0.205.0",
-    "@opentelemetry/instrumentation-bunyan": "0.51.0",
+    "@opentelemetry/instrumentation-bunyan": "0.51.4",
     "@opentelemetry/instrumentation-http": "0.205.0",
-    "@opentelemetry/resource-detector-aws": "2.5.0",
-    "@opentelemetry/resource-detector-azure": "0.12.0",
-    "@opentelemetry/resource-detector-gcp": "0.40.0",
-    "@opentelemetry/resource-detector-github": "0.31.0",
+    "@opentelemetry/resource-detector-aws": "2.5.3",
+    "@opentelemetry/resource-detector-azure": "0.13.2",
+    "@opentelemetry/resource-detector-gcp": "0.40.3",
+    "@opentelemetry/resource-detector-github": "0.31.2",
     "@opentelemetry/resources": "2.1.0",
     "@opentelemetry/sdk-trace-base": "2.1.0",
     "@opentelemetry/sdk-trace-node": "2.1.0",
@@ -304,7 +304,7 @@
     "@types/mdast": "4.0.4",
     "@types/moo": "0.5.10",
     "@types/ms": "2.1.0",
-    "@types/node": "22.18.6",
+    "@types/node": "22.18.7",
     "@types/parse-link-header": "2.0.3",
     "@types/punycode": "2.1.4",
     "@types/sax": "1.2.7",
