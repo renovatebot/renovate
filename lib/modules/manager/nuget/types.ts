@@ -17,7 +17,6 @@ export interface Registry {
   readonly name?: string;
   sourceMappedPackagePatterns?: string[];
 }
-
 export interface ProjectFile {
   readonly isLeaf: boolean;
   readonly name: string;
