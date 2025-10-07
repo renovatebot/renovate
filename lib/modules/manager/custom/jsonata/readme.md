@@ -23,11 +23,11 @@ The first two required fields are `managerFilePatterns` and `matchStrings`:
 
 Before Renovate can look up a dependency and decide about updates, it must have this info about each dependency:
 
-| Info type                                            | Required | Notes                                                     | Docs                                                                                  |
-| :--------------------------------------------------- | :------- | :-------------------------------------------------------- | :------------------------------------------------------------------------------------ |
-| Name of the dependency                               | Yes      |                                                           |                                                                                       |
-| `datasource`                                         | Yes      | Example datasources: npm, Docker, GitHub tags, and so on. | [Supported datasources](../../datasource/index.md#supported-datasources)              |
-| Version scheme to use. Defaults to `semver-coerced`. | Yes      | You may set another version scheme, like `pep440`.        | [Supported versioning schemes](../../versioning/index.md#supported-versioning)        |
+| Info type                                            | Required | Notes                                                     | Docs                                                                                     |
+| :--------------------------------------------------- | :------- | :-------------------------------------------------------- | :--------------------------------------------------------------------------------------- |
+| Name of the dependency                               | Yes      |                                                           |                                                                                          |
+| `datasource`                                         | Yes      | Example datasources: npm, Docker, GitHub tags, and so on. | [Supported datasources](../../datasource/index.md#supported-datasources)                 |
+| Version scheme to use. Defaults to `semver-coerced`. | Yes      | You may set another version scheme, like `pep440`.        | [Supported versioning schemes](../../versioning/index.md#supported-versioning)           |
 | `fileFormat`                                         | Yes      | Must be either `json`, `yaml` or `toml`.                  | [`Configuration Options`](../../../../../docs/usage/configuration-options.md#fileFormat) |
 
 #### Required fields to be present in the resulting structure returned by the jsonata query
