@@ -59,7 +59,7 @@ When you configure a JSONata manager, use the following syntax:
       "customType": "jsonata",
       "fileFormat": "json",
       "managerFilePatterns": ["<file match pattern>"],
-      "matchStrings": ['<query>'],
+      "matchStrings": ["<query>"],
       ...
     }
   ]
