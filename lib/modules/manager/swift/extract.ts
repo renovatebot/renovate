@@ -1,5 +1,7 @@
 import { regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { MatchResult } from './types';
 
@@ -117,7 +119,9 @@ function getMatch(str: string, state: string | null): MatchResult | null {
   return result;
 }
 
-function getDepName(url: string | null): string | null {
+function parseUrl(
+  url: string | null,
+): { depName: string; datasource: string } | null {
   // istanbul ignore if
   if (!url) {
     return null;
@@ -125,12 +129,17 @@ function getDepName(url: string | null): string | null {
   try {
     const { host, pathname } = new URL(url);
     if (host === 'github.com' || host === 'gitlab.com') {
-      return pathname
+      const depName = pathname
         .replace(regEx(/^\//), '')
         .replace(regEx(/\.git$/), '')
         .replace(regEx(/\/$/), '');
+      const datasource =
+        host === 'github.com'
+          ? GithubTagsDatasource.id
+          : GitlabTagsDatasource.id;
+      return { depName, datasource };
     }
-    return url;
+    return { depName: url, datasource: GitTagsDatasource.id };
   } catch {
     return null;
   }
@@ -158,10 +167,12 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     if (!packageName) {
       return;
     }
-    const depName = getDepName(packageName);
-    if (depName && currentValue) {
+    const parsedUrl = parseUrl(packageName);
+    if (parsedUrl && currentValue) {
+      const { depName, datasource } = parsedUrl;
+
       const dep: PackageDependency = {
-        datasource: GitTagsDatasource.id,
+        datasource,
         depName,
         packageName,
         currentValue,
