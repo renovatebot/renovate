@@ -39,7 +39,7 @@ export const presets: Record<string, Preset> = {
       'Schedule automerge during typical office hours on weekdays (i.e., 8 AM - 6 PM).',
   },
   automergeOfficeHoursExceptFriday: {
-    automergeSchedule: officeHours,
+    automergeSchedule: officeHoursExceptFriday,
     description:
       'Schedule automerge during typical office hours on weekdays except friday (i.e., 8 AM - 6 PM).',
   },
