@@ -1846,5 +1846,72 @@ describe('workers/repository/updates/generate', () => {
         );
       },
     );
+
+    it('only filter pending upgrades, when both pending and non-pending upgrades are present', () => {
+      const commonOptions = {
+        ...requiredDefaultOptions,
+        manager: 'some-manager',
+        branchName: 'deps',
+      };
+
+      const branch = [
+        {
+          ...commonOptions,
+          depName: 'dep1',
+          newVersion: '1.2.0',
+          newValue: '1.2.0',
+          updateType: 'minor' as UpdateType,
+          pendingChecks: true,
+          fileReplacePosition: 1,
+          prBodyDefinitions: {
+            Issue: 'I1',
+          },
+        },
+        {
+          ...commonOptions,
+          depName: 'dep2',
+          newVersion: '1.0.0',
+          newValue: '1.0.0',
+          updateType: 'major' as UpdateType,
+          pendingChecks: false,
+          fileReplacePosition: 2,
+          prBodyDefinitions: {
+            Issue: 'I2',
+          },
+        },
+        {
+          ...commonOptions,
+          depName: 'dep3',
+          newVersion: '1.2.3',
+          newValue: '1.2.3',
+          updateType: 'patch' as UpdateType,
+          pendingChecks: false,
+          fileReplacePosition: 0,
+          prBodyDefinitions: {
+            Issue: 'I3',
+          },
+        },
+      ] satisfies BranchUpgradeConfig[];
+      let res = generateBranchConfig(branch);
+      expect(res.pendingChecks).toBeFalse();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { branch: branch[0].branchName },
+        'Branch is not pending, removing pending upgrades',
+      );
+
+      // set all upgrades to not-pending
+      branch[0].pendingChecks = false;
+      res = generateBranchConfig(branch);
+      expect(res.pendingChecks).toBeFalse();
+      expect(logger.logger.debug).not.toHaveBeenCalledWith();
+
+      // set all upgrades to pending
+      branch[0].pendingChecks = true;
+      branch[1].pendingChecks = true;
+      branch[2].pendingChecks = true;
+      res = generateBranchConfig(branch);
+      expect(res.pendingChecks).toBeTrue();
+      expect(logger.logger.debug).not.toHaveBeenCalledWith();
+    });
   });
 });
