@@ -44,6 +44,7 @@ FROM ${CI_REGISTRY:-}alpine:3.19.4
 ```
 
 This works with both formats, regardless of whether the registry alias ends with a slash or not:
+
 - Without slash in the variable: `${CI_REGISTRY:-}/alpine:3.19.4`
 - With slash in the variable: `${CI_REGISTRY:-}alpine:3.19.4`
 

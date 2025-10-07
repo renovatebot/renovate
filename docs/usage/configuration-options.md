@@ -4257,6 +4257,7 @@ This feature works with the following managers:
 ```
 
 This example with default values supports both formats:
+
 - Without slash in the variable: `${CI_REGISTRY:-}/image:1.0`
 - With slash in the variable: `${CI_REGISTRY:-}image:1.0`
 
