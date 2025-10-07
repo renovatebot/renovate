@@ -7,8 +7,10 @@ const earlyMondays = ['* 0-3 * * 1'];
 const monthly = ['* 0-3 1 * *'];
 const nonOfficeHours = ['* 0-4,22-23 * * 1-5', '* * * * 0,6'];
 const officeHours = ['* 8-17 * * 1-5'];
+const officeHoursExceptFriday = ['* 8-17 * * 1-4'];
 const quarterly = ['* * 1 */3 *'];
 const weekdays = ['* * * * 1-5'];
+const weekdaysExceptFriday = ['* * * * 1-4'];
 const weekends = ['* * * * 0,6'];
 const yearly = ['* * 1 */12 *'];
 
@@ -35,6 +37,11 @@ export const presets: Record<string, Preset> = {
     automergeSchedule: officeHours,
     description:
       'Schedule automerge during typical office hours on weekdays (i.e., 8 AM - 6 PM).',
+  },
+  automergeOfficeHoursExceptFriday: {
+    automergeSchedule: officeHours,
+    description:
+      'Schedule automerge during typical office hours on weekdays except friday (i.e., 8 AM - 6 PM).',
   },
   automergeQuarterly: {
     automergeSchedule: quarterly,
@@ -89,6 +96,10 @@ export const presets: Record<string, Preset> = {
   weekdays: {
     description: 'Schedule for weekdays.',
     schedule: weekdays,
+  },
+  weekdays: {
+    description: 'Schedule for weekdays except Fridays.',
+    schedule: weekdaysExceptFriday,
   },
   weekends: {
     description: 'Schedule for weekends.',
