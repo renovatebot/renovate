@@ -66,4 +66,13 @@ describe('workers/repository/onboarding/branch/check', () => {
       REPOSITORY_CLOSED_ONBOARDING,
     );
   });
+
+  it('checks git file list for config file when in fork mode', async () => {
+    config.forkToken = 'token';
+    cache.getCache.mockReturnValue({ configFileName: 'renovate.json' });
+    scm.getFileList.mockResolvedValue([]);
+    await isOnboarded(config);
+    expect(platform.getJsonFile).not.toHaveBeenCalled();
+    expect(scm.getFileList).toHaveBeenCalled();
+  });
 });

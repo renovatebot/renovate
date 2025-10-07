@@ -28,7 +28,11 @@ function loadAbandonmentPresets(): Record<string, Preset> {
   }
 
   return {
-    recommended: { packageRules },
+    recommended: {
+      description:
+        'Recommended configuration for abandoned packages, treating packages without a release for 1 year as abandoned, while taking into account community-sourced overrides.',
+      packageRules,
+    },
   };
 }
 
