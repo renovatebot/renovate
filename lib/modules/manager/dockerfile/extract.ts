@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { ensureTrailingSlash } from '../../../util/url';
 import { DockerDatasource } from '../../datasource/docker';
 import * as debianVersioning from '../../versioning/debian';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
@@ -183,9 +184,11 @@ export function getDep(
     // 1. Variable followed by slash: "${VAR}/image"
     // 2. Variable including a slash: "${VAR}image"
     if (currentFrom.startsWith(`${name}/`) || currentFrom.startsWith(name)) {
-      const depNameStartIndex = currentFrom.startsWith(`${name}/`) ? name.length + 1 : name.length;
+      const depNameStartIndex = currentFrom.startsWith(`${name}/`)
+        ? name.length + 1
+        : name.length;
       const depName = currentFrom.substring(depNameStartIndex);
-      const valueWithSlash = value.endsWith('/') ? value : `${value}/`;
+      const valueWithSlash = ensureTrailingSlash(value);
       const dep = {
         ...getDep(`${valueWithSlash}${depName}`, false),
         replaceString: currentFrom,
@@ -194,8 +197,17 @@ export function getDep(
       if (dep.depName?.startsWith(valueWithSlash)) {
         dep.packageName = dep.depName;
         // Keep original name and path structure in the depName
-        if (currentFrom.includes(':')) {
-          dep.depName = currentFrom.substring(0, currentFrom.indexOf(':'));
+        // Only extract depName up to the tag separator if there's actually a tag/digest
+        if (dep.currentValue || dep.currentDigest) {
+          // Split on @ first (for digest), then find the last : (for tag)
+          const [imageAndTag] = currentFrom.split('@');
+          const lastColonIndex = imageAndTag.lastIndexOf(':');
+          if (lastColonIndex > 0) {
+            dep.depName = imageAndTag.substring(0, lastColonIndex);
+          }
+        } else {
+          // No tag/digest, so the entire currentFrom is the depName
+          dep.depName = currentFrom;
         }
       }
       if (specifyReplaceString) {
