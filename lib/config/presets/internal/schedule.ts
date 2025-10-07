@@ -97,7 +97,7 @@ export const presets: Record<string, Preset> = {
     description: 'Schedule for weekdays.',
     schedule: weekdays,
   },
-  weekdays: {
+  weekdaysExceptFriday: {
     description: 'Schedule for weekdays except Fridays.',
     schedule: weekdaysExceptFriday,
   },
