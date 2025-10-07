@@ -30,5 +30,6 @@ Variables with default values (using the `:-` syntax) are also supported, which 
 ```
 
 This supports both formats with and without slashes:
+
 - `${DEPENDENCY_PROXY:-}/image:1.0`
 - `${DEPENDENCY_PROXY:-}image:1.0`
