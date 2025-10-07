@@ -612,9 +612,13 @@ export interface ConfigMigration {
 }
 
 export interface MigratedConfig {
-  // Indicates whether there was a migration applied to the configuration.
-  // Returns `false` if the configuration does not need migrating, and `migratedConfig` can be ignored
-  // Returns `true` if the configuration was migrated, and if so, `migratedConfig` should be used instead of the provided config
+  /**
+   * Indicates whether there was a migration applied to the configuration.
+   *
+   * @returns
+   * `false` if the configuration does not need migrating, and `migratedConfig` can be ignored
+   * `true` if the configuration was migrated, and if so, `migratedConfig` should be used instead of the provided config
+   */
   isMigrated: boolean;
   migratedConfig: RenovateConfig;
 }
