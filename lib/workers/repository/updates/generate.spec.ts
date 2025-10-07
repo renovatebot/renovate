@@ -1899,19 +1899,21 @@ describe('workers/repository/updates/generate', () => {
         'Branch is not pending, removing pending upgrades',
       );
 
+      vi.resetAllMocks();
       // set all upgrades to not-pending
       branch[0].pendingChecks = false;
       res = generateBranchConfig(branch);
       expect(res.pendingChecks).toBeFalse();
-      expect(logger.logger.debug).not.toHaveBeenCalledWith();
+      expect(logger.logger.debug).not.toHaveBeenCalled();
 
+      vi.resetAllMocks();
       // set all upgrades to pending
       branch[0].pendingChecks = true;
       branch[1].pendingChecks = true;
       branch[2].pendingChecks = true;
       res = generateBranchConfig(branch);
       expect(res.pendingChecks).toBeTrue();
-      expect(logger.logger.debug).not.toHaveBeenCalledWith();
+      expect(logger.logger.debug).not.toHaveBeenCalled();
     });
   });
 });
