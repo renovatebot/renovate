@@ -142,7 +142,7 @@ export class TerraformProviderHash {
     builds: TerraformBuild[],
   ): Promise<string[]> {
     logger.debug(`Calculating hashes for ${builds.length} builds`);
-    const cacheDir = await ensureCacheDir('./others/terraform');
+    const cacheDir = await ensureCacheDir('terraform');
 
     // for each build download ZIP, extract content and generate hash for all containing files
     return p.map(builds, (build) => this.calculateSingleHash(build, cacheDir), {

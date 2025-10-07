@@ -48,4 +48,4 @@ jobs:
           commit-message: 'fix(data): automatic update of static data'
           committer: 'Renovate Bot <renovate@whitesourcesoftware.com>'
           title: 'fix(data): automatic update of static data'
-          assignees: viceice,secustor
+          assignees: viceice,secustor,jamietanna

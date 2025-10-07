@@ -587,5 +587,87 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
       expect(res.artifactErrors).toHaveLength(0);
     });
+
+    it('uses workingDirTemplate when provided', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'npm',
+          branchName: 'renovate/jest-29.x',
+          depName: 'jest',
+          newVersion: '29.5.0',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            workingDirTemplate:
+              'projects/{{manager}}/{{depName}}-{{newVersion}}',
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'npm',
+        updatedPackageFiles: [],
+        updatedArtifacts: [],
+        upgrades: [],
+        branchName: 'renovate/jest-29.x',
+        baseBranch: 'main',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: '/default/dir',
+        allowedCommands: ['some-command'],
+      });
+      exec.exec.mockResolvedValue({ stdout: '', stderr: '' });
+
+      await postUpgradeCommands.postUpgradeCommandsExecutor(commands, config);
+
+      expect(exec.exec).toHaveBeenCalledWith('some-command', {
+        cwd: 'projects/npm/jest-29.5.0',
+      });
+    });
+
+    it('uses localDir when workingDirTemplate is not provided', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [],
+        updatedArtifacts: [],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: '/default/dir',
+        allowedCommands: ['some-command'],
+      });
+      exec.exec = vi.fn().mockResolvedValue({ stdout: '', stderr: '' });
+
+      await postUpgradeCommands.postUpgradeCommandsExecutor(commands, config);
+
+      expect(exec.exec).toHaveBeenCalledWith('some-command', {
+        cwd: '/default/dir',
+      });
+    });
   });
 });
