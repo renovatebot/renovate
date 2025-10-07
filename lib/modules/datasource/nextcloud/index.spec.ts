@@ -47,7 +47,7 @@ describe('modules/datasource/nextcloud/index', () => {
       registryUrls: ['https://custom.registry.com'],
     });
 
-    expect(res?.homepage).toBeUndefined();
+    expect(res?.sourceUrl).toBe('https://github.com/nextcloud/user_oidc');
     expect(res?.registryUrl).toBe('https://custom.registry.com');
 
     expect(res?.releases).toBeEmpty();
