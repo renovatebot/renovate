@@ -3,7 +3,7 @@ import { NextcloudDatasource } from '.';
 import * as httpMock from '~test/http-mock';
 
 describe('modules/datasource/nextcloud/index', () => {
-  it(`no registryUrl`, async () => {
+  it('no registryUrl', async () => {
     const res = await getPkgReleases({
       datasource: NextcloudDatasource.id,
       packageName: 'user_oidc',
@@ -13,7 +13,7 @@ describe('modules/datasource/nextcloud/index', () => {
     expect(res).toBeNull();
   });
 
-  it(`no package`, async () => {
+  it('no package', async () => {
     const data = '[]';
 
     httpMock.scope('https://custom.registry.com').get('/').reply(200, data);
@@ -27,7 +27,7 @@ describe('modules/datasource/nextcloud/index', () => {
     expect(res).toBeNull();
   });
 
-  it(`package with no versions`, async () => {
+  it('package with no versions', async () => {
     const data = `
       [
         {
@@ -99,7 +99,7 @@ describe('modules/datasource/nextcloud/index', () => {
     },
   );
 
-  it(`package with changelog content and url`, async () => {
+  it('package with changelog content and url', async () => {
     const data = `
       [
         {
