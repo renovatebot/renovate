@@ -167,14 +167,14 @@ describe('modules/manager/swift/extract', () => {
       expect(result?.deps).toHaveLength(9);
 
       const githubDeps =
-        result?.deps.filter((dep) => dep.datasource === 'github-tags') || [];
+        result?.deps.filter((dep) => dep.datasource === 'github-tags') ?? [];
       expect(githubDeps).toHaveLength(9);
 
       expect(result?.deps).toContainEqual({
         datasource: 'github-tags',
         depName: '0x7fs/CountedSet',
         packageName: 'https://github.com/0x7fs/CountedSet',
-        currentValue: '\"master\"\n        ',
+        currentValue: '"master"\n        ',
       });
 
       expect(result?.deps).toContainEqual({
@@ -196,7 +196,7 @@ describe('modules/manager/swift/extract', () => {
         datasource: 'github-tags',
         depName: 'weichsel/ZIPFoundation',
         packageName: 'https://github.com/weichsel/ZIPFoundation/',
-        currentValue: 'from : \"0.9.6\"',
+        currentValue: 'from : "0.9.6"',
       });
     });
 
