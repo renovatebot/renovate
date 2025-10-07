@@ -19,7 +19,7 @@ const errorLogFormat = process.env.CI
 function reportIssue(file: string, token: Token, message: string): void {
   const [start, end] = token.map ?? [-1, -1];
   issues += 1;
-  console.log(format(errorLogFormat, file, start + 1, end + 1, message));
+  console.error(format(errorLogFormat, file, start + 1, end + 1, message));
 }
 
 const markdownGlob = '{docs,lib}/**/*.md';
@@ -83,7 +83,7 @@ async function processFile(file: string): Promise<void> {
     const validJson = checkValidJson(file, token);
     if (
       validJson === undefined ||
-      tokens[index - 2]?.content ===
+      tokens.at(index - 2)?.content ===
         '<!-- schema-validation-disable-next-block -->'
     ) {
       continue;
