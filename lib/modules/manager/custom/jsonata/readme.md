@@ -28,6 +28,7 @@ Before Renovate can look up a dependency and decide about updates, it must have 
 | Name of the dependency                               | Yes      |                                                           |                                                                                |
 | `datasource`                                         | Yes      | Example datasources: npm, Docker, GitHub tags, and so on. | [Supported datasources](../../datasource/index.md#supported-datasources)       |
 | Version scheme to use. Defaults to `semver-coerced`. | Yes      | You may set another version scheme, like `pep440`.        | [Supported versioning schemes](../../versioning/index.md#supported-versioning) |
+| `fileFormat`                                         | Yes      | Must be either `json`, `yaml` or `toml`.                  | [`Configuration Options`](../../../configuration-options.md#fileformat)        |
 
 #### Required fields to be present in the resulting structure returned by the jsonata query
 
@@ -59,7 +60,7 @@ When you configure a JSONata manager, use the following syntax:
       "customType": "jsonata",
       "fileFormat": "json",
       "managerFilePatterns": ["<file match pattern>"],
-      "matchStrings": ['<query>'],
+      "matchStrings": ["<query>"],
       ...
     }
   ]
