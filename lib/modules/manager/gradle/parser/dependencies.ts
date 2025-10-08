@@ -208,42 +208,34 @@ const qTestSuiteMethod = q
 
 // testing { suites { test { useSpock("1.2.3") } } }
 // testing.suites.test { useJunit("1.2.3") }
-const qImplicitTestSuites = qDotOrBraceExpr(
-  'testing',
-  qDotOrBraceExpr('suites', qDotOrBraceExpr('test', qTestSuiteMethod)),
-)
-  .handler(handleImplicitDep)
-  .handler(cleanupTempVars);
-
 // testing { suites.withType(JvmTestSuite).configureEach { useJUnitJupiter("5.13.4") } }
 // testing { suites.withType(JvmTestSuite::class).configureEach { useSpock("2.3") } }
-const qImplicitTestSuitesWithType = q
-  .sym<Ctx>('testing')
-  .tree({
-    type: 'wrapped-tree',
-    maxDepth: 1,
-    startsWith: '{',
-    endsWith: '}',
-    search: q
-      .sym<Ctx>('suites')
-      .op('.')
-      .sym('withType')
-      .tree({
-        type: 'wrapped-tree',
-        maxDepth: 1,
-        startsWith: '(',
-        endsWith: ')',
-      })
-      .op('.')
-      .sym('configureEach')
-      .tree({
-        type: 'wrapped-tree',
-        maxDepth: 1,
-        startsWith: '{',
-        endsWith: '}',
-        search: qTestSuiteMethod,
-      }),
-  })
+const qImplicitTestSuites = qDotOrBraceExpr(
+  'testing',
+  qDotOrBraceExpr(
+    'suites',
+    q.alt(
+      qDotOrBraceExpr('test', qTestSuiteMethod),
+      q
+        .sym<Ctx>('withType')
+        .tree({
+          type: 'wrapped-tree',
+          maxDepth: 1,
+          startsWith: '(',
+          endsWith: ')',
+        })
+        .op('.')
+        .sym('configureEach')
+        .tree({
+          type: 'wrapped-tree',
+          maxDepth: 1,
+          startsWith: '{',
+          endsWith: '}',
+          search: qTestSuiteMethod,
+        }),
+    ),
+  ),
+)
   .handler(handleImplicitDep)
   .handler(cleanupTempVars);
 
@@ -255,7 +247,6 @@ export const qDependencies = q.alt(
   qKotlinMapNotationDependencies,
   qImplicitGradlePlugin,
   qImplicitTestSuites,
-  qImplicitTestSuitesWithType,
   // avoid heuristic matching of gradle feature variant capabilities
   qDotOrBraceExpr('java', q.sym<Ctx>('registerFeature').tree()),
 );
