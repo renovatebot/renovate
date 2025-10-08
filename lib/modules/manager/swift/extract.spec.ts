@@ -29,6 +29,50 @@ describe('modules/manager/swift/extract', () => {
       expect(extractPackageFile(content)).toBeNull();
     });
 
+    it('extracts GitHub dependencies with github-tags datasource', () => {
+      const content = `
+        let package = Package(
+          name: "MyPackage",
+          dependencies: [
+            .package(url: "https://github.com/example/repo", from: "1.0.0")
+          ]
+        )
+      `;
+      const result = extractPackageFile(content);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            datasource: 'github-tags',
+            depName: 'example/repo',
+            packageName: 'https://github.com/example/repo',
+            currentValue: 'from: "1.0.0"',
+          },
+        ],
+      });
+    });
+
+    it('extracts GitLab dependencies with gitlab-tags datasource', () => {
+      const content = `
+        let package = Package(
+          name: "MyPackage",
+          dependencies: [
+            .package(url: "https://gitlab.com/example/repo", from: "2.0.0")
+          ]
+        )
+      `;
+      const result = extractPackageFile(content);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            datasource: 'gitlab-tags',
+            depName: 'example/repo',
+            packageName: 'https://gitlab.com/example/repo',
+            currentValue: 'from: "2.0.0"',
+          },
+        ],
+      });
+    });
+
     it('extracts other dependencies with git-tags datasource', () => {
       const content = `
         let package = Package(
