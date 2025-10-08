@@ -294,6 +294,9 @@ jobs:
       - name: Lint markdown
         uses: DavidAnson/markdownlint-cli2-action@992badcdf24e3b8eb7e87ff9287fe931bcb00c6e # v20.0.0
 
+      - name: Generate JSON schema
+        run: pnpm create-json-schema
+
       - name: Lint fenced code blocks
         run: pnpm doc-fence-check
 
@@ -705,7 +708,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@81b2f1cc6e9fb463076193af37c1eb80c616238b # v3.13.12
+        uses: containerbase/internal-tools@c7bb1d76b0bbba5b10b0e204aa1f339c627ec214 # v3.13.13
         with:
           command: docker-config
 
