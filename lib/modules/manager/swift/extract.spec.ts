@@ -44,7 +44,6 @@ describe('modules/manager/swift/extract', () => {
           {
             datasource: 'github-tags',
             depName: 'example/repo',
-            packageName: 'https://github.com/example/repo',
             currentValue: 'from: "1.0.0"',
           },
         ],
@@ -66,7 +65,6 @@ describe('modules/manager/swift/extract', () => {
           {
             datasource: 'gitlab-tags',
             depName: 'example/repo',
-            packageName: 'https://gitlab.com/example/repo',
             currentValue: 'from: "2.0.0"',
           },
         ],
@@ -110,7 +108,6 @@ describe('modules/manager/swift/extract', () => {
           {
             datasource: 'github-tags',
             depName: 'example/repo',
-            packageName: 'https://github.com/example/repo',
             currentValue: '1.2.3',
           },
         ],
@@ -132,7 +129,6 @@ describe('modules/manager/swift/extract', () => {
           {
             datasource: 'github-tags',
             depName: 'example/repo',
-            packageName: 'https://github.com/example/repo',
             currentValue: '1.2.1',
           },
         ],
@@ -154,7 +150,6 @@ describe('modules/manager/swift/extract', () => {
           {
             datasource: 'github-tags',
             depName: 'example/repo',
-            packageName: 'https://github.com/example/repo',
             currentValue: '"1.0.0"..."2.0.0"',
           },
         ],
@@ -173,21 +168,18 @@ describe('modules/manager/swift/extract', () => {
       expect(result?.deps).toContainEqual({
         datasource: 'github-tags',
         depName: '0x7fs/CountedSet',
-        packageName: 'https://github.com/0x7fs/CountedSet',
         currentValue: '"master"\n        ',
       });
 
       expect(result?.deps).toContainEqual({
         datasource: 'github-tags',
         depName: 'avito-tech/GraphiteClient',
-        packageName: 'https://github.com/avito-tech/GraphiteClient.git',
         currentValue: '0.1.0',
       });
 
       expect(result?.deps).toContainEqual({
         datasource: 'github-tags',
         depName: 'apple/swift-argument-parser',
-        packageName: 'https://github.com/apple/swift-argument-parser',
         currentValue: '1.2.1',
       });
 
@@ -195,7 +187,6 @@ describe('modules/manager/swift/extract', () => {
       expect(result?.deps).toContainEqual({
         datasource: 'github-tags',
         depName: 'weichsel/ZIPFoundation',
-        packageName: 'https://github.com/weichsel/ZIPFoundation/',
         currentValue: 'from : "0.9.6"',
       });
     });
