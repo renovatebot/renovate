@@ -441,3 +441,21 @@ USER 12021
 # OpenSSL
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 ```
+
+## Proxy Environment Variable Configuration
+
+If your environment uses an HTTP proxy configured via environment variables (`HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`, and their lowercase variants), Renovate inherits these settings and prefers the lowercase variant.
+
+In some cases, you may need to adjust the `NO_PROXY` variable if Renovate encounters network or TLS errors when accessing internal or excluded domains.
+
+Renovate uses the [global-agent](https://github.com/gajus/global-agent) library to manage proxy connections.
+
+To exclude a domain and all its subdomains, you must use a wildcard — for example:
+
+```
+NO_PROXY=*.example.org
+```
+
+This configuration ensures that both `example.org` and `www.example.org` are accessed directly, bypassing the proxy for Renovate.
+
+If a tool that Renovate runs (such as git) still has proxy-related issues, note that different tools interpret NO_PROXY formats differently. See [GitLab’s detailed explanation](https://about.gitlab.com/blog/we-need-to-talk-no-proxy/#no_proxy-format) for guidance on tool-specific behavior.
