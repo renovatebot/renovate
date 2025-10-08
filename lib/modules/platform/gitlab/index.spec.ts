@@ -556,7 +556,6 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
-            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -595,7 +594,6 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
-            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -634,7 +632,6 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
-            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -694,7 +691,6 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
-            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -777,7 +773,6 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
-            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -823,7 +818,6 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
-            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -873,7 +867,6 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
-            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -1868,7 +1861,6 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'branch a pr',
             state: 'opened',
-            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -1892,7 +1884,6 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'branch a pr',
             state: 'merged',
-            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -1917,7 +1908,6 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'branch a pr',
             state: 'opened',
-            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -1943,7 +1933,6 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'branch a pr',
             state: 'opened',
-            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -1968,7 +1957,6 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'Draft: branch a pr',
             state: 'opened',
-            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -1993,7 +1981,6 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'WIP: branch a pr',
             state: 'opened',
-            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -2018,7 +2005,6 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'branch a pr',
             state: 'opened',
-            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -3385,10 +3371,10 @@ describe('modules/platform/gitlab/index', () => {
           {
             iid: 1,
             source_branch: 'branch-a',
-            target_branch: 'branch-new',
             title: 'branch a pr',
             description: 'a merge request',
             state: 'opened',
+            target_branch: 'branch-b',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -3401,7 +3387,6 @@ describe('modules/platform/gitlab/index', () => {
           description: 'body',
           state: 'opened',
           target_branch: 'branch-new',
-          created_at: '2025-05-19T12:00:00.000Z',
         });
       await expect(
         gitlab.updatePr({
@@ -3440,7 +3425,6 @@ describe('modules/platform/gitlab/index', () => {
           title: 'title',
           description: 'body',
           state: 'opened',
-          created_at: '2025-05-19T12:00:00.000Z',
         })
         .post('/api/v4/projects/undefined/merge_requests/1/approve')
         .reply(200);
@@ -3483,7 +3467,6 @@ describe('modules/platform/gitlab/index', () => {
           title: 'title',
           description: 'a merge requbody',
           state: 'closed',
-          created_at: '2025-05-19T12:00:00.000Z',
         });
       await expect(
         gitlab.updatePr({
@@ -3522,7 +3505,6 @@ describe('modules/platform/gitlab/index', () => {
           title: 'title',
           description: 'body',
           state: 'opened',
-          created_at: '2025-05-19T12:00:00.000Z',
         });
       await expect(
         gitlab.updatePr({
