@@ -1535,5 +1535,56 @@ describe('workers/repository/update/branch/auto-replace', () => {
         `,
       );
     });
+
+    it('updates only digest', async () => {
+      const githubAction = codeBlock`
+        """Rules/toolchains for angular with Bazel."""
+    module(
+        name = "angular-cli",
+    )
+
+    bazel_dep(name = "rules_angular")
+    git_override(
+        module_name = "rules_angular",
+        commit = "17eac47ea99057f7473a7d93292e76327c894ed9",
+        remote = "https://github.com/devversion/rules_angular.git",
+    )
+      `;
+      upgrade.manager = 'bazel-module';
+      upgrade.updateType = 'digest';
+      upgrade.pinDigests = false;
+      upgrade.autoReplaceStringTemplate = undefined;
+      upgrade.depName = 'rules_angular';
+      upgrade.currentValue = undefined;
+      upgrade.currentDigestShort = '17eac47';
+      upgrade.currentDigest = '17eac47ea99057f7473a7d93292e76327c894ed9';
+      upgrade.depIndex = 1;
+      upgrade.replaceString = undefined;
+      upgrade.newName = undefined;
+      upgrade.newValue = undefined;
+      upgrade.newDigest = '84f4bf185682d841c7e7b369f498e68c742229cc';
+      upgrade.packageFile = 'MODULE.bazel';
+      upgrade.autoReplaceGlobalMatch = true;
+      const res = await doAutoReplace(
+        upgrade,
+        githubAction,
+        reuseExistingBranch,
+      );
+      expect(res).toBe(
+        codeBlock`
+          """Rules/toolchains for angular with Bazel."""
+    module(
+        name = "angular-cli",
+    )
+
+    bazel_dep(name = "rules_angular")
+    git_override(
+        module_name = "rules_angular",
+        commit = "84f4bf185682d841c7e7b369f498e68c742229cc",
+        remote = "https://github.com/devversion/rules_angular.git",
+    )
+        `,
+      );
+    });
   });
 });

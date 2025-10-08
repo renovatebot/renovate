@@ -3424,7 +3424,7 @@ describe('modules/platform/gitlab/index', () => {
           {
             iid: 1,
             source_branch: 'branch-a',
-            target_branch: 'branch-new',
+            target_branch: 'branch-b',
             title: 'branch a pr',
             description: 'a merge request',
             state: 'opened',
@@ -3436,7 +3436,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, {
           iid: 1,
           source_branch: 'branch-a',
-          target_branch: 'branch-new',
+          target_branch: 'branch-b',
           title: 'title',
           description: 'body',
           state: 'opened',
@@ -3467,7 +3467,7 @@ describe('modules/platform/gitlab/index', () => {
           {
             iid: 1,
             source_branch: 'branch-a',
-            target_branch: 'branch-new',
+            target_branch: 'branch-b',
             title: 'branch a pr',
             description: 'a merge request',
             state: 'opened',
@@ -3479,7 +3479,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, {
           iid: 1,
           source_branch: 'branch-a',
-          target_branch: 'branch-new',
+          target_branch: 'branch-b',
           title: 'title',
           description: 'a merge requbody',
           state: 'closed',
@@ -3506,7 +3506,7 @@ describe('modules/platform/gitlab/index', () => {
           {
             iid: 1,
             source_branch: 'branch-a',
-            target_branch: 'branch-new',
+            target_branch: 'branch-b',
             title: 'branch a pr',
             description: 'a merge request',
             state: 'opened',
@@ -3518,7 +3518,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, {
           iid: 1,
           source_branch: 'branch-a',
-          target_branch: 'branch-new',
+          target_branch: 'branch-b',
           title: 'title',
           description: 'body',
           state: 'opened',

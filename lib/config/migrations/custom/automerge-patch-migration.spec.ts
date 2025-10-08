@@ -1,8 +1,8 @@
 import { AutomergePatchMigration } from './automerge-patch-migration';
 
 describe('config/migrations/custom/automerge-patch-migration', () => {
-  it('should migrate value to object', () => {
-    expect(AutomergePatchMigration).toMigrate(
+  it('should migrate value to object', async () => {
+    await expect(AutomergePatchMigration).toMigrate(
       {
         automergePatch: 'some-value',
       },
@@ -14,8 +14,8 @@ describe('config/migrations/custom/automerge-patch-migration', () => {
     );
   });
 
-  it('should migrate value to object and concat with existing minor object', () => {
-    expect(AutomergePatchMigration).toMigrate(
+  it('should migrate value to object and concat with existing minor object', async () => {
+    await expect(AutomergePatchMigration).toMigrate(
       {
         automergePatch: 'some-value',
         patch: {
@@ -31,8 +31,8 @@ describe('config/migrations/custom/automerge-patch-migration', () => {
     );
   });
 
-  it('should ignore non object minor value', () => {
-    expect(AutomergePatchMigration).toMigrate(
+  it('should ignore non object minor value', async () => {
+    await expect(AutomergePatchMigration).toMigrate(
       {
         automergePatch: 'some-value',
         patch: null,
