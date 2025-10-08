@@ -6,4 +6,4 @@ Non-GitHub platforms (Bitbucket, Azure DevOps, GitLab, etc.) require a GitHub to
 
 <!-- prettier-ignore -->
 !!! note
-  Follow the [GitHub token setup guide](../../../mend-hosted/github-com-token.md) to configure authentication for non-GitHub platforms.
+  Follow the [GitHub token setup guide](../../../../docs/usage/mend-hosted/github-com-token.md) to configure authentication for non-GitHub platforms.
