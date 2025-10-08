@@ -85,6 +85,7 @@ That's why in the `manifest.json` above, the version is defined as `1.0.0-1`, if
 Or just `1.1.0` if `rel` is not available.
 
 You may also check the `yum/dnf info` for the package to find version and release:
+
 ```
 # dnf info example-package1
 Last metadata expiration check: 18:34:13 ago on Tue Oct  7 13:58:36 2025.
