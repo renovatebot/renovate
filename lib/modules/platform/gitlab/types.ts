@@ -1,4 +1,3 @@
-import type { LongCommitSha } from '../../../util/git/types';
 import type { Pr } from '../types';
 
 export interface GitlabIssue {
@@ -17,28 +16,6 @@ export interface GitlabComment {
 export interface GitLabUser {
   id: number;
   username: string;
-}
-
-export interface GitLabMergeRequest {
-  iid: number;
-  title: string;
-  state: string;
-  created_at: string;
-  source_branch: string;
-  target_branch: string;
-  description: string;
-  diverged_commits_count: number;
-  merge_status: string;
-  assignee?: GitLabUser;
-  assignees?: GitLabUser[];
-  reviewers?: GitLabUser[];
-  labels: string[];
-  sha: LongCommitSha;
-  head_pipeline?: {
-    status: string;
-    sha: string;
-  };
-  updated_at: string;
 }
 
 export interface GitlabPr extends Pr {
