@@ -230,7 +230,7 @@ const qImplicitTestSuitesWithType = q
       .sym('withType')
       .tree({
         type: 'wrapped-tree',
-        maxDepth: 2,
+        maxDepth: 1,
         startsWith: '(',
         endsWith: ')',
       })
