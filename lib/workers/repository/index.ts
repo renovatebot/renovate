@@ -156,7 +156,18 @@ export async function renovateRepository(
   ObsoleteCacheHitLogger.report();
   AbandonedPackageStats.report();
   const cloned = isCloned();
-  logger.info({ cloned, durationMs: splits.total }, 'Repository finished');
+  /* v8 ignore next 11 -- coverage not required of these `undefined` checks, as we're happy receiving an `undefined` in the logs */
+  logger.info(
+    {
+      cloned,
+      durationMs: splits.total,
+      result: repoResult?.res,
+      status: repoResult?.status,
+      enabled: repoResult?.enabled,
+      onboarded: repoResult?.onboarded,
+    },
+    'Repository finished',
+  );
   resetRepositoryLogLevelRemaps();
   return repoResult;
 }

@@ -606,18 +606,6 @@ describe('modules/manager/github-actions/extract', () => {
                 uses: actions/setup-node@v3
                 with:
                   node-version: 'latest'
-              - name: "Setup Deno"
-                uses: actions/setup-deno@v2
-                with:
-                  deno-version: '2.4.0'
-              - name: "Setup Bun"
-                uses: actions/setup-bun@v2
-                with:
-                  bun-version: '1.2.0'
-              - name: "Setup Ruby"
-                uses: actions/setup-ruby@v1
-                with:
-                  ruby-version: '3.4'
         `;
 
       const res = extractPackageFile(yamlContent, 'workflow.yml');
@@ -678,39 +666,6 @@ describe('modules/manager/github-actions/extract', () => {
           versioning: 'docker',
         },
         {
-          autoReplaceStringTemplate:
-            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
-          commitMessageTopic: '{{{depName}}} action',
-          currentValue: 'v2',
-          datasource: 'github-tags',
-          depName: 'actions/setup-deno',
-          depType: 'action',
-          replaceString: 'actions/setup-deno@v2',
-          versioning: 'docker',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
-          commitMessageTopic: '{{{depName}}} action',
-          currentValue: 'v2',
-          datasource: 'github-tags',
-          depName: 'actions/setup-bun',
-          depType: 'action',
-          replaceString: 'actions/setup-bun@v2',
-          versioning: 'docker',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
-          commitMessageTopic: '{{{depName}}} action',
-          currentValue: 'v1',
-          datasource: 'github-tags',
-          depName: 'actions/setup-ruby',
-          depType: 'action',
-          replaceString: 'actions/setup-ruby@v1',
-          versioning: 'docker',
-        },
-        {
           depName: 'node',
           packageName: 'actions/node-versions',
           currentValue: '16.x',
@@ -755,33 +710,6 @@ describe('modules/manager/github-actions/extract', () => {
           extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
           depType: 'uses-with',
         },
-        {
-          currentValue: '2.4.0',
-          datasource: 'github-releases',
-          depName: 'deno',
-          depType: 'uses-with',
-          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
-          packageName: 'actions/deno-versions',
-          versioning: 'semver',
-        },
-        {
-          currentValue: '1.2.0',
-          datasource: 'github-releases',
-          depName: 'bun',
-          depType: 'uses-with',
-          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
-          packageName: 'actions/bun-versions',
-          versioning: 'npm',
-        },
-        {
-          currentValue: '3.4',
-          datasource: 'github-releases',
-          depName: 'ruby',
-          depType: 'uses-with',
-          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
-          packageName: 'actions/ruby-versions',
-          versioning: 'ruby',
-        },
       ]);
     });
 
@@ -810,18 +738,6 @@ describe('modules/manager/github-actions/extract', () => {
               uses: actions/setup-node@v3
               with:
                 node-version: 'latest'
-            - name: "Setup Deno"
-              uses: actions/setup-deno@v2
-              with:
-                deno-version: '2.4.0'
-            - name: "Setup Bun"
-              uses: actions/setup-bun@v2
-              with:
-                bun-version: '1.2.0'
-            - name: "Setup Ruby"
-              uses: actions/setup-ruby@v1
-              with:
-                ruby-version: '3.4'
         `;
 
       const res = extractPackageFile(yamlContent, 'action.yml');
@@ -882,39 +798,6 @@ describe('modules/manager/github-actions/extract', () => {
           versioning: 'docker',
         },
         {
-          autoReplaceStringTemplate:
-            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
-          commitMessageTopic: '{{{depName}}} action',
-          currentValue: 'v2',
-          datasource: 'github-tags',
-          depName: 'actions/setup-deno',
-          depType: 'action',
-          replaceString: 'actions/setup-deno@v2',
-          versioning: 'docker',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
-          commitMessageTopic: '{{{depName}}} action',
-          currentValue: 'v2',
-          datasource: 'github-tags',
-          depName: 'actions/setup-bun',
-          depType: 'action',
-          replaceString: 'actions/setup-bun@v2',
-          versioning: 'docker',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
-          commitMessageTopic: '{{{depName}}} action',
-          currentValue: 'v1',
-          datasource: 'github-tags',
-          depName: 'actions/setup-ruby',
-          depType: 'action',
-          replaceString: 'actions/setup-ruby@v1',
-          versioning: 'docker',
-        },
-        {
           depName: 'node',
           packageName: 'actions/node-versions',
           currentValue: '16.x',
@@ -958,33 +841,6 @@ describe('modules/manager/github-actions/extract', () => {
           versioning: 'node',
           extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
           depType: 'uses-with',
-        },
-        {
-          currentValue: '2.4.0',
-          datasource: 'github-releases',
-          depName: 'deno',
-          depType: 'uses-with',
-          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
-          packageName: 'actions/deno-versions',
-          versioning: 'semver',
-        },
-        {
-          currentValue: '1.2.0',
-          datasource: 'github-releases',
-          depName: 'bun',
-          depType: 'uses-with',
-          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
-          packageName: 'actions/bun-versions',
-          versioning: 'npm',
-        },
-        {
-          currentValue: '3.4',
-          datasource: 'github-releases',
-          depName: 'ruby',
-          depType: 'uses-with',
-          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
-          packageName: 'actions/ruby-versions',
-          versioning: 'ruby',
         },
       ]);
     });
@@ -1216,6 +1072,105 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'uses-with',
           packageName: 'prefix-dev/pixi',
           versioning: 'conda',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'oven-sh/setup-bun@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'bun',
+          depType: 'uses-with',
+          packageName: 'bun',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'oven-sh/setup-bun@v2',
+        with: { 'bun-version': '1.2.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.2.0',
+          datasource: 'npm',
+          depName: 'bun',
+          depType: 'uses-with',
+          packageName: 'bun',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'denoland/setup-deno@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'deno',
+          depType: 'uses-with',
+          packageName: 'deno',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'denoland/setup-deno@v2',
+        with: { 'deno-version': '2.4.0' },
+      },
+      expected: [
+        {
+          currentValue: '2.4.0',
+          datasource: 'npm',
+          depName: 'deno',
+          depType: 'uses-with',
+          packageName: 'deno',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'ruby/setup-ruby@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'ruby-version',
+          depName: 'ruby',
+          depType: 'uses-with',
+          packageName: 'ruby',
+          versioning: 'ruby',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'ruby/setup-ruby@v1',
+        with: { 'ruby-version': '3.4' },
+      },
+      expected: [
+        {
+          currentValue: '3.4',
+          datasource: 'ruby-version',
+          depName: 'ruby',
+          depType: 'uses-with',
+          packageName: 'ruby',
+          versioning: 'ruby',
         },
       ],
     },

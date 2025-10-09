@@ -90,7 +90,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["config/options/index.ts"],
+      "managerFilePatterns": ["lib/config/options/index.ts"],
       "matchStrings": [
         "default: '(?<depName>ghcr.io/containerbase/sidecar):(?<currentValue>.*)'"
       ],
