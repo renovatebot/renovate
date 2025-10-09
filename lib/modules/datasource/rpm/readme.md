@@ -79,11 +79,6 @@ In an RPM repository, the `<SHA256>-primary.xml` looks like this:
 </metadata>
 ```
 
-You can see that `ver` and `rel` (release/revision) is stored separately.
-But the RPM datasource implementation will combine these together as `ver-rel`.
-That's why in the `manifest.json` above, the version is defined as `1.0.0-1`, if `rel` is available.
-Or just `1.1.0` if `rel` is not available.
-
 You may also check the `yum/dnf info` for the package to find version and release:
 
 ```
@@ -97,7 +92,10 @@ Architecture : x86_64
 [...]
 ```
 
-When you see in log a message like: `INFO: Found no results from datasource that look like a version` probably the Release won't fit.
+You can see that `ver` and `rel` (`release`/`revision`) is stored separately.
+The RPM datasource implementation will combine these together as `ver-rel`.
+That's why the version is defined as `1.0.0-1.az3`, if `rel` (like `example-package1`) is available.
+Or just `1.1.0` if `rel` (like `example-package2`) is not available.
 
 ## Limitation and Consideration
 
