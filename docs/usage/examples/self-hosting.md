@@ -459,3 +459,5 @@ NO_PROXY=*.example.org
 This configuration ensures that both `example.org` and `www.example.org` are accessed directly, bypassing the proxy for Renovate.
 
 If a tool that Renovate runs (such as git) still has proxy-related issues, note that different tools interpret NO_PROXY formats differently. See [GitLab’s detailed explanation](https://about.gitlab.com/blog/we-need-to-talk-no-proxy/#no_proxy-format) for guidance on tool-specific behavior.
+
+To to debug the proxy configuration behavior you can set the environment variable `ROARR_LOG=true` to enable log printing to stdout.
