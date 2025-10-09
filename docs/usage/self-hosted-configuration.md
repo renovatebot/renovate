@@ -279,14 +279,32 @@ For example:
 
 ## cacheHardTtlMinutes
 
-This experimental feature is used to implement the concept of a "soft" cache expiry for datasources, starting with `npm`.
-It should be set to a non-zero value, recommended to be at least 60 (i.e. one hour).
+This experimental feature configures the physical lifetime of cache entries.
+Renovate internally uses two types of Time-to-Live (TTL) for its cache:
 
-When this value is set, the `npm` datasource will use the `cacheHardTtlMinutes` value for cache expiry, instead of its default expiry of 15 minutes, which becomes the "soft" expiry value.
-Results which are soft expired are reused in the following manner:
+- **Soft TTL (logical):** When a cache entry's soft TTL expires, Renovate tries to refresh the data from the upstream source.
+- **Hard TTL (physical):** When a cache entry's hard TTL expires, Renovate permanently removes the data from the cache.
 
-- The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
-- If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
+This two-level cache expiry is used for:
+
+1. [HTTP caching](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching) with `ETag`, `Last-Modified`, and `If-Modified-Since` headers
+2. `getReleases` and `getDigest` datasource methods, i.e. the package release data
+
+If an upstream request fails, Renovate can still use stale data from the cache as long as its hard TTL has not expired.
+
+The `cacheHardTtlMinutes` option lets you configure the hard TTL.
+Set this to a non-zero value, the recommended minimum is 60 (one hour).
+
+If the soft TTL for a cache entry is longer than the hard TTL, Renovate uses the soft TTL value for both.
+The soft TTL is hard-coded but can be overridden with [`cacheTtlOverride`](./self-hosted-configuration.md#cachettloverride).
+
+**Example:**
+
+The `npm` datasource has a default soft TTL of 15 minutes.
+When `cacheHardTtlMinutes` is set, for example to 60, Renovate will use the stale `npm` data in the following ways:
+
+- The `ETag` from the cached result is used in new requests. If the upstream server returns a `304 Not Modified` response, the cached data is revalidated and used.
+- If an error occurs when querying the `npmjs` registry, Renovate will use the stale data from the cache as long as it has been cached for less than 60 minutes.
 
 ## cachePrivatePackages
 
@@ -294,7 +312,12 @@ In the self-hosted setup, use option to enable caching of private packages to im
 
 ## cacheTtlOverride
 
-Utilize this key-value map to override the default package cache TTL values for a specific namespace. This object contains pairs of namespaces and their corresponding TTL values in minutes.
+Use this key-value map to override the default package cache TTL values for a specific namespace.
+This object contains pairs of namespaces and their corresponding TTL values in minutes.
+
+Internally, Renovate has the notion of soft TTL and hard TTL.
+In some contexts they are equal, but when they differ, this option overrides the soft TTL.
+See [`cacheHardTtlMinutes`](./self-hosted-configuration.md#cachehardttlminutes) for more information.
 
 You can use:
 
@@ -341,6 +364,8 @@ Other valid cache namespaces are as follows:
 - `changelog-bitbucket-release`
 - `changelog-bitbucket-server-notes@v2`
 - `changelog-bitbucket-server-release`
+- `changelog-forgejo-notes@v2`
+- `changelog-forgejo-release`
 - `changelog-gitea-notes@v2`
 - `changelog-gitea-release`
 - `changelog-github-notes@v2`
@@ -376,6 +401,8 @@ Other valid cache namespaces are as follows:
 - `datasource-docker-tags`
 - `datasource-dotnet-version`
 - `datasource-endoflife-date`
+- `datasource-forgejo-releases`
+- `datasource-forgejo-tags`
 - `datasource-galaxy-collection`
 - `datasource-galaxy`
 - `datasource-git-refs`
@@ -399,6 +426,7 @@ Other valid cache namespaces are as follows:
 - `datasource-hexpm-bob`
 - `datasource-java-version`
 - `datasource-jenkins-plugins`
+- `datasource-jsr`
 - `datasource-maven:cache-provider`
 - `datasource-maven:postprocess-reject`
 - `datasource-node-version`
@@ -416,6 +444,8 @@ Other valid cache namespaces are as follows:
 - `datasource-terraform-module`
 - `datasource-terraform-provider`
 - `datasource-terraform`
+- `datasource-typst:cache-provider`
+- `datasource-typst:releases`
 - `datasource-unity3d`
 - `datasource-unity3d-packages`
 - `github-releases-datasource-v2`
@@ -470,6 +500,16 @@ The above configuration approach will mean the values are redacted in logs like 
          "secrets": {"SECRET_TOKEN": "***********"},
          "customEnvVariables": {"SECRET_TOKEN": "{{ secrets.SECRET_TOKEN }}"},
 ```
+
+## deleteAdditionalConfigFile
+
+If set to `true` Renovate tries to delete the additional self-hosted config file after reading it.
+
+The process that runs Renovate must have the correct permissions to delete the additional config file.
+
+<!-- prettier-ignore -->
+!!! tip
+    You can tell Renovate where to find your config file with the `RENOVATE_ADDITONAL_CONFIG_FILE` environment variable.
 
 ## deleteConfigFile
 
@@ -755,6 +795,21 @@ Before the first commit in a repository, Renovate will:
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
 
+## gitPrivateKeyPassphrase
+
+Passphrase for the `gitPrivateKey` when the private key is protected with a passphrase.
+
+Currently supported for SSH keys only.
+When provided, Renovate will automatically decrypt the SSH private key during the signing process.
+
+<!-- prettier-ignore -->
+!!! note
+    Passphrases are not yet supported for GPG keys. If you provide a passphrase for a GPG key, it will be ignored and a warning will be logged.
+
+<!-- prettier-ignore -->
+!!! warning
+    Store this value securely as it provides access to decrypt your private key. Consider using environment variables or secure secret management systems rather than storing it in plain text configuration files.
+
 ## gitTimeout
 
 To handle the case where the underlying Git processes appear to hang, configure the timeout with the number of milliseconds to wait after last received content on either `stdOut` or `stdErr` streams before sending a `SIGINT` kill message.
@@ -797,6 +852,16 @@ Value of `0` means no caching.
 <!-- prettier-ignore -->
 !!! warning
     When you set `httpCacheTtlDays` to `0`, Renovate will remove the cached HTTP data.
+
+## ignorePrAuthor
+
+This is usually needed if someone needs to migrate bot accounts, including from the Mend Renovate App to self-hosted.
+An additional use case is for GitLab users of project or group access tokens who need to rotate them.
+
+If `ignorePrAuthor` is configured to true, it means Renovate will fetch the entire list of repository PRs instead of optimizing to fetch only those PRs which it created itself.
+You should only want to enable this if you are changing the bot account (e.g. from `@old-bot` to `@new-bot`) and want `@new-bot` to find and update any existing PRs created by `@old-bot`.
+
+Setting this field to `true` in Github or GitLab will also mean that all Issues will be fetched instead of only those by the bot itself.
 
 ## includeMirrors
 
@@ -890,7 +955,7 @@ If you use the Mend Renovate Enterprise Edition (Renovate EE) and:
 
 Then you must set this variable at the _server_ and the _workers_.
 
-But if you have specified the token as a [`matchConfidence`](configuration-options.md#matchconfidence) `hostRule`, you only need to set this variable at the _workers_.
+But if you have specified the token as a [`matchConfidence`](configuration-options.md#matchconfidence) `packageRule`, you only need to set this variable at the _workers_.
 
 This feature is in private beta.
 
@@ -1110,6 +1175,12 @@ gpg> save
 
 The private key should then be added to your Renovate Bot global config (either using `privateKeyPath` or exporting it to the `RENOVATE_PRIVATE_KEY` environment variable).
 The public key can be used to replace the existing key in <https://app.renovatebot.com/encrypt> for your own use.
+
+<!-- prettier-ignore -->
+!!! note "Base64 Encoding Support"
+    Renovate supports base64-encoded private keys for easier handling in environment variables or configuration files.
+    Simply provide the base64-encoded version of your private key, and Renovate will automatically detect and decode it.
+    This works for both GPG and SSH private keys.
 
 Any PGP-encrypted secrets must have a mandatory organization/group scope, and optionally can be scoped for a single repository only.
 The reason for this is to avoid "replay" attacks where someone could learn your encrypted secret and then reuse it in their own Renovate repositories.
@@ -1401,6 +1472,8 @@ Known use cases consist, among other things, of horizontal scaling setups.
 See [Scaling Renovate Bot on self-hosted GitLab](https://github.com/renovatebot/renovate/discussions/13172).
 
 Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
+
+<!-- schema-validation-disable-next-block -->
 
 ```json
 ["myOrg/myRepo", "myOrg/anotherRepo"]

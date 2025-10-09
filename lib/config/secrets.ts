@@ -10,8 +10,8 @@ import type { AllConfig, RenovateConfig } from './types';
 
 const namePattern = '[A-Za-z][A-Za-z0-9_]*';
 const nameRegex = regEx(`^${namePattern}$`);
-const secretTemplateRegex = regEx(`{{ secrets\\.(${namePattern}) }}`);
-const variableTemplateRegex = regEx(`{{ variables\\.(${namePattern}) }}`);
+const secretTemplateRegex = regEx(`{{ secrets\\.(${namePattern}) }}`, 'g');
+const variableTemplateRegex = regEx(`{{ variables\\.(${namePattern}) }}`, 'g');
 
 export const options: Record<'secrets' | 'variables', InterpolatorOptions> = {
   secrets: {

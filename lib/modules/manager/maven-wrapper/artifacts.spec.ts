@@ -1,7 +1,7 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
 import type { StatusResult } from 'simple-git';
-import { join } from 'upath';
+import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import { resetPrefetchedImages } from '../../../util/exec/docker';
@@ -29,7 +29,7 @@ function mockMavenFileChangedInGit(fileName = 'maven-wrapper.properties') {
 describe('modules/manager/maven-wrapper/artifacts', () => {
   beforeEach(() => {
     osPlatformSpy.mockImplementation(() => 'linux');
-    GlobalConfig.set({ localDir: join('/tmp/github/some/repo') });
+    GlobalConfig.set({ localDir: upath.join('/tmp/github/some/repo') });
     fs.statLocalFile.mockResolvedValue(
       partial<Stats>({
         isFile: () => true,
@@ -271,7 +271,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     mockMavenFileChangedInGit();
     GlobalConfig.set({
-      localDir: join('/tmp/github/some/repo'),
+      localDir: upath.join('/tmp/github/some/repo'),
       binarySource: 'install',
     });
     const updatedDeps = await updateArtifacts({
@@ -312,6 +312,46 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ]);
+    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+  });
+
+  it('updates with binarySource install after detecting wrapper version from mvnw script', async () => {
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+    mockMavenFileChangedInGit();
+    GlobalConfig.set({
+      localDir: upath.join('/tmp/github/some/repo'),
+      binarySource: 'install',
+    });
+    const updatedDeps = await updateArtifacts({
+      packageFileName: './mvnw',
+      newPackageFileContent: '',
+      updatedDeps: [{ depName: 'maven-wrapper' }],
+      config: { currentValue: '3.0.0', newValue: '3.3.1' },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool java 17.0.0' },
+      {
+        cmd: './mvnw wrapper:wrapper',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          encoding: 'utf-8',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+    ]);
+
+    expect(updatedDeps).toEqual([]);
     expect(git.getRepoStatus).toHaveBeenCalledOnce();
   });
 

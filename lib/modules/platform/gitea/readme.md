@@ -1,7 +1,11 @@
-# Gitea and Forgejo
+# Gitea
 
-Renovate supports [Gitea](https://gitea.io) and the [Forgejo](https://forgejo.org) fork.
-Forgejo exists since `v1.18.0` and is currently fully compatible to Gitea.
+Renovate supports [Gitea](https://gitea.io).
+
+<!-- prettier-ignore -->
+!!! note
+    Use [`forgejo`](../forgejo/index.md) as the platform if you are using Forgejo.
+    Forgejo support will be removed from `gitea` platform in a future release.
 
 ## Authentication
 
@@ -31,7 +35,7 @@ If you use Gitea packages, add the `read:packages` scope.
 ## Unsupported platform features/concepts
 
 - **Adding reviewers to PRs not supported**: Gitea versions older than `v1.14.0` do not have the required API.
-- **`platformAutomerge` (`true` by default) for platform-native automerge not supported**: Gitea versions older than v1.24.0 and Forgejo versions older than v10.0.0 don't support required branch autodelete for automerge.
+- **`platformAutomerge` (`true` by default) for platform-native automerge not supported**: Gitea versions older than v1.24.0 don't support required branch autodelete for automerge.
 - **Git upload filters**: If you're using a Gitea version older than `v1.16.0` then you must enable [clone filters](https://docs.gitea.io/en-us/clone-filters/).
 
 ## Features awaiting implementation
@@ -50,3 +54,10 @@ Repositories are ignored when one of the following conditions is met:
 You can change the default server-side sort method and order for autodiscover API.
 Set those via [`autodiscoverRepoSort`](../../../self-hosted-configuration.md#autodiscoverreposort) and [`autodiscoverRepoOrder`](../../../self-hosted-configuration.md#autodiscoverrepoorder).
 Read the [Gitea swagger docs](https://try.gitea.io/api/swagger#/repository/repoSearch) for more details.
+
+## Merge style
+
+Renovate uses the repository's default merge style if allowed; if the default
+merge style is not an allowed merge style, renovate falls back to an allowed
+merge style as per an order chosen to minimize commits. If no merge style is
+allowed, the repository is blocked.

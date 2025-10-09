@@ -203,7 +203,7 @@ export class GoProxyDatasource extends Datasource {
     const isGopkgin = packageName.startsWith('gopkg.in/');
     const majorSuffixSeparator = isGopkgin ? '.' : '/';
     const modParts = packageName.match(modRegex)?.groups;
-    const baseMod = modParts?.baseMod ?? /* istanbul ignore next */ packageName;
+    const baseMod = modParts?.baseMod ?? /* v8 ignore next */ packageName;
     const packageMajor = parseInt(modParts?.majorVersion ?? '0');
 
     const result: ReleaseResult = { releases: [] };
@@ -249,9 +249,10 @@ export class GoProxyDatasource extends Datasource {
       } catch (err) {
         const potentialHttpError =
           err instanceof ExternalHostError ? err.err : err;
+        const status = potentialHttpError.response?.statusCode;
         if (
           potentialHttpError instanceof HttpError &&
-          potentialHttpError.response?.statusCode === 404 &&
+          (status === 404 || status === 403) &&
           major !== packageMajor
         ) {
           break;

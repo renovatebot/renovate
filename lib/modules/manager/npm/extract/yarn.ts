@@ -7,7 +7,11 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../../util/fs';
-import type { LockFile } from './types';
+import type { PackageFileContent } from '../../types';
+import type { YarnCatalogs } from '../schema';
+import type { NpmManagerData } from '../types';
+import { extractCatalogDeps } from './common/catalogs';
+import type { Catalog, LockFile } from './types';
 
 export async function getYarnLock(filePath: string): Promise<LockFile> {
   // TODO #22198
@@ -20,7 +24,7 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
     for (const [key, val] of Object.entries(parsed)) {
       if (key === '__metadata') {
         // yarn 2
-        lockfileVersion = parseInt(val.cacheKey, 10);
+        lockfileVersion = parseInt(val.cacheKey);
         logger.once.debug(
           `yarn.lock ${filePath} has __metadata.cacheKey=${lockfileVersion}`,
         );
@@ -66,10 +70,10 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
 export function getZeroInstallPaths(yarnrcYml: string): string[] {
   let conf: any;
   try {
-    conf = parseSyml(yarnrcYml);
-  } catch (err) /* istanbul ignore next */ {
+    conf = parseSyml(yarnrcYml); /* v8 ignore start -- needs test */
+  } catch (err) {
     logger.warn({ err }, 'Error parsing .yarnrc.yml');
-  }
+  } /* v8 ignore stop -- needs test */
   const paths = [
     conf?.cacheFolder ?? './.yarn/cache',
     '.pnp.cjs',
@@ -120,4 +124,56 @@ export function getYarnVersionFromLock(lockfile: LockFile): string {
   }
 
   return '^2.0.0';
+}
+
+export async function extractYarnCatalogs(
+  catalogs: YarnCatalogs | undefined,
+  packageFile: string,
+  hasPackageManager: boolean,
+): Promise<PackageFileContent<NpmManagerData>> {
+  logger.trace(`yarn.extractYarnCatalogs(${packageFile})`);
+
+  const yarnCatalogs = yarnCatalogsToArray(catalogs);
+
+  const deps = extractCatalogDeps(yarnCatalogs, 'yarn');
+
+  let yarnLock: string | undefined;
+  const filePath = getSiblingFileName(packageFile, 'yarn.lock');
+
+  if (await localPathExists(filePath)) {
+    yarnLock = filePath;
+  }
+
+  return {
+    deps,
+    managerData: {
+      yarnLock,
+      hasPackageManager,
+    },
+  };
+}
+
+function yarnCatalogsToArray(catalogs: YarnCatalogs | undefined): Catalog[] {
+  const result: Catalog[] = [];
+
+  if (catalogs?.list !== undefined) {
+    for (const [
+      depNameOrCatalogName,
+      depsVersionOrNamedCatalog,
+    ] of Object.entries(catalogs.list)) {
+      if (is.object(depsVersionOrNamedCatalog)) {
+        result.push({
+          name: depNameOrCatalogName,
+          dependencies: depsVersionOrNamedCatalog,
+        });
+      } else {
+        result.push({
+          name: 'default',
+          dependencies: { [depNameOrCatalogName]: depsVersionOrNamedCatalog },
+        });
+      }
+    }
+  }
+
+  return result;
 }

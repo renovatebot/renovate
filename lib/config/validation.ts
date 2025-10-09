@@ -31,7 +31,6 @@ import type {
   ValidationResult,
 } from './types';
 import { allowedStatusCheckStrings } from './types';
-import * as managerValidator from './validation-helpers/managers';
 import * as matchBaseBranchesValidator from './validation-helpers/match-base-branches';
 import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers';
 import {
@@ -251,9 +250,8 @@ export async function validateConfig(
         !optionParents[key].includes(parentName as AllowedParents)
       ) {
         // TODO: types (#22198)
-        const message = `${key} should only be configured within one of "${optionParents[
-          key
-        ]?.join(' or ')}" objects. Was found in ${parentName}`;
+        const options = optionParents[key]?.sort().join(', ');
+        const message = `"${key}" can't be used in "${parentName}". Allowed objects: ${options}.`;
         warnings.push({
           topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
           message,
@@ -394,9 +392,6 @@ export async function validateConfig(
                       ),
                     ],
                   }).migratedConfig.packageRules![0];
-                  errors.push(
-                    ...managerValidator.check({ resolvedRule, currentPath }),
-                  );
                   warnings.push(
                     ...matchBaseBranchesValidator.check({
                       resolvedRule,

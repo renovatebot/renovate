@@ -32,7 +32,7 @@ const options: RenovateOptions[] = [
     default: null,
     globalOnly: true,
     allowedValues: ['asc', 'desc'],
-    supportedPlatforms: ['gitea'],
+    supportedPlatforms: ['forgejo', 'gitea'],
   },
   {
     name: 'autodiscoverRepoSort',
@@ -42,7 +42,7 @@ const options: RenovateOptions[] = [
     default: null,
     globalOnly: true,
     allowedValues: ['alpha', 'created', 'updated', 'size', 'id'],
-    supportedPlatforms: ['gitea'],
+    supportedPlatforms: ['forgejo', 'gitea'],
   },
   {
     name: 'allowedEnv',
@@ -170,6 +170,15 @@ const options: RenovateOptions[] = [
     parents: ['postUpgradeTasks'],
     default: [],
     cli: false,
+  },
+  {
+    name: 'workingDirTemplate',
+    description:
+      'A template describing the working directory in which post-upgrade tasks should be executed.',
+    type: 'string',
+    parents: ['postUpgradeTasks'],
+    cli: false,
+    env: false,
   },
   {
     name: 'dataFileTemplate',
@@ -351,6 +360,13 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'minimumGroupSize',
+    description:
+      'The minimum number of updates which must be in a group for branches to be created.',
+    type: 'integer',
+    default: 1,
+  },
+  {
     name: 'presetCachePersistence',
     description: 'Cache resolved presets in package cache.',
     type: 'boolean',
@@ -461,7 +477,7 @@ const options: RenovateOptions[] = [
       'If set to `true` then Renovate creates draft PRs, instead of normal status PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
+    supportedPlatforms: ['azure', 'forgejo', 'gitea', 'github', 'gitlab'],
   },
   {
     name: 'dryRun',
@@ -569,7 +585,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.8.23',
+    default: 'ghcr.io/containerbase/sidecar:13.18.1',
     globalOnly: true,
   },
   {
@@ -629,7 +645,7 @@ const options: RenovateOptions[] = [
       'Set to enable rebase/retry markdown checkbox for onboarding PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['gitea', 'github', 'gitlab'],
+    supportedPlatforms: ['forgejo', 'gitea', 'github', 'gitlab'],
     globalOnly: true,
     experimental: true,
     experimentalIssues: [17633],
@@ -775,6 +791,15 @@ const options: RenovateOptions[] = [
     description: 'Title for the Dependency Dashboard issue.',
     type: 'string',
     default: `Dependency Dashboard`,
+  },
+  {
+    name: 'dependencyDashboardCategory',
+    description:
+      'The category to group branches on the Dependency Dashboard issue.',
+    type: 'string',
+    default: null,
+    cli: false,
+    env: false,
   },
   {
     name: 'dependencyDashboardHeader',
@@ -1004,11 +1029,10 @@ const options: RenovateOptions[] = [
     type: 'string',
   },
   {
-    name: 'updateLockFiles',
-    description: 'Set to `false` to disable lock file updating.',
+    name: 'skipArtifactsUpdate',
+    description: "Skip Renovate's automatic artifact updating.",
     type: 'boolean',
-    default: true,
-    supportedManagers: ['npm'],
+    default: false,
   },
   {
     name: 'skipInstalls',
@@ -1044,7 +1068,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: null,
     globalOnly: true,
-    supportedPlatforms: ['gitea', 'gitlab'],
+    supportedPlatforms: ['forgejo', 'gitea', 'gitlab'],
   },
   {
     name: 'autodiscoverProjects',
@@ -1066,7 +1090,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: null,
     globalOnly: true,
-    supportedPlatforms: ['gitea', 'github', 'gitlab'],
+    supportedPlatforms: ['forgejo', 'gitea', 'github', 'gitlab'],
   },
   {
     name: 'prCommitsPerRunLimit',
@@ -1112,6 +1136,14 @@ const options: RenovateOptions[] = [
   {
     name: 'gitPrivateKey',
     description: 'PGP key to use for signing Git commits.',
+    type: 'string',
+    cli: false,
+    globalOnly: true,
+    stage: 'global',
+  },
+  {
+    name: 'gitPrivateKeyPassphrase',
+    description: 'Passphrase for the `gitPrivateKey`',
     type: 'string',
     cli: false,
     globalOnly: true,
@@ -1191,6 +1223,7 @@ const options: RenovateOptions[] = [
       'bitbucket-pipelines',
       'buildpacks',
       'crossplane',
+      'crow',
       'devcontainer',
       'docker-compose',
       'dockerfile',
@@ -1365,6 +1398,7 @@ const options: RenovateOptions[] = [
     parents: ['packageRules'],
     stage: 'package',
     mergeable: true,
+    patternMatch: true,
     cli: false,
     env: false,
   },
@@ -1870,7 +1904,14 @@ const options: RenovateOptions[] = [
     description:
       'If set, users can add this label to PRs to request they be kept updated with the base branch.',
     type: 'string',
-    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab', 'gerrit'],
+    supportedPlatforms: [
+      'azure',
+      'forgejo',
+      'gerrit',
+      'gitea',
+      'github',
+      'gitlab',
+    ],
   },
   {
     name: 'rollbackPrs',
@@ -1910,7 +1951,14 @@ const options: RenovateOptions[] = [
     description: 'Label to make Renovate stop updating a PR.',
     type: 'string',
     default: 'stop-updating',
-    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab', 'gerrit'],
+    supportedPlatforms: [
+      'azure',
+      'forgejo',
+      'gerrit',
+      'gitea',
+      'github',
+      'gitlab',
+    ],
   },
   {
     name: 'minimumReleaseAge',
@@ -2087,9 +2135,16 @@ const options: RenovateOptions[] = [
     description:
       'The merge strategy to use when `automergeType` is `branch` or `pr`.',
     type: 'string',
-    allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
+    allowedValues: [
+      'auto',
+      'fast-forward',
+      'merge-commit',
+      'rebase',
+      'rebase-merge',
+      'squash',
+    ],
     default: 'auto',
-    supportedPlatforms: ['azure', 'bitbucket', 'gitea', 'github'],
+    supportedPlatforms: ['azure', 'bitbucket', 'forgejo', 'gitea', 'github'],
   },
   {
     name: 'automergeComment',
@@ -2485,6 +2540,8 @@ const options: RenovateOptions[] = [
     subType: 'string',
     allowedValues: [
       'bundlerConservative',
+      'composerWithAll',
+      'dotnetWorkloadRestore',
       'gomodMassage',
       'gomodTidy',
       'gomodTidy1.17',
@@ -2495,6 +2552,7 @@ const options: RenovateOptions[] = [
       'helmUpdateSubChartArchives',
       'kustomizeInflateHelmCharts',
       'npmDedupe',
+      'npmInstallTwice',
       'pnpmDedupe',
       'yarnDedupeFewer',
       'yarnDedupeHighest',
@@ -2856,6 +2914,16 @@ const options: RenovateOptions[] = [
     parents: ['customManagers'],
     cli: false,
     env: false,
+    requiredIf: [
+      {
+        siblingProperties: [
+          {
+            property: 'customType',
+            value: 'jsonata',
+          },
+        ],
+      },
+    ],
   },
   {
     name: 'matchStrings',
@@ -2986,6 +3054,7 @@ const options: RenovateOptions[] = [
     description:
       'Set to `true` to fetch the entire list of PRs instead of only those authored by the Renovate user.',
     type: 'boolean',
+    globalOnly: true,
     default: false,
   },
   {
@@ -3012,7 +3081,7 @@ const options: RenovateOptions[] = [
     description:
       'Overrides the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
     type: 'string',
-    supportedPlatforms: ['gitea', 'gitlab', 'bitbucket-server'],
+    supportedPlatforms: ['bitbucket-server', 'forgejo', 'gitea', 'gitlab'],
     allowedValues: ['default', 'ssh', 'endpoint'],
     default: 'default',
     stage: 'repository',
@@ -3029,7 +3098,7 @@ const options: RenovateOptions[] = [
     description: `Controls if platform-native auto-merge is used.`,
     type: 'boolean',
     default: true,
-    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
+    supportedPlatforms: ['azure', 'forgejo', 'gitea', 'github', 'gitlab'],
   },
   {
     name: 'userStrings',
@@ -3045,6 +3114,7 @@ const options: RenovateOptions[] = [
         'Because you closed this PR without merging, Renovate will ignore this update. You will not get PRs for the `{{{depName}}}` `{{{newDigestShort}}}` update again.',
       ignoreOther:
         'Because you closed this PR without merging, Renovate will ignore this update (`{{{newValue}}}`). You will get a PR once a newer version is released. To ignore this dependency forever, add it to the `ignoreDeps` array of your Renovate config.',
+      artifactErrorWarning: 'You probably do not want to merge this PR as-is.',
     },
   },
   {
@@ -3137,6 +3207,14 @@ const options: RenovateOptions[] = [
     name: 'deleteConfigFile',
     description:
       'If set to `true`, Renovate tries to delete the self-hosted config file after reading it.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
+    name: 'deleteAdditionalConfigFile',
+    description:
+      'If set to `true`, Renovate tries to delete the additional self-hosted config file after reading it.',
     type: 'boolean',
     default: false,
     globalOnly: true,

@@ -124,7 +124,7 @@ describe('workers/repository/dependency-dashboard', () => {
         title: '',
         number: 1,
         body:
-          Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
+          Fixtures.get('dependency-dashboard-with-10-PR.txt').replace(
             '- [ ]',
             '- [x]',
           ) + '\n\n - [x] <!-- rebase-all-open-prs -->',
@@ -151,7 +151,7 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body: Fixtures.get('dependency-dashboard-with-8-PR.txt'),
+        body: Fixtures.get('dependency-dashboard-with-10-PR.txt'),
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
@@ -176,7 +176,7 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body: Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
+        body: Fixtures.get('dependency-dashboard-with-10-PR.txt').replace(
           '- [ ] <!-- approve-all-pending-prs -->',
           '- [x] <!-- approve-all-pending-prs -->',
         ),
@@ -203,7 +203,7 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body: Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
+        body: Fixtures.get('dependency-dashboard-with-10-PR.txt').replace(
           '- [ ] <!-- create-all-rate-limited-prs -->',
           '- [x] <!-- create-all-rate-limited-prs -->',
         ),
@@ -281,6 +281,23 @@ describe('workers/repository/dependency-dashboard', () => {
           branch2: 'global-config',
         },
         dependencyDashboardRebaseAllOpen: false,
+      });
+    });
+
+    it('reads dashboard body and group size not met branches', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: `
+        - [x] <!-- approveGroup-branch=groupedBranch1 -->
+        - [ ] <!-- approveGroup-branch=groupedBranch2 -->
+        `,
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf.dependencyDashboardChecks).toMatchObject({
+        groupedBranch1: 'approveGroup',
       });
     });
   });
@@ -458,7 +475,7 @@ describe('workers/repository/dependency-dashboard', () => {
       await dryRun(branches, platform, 0, 1);
     });
 
-    it('checks an issue with 2 Pending Approvals, 2 not scheduled, 2 pr-hourly-limit-reached and 2 in error', async () => {
+    it('checks an issue with 2 Pending Approvals, 2 not scheduled, 2 pr-hourly-limit-reached, 2 in error, 1 pending automerge and 1 other', async () => {
       const branches: BranchConfig[] = [
         {
           ...mock<BranchConfig>(),
@@ -524,6 +541,14 @@ describe('workers/repository/dependency-dashboard', () => {
           prBlockedBy: 'BranchAutomerge',
           branchName: 'branchName9',
         },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr10',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep10' }],
+          result: 'done',
+          prBlockedBy: undefined,
+          branchName: 'branchName10',
+        },
       ];
       config.dependencyDashboard = true;
       await dependencyDashboard.ensureDependencyDashboard(
@@ -538,8 +563,102 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('dependency-dashboard-with-8-PR.txt'),
+        Fixtures.get('dependency-dashboard-with-10-PR.txt'),
       );
+
+      // same with dry run
+      await dryRun(branches, platform, 0, 1);
+    });
+
+    it('checks an issue with dependency dashboard categories', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr0',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep0' }],
+          result: 'needs-approval',
+          dependencyDashboardCategory: 'Category #2',
+          branchName: 'branchName0',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
+          result: 'needs-approval',
+          branchName: 'branchName1',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr2',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
+          result: 'needs-approval',
+          dependencyDashboardCategory: 'Category #10',
+          branchName: 'branchName2',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr3',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
+          result: 'not-scheduled',
+          branchName: 'branchName3',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr4',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
+          result: 'not-scheduled',
+          branchName: 'branchName4',
+          dependencyDashboardCategory: 'Category #1',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr5',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep5' }],
+          result: 'pr-limit-reached',
+          branchName: 'branchName5',
+          dependencyDashboardCategory: 'Category #3',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr6',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep6' }],
+          result: 'pr-limit-reached',
+          branchName: 'branchName6',
+          dependencyDashboardCategory: 'Category #3',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr7',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep7' }],
+          result: 'error',
+          branchName: 'branchName7',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr8',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep8' }],
+          result: 'error',
+          branchName: 'branchName8',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr9',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep9' }],
+          result: 'done',
+          prBlockedBy: 'BranchAutomerge',
+          branchName: 'branchName9',
+        },
+      ];
+      config.dependencyDashboard = true;
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        {},
+        { result: 'no-migration' },
+      );
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
       // same with dry run
       await dryRun(branches, platform, 0, 1);
@@ -671,6 +790,47 @@ describe('workers/repository/dependency-dashboard', () => {
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         Fixtures.get('dependency-dashboard-with-2-PR-closed-ignored.txt'),
+      );
+
+      // same with dry run
+      await dryRun(branches, platform, 0, 1);
+    });
+
+    it('checks an issue with group size not met branches', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
+          result: 'minimum-group-size-not-met',
+          branchName: 'groupBranch1',
+        },
+      ];
+      config.dependencyDashboard = true;
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        {},
+        { result: 'no-migration' },
+      );
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
+        config.dependencyDashboardTitle,
+      );
+      expect(platform.ensureIssue.mock.calls[0][0].body.trim()).toBe(
+        codeBlock`
+This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+## Group Size Not Met
+
+The following branches have not met their minimum group size. To create them, click on a checkbox below.
+
+ - [ ] <!-- approveGroup-branch=groupBranch1 -->undefined
+
+## Detected dependencies
+
+None detected
+`,
       );
 
       // same with dry run
@@ -1115,14 +1275,14 @@ describe('workers/repository/dependency-dashboard', () => {
 
         ## Pending Approval
 
-        These branches will be created by Renovate only once you click their checkbox below.
+        The following branches are pending approval. To create them, click on a checkbox below.
 
          - [ ] <!-- approve-branch=branchName1 -->pr1
          - [x] <!-- approve-branch=branchName2 -->pr2
 
         ## Awaiting Schedule
 
-        These updates are awaiting their schedule. Click on a checkbox to get an update now.
+        The following updates are awaiting their schedule. To get an update now, click on a checkbox below.
 
          - [x] <!-- unschedule-branch=branchName3 -->pr3
 

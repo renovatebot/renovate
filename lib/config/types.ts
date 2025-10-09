@@ -94,6 +94,7 @@ export interface RenovateSharedConfig {
   semanticCommitScope?: string | null;
   semanticCommitType?: string;
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
+  skipArtifactsUpdate?: boolean;
   stopUpdatingLabel?: string;
   suppressNotifications?: string[];
   timezone?: string;
@@ -117,6 +118,7 @@ export interface GlobalOnlyConfig {
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
+  gitPrivateKeyPassphrase?: string;
   globalExtends?: string[];
   mergeConfidenceDatasources?: string[];
   mergeConfidenceEndpoint?: string;
@@ -131,6 +133,7 @@ export interface GlobalOnlyConfig {
   repositories?: RenovateRepository[];
   useCloudMetadataServices?: boolean;
   deleteConfigFile?: boolean;
+  deleteAdditionalConfigFile?: boolean;
 }
 
 // Config options used within the repository worker, but not user configurable
@@ -172,6 +175,7 @@ export interface RepoGlobalConfig {
   s3Endpoint?: string;
   s3PathStyle?: boolean;
   cachePrivatePackages?: boolean;
+  ignorePrAuthor?: boolean;
 }
 
 export interface LegacyAdminConfig {
@@ -195,6 +199,7 @@ export type ExecutionMode = 'branch' | 'update';
 
 export interface PostUpgradeTasks {
   commands?: string[];
+  workingDirTemplate?: string;
   dataFileTemplate?: string;
   fileFilters?: string[];
   executionMode: ExecutionMode;
@@ -320,6 +325,7 @@ export interface RenovateConfig
   branchTopic?: string;
   additionalBranchPrefix?: string;
   sharedVariableName?: string;
+  minimumGroupSize?: number;
 }
 
 const CustomDatasourceFormats = [
@@ -392,6 +398,7 @@ export type MergeStrategy =
   | 'fast-forward'
   | 'merge-commit'
   | 'rebase'
+  | 'rebase-merge'
   | 'squash';
 
 // TODO: Proper typings
@@ -483,7 +490,7 @@ export interface RenovateOptionBase {
   advancedUse?: boolean;
 
   /**
-   * This is used to add depreciation message in the docs
+   * This is used to add a deprecation message in the docs
    */
   deprecationMsg?: string;
 
@@ -506,6 +513,15 @@ export interface RenovateOptionBase {
    * Platforms which support this option, leave undefined if all platforms support it.
    */
   supportedPlatforms?: PlatformId[];
+
+  /**
+   * Conditions that must be met for this option to be required.
+   */
+  requiredIf?: RenovateRequiredOption[];
+}
+
+export interface RenovateRequiredOption {
+  siblingProperties: { property: string; value: string }[];
 }
 
 export interface RenovateArrayOption<
@@ -596,6 +612,13 @@ export interface ConfigMigration {
 }
 
 export interface MigratedConfig {
+  /**
+   * Indicates whether there was a migration applied to the configuration.
+   *
+   * @returns
+   * `false` if the configuration does not need migrating, and `migratedConfig` can be ignored
+   * `true` if the configuration was migrated, and if so, `migratedConfig` should be used instead of the provided config
+   */
   isMigrated: boolean;
   migratedConfig: RenovateConfig;
 }

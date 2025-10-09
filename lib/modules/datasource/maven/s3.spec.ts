@@ -65,6 +65,7 @@ describe('modules/datasource/maven/s3', () => {
           { version: '1.0.2' },
           { version: '1.0.3' },
         ],
+        respectLatest: false,
         tags: {
           latest: '1.0.2',
           release: '1.0.2',

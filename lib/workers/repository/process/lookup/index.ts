@@ -205,6 +205,7 @@ export async function lookupUpdates(
         'packageScope',
         'mostRecentTimestamp',
         'isAbandoned',
+        'respectLatest',
       ]);
 
       const latestVersion = dependency.tags?.latest;
@@ -522,9 +523,8 @@ export async function lookupUpdates(
           update.pendingChecks = pendingChecks;
         }
 
-        // TODO #22198
-        if (pendingReleases!.length) {
-          update.pendingVersions = pendingReleases!.map((r) => r.version);
+        if (pendingReleases.length) {
+          update.pendingVersions = pendingReleases.map((r) => r.version);
         }
         if (!update.newValue || update.newValue === compareValue) {
           if (!config.lockedVersion) {

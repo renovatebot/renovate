@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { GlobalConfig } from '../../../config/global';
+import * as yaml from '../../../util/yaml';
 import { extractPackageFile } from '.';
 import { Fixtures } from '~test/fixtures';
 
@@ -500,7 +501,7 @@ describe('modules/manager/github-actions/extract', () => {
             currentValue: 'v3.1.1',
             replaceString:
               'https://code.forgejo.org/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1',
-            datasource: 'gitea-tags',
+            datasource: 'forgejo-tags',
             registryUrls: ['https://code.forgejo.org/'],
           },
           {
@@ -582,29 +583,30 @@ describe('modules/manager/github-actions/extract', () => {
 
     it('extracts x-version from actions/setup-x', () => {
       const yamlContent = codeBlock`
-      jobs:
-        build:
-          steps:
-            - name: "Setup Node.js"
-              uses: actions/setup-node@v3
-              with:
-                node-version: '16.x'
-            - name: "Setup Node.js with exact version"
-              uses: actions/setup-node@v3
-              with:
-                node-version: '20.0.0'
-            - name: "Setup Go"
-              uses: actions/setup-go@v5
-              with:
-                go-version: '1.23'
-            - name: "Setup Python with range"
-              uses: actions/setup-python@v3
-              with:
-                python-version: '>=3.8.0 <3.10.0'
-            - name: "Setup Node.js with latest"
-              uses: actions/setup-node@v3
-              with:
-                node-version: 'latest'`;
+        jobs:
+          build:
+            steps:
+              - name: "Setup Node.js"
+                uses: actions/setup-node@v3
+                with:
+                  node-version: '16.x'
+              - name: "Setup Node.js with exact version"
+                uses: actions/setup-node@v3
+                with:
+                  node-version: '20.0.0'
+              - name: "Setup Go"
+                uses: actions/setup-go@v5
+                with:
+                  go-version: '1.23'
+              - name: "Setup Python with range"
+                uses: actions/setup-python@v3
+                with:
+                  python-version: '>=3.8.0 <3.10.0'
+              - name: "Setup Node.js with latest"
+                uses: actions/setup-node@v3
+                with:
+                  node-version: 'latest'
+        `;
 
       const res = extractPackageFile(yamlContent, 'workflow.yml');
       expect(res?.deps).toMatchObject([
@@ -851,5 +853,333 @@ describe('modules/manager/github-actions/extract', () => {
         `;
       expect(extractPackageFile(yamlContent, 'action.yml')).toBeNull();
     });
+  });
+
+  it.each([
+    {
+      step: {
+        uses: 'astral-sh/setup-uv@v5',
+        with: {
+          version: 'latest',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'github-releases',
+          depName: 'astral-sh/uv',
+          depType: 'uses-with',
+          packageName: 'astral-sh/uv',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        name: 'Pinning a minor version of uv',
+        uses: 'astral-sh/setup-uv@v5',
+        with: {
+          version: '0.4.x',
+        },
+      },
+      expected: [
+        {
+          currentValue: '0.4.x',
+          datasource: 'github-releases',
+          depName: 'astral-sh/uv',
+          depType: 'uses-with',
+          packageName: 'astral-sh/uv',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        name: 'Pinning a minor version of uv',
+        uses: 'https://github.com/astral-sh/setup-uv@v5',
+        with: {
+          version: '0.4.x',
+        },
+      },
+      expected: [
+        {
+          currentValue: '0.4.x',
+          datasource: 'github-releases',
+          depName: 'astral-sh/uv',
+          depType: 'uses-with',
+          packageName: 'astral-sh/uv',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'https://github.com/astral-sh/setup-uv@v5',
+        with: {},
+      },
+      expected: [
+        {
+          datasource: 'github-releases',
+          depName: 'astral-sh/uv',
+          depType: 'uses-with',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          packageName: 'astral-sh/uv',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pnpm/action-setup@v4',
+        with: {
+          version: 'latest',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pnpm/action-setup@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        name: 'Install gotestsum',
+        uses: 'jaxxstorm/action-install-gh-release@v1.10.0',
+        with: {
+          repo: 'gotestyourself/gotestsum',
+          tag: 'v1.12.1',
+          platform: 'linux',
+          arch: 'amd64',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v1.12.1',
+          datasource: 'github-releases',
+          depName: 'gotestyourself/gotestsum',
+          depType: 'uses-with',
+          packageName: 'gotestyourself/gotestsum',
+        },
+      ],
+    },
+
+    {
+      step: {
+        uses: 'pnpm/action-setup@v4',
+        with: {
+          version: 10,
+        },
+      },
+      expected: [
+        {
+          currentValue: '10',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pnpm/action-setup@v4',
+        with: {
+          version: '10.x',
+        },
+      },
+      expected: [
+        {
+          currentValue: '10.x',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pdm-project/setup-pdm@v4.2',
+        with: {
+          version: '1.2.3',
+        },
+      },
+      expected: [
+        {
+          currentValue: '1.2.3',
+          datasource: 'pypi',
+          depName: 'pdm',
+          depType: 'uses-with',
+          packageName: 'pdm',
+          versioning: 'pep440',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pdm-project/setup-pdm@v4.2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'pypi',
+          depName: 'pdm',
+          depType: 'uses-with',
+          packageName: 'pdm',
+          versioning: 'pep440',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'prefix-dev/setup-pixi@v0.8.3',
+        with: {
+          'pixi-version': 'v0.41.4',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v0.41.4',
+          datasource: 'github-releases',
+          depName: 'prefix-dev/pixi',
+          depType: 'uses-with',
+          packageName: 'prefix-dev/pixi',
+          versioning: 'conda',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'oven-sh/setup-bun@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'bun',
+          depType: 'uses-with',
+          packageName: 'bun',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'oven-sh/setup-bun@v2',
+        with: { 'bun-version': '1.2.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.2.0',
+          datasource: 'npm',
+          depName: 'bun',
+          depType: 'uses-with',
+          packageName: 'bun',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'denoland/setup-deno@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'deno',
+          depType: 'uses-with',
+          packageName: 'deno',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'denoland/setup-deno@v2',
+        with: { 'deno-version': '2.4.0' },
+      },
+      expected: [
+        {
+          currentValue: '2.4.0',
+          datasource: 'npm',
+          depName: 'deno',
+          depType: 'uses-with',
+          packageName: 'deno',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'ruby/setup-ruby@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'ruby-version',
+          depName: 'ruby',
+          depType: 'uses-with',
+          packageName: 'ruby',
+          versioning: 'ruby',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'ruby/setup-ruby@v1',
+        with: { 'ruby-version': '3.4' },
+      },
+      expected: [
+        {
+          currentValue: '3.4',
+          datasource: 'ruby-version',
+          depName: 'ruby',
+          depType: 'uses-with',
+          packageName: 'ruby',
+          versioning: 'ruby',
+        },
+      ],
+    },
+  ])('extract from $step.uses', ({ step, expected }) => {
+    const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
+
+    const res = extractPackageFile(yamlContent, 'workflow.yml');
+    expect(res?.deps.filter((pkg) => pkg.depType !== 'action')).toMatchObject(
+      expected,
+    );
   });
 });

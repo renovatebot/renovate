@@ -155,29 +155,12 @@ exports[`config/validation > validateConfig(config) > errors if manager objects 
 ]
 `;
 
-exports[`config/validation > validateConfig(config) > errors if managerFilePatterns has wrong parent 1`] = `
-[
-  {
-    "message": "managerFilePatterns should only be configured within one of "ansible or ansible-galaxy or argocd or asdf or azure-pipelines or batect or batect-wrapper or bazel or bazel-module or bazelisk or bicep or bitbucket-pipelines or bitrise or buildkite or buildpacks or bun or bun-version or bundler or cake or cargo or cdnurl or circleci or cloudbuild or cocoapods or composer or conan or copier or cpanfile or crossplane or deps-edn or devbox or devcontainer or docker-compose or dockerfile or droneci or fleet or flux or fvm or git-submodules or github-actions or gitlabci or gitlabci-include or glasskube or gleam or gomod or gradle or gradle-wrapper or haskell-cabal or helm-requirements or helm-values or helmfile or helmsman or helmv3 or hermit or homebrew or html or jenkins or jsonnet-bundler or kotlin-script or kubernetes or kustomize or leiningen or maven or maven-wrapper or meteor or mint or mise or mix or nix or nodenv or npm or nuget or nvm or ocb or osgi or pep621 or pep723 or pip-compile or pip_requirements or pip_setup or pipenv or pixi or poetry or pre-commit or pub or puppet or pyenv or renovate-config-presets or ruby-version or runtime-version or sbt or scalafmt or setup-cfg or sveltos or swift or tekton or terraform or terraform-version or terragrunt or terragrunt-version or tflint-plugin or travis or unity3d or velaci or vendir or woodpecker or customManagers" objects. Was found in .",
-    "topic": "managerFilePatterns",
-  },
-  {
-    "message": "managerFilePatterns should only be configured within one of "ansible or ansible-galaxy or argocd or asdf or azure-pipelines or batect or batect-wrapper or bazel or bazel-module or bazelisk or bicep or bitbucket-pipelines or bitrise or buildkite or buildpacks or bun or bun-version or bundler or cake or cargo or cdnurl or circleci or cloudbuild or cocoapods or composer or conan or copier or cpanfile or crossplane or deps-edn or devbox or devcontainer or docker-compose or dockerfile or droneci or fleet or flux or fvm or git-submodules or github-actions or gitlabci or gitlabci-include or glasskube or gleam or gomod or gradle or gradle-wrapper or haskell-cabal or helm-requirements or helm-values or helmfile or helmsman or helmv3 or hermit or homebrew or html or jenkins or jsonnet-bundler or kotlin-script or kubernetes or kustomize or leiningen or maven or maven-wrapper or meteor or mint or mise or mix or nix or nodenv or npm or nuget or nvm or ocb or osgi or pep621 or pep723 or pip-compile or pip_requirements or pip_setup or pipenv or pixi or poetry or pre-commit or pub or puppet or pyenv or renovate-config-presets or ruby-version or runtime-version or sbt or scalafmt or setup-cfg or sveltos or swift or tekton or terraform or terraform-version or terragrunt or terragrunt-version or tflint-plugin or travis or unity3d or velaci or vendir or woodpecker or customManagers" objects. Was found in minor",
-    "topic": "npm.minor.managerFilePatterns",
-  },
-]
-`;
-
 exports[`config/validation > validateConfig(config) > ignore packageRule nesting validation for presets 1`] = `[]`;
 
 exports[`config/validation > validateConfig(config) > included managers of the wrong type 1`] = `
 [
   {
     "message": "Configuration option \`packageRules[0].matchManagers\` should be a list (Array)",
-    "topic": "Configuration Error",
-  },
-  {
-    "message": "packageRules: Managers should be type of List. You have included string.",
     "topic": "Configuration Error",
   },
 ]
@@ -246,7 +229,7 @@ exports[`config/validation > validateConfig(config) > validates regEx for each m
 exports[`config/validation > validateConfig(config) > warns if hostType has the wrong parent 1`] = `
 [
   {
-    "message": "hostType should only be configured within one of "hostRules" objects. Was found in .",
+    "message": ""hostType" can't be used in ".". Allowed objects: hostRules.",
     "topic": "hostType",
   },
 ]

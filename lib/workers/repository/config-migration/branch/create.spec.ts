@@ -49,6 +49,7 @@ describe('workers/repository/config-migration/branch/create', () => {
         message: 'Migrate config renovate.json',
         platformCommit: 'auto',
         force: true,
+        labels: [],
       });
     });
 
@@ -73,6 +74,7 @@ describe('workers/repository/config-migration/branch/create', () => {
         message,
         platformCommit: 'auto',
         force: true,
+        labels: [],
       });
     });
 
@@ -109,6 +111,7 @@ describe('workers/repository/config-migration/branch/create', () => {
         message: 'Migrate config renovate.json',
         platformCommit: 'auto',
         force: true,
+        labels: [],
       });
     });
 
@@ -134,32 +137,7 @@ describe('workers/repository/config-migration/branch/create', () => {
           message,
           platformCommit: 'auto',
           force: true,
-        });
-      });
-    });
-
-    describe('applies the commitMessageSuffix value', () => {
-      it('to the default commit message', async () => {
-        const suffix = 'SUFFIX';
-        config.commitMessageSuffix = suffix;
-
-        const message = `Migrate config renovate.json ${suffix}`;
-        await createConfigMigrationBranch(config, migratedConfigData);
-
-        expect(scm.checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
-          branchName: 'renovate/migrate-config',
-          baseBranch: 'dev',
-          files: [
-            {
-              type: 'addition',
-              path: 'renovate.json',
-              contents: renovateConfig,
-            },
-          ],
-          message,
-          platformCommit: 'auto',
-          force: true,
+          labels: [],
         });
       });
     });
@@ -187,6 +165,7 @@ describe('workers/repository/config-migration/branch/create', () => {
           message,
           platformCommit: 'auto',
           force: true,
+          labels: [],
         });
       });
 
@@ -213,6 +192,7 @@ describe('workers/repository/config-migration/branch/create', () => {
           message,
           platformCommit: 'auto',
           force: true,
+          labels: [],
         });
       });
     });

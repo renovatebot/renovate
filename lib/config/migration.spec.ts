@@ -29,6 +29,7 @@ describe('config/migration', () => {
         },
         extends: [
           ':automergeBranchMergeCommit',
+          ':disableLockFiles',
           'default:js-app',
           'config:library',
           ':masterIssue',
@@ -53,6 +54,7 @@ describe('config/migration', () => {
         gomodTidy: true,
         upgradeInRange: true,
         trustLevel: 'high',
+        updateLockFiles: false,
         automergeType: 'branch-push',
         branchName:
           '{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}{{{baseDir}}}',
@@ -431,28 +433,28 @@ describe('config/migration', () => {
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
-        extends: ['npm:unpublishSafe'],
+        extends: ['security:minimumReleaseAgeNpm'],
       });
 
       config = { unpublishSafe: true, extends: 'foo' } as never;
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'npm:unpublishSafe'],
+        extends: ['foo', 'security:minimumReleaseAgeNpm'],
       });
 
       config = { unpublishSafe: true, extends: [] };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
-        extends: ['npm:unpublishSafe'],
+        extends: ['security:minimumReleaseAgeNpm'],
       });
 
       config = { unpublishSafe: true, extends: ['foo', 'bar'] };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'bar', 'npm:unpublishSafe'],
+        extends: ['foo', 'bar', 'security:minimumReleaseAgeNpm'],
       });
 
       config = {
@@ -462,7 +464,7 @@ describe('config/migration', () => {
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'npm:unpublishSafe', 'bar'],
+        extends: ['foo', 'security:minimumReleaseAgeNpm', 'bar'],
       });
 
       config = {
@@ -472,7 +474,7 @@ describe('config/migration', () => {
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'npm:unpublishSafe', 'bar'],
+        extends: ['foo', 'security:minimumReleaseAgeNpm', 'bar'],
       });
 
       config = {
@@ -492,7 +494,7 @@ describe('config/migration', () => {
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'bar', 'npm:unpublishSafe'],
+        extends: ['foo', 'bar', 'security:minimumReleaseAgeNpm'],
       });
 
       config = {
@@ -502,7 +504,26 @@ describe('config/migration', () => {
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
-        extends: [':unpublishSafeDisabled', 'npm:unpublishSafe'],
+        extends: [':unpublishSafeDisabled', 'security:minimumReleaseAgeNpm'],
+      });
+    });
+
+    it('migrates npm:unpublishSafe', () => {
+      let config: TestRenovateConfig;
+      let res: MigratedConfig;
+
+      config = { extends: ['npm:unpublishSafe'] };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBeTrue();
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['security:minimumReleaseAgeNpm'],
+      });
+
+      config = { extends: ['foo', 'npm:unpublishSafe'] } as never;
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBeTrue();
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'security:minimumReleaseAgeNpm'],
       });
     });
 
