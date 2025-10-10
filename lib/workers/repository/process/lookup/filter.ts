@@ -40,20 +40,23 @@ export function filterVersions(
   }
 
   // Leave only versions greater than current
-  let filteredReleases = releases.filter(
-    (r) =>
-      versioningApi.isVersion(r.version) &&
-      versioningApi.isGreaterThan(r.version, currentVersion),
+  const versionReleases = releases.filter((r) =>
+    versioningApi.isVersion(r.version),
+  );
+  let filteredReleases = versionReleases.filter((r) =>
+    versioningApi.isGreaterThan(r.version, currentVersion),
   );
 
-  const currentRelease = releases.find(
-    (r) =>
-      versioningApi.isValid(r.version) &&
-      versioningApi.isVersion(r.version) &&
-      versioningApi.isValid(currentVersion) &&
-      versioningApi.isVersion(currentVersion) &&
-      versioningApi.equals(r.version, currentVersion),
-  );
+  const currentVersionValid =
+    versioningApi.isValid(currentVersion) &&
+    versioningApi.isVersion(currentVersion);
+  const currentRelease = currentVersionValid
+    ? versionReleases.find(
+        (r) =>
+          versioningApi.isValid(r.version) &&
+          versioningApi.equals(r.version, currentVersion),
+      )
+    : undefined;
 
   // Don't upgrade from non-deprecated to deprecated
   if (ignoreDeprecated && currentRelease && !currentRelease.isDeprecated) {

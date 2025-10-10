@@ -248,19 +248,33 @@ export async function lookupUpdates(
               versioningApi.isGreaterThan(taggedVersion, compareValue)),
         );
       }
-      // Check that existing constraint can be satisfied
-      const allSatisfyingVersions = allVersions.filter(
-        (v) =>
-          // TODO #22198
-          unconstrainedValue || versioningApi.matches(v.version, compareValue!),
-      );
-      if (!allSatisfyingVersions.length) {
-        logger.debug(
-          `Found no satisfying versions with '${config.versioning}' versioning`,
-        );
-      }
 
-      if (config.rollbackPrs && !allSatisfyingVersions.length) {
+      const inRangeOnlyStrategy = config.rangeStrategy === 'in-range-only';
+      let allSatisfyingVersions: Release[] = [];
+      if (inRangeOnlyStrategy) {
+        // Check that existing constraint can be satisfied
+        allSatisfyingVersions = unconstrainedValue
+          ? allVersions
+          : allVersions.filter((v) =>
+              // TODO #22198
+              versioningApi.matches(v.version, compareValue!),
+            );
+        if (!allSatisfyingVersions.length) {
+          logger.debug(
+            `Found no satisfying versions with '${config.versioning}' versioning`,
+          );
+        }
+      }
+      if (
+        config.rollbackPrs &&
+        ((inRangeOnlyStrategy && !allSatisfyingVersions.length) ||
+          (!inRangeOnlyStrategy &&
+            !unconstrainedValue &&
+            !allVersions.find((v) =>
+              // TODO #22198
+              versioningApi.matches(v.version, compareValue!),
+            )))
+      ) {
         const rollback = getRollbackUpdate(config, allVersions, versioningApi);
         // istanbul ignore if
         if (!rollback) {
@@ -391,9 +405,7 @@ export async function lookupUpdates(
         config,
         currentVersion!,
         latestVersion!,
-        config.rangeStrategy === 'in-range-only'
-          ? allSatisfyingVersions
-          : allVersions,
+        inRangeOnlyStrategy ? allSatisfyingVersions : allVersions,
         versioningApi,
       ).filter(
         (v) =>
