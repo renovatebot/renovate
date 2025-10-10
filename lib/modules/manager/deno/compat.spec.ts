@@ -1,6 +1,10 @@
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
-import { collectPackageJson, processDenoCompatiblePackageJson } from './compat';
+import {
+  collectPackageJson,
+  detectNodeCompatWorkspaces,
+  processDenoCompatiblePackageJson,
+} from './compat';
 
 vi.mock('../../../util/fs');
 // used in detectNodeCompatWorkspaces()
@@ -28,6 +32,15 @@ describe('modules/manager/deno/compat', () => {
         }),
       );
       const result = await processDenoCompatiblePackageJson('package.json');
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('detectNodeCompatWorkspaces()', () => {
+    it('handle no packageFile', async () => {
+      const result = await detectNodeCompatWorkspaces({
+        packageFile: undefined,
+      });
       expect(result).toBeNull();
     });
   });

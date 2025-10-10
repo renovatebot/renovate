@@ -3,6 +3,7 @@ import { findPackages } from 'find-packages';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
+import { parseJson } from '../../../util/common';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { extractPackageJson } from '../npm/extract/common/package-file';
 import type { NpmPackage } from '../npm/extract/types';
@@ -27,9 +28,9 @@ export function extractDenoCompatiblePackageJson(
 ): PackageFile<DenoManagerData> | null {
   let packageJson: NpmPackage;
   try {
-    packageJson = JSON.parse(content);
+    packageJson = parseJson(content, packageFile) as NpmPackage;
   } catch (err) {
-    logger.error({ err }, 'Error parsing package.json');
+    logger.error({ err, packageFile }, 'Error parsing package.json');
     return null;
   }
 
@@ -106,6 +107,7 @@ export async function collectPackageJson(
 
     // detect node compat workspaces
     const result = await detectNodeCompatWorkspaces(pkg);
+    /* v8 ignore next 3: hard to test */
     if (!result) {
       return null;
     }
