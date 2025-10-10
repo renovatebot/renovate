@@ -56,7 +56,59 @@ export const Vendir = VendirResource.extend({
   ),
 });
 
+// Lockfile schemas
+export const VendirLockResource = z.object({
+  apiVersion: z.literal('vendir.k14s.io/v1alpha1'),
+  kind: z.literal('LockConfig'),
+});
+
+export const LockedHelmChart = z.object({
+  version: z.string(),
+  appVersion: z.string().optional(),
+});
+
+export const LockedGitRef = z.object({
+  sha: z.string(),
+  tags: z.array(z.string()).optional(),
+});
+
+export const LockedGithubRelease = z.object({
+  url: z.string(),
+  tag: z.string().optional(),
+});
+
+export const LockedHelmChartContent = z.object({
+  path: z.string(),
+  helmChart: LockedHelmChart,
+});
+
+export const LockedGitRefContent = z.object({
+  path: z.string(),
+  git: LockedGitRef,
+});
+
+export const LockedGithubReleaseContent = z.object({
+  path: z.string(),
+  githubRelease: LockedGithubRelease,
+});
+
+export const LockedContents = z.union([
+  LockedHelmChartContent,
+  LockedGitRefContent,
+  LockedGithubReleaseContent,
+]);
+
+export const VendirLock = VendirLockResource.extend({
+  directories: z.array(
+    z.object({
+      path: z.string(),
+      contents: LooseArray(LockedContents),
+    }),
+  ),
+});
+
 export type VendirDefinition = z.infer<typeof Vendir>;
 export type HelmChartDefinition = z.infer<typeof HelmChart>;
 export type GitRefDefinition = z.infer<typeof GitRef>;
 export type GithubReleaseDefinition = z.infer<typeof GithubRelease>;
+export type VendirLockDefinition = z.infer<typeof VendirLock>;
