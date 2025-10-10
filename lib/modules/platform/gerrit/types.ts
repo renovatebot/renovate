@@ -3,9 +3,28 @@ import type { FindPRConfig } from '../types';
 export interface GerritFindPRConfig extends FindPRConfig {
   label?: string;
   requestDetails?: GerritRequestDetail[];
+  /**
+   * Whether only one change is needed.
+   * Useful for optimizing the search request.
+   */
   singleChange?: boolean;
+  /**
+   * Whether to disable the automatic pagination handling or not.
+   * Useful when handling pagination manually.
+   */
+  noPagination?: boolean;
+  /**
+   * How many changes to fetch per request/page.
+   * Default is 50.
+   * Useful when handling pagination manually.
+   */
+  limit?: number;
+  /**
+   * How many changes to skip from the beginning.
+   * Default is 0.
+   * Useful when handling pagination manually.
+   */
   startOffset?: number;
-  pageLimit?: number;
 }
 
 /**

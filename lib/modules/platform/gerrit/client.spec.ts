@@ -166,12 +166,12 @@ describe('modules/platform/gerrit/client', () => {
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
           singleChange: true,
-          pageLimit: 5, // should be ignored
+          limit: 5, // should be ignored
         }),
       ).resolves.toEqual([{ _number: 1 }]);
     });
 
-    it('sets query.n as 50 if pageLimit is not provided', async () => {
+    it('sets query.n as 50 if limit is not provided', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
@@ -184,7 +184,7 @@ describe('modules/platform/gerrit/client', () => {
       ).resolves.toEqual([{ _number: 1 }]);
     });
 
-    it('sets query.n with pageLimit if provided', async () => {
+    it('sets query.n with limit if provided', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
@@ -193,7 +193,7 @@ describe('modules/platform/gerrit/client', () => {
       await expect(
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
-          pageLimit: 5,
+          limit: 5,
         }),
       ).resolves.toEqual([{ _number: 1 }]);
     });
@@ -212,7 +212,7 @@ describe('modules/platform/gerrit/client', () => {
       ).resolves.toEqual([{ _number: 1 }]);
     });
 
-    it('sets query.S with 0 if startOffset is not provided', async () => {
+    it('sets query.S as 0 if startOffset is not provided', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
@@ -225,7 +225,7 @@ describe('modules/platform/gerrit/client', () => {
       ).resolves.toEqual([{ _number: 1 }]);
     });
 
-    it('handles pagination', async () => {
+    it('handles pagination automatically', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
@@ -258,7 +258,7 @@ describe('modules/platform/gerrit/client', () => {
       await expect(
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
-          pageLimit: 2,
+          limit: 2, // to keep the test short
         }),
       ).resolves.toEqual([
         { _number: 1 },
@@ -293,7 +293,7 @@ describe('modules/platform/gerrit/client', () => {
       await expect(
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
-          pageLimit: 2,
+          limit: 2,
           startOffset: 2,
         }),
       ).resolves.toEqual([
@@ -302,6 +302,28 @@ describe('modules/platform/gerrit/client', () => {
         { _number: 5 },
         { _number: 6 },
       ]);
+    });
+
+    it('allows disabling automatic pagination', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '0')
+        .reply(
+          200,
+          gerritRestResponse([
+            { _number: 1 },
+            { _number: 2, _more_changes: true },
+          ]),
+          jsonResultHeader,
+        );
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+          noPagination: true,
+          limit: 2,
+        }),
+      ).resolves.toEqual([{ _number: 1 }, { _number: 2 }]);
     });
 
     it('sets query.o when requestDetails is provided', async () => {
