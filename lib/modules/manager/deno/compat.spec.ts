@@ -3,7 +3,7 @@ import { GlobalConfig } from '../../../config/global';
 import {
   collectPackageJson,
   detectNodeCompatWorkspaces,
-  processDenoCompatiblePackageJson,
+  extractDenoCompatiblePackageJson,
 } from './compat';
 
 vi.mock('../../../util/fs');
@@ -13,11 +13,11 @@ vi.mock('find-packages', () => ({
 }));
 
 describe('modules/manager/deno/compat', () => {
-  describe('processDenoCompatiblePackageJson()', () => {
+  describe('extractDenoCompatiblePackageJson()', () => {
     it('invalid package.json', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('package.json');
       fs.readLocalFile.mockResolvedValueOnce('invalid');
-      const result = await processDenoCompatiblePackageJson('package.json');
+      const result = await extractDenoCompatiblePackageJson('package.json');
       expect(result).toBeNull();
     });
 
@@ -31,7 +31,7 @@ describe('modules/manager/deno/compat', () => {
           _from: 1,
         }),
       );
-      const result = await processDenoCompatiblePackageJson('package.json');
+      const result = await extractDenoCompatiblePackageJson('package.json');
       expect(result).toBeNull();
     });
   });

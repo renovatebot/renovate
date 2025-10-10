@@ -10,7 +10,7 @@ import type { NpmPackage } from '../npm/extract/types';
 import type { PackageFile } from '../types';
 import type { DenoManagerData } from './types';
 
-export async function processDenoCompatiblePackageJson(
+export async function extractDenoCompatiblePackageJson(
   packageFile: string,
 ): Promise<PackageFile<DenoManagerData> | null> {
   const packageFileContent = await readLocalFile(packageFile, 'utf8');
@@ -19,16 +19,9 @@ export async function processDenoCompatiblePackageJson(
     return null;
   }
 
-  return extractDenoCompatiblePackageJson(packageFileContent, packageFile);
-}
-
-export function extractDenoCompatiblePackageJson(
-  content: string,
-  packageFile: string,
-): PackageFile<DenoManagerData> | null {
   let packageJson: NpmPackage;
   try {
-    packageJson = parseJson(content, packageFile) as NpmPackage;
+    packageJson = parseJson(packageFileContent, packageFile) as NpmPackage;
   } catch (err) {
     logger.error({ err, packageFile }, 'Error parsing package.json');
     return null;
@@ -98,7 +91,7 @@ export async function collectPackageJson(
   const packageFiles: PackageFile<DenoManagerData>[] = [];
   const rootPackageJson = getSiblingFileName(lockFile, 'package.json');
   const rootPackageFile =
-    await processDenoCompatiblePackageJson(rootPackageJson);
+    await extractDenoCompatiblePackageJson(rootPackageJson);
   if (rootPackageFile) {
     const pkg = {
       ...rootPackageFile,
@@ -120,7 +113,7 @@ export async function collectPackageJson(
     packageFiles.push(pkg);
 
     for (const packagePath of packagePaths) {
-      const packageFile = await processDenoCompatiblePackageJson(packagePath);
+      const packageFile = await extractDenoCompatiblePackageJson(packagePath);
       if (packageFile) {
         const pkg = {
           ...packageFile,
