@@ -84,7 +84,8 @@ export function getLockedVersion(
   // jsr and npm datasource
   if (datasource === 'jsr' || datasource === 'npm') {
     if (
-      is.nonEmptyObject(lockFileContent.lockedVersions)
+      !lockFileContent.lockedVersions ||
+      is.emptyObject(lockFileContent.lockedVersions)
     ) {
       return null;
     }
