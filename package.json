@@ -349,7 +349,7 @@
     "typescript": "5.9.3",
     "typescript-eslint": "8.43.0",
     "unified": "11.0.5",
-    "vite": "7.1.8",
+    "vite": "7.1.9",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.2.4",
     "vitest-mock-extended": "3.1.0"
