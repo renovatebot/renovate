@@ -1,3 +1,4 @@
+import * as apk from './apk';
 import * as awsEksAddon from './aws-eks-addon';
 import * as amazonMachineImage from './aws-machine-image';
 import * as azureRestApi from './azure-rest-api';
@@ -49,6 +50,7 @@ import * as unity3dPackages from './unity3d-packages';
 const api = new Map<string, VersioningApi | VersioningApiConstructor>();
 export default api;
 
+api.set(apk.id, apk.api);
 api.set(awsEksAddon.id, awsEksAddon.api);
 api.set(amazonMachineImage.id, amazonMachineImage.api);
 api.set(azureRestApi.id, azureRestApi.api);
