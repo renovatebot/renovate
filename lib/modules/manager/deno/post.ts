@@ -10,7 +10,7 @@ import {
   extractDenoCompatiblePackageJson,
 } from './compat';
 import { DenoLock } from './schema';
-import type { DenoManagerData, LockFile } from './types';
+import type { DenoManagerData, LockFile, WorkspaceContext } from './types';
 import { denoLandRegex, depValueRegex } from './utils';
 
 export async function getDenoLock(filePath: string): Promise<LockFile> {
@@ -152,13 +152,6 @@ export async function collectPackageJsonAsWorkspaceMember(
       }
     }
   }
-}
-
-interface WorkspaceContext {
-  lockFiles?: string[];
-  rootDir: string;
-  packageFile: string;
-  matchers: Minimatch[];
 }
 
 export function normalizeWorkspace(

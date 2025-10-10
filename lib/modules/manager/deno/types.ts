@@ -1,3 +1,5 @@
+import type { Minimatch } from 'minimatch';
+
 export interface DenoManagerData extends Record<string, any> {
   packageName?: string;
   workspaces?: string[];
@@ -12,4 +14,11 @@ export interface LockFile {
   lockfileVersion?: number;
   redirectVersions?: Record<string, string>;
   remoteVersions?: Set<string>;
+}
+
+export interface WorkspaceContext {
+  lockFiles?: string[];
+  rootDir: string;
+  packageFile: string;
+  matchers: Minimatch[];
 }
