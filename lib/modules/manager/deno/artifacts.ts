@@ -63,9 +63,11 @@ export async function updateArtifacts(
     await writeLocalFile(packageFileName, newPackageFileContent);
 
     // run from its referred deno.json/deno.jsonc location if import map is used
+    const importMapReferrerDep = updatedDeps.find(
+      (dep) => dep.managerData?.importMapReferrer,
+    );
     const cwdFile =
-      updatedDeps.find((dep) => dep.managerData?.importMapReferrer)?.managerData
-        ?.importMapReferrer ?? packageFileName;
+      importMapReferrerDep?.managerData?.importMapReferrer ?? packageFileName;
 
     const execOptions: ExecOptions = {
       cwdFile,
