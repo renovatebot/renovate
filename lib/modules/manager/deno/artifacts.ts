@@ -34,7 +34,14 @@ export async function updateArtifacts(
   const oldLockFileContent = await readLocalFile(lockFileName);
   if (!oldLockFileContent) {
     logger.debug(`Failed to read ${lockFileName}. Skipping artifact update.`);
-    return null;
+    return [
+      {
+        artifactError: {
+          lockFile: lockFileName,
+          stderr: `Failed to read "${lockFileName}"`,
+        },
+      },
+    ];
   }
 
   for (const updateDep of updatedDeps) {
@@ -43,9 +50,16 @@ export async function updateArtifacts(
       updateDep.depType === 'tasks.command'
     ) {
       logger.warn(
-        `depType "${updateDep.depType}" can't be updated with a lock file: ${updateDep.depName}`,
+        `depType: "${updateDep.depType}", depName: "${updateDep.depName}" can't be updated with a lock file: "${lockFileName}"`,
       );
-      return null;
+      return [
+        {
+          artifactError: {
+            lockFile: lockFileName,
+            stderr: `depType: "${updateDep.depType}", depName: "${updateDep.depName}" can't be updated with a lock file: "${lockFileName}"`,
+          },
+        },
+      ];
     }
   }
 

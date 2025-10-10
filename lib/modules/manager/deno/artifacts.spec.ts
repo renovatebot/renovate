@@ -48,9 +48,16 @@ describe('modules/manager/deno/artifacts', () => {
       expect(await updateArtifacts(updateArtifact)).toBeNull();
     });
 
-    it('skips if cannot read lock file', async () => {
+    it('skips and returns an error if cannot read lock file', async () => {
       updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
-      expect(await updateArtifacts(updateArtifact)).toBeNull();
+      expect(await updateArtifacts(updateArtifact)).toEqual([
+        {
+          artifactError: {
+            lockFile: 'deno.lock',
+            stderr: `Failed to read "deno.lock"`,
+          },
+        },
+      ]);
     });
 
     it('returns null if lock content unchanged', async () => {
@@ -153,34 +160,52 @@ describe('modules/manager/deno/artifacts', () => {
     });
   });
 
-  it('depType tasks returns null', async () => {
+  it('depType tasks returns an error', async () => {
     const updateArtifact: UpdateArtifact = {
       config: {},
       newPackageFileContent: '',
       packageFileName: '',
-      updatedDeps: [{ lockFiles: ['deno.lock'], depType: 'tasks' }],
+      updatedDeps: [
+        { lockFiles: ['deno.lock'], depType: 'tasks', depName: 'dep1' },
+      ],
     };
     const oldLock = Buffer.from('old');
     fs.readFile.mockResolvedValueOnce(oldLock as never);
     const newLock = Buffer.from('new');
     fs.readFile.mockResolvedValueOnce(newLock as never);
 
-    expect(await updateArtifacts(updateArtifact)).toBeNull();
+    expect(await updateArtifacts(updateArtifact)).toEqual([
+      {
+        artifactError: {
+          lockFile: 'deno.lock',
+          stderr: `depType: "tasks", depName: "dep1" can't be updated with a lock file: "deno.lock"`,
+        },
+      },
+    ]);
   });
 
-  it('depType tasks.command returns null', async () => {
+  it('depType tasks.command returns an error', async () => {
     const updateArtifact: UpdateArtifact = {
       config: {},
       newPackageFileContent: '',
       packageFileName: '',
-      updatedDeps: [{ lockFiles: ['deno.lock'], depType: 'tasks.command' }],
+      updatedDeps: [
+        { lockFiles: ['deno.lock'], depType: 'tasks.command', depName: 'dep1' },
+      ],
     };
     const oldLock = Buffer.from('old');
     fs.readFile.mockResolvedValueOnce(oldLock as never);
     const newLock = Buffer.from('new');
     fs.readFile.mockResolvedValueOnce(newLock as never);
 
-    expect(await updateArtifacts(updateArtifact)).toBeNull();
+    expect(await updateArtifacts(updateArtifact)).toEqual([
+      {
+        artifactError: {
+          lockFile: 'deno.lock',
+          stderr: `depType: "tasks.command", depName: "dep1" can't be updated with a lock file: "deno.lock"`,
+        },
+      },
+    ]);
   });
 
   it('deno command execution', async () => {
