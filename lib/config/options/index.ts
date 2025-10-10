@@ -2105,6 +2105,8 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
     supportedPlatforms: ['bitbucket'],
+    globalOnly: true,
+    inheritConfigSupport: true,
   },
   {
     name: 'bbUseDefaultReviewers',

@@ -880,6 +880,7 @@ If the file exists but cannot be parsed, then Renovate will raise a config warni
 
 The inherited config may include all valid repository config and these config options:
 
+- `bbMendAppDashboardStatus`
 - `bbUseDevelopmentBranch`
 - `onboarding`
 - `onboardingBranch`
