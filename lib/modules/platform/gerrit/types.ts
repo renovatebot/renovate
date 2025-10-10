@@ -2,8 +2,10 @@ import type { FindPRConfig } from '../types';
 
 export interface GerritFindPRConfig extends FindPRConfig {
   label?: string;
-  limit?: number;
   requestDetails?: GerritRequestDetail[];
+  singleChange?: boolean;
+  startOffset?: number;
+  pageLimit?: number;
 }
 
 /**
@@ -71,6 +73,11 @@ export interface GerritChange {
    * Potential consistency issues with the change (not related to labels).
    * Requires o=CHECKS. */
   problems?: unknown[];
+  /**
+   *  Whether the query would deliver more results if not limited.
+   *  Only set on the last change that is returned, except when there are no more changes.
+   */
+  _more_changes?: boolean;
 }
 
 export interface GerritRevisionInfo {

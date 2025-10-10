@@ -28,7 +28,7 @@ describe('modules/platform/gerrit/scm', () => {
         branchName: 'myBranchName',
         state: 'open',
         targetBranch: 'baseBranch',
-        limit: 1,
+        singleChange: true,
         refreshCache: true,
         requestDetails: ['CURRENT_REVISION', 'CURRENT_ACTIONS'],
       });
@@ -81,7 +81,7 @@ describe('modules/platform/gerrit/scm', () => {
         branchName: 'myBranchName',
         state: 'open',
         targetBranch: 'master',
-        limit: 1,
+        singleChange: true,
         refreshCache: true,
         requestDetails: ['CURRENT_REVISION', 'DETAILED_ACCOUNTS'],
       });
@@ -128,7 +128,7 @@ describe('modules/platform/gerrit/scm', () => {
         branchName: 'myBranchName',
         state: 'open',
         targetBranch: 'target',
-        limit: 1,
+        singleChange: true,
       });
     });
 
@@ -167,7 +167,7 @@ describe('modules/platform/gerrit/scm', () => {
       expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
         branchName: 'myBranchName',
         state: 'open',
-        limit: 1,
+        singleChange: true,
         refreshCache: true,
       });
       expect(git.branchExists).toHaveBeenCalledWith('myBranchName');
@@ -191,7 +191,7 @@ describe('modules/platform/gerrit/scm', () => {
       expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
         branchName: 'myBranchName',
         state: 'open',
-        limit: 1,
+        singleChange: true,
         refreshCache: true,
         requestDetails: ['CURRENT_REVISION'],
       });
@@ -220,7 +220,7 @@ describe('modules/platform/gerrit/scm', () => {
       expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
         branchName: 'nonExistingChange',
         state: 'open',
-        limit: 1,
+        singleChange: true,
         refreshCache: true,
         requestDetails: ['CURRENT_REVISION'],
       });
@@ -244,7 +244,7 @@ describe('modules/platform/gerrit/scm', () => {
       expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
         branchName: 'existingChange',
         state: 'open',
-        limit: 1,
+        singleChange: true,
         refreshCache: true,
         requestDetails: ['CURRENT_REVISION'],
       });
@@ -270,7 +270,7 @@ describe('modules/platform/gerrit/scm', () => {
         branchName: 'renovate/dependency-1.x',
         state: 'open',
         targetBranch: 'main',
-        limit: 1,
+        singleChange: true,
         refreshCache: true,
         requestDetails: ['CURRENT_REVISION'],
       });
