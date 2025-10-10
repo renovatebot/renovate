@@ -24,9 +24,7 @@ export async function updateArtifacts(
     return null;
   }
 
-  // Find the first deno dependency in order to handle mixed manager updates
-  const lockFileName = updatedDeps.find((dep) => dep.manager === 'deno')
-    ?.lockFiles?.[0];
+  const lockFileName = updatedDeps[0].lockFiles?.[0];
 
   if (!lockFileName) {
     logger.debug('No lock file found. Skipping artifact update.');

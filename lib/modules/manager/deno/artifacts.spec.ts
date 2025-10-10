@@ -49,16 +49,12 @@ describe('modules/manager/deno/artifacts', () => {
     });
 
     it('skips if cannot read lock file', async () => {
-      updateArtifact.updatedDeps = [
-        { manager: 'deno', lockFiles: ['deno.lock'] },
-      ];
+      updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
       expect(await updateArtifacts(updateArtifact)).toBeNull();
     });
 
     it('returns null if lock content unchanged', async () => {
-      updateArtifact.updatedDeps = [
-        { manager: 'deno', lockFiles: ['deno.lock'] },
-      ];
+      updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
       const oldLock = Buffer.from('old');
       fs.readFile.mockResolvedValueOnce(oldLock as never);
       fs.readFile.mockResolvedValueOnce(oldLock as never);
@@ -66,9 +62,7 @@ describe('modules/manager/deno/artifacts', () => {
     });
 
     it('returns updated lock content', async () => {
-      updateArtifact.updatedDeps = [
-        { manager: 'deno', lockFiles: ['deno.lock'] },
-      ];
+      updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
       const oldLock = Buffer.from('old');
       fs.readFile.mockResolvedValueOnce(oldLock as never);
       const newLock = Buffer.from('new');
@@ -109,9 +103,7 @@ describe('modules/manager/deno/artifacts', () => {
     });
 
     it('supports lockFileMaintenance', async () => {
-      updateArtifact.updatedDeps = [
-        { manager: 'deno', lockFiles: ['deno.lock'] },
-      ];
+      updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
       updateArtifact.config.updateType = 'lockFileMaintenance';
       const oldLock = Buffer.from('old');
       fs.readFile.mockResolvedValueOnce(oldLock as never);
@@ -135,9 +127,7 @@ describe('modules/manager/deno/artifacts', () => {
         stderr: '',
         options: { encoding: 'utf8' },
       });
-      updateArtifact.updatedDeps = [
-        { manager: 'deno', lockFiles: ['deno.lock'] },
-      ];
+      updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
       const oldLock = Buffer.from('old');
       fs.readFile.mockResolvedValueOnce(oldLock as never);
       exec.mockRejectedValueOnce(execError);
@@ -153,9 +143,7 @@ describe('modules/manager/deno/artifacts', () => {
         stderr: '',
         options: { encoding: 'utf8' },
       });
-      updateArtifact.updatedDeps = [
-        { manager: 'deno', lockFiles: ['deno.lock'] },
-      ];
+      updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
       const oldLock = Buffer.from('old');
       fs.readFile.mockResolvedValueOnce(oldLock as never);
       exec.mockRejectedValueOnce(execError);
@@ -170,9 +158,7 @@ describe('modules/manager/deno/artifacts', () => {
       config: {},
       newPackageFileContent: '',
       packageFileName: '',
-      updatedDeps: [
-        { manager: 'deno', lockFiles: ['deno.lock'], depType: 'tasks' },
-      ],
+      updatedDeps: [{ lockFiles: ['deno.lock'], depType: 'tasks' }],
     };
     const oldLock = Buffer.from('old');
     fs.readFile.mockResolvedValueOnce(oldLock as never);
@@ -187,9 +173,7 @@ describe('modules/manager/deno/artifacts', () => {
       config: {},
       newPackageFileContent: '',
       packageFileName: '',
-      updatedDeps: [
-        { manager: 'deno', lockFiles: ['deno.lock'], depType: 'tasks.command' },
-      ],
+      updatedDeps: [{ lockFiles: ['deno.lock'], depType: 'tasks.command' }],
     };
     const oldLock = Buffer.from('old');
     fs.readFile.mockResolvedValueOnce(oldLock as never);
@@ -204,7 +188,7 @@ describe('modules/manager/deno/artifacts', () => {
       config: {},
       newPackageFileContent: '',
       packageFileName: '',
-      updatedDeps: [{ manager: 'deno', lockFiles: ['deno.lock'] }],
+      updatedDeps: [{ lockFiles: ['deno.lock'] }],
     };
 
     const oldLock = Buffer.from('old');
