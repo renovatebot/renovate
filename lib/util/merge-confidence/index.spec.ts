@@ -178,6 +178,32 @@ describe('util/merge-confidence/index', () => {
         ).toBe('high');
       });
 
+      it('escapes a partial Maven coordinate of groupId:artifactId from the packageName', async () => {
+        const datasource = 'maven';
+        const packageName =
+          'org.springframework.boot:org.springframework.boot.gradle.plugin';
+        const escapedPackageName =
+          'org.springframework.boot%3Aorg.springframework.boot.gradle.plugin';
+        const currentVersion = '2.6.2';
+        const newVersion = '2.7.2';
+        httpMock
+          .scope(apiBaseUrl)
+          .get(
+            `/api/mc/json/${datasource}/${escapedPackageName}/${currentVersion}/${newVersion}`,
+          )
+          .reply(200, { confidence: 'high' });
+
+        expect(
+          await getMergeConfidenceLevel(
+            datasource,
+            packageName,
+            currentVersion,
+            newVersion,
+            'major',
+          ),
+        ).toBe('high');
+      });
+
       it('returns neutral on invalid merge confidence response from api', async () => {
         const datasource = 'npm';
         const depName = 'renovate';
