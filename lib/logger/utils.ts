@@ -216,6 +216,9 @@ export function sanitizeValue(
     return arrayResult;
   }
 
+  // Define a regular expression to detect the JWT format (header.payload.signature)
+  const jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$/;
+
   if (is.object(value)) {
     const objectResult: Record<string, any> = {};
     seen.set(value, objectResult);
@@ -230,6 +233,13 @@ export function sanitizeValue(
         } else {
           curValue = '***********';
         }
+      } else if (
+        key === 'username' &&
+        is.string(val) &&
+        val.length > 60 &&
+        jwtRegex.test(val)
+      ) {
+        curValue = '***********';
       } else if (contentFields.includes(key)) {
         curValue = '[content]';
       } else if (key === 'secrets') {
