@@ -1,4 +1,6 @@
 import _fs from 'fs-extra';
+import type { DirectoryResult } from 'tmp-promise';
+import tmp from 'tmp-promise';
 import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { exec as _exec } from '../../../util/exec';
@@ -23,10 +25,18 @@ const updateArtifact: UpdateArtifact = {
 
 describe('modules/manager/deno/artifacts', () => {
   describe('updateArtifacts()', () => {
-    beforeEach(() => {
-      GlobalConfig.set({
-        localDir: '',
-      });
+    let localDirResult: DirectoryResult;
+    let localDir: string;
+
+    beforeEach(async () => {
+      localDirResult = await tmp.dir({ unsafeCleanup: true });
+      localDir = localDirResult.path;
+
+      GlobalConfig.set({ localDir });
+    });
+
+    afterEach(async () => {
+      await localDirResult?.cleanup();
     });
 
     it('skips if no updatedDeps and no lockFileMaintenance', async () => {
