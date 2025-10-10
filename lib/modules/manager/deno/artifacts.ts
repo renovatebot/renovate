@@ -75,7 +75,7 @@ export async function updateArtifacts(
       toolConstraints: [
         {
           toolName: 'deno',
-          constraint: updateArtifact?.config?.constraints?.deno,
+          constraint: config.constraints?.deno,
         },
       ],
     };
