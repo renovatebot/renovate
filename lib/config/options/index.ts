@@ -1967,6 +1967,14 @@ const options: RenovateOptions[] = [
     default: null,
   },
   {
+    name: 'minimumReleaseAgeTimestamp',
+    description:
+      'When set in conjunction with `minimumReleaseAge`, controls whether the releaseTimestamp from a package lookup is needed to enforce the `minimumReleaseAge`. When set to `required`, this version is not treated stable unless there is releaseTimestamp, and that releaseTimestamp is past the `minimumReleaseAge`. When set to `optional`, Renovate will treat a release without a releaseTimestamp as stable',
+    type: 'string',
+    default: 'optional',
+    allowedValues: ['required', 'optional'],
+  },
+  {
     name: 'abandonmentThreshold',
     description:
       'Flags packages that have not been updated within this period as abandoned.',
