@@ -111,5 +111,39 @@ describe('workers/repository/process/lookup/filter', () => {
         { version: '2.1.0' },
       ]);
     });
+
+    it('single version range, but invalid current version (for coverage)', () => {
+      const mavenVersioning = allVersioning.get('maven');
+
+      const releases = [
+        { version: '1.0.1' },
+        { version: '1.2.0' },
+        { version: '2.0.0' },
+        { version: '2.2.0' },
+      ] satisfies Release[];
+
+      const config = partial<FilterConfig>({
+        ignoreUnstable: false,
+        ignoreDeprecated: false,
+        respectLatest: true,
+      });
+      // valid version range, but invalid version
+      const currentVersion = '[1.0.1]';
+      const latestVersion = '2.0.0';
+
+      const filteredVersions = filterVersions(
+        config,
+        currentVersion,
+        latestVersion,
+        releases,
+        mavenVersioning,
+      );
+
+      expect(filteredVersions).toEqual([
+        { version: '1.0.1' },
+        { version: '1.2.0' },
+        { version: '2.0.0' },
+      ]);
+    });
   });
 });
