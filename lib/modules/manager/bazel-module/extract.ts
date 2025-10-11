@@ -2,7 +2,11 @@ import upath from 'upath';
 import { logger } from '../../../logger';
 import { isNotNullOrUndefined } from '../../../util/array';
 import { LooseArray } from '../../../util/schema-utils';
-import type { PackageDependency, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import * as bazelrc from './bazelrc';
 import { parse } from './parser';
 import type { ResultFragment } from './parser/fragments';
@@ -18,13 +22,18 @@ import { transformRulesImgCalls } from './rules-img';
 export async function extractPackageFile(
   content: string,
   packageFile: string,
+  config?: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   try {
     const records = parse(content);
     const pfc = await extractBazelPfc(records, packageFile);
     const gitRepositoryDeps = extractGitRepositoryDeps(records);
     const mavenDeps = extractMavenDeps(records);
-    const dockerDeps = LooseArray(RuleToDockerPackageDep).parse(records);
+    const dockerDeps = LooseArray(RuleToDockerPackageDep)
+      .transform((deps) =>
+        deps.map((dep) => applyRegistryAliases(dep, config?.registryAliases)),
+      )
+      .parse(records);
     const rulesImgDeps = transformRulesImgCalls(records);
 
     if (gitRepositoryDeps.length) {
@@ -81,4 +90,26 @@ function extractMavenDeps(records: ResultFragment[]): PackageDependency[] {
   return LooseArray(RuleToMavenPackageDep)
     .transform(fillRegistryUrls)
     .parse(records);
+}
+
+function applyRegistryAliases(
+  dep: PackageDependency,
+  registryAliases?: Record<string, string>,
+): PackageDependency {
+  if (!registryAliases || !dep.packageName) {
+    return dep;
+  }
+
+  // Find the matching registry alias
+  for (const [alias, replacement] of Object.entries(registryAliases)) {
+    if (dep.packageName.startsWith(alias + '/')) {
+      const newPackageName = dep.packageName.replace(alias, replacement);
+      return {
+        ...dep,
+        packageName: newPackageName,
+      };
+    }
+  }
+
+  return dep;
 }
