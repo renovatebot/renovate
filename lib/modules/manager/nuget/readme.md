@@ -53,9 +53,7 @@ You can enable this behavior by adding `dotnetWorkloadRestore` to the `postUpdat
 
 ### Windows targeting
 
-In case you need to allow Windows targeting during package restore, e.g. adding the `-p:EnableWindowsTargeting=true` CLI argument to the
-Sometimes package restore needs Windows targeting enabled.  
-Normally, you do this by adding `-p:EnableWindowsTargeting=true` to the `dotnet restore` command.  
+In case you need to allow Windows targeting during package restore, e.g. adding the `-p:EnableWindowsTargeting=true`.
 In Renovate, the same effect is achieved by adding `dotnetEnableWindowsTargeting` to `postUpdateOptions`.
 
 ```json
