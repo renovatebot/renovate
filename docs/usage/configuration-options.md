@@ -292,6 +292,25 @@ Example use:
 }
 ```
 
+## automergeMergeCommitMessage
+
+Use this only if you configure `automergeType="branch"` and `automergeStrategy="merge-commit"`.
+
+When you configure branch automerge using merge commits then you can use this option to set the merge commit message.
+This can be useful if you want to differentiate between Renovate's automerge commits and other (merge) commits.
+If omitted, git will use its default merge commit message.
+If you need the merge commit message to use semantic commits, you will need to add it into this field, e.g. `"chore: merge commit by Renovate"`.
+
+Example use:
+
+```json
+{
+  "automergeType": "branch",
+  "automergeStrategy": "merge-commit",
+  "automergeMergeCommitMessage": "Automerge by Renovate Bot"
+}
+```
+
 ## automergeSchedule
 
 Use the `automergeSchedule` option to define times of week or month during which Renovate may automerge its PRs.
@@ -308,7 +327,7 @@ To configure this option refer to [`schedule`](#schedule) as the syntax is the s
 The automerge strategy defaults to `auto`, so Renovate decides how to merge pull requests as best it can.
 If possible, Renovate follows the merge strategy set on the platform itself for the repository.
 
-If you've set `automerge=true` and `automergeType=pr` for any of your dependencies, then you may choose what automerge strategy Renovate uses by setting the `automergeStrategy` config option.
+If you've set `automerge=true` and `automergeType` to either `pr` or `branch` for any of your dependencies, then you may choose what automerge strategy Renovate uses by setting the `automergeStrategy` config option.
 If you're happy with the default behavior, you don't need to do anything.
 
 You may choose from these values:
