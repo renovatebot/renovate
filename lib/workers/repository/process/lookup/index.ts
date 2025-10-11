@@ -250,31 +250,21 @@ export async function lookupUpdates(
       }
 
       const inRangeOnlyStrategy = config.rangeStrategy === 'in-range-only';
-      let allSatisfyingVersions: Release[] = [];
-      if (inRangeOnlyStrategy) {
-        // Check that existing constraint can be satisfied
-        allSatisfyingVersions = unconstrainedValue
-          ? allVersions
-          : allVersions.filter((v) =>
+      // Check that existing constraint can be satisfied
+      const allSatisfyingVersions =
+        (inRangeOnlyStrategy || config.rollbackPrs) && !unconstrainedValue
+          ? allVersions.filter((v) =>
               // TODO #22198
               versioningApi.matches(v.version, compareValue!),
-            );
-        if (!allSatisfyingVersions.length) {
-          logger.debug(
-            `Found no satisfying versions with '${config.versioning}' versioning`,
-          );
-        }
+            )
+          : allVersions;
+      if (!allSatisfyingVersions.length) {
+        logger.debug(
+          `Found no satisfying versions with '${config.versioning}' versioning`,
+        );
       }
-      if (
-        config.rollbackPrs &&
-        ((inRangeOnlyStrategy && !allSatisfyingVersions.length) ||
-          (!inRangeOnlyStrategy &&
-            !unconstrainedValue &&
-            !allVersions.find((v) =>
-              // TODO #22198
-              versioningApi.matches(v.version, compareValue!),
-            )))
-      ) {
+
+      if (config.rollbackPrs && !allSatisfyingVersions.length) {
         const rollback = getRollbackUpdate(config, allVersions, versioningApi);
         // istanbul ignore if
         if (!rollback) {
