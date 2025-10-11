@@ -63,7 +63,7 @@ export interface PackageFileContent<T = Record<string, any>>
   datasource?: string;
   registryUrls?: string[];
   additionalRegistryUrls?: string[];
-  deps: PackageDependency[];
+  deps: PackageDependency<T>[];
   lockFiles?: string[];
   npmrc?: string;
   packageFileVersion?: string;
