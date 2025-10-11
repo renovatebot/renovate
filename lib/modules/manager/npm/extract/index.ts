@@ -2,6 +2,8 @@ import is from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
+import type { Nullish } from '../../../../types';
+import { parseJson } from '../../../../util/common';
 import {
   findLocalSiblingOrParent,
   getSiblingFileName,
@@ -51,7 +53,12 @@ export async function extractPackageFile(
     }
   } else {
     try {
-      packageJson = parseJson(content);
+      const loadedFile = parseJson(content, packageFile) as Nullish<NpmPackage>;
+      if (loadedFile) {
+        packageJson = loadedFile;
+      } else {
+        return null;
+      }
     } catch {
       logger.debug({ packageFile }, `Invalid JSON`);
       return null;
