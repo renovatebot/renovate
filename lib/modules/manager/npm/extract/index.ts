@@ -51,7 +51,7 @@ export async function extractPackageFile(
     }
   } else {
     try {
-      packageJson = JSON.parse(content);
+      packageJson = parseJson(content);
     } catch {
       logger.debug({ packageFile }, `Invalid JSON`);
       return null;
