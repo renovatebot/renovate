@@ -308,7 +308,7 @@ plugins {
 Renovate will give the dependency these properties:
 
 - `depName=com.gradle.develocity`
-- `packageName: com.gradle.develocity:com.gradle.develocity.gradle.plugin`
+- `packageName=com.gradle.develocity:com.gradle.develocity.gradle.plugin`
 
 Again, often the `depName` and `packageName` are equal.
 The names Renovate uses for the `depName` and `packageName` depend on the package manager (and package ecosystem naming conventions).
