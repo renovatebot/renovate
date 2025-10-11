@@ -407,6 +407,7 @@ Configuring this to `true` means that Renovate will mark all PR Tasks as complet
 ## bbUseDefaultReviewers
 
 Configuring this to `true` means that Renovate will detect and apply the default reviewers rules to PRs (Bitbucket only).
+Renovate will add the reviewers only at time of PR creation and not update them after that.
 
 ## branchConcurrentLimit
 
@@ -1852,6 +1853,28 @@ Ignore the default project level approval(s), so that Renovate bot can automerge
 Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
 This option works only when `automerge=true` and either `automergeType=pr` or `automergeType=branch`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
+
+## gitLabReviewersFromApprovalRule
+
+There are cases where you want to automatically add reviewers to Renovate PRs based on existing GitLab [approval rules](https://docs.gitlab.com/user/project/merge_requests/approvals/rules/).
+Renovate can use a GitLab's project approval rule to determine who should review dependency updates.
+This is particularly useful for teams that already have well-defined approval processes in GitLab.
+
+To enable this functionality, use the `gitLabReviewersFromApprovalRule` option to specify the name of the GitLab approval rule to use for selecting reviewers.
+Renovate will then add all reviewers from that rule to merge requests it creates.
+It will add the reviewers only at time of MR creation and does not update them after that.
+
+For example, to add reviewers from the "default reviewers" approval rule to all dependency updates:
+
+```json
+{
+  "gitLabReviewersFromApprovalRule": "default reviewers"
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+    GitLab approval rules are only available for the 'Premium' or 'Ultimate' GitLab Tier
 
 ## goGetDirs
 
