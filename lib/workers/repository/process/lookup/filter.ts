@@ -24,18 +24,6 @@ function isReleaseStable(
   return true;
 }
 
-/**
- * Filters a list of release versions according to the provided configuration.
- *
- * @param config filtering configuration
- * @param currentVersion the currently used version (should be a valid version
- * according to versioningApi)
- * @param latestVersion the latest known version
- * @param releases list of available releases (must use valid version strings
- * according to versioningApi)
- * @param versioningApi versioning API used for version comparison
- * @returns list of releases filtered according to the applied rules
- */
 export function filterVersions(
   config: FilterConfig,
   currentVersion: string,
@@ -52,12 +40,17 @@ export function filterVersions(
   }
 
   // Leave only versions greater than current
-  let filteredReleases = releases.filter((r) =>
+  const versionedReleases = releases.filter((r) =>
+    versioningApi.isVersion(r.version),
+  );
+  let filteredReleases = versionedReleases.filter((r) =>
     versioningApi.isGreaterThan(r.version, currentVersion),
   );
 
   const currentRelease = versioningApi.isVersion(currentVersion)
-    ? releases.find((r) => versioningApi.equals(r.version, currentVersion))
+    ? versionedReleases.find((r) =>
+        versioningApi.equals(r.version, currentVersion),
+      )
     : undefined;
 
   // Don't upgrade from non-deprecated to deprecated

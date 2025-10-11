@@ -27,6 +27,11 @@ describe('workers/repository/process/lookup/filter', () => {
           version: '2.1.0',
           releaseTimestamp: '2021-01-07T00:00:00.000Z' as Timestamp,
         },
+        // for coverage
+        {
+          version: 'invalid.version',
+          releaseTimestamp: '2021-01-07T00:00:00.000Z' as Timestamp,
+        },
       ] satisfies Release[];
 
       const config = partial<FilterConfig>({
