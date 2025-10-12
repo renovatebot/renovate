@@ -1,3 +1,4 @@
+import ini from 'ini';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import type { JsonArray, JsonValue } from 'type-fest';
@@ -281,6 +282,15 @@ export const Toml = z.string().transform((str, ctx) => {
     return parseToml(str);
   } catch {
     ctx.addIssue({ code: 'custom', message: 'Invalid TOML' });
+    return z.NEVER;
+  }
+});
+
+export const Ini = z.string().transform((str, ctx): Record<string, unknown> => {
+  try {
+    return ini.parse(str);
+  } catch {
+    ctx.addIssue({ code: 'custom', message: 'Invalid INI' });
     return z.NEVER;
   }
 });

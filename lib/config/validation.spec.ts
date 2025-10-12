@@ -5,8 +5,6 @@ import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
 import { partial } from '~test/util';
 
-const managerList = getManagerList().sort();
-
 describe('config/validation', () => {
   describe('validateConfig(config)', () => {
     it('returns deprecation warnings', async () => {
@@ -39,15 +37,19 @@ describe('config/validation', () => {
       const config = {
         binarySource: 'something',
         username: 'user',
+        ignorePrAuthor: true,
       };
       const { warnings } = await configValidation.validateConfig(
         'repo',
         config,
       );
-      expect(warnings).toHaveLength(2);
+      expect(warnings).toHaveLength(3);
       expect(warnings).toMatchObject([
         {
           message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+        },
+        {
+          message: `The "ignorePrAuthor" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
         {
           message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
@@ -1098,7 +1100,20 @@ describe('config/validation', () => {
 
       expect(errors).toHaveLength(0);
       expect(warnings).toHaveLength(2);
-      expect(warnings).toMatchSnapshot();
+      expect(warnings).toEqual([
+        {
+          topic: 'managerFilePatterns',
+          message: expect.toStartWith(
+            `"managerFilePatterns" can't be used in ".". Allowed objects: `,
+          ),
+        },
+        {
+          topic: 'npm.minor.managerFilePatterns',
+          message: expect.toStartWith(
+            `"managerFilePatterns" can't be used in "minor". Allowed objects: `,
+          ),
+        },
+      ]);
     });
 
     it('errors if manager objects are nested', async () => {
@@ -1763,7 +1778,9 @@ describe('config/validation', () => {
           },
           {
             topic: 'managerFilePatterns',
-            message: `managerFilePatterns should only be configured within one of "${managerList.join(' or ')} or customManagers" objects. Was found in .`,
+            message: expect.toStartWith(
+              `"managerFilePatterns" can't be used in ".". Allowed objects: `,
+            ),
           },
         ]);
       });
@@ -1786,7 +1803,9 @@ describe('config/validation', () => {
         expect(warnings).toEqual([
           {
             topic: 'managerFilePatterns',
-            message: `managerFilePatterns should only be configured within one of "${managerList.join(' or ')} or customManagers" objects. Was found in .`,
+            message: expect.toStartWith(
+              `"managerFilePatterns" can't be used in ".". Allowed objects: `,
+            ),
           },
         ]);
       });
@@ -2118,7 +2137,7 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(2);
     });
 
-    it('allow bumpVersion ', async () => {
+    it('allow bumpVersion', async () => {
       const config = partial<RenovateConfig>({
         bumpVersion: {
           filePatterns: ['foo'],

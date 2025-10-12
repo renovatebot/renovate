@@ -200,6 +200,19 @@ const staticGroups = {
       },
     ],
   },
+  gradle: {
+    description:
+      "Group anything that looks like Gradle together so that it's updated together.",
+    packageRules: [
+      {
+        commitMessageTopic: 'Gradle',
+        matchDatasources: ['docker', 'gradle-version'],
+        matchPackageNames: [
+          '/(?:^|/)gradle$/', // gradle or ends with "/gradle"
+        ],
+      },
+    ],
+  },
   hibernateCommons: {
     description: 'Group Java Hibernate Commons packages.',
     packageRules: [
@@ -513,6 +526,7 @@ const staticGroups = {
       'group:githubArtifactActions',
       'group:glimmer',
       'group:goOpenapi',
+      'group:gradle',
       'group:hibernateCore',
       'group:hibernateValidator',
       'group:hibernateOgm',

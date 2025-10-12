@@ -28,7 +28,13 @@ export async function filterInternalChecks(
   bucket: string,
   sortedReleases: Release[],
 ): Promise<InternalChecksResult> {
-  const { currentVersion, datasource, depName, internalChecksFilter } = config;
+  const {
+    currentVersion,
+    datasource,
+    depName,
+    packageName,
+    internalChecksFilter,
+  } = config;
   let release: Release | undefined = undefined;
   let pendingChecks = false;
   let pendingReleases: Release[] = [];
@@ -90,7 +96,7 @@ export async function filterInternalChecks(
         const confidenceLevel =
           (await getMergeConfidenceLevel(
             datasource!,
-            depName!,
+            packageName!,
             currentVersion!,
             candidateRelease.version,
             updateType!,

@@ -79,7 +79,6 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         'patch',
         sortedReleases,
       );
-      expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(0);
       expect(res.release?.version).toBe('1.0.4');
@@ -128,7 +127,6 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         'patch',
         sortedReleases,
       );
-      expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(0);
       expect(res.release?.version).toBe('1.0.4');
@@ -143,7 +141,6 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         'patch',
         sortedReleases,
       );
-      expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeTrue();
       expect(res.pendingReleases).toHaveLength(0);
       expect(res.release?.version).toBe('1.0.4');
@@ -158,14 +155,13 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         'patch',
         sortedReleases,
       );
-      expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(2);
       expect(res.release?.version).toBe('1.0.2');
     });
 
     it('returns non-latest release if internalChecksFilter=flexible and some pass checks', async () => {
-      config.internalChecksFilter = 'strict';
+      config.internalChecksFilter = 'flexible';
       config.minimumReleaseAge = '6 days';
       const res = await filterInternalChecks(
         config,
@@ -173,13 +169,12 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         'patch',
         sortedReleases,
       );
-      expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(2);
       expect(res.release?.version).toBe('1.0.2');
     });
 
-    it('picks up minimumReleaseAge settings from hostRules', async () => {
+    it('picks up minimumReleaseAge settings from packageRules', async () => {
       config.internalChecksFilter = 'strict';
       config.minimumReleaseAge = '6 days';
       config.packageRules = [
@@ -191,7 +186,6 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         'patch',
         sortedReleases,
       );
-      expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(0);
       expect(res.release?.version).toBe('1.0.4');
@@ -206,10 +200,43 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         'patch',
         sortedReleases,
       );
-      expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(1);
       expect(res.release?.version).toBe('1.0.3');
+    });
+
+    // TODO: will be fixed in https://github.com/renovatebot/renovate/discussions/38290 / https://github.com/renovatebot/renovate/discussions/38348
+    it('returns latest release if internalChecksFilter=strict, minimumReleaseAge is specified, but the latest release does not have a releaseTimestamp', async () => {
+      const releasesWithMissingReleaseTimestamp: Release[] = [
+        {
+          version: '1.0.1',
+          releaseTimestamp: '2021-01-01T00:00:01.000Z' as Timestamp,
+        },
+        {
+          version: '1.0.2',
+          releaseTimestamp: '2021-01-03T00:00:00.000Z' as Timestamp,
+        },
+        {
+          version: '1.0.3',
+          releaseTimestamp: '2021-01-05T00:00:00.000Z' as Timestamp,
+        },
+        {
+          version: '1.0.4',
+          // no releaseTimestamp
+        },
+      ];
+
+      config.internalChecksFilter = 'strict';
+      config.minimumReleaseAge = '100 days';
+      const res = await filterInternalChecks(
+        config,
+        versioning,
+        'patch',
+        releasesWithMissingReleaseTimestamp,
+      );
+      expect(res.pendingChecks).toBeFalse();
+      expect(res.pendingReleases).toHaveLength(0);
+      expect(res.release?.version).toBe('1.0.4');
     });
 
     it('picks up minimumConfidence settings from updateType', async () => {
@@ -226,7 +253,6 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         'patch',
         sortedReleases,
       );
-      expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(3);
       expect(res.release?.version).toBe('1.0.1');

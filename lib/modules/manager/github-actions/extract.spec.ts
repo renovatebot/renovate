@@ -583,29 +583,30 @@ describe('modules/manager/github-actions/extract', () => {
 
     it('extracts x-version from actions/setup-x', () => {
       const yamlContent = codeBlock`
-      jobs:
-        build:
-          steps:
-            - name: "Setup Node.js"
-              uses: actions/setup-node@v3
-              with:
-                node-version: '16.x'
-            - name: "Setup Node.js with exact version"
-              uses: actions/setup-node@v3
-              with:
-                node-version: '20.0.0'
-            - name: "Setup Go"
-              uses: actions/setup-go@v5
-              with:
-                go-version: '1.23'
-            - name: "Setup Python with range"
-              uses: actions/setup-python@v3
-              with:
-                python-version: '>=3.8.0 <3.10.0'
-            - name: "Setup Node.js with latest"
-              uses: actions/setup-node@v3
-              with:
-                node-version: 'latest'`;
+        jobs:
+          build:
+            steps:
+              - name: "Setup Node.js"
+                uses: actions/setup-node@v3
+                with:
+                  node-version: '16.x'
+              - name: "Setup Node.js with exact version"
+                uses: actions/setup-node@v3
+                with:
+                  node-version: '20.0.0'
+              - name: "Setup Go"
+                uses: actions/setup-go@v5
+                with:
+                  go-version: '1.23'
+              - name: "Setup Python with range"
+                uses: actions/setup-python@v3
+                with:
+                  python-version: '>=3.8.0 <3.10.0'
+              - name: "Setup Node.js with latest"
+                uses: actions/setup-node@v3
+                with:
+                  node-version: 'latest'
+        `;
 
       const res = extractPackageFile(yamlContent, 'workflow.yml');
       expect(res?.deps).toMatchObject([
@@ -1071,6 +1072,105 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'uses-with',
           packageName: 'prefix-dev/pixi',
           versioning: 'conda',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'oven-sh/setup-bun@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'bun',
+          depType: 'uses-with',
+          packageName: 'bun',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'oven-sh/setup-bun@v2',
+        with: { 'bun-version': '1.2.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.2.0',
+          datasource: 'npm',
+          depName: 'bun',
+          depType: 'uses-with',
+          packageName: 'bun',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'denoland/setup-deno@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'deno',
+          depType: 'uses-with',
+          packageName: 'deno',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'denoland/setup-deno@v2',
+        with: { 'deno-version': '2.4.0' },
+      },
+      expected: [
+        {
+          currentValue: '2.4.0',
+          datasource: 'npm',
+          depName: 'deno',
+          depType: 'uses-with',
+          packageName: 'deno',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'ruby/setup-ruby@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'ruby-version',
+          depName: 'ruby',
+          depType: 'uses-with',
+          packageName: 'ruby',
+          versioning: 'ruby',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'ruby/setup-ruby@v1',
+        with: { 'ruby-version': '3.4' },
+      },
+      expected: [
+        {
+          currentValue: '3.4',
+          datasource: 'ruby-version',
+          depName: 'ruby',
+          depType: 'uses-with',
+          packageName: 'ruby',
+          versioning: 'ruby',
         },
       ],
     },
