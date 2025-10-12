@@ -115,7 +115,16 @@ describe('workers/repository/update/pr/pr-reuse', () => {
       sourceBranch: 'some-branch',
       state: 'open',
     });
-    expect(tryReuseFn).toHaveBeenCalledOnce();
+    expect(tryReuseFn).toHaveBeenCalledExactlyOnceWith(
+      {
+        number: 123,
+        title: 'foobar - autoclosed',
+        sourceBranch: 'some-branch',
+        state: 'closed',
+        closedAt: expect.any(String),
+      },
+      'PR Title',
+    );
   });
 
   it('returns null if the retry throws', async () => {
@@ -132,6 +141,15 @@ describe('workers/repository/update/pr/pr-reuse', () => {
     const res = await tryReuseAutoclosedPr('some-branch', 'PR Title');
 
     expect(res).toBeNull();
-    expect(tryReuseFn).toHaveBeenCalledOnce();
+    expect(tryReuseFn).toHaveBeenCalledExactlyOnceWith(
+      {
+        number: 123,
+        title: 'foobar - autoclosed',
+        sourceBranch: 'some-branch',
+        state: 'closed',
+        closedAt: expect.any(String),
+      },
+      'PR Title',
+    );
   });
 });

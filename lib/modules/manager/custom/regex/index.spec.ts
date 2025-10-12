@@ -185,6 +185,7 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.warn).toHaveBeenCalledWith(
       { value: 'this-is-not-a-valid-url-gradle' },
       'Invalid regex manager registryUrl',

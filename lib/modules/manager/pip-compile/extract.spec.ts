@@ -393,6 +393,7 @@ describe('modules/manager/pip-compile/extract', () => {
     expect(packageFiles).toBeDefined();
     const packageFile = packageFiles!.pop();
     expect(packageFile!.deps).toHaveLength(2);
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.warn).toHaveBeenCalledWith(
       { depName: 'bar', lockFile: 'requirements.txt' },
       'pip-compile: dependency not found in lock file',
@@ -505,6 +506,7 @@ describe('modules/manager/pip-compile/extract', () => {
     const lockFiles = ['reqs-no-headers.txt', '2.txt'];
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
     expect(packageFiles?.map((p) => p.lockFiles)).toEqual([['2.txt']]);
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.warn).toHaveBeenCalledWith(
       { packageFile: '1.in', requirementsFile: 'reqs-no-headers.txt' },
       'pip-compile: Package file references a file which does not appear to be a requirements file managed by pip-compile',
@@ -527,6 +529,7 @@ describe('modules/manager/pip-compile/extract', () => {
     const lockFiles = ['2.txt'];
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
     expect(packageFiles?.map((p) => p.lockFiles)).toEqual([['2.txt']]);
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.warn).toHaveBeenCalledWith(
       { packageFile: '1.in', requirementsFile: 'unmanaged-file.txt' },
       'pip-compile: Package file references a file which does not appear to be a requirements file managed by pip-compile',

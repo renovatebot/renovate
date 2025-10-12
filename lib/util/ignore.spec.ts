@@ -22,6 +22,7 @@ describe('util/ignore', () => {
 
   it('logs unknown command for "renovate:" comments without "ignore"', () => {
     isSkipComment('renovate:update');
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.debug).toHaveBeenCalledWith(
       'Unknown comment command: update',
     );
