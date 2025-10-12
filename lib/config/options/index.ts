@@ -245,6 +245,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: null,
     globalOnly: true,
+    inheritConfigSupport: true,
     cli: false,
     env: false,
   },

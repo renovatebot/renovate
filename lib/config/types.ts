@@ -327,6 +327,7 @@ export interface RenovateConfig
   additionalBranchPrefix?: string;
   sharedVariableName?: string;
   minimumGroupSize?: number;
+  configFileNames?: string[];
 }
 
 const CustomDatasourceFormats = [
