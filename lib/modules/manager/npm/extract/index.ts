@@ -2,8 +2,7 @@ import is from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
-import type { Nullish } from '../../../../types';
-import { parseJson, parseJsonWithFallback } from '../../../../util/common';
+import { parseJsonWithFallback } from '../../../../util/common';
 import {
   findLocalSiblingOrParent,
   getSiblingFileName,
