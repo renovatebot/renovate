@@ -313,7 +313,6 @@ export async function getUpdatedPackageFiles(
           upgrade.newDigest &&
           upgrade.currentDigest !== upgrade.newDigest
         ) {
-          // For Nix digest-only updates, track for artifact updates without committing the unchanged file
           logger.debug(
             { packageFile, depName },
             'Nix digest-only update - tracking for artifact update',
