@@ -32,6 +32,7 @@ With `rangeStrategy: replace`:
 With `rangeStrategy: pin`:
 
 - `1.90` → `1.90.0` (range pinning)
+- `stable` → `1.90.0` (stable channel pinning)
 - `nightly` → `nightly-2025-10-11` (nightly channel pinning)
 
 _Note: The version numbers shown above are just examples for illustration purposes._

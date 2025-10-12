@@ -9,7 +9,7 @@ describe('modules/versioning/rust-toolchain/index', () => {
     ${'0.0.0'}              | ${true}
     ${'1.90'}               | ${true}
     ${'0.1'}                | ${true}
-    ${'stable'}             | ${false}
+    ${'stable'}             | ${true}
     ${'beta'}               | ${false}
     ${'nightly'}            | ${false}
     ${'nightly-2025-10-12'} | ${false}
@@ -60,7 +60,7 @@ describe('modules/versioning/rust-toolchain/index', () => {
     ${'0.0.0'}              | ${false}
     ${'1.90'}               | ${true}
     ${'0.1'}                | ${false}
-    ${'stable'}             | ${false}
+    ${'stable'}             | ${true}
     ${'beta'}               | ${false}
     ${'nightly'}            | ${false}
     ${'nightly-2025-10-12'} | ${false}
@@ -77,7 +77,7 @@ describe('modules/versioning/rust-toolchain/index', () => {
     ${'0.0.0'}              | ${true}
     ${'1.90'}               | ${true}
     ${'0.1'}                | ${true}
-    ${'stable'}             | ${false}
+    ${'stable'}             | ${true}
     ${'beta'}               | ${false}
     ${'nightly'}            | ${false}
     ${'nightly-2025-10-12'} | ${false}
@@ -147,7 +147,7 @@ describe('modules/versioning/rust-toolchain/index', () => {
     ${['1.89.0', '1.89.1', '1.90.0']} | ${'1.89.1'} | ${'1.89.1'}
     ${['1.89.0', '1.89.1', '1.90.0']} | ${'1.88.0'} | ${null}
     ${['1.89.0', '1.89.1', '1.90.0']} | ${'1.91.0'} | ${null}
-    ${['1.89.0', '1.89.1', '1.90.0']} | ${'stable'} | ${null}
+    ${['1.89.0', '1.89.1', '1.90.0']} | ${'stable'} | ${'1.90.0'}
     ${['1.89.0', '1.89.1', '1.90.0']} | ${'1.89'}   | ${'1.89.1'}
     ${[]}                             | ${'1.89.1'} | ${null}
     ${[]}                             | ${'1.89'}   | ${null}
@@ -166,7 +166,7 @@ describe('modules/versioning/rust-toolchain/index', () => {
     ${['1.89.0', '1.89.1', '1.90.0']} | ${'1.89.1'} | ${'1.89.1'}
     ${['1.89.0', '1.89.1', '1.90.0']} | ${'1.88.0'} | ${null}
     ${['1.89.0', '1.89.1', '1.90.0']} | ${'1.91.0'} | ${null}
-    ${['1.89.0', '1.89.1', '1.90.0']} | ${'stable'} | ${null}
+    ${['1.89.0', '1.89.1', '1.90.0']} | ${'stable'} | ${'1.89.0'}
     ${['1.89.0', '1.89.1', '1.90.0']} | ${'1.89'}   | ${'1.89.0'}
     ${[]}                             | ${'1.89.1'} | ${null}
     ${[]}                             | ${'1.89'}   | ${null}
@@ -196,7 +196,7 @@ describe('modules/versioning/rust-toolchain/index', () => {
     ${{ rangeStrategy: 'pin', currentValue: '1.90.0', newVersion: '1.90.0' }}             | ${null}
     ${{ rangeStrategy: 'pin', currentValue: '1.90', newVersion: '1.91.0' }}               | ${'1.91.0'}
     ${{ rangeStrategy: 'pin', currentValue: '1.90', newVersion: '1.90.1' }}               | ${'1.90.1'}
-    ${{ rangeStrategy: 'pin', currentValue: 'stable', newVersion: '1.91.0' }}             | ${null}
+    ${{ rangeStrategy: 'pin', currentValue: 'stable', newVersion: '1.91.0' }}             | ${'1.91.0'}
     ${{ rangeStrategy: 'pin', currentValue: 'beta', newVersion: '1.91.0' }}               | ${null}
     ${{ rangeStrategy: 'update-lockfile', currentValue: '1.90.0', newVersion: '1.91.0' }} | ${null}
   `(
@@ -232,7 +232,7 @@ describe('modules/versioning/rust-toolchain/index', () => {
     ${'1.90.0'} | ${'1.91'}               | ${false}
     ${'1.90.0'} | ${'1.90'}               | ${true}
     ${'1.90.0'} | ${'1.89'}               | ${false}
-    ${'1.90.0'} | ${'stable'}             | ${false}
+    ${'1.90.0'} | ${'stable'}             | ${true}
     ${'1.90.0'} | ${'beta'}               | ${false}
     ${'1.90.0'} | ${'nightly'}            | ${false}
     ${'1.90.0'} | ${'nightly-2025-10-12'} | ${false}
