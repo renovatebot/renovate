@@ -1,4 +1,4 @@
-This manager can be used to update the Rust toolchain version in `rust-toolchain.toml` files.
+This manager can be used to update the Rust toolchain version in `rust-toolchain.toml` and `rust-toolchain` files.
 
 It supports the TOML format as specified in the [Rust toolchain documentation](https://rust-lang.github.io/rustup/overrides.html#the-toolchain-file).
 
