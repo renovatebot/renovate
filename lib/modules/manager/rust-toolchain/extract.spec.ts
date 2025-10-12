@@ -103,5 +103,34 @@ describe('modules/manager/rust-toolchain/extract', () => {
         ],
       });
     });
+
+    it('returns null for empty legacy file', () => {
+      const result = extractPackageFile('', 'rust-toolchain');
+      expect(result).toBeNull();
+    });
+
+    it('extracts from legacy format', () => {
+      const result = extractPackageFile('1.89.1', 'rust-toolchain');
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'rust',
+            depType: 'toolchain',
+            packageName: 'rust-lang/rust',
+            currentValue: '1.89.1',
+            datasource: GithubReleasesDatasource.id,
+            versioning: rustToolchainVersioning.id,
+          },
+        ],
+      });
+    });
+
+    it('returns null for multiline legacy files', () => {
+      const result = extractPackageFile(
+        '1.89.1\nextra line\nanother line\n',
+        'rust-toolchain',
+      );
+      expect(result).toBeNull();
+    });
   });
 });
