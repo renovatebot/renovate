@@ -260,6 +260,7 @@ export async function writeUpdatedPackageFiles(
     if (
       !(
         packageFile.path.endsWith('package.json') ||
+        packageFile.path.endsWith('package.json5') ||
         packageFile.path.endsWith('package.yaml') ||
         packageFile.path.endsWith('package.yml') ||
         packageFile.path.endsWith('pnpm-workspace.yaml') ||

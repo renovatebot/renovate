@@ -3,7 +3,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { Nullish } from '../../../../types';
-import { parseJson } from '../../../../util/common';
+import { parseJson, parseJsonWithFallback } from '../../../../util/common';
 import {
   findLocalSiblingOrParent,
   getSiblingFileName,
@@ -44,7 +44,7 @@ export async function extractPackageFile(
   logger.trace(`npm.extractPackageFile(${packageFile})`);
   logger.trace({ content });
   let packageJson: NpmPackage;
-  if (packageFile.endsWith('.yaml') || packageFile.endsWith('.yml')) {
+  if (/\.ya?ml$/.test(packageFile)) {
     try {
       packageJson = parseSingleYaml(content);
     } catch {
@@ -53,12 +53,7 @@ export async function extractPackageFile(
     }
   } else {
     try {
-      const loadedFile = parseJson(content, packageFile) as Nullish<NpmPackage>;
-      if (loadedFile) {
-        packageJson = loadedFile;
-      } else {
-        return null;
-      }
+      packageJson = parseJsonWithFallback(content, packageFile) as NpmPackage;
     } catch {
       logger.debug({ packageFile }, `Invalid JSON`);
       return null;

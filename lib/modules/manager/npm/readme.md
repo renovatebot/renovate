@@ -43,15 +43,25 @@ Configuration/conversion of `NO_PROXY` to Yarn config is not supported.
 
 ### pnpm
 
-Renovate supports updating the dependencies in your `package.yaml` file.
+Renovate supports updating the dependencies in your `package.yaml` or `package.json5` file.
 To enable it you need to extend the `managerFilePatterns` for the npm manager as shown below:
 
 ```json
 {
   "npm": {
+    // Yaml example
     "managerFilePatterns": ["/(^|/)package\\.yaml$/"]
   }
 }
 ```
 
-This is the sample repo: [package.yaml test repo](https://github.com/Dracks/renovate-tests)
+```json
+{
+  "npm": {
+    // Json5 example
+    "managerFilePatterns": ["/(^|/)package\\.json5$/"]
+  }
+}
+```
+
+This ire the sample repo: [package.yaml test repo](https://github.com/Dracks/renovate-tests) & [package.json5 test repo](https://github.com/Dracks/renovate-tests-json5)
