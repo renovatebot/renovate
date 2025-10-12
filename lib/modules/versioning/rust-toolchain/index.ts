@@ -17,8 +17,10 @@ export const supportedRangeStrategies: RangeStrategy[] = [
 
 const versionPattern = regEx(/^(\d+).(\d+)(?:.(\d+))?$/);
 
+const channelName = 'stable';
+
 function isValid(input: string): boolean {
-  return versionPattern.test(input);
+  return input === channelName || versionPattern.test(input);
 }
 
 function isVersion(input: string | undefined | null): boolean {
@@ -34,6 +36,10 @@ function isSingleVersion(input: string): boolean {
 }
 
 function isStable(version: string): boolean {
+  if (version === channelName) {
+    return true;
+  }
+
   const major = getMajor(version);
   return Boolean(major);
 }
@@ -159,6 +165,10 @@ function sortVersions(version: string, other: string): number {
 }
 
 function matches(version: string, range: string): boolean {
+  if (range === channelName) {
+    return true;
+  }
+
   if (getMajor(version) !== getMajor(range)) {
     return false;
   }
