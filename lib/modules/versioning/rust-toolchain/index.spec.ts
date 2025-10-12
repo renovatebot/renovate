@@ -182,6 +182,7 @@ describe('modules/versioning/rust-toolchain/index', () => {
 
   it.each`
     input                                                                         | expected
+    ${{ rangeStrategy: 'replace', currentValue: '1.90.0', newVersion: '2.0.0' }}  | ${'2.0.0'}
     ${{ rangeStrategy: 'replace', currentValue: '1.90.0', newVersion: '1.91.0' }} | ${'1.91.0'}
     ${{ rangeStrategy: 'replace', currentValue: '1.90.0', newVersion: '1.90.1' }} | ${'1.90.1'}
     ${{ rangeStrategy: 'replace', currentValue: '1.90.0', newVersion: '1.90.0' }} | ${null}
