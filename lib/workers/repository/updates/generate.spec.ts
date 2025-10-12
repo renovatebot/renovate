@@ -1847,7 +1847,7 @@ describe('workers/repository/updates/generate', () => {
       },
     );
 
-    it('only filter pending upgrades, when both pending and non-pending upgrades are present', () => {
+    it('filters out pending upgrades when other non-pending upgrades are also present', () => {
       const commonOptions = {
         ...requiredDefaultOptions,
         manager: 'some-manager',
@@ -1892,27 +1892,65 @@ describe('workers/repository/updates/generate', () => {
           },
         },
       ] satisfies BranchUpgradeConfig[];
-      let res = generateBranchConfig(branch);
-      expect(res.pendingChecks).toBeFalse();
-      expect(logger.logger.debug).toHaveBeenCalledWith(
-        { branch: branch[0].branchName },
-        'Branch is not pending, removing pending upgrades',
-      );
+      const res = generateBranchConfig(branch);
+      expect(res.upgrades).toHaveLength(2);
+      expect(logger.logger.debug).toHaveBeenCalled();
+    });
 
-      vi.resetAllMocks();
-      // set all upgrades to not-pending
-      branch[0].pendingChecks = false;
-      res = generateBranchConfig(branch);
-      expect(res.pendingChecks).toBeFalse();
+    it('does not filter pending upgrades, when only pending/non-pending upgrades are present', () => {
+      const commonOptions = {
+        ...requiredDefaultOptions,
+        manager: 'some-manager',
+        branchName: 'deps',
+      };
+
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...commonOptions,
+          depName: 'dep1',
+          newVersion: '1.2.0',
+          newValue: '1.2.0',
+          updateType: 'minor' as UpdateType,
+          pendingChecks: true,
+          fileReplacePosition: 1,
+          prBodyDefinitions: {
+            Issue: 'I1',
+          },
+        },
+        {
+          ...commonOptions,
+          depName: 'dep2',
+          newVersion: '1.0.0',
+          newValue: '1.0.0',
+          updateType: 'major' as UpdateType,
+          pendingChecks: true,
+          fileReplacePosition: 2,
+          prBodyDefinitions: {
+            Issue: 'I2',
+          },
+        },
+        {
+          ...commonOptions,
+          depName: 'dep3',
+          newVersion: '1.2.3',
+          newValue: '1.2.3',
+          updateType: 'patch' as UpdateType,
+          pendingChecks: true,
+          fileReplacePosition: 0,
+          prBodyDefinitions: {
+            Issue: 'I3',
+          },
+        },
+      ] satisfies BranchUpgradeConfig[];
+      let res = generateBranchConfig(branch);
+      expect(res.pendingChecks).toBeTrue();
       expect(logger.logger.debug).not.toHaveBeenCalled();
 
-      vi.resetAllMocks();
-      // set all upgrades to pending
-      branch[0].pendingChecks = true;
-      branch[1].pendingChecks = true;
-      branch[2].pendingChecks = true;
+      branch[0].pendingChecks = false;
+      branch[1].pendingChecks = false;
+      branch[2].pendingChecks = false;
       res = generateBranchConfig(branch);
-      expect(res.pendingChecks).toBeTrue();
+      expect(res.pendingChecks).toBeFalse();
       expect(logger.logger.debug).not.toHaveBeenCalled();
     });
   });
