@@ -37,21 +37,26 @@ export async function extractPackageFile(
   }
 
   const flakeLock = flakeLockParsed.data;
-  const rootInputs = flakeLock.nodes.root?.inputs;
+  const rootInputs = new Map(
+    Object.entries(flakeLock.nodes.root?.inputs ?? {}).map(([key, value]) => [
+      value,
+      key,
+    ]),
+  );
 
-  if (!rootInputs) {
+  if (!rootInputs.size) {
     logger.debug({ flakeLockFile }, 'flake.lock is missing "root" node');
     return null;
   }
 
-  for (const [depName, flakeInput] of Object.entries(flakeLock.nodes)) {
+  for (const [node, flakeInput] of Object.entries(flakeLock.nodes)) {
     // the root input is a magic string for the entrypoint and only references other flake inputs
-    if (depName === 'root') {
+    if (node === 'root') {
       continue;
     }
 
     // skip all locked and transitive nodes as they cannot be updated by regular means
-    if (!(depName in rootInputs)) {
+    if (!rootInputs.has(node)) {
       continue;
     }
 
@@ -102,7 +107,7 @@ export async function extractPackageFile(
     }
 
     const dep: PackageDependency = {
-      depName,
+      depName: rootInputs.get(node),
       datasource: GitRefsDatasource.id,
     };
 
