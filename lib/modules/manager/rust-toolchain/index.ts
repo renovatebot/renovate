@@ -1,5 +1,6 @@
 import type { Category } from '../../../constants';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
+import { RustNightlyDatasource } from '../../datasource/rust-nightly';
 
 export { extractPackageFile } from './extract';
 
@@ -13,4 +14,7 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)rust-toolchain(\\.toml)?$/'],
 };
 
-export const supportedDatasources = [GithubReleasesDatasource.id];
+export const supportedDatasources = [
+  GithubReleasesDatasource.id,
+  RustNightlyDatasource.id,
+];

@@ -1,5 +1,7 @@
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
+import { RustNightlyDatasource } from '../../datasource/rust-nightly';
 import * as rustToolchainVersioning from '../../versioning/rust-toolchain';
+import * as rustToolchainNightlyVersioning from '../../versioning/rust-toolchain-nightly';
 import { extractPackageFile } from './extract';
 
 describe('modules/manager/rust-toolchain/extract', () => {
@@ -52,10 +54,29 @@ describe('modules/manager/rust-toolchain/extract', () => {
 
     it('returns null for nightly channel', () => {
       const result = extractPackageFile(
-        '[toolchain]\nchannel = "nightly-2025-10-12"',
+        '[toolchain]\nchannel = "nightly"',
         'rust-toolchain.toml',
       );
       expect(result).toBeNull();
+    });
+
+    it('extracts pinned nightly versions', () => {
+      const result = extractPackageFile(
+        '[toolchain]\nchannel = "nightly-2025-10-12"',
+        'rust-toolchain.toml',
+      );
+
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'rust-nightly',
+            depType: 'toolchain',
+            currentValue: 'nightly-2025-10-12',
+            datasource: RustNightlyDatasource.id,
+            versioning: rustToolchainNightlyVersioning.id,
+          },
+        ],
+      });
     });
 
     it('returns null for invalid TOML', () => {

@@ -22,6 +22,7 @@ If you'd like to pin your toolchain to a particular version, the following confi
 - `1.90.0` → `2.0.0` (major version updates)
 - `1.90.0` → `1.91.0` (minor version updates)
 - `1.90.0` → `1.90.1` (patch version updates)
+- `nightly-2025-10-10` → `nightly-2025-10-11` (nightly version updates)
 
 With `rangeStrategy: replace`:
 
