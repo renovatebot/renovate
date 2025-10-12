@@ -10,7 +10,7 @@ describe('modules/versioning/rust-toolchain-nightly/index', () => {
     ${'nightly-2024-01-15'} | ${true}
     ${'nightly-2023-12-31'} | ${true}
     ${'nightly-2025-01-01'} | ${true}
-    ${'nightly'}            | ${false}
+    ${'nightly'}            | ${true}
     ${'nightly-2025-1-1'}   | ${false}
     ${'nightly-2025-10-1'}  | ${false}
     ${'nightly-25-10-12'}   | ${false}
@@ -164,8 +164,9 @@ describe('modules/versioning/rust-toolchain-nightly/index', () => {
     ${['nightly-2025-10-10', 'nightly-2025-10-11', 'nightly-2025-10-12']} | ${'nightly-2025-10-11'} | ${'nightly-2025-10-11'}
     ${['nightly-2025-10-10', 'nightly-2025-10-11', 'nightly-2025-10-12']} | ${'nightly-2025-10-09'} | ${null}
     ${['nightly-2025-10-10', 'nightly-2025-10-11', 'nightly-2025-10-12']} | ${'nightly-2025-10-13'} | ${null}
-    ${['nightly-2025-10-10', 'nightly-2025-10-11', 'nightly-2025-10-12']} | ${'nightly'}            | ${null}
+    ${['nightly-2025-10-10', 'nightly-2025-10-11', 'nightly-2025-10-12']} | ${'nightly'}            | ${'nightly-2025-10-12'}
     ${['nightly-2025-10-10', 'nightly-2025-10-11', 'nightly-2025-10-12']} | ${'stable'}             | ${null}
+    ${[]}                                                                 | ${'nightly'}            | ${null}
     ${[]}                                                                 | ${'nightly-2025-10-12'} | ${null}
   `(
     'getSatisfyingVersion($versions, "$range") === "$expected"',
@@ -182,8 +183,9 @@ describe('modules/versioning/rust-toolchain-nightly/index', () => {
     ${['nightly-2025-10-10', 'nightly-2025-10-11', 'nightly-2025-10-12']} | ${'nightly-2025-10-11'} | ${'nightly-2025-10-11'}
     ${['nightly-2025-10-10', 'nightly-2025-10-11', 'nightly-2025-10-12']} | ${'nightly-2025-10-09'} | ${null}
     ${['nightly-2025-10-10', 'nightly-2025-10-11', 'nightly-2025-10-12']} | ${'nightly-2025-10-13'} | ${null}
-    ${['nightly-2025-10-10', 'nightly-2025-10-11', 'nightly-2025-10-12']} | ${'nightly'}            | ${null}
+    ${['nightly-2025-10-10', 'nightly-2025-10-11', 'nightly-2025-10-12']} | ${'nightly'}            | ${'nightly-2025-10-10'}
     ${['nightly-2025-10-10', 'nightly-2025-10-11', 'nightly-2025-10-12']} | ${'stable'}             | ${null}
+    ${[]}                                                                 | ${'nightly'}            | ${null}
     ${[]}                                                                 | ${'nightly-2025-10-12'} | ${null}
   `(
     'minSatisfyingVersion($versions, "$range") === "$expected"',
@@ -228,6 +230,8 @@ describe('modules/versioning/rust-toolchain-nightly/index', () => {
     ${'nightly-2025-10-12'} | ${'nightly-2025-10-12'} | ${true}
     ${'nightly-2025-10-12'} | ${'nightly-2025-10-13'} | ${false}
     ${'nightly-2025-10-13'} | ${'nightly-2025-10-12'} | ${false}
+    ${'nightly-2025-10-13'} | ${'nightly'}            | ${true}
+    ${'nightly-2025-10-13'} | ${'stable'}             | ${false}
   `(
     'matches("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {

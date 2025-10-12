@@ -52,12 +52,22 @@ describe('modules/manager/rust-toolchain/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('returns null for nightly channel', () => {
+    it('extracts nightly channel', () => {
       const result = extractPackageFile(
         '[toolchain]\nchannel = "nightly"',
         'rust-toolchain.toml',
       );
-      expect(result).toBeNull();
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'rust-nightly',
+            depType: 'toolchain',
+            currentValue: 'nightly',
+            datasource: RustNightlyDatasource.id,
+            versioning: rustToolchainNightlyVersioning.id,
+          },
+        ],
+      });
     });
 
     it('extracts pinned nightly versions', () => {
@@ -65,7 +75,6 @@ describe('modules/manager/rust-toolchain/extract', () => {
         '[toolchain]\nchannel = "nightly-2025-10-12"',
         'rust-toolchain.toml',
       );
-
       expect(result).toEqual({
         deps: [
           {
