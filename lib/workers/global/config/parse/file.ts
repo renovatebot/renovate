@@ -1,8 +1,7 @@
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
-import upath from 'upath';
 import { setUserConfigFileNames } from '../../../../config/app-strings';
-import type { AllConfig, RenovateConfig } from '../../../../config/types';
+import type { AllConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { getParsedContent, migrateAndValidateConfig } from './util';
 
