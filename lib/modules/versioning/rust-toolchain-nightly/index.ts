@@ -7,21 +7,23 @@ export const displayName = 'Rust Toolchain Nightly';
 export const urls = [
   'https://rust-lang.github.io/rustup/overrides.html#the-toolchain-file',
 ];
-export const supportsRanges = false;
-export const supportedRangeStrategies: RangeStrategy[] = ['replace'];
+export const supportsRanges = true;
+export const supportedRangeStrategies: RangeStrategy[] = ['pin', 'replace'];
 
-const versionPattern = regEx(/^nightly-\d{4}-\d{2}-\d{2}$/);
+const versionPattern = regEx(/^nightly(-\d{4}-\d{2}-\d{2})?$/);
+
+const channelName = 'nightly';
 
 function isValid(input: string): boolean {
   return versionPattern.test(input);
 }
 
 function isVersion(input: string): boolean {
-  return isValid(input);
+  return input !== channelName && isValid(input);
 }
 
 function isSingleVersion(version: string): boolean {
-  return isValid(version);
+  return isVersion(version);
 }
 
 function isStable(_version: string): boolean {
@@ -77,6 +79,11 @@ function getSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
+  if (range === channelName) {
+    const sortedVersions = versions.sort(sortVersions);
+    return sortedVersions[sortedVersions.length - 1] ?? null;
+  }
+
   return versions.includes(range) ? range : null;
 }
 
@@ -84,6 +91,11 @@ function minSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
+  if (range === channelName) {
+    const sortedVersions = versions.sort(sortVersions);
+    return sortedVersions[0] ?? null;
+  }
+
   return getSatisfyingVersion(versions, range);
 }
 
@@ -102,7 +114,7 @@ function sortVersions(version: string, other: string): number {
 }
 
 function matches(version: string, range: string): boolean {
-  return equals(version, range);
+  return range === channelName || equals(version, range);
 }
 
 export const api: VersioningApi = {
