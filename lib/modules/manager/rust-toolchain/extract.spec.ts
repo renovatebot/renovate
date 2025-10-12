@@ -84,5 +84,24 @@ describe('modules/manager/rust-toolchain/extract', () => {
         ],
       });
     });
+
+    it('can read from legacy filename', () => {
+      const result = extractPackageFile(
+        '[toolchain]\nchannel = "1.89.1"',
+        'rust-toolchain',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'rust',
+            depType: 'toolchain',
+            packageName: 'rust-lang/rust',
+            currentValue: '1.89.1',
+            datasource: GithubReleasesDatasource.id,
+            versioning: rustToolchainVersioning.id,
+          },
+        ],
+      });
+    });
   });
 });
