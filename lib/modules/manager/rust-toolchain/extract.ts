@@ -1,6 +1,8 @@
 import { logger } from '../../../logger';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
+import { RustNightlyDatasource } from '../../datasource/rust-nightly';
 import * as stableVersioning from '../../versioning/rust-toolchain';
+import * as nightlyVersioning from '../../versioning/rust-toolchain-nightly';
 import type { PackageFileContent } from '../types';
 import { RustToolchain } from './schema';
 
@@ -35,22 +37,34 @@ function createDependency(
   channel: string,
   packageFile: string,
 ): PackageFileContent | null {
-  if (!stableVersioning.api.isValid(channel)) {
-    logger.warn(
-      { channel, packageFile },
-      'Unsupported rust-toolchain channel value',
-    );
-    return null;
+  if (stableVersioning.api.isValid(channel)) {
+    const dep = {
+      depName: 'rust',
+      depType: 'toolchain',
+      packageName: 'rust-lang/rust',
+      currentValue: channel,
+      datasource: GithubReleasesDatasource.id,
+      versioning: stableVersioning.id,
+    };
+
+    return { deps: [dep] };
   }
 
-  const dep = {
-    depName: 'rust',
-    depType: 'toolchain',
-    packageName: 'rust-lang/rust',
-    currentValue: channel,
-    datasource: GithubReleasesDatasource.id,
-    versioning: stableVersioning.id,
-  };
+  if (nightlyVersioning.api.isValid(channel)) {
+    const dep = {
+      depName: 'rust-nightly',
+      depType: 'toolchain',
+      currentValue: channel,
+      datasource: RustNightlyDatasource.id,
+      versioning: nightlyVersioning.id,
+    };
 
-  return { deps: [dep] };
+    return { deps: [dep] };
+  }
+
+  logger.warn(
+    { channel, packageFile },
+    'Unsupported rust-toolchain channel value',
+  );
+  return null;
 }
