@@ -1,4 +1,3 @@
-import { getManagerList } from '../modules/manager';
 import { getConfigFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
