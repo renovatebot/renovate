@@ -87,6 +87,7 @@ export const packageCacheNamespaces = [
   'datasource-rpm',
   'datasource-ruby-version',
   'datasource-rubygems',
+  'datasource-rust-nightly-version',
   'datasource-sbt-package',
   'datasource-terraform-module',
   'datasource-terraform-provider',
