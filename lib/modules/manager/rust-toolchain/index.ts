@@ -11,7 +11,7 @@ export const categories: Category[] = ['rust'];
 
 export const defaultConfig = {
   commitMessageTopic: 'Rust',
-  managerFilePatterns: ['/(^|/)rust-toolchain\\.toml$/'],
+  managerFilePatterns: ['/(^|/)rust-toolchain(\\.toml)?$/'],
 };
 
 export const supportedDatasources = [RustVersionDatasource.id];
