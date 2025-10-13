@@ -525,10 +525,9 @@ describe('workers/repository/update/branch/get-updated', () => {
         newDigest: '88cef159e47c0dc56f151593e044453a39a6e547',
         updateType: 'digest',
       } satisfies BranchUpgradeConfig);
+
       // For digest-only updates, Nix returns unchanged content
       nix.updateDependency.mockResolvedValueOnce(fileContent);
-
-      // Mock the artifact update to return a lock file update
       nix.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
@@ -540,9 +539,9 @@ describe('workers/repository/update/branch/get-updated', () => {
       ]);
 
       const res = await getUpdatedPackageFiles(config);
-      // The unchanged flake.nix should not be in updatedPackageFiles
+
+      // The unchanged flake.nix should not be in updatedPackageFiles but the lock file should be updated via artifacts
       expect(res.updatedPackageFiles).toEqual([]);
-      // But the lock file should be updated via artifacts
       expect(res.updatedArtifacts).toEqual([
         {
           type: 'addition',
@@ -564,7 +563,9 @@ describe('workers/repository/update/branch/get-updated', () => {
         newValue: 'nixos-24.11',
         updateType: 'minor',
       } satisfies BranchUpgradeConfig);
+
       nix.updateDependency.mockResolvedValueOnce(updatedContent);
+
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchObject({
         updatedPackageFiles: [
