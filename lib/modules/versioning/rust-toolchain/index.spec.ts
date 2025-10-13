@@ -7,8 +7,8 @@ describe('modules/versioning/rust-toolchain/index', () => {
     ${'1.90.0'}             | ${true}
     ${'1.0.0'}              | ${true}
     ${'0.0.0'}              | ${true}
-    ${'1.90'}               | ${false}
-    ${'0.1'}                | ${false}
+    ${'1.90'}               | ${true}
+    ${'0.1'}                | ${true}
     ${'stable'}             | ${false}
     ${'beta'}               | ${false}
     ${'nightly'}            | ${false}
@@ -58,7 +58,7 @@ describe('modules/versioning/rust-toolchain/index', () => {
     ${'1.0.0'}              | ${true}
     ${'0.99.9999'}          | ${false}
     ${'0.0.0'}              | ${false}
-    ${'1.90'}               | ${false}
+    ${'1.90'}               | ${true}
     ${'0.1'}                | ${false}
     ${'stable'}             | ${false}
     ${'beta'}               | ${false}
@@ -75,8 +75,8 @@ describe('modules/versioning/rust-toolchain/index', () => {
     ${'1.0.0'}              | ${true}
     ${'0.99.9999'}          | ${true}
     ${'0.0.0'}              | ${true}
-    ${'1.90'}               | ${false}
-    ${'0.1'}                | ${false}
+    ${'1.90'}               | ${true}
+    ${'0.1'}                | ${true}
     ${'stable'}             | ${false}
     ${'beta'}               | ${false}
     ${'nightly'}            | ${false}
@@ -92,8 +92,8 @@ describe('modules/versioning/rust-toolchain/index', () => {
     ${'1.0.0'}              | ${1}    | ${0}    | ${0}
     ${'0.99.9999'}          | ${0}    | ${99}   | ${9999}
     ${'0.0.0'}              | ${0}    | ${0}    | ${0}
-    ${'1.90'}               | ${null} | ${null} | ${null}
-    ${'0.1'}                | ${null} | ${null} | ${null}
+    ${'1.90'}               | ${1}    | ${90}   | ${null}
+    ${'0.1'}                | ${0}    | ${1}    | ${null}
     ${'stable'}             | ${null} | ${null} | ${null}
     ${'beta'}               | ${null} | ${null} | ${null}
     ${'nightly'}            | ${null} | ${null} | ${null}
@@ -148,7 +148,7 @@ describe('modules/versioning/rust-toolchain/index', () => {
     ${['1.89.0', '1.89.1', '1.90.0']} | ${'1.88.0'} | ${null}
     ${['1.89.0', '1.89.1', '1.90.0']} | ${'1.91.0'} | ${null}
     ${['1.89.0', '1.89.1', '1.90.0']} | ${'stable'} | ${null}
-    ${['1.89.0', '1.89.1', '1.90.0']} | ${'1.89'}   | ${null}
+    ${['1.89.0', '1.89.1', '1.90.0']} | ${'1.89'}   | ${'1.89.1'}
     ${[]}                             | ${'1.89.1'} | ${null}
     ${[]}                             | ${'1.89'}   | ${null}
     ${[]}                             | ${'stable'} | ${null}
@@ -167,7 +167,7 @@ describe('modules/versioning/rust-toolchain/index', () => {
     ${['1.89.0', '1.89.1', '1.90.0']} | ${'1.88.0'} | ${null}
     ${['1.89.0', '1.89.1', '1.90.0']} | ${'1.91.0'} | ${null}
     ${['1.89.0', '1.89.1', '1.90.0']} | ${'stable'} | ${null}
-    ${['1.89.0', '1.89.1', '1.90.0']} | ${'1.89'}   | ${null}
+    ${['1.89.0', '1.89.1', '1.90.0']} | ${'1.89'}   | ${'1.89.0'}
     ${[]}                             | ${'1.89.1'} | ${null}
     ${[]}                             | ${'1.89'}   | ${null}
     ${[]}                             | ${'stable'} | ${null}
@@ -181,22 +181,24 @@ describe('modules/versioning/rust-toolchain/index', () => {
   );
 
   it.each`
-    input                                                                         | expected
-    ${{ rangeStrategy: 'replace', currentValue: '1.90.0', newVersion: '2.0.0' }}  | ${'2.0.0'}
-    ${{ rangeStrategy: 'replace', currentValue: '1.90.0', newVersion: '1.91.0' }} | ${'1.91.0'}
-    ${{ rangeStrategy: 'replace', currentValue: '1.90.0', newVersion: '1.90.1' }} | ${'1.90.1'}
-    ${{ rangeStrategy: 'replace', currentValue: '1.90.0', newVersion: '1.90.0' }} | ${null}
-    ${{ rangeStrategy: 'replace', currentValue: '1.90', newVersion: '1.91.0' }}   | ${null}
-    ${{ rangeStrategy: 'replace', currentValue: '1.90', newVersion: '1.90.1' }}   | ${null}
-    ${{ rangeStrategy: 'replace', currentValue: 'stable', newVersion: '1.91.0' }} | ${null}
-    ${{ rangeStrategy: 'replace', currentValue: 'beta', newVersion: '1.91.0' }}   | ${null}
-    ${{ rangeStrategy: 'pin', currentValue: '1.90.0', newVersion: '1.91.0' }}     | ${null}
-    ${{ rangeStrategy: 'pin', currentValue: '1.90.0', newVersion: '1.90.1' }}     | ${null}
-    ${{ rangeStrategy: 'pin', currentValue: '1.90.0', newVersion: '1.90.0' }}     | ${null}
-    ${{ rangeStrategy: 'pin', currentValue: '1.90', newVersion: '1.91.0' }}       | ${null}
-    ${{ rangeStrategy: 'pin', currentValue: '1.90', newVersion: '1.90.1' }}       | ${null}
-    ${{ rangeStrategy: 'pin', currentValue: 'stable', newVersion: '1.91.0' }}     | ${null}
-    ${{ rangeStrategy: 'pin', currentValue: 'beta', newVersion: '1.91.0' }}       | ${null}
+    input                                                                                 | expected
+    ${{ rangeStrategy: 'replace', currentValue: '1.90.0', newVersion: '2.0.0' }}          | ${'2.0.0'}
+    ${{ rangeStrategy: 'replace', currentValue: '1.90.0', newVersion: '1.91.0' }}         | ${'1.91.0'}
+    ${{ rangeStrategy: 'replace', currentValue: '1.90.0', newVersion: '1.90.1' }}         | ${'1.90.1'}
+    ${{ rangeStrategy: 'replace', currentValue: '1.90.0', newVersion: '1.90.0' }}         | ${null}
+    ${{ rangeStrategy: 'replace', currentValue: '1.90', newVersion: '2.0.0' }}            | ${'2.0'}
+    ${{ rangeStrategy: 'replace', currentValue: '1.90', newVersion: '1.91.0' }}           | ${'1.91'}
+    ${{ rangeStrategy: 'replace', currentValue: '1.90', newVersion: '1.90.1' }}           | ${null}
+    ${{ rangeStrategy: 'replace', currentValue: 'stable', newVersion: '1.91.0' }}         | ${null}
+    ${{ rangeStrategy: 'replace', currentValue: 'beta', newVersion: '1.91.0' }}           | ${null}
+    ${{ rangeStrategy: 'pin', currentValue: '1.90.0', newVersion: '1.91.0' }}             | ${'1.91.0'}
+    ${{ rangeStrategy: 'pin', currentValue: '1.90.0', newVersion: '1.90.1' }}             | ${'1.90.1'}
+    ${{ rangeStrategy: 'pin', currentValue: '1.90.0', newVersion: '1.90.0' }}             | ${null}
+    ${{ rangeStrategy: 'pin', currentValue: '1.90', newVersion: '1.91.0' }}               | ${'1.91.0'}
+    ${{ rangeStrategy: 'pin', currentValue: '1.90', newVersion: '1.90.1' }}               | ${'1.90.1'}
+    ${{ rangeStrategy: 'pin', currentValue: 'stable', newVersion: '1.91.0' }}             | ${null}
+    ${{ rangeStrategy: 'pin', currentValue: 'beta', newVersion: '1.91.0' }}               | ${null}
+    ${{ rangeStrategy: 'update-lockfile', currentValue: '1.90.0', newVersion: '1.91.0' }} | ${null}
   `(
     'getNewValue($input.rangeStrategy: $input.currentValue -> $input.newVersion) === $expected',
     ({ input, expected }) => {
@@ -227,7 +229,8 @@ describe('modules/versioning/rust-toolchain/index', () => {
     version     | range                   | expected
     ${'1.90.0'} | ${'1.90.0'}             | ${true}
     ${'1.90.0'} | ${'1.89.0'}             | ${false}
-    ${'1.90.0'} | ${'1.90'}               | ${false}
+    ${'1.90.0'} | ${'1.91'}               | ${false}
+    ${'1.90.0'} | ${'1.90'}               | ${true}
     ${'1.90.0'} | ${'1.89'}               | ${false}
     ${'1.90.0'} | ${'stable'}             | ${false}
     ${'1.90.0'} | ${'beta'}               | ${false}

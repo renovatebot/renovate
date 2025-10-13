@@ -8,21 +8,29 @@ export const displayName = 'Rust Toolchain';
 export const urls = [
   'https://rust-lang.github.io/rustup/overrides.html#the-toolchain-file',
 ];
-export const supportsRanges = false;
-export const supportedRangeStrategies: RangeStrategy[] = ['replace'];
+export const supportsRanges = true;
+export const supportedRangeStrategies: RangeStrategy[] = [
+  'bump',
+  'pin',
+  'replace',
+];
 
-const versionPattern = regEx(/^(\d+).(\d+).(\d+)$/);
+const versionPattern = regEx(/^(\d+).(\d+)(?:.(\d+))?$/);
 
 function isValid(input: string): boolean {
   return versionPattern.test(input);
 }
 
 function isVersion(input: string | undefined | null): boolean {
-  return input ? isValid(input) : false;
+  if (!input) {
+    return false;
+  }
+  const match = versionPattern.exec(input);
+  return Boolean(match?.[3]);
 }
 
 function isSingleVersion(input: string): boolean {
-  return isValid(input);
+  return isVersion(input);
 }
 
 function isStable(version: string): boolean {
@@ -46,7 +54,7 @@ function getMinor(version: string | SemVer): null | number {
 
 function getPatch(version: string | SemVer): null | number {
   const match = versionPattern.exec(version.toString());
-  return match ? parseInt(match[3]) : null;
+  return match?.[3] ? parseInt(match[3]) : null;
 }
 
 function equals(version: string, other: string): boolean {
@@ -61,14 +69,22 @@ function getSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
-  return versions.includes(range) ? range : null;
+  const filteredVersions = versions
+    .filter((v) => matches(v, range))
+    .sort(sortVersions);
+
+  return filteredVersions[filteredVersions.length - 1] ?? null;
 }
 
 function minSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
-  return versions.includes(range) ? range : null;
+  const filteredVersions = versions
+    .filter((v) => matches(v, range))
+    .sort(sortVersions);
+
+  return filteredVersions[0] ?? null;
 }
 
 function getNewValue({
@@ -76,19 +92,31 @@ function getNewValue({
   rangeStrategy,
   newVersion,
 }: NewValueConfig): string | null {
-  if (rangeStrategy !== 'replace') {
-    return null;
-  }
-
   if (!isValid(currentValue)) {
     return null;
   }
 
-  if (equals(newVersion, currentValue)) {
-    return null;
+  if (rangeStrategy === 'pin') {
+    if (equals(newVersion, currentValue)) {
+      return null;
+    }
+
+    return newVersion;
+  } else if (rangeStrategy === 'replace') {
+    if (matches(newVersion, currentValue)) {
+      return null;
+    }
+
+    if (isVersion(currentValue)) {
+      return newVersion;
+    }
+
+    const newMajor = getMajor(newVersion);
+    const newMinor = getMinor(newVersion);
+    return `${newMajor}.${newMinor}`;
   }
 
-  return newVersion;
+  return null;
 }
 
 function sortVersions(version: string, other: string): number {
@@ -131,7 +159,16 @@ function sortVersions(version: string, other: string): number {
 }
 
 function matches(version: string, range: string): boolean {
-  return version === range;
+  if (getMajor(version) !== getMajor(range)) {
+    return false;
+  }
+
+  if (getMinor(version) !== getMinor(range)) {
+    return false;
+  }
+
+  const rangePatch = getPatch(range);
+  return rangePatch === null || getPatch(version) === rangePatch;
 }
 
 export const api: VersioningApi = {
