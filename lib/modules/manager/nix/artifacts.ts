@@ -5,6 +5,7 @@ import { findGithubToken } from '../../../util/check-token';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
+  ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
@@ -57,7 +58,10 @@ export async function updateArtifacts({
   }
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
-    extraEnv: getGitEnvironmentVariables(),
+    extraEnv: {
+      ...getGitEnvironmentVariables(),
+      NIX_CACHE_HOME: await ensureCacheDir('nix'),
+    },
     toolConstraints: [
       {
         toolName: 'nix',
