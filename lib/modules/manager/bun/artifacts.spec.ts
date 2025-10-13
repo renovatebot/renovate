@@ -308,7 +308,7 @@ describe('modules/manager/bun/artifacts', () => {
 
           await updateArtifacts(updateArtifact);
 
-          expect(exec).toHaveBeenCalledWith(testCase.expectedCmd, {
+          expect(exec).toHaveBeenCalledExactlyOnceWith(testCase.expectedCmd, {
             cwdFile: '',
             docker: {},
             toolConstraints: [

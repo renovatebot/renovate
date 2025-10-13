@@ -20,6 +20,7 @@ describe('util/git/set-branch-commit', () => {
     it('sets new branch in cache if it does not exist', () => {
       git.getBranchCommit.mockReturnValueOnce('base_SHA' as LongCommitSha);
       setBranchNewCommit('branch_name', 'base_branch', 'SHA');
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'setBranchCommit(): Branch cache not present',
       );

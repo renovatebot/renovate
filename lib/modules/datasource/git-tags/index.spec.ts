@@ -108,7 +108,7 @@ describe('modules/datasource/git-tags/index', () => {
         undefined,
       );
       expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
-      expect(gitMock.env).toHaveBeenCalledWith({
+      expect(gitMock.env).toHaveBeenCalledExactlyOnceWith({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
         GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
@@ -133,7 +133,7 @@ describe('modules/datasource/git-tags/index', () => {
         undefined,
       );
       expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
-      expect(gitMock.env).toHaveBeenCalledWith({
+      expect(gitMock.env).toHaveBeenCalledExactlyOnceWith({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.https://ssh:token123@git.example.com/.insteadOf',
         GIT_CONFIG_KEY_1: 'url.https://git:token123@git.example.com/.insteadOf',

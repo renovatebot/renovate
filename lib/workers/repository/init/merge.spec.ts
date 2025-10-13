@@ -76,6 +76,7 @@ describe('workers/repository/init/merge', () => {
       scm.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       expect(await detectRepoFileConfig()).toEqual({});
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Existing config file no longer exists',
       );
@@ -585,8 +586,7 @@ describe('workers/repository/init/merge', () => {
             resolveStaticRepoConfig({}, 'static_config.json'),
           ).rejects.toThrow(error);
 
-          expect(exitMock).toHaveBeenCalledOnce();
-          expect(exitMock).toHaveBeenCalledWith(1);
+          expect(exitMock).toHaveBeenCalledExactlyOnceWith(1);
         });
 
         it('should log static config validation errors and warnings', async () => {
@@ -600,7 +600,8 @@ describe('workers/repository/init/merge', () => {
           );
 
           expect(resolved).toStrictEqual(invalidConfig);
-          expect(logger.logger.info).toHaveBeenCalledExactlyOnceWith(
+          // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+          expect(logger.logger.info).toHaveBeenCalledWith(
             {
               errors: [
                 {

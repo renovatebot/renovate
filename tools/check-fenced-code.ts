@@ -1,6 +1,6 @@
 import { format } from 'node:util';
 import type { ValidateFunction } from 'ajv';
-import Ajv from 'ajv';
+import ajv from 'ajv';
 import draft04 from 'ajv/lib/refs/json-schema-draft-04.json';
 import fs from 'fs-extra';
 import { glob } from 'glob';
@@ -96,7 +96,7 @@ async function processFile(file: string): Promise<void> {
 }
 
 void (async () => {
-  validate = new Ajv({
+  validate = new ajv({
     extendRefs: true,
     meta: false,
     schemaId: 'id',
