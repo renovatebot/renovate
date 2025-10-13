@@ -749,6 +749,39 @@ describe('modules/platform/github/index', () => {
       expect(config).toMatchSnapshot();
     });
 
+    // https://github.com/renovatebot/renovate/discussions/38325
+    it('should warn if deleteBranchOnMerge is not set', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post(`/graphql`)
+        .reply(200, {
+          data: {
+            repository: {
+              deleteBranchOnMerge: false,
+              nameWithOwner: 'some/repo',
+              hasIssuesEnabled: true,
+              defaultBranchRef: {
+                name: 'master',
+                target: {
+                  oid: '1234',
+                },
+              },
+            },
+          },
+        });
+
+      await github.initRepo({ repository: 'some/repo' });
+
+      expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
+        {
+          repo: 'some/repo',
+          documentationUrl:
+            'https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-the-automatic-deletion-of-branches',
+        },
+        'Repository does not have "Automatically delete head branches" set, which could cause Renovate to re-use a repository in some cases',
+      );
+    });
+
     it('should throw error if archived', async () => {
       httpMock
         .scope(githubApiHost)

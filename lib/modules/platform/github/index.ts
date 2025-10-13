@@ -582,6 +582,19 @@ export async function initRepo({
       );
       throw new Error(REPOSITORY_ARCHIVED);
     }
+
+    // https://github.com/renovatebot/renovate/discussions/38325
+    if (!repo.deleteBranchOnMerge) {
+      logger.warn(
+        {
+          repo: repository,
+          documentationUrl:
+            'https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-the-automatic-deletion-of-branches',
+        },
+        'Repository does not have "Automatically delete head branches" set, which could cause Renovate to re-use a repository in some cases',
+      );
+    }
+
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = repo.defaultBranchRef.name;
     // Base branch may be configured but defaultBranch is always fixed
