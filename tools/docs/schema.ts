@@ -3,12 +3,14 @@ import type {
   RenovateOptions,
   RenovateRequiredOption,
 } from '../../lib/config/types';
+import { pkg } from '../../lib/expose.cjs';
 import { hasKey } from '../../lib/util/object';
 import { updateFile } from '../utils';
 
 const schema = {
-  title: 'JSON schema for Renovate config files (https://renovatebot.com/)',
+  title: `JSON schema for Renovate ${pkg.version} config files (https://renovatebot.com/)`,
   $schema: 'http://json-schema.org/draft-04/schema#',
+  'x-renovate-version': `${pkg.version}`,
   type: 'object',
   properties: {},
 };
