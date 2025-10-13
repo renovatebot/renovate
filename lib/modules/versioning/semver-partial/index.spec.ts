@@ -1,0 +1,309 @@
+import semverPartial from '.';
+
+describe('modules/versioning/semver-partial/index', () => {
+  describe('.isValid()', () => {
+    it.each`
+      version          | expected
+      ${'1'}           | ${true}
+      ${'1.2'}         | ${true}
+      ${'1.2.3'}       | ${true}
+      ${'v1'}          | ${true}
+      ${'v1.2'}        | ${true}
+      ${'v1.2.3'}      | ${true}
+      ${'~latest'}     | ${true}
+      ${'1.2.3-alpha'} | ${true}
+      ${'invalid'}     | ${false}
+      ${''}            | ${false}
+    `('isValid("$version") === $expected', ({ version, expected }) => {
+      expect(semverPartial.isValid(version)).toBe(expected);
+    });
+  });
+
+  describe('.isVersion()', () => {
+    it.each`
+      version          | expected
+      ${'1'}           | ${false}
+      ${'1.2'}         | ${false}
+      ${'1.2.3'}       | ${true}
+      ${'v1'}          | ${false}
+      ${'v1.2'}        | ${false}
+      ${'v1.2.3'}      | ${true}
+      ${'~latest'}     | ${false}
+      ${'1.2.3-alpha'} | ${true}
+      ${'1.2.3-rc.1'}  | ${true}
+      ${'invalid'}     | ${false}
+      ${''}            | ${false}
+      ${'#1.0.0'}      | ${false}
+      ${'x1.0.0'}      | ${false}
+    `('isVersion("$version") === $expected', ({ version, expected }) => {
+      expect(semverPartial.isVersion(version)).toBe(expected);
+    });
+  });
+
+  describe('.isSingleVersion()', () => {
+    it.each`
+      version          | expected
+      ${'1'}           | ${false}
+      ${'1.2'}         | ${false}
+      ${'1.2.3'}       | ${true}
+      ${'v1.2.3'}      | ${true}
+      ${'~latest'}     | ${false}
+      ${'1.2.3-alpha'} | ${true}
+    `('isSingleVersion("$version") === $expected', ({ version, expected }) => {
+      expect(semverPartial.isSingleVersion(version)).toBe(expected);
+    });
+  });
+
+  describe('.matches()', () => {
+    it.each`
+      version       | range        | expected
+      ${'1.0.0'}    | ${'1'}       | ${true}
+      ${'1.2.0'}    | ${'1'}       | ${true}
+      ${'1.2.3'}    | ${'1'}       | ${true}
+      ${'2.0.0'}    | ${'1'}       | ${false}
+      ${'1.1.0'}    | ${'1.1'}     | ${true}
+      ${'1.1.5'}    | ${'1.1'}     | ${true}
+      ${'1.2.0'}    | ${'1.1'}     | ${false}
+      ${'1.0.0'}    | ${'1.1'}     | ${false}
+      ${'1.2.3'}    | ${'1.2'}     | ${true}
+      ${'1.2.0'}    | ${'1.2'}     | ${true}
+      ${'1.3.0'}    | ${'1.2'}     | ${false}
+      ${'v1.2.3'}   | ${'1.2'}     | ${true}
+      ${'v1.2.3'}   | ${'v1.2'}    | ${true}
+      ${'1.0.0'}    | ${'~latest'} | ${true}
+      ${'2.1.0'}    | ${'~latest'} | ${true}
+      ${'1.0.0-rc'} | ${'1'}       | ${false}
+      ${'1.0.0-rc'} | ${'1.0'}     | ${false}
+    `(
+      'matches("$version", "$range") === $expected',
+      ({ version, range, expected }) => {
+        expect(semverPartial.matches(version, range)).toBe(expected);
+      },
+    );
+  });
+
+  describe('.getSatisfyingVersion()', () => {
+    it.each`
+      versions                                                     | range        | expected
+      ${['1.0.0', '1.1.0', '1.1.1', '1.2.0', '2.0.0', '2.0.1']}    | ${'1'}       | ${'1.2.0'}
+      ${['1.0.0', '1.1.0', '1.1.1', '1.2.0', '2.0.0', '2.0.1']}    | ${'1.1'}     | ${'1.1.1'}
+      ${['1.0.0', '1.1.0', '1.1.1', '1.2.0', '2.0.0', '2.0.1']}    | ${'2'}       | ${'2.0.1'}
+      ${['1.0.0', '1.1.0', '1.1.1', '1.2.0', '2.0.0', '2.1.0']}    | ${'~latest'} | ${'2.1.0'}
+      ${['1.0.0', '1.1.0', '1.2.0', '2.0.0', '2.0.1', '2.1.0-rc']} | ${'2'}       | ${'2.0.1'}
+      ${['1.0.0', '1.0.1-rc', '1.1.0']}                            | ${'1.0'}     | ${'1.0.0'}
+      ${['0.5.0', '1.0.0', '2.0.0']}                               | ${'3'}       | ${null}
+      ${['v1.0', '1.1.0', '1.2.0']}                                | ${'1'}       | ${'1.2.0'}
+    `(
+      'getSatisfyingVersion($versions, "$range") === $expected',
+      ({ versions, range, expected }) => {
+        expect(semverPartial.getSatisfyingVersion(versions, range)).toBe(
+          expected,
+        );
+      },
+    );
+  });
+
+  describe('.minSatisfyingVersion()', () => {
+    it.each`
+      versions                                                  | range        | expected
+      ${['1.0.0', '1.1.0', '1.1.1', '1.2.0', '2.0.0']}          | ${'1'}       | ${'1.0.0'}
+      ${['1.0.0', '1.1.0', '1.1.1', '1.2.0', '2.0.0']}          | ${'1.1'}     | ${'1.1.0'}
+      ${['1.0.0', '1.1.0', '1.1.1', '1.2.0', '2.0.0', '2.0.1']} | ${'2'}       | ${'2.0.0'}
+      ${['1.0.0', '1.1.0', '1.2.0', '2.0.0', '2.0.1', '2.1.0']} | ${'~latest'} | ${'1.0.0'}
+      ${['1.0.0', '1.0.1-rc', '1.1.0']}                         | ${'1.0'}     | ${'1.0.0'}
+      ${['0.5.0', '1.0.0', '2.0.0']}                            | ${'3'}       | ${null}
+    `(
+      'minSatisfyingVersion($versions, "$range") === $expected',
+      ({ versions, range, expected }) => {
+        expect(semverPartial.minSatisfyingVersion(versions, range)).toBe(
+          expected,
+        );
+      },
+    );
+  });
+
+  describe('.isLessThanRange()', () => {
+    it.each`
+      version    | range        | expected
+      ${'0.9.0'} | ${'1'}       | ${true}
+      ${'1.0.0'} | ${'1'}       | ${false}
+      ${'1.5.0'} | ${'1'}       | ${false}
+      ${'2.0.0'} | ${'1'}       | ${false}
+      ${'1.0.0'} | ${'1.1'}     | ${true}
+      ${'1.1.0'} | ${'1.1'}     | ${false}
+      ${'1.2.0'} | ${'1.1'}     | ${false}
+      ${'0.9.0'} | ${'~latest'} | ${false}
+      ${'1.0.0'} | ${'~latest'} | ${false}
+      ${'1.0.0'} | ${'^2.0.0'}  | ${true}
+      ${'2.5.0'} | ${'^2.0.0'}  | ${false}
+      ${'1.9.0'} | ${'>=2.0.0'} | ${true}
+    `(
+      'isLessThanRange("$version", "$range") === $expected',
+      ({ version, range, expected }) => {
+        expect(semverPartial.isLessThanRange?.(version, range)).toBe(expected);
+      },
+    );
+  });
+
+  describe('.equals()', () => {
+    it.each`
+      version    | other      | expected
+      ${'1.0.0'} | ${'1.0.0'} | ${true}
+      ${'1.0.0'} | ${'1.0.1'} | ${false}
+      ${'v1.0'}  | ${'1.0.0'} | ${true}
+      ${'v1.x'}  | ${'1.0.0'} | ${true}
+    `(
+      'equals("$version", "$other") === $expected',
+      ({ version, other, expected }) => {
+        expect(semverPartial.equals(version, other)).toBe(expected);
+      },
+    );
+  });
+
+  describe('.getMajor()', () => {
+    it.each`
+      version      | expected
+      ${'1.0.0'}   | ${1}
+      ${'v1.2'}    | ${1}
+      ${'2.3.4'}   | ${2}
+      ${'invalid'} | ${null}
+    `('getMajor("$version") === $expected', ({ version, expected }) => {
+      expect(semverPartial.getMajor(version)).toBe(expected);
+    });
+  });
+
+  describe('.getMinor()', () => {
+    it.each`
+      version      | expected
+      ${'1.0.0'}   | ${0}
+      ${'v1.2'}    | ${2}
+      ${'2.3.4'}   | ${3}
+      ${'invalid'} | ${null}
+    `('getMinor("$version") === $expected', ({ version, expected }) => {
+      expect(semverPartial.getMinor(version)).toBe(expected);
+    });
+  });
+
+  describe('.getPatch()', () => {
+    it.each`
+      version      | expected
+      ${'1.0.0'}   | ${0}
+      ${'v1.2'}    | ${0}
+      ${'2.3.4'}   | ${4}
+      ${'invalid'} | ${null}
+    `('getPatch("$version") === $expected', ({ version, expected }) => {
+      expect(semverPartial.getPatch(version)).toBe(expected);
+    });
+  });
+
+  describe('.isGreaterThan()', () => {
+    it.each`
+      version    | other      | expected
+      ${'1.0.1'} | ${'1.0.0'} | ${true}
+      ${'1.0.0'} | ${'1.0.1'} | ${false}
+      ${'2.0.0'} | ${'1.9.9'} | ${true}
+    `(
+      'isGreaterThan("$version", "$other") === $expected',
+      ({ version, other, expected }) => {
+        expect(semverPartial.isGreaterThan(version, other)).toBe(expected);
+      },
+    );
+  });
+
+  describe('.isStable()', () => {
+    it.each`
+      version          | expected
+      ${'1.0.0'}       | ${true}
+      ${'v1.2'}        | ${true}
+      ${'2'}           | ${true}
+      ${'1.0.0-alpha'} | ${false}
+      ${'1.0.0-rc.1'}  | ${false}
+      ${'v1.0-beta'}   | ${false}
+    `('isStable("$version") === $expected', ({ version, expected }) => {
+      expect(semverPartial.isStable(version)).toBe(expected);
+    });
+  });
+
+  describe('.sortVersions()', () => {
+    it.each`
+      a          | b          | expected
+      ${'1.0.0'} | ${'1.0.0'} | ${0}
+      ${'1.0.0'} | ${'1.0.1'} | ${-1}
+      ${'1.0.1'} | ${'1.0.0'} | ${1}
+      ${'2.0.0'} | ${'1.9.9'} | ${1}
+    `('sortVersions("$a", "$b") === $expected', ({ a, b, expected }) => {
+      expect(semverPartial.sortVersions(a, b)).toBe(expected);
+    });
+  });
+
+  describe('.isBreaking()', () => {
+    it.each`
+      version    | current    | expected
+      ${'2.0.0'} | ${'1.0.0'} | ${true}
+      ${'1.1.0'} | ${'1.0.0'} | ${false}
+      ${'1.0.1'} | ${'1.0.0'} | ${false}
+      ${'0.2.0'} | ${'0.1.0'} | ${true}
+      ${'0.1.1'} | ${'0.1.0'} | ${false}
+      ${'1.0.0'} | ${'0.9.0'} | ${true}
+    `(
+      'isBreaking("$version", "$current") === $expected',
+      ({ version, current, expected }) => {
+        expect(semverPartial.isBreaking!(version, current)).toBe(expected);
+      },
+    );
+  });
+
+  describe('.isCompatible()', () => {
+    it.each`
+      version      | expected
+      ${'1.0.0'}   | ${true}
+      ${'v1.2'}    | ${true}
+      ${'1'}       | ${true}
+      ${'~latest'} | ${true}
+      ${'invalid'} | ${false}
+    `('isCompatible("$version") === $expected', ({ version, expected }) => {
+      expect(semverPartial.isCompatible(version)).toBe(expected);
+    });
+  });
+
+  describe('.getNewValue()', () => {
+    it.each`
+      currentValue | rangeStrategy | currentVersion | newVersion   | expected
+      ${'1'}       | ${'pin'}      | ${'1.0.0'}     | ${'1.1.0'}   | ${'1.1.0'}
+      ${'1.2'}     | ${'pin'}      | ${'1.2.0'}     | ${'1.2.1'}   | ${'1.2.1'}
+      ${'1'}       | ${'bump'}     | ${'1.0.0'}     | ${'1.1.0'}   | ${'1.1.0'}
+      ${'1'}       | ${'bump'}     | ${'1.0.0'}     | ${'2.0.0'}   | ${'2.0.0'}
+      ${'1'}       | ${'replace'}  | ${'1.0.0'}     | ${'1.1.0'}   | ${'1'}
+      ${'1'}       | ${'replace'}  | ${'1.0.0'}     | ${'2.0.0'}   | ${'2'}
+      ${'1.2'}     | ${'bump'}     | ${'1.2.0'}     | ${'1.2.1'}   | ${'1.2.1'}
+      ${'1.2'}     | ${'replace'}  | ${'1.2.0'}     | ${'1.2.1'}   | ${'1.2'}
+      ${'1.2'}     | ${'replace'}  | ${'1.2.0'}     | ${'1.3.0'}   | ${'1.3'}
+      ${'v1'}      | ${'replace'}  | ${'1.0.0'}     | ${'2.0.0'}   | ${'v2'}
+      ${'v1.2'}    | ${'replace'}  | ${'1.2.0'}     | ${'1.3.0'}   | ${'v1.3'}
+      ${'~latest'} | ${'bump'}     | ${'1.0.0'}     | ${'1.1.0'}   | ${'~latest'}
+      ${'~latest'} | ${'replace'}  | ${'1.0.0'}     | ${'2.0.0'}   | ${'~latest'}
+      ${'1.0.0'}   | ${'bump'}     | ${'v1.0.0'}    | ${'v1.1.0'}  | ${'1.1.0'}
+      ${'1.0.0'}   | ${'bump'}     | ${'1.0.0'}     | ${'1.1.0'}   | ${'1.1.0'}
+      ${'1'}       | ${'replace'}  | ${'1.0.0'}     | ${'invalid'} | ${'invalid'}
+      ${'1.0.0'}   | ${'bump'}     | ${'2.0.0'}     | ${'2.1.0'}   | ${'2.1.0'}
+    `(
+      'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
+      ({
+        currentValue,
+        rangeStrategy,
+        currentVersion,
+        newVersion,
+        expected,
+      }) => {
+        expect(
+          semverPartial.getNewValue({
+            currentValue,
+            rangeStrategy,
+            currentVersion,
+            newVersion,
+          }),
+        ).toBe(expected);
+      },
+    );
+  });
+});
