@@ -1189,6 +1189,7 @@ But the second custom manager will upgrade both definitions as its first `matchS
       "datasourceTemplate": "docker"
     },
     {
+      "customType": "regex",
       "managerFilePatterns": ["/^example.json$/"],
       "matchStringsStrategy": "recursive",
       "matchStrings": [
@@ -1244,6 +1245,7 @@ Matched group values will be merged to form a single dependency.
       "datasourceTemplate": "docker"
     },
     {
+      "customType": "regex",
       "managerFilePatterns": ["/^main.yml$/"],
       "matchStringsStrategy": "combination",
       "matchStrings": [
@@ -2835,6 +2837,8 @@ Renovate only queries the OSV database for dependencies that use one of these da
 - [`pypi`](./modules/datasource/pypi/index.md)
 - [`rubygems`](./modules/datasource/rubygems/index.md)
 
+The entire database is downloaded locally by [renovate-offline](https://github.com/renovatebot/osv-offline) and queried offline.
+
 ## packageRules
 
 `packageRules` is a powerful feature that lets you apply rules to individual packages or to groups of packages using regex pattern matching.
@@ -3609,7 +3613,7 @@ Here's an example of how you would define PR priority so that `devDependencies` 
 ### replacementName
 
 This config option only works with some managers.
-We're working to support more managers, subscribe to issue [renovatebot/renovate#14149](https://github.com/renovatebot/renovate/issues/14149) to follow our progress.
+We're working to support more managers, subscribe to issue [renovatebot/renovate#24883](https://github.com/renovatebot/renovate/discussions/24883) to follow our progress.
 
 Managers which do not support replacement:
 

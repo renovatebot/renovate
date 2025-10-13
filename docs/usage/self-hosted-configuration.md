@@ -955,7 +955,7 @@ If you use the Mend Renovate Enterprise Edition (Renovate EE) and:
 
 Then you must set this variable at the _server_ and the _workers_.
 
-But if you have specified the token as a [`matchConfidence`](configuration-options.md#matchconfidence) `hostRule`, you only need to set this variable at the _workers_.
+But if you have specified the token as a [`matchConfidence`](configuration-options.md#matchconfidence) `packageRule`, you only need to set this variable at the _workers_.
 
 This feature is in private beta.
 
@@ -1472,6 +1472,8 @@ Known use cases consist, among other things, of horizontal scaling setups.
 See [Scaling Renovate Bot on self-hosted GitLab](https://github.com/renovatebot/renovate/discussions/13172).
 
 Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
+
+<!-- schema-validation-disable-next-block -->
 
 ```json
 ["myOrg/myRepo", "myOrg/anotherRepo"]

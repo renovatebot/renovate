@@ -116,7 +116,14 @@ describe('modules/datasource/aws-eks-addon/index', () => {
         packageName: '{"kubernetesVersion":"1.30"}',
       });
       expect(res).toBeNull();
-      expect(logger.logger.warn).toHaveBeenCalledOnce();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        {
+          err: expect.anything(),
+          serializedFilter: '{"kubernetesVersion":"1.30"}',
+        },
+        'Error parsing eks-addons config.',
+      );
     });
 
     it('with addonName only', async () => {

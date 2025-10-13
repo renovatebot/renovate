@@ -310,7 +310,9 @@ describe('modules/manager/kustomize/artifacts', () => {
         },
       },
     ]);
-    expect(fs.deleteLocalFile).toHaveBeenCalledWith('charts/example-1.0.0');
+    expect(fs.deleteLocalFile).toHaveBeenCalledExactlyOnceWith(
+      'charts/example-1.0.0',
+    );
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'helm pull --untar --untardir charts/example-2.0.0 --version 2.0.0 --repo https://github.com.com/example/example example',

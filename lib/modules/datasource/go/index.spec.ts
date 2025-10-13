@@ -155,7 +155,7 @@ describe('modules/datasource/go/index', () => {
         'v1.2.3',
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
-      expect(getDigestGithubMock).toHaveBeenCalledWith(
+      expect(getDigestGithubMock).toHaveBeenCalledExactlyOnceWith(
         {
           datasource: 'github-tags',
           packageName: 'golang/text',
@@ -176,7 +176,7 @@ describe('modules/datasource/go/index', () => {
         'v0.0.0',
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
-      expect(getDigestGithubMock).toHaveBeenCalledWith(
+      expect(getDigestGithubMock).toHaveBeenCalledExactlyOnceWith(
         {
           datasource: 'github-tags',
           packageName: 'golang/text',
