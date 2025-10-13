@@ -109,6 +109,11 @@ export async function getLockedVersions(
       const relativeDir = upath.relative(npmRootDir, packageDir);
 
       for (const dep of packageFile.deps) {
+        // Skip dependencies that do not alter package-lock.json
+        if (dep.depType === 'volta' || dep.depType === 'packageManager') {
+          continue;
+        }
+
         // TODO: types (#22198)
         let lockedDepName = dep.depName!;
         if (relativeDir && relativeDir !== '.') {

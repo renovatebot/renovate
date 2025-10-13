@@ -345,6 +345,74 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       ]);
     });
 
+    it('does not set locked versions for volta and packageManager dependencies', async () => {
+      npm.getNpmLock.mockResolvedValue({
+        lockedVersions: {
+          npm: '10.9.4',
+        },
+        lockfileVersion: 3,
+      });
+      const packageFiles = [
+        {
+          managerData: { npmLock: 'package-lock.json' },
+          extractedConstraints: {},
+          deps: [
+            {
+              depName: 'npm',
+              currentValue: '^10.0.0',
+              depType: 'devDependencies',
+              datasource: 'npm',
+            },
+            {
+              depName: 'npm',
+              currentValue: '10.9.3',
+              depType: 'volta',
+              datasource: 'npm',
+            },
+            {
+              depName: 'pnpm',
+              currentValue: '9.12.3',
+              depType: 'packageManager',
+              datasource: 'npm',
+            },
+          ],
+          packageFile: 'package.json',
+        },
+      ];
+      await getLockedVersions(packageFiles);
+      expect(packageFiles).toEqual([
+        {
+          extractedConstraints: { npm: '>=7' },
+          deps: [
+            {
+              depName: 'npm',
+              currentValue: '^10.0.0',
+              depType: 'devDependencies',
+              lockedVersion: '10.9.4',
+              datasource: 'npm',
+            },
+            {
+              depName: 'npm',
+              currentValue: '10.9.3',
+              depType: 'volta',
+              datasource: 'npm',
+              // volta deps should NOT have lockedVersion
+            },
+            {
+              depName: 'pnpm',
+              currentValue: '9.12.3',
+              depType: 'packageManager',
+              datasource: 'npm',
+              // packageManager deps should NOT have lockedVersion
+            },
+          ],
+          lockFiles: ['package-lock.json'],
+          managerData: { npmLock: 'package-lock.json' },
+          packageFile: 'package.json',
+        },
+      ]);
+    });
+
     it('does nothing if managerData is not present', async () => {
       npm.getNpmLock.mockResolvedValue({
         lockedVersions: { a: '1.0.0', b: '2.0.0', c: '3.0.0' },
