@@ -10,6 +10,7 @@ export const urls = [
   'https://docs.gitlab.com/ci/components/#partial-semantic-versions',
 ];
 export const supportsRanges = true;
+export const supportedRangeStrategies = ['pin', 'bump', 'replace'];
 
 function isPartialVersion(input: string): boolean {
   return /^v?(\d+)(?:\.(\d+))?$/.test(input);
