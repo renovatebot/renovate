@@ -74,6 +74,10 @@ describe('modules/versioning/semver-partial/index', () => {
       ${'2.1.0'}    | ${'~latest'} | ${true}
       ${'1.0.0-rc'} | ${'1'}       | ${false}
       ${'1.0.0-rc'} | ${'1.0'}     | ${false}
+      ${'invalid'}  | ${'1'}       | ${false}
+      ${'~latest'}  | ${'1'}       | ${false}
+      ${'1'}        | ${'1'}       | ${false}
+      ${'1.2'}      | ${'1.2'}     | ${false}
     `(
       'matches("$version", "$range") === $expected',
       ({ version, range, expected }) => {
@@ -124,19 +128,21 @@ describe('modules/versioning/semver-partial/index', () => {
 
   describe('.isLessThanRange()', () => {
     it.each`
-      version    | range        | expected
-      ${'0.9.0'} | ${'1'}       | ${true}
-      ${'1.0.0'} | ${'1'}       | ${false}
-      ${'1.5.0'} | ${'1'}       | ${false}
-      ${'2.0.0'} | ${'1'}       | ${false}
-      ${'1.0.0'} | ${'1.1'}     | ${true}
-      ${'1.1.0'} | ${'1.1'}     | ${false}
-      ${'1.2.0'} | ${'1.1'}     | ${false}
-      ${'0.9.0'} | ${'~latest'} | ${false}
-      ${'1.0.0'} | ${'~latest'} | ${false}
-      ${'1.0.0'} | ${'^2.0.0'}  | ${true}
-      ${'2.5.0'} | ${'^2.0.0'}  | ${false}
-      ${'1.9.0'} | ${'>=2.0.0'} | ${true}
+      version      | range        | expected
+      ${'0.9.0'}   | ${'1'}       | ${true}
+      ${'1.0.0'}   | ${'1'}       | ${false}
+      ${'1.5.0'}   | ${'1'}       | ${false}
+      ${'2.0.0'}   | ${'1'}       | ${false}
+      ${'1.0.0'}   | ${'1.1'}     | ${true}
+      ${'1.1.0'}   | ${'1.1'}     | ${false}
+      ${'1.2.0'}   | ${'1.1'}     | ${false}
+      ${'0.9.0'}   | ${'~latest'} | ${false}
+      ${'1.0.0'}   | ${'~latest'} | ${false}
+      ${'1.0.0'}   | ${'^2.0.0'}  | ${true}
+      ${'2.5.0'}   | ${'^2.0.0'}  | ${false}
+      ${'1.9.0'}   | ${'>=2.0.0'} | ${true}
+      ${'invalid'} | ${'1'}       | ${false}
+      ${'invalid'} | ${'^2.0.0'}  | ${false}
     `(
       'isLessThanRange("$version", "$range") === $expected',
       ({ version, range, expected }) => {
@@ -147,11 +153,14 @@ describe('modules/versioning/semver-partial/index', () => {
 
   describe('.equals()', () => {
     it.each`
-      version    | other      | expected
-      ${'1.0.0'} | ${'1.0.0'} | ${true}
-      ${'1.0.0'} | ${'1.0.1'} | ${false}
-      ${'v1.0'}  | ${'1.0.0'} | ${true}
-      ${'v1.x'}  | ${'1.0.0'} | ${true}
+      version      | other        | expected
+      ${'1.0.0'}   | ${'1.0.0'}   | ${true}
+      ${'1.0.0'}   | ${'1.0.1'}   | ${false}
+      ${'v1.0'}    | ${'1.0.0'}   | ${true}
+      ${'v1.x'}    | ${'1.0.0'}   | ${true}
+      ${'invalid'} | ${'1.0.0'}   | ${false}
+      ${'1.0.0'}   | ${'invalid'} | ${false}
+      ${'invalid'} | ${'invalid'} | ${false}
     `(
       'equals("$version", "$other") === $expected',
       ({ version, other, expected }) => {
@@ -198,16 +207,33 @@ describe('modules/versioning/semver-partial/index', () => {
 
   describe('.isGreaterThan()', () => {
     it.each`
-      version    | other      | expected
-      ${'1.0.1'} | ${'1.0.0'} | ${true}
-      ${'1.0.0'} | ${'1.0.1'} | ${false}
-      ${'2.0.0'} | ${'1.9.9'} | ${true}
+      version      | other        | expected
+      ${'1.0.1'}   | ${'1.0.0'}   | ${true}
+      ${'1.0.0'}   | ${'1.0.1'}   | ${false}
+      ${'2.0.0'}   | ${'1.9.9'}   | ${true}
+      ${'invalid'} | ${'1.0.0'}   | ${false}
+      ${'1.0.0'}   | ${'invalid'} | ${false}
     `(
       'isGreaterThan("$version", "$other") === $expected',
       ({ version, other, expected }) => {
         expect(semverPartial.isGreaterThan(version, other)).toBe(expected);
       },
     );
+  });
+
+  describe('.sortVersions()', () => {
+    it.each`
+      a            | b            | expected
+      ${'1.0.0'}   | ${'1.0.0'}   | ${0}
+      ${'1.0.0'}   | ${'1.0.1'}   | ${-1}
+      ${'1.0.1'}   | ${'1.0.0'}   | ${1}
+      ${'2.0.0'}   | ${'1.9.9'}   | ${1}
+      ${'invalid'} | ${'1.0.0'}   | ${0}
+      ${'1.0.0'}   | ${'invalid'} | ${0}
+      ${'invalid'} | ${'invalid'} | ${0}
+    `('sortVersions("$a", "$b") === $expected', ({ a, b, expected }) => {
+      expect(semverPartial.sortVersions(a, b)).toBe(expected);
+    });
   });
 
   describe('.isStable()', () => {
@@ -238,13 +264,15 @@ describe('modules/versioning/semver-partial/index', () => {
 
   describe('.isBreaking()', () => {
     it.each`
-      version    | current    | expected
-      ${'2.0.0'} | ${'1.0.0'} | ${true}
-      ${'1.1.0'} | ${'1.0.0'} | ${false}
-      ${'1.0.1'} | ${'1.0.0'} | ${false}
-      ${'0.2.0'} | ${'0.1.0'} | ${true}
-      ${'0.1.1'} | ${'0.1.0'} | ${false}
-      ${'1.0.0'} | ${'0.9.0'} | ${true}
+      version      | current      | expected
+      ${'2.0.0'}   | ${'1.0.0'}   | ${true}
+      ${'1.1.0'}   | ${'1.0.0'}   | ${false}
+      ${'1.0.1'}   | ${'1.0.0'}   | ${false}
+      ${'0.2.0'}   | ${'0.1.0'}   | ${true}
+      ${'0.1.1'}   | ${'0.1.0'}   | ${false}
+      ${'1.0.0'}   | ${'0.9.0'}   | ${true}
+      ${'invalid'} | ${'1.0.0'}   | ${false}
+      ${'1.0.0'}   | ${'invalid'} | ${false}
     `(
       'isBreaking("$version", "$current") === $expected',
       ({ version, current, expected }) => {

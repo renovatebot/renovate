@@ -27,7 +27,10 @@ function isStable(version: string): boolean {
     return false;
   }
   const coerced = semver.coerce(version);
-  return coerced ? stable.is(coerced.version) : false;
+  if (!coerced) {
+    return false;
+  }
+  return stable.is(coerced.version);
 }
 
 function isValid(input: string): boolean {
@@ -52,35 +55,53 @@ function isSingleVersion(input: string): boolean {
 
 function getMajor(version: string | SemVer): number | null {
   const coerced = semver.coerce(version);
-  return coerced ? semver.major(coerced) : null;
+  if (!coerced) {
+    return null;
+  }
+  return semver.major(coerced);
 }
 
 function getMinor(version: string | SemVer): number | null {
   const coerced = semver.coerce(version);
-  return coerced ? semver.minor(coerced) : null;
+  if (!coerced) {
+    return null;
+  }
+  return semver.minor(coerced);
 }
 
 function getPatch(version: string | SemVer): number | null {
   const coerced = semver.coerce(version);
-  return coerced ? semver.patch(coerced) : null;
+  if (!coerced) {
+    return null;
+  }
+  return semver.patch(coerced);
 }
 
 function sortVersions(a: string, b: string): number {
   const aCoerced = semver.coerce(a);
   const bCoerced = semver.coerce(b);
-  return aCoerced && bCoerced ? semver.compare(aCoerced, bCoerced) : 0;
+  if (!aCoerced || !bCoerced) {
+    return 0;
+  }
+  return semver.compare(aCoerced, bCoerced);
 }
 
 function equals(version: string, other: string): boolean {
   const vCoerced = semver.coerce(version);
   const oCoerced = semver.coerce(other);
-  return vCoerced && oCoerced ? semver.eq(vCoerced, oCoerced) : false;
+  if (!vCoerced || !oCoerced) {
+    return false;
+  }
+  return semver.eq(vCoerced, oCoerced);
 }
 
 function isGreaterThan(version: string, other: string): boolean {
   const vCoerced = semver.coerce(version);
   const oCoerced = semver.coerce(other);
-  return vCoerced && oCoerced ? semver.gt(vCoerced, oCoerced) : false;
+  if (!vCoerced || !oCoerced) {
+    return false;
+  }
+  return semver.gt(vCoerced, oCoerced);
 }
 
 function matches(version: string, range: string): boolean {
@@ -101,19 +122,28 @@ function matches(version: string, range: string): boolean {
     const major = parseInt(partialMatch[1]);
     const minor = partialMatch[2];
 
-    return minor === undefined
-      ? parsed.major === major
-      : parsed.major === major && parsed.minor === parseInt(minor);
+    if (minor === undefined) {
+      return parsed.major === major;
+    }
+    return parsed.major === major && parsed.minor === parseInt(minor);
   }
 
   const coercedVersion = semver.coerce(version);
-  return coercedVersion ? semver.satisfies(coercedVersion, range) : false;
+  if (!coercedVersion) {
+    return false;
+  }
+  return semver.satisfies(coercedVersion, range);
 }
 
 function filterMatchingVersions(versions: string[], range: string): string[] {
   if (range === '~latest') {
     return versions
-      .map((v) => (semver.valid(v) ? v : semver.coerce(v)?.version))
+      .map((v) => {
+        if (semver.valid(v)) {
+          return v;
+        }
+        return semver.coerce(v)?.version;
+      })
       .filter(is.string)
       .filter(isStable);
   }
@@ -135,14 +165,20 @@ function filterMatchingVersions(versions: string[], range: string): string[] {
         if (!parsed) {
           return false;
         }
-        return minor === undefined
-          ? parsed.major === major
-          : parsed.major === major && parsed.minor === parseInt(minor);
+        if (minor === undefined) {
+          return parsed.major === major;
+        }
+        return parsed.major === major && parsed.minor === parseInt(minor);
       });
   }
 
   return versions
-    .map((v) => (semver.valid(v) ? v : semver.coerce(v)?.version))
+    .map((v) => {
+      if (semver.valid(v)) {
+        return v;
+      }
+      return semver.coerce(v)?.version;
+    })
     .filter(is.string);
 }
 
@@ -151,10 +187,12 @@ function getSatisfyingVersion(
   range: string,
 ): string | null {
   const filtered = filterMatchingVersions(versions, range);
-  return filtered.length === 0
-    ? null
-    : (semver.maxSatisfying(filtered, '*') ??
-        semver.maxSatisfying(filtered, range));
+  if (filtered.length === 0) {
+    return null;
+  }
+  return (
+    semver.maxSatisfying(filtered, '*') ?? semver.maxSatisfying(filtered, range)
+  );
 }
 
 function minSatisfyingVersion(
@@ -162,10 +200,12 @@ function minSatisfyingVersion(
   range: string,
 ): string | null {
   const filtered = filterMatchingVersions(versions, range);
-  return filtered.length === 0
-    ? null
-    : (semver.minSatisfying(filtered, '*') ??
-        semver.minSatisfying(filtered, range));
+  if (filtered.length === 0) {
+    return null;
+  }
+  return (
+    semver.minSatisfying(filtered, '*') ?? semver.minSatisfying(filtered, range)
+  );
 }
 
 function isLessThanRange(version: string, range: string): boolean {
@@ -194,7 +234,10 @@ function isLessThanRange(version: string, range: string): boolean {
   }
 
   const coercedVersion = semver.coerce(version);
-  return coercedVersion ? semver.ltr(coercedVersion, range) : false;
+  if (!coercedVersion) {
+    return false;
+  }
+  return semver.ltr(coercedVersion, range);
 }
 
 function getNewValue({
@@ -223,14 +266,16 @@ function getNewValue({
     const minor = partialMatch[2];
     const prefix = currentValue.startsWith('v') ? 'v' : '';
 
-    return minor === undefined
-      ? `${prefix}${newParsed.major}`
-      : `${prefix}${newParsed.major}.${newParsed.minor}`;
+    if (minor === undefined) {
+      return `${prefix}${newParsed.major}`;
+    }
+    return `${prefix}${newParsed.major}.${newParsed.minor}`;
   }
 
-  return currentVersion === `v${currentValue}`
-    ? newVersion.replace(/^v/, '')
-    : newVersion;
+  if (currentVersion === `v${currentValue}`) {
+    return newVersion.replace(/^v/, '');
+  }
+  return newVersion;
 }
 
 function isCompatible(version: string): boolean {
