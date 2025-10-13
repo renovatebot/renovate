@@ -54,7 +54,7 @@ describe('workers/repository/process/index', () => {
         branches: [undefined, undefined],
         packageFiles: undefined,
       });
-      expect(platform.getJsonFile).not.toHaveBeenCalledWith(
+      expect(platform.getJsonFile).not.toHaveBeenCalledExactlyOnceWith(
         'renovate.json',
         undefined,
         'dev',
@@ -75,6 +75,8 @@ describe('workers/repository/process/index', () => {
         branches: [undefined, undefined],
         packageFiles: undefined,
       });
+
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(platform.getJsonFile).toHaveBeenCalledWith(
         'renovate.json',
         undefined,
@@ -155,6 +157,7 @@ describe('workers/repository/process/index', () => {
         packageFiles: undefined,
       });
 
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           baseBranches: [
@@ -167,11 +170,21 @@ describe('workers/repository/process/index', () => {
         },
         'baseBranches',
       );
-      expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'RELEASE/v0' });
-      expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'release/v1' });
-      expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'release/v2' });
+      /* eslint-disable vitest/prefer-called-exactly-once-with */
+      expect(addMeta).toHaveBeenCalledWith({
+        baseBranch: 'RELEASE/v0',
+      });
+      expect(addMeta).toHaveBeenCalledWith({
+        baseBranch: 'release/v1',
+      });
+      expect(addMeta).toHaveBeenCalledWith({
+        baseBranch: 'release/v2',
+      });
       expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'dev' });
-      expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'some-other' });
+      expect(addMeta).toHaveBeenCalledWith({
+        baseBranch: 'some-other',
+      });
+      /* eslint-enable vitest/prefer-called-exactly-once-with */
     });
 
     it('maps $default to defaultBranch', async () => {
@@ -186,7 +199,11 @@ describe('workers/repository/process/index', () => {
         branches: [undefined],
         packageFiles: undefined,
       });
-      expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'master' });
+
+      // one for baseBranches and one for extract
+      expect(addMeta).toHaveBeenCalledTimes(2);
+      expect(addMeta).toHaveBeenNthCalledWith(1, { baseBranch: 'master' });
+      expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'master' });
     });
   });
 });

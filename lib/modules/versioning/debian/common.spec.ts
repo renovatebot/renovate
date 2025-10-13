@@ -13,6 +13,7 @@ describe('modules/versioning/debian/common', () => {
     expect(rollingReleases.has('buster')).toBeFalse();
     expect(rollingReleases.has('trixie')).toBeFalse();
     expect(logger.debug).toHaveBeenCalledTimes(1);
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.debug).toHaveBeenCalledWith(
       'RollingReleasesData - data written',
     );
