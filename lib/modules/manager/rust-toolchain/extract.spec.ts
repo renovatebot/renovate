@@ -23,12 +23,23 @@ describe('modules/manager/rust-toolchain/extract', () => {
       });
     });
 
-    it('returns null for major.minor versions', () => {
+    it('extracts major.minor versions', () => {
       const result = extractPackageFile(
         '[toolchain]\nchannel = "1.89"',
         'rust-toolchain.toml',
       );
-      expect(result).toBeNull();
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'rust',
+            depType: 'toolchain',
+            packageName: 'rust-lang/rust',
+            currentValue: '1.89',
+            datasource: GithubReleasesDatasource.id,
+            versioning: rustToolchainVersioning.id,
+          },
+        ],
+      });
     });
 
     it('returns null for beta channel', () => {
