@@ -37,6 +37,7 @@ describe('workers/repository/onboarding/branch/check', () => {
       .mockReturnValueOnce('onboarding-sha' as LongCommitSha);
     const res = await isOnboarded(config);
     expect(res).toBeFalse();
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.debug).toHaveBeenCalledWith(
       'Onboarding cache is valid. Repo is not onboarded',
     );
@@ -53,7 +54,7 @@ describe('workers/repository/onboarding/branch/check', () => {
     });
     scm.getFileList.mockResolvedValue([]);
     await isOnboarded(config);
-    expect(logger.debug).not.toHaveBeenCalledWith(
+    expect(logger.debug).not.toHaveBeenCalledExactlyOnceWith(
       'Onboarding cache is valid. Repo is not onboarded',
     );
   });

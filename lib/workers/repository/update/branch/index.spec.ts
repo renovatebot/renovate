@@ -374,6 +374,7 @@ describe('workers/repository/update/branch/index', () => {
       checkExisting.prAlreadyExisted.mockResolvedValueOnce(pr);
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         `Matching PR #${pr.number} was merged previously`,
       );
@@ -430,11 +431,11 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pr-edited',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         `PR has been edited, PrNo:${pr.number}`,
       );
-      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-      expect(platform.ensureComment).toHaveBeenCalledWith(
+      expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ ...ensureCommentConfig }),
       );
     });
@@ -462,11 +463,11 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pr-edited',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         `PR has been edited, PrNo:${pr.number}`,
       );
-      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-      expect(platform.ensureComment).toHaveBeenCalledWith(
+      expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ ...ensureCommentConfig }),
       );
     });
@@ -488,6 +489,7 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pr-edited',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         `PR has been edited, PrNo:${pr.number}`,
       );
@@ -521,11 +523,11 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pr-edited',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         `PR has been edited, PrNo:${pr.number}`,
       );
-      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-      expect(platform.ensureComment).toHaveBeenCalledWith(
+      expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ ...ensureCommentConfig }),
       );
     });
@@ -1029,7 +1031,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
-      expect(platform.ensureComment).toHaveBeenCalledWith({
+      expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith({
         content: codeBlock`
           ##### File name: go.mod
 
@@ -1148,6 +1150,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'not-scheduled',
         commitSha: null,
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         'Branch cannot automerge now because automergeSchedule is off schedule - skipping',
       );
@@ -1203,7 +1206,7 @@ describe('workers/repository/update/branch/index', () => {
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
-      expect(platform.ensureComment).toHaveBeenCalledWith(
+      expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           content: expect.stringContaining(
             'You probably do not want to merge this PR as-is',
@@ -1241,7 +1244,7 @@ describe('workers/repository/update/branch/index', () => {
         },
       };
       await branchWorker.processBranch(inconfig);
-      expect(platform.ensureComment).toHaveBeenCalledWith(
+      expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           content: expect.stringContaining(customMessage),
         }),
@@ -1276,7 +1279,7 @@ describe('workers/repository/update/branch/index', () => {
         },
       };
       await branchWorker.processBranch(inconfig);
-      expect(platform.ensureComment).toHaveBeenCalledWith(
+      expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           content: expect.stringContaining(
             'Lock file error in some-manager - please review carefully.',
@@ -1444,6 +1447,7 @@ describe('workers/repository/update/branch/index', () => {
         baseBranch: 'new_base',
         cacheFingerprintMatch: 'matched',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         'Base branch changed by user, rebasing the branch onto new base',
       );
@@ -1482,6 +1486,7 @@ describe('workers/repository/update/branch/index', () => {
         reuseExistingBranch: true,
         cacheFingerprintMatch: 'no-fingerprint',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         'Existing branch needs updating. Restarting processBranch() with a clean branch',
       );
@@ -1517,6 +1522,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
         cacheFingerprintMatch: 'no-fingerprint',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         'Existing branch needs updating. Restarting processBranch() with a clean branch',
       );
@@ -1579,6 +1585,7 @@ describe('workers/repository/update/branch/index', () => {
         prNo: 1,
         result: 'pr-edited',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.info).toHaveBeenCalledWith(
         `DRY-RUN: Would ensure edited/blocked PR comment in PR #${pr.number}`,
       );
@@ -1624,6 +1631,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.info).toHaveBeenCalledWith(
         `DRY-RUN: Would remove edited/blocked PR comment in PR #${pr.number}`,
       );
@@ -1671,6 +1679,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would ensure comment removal in PR #undefined',
       );
@@ -1953,12 +1962,13 @@ describe('workers/repository/update/branch/index', () => {
       const errorMessage = expect.stringContaining(
         "Post-upgrade command 'disallowed task' has not been added to the allowed list in allowedCommands",
       );
-      expect(platform.ensureComment).toHaveBeenCalledWith(
+      expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           content: errorMessage,
         }),
       );
-      expect(sanitize.sanitize).toHaveBeenCalledWith(errorMessage);
+      expect(sanitize.sanitize).toHaveBeenCalledTimes(2);
+      expect(sanitize.sanitize).toHaveBeenNthCalledWith(2, errorMessage);
     });
 
     it('handles post-upgrade task exec errors', async () => {
@@ -2037,12 +2047,12 @@ describe('workers/repository/update/branch/index', () => {
       });
 
       const errorMessage = expect.stringContaining('Meh, this went wrong!');
-      expect(platform.ensureComment).toHaveBeenCalledWith(
+      expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           content: errorMessage,
         }),
       );
-      expect(sanitize.sanitize).toHaveBeenCalledWith(errorMessage);
+      expect(sanitize.sanitize).toHaveBeenCalledExactlyOnceWith(errorMessage);
     });
 
     it('executes post-upgrade tasks with disabled post-upgrade command templating', async () => {
@@ -2130,7 +2140,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
-      expect(exec.exec).toHaveBeenCalledWith('echo semver', {
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith('echo semver', {
         cwd: '/localDir',
         extraEnv: {},
       });
@@ -2772,7 +2782,9 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: '123test',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         'No package files need updating',
       );
@@ -2809,6 +2821,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
       expect(logger.debug).not.toHaveBeenCalledWith(
         'No package files need updating',
@@ -2992,6 +3005,7 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
       await branchWorker.processBranch(config);
       expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would reattempt platform automerge for PR #123',
       );
