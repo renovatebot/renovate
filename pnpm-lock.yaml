@@ -379,8 +379,8 @@ importers:
         specifier: 2.3.1
         version: 2.3.1
       '@openpgp/web-stream-tools':
-        specifier: 0.1.3
-        version: 0.1.3(typescript@5.9.3)
+        specifier: 0.2.0
+        version: 0.2.0(@types/node@22.18.8)(typescript@5.9.3)
       '@semantic-release/exec':
         specifier: 7.1.0
         version: 7.1.0(semantic-release@24.2.9(typescript@5.9.3))
@@ -1338,12 +1338,15 @@ packages:
   '@open-draft/until@2.1.0':
     resolution: {integrity: sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==}
 
-  '@openpgp/web-stream-tools@0.1.3':
-    resolution: {integrity: sha512-mT/ds43cH6c+AO5RFpxs+LkACr7KjC3/dZWHrP6KPrWJu4uJ/XJ+p7telaoYiqUfdjiiIvdNSOfhezW9fkmboQ==}
+  '@openpgp/web-stream-tools@0.2.0':
+    resolution: {integrity: sha512-vX5a0oZKyqcBuS4BSGCufJVHhhIgZKj5Tc0lA7fzivj6iszedbIua6yKCe5ZujVCD7sZlOaYhxSZnLO8FH8rbQ==}
     engines: {node: '>= 18.0.0'}
     peerDependencies:
-      typescript: '>=4.2'
+      '@types/node': '>=18.0.0'
+      typescript: '>=4.7'
     peerDependenciesMeta:
+      '@types/node':
+        optional: true
       typescript:
         optional: true
 
@@ -7878,8 +7881,9 @@ snapshots:
 
   '@open-draft/until@2.1.0': {}
 
-  '@openpgp/web-stream-tools@0.1.3(typescript@5.9.3)':
+  '@openpgp/web-stream-tools@0.2.0(@types/node@22.18.8)(typescript@5.9.3)':
     optionalDependencies:
+      '@types/node': 22.18.8
       typescript: 5.9.3
 
   '@opentelemetry/api-logs@0.205.0':
