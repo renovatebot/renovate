@@ -330,6 +330,7 @@ describe('modules/platform/bitbucket/index', () => {
         repoFingerprint: expect.any(String),
       });
 
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Creating branch status for Mend.io Dashboard',
       );
@@ -420,6 +421,7 @@ describe('modules/platform/bitbucket/index', () => {
         repoFingerprint: expect.any(String),
       });
 
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Creating branch status for Mend.io Dashboard',
       );
