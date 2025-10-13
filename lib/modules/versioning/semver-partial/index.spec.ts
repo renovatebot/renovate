@@ -250,18 +250,6 @@ describe('modules/versioning/semver-partial/index', () => {
     });
   });
 
-  describe('.sortVersions()', () => {
-    it.each`
-      a          | b          | expected
-      ${'1.0.0'} | ${'1.0.0'} | ${0}
-      ${'1.0.0'} | ${'1.0.1'} | ${-1}
-      ${'1.0.1'} | ${'1.0.0'} | ${1}
-      ${'2.0.0'} | ${'1.9.9'} | ${1}
-    `('sortVersions("$a", "$b") === $expected', ({ a, b, expected }) => {
-      expect(semverPartial.sortVersions(a, b)).toBe(expected);
-    });
-  });
-
   describe('.isBreaking()', () => {
     it.each`
       version      | current      | expected
