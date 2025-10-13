@@ -240,6 +240,7 @@ describe('modules/manager/maven/extract', () => {
         'some-file',
         {},
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Your pom.xml contains windows line endings. This is not supported and may result in parsing issues.',
       );

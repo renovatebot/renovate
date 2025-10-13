@@ -112,6 +112,7 @@ describe('instrumentation/reporting', () => {
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
 
     await exportStats(config);
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.logger.info).toHaveBeenCalledWith(
       { report: expectedReport },
       'Printing report',
@@ -129,7 +130,7 @@ describe('instrumentation/reporting', () => {
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
 
     await exportStats(config);
-    expect(fs.writeSystemFile).toHaveBeenCalledWith(
+    expect(fs.writeSystemFile).toHaveBeenCalledExactlyOnceWith(
       config.reportPath,
       JSON.stringify(expectedReport),
     );
@@ -170,6 +171,7 @@ describe('instrumentation/reporting', () => {
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
 
     await exportStats(config);
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.logger.warn).toHaveBeenCalledWith(
       { reportPath: config.reportPath },
       'Failed to parse s3 URL',

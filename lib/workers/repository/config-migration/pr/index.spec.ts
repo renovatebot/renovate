@@ -108,6 +108,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       await ensureConfigMigrationPr(config, migratedData);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith('Found open migration PR');
       expect(logger.debug).not.toHaveBeenLastCalledWith(
         `does not need updating`,
@@ -263,6 +264,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       };
       platform.createPr.mockRejectedValue(err);
       await expect(ensureConfigMigrationPr(config, migratedData)).toResolve();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.warn).toHaveBeenCalledWith(
         { err },
         'Migration PR already exists but cannot find it. It was probably created by a different user.',
