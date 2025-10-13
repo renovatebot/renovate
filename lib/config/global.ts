@@ -7,6 +7,7 @@ export class GlobalConfig {
     'allowedEnv',
     'allowCustomCrateRegistries',
     'allowedHeaders',
+    'allowHelmPassCredentials',
     'allowPlugins',
     'allowScripts',
     'binarySource',

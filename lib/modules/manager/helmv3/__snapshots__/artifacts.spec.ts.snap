@@ -625,3 +625,52 @@ exports[`modules/manager/helmv3/artifacts > sets repositories from registryAlias
   },
 ]
 `;
+
+exports[`modules/manager/helmv3/artifacts > support --pass-credentials option 1`] = `
+[
+  {
+    "cmd": "helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update",
+    "options": {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": {
+        "HELM_EXPERIMENTAL_OCI": "1",
+        "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
+        "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
+        "HELM_REPOSITORY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/repositories.yaml",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "helm dependency update ''",
+    "options": {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": {
+        "HELM_EXPERIMENTAL_OCI": "1",
+        "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
+        "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
+        "HELM_REPOSITORY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/repositories.yaml",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;

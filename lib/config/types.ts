@@ -141,6 +141,7 @@ export interface GlobalOnlyConfig {
 export interface RepoGlobalConfig {
   allowedCommands?: string[];
   allowCustomCrateRegistries?: boolean;
+  allowHelmPassCredentials?: boolean;
   allowPlugins?: boolean;
   allowScripts?: boolean;
   allowedEnv?: string[];
