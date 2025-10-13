@@ -49,7 +49,6 @@ To enable it you need to extend the `managerFilePatterns` for the npm manager as
 ```json
 {
   "npm": {
-    // Yaml example
     "managerFilePatterns": ["/(^|/)package\\.yaml$/"]
   }
 }
@@ -58,7 +57,6 @@ To enable it you need to extend the `managerFilePatterns` for the npm manager as
 ```json
 {
   "npm": {
-    // Json5 example
     "managerFilePatterns": ["/(^|/)package\\.json5$/"]
   }
 }
