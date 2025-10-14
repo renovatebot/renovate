@@ -165,8 +165,8 @@ function minSatisfyingVersion(
 }
 
 function isLessThanRange(version: string, range: string): boolean {
-  const v = semver.parse(version);
-  const r = semver.coerce(range);
+  const v = parseVersion(version);
+  const r = parseRange(range);
 
   if (!v || !r) {
     return false;

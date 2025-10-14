@@ -168,6 +168,7 @@ describe('modules/versioning/semver-partial/index', () => {
       ${'1.2.0'}   | ${'1.1'}     | ${false}
       ${'0.9.0'}   | ${'~latest'} | ${false}
       ${'1.0.0'}   | ${'~latest'} | ${false}
+      ${'1.5.0'}   | ${'1'}       | ${false}
       ${'invalid'} | ${'1'}       | ${false}
     `(
       'isLessThanRange("$version", "$range") === $expected',
@@ -175,10 +176,6 @@ describe('modules/versioning/semver-partial/index', () => {
         expect(semverPartial.isLessThanRange?.(version, range)).toBe(expected);
       },
     );
-
-    it('should return false when version major equals range major and range has no minor', () => {
-      expect(semverPartial.isLessThanRange?.('1.5.0', '1')).toBe(false);
-    });
   });
 
   describe('.equals()', () => {
