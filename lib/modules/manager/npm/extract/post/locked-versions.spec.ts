@@ -345,7 +345,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       ]);
     });
 
-    it('does not set locked versions for volta and packageManager dependencies', async () => {
+    it('does not set locked versions for engines, packageManager, and volta deps', async () => {
       npm.getNpmLock.mockResolvedValue({
         lockedVersions: {
           npm: '10.9.4',
@@ -364,15 +364,21 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
               datasource: 'npm',
             },
             {
-              depName: 'npm',
-              currentValue: '10.9.3',
-              depType: 'volta',
+              depName: 'yarn',
+              currentValue: '1.2.3',
+              depType: 'engines',
               datasource: 'npm',
             },
             {
               depName: 'pnpm',
               currentValue: '9.12.3',
               depType: 'packageManager',
+              datasource: 'npm',
+            },
+            {
+              depName: 'npm',
+              currentValue: '10.9.3',
+              depType: 'volta',
               datasource: 'npm',
             },
           ],
@@ -392,11 +398,11 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
               datasource: 'npm',
             },
             {
-              depName: 'npm',
-              currentValue: '10.9.3',
-              depType: 'volta',
+              depName: 'yarn',
+              currentValue: '1.2.3',
+              depType: 'engines',
               datasource: 'npm',
-              // volta deps should NOT have lockedVersion
+              // engines deps should NOT have lockedVersion
             },
             {
               depName: 'pnpm',
@@ -404,6 +410,13 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
               depType: 'packageManager',
               datasource: 'npm',
               // packageManager deps should NOT have lockedVersion
+            },
+            {
+              depName: 'npm',
+              currentValue: '10.9.3',
+              depType: 'volta',
+              datasource: 'npm',
+              // volta deps should NOT have lockedVersion
             },
           ],
           lockFiles: ['package-lock.json'],
