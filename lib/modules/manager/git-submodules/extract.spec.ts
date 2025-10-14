@@ -70,7 +70,7 @@ describe('modules/manager/git-submodules/extract', () => {
       const res = await extractPackageFile('', '.gitmodules.2', {});
       expect(res?.deps).toHaveLength(1);
       expect(res?.deps[0].currentValue).toBe('main');
-      expect(gitMock.env).toHaveBeenCalledWith({
+      expect(gitMock.env).toHaveBeenCalledExactlyOnceWith({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.https://ssh:abc123@github.com/.insteadOf',
         GIT_CONFIG_KEY_1: 'url.https://git:abc123@github.com/.insteadOf',
@@ -79,7 +79,7 @@ describe('modules/manager/git-submodules/extract', () => {
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
       });
-      expect(gitMock.listRemote).toHaveBeenCalledWith([
+      expect(gitMock.listRemote).toHaveBeenCalledExactlyOnceWith([
         '--symref',
         'https://github.com/PowerShell/PowerShell-Docs',
         'HEAD',
@@ -98,7 +98,7 @@ describe('modules/manager/git-submodules/extract', () => {
       const res = await extractPackageFile('', '.gitmodules.2', {});
       expect(res?.deps).toHaveLength(1);
       expect(res?.deps[0].currentValue).toBe('main');
-      expect(gitMock.env).toHaveBeenCalledWith({
+      expect(gitMock.env).toHaveBeenCalledExactlyOnceWith({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0:
           'url.https://x-access-token:ghs_abc123@github.com/.insteadOf',
@@ -110,7 +110,7 @@ describe('modules/manager/git-submodules/extract', () => {
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
       });
-      expect(gitMock.listRemote).toHaveBeenCalledWith([
+      expect(gitMock.listRemote).toHaveBeenCalledExactlyOnceWith([
         '--symref',
         'https://github.com/PowerShell/PowerShell-Docs',
         'HEAD',
@@ -151,7 +151,7 @@ describe('modules/manager/git-submodules/extract', () => {
       const res = await extractPackageFile('', '.gitmodules.2', {});
       expect(res?.deps).toHaveLength(1);
       expect(res?.deps[0].currentValue).toBe('main');
-      expect(gitMock.env).toHaveBeenCalledWith({
+      expect(gitMock.env).toHaveBeenCalledExactlyOnceWith({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.https://username:password@gitlab.com/.insteadOf',
         GIT_CONFIG_KEY_1: 'url.https://username:password@gitlab.com/.insteadOf',
@@ -160,7 +160,7 @@ describe('modules/manager/git-submodules/extract', () => {
         GIT_CONFIG_VALUE_1: 'git@gitlab.com:',
         GIT_CONFIG_VALUE_2: 'https://gitlab.com/',
       });
-      expect(gitMock.listRemote).toHaveBeenCalledWith([
+      expect(gitMock.listRemote).toHaveBeenCalledExactlyOnceWith([
         '--symref',
         'https://github.com/PowerShell/PowerShell-Docs',
         'HEAD',
@@ -186,7 +186,7 @@ describe('modules/manager/git-submodules/extract', () => {
       const res = await extractPackageFile('', '.gitmodules.2', {});
       expect(res?.deps).toHaveLength(1);
       expect(res?.deps[0].currentValue).toBe('main');
-      expect(gitMock.env).toHaveBeenCalledWith({
+      expect(gitMock.env).toHaveBeenCalledExactlyOnceWith({
         GIT_CONFIG_COUNT: '6',
         GIT_CONFIG_KEY_0:
           'url.https://git-refs-user:git-refs-password@gitrefs.com/.insteadOf',
@@ -207,7 +207,7 @@ describe('modules/manager/git-submodules/extract', () => {
         GIT_CONFIG_VALUE_4: 'git@gittags.com:',
         GIT_CONFIG_VALUE_5: 'https://gittags.com/',
       });
-      expect(gitMock.listRemote).toHaveBeenCalledWith([
+      expect(gitMock.listRemote).toHaveBeenCalledExactlyOnceWith([
         '--symref',
         'https://github.com/PowerShell/PowerShell-Docs',
         'HEAD',

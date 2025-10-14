@@ -401,6 +401,7 @@ export async function processBranch(
         }
         const datasource = upgrade.datasource!;
         const depName = upgrade.depName!;
+        const packageName = upgrade.packageName!;
         const minimumConfidence = upgrade.minimumConfidence!;
         const updateType = upgrade.updateType!;
         const currentVersion = upgrade.currentVersion!;
@@ -409,7 +410,7 @@ export async function processBranch(
           const confidence =
             (await getMergeConfidenceLevel(
               datasource,
-              depName,
+              packageName,
               currentVersion,
               newVersion,
               updateType,
