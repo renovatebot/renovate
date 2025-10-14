@@ -349,6 +349,8 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       npm.getNpmLock.mockResolvedValue({
         lockedVersions: {
           npm: '10.9.4',
+          yarn: '1.2.3',
+          pnpm: '9.12.3',
         },
         lockfileVersion: 3,
       });
@@ -365,19 +367,31 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
             },
             {
               depName: 'yarn',
-              currentValue: '1.2.3',
-              depType: 'engines',
+              currentValue: '^1.0.0',
+              depType: 'devDependencies',
               datasource: 'npm',
             },
             {
               depName: 'pnpm',
-              currentValue: '9.12.3',
-              depType: 'packageManager',
+              currentValue: '^9.0.0',
+              depType: 'devDependencies',
               datasource: 'npm',
             },
             {
               depName: 'npm',
               currentValue: '10.9.3',
+              depType: 'engines',
+              datasource: 'npm',
+            },
+            {
+              depName: 'yarn',
+              currentValue: '1.2.3',
+              depType: 'packageManager',
+              datasource: 'npm',
+            },
+            {
+              depName: 'pnpm',
+              currentValue: '1.2.3',
               depType: 'volta',
               datasource: 'npm',
             },
@@ -399,21 +413,35 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
             },
             {
               depName: 'yarn',
-              currentValue: '1.2.3',
+              currentValue: '^1.0.0',
+              depType: 'devDependencies',
+              lockedVersion: '1.2.3',
+              datasource: 'npm',
+            },
+            {
+              depName: 'pnpm',
+              currentValue: '^9.0.0',
+              depType: 'devDependencies',
+              lockedVersion: '9.12.3',
+              datasource: 'npm',
+            },
+            {
+              depName: 'npm',
+              currentValue: '10.9.3',
               depType: 'engines',
               datasource: 'npm',
               // engines deps should NOT have lockedVersion
             },
             {
-              depName: 'pnpm',
-              currentValue: '9.12.3',
+              depName: 'yarn',
+              currentValue: '1.2.3',
               depType: 'packageManager',
               datasource: 'npm',
               // packageManager deps should NOT have lockedVersion
             },
             {
-              depName: 'npm',
-              currentValue: '10.9.3',
+              depName: 'pnpm',
+              currentValue: '1.2.3',
               depType: 'volta',
               datasource: 'npm',
               // volta deps should NOT have lockedVersion
