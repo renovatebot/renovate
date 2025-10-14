@@ -10,18 +10,14 @@ export const urls = [
   'https://docs.gitlab.com/ci/components/#partial-semantic-versions',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['pin', 'bump', 'replace'];
+export const supportedRangeStrategies = ['pin', 'replace'];
 
 function isLatest(input: string): boolean {
   return input === '~latest';
 }
 
-function massage(input: string): string {
-  return input.replace(regEx(/^v?/), '');
-}
-
 function parseVersion(input: string): SemVer | null {
-  return semver.parse(massage(input));
+  return semver.parse(input);
 }
 
 interface Range {
@@ -30,14 +26,13 @@ interface Range {
 }
 
 function parseRange(input: string): Range | null {
-  const range = massage(input);
-  const coerced = semver.coerce(range);
+  const coerced = semver.coerce(input);
   if (!coerced) {
     return null;
   }
   const { major, minor } = coerced;
 
-  if (regEx(/^\d+$/).test(range)) {
+  if (regEx(/^\d+$/).test(input)) {
     return { major };
   }
 
@@ -202,33 +197,32 @@ function getNewValue({
     return newVersion;
   }
 
-  if (currentValue === '~latest') {
-    return '~latest';
+  if (isLatest(currentValue)) {
+    return currentValue;
   }
 
-  const partialMatch = /^v?(\d+)(?:\.(\d+))?$/.exec(currentValue);
-  if (partialMatch) {
-    const newParsed = semver.coerce(newVersion);
-    if (!newParsed) {
-      return newVersion;
-    }
-    if (rangeStrategy === 'bump') {
-      return newVersion;
-    }
-
-    const minor = partialMatch[2];
-    const prefix = currentValue.startsWith('v') ? 'v' : '';
-
-    if (minor === undefined) {
-      return `${prefix}${newParsed.major}`;
-    }
-    return `${prefix}${newParsed.major}.${newParsed.minor}`;
+  const range = parseRange(currentValue);
+  if (!range) {
+    return newVersion;
   }
 
-  if (currentVersion === `v${currentValue}`) {
-    return newVersion.replace(/^v/, '');
+  const newParsed = parseVersion(newVersion);
+  if (!newParsed) {
+    return newVersion;
   }
-  return newVersion;
+
+  // Check if currentValue is a full version (has patch component)
+  const currentParsed = parseVersion(currentValue);
+  if (currentParsed) {
+    // currentValue is a full version, return full newVersion
+    return newVersion;
+  }
+
+  if (is.undefined(range.minor)) {
+    return `${newParsed.major}`;
+  }
+
+  return `${newParsed.major}.${newParsed.minor}`;
 }
 
 function isCompatible(version: string): boolean {
@@ -236,8 +230,8 @@ function isCompatible(version: string): boolean {
 }
 
 function isBreaking(version: string, current: string): boolean {
-  const versionParsed = semver.coerce(version);
-  const currentParsed = semver.coerce(current);
+  const versionParsed = parseVersion(version);
+  const currentParsed = parseVersion(current);
 
   if (!versionParsed || !currentParsed) {
     return false;
