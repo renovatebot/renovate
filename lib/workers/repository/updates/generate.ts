@@ -190,13 +190,13 @@ export function generateBranchConfig(
 ): BranchConfig {
   let branchUpgrades = upgrades;
 
-  const hasPendingUpgrades = branchUpgrades.some(
-    (upgrade) => upgrade.pendingChecks,
-  );
-  const hasNonPendingUpgrades = branchUpgrades.some(
-    (upgrade) => !upgrade.pendingChecks,
-  );
-  if (hasPendingUpgrades && hasNonPendingUpgrades) {
+  // const hasPendingUpgrades = branchUpgrades.some(
+  //   (upgrade) => upgrade.pendingChecks,
+  // );
+  // const hasNonPendingUpgrades = branchUpgrades.some(
+  //   (upgrade) => !upgrade.pendingChecks,
+  // );
+  if (!branchUpgrades.every((upgrade) => upgrade.pendingChecks)) {
     // If the branch isn't pending, then remove any upgrades within which *are*
     logger.debug(
       { branch: branchUpgrades[0].branchName },
