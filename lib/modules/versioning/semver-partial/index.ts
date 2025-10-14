@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import type { SemVer } from 'semver';
 import semver from 'semver';
-import stable from 'semver-stable';
+import { regEx } from '../../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'semver-partial';
@@ -12,217 +12,185 @@ export const urls = [
 export const supportsRanges = true;
 export const supportedRangeStrategies = ['pin', 'bump', 'replace'];
 
-function isPartialVersion(input: string): boolean {
-  return /^v?(\d+)(?:\.(\d+))?$/.test(input);
+function isLatest(input: string): boolean {
+  return input === '~latest';
 }
 
-function isStable(version: string): boolean {
-  // Check for prerelease indicators in the original string
-  if (/-(?:alpha|beta|rc|pre|dev|snapshot|unstable)/i.test(version)) {
-    return false;
+function massage(input: string): string {
+  return input.replace(regEx(/^v?/), '');
+}
+
+function parseVersion(input: string): SemVer | null {
+  return semver.parse(massage(input));
+}
+
+interface Range {
+  major: number;
+  minor?: number;
+}
+
+function parseRange(input: string): Range | null {
+  const range = massage(input);
+  const coerced = semver.coerce(range);
+  if (!coerced) {
+    return null;
+  }
+  const { major, minor } = coerced;
+
+  if (regEx(/^\d+$/).test(range)) {
+    return { major };
   }
 
-  const parsed = semver.parse(version);
-  if (parsed && parsed.prerelease.length > 0) {
-    return false;
-  }
-  const coerced = semver.coerce(version);
-  if (!coerced) {
-    return false;
-  }
-  return stable.is(coerced.version);
+  return { major, minor };
 }
 
 function isValid(input: string): boolean {
-  return (
-    input === '~latest' || isPartialVersion(input) || !!semver.coerce(input)
-  );
+  return isLatest(input) || !!parseVersion(input) || !!parseRange(input);
 }
 
 function isVersion(input: string | undefined | null): boolean {
-  if (!input || input === '~latest' || isPartialVersion(input)) {
+  if (!input) {
     return false;
   }
-  if (!input.startsWith('v') && !/^\d/.test(input)) {
+
+  return !!parseVersion(input);
+}
+
+function isStable(version: string): boolean {
+  const v = parseVersion(version);
+  if (!v) {
     return false;
   }
-  return !!semver.coerce(input);
+
+  return v.prerelease.length === 0;
 }
 
 function isSingleVersion(input: string): boolean {
   return isVersion(input);
 }
 
-function getMajor(version: string | SemVer): number | null {
-  const coerced = semver.coerce(version);
-  if (!coerced) {
-    return null;
-  }
-  return semver.major(coerced);
+function getMajor(version: string): number | null {
+  return parseVersion(version)?.major ?? null;
 }
 
-function getMinor(version: string | SemVer): number | null {
-  const coerced = semver.coerce(version);
-  if (!coerced) {
-    return null;
-  }
-  return semver.minor(coerced);
+function getMinor(version: string): number | null {
+  return parseVersion(version)?.minor ?? null;
 }
 
-function getPatch(version: string | SemVer): number | null {
-  const coerced = semver.coerce(version);
-  if (!coerced) {
-    return null;
-  }
-  return semver.patch(coerced);
+function getPatch(version: string): number | null {
+  return parseVersion(version)?.patch ?? null;
 }
 
-function sortVersions(a: string, b: string): number {
-  const aCoerced = semver.coerce(a);
-  const bCoerced = semver.coerce(b);
-  if (!aCoerced || !bCoerced) {
+function sortVersions(x: string, y: string): number {
+  const a = parseVersion(x);
+  const b = parseVersion(y);
+  if (!a || !b) {
     return 0;
   }
-  return semver.compare(aCoerced, bCoerced);
+  return semver.compare(a, b);
 }
 
-function equals(version: string, other: string): boolean {
-  const vCoerced = semver.coerce(version);
-  const oCoerced = semver.coerce(other);
-  if (!vCoerced || !oCoerced) {
+function equals(x: string, y: string): boolean {
+  const a = parseVersion(x);
+  const b = parseVersion(y);
+  if (!a || !b) {
     return false;
   }
-  return semver.eq(vCoerced, oCoerced);
+  return semver.eq(a, b);
 }
 
-function isGreaterThan(version: string, other: string): boolean {
-  const vCoerced = semver.coerce(version);
-  const oCoerced = semver.coerce(other);
-  if (!vCoerced || !oCoerced) {
+function isGreaterThan(x: string, y: string): boolean {
+  const a = parseVersion(x);
+  const b = parseVersion(y);
+  if (!a || !b) {
     return false;
   }
-  return semver.gt(vCoerced, oCoerced);
+  return semver.gt(a, b);
 }
 
 function matches(version: string, range: string): boolean {
   if (!isVersion(version)) {
     return false;
   }
-  if (range === '~latest') {
+
+  if (isLatest(range)) {
     return true;
   }
 
-  const partialMatch = /^v?(\d+)(?:\.(\d+))?$/.exec(range);
-  if (partialMatch) {
-    const parsed = semver.parse(version);
-    if (!parsed || parsed.prerelease.length > 0) {
-      return false;
-    }
-
-    const major = parseInt(partialMatch[1]);
-    const minor = partialMatch[2];
-
-    if (minor === undefined) {
-      return parsed.major === major;
-    }
-    return parsed.major === major && parsed.minor === parseInt(minor);
+  const v = parseVersion(version);
+  if (!v) {
+    return false;
   }
 
-  if (isVersion(range)) {
-    return equals(version, range);
+  const rv = parseVersion(range);
+  if (rv) {
+    return semver.eq(v, rv);
   }
 
-  return false;
-}
-
-function filterMatchingVersions(versions: string[], range: string): string[] {
-  if (range === '~latest') {
-    return versions
-      .map((v) => {
-        if (semver.valid(v)) {
-          return v;
-        }
-        return semver.coerce(v)?.version;
-      })
-      .filter(is.string)
-      .filter(isStable);
+  const r = parseRange(range);
+  if (!r) {
+    return false;
   }
 
-  const partialMatch = /^v?(\d+)(?:\.(\d+))?$/.exec(range);
-  if (partialMatch) {
-    const major = parseInt(partialMatch[1]);
-    const minor = partialMatch[2];
-
-    return versions
-      .filter((v) => {
-        const parsed = semver.parse(v);
-        return parsed && parsed.prerelease.length === 0;
-      })
-      .map((v) => semver.coerce(v)?.version)
-      .filter(is.string)
-      .filter((v) => {
-        const parsed = semver.parse(v);
-        if (!parsed) {
-          return false;
-        }
-        if (minor === undefined) {
-          return parsed.major === major;
-        }
-        return parsed.major === major && parsed.minor === parseInt(minor);
-      });
+  if (v.prerelease.length > 0) {
+    return false;
   }
 
-  return versions
-    .map((v) => {
-      if (semver.valid(v)) {
-        return v;
-      }
-      return semver.coerce(v)?.version;
-    })
-    .filter(is.string);
+  if (v.major !== r.major) {
+    return false;
+  }
+
+  if (is.undefined(r.minor)) {
+    return true;
+  }
+
+  return v.minor === r.minor;
 }
 
 function getSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
-  const filtered = filterMatchingVersions(versions, range);
-  const rng = range === '~latest' ? '*' : range;
-  return semver.maxSatisfying(filtered, rng);
+  const sortedVersions = versions.sort(sortVersions).reverse();
+  for (const version of sortedVersions) {
+    if (matches(version, range)) {
+      return version;
+    }
+  }
+  return null;
 }
 
 function minSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
-  const filtered = filterMatchingVersions(versions, range);
-  const rng = range === '~latest' ? '*' : range;
-  return semver.minSatisfying(filtered, rng);
+  const sortedVersions = versions.sort(sortVersions);
+  for (const version of sortedVersions) {
+    if (matches(version, range)) {
+      return version;
+    }
+  }
+  return null;
 }
 
 function isLessThanRange(version: string, range: string): boolean {
-  if (range === '~latest') {
+  const v = semver.parse(version);
+  const r = semver.coerce(range);
+
+  if (!v || !r) {
     return false;
   }
 
-  const partialMatch = /^v?(\d+)(?:\.(\d+))?$/.exec(range);
-  if (partialMatch) {
-    const coerced = semver.coerce(version);
-    if (!coerced) {
-      return false;
-    }
+  if (v.major !== r.major) {
+    return v.major < r.major;
+  }
 
-    const major = parseInt(partialMatch[1]);
-    const minor = partialMatch[2];
+  if (is.undefined(r.minor)) {
+    return false;
+  }
 
-    if (minor !== undefined) {
-      const minorNum = parseInt(minor);
-      return (
-        coerced.major < major ||
-        (coerced.major === major && coerced.minor < minorNum)
-      );
-    }
-    return coerced.major < major;
+  if (v.minor !== r.minor) {
+    return v.minor < r.minor;
   }
 
   return false;
@@ -237,6 +205,7 @@ function getNewValue({
   if (rangeStrategy === 'pin') {
     return newVersion;
   }
+
   if (currentValue === '~latest') {
     return '~latest';
   }
