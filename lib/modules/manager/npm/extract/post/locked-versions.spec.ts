@@ -348,9 +348,9 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
     it('does not set locked versions for engines, packageManager, and volta deps', async () => {
       npm.getNpmLock.mockResolvedValue({
         lockedVersions: {
-          npm: '10.9.4',
-          yarn: '1.2.3',
-          pnpm: '9.12.3',
+          npm: '1.2.3',
+          yarn: '2.3.4',
+          pnpm: '3.4.5',
         },
         lockfileVersion: 3,
       });
@@ -361,37 +361,37 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
           deps: [
             {
               depName: 'npm',
-              currentValue: '^10.0.0',
-              depType: 'devDependencies',
-              datasource: 'npm',
-            },
-            {
-              depName: 'yarn',
               currentValue: '^1.0.0',
               depType: 'devDependencies',
               datasource: 'npm',
             },
             {
+              depName: 'yarn',
+              currentValue: '^2.0.0',
+              depType: 'devDependencies',
+              datasource: 'npm',
+            },
+            {
               depName: 'pnpm',
-              currentValue: '^9.0.0',
+              currentValue: '^3.0.0',
               depType: 'devDependencies',
               datasource: 'npm',
             },
             {
               depName: 'npm',
-              currentValue: '10.9.3',
+              currentValue: '2.0.0',
               depType: 'engines',
               datasource: 'npm',
             },
             {
               depName: 'yarn',
-              currentValue: '1.2.3',
+              currentValue: '3.0.0',
               depType: 'packageManager',
               datasource: 'npm',
             },
             {
               depName: 'pnpm',
-              currentValue: '1.2.3',
+              currentValue: '4.0.0',
               depType: 'volta',
               datasource: 'npm',
             },
@@ -406,42 +406,42 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
           deps: [
             {
               depName: 'npm',
-              currentValue: '^10.0.0',
-              depType: 'devDependencies',
-              lockedVersion: '10.9.4',
-              datasource: 'npm',
-            },
-            {
-              depName: 'yarn',
               currentValue: '^1.0.0',
               depType: 'devDependencies',
               lockedVersion: '1.2.3',
               datasource: 'npm',
             },
             {
-              depName: 'pnpm',
-              currentValue: '^9.0.0',
+              depName: 'yarn',
+              currentValue: '^2.0.0',
               depType: 'devDependencies',
-              lockedVersion: '9.12.3',
+              lockedVersion: '2.3.4',
+              datasource: 'npm',
+            },
+            {
+              depName: 'pnpm',
+              currentValue: '^3.0.0',
+              depType: 'devDependencies',
+              lockedVersion: '3.4.5',
               datasource: 'npm',
             },
             {
               depName: 'npm',
-              currentValue: '10.9.3',
+              currentValue: '2.0.0',
               depType: 'engines',
               datasource: 'npm',
               // engines deps should NOT have lockedVersion
             },
             {
               depName: 'yarn',
-              currentValue: '1.2.3',
+              currentValue: '3.0.0',
               depType: 'packageManager',
               datasource: 'npm',
               // packageManager deps should NOT have lockedVersion
             },
             {
               depName: 'pnpm',
-              currentValue: '1.2.3',
+              currentValue: '4.0.0',
               depType: 'volta',
               datasource: 'npm',
               // volta deps should NOT have lockedVersion
