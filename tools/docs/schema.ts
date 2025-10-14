@@ -13,6 +13,13 @@ const schema = {
   'x-renovate-version': `${pkg.version}`,
   type: 'object',
   properties: {},
+
+  // any global-only configuration items that should not be set on the Repository configuration
+  not: {
+    anyOf: [] as {
+      required: string[];
+    }[],
+  },
 };
 const options = getOptions();
 options.sort((a, b) => {
@@ -177,10 +184,26 @@ function createSchemaForChildConfigs(): void {
   }
 }
 
+/**
+ * Ensure that any global-only configuration options are marked as "you should not use this" by JSON Schema validation rules.
+ *
+ */
+function forbidGlobalOnlyConfiguration(): void {
+  for (const option of options) {
+    if (option.globalOnly) {
+      // we have to use `anyOf` here with each rule, so any of the properties can be found in isolation, and will be excluded
+      schema.not.anyOf.push({
+        required: [option.name],
+      });
+    }
+  }
+}
+
 export async function generateSchema(dist: string): Promise<void> {
   createSchemaForParentConfigs();
   addChildrenArrayInParents();
   createSchemaForChildConfigs();
+  forbidGlobalOnlyConfiguration();
   await updateFile(
     `${dist}/renovate-schema.json`,
     `${JSON.stringify(schema, null, 2)}\n`,
