@@ -737,5 +737,5 @@ jobs:
         run: |
           pnpm semantic-release --dry-run ${{env.DRY_RUN}}
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LOG_LEVEL: debug
