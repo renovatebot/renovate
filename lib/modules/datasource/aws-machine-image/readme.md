@@ -64,7 +64,7 @@ module.exports = {
       customType: 'regex',
       managerFilePatterns: ['/.*/'],
       matchStrings: [
-        '.*amiFilter=(?<packageName>.*?)\n(.*currentImageName=.*?\n)?(.*\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?["|\']?(?<currentValue>ami-[a-z0-9]{17})["|\']?.*',
+        '.*amiFilter=(?<packageName>.*?)\n(.*currentImageName=(?<currentDigest>.*?)\n)?(.*\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?["|\']?(?<currentValue>ami-[a-z0-9]{17})["|\']?.*',
       ],
       datasourceTemplate: 'aws-machine-image',
       versioningTemplate: 'aws-machine-image',
@@ -84,7 +84,7 @@ Or as JSON:
         'managerFilePatterns': ['/.*/'],
         'matchStrings':
           [
-            ".*amiFilter=(?<packageName>.*?)\n(.*currentImageName=.*?\n)?(.*\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?[\"|']?(?<currentValue>ami-[a-z0-9]{17})[\"|']?.*",
+            ".*amiFilter=(?<packageName>.*?)\n(.*currentImageName=(?<currentDigest>.*?)\n)?(.*\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?[\"|']?(?<currentValue>ami-[a-z0-9]{17})[\"|']?.*",
           ],
         'datasourceTemplate': 'aws-machine-image',
         'versioningTemplate': 'aws-machine-image',
@@ -93,21 +93,26 @@ Or as JSON:
 }
 ```
 
+**Note about `currentImageName`:**
+
+The optional `currentImageName` comment is automatically updated by Renovate to track the actual AMI name corresponding to the AMI ID. This provides human-readable context about which image version is being used. When Renovate finds a newer AMI, it will update both the AMI ID and the `currentImageName` comment.
+
 This would match every file, and would recognize the following lines:
 
 ```yaml
 # With AMI name mentioned in the comments
 # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]
-# currentImageName=unknown
+# currentImageName=amazon-eks-node-1.21-v20240703
 my_ami1: ami-02ce3d9008cab69cb
+
 # Only AMI, no name mentioned
 # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]}]
-# currentImageName=unknown
+# currentImageName=amazon-eks-node-1.20-v20240615
 my_ami2: ami-0083e9407e275acf2
 
 # Using custom aws profile and region
 # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]},{"profile":"test","region":"eu-central-1"}]
-# currentImageName=unknown
+# currentImageName=amazon-eks-node-1.20-v20240615
 ami = "ami-0083e9407e275acf2"
 ```
 
@@ -115,14 +120,14 @@ ami = "ami-0083e9407e275acf2"
 const myConfigObject = {
   // With AMI name mentioned in the comments
   // amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]
-  // currentImageName=unknown
+  // currentImageName=amazon-eks-node-1.21-v20240703
   my_ami1: 'ami-02ce3d9008cab69cb',
 };
 
 /**
  * Only AMI, no AMI name mentioned
  * amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]}]
- * currentImageName=unknown
+ * currentImageName=amazon-eks-node-1.20-v20240615
  */
 const my_ami2 = 'ami-0083e9407e275acf2';
 ```
@@ -130,9 +135,9 @@ const my_ami2 = 'ami-0083e9407e275acf2';
 ```hcl
 resource "aws_instance" "web" {
 
-    # Only AMI, no name mentioned
+    # AMI with name tracked in comment
     # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]}]
-    # currentImageName=unknown
+    # currentImageName=amazon-eks-node-1.20-v20240615
     ami = "ami-0083e9407e275acf2"
 
     count = 2
