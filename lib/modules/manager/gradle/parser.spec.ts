@@ -904,6 +904,7 @@ describe('modules/manager/gradle/parser', () => {
             }
           `;
           parseGradle(input);
+          // eslint-disable-next-line vitest/prefer-called-exactly-once-with
           expect(logger.logger.debug).toHaveBeenCalledWith(
             expect.stringContaining(
               `Skipping content descriptor with unsupported regExp pattern for ${fieldName}`,
@@ -1284,6 +1285,7 @@ describe('modules/manager/gradle/parser', () => {
         fileContents,
         3,
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Max recursion depth reached in script file: foo/bar.gradle',
       );

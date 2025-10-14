@@ -3,6 +3,7 @@ import fsExtra from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
+import { expect } from 'vitest';
 import { getConfigFileNames } from '../../../../config/app-strings';
 import { logger } from '../../../../logger';
 import customConfig from './__fixtures__/config';
@@ -97,7 +98,7 @@ describe('workers/global/config/parse/file', () => {
         const configFile = upath.resolve(tmp.path, fileName);
         fs.writeFileSync(configFile, fileContent, { encoding: 'utf8' });
         await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
-        expect(processExitSpy).toHaveBeenCalledWith(1);
+        expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
         fs.unlinkSync(configFile);
       },
     );
@@ -110,6 +111,9 @@ describe('workers/global/config/parse/file', () => {
 
       await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
 
+      // TODO this should be called exactly once, but is called twice
+      // expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(processExitSpy).toHaveBeenCalledWith(1);
     });
 
@@ -128,10 +132,11 @@ describe('workers/global/config/parse/file', () => {
 
       await file.getConfig({ RENOVATE_CONFIG_FILE: tmpConfigFile });
 
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.fatal).toHaveBeenCalledWith(
         `Error parsing config file due to unresolved variable(s): CI_API_V4_URL is not defined`,
       );
-      expect(processExitSpy).toHaveBeenCalledWith(1);
+      expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
     });
 
     it.each([
@@ -142,7 +147,8 @@ describe('workers/global/config/parse/file', () => {
       const configFile = upath.resolve(tmp.path, filePath);
       fs.writeFileSync(configFile, `{"token": "abc"}`, { encoding: 'utf8' });
       await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
-      expect(processExitSpy).toHaveBeenCalledWith(1);
+      expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.fatal).toHaveBeenCalledWith('Unsupported file type');
       fs.unlinkSync(configFile);
     });
@@ -273,7 +279,8 @@ describe('workers/global/config/parse/file', () => {
       );
 
       expect(fsRemoveSpy).toHaveBeenCalledTimes(1);
-      expect(fsRemoveSpy).toHaveBeenCalledWith(configFile);
+      expect(fsRemoveSpy).toHaveBeenCalledExactlyOnceWith(configFile);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.trace).toHaveBeenCalledWith(
         expect.anything(),
         'config file successfully deleted',
@@ -295,7 +302,8 @@ describe('workers/global/config/parse/file', () => {
       );
 
       expect(fsRemoveSpy).toHaveBeenCalledTimes(1);
-      expect(fsRemoveSpy).toHaveBeenCalledWith(configFile);
+      expect(fsRemoveSpy).toHaveBeenCalledExactlyOnceWith(configFile);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.warn).toHaveBeenCalledWith(
         expect.anything(),
         'error deleting config file',

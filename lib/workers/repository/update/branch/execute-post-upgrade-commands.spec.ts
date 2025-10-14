@@ -190,7 +190,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
       expect(res.updatedArtifacts).toHaveLength(0);
       expect(fs.outputCacheFile).toHaveBeenCalledTimes(1);
-      expect(fs.outputCacheFile).toHaveBeenCalledWith(
+      expect(fs.outputCacheFile).toHaveBeenCalledExactlyOnceWith(
         expect.stringMatching(
           `^.*${upath.sep}post-upgrade-data-file-[a-f0-9]{16}.tmp$`,
         ),
@@ -296,6 +296,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
       expect(res.updatedArtifacts).toHaveLength(0);
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(1);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { file: 'not-a-txt-file' },
         'Post-upgrade file did not match any file filters',
@@ -581,7 +582,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         config,
       );
 
-      expect(exec.exec).toHaveBeenCalledWith('some-command', {
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith('some-command', {
         cwd: localDir,
         extraEnv: gitEnvVars,
       });
@@ -626,7 +627,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
       await postUpgradeCommands.postUpgradeCommandsExecutor(commands, config);
 
-      expect(exec.exec).toHaveBeenCalledWith('some-command', {
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith('some-command', {
         cwd: 'projects/npm/jest-29.5.0',
       });
     });
@@ -665,7 +666,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
       await postUpgradeCommands.postUpgradeCommandsExecutor(commands, config);
 
-      expect(exec.exec).toHaveBeenCalledWith('some-command', {
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith('some-command', {
         cwd: '/default/dir',
       });
     });
