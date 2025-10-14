@@ -15,7 +15,7 @@
         ]
       }
     ],
-    "@semantic-release/npm",
+    "@containerbase/semantic-release-pnpm",
     [
       "@semantic-release/exec",
       {
