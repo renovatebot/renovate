@@ -737,6 +737,5 @@ jobs:
         run: |
           pnpm semantic-release --dry-run ${{env.DRY_RUN}}
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} # TODO: use action token?
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LOG_LEVEL: debug
