@@ -109,17 +109,13 @@ function isGreaterThan(x: string, y: string): boolean {
 }
 
 function matches(version: string, range: string): boolean {
-  if (!isVersion(version)) {
+  const v = parseVersion(version);
+  if (!v) {
     return false;
   }
 
   if (isLatest(range)) {
     return true;
-  }
-
-  const v = parseVersion(version);
-  if (!v) {
-    return false;
   }
 
   const rv = parseVersion(range);

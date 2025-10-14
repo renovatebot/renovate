@@ -112,6 +112,12 @@ describe('modules/versioning/semver-partial/index', () => {
         expect(semverPartial.matches(version, range)).toBe(expected);
       },
     );
+
+    it('should handle invalid range that is not ~latest or valid version', () => {
+      expect(semverPartial.matches('1.0.0', 'completely-invalid-range')).toBe(
+        false,
+      );
+    });
   });
 
   describe('.getSatisfyingVersion()', () => {
@@ -183,6 +189,10 @@ describe('modules/versioning/semver-partial/index', () => {
         expect(semverPartial.isLessThanRange?.(version, range)).toBe(expected);
       },
     );
+
+    it('should return false when version major equals range major and range has no minor', () => {
+      expect(semverPartial.isLessThanRange?.('1.5.0', '1')).toBe(false);
+    });
   });
 
   describe('.equals()', () => {
