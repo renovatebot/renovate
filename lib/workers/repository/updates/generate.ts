@@ -204,7 +204,6 @@ export function generateBranchConfig(
     );
     branchUpgrades = branchUpgrades.filter((upgrade) => !upgrade.pendingChecks);
   }
-
   logger.trace({ config: branchUpgrades }, 'generateBranchConfig');
   let config: BranchConfig = {
     upgrades: [],
