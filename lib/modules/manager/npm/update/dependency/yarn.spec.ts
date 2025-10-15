@@ -15,14 +15,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react: 18.3.1
+      catalog:
+        react: 18.3.1
     `;
       const testContent = updateYarnrcCatalogDependency({
         fileContent: yarnrcYaml,
@@ -46,15 +40,9 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
       catalogs:
-        list:
-          react18:
-            react: 18.3.1
+        react18:
+          react: 18.3.1
     `;
       const testContent = updateYarnrcCatalogDependency({
         fileContent: yarnrcYaml,
@@ -73,15 +61,9 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
       catalogs:
-        list:
-          react18:
-            react-dom: 18.3.1
+        react18:
+          react-dom: 18.3.1
     `;
 
       const testContent = updateYarnrcCatalogDependency({
@@ -101,14 +83,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react: 18.3.1
+      catalog:
+        react: 18.3.1
     `;
       updateYarnrcCatalogDependency({
         fileContent: yarnrcYaml,
@@ -131,14 +107,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react: 18.3.1
+      catalog:
+        react: 18.3.1
     `;
 
       const testContent = npmUpdater.updateDependency({
@@ -158,14 +128,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react: 18.3.1
+      catalog:
+        react: 18.3.1
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
@@ -174,14 +138,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       expect(testContent).toEqual(codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react: 19.0.0
+      catalog:
+        react: 19.0.0
     `);
     });
 
@@ -194,15 +152,9 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
       catalogs:
-        list:
-          react17:
-            react: 17.0.0
+        react17:
+          react: 17.0.0
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
@@ -211,15 +163,9 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       expect(testContent).toEqual(codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
       catalogs:
-        list:
-          react17:
-            react: 19.0.0
+        react17:
+          react: 19.0.0
     `);
     });
 
@@ -232,14 +178,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react: 19.0.0
+      catalog:
+        react: 19.0.0
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
@@ -258,14 +198,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          config: 1.21.0
+      catalog:
+        config: 1.21.0
     `;
 
       const testContent = npmUpdater.updateDependency({
@@ -275,14 +209,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       expect(testContent).toEqual(codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          abc: 2.0.0
+      catalog:
+        abc: 2.0.0
     `);
     });
 
@@ -297,14 +225,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          gulp: gulpjs/gulp#v4.0.0-alpha.2
+      catalog:
+        gulp: gulpjs/gulp#v4.0.0-alpha.2
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
@@ -313,14 +235,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       expect(testContent).toEqual(codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          gulp: gulpjs/gulp#v4.0.0
+      catalog:
+        gulp: gulpjs/gulp#v4.0.0
     `);
     });
 
@@ -336,14 +252,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          hapi: npm:@hapi/hapi@18.3.0
+      catalog:
+        hapi: npm:@hapi/hapi@18.3.0
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
@@ -352,14 +262,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       expect(testContent).toEqual(codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          hapi: npm:@hapi/hapi@18.3.1
+      catalog:
+        hapi: npm:@hapi/hapi@18.3.1
     `);
     });
 
@@ -374,14 +278,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          gulp: gulpjs/gulp#abcdef7
+      catalog:
+        gulp: gulpjs/gulp#abcdef7
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
@@ -390,14 +288,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       expect(testContent).toEqual(codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          gulp: gulpjs/gulp#0000000
+      catalog:
+        gulp: gulpjs/gulp#0000000
     `);
     });
 
@@ -412,14 +304,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          n: git+https://github.com/owner/n#v1.0.0
+      catalog:
+        n: git+https://github.com/owner/n#v1.0.0
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
@@ -428,14 +314,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       expect(testContent).toEqual(codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          n: git+https://github.com/owner/n#v1.1.0
+      catalog:
+        n: git+https://github.com/owner/n#v1.1.0
     `);
     });
 
@@ -448,16 +328,11 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
+      catalog:
 
       catalogs:
-        list:
-
-      catalog:
-        react: 18.3.1
+        react18:
+          react: 18.3.1
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
@@ -474,11 +349,6 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       };
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
-
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
 
     `;
       const testContent = npmUpdater.updateDependency({
@@ -510,14 +380,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react:    18.3.1
+      catalog:
+        react:    18.3.1
 
     `;
       const testContent = npmUpdater.updateDependency({
@@ -527,14 +391,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       expect(testContent).toEqual(codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react:    19.0.0
+      catalog:
+        react:    19.0.0
     `);
     });
 
@@ -547,14 +405,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react: '18.3.1'
+      catalog:
+        react: '18.3.1'
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
@@ -563,14 +415,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       expect(testContent).toEqual(codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react: '19.0.0'
+      catalog:
+        react: '19.0.0'
     `);
     });
 
@@ -583,16 +429,10 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react: 18.3.1 # This is a comment
-          # This is another comment
-          react-dom: 18.3.1
+      catalog:
+        react: 18.3.1 # This is a comment
+        # This is another comment
+        react-dom: 18.3.1
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
@@ -601,16 +441,10 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       expect(testContent).toEqual(codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react: 19.0.0 # This is a comment
-          # This is another comment
-          react-dom: 18.3.1
+      catalog:
+        react: 19.0.0 # This is a comment
+        # This is another comment
+        react-dom: 18.3.1
     `);
     });
 
@@ -623,14 +457,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react: "18.3.1"
+      catalog:
+        react: "18.3.1"
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
@@ -639,14 +467,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       expect(testContent).toEqual(codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react: "19.0.0"
+      catalog:
+        react: "19.0.0"
     `);
     });
 
@@ -662,15 +484,9 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react: &react 18.3.1
-          react-dom: *react
+      catalog:
+        react: &react 18.3.1
+        react-dom: *react
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
@@ -679,15 +495,9 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       expect(testContent).toEqual(codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react: &react 19.0.0
-          react-dom: *react
+      catalog:
+        react: &react 19.0.0
+        react-dom: *react
     `);
     });
 
@@ -700,14 +510,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react: &react    18.3.1
+      catalog:
+        react: &react    18.3.1
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
@@ -716,14 +520,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       expect(testContent).toEqual(codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react: &react    19.0.0
+      catalog:
+        react: &react    19.0.0
     `);
     });
 
@@ -736,14 +534,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react: &react "18.3.1"
+      catalog:
+        react: &react "18.3.1"
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
@@ -752,14 +544,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       expect(testContent).toEqual(codeBlock`
        nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react: &react "19.0.0"
+      catalog:
+        react: &react "19.0.0"
     `);
     });
 
@@ -772,16 +558,10 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       const yarnrcYaml = codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list: {
-          # This is a comment
-          "react": "18.3.1"
-        }
+      catalog: {
+        # This is a comment
+        "react": "18.3.1"
+      }
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
@@ -790,16 +570,10 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       expect(testContent).toEqual(codeBlock`
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list: {
-          # This is a comment
-          "react": "19.0.0"
-        }
+      catalog: {
+        # This is a comment
+        "react": "19.0.0"
+      }
     `);
     });
 
@@ -818,15 +592,9 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          react: *react
-          react-dom: *react
+      catalog:
+        react: *react
+        react-dom: *react
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
@@ -847,14 +615,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       nodeLinker: node-modules
 
-      plugins:
-        - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-          path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-          spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-      catalogs:
-        list:
-          *r: 18.0.0
+      catalog:
+        *r: 18.0.0
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
