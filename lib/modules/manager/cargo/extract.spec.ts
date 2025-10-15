@@ -43,10 +43,6 @@ describe('modules/manager/cargo/extract', () => {
       });
     });
 
-    afterEach(() => {
-      hostRules.clear();
-    });
-
     it('returns null for invalid toml', async () => {
       expect(
         await extractPackageFile('invalid toml', 'Cargo.toml', config),
