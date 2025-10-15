@@ -21,9 +21,11 @@ describe('workers/repository/index', () => {
       config.localDir = '';
     });
 
-    it('runs', async () => {
+    it('does not process a repository, but also does not error', async () => {
       process.extractDependencies.mockResolvedValue(mock<ExtractResult>());
       const res = await renovateRepository(config);
+      // this returns `undefined`, as we do not actually process a repository, so no `ProcessResult` is returned
+      // but importantly, no errors are thrown, either
       expect(res).toBeUndefined();
     });
   });
