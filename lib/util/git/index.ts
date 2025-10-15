@@ -391,8 +391,10 @@ export async function cloneSubmodules(
 
       await gitRetry(() =>
         cloneSubmodulesRecursive
-          ? git.env(gitEnv).submoduleUpdate(['--init', '--recursive', submodule])
-          : git.env(gitEnv).submoduleUpdate(['--init', submodule])
+          ? git
+              .env(gitEnv)
+              .submoduleUpdate(['--init', '--recursive', submodule])
+          : git.env(gitEnv).submoduleUpdate(['--init', submodule]),
       );
     } catch (err) {
       logger.warn({ err, submodule }, `Unable to initialise git submodule`);
