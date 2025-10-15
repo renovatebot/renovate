@@ -96,8 +96,8 @@ importers:
         specifier: 4.0.3
         version: 4.0.3
       '@renovatebot/osv-offline':
-        specifier: 1.6.11
-        version: 1.6.11
+        specifier: 1.7.8
+        version: 1.7.8
       '@renovatebot/pep440':
         specifier: 4.2.1
         version: 4.2.1
@@ -369,6 +369,9 @@ importers:
       '@containerbase/eslint-plugin':
         specifier: 1.1.14
         version: 1.1.14(eslint-plugin-import@2.32.0)(eslint-plugin-promise@7.2.1(eslint@9.35.0))(eslint@9.35.0)
+      '@containerbase/semantic-release-pnpm':
+        specifier: 1.2.6
+        version: 1.2.6(semantic-release@24.2.9(typescript@5.9.3))
       '@eslint/js':
         specifier: 9.35.0
         version: 9.35.0
@@ -927,6 +930,12 @@ packages:
       eslint: ^9.0.0
       eslint-plugin-import: ^2.31.0
       eslint-plugin-promise: ^7.0.0
+
+  '@containerbase/semantic-release-pnpm@1.2.6':
+    resolution: {integrity: sha512-hIprZI5YyJUTsboS1/Wgml+tRxADxM4kktqiolS6GXeMKls0Xvyi3m0Ma3pAy5k4PrRuQHCLpU2s/CCSmWgo6g==}
+    engines: {node: ^22.11.0 || ^24}
+    peerDependencies:
+      semantic-release: ^24.0.0
 
   '@emnapi/core@1.5.0':
     resolution: {integrity: sha512-sbP8GzB1WDzacS8fgNPpHlp6C9VZe+SJP3F90W9rLemaQj2PzIuTEl1qDOYQf58YIpyjViI24y9aPWCjEzY2cg==}
@@ -1609,12 +1618,12 @@ packages:
     resolution: {integrity: sha512-RMj9zekThsU/rCZxY0DeXl4hXU0rJOJm9wrFfLoFJnNsLQO1v2nfkK7sdYiMe/9+i99W/JWCtGDfySxIhC8CmA==}
     engines: {node: ^20.9.0 || ^22.11.0, pnpm: ^10.0.0}
 
-  '@renovatebot/osv-offline-db@1.7.6':
-    resolution: {integrity: sha512-1M17R6wzUvvRLKZegmAGDXTV/HhRCDMqipaqQn/bZ+8JMDeY0WQfl07EZKI/x5hyin1v2tMcmCTvJZYFCm6Y7Q==}
+  '@renovatebot/osv-offline-db@1.7.8':
+    resolution: {integrity: sha512-I7YaUfxVJ64GOdMHAWgPSU4RDhTnEdMQ+uXbOnfpPnkf2yHe0rRs9JbP/BsS7uJbGoJzQjBbGwqZVkg4uXrDKA==}
     engines: {node: '>=18.12.0'}
 
-  '@renovatebot/osv-offline@1.6.11':
-    resolution: {integrity: sha512-eWy9aKrsUIJctnghdwUHt+DIweVNC0ppdsfmyf3jYocs9c/W9SFUOswBUnZAgvTPQ3qvQ3yWNIzjADFFRjD2SQ==}
+  '@renovatebot/osv-offline@1.7.8':
+    resolution: {integrity: sha512-E3qvKHRAhs2js6vrRKD38+XdjKZ735fyUVq/8oBZQPJphPVQep7TZg+dvEhYCuzQAU5CxDcLr1Esr7cx+O9lww==}
     engines: {node: '>=18.12.0'}
 
   '@renovatebot/pep440@4.2.1':
@@ -7514,6 +7523,14 @@ snapshots:
       eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.43.0(eslint@9.35.0)(typescript@5.9.3))(eslint-import-resolver-typescript@4.4.4)(eslint@9.35.0)
       eslint-plugin-promise: 7.2.1(eslint@9.35.0)
 
+  '@containerbase/semantic-release-pnpm@1.2.6(semantic-release@24.2.9(typescript@5.9.3))':
+    dependencies:
+      '@semantic-release/error': 4.0.0
+      aggregate-error: 5.0.0
+      execa: 9.6.0
+      semantic-release: 24.2.9(typescript@5.9.3)
+      semver: 7.7.2
+
   '@emnapi/core@1.5.0':
     dependencies:
       '@emnapi/wasi-threads': 1.1.0
@@ -8177,13 +8194,13 @@ snapshots:
       triplesec: 4.0.3
       tweetnacl: 1.0.3
 
-  '@renovatebot/osv-offline-db@1.7.6':
+  '@renovatebot/osv-offline-db@1.7.8':
     dependencies:
       '@seald-io/nedb': 4.1.2
 
-  '@renovatebot/osv-offline@1.6.11':
+  '@renovatebot/osv-offline@1.7.8':
     dependencies:
-      '@renovatebot/osv-offline-db': 1.7.6
+      '@renovatebot/osv-offline-db': 1.7.8
       adm-zip: 0.5.16
       fs-extra: 11.3.2
       got: 11.8.6

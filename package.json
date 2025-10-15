@@ -174,7 +174,7 @@
     "@qnighy/marshal": "0.1.3",
     "@renovatebot/detect-tools": "1.2.4",
     "@renovatebot/kbpgp": "4.0.3",
-    "@renovatebot/osv-offline": "1.6.11",
+    "@renovatebot/osv-offline": "1.7.8",
     "@renovatebot/pep440": "4.2.1",
     "@renovatebot/ruby-semver": "4.1.2",
     "@sindresorhus/is": "7.1.0",
@@ -272,6 +272,7 @@
   },
   "devDependencies": {
     "@containerbase/eslint-plugin": "1.1.14",
+    "@containerbase/semantic-release-pnpm": "1.2.6",
     "@eslint/js": "9.35.0",
     "@hyrious/marshal": "0.3.3",
     "@ls-lint/ls-lint": "2.3.1",

@@ -708,7 +708,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@66b405935dcae82e181020ae985aeaa9ad91f8cc # v3.13.18
+        uses: containerbase/internal-tools@0a2a6d34b860b45e2a28771783f9b68daa175876 # v3.13.19
         with:
           command: docker-config
 
@@ -717,6 +717,9 @@ jobs:
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
+
+      - name: Install newer npm
+        run: npm install -g npm
 
       - uses: sigstore/cosign-installer@d7543c93d881b35a8faa02e8e3605f69b7a1ce62 # v3.10.0
 
@@ -737,6 +740,5 @@ jobs:
         run: |
           pnpm semantic-release --dry-run ${{env.DRY_RUN}}
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} # TODO: use action token?
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LOG_LEVEL: debug
