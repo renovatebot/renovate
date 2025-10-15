@@ -36,6 +36,7 @@ describe('modules/manager/cargo/extract', () => {
       delete process.env.CARGO_REGISTRIES_PRIVATE_CRATES_INDEX;
       delete process.env.CARGO_REGISTRIES_MCORBIN_INDEX;
 
+      hostRules.clear();
       hostRules.add({
         hostType: 'github',
         matchHost: 'git.example.com',
