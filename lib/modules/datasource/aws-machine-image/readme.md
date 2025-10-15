@@ -116,6 +116,10 @@ my_ami2: ami-0083e9407e275acf2
 # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]},{"profile":"test","region":"eu-central-1"}]
 # currentImageName=amazon-eks-node-1.20-v20240615
 ami = "ami-0083e9407e275acf2"
+
+# Without currentImageName comment (also works!)
+# amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.19-*"]}]
+my_ami3: ami-0a1b2c3d4e5f6g7h8
 ```
 
 ```typescript
@@ -127,7 +131,7 @@ const myConfigObject = {
 };
 
 /**
- * Only AMI, no AMI name mentioned
+ * AMI with name tracked in comment
  * amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]}]
  * currentImageName=amazon-eks-node-1.20-v20240615
  */
@@ -148,5 +152,13 @@ resource "aws_instance" "web" {
     connection {
         user = "root"
     }
+}
+
+resource "aws_instance" "app" {
+    # Without currentImageName comment
+    # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.19-*"]}]
+    ami = "ami-0a1b2c3d4e5f6g7h8"
+
+    count = 1
 }
 ```
