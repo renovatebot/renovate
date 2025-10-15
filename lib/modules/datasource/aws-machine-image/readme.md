@@ -136,6 +136,12 @@ const myConfigObject = {
  * currentImageName=amazon-eks-node-1.20-v20240615
  */
 const my_ami2 = 'ami-0083e9407e275acf2';
+
+/**
+ * Without currentImageName comment
+ * amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.19-*"]}]
+ */
+const my_ami3 = 'ami-0a1b2c3d4e5f6g7h8';
 ```
 
 ```hcl
