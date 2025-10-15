@@ -11,6 +11,7 @@ import type { MergeConfidence } from '../../../../util/merge-confidence/types';
 import type { Timestamp } from '../../../../util/timestamp';
 
 export interface FilterConfig {
+  allowedMinimumReleaseAge?: string;
   allowedVersions?: string;
   depName?: string;
   followTag?: string;
