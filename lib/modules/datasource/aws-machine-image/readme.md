@@ -95,7 +95,9 @@ Or as JSON:
 
 **Note about `currentImageName`:**
 
-The optional `currentImageName` comment is automatically updated by Renovate to track the actual AMI name corresponding to the AMI ID. This provides human-readable context about which image version is being used. When Renovate finds a newer AMI, it will update both the AMI ID and the `currentImageName` comment.
+The optional `currentImageName` comment is automatically updated by Renovate to track the actual AMI name corresponding to the AMI ID.
+This provides human-readable context about which image version is being used.
+When Renovate finds a newer AMI, it will update both the AMI ID and the `currentImageName` comment.
 
 This would match every file, and would recognize the following lines:
 
