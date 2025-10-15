@@ -167,11 +167,14 @@ function createSchemaForChildConfigs(
   }
 }
 
-export async function generateSchema(dist: string): Promise<void> {
+export async function generateSchema(
+  dist: string,
+  version: string = pkg.version,
+): Promise<void> {
   const schema = {
-    title: `JSON schema for Renovate ${pkg.version} config files (https://renovatebot.com/)`,
+    title: `JSON schema for Renovate ${version} config files (https://renovatebot.com/)`,
     $schema: 'http://json-schema.org/draft-04/schema#',
-    'x-renovate-version': `${pkg.version}`,
+    'x-renovate-version': `${version}`,
     type: 'object',
     properties: {},
   };
