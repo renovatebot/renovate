@@ -42,6 +42,9 @@ importers:
       '@cdktf/hcl2json':
         specifier: 0.21.0
         version: 0.21.0
+      '@felipecrs/jsonc-weaver':
+        specifier: jsr:0.2.0
+        version: '@jsr/felipecrs__jsonc-weaver@0.2.0'
       '@opentelemetry/api':
         specifier: 1.9.0
         version: 1.9.0
@@ -1299,6 +1302,12 @@ packages:
     engines: {node: '>=10.0'}
     peerDependencies:
       tslib: '2'
+
+  '@jsr/david__jsonc-morph@0.2.2':
+    resolution: {integrity: sha512-/1pW3yO/tnY22Ueb+b6jawazAS0m3J6z907qCybmchiZSRzAU4WH0o+oDjgWc5HHf3ODqqso900Ql7KG9ihfGA==, tarball: https://npm.jsr.io/~/11/@jsr/david__jsonc-morph/0.2.2.tgz}
+
+  '@jsr/felipecrs__jsonc-weaver@0.2.0':
+    resolution: {integrity: sha512-l9pE9PTq8qe4NMM9PiGUz63Fe8QrjvdfqugayM8fdxXRHzcH8xgNKlI58QTqbdZurfRYhN037uyLzqx68DZNqw==, tarball: https://npm.jsr.io/~/11/@jsr/felipecrs__jsonc-weaver/0.2.0.tgz}
 
   '@kwsites/file-exists@1.1.1':
     resolution: {integrity: sha512-m9/5YGR18lIwxSFDwfE3oA7bWuq9kdau6ugN4H2rJeyhFQZcG9AgSHkQtSD15a8WvTgfz9aikZMrKPHvbpqFiw==}
@@ -7916,6 +7925,12 @@ snapshots:
       '@jsonjoy.com/buffers': 1.2.1(tslib@2.8.1)
       '@jsonjoy.com/codegen': 1.0.0(tslib@2.8.1)
       tslib: 2.8.1
+
+  '@jsr/david__jsonc-morph@0.2.2': {}
+
+  '@jsr/felipecrs__jsonc-weaver@0.2.0':
+    dependencies:
+      '@jsr/david__jsonc-morph': 0.2.2
 
   '@kwsites/file-exists@1.1.1':
     dependencies:

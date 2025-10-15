@@ -1,5 +1,6 @@
 import type { PathLike, Stats } from 'node:fs';
 import callsite from 'callsite';
+import * as JSONC from 'jsonc-parser';
 import type { DirectoryJSON } from 'memfs';
 import { fs as memfs, vol } from 'memfs';
 import type { TDataOut } from 'memfs/lib/encoding';
@@ -57,6 +58,23 @@ export class Fixtures {
    */
   static getJson<T = any>(name: string, fixturesRoot = '.'): T {
     return JSON.parse(
+      realFs.readFileSync(
+        upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name),
+        {
+          encoding: 'utf-8',
+        },
+      ),
+    ) as T;
+  }
+
+  /**
+   * Returns content from fixture file from __fixtures__ folder and parses as JSONC
+   * @param name name of the fixture file
+   * @param [fixturesRoot] - Where to find the fixtures, uses the current test folder by default
+   * @returns
+   */
+  static getJsonc<T = any>(name: string, fixturesRoot = '.'): T {
+    return JSONC.parse(
       realFs.readFileSync(
         upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name),
         {
