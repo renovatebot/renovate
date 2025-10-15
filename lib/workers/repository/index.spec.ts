@@ -1,6 +1,5 @@
 import { mock } from 'vitest-mock-extended';
 import { getConfig } from '../../config/defaults';
-import { GlobalConfig } from '../../config/global';
 import * as _process from './process';
 import type { ExtractResult } from './process/extract-update';
 import { renovateRepository } from '.';
@@ -19,7 +18,7 @@ describe('workers/repository/index', () => {
 
     beforeEach(() => {
       config = getConfig();
-      GlobalConfig.set({ localDir: '' });
+      config.localDir = '';
     });
 
     it('runs', async () => {
