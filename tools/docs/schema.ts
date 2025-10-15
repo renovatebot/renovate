@@ -175,6 +175,7 @@ export async function generateSchema(
     title: `JSON schema for Renovate ${version} config files (https://renovatebot.com/)`,
     $schema: 'http://json-schema.org/draft-04/schema#',
     'x-renovate-version': `${version}`,
+    allowComments: true,
     type: 'object',
     properties: {},
   };
