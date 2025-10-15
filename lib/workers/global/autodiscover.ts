@@ -144,7 +144,7 @@ export function addToRange(
   const lo = Math.max(0, Math.min(start, end));
   const hi = Math.min(shards - 1, Math.max(start, end));
   for (let i = lo; i <= hi; i++) {
-    if (Number.isInteger(i) && i >= 0 && i < shards) {
+    if (i >= 0 && i < shards) {
       picks.add(i);
     }
   }
