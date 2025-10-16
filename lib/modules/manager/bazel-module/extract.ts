@@ -2,6 +2,7 @@ import upath from 'upath';
 import { logger } from '../../../logger';
 import { isNotNullOrUndefined } from '../../../util/array';
 import { LooseArray } from '../../../util/schema-utils';
+import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -31,7 +32,18 @@ export async function extractPackageFile(
     const mavenDeps = extractMavenDeps(records);
     const dockerDeps = LooseArray(RuleToDockerPackageDep)
       .transform((deps) =>
-        deps.map((dep) => applyRegistryAliases(dep, config?.registryAliases)),
+        deps.map((dep) => {
+          // Reconstruct the image reference from parsed data
+          const imageRef = `${dep.packageName}${dep.currentValue ? `:${dep.currentValue}` : ''}${dep.currentDigest ? `@${dep.currentDigest}` : ''}`;
+          // Use getDep to handle registry aliases properly
+          const processedDep = getDep(imageRef, false, config?.registryAliases);
+          return {
+            ...processedDep,
+            depType: 'oci_pull',
+            depName: dep.depName, // Keep the original name field from bazel
+            replaceString: dep.replaceString, // Keep the original replace string
+          };
+        }),
       )
       .parse(records);
     const rulesImgDeps = transformRulesImgCalls(records);
@@ -90,26 +102,4 @@ function extractMavenDeps(records: ResultFragment[]): PackageDependency[] {
   return LooseArray(RuleToMavenPackageDep)
     .transform(fillRegistryUrls)
     .parse(records);
-}
-
-function applyRegistryAliases(
-  dep: PackageDependency,
-  registryAliases?: Record<string, string>,
-): PackageDependency {
-  if (!registryAliases || !dep.packageName) {
-    return dep;
-  }
-
-  // Find the matching registry alias
-  for (const [alias, replacement] of Object.entries(registryAliases)) {
-    if (dep.packageName.startsWith(alias + '/')) {
-      const newPackageName = dep.packageName.replace(alias, replacement);
-      return {
-        ...dep,
-        packageName: newPackageName,
-      };
-    }
-  }
-
-  return dep;
 }
