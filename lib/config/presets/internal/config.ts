@@ -13,7 +13,7 @@ export const presets: Record<string, Preset> = {
       ':configMigration',
       ':pinDevDependencies',
       'abandonments:recommended',
-      'security:minimumReleaseAge',
+      'security:minimumReleaseAgeNpm',
     ],
   },
   'js-app': {
