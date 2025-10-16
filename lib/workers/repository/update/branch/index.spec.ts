@@ -238,19 +238,40 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
-    // TODO: will be fixed in https://github.com/renovatebot/renovate/discussions/38290 / https://github.com/renovatebot/renovate/discussions/38348
-    it('does not skip branch if release is missing releaseTimestamp with minimumReleaseAge set', async () => {
-      schedule.isScheduledNow.mockReturnValueOnce(true);
-      config.prCreation = 'not-pending';
-      config.upgrades = partial<BranchUpgradeConfig>([
-        {
-          // no releaseTimestamp
-          minimumReleaseAge: '100 days',
-        },
-      ]);
-      scm.isBranchModified.mockResolvedValueOnce(false);
-      await branchWorker.processBranch(config);
-      expect(reuse.shouldReuseExistingBranch).toHaveBeenCalled();
+    describe('if release is missing releaseTimestamp with minimumReleaseAge set', () => {
+      it('skips branch if minimumReleaseAgeBehaviour=timestamp-required', async () => {
+        schedule.isScheduledNow.mockReturnValueOnce(true);
+        config.prCreation = 'not-pending';
+        config.upgrades = partial<BranchUpgradeConfig>([
+          {
+            releaseTimestamp: undefined,
+            minimumReleaseAge: '100 days',
+            minimumReleaseAgeBehaviour: 'timestamp-required',
+          },
+        ]);
+
+        const res = await branchWorker.processBranch(config);
+        expect(res).toEqual({
+          branchExists: false,
+          prNo: undefined,
+          result: 'pending',
+        });
+      });
+
+      it('does not skip branch if minimumReleaseAgeBehaviour=timestamp-optional', async () => {
+        schedule.isScheduledNow.mockReturnValueOnce(true);
+        config.prCreation = 'not-pending';
+        config.upgrades = partial<BranchUpgradeConfig>([
+          {
+            releaseTimestamp: undefined,
+            minimumReleaseAge: '100 days',
+            minimumReleaseAgeBehaviour: 'timestamp-optional',
+          },
+        ]);
+        scm.isBranchModified.mockResolvedValueOnce(false);
+        await branchWorker.processBranch(config);
+        expect(reuse.shouldReuseExistingBranch).toHaveBeenCalled();
+      });
     });
 
     it('skips branch if minimumConfidence not met', async () => {
