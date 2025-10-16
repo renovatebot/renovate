@@ -496,6 +496,69 @@ describe('modules/manager/bazel-module/extract', () => {
       });
     });
 
+    it('returns oci.pull dependencies with tag only (no digest)', async () => {
+      const input = codeBlock`
+        oci.pull(
+          name = "nginx_image",
+          image = "index.docker.io/library/nginx",
+          platforms = ["linux/amd64"],
+          tag = "1.27.1",
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: DockerDatasource.id,
+            depType: 'oci_pull',
+            depName: 'nginx_image',
+            packageName: 'index.docker.io/library/nginx',
+            currentValue: '1.27.1',
+            replaceString: codeBlock`
+              oci.pull(
+                name = "nginx_image",
+                image = "index.docker.io/library/nginx",
+                platforms = ["linux/amd64"],
+                tag = "1.27.1",
+              )
+            `,
+          },
+        ],
+      });
+    });
+
+    it('returns oci.pull dependencies without tag or digest', async () => {
+      const input = codeBlock`
+        oci.pull(
+          name = "nginx_image",
+          image = "index.docker.io/library/nginx",
+          platforms = ["linux/amd64"],
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: DockerDatasource.id,
+            depType: 'oci_pull',
+            depName: 'nginx_image',
+            packageName: 'index.docker.io/library/nginx',
+            replaceString: codeBlock`
+              oci.pull(
+                name = "nginx_image",
+                image = "index.docker.io/library/nginx",
+                platforms = ["linux/amd64"],
+              )
+            `,
+          },
+        ],
+      });
+    });
+
     it('returns oci.pull dependencies with registryAliases', async () => {
       const input = codeBlock`
         oci.pull(
@@ -576,6 +639,31 @@ describe('modules/manager/bazel-module/extract', () => {
           },
         ],
       });
+    });
+
+    it('oci.pull with registryAliases does not set autoReplaceStringTemplate', async () => {
+      const input = codeBlock`
+        oci.pull(
+          name = "nginx_image",
+          digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+          image = "index.docker.io/library/nginx",
+          tag = "1.27.1",
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel', {
+        registryAliases: {
+          'index.docker.io': 'docker.io',
+        },
+      });
+
+      expect(result?.deps[0]).not.toHaveProperty('autoReplaceStringTemplate');
+      expect(result?.deps[0].packageName).toBe('docker.io/library/nginx');
+      expect(result?.deps[0].depName).toBe('nginx_image');
+      expect(result?.deps[0].replaceString).toContain('oci.pull(');
+      expect(result?.deps[0].replaceString).toContain(
+        'image = "index.docker.io/library/nginx"',
+      );
     });
 
     it('returns maven.install and bazel_dep dependencies together', async () => {
