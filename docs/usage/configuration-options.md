@@ -2722,6 +2722,14 @@ The datasource that Renovate uses must have a release timestamp for the `minimum
 Some datasources may have a release timestamp, but in a format Renovate does not support.
 In those cases a feature request needs to be implemented.
 
+You can confirm if your datasource supports the release timestamp by viewing [the documentation for the given datasource](./modules/datasource/index.md).
+
+<!-- prettier-ignore -->
+!!! note
+    If you use a custom registry, for instance as a pull-through cache, additional configuration may be required.
+    The [the documentation for the datasource](./modules/datasource/index.md) provides information about which field(s) need to be returned from the registry.
+    Alternatively, it may be possible to configure the `registryUrls`, like we can see in the below Maven example:
+
 <!-- prettier-ignore -->
 !!! warning "Warning for Maven users"
     For `minimumReleaseAge` to work, the Maven source must return reliable `last-modified` headers.
@@ -3218,7 +3226,7 @@ Consider using instead `matchCurrentValue` if you wish to match against the raw 
 ```
 
 The syntax of the version range must follow the [versioning scheme](modules/versioning/index.md#supported-versioning) used by the matched package(s).
-This is usually defined by the [manager](modules/manager/index.md#supported-managers) which discovered them or by the default versioning for the package's [datasource](modules/datasource/index.md).
+This is usually defined by the [manager](modules/manager/index.md#supported-managers) which discovered them or by the default versioning for the package's [datasource](./modules/datasource/index.md).
 For example, a Gradle package would typically need Gradle constraint syntax (e.g. `[,7.0)`) and not SemVer syntax (e.g. `<7.0`).
 
 This field also supports Regular Expressions which must begin and end with `/`.
