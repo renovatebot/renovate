@@ -576,7 +576,7 @@ describe('util/stats', () => {
     });
   });
 
-  describe('AbandonmentStats', () => {
+  describe('AbandonedPackageStats', () => {
     beforeEach(() => {
       memCache.init();
     });

@@ -53,6 +53,7 @@ describe('util/http/gitlab', () => {
       paginate: true,
     });
     expect(res.body).toHaveLength(4);
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.logger.warn).toHaveBeenCalledWith(
       { err: expect.any(Error) },
       'Pagination error',

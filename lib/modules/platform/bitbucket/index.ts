@@ -8,8 +8,10 @@ import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import type { BitbucketHttpOptions } from '../../../util/http/bitbucket';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
-import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
+import {
+  aggressiveRepoCacheProvider,
+  repoCacheProvider,
+} from '../../../util/http/cache/repository-http-cache-provider';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -316,7 +318,7 @@ export async function findPr({
     const prs = (
       await bitbucketHttp.getJsonUnchecked<PagedResult<PrResponse>>(
         `/2.0/repositories/${config.repository}/pullrequests?q=source.branch.name="${branchName}"&state=open`,
-        { cacheProvider: memCacheProvider },
+        { cacheProvider: aggressiveRepoCacheProvider },
       )
     ).body.values;
 
@@ -376,7 +378,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   const pr = (
     await bitbucketHttp.getJsonUnchecked<PrResponse>(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
-      { cacheProvider: memCacheProvider },
+      { cacheProvider: aggressiveRepoCacheProvider },
     )
   ).body;
 
@@ -411,7 +413,7 @@ async function getBranchCommit(
         `/2.0/repositories/${config.repository}/refs/branches/${escapeHash(
           branchName,
         )}`,
-        { cacheProvider: memCacheProvider },
+        { cacheProvider: aggressiveRepoCacheProvider },
       )
     ).body;
     return branch.target.hash;
@@ -439,7 +441,7 @@ async function getStatus(
   const opts: BitbucketHttpOptions = { paginate: true };
   /* v8 ignore start: temporary code */
   if (memCache) {
-    opts.cacheProvider = memCacheProvider;
+    opts.cacheProvider = aggressiveRepoCacheProvider;
   } else {
     opts.memCache = false;
   } /* v8 ignore stop */
@@ -531,8 +533,12 @@ export async function setBranchStatus({
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses/build`,
     { body },
   );
-  // update status cache
-  await getStatus(branchName, false);
+
+  // invalidate status cache
+  const branchStatusesUrl = bitbucketHttp
+    .resolveUrl(`/2.0/repositories/${config.repository}/commit/${sha}/statuses`)
+    .toString();
+  aggressiveRepoCacheProvider.markSynced('get', branchStatusesUrl, false);
 }
 
 interface BbIssue {
@@ -555,7 +561,7 @@ async function findOpenIssues(title: string): Promise<BbIssue[]> {
       (
         await bitbucketHttp.getJsonUnchecked<{ values: BbIssue[] }>(
           `/2.0/repositories/${config.repository}/issues?q=${filter}`,
-          { cacheProvider: memCacheProvider },
+          { cacheProvider: aggressiveRepoCacheProvider },
         )
       ).body.values /* v8 ignore start */ || [] /* v8 ignore stop */
     );
@@ -813,7 +819,7 @@ async function sanitizeReviewers(
           const reviewerUser = (
             await bitbucketHttp.getJsonUnchecked<Account>(
               `/2.0/users/${reviewer.uuid}`,
-              { cacheProvider: memCacheProvider },
+              { cacheProvider: aggressiveRepoCacheProvider },
             )
           ).body;
 
@@ -868,7 +874,7 @@ async function isAccountMemberOfWorkspace(
   try {
     await bitbucketHttp.get(
       `/2.0/workspaces/${workspace}/members/${reviewer.uuid}`,
-      { cacheProvider: memCacheProvider },
+      { cacheProvider: aggressiveRepoCacheProvider },
     );
 
     return true;
@@ -908,7 +914,7 @@ export async function createPr({
         `/2.0/repositories/${config.repository}/effective-default-reviewers`,
         {
           paginate: true,
-          cacheProvider: memCacheProvider,
+          cacheProvider: aggressiveRepoCacheProvider,
         },
       )
     ).body;

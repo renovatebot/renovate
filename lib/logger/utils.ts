@@ -241,7 +241,8 @@ export function sanitizeValue(
         curValue = seen.has(val) ? seen.get(val) : sanitizeValue(val, seen);
       }
 
-      objectResult[key] = curValue;
+      const sanitizedKey = sanitizeValue(key, seen);
+      objectResult[sanitizedKey] = curValue;
     }
 
     return objectResult;

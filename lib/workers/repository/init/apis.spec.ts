@@ -138,10 +138,12 @@ describe('workers/repository/init/apis', () => {
       expect(workerPlatformConfig.onboardingConfigFileName).toBe(
         '.github/renovate.json',
       );
-      expect(platform.getJsonFile).toHaveBeenCalledWith(
+      expect(platform.getJsonFile).toHaveBeenCalledExactlyOnceWith(
         '.github/renovate.json',
       );
-      expect(platform.getJsonFile).not.toHaveBeenCalledWith('renovate.json');
+      expect(platform.getJsonFile).not.toHaveBeenCalledExactlyOnceWith(
+        'renovate.json',
+      );
     });
 
     it('falls back to "renovate.json" if onboardingConfigFileName is not set', async () => {
@@ -160,7 +162,9 @@ describe('workers/repository/init/apis', () => {
       });
       expect(workerPlatformConfig).toBeTruthy();
       expect(workerPlatformConfig.onboardingConfigFileName).toBeUndefined();
-      expect(platform.getJsonFile).toHaveBeenCalledWith('renovate.json');
+      expect(platform.getJsonFile).toHaveBeenCalledExactlyOnceWith(
+        'renovate.json',
+      );
     });
 
     it('falls back to "renovate.json" if onboardingConfigFileName is not valid', async () => {
@@ -177,7 +181,9 @@ describe('workers/repository/init/apis', () => {
       });
       expect(workerPlatformConfig).toBeTruthy();
       expect(workerPlatformConfig.onboardingConfigFileName).toBe('foo.bar');
-      expect(platform.getJsonFile).toHaveBeenCalledWith('renovate.json');
+      expect(platform.getJsonFile).toHaveBeenCalledExactlyOnceWith(
+        'renovate.json',
+      );
     });
 
     it('checks for re-enablement and continues', async () => {
@@ -195,7 +201,9 @@ describe('workers/repository/init/apis', () => {
         extends: [':disableRenovate'],
       });
       expect(workerPlatformConfig).toBeTruthy();
-      expect(platform.getJsonFile).toHaveBeenCalledWith('renovate.json');
+      expect(platform.getJsonFile).toHaveBeenCalledExactlyOnceWith(
+        'renovate.json',
+      );
     });
 
     it('checks for re-enablement and skips', async () => {

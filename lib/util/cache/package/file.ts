@@ -51,19 +51,19 @@ export async function set(
   namespace: PackageCacheNamespace,
   key: string,
   value: unknown,
-  ttlMinutes = 5,
+  hardTtlMinutes = 5,
 ): Promise<void> {
   if (!cacheFileName) {
     return;
   }
-  logger.trace({ namespace, key, ttlMinutes }, 'Saving cached value');
+  logger.trace({ namespace, key, hardTtlMinutes }, 'Saving cached value');
   await cacache.put(
     cacheFileName,
     getKey(namespace, key),
     JSON.stringify({
       compress: true,
       value: await compressToBase64(JSON.stringify(value)),
-      expiry: DateTime.local().plus({ minutes: ttlMinutes }),
+      expiry: DateTime.local().plus({ minutes: hardTtlMinutes }),
     }),
   );
 }

@@ -1,8 +1,8 @@
 import { DepTypesMigration } from './dep-types-migration';
 
 describe('config/migrations/custom/dep-types-migration', () => {
-  it('should only add depTypes to packageRules', () => {
-    expect(DepTypesMigration).toMigrate(
+  it('should only add depTypes to packageRules', async () => {
+    await expect(DepTypesMigration).toMigrate(
       {
         peerDependencies: {
           versionStrategy: 'widen',

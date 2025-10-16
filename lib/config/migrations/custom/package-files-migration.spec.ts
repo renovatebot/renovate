@@ -1,8 +1,8 @@
 import { PackageFilesMigration } from './package-files-migration';
 
 describe('config/migrations/custom/package-files-migration', () => {
-  it('should migrate value to array', () => {
-    expect(PackageFilesMigration).toMigrate(
+  it('should migrate value to array', async () => {
+    await expect(PackageFilesMigration).toMigrate(
       {
         packageFiles: [
           {
@@ -18,8 +18,8 @@ describe('config/migrations/custom/package-files-migration', () => {
     );
   });
 
-  it('should handle multiple packageFile', () => {
-    expect(PackageFilesMigration).toMigrate(
+  it('should handle multiple packageFile', async () => {
+    await expect(PackageFilesMigration).toMigrate(
       {
         packageFiles: [['package.json', 'Chart.yaml']],
       },
@@ -29,8 +29,8 @@ describe('config/migrations/custom/package-files-migration', () => {
     );
   });
 
-  it('should still work for wrong config', () => {
-    expect(PackageFilesMigration).toMigrate(
+  it('should still work for wrong config', async () => {
+    await expect(PackageFilesMigration).toMigrate(
       {
         packageRules: [{ labels: ['lint'] }],
         packageFiles: [
@@ -53,8 +53,8 @@ describe('config/migrations/custom/package-files-migration', () => {
     );
   });
 
-  it('should work for non-object packageFiles', () => {
-    expect(PackageFilesMigration).toMigrate(
+  it('should work for non-object packageFiles', async () => {
+    await expect(PackageFilesMigration).toMigrate(
       {
         packageFiles: ['package.json'],
       },
@@ -64,8 +64,8 @@ describe('config/migrations/custom/package-files-migration', () => {
     );
   });
 
-  it('should work for nested rules', () => {
-    expect(PackageFilesMigration).toMigrate(
+  it('should work for nested rules', async () => {
+    await expect(PackageFilesMigration).toMigrate(
       {
         packageFiles: [
           {
@@ -96,8 +96,8 @@ describe('config/migrations/custom/package-files-migration', () => {
     );
   });
 
-  it('no change for empty packageFiles', () => {
-    expect(PackageFilesMigration).toMigrate(
+  it('no change for empty packageFiles', async () => {
+    await expect(PackageFilesMigration).toMigrate(
       {
         includePaths: ['package.json'],
         packageRules: [{ labels: ['linter'] }],

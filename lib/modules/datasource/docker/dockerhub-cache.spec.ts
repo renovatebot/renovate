@@ -116,7 +116,7 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
     expect(res).toEqual(Object.values(newCache.items));
 
     await cache.save();
-    expect(packageCache.set).toHaveBeenCalledWith(
+    expect(packageCache.set).toHaveBeenCalledExactlyOnceWith(
       'datasource-docker-hub-cache',
       'foo/bar',
       newCache,
@@ -213,7 +213,7 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
     expect(res).toEqual([item]);
 
     await cache.save();
-    expect(packageCache.set).toHaveBeenCalledWith(
+    expect(packageCache.set).toHaveBeenCalledExactlyOnceWith(
       'datasource-docker-hub-cache',
       'foo/bar',
       expectedCache,

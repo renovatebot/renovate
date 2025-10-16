@@ -10,6 +10,7 @@ import {
   UNKNOWN_ERROR,
 } from '../../constants/error-messages';
 import { newlineRegex, regEx } from '../regex';
+import * as _auth from './auth';
 import * as _behindBaseCache from './behind-base-branch-cache';
 import * as _conflictsCache from './conflicts-cache';
 import * as _modifiedCache from './modified-cache';
@@ -23,11 +24,13 @@ vi.mock('./behind-base-branch-cache');
 vi.mock('./modified-cache');
 vi.mock('timers/promises');
 vi.mock('../cache/repository');
+vi.mock('./auth');
 vi.unmock('.');
 
 const behindBaseCache = vi.mocked(_behindBaseCache);
 const conflictsCache = vi.mocked(_conflictsCache);
 const modifiedCache = vi.mocked(_modifiedCache);
+const auth = vi.mocked(_auth);
 // Class is no longer exported
 const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
 
@@ -209,6 +212,10 @@ describe('util/git/index', { timeout: 10000 }, () => {
       beforeEach(async () => {
         const repo = Git(base.path);
 
+        auth.getGitEnvironmentVariables.mockReturnValue({
+          GIT_ALLOW_PROTOCOL: 'file',
+        });
+
         const submoduleBasePath = base.path + '/submodule';
         await fs.mkdir(submoduleBasePath);
         const submodule = Git(submoduleBasePath);
@@ -331,6 +338,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     it('returns cached value', async () => {
       behindBaseCache.getCachedBehindBaseResult.mockReturnValue(true);
       expect(await git.isBranchBehindBase('develop', defaultBranch)).toBeTrue();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'branch.isBehindBase(): using cached result "true"',
       );
@@ -500,7 +508,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     it('should add no verify flag', async () => {
       const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
       await git.deleteBranch('renovate/something');
-      expect(rawSpy).toHaveBeenCalledWith([
+      expect(rawSpy).toHaveBeenCalledExactlyOnceWith([
         'push',
         '--delete',
         'origin',
@@ -512,7 +520,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
       setNoVerify(['push']);
       await git.deleteBranch('renovate/something');
-      expect(rawSpy).toHaveBeenCalledWith([
+      expect(rawSpy).toHaveBeenCalledExactlyOnceWith([
         'push',
         '--delete',
         'origin',
@@ -719,12 +727,12 @@ describe('util/git/index', { timeout: 10000 }, () => {
         message: 'Pass no-verify',
       });
 
-      expect(commitSpy).toHaveBeenCalledWith(
+      expect(commitSpy).toHaveBeenCalledExactlyOnceWith(
         expect.anything(),
         expect.anything(),
         expect.not.objectContaining({ '--no-verify': null }),
       );
-      expect(pushSpy).toHaveBeenCalledWith(
+      expect(pushSpy).toHaveBeenCalledExactlyOnceWith(
         expect.anything(),
         expect.anything(),
         expect.not.objectContaining({ '--no-verify': null }),
@@ -750,12 +758,12 @@ describe('util/git/index', { timeout: 10000 }, () => {
         message: 'Pass no-verify',
       });
 
-      expect(commitSpy).toHaveBeenCalledWith(
+      expect(commitSpy).toHaveBeenCalledExactlyOnceWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({ '--no-verify': null }),
       );
-      expect(pushSpy).toHaveBeenCalledWith(
+      expect(pushSpy).toHaveBeenCalledExactlyOnceWith(
         expect.anything(),
         expect.anything(),
         expect.not.objectContaining({ '--no-verify': null }),
@@ -781,12 +789,12 @@ describe('util/git/index', { timeout: 10000 }, () => {
         message: 'Pass no-verify',
       });
 
-      expect(commitSpy).toHaveBeenCalledWith(
+      expect(commitSpy).toHaveBeenCalledExactlyOnceWith(
         expect.anything(),
         expect.anything(),
         expect.not.objectContaining({ '--no-verify': null }),
       );
-      expect(pushSpy).toHaveBeenCalledWith(
+      expect(pushSpy).toHaveBeenCalledExactlyOnceWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({ '--no-verify': null }),
@@ -1146,7 +1154,13 @@ describe('util/git/index', { timeout: 10000 }, () => {
       expect(await lsRenovateRefs()).not.toBeEmpty();
       await git.clearRenovateRefs();
       expect(await lsRenovateRefs()).toBeEmpty();
-      expect(pushSpy).toHaveBeenCalledOnce();
+      expect(pushSpy).toHaveBeenCalledExactlyOnceWith([
+        '--delete',
+        'origin',
+        'refs/renovate/branches/aaa',
+        'refs/renovate/branches/bbb',
+        'refs/renovate/branches/ccc',
+      ]);
     });
 
     it('preserves unknown sections by default', async () => {
@@ -1267,7 +1281,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
           pushOptions: ['ci.skip', 'foo=bar'],
         }),
       ).resolves.toBeTrue();
-      expect(pushSpy).toHaveBeenCalledWith(
+      expect(pushSpy).toHaveBeenCalledExactlyOnceWith(
         'origin',
         `${defaultBranch}:${defaultBranch}`,
         expect.objectContaining({
@@ -1345,6 +1359,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
         await git.syncGit();
         await expect(git.syncForkWithUpstream('develop')).toResolve();
+        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'Checking out branch develop from remote renovate-fork-upstream',
         );

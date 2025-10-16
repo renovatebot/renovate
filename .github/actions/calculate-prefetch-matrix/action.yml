@@ -30,40 +30,45 @@ runs:
       shell: bash
       run: |
         echo 'MACOS_KEY=node_modules-macOS-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_ENV"
-        echo 'WINDOWS_KEY=node_modules-Windows-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_ENV"
+        # echo 'WINDOWS_KEY=node_modules-Windows-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_ENV"
 
     - name: Check cache miss for MacOS
       id: macos-cache
-      uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+      uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       with:
         path: node_modules
         key: ${{ env.MACOS_KEY }}
         lookup-only: true
         enableCrossOsArchive: true
 
-    - name: Check cache miss for Windows
-      id: windows-cache
-      uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-      with:
-        path: node_modules
-        key: ${{ env.WINDOWS_KEY }}
-        lookup-only: true
-        enableCrossOsArchive: true
+    # - name: Check cache miss for Windows
+    #   id: windows-cache
+    #   uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+    #   with:
+    #     path: node_modules
+    #     key: ${{ env.WINDOWS_KEY }}
+    #     lookup-only: true
+    #     enableCrossOsArchive: true
 
     - name: Dispatch `node_modules` prefetch for MacOS and Windows
       id: os-matrix-prefetch
       env:
         MACOS_MISS: ${{ steps.macos-cache.outputs.cache-hit != 'true' && 'true' || '' }}
-        WINDOWS_MISS: ${{ steps.windows-cache.outputs.cache-hit != 'true' && 'true' || '' }}
+        # WINDOWS_MISS: ${{ steps.windows-cache.outputs.cache-hit != 'true' && 'true' || '' }}
         PREFETCH_MAC_ONLY: '["macos-latest"]'
-        PREFETCH_WINDOWS_ONLY: '["windows-latest"]'
-        PREFETCH_BOTH: '["macos-latest", "windows-latest"]'
+        # PREFETCH_WINDOWS_ONLY: '["windows-latest"]'
+        # PREFETCH_BOTH: '["macos-latest", "windows-latest"]'
         PREFETCH_FALLBACK: '["ubuntu-latest"]'
       shell: bash
+      # run: |
+      #   echo 'os-matrix-prefetch=${{
+      #     (env.OS_MATRIX_IS_FULL && env.WINDOWS_MISS && env.MACOS_MISS && env.PREFETCH_BOTH) ||
+      #     (env.OS_MATRIX_IS_FULL && env.MACOS_MISS && env.PREFETCH_MAC_ONLY) ||
+      #     (env.OS_MATRIX_IS_FULL && env.WINDOWS_MISS && env.PREFETCH_WINDOWS_ONLY) ||
+      #     env.PREFETCH_FALLBACK
+      #   }}' >> "$GITHUB_OUTPUT"
       run: |
         echo 'os-matrix-prefetch=${{
-          (env.OS_MATRIX_IS_FULL && env.WINDOWS_MISS && env.MACOS_MISS && env.PREFETCH_BOTH) ||
           (env.OS_MATRIX_IS_FULL && env.MACOS_MISS && env.PREFETCH_MAC_ONLY) ||
-          (env.OS_MATRIX_IS_FULL && env.WINDOWS_MISS && env.PREFETCH_WINDOWS_ONLY) ||
           env.PREFETCH_FALLBACK
         }}' >> "$GITHUB_OUTPUT"

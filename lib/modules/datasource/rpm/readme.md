@@ -26,8 +26,8 @@ Assuming your `manifest.json` looks like this.
 
 ```manifest.json
 {
-  "package1": "1.0.0-1",
-  "package2": "1.1.0"
+  "example-package1": "1.0.0-1.azl3",
+  "example-package2": "1.1.0"
 }
 ```
 
@@ -39,7 +39,7 @@ where the versioning format could be `<semantic version>-<revision or release>`,
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": [
+      "managerFilePatterns": [
         "path_to_manifest_json"
       ],
       "registryUrlTemplate": "http://example.com/repo/repodata/",
@@ -55,22 +55,22 @@ In an RPM repository, the `<SHA256>-primary.xml` looks like this:
 `<?xml version="1.0" encoding="UTF-8"?>
 <metadata xmlns="http://linux.duke.edu/metadata/common">
   <package type="rpm">
-    <name>example-package</name>
+    <name>example-package1</name>
     <arch>x86_64</arch>
     <version epoch="0" ver="1.0" rel="2.azl3"/>
   </package>
   <package type="rpm">
-    <name>example-package</name>
+    <name>example-package1</name>
     <arch>x86_64</arch>
     <version epoch="0" ver="1.1" rel="1.azl3"/>
   </package>
   <package type="rpm">
-    <name>example-package</name>
+    <name>example-package1</name>
     <arch>x86_64</arch>
     <version epoch="0" ver="1.1" rel="2.azl3"/>
   </package>
   <package type="rpm">
-    <name>example-package</name>
+    <name>example-package1</name>
     <arch>x86_64</arch>
     <version epoch="0" ver="1.2"/>
   </package>
@@ -79,10 +79,23 @@ In an RPM repository, the `<SHA256>-primary.xml` looks like this:
 </metadata>
 ```
 
-You can see that `ver` and `rel` (release/revision) is stored separately.
-But the RPM datasource implementation will combine these together as `ver-rel`.
-That's why in the `manifest.json` above, the version is defined as `1.0.0-1`, if `rel` is available.
-Or just `1.1.0` if `rel` is not available.
+You may also check the `yum/dnf info` for the package to find version and release:
+
+```
+# dnf info example-package1
+Last metadata expiration check: 18:34:13 ago on Tue Oct  7 13:58:36 2025.
+Installed Packages
+Name         : example-package1
+Version      : 1.0.0
+Release      : 1.azl3
+Architecture : x86_64
+[...]
+```
+
+You can see that `ver` and `rel` (`release`/`revision`) is stored separately.
+The RPM datasource implementation will combine these together as `ver-rel`.
+That's why the version is defined as `1.0.0-1.az3`, if `rel` (like `example-package1`) is available.
+Or just `1.1.0` if `rel` (like `example-package2`) is not available.
 
 ## Limitation and Consideration
 

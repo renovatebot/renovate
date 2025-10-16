@@ -2,8 +2,9 @@
 import type { Ecosystem, Osv } from '@renovatebot/osv-offline';
 import { OsvOffline } from '@renovatebot/osv-offline';
 import is from '@sindresorhus/is';
-import type { CvssScore } from 'vuln-vects';
-import { parseCvssVector } from 'vuln-vects';
+import type { CvssVector } from 'ae-cvss-calculator';
+import { fromVector } from 'ae-cvss-calculator';
+import { z } from 'zod';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { PackageRule, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -504,12 +505,17 @@ export class Vulnerabilities {
     };
   }
 
-  private evaluateCvssVector(vector: string): [string, string] {
-    try {
-      const parsedCvss: CvssScore = parseCvssVector(vector);
-      const severityLevel = parsedCvss.cvss3OverallSeverityText;
+  static evaluateCvssVector(vector: string): [string, string] {
+    const CvssJsonSchema = z.object({
+      baseScore: z.number().default(0.0),
+      baseSeverity: z.string().toUpperCase().default('UNKNOWN'),
+    });
 
-      return [parsedCvss.baseScore.toFixed(1), severityLevel];
+    try {
+      const parsedCvssScore: CvssVector<any> | null = fromVector(vector);
+      const res = CvssJsonSchema.parse(parsedCvssScore?.createJsonSchema());
+
+      return [res.baseScore.toFixed(1), res.baseSeverity];
     } catch {
       logger.debug(`Error processing CVSS vector ${vector}`);
     }
@@ -592,12 +598,13 @@ export class Vulnerabilities {
     let score = 'Unknown';
 
     const cvssVector =
+      vulnerability.severity?.find((e) => e.type === 'CVSS_V4')?.score ??
       vulnerability.severity?.find((e) => e.type === 'CVSS_V3')?.score ??
-      vulnerability.severity?.[0]?.score ??
       (affected.database_specific?.cvss as string); // RUSTSEC
 
     if (cvssVector) {
-      const [baseScore, severity] = this.evaluateCvssVector(cvssVector);
+      const [baseScore, severity] =
+        Vulnerabilities.evaluateCvssVector(cvssVector);
       severityLevel = severity ? severity.toUpperCase() : 'UNKNOWN';
       score = baseScore
         ? `${baseScore} / 10 (${titleCase(severityLevel)})`

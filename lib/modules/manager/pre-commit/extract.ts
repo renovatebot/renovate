@@ -77,6 +77,8 @@ function determineDatasource(
   return { skipReason: 'unknown-registry', registryUrls: [hostname] };
 }
 
+const gitUrlRegex = regEx(/\.git$/i);
+
 function extractDependency(
   tag: string,
   repository: string,
@@ -104,7 +106,7 @@ function extractDependency(
     const match = urlMatcher.exec(repository);
     if (match?.groups) {
       const hostname = match.groups.hostname;
-      const depName = match.groups.depName.replace(regEx(/\.git$/i), ''); // TODO 12071
+      const depName = match.groups.depName.replace(gitUrlRegex, '');
       const sourceDef = determineDatasource(repository, hostname);
       return {
         ...sourceDef,

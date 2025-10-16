@@ -348,7 +348,7 @@ describe('workers/global/config/parse/env', () => {
         });
 
         await expect(env.getConfig(envParam)).toReject();
-        expect(processExit).toHaveBeenCalledWith(1);
+        expect(processExit).toHaveBeenCalledExactlyOnceWith(1);
       });
 
       it('migrates RENOVATE_CONFIG', async () => {

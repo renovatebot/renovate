@@ -128,7 +128,10 @@ describe('workers/global/config/parse/index', () => {
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
 
       expect(parsedConfig.privateKey).toBeUndefined();
-      expect(decrypt.setPrivateKeys).toHaveBeenCalledWith(expected, undefined);
+      expect(decrypt.setPrivateKeys).toHaveBeenCalledExactlyOnceWith(
+        expected,
+        undefined,
+      );
     });
 
     it('supports Bitbucket username/password', async () => {
@@ -336,6 +339,17 @@ describe('workers/global/config/parse/index', () => {
         ':pinDigests',
         'customManagers:azurePipelinesVersions',
       ]);
+    });
+
+    it('adds extends from fileConfig only', async () => {
+      fileConfigParser.getConfig.mockResolvedValueOnce({
+        extends: [':pinDigests'],
+      });
+      const parsedConfig = await configParser.parseConfigs(
+        defaultEnv,
+        defaultArgv,
+      );
+      expect(parsedConfig.extends).toMatchObject([':pinDigests']);
     });
   });
 });

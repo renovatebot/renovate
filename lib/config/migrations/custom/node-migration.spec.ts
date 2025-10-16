@@ -1,8 +1,8 @@
 import { NodeMigration } from './node-migration';
 
 describe('config/migrations/custom/node-migration', () => {
-  it('should migrate node to travis', () => {
-    expect(NodeMigration).toMigrate(
+  it('should migrate node to travis', async () => {
+    await expect(NodeMigration).toMigrate(
       {
         node: { enabled: true },
       },
@@ -12,8 +12,8 @@ describe('config/migrations/custom/node-migration', () => {
     );
   });
 
-  it('should not delete node in case it has more than one property', () => {
-    expect(NodeMigration).toMigrate(
+  it('should not delete node in case it has more than one property', async () => {
+    await expect(NodeMigration).toMigrate(
       {
         node: { enabled: true, automerge: false },
       },

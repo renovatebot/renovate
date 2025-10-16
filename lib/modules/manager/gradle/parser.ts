@@ -56,6 +56,7 @@ export function parseGradle(
     search: q.alt<Ctx>(
       qKotlinImport,
       qAssignments,
+      qKotlinMultiObjectVarAssignment,
       qDependencies,
       qPlugins,
       qRegistryUrls,

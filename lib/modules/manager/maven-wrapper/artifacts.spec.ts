@@ -93,7 +93,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
 
     expect(execSnapshots[2].cmd).toContain('java 8.0.1');
     expect(updatedDeps).toEqual(expected);
-    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+    expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
   });
 
   it('Should update when it is maven wrapper', async () => {
@@ -136,7 +136,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ]);
-    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+    expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
   });
 
   it('Should not update deps when maven-wrapper.properties is not in git change', async () => {
@@ -169,7 +169,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ]);
-    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+    expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
   });
 
   it('updates with docker', async () => {
@@ -229,7 +229,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ]);
-    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+    expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
   });
 
   it('Should return null when cmd is not found', async () => {
@@ -312,7 +312,47 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ]);
-    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+    expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
+  });
+
+  it('updates with binarySource install after detecting wrapper version from mvnw script', async () => {
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+    mockMavenFileChangedInGit();
+    GlobalConfig.set({
+      localDir: upath.join('/tmp/github/some/repo'),
+      binarySource: 'install',
+    });
+    const updatedDeps = await updateArtifacts({
+      packageFileName: './mvnw',
+      newPackageFileContent: '',
+      updatedDeps: [{ depName: 'maven-wrapper' }],
+      config: { currentValue: '3.0.0', newValue: '3.3.1' },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool java 17.0.0' },
+      {
+        cmd: './mvnw wrapper:wrapper',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          encoding: 'utf-8',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+    ]);
+
+    expect(updatedDeps).toEqual([]);
+    expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
   });
 
   it('should run wrapper:wrapper with MVNW_REPOURL if it is a custom artifactory', async () => {
@@ -352,7 +392,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ]);
-    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+    expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
   });
 
   it('should run not include MVNW_REPOURL when run with default maven repo url', async () => {
@@ -392,7 +432,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       },
     ]);
     expect(execSnapshots[0].options!.env).not.toHaveProperty('MVNW_REPOURL');
-    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+    expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
   });
 
   it('should run not include MVNW_REPOURL when run with a malformed replaceString', async () => {
@@ -432,6 +472,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     ]);
 
     expect(execSnapshots[0].options!.env).not.toHaveProperty('MVNW_REPOURL');
-    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+    expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
   });
 });

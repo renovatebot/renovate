@@ -38,7 +38,8 @@
     "config.js",
     "tmp",
     "tools/mkdocs/docs",
-    "tools/mkdocs/site"
+    "tools/mkdocs/site",
+    ".worktrees/**/*"
   ],
   "ts-node": {
     "transpileOnly": true,

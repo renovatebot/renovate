@@ -293,7 +293,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
       ]);
       await getUpdatedPackageFiles(config);
-      expect(composer.updateArtifacts).toHaveBeenCalledWith(
+      expect(composer.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           config: expect.objectContaining({
             lockFiles: ['composer.lock'],
@@ -332,7 +332,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
       ]);
       await getUpdatedPackageFiles(config);
-      expect(composer.updateArtifacts).toHaveBeenCalledWith(
+      expect(composer.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           config: expect.objectContaining({
             lockFiles: ['composer.lock'],
@@ -368,7 +368,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
       ]);
       await getUpdatedPackageFiles(config);
-      expect(composer.updateArtifacts).toHaveBeenCalledWith(
+      expect(composer.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           config: expect.objectContaining({
             lockFiles: ['composer.lock'],
@@ -1009,8 +1009,34 @@ describe('workers/repository/update/branch/get-updated', () => {
 
       await getUpdatedPackageFiles(config);
 
-      expect(pep621.updateArtifacts).toHaveBeenCalledOnce();
-      expect(poetry.updateArtifacts).toHaveBeenCalledOnce();
+      expect(pep621.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: 'my-new-dep:1.0.0',
+          config: expect.objectContaining({
+            upgrades: expect.arrayContaining([
+              expect.objectContaining({
+                packageFile: 'pyproject.toml',
+                manager: 'pep621',
+              }),
+            ]),
+          }),
+        }),
+      );
+      expect(poetry.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: 'my-new-dep:1.0.0',
+          config: expect.objectContaining({
+            upgrades: expect.arrayContaining([
+              expect.objectContaining({
+                packageFile: 'pyproject.toml',
+                manager: 'poetry',
+              }),
+            ]),
+          }),
+        }),
+      );
     });
 
     describe('when some artifacts have changed and others have not', () => {
@@ -1049,8 +1075,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           mockUnsupported();
 
           await getUpdatedPackageFiles(config);
-          expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
-          expect(bundler.updateArtifacts).toHaveBeenCalledWith(
+          expect(bundler.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
             expect.objectContaining({ newPackageFileContent: 'new contents' }),
           );
         });
@@ -1065,8 +1090,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           mockUpdated();
 
           await getUpdatedPackageFiles(config);
-          expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
-          expect(bundler.updateArtifacts).toHaveBeenCalledWith(
+          expect(bundler.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
             expect.objectContaining({ newPackageFileContent: 'new contents' }),
           );
         });
@@ -1084,8 +1108,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           autoReplace.doAutoReplace.mockResolvedValueOnce(newContent);
           mockUnsupported();
           await getUpdatedPackageFiles(config);
-          expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
-          expect(bundler.updateArtifacts).toHaveBeenCalledWith(
+          expect(bundler.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
             expect.objectContaining({ newPackageFileContent: newContent }),
           );
         });
@@ -1103,8 +1126,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           autoReplace.doAutoReplace.mockResolvedValueOnce(newContent);
           mockUnsupported();
           await getUpdatedPackageFiles(config);
-          expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
-          expect(bundler.updateArtifacts).toHaveBeenCalledWith(
+          expect(bundler.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
             expect.objectContaining({ newPackageFileContent: newContent }),
           );
         });
@@ -1124,8 +1146,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           mockUnsupported();
 
           await getUpdatedPackageFiles(config);
-          expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
-          expect(bundler.updateArtifacts).toHaveBeenCalledWith(
+          expect(bundler.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
             expect.objectContaining({ newPackageFileContent: 'new contents' }),
           );
         });
@@ -1145,8 +1166,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           mockUpdated();
 
           await getUpdatedPackageFiles(config);
-          expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
-          expect(bundler.updateArtifacts).toHaveBeenCalledWith(
+          expect(bundler.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
             expect.objectContaining({ newPackageFileContent: 'new contents' }),
           );
         });

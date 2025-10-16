@@ -4,6 +4,7 @@ import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { getCacheType } from '../../../util/cache/package';
 import { type Http, HttpError } from '../../../util/http';
 import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types';
@@ -126,6 +127,20 @@ export async function downloadHttpProtocol(
       if (isTemporaryError(err)) {
         logger.debug({ failedUrl, err }, 'Temporary error');
         if (getHost(url) === getHost(MAVEN_REPO)) {
+          const statusCode = err?.response?.statusCode;
+          if (statusCode === 429) {
+            if (getCacheType() === 'redis') {
+              logger.once.warn(
+                { failedUrl },
+                'Maven Central rate limiting detected despite Redis caching.',
+              );
+            } else {
+              logger.once.warn(
+                { failedUrl },
+                'Maven Central rate limiting detected. Persistent caching required.',
+              );
+            }
+          }
           return Result.err({ type: 'maven-central-temporary-error', err });
         } else {
           return Result.err({ type: 'temporary-error' });

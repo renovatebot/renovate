@@ -22,7 +22,7 @@ const DEFAULT_COMMAND_OPTIONS = ['--skip-answered', '--defaults'];
 function buildCommand(
   config: UpdateArtifactsConfig,
   packageFileName: string,
-  newVersion: string,
+  newValue: string,
 ): string {
   const command = ['copier', 'update', ...DEFAULT_COMMAND_OPTIONS];
   if (GlobalConfig.get('allowScripts') && !config.ignoreScripts) {
@@ -32,7 +32,7 @@ function buildCommand(
     '--answers-file',
     quote(upath.basename(packageFileName)),
     '--vcs-ref',
-    quote(newVersion),
+    quote(newValue),
   );
   return command.join(' ');
 }
@@ -64,15 +64,15 @@ export async function updateArtifacts({
     );
   }
 
-  const newVersion = updatedDeps[0]?.newVersion ?? updatedDeps[0]?.newValue;
-  if (!newVersion) {
+  const newValue = updatedDeps[0]?.newValue;
+  if (!newValue) {
     return artifactError(
       packageFileName,
       'Missing copier template version to update to',
     );
   }
 
-  const command = buildCommand(config, packageFileName, newVersion);
+  const command = buildCommand(config, packageFileName, newValue);
   const gitEnv = getGitEnvironmentVariables(['git-tags']);
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,

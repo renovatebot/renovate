@@ -5,6 +5,7 @@ import { logger } from '../../../../../logger';
 import { regEx } from '../../../../../util/regex';
 import type { PackageDependency, PackageFileContent } from '../../../types';
 import type { NpmManagerData } from '../../types';
+import { loadPackageJson } from '../../utils';
 import type { NpmPackage, NpmPackageDependency } from '../types';
 import {
   extractDependency,
@@ -146,4 +147,17 @@ export function extractPackageJson(
       workspaces: packageJson.workspaces,
     },
   };
+}
+
+export async function hasPackageManager(
+  packageJsonDir: string,
+): Promise<boolean> {
+  logger.trace(`npm.hasPackageManager from package.json`);
+
+  const packageJsonResult = await loadPackageJson(packageJsonDir);
+
+  return (
+    is.nonEmptyString(packageJsonResult?.packageManager?.name) &&
+    is.nonEmptyString(packageJsonResult?.packageManager?.version)
+  );
 }

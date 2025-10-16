@@ -55,6 +55,7 @@ describe('util/cache/repository/impl/local', () => {
       'local',
     );
     await localRepoCache.load(); // readCacheFile is mocked but has no return value set - therefore returns undefined
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.debug).toHaveBeenCalledWith(
       "RepoCacheBase.load() - expecting data of type 'string' received 'undefined' instead - skipping",
     );
@@ -69,6 +70,7 @@ describe('util/cache/repository/impl/local', () => {
       'local',
     );
     await localRepoCache.load(); // readCacheFile is mocked but has no return value set - therefore returns undefined
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.debug).toHaveBeenCalledWith(
       'RepoCacheBase.load() - cache file is empty - skipping',
     );
@@ -82,7 +84,7 @@ describe('util/cache/repository/impl/local', () => {
       'local',
     );
     await localRepoCache.load(); // readCacheFile is mocked but has no return value set - therefore returns undefined
-    expect(logger.debug).not.toHaveBeenCalledWith();
+    expect(logger.debug).not.toHaveBeenCalledExactlyOnceWith();
     expect(localRepoCache.isModified()).toBeUndefined();
   });
 
@@ -197,11 +199,12 @@ describe('util/cache/repository/impl/local', () => {
     });
     expect(localRepoCache instanceof RepoCacheLocal).toBeTrue();
     expect(localRepoCache.isModified()).toBeTrue();
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.warn).toHaveBeenCalledWith(
       { cacheType },
       `Repository cache type not supported using type "local" instead`,
     );
-    expect(fs.outputCacheFile).toHaveBeenCalledWith(
+    expect(fs.outputCacheFile).toHaveBeenCalledExactlyOnceWith(
       'renovate/repository/github/some/repo.json',
       JSON.stringify(newCacheRecord),
     );
@@ -225,7 +228,7 @@ describe('util/cache/repository/impl/local', () => {
 
     await localRepoCache.save();
 
-    expect(fs.outputCacheFile).not.toHaveBeenCalledWith();
+    expect(fs.outputCacheFile).not.toHaveBeenCalledExactlyOnceWith();
   });
 
   it('does not write cache when only key order has changed', async () => {
@@ -252,6 +255,6 @@ describe('util/cache/repository/impl/local', () => {
 
     await localRepoCache.save();
 
-    expect(fs.outputCacheFile).not.toHaveBeenCalledWith();
+    expect(fs.outputCacheFile).not.toHaveBeenCalledExactlyOnceWith();
   });
 });

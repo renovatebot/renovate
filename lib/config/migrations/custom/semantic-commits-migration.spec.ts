@@ -1,8 +1,8 @@
 import { SemanticCommitsMigration } from './semantic-commits-migration';
 
 describe('config/migrations/custom/semantic-commits-migration', () => {
-  it('should migrate true to "enabled"', () => {
-    expect(SemanticCommitsMigration).toMigrate(
+  it('should migrate true to "enabled"', async () => {
+    await expect(SemanticCommitsMigration).toMigrate(
       {
         semanticCommits: true,
       } as any,
@@ -10,8 +10,8 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
     );
   });
 
-  it('should migrate false to "disabled"', () => {
-    expect(SemanticCommitsMigration).toMigrate(
+  it('should migrate false to "disabled"', async () => {
+    await expect(SemanticCommitsMigration).toMigrate(
       {
         semanticCommits: false,
       } as any,
@@ -19,8 +19,8 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
     );
   });
 
-  it('should migrate null to "auto"', () => {
-    expect(SemanticCommitsMigration).toMigrate(
+  it('should migrate null to "auto"', async () => {
+    await expect(SemanticCommitsMigration).toMigrate(
       {
         semanticCommits: null,
       } as any,
@@ -28,8 +28,8 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
     );
   });
 
-  it('should migrate random string to "auto"', () => {
-    expect(SemanticCommitsMigration).toMigrate(
+  it('should migrate random string to "auto"', async () => {
+    await expect(SemanticCommitsMigration).toMigrate(
       {
         semanticCommits: 'test',
       } as any,
@@ -37,8 +37,8 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
     );
   });
 
-  it('should not migrate valid enabled config', () => {
-    expect(SemanticCommitsMigration).toMigrate(
+  it('should not migrate valid enabled config', async () => {
+    await expect(SemanticCommitsMigration).toMigrate(
       {
         semanticCommits: 'enabled',
       } as any,
@@ -47,8 +47,8 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
     );
   });
 
-  it('should not migrate valid disabled config', () => {
-    expect(SemanticCommitsMigration).toMigrate(
+  it('should not migrate valid disabled config', async () => {
+    await expect(SemanticCommitsMigration).toMigrate(
       {
         semanticCommits: 'disabled',
       } as any,

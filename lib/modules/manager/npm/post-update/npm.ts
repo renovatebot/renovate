@@ -87,7 +87,7 @@ export async function generateLockFile(
     const supportsPreferDedupeFlag =
       !npmToolConstraint.constraint ||
       semver.intersects('>=7.0.0', npmToolConstraint.constraint);
-    const commands: string[] = [];
+    let commands: string[] = [];
     let cmdOptions = '';
     if (
       (postUpdateOptions?.includes('npmDedupe') === true &&
@@ -194,6 +194,20 @@ export async function generateLockFile(
           'Error removing `package-lock.json` for lock file maintenance',
         );
       } /* v8 ignore stop -- needs test */
+    }
+
+    if (postUpdateOptions?.includes('npmInstallTwice')) {
+      logger.debug('Running npm install twice');
+      // Run the install command twice to ensure the lock file is up to date
+      // iterate through commands and if any command starts with `npm install`, add it again
+      const existingCommands = [...commands];
+      commands = [];
+      for (const command of existingCommands) {
+        commands.push(command);
+        if (command.startsWith('npm install')) {
+          commands.push(command);
+        }
+      }
     }
 
     // Run the commands

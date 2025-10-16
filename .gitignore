@@ -1,6 +1,5 @@
 /node_modules
 /.pnpm-store
-/config.js*
 /coverage
 /dist
 /tmp
@@ -26,7 +25,11 @@ tools/dist
 test/datasource/nuget/_fixtures/obj
 
 # testing
+/.env
+/.envrc
+/config.js*
 /docker-compose.yml
+/report*.json
 
 # pdm
 /.pdm-python

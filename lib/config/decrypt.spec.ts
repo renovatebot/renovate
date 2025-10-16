@@ -32,6 +32,7 @@ describe('config/decrypt', () => {
 
       const res = await decryptConfig(config, repository);
 
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.once.warn).toHaveBeenCalledWith('text');
       expect(res.encrypted).toBeUndefined();
       expect(res.a).toBeUndefined();

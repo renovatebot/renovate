@@ -1476,8 +1476,8 @@ describe('modules/platform/azure/index', () => {
         number: 42,
         topic: 'some-subject',
       });
-      expect(gitApiMock.getThreads).toHaveBeenCalledWith('1', 42);
-      expect(gitApiMock.updateThread).toHaveBeenCalledWith(
+      expect(gitApiMock.getThreads).toHaveBeenCalledExactlyOnceWith('1', 42);
+      expect(gitApiMock.updateThread).toHaveBeenCalledExactlyOnceWith(
         { status: 4 },
         '1',
         42,
@@ -1492,8 +1492,8 @@ describe('modules/platform/azure/index', () => {
         number: 42,
         content: 'some-content',
       });
-      expect(gitApiMock.getThreads).toHaveBeenCalledWith('1', 42);
-      expect(gitApiMock.updateThread).toHaveBeenCalledWith(
+      expect(gitApiMock.getThreads).toHaveBeenCalledExactlyOnceWith('1', 42);
+      expect(gitApiMock.updateThread).toHaveBeenCalledExactlyOnceWith(
         { status: 4 },
         '1',
         42,
@@ -1508,7 +1508,7 @@ describe('modules/platform/azure/index', () => {
         number: 42,
         topic: 'does-not-exist',
       });
-      expect(gitApiMock.getThreads).toHaveBeenCalledWith('1', 42);
+      expect(gitApiMock.getThreads).toHaveBeenCalledExactlyOnceWith('1', 42);
       expect(gitApiMock.updateThread).not.toHaveBeenCalled();
     });
   });
@@ -1633,7 +1633,7 @@ describe('modules/platform/azure/index', () => {
         state: 'yellow',
         url: 'test.com',
       });
-      expect(createCommitStatusMock).toHaveBeenCalledWith(
+      expect(createCommitStatusMock).toHaveBeenCalledExactlyOnceWith(
         {
           context: {
             genre: undefined,
@@ -1665,7 +1665,7 @@ describe('modules/platform/azure/index', () => {
         state: 'green',
         url: 'test.com',
       });
-      expect(createCommitStatusMock).toHaveBeenCalledWith(
+      expect(createCommitStatusMock).toHaveBeenCalledExactlyOnceWith(
         {
           context: {
             genre: 'renovate/artifact',
@@ -1712,7 +1712,7 @@ describe('modules/platform/azure/index', () => {
         strategy: 'auto',
       });
 
-      expect(updatePullRequestMock).toHaveBeenCalledWith(
+      expect(updatePullRequestMock).toHaveBeenCalledExactlyOnceWith(
         {
           status: PullRequestStatus.Completed,
           lastMergeSourceCommit: lastMergeSourceCommitMock,
@@ -1765,7 +1765,7 @@ describe('modules/platform/azure/index', () => {
           strategy: automergeStrategy,
         });
 
-        expect(updatePullRequestMock).toHaveBeenCalledWith(
+        expect(updatePullRequestMock).toHaveBeenCalledExactlyOnceWith(
           {
             status: PullRequestStatus.Completed,
             lastMergeSourceCommit: lastMergeSourceCommitMock,

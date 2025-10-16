@@ -43,7 +43,7 @@ describe('util/github/tags', () => {
         http,
       );
       expect(commit).toBeNull();
-      expect(githubGraphql.queryTags).toHaveBeenCalledWith(
+      expect(githubGraphql.queryTags).toHaveBeenCalledExactlyOnceWith(
         {
           packageName: 'some-org/repo',
           registryUrl: 'https://my-enterprise-github.dev',

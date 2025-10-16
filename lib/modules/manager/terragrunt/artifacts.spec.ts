@@ -42,13 +42,16 @@ describe('modules/manager/terragrunt/artifacts', () => {
       ...config,
     };
 
-    await updateArtifacts({
+    const param = {
       packageFileName: '',
       updatedDeps: [],
       newPackageFileContent: '',
       config: localConfig,
-    });
-    expect(terraformLockfile.updateArtifacts).toHaveBeenCalledOnce();
+    };
+    await updateArtifacts(param);
+    expect(terraformLockfile.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
+      param,
+    );
   });
 
   it.each(updateTypes)(

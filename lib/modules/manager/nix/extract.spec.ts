@@ -659,4 +659,51 @@ describe('modules/manager/nix/extract', () => {
       ],
     });
   });
+
+  it('ignores unsupported file type and still extracts other inputs', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "file": {
+          "flake": false,
+          "locked": {
+            "narHash": "sha256-55ZgnQaZD3uRr/Dom05x0K7ui4+Fnb6H30jW5Eu3ZE0=",
+            "type": "file",
+            "url": "https://raw.githubusercontent.com/NixOS/nixpkgs/a69c58b926f609e5b9c56b25b075d2af9a5b7dc5/README.md"
+          },
+          "original": {
+            "type": "file",
+            "url": "https://raw.githubusercontent.com/NixOS/nixpkgs/a69c58b926f609e5b9c56b25b075d2af9a5b7dc5/README.md"
+          }
+        },
+        "nixpkgs": {
+          "locked": {
+            "lastModified": 1757068644,
+            "narHash": "sha256-NOrUtIhTkIIumj1E/Rsv1J37Yi3xGStISEo8tZm3KW4=",
+            "owner": "NixOS",
+            "repo": "nixpkgs",
+            "rev": "8eb28adfa3dc4de28e792e3bf49fcf9007ca8ac9",
+            "type": "github"
+          },
+          "original": {
+            "owner": "NixOS",
+            "ref": "nixos-unstable",
+            "repo": "nixpkgs",
+            "type": "github"
+          }
+        },
+        "root": {
+          "inputs": {
+            "file": "file",
+            "nixpkgs": "nixpkgs"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    const result = await extractPackageFile('', 'flake.nix');
+    expect(result?.deps).toHaveLength(1);
+    expect(result?.deps[0].depName).toBe('nixpkgs');
+  });
 });

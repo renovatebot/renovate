@@ -22,6 +22,7 @@ export const defaults = {
 export function prInfo(mr: GitLabMergeRequest): GitlabPr {
   const pr: GitlabPr = {
     sourceBranch: mr.source_branch,
+    targetBranch: mr.target_branch,
     state: mr.state === 'opened' ? 'open' : mr.state,
     number: mr.iid,
     title: mr.title,

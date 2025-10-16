@@ -345,6 +345,115 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       ]);
     });
 
+    it('does not set locked versions for engines, packageManager, and volta deps', async () => {
+      npm.getNpmLock.mockResolvedValue({
+        lockedVersions: {
+          npm: '1.2.3',
+          yarn: '2.3.4',
+          pnpm: '3.4.5',
+        },
+        lockfileVersion: 3,
+      });
+      const packageFiles = [
+        {
+          managerData: { npmLock: 'package-lock.json' },
+          extractedConstraints: {},
+          deps: [
+            {
+              depName: 'npm',
+              currentValue: '^1.0.0',
+              depType: 'devDependencies',
+              datasource: 'npm',
+            },
+            {
+              depName: 'yarn',
+              currentValue: '^2.0.0',
+              depType: 'devDependencies',
+              datasource: 'npm',
+            },
+            {
+              depName: 'pnpm',
+              currentValue: '^3.0.0',
+              depType: 'devDependencies',
+              datasource: 'npm',
+            },
+            {
+              depName: 'npm',
+              currentValue: '2.0.0',
+              depType: 'engines',
+              datasource: 'npm',
+            },
+            {
+              depName: 'yarn',
+              currentValue: '3.0.0',
+              depType: 'packageManager',
+              datasource: 'npm',
+            },
+            {
+              depName: 'pnpm',
+              currentValue: '4.0.0',
+              depType: 'volta',
+              datasource: 'npm',
+            },
+          ],
+          packageFile: 'package.json',
+        },
+      ];
+      await getLockedVersions(packageFiles);
+      expect(packageFiles).toEqual([
+        {
+          extractedConstraints: { npm: '>=7' },
+          deps: [
+            {
+              depName: 'npm',
+              currentValue: '^1.0.0',
+              depType: 'devDependencies',
+              lockedVersion: '1.2.3',
+              datasource: 'npm',
+            },
+            {
+              depName: 'yarn',
+              currentValue: '^2.0.0',
+              depType: 'devDependencies',
+              lockedVersion: '2.3.4',
+              datasource: 'npm',
+            },
+            {
+              depName: 'pnpm',
+              currentValue: '^3.0.0',
+              depType: 'devDependencies',
+              lockedVersion: '3.4.5',
+              datasource: 'npm',
+            },
+            {
+              depName: 'npm',
+              currentValue: '2.0.0',
+              depType: 'engines',
+              datasource: 'npm',
+              // engines deps should NOT have lockedVersion
+            },
+            {
+              depName: 'yarn',
+              currentValue: '3.0.0',
+              depType: 'packageManager',
+              datasource: 'npm',
+              // packageManager deps should NOT have lockedVersion
+            },
+            {
+              depName: 'pnpm',
+              currentValue: '4.0.0',
+              depType: 'volta',
+              datasource: 'npm',
+              // volta deps should NOT have lockedVersion
+            },
+          ],
+          lockFiles: ['package-lock.json'],
+          managerData: { npmLock: 'package-lock.json' },
+          packageFile: 'package.json',
+        },
+      ]);
+    });
+
     it('does nothing if managerData is not present', async () => {
       npm.getNpmLock.mockResolvedValue({
         lockedVersions: { a: '1.0.0', b: '2.0.0', c: '3.0.0' },
@@ -855,6 +964,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
     ];
     await getLockedVersions(packageFiles);
     expect(packageFiles).toEqual(packageFiles);
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.logger.warn).toHaveBeenCalledWith(
       {
         lockfileVersion: 99,

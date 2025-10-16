@@ -1,8 +1,8 @@
 import { TrustLevelMigration } from './trust-level-migration';
 
 describe('config/migrations/custom/trust-level-migration', () => {
-  it('should handle hight level', () => {
-    expect(TrustLevelMigration).toMigrate(
+  it('should handle hight level', async () => {
+    await expect(TrustLevelMigration).toMigrate(
       {
         trustLevel: 'high',
       },
@@ -14,8 +14,8 @@ describe('config/migrations/custom/trust-level-migration', () => {
     );
   });
 
-  it('should not rewrite provided properties', () => {
-    expect(TrustLevelMigration).toMigrate(
+  it('should not rewrite provided properties', async () => {
+    await expect(TrustLevelMigration).toMigrate(
       {
         allowCustomCrateRegistries: false,
         allowScripts: false,

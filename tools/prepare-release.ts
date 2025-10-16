@@ -32,7 +32,7 @@ void (async () => {
   const opts = program.opts();
   logger.info(`Preparing v${opts.version} ...`);
   build();
-  await generateDocs();
+  await generateDocs(undefined, undefined, opts.version);
   await bake('build', opts);
 })();
 

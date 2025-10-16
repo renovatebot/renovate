@@ -54,6 +54,7 @@ describe('workers/repository/update/branch/check-existing', () => {
       );
       expect(await prAlreadyExisted(config)).toEqual({ number: 12 });
       expect(platform.findPr).toHaveBeenCalledTimes(2);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         `Found closed PR with current title`,
       );

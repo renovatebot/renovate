@@ -95,17 +95,21 @@ describe('workers/repository/finalize/prune', () => {
       scm.isBranchModified.mockResolvedValueOnce(true);
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getBranchList).toHaveBeenCalledTimes(1);
-      expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
-      expect(scm.deleteBranch).toHaveBeenCalledWith('renovate/maint/v7-a');
+      expect(scm.deleteBranch).toHaveBeenCalledExactlyOnceWith(
+        'renovate/maint/v7-a',
+      );
       expect(scm.isBranchModified).toHaveBeenCalledTimes(3);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(scm.isBranchModified).toHaveBeenCalledWith(
         'renovate/main-b',
         'main',
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(scm.isBranchModified).toHaveBeenCalledWith(
         'renovate/maint/v7-a',
         'maint/v7',
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(scm.isBranchModified).toHaveBeenCalledWith(
         'renovate/maint/v7-b',
         'maint/v7',
