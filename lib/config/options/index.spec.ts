@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import * as manager from '../../modules/manager';
 import * as platform from '../../modules/platform';
 import { getOptions } from '.';
@@ -46,5 +47,23 @@ describe('config/options/index', () => {
     const optsNames = getOptions().map((option) => option.name);
     const optsNameSet = new Set(optsNames);
     expect(optsNames).toHaveLength(optsNameSet.size);
+  });
+
+  describe('every option with allowedValues and a default must have the default in allowedValues', () => {
+    const opts = getOptions();
+    for (const option of opts) {
+      if (option.allowedValues && !is.nullOrUndefined(option.default)) {
+        it(`${option.name}: \`${option.default}\` is in ${JSON.stringify(option.allowedValues)}`, () => {
+          expect(option.allowedValues).toBeDefined();
+
+          const defaults = Array.isArray(option.default)
+            ? option.default
+            : [option.default];
+          for (const defVal of defaults) {
+            expect(option.allowedValues).toContain(defVal);
+          }
+        });
+      }
+    }
   });
 });
