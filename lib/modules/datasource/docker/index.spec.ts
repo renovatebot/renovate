@@ -2186,7 +2186,7 @@ describe('modules/datasource/docker/index', () => {
         {
           version: '0.9.0',
           newDigest: 'bbb',
-          releaseTimestamp: '2020-01-01T00:00:00.000Z',
+          // no releaseTimestamp
         },
         {
           version: '1.0.0',
@@ -2195,6 +2195,7 @@ describe('modules/datasource/docker/index', () => {
         },
       ]);
 
+      expect(res?.releases[0].releaseTimestamp).toBeUndefined();
       expect(res?.releases[1].releaseTimestamp).toBeUndefined();
     });
 

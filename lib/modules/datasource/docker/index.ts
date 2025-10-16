@@ -1043,6 +1043,14 @@ export class DockerDatasource extends Datasource {
 
         if (newDigest) {
           release.newDigest = newDigest;
+
+          // NOTE Docker Hub's `tag_last_pushed` is used to denote the last push to this tag, and is for the last digest that this tag points to. This means that the use of `tag_last_pushed` for our digest's releaseTimestamp will differ from the actual time that the digest was created, and instead of causing confusion, we do not attach this, until #38656 is implemented to look up the digest-level metadata
+          // TODO #38656
+          logger.debug(
+            { dockerRepository, newDigest },
+            'Ensuring no releaseTimestamp from Docker Hub on digest',
+          );
+          release.releaseTimestamp = undefined;
         }
 
         return release;
