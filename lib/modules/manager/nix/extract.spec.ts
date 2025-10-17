@@ -22,7 +22,7 @@ describe('modules/manager/nix/extract', () => {
   it('returns null when flake.lock cannot be parsed', async () => {
     fs.readLocalFile.mockResolvedValueOnce('{ invalid json');
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
-    expect(logger.logger.debug).toHaveBeenCalledWith(
+    expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
       { flakeLockFile: 'flake.lock', error: expect.any(ZodError) },
       'invalid flake.lock file',
     );
@@ -36,7 +36,7 @@ describe('modules/manager/nix/extract', () => {
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
-    expect(logger.logger.debug).toHaveBeenCalledWith(
+    expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
       { flakeLockFile: 'flake.lock' },
       'flake.lock is missing "root" node',
     );
@@ -96,7 +96,7 @@ describe('modules/manager/nix/extract', () => {
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
-    expect(logger.logger.debug).toHaveBeenCalledWith(
+    expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
       {
         flakeLockFile: 'flake.lock',
         flakeInput: {
@@ -136,7 +136,7 @@ describe('modules/manager/nix/extract', () => {
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
-    expect(logger.logger.debug).toHaveBeenCalledWith(
+    expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
       {
         flakeLockFile: 'flake.lock',
         flakeInput: {
@@ -180,7 +180,7 @@ describe('modules/manager/nix/extract', () => {
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
-    expect(logger.logger.debug).toHaveBeenCalledWith(
+    expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
       {
         flakeLockFile: 'flake.lock',
         flakeInput: {
@@ -230,7 +230,7 @@ describe('modules/manager/nix/extract', () => {
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
-    expect(logger.logger.debug).toHaveBeenCalledWith(
+    expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
       {
         flakeLockFile: 'flake.lock',
         flakeInput: {
@@ -280,7 +280,7 @@ describe('modules/manager/nix/extract', () => {
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
-    expect(logger.logger.debug).toHaveBeenCalledWith(
+    expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
       {
         flakeLockFile: 'flake.lock',
         flakeInput: {
@@ -326,7 +326,7 @@ describe('modules/manager/nix/extract', () => {
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
-    expect(logger.logger.debug).toHaveBeenCalledWith(
+    expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
       {
         flakeLockFile: 'flake.lock',
         flakeInput: {
