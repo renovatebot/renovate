@@ -1,6 +1,6 @@
 import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
-import { getHttpUrl } from '../../../util/git/url';
+import { parseGitUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
@@ -116,8 +116,7 @@ export async function extractPackageFile(
 
     switch (flakeLocked.type) {
       case 'git':
-        // Convert SSH URLs to HTTPS for proper sourceUrl handling
-        dep.packageName = getHttpUrl(flakeOriginal.url!);
+        dep.packageName = parseGitUrl(flakeOriginal.url!).toString();
         break;
 
       case 'github':
