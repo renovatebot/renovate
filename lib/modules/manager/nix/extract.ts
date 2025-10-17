@@ -169,7 +169,7 @@ export async function extractPackageFile(
     }
 
     if (flakeLocked.type !== 'tarball') {
-      dep.sourceUrl = getHttpUrl(dep.packageName).replace(/\.git$/, '');
+      dep.sourceUrl = getHttpUrl(dep.packageName!).replace(/\.git$/, '');
     }
 
     deps.push(dep);
