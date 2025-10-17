@@ -117,7 +117,6 @@ export async function extractPackageFile(
     switch (flakeLocked.type) {
       case 'git':
         dep.packageName = parseGitUrl(flakeOriginal.url!).toString();
-        dep.sourceUrl = getHttpUrl(flakeOriginal.url!).replace(/\.git$/, '');
         break;
 
       case 'github':
@@ -162,6 +161,10 @@ export async function extractPackageFile(
           'https://$<domain>/$<owner>/$<repo>',
         );
         break;
+    }
+
+    if (flakeLocked.type !== 'tarball') {
+      dep.sourceUrl = getHttpUrl(dep.packageName).replace(/\.git$/, '');
     }
 
     deps.push(dep);

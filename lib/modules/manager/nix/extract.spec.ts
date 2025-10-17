@@ -684,6 +684,7 @@ describe('modules/manager/nix/extract', () => {
             datasource: GitRefsDatasource.id,
             depName: 'flake-parts',
             packageName: 'https://github.com/hercules-ci/flake-parts',
+            sourceUrl: 'https://github.com/hercules-ci/flake-parts',
           },
         ],
       });
@@ -729,6 +730,7 @@ describe('modules/manager/nix/extract', () => {
             datasource: GitRefsDatasource.id,
             depName: 'flake-parts',
             packageName: 'https://github.com/hercules-ci/flake-parts',
+            sourceUrl: 'https://github.com/hercules-ci/flake-parts',
           },
         ],
       });
@@ -776,6 +778,7 @@ describe('modules/manager/nix/extract', () => {
             datasource: GitRefsDatasource.id,
             depName: 'nixpkgs',
             packageName: 'https://github.com/NixOS/nixpkgs',
+            sourceUrl: 'https://github.com/NixOS/nixpkgs',
             versioning: nixpkgsVersioning,
           },
         ],
@@ -822,6 +825,7 @@ describe('modules/manager/nix/extract', () => {
             datasource: GitRefsDatasource.id,
             depName: 'nixpkgs',
             packageName: 'https://github.com/NixOS/nixpkgs',
+            sourceUrl: 'https://github.com/NixOS/nixpkgs',
             versioning: 'nixpkgs',
           },
         ],
@@ -873,6 +877,8 @@ describe('modules/manager/nix/extract', () => {
             depName: 'nixpkgs-extra-pkgs',
             packageName:
               'https://github.corp.example.com/my-org/nixpkgs-extra-pkgs',
+            sourceUrl:
+              'https://github.corp.example.com/my-org/nixpkgs-extra-pkgs',
           },
         ],
       });
@@ -920,6 +926,7 @@ describe('modules/manager/nix/extract', () => {
             datasource: GitRefsDatasource.id,
             depName: 'home-manager',
             packageName: 'https://gitlab.com/rycee/home-manager',
+            sourceUrl: 'https://gitlab.com/rycee/home-manager',
           },
         ],
       });
@@ -969,6 +976,7 @@ describe('modules/manager/nix/extract', () => {
             datasource: GitRefsDatasource.id,
             depName: 'firefox-addons',
             packageName: 'https://git.sr.ht/~rycee/nur-expressions',
+            sourceUrl: 'https://git.sr.ht/~rycee/nur-expressions',
           },
         ],
       });
