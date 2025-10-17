@@ -198,6 +198,13 @@ export async function updateArtifacts({
     logger.trace({ cmd, args }, 'composer command');
     commands.push(`${cmd} ${args}`);
 
+    if (config.postUpdateOptions?.includes('composerBump')) {
+      const bumpCmd = 'composer bump';
+      const bumpArgs = '--no-ansi --no-interaction';
+      logger.trace({ cmd: bumpCmd, args: bumpArgs }, 'composer bump command');
+      commands.push(`${bumpCmd} ${bumpArgs}`);
+    }
+
     await exec(commands, execOptions);
     const status = await getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
