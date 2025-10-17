@@ -1,6 +1,6 @@
 import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
-import { parseGitUrl } from '../../../util/git/url';
+import { getHttpUrl, parseGitUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { id as gitRefVersioning } from '../../versioning/git';
@@ -122,6 +122,7 @@ export async function extractPackageFile(
     switch (flakeLocked.type) {
       case 'git':
         dep.packageName = parseGitUrl(flakeOriginal.url!).toString();
+        dep.sourceUrl = getHttpUrl(flakeOriginal.url!).replace(/\.git$/, '');
         break;
 
       case 'github':
