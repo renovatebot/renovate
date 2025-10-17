@@ -168,7 +168,7 @@ export async function filterInternalChecks(
             candidateVersionsWithoutReleaseTimestamp['timestamp-optional'],
           check: 'minimumReleaseAge',
         },
-        `${candidateVersionsWithoutReleaseTimestamp['timestamp-optional'].length} release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=optional-timestamp, proceeding`,
+        `${candidateVersionsWithoutReleaseTimestamp['timestamp-optional'].length} release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding`,
       );
     }
 
