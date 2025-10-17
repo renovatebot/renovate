@@ -14,6 +14,7 @@ export const presets: Record<string, Preset> = {
       ':pinDevDependencies',
       'abandonments:recommended',
     ],
+    minimumReleaseAgeBehaviour: 'timestamp-required',
   },
   'js-app': {
     description: 'Default configuration for webapps.',
