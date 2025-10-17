@@ -14,7 +14,9 @@ describe('modules/manager/nix/update', () => {
         },
       });
       expect(result).toBeNull();
-      expect(logger.logger.debug).toHaveBeenCalledWith('No depName provided');
+      expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
+        'No depName provided',
+      );
     });
 
     it('returns null if dependency not found', () => {
@@ -34,7 +36,7 @@ describe('modules/manager/nix/update', () => {
         },
       });
       expect(result).toBeNull();
-      expect(logger.logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
         'Could not find URL for dependency nonexistent',
       );
     });
@@ -54,7 +56,7 @@ describe('modules/manager/nix/update', () => {
         },
       });
       expect(result).toBeNull();
-      expect(logger.logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
         'Could not parse URL for dependency nixpkgs: derp',
       );
     });
@@ -298,7 +300,8 @@ describe('modules/manager/nix/update', () => {
         },
       });
       expect(result).toBeNull();
-      expect(logger.logger.trace).toHaveBeenCalledWith(
+      expect(logger.logger.trace).toHaveBeenNthCalledWith(
+        3,
         {
           depName: 'mypackage',
           url: 'git+ssh://git@example.com/org/repo?ref=refs/tags/1.0.0',
@@ -362,7 +365,7 @@ describe('modules/manager/nix/update', () => {
         },
       });
       expect(result).toBe(fileContent);
-      expect(logger.logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
         {
           depName: 'nixpkgs-tar',
           currentDigest: '58dcbf1ec551914c3756c267b8b9c8c86baa1b2f',
@@ -433,7 +436,8 @@ describe('modules/manager/nix/update', () => {
         },
       });
       expect(result).toBeNull();
-      expect(logger.logger.trace).toHaveBeenCalledWith(
+      expect(logger.logger.trace).toHaveBeenNthCalledWith(
+        3,
         {
           depName: 'nixpkgs-tar',
           url: 'https://nixos.org/channels/nixpkgs-unstable/nixexprs.tar.xz',
