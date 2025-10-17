@@ -10,6 +10,7 @@ import {
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
 import { addExtractionStats } from '../../instrumentation/reporting';
+import { ATTR_RENOVATE_SPLIT } from '../../instrumentation/types';
 import { logger, setMeta } from '../../logger';
 import { resetRepositoryLogLevelRemaps } from '../../logger/remap';
 import { removeDanglingContainers } from '../../util/exec/docker';
@@ -74,7 +75,11 @@ export async function renovateRepository(
       !OnboardingState.onboardingCacheValid ||
       OnboardingState.prUpdateRequested;
     const extractResult = performExtract
-      ? await instrument('extract', () => extractDependencies(config))
+      ? await instrument('extract', () => extractDependencies(config), {
+          attributes: {
+            [ATTR_RENOVATE_SPLIT]: 'extract',
+          },
+        })
       : emptyExtract(config);
     addExtractionStats(config, extractResult);
 
@@ -88,12 +93,24 @@ export async function renovateRepository(
       GlobalConfig.get('dryRun') !== 'lookup' &&
       GlobalConfig.get('dryRun') !== 'extract'
     ) {
-      await instrument('onboarding', () =>
-        ensureOnboardingPr(config, packageFiles, branches),
+      await instrument(
+        'onboarding',
+        () => ensureOnboardingPr(config, packageFiles, branches),
+        {
+          attributes: {
+            [ATTR_RENOVATE_SPLIT]: 'onboarding',
+          },
+        },
       );
       addSplit('onboarding');
-      const res = await instrument('update', () =>
-        updateRepo(config, branches),
+      const res = await instrument(
+        'update',
+        () => updateRepo(config, branches),
+        {
+          attributes: {
+            [ATTR_RENOVATE_SPLIT]: 'update',
+          },
+        },
       );
       setMeta({ repository: config.repository });
       addSplit('update');
