@@ -516,7 +516,7 @@ describe('modules/manager/nix/extract', () => {
             currentValue: 'v1.7.2',
             datasource: GitRefsDatasource.id,
             depName: 'cachix',
-            packageName: 'git@github.com:cachix/cachix.git',
+            packageName: 'https://github.com/cachix/cachix.git',
           },
         ],
       });
@@ -629,7 +629,53 @@ describe('modules/manager/nix/extract', () => {
             currentDigest: '64334fda8d632bec7c80c9bef668ad9633a8dd64',
             datasource: GitRefsDatasource.id,
             depName: 'nixpkgs-ssh',
-            packageName: 'git@github.com:NixOS/nixpkgs.git',
+            packageName: 'https://github.com/NixOS/nixpkgs.git',
+          },
+        ],
+      });
+    });
+
+    it('supports subdirectories', async () => {
+      const flakeNix = codeBlock`{
+        inputs = {
+          example.url = "git+https://github.com/example/example.git?rev=64334fda8d632bec7c80c9bef668ad9633a8dd64&dir=subdir";
+        };
+      }`;
+      const flakeLock = codeBlock`{
+        "nodes": {
+          "example": {
+            "locked": {
+              "lastModified": 1758007619,
+              "narHash": "sha256-ADv63t4pEj5zhTAggwzyCbSpQosDtxKy0qg9cB9a1Eo=",
+              "ref": "refs/heads/master",
+              "rev": "64334fda8d632bec7c80c9bef668ad9633a8dd64",
+              "revCount": 862499,
+              "type": "git",
+              "url": "https://github.com/NixOS/nixpkgs.git?depth=1"
+            },
+            "original": {
+              "rev": "64334fda8d632bec7c80c9bef668ad9633a8dd64",
+              "type": "git",
+              "url": "https://github.com/example/example.git?dir=subdir"
+            }
+          },
+          "root": {
+            "inputs": {
+              "example": "example"
+            }
+          }
+        },
+        "root": "root",
+        "version": 7
+      }`;
+      fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+      expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
+        deps: [
+          {
+            currentDigest: '64334fda8d632bec7c80c9bef668ad9633a8dd64',
+            datasource: GitRefsDatasource.id,
+            depName: 'example',
+            packageName: 'https://github.com/example/example.git',
           },
         ],
       });
