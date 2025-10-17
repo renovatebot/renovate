@@ -62,6 +62,7 @@ describe('modules/manager/gradle/extract', () => {
     });
     await extractAllPackageFiles(partial<ExtractConfig>(), [filename]);
 
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.logger.debug).toHaveBeenCalledWith(
       { err, config: {}, packageFile: filename },
       `Failed to process Gradle file`,
