@@ -2,12 +2,14 @@ import is from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
+import { parseJsonWithFallback } from '../../../../util/common';
 import {
   findLocalSiblingOrParent,
   getSiblingFileName,
   readLocalFile,
 } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
+import { parseSingleYaml } from '../../../../util/yaml';
 import { NpmDatasource } from '../../../datasource/npm';
 
 import type {
@@ -41,11 +43,20 @@ export async function extractPackageFile(
   logger.trace(`npm.extractPackageFile(${packageFile})`);
   logger.trace({ content });
   let packageJson: NpmPackage;
-  try {
-    packageJson = JSON.parse(content);
-  } catch {
-    logger.debug({ packageFile }, `Invalid JSON`);
-    return null;
+  if (/\.ya?ml$/.test(packageFile)) {
+    try {
+      packageJson = parseSingleYaml(content);
+    } catch {
+      logger.debug({ packageFile }, `Invalid YAML`);
+      return null;
+    }
+  } else {
+    try {
+      packageJson = parseJsonWithFallback(content, packageFile) as NpmPackage;
+    } catch {
+      logger.debug({ packageFile }, `Invalid JSON`);
+      return null;
+    }
   }
 
   const res = extractPackageJson(packageJson, packageFile);
@@ -255,8 +266,8 @@ export async function extractAllPackageFiles(
           });
         }
       } else {
-        if (packageFile.endsWith('json')) {
-          logger.trace({ packageFile }, `Extracting as a package.json file`);
+        if (packageFile.startsWith('package.')) {
+          logger.trace({ packageFile }, `Extracting as a ${packageFile} file`);
 
           const deps = await extractPackageFile(content, packageFile, config);
           if (deps) {
