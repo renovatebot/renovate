@@ -82,9 +82,6 @@ export async function updateArtifacts(
 
     // "deno install" don't execute lifecycle scripts of package.json by default
     // https://docs.deno.com/runtime/reference/cli/install/#native-node.js-addons
-    // NOTE: Specifying individual packages e.g. "deno install <datasource>:<package>@<version>"
-    // could be better to reduce registry queries, but does not support the http import module
-    // https://docs.deno.com/runtime/reference/cli/install/#deno-install-%5Bpackages%5D
     await exec('deno install', execOptions);
 
     const newLockFileContent = await readLocalFile(lockFileName);
