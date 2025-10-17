@@ -18,6 +18,20 @@ import { generateHelmEnvs } from '../helmv3/common';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { Doc, LockVersion } from './schema';
 import { generateRegistryLoginCmd, isOCIRegistry } from './utils';
+import * as path from 'path';
+
+/**
+ * Derive the lockfile path from the given packageFileName.
+ * Example:
+ *   helmfile.d/foo.yaml       -> helmfile.d/foo.lock
+ *   helmfile.d/bar.yaml.gotmpl -> helmfile.d/bar.lock
+ */
+function deriveLockFileName(packageFileName: string): string {
+  const dir = path.dirname(packageFileName);
+  const base = path.basename(packageFileName)
+    .replace(/\.yaml(\.gotmpl)?$/, ''); // strip .yaml or .yaml.gotmpl
+  return path.join(dir, `${base}.lock`);
+}
 
 export async function updateArtifacts({
   packageFileName,
@@ -36,11 +50,11 @@ export async function updateArtifacts({
     return null;
   }
 
-  const lockFileName = getSiblingFileName(packageFileName, 'helmfile.lock');
+  const lockFileName = deriveLockFileName(packageFileName);
   const existingLockFileContent = await getFile(lockFileName);
 
   if (is.falsy(existingLockFileContent)) {
-    logger.debug('No helmfile.lock found');
+    logger.debug(`No lock file found for ${packageFileName} (${lockFileName})`);
     return null;
   }
 
@@ -81,7 +95,7 @@ export async function updateArtifacts({
         const loginCmd = await generateRegistryLoginCmd(
           value.name,
           `https://${value.url}`,
-          // this extracts the hostname from url like format ghcr.ip/helm-charts
+          // this extracts the hostname from url-like format (e.g. ghcr.io/helm-charts → ghcr.io)
           value.url.replace(regEx(/\/.*/), ''),
         );
 
@@ -100,7 +114,7 @@ export async function updateArtifacts({
 
     const newHelmLockContent = await readLocalFile(lockFileName, 'utf8');
     if (existingLockFileContent === newHelmLockContent) {
-      logger.debug('helmfile.lock is unchanged');
+      logger.debug(`${lockFileName} is unchanged`);
       return null;
     }
 
