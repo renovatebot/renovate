@@ -44,6 +44,31 @@ describe('workers/repository/process/limits', () => {
     });
   });
 
+  describe('getCommitHourlyCount()', () => {
+    it('calculates hourly commit count', async () => {
+      const time = DateTime.local();
+      scm.getBranchUpdateDate.mockResolvedValueOnce(time);
+      scm.getBranchUpdateDate.mockResolvedValueOnce(time);
+      scm.getBranchUpdateDate.mockResolvedValueOnce(time.minus({ hours: 1 }));
+      scm.getBranchUpdateDate.mockResolvedValueOnce(time);
+      const res = await limits.getCommitsHourlyCount([
+        { branchName: 'foo/test-1' },
+        { branchName: 'foo/test-2' },
+        { branchName: 'foo/test-3' },
+        { branchName: 'foo/test-4' },
+      ] as never);
+      expect(res).toBe(3);
+    });
+
+    it('returns zero if errored', async () => {
+      scm.getBranchUpdateDate.mockRejectedValue('Unknown error');
+      const res = await limits.getCommitsHourlyCount([
+        { branchName: 'foo/test-1' },
+      ] as never);
+      expect(res).toBe(0);
+    });
+  });
+
   describe('getConcurrentPrsCount()', () => {
     it('calculates concurrent prs present', async () => {
       platform.getBranchPr.mockImplementation((branchName) =>
