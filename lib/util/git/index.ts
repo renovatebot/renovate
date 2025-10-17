@@ -122,11 +122,18 @@ async function isDirectory(dir: string): Promise<boolean> {
   }
 }
 
+import { instrument } from './instrument';
+
 async function getDefaultBranch(git: SimpleGit): Promise<string> {
   logger.debug('getDefaultBranch()');
   // see https://stackoverflow.com/a/62352647/3005034
   try {
     let res = await git.raw(['rev-parse', '--abbrev-ref', 'origin/HEAD']);
+
+    res = await instrument('other', async () => {
+      await git.raw(['rev-parse', '--abbrev-ref', 'origin/HEAD']);
+    });
+
     /* v8 ignore start -- TODO: add test */
     if (!res) {
       logger.debug('Could not determine default branch using git rev-parse');
