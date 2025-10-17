@@ -246,7 +246,10 @@ describe('modules/manager/nix/artifacts', () => {
       },
     ]);
 
-    expect(fs.writeLocalFile).toHaveBeenCalledWith('flake.nix', newContent);
+    expect(fs.writeLocalFile).toHaveBeenCalledExactlyOnceWith(
+      'flake.nix',
+      newContent,
+    );
     expect(execSnapshots).toMatchObject([{ cmd: updateInputCmd }]);
   });
 
