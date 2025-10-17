@@ -9,7 +9,7 @@ exports[`logger/err-serializer > got > sanitize http error 1`] = `
     "headers": {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "user-agent": "Renovate/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "hostType": "any",
     "http2": false,
