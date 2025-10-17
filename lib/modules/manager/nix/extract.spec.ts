@@ -425,6 +425,7 @@ describe('modules/manager/nix/extract', () => {
             datasource: GitRefsDatasource.id,
             depName: 'cachix',
             packageName: 'https://github.com/cachix/cachix.git',
+            sourceUrl: 'https://github.com/cachix/cachix',
           },
         ],
       });
@@ -470,6 +471,7 @@ describe('modules/manager/nix/extract', () => {
             datasource: GitRefsDatasource.id,
             depName: 'cachix',
             packageName: 'https://github.com/cachix/cachix.git',
+            sourceUrl: 'https://github.com/cachix/cachix',
           },
         ],
       });
@@ -517,6 +519,7 @@ describe('modules/manager/nix/extract', () => {
             datasource: GitRefsDatasource.id,
             depName: 'cachix',
             packageName: 'git@github.com:cachix/cachix.git',
+            sourceUrl: 'https://github.com/cachix/cachix',
           },
         ],
       });
@@ -561,6 +564,7 @@ describe('modules/manager/nix/extract', () => {
             datasource: GitRefsDatasource.id,
             depName: 'cachix',
             packageName: 'https://github.com/cachix/cachix.git',
+            sourceUrl: 'https://github.com/cachix/cachix',
           },
         ],
       });
@@ -624,12 +628,14 @@ describe('modules/manager/nix/extract', () => {
             datasource: GitRefsDatasource.id,
             depName: 'nixpkgs-https',
             packageName: 'https://github.com/NixOS/nixpkgs.git',
+            sourceUrl: 'https://github.com/NixOS/nixpkgs',
           },
           {
             currentDigest: '64334fda8d632bec7c80c9bef668ad9633a8dd64',
             datasource: GitRefsDatasource.id,
             depName: 'nixpkgs-ssh',
             packageName: 'git@github.com:NixOS/nixpkgs.git',
+            sourceUrl: 'https://github.com/NixOS/nixpkgs',
           },
         ],
       });
