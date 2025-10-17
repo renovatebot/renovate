@@ -37,6 +37,7 @@ function getManagerLink(manager: string): string {
 
 export const CategoryNames: Record<Category, string> = {
   ansible: 'Ansible',
+  alpine: 'Alpine',
   batect: 'Batect',
   bazel: 'Bazel',
   c: 'C and C++',

@@ -35,6 +35,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'cocoapods',
     versioning: rubyVersioningId,
   },
+  apko: {
+    datasource: 'github-releases',
+    packageName: 'chainguard-dev/apko',
+    versioning: semverVersioningId,
+  },
   composer: {
     datasource: 'github-releases',
     packageName: 'containerbase/composer-prebuild',
