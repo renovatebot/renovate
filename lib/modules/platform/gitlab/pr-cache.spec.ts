@@ -27,6 +27,7 @@ const pr1: GitLabMergeRequest = {
   merge_status: 'cannot_be_merged',
   description: 'a merge request',
   sha: 'defg' as LongCommitSha,
+  assignee: null,
 };
 
 const pr2: GitLabMergeRequest = {
