@@ -596,7 +596,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.23.0',
+    default: 'ghcr.io/containerbase/sidecar:13.23.2',
     globalOnly: true,
   },
   {
@@ -1976,6 +1976,14 @@ const options: RenovateOptions[] = [
     description: 'Time required before a new release is considered stable.',
     type: 'string',
     default: null,
+  },
+  {
+    name: 'minimumReleaseAgeBehaviour',
+    description:
+      'When set in conjunction with `minimumReleaseAge`, controls whether the `releaseTimestamp` for a dependency update is required.',
+    type: 'string',
+    default: 'timestamp-optional',
+    allowedValues: ['timestamp-required', 'timestamp-optional'],
   },
   {
     name: 'abandonmentThreshold',

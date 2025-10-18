@@ -220,6 +220,9 @@ export type RenovateRepository =
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
+export type MinimumReleaseAgeBehaviour =
+  | 'timestamp-optional'
+  | 'timestamp-required';
 
 export const allowedStatusCheckStrings = [
   'minimumReleaseAge',
@@ -328,6 +331,7 @@ export interface RenovateConfig
   sharedVariableName?: string;
   minimumGroupSize?: number;
   configFileNames?: string[];
+  minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
 }
 
 const CustomDatasourceFormats = [

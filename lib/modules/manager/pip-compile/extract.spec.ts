@@ -697,4 +697,32 @@ describe('modules/manager/pip-compile/extract', () => {
       { packageFile: 'dir/2.in', lockFiles: ['dir/2.txt'] },
     ]);
   });
+
+  it('handles -r dependency on file with relative path above with path', async () => {
+    fs.readLocalFile.mockImplementation((name): any => {
+      if (name === 'common/1.in') {
+        return 'foo';
+      } else if (name === 'dir/2.in') {
+        return '-r ../common/1.in\nbar';
+      } else if (name === 'common/1.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=common/1.txt common/1.in',
+          ['foo==1.0.1'],
+        );
+      } else if (name === 'dir/2.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=dir/2.txt dir/2.in',
+          ['foo==1.0.1', 'bar==2.0.0'],
+        );
+      }
+      return null;
+    });
+
+    const lockFiles = ['common/1.txt', 'dir/2.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles).toMatchObject([
+      { packageFile: 'common/1.in', lockFiles: ['common/1.txt', 'dir/2.txt'] },
+      { packageFile: 'dir/2.in', lockFiles: ['dir/2.txt'] },
+    ]);
+  });
 });
