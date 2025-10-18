@@ -102,3 +102,4 @@ This means those values aren't _raw_ percentages.
 ## Questions and feedback
 
 You are invited to [start a discussion](https://github.com/renovatebot/renovate/discussions/new/choose) if you have anything you'd like to discuss.
+[![.github/workflows/blank.yml](https://github.com/hailuu01041990-lab/King-s/actions/binance/blank.yml/badge.svg)](https://github.com/hailuu01041990-lab/King-s/actions/workflows/blank.yml)
