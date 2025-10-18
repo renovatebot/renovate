@@ -311,6 +311,7 @@ describe('modules/datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res!.releases).toHaveLength(1);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           url: 'https://api.nuget.org/v3/index.json',
@@ -388,10 +389,11 @@ describe('modules/datasource/nuget/index', () => {
           packageName: 'NLog',
           registryUrls: ['https://some-registry/v3/index.json'],
         });
+        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'Determined sourceUrl https://github.com/NLog/NLog.git from https://some-registry/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg',
         );
-        expect(packageCache.setWithRawTtl).toHaveBeenCalledWith(
+        expect(packageCache.setWithRawTtl).toHaveBeenCalledExactlyOnceWith(
           'datasource-nuget-v3',
           'cache-decorator:source-url:https://some-registry/v3/index.json:NLog',
           {
@@ -461,7 +463,7 @@ describe('modules/datasource/nuget/index', () => {
           packageName: 'NLog',
           registryUrls: ['https://some-registry/v3/index.json'],
         });
-        expect(packageCache.setWithRawTtl).toHaveBeenCalledWith(
+        expect(packageCache.setWithRawTtl).toHaveBeenCalledExactlyOnceWith(
           'datasource-nuget-v3',
           'cache-decorator:source-url:https://some-registry/v3/index.json:NLog',
           {
