@@ -466,6 +466,24 @@ It is highly unlikely that you should ever need to add this to your permanent gl
 
 Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/checked` will rebase the `renovate/chalk-4.x` branch in the `renovate-reproductions/checked` repository.`
 
+## configFileNames
+
+A list of filenames where repository config can be stored.
+
+This list doesn't replace the existing list of default config filenames used internally, instead these filenames are prepended to the list.
+
+Example:
+
+```json
+{
+  "configFileNames": ["myrenovate.json"]
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+    If you want renovate to use a custom filename for the onboarding branch you also need to change the [`onboardingConfigFileName`](#onboardingconfigfilename).
+
 ## containerbaseDir
 
 This directory is used to cache downloads when `binarySource=docker` or `binarySource=install`.
@@ -1008,6 +1026,10 @@ If `commitMessagePrefix` or `semanticCommits` values are set then they will be p
 
 If set to one of the valid [config file names](./configuration-options.md), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
 Falls back to `renovate.json` if the name provided is not valid.
+
+<!-- prettier-ignore -->
+!!! note
+    If you want renovate to use a custom filename for the onboarding branch you need add allow that filename using the [`configFileNames`](#configfilenames) option.
 
 ## onboardingNoDeps
 

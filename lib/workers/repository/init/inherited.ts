@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { mergeChildConfig, removeGlobalConfig } from '../../../config';
+import { setUserConfigFileNames } from '../../../config/app-strings';
 import { decryptConfig } from '../../../config/decrypt';
 import { parseFileConfig } from '../../../config/parse';
 import { resolveConfigPresets } from '../../../config/presets';
@@ -97,6 +98,16 @@ export async function mergeInheritedConfig(
       { warnings: res.warnings },
       'Found warnings in inherited configuration.',
     );
+  }
+
+  // set user config file name here
+  if (is.nonEmptyArray(inheritedConfig.configFileNames)) {
+    logger.debug(
+      { configFileNames: inheritedConfig.configFileNames },
+      'Updated the config filenames list',
+    );
+    setUserConfigFileNames(inheritedConfig.configFileNames);
+    delete config.configFileNames;
   }
 
   let decryptedConfig = await decryptConfig(inheritedConfig, config.repository);

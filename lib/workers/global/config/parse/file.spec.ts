@@ -4,6 +4,7 @@ import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { expect } from 'vitest';
+import { getConfigFileNames } from '../../../../config/app-strings';
 import { logger } from '../../../../logger';
 import customConfig from './__fixtures__/config';
 import * as file from './file';
@@ -201,6 +202,23 @@ describe('workers/global/config/parse/file', () => {
       fs.unlinkSync(configFile);
       delete process.env.SOME_KEY;
       delete process.env.valid_Key;
+    });
+
+    it('appends files from configFileNames to config filenames list', async () => {
+      const configFile = upath.resolve(tmp.path, 'config4.js');
+      const fileContent1 = `module.exports = {
+        "configFileNames": ["myrenovate.json"]
+      }`;
+      fs.writeFileSync(configFile, fileContent1, {
+        encoding: 'utf8',
+      });
+      const fileConfig = await file.getConfig({
+        RENOVATE_CONFIG_FILE: configFile,
+      });
+
+      expect(fileConfig.configFileNames).toBeUndefined();
+      expect(getConfigFileNames()[0]).toBe('myrenovate.json');
+      fs.unlinkSync(configFile);
     });
   });
 
