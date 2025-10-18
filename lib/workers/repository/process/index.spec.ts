@@ -208,7 +208,7 @@ describe('workers/repository/process/index', () => {
   });
 
   describe('getBaseBranchConfig', () => {
-    it('adds branchPrefix if multiple base branches expected - more than one base branch configured', async () => {
+    it('adds base branch name to branchPrefix if multiple base branches expected - more than one base branch configured', async () => {
       const res = await getBaseBranchConfig('main', {
         ...config,
         baseBranchPatterns: ['main', 'maint/v7'],
@@ -218,7 +218,7 @@ describe('workers/repository/process/index', () => {
       expect(res.branchPrefix).toBe('renovate/main-');
     });
 
-    it('adds branchPrefix if multiple base branches expected - base branch regex configured', async () => {
+    it('adds base branch name to branchPrefix if multiple base branches expected - base branch regex configured', async () => {
       const res = await getBaseBranchConfig('main', {
         ...config,
         baseBranchPatterns: ['/main/'],
@@ -228,7 +228,7 @@ describe('workers/repository/process/index', () => {
       expect(res.branchPrefix).toBe('renovate/main-');
     });
 
-    it('does not add branchPrefix if multiple base branches are not expected', async () => {
+    it('does not add base branch name to branchPrefix if multiple base branches are not expected', async () => {
       const res = await getBaseBranchConfig('main', {
         ...config,
         baseBranchPatterns: ['main'],
