@@ -172,6 +172,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'workingDirTemplate',
+    description:
+      'A template describing the working directory in which post-upgrade tasks should be executed.',
+    type: 'string',
+    parents: ['postUpgradeTasks'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'dataFileTemplate',
     description: 'A template to create post-upgrade command data file from.',
     type: 'string',
@@ -576,7 +585,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.8.23',
+    default: 'ghcr.io/containerbase/sidecar:13.23.2',
     globalOnly: true,
   },
   {
@@ -782,6 +791,15 @@ const options: RenovateOptions[] = [
     description: 'Title for the Dependency Dashboard issue.',
     type: 'string',
     default: `Dependency Dashboard`,
+  },
+  {
+    name: 'dependencyDashboardCategory',
+    description:
+      'The category to group branches on the Dependency Dashboard issue.',
+    type: 'string',
+    default: null,
+    cli: false,
+    env: false,
   },
   {
     name: 'dependencyDashboardHeader',
@@ -1949,6 +1967,14 @@ const options: RenovateOptions[] = [
     default: null,
   },
   {
+    name: 'minimumReleaseAgeBehaviour',
+    description:
+      'When set in conjunction with `minimumReleaseAge`, controls whether the `releaseTimestamp` for a dependency update is required.',
+    type: 'string',
+    default: 'timestamp-optional',
+    allowedValues: ['timestamp-required', 'timestamp-optional'],
+  },
+  {
     name: 'abandonmentThreshold',
     description:
       'Flags packages that have not been updated within this period as abandoned.',
@@ -2534,6 +2560,7 @@ const options: RenovateOptions[] = [
       'helmUpdateSubChartArchives',
       'kustomizeInflateHelmCharts',
       'npmDedupe',
+      'npmInstallTwice',
       'pnpmDedupe',
       'yarnDedupeFewer',
       'yarnDedupeHighest',
@@ -2895,6 +2922,16 @@ const options: RenovateOptions[] = [
     parents: ['customManagers'],
     cli: false,
     env: false,
+    requiredIf: [
+      {
+        siblingProperties: [
+          {
+            property: 'customType',
+            value: 'jsonata',
+          },
+        ],
+      },
+    ],
   },
   {
     name: 'matchStrings',
@@ -3025,6 +3062,7 @@ const options: RenovateOptions[] = [
     description:
       'Set to `true` to fetch the entire list of PRs instead of only those authored by the Renovate user.',
     type: 'boolean',
+    globalOnly: true,
     default: false,
   },
   {

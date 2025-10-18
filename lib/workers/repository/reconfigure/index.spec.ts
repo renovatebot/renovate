@@ -66,6 +66,7 @@ describe('workers/repository/reconfigure/index', () => {
   it('no effect when running with platform=local', async () => {
     GlobalConfig.set({ platform: 'local' });
     await checkReconfigureBranch(config, repoConfig);
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.logger.debug).toHaveBeenCalledWith(
       'Not attempting to reconfigure when running with local platform',
     );
@@ -74,7 +75,9 @@ describe('workers/repository/reconfigure/index', () => {
   it('no effect on repo with no reconfigure branch', async () => {
     scm.branchExists.mockResolvedValueOnce(false);
     await checkReconfigureBranch(config, repoConfig);
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.logger.debug).toHaveBeenCalledWith(
+      { reconfigureBranch: 'prefix/reconfigure' },
       'No reconfigure branch found',
     );
   });
@@ -92,7 +95,9 @@ describe('workers/repository/reconfigure/index', () => {
       },
     });
     await expect(checkReconfigureBranch(config, repoConfig)).toResolve();
-    expect(validate.validateReconfigureBranch).not.toHaveBeenCalledWith();
+    expect(
+      validate.validateReconfigureBranch,
+    ).not.toHaveBeenCalledExactlyOnceWith();
   });
 
   it('skips if error while finding reconfigure config', async () => {
@@ -102,12 +107,15 @@ describe('workers/repository/reconfigure/index', () => {
       errMessage: 'error',
     });
     await expect(checkReconfigureBranch(config, repoConfig)).toResolve();
-    expect(validate.validateReconfigureBranch).not.toHaveBeenCalledWith();
+    expect(
+      validate.validateReconfigureBranch,
+    ).not.toHaveBeenCalledExactlyOnceWith();
   });
 
   it('skips if reconfigure config is invalid', async () => {
     validate.validateReconfigureBranch.mockResolvedValue(false);
     await expect(checkReconfigureBranch(config, repoConfig)).toResolve();
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.logger.debug).toHaveBeenCalledWith(
       'Found errors in reconfigure config. Skipping dependencies extraction',
     );
@@ -116,6 +124,7 @@ describe('workers/repository/reconfigure/index', () => {
   it('validates reconfigure branch and skips extraction if no reconfigure pr', async () => {
     platform.findPr.mockResolvedValue(null);
     await expect(checkReconfigureBranch(config, repoConfig)).toResolve();
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.logger.debug).toHaveBeenCalledWith(
       'No reconfigure pr found. Skipping dependencies extraction',
     );

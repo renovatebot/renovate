@@ -1,7 +1,10 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
+import {
+  type MinimumReleaseAgeBehaviour,
+  type RenovateConfig,
+} from '../../../../config/types';
 import {
   CONFIG_VALIDATION,
   MANAGER_LOCKFILE_ERROR,
@@ -371,36 +374,61 @@ export async function processBranch(
     if (
       config.upgrades.some(
         (upgrade) =>
-          (is.nonEmptyString(upgrade.minimumReleaseAge) &&
-            is.nonEmptyString(upgrade.releaseTimestamp)) ||
+          is.nonEmptyString(upgrade.minimumReleaseAge) ||
           isActiveConfidenceLevel(upgrade.minimumConfidence!),
       )
     ) {
+      const depNamesWithoutReleaseTimestamp: Record<
+        MinimumReleaseAgeBehaviour,
+        string[]
+      > = {
+        'timestamp-required': [],
+        'timestamp-optional': [],
+      };
+
       // Only set a stability status check if one or more of the updates contain
       // both a minimumReleaseAge setting and a releaseTimestamp
       config.stabilityStatus = 'green';
       // Default to 'success' but set 'pending' if any update is pending
       for (const upgrade of config.upgrades) {
-        if (
-          is.nonEmptyString(upgrade.minimumReleaseAge) &&
-          upgrade.releaseTimestamp
-        ) {
-          const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
-          if (timeElapsed < coerceNumber(toMs(upgrade.minimumReleaseAge))) {
-            logger.debug(
-              {
-                depName: upgrade.depName,
-                timeElapsed,
-                minimumReleaseAge: upgrade.minimumReleaseAge,
-              },
-              'Update has not passed minimum release age',
-            );
-            config.stabilityStatus = 'yellow';
-            continue;
+        if (is.nonEmptyString(upgrade.minimumReleaseAge)) {
+          const minimumReleaseAgeBehaviour: MinimumReleaseAgeBehaviour =
+            upgrade.minimumReleaseAgeBehaviour ?? 'timestamp-optional';
+
+          // regardless of the value of `minimumReleaseAgeBehaviour`, if there is a timestamp, we will process it according to `minimumReleaseAge`
+          if (upgrade.releaseTimestamp) {
+            const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
+            if (timeElapsed < coerceNumber(toMs(upgrade.minimumReleaseAge))) {
+              logger.debug(
+                {
+                  depName: upgrade.depName,
+                  timeElapsed,
+                  minimumReleaseAge: upgrade.minimumReleaseAge,
+                },
+                'Update has not passed minimum release age',
+              );
+              config.stabilityStatus = 'yellow';
+              continue;
+            }
+          } else {
+            // if we're set to `minimumReleaseAgeBehaviour=timestamp-required`, and there isn't a timestamp, always mark the update as pending
+            if (minimumReleaseAgeBehaviour === 'timestamp-required') {
+              depNamesWithoutReleaseTimestamp['timestamp-required'].push(
+                upgrade.depName!,
+              );
+              config.stabilityStatus = 'yellow';
+              continue;
+            } else {
+              // if there is no timestamp, and we're running in `optional` mode, we can allow it, but make sure to warn the user
+              depNamesWithoutReleaseTimestamp['timestamp-optional'].push(
+                upgrade.depName!,
+              );
+            }
           }
         }
         const datasource = upgrade.datasource!;
         const depName = upgrade.depName!;
+        const packageName = upgrade.packageName!;
         const minimumConfidence = upgrade.minimumConfidence!;
         const updateType = upgrade.updateType!;
         const currentVersion = upgrade.currentVersion!;
@@ -409,7 +437,7 @@ export async function processBranch(
           const confidence =
             (await getMergeConfidenceLevel(
               datasource,
-              depName,
+              packageName,
               currentVersion,
               newVersion,
               updateType,
@@ -426,6 +454,20 @@ export async function processBranch(
           }
         }
       }
+
+      if (depNamesWithoutReleaseTimestamp['timestamp-required'].length) {
+        logger.debug(
+          { depNames: depNamesWithoutReleaseTimestamp['timestamp-required'] },
+          `Marking ${depNamesWithoutReleaseTimestamp['timestamp-required'].length} release(s) as pending, as they not have a releaseTimestamp and we're running with minimumReleaseAgeBehaviour=require-timestamp`,
+        );
+      }
+      if (depNamesWithoutReleaseTimestamp['timestamp-optional'].length) {
+        logger.warn(
+          { depNames: depNamesWithoutReleaseTimestamp['timestamp-optional'] },
+          `${depNamesWithoutReleaseTimestamp['timestamp-optional'].length} upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding`,
+        );
+      }
+
       // Don't create a branch if we know it will be status 'pending'
       if (
         !dependencyDashboardCheck &&
@@ -649,10 +691,16 @@ export async function processBranch(
         platformPrOptions.usePlatformAutomerge &&
         platform.reattemptPlatformAutomerge
       ) {
-        await platform.reattemptPlatformAutomerge({
-          number: branchPr.number,
-          platformPrOptions,
-        });
+        if (GlobalConfig.get('dryRun')) {
+          logger.info(
+            `DRY-RUN: Would reattempt platform automerge for PR #${branchPr.number}`,
+          );
+        } else {
+          await platform.reattemptPlatformAutomerge({
+            number: branchPr.number,
+            platformPrOptions,
+          });
+        }
       }
       if (platform.refreshPr) {
         await platform.refreshPr(branchPr.number);

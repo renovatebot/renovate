@@ -2,12 +2,10 @@ import { PoetrySection, PoetrySources } from './schema';
 
 describe('modules/manager/poetry/schema', () => {
   it('parses project version', () => {
-    expect(PoetrySection.parse({ version: '1.2.3' }).packageFileVersion).toBe(
-      '1.2.3',
-    );
+    expect(PoetrySection.parse({ version: '1.2.3' }).version).toBe('1.2.3');
 
     expect(
-      PoetrySection.parse({ version: { some: 'value' } }).packageFileVersion,
+      PoetrySection.parse({ version: { some: 'value' } }).version,
     ).toBeUndefined();
   });
 

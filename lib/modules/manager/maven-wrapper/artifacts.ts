@@ -224,7 +224,10 @@ function mavenWrapperFileName(): string {
 
 function getMavenPaths(packageFileName: string): MavenWrapperPaths {
   const wrapperExecutableFileName = mavenWrapperFileName();
-  const localProjectDir = upath.join(upath.dirname(packageFileName), '../../');
+  const localProjectDir = upath.join(
+    upath.dirname(packageFileName),
+    packageFileName.includes('mvnw') ? '.' : '../../',
+  );
   const wrapperFullyQualifiedPath = upath.join(
     localProjectDir,
     wrapperExecutableFileName,

@@ -556,7 +556,7 @@ describe('modules/platform/forgejo/index', () => {
       );
     });
 
-    it('should fall back to fast-forward-only merge method', async () => {
+    it('should select default merge method when it is allowed', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .get(`/repos/${initRepoCfg.repository}`)
@@ -577,57 +577,15 @@ describe('modules/platform/forgejo/index', () => {
       );
     });
 
-    it('should fall back to rebase-merge method', async () => {
+    it('should fall back to merge method as per ordered list when default not allowed', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .get(`/repos/${initRepoCfg.repository}`)
         .reply(200, {
           ...mockRepo,
-          allow_rebase: false,
-          allow_rebase_explicit: true,
-          default_merge_style: 'rebase-merge',
-        });
-      await initFakePlatform(scope);
-
-      await forgejo.initRepo(initRepoCfg);
-
-      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({
-          mergeMethod: 'rebase-merge',
-        }),
-      );
-    });
-
-    it('should fall back to squash merge method', async () => {
-      const scope = httpMock
-        .scope('https://code.forgejo.org/api/v1')
-        .get(`/repos/${initRepoCfg.repository}`)
-        .reply(200, {
-          ...mockRepo,
-          allow_rebase: false,
-          allow_squash_merge: true,
-          default_merge_style: 'squash',
-        });
-      await initFakePlatform(scope);
-
-      await forgejo.initRepo(initRepoCfg);
-
-      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({
-          mergeMethod: 'squash',
-        }),
-      );
-    });
-
-    it('should fall back to standard merge method', async () => {
-      const scope = httpMock
-        .scope('https://code.forgejo.org/api/v1')
-        .get(`/repos/${initRepoCfg.repository}`)
-        .reply(200, {
-          ...mockRepo,
-          allow_rebase: false,
           allow_merge_commits: true,
-          default_merge_style: 'merge',
+          allow_squash_merge: false,
+          default_merge_style: 'squash',
         });
       await initFakePlatform(scope);
 
@@ -637,6 +595,21 @@ describe('modules/platform/forgejo/index', () => {
         expect.objectContaining({
           mergeMethod: 'merge',
         }),
+      );
+    });
+
+    it('should throw if unknown default merge style is configured', async () => {
+      const scope = httpMock
+        .scope('https://code.forgejo.org/api/v1')
+        .get(`/repos/${initRepoCfg.repository}`)
+        .reply(200, {
+          ...mockRepo,
+          default_merge_style: 'unknown',
+        });
+      await initFakePlatform(scope);
+
+      await expect(forgejo.initRepo(initRepoCfg)).rejects.toThrow(
+        REPOSITORY_BLOCKED,
       );
     });
 
@@ -652,7 +625,7 @@ describe('modules/platform/forgejo/index', () => {
       };
       await forgejo.initRepo(repoCfg);
 
-      expect(git.initRepo).toHaveBeenCalledWith(
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ url: mockRepo.clone_url }),
       );
     });
@@ -670,7 +643,7 @@ describe('modules/platform/forgejo/index', () => {
       };
       await forgejo.initRepo(repoCfg);
 
-      expect(git.initRepo).toHaveBeenCalledWith(
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ url: mockRepo.clone_url }),
       );
     });
@@ -688,7 +661,7 @@ describe('modules/platform/forgejo/index', () => {
       };
       await forgejo.initRepo(repoCfg);
 
-      expect(git.initRepo).toHaveBeenCalledWith(
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ url: mockRepo.ssh_url }),
       );
     });
@@ -723,7 +696,7 @@ describe('modules/platform/forgejo/index', () => {
       };
       await forgejo.initRepo(repoCfg);
 
-      expect(git.initRepo).toHaveBeenCalledWith(
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           url: `https://code.forgejo.org/${mockRepo.full_name}.git`,
         }),
@@ -771,7 +744,7 @@ describe('modules/platform/forgejo/index', () => {
 
       const url = new URL(`${mockRepo.clone_url}`);
       url.username = token;
-      expect(git.initRepo).toHaveBeenCalledWith(
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           url: `https://${token}@code.forgejo.org/${mockRepo.full_name}.git`,
         }),
@@ -799,7 +772,7 @@ describe('modules/platform/forgejo/index', () => {
 
       const url = new URL(`${mockRepo.clone_url}`);
       url.username = token;
-      expect(git.initRepo).toHaveBeenCalledWith(
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ url: url.toString() }),
       );
     });
@@ -931,6 +904,7 @@ describe('modules/platform/forgejo/index', () => {
         }),
       ).toResolve();
 
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         {
           err: expect.any(Error),
@@ -1835,6 +1809,7 @@ describe('modules/platform/forgejo/index', () => {
         number: 42,
         title: 'pr-title',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42 }),
         'Forgejo-native automerge: fail',
@@ -1862,6 +1837,7 @@ describe('modules/platform/forgejo/index', () => {
         number: 42,
         title: 'pr-title',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42 }),
         'Forgejo-native automerge: not supported on this version of Forgejo. Use 10.0.0 or newer.',
@@ -2123,6 +2099,7 @@ describe('modules/platform/forgejo/index', () => {
           labels: ['some-label', 'unavailable-label'],
         }),
       ).toResolve();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Some labels could not be looked up. Renovate may halt label updates assuming changes by others.',
       );
@@ -2331,12 +2308,11 @@ describe('modules/platform/forgejo/index', () => {
         .get('/repos/some/repo/issues')
         .query({ state: 'all', type: 'issues' })
         .reply(200, mockIssues)
-        .patch('/repos/some/repo/issues/2', {
+        .post('/repos/some/repo/issues', {
           body: closedIssue.body,
-          state: closedIssue.state,
-          title: 'closed-issue',
+          title: closedIssue.title,
         })
-        .reply(200, closedIssue);
+        .reply(200, { number: 42 });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2347,7 +2323,7 @@ describe('modules/platform/forgejo/index', () => {
         once: false,
       });
 
-      expect(res).toBe('updated');
+      expect(res).toBe('created');
     });
 
     it('should not update labels when not necessary', async () => {
@@ -2583,6 +2559,7 @@ describe('modules/platform/forgejo/index', () => {
         once: false,
       });
 
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { err: expect.any(Error) },
         'Could not ensure issue',
@@ -2658,6 +2635,7 @@ describe('modules/platform/forgejo/index', () => {
 
       await expect(forgejo.deleteLabel(42, 'missing')).toResolve();
 
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { issue: 42, labelName: 'missing' },
         'Failed to lookup label for deletion',
@@ -2759,6 +2737,7 @@ describe('modules/platform/forgejo/index', () => {
       });
 
       expect(res).toBe(false);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { err: expect.any(Error), issue: 1, subject: 'some-topic' },
         'Error ensuring comment',
@@ -2821,6 +2800,7 @@ describe('modules/platform/forgejo/index', () => {
         topic: 'some-topic',
       });
 
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         {
           config: { number: 1, topic: 'some-topic', type: 'by-topic' },
@@ -2898,12 +2878,15 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .post('/repos/some/repo/pulls/1/requested_reviewers', {
           reviewers: ['me', 'you'],
+          team_reviewers: ['org/team'],
         })
         .reply(200);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
-      await expect(forgejo.addReviewers(1, ['me', 'you'])).toResolve();
+      await expect(
+        forgejo.addReviewers(1, ['me', 'you', 'org/team']),
+      ).toResolve();
 
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
@@ -2919,6 +2902,7 @@ describe('modules/platform/forgejo/index', () => {
       await initFakeRepo(scope);
       ///
       await expect(forgejo.addReviewers(1, ['me', 'you'])).toResolve();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { err: expect.any(Error), number: 1, reviewers: ['me', 'you'] },
         'Failed to assign reviewer',
