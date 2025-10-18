@@ -126,7 +126,7 @@ function unfoldBaseBranches(
 }
 
 function isMultiBaseBranch(config: RenovateConfig): boolean {
-  if (!config.baseBranchPatterns) {
+  if (!config.baseBranchPatterns?.length) {
     return false;
   }
 
