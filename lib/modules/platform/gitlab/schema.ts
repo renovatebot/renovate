@@ -9,12 +9,10 @@ export const LastPipelineId = z
   })
   .transform(({ last_pipeline }) => last_pipeline.id);
 
-const GitlabUserSchema = z
-  .object({
-    id: z.number(),
-    username: z.string(),
-  })
-  .nullable();
+const GitlabUserSchema = z.object({
+  id: z.number(),
+  username: z.string(),
+});
 
 const LongCommitShaSchema = z.string().transform((val) => val as LongCommitSha);
 
@@ -29,7 +27,7 @@ export const GitLabMergeRequestSchema = z.object({
   updated_at: z.string(),
   diverged_commits_count: z.number().optional(),
   merge_status: z.string().optional(),
-  assignee: GitlabUserSchema.optional(),
+  assignee: GitlabUserSchema.optional().nullable(),
   assignees: z.array(GitlabUserSchema).optional(),
   reviewers: z.array(GitlabUserSchema).optional(),
   labels: z.array(z.string()).optional(),
@@ -39,8 +37,7 @@ export const GitLabMergeRequestSchema = z.object({
       status: z.string(),
       sha: LongCommitShaSchema,
     })
-    .optional()
-    .nullable(),
+    .optional(),
 });
 
 export const GitLabMergeRequestsSchema = z.array(GitLabMergeRequestSchema);
