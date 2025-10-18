@@ -12,7 +12,6 @@ import { scm } from '../../../modules/platform/scm';
 import { getCache } from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
 import { getBranchList } from '../../../util/git';
-import { expectMultipleBaseBranches } from '../../../util/multiple-base-branches';
 import { addSplit } from '../../../util/split';
 import { getRegexPredicate } from '../../../util/string-match';
 import type { BranchConfig } from '../../types';
@@ -87,9 +86,10 @@ export async function getBaseBranchConfig(
 
     // baseBranches value should be based off the default branch
     baseBranchConfig.baseBranchPatterns = config.baseBranchPatterns;
+    baseBranchConfig.baseBranches = config.baseBranches;
   }
 
-  if (expectMultipleBaseBranches()) {
+  if (isMultiBaseBranch(config)) {
     baseBranchConfig.branchPrefix += `${baseBranch}-`;
     baseBranchConfig.hasBaseBranches = true;
   }
@@ -125,6 +125,17 @@ function unfoldBaseBranches(
   return [...new Set(unfoldedList)];
 }
 
+function isMultiBaseBranch(config: RenovateConfig): boolean {
+  if (!config.baseBranchPatterns) {
+    return false;
+  }
+
+  return (
+    config.baseBranchPatterns.length > 1 ||
+    config.baseBranchPatterns[0].startsWith('/')
+  );
+}
+
 export async function extractDependencies(
   config: RenovateConfig,
   overwriteCache = true,
@@ -139,13 +150,13 @@ export async function extractDependencies(
     GlobalConfig.get('platform') !== 'local' &&
     config.baseBranchPatterns?.length
   ) {
-    config.baseBranchPatterns = unfoldBaseBranches(
+    config.baseBranches = unfoldBaseBranches(
       config.defaultBranch!,
       config.baseBranchPatterns,
     );
-    logger.debug({ baseBranches: config.baseBranchPatterns }, 'baseBranches');
+    logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
-    for (const baseBranch of config.baseBranchPatterns) {
+    for (const baseBranch of config.baseBranches) {
       addMeta({ baseBranch });
 
       if (scm.syncForkWithUpstream) {
@@ -159,7 +170,7 @@ export async function extractDependencies(
       }
     }
     addSplit('extract');
-    for (const baseBranch of config.baseBranchPatterns) {
+    for (const baseBranch of config.baseBranches) {
       if (await scm.branchExists(baseBranch)) {
         addMeta({ baseBranch });
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);

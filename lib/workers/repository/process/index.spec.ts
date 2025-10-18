@@ -3,7 +3,6 @@ import { GlobalConfig } from '../../../config/global';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { addMeta } from '../../../logger';
 import { getCache } from '../../../util/cache/repository';
-import { setMultipleBaseBranches } from '../../../util/multiple-base-branches';
 import * as _extractUpdate from './extract-update';
 import { lookup } from './extract-update';
 import { extractDependencies, getBaseBranchConfig, updateRepo } from '.';
@@ -209,12 +208,34 @@ describe('workers/repository/process/index', () => {
   });
 
   describe('getBaseBranchConfig', () => {
-    it('adds branchPrefix if multiple baseBranches expected', async () => {
-      setMultipleBaseBranches({ baseBranchPatterns: ['/test/'] });
-      const res = await getBaseBranchConfig('main', config);
+    it('adds branchPrefix if multiple base branches expected - more than one base branch configured', async () => {
+      const res = await getBaseBranchConfig('main', {
+        ...config,
+        baseBranchPatterns: ['main', 'maint/v7'],
+      });
       expect(res.baseBranch).toBe('main');
       expect(res.hasBaseBranches).toBeTrue();
       expect(res.branchPrefix).toBe('renovate/main-');
+    });
+
+    it('adds branchPrefix if multiple base branches expected - base branch regex configured', async () => {
+      const res = await getBaseBranchConfig('main', {
+        ...config,
+        baseBranchPatterns: ['/main/'],
+      });
+      expect(res.baseBranch).toBe('main');
+      expect(res.hasBaseBranches).toBeTrue();
+      expect(res.branchPrefix).toBe('renovate/main-');
+    });
+
+    it('does not add branchPrefix if multiple base branches are not expected', async () => {
+      const res = await getBaseBranchConfig('main', {
+        ...config,
+        baseBranchPatterns: ['main'],
+      });
+      expect(res.baseBranch).toBe('main');
+      expect(res.hasBaseBranches).toBeUndefined();
+      expect(res.branchPrefix).toBe('renovate/');
     });
   });
 });
