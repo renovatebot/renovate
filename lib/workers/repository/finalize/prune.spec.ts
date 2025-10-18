@@ -82,6 +82,7 @@ describe('workers/repository/finalize/prune', () => {
 
     it('deletes with base branches', async () => {
       config.branchList = ['renovate/main-a'];
+      config.baseBranchPatterns = ['/main.*/'];
       config.baseBranches = ['main', 'maint/v7'];
       git.getBranchList.mockReturnValueOnce(
         config.branchList.concat([
