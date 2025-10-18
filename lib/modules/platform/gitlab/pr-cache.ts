@@ -5,7 +5,8 @@ import { repoCacheProvider } from '../../../util/http/cache/repository-http-cach
 import type { GitlabHttp, GitlabHttpOptions } from '../../../util/http/gitlab';
 import { regEx } from '../../../util/regex';
 import { getQueryString } from '../../../util/url';
-import type { GitLabMergeRequest, GitlabPr, GitlabPrCacheData } from './types';
+import { GitLabMergeRequestsSchema } from './schema';
+import type { GitlabPr, GitlabPrCacheData } from './types';
 import { prInfo } from './utils';
 
 export class GitlabPrCache {
@@ -130,9 +131,10 @@ export class GitlabPrCache {
     }
 
     const query: string | null = getQueryString(searchParams);
-    const { body: items } = await http.getJsonUnchecked<GitLabMergeRequest[]>(
+    const { body: items } = await http.getJson(
       `/projects/${this.repo}/merge_requests?${query}`,
       opts,
+      GitLabMergeRequestsSchema,
     );
 
     if (items.length) {
