@@ -41,6 +41,9 @@ importers:
       '@cdktf/hcl2json':
         specifier: 0.21.0
         version: 0.21.0
+      '@felipecrs/jsonc-weaver':
+        specifier: jsr:0.1.1
+        version: '@jsr/felipecrs__jsonc-weaver@0.1.1'
       '@opentelemetry/api':
         specifier: 1.9.0
         version: 1.9.0
@@ -1247,6 +1250,9 @@ packages:
     engines: {node: '>=10.0'}
     peerDependencies:
       tslib: '2'
+
+  '@jsr/felipecrs__jsonc-weaver@0.1.1':
+    resolution: {integrity: sha512-bGqVtFjMf1BsUbRwDDkWxL5cL5HFEdyoJf3PWzeDSRcF38SlYJnNoykzpYzOKR2SpDD/LbyQJUbExwouiv1aVw==, tarball: https://npm.jsr.io/~/11/@jsr/felipecrs__jsonc-weaver/0.1.1.tgz}
 
   '@kwsites/file-exists@1.1.1':
     resolution: {integrity: sha512-m9/5YGR18lIwxSFDwfE3oA7bWuq9kdau6ugN4H2rJeyhFQZcG9AgSHkQtSD15a8WvTgfz9aikZMrKPHvbpqFiw==}
@@ -7770,6 +7776,8 @@ snapshots:
       '@jsonjoy.com/buffers': 1.2.0(tslib@2.8.1)
       '@jsonjoy.com/codegen': 1.0.0(tslib@2.8.1)
       tslib: 2.8.1
+
+  '@jsr/felipecrs__jsonc-weaver@0.1.1': {}
 
   '@kwsites/file-exists@1.1.1':
     dependencies:
