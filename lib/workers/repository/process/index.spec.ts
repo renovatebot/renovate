@@ -210,7 +210,7 @@ describe('workers/repository/process/index', () => {
 
   describe('getBaseBranchConfig', () => {
     it('adds branchPrefix if multiple baseBranches expected', async () => {
-      setMultipleBaseBranches({ baseBranches: ['/test/'] });
+      setMultipleBaseBranches({ baseBranchPatterns: ['/test/'] });
       const res = await getBaseBranchConfig('main', config);
       expect(res.baseBranch).toBe('main');
       expect(res.hasBaseBranches).toBeTrue();
