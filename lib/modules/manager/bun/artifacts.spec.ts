@@ -101,6 +101,26 @@ describe('modules/manager/bun/artifacts', () => {
         ]);
       });
 
+      it('supports lockFileMaintenance (without updated deps)', async () => {
+        updateArtifact.config.lockFiles = ['bun.lockb'];
+        updateArtifact.config.isLockFileMaintenance = true;
+        const oldLock = Buffer.from('old');
+        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        // npmrc
+        fs.readFile.mockResolvedValueOnce('# dummy' as never);
+        const newLock = Buffer.from('new');
+        fs.readFile.mockResolvedValueOnce(newLock as never);
+        expect(await updateArtifacts(updateArtifact)).toEqual([
+          {
+            file: {
+              path: 'bun.lockb',
+              type: 'addition',
+              contents: newLock,
+            },
+          },
+        ]);
+      });
+
       it('handles temporary error', async () => {
         const execError = new ExecError(TEMPORARY_ERROR, {
           cmd: '',
@@ -181,6 +201,26 @@ describe('modules/manager/bun/artifacts', () => {
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lock'] },
         ];
+        updateArtifact.config.isLockFileMaintenance = true;
+        const oldLock = Buffer.from('old');
+        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        // npmrc
+        fs.readFile.mockResolvedValueOnce('# dummy' as never);
+        const newLock = Buffer.from('new');
+        fs.readFile.mockResolvedValueOnce(newLock as never);
+        expect(await updateArtifacts(updateArtifact)).toEqual([
+          {
+            file: {
+              path: 'bun.lock',
+              type: 'addition',
+              contents: newLock,
+            },
+          },
+        ]);
+      });
+
+      it('supports lockFileMaintenance (without updated deps)', async () => {
+        updateArtifact.config.lockFiles = ['bun.lock'];
         updateArtifact.config.isLockFileMaintenance = true;
         const oldLock = Buffer.from('old');
         fs.readFile.mockResolvedValueOnce(oldLock as never);
