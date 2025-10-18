@@ -455,7 +455,7 @@ export async function createFork(
         body: {
           organization: forkOrg ?? undefined,
           name: config.parentRepo!.replace('/', '-_-'),
-          default_branch_only: true, // no baseBranches support yet
+          default_branch_only: true, // no baseBranchPatterns support yet
         },
       })
     ).body;

@@ -78,6 +78,7 @@ describe('workers/repository/process/extract-update', () => {
     it('runs with baseBranchPatterns', async () => {
       const config = {
         baseBranchPatterns: ['master', 'dev'],
+        baseBranches: ['master', 'dev'],
         repoIsOnboarded: true,
         enabledManagers: ['npm'],
         javascript: {
