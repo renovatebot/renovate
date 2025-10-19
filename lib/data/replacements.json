@@ -17,7 +17,7 @@
       "replacements:fakerjs-to-scoped",
       "replacements:fastify-to-scoped",
       "replacements:hapi-to-scoped",
-      "repacements:google-github-action-release-please-to-googleapis",
+      "replacements:google-github-action-release-please-to-googleapis",
       "replacements:jade-to-pug",
       "replacements:joi-to-scoped",
       "replacements:joi-to-unscoped",
