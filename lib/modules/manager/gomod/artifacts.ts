@@ -336,20 +336,12 @@ export async function updateArtifacts({
             goModFileName,
             feature: 'gomodTidyAll',
           },
-          'Failed to get dependent modules for gomodTidyAll - falling back to single module',
+          'Failed to process gomodTidyAll - no dependent modules processed',
         );
-
-        // Fallback: treat as regular gomodTidy if graph processing fails
-        if (isGoModTidyRequired) {
-          execCommands.push(`${cmd} mod tidy${tidyOpts}`);
-          logger.debug(
-            'go mod tidy command included (fallback from gomodTidyAll)',
-          );
-        }
       }
     } else if (isGoModTidyRequired) {
-      // Regular gomodTidy logic - completely unchanged from original
-      execCommands.push(`${cmd} mod tidy${tidyOpts}`);
+      args = 'mod tidy' + tidyOpts;
+      execCommands.push(`${cmd} ${args}`);
       logger.debug('go mod tidy command included');
     }
 
