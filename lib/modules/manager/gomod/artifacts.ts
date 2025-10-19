@@ -341,8 +341,8 @@ export async function updateArtifacts({
       }
     } else if (isGoModTidyRequired) {
       args = 'mod tidy' + tidyOpts;
-      execCommands.push(`${cmd} ${args}`);
       logger.debug('go mod tidy command included');
+      execCommands.push(`${cmd} ${args}`);
     }
 
     let goWorkSumFileName = upath.join(goModDir, 'go.work.sum');
