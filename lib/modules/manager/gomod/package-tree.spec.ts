@@ -3,9 +3,7 @@ import {
   getGoModulesInDependencyOrder,
   getModuleName,
   getTransitiveDependentModules,
-  hasLocalReplaceDirectives,
   parseGoModDependencies,
-  parseReplaceDirectives,
   resolveGoModulePath,
 } from './package-tree';
 
@@ -76,34 +74,6 @@ const mockGraph = new Map([
 ]);
 
 describe('modules/manager/gomod/package-tree', () => {
-  describe('parseReplaceDirectives', () => {
-    it('parses complex replace directive patterns from monorepo go.mod', () => {
-      const goModContent = `module github.com/hashicorp/consul
-
-go 1.21
-
-require (
-	github.com/hashicorp/consul/api v1.25.1
-	github.com/hashicorp/serf v0.9.6
-)
-
-replace github.com/hashicorp/consul/api => ./api
-replace github.com/hashicorp/consul/sdk => ./sdk
-replace (
-    github.com/hashicorp/consul agent => ./agent
-    github.com/hashicorp/consul tls => ./tls
-)`;
-
-      const directives = parseReplaceDirectives(goModContent);
-      expect(directives).toEqual([
-        { oldPath: 'github.com/hashicorp/consul/api', newPath: 'api' },
-        { oldPath: 'github.com/hashicorp/consul/sdk', newPath: 'sdk' },
-        { oldPath: 'agent', newPath: 'agent' },
-        { oldPath: 'tls', newPath: 'tls' },
-      ]);
-    });
-  });
-
   describe('resolveGoModulePath', () => {
     it('resolves relative module paths to absolute go.mod locations', () => {
       const baseModPath = '/workspace/consul/go.mod';
@@ -158,32 +128,6 @@ replace k8s.io/client-go => ./staging/src/k8s.io/client-go`;
         resolvedPath:
           '/workspace/kubernetes/staging/src/k8s.io/client-go/go.mod',
       });
-    });
-  });
-
-  describe('hasLocalReplaceDirectives', () => {
-    it('identifies go.mod files with local replace directives', () => {
-      const monorepoGoMod = `module github.com/hashicorp/vault
-
-go 1.21
-
-replace github.com/hashicorp/vault/sdk => ./sdk
-replace github.com/hashicorp/vault/api => ./api
-replace github.com/hashicorp/vault/database => ../database
-replace github.com/golang/protobuf => github.com/protocolbuffers/protobuf-go v1.28.0`;
-
-      expect(hasLocalReplaceDirectives(monorepoGoMod)).toBe(true);
-    });
-
-    it('identifies go.mod files with only remote replace directives', () => {
-      const remoteOnlyGoMod = `module github.com/kubernetes/autoscaler
-
-go 1.21
-
-replace github.com/orig/lib => github.com/fork/lib v2.0.0
-replace github.com/upstream/dep => github.com/custom/dep v1.5.0`;
-
-      expect(hasLocalReplaceDirectives(remoteOnlyGoMod)).toBe(false);
     });
   });
 

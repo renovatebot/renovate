@@ -1,11 +1,12 @@
 import upath from 'upath';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import {
   buildDependencyGraph,
   getTransitiveDependents,
   topologicalSort,
 } from '../../../util/tree';
 import type { DependencyGraph } from '../../../util/tree';
+import { parseLine } from './line-parser';
 
 /**
  * Interface for Go module replace directive
@@ -25,48 +26,6 @@ export interface GoModuleDependency {
   resolvedPath?: string;
 }
 
-/**
- * Parse replace directives from go.mod content
- */
-export function parseReplaceDirectives(content: string): ReplaceDirective[] {
-  const directives: ReplaceDirective[] = [];
-
-  const singleLineRegex = regEx(
-    /(\r?\n)replace\s+([^\s]+)\s+(?:=>\s+([^\s]+)|([^\s]+\s+)=>\s+(.+))/g,
-  );
-
-  let match;
-  while ((match = singleLineRegex.exec(content)) !== null) {
-    const [, , oldPath, newPath] = match;
-    if (newPath && (newPath.startsWith('./') || newPath.startsWith('../'))) {
-      directives.push({
-        oldPath,
-        newPath: newPath.replace(/^\.\//, ''),
-      });
-    }
-  }
-
-  const blockRegex = regEx(/(\r?\n)replace\s*\(\s*([^)]+)\s*\)/s);
-  const blockMatch = blockRegex.exec(content);
-
-  if (blockMatch) {
-    const blockContent = blockMatch[2];
-    const lineRegex = regEx(/([^\s]+)\s+=>\s+([^\s]+)/g);
-
-    while ((match = lineRegex.exec(blockContent)) !== null) {
-      const [, oldPath, newPath] = match;
-      if (newPath.startsWith('./') || newPath.startsWith('../')) {
-        directives.push({
-          oldPath,
-          newPath: newPath.replace(/^\.\//, ''),
-        });
-      }
-    }
-  }
-
-  return directives;
-}
-
 export function resolveGoModulePath(
   baseGoModPath: string,
   replaceDirective: ReplaceDirective,
@@ -78,15 +37,72 @@ export function resolveGoModulePath(
 }
 
 /**
+ * Extract replace directives from go.mod content using existing line-parser infrastructure
+ */
+function extractReplaceDirectives(content: string): ReplaceDirective[] {
+  const directives: ReplaceDirective[] = [];
+  const lines = content.split(newlineRegex);
+  let inReplaceBlock = false;
+
+  for (const line of lines) {
+    const trimmedLine = line.trim();
+
+    // Handle block start - exactly matching artifacts.ts gomodMassage pattern
+    if (trimmedLine.startsWith('replace (')) {
+      inReplaceBlock = true;
+      continue;
+    }
+
+    // Handle block end - exactly matching artifacts.ts gomodMassage pattern
+    if (inReplaceBlock && trimmedLine === ')') {
+      inReplaceBlock = false;
+      continue;
+    }
+
+    // Use existing parseLine function to handle replace directives
+    const dep = parseLine(line);
+    if (
+      dep &&
+      dep.depType === 'replace' &&
+      dep.skipReason === 'local-dependency'
+    ) {
+      // Extract oldPath from depName (the replacement path)
+      // For local replace directives, we need to extract the module being replaced
+      const replaceMatch = regEx(
+        /^(?:replace\s+)?([^\s]+(?:\s+[^\s]+)*)\s*=>\s+(.+)$/,
+      ).exec(line.trim());
+      if (replaceMatch) {
+        let oldPath = replaceMatch[1].trim();
+        const newPath = dep.depName!.replace(/^\.\//, ''); // Remove leading ./ if present
+
+        // For module paths with spaces (like "github.com/hashicorp/consul agent"),
+        // extract just the last part as the module identifier
+        if (oldPath.includes(' ')) {
+          oldPath = oldPath.split(' ').pop() ?? oldPath;
+        }
+
+        directives.push({
+          oldPath,
+          newPath,
+          version: dep.currentValue ?? undefined,
+        });
+      }
+    }
+  }
+
+  return directives;
+}
+
+/**
  * Parse Go module dependencies from go.mod content
  */
 export function parseGoModDependencies(
   filePath: string,
   content: string,
 ): GoModuleDependency[] {
-  const replaceDirectives = parseReplaceDirectives(content);
+  const directives = extractReplaceDirectives(content);
 
-  return replaceDirectives
+  return directives
     .map((directive) => {
       const resolvedPath = resolveGoModulePath(filePath, directive);
       return {
@@ -149,17 +165,6 @@ export async function getGoModulesInDependencyOrder(
 ): Promise<string[]> {
   const graph = await buildGoModDependencyGraph(fileList);
   return topologicalSort(graph);
-}
-
-/**
- * Check if a module has local replace directives
- */
-export function hasLocalReplaceDirectives(content: string): boolean {
-  const directives = parseReplaceDirectives(content);
-  return directives.some(
-    (directive) =>
-      directive.newPath.startsWith('./') || directive.newPath.startsWith('../'),
-  );
 }
 
 /**
