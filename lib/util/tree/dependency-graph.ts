@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../logger';
 import { matchRegexOrGlob } from '../../util/string-match';
@@ -27,7 +28,14 @@ export async function buildDependencyGraph<T>(
   const edges: DependencyGraph<T>['edges'] = [];
 
   // Filter the provided file list using the pattern
-  const files = fileList.filter((file) => matchRegexOrGlob(file, filePattern));
+  const files = fileList.filter((file) => {
+    if (is.string(filePattern)) {
+      return matchRegexOrGlob(file, filePattern);
+    }
+    // Since filePattern is not a string, it must be a RegExp
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    return (filePattern as RegExp).test(file);
+  });
   logger.debug(
     `Found ${files.length} files matching pattern ${filePattern} from provided list`,
   );

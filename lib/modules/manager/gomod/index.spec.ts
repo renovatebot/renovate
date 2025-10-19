@@ -224,7 +224,9 @@ describe('modules/manager/gomod/index', () => {
         ]);
 
         // Verify the dependency graph was built
-        expect(mockBuildGoModDependencyGraph).toHaveBeenCalledWith(['go.mod']);
+        expect(mockBuildGoModDependencyGraph).toHaveBeenCalledExactlyOnceWith([
+          'go.mod',
+        ]);
       });
 
       it('handles dependency graph building errors gracefully', async () => {
