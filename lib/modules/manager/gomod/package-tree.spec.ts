@@ -8,8 +8,8 @@ import {
   parseGoModDependencies,
   resolveGoModulePath,
 } from './package-tree';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { env, fs, git, partial } from '~test/util';
+import { envMock } from '~test/exec-util';
+import { env, fs } from '~test/util';
 
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/tree', () => ({
@@ -291,7 +291,7 @@ describe('modules/manager/gomod/package-tree', () => {
       );
 
       const serverDeps =
-        graph.nodes.get('cmd/server/go.mod')?.dependencies || [];
+        graph.nodes.get('cmd/server/go.mod')?.dependencies ?? [];
       expect(serverDeps).toContain('api/go.mod');
       expect(serverDeps).toContain('sdk/go.mod');
     });
@@ -427,13 +427,6 @@ describe('modules/manager/gomod/package-tree', () => {
     });
 
     it('excludes already processed modules from results', async () => {
-      const fileList = [
-        'shared/go.mod',
-        'api/go.mod',
-        'sdk/go.mod',
-        'cmd/server/go.mod',
-      ];
-
       const { getTransitiveDependents } = vi.mocked(
         await import('../../../util/tree'),
       );
@@ -658,9 +651,6 @@ describe('modules/manager/gomod/package-tree', () => {
       ]);
 
       vi.mocked(fs).readLocalFile.mockResolvedValue('module test\ngo 1.21');
-
-      // Build graph
-      const graph = await buildGoModDependencyGraph(fileList);
 
       // Get transitive dependents
       const dependents = await getTransitiveDependentModules(

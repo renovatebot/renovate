@@ -67,16 +67,6 @@ const sharedGoMod = codeBlock`
   require github.com/pkg/errors v0.7.0
 `;
 
-const apiGoMod = codeBlock`
-  module github.com/example/project/api
-
-  go 1.21
-
-  require github.com/example/project/shared v0.0.0
-
-  replace github.com/example/project/shared => ../shared
-`;
-
 describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
   beforeEach(async () => {
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });

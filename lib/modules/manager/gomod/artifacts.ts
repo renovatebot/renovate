@@ -5,7 +5,6 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { getTransitiveDependents, topologicalSort } from '../../../util/tree';
 import { coerceArray } from '../../../util/array';
 import { getEnv } from '../../../util/env';
 import { exec } from '../../../util/exec';
@@ -21,6 +20,7 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { regEx } from '../../../util/regex';
+import { getTransitiveDependents, topologicalSort } from '../../../util/tree';
 import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,

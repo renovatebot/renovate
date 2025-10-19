@@ -1,7 +1,7 @@
 import upath from 'upath';
 import { logger } from '../../logger';
-import { readLocalFile } from '../fs';
 import { matchRegexOrGlob } from '../../util/string-match';
+import { readLocalFile } from '../fs';
 import type {
   CircularDependency,
   DependencyGraph,

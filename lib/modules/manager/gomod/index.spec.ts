@@ -1,11 +1,9 @@
 import { codeBlock } from 'common-tags';
-import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
-import { extractAllPackageFiles } from './index';
 import { readLocalFile } from '../../../util/fs';
 import { extractPackageFile } from './extract';
-import { fs } from '~test/util';
+import { extractAllPackageFiles } from './index';
 
 // Mock dependencies
 vi.mock('../../../util/fs');
@@ -51,7 +49,10 @@ describe('modules/manager/gomod/index', () => {
 
   describe('extractAllPackageFiles', () => {
     it('returns null when no package files are provided', async () => {
-      const result = await extractAllPackageFiles({}, []);
+      const result = await extractAllPackageFiles(
+        { manager: 'gomod', fileList: [] },
+        [],
+      );
 
       expect(result).toBeNull();
     });
@@ -59,15 +60,16 @@ describe('modules/manager/gomod/index', () => {
     it('returns null when all files have no content', async () => {
       mockReadLocalFile.mockResolvedValue(null);
 
-      const result = await extractAllPackageFiles({}, [
-        'go.mod',
-        'submodule/go.mod',
-      ]);
+      const result = await extractAllPackageFiles(
+        { manager: 'gomod', fileList: ['go.mod', 'submodule/go.mod'] },
+        ['go.mod', 'submodule/go.mod'],
+      );
 
       expect(result).toBeNull();
       expect(mockReadLocalFile).toHaveBeenCalledTimes(2);
-      expect(mockReadLocalFile).toHaveBeenCalledWith('go.mod', 'utf8');
-      expect(mockReadLocalFile).toHaveBeenCalledWith(
+      expect(mockReadLocalFile).toHaveBeenNthCalledWith(1, 'go.mod', 'utf8');
+      expect(mockReadLocalFile).toHaveBeenNthCalledWith(
+        2,
         'submodule/go.mod',
         'utf8',
       );
@@ -75,27 +77,35 @@ describe('modules/manager/gomod/index', () => {
 
     it('returns null when all files fail to extract', async () => {
       mockReadLocalFile.mockImplementation((path) => {
-        if (path === 'go.mod') return Promise.resolve(sampleGoMod);
-        if (path === 'submodule/go.mod') return Promise.resolve(sampleGoMod2);
+        if (path === 'go.mod') {
+          return Promise.resolve(sampleGoMod);
+        }
+        if (path === 'submodule/go.mod') {
+          return Promise.resolve(sampleGoMod2);
+        }
         return Promise.resolve(null);
       });
       mockExtractPackageFile.mockReturnValue(null);
 
-      const result = await extractAllPackageFiles({}, [
-        'go.mod',
-        'submodule/go.mod',
-      ]);
+      const result = await extractAllPackageFiles(
+        { manager: 'gomod', fileList: ['go.mod', 'submodule/go.mod'] },
+        ['go.mod', 'submodule/go.mod'],
+      );
 
       expect(result).toBeNull();
       expect(mockExtractPackageFile).toHaveBeenCalledTimes(2);
-      expect(mockExtractPackageFile).toHaveBeenCalledWith(sampleGoMod);
-      expect(mockExtractPackageFile).toHaveBeenCalledWith(sampleGoMod2);
+      expect(mockExtractPackageFile).toHaveBeenNthCalledWith(1, sampleGoMod);
+      expect(mockExtractPackageFile).toHaveBeenNthCalledWith(2, sampleGoMod2);
     });
 
     it('extracts package files successfully', async () => {
       mockReadLocalFile.mockImplementation((path) => {
-        if (path === 'go.mod') return Promise.resolve(sampleGoMod);
-        if (path === 'submodule/go.mod') return Promise.resolve(sampleGoMod2);
+        if (path === 'go.mod') {
+          return Promise.resolve(sampleGoMod);
+        }
+        if (path === 'submodule/go.mod') {
+          return Promise.resolve(sampleGoMod2);
+        }
         return Promise.resolve(null);
       });
 
@@ -117,10 +127,10 @@ describe('modules/manager/gomod/index', () => {
         return null;
       });
 
-      const result = await extractAllPackageFiles({}, [
-        'go.mod',
-        'submodule/go.mod',
-      ]);
+      const result = await extractAllPackageFiles(
+        { manager: 'gomod', fileList: ['go.mod', 'submodule/go.mod'] },
+        ['go.mod', 'submodule/go.mod'],
+      );
 
       expect(result).toEqual([
         {
@@ -136,9 +146,15 @@ describe('modules/manager/gomod/index', () => {
 
     it('handles mix of successful and failed extractions', async () => {
       mockReadLocalFile.mockImplementation((path) => {
-        if (path === 'go.mod') return Promise.resolve(sampleGoMod);
-        if (path === 'invalid/go.mod') return Promise.resolve(sampleGoMod2);
-        if (path === 'empty/go.mod') return Promise.resolve(null);
+        if (path === 'go.mod') {
+          return Promise.resolve(sampleGoMod);
+        }
+        if (path === 'invalid/go.mod') {
+          return Promise.resolve(sampleGoMod2);
+        }
+        if (path === 'empty/go.mod') {
+          return Promise.resolve(null);
+        }
         return Promise.resolve(null);
       });
 
@@ -156,11 +172,13 @@ describe('modules/manager/gomod/index', () => {
         return null;
       });
 
-      const result = await extractAllPackageFiles({}, [
-        'go.mod',
-        'invalid/go.mod',
-        'empty/go.mod',
-      ]);
+      const result = await extractAllPackageFiles(
+        {
+          manager: 'gomod',
+          fileList: ['go.mod', 'invalid/go.mod', 'empty/go.mod'],
+        },
+        ['go.mod', 'invalid/go.mod', 'empty/go.mod'],
+      );
 
       expect(result).toEqual([
         {
@@ -183,12 +201,16 @@ describe('modules/manager/gomod/index', () => {
           edges: [],
         });
 
-        vi.doMock('./package-tree.js', () => ({
+        vi.doMock('./package-tree', () => ({
           buildGoModDependencyGraph: mockBuildGoModDependencyGraph,
         }));
 
         const result = await extractAllPackageFiles(
-          { postUpdateOptions: ['gomodTidyAll'] },
+          {
+            manager: 'gomod',
+            fileList: ['go.mod'],
+            postUpdateOptions: ['gomodTidyAll'],
+          },
           ['go.mod'],
         );
 
@@ -212,14 +234,18 @@ describe('modules/manager/gomod/index', () => {
         });
 
         // Mock the package-tree module to throw an error
-        vi.doMock('./package-tree.js', () => ({
+        vi.doMock('./package-tree', () => ({
           buildGoModDependencyGraph: vi
             .fn()
             .mockRejectedValue(new Error('Graph building failed')),
         }));
 
         const result = await extractAllPackageFiles(
-          { postUpdateOptions: ['gomodTidyAll'] },
+          {
+            manager: 'gomod',
+            fileList: ['go.mod'],
+            postUpdateOptions: ['gomodTidyAll'],
+          },
           ['go.mod'],
         );
 
@@ -241,7 +267,11 @@ describe('modules/manager/gomod/index', () => {
         });
 
         const result = await extractAllPackageFiles(
-          { postUpdateOptions: ['otherOption'] }, // Not gomodTidyAll
+          {
+            manager: 'gomod',
+            fileList: ['go.mod'],
+            postUpdateOptions: ['otherOption'],
+          }, // Not gomodTidyAll
           ['go.mod'],
         );
 
