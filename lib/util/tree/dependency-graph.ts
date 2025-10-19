@@ -1,6 +1,6 @@
 import upath from 'upath';
-import { readLocalFile } from '../fs';
 import { logger } from '../../logger';
+import { readLocalFile } from '../fs';
 import type {
   CircularDependency,
   DependencyGraph,
