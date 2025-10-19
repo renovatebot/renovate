@@ -278,16 +278,79 @@ export async function updateArtifacts({
       tidyOpts += ' -e';
     }
 
+    // Determine if any go mod tidy is needed (for use in multiple places)
     const isGoModTidyRequired =
       !mustSkipGoModTidy &&
       (config.postUpdateOptions?.includes('gomodTidy') === true ||
         config.postUpdateOptions?.includes('gomodTidy1.17') === true ||
         config.postUpdateOptions?.includes('gomodTidyE') === true ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
-    if (isGoModTidyRequired) {
-      args = 'mod tidy' + tidyOpts;
+
+    // Handle gomodTidyAll first - this has special graph-aware logic
+    if (config.postUpdateOptions?.includes('gomodTidyAll')) {
+      try {
+        const dependencyGraph = (globalThis as any).gomodDependencyGraph;
+        if (dependencyGraph) {
+          // Get all modules that depend on the updated module
+          const transitiveDependents = getTransitiveDependents(
+            dependencyGraph,
+            goModFileName,
+            {
+              includeSelf: false,
+              direction: 'dependents',
+            },
+          );
+
+          // Start with the updated module, then add dependents in topological order
+          const modulesToTidy = [goModFileName];
+
+          if (transitiveDependents.length > 0) {
+            // Sort in topological order for correct processing
+            const allModulesSorted = topologicalSort(dependencyGraph);
+            const affectedModulesSorted = allModulesSorted.filter((module) =>
+              transitiveDependents.includes(module),
+            );
+
+            modulesToTidy.push(...affectedModulesSorted);
+            logger.debug(
+              `gomodTidyAll: processing ${affectedModulesSorted.length} dependent modules: ${affectedModulesSorted.join(', ')}`,
+            );
+          }
+
+          // Add go mod tidy commands for all modules that need processing
+          for (const moduleToTidy of modulesToTidy) {
+            const moduleDir = upath.dirname(moduleToTidy);
+            const tidyCmd =
+              moduleDir === goModDir
+                ? `${cmd} mod tidy${tidyOpts}`
+                : `(cd '${moduleDir}' && ${cmd} mod tidy${tidyOpts})`;
+
+            execCommands.push(tidyCmd);
+            logger.debug(`go mod tidy command included for: ${moduleToTidy}`);
+          }
+        }
+      } catch (error) {
+        logger.warn(
+          {
+            error: error instanceof Error ? error.message : String(error),
+            goModFileName,
+            feature: 'gomodTidyAll',
+          },
+          'Failed to get dependent modules for gomodTidyAll - falling back to single module',
+        );
+
+        // Fallback: treat as regular gomodTidy if graph processing fails
+        if (isGoModTidyRequired) {
+          execCommands.push(`${cmd} mod tidy${tidyOpts}`);
+          logger.debug(
+            'go mod tidy command included (fallback from gomodTidyAll)',
+          );
+        }
+      }
+    } else if (isGoModTidyRequired) {
+      // Regular gomodTidy logic - completely unchanged from original
+      execCommands.push(`${cmd} mod tidy${tidyOpts}`);
       logger.debug('go mod tidy command included');
-      execCommands.push(`${cmd} ${args}`);
     }
 
     let goWorkSumFileName = upath.join(goModDir, 'go.work.sum');
@@ -329,53 +392,6 @@ export async function updateArtifacts({
       args = 'mod tidy' + tidyOpts;
       logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
-    }
-
-    // Process transitive dependents when gomodTidyAll is enabled
-    if (config.postUpdateOptions?.includes('gomodTidyAll')) {
-      try {
-        const dependencyGraph = (globalThis as any).gomodDependencyGraph;
-        if (dependencyGraph) {
-          // Get all modules that depend on the updated module
-          const transitiveDependentModules = getTransitiveDependents(
-            dependencyGraph,
-            goModFileName,
-            {
-              includeSelf: false,
-              direction: 'dependents',
-            },
-          );
-
-          if (transitiveDependentModules.length > 0) {
-            // Sort modules in topological order to ensure correct processing sequence
-            const allModulesSorted = topologicalSort(dependencyGraph);
-            const affectedModulesSorted = allModulesSorted.filter((module) =>
-              transitiveDependentModules.includes(module),
-            );
-
-            logger.debug(
-              `Processing ${affectedModulesSorted.length} dependent modules in topological order: ${affectedModulesSorted.join(', ')}`,
-            );
-
-            // Process modules in correct topological order
-            for (const modulePath of affectedModulesSorted) {
-              const moduleDir = modulePath.replace(/\/[^\/]+$/, '');
-              logger.debug(`Processing dependent module: ${modulePath}`);
-              // Use subshell to isolate directory changes
-              execCommands.push(`(cd '${moduleDir}' && go mod tidy)`);
-            }
-          }
-        }
-      } catch (error) {
-        logger.warn(
-          {
-            error: error instanceof Error ? error.message : String(error),
-            goModFileName,
-            feature: 'gomodTidyAll',
-          },
-          'Failed to process gomodTidyAll - skipping',
-        );
-      }
     }
 
     await exec(execCommands, execOptions);
