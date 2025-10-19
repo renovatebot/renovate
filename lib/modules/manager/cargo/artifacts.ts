@@ -205,6 +205,57 @@ async function updateArtifactsImpl(
       }
     }
 
+    // In other cases, athe dependency cannot be updated because a different dependency
+    // depends on the prior version. `cargo update --workspace` should handle such cases by aligning
+    // the `Cargo.toml` versions with the lock file if not a lockfile-only update.
+    if (
+      recursionLimit > 0 &&
+      regEx(/error: failed to select a version for the requirement/).test(
+        err.stderr,
+      )
+    ) {
+      // error: failed to select a version for the requirement `dep = "^version"`
+      // Filter any of these and retry recursively
+      const newUpdatedDeps = updatedDeps
+        // Stay stricter with lockfile updates
+        .filter((dep) => dep.updateType !== 'lockfileUpdate')
+        .filter((dep) => {
+          const regex = new RegExp(
+            `error: failed to select a version for the requirement \`${dep.depName}`,
+          );
+          return !regex.test(err.stderr);
+        });
+
+      if (newUpdatedDeps.length < updatedDeps.length) {
+        // Manually run a full update if all dependencies are filtered out
+        if (newUpdatedDeps.length === 0) {
+          await cargoUpdate(packageFileName, false, config.constraints?.rust);
+          const finalCargoLockContent = await readLocalFile(lockFileName);
+          logger.debug('All dependencies already up to date');
+          return [
+            {
+              file: {
+                type: 'addition',
+                path: lockFileName,
+                contents: finalCargoLockContent,
+              },
+            },
+          ];
+        }
+
+        logger.debug('Version selection failed - reattempting recursively');
+        return updateArtifactsImpl(
+          {
+            packageFileName,
+            updatedDeps: newUpdatedDeps,
+            newPackageFileContent,
+            config,
+          },
+          recursionLimit - 1,
+        );
+      }
+    }
+
     logger.debug({ err }, 'Failed to update Cargo lock file');
 
     return [
