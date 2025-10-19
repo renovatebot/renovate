@@ -123,6 +123,12 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
 
+  // Defensive check for newGoModContent
+  if (!newGoModContent) {
+    logger.debug('No new go.mod content provided');
+    return null;
+  }
+
   const sumFileName = goModFileName.replace(regEx(/\.mod$/), '.sum');
   const existingGoSumContent = await readLocalFile(sumFileName);
   if (!existingGoSumContent) {
@@ -143,21 +149,27 @@ export async function updateArtifacts({
   let massagedGoMod = newGoModContent;
 
   if (config.postUpdateOptions?.includes('gomodMassage')) {
-    // Regex match inline replace directive, example:
-    // replace golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
-    // https://go.dev/ref/mod#go-mod-file-replace
+    // Defensive check for massagedGoMod
+    if (!massagedGoMod) {
+      logger.debug('No go.mod content to massage');
+      massagedGoMod = '';
+    } else {
+      // Regex match inline replace directive, example:
+      // replace golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
+      // https://go.dev/ref/mod#go-mod-file-replace
 
-    // replace bracket after comments, so it doesn't break the regex, doing a complex regex causes problems
-    // when there's a comment and ")" after it, the regex will read replace block until comment.. and stop.
-    massagedGoMod = massagedGoMod
-      .split('\n')
-      .map((line) => {
-        if (line.trim().startsWith('//')) {
-          return line.replace(')', 'renovate-replace-bracket');
-        }
-        return line;
-      })
-      .join('\n');
+      // replace bracket after comments, so it doesn't break the regex, doing a complex regex causes problems
+      // when there's a comment and ")" after it, the regex will read replace block until comment.. and stop.
+      massagedGoMod = massagedGoMod
+        .split('\n')
+        .map((line) => {
+          if (line.trim().startsWith('//')) {
+            return line.replace(')', 'renovate-replace-bracket');
+          }
+          return line;
+        })
+        .join('\n');
+    }
 
     const inlineReplaceRegEx = regEx(
       /(\r?\n)(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g,
@@ -385,24 +397,58 @@ export async function updateArtifacts({
     await exec(execCommands, execOptions);
 
     const status = await getRepoStatus();
-    if (
-      !status.modified.includes(sumFileName) &&
-      !status.modified.includes(goModFileName) &&
-      !status.modified.includes(goWorkSumFileName)
-    ) {
+
+    // Collect all sum files that might have been modified
+    const allSumFiles = new Set<string>();
+
+    // Always include the main module's sum file
+    allSumFiles.add(sumFileName);
+
+    // If gomodTidyAll is enabled, also collect sum files from dependent modules
+    if (config.postUpdateOptions?.includes('gomodTidyAll')) {
+      const dependencyGraph = (globalThis as any).gomodDependencyGraph;
+      if (dependencyGraph) {
+        const transitiveDependentModules = getTransitiveDependents(
+          dependencyGraph,
+          goModFileName,
+          {
+            includeSelf: false,
+            direction: 'dependents',
+          },
+        );
+
+        // Add sum files for all dependent modules
+        for (const modulePath of transitiveDependentModules) {
+          const moduleSumFileName = modulePath.replace(regEx(/\.mod$/), '.sum');
+          allSumFiles.add(moduleSumFileName);
+        }
+      }
+    }
+
+    // Check if any relevant files were modified
+    const hasModifiedFiles =
+      Array.from(allSumFiles).some((file) => status.modified.includes(file)) ||
+      status.modified.includes(goModFileName) ||
+      status.modified.includes(goWorkSumFileName);
+
+    if (!hasModifiedFiles) {
       return null;
     }
 
     const res: UpdateArtifactsResult[] = [];
-    if (status.modified.includes(sumFileName)) {
-      logger.debug('Returning updated go.sum');
-      res.push({
-        file: {
-          type: 'addition',
-          path: sumFileName,
-          contents: await readLocalFile(sumFileName),
-        },
-      });
+
+    // Return all modified sum files
+    for (const sumFile of allSumFiles) {
+      if (status.modified.includes(sumFile)) {
+        logger.debug(`Returning updated ${sumFile}`);
+        res.push({
+          file: {
+            type: 'addition',
+            path: sumFile,
+            contents: await readLocalFile(sumFile),
+          },
+        });
+      }
     }
 
     if (status.modified.includes(goWorkSumFileName)) {

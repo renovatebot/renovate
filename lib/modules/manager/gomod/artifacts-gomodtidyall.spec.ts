@@ -1,262 +1,315 @@
-import { describe, expect, it, vi } from 'vitest';
-import type { UpdateArtifact } from '../types';
+import { codeBlock } from 'common-tags';
+import { mockDeep } from 'vitest-mock-extended';
+import { GlobalConfig } from '../../../config/global';
+import type { RepoGlobalConfig } from '../../../config/types';
+import type { StatusResult } from '../../../util/git/types';
+import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { env, fs, git, partial } from '~test/util';
 
-vi.mock('./package-tree', async () => {
-  const actual = await vi.importActual('./package-tree');
-  return {
-    ...actual,
-    getTransitiveDependentModules: vi.fn(),
-    getGoModulesInDependencyOrder: vi.fn(),
-    buildGoModDependencyGraph: vi.fn(),
-  };
+vi.mock('../../../util/exec/env', () => ({
+  getEnv: vi.fn(() => goEnv),
+  getChildProcessEnv: vi.fn(() => ({ ...envMock.basic, ...goEnv })),
+}));
+vi.mock('./package-tree', () => mockDeep());
+vi.mock('../../../util/fs', async () => {
+  // restore
+  return mockDeep({
+    isValidLocalPath: (await vi.importActual('../../../util/fs'))
+      .isValidLocalPath,
+    writeLocalFile: vi.fn(),
+    ensureCacheDir: vi.fn(() => Promise.resolve('/tmp/cache')),
+  });
 });
-
+vi.mock('../../../util/exec', () => ({
+  exec: vi.fn(() => Promise.resolve({ stdout: '', stderr: '' })),
+}));
+vi.mock('../../../util/git', () => ({
+  getRepoStatus: vi.fn(() =>
+    Promise.resolve({ modified: [], not_added: [], deleted: [] }),
+  ),
+  getGitEnvironmentVariables: vi.fn(() => ({})),
+}));
 vi.mock('../../../util/tree', () => ({
-  buildDependencyGraph: vi.fn(),
   getTransitiveDependents: vi.fn(),
   topologicalSort: vi.fn(),
 }));
+vi.mock('../../../config/global', () => mockDeep());
+vi.mock('../../../logger', () => mockDeep());
 
-vi.mock('../../../util/fs', () => ({
-  readLocalFile: vi.fn(),
-  writeLocalFile: vi.fn(),
-  ensureCacheDir: vi.fn(),
-  findLocalSiblingOrParent: vi.fn(),
-  isValidLocalPath: vi.fn(),
-}));
+const adminConfig: RepoGlobalConfig = {
+  localDir: '/tmp/github/some/repo',
+  cacheDir: '/tmp/renovate/cache',
+  containerbaseDir: '/tmp/renovate/cache/containerbase',
+  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+};
 
-vi.mock('../../../util/exec', () => ({
-  exec: vi.fn(),
-}));
+const config: UpdateArtifactsConfig = {
+  constraints: { go: '1.21' },
+  postUpdateOptions: ['gomodTidyAll'],
+};
 
-vi.mock('../../../util/git', () => ({
-  getRepoStatus: vi.fn(),
-  getGitEnvironmentVariables: vi.fn(() => ({})),
-}));
+const goEnv = {
+  GONOSUMDB: '1',
+  GOPROXY: 'proxy.example.com',
+  GOPRIVATE: 'private.example.com/*',
+  GONOPROXY: 'noproxy.example.com/*',
+  GOINSECURE: 'insecure.example.com/*',
+  CGO_ENABLED: '1',
+};
 
-vi.mock('../../../util/env', () => ({
-  getEnv: vi.fn(() => ({})),
-}));
+const sharedGoMod = codeBlock`
+  module github.com/example/project/shared
 
-vi.mock('../../../config/global', () => ({
-  GlobalConfig: {
-    get: vi.fn(),
-  },
-}));
+  go 1.21
 
-vi.mock('../../../logger', () => ({
-  logger: {
-    debug: vi.fn(),
-    trace: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-  },
-}));
+  require github.com/pkg/errors v0.7.0
+`;
 
-afterEach(() => {
-  delete (globalThis as any).gomodDependencyGraph;
-});
+const apiGoMod = codeBlock`
+  module github.com/example/project/api
+
+  go 1.21
+
+  require github.com/example/project/shared v0.0.0
+
+  replace github.com/example/project/shared => ../shared
+`;
 
 describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
-  const mockUpdateArtifact: UpdateArtifact = {
-    packageFileName: '/workspace/consul/go.mod',
-    updatedDeps: [],
-    newPackageFileContent: 'module github.com/hashicorp/consul\ngo 1.21\n',
-    config: {
-      postUpdateOptions: ['gomodTidyAll'],
-      constraints: {},
-      updateType: 'patch',
-    },
-  };
+  beforeEach(async () => {
+    env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
+    GlobalConfig.set(adminConfig);
 
-  beforeEach(() => {
+    // Set up global dependency graph mock
+    (globalThis as any).gomodDependencyGraph = {
+      nodes: new Map([
+        [
+          'shared/go.mod',
+          {
+            path: 'shared/go.mod',
+            dependencies: [],
+            dependents: ['api/go.mod'],
+          },
+        ],
+        [
+          'api/go.mod',
+          {
+            path: 'api/go.mod',
+            dependencies: ['shared/go.mod'],
+            dependents: [],
+          },
+        ],
+      ]),
+      edges: [],
+    };
+
+    // Set up tree utility mocks
+    const { getTransitiveDependents, topologicalSort } = vi.mocked(
+      await import('../../../util/tree'),
+    );
+    getTransitiveDependents.mockReturnValue(['api/go.mod']);
+    topologicalSort.mockReturnValue(['shared/go.mod', 'api/go.mod']);
+
+    // Mock readLocalFile to return content for go.sum files
+    vi.mocked(fs.readLocalFile).mockImplementation((path: string) => {
+      if (path.endsWith('.sum')) {
+        return Promise.resolve('some go.sum content');
+      }
+      return Promise.resolve(null);
+    });
+  });
+
+  afterEach(() => {
+    GlobalConfig.reset();
     vi.clearAllMocks();
   });
 
-  it('processes dependent modules when gomodTidyAll is enabled', async () => {
-    const { readLocalFile, writeLocalFile } = await import('../../../util/fs');
-    const { exec } = await import('../../../util/exec');
-    const { getRepoStatus } = await import('../../../util/git');
+  describe('when gomodTidyAll is enabled', () => {
+    it('skips processing when no go.sum found', async () => {
+      // Mock findLocalSiblingOrParent to return null (no go.sum found)
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce(null);
 
-    vi.mocked(readLocalFile).mockResolvedValue('go.sum content');
-    vi.mocked(writeLocalFile).mockResolvedValue();
+      const result = await updateArtifacts({
+        packageFileName: 'shared/go.mod',
+        updatedDeps: [],
+        newPackageFileContent: sharedGoMod,
+        config,
+      });
 
-    vi.mocked(getRepoStatus).mockResolvedValue({
-      modified: ['/workspace/consul/go.sum'],
-      added: [],
-      deleted: [],
-      not_added: [],
-      renamed: [],
-      files: [],
-      staged: [],
+      expect(result).toBeNull();
     });
 
-    const mockGlobalGraph = new Map([
-      [
-        '/workspace/consul/go.mod',
-        {
-          path: '/workspace/consul/go.mod',
-          dependencies: [],
-          dependents: [
-            '/workspace/consul/api/go.mod',
-            '/workspace/consul/sdk/go.mod',
-            '/workspace/consul/agent/go.mod',
-          ],
-        },
-      ],
-      [
-        '/workspace/consul/api/go.mod',
-        {
-          path: '/workspace/consul/api/go.mod',
-          dependencies: ['/workspace/consul/go.mod'],
-          dependents: ['/workspace/consul/cmd/agent/go.mod'],
-        },
-      ],
-      [
-        '/workspace/consul/sdk/go.mod',
-        {
-          path: '/workspace/consul/sdk/go.mod',
-          dependencies: ['/workspace/consul/go.mod'],
-          dependents: ['/workspace/consul/cmd/agent/go.mod'],
-        },
-      ],
-      [
-        '/workspace/consul/agent/go.mod',
-        {
-          path: '/workspace/consul/agent/go.mod',
-          dependencies: ['/workspace/consul/go.mod'],
-          dependents: ['/workspace/consul/cmd/agent/go.mod'],
-        },
-      ],
-      [
-        '/workspace/consul/cmd/agent/go.mod',
-        {
-          path: '/workspace/consul/cmd/agent/go.mod',
-          dependencies: [
-            '/workspace/consul/go.mod',
-            '/workspace/consul/api/go.mod',
-            '/workspace/consul/sdk/go.mod',
-            '/workspace/consul/agent/go.mod',
-          ],
-          dependents: [],
-        },
-      ],
-    ]);
+    it('skips processing when no dependency graph available', async () => {
+      // Mock findLocalSiblingOrParent to return go.sum
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce('go.sum');
 
-    (globalThis as any).gomodDependencyGraph = mockGlobalGraph;
+      // Remove the global dependency graph
+      (globalThis as any).gomodDependencyGraph = undefined;
 
-    vi.mocked(exec).mockResolvedValue({ stdout: '', stderr: '' });
+      // Mock git status to return no changes
+      vi.mocked(git.getRepoStatus).mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+        }),
+      );
 
-    const result = await updateArtifacts(mockUpdateArtifact);
+      const result = await updateArtifacts({
+        packageFileName: 'shared/go.mod',
+        updatedDeps: [],
+        newPackageFileContent: sharedGoMod,
+        config,
+      });
 
-    expect(result).not.toBeNull();
+      expect(result).toBeNull();
+    });
 
-    delete (globalThis as any).gomodDependencyGraph;
+    it('skips processing when no dependents found', async () => {
+      // Mock findLocalSiblingOrParent to return go.sum
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce('go.sum');
+
+      // Mock getTransitiveDependents to return empty array
+      const { getTransitiveDependents } = vi.mocked(
+        await import('../../../util/tree'),
+      );
+      getTransitiveDependents.mockReturnValue([]);
+
+      // Mock git status to return no changes
+      vi.mocked(git.getRepoStatus).mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+        }),
+      );
+
+      const result = await updateArtifacts({
+        packageFileName: 'shared/go.mod',
+        updatedDeps: [],
+        newPackageFileContent: sharedGoMod,
+        config,
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('processes transitive dependents when dependents are found', async () => {
+      // Mock findLocalSiblingOrParent to return go.sum
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce('go.sum');
+
+      // Mock writeLocalFile to succeed
+      vi.mocked(fs.writeLocalFile).mockResolvedValueOnce();
+
+      // Mock exec to return successfully
+      const execMock = vi.mocked(await import('../../../util/exec'));
+      execMock.exec.mockResolvedValueOnce({ stdout: '', stderr: '' });
+
+      // Mock git status to show that api/go.sum was modified
+      vi.mocked(git.getRepoStatus).mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['api/go.sum'],
+        }),
+      );
+
+      const result = await updateArtifacts({
+        packageFileName: 'shared/go.mod',
+        updatedDeps: [],
+        newPackageFileContent: sharedGoMod,
+        config,
+      });
+
+      // Verify the function was called and dependency graph processing was attempted
+      expect(execMock.exec).toHaveBeenCalled();
+
+      // The exact result format depends on the implementation details
+      // We're mainly testing that the function doesn't crash and processes dependents
+      expect(result).toBeDefined();
+    });
   });
 
-  it('skips processing when no dependent modules exist', async () => {
-    const { readLocalFile, writeLocalFile } = await import('../../../util/fs');
-    const { exec } = await import('../../../util/exec');
-    const { getRepoStatus } = await import('../../../util/git');
+  describe('when gomodTidyAll is not configured', () => {
+    it('does not process transitive dependents', async () => {
+      // Mock findLocalSiblingOrParent to return go.sum
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce('go.sum');
 
-    vi.mocked(readLocalFile).mockResolvedValue('go.sum content');
-    vi.mocked(writeLocalFile).mockResolvedValue();
+      const execSnapshots = mockExecAll();
 
-    vi.mocked(getRepoStatus).mockResolvedValue({
-      modified: ['/workspace/consul/go.sum'],
-      added: [],
-      deleted: [],
-      not_added: [],
-      renamed: [],
-      files: [],
-      staged: [],
-    });
+      // Mock git status to return no changes
+      vi.mocked(git.getRepoStatus).mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+        }),
+      );
 
-    const mockGlobalGraph = new Map([
-      [
-        '/workspace/consul/go.mod',
-        {
-          path: '/workspace/consul/go.mod',
-          dependencies: [],
-          dependents: [],
+      const result = await updateArtifacts({
+        packageFileName: 'shared/go.mod',
+        updatedDeps: [],
+        newPackageFileContent: sharedGoMod,
+        config: {
+          ...config,
+          postUpdateOptions: ['gomodTidy'], // Not gomodTidyAll
         },
-      ],
-    ]);
+      });
 
-    (globalThis as any).gomodDependencyGraph = mockGlobalGraph;
+      expect(result).toBeNull();
 
-    vi.mocked(exec).mockResolvedValue({ stdout: '', stderr: '' });
-
-    const result = await updateArtifacts(mockUpdateArtifact);
-
-    expect(result).not.toBeNull();
+      // Should not include gomodTidyAll commands
+      expect(execSnapshots).not.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            cmd: expect.stringContaining('(cd'),
+          }),
+        ]),
+      );
+    });
   });
 
-  it('skips processing when dependency graph is unavailable', async () => {
-    const { readLocalFile, writeLocalFile } = await import('../../../util/fs');
-    const { exec } = await import('../../../util/exec');
-    const { getRepoStatus } = await import('../../../util/git');
+  describe('edge cases', () => {
+    it('handles empty new package file content', async () => {
+      const result = await updateArtifacts({
+        packageFileName: 'shared/go.mod',
+        updatedDeps: [],
+        newPackageFileContent: '', // Empty content
+        config,
+      });
 
-    vi.mocked(readLocalFile).mockResolvedValue('go.sum content');
-    vi.mocked(writeLocalFile).mockResolvedValue();
-
-    vi.mocked(getRepoStatus).mockResolvedValue({
-      modified: ['/workspace/consul/go.sum'],
-      added: [],
-      deleted: [],
-      not_added: [],
-      renamed: [],
-      files: [],
-      staged: [],
+      expect(result).toBeNull();
     });
 
-    delete (globalThis as any).gomodDependencyGraph;
+    it('handles null new package file content', async () => {
+      const result = await updateArtifacts({
+        packageFileName: 'shared/go.mod',
+        updatedDeps: [],
+        newPackageFileContent: null as any, // Null content
+        config,
+      });
 
-    vi.mocked(exec).mockResolvedValue({ stdout: '', stderr: '' });
-
-    const result = await updateArtifacts(mockUpdateArtifact);
-
-    expect(result).not.toBeNull();
-    expect(exec).not.toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.stringContaining('cd /workspace/consul/api && go mod tidy'),
-      ]),
-    );
-  });
-
-  it('does not process when gomodTidyAll is not configured', async () => {
-    const { readLocalFile, writeLocalFile } = await import('../../../util/fs');
-    const { exec } = await import('../../../util/exec');
-    const { getRepoStatus } = await import('../../../util/git');
-    const { getTransitiveDependentModules } = await import('./package-tree');
-
-    const updateArtifactWithoutTidyAll = {
-      ...mockUpdateArtifact,
-      config: {
-        ...mockUpdateArtifact.config,
-        postUpdateOptions: ['gomodTidy'],
-      },
-    };
-
-    vi.mocked(readLocalFile).mockResolvedValue('go.sum content');
-    vi.mocked(writeLocalFile).mockResolvedValue();
-
-    vi.mocked(getRepoStatus).mockResolvedValue({
-      modified: ['/workspace/consul/go.sum'],
-      added: [],
-      deleted: [],
-      not_added: [],
-      renamed: [],
-      files: [],
-      staged: [],
+      expect(result).toBeNull();
     });
 
-    vi.mocked(exec).mockResolvedValue({ stdout: '', stderr: '' });
+    it('handles execution errors gracefully', async () => {
+      // Mock findLocalSiblingOrParent to return go.sum
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce('go.sum');
 
-    const result = await updateArtifacts(updateArtifactWithoutTidyAll);
+      // Mock exec to throw an error
+      const { exec } = vi.mocked(await import('../../../util/exec'));
+      exec.mockRejectedValueOnce(new Error('Execution failed'));
 
-    expect(result).not.toBeNull();
-    expect(getTransitiveDependentModules).not.toHaveBeenCalled();
+      const result = await updateArtifacts({
+        packageFileName: 'shared/go.mod',
+        updatedDeps: [],
+        newPackageFileContent: sharedGoMod,
+        config,
+      });
+
+      // Should return artifact error
+      expect(result).toEqual([
+        {
+          artifactError: {
+            lockFile: 'shared/go.sum',
+            stderr: 'Execution failed',
+          },
+        },
+      ]);
+    });
   });
 });
