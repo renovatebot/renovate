@@ -14,6 +14,7 @@ import {
   ensureCacheDir,
   ensureDir,
   ensureLocalDir,
+  findFiles,
   findLocalSiblingOrParent,
   findUpLocal,
   getLocalFiles,
@@ -550,6 +551,63 @@ describe('util/fs/index', () => {
       expect(res).toStrictEqual({
         invalidfile: null,
       });
+    });
+  });
+
+  describe('findFiles', () => {
+    it('finds files matching pattern', async () => {
+      await fs.outputFile(`${localDir}/subdir/file1.txt`, 'content1');
+      await fs.outputFile(`${localDir}/subdir/file2.txt`, 'content2');
+      await fs.outputFile(`${localDir}/other/file3.md`, 'content3');
+      await fs.outputFile(`${localDir}/subdir/nested/file4.txt`, 'content4');
+
+      const result = await findFiles('**/*.txt');
+      expect(result).toHaveLength(3);
+      expect(result.every((file) => file.endsWith('.txt'))).toBe(true);
+      expect(result.some((file) => file.includes('file1.txt'))).toBe(true);
+      expect(result.some((file) => file.includes('file2.txt'))).toBe(true);
+      expect(result.some((file) => file.includes('file4.txt'))).toBe(true);
+    });
+
+    it('finds go.mod files specifically', async () => {
+      await fs.outputFile(`${localDir}/go.mod`, 'module test');
+      await fs.outputFile(`${localDir}/subdir/go.mod`, 'module subdir');
+      await fs.outputFile(`${localDir}/other/go.sum`, 'go sum content');
+      await fs.outputFile(`${localDir}/subdir/nested/go.mod`, 'module nested');
+
+      const result = await findFiles('**/go.mod');
+      expect(result).toHaveLength(3);
+      expect(result.every((file) => file.endsWith('go.mod'))).toBe(true);
+    });
+
+    it('returns empty array when no files match', async () => {
+      await fs.outputFile(`${localDir}/file1.txt`, 'content');
+      await fs.outputFile(`${localDir}/file2.md`, 'content');
+
+      const result = await findFiles('**/*.go');
+      expect(result).toHaveLength(0);
+    });
+
+    it('handles nested directory patterns', async () => {
+      await fs.outputFile(`${localDir}/a/b/c/file.txt`, 'content');
+      await fs.outputFile(`${localDir}/a/b/file.txt`, 'content');
+      await fs.outputFile(`${localDir}/a/file.txt`, 'content');
+
+      const result = await findFiles('**/file.txt');
+      expect(result).toHaveLength(3);
+    });
+
+    it('respects gitignore by default', async () => {
+      await fs.outputFile(`${localDir}/.gitignore`, '*.ignored\nnode_modules/');
+      await fs.outputFile(`${localDir}/file.txt`, 'content');
+      await fs.outputFile(`${localDir}/file.ignored`, 'content');
+      await fs.ensureDir(`${localDir}/node_modules`);
+      await fs.outputFile(`${localDir}/node_modules/package.json`, '{}');
+
+      const result = await findFiles('**/*');
+      expect(result.some((file) => file.includes('file.txt'))).toBe(true);
+      expect(result.some((file) => file.includes('file.ignored'))).toBe(false);
+      expect(result.some((file) => file.includes('node_modules'))).toBe(false);
     });
   });
 });

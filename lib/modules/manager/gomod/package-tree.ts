@@ -1,10 +1,8 @@
 import upath from 'upath';
-import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import {
   buildDependencyGraph,
   getTransitiveDependents,
-  groupByDependencyLevel,
   topologicalSort,
 } from '../../../util/tree';
 import type { DependencyGraph } from '../../../util/tree';
@@ -46,39 +44,20 @@ export interface GoModuleDependency {
 }
 
 /**
- * Find all go.mod files in the repository
- */
-export async function getAllGoModFiles(
-  rootDir: string = process.cwd(),
-): Promise<string[]> {
-  try {
-    const { globby } = await import('globby');
-    const files = await globby('**/go.mod', {
-      cwd: rootDir,
-      absolute: true,
-      gitignore: true,
-    });
-    return files;
-  } catch (error) {
-    logger.error({ error }, 'Failed to find go.mod files');
-    return [];
-  }
-}
-
-/**
  * Parse replace directives from go.mod content
+ * Reuses the same logic as in artifacts.ts for consistency
  */
 export function parseReplaceDirectives(content: string): ReplaceDirective[] {
   const directives: ReplaceDirective[] = [];
 
-  // Match single-line replace directives
+  // Match single-line replace directives (same as artifacts.ts)
   const singleLineRegex = regEx(
-    /^replace\s+([^\s]+)\s+(?:=>\s+([^\s]+)|([^\s]+\s+)=>\s+(.+))$/gm,
+    /(\r?\n)replace\s+([^\s]+)\s+(?:=>\s+([^\s]+)|([^\s]+\s+)=>\s+(.+))/g,
   );
 
   let match;
   while ((match = singleLineRegex.exec(content)) !== null) {
-    const [, oldPath, newPath] = match;
+    const [, , oldPath, newPath] = match;
     if (newPath && (newPath.startsWith('./') || newPath.startsWith('../'))) {
       directives.push({
         oldPath,
@@ -87,12 +66,12 @@ export function parseReplaceDirectives(content: string): ReplaceDirective[] {
     }
   }
 
-  // Match multi-line replace blocks
-  const blockRegex = regEx(/replace\s*\(\s*([^)]+)\s*\)/s);
+  // Match multi-line replace blocks (same as artifacts.ts)
+  const blockRegex = regEx(/(\r?\n)replace\s*\(\s*([^)]+)\s*\)/s);
   const blockMatch = blockRegex.exec(content);
 
   if (blockMatch) {
-    const blockContent = blockMatch[1];
+    const blockContent = blockMatch[2];
     const lineRegex = regEx(/([^\s]+)\s+=>\s+([^\s]+)/g);
 
     while ((match = lineRegex.exec(blockContent)) !== null) {
@@ -144,8 +123,8 @@ export function parseGoModDependencies(
       };
     })
     .filter(
-      (dep): dep is GoModuleDependency & { resolvedPath: string } =>
-        !!dep.resolvedPath,
+      (dep): dep is Required<GoModuleDependency> & { resolvedPath: string } =>
+        !!dep.resolvedPath && !!dep.replaceDirective,
     );
 }
 
@@ -163,13 +142,15 @@ function resolveGoDependencyPath(
  * Build Go module dependency graph
  */
 export async function buildGoModDependencyGraph(
+  fileList: string[], // Pass discovered go.mod files
   rootDir?: string,
 ): Promise<DependencyGraph<GoModuleDependency>> {
-  return buildDependencyGraph<GoModuleDependency>({
-    filePattern: '**/go.mod',
+  return await buildDependencyGraph<GoModuleDependency>({
+    filePattern: '/(^|/)go\\.mod$/', // Use the same pattern as managerFilePatterns
     parseFileDependencies: parseGoModDependencies,
     resolveDependencyPath: resolveGoDependencyPath,
     rootDir,
+    fileList, // Use the provided files
   });
 }
 
@@ -178,9 +159,9 @@ export async function buildGoModDependencyGraph(
  */
 export async function getTransitiveDependentModules(
   targetModulePath: string,
-  rootDir?: string,
+  fileList: string[],
 ): Promise<string[]> {
-  const graph = await buildGoModDependencyGraph(rootDir);
+  const graph = await buildGoModDependencyGraph(fileList);
   return getTransitiveDependents(graph, targetModulePath, {
     includeSelf: false,
     direction: 'dependents',
@@ -188,14 +169,13 @@ export async function getTransitiveDependentModules(
 }
 
 /**
- * Get modules in dependency order for batch processing
+ * Get modules in dependency order for sequential processing
  */
 export async function getGoModulesInDependencyOrder(
-  rootDir?: string,
-): Promise<string[][]> {
-  const graph = await buildGoModDependencyGraph(rootDir);
-  const sortedNodes = topologicalSort(graph);
-  return groupByDependencyLevel(sortedNodes);
+  fileList: string[],
+): Promise<string[]> {
+  const graph = await buildGoModDependencyGraph(fileList);
+  return topologicalSort(graph);
 }
 
 /**

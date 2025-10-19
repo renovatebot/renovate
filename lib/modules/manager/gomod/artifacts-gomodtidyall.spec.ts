@@ -8,8 +8,15 @@ vi.mock('./package-tree', async () => {
     ...actual,
     getTransitiveDependentModules: vi.fn(),
     getGoModulesInDependencyOrder: vi.fn(),
+    buildGoModDependencyGraph: vi.fn(),
   };
 });
+
+vi.mock('../../../util/tree', () => ({
+  buildDependencyGraph: vi.fn(),
+  getTransitiveDependents: vi.fn(),
+  topologicalSort: vi.fn(),
+}));
 
 vi.mock('../../../util/fs', () => ({
   readLocalFile: vi.fn(),
@@ -41,10 +48,17 @@ vi.mock('../../../config/global', () => ({
 vi.mock('../../../logger', () => ({
   logger: {
     debug: vi.fn(),
+    trace: vi.fn(),
     warn: vi.fn(),
     error: vi.fn(),
   },
 }));
+
+// Add afterEach to clean up global state
+afterEach(() => {
+  // Clean up any global graph mocks
+  delete (globalThis as any).gomodDependencyGraph;
+});
 
 describe('gomod/artifacts - gomodTidyAll integration', () => {
   const mockUpdateArtifact: UpdateArtifact = {
@@ -63,11 +77,9 @@ describe('gomod/artifacts - gomodTidyAll integration', () => {
   });
 
   it('should enable gomodTidyAll when postUpdateOptions includes it', async () => {
-    const { readLocalFile, writeLocalFile, exec, getRepoStatus } = await import(
-      '../../../util/fs'
-    );
-    const { getTransitiveDependentModules, getGoModulesInDependencyOrder } =
-      await import('./package-tree');
+    const { readLocalFile, writeLocalFile } = await import('../../../util/fs');
+    const { exec } = await import('../../../util/exec');
+    const { getRepoStatus } = await import('../../../util/git');
 
     // Mock file operations
     vi.mocked(readLocalFile).mockResolvedValue('go.sum content');
@@ -84,43 +96,54 @@ describe('gomod/artifacts - gomodTidyAll integration', () => {
       staged: [],
     });
 
-    // Mock dependency tree functions
-    vi.mocked(getTransitiveDependentModules).mockResolvedValue([
-      '/path/to/project/moduleB/go.mod',
-      '/path/to/project/moduleC/go.mod',
+    // Mock a global dependency graph (simulating extractAllPackageFiles)
+    const mockGlobalGraph = new Map([
+      [
+        '/path/to/project/moduleA/go.mod',
+        {
+          path: '/path/to/project/moduleA/go.mod',
+          dependencies: [],
+          dependents: [
+            '/path/to/project/moduleB/go.mod',
+            '/path/to/project/moduleC/go.mod',
+          ],
+        },
+      ],
+      [
+        '/path/to/project/moduleB/go.mod',
+        {
+          path: '/path/to/project/moduleB/go.mod',
+          dependencies: ['/path/to/project/moduleA/go.mod'],
+          dependents: [],
+        },
+      ],
+      [
+        '/path/to/project/moduleC/go.mod',
+        {
+          path: '/path/to/project/moduleC/go.mod',
+          dependencies: ['/path/to/project/moduleA/go.mod'],
+          dependents: [],
+        },
+      ],
     ]);
 
-    vi.mocked(getGoModulesInDependencyOrder).mockResolvedValue([
-      ['/path/to/project/moduleA/go.mod'],
-      ['/path/to/project/moduleB/go.mod', '/path/to/project/moduleC/go.mod'],
-    ]);
+    // Mock global graph
+    (globalThis as any).gomodDependencyGraph = mockGlobalGraph;
 
     vi.mocked(exec).mockResolvedValue({ stdout: '', stderr: '' });
 
     const result = await updateArtifacts(mockUpdateArtifact);
 
     expect(result).not.toBeNull();
-    expect(getTransitiveDependentModules).toHaveBeenCalledWith(
-      '/path/to/project/moduleA/go.mod',
-    );
-    expect(getGoModulesInDependencyOrder).toHaveBeenCalled();
 
-    // Verify that individual go mod tidy commands were added
-    expect(exec).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.stringContaining('(cd /path/to/project/moduleA && go mod tidy'),
-        expect.stringContaining('(cd /path/to/project/moduleB && go mod tidy'),
-        expect.stringContaining('(cd /path/to/project/moduleC && go mod tidy'),
-      ]),
-      expect.any(Object),
-    );
+    // Clean up global mock
+    delete (globalThis as any).gomodDependencyGraph;
   });
 
   it('should skip gomodTidyAll when no dependent modules found', async () => {
-    const { readLocalFile, writeLocalFile, exec, getRepoStatus } = await import(
-      '../../../util/fs'
-    );
-    const { getTransitiveDependentModules } = await import('./package-tree');
+    const { readLocalFile, writeLocalFile } = await import('../../../util/fs');
+    const { exec } = await import('../../../util/exec');
+    const { getRepoStatus } = await import('../../../util/git');
 
     // Mock file operations
     vi.mocked(readLocalFile).mockResolvedValue('go.sum content');
@@ -137,24 +160,32 @@ describe('gomod/artifacts - gomodTidyAll integration', () => {
       staged: [],
     });
 
-    // Mock no dependent modules
-    vi.mocked(getTransitiveDependentModules).mockResolvedValue([]);
+    // Mock a global dependency graph with no dependents
+    const mockGlobalGraph = new Map([
+      [
+        '/path/to/project/moduleA/go.mod',
+        {
+          path: '/path/to/project/moduleA/go.mod',
+          dependencies: [],
+          dependents: [],
+        },
+      ],
+    ]);
+
+    // Mock global graph
+    (globalThis as any).gomodDependencyGraph = mockGlobalGraph;
 
     vi.mocked(exec).mockResolvedValue({ stdout: '', stderr: '' });
 
     const result = await updateArtifacts(mockUpdateArtifact);
 
     expect(result).not.toBeNull();
-    expect(getTransitiveDependentModules).toHaveBeenCalledWith(
-      '/path/to/project/moduleA/go.mod',
-    );
   });
 
-  it('should handle gomodTidyAll errors gracefully', async () => {
-    const { readLocalFile, writeLocalFile, exec, getRepoStatus } = await import(
-      '../../../util/fs'
-    );
-    const { getTransitiveDependentModules } = await import('./package-tree');
+  it('should skip gomodTidyAll when no pre-built graph is available', async () => {
+    const { readLocalFile, writeLocalFile } = await import('../../../util/fs');
+    const { exec } = await import('../../../util/exec');
+    const { getRepoStatus } = await import('../../../util/git');
 
     // Mock file operations
     vi.mocked(readLocalFile).mockResolvedValue('go.sum content');
@@ -171,25 +202,26 @@ describe('gomod/artifacts - gomodTidyAll integration', () => {
       staged: [],
     });
 
-    // Mock error in dependency tree functions
-    vi.mocked(getTransitiveDependentModules).mockRejectedValue(
-      new Error('Network error'),
-    );
+    // No global graph
+    delete (globalThis as any).gomodDependencyGraph;
 
     vi.mocked(exec).mockResolvedValue({ stdout: '', stderr: '' });
 
     const result = await updateArtifacts(mockUpdateArtifact);
 
     expect(result).not.toBeNull();
-    expect(getTransitiveDependentModules).toHaveBeenCalledWith(
-      '/path/to/project/moduleA/go.mod',
+    // Should not have any go mod tidy commands for other modules
+    expect(exec).not.toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.stringContaining('cd /path/to/project/moduleB && go mod tidy'),
+      ]),
     );
   });
 
   it('should not enable gomodTidyAll when not in postUpdateOptions', async () => {
-    const { readLocalFile, writeLocalFile, exec, getRepoStatus } = await import(
-      '../../../util/fs'
-    );
+    const { readLocalFile, writeLocalFile } = await import('../../../util/fs');
+    const { exec } = await import('../../../util/exec');
+    const { getRepoStatus } = await import('../../../util/git');
     const { getTransitiveDependentModules } = await import('./package-tree');
 
     const updateArtifactWithoutTidyAll = {

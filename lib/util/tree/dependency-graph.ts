@@ -1,11 +1,11 @@
 import upath from 'upath';
-import { logger } from '../../logger';
-import { readLocalFile } from '../../fs';
+import { readLocalFile } from '../../../fs';
+import { logger } from '../../../logger';
 import type {
+  CircularDependency,
   DependencyGraph,
   DependencyGraphOptions,
   DependencyNode,
-  CircularDependency,
   GraphTraversalOptions,
 } from './types';
 
@@ -20,23 +20,18 @@ export async function buildDependencyGraph<T>(
     parseFileDependencies,
     resolveDependencyPath,
     rootDir = process.cwd(),
+    fileList,
   } = options;
 
   const nodes = new Map<string, DependencyNode<T>>();
   const edges: DependencyGraph<T>['edges'] = [];
 
-  // Find all files matching the pattern
-  const { globby } = await import('globby');
-  const files = await globby(
-    typeof filePattern === 'string' ? filePattern : [filePattern],
-    {
-      cwd: rootDir,
-      absolute: true,
-      gitignore: true,
-    },
+  // Filter the provided file list using the pattern
+  const { matchRegexOrGlob } = await import('../../../string-match');
+  const files = fileList.filter((file) => matchRegexOrGlob(file, filePattern));
+  logger.debug(
+    `Found ${files.length} files matching pattern ${filePattern} from provided list`,
   );
-
-  logger.debug(`Found ${files.length} files matching pattern ${filePattern}`);
 
   // Initialize nodes for all files
   for (const filePath of files) {
@@ -153,41 +148,6 @@ export function topologicalSort<T>(graph: DependencyGraph<T>): string[] {
 
   // Reverse to get dependencies before dependents
   return result.reverse();
-}
-
-/**
- * Group nodes by dependency level for parallel execution
- * Level 0: nodes with no dependencies
- * Level 1: nodes that depend only on level 0
- * Level 2: nodes that depend only on levels 0-1, etc.
- */
-export function groupByDependencyLevel(sortedNodes: string[]): string[][] {
-  if (sortedNodes.length === 0) {
-    return [];
-  }
-
-  const levels: string[][] = [];
-  const placed = new Set<string>();
-
-  for (const nodePath of sortedNodes) {
-    let level = 0;
-
-    // Find the highest level of all dependencies
-    for (let i = 0; i < levels.length; i++) {
-      if (levels[i].some((dep) => isDependencyOf(nodePath, dep))) {
-        level = i + 1;
-      }
-    }
-
-    // Add node to appropriate level
-    if (!levels[level]) {
-      levels[level] = [];
-    }
-    levels[level].push(nodePath);
-    placed.add(nodePath);
-  }
-
-  return levels.filter((level) => level.length > 0);
 }
 
 /**
@@ -308,13 +268,4 @@ function resolveDependencyPath<T>(
   }
 
   return null;
-}
-
-function isDependencyOf(
-  _nodePath: string,
-  _potentialDependency: string,
-): boolean {
-  // This would need to be implemented based on the graph structure
-  // For now, return false as a conservative default
-  return false;
 }

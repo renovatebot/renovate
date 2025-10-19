@@ -20,6 +20,7 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { regEx } from '../../../util/regex';
+import { getTransitiveDependents, topologicalSort } from '../../../util/tree';
 import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,
@@ -28,10 +29,6 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 import { getExtraDepsNotice } from './artifacts-extra';
-import {
-  getGoModulesInDependencyOrder,
-  getTransitiveDependentModules,
-} from './package-tree';
 
 const { major, valid } = semver;
 
@@ -344,45 +341,50 @@ export async function updateArtifacts({
 
     // Handle gomodTidyAll - run go mod tidy on all dependent modules in correct order
     if (config.postUpdateOptions?.includes('gomodTidyAll')) {
-      logger.debug('gomodTidyAll enabled - processing dependent modules');
-
       try {
-        // Get all modules that depend on the current module
-        const dependentModules =
-          await getTransitiveDependentModules(goModFileName);
+        // Use pre-built dependency graph from extractAllPackageFiles
+        const dependencyGraph = (globalThis as any).gomodDependencyGraph;
 
-        if (dependentModules.length > 0) {
-          logger.debug(
-            { dependentModules },
-            'Found dependent modules for gomodTidyAll',
+        if (dependencyGraph) {
+          // Get all modules that depend on the current module
+          const transitiveDependentModules = getTransitiveDependents(
+            dependencyGraph,
+            goModFileName,
+            {
+              includeSelf: false,
+              direction: 'dependents',
+            },
           );
 
-          // Get modules in dependency order
-          const modulesByLevel = await getGoModulesInDependencyOrder();
+          if (transitiveDependentModules.length > 0) {
+            // Get modules in dependency order (sequential)
+            const modulesInDependencyOrder = topologicalSort(dependencyGraph);
 
-          // Filter to only include modules that need tidying (dependents + current module)
-          const modulesToTidy = new Set([goModFileName, ...dependentModules]);
+            // Filter to only include modules that need tidying (dependents + current module)
+            const visitedModules = new Set([
+              goModFileName,
+              ...transitiveDependentModules,
+            ]);
 
-          // Execute go mod tidy in dependency order (sequential)
-          for (const levelModules of modulesByLevel) {
-            const modulesInThisLevel = levelModules.filter((module) =>
-              modulesToTidy.has(module),
-            );
-
-            for (const modulePath of modulesInThisLevel) {
-              const moduleDir = upath.dirname(modulePath);
-              const tidyCommand = `go mod tidy${tidyOpts}`;
-              logger.debug(`Running go mod tidy in ${moduleDir}`);
-              execCommands.push(
-                `(cd ${quotePath(moduleDir)} && ${tidyCommand})`,
-              );
+            // Execute go mod tidy in dependency order (sequential, one module at a time)
+            for (const modulePath of modulesInDependencyOrder) {
+              if (visitedModules.has(modulePath)) {
+                const moduleDir = upath.dirname(modulePath);
+                args = 'mod tidy' + tidyOpts;
+                execCommands.push(`(cd ${quotePath(moduleDir)} && go ${args})`);
+              }
             }
           }
-        } else {
-          logger.debug('No dependent modules found for gomodTidyAll');
         }
       } catch (error) {
-        logger.warn({ error }, 'Failed to process gomodTidyAll - skipping');
+        logger.warn(
+          {
+            error: error instanceof Error ? error.message : String(error),
+            goModFileName,
+            feature: 'gomodTidyAll',
+          },
+          'Failed to process gomodTidyAll - skipping',
+        );
       }
     }
 

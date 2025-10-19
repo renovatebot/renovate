@@ -45,6 +45,11 @@ export interface DependencyGraphOptions<T> {
    * Root directory to start searching from (defaults to current working directory)
    */
   rootDir?: string;
+  /**
+   * List of files to use for building the dependency graph
+   * This list will be filtered using the filePattern
+   */
+  fileList: string[];
 }
 
 export interface GraphTraversalOptions {
