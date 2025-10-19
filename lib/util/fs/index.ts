@@ -352,24 +352,3 @@ export async function getLocalFiles(
 
   return fileContentMap;
 }
-
-/**
- * Find all files matching a pattern in the repository
- */
-export async function findFiles(
-  pattern: string,
-  rootDir: string = process.cwd(),
-): Promise<string[]> {
-  try {
-    const { globby } = await import('globby');
-    const files = await globby(pattern, {
-      cwd: ensureLocalPath(rootDir),
-      absolute: true,
-      gitignore: true,
-    });
-    return files;
-  } catch (error) {
-    logger.error({ error, pattern }, 'Failed to find files matching pattern');
-    return [];
-  }
-}

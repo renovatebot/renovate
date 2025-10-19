@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { updateArtifacts } from './artifacts';
 import type { UpdateArtifact } from '../types';
+import { updateArtifacts } from './artifacts';
 
 vi.mock('./package-tree', async () => {
   const actual = await vi.importActual('./package-tree');

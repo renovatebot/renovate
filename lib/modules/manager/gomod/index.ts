@@ -1,10 +1,10 @@
 import type { Category } from '../../../constants';
-import { GoDatasource } from '../../datasource/go';
-import { GolangVersionDatasource } from '../../datasource/golang-version';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../types';
 import type { WorkerExtractConfig } from '../../../workers/types';
 import { readLocalFile } from '../../../util/fs';
+import { GoDatasource } from '../../datasource/go';
+import { GolangVersionDatasource } from '../../datasource/golang-version';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 import { updateDependency } from './update';
