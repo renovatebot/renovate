@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  topologicalSort,
-  groupByDependencyLevel,
   detectCircularDependencies,
+  topologicalSort,
 } from './dependency-graph';
 import type { DependencyGraph } from './types';
 
@@ -67,30 +66,6 @@ describe('util/tree/dependency-graph', () => {
       // B and C should come before A
       expect(result.indexOf('B')).toBeLessThan(result.indexOf('A'));
       expect(result.indexOf('C')).toBeLessThan(result.indexOf('A'));
-    });
-  });
-
-  describe('groupByDependencyLevel', () => {
-    it('should group simple linear dependencies', () => {
-      const sortedNodes = ['C', 'B', 'A']; // C -> B -> A
-      const result = groupByDependencyLevel(sortedNodes);
-      expect(result).toEqual([['C'], ['B'], ['A']]);
-    });
-
-    it('should group parallel dependencies correctly', () => {
-      const sortedNodes = ['C', 'D', 'B', 'A']; // C -> B -> A, D -> B -> A
-      const result = groupByDependencyLevel(sortedNodes);
-      expect(result).toEqual([['C', 'D'], ['B'], ['A']]);
-    });
-
-    it('should handle empty input', () => {
-      const result = groupByDependencyLevel([]);
-      expect(result).toEqual([]);
-    });
-
-    it('should handle single node', () => {
-      const result = groupByDependencyLevel(['A']);
-      expect(result).toEqual([['A']]);
     });
   });
 

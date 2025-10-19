@@ -36,11 +36,10 @@ export async function extractAllPackageFiles(
 
   const packageFiles: PackageFile[] = [];
 
-  // Process each go.mod file
   for (const packageFile of fileList) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (content) {
-      const res = extractPackageFile(content, packageFile, config);
+      const res = extractPackageFile(content);
       if (res) {
         packageFiles.push({
           ...res,
@@ -52,15 +51,13 @@ export async function extractAllPackageFiles(
     }
   }
 
-  // If gomodTidyAll is enabled, build the dependency graph
   const isGomodTidyAllEnabled =
     config.postUpdateOptions?.includes('gomodTidyAll');
   if (isGomodTidyAllEnabled && packageFiles.length > 0) {
     try {
-      const { buildGoModDependencyGraph } = await import('./package-tree');
+      const { buildGoModDependencyGraph } = await import('./package-tree.js');
       const graph = await buildGoModDependencyGraph(fileList);
 
-      // Store the graph globally for artifacts to use
       (globalThis as any).gomodDependencyGraph = graph;
 
       logger.debug(

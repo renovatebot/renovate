@@ -11,17 +11,8 @@ import type { DependencyGraph } from '../../../util/tree';
  * Interface for Go module replace directive
  */
 export interface ReplaceDirective {
-  /**
-   * The original module path being replaced
-   */
   oldPath: string;
-  /**
-   * The local path to replace it with
-   */
   newPath: string;
-  /**
-   * The version constraint (optional)
-   */
   version?: string;
 }
 
@@ -29,28 +20,17 @@ export interface ReplaceDirective {
  * Go module specific dependency information
  */
 export interface GoModuleDependency {
-  /**
-   * The module path
-   */
   path: string;
-  /**
-   * The replace directive information
-   */
   replaceDirective?: ReplaceDirective;
-  /**
-   * The resolved path to the go.mod file
-   */
   resolvedPath?: string;
 }
 
 /**
  * Parse replace directives from go.mod content
- * Reuses the same logic as in artifacts.ts for consistency
  */
 export function parseReplaceDirectives(content: string): ReplaceDirective[] {
   const directives: ReplaceDirective[] = [];
 
-  // Match single-line replace directives (same as artifacts.ts)
   const singleLineRegex = regEx(
     /(\r?\n)replace\s+([^\s]+)\s+(?:=>\s+([^\s]+)|([^\s]+\s+)=>\s+(.+))/g,
   );
@@ -66,7 +46,6 @@ export function parseReplaceDirectives(content: string): ReplaceDirective[] {
     }
   }
 
-  // Match multi-line replace blocks (same as artifacts.ts)
   const blockRegex = regEx(/(\r?\n)replace\s*\(\s*([^)]+)\s*\)/s);
   const blockMatch = blockRegex.exec(content);
 
@@ -88,9 +67,6 @@ export function parseReplaceDirectives(content: string): ReplaceDirective[] {
   return directives;
 }
 
-/**
- * Resolve the absolute path of a Go module from a replace directive
- */
 export function resolveGoModulePath(
   baseGoModPath: string,
   replaceDirective: ReplaceDirective,
@@ -98,9 +74,7 @@ export function resolveGoModulePath(
   const baseDir = upath.dirname(baseGoModPath);
   const resolvedPath = upath.resolve(baseDir, replaceDirective.newPath);
 
-  // Check if the resolved path contains a go.mod file
-  const goModPath = upath.join(resolvedPath, 'go.mod');
-  return goModPath;
+  return upath.join(resolvedPath, 'go.mod');
 }
 
 /**
@@ -118,7 +92,6 @@ export function parseGoModDependencies(
       return {
         path: directive.oldPath,
         replaceDirective: directive,
-        // The actual dependency path for graph building is the resolved go.mod path
         resolvedPath,
       };
     })
@@ -142,15 +115,15 @@ function resolveGoDependencyPath(
  * Build Go module dependency graph
  */
 export async function buildGoModDependencyGraph(
-  fileList: string[], // Pass discovered go.mod files
+  fileList: string[],
   rootDir?: string,
 ): Promise<DependencyGraph<GoModuleDependency>> {
   return await buildDependencyGraph<GoModuleDependency>({
-    filePattern: '/(^|/)go\\.mod$/', // Use the same pattern as managerFilePatterns
+    filePattern: '/(^|/)go\\.mod$/',
     parseFileDependencies: parseGoModDependencies,
     resolveDependencyPath: resolveGoDependencyPath,
     rootDir,
-    fileList, // Use the provided files
+    fileList,
   });
 }
 

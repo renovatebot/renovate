@@ -9,55 +9,67 @@ import {
   resolveGoModulePath,
 } from './package-tree';
 
-// Mock tree utilities
 vi.mock('../../../util/tree', () => ({
   buildDependencyGraph: vi.fn(),
   getTransitiveDependents: vi.fn(),
   topologicalSort: vi.fn(),
 }));
 
-// Create mock graph for tests
 const mockGraph = new Map([
   [
-    '/workspace/shared/utils/go.mod',
+    '/workspace/go.mod',
     {
-      path: '/workspace/shared/utils/go.mod',
+      path: '/workspace/go.mod',
       dependencies: [],
       dependents: [
-        '/workspace/services/billing/go.mod',
-        '/workspace/services/notification/go.mod',
+        '/workspace/internal/go.mod',
+        '/workspace/pkg/api/go.mod',
+        '/workspace/pkg/client/go.mod',
       ],
     },
   ],
   [
-    '/workspace/services/billing/go.mod',
+    '/workspace/internal/go.mod',
     {
-      path: '/workspace/services/billing/go.mod',
-      dependencies: ['/workspace/shared/utils/go.mod'],
+      path: '/workspace/internal/go.mod',
+      dependencies: ['/workspace/go.mod'],
+      dependents: ['/workspace/cmd/server/go.mod'],
+    },
+  ],
+  [
+    '/workspace/pkg/api/go.mod',
+    {
+      path: '/workspace/pkg/api/go.mod',
+      dependencies: ['/workspace/go.mod'],
+      dependents: ['/workspace/cmd/server/go.mod', '/workspace/cmd/cli/go.mod'],
+    },
+  ],
+  [
+    '/workspace/pkg/client/go.mod',
+    {
+      path: '/workspace/pkg/client/go.mod',
+      dependencies: ['/workspace/go.mod'],
+      dependents: ['/workspace/cmd/server/go.mod'],
+    },
+  ],
+  [
+    '/workspace/cmd/server/go.mod',
+    {
+      path: '/workspace/cmd/server/go.mod',
+      dependencies: [
+        '/workspace/go.mod',
+        '/workspace/internal/go.mod',
+        '/workspace/pkg/api/go.mod',
+        '/workspace/pkg/client/go.mod',
+      ],
       dependents: [],
     },
   ],
   [
-    '/workspace/services/notification/go.mod',
+    '/workspace/cmd/cli/go.mod',
     {
-      path: '/workspace/services/notification/go.mod',
-      dependencies: ['/workspace/shared/utils/go.mod'],
-      dependents: [],
-    },
-  ],
-  [
-    '/workspace/services/user/go.mod',
-    {
-      path: '/workspace/services/user/go.mod',
-      dependencies: ['/workspace/shared/utils/go.mod'],
-      dependents: [],
-    },
-  ],
-  [
-    '/workspace/services/payment/go.mod',
-    {
-      path: '/workspace/services/payment/go.mod',
-      dependencies: ['/workspace/shared/utils/go.mod'],
+      path: '/workspace/cmd/cli/go.mod',
+      dependencies: ['/workspace/go.mod', '/workspace/pkg/api/go.mod'],
       dependents: [],
     },
   ],
@@ -65,101 +77,106 @@ const mockGraph = new Map([
 
 describe('modules/manager/gomod/package-tree', () => {
   describe('parseReplaceDirectives', () => {
-    it('should parse real-world go.mod replace directives', () => {
-      const goModContent = `module github.com/mycompany/myservice
+    it('parses complex replace directive patterns from monorepo go.mod', () => {
+      const goModContent = `module github.com/hashicorp/consul
 
 go 1.21
 
 require (
-	github.com/company/utils v1.2.3
-	github.com/external/api v4.5.6
+	github.com/hashicorp/consul/api v1.25.1
+	github.com/hashicorp/serf v0.9.6
 )
 
-replace github.com/company/utils => ../utils
-replace github.com/external/api => ./forked-api v4.5.6
+replace github.com/hashicorp/consul/api => ./api
+replace github.com/hashicorp/consul/sdk => ./sdk
 replace (
-    github.com/legacy/dep => ../legacy-deps/legacy
-    github.com/github.com/fork/repo => https://github.com/fork/repo v1.0.0
+    github.com/hashicorp/consul agent => ./agent
+    github.com/hashicorp/consul tls => ./tls
 )`;
 
       const directives = parseReplaceDirectives(goModContent);
       expect(directives).toEqual([
-        { oldPath: 'github.com/company/utils', newPath: '../utils' },
-        { oldPath: 'github.com/external/api', newPath: 'forked-api' },
-        { oldPath: 'github.com/legacy/dep', newPath: '../legacy-deps/legacy' },
+        { oldPath: 'github.com/hashicorp/consul/api', newPath: 'api' },
+        { oldPath: 'github.com/hashicorp/consul/sdk', newPath: 'sdk' },
+        { oldPath: 'agent', newPath: 'agent' },
+        { oldPath: 'tls', newPath: 'tls' },
       ]);
     });
   });
 
   describe('resolveGoModulePath', () => {
-    it('should resolve paths like in a monorepo structure', () => {
-      const baseModPath = '/workspace/services/user-service/go.mod';
+    it('resolves relative module paths to absolute go.mod locations', () => {
+      const baseModPath = '/workspace/consul/go.mod';
 
-      // Relative to parent directory
       const dep1 = resolveGoModulePath(baseModPath, {
-        oldPath: 'github.com/company/shared',
-        newPath: '../shared-lib',
+        oldPath: 'github.com/hashicorp/consul/api',
+        newPath: './api',
       });
-      expect(dep1).toBe('/workspace/services/shared-lib/go.mod');
+      expect(dep1).toBe('/workspace/consul/api/go.mod');
 
-      // Same directory
       const dep2 = resolveGoModulePath(baseModPath, {
-        oldPath: 'github.com/company/local',
-        newPath: './internal',
+        oldPath: 'github.com/hashicorp/consul/sdk',
+        newPath: './sdk',
       });
-      expect(dep2).toBe('/workspace/services/user-service/internal/go.mod');
+      expect(dep2).toBe('/workspace/consul/sdk/go.mod');
 
-      // Nested path
       const dep3 = resolveGoModulePath(baseModPath, {
-        oldPath: 'github.com/company/nested',
-        newPath: '../../packages/nested-lib',
+        oldPath: 'github.com/hashicorp/consul agent',
+        newPath: './agent',
       });
-      expect(dep3).toBe('/workspace/packages/nested-lib/go.mod');
+      expect(dep3).toBe('/workspace/consul/agent/go.mod');
     });
   });
 
   describe('parseGoModDependencies', () => {
-    it('should extract dependencies from microservice go.mod', () => {
-      const microserviceGoMod = `module github.com/mycompany/payment-service
+    it('extracts and resolves local dependencies from go.mod replace directives', () => {
+      const kubernetesGoMod = `module k8s.io/kubernetes
 
 go 1.21
 
-replace github.com/mycompany/common => ../common
-replace github.com/mycompany/auth => ../../auth-service
-replace github.com/stripe/stripe-go => github.com/mycompany/stripe-go v1.0.0`;
+replace k8s.io/api => ./staging/src/k8s.io/api
+replace k8s.io/apimachinery => ./staging/src/k8s.io/apimachinery
+replace k8s.io/client-go => ./staging/src/k8s.io/client-go`;
 
       const deps = parseGoModDependencies(
-        '/workspace/services/payment-service/go.mod',
-        microserviceGoMod,
+        '/workspace/kubernetes/go.mod',
+        kubernetesGoMod,
       );
 
-      expect(deps).toHaveLength(2);
+      expect(deps).toHaveLength(3);
       expect(deps[0]).toMatchObject({
-        path: 'github.com/mycompany/common',
-        resolvedPath: '/workspace/services/common/go.mod',
+        path: 'k8s.io/api',
+        resolvedPath: '/workspace/kubernetes/staging/src/k8s.io/api/go.mod',
       });
       expect(deps[1]).toMatchObject({
-        path: 'github.com/mycompany/auth',
-        resolvedPath: '/workspace/auth-service/go.mod',
+        path: 'k8s.io/apimachinery',
+        resolvedPath:
+          '/workspace/kubernetes/staging/src/k8s.io/apimachinery/go.mod',
+      });
+      expect(deps[2]).toMatchObject({
+        path: 'k8s.io/client-go',
+        resolvedPath:
+          '/workspace/kubernetes/staging/src/k8s.io/client-go/go.mod',
       });
     });
   });
 
   describe('hasLocalReplaceDirectives', () => {
-    it('should detect local replacements in enterprise monorepo', () => {
-      const enterpriseGoMod = `module github.com/enterprise/platform
+    it('identifies go.mod files with local replace directives', () => {
+      const monorepoGoMod = `module github.com/hashicorp/vault
 
 go 1.21
 
-replace github.com/enterprise/core => ../core
-replace github.com/enterprise/db => ./database
+replace github.com/hashicorp/vault/sdk => ./sdk
+replace github.com/hashicorp/vault/api => ./api
+replace github.com/hashicorp/vault/database => ../database
 replace github.com/golang/protobuf => github.com/protocolbuffers/protobuf-go v1.28.0`;
 
-      expect(hasLocalReplaceDirectives(enterpriseGoMod)).toBe(true);
+      expect(hasLocalReplaceDirectives(monorepoGoMod)).toBe(true);
     });
 
-    it('should return false for go.mod with only remote replacements', () => {
-      const remoteOnlyGoMod = `module github.com/myapp/api
+    it('identifies go.mod files with only remote replace directives', () => {
+      const remoteOnlyGoMod = `module github.com/kubernetes/autoscaler
 
 go 1.21
 
@@ -171,9 +188,10 @@ replace github.com/upstream/dep => github.com/custom/dep v1.5.0`;
   });
 
   describe('getModuleName', () => {
-    it('should extract module names from various go.mod formats', () => {
-      const cases = [
+    it('extracts module names from various go.mod content formats', () => {
+      const testCases = [
         {
+          description: 'HashiCorp Consul go.mod with dependencies',
           content: `module github.com/hashicorp/consul
 
 go 1.21
@@ -182,82 +200,106 @@ require github.com/hashicorp/serf v0.9.6`,
           expected: 'github.com/hashicorp/consul',
         },
         {
+          description: 'Kubernetes client-go minimal go.mod',
           content: `module github.com/kubernetes/client-go
 
 go 1.19`,
           expected: 'github.com/kubernetes/client-go',
         },
         {
+          description: 'go.mod without module declaration',
           content: `// Simple go.mod without module
 go 1.21`,
           expected: null,
         },
         {
+          description: 'empty go.mod content',
           content: '',
           expected: null,
         },
       ];
 
-      cases.forEach(({ content, expected }) => {
+      testCases.forEach(({ content, expected }) => {
         expect(getModuleName(content)).toBe(expected);
       });
     });
   });
 
-  describe('dependency graph functions', () => {
+  describe('dependency graph operations', () => {
     beforeEach(() => {
       vi.clearAllMocks();
     });
 
-    it('should find dependents of updated shared library', async () => {
+    it('finds all transitive dependents for a given module', async () => {
       const { buildDependencyGraph, getTransitiveDependents } = await import(
         '../../../util/tree'
       );
 
-      // Mock buildDependencyGraph to return our mock graph
       vi.mocked(buildDependencyGraph).mockResolvedValue(mockGraph);
       vi.mocked(getTransitiveDependents).mockReturnValue([
-        '/workspace/services/billing/go.mod',
-        '/workspace/services/notification/go.mod',
+        '/workspace/internal/go.mod',
+        '/workspace/pkg/api/go.mod',
+        '/workspace/pkg/client/go.mod',
       ]);
 
       const dependents = await getTransitiveDependentModules(
-        '/workspace/shared/utils/go.mod',
+        '/workspace/go.mod',
+        [
+          '/workspace/go.mod',
+          '/workspace/internal/go.mod',
+          '/workspace/pkg/api/go.mod',
+          '/workspace/pkg/client/go.mod',
+          '/workspace/cmd/server/go.mod',
+          '/workspace/cmd/cli/go.mod',
+        ],
       );
 
       expect(buildDependencyGraph).toHaveBeenCalled();
       expect(getTransitiveDependents).toHaveBeenCalledWith(
         mockGraph,
-        '/workspace/shared/utils/go.mod',
+        '/workspace/go.mod',
         { includeSelf: false, direction: 'dependents' },
       );
       expect(dependents).toEqual([
-        '/workspace/services/billing/go.mod',
-        '/workspace/services/notification/go.mod',
+        '/workspace/internal/go.mod',
+        '/workspace/pkg/api/go.mod',
+        '/workspace/pkg/client/go.mod',
       ]);
     });
 
-    it('should return correct dependency order for go mod tidy execution', async () => {
+    it('determines correct topological order for sequential processing', async () => {
       const { buildDependencyGraph, topologicalSort } = await import(
         '../../../util/tree'
       );
 
-      // Mock buildDependencyGraph to return our mock graph
       vi.mocked(buildDependencyGraph).mockResolvedValue(mockGraph);
       vi.mocked(topologicalSort).mockResolvedValue([
-        '/workspace/shared/utils/go.mod',
-        '/workspace/services/user/go.mod',
-        '/workspace/services/payment/go.mod',
+        '/workspace/go.mod',
+        '/workspace/internal/go.mod',
+        '/workspace/pkg/api/go.mod',
+        '/workspace/pkg/client/go.mod',
+        '/workspace/cmd/server/go.mod',
+        '/workspace/cmd/cli/go.mod',
       ]);
 
-      const order = await getGoModulesInDependencyOrder();
+      const order = await getGoModulesInDependencyOrder([
+        '/workspace/go.mod',
+        '/workspace/internal/go.mod',
+        '/workspace/pkg/api/go.mod',
+        '/workspace/pkg/client/go.mod',
+        '/workspace/cmd/server/go.mod',
+        '/workspace/cmd/cli/go.mod',
+      ]);
 
       expect(buildDependencyGraph).toHaveBeenCalled();
       expect(topologicalSort).toHaveBeenCalledWith(mockGraph);
       expect(order).toEqual([
-        '/workspace/shared/utils/go.mod',
-        '/workspace/services/user/go.mod',
-        '/workspace/services/payment/go.mod',
+        '/workspace/go.mod',
+        '/workspace/internal/go.mod',
+        '/workspace/pkg/api/go.mod',
+        '/workspace/pkg/client/go.mod',
+        '/workspace/cmd/server/go.mod',
+        '/workspace/cmd/cli/go.mod',
       ]);
     });
   });

@@ -339,14 +339,11 @@ export async function updateArtifacts({
       execCommands.push(`${cmd} ${args}`);
     }
 
-    // Handle gomodTidyAll - run go mod tidy on all dependent modules in correct order
     if (config.postUpdateOptions?.includes('gomodTidyAll')) {
       try {
-        // Use pre-built dependency graph from extractAllPackageFiles
         const dependencyGraph = (globalThis as any).gomodDependencyGraph;
 
         if (dependencyGraph) {
-          // Get all modules that depend on the current module
           const transitiveDependentModules = getTransitiveDependents(
             dependencyGraph,
             goModFileName,
@@ -357,16 +354,13 @@ export async function updateArtifacts({
           );
 
           if (transitiveDependentModules.length > 0) {
-            // Get modules in dependency order (sequential)
             const modulesInDependencyOrder = topologicalSort(dependencyGraph);
 
-            // Filter to only include modules that need tidying (dependents + current module)
             const visitedModules = new Set([
               goModFileName,
               ...transitiveDependentModules,
             ]);
 
-            // Execute go mod tidy in dependency order (sequential, one module at a time)
             for (const modulePath of modulesInDependencyOrder) {
               if (visitedModules.has(modulePath)) {
                 const moduleDir = upath.dirname(modulePath);
@@ -460,7 +454,6 @@ export async function updateArtifacts({
       }
     }
 
-    // TODO: throws in tests (#22198)
     const finalGoModContent = (await readLocalFile(goModFileName, 'utf8'))!
       .replace(regEx(/\/\/ renovate-replace /g), '')
       .replace(regEx(/renovate-replace-bracket/g), ')');

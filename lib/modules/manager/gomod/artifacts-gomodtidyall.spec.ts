@@ -54,17 +54,15 @@ vi.mock('../../../logger', () => ({
   },
 }));
 
-// Add afterEach to clean up global state
 afterEach(() => {
-  // Clean up any global graph mocks
   delete (globalThis as any).gomodDependencyGraph;
 });
 
-describe('gomod/artifacts - gomodTidyAll integration', () => {
+describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
   const mockUpdateArtifact: UpdateArtifact = {
-    packageFileName: '/path/to/project/moduleA/go.mod',
+    packageFileName: '/workspace/consul/go.mod',
     updatedDeps: [],
-    newPackageFileContent: 'module github.com/example/moduleA\ngo 1.21\n',
+    newPackageFileContent: 'module github.com/hashicorp/consul\ngo 1.21\n',
     config: {
       postUpdateOptions: ['gomodTidyAll'],
       constraints: {},
@@ -76,18 +74,16 @@ describe('gomod/artifacts - gomodTidyAll integration', () => {
     vi.clearAllMocks();
   });
 
-  it('should enable gomodTidyAll when postUpdateOptions includes it', async () => {
+  it('processes dependent modules when gomodTidyAll is enabled', async () => {
     const { readLocalFile, writeLocalFile } = await import('../../../util/fs');
     const { exec } = await import('../../../util/exec');
     const { getRepoStatus } = await import('../../../util/git');
 
-    // Mock file operations
     vi.mocked(readLocalFile).mockResolvedValue('go.sum content');
     vi.mocked(writeLocalFile).mockResolvedValue();
 
-    // Mock git status
     vi.mocked(getRepoStatus).mockResolvedValue({
-      modified: ['/path/to/project/moduleA/go.sum'],
+      modified: ['/workspace/consul/go.sum'],
       added: [],
       deleted: [],
       not_added: [],
@@ -96,38 +92,58 @@ describe('gomod/artifacts - gomodTidyAll integration', () => {
       staged: [],
     });
 
-    // Mock a global dependency graph (simulating extractAllPackageFiles)
     const mockGlobalGraph = new Map([
       [
-        '/path/to/project/moduleA/go.mod',
+        '/workspace/consul/go.mod',
         {
-          path: '/path/to/project/moduleA/go.mod',
+          path: '/workspace/consul/go.mod',
           dependencies: [],
           dependents: [
-            '/path/to/project/moduleB/go.mod',
-            '/path/to/project/moduleC/go.mod',
+            '/workspace/consul/api/go.mod',
+            '/workspace/consul/sdk/go.mod',
+            '/workspace/consul/agent/go.mod',
           ],
         },
       ],
       [
-        '/path/to/project/moduleB/go.mod',
+        '/workspace/consul/api/go.mod',
         {
-          path: '/path/to/project/moduleB/go.mod',
-          dependencies: ['/path/to/project/moduleA/go.mod'],
-          dependents: [],
+          path: '/workspace/consul/api/go.mod',
+          dependencies: ['/workspace/consul/go.mod'],
+          dependents: ['/workspace/consul/cmd/agent/go.mod'],
         },
       ],
       [
-        '/path/to/project/moduleC/go.mod',
+        '/workspace/consul/sdk/go.mod',
         {
-          path: '/path/to/project/moduleC/go.mod',
-          dependencies: ['/path/to/project/moduleA/go.mod'],
+          path: '/workspace/consul/sdk/go.mod',
+          dependencies: ['/workspace/consul/go.mod'],
+          dependents: ['/workspace/consul/cmd/agent/go.mod'],
+        },
+      ],
+      [
+        '/workspace/consul/agent/go.mod',
+        {
+          path: '/workspace/consul/agent/go.mod',
+          dependencies: ['/workspace/consul/go.mod'],
+          dependents: ['/workspace/consul/cmd/agent/go.mod'],
+        },
+      ],
+      [
+        '/workspace/consul/cmd/agent/go.mod',
+        {
+          path: '/workspace/consul/cmd/agent/go.mod',
+          dependencies: [
+            '/workspace/consul/go.mod',
+            '/workspace/consul/api/go.mod',
+            '/workspace/consul/sdk/go.mod',
+            '/workspace/consul/agent/go.mod',
+          ],
           dependents: [],
         },
       ],
     ]);
 
-    // Mock global graph
     (globalThis as any).gomodDependencyGraph = mockGlobalGraph;
 
     vi.mocked(exec).mockResolvedValue({ stdout: '', stderr: '' });
@@ -136,22 +152,19 @@ describe('gomod/artifacts - gomodTidyAll integration', () => {
 
     expect(result).not.toBeNull();
 
-    // Clean up global mock
     delete (globalThis as any).gomodDependencyGraph;
   });
 
-  it('should skip gomodTidyAll when no dependent modules found', async () => {
+  it('skips processing when no dependent modules exist', async () => {
     const { readLocalFile, writeLocalFile } = await import('../../../util/fs');
     const { exec } = await import('../../../util/exec');
     const { getRepoStatus } = await import('../../../util/git');
 
-    // Mock file operations
     vi.mocked(readLocalFile).mockResolvedValue('go.sum content');
     vi.mocked(writeLocalFile).mockResolvedValue();
 
-    // Mock git status
     vi.mocked(getRepoStatus).mockResolvedValue({
-      modified: ['/path/to/project/moduleA/go.sum'],
+      modified: ['/workspace/consul/go.sum'],
       added: [],
       deleted: [],
       not_added: [],
@@ -160,19 +173,17 @@ describe('gomod/artifacts - gomodTidyAll integration', () => {
       staged: [],
     });
 
-    // Mock a global dependency graph with no dependents
     const mockGlobalGraph = new Map([
       [
-        '/path/to/project/moduleA/go.mod',
+        '/workspace/consul/go.mod',
         {
-          path: '/path/to/project/moduleA/go.mod',
+          path: '/workspace/consul/go.mod',
           dependencies: [],
           dependents: [],
         },
       ],
     ]);
 
-    // Mock global graph
     (globalThis as any).gomodDependencyGraph = mockGlobalGraph;
 
     vi.mocked(exec).mockResolvedValue({ stdout: '', stderr: '' });
@@ -182,18 +193,16 @@ describe('gomod/artifacts - gomodTidyAll integration', () => {
     expect(result).not.toBeNull();
   });
 
-  it('should skip gomodTidyAll when no pre-built graph is available', async () => {
+  it('skips processing when dependency graph is unavailable', async () => {
     const { readLocalFile, writeLocalFile } = await import('../../../util/fs');
     const { exec } = await import('../../../util/exec');
     const { getRepoStatus } = await import('../../../util/git');
 
-    // Mock file operations
     vi.mocked(readLocalFile).mockResolvedValue('go.sum content');
     vi.mocked(writeLocalFile).mockResolvedValue();
 
-    // Mock git status
     vi.mocked(getRepoStatus).mockResolvedValue({
-      modified: ['/path/to/project/moduleA/go.sum'],
+      modified: ['/workspace/consul/go.sum'],
       added: [],
       deleted: [],
       not_added: [],
@@ -202,7 +211,6 @@ describe('gomod/artifacts - gomodTidyAll integration', () => {
       staged: [],
     });
 
-    // No global graph
     delete (globalThis as any).gomodDependencyGraph;
 
     vi.mocked(exec).mockResolvedValue({ stdout: '', stderr: '' });
@@ -210,15 +218,14 @@ describe('gomod/artifacts - gomodTidyAll integration', () => {
     const result = await updateArtifacts(mockUpdateArtifact);
 
     expect(result).not.toBeNull();
-    // Should not have any go mod tidy commands for other modules
     expect(exec).not.toHaveBeenCalledWith(
       expect.arrayContaining([
-        expect.stringContaining('cd /path/to/project/moduleB && go mod tidy'),
+        expect.stringContaining('cd /workspace/consul/api && go mod tidy'),
       ]),
     );
   });
 
-  it('should not enable gomodTidyAll when not in postUpdateOptions', async () => {
+  it('does not process when gomodTidyAll is not configured', async () => {
     const { readLocalFile, writeLocalFile } = await import('../../../util/fs');
     const { exec } = await import('../../../util/exec');
     const { getRepoStatus } = await import('../../../util/git');
@@ -232,13 +239,11 @@ describe('gomod/artifacts - gomodTidyAll integration', () => {
       },
     };
 
-    // Mock file operations
     vi.mocked(readLocalFile).mockResolvedValue('go.sum content');
     vi.mocked(writeLocalFile).mockResolvedValue();
 
-    // Mock git status
     vi.mocked(getRepoStatus).mockResolvedValue({
-      modified: ['/path/to/project/moduleA/go.sum'],
+      modified: ['/workspace/consul/go.sum'],
       added: [],
       deleted: [],
       not_added: [],

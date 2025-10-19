@@ -1,6 +1,6 @@
 import upath from 'upath';
-import { readLocalFile } from '../../../fs';
-import { logger } from '../../../logger';
+import { readLocalFile } from '../fs';
+import { logger } from '../../logger';
 import type {
   CircularDependency,
   DependencyGraph,
@@ -19,7 +19,6 @@ export async function buildDependencyGraph<T>(
     filePattern,
     parseFileDependencies,
     resolveDependencyPath,
-    rootDir = process.cwd(),
     fileList,
   } = options;
 
@@ -27,7 +26,7 @@ export async function buildDependencyGraph<T>(
   const edges: DependencyGraph<T>['edges'] = [];
 
   // Filter the provided file list using the pattern
-  const { matchRegexOrGlob } = await import('../../../string-match');
+  const { matchRegexOrGlob } = await import('../../../util/string-match.js');
   const files = fileList.filter((file) => matchRegexOrGlob(file, filePattern));
   logger.debug(
     `Found ${files.length} files matching pattern ${filePattern} from provided list`,
@@ -97,12 +96,14 @@ export function topologicalSort<T>(graph: DependencyGraph<T>): string[] {
   const cycles: CircularDependency[] = [];
 
   function visit(nodePath: string, path: string[] = []): void {
-    if (visited.has(nodePath)) return;
+    if (visited.has(nodePath)) {
+      return;
+    }
 
     if (visiting.has(nodePath)) {
       // Detect circular dependency
       const cycleStart = path.indexOf(nodePath);
-      const cycle = [...path.slice(cycleStart), nodePath];
+      const cycle = path.slice(cycleStart);
       cycles.push({
         cycle,
         type: cycle.length === 2 ? 'direct' : 'indirect',
@@ -146,8 +147,8 @@ export function topologicalSort<T>(graph: DependencyGraph<T>): string[] {
     logger.warn({ cycles }, 'Circular dependencies detected');
   }
 
-  // Reverse to get dependencies before dependents
-  return result.reverse();
+  // The result is already in correct order: dependencies before dependents
+  return result;
 }
 
 /**
@@ -163,7 +164,7 @@ export function getTransitiveDependents<T>(
   const visited = new Set<string>();
   const result: string[] = [];
 
-  function traverse(nodePath: string, depth: number = 0): void {
+  function traverse(nodePath: string, depth = 0): void {
     if (visited.has(nodePath)) {
       return;
     }
@@ -207,11 +208,13 @@ export function detectCircularDependencies<T>(
   const cycles: CircularDependency[] = [];
 
   function visit(nodePath: string, path: string[] = []): void {
-    if (visited.has(nodePath)) return;
+    if (visited.has(nodePath)) {
+      return;
+    }
 
     if (visiting.has(nodePath)) {
       const cycleStart = path.indexOf(nodePath);
-      const cycle = [...path.slice(cycleStart), nodePath];
+      const cycle = path.slice(cycleStart);
       cycles.push({
         cycle,
         type: cycle.length === 2 ? 'direct' : 'indirect',
@@ -260,10 +263,17 @@ function resolveDependencyPath<T>(
   // This is a simplified implementation
   // Each manager should implement proper path resolution
   const node = graph.nodes.get(basePath);
-  if (!node) return null;
+  if (!node) {
+    return null;
+  }
 
-  // For string dependencies, assume it's a relative path
+  // For string dependencies, check if it's already a valid node name
   if (typeof dependency === 'string') {
+    // If the dependency string is already a valid node path in the graph, return it directly
+    if (graph.nodes.has(dependency)) {
+      return dependency;
+    }
+    // Otherwise, treat it as a relative path
     return upath.resolve(upath.dirname(basePath), dependency);
   }
 
