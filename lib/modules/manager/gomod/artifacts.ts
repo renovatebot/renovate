@@ -5,6 +5,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { getTransitiveDependents } from '../../../util/tree';
 import { coerceArray } from '../../../util/array';
 import { getEnv } from '../../../util/env';
 import { exec } from '../../../util/exec';
@@ -20,7 +21,6 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { regEx } from '../../../util/regex';
-import { getTransitiveDependents, topologicalSort } from '../../../util/tree';
 import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,
@@ -31,14 +31,6 @@ import type {
 import { getExtraDepsNotice } from './artifacts-extra';
 
 const { major, valid } = semver;
-
-/**
- * Quote a path for shell execution
- */
-function quotePath(path: string): string {
-  // Simple path quoting - use single quotes and escape any existing single quotes
-  return `'${path.replace(/'/g, "'\\''")}'`;
-}
 
 function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
@@ -122,12 +114,6 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
-
-  // Defensive check for newGoModContent
-  if (!newGoModContent) {
-    logger.debug('No new go.mod content provided');
-    return null;
-  }
 
   const sumFileName = goModFileName.replace(regEx(/\.mod$/), '.sum');
   const existingGoSumContent = await readLocalFile(sumFileName);
@@ -345,10 +331,10 @@ export async function updateArtifacts({
       execCommands.push(`${cmd} ${args}`);
     }
 
+    // Process transitive dependents when gomodTidyAll is enabled
     if (config.postUpdateOptions?.includes('gomodTidyAll')) {
       try {
         const dependencyGraph = (globalThis as any).gomodDependencyGraph;
-
         if (dependencyGraph) {
           const transitiveDependentModules = getTransitiveDependents(
             dependencyGraph,
@@ -359,21 +345,15 @@ export async function updateArtifacts({
             },
           );
 
-          if (transitiveDependentModules.length > 0) {
-            const modulesInDependencyOrder = topologicalSort(dependencyGraph);
-
-            const visitedModules = new Set([
-              goModFileName,
-              ...transitiveDependentModules,
-            ]);
-
-            for (const modulePath of modulesInDependencyOrder) {
-              if (visitedModules.has(modulePath)) {
-                const moduleDir = upath.dirname(modulePath);
-                args = 'mod tidy' + tidyOpts;
-                execCommands.push(`(cd ${quotePath(moduleDir)} && go ${args})`);
-              }
-            }
+          for (const modulePath of transitiveDependentModules) {
+            const moduleSumFileName = modulePath.replace(
+              regEx(/\.mod$/),
+              '.sum',
+            );
+            const moduleDir = modulePath.replace(/\/[^\/]+$/, '');
+            logger.debug(`Processing dependent module: ${modulePath}`);
+            // Use subshell to isolate directory changes
+            execCommands.push(`(cd '${moduleDir}' && go mod tidy)`);
           }
         }
       } catch (error) {
@@ -391,14 +371,38 @@ export async function updateArtifacts({
     await exec(execCommands, execOptions);
 
     const status = await getRepoStatus();
+    if (
+      !status.modified.includes(sumFileName) &&
+      !status.modified.includes(goModFileName) &&
+      !status.modified.includes(goWorkSumFileName)
+    ) {
+      return null;
+    }
 
-    // Collect all sum files that might have been modified
-    const allSumFiles = new Set<string>();
+    const res: UpdateArtifactsResult[] = [];
+    if (status.modified.includes(sumFileName)) {
+      logger.debug('Returning updated go.sum');
+      res.push({
+        file: {
+          type: 'addition',
+          path: sumFileName,
+          contents: await readLocalFile(sumFileName),
+        },
+      });
+    }
 
-    // Always include the main module's sum file
-    allSumFiles.add(sumFileName);
+    if (status.modified.includes(goWorkSumFileName)) {
+      logger.debug('Returning updated go.work.sum');
+      res.push({
+        file: {
+          type: 'addition',
+          path: goWorkSumFileName,
+          contents: await readLocalFile(goWorkSumFileName),
+        },
+      });
+    }
 
-    // If gomodTidyAll is enabled, also collect sum files from dependent modules
+    // Include dependent module sum files when gomodTidyAll is enabled
     if (config.postUpdateOptions?.includes('gomodTidyAll')) {
       const dependencyGraph = (globalThis as any).gomodDependencyGraph;
       if (dependencyGraph) {
@@ -411,49 +415,22 @@ export async function updateArtifacts({
           },
         );
 
-        // Add sum files for all dependent modules
         for (const modulePath of transitiveDependentModules) {
           const moduleSumFileName = modulePath.replace(regEx(/\.mod$/), '.sum');
-          allSumFiles.add(moduleSumFileName);
+          if (status.modified.includes(moduleSumFileName)) {
+            logger.debug(
+              `Returning updated dependent module go.sum: ${moduleSumFileName}`,
+            );
+            res.push({
+              file: {
+                type: 'addition',
+                path: moduleSumFileName,
+                contents: await readLocalFile(moduleSumFileName),
+              },
+            });
+          }
         }
       }
-    }
-
-    // Check if any relevant files were modified
-    const hasModifiedFiles =
-      Array.from(allSumFiles).some((file) => status.modified.includes(file)) ||
-      status.modified.includes(goModFileName) ||
-      status.modified.includes(goWorkSumFileName);
-
-    if (!hasModifiedFiles) {
-      return null;
-    }
-
-    const res: UpdateArtifactsResult[] = [];
-
-    // Return all modified sum files
-    for (const sumFile of allSumFiles) {
-      if (status.modified.includes(sumFile)) {
-        logger.debug(`Returning updated ${sumFile}`);
-        res.push({
-          file: {
-            type: 'addition',
-            path: sumFile,
-            contents: await readLocalFile(sumFile),
-          },
-        });
-      }
-    }
-
-    if (status.modified.includes(goWorkSumFileName)) {
-      logger.debug('Returning updated go.work.sum');
-      res.push({
-        file: {
-          type: 'addition',
-          path: goWorkSumFileName,
-          contents: await readLocalFile(goWorkSumFileName),
-        },
-      });
     }
 
     // Include all the .go file import changes
@@ -494,6 +471,7 @@ export async function updateArtifacts({
       }
     }
 
+    // TODO: throws in tests (#22198)
     const finalGoModContent = (await readLocalFile(goModFileName, 'utf8'))!
       .replace(regEx(/\/\/ renovate-replace /g), '')
       .replace(regEx(/renovate-replace-bracket/g), ')');
