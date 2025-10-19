@@ -26,7 +26,7 @@ export async function buildDependencyGraph<T>(
   const edges: DependencyGraph<T>['edges'] = [];
 
   // Filter the provided file list using the pattern
-  const { matchRegexOrGlob } = await import('../../../util/string-match.js');
+  const { matchRegexOrGlob } = await import('../../../util/string-match');
   const files = fileList.filter((file) => matchRegexOrGlob(file, filePattern));
   logger.debug(
     `Found ${files.length} files matching pattern ${filePattern} from provided list`,
