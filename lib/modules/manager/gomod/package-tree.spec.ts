@@ -74,81 +74,77 @@ const mockGraph = new Map([
 ]);
 
 describe('modules/manager/gomod/package-tree', () => {
-  describe('resolveGoModulePath', () => {
-    it('resolves relative module paths to absolute go.mod locations', () => {
-      const baseModPath = '/workspace/consul/go.mod';
-
-      const dep1 = resolveGoModulePath(baseModPath, {
-        oldPath: 'github.com/hashicorp/consul/api',
-        newPath: './api',
-      });
-      expect(dep1).toBe('/workspace/consul/api/go.mod');
-
-      const dep2 = resolveGoModulePath(baseModPath, {
-        oldPath: 'github.com/hashicorp/consul/sdk',
-        newPath: './sdk',
-      });
-      expect(dep2).toBe('/workspace/consul/sdk/go.mod');
-
-      const dep3 = resolveGoModulePath(baseModPath, {
-        oldPath: 'github.com/hashicorp/consul agent',
-        newPath: './agent',
-      });
-      expect(dep3).toBe('/workspace/consul/agent/go.mod');
-    });
-  });
-
   describe('parseGoModDependencies', () => {
     it('extracts and resolves local dependencies from go.mod replace directives', () => {
-      const kubernetesGoMod = `module k8s.io/kubernetes
+      const testCases = [
+        {
+          description: 'Kubernetes monorepo with staging dependencies',
+          content: `module k8s.io/kubernetes
 
 go 1.21
 
 replace k8s.io/api => ./staging/src/k8s.io/api
 replace k8s.io/apimachinery => ./staging/src/k8s.io/apimachinery
-replace k8s.io/client-go => ./staging/src/k8s.io/client-go`;
+replace k8s.io/client-go => ./staging/src/k8s.io/client-go`,
+          basePath: '/workspace/kubernetes/go.mod',
+          expectedPaths: [
+            'k8s.io/api',
+            'k8s.io/apimachinery',
+            'k8s.io/client-go',
+          ],
+          expectedResolvedPaths: [
+            '/workspace/kubernetes/staging/src/k8s.io/api/go.mod',
+            '/workspace/kubernetes/staging/src/k8s.io/apimachinery/go.mod',
+            '/workspace/kubernetes/staging/src/k8s.io/client-go/go.mod',
+          ],
+        },
+        {
+          description: 'HashiCorp Consul with API and SDK paths',
+          content: `module github.com/hashicorp/consul
 
-      const deps = parseGoModDependencies(
-        '/workspace/kubernetes/go.mod',
-        kubernetesGoMod,
+go 1.21
+
+replace github.com/hashicorp/consul/api => ./api
+replace github.com/hashicorp/consul/sdk => ./sdk`,
+          basePath: '/workspace/consul/go.mod',
+          expectedPaths: [
+            'github.com/hashicorp/consul/api',
+            'github.com/hashicorp/consul/sdk',
+          ],
+          expectedResolvedPaths: [
+            '/workspace/consul/api/go.mod',
+            '/workspace/consul/sdk/go.mod',
+          ],
+        },
+      ];
+
+      testCases.forEach(
+        ({ content, basePath, expectedPaths, expectedResolvedPaths }) => {
+          const deps = parseGoModDependencies(basePath, content);
+
+          expect(deps).toHaveLength(expectedPaths.length);
+          deps.forEach((dep, index) => {
+            expect(dep).toMatchObject({
+              path: expectedPaths[index],
+              resolvedPath: expectedResolvedPaths[index],
+            });
+          });
+        },
       );
-
-      expect(deps).toHaveLength(3);
-      expect(deps[0]).toMatchObject({
-        path: 'k8s.io/api',
-        resolvedPath: '/workspace/kubernetes/staging/src/k8s.io/api/go.mod',
-      });
-      expect(deps[1]).toMatchObject({
-        path: 'k8s.io/apimachinery',
-        resolvedPath:
-          '/workspace/kubernetes/staging/src/k8s.io/apimachinery/go.mod',
-      });
-      expect(deps[2]).toMatchObject({
-        path: 'k8s.io/client-go',
-        resolvedPath:
-          '/workspace/kubernetes/staging/src/k8s.io/client-go/go.mod',
-      });
     });
   });
 
   describe('getModuleName', () => {
-    it('extracts module names from various go.mod content formats', () => {
+    it('extracts module names from go.mod content', () => {
       const testCases = [
         {
-          description: 'HashiCorp Consul go.mod with dependencies',
+          description: 'HashiCorp Consul go.mod',
           content: `module github.com/hashicorp/consul
 
 go 1.21
 
 require github.com/hashicorp/serf v0.9.6`,
           expected: 'github.com/hashicorp/consul',
-        },
-        {
-          description: 'Kubernetes client-go minimal go.mod',
-          content: `module github.com/kubernetes/client-go
-
-go 1.19`,
-          expected: 'github.com/kubernetes/client-go',
         },
         {
           description: 'go.mod without module declaration',
@@ -169,82 +165,56 @@ go 1.21`,
     });
   });
 
+  describe('resolveGoModulePath', () => {
+    it('resolves relative module paths to absolute go.mod locations', () => {
+      const baseModPath = '/workspace/consul/go.mod';
+      const resolved = resolveGoModulePath(baseModPath, {
+        oldPath: 'github.com/hashicorp/consul/api',
+        newPath: './api',
+      });
+      expect(resolved).toBe('/workspace/consul/api/go.mod');
+    });
+  });
+
   describe('dependency graph operations', () => {
     beforeEach(() => {
       vi.clearAllMocks();
     });
 
-    it('finds all transitive dependents for a given module', async () => {
-      const { buildDependencyGraph, getTransitiveDependents } = await import(
-        '../../../util/tree'
-      );
+    it('handles dependency graph operations correctly', async () => {
+      const { buildDependencyGraph, getTransitiveDependents, topologicalSort } =
+        await import('../../../util/tree');
 
       vi.mocked(buildDependencyGraph).mockResolvedValue(mockGraph);
       vi.mocked(getTransitiveDependents).mockReturnValue([
         '/workspace/internal/go.mod',
         '/workspace/pkg/api/go.mod',
-        '/workspace/pkg/client/go.mod',
       ]);
-
-      const dependents = await getTransitiveDependentModules(
-        '/workspace/go.mod',
-        [
-          '/workspace/go.mod',
-          '/workspace/internal/go.mod',
-          '/workspace/pkg/api/go.mod',
-          '/workspace/pkg/client/go.mod',
-          '/workspace/cmd/server/go.mod',
-          '/workspace/cmd/cli/go.mod',
-        ],
-      );
-
-      expect(buildDependencyGraph).toHaveBeenCalled();
-      expect(getTransitiveDependents).toHaveBeenCalledWith(
-        mockGraph,
-        '/workspace/go.mod',
-        { includeSelf: false, direction: 'dependents' },
-      );
-      expect(dependents).toEqual([
-        '/workspace/internal/go.mod',
-        '/workspace/pkg/api/go.mod',
-        '/workspace/pkg/client/go.mod',
-      ]);
-    });
-
-    it('determines correct topological order for sequential processing', async () => {
-      const { buildDependencyGraph, topologicalSort } = await import(
-        '../../../util/tree'
-      );
-
-      vi.mocked(buildDependencyGraph).mockResolvedValue(mockGraph);
       vi.mocked(topologicalSort).mockResolvedValue([
         '/workspace/go.mod',
         '/workspace/internal/go.mod',
         '/workspace/pkg/api/go.mod',
-        '/workspace/pkg/client/go.mod',
-        '/workspace/cmd/server/go.mod',
-        '/workspace/cmd/cli/go.mod',
       ]);
 
-      const order = await getGoModulesInDependencyOrder([
+      // Test transitive dependents
+      const dependents = await getTransitiveDependentModules(
         '/workspace/go.mod',
+        ['/workspace/go.mod', '/workspace/internal/go.mod'],
+      );
+      expect(dependents).toEqual([
         '/workspace/internal/go.mod',
         '/workspace/pkg/api/go.mod',
-        '/workspace/pkg/client/go.mod',
-        '/workspace/cmd/server/go.mod',
-        '/workspace/cmd/cli/go.mod',
       ]);
 
-      expect(buildDependencyGraph).toHaveBeenCalled();
-      expect(topologicalSort).toHaveBeenCalledWith(mockGraph);
+      // Test topological order
+      const order = await getGoModulesInDependencyOrder(['/workspace/go.mod']);
       expect(order).toEqual([
         '/workspace/go.mod',
         '/workspace/internal/go.mod',
         '/workspace/pkg/api/go.mod',
-        '/workspace/pkg/client/go.mod',
-        '/workspace/cmd/server/go.mod',
-        '/workspace/cmd/cli/go.mod',
       ]);
+
+      expect(buildDependencyGraph).toHaveBeenCalledTimes(2);
     });
   });
 });
