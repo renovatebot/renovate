@@ -5,7 +5,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { getTransitiveDependents } from '../../../util/tree';
+import { getTransitiveDependents, topologicalSort } from '../../../util/tree';
 import { coerceArray } from '../../../util/array';
 import { getEnv } from '../../../util/env';
 import { exec } from '../../../util/exec';
@@ -336,6 +336,7 @@ export async function updateArtifacts({
       try {
         const dependencyGraph = (globalThis as any).gomodDependencyGraph;
         if (dependencyGraph) {
+          // Get all modules that depend on the updated module
           const transitiveDependentModules = getTransitiveDependents(
             dependencyGraph,
             goModFileName,
@@ -345,15 +346,24 @@ export async function updateArtifacts({
             },
           );
 
-          for (const modulePath of transitiveDependentModules) {
-            const moduleSumFileName = modulePath.replace(
-              regEx(/\.mod$/),
-              '.sum',
+          if (transitiveDependentModules.length > 0) {
+            // Sort modules in topological order to ensure correct processing sequence
+            const allModulesSorted = topologicalSort(dependencyGraph);
+            const affectedModulesSorted = allModulesSorted.filter((module) =>
+              transitiveDependentModules.includes(module),
             );
-            const moduleDir = modulePath.replace(/\/[^\/]+$/, '');
-            logger.debug(`Processing dependent module: ${modulePath}`);
-            // Use subshell to isolate directory changes
-            execCommands.push(`(cd '${moduleDir}' && go mod tidy)`);
+
+            logger.debug(
+              `Processing ${affectedModulesSorted.length} dependent modules in topological order: ${affectedModulesSorted.join(', ')}`,
+            );
+
+            // Process modules in correct topological order
+            for (const modulePath of affectedModulesSorted) {
+              const moduleDir = modulePath.replace(/\/[^\/]+$/, '');
+              logger.debug(`Processing dependent module: ${modulePath}`);
+              // Use subshell to isolate directory changes
+              execCommands.push(`(cd '${moduleDir}' && go mod tidy)`);
+            }
           }
         }
       } catch (error) {
