@@ -203,7 +203,7 @@ describe('modules/manager/gomod/package-tree', () => {
     beforeEach(async () => {
       vi.clearAllMocks();
       const { buildDependencyGraph } = vi.mocked(
-        await import('../../../util/tree'),
+        await import('../../../util/tree/index.js'),
       );
       buildDependencyGraph.mockResolvedValue({
         nodes: new Map(),
@@ -222,7 +222,7 @@ describe('modules/manager/gomod/package-tree', () => {
 
       // Mock the dependency graph with realistic structure
       const { buildDependencyGraph } = vi.mocked(
-        await import('../../../util/tree'),
+        await import('../../../util/tree/index.js'),
       );
       buildDependencyGraph.mockResolvedValue({
         nodes: new Map([
@@ -299,7 +299,7 @@ describe('modules/manager/gomod/package-tree', () => {
     it('handles missing files gracefully', async () => {
       // Mock the dependency graph for missing files scenario
       const { buildDependencyGraph } = vi.mocked(
-        await import('../../../util/tree'),
+        await import('../../../util/tree/index.js'),
       );
       buildDependencyGraph.mockResolvedValue({
         nodes: new Map([
@@ -334,7 +334,7 @@ describe('modules/manager/gomod/package-tree', () => {
     beforeEach(async () => {
       vi.clearAllMocks();
       const { buildDependencyGraph, getTransitiveDependents } = vi.mocked(
-        await import('../../../util/tree'),
+        await import('../../../util/tree/index.js'),
       );
       buildDependencyGraph.mockResolvedValue({
         nodes: new Map([
@@ -406,7 +406,7 @@ describe('modules/manager/gomod/package-tree', () => {
 
       // Test API module (fewer dependents) - update mock for different result
       const { getTransitiveDependents } = vi.mocked(
-        await import('../../../util/tree'),
+        await import('../../../util/tree/index.js'),
       );
       getTransitiveDependents.mockReturnValue(['cmd/server/go.mod']);
       const apiDependents = await getTransitiveDependentModules(
@@ -428,7 +428,7 @@ describe('modules/manager/gomod/package-tree', () => {
 
     it('excludes already processed modules from results', async () => {
       const { getTransitiveDependents } = vi.mocked(
-        await import('../../../util/tree'),
+        await import('../../../util/tree/index.js'),
       );
       getTransitiveDependents.mockReturnValue([
         'sdk/go.mod',
@@ -450,7 +450,7 @@ describe('modules/manager/gomod/package-tree', () => {
 
     it('handles case when dependency graph building fails', async () => {
       const { buildDependencyGraph } = vi.mocked(
-        await import('../../../util/tree'),
+        await import('../../../util/tree/index.js'),
       );
       buildDependencyGraph.mockRejectedValueOnce(
         new Error('Graph build failed'),
@@ -466,7 +466,7 @@ describe('modules/manager/gomod/package-tree', () => {
     beforeEach(async () => {
       vi.clearAllMocks();
       const { buildDependencyGraph, topologicalSort } = vi.mocked(
-        await import('../../../util/tree'),
+        await import('../../../util/tree/index.js'),
       );
       buildDependencyGraph.mockResolvedValue({
         nodes: new Map([
@@ -541,7 +541,9 @@ describe('modules/manager/gomod/package-tree', () => {
     });
 
     it('handles empty file list', async () => {
-      const { topologicalSort } = vi.mocked(await import('../../../util/tree'));
+      const { topologicalSort } = vi.mocked(
+        await import('../../../util/tree/index.js'),
+      );
       topologicalSort.mockReturnValueOnce([]);
 
       const order = await getGoModulesInDependencyOrder([]);
@@ -552,7 +554,9 @@ describe('modules/manager/gomod/package-tree', () => {
     it('handles modules not in dependency graph', async () => {
       const fileList = ['shared/go.mod', 'api/go.mod', 'external/mod/go.mod'];
 
-      const { topologicalSort } = vi.mocked(await import('../../../util/tree'));
+      const { topologicalSort } = vi.mocked(
+        await import('../../../util/tree/index.js'),
+      );
       topologicalSort.mockReturnValueOnce([
         'shared/go.mod',
         'api/go.mod',
@@ -574,7 +578,7 @@ describe('modules/manager/gomod/package-tree', () => {
 
     it('handles topological sort failure', async () => {
       const { buildDependencyGraph } = vi.mocked(
-        await import('../../../util/tree'),
+        await import('../../../util/tree/index.js'),
       );
       buildDependencyGraph.mockRejectedValueOnce(
         new Error('Topological sort failed'),
@@ -637,7 +641,7 @@ describe('modules/manager/gomod/package-tree', () => {
       };
 
       const { buildDependencyGraph, getTransitiveDependents, topologicalSort } =
-        vi.mocked(await import('../../../util/tree'));
+        vi.mocked(await import('../../../util/tree/index.js'));
       buildDependencyGraph.mockResolvedValue(mockGraph);
       getTransitiveDependents.mockReturnValue([
         'api/go.mod',

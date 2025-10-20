@@ -2577,7 +2577,7 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     });
 
-    expect(execSnapshots[0].options.env).not.toHaveProperty(
+    expect(execSnapshots[0]!.options!.env).not.toHaveProperty(
       'GOFLAGS',
       '-modcacherw',
     );

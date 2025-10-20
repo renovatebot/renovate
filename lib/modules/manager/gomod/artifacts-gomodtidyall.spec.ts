@@ -97,7 +97,7 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
 
     // Set up tree utility mocks
     const { getTransitiveDependents, topologicalSort } = vi.mocked(
-      await import('../../../util/tree'),
+      await import('../../../util/tree/index.js'),
     );
     getTransitiveDependents.mockReturnValue(['api/go.mod']);
     topologicalSort.mockReturnValue(['shared/go.mod', 'api/go.mod']);
@@ -161,7 +161,7 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
 
       // Mock getTransitiveDependents to return empty array
       const { getTransitiveDependents } = vi.mocked(
-        await import('../../../util/tree'),
+        await import('../../../util/tree/index.js'),
       );
       getTransitiveDependents.mockReturnValue([]);
 
@@ -190,7 +190,7 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
       vi.mocked(fs.writeLocalFile).mockResolvedValueOnce();
 
       // Mock exec to return successfully
-      const execMock = vi.mocked(await import('../../../util/exec'));
+      const execMock = vi.mocked(await import('../../../util/exec/index.js'));
       execMock.exec.mockResolvedValueOnce({ stdout: '', stderr: '' });
 
       // Mock git status to show that api/go.sum was modified
@@ -281,7 +281,7 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
       vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce('go.sum');
 
       // Mock exec to throw an error
-      const { exec } = vi.mocked(await import('../../../util/exec'));
+      const { exec } = vi.mocked(await import('../../../util/exec/index.js'));
       exec.mockRejectedValueOnce(new Error('Execution failed'));
 
       const result = await updateArtifacts({
