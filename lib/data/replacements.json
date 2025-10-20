@@ -17,6 +17,7 @@
       "replacements:fakerjs-to-scoped",
       "replacements:fastify-to-scoped",
       "replacements:hapi-to-scoped",
+      "replacements:google-github-action-release-please-to-googleapis",
       "replacements:jade-to-pug",
       "replacements:joi-to-scoped",
       "replacements:joi-to-unscoped",
@@ -678,6 +679,16 @@
         "matchPackageNames": ["fastify-zipkin"],
         "replacementName": "@fastify/zipkin",
         "replacementVersion": "3.0.0"
+      }
+    ]
+  },
+  "google-github-action-release-please-to-googleapis": {
+    "description": "`google-github-action/release-please` was renamed to `googleapis/release-please`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["github-actions"],
+        "matchPackageNames": ["google-github-action/release-please"],
+        "replacementName": "googleapis/release-please"
       }
     ]
   },
