@@ -641,7 +641,9 @@
     "ui5-webcomponents": [
       "https://github.com/SAP/ui5-webcomponents",
       "https://github.com/SAP/ui5-webcomponents-react",
-      "https://github.com/SAP/ui5-webcomponents-ngx"
+      "https://github.com/SAP/ui5-webcomponents-ngx",
+      "https://github.com/UI5/webcomponents",
+      "https://github.com/UI5/webcomponents-react"
     ],
     "unhead": "https://github.com/unjs/unhead",
     "unocss": "https://github.com/unocss/unocss",

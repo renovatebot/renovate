@@ -6,7 +6,7 @@ import semver from 'semver';
 import type { Options, SimpleGit, TaskOptions } from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
 import upath from 'upath';
-import { configFileNames } from '../../config/app-strings';
+import { getConfigFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
@@ -1189,7 +1189,7 @@ export async function prepareCommit({
         try {
           /* v8 ignore next 2 -- TODO: add test */
           const addParams =
-            fileName === configFileNames[0] ? ['-f', fileName] : fileName;
+            fileName === getConfigFileNames()[0] ? ['-f', fileName] : fileName;
           await git.add(addParams);
           if (file.isExecutable) {
             await git.raw(['update-index', '--chmod=+x', fileName]);

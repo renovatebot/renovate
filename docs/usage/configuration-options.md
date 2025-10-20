@@ -21,6 +21,9 @@ You can store your Renovate configuration file in one of these locations:
 1. `.renovaterc.json5`
 1. `package.json` _(within a `"renovate"` section)_
 
+Or in a custom file present within the [`configFileNames`](./self-hosted-configuration.md#configfilenames).
+The bot first checks all the files in the `configFileNames` array before checking from the above file list.
+
 <!-- prettier-ignore -->
 !!! warning
     Storing the Renovate configuration in a `package.json` file is deprecated and support may be removed in the future.
@@ -1189,6 +1192,7 @@ But the second custom manager will upgrade both definitions as its first `matchS
       "datasourceTemplate": "docker"
     },
     {
+      "customType": "regex",
       "managerFilePatterns": ["/^example.json$/"],
       "matchStringsStrategy": "recursive",
       "matchStrings": [
@@ -1244,6 +1248,7 @@ Matched group values will be merged to form a single dependency.
       "datasourceTemplate": "docker"
     },
     {
+      "customType": "regex",
       "managerFilePatterns": ["/^main.yml$/"],
       "matchStringsStrategy": "combination",
       "matchStrings": [
@@ -2706,7 +2711,7 @@ Example:
 
 This feature used to be called `stabilityDays`.
 
-If `minimumReleaseAge` is set to a time duration _and_ the update has a release timestamp header, then Renovate will check if the set duration has passed.
+If `minimumReleaseAge` is set to a time duration _and_ the update has a release timestamp header, then Renovate will check if the set duration has passed. This behaviour can be changed using [`minimumReleaseAgeBehaviour`](#minimumreleaseagebehaviour).
 
 Note: Renovate will wait for the set duration to pass for each **separate** version.
 Renovate does not wait until the package has seen no releases for x time-duration(`minimumReleaseAge`).
@@ -2774,6 +2779,16 @@ This pending check prevents the branch going green to automerge before the time 
 
 <!-- markdownlint-enable MD001 -->
 
+## minimumReleaseAgeBehaviour
+
+When `minimumReleaseAge` is set to a time duration, the `minimumReleaseAgeBehaviour` will be used to control whether the release timestamp is required.
+
+When set to `timestamp-required`, this version is not treated stable unless there is release timestamp, and that release timestamp is past the [`minimumReleaseAge`](#minimumreleaseage).
+
+When set to `timestamp-optional`, Renovate will treat a release without a releaseTimestamp as stable.
+
+This only applies when used with [`minimumReleaseAge`](#minimumreleaseage).
+
 ## minor
 
 Add to this object if you wish to define rules that apply only to minor updates.
@@ -2835,6 +2850,8 @@ Renovate only queries the OSV database for dependencies that use one of these da
 - [`packagist`](./modules/datasource/packagist/index.md)
 - [`pypi`](./modules/datasource/pypi/index.md)
 - [`rubygems`](./modules/datasource/rubygems/index.md)
+
+The entire database is downloaded locally by [renovate-offline](https://github.com/renovatebot/osv-offline) and queried offline.
 
 ## packageRules
 
@@ -3610,7 +3627,7 @@ Here's an example of how you would define PR priority so that `devDependencies` 
 ### replacementName
 
 This config option only works with some managers.
-We're working to support more managers, subscribe to issue [renovatebot/renovate#14149](https://github.com/renovatebot/renovate/issues/14149) to follow our progress.
+We're working to support more managers, subscribe to issue [renovatebot/renovate#24883](https://github.com/renovatebot/renovate/discussions/24883) to follow our progress.
 
 Managers which do not support replacement:
 
