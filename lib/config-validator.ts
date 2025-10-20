@@ -3,7 +3,7 @@ import 'source-map-support/register';
 import './punycode.cjs';
 import { dequal } from 'dequal';
 import { pathExists, readFile } from 'fs-extra';
-import { configFileNames } from './config/app-strings';
+import { getConfigFileNames } from './config/app-strings';
 import { massageConfig } from './config/massage';
 import { migrateConfig } from './config/migration';
 import type { RenovateConfig } from './config/types';
@@ -86,7 +86,7 @@ interface PackageJson {
       }
     }
   } else {
-    for (const file of configFileNames.filter(
+    for (const file of getConfigFileNames().filter(
       (name) => name !== 'package.json',
     )) {
       try {

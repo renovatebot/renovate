@@ -1,5 +1,5 @@
 import { mock } from 'vitest-mock-extended';
-import { configFileNames } from '../../../../config/app-strings';
+import { getConfigFileNames } from '../../../../config/app-strings';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import {
@@ -145,7 +145,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       delete expectConfig.ignorePresets;
       expect(
         configModule.getOnboardingConfigContents,
-      ).toHaveBeenCalledExactlyOnceWith(expectConfig, configFileNames[0]);
+      ).toHaveBeenCalledExactlyOnceWith(expectConfig, getConfigFileNames()[0]);
       const file = scm.commitAndPush.mock.calls[0][0].files[0] as FileAddition;
       const contents = file.contents?.toString();
       expect(contents).toBeJsonString();
