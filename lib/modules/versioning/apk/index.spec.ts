@@ -172,28 +172,6 @@ describe('modules/versioning/apk/index', () => {
       },
     );
 
-    it.each`
-      range           | expected
-      ${'^2.39.0-r0'} | ${'2.40.0-r1'}
-      ${'^2.40.0-r0'} | ${'2.40.0-r1'}
-      ${'^3.0.0-r0'}  | ${'3.0.0-r0'}
-    `(
-      'getSatisfyingVersion with caret range ($range) === $expected',
-      ({ range, expected }) => {
-        expect(apk.getSatisfyingVersion(versions, range)).toBe(expected);
-      },
-    );
-
-    it('should handle 0.x.x versions with caret range', () => {
-      const zeroVersions = ['0.1.0-r0', '0.1.1-r0', '0.2.0-r0', '1.0.0-r0'];
-      expect(apk.getSatisfyingVersion(zeroVersions, '^0.1.0-r0')).toBe(
-        '0.1.1-r0',
-      );
-      expect(apk.getSatisfyingVersion(zeroVersions, '^0.2.0-r0')).toBe(
-        '0.2.0-r0',
-      );
-    });
-
     it('should return null for invalid range operators', () => {
       expect(apk.getSatisfyingVersion(versions, 'invalid-range')).toBe(null);
     });
@@ -215,11 +193,16 @@ describe('modules/versioning/apk/index', () => {
       version         | expected
       ${'2.39.0-r0'}  | ${true}
       ${'2.39.0'}     | ${true}
-      ${'^2.39.0-r0'} | ${false}
       ${'~2.39.0-r0'} | ${false}
       ${'>2.39.0-r0'} | ${false}
     `('isSingleVersion($version) === $expected', ({ version, expected }) => {
       expect(apk.isSingleVersion(version)).toBe(expected);
+    });
+
+    it('should return false for empty versions', () => {
+      expect(apk.isSingleVersion('')).toBe(false);
+      expect(apk.isSingleVersion(null as any)).toBe(false);
+      expect(apk.isSingleVersion(undefined as any)).toBe(false);
     });
   });
 
@@ -248,6 +231,14 @@ describe('modules/versioning/apk/index', () => {
         '2.39.1-r0',
         '2.40.0-r0',
       ]);
+    });
+
+    it('should compare release numbers when version parts are equal', () => {
+      // Both versions have same version and prerelease, different release numbers
+      expect(apk.sortVersions('2.39.0-r1', '2.39.0-r2')).toBeLessThan(0);
+      expect(apk.sortVersions('2.39.0-r2', '2.39.0-r1')).toBeGreaterThan(0);
+      // Both have no release number (should be equal)
+      expect(apk.sortVersions('2.39.0', '2.39.0')).toBe(0);
     });
   });
 
@@ -316,6 +307,21 @@ describe('modules/versioning/apk/index', () => {
       expect(apk.isValid(undefined as any)).toBe(false);
       expect(apk.getMajor(null as any)).toBe(null);
       expect(apk.getMinor(undefined as any)).toBe(null);
+      expect(apk.getPatch(null as any)).toBe(null);
+      expect(apk.getPatch(undefined as any)).toBe(null);
+      expect(apk.getPatch('')).toBe(null);
+    });
+
+    it('should return false for unstable versions with prerelease', () => {
+      expect(apk.isStable('=2.39.0_rc1-r0')).toBe(false);
+      expect(apk.isStable('>2.39.0_beta-r0')).toBe(false);
+      expect(apk.isStable('~2.39.0_alpha-r0')).toBe(false);
+    });
+
+    it('should return false for empty versions in isStable', () => {
+      expect(apk.isStable('')).toBe(false);
+      expect(apk.isStable(null as any)).toBe(false);
+      expect(apk.isStable(undefined as any)).toBe(false);
     });
   });
 
@@ -331,27 +337,10 @@ describe('modules/versioning/apk/index', () => {
       expect(apk.getSatisfyingVersion(versions, '~2.1.0-r0')).toBe('2.1.0-r0');
     });
 
-    it('should handle 0.x.x versions with caret range edge cases', () => {
-      const zeroVersions = [
-        '0.0.1-r0',
-        '0.1.0-r0',
-        '0.1.1-r0',
-        '0.2.0-r0',
-        '1.0.0-r0',
-      ];
-      expect(apk.getSatisfyingVersion(zeroVersions, '^0.0.1-r0')).toBe(
-        '1.0.0-r0',
-      );
-      expect(apk.getSatisfyingVersion(zeroVersions, '^0.1.0-r0')).toBe(
-        '0.1.1-r0',
-      );
-    });
-
     it('should handle invalid target versions in ranges', () => {
       const versions = ['2.39.0-r0', '2.40.0-r0'];
       expect(apk.getSatisfyingVersion(versions, '>invalid')).toBe(null);
       expect(apk.getSatisfyingVersion(versions, '~invalid')).toBe(null);
-      expect(apk.getSatisfyingVersion(versions, '^invalid')).toBe(null);
     });
 
     it('should handle versions with prerelease identifiers in ranges', () => {
@@ -377,6 +366,54 @@ describe('modules/versioning/apk/index', () => {
       expect(apk.getPatch('2.39.1-r0')).toBe(1);
       expect(apk.getPatch('2.39.0_rc1-r0')).toBe(0);
     });
+
+    it('should handle versions with operators', () => {
+      expect(apk.getPatch('=2.39.0-r0')).toBe(0);
+      expect(apk.getPatch('>2.39.1-r0')).toBe(1);
+      expect(apk.getPatch('~2.39.2-r0')).toBe(2);
+    });
+  });
+
+  describe('getNewValue', () => {
+    it('should strip revision from newVersion when currentValue has no revision', () => {
+      expect(
+        apk.getNewValue({
+          currentValue: '2.50.0',
+          rangeStrategy: 'replace',
+          newVersion: '2.51.1-r1',
+        }),
+      ).toBe('2.51.1');
+    });
+
+    it('should keep revision in newVersion when currentValue has revision', () => {
+      expect(
+        apk.getNewValue({
+          currentValue: '2.50.0-r0',
+          rangeStrategy: 'replace',
+          newVersion: '2.51.1-r1',
+        }),
+      ).toBe('2.51.1-r1');
+    });
+
+    it('should handle newVersion without revision when currentValue has no revision', () => {
+      expect(
+        apk.getNewValue({
+          currentValue: '2.50.0',
+          rangeStrategy: 'replace',
+          newVersion: '2.51.1',
+        }),
+      ).toBe('2.51.1');
+    });
+
+    it('should handle newVersion without revision when currentValue has revision', () => {
+      expect(
+        apk.getNewValue({
+          currentValue: '2.50.0-r0',
+          rangeStrategy: 'replace',
+          newVersion: '2.51.1',
+        }),
+      ).toBe('2.51.1');
+    });
   });
 
   describe('version comparison with prerelease identifiers', () => {
@@ -399,44 +436,6 @@ describe('modules/versioning/apk/index', () => {
   });
 
   describe('getSatisfyingVersion edge cases for coverage', () => {
-    it('should handle 0.x.x versions where getMinor returns null', () => {
-      // Test case where getMinor might return null for malformed 0.x versions
-      const malformedVersions = ['0', '0.1.0-r0', '1.0.0-r0'];
-
-      // This should trigger the null check in caret range logic
-      expect(apk.getSatisfyingVersion(malformedVersions, '^0.1.0-r0')).toBe(
-        '0.1.0-r0',
-      );
-    });
-
-    it('should handle versions where getMajor returns null in caret range', () => {
-      // Test case where getMajor might return null for malformed versions
-      const malformedVersions = ['invalid', '2.39.0-r0', '3.0.0-r0'];
-
-      // This should trigger the null check in caret range logic for getMajor
-      // The invalid version should be filtered out, and 2.39.0-r0 should match
-      expect(apk.getSatisfyingVersion(malformedVersions, '^2.39.0-r0')).toBe(
-        '2.39.0-r0',
-      );
-    });
-
-    it('should handle caret range with invalid version in list', () => {
-      const versions = ['2.39.0-r0', 'invalid', '3.0.0-r0'];
-
-      // This should trigger the null check in caret range logic when version parsing fails
-      expect(apk.getSatisfyingVersion(versions, '^2.39.0-r0')).toBe(
-        '2.39.0-r0',
-      );
-    });
-
-    it('should handle target version with null getMajor in caret range', () => {
-      // Test case where the target version itself has null getMajor
-      const versions = ['2.39.0-r0', '3.0.0-r0'];
-
-      // This should trigger the null check for targetMajor in caret range logic
-      expect(apk.getSatisfyingVersion(versions, '^invalid')).toBe(null);
-    });
-
     it('should handle unknown range operators', () => {
       const versions = ['2.39.0-r0', '2.40.0-r0'];
 
@@ -462,13 +461,6 @@ describe('modules/versioning/apk/index', () => {
       expect(apk.getSatisfyingVersion(versions, '~2.39.0-r0')).toBe(
         '2.39.0-r0',
       );
-    });
-
-    it('should handle caret range with null getMajor for target version', () => {
-      const versions = ['2.39.0-r0', '3.0.0-r0'];
-
-      // This should trigger the null check for targetMajor in caret range logic
-      expect(apk.getSatisfyingVersion(versions, '^invalid')).toBe(null);
     });
   });
 

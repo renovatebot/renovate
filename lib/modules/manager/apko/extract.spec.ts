@@ -87,6 +87,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '1.24.0',
             versioning: 'apk',
+            managerData: { hasRevision: false },
           },
         ],
         lockFiles: undefined, // No lock file mocked, so will be undefined
@@ -145,6 +146,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '1.24.0',
             versioning: 'apk',
+            managerData: { hasRevision: false },
           },
           {
             datasource: 'apk',
@@ -155,6 +157,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '20.10.0',
             versioning: 'apk',
+            managerData: { hasRevision: false },
           },
         ],
         lockFiles: undefined, // No lock file mocked, so will be undefined
@@ -196,6 +199,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '1.24.0',
             versioning: 'apk',
+            managerData: { hasRevision: false },
           },
           {
             datasource: 'apk',
@@ -215,6 +219,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '20.10.0',
             versioning: 'apk',
+            managerData: { hasRevision: false },
           },
         ],
         lockFiles: undefined, // No lock file mocked, so will be undefined
@@ -245,6 +250,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '1.24.0-r0',
             versioning: 'apk',
+            managerData: { hasRevision: true },
           },
           {
             datasource: 'apk',
@@ -255,6 +261,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '20.10.0-r1',
             versioning: 'apk',
+            managerData: { hasRevision: true },
           },
         ],
         lockFiles: undefined, // No lock file mocked, so will be undefined
@@ -286,6 +293,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '1.24.0',
             versioning: 'apk',
+            managerData: { hasRevision: false },
           },
           {
             datasource: 'apk',
@@ -305,6 +313,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '3.11.0',
             versioning: 'apk',
+            managerData: { hasRevision: false },
           },
         ],
         lockFiles: undefined, // No lock file mocked, so will be undefined
@@ -339,6 +348,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '1.24.0',
             versioning: 'apk',
+            managerData: { hasRevision: false },
           },
           {
             datasource: 'apk',
@@ -348,6 +358,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '20.10.0',
             versioning: 'apk',
+            managerData: { hasRevision: false },
           },
         ],
         lockFiles: undefined, // No lock file mocked, so will be undefined
@@ -378,6 +389,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '23.0.0',
             versioning: 'apk',
+            managerData: { hasRevision: false },
           },
           {
             datasource: 'apk',
@@ -388,6 +400,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '10.0.0',
             versioning: 'apk',
+            managerData: { hasRevision: false },
           },
         ],
         lockFiles: undefined, // No lock file mocked, so will be undefined
@@ -477,6 +490,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '1.24.0',
             versioning: 'apk',
+            managerData: { hasRevision: false },
             lockedVersion: '1.24.0-r0',
           },
           {
@@ -484,6 +498,7 @@ describe('modules/manager/apko/extract', () => {
             depName: 'nodejs',
             currentValue: '20.10.0',
             versioning: 'apk',
+            managerData: { hasRevision: false },
             lockedVersion: '20.10.0-r0',
             registryUrls: [
               'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
@@ -522,6 +537,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '1.24.0',
             versioning: 'apk',
+            managerData: { hasRevision: false },
           },
         ],
         lockFiles: ['apko.lock.json'],
@@ -555,6 +571,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '1.24.0',
             versioning: 'apk',
+            managerData: { hasRevision: false },
           },
         ],
         lockFiles: ['apko.lock.json'],
@@ -644,6 +661,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '1.24.0',
             versioning: 'apk',
+            managerData: { hasRevision: false },
             lockedVersion: '1.24.0-r0',
           },
           {
@@ -651,6 +669,7 @@ describe('modules/manager/apko/extract', () => {
             depName: 'nodejs',
             currentValue: '20.10.0',
             versioning: 'apk',
+            managerData: { hasRevision: false },
             lockedVersion: '20.10.0-r0',
             registryUrls: [
               'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
@@ -702,6 +721,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '2.36-r3',
             versioning: 'apk',
+            managerData: { hasRevision: true },
           },
           {
             datasource: 'apk',
@@ -712,6 +732,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '2.39-r4',
             versioning: 'apk',
+            managerData: { hasRevision: true },
           },
         ],
         lockFiles: undefined, // No lock file mocked, so will be undefined
@@ -747,6 +768,7 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '1.24.0',
             versioning: 'apk',
+            managerData: { hasRevision: false },
           },
         ],
         lockFiles: ['not here'],
@@ -779,6 +801,63 @@ describe('modules/manager/apko/extract', () => {
             ],
             currentValue: '1.24.0',
             versioning: 'apk',
+            managerData: { hasRevision: false },
+          },
+        ],
+        lockFiles: undefined,
+      });
+    });
+
+    it('skips packages with range constraints', async () => {
+      const apkoYaml = codeBlock`
+        contents:
+          repositories:
+            - https://dl-cdn.alpinelinux.org/alpine/edge/main
+          packages:
+            - git>2.40
+            - bash~5.2
+            - curl<7.80
+            - openssl=3.0.7-r0
+        archs:
+          - x86_64
+      `;
+
+      const result = await extractPackageFile(apkoYaml, 'apko.yaml');
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: 'apk',
+            depName: 'git',
+            skipReason: 'unsupported-version',
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+            ],
+          },
+          {
+            datasource: 'apk',
+            depName: 'bash',
+            skipReason: 'unsupported-version',
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+            ],
+          },
+          {
+            datasource: 'apk',
+            depName: 'curl',
+            skipReason: 'unsupported-version',
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+            ],
+          },
+          {
+            datasource: 'apk',
+            depName: 'openssl',
+            currentValue: '3.0.7-r0',
+            versioning: 'apk',
+            managerData: { hasRevision: true },
+            registryUrls: [
+              'https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64',
+            ],
           },
         ],
         lockFiles: undefined,

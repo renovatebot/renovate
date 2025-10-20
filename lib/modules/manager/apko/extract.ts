@@ -87,17 +87,44 @@ export async function extractPackageFile(
       for (const pkg of parsed.contents.packages) {
         // Try to extract version from package.
         // format is name{@tag}{[<>~=]version} - from https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper#World
-        const versionMatch = /^(.+)[=><~^][=]?(.+)$/.exec(pkg);
+        const versionMatch = /^(.+?)([=><~][=]?.+)$/.exec(pkg);
 
         if (versionMatch) {
-          const [, depName, currentValue] = versionMatch;
-          deps.push({
+          const [, depName, fullConstraint] = versionMatch;
+
+          // We are only concerned with packages with = version constraint
+          // Range constraints (>, ~, <) are not supported
+
+          if (/^[><~]/.test(fullConstraint)) {
+            logger.debug(
+              { depName, constraint: fullConstraint },
+              'Skipping dependency with range constraint - not supported in apko.yaml',
+            );
+            deps.push({
+              datasource: ApkDatasource.id,
+              depName,
+              skipReason: 'unsupported-version',
+              registryUrls,
+            });
+            continue;
+          }
+
+          // Only process exact versions (=version)
+          // Strip the = operator for cleaner display in PRs
+          const cleanVersion = fullConstraint.replace(/^=/, '');
+          const hasRevision = /-r\d+$/.test(cleanVersion);
+
+          const dep: any = {
             datasource: ApkDatasource.id,
             depName,
-            currentValue,
+            currentValue: cleanVersion, // Store without = operator (clean for PR display)
             versioning: apkVersioning,
             registryUrls,
-          });
+            managerData: {
+              hasRevision, // Track if current version has revision
+            },
+          };
+          deps.push(dep);
         } else {
           // Package without version - add as unversioned
           deps.push({

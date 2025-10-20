@@ -12,6 +12,15 @@ export const categories: Category[] = ['alpine'];
 export const defaultConfig = {
   managerFilePatterns: ['/(^|/)apko\\.ya?ml$/'],
   lockFiles: ['apko.lock.json'],
+  commitMessageTopic: '{{{depName}}} alpine package',
+  // Use newValue for version display (without revision if not present in current version)
+  commitMessageExtra: 'to v{{{newValue}}}',
+  commitMessage:
+    '{{{commitMessagePrefix}}} {{{commitMessageAction}}} {{{commitMessageTopic}}}{{#if newValue}} to v{{{newValue}}}{{/if}}',
+  prTitle: null, // Use commitMessage for PR title
+  prBodyDefinitions: {
+    Change: '`{{{currentValue}}}` -> `{{{newValue}}}`',
+  },
 };
 
 export const supportedDatasources = [ApkDatasource.id];

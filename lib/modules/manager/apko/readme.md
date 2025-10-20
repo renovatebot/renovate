@@ -23,11 +23,10 @@ Note: `apko` does not specify default filenames, however [rules_apko](https://gi
 
 ### Version Format
 
-The manager supports Alpine Linux APK versioning format:
+The manager supports Alpine Linux APK versioning format for exact versions only:
 
 - `package=version-release` (e.g., `git=2.39.0-r0`)
-- `package-version` (e.g., `nginx-1.24.0`)
-- Version constraints: `package>version`, `package>=version`, `package~version`, `package^version`
+- `package=version` (e.g., `nginx=1.24.0`)
 
 ### Lock File Support
 

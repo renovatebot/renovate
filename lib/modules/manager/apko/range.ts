@@ -8,7 +8,7 @@ export function getRangeStrategy({
     return rangeStrategy;
   }
 
-  // For APK packages, we want to suggest patch updates (e.g., 5.2.37-r0 -> 5.2.37-r33)
-  // and minor updates (e.g., 5.2.37-r0 -> 5.3-r3), not just the latest version
-  return 'replace';
+  // For APK packages, we want to preserve range constraints and only update lock files
+  // This means git>2.40 stays as git>2.40, and only the lock file gets updated
+  return 'update-lockfile';
 }
