@@ -5,36 +5,7 @@ import * as util from '../util';
 import { mapPrFromScmToRenovate } from './mapper';
 import type { PullRequest, Repo, User } from './schema';
 import type { PrFilterByState } from './types';
-import {
-  addAssignees,
-  addReviewers,
-  createPr,
-  deleteLabel,
-  ensureComment,
-  ensureCommentRemoval,
-  ensureIssue,
-  ensureIssueClosing,
-  findIssue,
-  findPr,
-  getBranchPr,
-  getBranchStatus,
-  getBranchStatusCheck,
-  getIssueList,
-  getJsonFile,
-  getPr,
-  getPrList,
-  getRawFile,
-  getRepoForceRebase,
-  getRepos,
-  initPlatform,
-  initRepo,
-  invalidatePrCache,
-  massageMarkdown,
-  maxBodyLength,
-  mergePr,
-  setBranchStatus,
-  updatePr,
-} from '.';
+import * as scmPlatform from '.';
 import { git } from '~test/util';
 
 vi.mock('../util');
@@ -96,18 +67,18 @@ describe('modules/platform/scm-manager/index', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     hostRules.add({ token, username: user.name });
-    invalidatePrCache();
+    scmPlatform.invalidatePrCache();
   });
 
-  describe(initPlatform, () => {
+  describe(scmPlatform.initPlatform, () => {
     it('should throw error, when endpoint is not configured', async () => {
-      await expect(initPlatform({ token })).rejects.toThrow(
+      await expect(scmPlatform.initPlatform({ token })).rejects.toThrow(
         'SCM-Manager endpoint not configured',
       );
     });
 
     it('should throw error, when token is not configured', async () => {
-      await expect(initPlatform({ endpoint })).rejects.toThrow(
+      await expect(scmPlatform.initPlatform({ endpoint })).rejects.toThrow(
         'SCM-Manager API token not configured',
       );
     });
@@ -116,20 +87,20 @@ describe('modules/platform/scm-manager/index', () => {
       httpMock.scope(endpoint).get(`/me`).reply(401);
 
       await expect(
-        initPlatform({ endpoint, token: 'invalid' }),
+        scmPlatform.initPlatform({ endpoint, token: 'invalid' }),
       ).rejects.toThrow('Init: Authentication failure');
     });
 
     it('should init platform', async () => {
       httpMock.scope(endpoint).get('/me').reply(200, user);
-      expect(await initPlatform({ endpoint, token })).toEqual({
+      expect(await scmPlatform.initPlatform({ endpoint, token })).toEqual({
         endpoint,
         gitAuthor: 'Test User <test@user.de>',
       });
     });
   });
 
-  describe(initRepo, () => {
+  describe(scmPlatform.initRepo, () => {
     it('should init repo', async () => {
       const repository = `${repo.namespace}/${repo.name}`;
       const expectedFingerprint = 'expectedFingerprint';
@@ -148,7 +119,7 @@ describe('modules/platform/scm-manager/index', () => {
       vi.mocked(util.repoFingerprint).mockReturnValueOnce(expectedFingerprint);
 
       expect(
-        await initRepo({
+        await scmPlatform.initRepo({
           repository: `${repo.namespace}/${repo.name}`,
           ignorePrAuthor: expectedIgnorePrAuthor,
         }),
@@ -167,7 +138,7 @@ describe('modules/platform/scm-manager/index', () => {
     });
   });
 
-  describe(getRepos, () => {
+  describe(scmPlatform.getRepos, () => {
     it('should return all available repos', async () => {
       httpMock
         .scope(endpoint)
@@ -185,11 +156,14 @@ describe('modules/platform/scm-manager/index', () => {
           },
         });
 
-      expect(await getRepos()).toEqual(['default/repo', 'other/repository']);
+      expect(await scmPlatform.getRepos()).toEqual([
+        'default/repo',
+        'other/repository',
+      ]);
     });
   });
 
-  describe(getPrList, () => {
+  describe(scmPlatform.getPrList, () => {
     it('should return empty array, because no PR could be found', async () => {
       httpMock
         .scope(endpoint)
@@ -204,7 +178,7 @@ describe('modules/platform/scm-manager/index', () => {
           },
         });
 
-      expect(await getPrList()).toIncludeAllMembers([]);
+      expect(await scmPlatform.getPrList()).toBeEmptyArray();
     });
 
     it('should return empty array, because API request failed', async () => {
@@ -215,7 +189,7 @@ describe('modules/platform/scm-manager/index', () => {
         )
         .reply(400);
 
-      expect(await getPrList()).toIncludeAllMembers([]);
+      expect(await scmPlatform.getPrList()).toBeEmptyArray();
     });
 
     it('should return all PRs of a repo', async () => {
@@ -248,13 +222,13 @@ describe('modules/platform/scm-manager/index', () => {
         });
 
       //Fetching from client
-      expect(await getPrList()).toIncludeAllMembers(expectedResult);
+      expect(await scmPlatform.getPrList()).toIncludeAllMembers(expectedResult);
       //Fetching from cache
-      expect(await getPrList()).toIncludeAllMembers(expectedResult);
+      expect(await scmPlatform.getPrList()).toIncludeAllMembers(expectedResult);
     });
   });
 
-  describe(findPr, () => {
+  describe(scmPlatform.findPr, () => {
     it('search in Pull Request without explicitly setting the state as argument', async () => {
       httpMock
         .scope(endpoint)
@@ -270,7 +244,7 @@ describe('modules/platform/scm-manager/index', () => {
         });
 
       expect(
-        await findPr({
+        await scmPlatform.findPr({
           branchName: pullRequest.source,
           prTitle: pullRequest.title,
         }),
@@ -317,7 +291,7 @@ describe('modules/platform/scm-manager/index', () => {
           });
 
         expect(
-          await findPr({
+          await scmPlatform.findPr({
             branchName,
             prTitle,
             state: state as PrFilterByState,
@@ -327,7 +301,7 @@ describe('modules/platform/scm-manager/index', () => {
     );
   });
 
-  describe(getBranchPr, () => {
+  describe(scmPlatform.getBranchPr, () => {
     it.each`
       availablePullRequest | branchName              | result
       ${[]}                | ${pullRequest.source}   | ${null}
@@ -357,12 +331,12 @@ describe('modules/platform/scm-manager/index', () => {
             },
           });
 
-        expect(await getBranchPr(branchName)).toEqual(result);
+        expect(await scmPlatform.getBranchPr(branchName)).toEqual(result);
       },
     );
   });
 
-  describe(getPr, () => {
+  describe(scmPlatform.getPr, () => {
     it('should return null, because PR was not found', async () => {
       httpMock
         .scope(endpoint)
@@ -382,7 +356,7 @@ describe('modules/platform/scm-manager/index', () => {
         .get(`/pull-requests/${repo.namespace}/${repo.name}/${pullRequest.id}`)
         .reply(404);
 
-      expect(await getPr(1)).toBeNull();
+      expect(await scmPlatform.getPr(1)).toBeNull();
     });
 
     it('should return PR from cache', async () => {
@@ -399,7 +373,9 @@ describe('modules/platform/scm-manager/index', () => {
           },
         });
 
-      expect(await getPr(parseInt(pullRequest.id))).toEqual(renovatePr);
+      expect(await scmPlatform.getPr(parseInt(pullRequest.id))).toEqual(
+        renovatePr,
+      );
     });
 
     it('should return fetched pr', async () => {
@@ -421,11 +397,13 @@ describe('modules/platform/scm-manager/index', () => {
         .get(`/pull-requests/${repo.namespace}/${repo.name}/${pullRequest.id}`)
         .reply(200, pullRequest);
 
-      expect(await getPr(parseInt(pullRequest.id))).toEqual(renovatePr);
+      expect(await scmPlatform.getPr(parseInt(pullRequest.id))).toEqual(
+        renovatePr,
+      );
     });
   });
 
-  describe(createPr, () => {
+  describe(scmPlatform.createPr, () => {
     it.each`
       draftPr      | expectedState | expectedIsDraft
       ${undefined} | ${'OPEN'}     | ${false}
@@ -472,7 +450,7 @@ describe('modules/platform/scm-manager/index', () => {
           });
 
         expect(
-          await createPr({
+          await scmPlatform.createPr({
             sourceBranch: 'feature/test',
             targetBranch: 'develop',
             prTitle: 'PR Title',
@@ -495,7 +473,7 @@ describe('modules/platform/scm-manager/index', () => {
     );
   });
 
-  describe(updatePr, () => {
+  describe(scmPlatform.updatePr, () => {
     it.each`
       state        | body
       ${'open'}    | ${'prBody'}
@@ -524,7 +502,7 @@ describe('modules/platform/scm-manager/index', () => {
           .reply(204);
 
         await expect(
-          updatePr({
+          scmPlatform.updatePr({
             number: 1,
             prTitle: 'PR Title',
             prBody: body,
@@ -536,24 +514,24 @@ describe('modules/platform/scm-manager/index', () => {
     );
   });
 
-  describe(mergePr, () => {
+  describe(scmPlatform.mergePr, () => {
     it('should Not implemented and return false', async () => {
-      const result = await mergePr({ id: 1 });
+      const result = await scmPlatform.mergePr({ id: 1 });
       expect(result).toBeFalse();
     });
   });
 
-  describe(getBranchStatus, () => {
+  describe(scmPlatform.getBranchStatus, () => {
     it('should Not implemented and return red', async () => {
-      const result = await getBranchStatus('test/branch', false);
+      const result = await scmPlatform.getBranchStatus('test/branch', false);
       expect(result).toBe('red');
     });
   });
 
-  describe(setBranchStatus, () => {
+  describe(scmPlatform.setBranchStatus, () => {
     it('should Not implemented', async () => {
       await expect(
-        setBranchStatus({
+        scmPlatform.setBranchStatus({
           branchName: 'test/branch',
           context: 'context',
           description: 'description',
@@ -563,62 +541,74 @@ describe('modules/platform/scm-manager/index', () => {
     });
   });
 
-  describe(getBranchStatusCheck, () => {
+  describe(scmPlatform.getBranchStatusCheck, () => {
     it('should Not implemented and return null', async () => {
-      const result = await getBranchStatusCheck('test/branch', null);
+      const result = await scmPlatform.getBranchStatusCheck(
+        'test/branch',
+        null,
+      );
       expect(result).toBeNull();
     });
   });
 
-  describe(addReviewers, () => {
+  describe(scmPlatform.addReviewers, () => {
     it('should Not implemented', async () => {
-      await expect(addReviewers(1, ['reviewer'])).resolves.not.toThrow();
+      await expect(
+        scmPlatform.addReviewers(1, ['reviewer']),
+      ).resolves.not.toThrow();
     });
   });
 
-  describe(addAssignees, () => {
+  describe(scmPlatform.addAssignees, () => {
     it('should Not implemented', async () => {
-      await expect(addAssignees(1, ['assignee'])).resolves.not.toThrow();
+      await expect(
+        scmPlatform.addAssignees(1, ['assignee']),
+      ).resolves.not.toThrow();
     });
   });
 
-  describe(deleteLabel, () => {
+  describe(scmPlatform.deleteLabel, () => {
     it('should Not implemented', async () => {
-      await expect(deleteLabel(1, 'label')).resolves.not.toThrow();
+      await expect(scmPlatform.deleteLabel(1, 'label')).resolves.not.toThrow();
     });
   });
 
-  describe(getIssueList, () => {
+  describe(scmPlatform.getIssueList, () => {
     it('should Not implemented and return empty list', async () => {
-      const result = await getIssueList();
+      const result = await scmPlatform.getIssueList();
       expect(result).toEqual([]);
     });
   });
 
-  describe(findIssue, () => {
+  describe(scmPlatform.findIssue, () => {
     it('should Not implemented and return null', async () => {
-      const result = await findIssue('issue');
+      const result = await scmPlatform.findIssue('issue');
       expect(result).toBeNull();
     });
   });
 
-  describe(ensureIssue, () => {
+  describe(scmPlatform.ensureIssue, () => {
     it('should Not implemented and return null', async () => {
-      const result = await ensureIssue({ title: 'issue', body: 'body' });
+      const result = await scmPlatform.ensureIssue({
+        title: 'issue',
+        body: 'body',
+      });
       expect(result).toBeNull();
     });
   });
 
-  describe(ensureIssueClosing, () => {
-    it('should Not implemented', async () => {
-      await expect(ensureIssueClosing('issue')).resolves.not.toThrow();
-    });
-  });
-
-  describe(ensureCommentRemoval, () => {
+  describe(scmPlatform.ensureIssueClosing, () => {
     it('should Not implemented', async () => {
       await expect(
-        ensureCommentRemoval({
+        scmPlatform.ensureIssueClosing('issue'),
+      ).resolves.not.toThrow();
+    });
+  });
+
+  describe(scmPlatform.ensureCommentRemoval, () => {
+    it('should Not implemented', async () => {
+      await expect(
+        scmPlatform.ensureCommentRemoval({
           type: 'by-content',
           number: 1,
           content: 'content',
@@ -627,10 +617,10 @@ describe('modules/platform/scm-manager/index', () => {
     });
   });
 
-  describe(ensureComment, () => {
+  describe(scmPlatform.ensureComment, () => {
     it('should Not implemented', async () => {
       expect(
-        await ensureComment({
+        await scmPlatform.ensureComment({
           number: 1,
           topic: 'comment',
           content: 'content',
@@ -639,37 +629,37 @@ describe('modules/platform/scm-manager/index', () => {
     });
   });
 
-  describe(massageMarkdown, () => {
+  describe(scmPlatform.massageMarkdown, () => {
     it('should adjust smart link for Pull Requests', () => {
-      const result = massageMarkdown('[PR](../pull/1)');
+      const result = scmPlatform.massageMarkdown('[PR](../pull/1)');
       expect(result).toBe('[PR](pulls/1)');
     });
   });
 
-  describe(getRepoForceRebase, () => {
+  describe(scmPlatform.getRepoForceRebase, () => {
     it('should Not implemented and return false', async () => {
-      const result = await getRepoForceRebase();
+      const result = await scmPlatform.getRepoForceRebase();
       expect(result).toBeFalse();
     });
   });
 
-  describe(getRawFile, () => {
+  describe(scmPlatform.getRawFile, () => {
     it('should Not implemented and return null', async () => {
-      const result = await getRawFile('file');
+      const result = await scmPlatform.getRawFile('file');
       expect(result).toBeNull();
     });
   });
 
-  describe(getJsonFile, () => {
+  describe(scmPlatform.getJsonFile, () => {
     it('should Not implemented and return undefined', async () => {
-      const result = await getJsonFile('package.json');
+      const result = await scmPlatform.getJsonFile('package.json');
       expect(result).toBeNull();
     });
   });
 
-  describe(maxBodyLength, () => {
+  describe(scmPlatform.maxBodyLength, () => {
     it('should return the max body length allowed for an SCM-Manager request body', () => {
-      expect(maxBodyLength()).toBe(200000);
+      expect(scmPlatform.maxBodyLength()).toBe(200000);
     });
   });
 });
