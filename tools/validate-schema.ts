@@ -14,6 +14,21 @@ async function validateFileAgainstDraft04Schema(
   }
 }
 
+async function validateFileAgainstDraft04SchemaFromFile(
+  schemaFilename: string,
+  filename: string,
+): Promise<ajv.ErrorObject[] | null | undefined> {
+  const data = JSON.parse(await promises.readFile(filename, 'utf-8'));
+  const schema = JSON.parse(await promises.readFile(schemaFilename, 'utf-8'));
+  const validator = new ajv({ schemaId: 'auto', meta: false });
+  validator.addMetaSchema(draft4MetaSchema);
+  const validate = validator.compile(schema);
+  const valid = await validate(data);
+  if (!valid) {
+    return validate.errors;
+  }
+}
+
 async function validateDraft04Schemas(): Promise<void> {
   const validator = new ajv({ schemaId: 'auto', meta: false });
   validator.addMetaSchema(draft4MetaSchema);
@@ -46,6 +61,66 @@ async function validateDraft04Schemas(): Promise<void> {
   }
 }
 
+async function validateDataFilesAgainstSchemas(): Promise<void> {
+  const filesAndSchemasToValidate: {
+    schemaFilename: string;
+    filename: string;
+  }[] = [
+    {
+      schemaFilename: 'tools/schemas/abandonments-schema.json',
+      filename: 'lib/data/abandonments.json',
+    },
+    {
+      schemaFilename: 'tools/schemas/changelog-urls-schema.json',
+      filename: 'lib/data/changelog-urls.json',
+    },
+    {
+      schemaFilename: 'tools/schemas/monorepo-schema.json',
+      filename: 'lib/data/monorepo.json',
+    },
+    {
+      schemaFilename: 'tools/schemas/replacements-schema.json',
+      filename: 'lib/data/replacements.json',
+    },
+    {
+      schemaFilename: 'tools/schemas/source-urls-schema.json',
+      filename: 'lib/data/source-urls.json',
+    },
+  ];
+
+  const failed: {
+    schemaFilename: string;
+    filename: string;
+    errors: ajv.ErrorObject[];
+  }[] = [];
+
+  for (const filename of filesAndSchemasToValidate) {
+    const errors = await validateFileAgainstDraft04SchemaFromFile(
+      filename.schemaFilename,
+      filename.filename,
+    );
+    if (errors) {
+      failed.push({ ...filename, errors });
+    } else {
+      console.log(
+        `${filename.filename} validated correctly against schema from ${filename.schemaFilename}!`,
+      );
+    }
+  }
+
+  if (failed.length > 0) {
+    for (const f of failed) {
+      console.error(
+        `${f.filename} failed to validate against schema from ${f.schemaFilename}:`,
+        f.errors,
+      );
+    }
+
+    process.exit(1);
+  }
+}
+
 void (async () => {
   await validateDraft04Schemas();
+  await validateDataFilesAgainstSchemas();
 })();
