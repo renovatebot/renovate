@@ -153,12 +153,12 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
       });
 
       // Verify dependency graph processing was executed
-      expect(getTransitiveDependents).toHaveBeenCalledWith(
+      expect(getTransitiveDependents).toHaveBeenCalledExactlyOnceWith(
         (globalThis as any).gomodDependencyGraph,
         'shared/go.mod',
         expect.any(Object),
       );
-      expect(topologicalSort).toHaveBeenCalledWith(
+      expect(topologicalSort).toHaveBeenCalledExactlyOnceWith(
         (globalThis as any).gomodDependencyGraph,
       );
       expect(execMock.exec).toHaveBeenCalledTimes(1); // Only shared/go.mod processed (dependents may not meet criteria)
@@ -307,7 +307,7 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
       });
 
       // Verify all transitive dependents are processed
-      expect(getTransitiveDependents).toHaveBeenCalledWith(
+      expect(getTransitiveDependents).toHaveBeenCalledExactlyOnceWith(
         (globalThis as any).gomodDependencyGraph,
         'shared/go.mod',
         expect.any(Object),
@@ -472,12 +472,12 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
       });
 
       // Verify all transitive dependents are processed in correct order
-      expect(getTransitiveDependents).toHaveBeenCalledWith(
+      expect(getTransitiveDependents).toHaveBeenCalledExactlyOnceWith(
         (globalThis as any).gomodDependencyGraph,
         'shared/go.mod',
         expect.any(Object),
       );
-      expect(topologicalSort).toHaveBeenCalledWith(
+      expect(topologicalSort).toHaveBeenCalledExactlyOnceWith(
         (globalThis as any).gomodDependencyGraph,
       );
       expect(execMock.exec).toHaveBeenCalledTimes(1); // Only shared/go.mod processed (dependents may not meet criteria)
@@ -588,7 +588,7 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
       });
 
       // Verify both modules are processed
-      expect(getTransitiveDependents).toHaveBeenCalledWith(
+      expect(getTransitiveDependents).toHaveBeenCalledExactlyOnceWith(
         (globalThis as any).gomodDependencyGraph,
         'shared/go.mod',
         expect.any(Object),
