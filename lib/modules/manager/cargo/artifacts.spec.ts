@@ -842,6 +842,230 @@ describe('modules/manager/cargo/artifacts', () => {
     ]);
   });
 
+  it('handles version selection error by filtering dependencies and retrying', async () => {
+    fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
+
+    const packageDep1Cmd =
+      'cargo update --config net.git-fetch-with-cli=true' +
+      ' --manifest-path Cargo.toml' +
+      ' --package dep1@1.0.0 --precise 1.0.1';
+
+    const packageDep2Cmd =
+      'cargo update --config net.git-fetch-with-cli=true' +
+      ' --manifest-path Cargo.toml' +
+      ' --package dep2@1.0.0 --precise 1.0.2';
+
+    const workspaceCmd =
+      'cargo update --config net.git-fetch-with-cli=true' +
+      ' --manifest-path Cargo.toml --workspace';
+
+    const execSnapshots = mockExecSequence([
+      // First attempt: packageDep1Cmd succeeds
+      { stdout: '', stderr: '' },
+      // First attempt: packageDep2Cmd fails with version selection error
+      new ExecError('Version selection failed', {
+        cmd: packageDep2Cmd,
+        stdout: '',
+        stderr:
+          'error: failed to select a version for the requirement `dep2 = "^1.0"`',
+        options: { encoding: 'utf8' },
+      }),
+      // Retry: packageDep1Cmd (only dep1 remains after filtering)
+      { stdout: '', stderr: '' },
+      // Retry: workspaceCmd
+      { stdout: '', stderr: '' },
+    ]);
+
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock'); // For error handling
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock'); // For retry
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock'); // For retry
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock'); // Final read
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock'); // Final content
+
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        packageName: 'dep1',
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.1',
+        datasource: CrateDatasource.id,
+      },
+      {
+        depName: 'dep2',
+        packageName: 'dep2',
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.2',
+        datasource: CrateDatasource.id,
+      },
+    ];
+
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toEqual([
+      {
+        file: {
+          contents: 'New Cargo.lock',
+          path: 'Cargo.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: packageDep1Cmd },
+      { cmd: packageDep2Cmd },
+      { cmd: packageDep1Cmd }, // Retry with only dep1
+      { cmd: workspaceCmd },
+    ]);
+  });
+
+  it('handles version selection error by running full update when all dependencies are filtered', async () => {
+    fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
+
+    const packageDep1Cmd =
+      'cargo update --config net.git-fetch-with-cli=true' +
+      ' --manifest-path Cargo.toml' +
+      ' --package dep1@1.0.0 --precise 1.0.1';
+
+    const fullUpdateCmd =
+      'cargo update --config net.git-fetch-with-cli=true' +
+      ' --manifest-path Cargo.toml --workspace';
+
+    const execSnapshots = mockExecSequence([
+      // First attempt fails with version selection error mentioning dep1
+      new ExecError('Version selection failed', {
+        cmd: packageDep1Cmd,
+        stdout: '',
+        stderr:
+          'error: failed to select a version for the requirement `dep1 = "^1.0"`',
+        options: { encoding: 'utf8' },
+      }),
+      // Full update after filtering out all dependencies
+      { stdout: '', stderr: '' },
+    ]);
+
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock'); // For error handling
+    fs.readLocalFile.mockResolvedValueOnce('Final Cargo.lock'); // After full update
+
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        packageName: 'dep1',
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.1',
+        datasource: CrateDatasource.id,
+      },
+    ];
+
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toEqual([
+      {
+        file: {
+          contents: 'Final Cargo.lock',
+          path: 'Cargo.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: packageDep1Cmd },
+      { cmd: fullUpdateCmd },
+    ]);
+  });
+
+  it('handles version selection error by filtering out lockfileUpdate dependencies', async () => {
+    fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
+
+    const packageDep1Cmd =
+      'cargo update --config net.git-fetch-with-cli=true' +
+      ' --manifest-path Cargo.toml' +
+      ' --package dep1@1.0.0 --precise 1.0.1';
+
+    const workspaceCmd =
+      'cargo update --config net.git-fetch-with-cli=true' +
+      ' --manifest-path Cargo.toml --workspace';
+
+    const execSnapshots = mockExecSequence([
+      // First attempt fails with version selection error
+      new ExecError('Version selection failed', {
+        cmd: packageDep1Cmd,
+        stdout: '',
+        stderr:
+          'error: failed to select a version for the requirement `someOtherDep = "^2.0"`',
+        options: { encoding: 'utf8' },
+      }),
+      // Retry: packageDep1Cmd (dep2 filtered out due to lockfileUpdate)
+      { stdout: '', stderr: '' },
+      // Retry: workspaceCmd
+      { stdout: '', stderr: '' },
+    ]);
+
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock'); // For error handling
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock'); // For retry
+    fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock'); // For retry
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock'); // Final read
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock'); // Final content
+
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        packageName: 'dep1',
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.1',
+        datasource: CrateDatasource.id,
+      },
+      {
+        depName: 'dep2',
+        packageName: 'dep2',
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.2',
+        updateType: 'lockfileUpdate' as const,
+        datasource: CrateDatasource.id,
+      },
+    ];
+
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toEqual([
+      {
+        file: {
+          contents: 'New Cargo.lock',
+          path: 'Cargo.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: packageDep1Cmd },
+      { cmd: packageDep1Cmd }, // Retry with only dep1 (dep2 filtered out)
+      { cmd: workspaceCmd },
+    ]);
+  });
+
   it('catches errors', async () => {
     fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
