@@ -49,26 +49,53 @@ export async function renovateRepository(
   canRetry = true,
 ): Promise<ProcessResult | undefined> {
   splitInit();
-  let config = GlobalConfig.set(
-    applySecretsAndVariablesToConfig({
-      config: repoConfig,
-      deleteVariables: false,
-      deleteSecrets: false,
-    }),
-  );
-  await removeDanglingContainers();
-  setMeta({ repository: config.repository });
-  logger.info({ renovateVersion: pkg.version }, 'Repository started');
-  logger.trace({ config });
+
   let repoResult: ProcessResult | undefined;
-  queue.clear();
-  throttle.clear();
-  const localDir = GlobalConfig.get('localDir')!;
+  const { config, localDir } = await instrument(
+    'init',
+    async (): Promise<{
+      config: RenovateConfig;
+      localDir: string;
+    }> => {
+      let config = GlobalConfig.set(
+        applySecretsAndVariablesToConfig({
+          config: repoConfig,
+          deleteVariables: false,
+          deleteSecrets: false,
+        }),
+      );
+      await removeDanglingContainers();
+      setMeta({ repository: config.repository });
+      logger.info({ renovateVersion: pkg.version }, 'Repository started');
+      logger.trace({ config });
+      queue.clear();
+      throttle.clear();
+      const localDir = GlobalConfig.get('localDir')!;
+
+      try {
+        await fs.ensureDir(localDir);
+        logger.debug('Using localDir: ' + localDir);
+        config = await initRepo(config);
+        addSplit('init');
+      } catch (err) /* istanbul ignore next */ {
+        setMeta({ repository: config.repository });
+        const errorRes = await handleError(config, err);
+        const pruneWhenErrors = [
+          REPOSITORY_DISABLED_BY_CONFIG,
+          REPOSITORY_FORKED,
+          REPOSITORY_NO_CONFIG,
+        ];
+        if (pruneWhenErrors.includes(errorRes)) {
+          await pruneStaleBranches(config, []);
+        }
+        repoResult = processResult(config, errorRes);
+      }
+
+      return { config, localDir };
+    },
+  );
+
   try {
-    await fs.ensureDir(localDir);
-    logger.debug('Using localDir: ' + localDir);
-    config = await initRepo(config);
-    addSplit('init');
     const performExtract =
       config.repoIsOnboarded! ||
       !OnboardingState.onboardingCacheValid ||
