@@ -16,6 +16,7 @@
       "replacements:eslint-plugin-vitest-to-scoped",
       "replacements:fakerjs-to-scoped",
       "replacements:fastify-to-scoped",
+      "replacements:framer-motion-to-motion",
       "replacements:hapi-to-scoped",
       "replacements:google-github-action-release-please-to-googleapis",
       "replacements:jade-to-pug",
@@ -679,6 +680,17 @@
         "matchPackageNames": ["fastify-zipkin"],
         "replacementName": "@fastify/zipkin",
         "replacementVersion": "3.0.0"
+      }
+    ]
+  },
+  "framer-motion-to-motion": {
+    "description": "`framer-motion` and Motion One have merged under the package name `motion`, though `framer-motion` is still being published. `motion` is now the recommended name.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=11.11.12",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["framer-motion"],
+        "replacementName": "motion"
       }
     ]
   },
