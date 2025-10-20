@@ -223,6 +223,8 @@ jobs:
 
       - name: Lint
         run: pnpm eslint-ci
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
 
       - name: Save eslint cache
         if: github.event_name == 'push'
