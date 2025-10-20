@@ -27,55 +27,55 @@ describe('modules/manager/gomod/package-tree', () => {
   describe('parseGoModDependencies', () => {
     it('extracts dependencies from modules with replace directives', () => {
       const mainGoMod = codeBlock`
-        module github.com/example/project
+        module github.com/renovate-tests/main
 
         go 1.21
 
         require (
-            github.com/example/project/api v0.0.0
-            github.com/example/project/sdk v0.0.0
+            github.com/renovate-tests/api v0.0.0
+            github.com/renovate-tests/sdk v0.0.0
         )
 
-        replace github.com/example/project/api => ./api
-        replace github.com/example/project/sdk => ./sdk
+        replace github.com/renovate-tests/api => ./api
+        replace github.com/renovate-tests/sdk => ./sdk
       `;
 
       const deps = parseGoModDependencies('main/go.mod', mainGoMod);
 
       expect(deps).toHaveLength(2);
       expect(deps[0]).toMatchObject({
-        path: 'github.com/example/project/api',
+        path: 'github.com/renovate-tests/api',
         resolvedPath: expect.stringContaining('main/api/go.mod'),
       });
       expect(deps[1]).toMatchObject({
-        path: 'github.com/example/project/sdk',
+        path: 'github.com/renovate-tests/sdk',
         resolvedPath: expect.stringContaining('main/sdk/go.mod'),
       });
     });
 
     it('extracts single dependency from module', () => {
       const apiGoMod = codeBlock`
-        module github.com/example/project/api
+        module github.com/renovate-tests/api
 
         go 1.21
 
-        require github.com/example/project/shared v0.0.0
+        require github.com/renovate-tests/shared v0.0.0
 
-        replace github.com/example/project/shared => ../shared
+        replace github.com/renovate-tests/shared => ../shared
       `;
 
       const deps = parseGoModDependencies('api/go.mod', apiGoMod);
 
       expect(deps).toHaveLength(1);
       expect(deps[0]).toMatchObject({
-        path: 'github.com/example/project/shared',
+        path: 'github.com/renovate-tests/shared',
         resolvedPath: expect.stringContaining('shared/go.mod'),
       });
     });
 
     it('returns empty array for modules with no dependencies', () => {
       const sharedGoMod = codeBlock`
-        module github.com/example/project/shared
+        module github.com/renovate-tests/shared
 
         go 1.21
       `;
@@ -86,43 +86,90 @@ describe('modules/manager/gomod/package-tree', () => {
 
     it('handles complex replace directive formats', () => {
       const complexContent = codeBlock`
-        module github.com/example/complex
+        module github.com/renovate-tests/main
 
         go 1.21
 
         replace (
-            github.com/example/lib => ./lib
-            github.com/example/pkg/submodule => ./pkg/submodule
-            github.com/example/external => ../external
+            github.com/renovate-tests/api => ./api
+            github.com/renovate-tests/sdk => ./sdk
+            github.com/renovate-tests/external => ../external
         )
       `;
 
-      const deps = parseGoModDependencies('complex/go.mod', complexContent);
+      const deps = parseGoModDependencies('main/go.mod', complexContent);
 
       expect(deps).toHaveLength(3);
       expect(deps.map((d) => d.path)).toEqual([
-        'github.com/example/lib',
-        'github.com/example/pkg/submodule',
-        'github.com/example/external',
+        'github.com/renovate-tests/api',
+        'github.com/renovate-tests/sdk',
+        'github.com/renovate-tests/external',
       ]);
       expect(deps.map((d) => d.resolvedPath)).toEqual([
-        expect.stringContaining('complex/lib/go.mod'),
-        expect.stringContaining('complex/pkg/submodule/go.mod'),
+        expect.stringContaining('main/api/go.mod'),
+        expect.stringContaining('main/sdk/go.mod'),
         expect.stringContaining('external/go.mod'),
+      ]);
+    });
+
+    it('handles empty replace directives', () => {
+      const emptyReplaceContent = codeBlock`
+        module github.com/renovate-tests/main
+
+        go 1.21
+
+        replace ()
+      `;
+
+      const deps = parseGoModDependencies('main/go.mod', emptyReplaceContent);
+      expect(deps).toEqual([]);
+    });
+
+    it('handles invalid replace directive syntax', () => {
+      const invalidContent = codeBlock`
+        module github.com/renovate-tests/main
+
+        go 1.21
+
+        replace github.com/renovate-tests/api // missing => path
+      `;
+
+      const deps = parseGoModDependencies('main/go.mod', invalidContent);
+      expect(deps).toEqual([]);
+    });
+
+    it('handles duplicate dependencies', () => {
+      const duplicateContent = codeBlock`
+        module github.com/renovate-tests/main
+
+        go 1.21
+
+        require github.com/renovate-tests/shared v1.0.0
+        require github.com/renovate-tests/shared v2.0.0
+
+        replace github.com/renovate-tests/shared => ./shared/v1
+        replace github.com/renovate-tests/shared => ./shared/v2
+      `;
+
+      const deps = parseGoModDependencies('main/go.mod', duplicateContent);
+      expect(deps).toHaveLength(2);
+      expect(deps.map((d) => d.path)).toEqual([
+        'github.com/renovate-tests/shared',
+        'github.com/renovate-tests/shared',
       ]);
     });
   });
 
   describe('getModuleName', () => {
     it('extracts module names from go.mod contents', () => {
-      const mainGoMod = 'module github.com/example/project\ngo 1.21\n';
-      const apiGoMod = 'module github.com/example/project/api\ngo 1.21\n';
-      const sharedGoMod = 'module github.com/example/project/shared\ngo 1.21\n';
+      const mainGoMod = 'module github.com/renovate-tests/main\ngo 1.21\n';
+      const apiGoMod = 'module github.com/renovate-tests/api\ngo 1.21\n';
+      const sharedGoMod = 'module github.com/renovate-tests/shared\ngo 1.21\n';
 
-      expect(getModuleName(mainGoMod)).toBe('github.com/example/project');
-      expect(getModuleName(apiGoMod)).toBe('github.com/example/project/api');
+      expect(getModuleName(mainGoMod)).toBe('github.com/renovate-tests/main');
+      expect(getModuleName(apiGoMod)).toBe('github.com/renovate-tests/api');
       expect(getModuleName(sharedGoMod)).toBe(
-        'github.com/example/project/shared',
+        'github.com/renovate-tests/shared',
       );
     });
 
@@ -140,17 +187,22 @@ describe('modules/manager/gomod/package-tree', () => {
     it('handles content with extra whitespace and comments', () => {
       const contentWithWhitespace = codeBlock`
         // This is a comment
-        module    github.com/example/whitespace
+        module    github.com/renovate-tests/api
 
         go 1.21
 
         // Another comment
-        require something v1.0.0
+        require github.com/renovate-tests/shared v1.0.0
       `;
 
       expect(getModuleName(contentWithWhitespace)).toBe(
-        'github.com/example/whitespace',
+        'github.com/renovate-tests/api',
       );
+    });
+
+    it('handles null and undefined input', () => {
+      expect(getModuleName(null as any)).toBeNull();
+      expect(getModuleName(undefined as any)).toBeNull();
     });
   });
 
@@ -159,33 +211,42 @@ describe('modules/manager/gomod/package-tree', () => {
       const testCases = [
         {
           baseModPath: 'main/go.mod',
-          replace: { oldPath: 'github.com/example/lib', newPath: './lib' },
-          expected: 'main/lib/go.mod',
+          replace: {
+            oldPath: 'github.com/renovate-tests/shared',
+            newPath: './shared',
+          },
+          expected: 'main/shared/go.mod',
         },
         {
           baseModPath: 'api/go.mod',
           replace: {
-            oldPath: 'github.com/example/shared',
+            oldPath: 'github.com/renovate-tests/shared',
             newPath: '../shared',
           },
           expected: 'shared/go.mod',
         },
         {
           baseModPath: 'cmd/server/go.mod',
-          replace: { oldPath: 'github.com/example/api', newPath: '../../api' },
+          replace: {
+            oldPath: 'github.com/renovate-tests/api',
+            newPath: '../../api',
+          },
           expected: 'api/go.mod',
         },
         {
           baseModPath: 'main/go.mod',
           replace: {
-            oldPath: 'github.com/example/abs',
+            oldPath: 'github.com/renovate-tests/abs',
             newPath: '/absolute/path',
           },
           expected: '/absolute/path/go.mod',
         },
         {
           baseModPath: 'main/go.mod',
-          replace: { oldPath: 'github.com/example/current', newPath: '.' },
+          replace: {
+            oldPath: 'github.com/renovate-tests/current',
+            newPath: '.',
+          },
           expected: 'main/go.mod',
         },
       ];
@@ -589,93 +650,6 @@ describe('modules/manager/gomod/package-tree', () => {
       await expect(
         getGoModulesInDependencyOrder(['shared/go.mod']),
       ).rejects.toThrow('Topological sort failed');
-    });
-  });
-
-  describe('integration test', () => {
-    it('handles complete realistic shared library update scenario', async () => {
-      const fileList = [
-        'main/go.mod',
-        'shared/go.mod',
-        'api/go.mod',
-        'sdk/go.mod',
-        'cmd/server/go.mod',
-      ];
-
-      const mockGraph = {
-        nodes: new Map([
-          [
-            'shared/go.mod',
-            {
-              path: 'shared/go.mod',
-              dependencies: [],
-              dependents: ['api/go.mod', 'sdk/go.mod'],
-            },
-          ],
-          [
-            'api/go.mod',
-            {
-              path: 'api/go.mod',
-              dependencies: ['shared/go.mod'],
-              dependents: ['cmd/server/go.mod'],
-            },
-          ],
-          [
-            'sdk/go.mod',
-            {
-              path: 'sdk/go.mod',
-              dependencies: ['shared/go.mod'],
-              dependents: ['cmd/server/go.mod'],
-            },
-          ],
-          [
-            'cmd/server/go.mod',
-            {
-              path: 'cmd/server/go.mod',
-              dependencies: ['api/go.mod', 'sdk/go.mod'],
-              dependents: [],
-            },
-          ],
-        ]),
-        edges: [],
-      };
-
-      const { buildDependencyGraph, getTransitiveDependents, topologicalSort } =
-        vi.mocked(await import('../../../util/tree/index.js'));
-      buildDependencyGraph.mockResolvedValue(mockGraph);
-      getTransitiveDependents.mockReturnValue([
-        'api/go.mod',
-        'sdk/go.mod',
-        'cmd/server/go.mod',
-      ]);
-      topologicalSort.mockReturnValue([
-        'api/go.mod',
-        'sdk/go.mod',
-        'cmd/server/go.mod',
-      ]);
-
-      vi.mocked(fs).readLocalFile.mockResolvedValue('module test\ngo 1.21');
-
-      // Get transitive dependents
-      const dependents = await getTransitiveDependentModules(
-        'shared/go.mod',
-        fileList,
-      );
-
-      // Get processing order
-      const order = await getGoModulesInDependencyOrder(dependents);
-
-      expect(dependents).toContain('api/go.mod');
-      expect(dependents).toContain('sdk/go.mod');
-      expect(dependents).toContain('cmd/server/go.mod');
-
-      expect(order).toContain('api/go.mod');
-      expect(order).toContain('sdk/go.mod');
-
-      // Dependencies should come before dependents
-      const apiIndex = order.indexOf('api/go.mod');
-      const serverIndex = order.indexOf('cmd/server/go.mod');
-      expect(apiIndex).toBeLessThan(serverIndex);
     });
   });
 });

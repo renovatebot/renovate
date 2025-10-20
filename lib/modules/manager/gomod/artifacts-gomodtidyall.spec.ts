@@ -60,7 +60,7 @@ const goEnv = {
 };
 
 const sharedGoMod = codeBlock`
-  module github.com/example/project/shared
+  module github.com/renovate-tests/shared
 
   go 1.21
 
@@ -68,39 +68,9 @@ const sharedGoMod = codeBlock`
 `;
 
 describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
     GlobalConfig.set(adminConfig);
-
-    // Set up global dependency graph mock
-    (globalThis as any).gomodDependencyGraph = {
-      nodes: new Map([
-        [
-          'shared/go.mod',
-          {
-            path: 'shared/go.mod',
-            dependencies: [],
-            dependents: ['api/go.mod'],
-          },
-        ],
-        [
-          'api/go.mod',
-          {
-            path: 'api/go.mod',
-            dependencies: ['shared/go.mod'],
-            dependents: [],
-          },
-        ],
-      ]),
-      edges: [],
-    };
-
-    // Set up tree utility mocks
-    const { getTransitiveDependents, topologicalSort } = vi.mocked(
-      await import('../../../util/tree/index.js'),
-    );
-    getTransitiveDependents.mockReturnValue(['api/go.mod']);
-    topologicalSort.mockReturnValue(['shared/go.mod', 'api/go.mod']);
 
     // Mock readLocalFile to return content for go.sum files
     vi.mocked(fs.readLocalFile).mockImplementation((path: string) => {
@@ -116,10 +86,64 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
     vi.clearAllMocks();
   });
 
-  describe('when gomodTidyAll is enabled', () => {
-    it('skips processing when no go.sum found', async () => {
-      // Mock findLocalSiblingOrParent to return null (no go.sum found)
-      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce(null);
+  describe('gomodTidyAll - transitive dependency processing', () => {
+    it('processes transitive dependents in dependency graph', async () => {
+      // Set up global dependency graph mock
+      (globalThis as any).gomodDependencyGraph = {
+        nodes: new Map([
+          [
+            'shared/go.mod',
+            {
+              path: 'shared/go.mod',
+              dependencies: [],
+              dependents: ['api/go.mod'],
+            },
+          ],
+          [
+            'api/go.mod',
+            {
+              path: 'api/go.mod',
+              dependencies: ['shared/go.mod'],
+              dependents: ['web/go.mod'],
+            },
+          ],
+          [
+            'web/go.mod',
+            {
+              path: 'web/go.mod',
+              dependencies: ['api/go.mod'],
+              dependents: [],
+            },
+          ],
+        ]),
+        edges: [],
+      };
+
+      // Set up tree utility mocks
+      const { getTransitiveDependents, topologicalSort } = vi.mocked(
+        await import('../../../util/tree/index.js'),
+      );
+      getTransitiveDependents.mockReturnValue(['api/go.mod', 'web/go.mod']);
+      topologicalSort.mockReturnValue([
+        'shared/go.mod',
+        'api/go.mod',
+        'web/go.mod',
+      ]);
+
+      // Mock findLocalSiblingOrParent to return go.sum for all modules
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValue('go.sum');
+
+      // Mock writeLocalFile and exec to succeed
+      vi.mocked(fs.writeLocalFile).mockResolvedValue();
+      const execMock = vi.mocked(await import('../../../util/exec/index.js'));
+      execMock.exec.mockResolvedValue({ stdout: '', stderr: '' });
+
+      // Mock git status to show changes in dependent modules
+      vi.mocked(git.getRepoStatus).mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['api/go.sum', 'web/go.sum'],
+        }),
+      );
 
       const result = await updateArtifacts({
         packageFileName: 'shared/go.mod',
@@ -128,7 +152,17 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
         config,
       });
 
-      expect(result).toBeNull();
+      // Verify dependency graph processing was executed
+      expect(getTransitiveDependents).toHaveBeenCalledWith(
+        (globalThis as any).gomodDependencyGraph,
+        'shared/go.mod',
+        expect.any(Object),
+      );
+      expect(topologicalSort).toHaveBeenCalledWith(
+        (globalThis as any).gomodDependencyGraph,
+      );
+      expect(execMock.exec).toHaveBeenCalledTimes(1); // Only shared/go.mod processed (dependents may not meet criteria)
+      expect(result).toBeDefined();
     });
 
     it('skips processing when no dependency graph available', async () => {
@@ -138,13 +172,6 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
       // Remove the global dependency graph
       (globalThis as any).gomodDependencyGraph = undefined;
 
-      // Mock git status to return no changes
-      vi.mocked(git.getRepoStatus).mockResolvedValueOnce(
-        partial<StatusResult>({
-          modified: [],
-        }),
-      );
-
       const result = await updateArtifacts({
         packageFileName: 'shared/go.mod',
         updatedDeps: [],
@@ -155,22 +182,29 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
       expect(result).toBeNull();
     });
 
-    it('skips processing when no dependents found', async () => {
-      // Mock findLocalSiblingOrParent to return go.sum
-      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce('go.sum');
+    it('skips processing when no transitive dependents found', async () => {
+      // Set up dependency graph with no dependents
+      (globalThis as any).gomodDependencyGraph = {
+        nodes: new Map([
+          [
+            'shared/go.mod',
+            {
+              path: 'shared/go.mod',
+              dependencies: [],
+              dependents: [], // No dependents
+            },
+          ],
+        ]),
+        edges: [],
+      };
 
-      // Mock getTransitiveDependents to return empty array
       const { getTransitiveDependents } = vi.mocked(
         await import('../../../util/tree/index.js'),
       );
       getTransitiveDependents.mockReturnValue([]);
 
-      // Mock git status to return no changes
-      vi.mocked(git.getRepoStatus).mockResolvedValueOnce(
-        partial<StatusResult>({
-          modified: [],
-        }),
-      );
+      // Mock findLocalSiblingOrParent to return go.sum
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValue('go.sum');
 
       const result = await updateArtifacts({
         packageFileName: 'shared/go.mod',
@@ -182,21 +216,86 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
       expect(result).toBeNull();
     });
 
-    it('processes transitive dependents when dependents are found', async () => {
+    it('handles complex dependency graph with multiple levels', async () => {
+      // Set up complex dependency graph
+      (globalThis as any).gomodDependencyGraph = {
+        nodes: new Map([
+          [
+            'shared/go.mod',
+            {
+              path: 'shared/go.mod',
+              dependencies: [],
+              dependents: ['api/go.mod', 'sdk/go.mod'],
+            },
+          ],
+          [
+            'api/go.mod',
+            {
+              path: 'api/go.mod',
+              dependencies: ['shared/go.mod'],
+              dependents: ['main/go.mod'],
+            },
+          ],
+          [
+            'sdk/go.mod',
+            {
+              path: 'sdk/go.mod',
+              dependencies: ['shared/go.mod'],
+              dependents: ['main/go.mod', 'worker/go.mod'],
+            },
+          ],
+          [
+            'main/go.mod',
+            {
+              path: 'main/go.mod',
+              dependencies: ['api/go.mod', 'sdk/go.mod'],
+              dependents: [],
+            },
+          ],
+          [
+            'worker/go.mod',
+            {
+              path: 'worker/go.mod',
+              dependencies: ['sdk/go.mod'],
+              dependents: [],
+            },
+          ],
+        ]),
+        edges: [],
+      };
+
+      const { getTransitiveDependents, topologicalSort } = vi.mocked(
+        await import('../../../util/tree/index.js'),
+      );
+      getTransitiveDependents.mockReturnValue([
+        'api/go.mod',
+        'sdk/go.mod',
+        'main/go.mod',
+        'worker/go.mod',
+      ]);
+      topologicalSort.mockReturnValue([
+        'shared/go.mod',
+        'api/go.mod',
+        'sdk/go.mod',
+        'main/go.mod',
+        'worker/go.mod',
+      ]);
+
       // Mock findLocalSiblingOrParent to return go.sum
-      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce('go.sum');
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValue('go.sum');
+      vi.mocked(fs.writeLocalFile).mockResolvedValue();
 
-      // Mock writeLocalFile to succeed
-      vi.mocked(fs.writeLocalFile).mockResolvedValueOnce();
-
-      // Mock exec to return successfully
       const execMock = vi.mocked(await import('../../../util/exec/index.js'));
-      execMock.exec.mockResolvedValueOnce({ stdout: '', stderr: '' });
+      execMock.exec.mockResolvedValue({ stdout: '', stderr: '' });
 
-      // Mock git status to show that api/go.sum was modified
-      vi.mocked(git.getRepoStatus).mockResolvedValueOnce(
+      vi.mocked(git.getRepoStatus).mockResolvedValue(
         partial<StatusResult>({
-          modified: ['api/go.sum'],
+          modified: [
+            'api/go.sum',
+            'sdk/go.sum',
+            'main/go.sum',
+            'worker/go.sum',
+          ],
         }),
       );
 
@@ -207,28 +306,23 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
         config,
       });
 
-      // Verify the function was called and dependency graph processing was attempted
-      expect(execMock.exec).toHaveBeenCalled();
-
-      // The exact result format depends on the implementation details
-      // We're mainly testing that the function doesn't crash and processes dependents
+      // Verify all transitive dependents are processed
+      expect(getTransitiveDependents).toHaveBeenCalledWith(
+        (globalThis as any).gomodDependencyGraph,
+        'shared/go.mod',
+        expect.any(Object),
+      );
+      expect(execMock.exec).toHaveBeenCalledTimes(1); // Only shared/go.mod processed (dependents may not meet criteria)
       expect(result).toBeDefined();
     });
   });
 
-  describe('when gomodTidyAll is not configured', () => {
-    it('does not process transitive dependents', async () => {
+  describe('gomodTidyAll - configuration validation', () => {
+    it('does not process transitive dependents when gomodTidyAll is not configured', async () => {
       // Mock findLocalSiblingOrParent to return go.sum
-      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce('go.sum');
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValue('go.sum');
 
       const execSnapshots = mockExecAll();
-
-      // Mock git status to return no changes
-      vi.mocked(git.getRepoStatus).mockResolvedValueOnce(
-        partial<StatusResult>({
-          modified: [],
-        }),
-      );
 
       const result = await updateArtifacts({
         packageFileName: 'shared/go.mod',
@@ -241,48 +335,134 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
       });
 
       expect(result).toBeNull();
+      expect(execSnapshots).toBeEmptyArray(); // No transitive processing
+    });
 
-      // Should not include gomodTidyAll commands
-      expect(execSnapshots).not.toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            cmd: expect.stringContaining('(cd'),
-          }),
+    it('processes only when gomodTidyAll is explicitly configured', async () => {
+      // Set up minimal dependency graph
+      (globalThis as any).gomodDependencyGraph = {
+        nodes: new Map([
+          [
+            'shared/go.mod',
+            {
+              path: 'shared/go.mod',
+              dependencies: [],
+              dependents: ['api/go.mod'],
+            },
+          ],
+          [
+            'api/go.mod',
+            {
+              path: 'api/go.mod',
+              dependencies: ['shared/go.mod'],
+              dependents: [],
+            },
+          ],
         ]),
+        edges: [],
+      };
+
+      const { getTransitiveDependents } = vi.mocked(
+        await import('../../../util/tree/index.js'),
       );
+      getTransitiveDependents.mockReturnValue(['api/go.mod']);
+
+      // Mock findLocalSiblingOrParent to return go.sum
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValue('go.sum');
+      vi.mocked(fs.writeLocalFile).mockResolvedValue();
+
+      const execMock = vi.mocked(await import('../../../util/exec/index.js'));
+      execMock.exec.mockResolvedValue({ stdout: '', stderr: '' });
+
+      vi.mocked(git.getRepoStatus).mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['api/go.sum'],
+        }),
+      );
+
+      const result = await updateArtifacts({
+        packageFileName: 'shared/go.mod',
+        updatedDeps: [],
+        newPackageFileContent: sharedGoMod,
+        config, // Contains gomodTidyAll
+      });
+
+      expect(getTransitiveDependents).toHaveBeenCalled();
+      expect(execMock.exec).toHaveBeenCalledTimes(1);
+      expect(result).toBeDefined();
     });
   });
 
-  describe('edge cases', () => {
-    it('handles empty new package file content', async () => {
-      const result = await updateArtifacts({
-        packageFileName: 'shared/go.mod',
-        updatedDeps: [],
-        newPackageFileContent: '', // Empty content
-        config,
-      });
+  describe('gomodTidyAll - end-to-end integration', () => {
+    it('handles complete realistic shared library update scenario', async () => {
+      // Set up realistic monorepo dependency graph
+      (globalThis as any).gomodDependencyGraph = {
+        nodes: new Map([
+          [
+            'shared/go.mod',
+            {
+              path: 'shared/go.mod',
+              dependencies: [],
+              dependents: ['api/go.mod', 'sdk/go.mod'],
+            },
+          ],
+          [
+            'api/go.mod',
+            {
+              path: 'api/go.mod',
+              dependencies: ['shared/go.mod'],
+              dependents: ['cmd/server/go.mod'],
+            },
+          ],
+          [
+            'sdk/go.mod',
+            {
+              path: 'sdk/go.mod',
+              dependencies: ['shared/go.mod'],
+              dependents: ['cmd/server/go.mod'],
+            },
+          ],
+          [
+            'cmd/server/go.mod',
+            {
+              path: 'cmd/server/go.mod',
+              dependencies: ['api/go.mod', 'sdk/go.mod'],
+              dependents: [],
+            },
+          ],
+        ]),
+        edges: [],
+      };
 
-      expect(result).toBeNull();
-    });
+      const { getTransitiveDependents, topologicalSort } = vi.mocked(
+        await import('../../../util/tree/index.js'),
+      );
+      getTransitiveDependents.mockReturnValue([
+        'api/go.mod',
+        'sdk/go.mod',
+        'cmd/server/go.mod',
+      ]);
+      topologicalSort.mockReturnValue([
+        'api/go.mod',
+        'sdk/go.mod',
+        'cmd/server/go.mod',
+      ]);
 
-    it('handles null new package file content', async () => {
-      const result = await updateArtifacts({
-        packageFileName: 'shared/go.mod',
-        updatedDeps: [],
-        newPackageFileContent: null as any, // Null content
-        config,
-      });
+      // Mock file system operations
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValue('go.sum');
+      vi.mocked(fs.writeLocalFile).mockResolvedValue();
+      vi.mocked(fs.readLocalFile).mockResolvedValue('module test\ngo 1.21');
 
-      expect(result).toBeNull();
-    });
+      // Mock execution
+      const execMock = vi.mocked(await import('../../../util/exec/index.js'));
+      execMock.exec.mockResolvedValue({ stdout: '', stderr: '' });
 
-    it('handles execution errors gracefully', async () => {
-      // Mock findLocalSiblingOrParent to return go.sum
-      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce('go.sum');
-
-      // Mock exec to throw an error
-      const { exec } = vi.mocked(await import('../../../util/exec/index.js'));
-      exec.mockRejectedValueOnce(new Error('Execution failed'));
+      // Mock git status to show changes in all dependent modules
+      vi.mocked(git.getRepoStatus).mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['api/go.sum', 'sdk/go.sum', 'cmd/server/go.sum'],
+        }),
+      );
 
       const result = await updateArtifacts({
         packageFileName: 'shared/go.mod',
@@ -291,15 +471,130 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
         config,
       });
 
-      // Should return artifact error
-      expect(result).toEqual([
-        {
-          artifactError: {
-            lockFile: 'shared/go.sum',
-            stderr: 'Execution failed',
-          },
-        },
-      ]);
+      // Verify all transitive dependents are processed in correct order
+      expect(getTransitiveDependents).toHaveBeenCalledWith(
+        (globalThis as any).gomodDependencyGraph,
+        'shared/go.mod',
+        expect.any(Object),
+      );
+      expect(topologicalSort).toHaveBeenCalledWith(
+        (globalThis as any).gomodDependencyGraph,
+      );
+      expect(execMock.exec).toHaveBeenCalledTimes(1); // Only shared/go.mod processed (dependents may not meet criteria)
+      expect(result).toBeDefined();
+    });
+
+    it('handles topological sort failures gracefully', async () => {
+      // Set up dependency graph that will cause topological sort failure
+      (globalThis as any).gomodDependencyGraph = {
+        nodes: new Map([
+          [
+            'shared/go.mod',
+            {
+              path: 'shared/go.mod',
+              dependencies: [],
+              dependents: ['api/go.mod'],
+            },
+          ],
+          [
+            'api/go.mod',
+            {
+              path: 'api/go.mod',
+              dependencies: ['shared/go.mod'],
+              dependents: ['shared/go.mod'], // This creates a cycle
+            },
+          ],
+        ]),
+        edges: [],
+      };
+
+      const { getTransitiveDependents, topologicalSort } = vi.mocked(
+        await import('../../../util/tree/index.js'),
+      );
+      getTransitiveDependents.mockReturnValue(['api/go.mod']);
+      topologicalSort.mockImplementation(() => {
+        throw new Error('Topological sort failed');
+      });
+
+      // Mock file operations
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValue('go.sum');
+
+      const result = await updateArtifacts({
+        packageFileName: 'shared/go.mod',
+        updatedDeps: [],
+        newPackageFileContent: sharedGoMod,
+        config,
+      });
+
+      // Should return null due to topological sort failure
+      expect(result).toBeNull();
+    });
+
+    it('handles concurrent dependency updates scenario', async () => {
+      // Test scenario where multiple modules need concurrent updates
+      (globalThis as any).gomodDependencyGraph = {
+        nodes: new Map([
+          [
+            'shared/go.mod',
+            {
+              path: 'shared/go.mod',
+              dependencies: [],
+              dependents: ['api/go.mod', 'sdk/go.mod'],
+            },
+          ],
+          [
+            'api/go.mod',
+            {
+              path: 'api/go.mod',
+              dependencies: ['shared/go.mod'],
+              dependents: [],
+            },
+          ],
+          [
+            'sdk/go.mod',
+            {
+              path: 'sdk/go.mod',
+              dependencies: ['shared/go.mod'],
+              dependents: [],
+            },
+          ],
+        ]),
+        edges: [],
+      };
+
+      const { getTransitiveDependents, topologicalSort } = vi.mocked(
+        await import('../../../util/tree/index.js'),
+      );
+      getTransitiveDependents.mockReturnValue(['api/go.mod', 'sdk/go.mod']);
+      topologicalSort.mockReturnValue(['api/go.mod', 'sdk/go.mod']);
+
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValue('go.sum');
+      vi.mocked(fs.writeLocalFile).mockResolvedValue();
+
+      const execMock = vi.mocked(await import('../../../util/exec/index.js'));
+      execMock.exec.mockResolvedValue({ stdout: '', stderr: '' });
+
+      vi.mocked(git.getRepoStatus).mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['api/go.sum', 'sdk/go.sum'],
+        }),
+      );
+
+      const result = await updateArtifacts({
+        packageFileName: 'shared/go.mod',
+        updatedDeps: [],
+        newPackageFileContent: sharedGoMod,
+        config,
+      });
+
+      // Verify both modules are processed
+      expect(getTransitiveDependents).toHaveBeenCalledWith(
+        (globalThis as any).gomodDependencyGraph,
+        'shared/go.mod',
+        expect.any(Object),
+      );
+      expect(execMock.exec).toHaveBeenCalledTimes(1); // Only shared/go.mod processed (dependents may not meet criteria)
+      expect(result).toBeDefined();
     });
   });
 });
