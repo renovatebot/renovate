@@ -129,11 +129,40 @@ function resolveGoDependencyPath(
 
 /**
  * Build Go module dependency graph
+ * If targetModulePath is provided, builds a focused graph starting from that module
+ * This is more efficient for large monorepos where only a subset of modules are affected
  */
 export async function buildGoModDependencyGraph(
   fileList: string[],
   rootDir?: string,
+  targetModulePath?: string,
 ): Promise<DependencyGraph<GoModuleDependency>> {
+  // If target module is specified, build focused graph
+  if (targetModulePath) {
+    // First, get all modules that could potentially depend on the target
+    const transitiveDependents = await getTransitiveDependentModules(
+      targetModulePath,
+      fileList,
+    );
+
+    // Include the target module itself and all its transitive dependents
+    const relevantModules = [targetModulePath, ...transitiveDependents];
+
+    // Build the dependency graph using only the relevant modules
+    const graph = await buildDependencyGraph<GoModuleDependency>({
+      filePattern: '/(^|/)go\\.mod$/',
+      parseFileDependencies: parseGoModDependencies,
+      resolveDependencyPath: resolveGoDependencyPath,
+      rootDir,
+      fileList: relevantModules,
+    });
+
+    // Store the relevant modules info for debugging
+    (graph as any).relevantModules = relevantModules;
+    return graph;
+  }
+
+  // Original behavior when no target module specified
   return await buildDependencyGraph<GoModuleDependency>({
     filePattern: '/(^|/)go\\.mod$/',
     parseFileDependencies: parseGoModDependencies,

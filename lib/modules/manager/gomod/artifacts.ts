@@ -19,8 +19,10 @@ import {
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
+import { minimatchFilter } from '../../../util/minimatch';
 import { regEx } from '../../../util/regex';
 import { getTransitiveDependents, topologicalSort } from '../../../util/tree';
+import { scm } from '../../platform/scm';
 import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,
@@ -297,47 +299,31 @@ export async function updateArtifacts({
               './package-tree.js'
             );
 
-            // Find all go.mod files in the repository
-            const fs = await import('fs');
-            const path = await import('path');
-
-            function findGoModFiles(
-              dir: string,
-              fileList: string[] = [],
-            ): string[] {
-              if (!fs.existsSync(dir)) {
-                return fileList;
-              }
-
-              const files = fs.readdirSync(dir);
-
-              for (const file of files) {
-                const filePath = path.join(dir, file);
-                const stat = fs.statSync(filePath);
-
-                if (stat.isDirectory() && !file.startsWith('.')) {
-                  findGoModFiles(filePath, fileList);
-                } else if (file === 'go.mod' && !fileList.includes(filePath)) {
-                  fileList.push(filePath);
-                }
-              }
-
-              return fileList;
-            }
-
-            // Find all go.mod files from the repository root
-            const repoRoot = upath.dirname(goModFileName);
-            const allGoModFiles = findGoModFiles(repoRoot);
-
-            logger.debug(
-              `Found ${allGoModFiles.length} go.mod files for dependency graph`,
+            // Find all go.mod files in the repository using Git-based discovery
+            const allFiles = await scm.getFileList();
+            const allGoModFiles = allFiles.filter(
+              minimatchFilter('**/go.mod', { matchBase: true }),
             );
 
-            dependencyGraph = await buildGoModDependencyGraph(allGoModFiles);
+            logger.debug(
+              `Found ${allGoModFiles.length} go.mod files in repository`,
+            );
+
+            // Build focused dependency graph starting from the updated module
+            dependencyGraph = await buildGoModDependencyGraph(
+              allGoModFiles,
+              undefined, // rootDir
+              goModFileName, // targetModulePath
+            );
             (globalThis as any).gomodDependencyGraph = dependencyGraph;
 
+            const relevantModules =
+              (dependencyGraph as any).relevantModules || [];
             logger.debug(
-              `Built Go module dependency graph with ${dependencyGraph.nodes.size} modules`,
+              `Built focused Go module dependency graph with ${dependencyGraph.nodes.size} modules from ${allGoModFiles.length} total files`,
+            );
+            logger.debug(
+              `Relevant modules for gomodTidyAll: ${relevantModules.join(', ')}`,
             );
           } catch (error) {
             logger.warn(

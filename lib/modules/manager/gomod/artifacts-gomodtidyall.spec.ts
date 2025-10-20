@@ -31,6 +31,11 @@ vi.mock('../../../util/git', () => ({
   ),
   getGitEnvironmentVariables: vi.fn(() => ({})),
 }));
+vi.mock('../../platform/scm', () => ({
+  scm: {
+    getFileList: vi.fn(() => Promise.resolve([])),
+  },
+}));
 vi.mock('../../../util/tree', () => ({
   getTransitiveDependents: vi.fn(),
   topologicalSort: vi.fn(),
@@ -87,9 +92,18 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
   });
 
   describe('gomodTidyAll - transitive dependency processing', () => {
-    it('processes transitive dependents in dependency graph', async () => {
-      // Set up global dependency graph mock
-      (globalThis as any).gomodDependencyGraph = {
+    it('processes transitive dependents in dependency graph using focused approach', async () => {
+      // Mock scm.getFileList to return all go.mod files in repository
+      const { scm } = vi.mocked(await import('../../platform/scm.js'));
+      scm.getFileList.mockResolvedValue([
+        'shared/go.mod',
+        'api/go.mod',
+        'web/go.mod',
+        'sdk/go.mod',
+      ]);
+
+      // Mock the new focused dependency graph function
+      const mockDependencyGraph = {
         nodes: new Map([
           [
             'shared/go.mod',
@@ -118,6 +132,17 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
         ]),
         edges: [],
       };
+
+      const packageTreeModule = vi.mocked(await import('./package-tree.js'));
+      // Store relevantModules on the graph for testing
+      (mockDependencyGraph as any).relevantModules = [
+        'shared/go.mod',
+        'api/go.mod',
+        'web/go.mod',
+      ];
+      packageTreeModule.buildGoModDependencyGraph.mockResolvedValue(
+        mockDependencyGraph,
+      );
 
       // Set up tree utility mocks
       const { getTransitiveDependents, topologicalSort } = vi.mocked(
