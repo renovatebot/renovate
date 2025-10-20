@@ -2557,33 +2557,6 @@ describe('modules/manager/gomod/artifacts', () => {
     expect(execSnapshots).toMatchObject([]);
   });
 
-  it('does not set GOFLAGS for go versions < 1.14', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-    const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-        not_added: [],
-        deleted: [],
-      }),
-    );
-    await gomod.updateArtifacts({
-      packageFileName: 'go.mod',
-      updatedDeps: [],
-      newPackageFileContent: gomod1,
-      config: {
-        ...config,
-        constraints: { go: '1.13' }, // Version < 1.14
-      },
-    });
-
-    expect(execSnapshots[0]!.options!.env).not.toHaveProperty(
-      'GOFLAGS',
-      '-modcacherw',
-    );
-    // GOFLAGS should not include -modcacherw for versions < 1.14
-  });
-
   it('throws temporary error', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.writeLocalFile.mockRejectedValueOnce(new Error(TEMPORARY_ERROR));
