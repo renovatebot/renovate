@@ -94,8 +94,8 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
   describe('gomodTidyAll - transitive dependency processing', () => {
     it('processes transitive dependents in dependency graph using focused approach', async () => {
       // Mock scm.getFileList to return all go.mod files in repository
-      const { scm } = vi.mocked(await import('../../platform/scm.js'));
-      scm.getFileList.mockResolvedValue([
+      const { scm } = await import('../../platform/scm.js');
+      vi.mocked(scm).getFileList.mockResolvedValue([
         'shared/go.mod',
         'api/go.mod',
         'web/go.mod',
@@ -117,7 +117,7 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
             'api/go.mod',
             {
               path: 'api/go.mod',
-              dependencies: ['shared/go.mod'],
+              dependencies: [{ path: 'shared/go.mod' }],
               dependents: ['web/go.mod'],
             },
           ],
@@ -125,7 +125,7 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
             'web/go.mod',
             {
               path: 'web/go.mod',
-              dependencies: ['api/go.mod'],
+              dependencies: [{ path: 'api/go.mod' }],
               dependents: [],
             },
           ],
