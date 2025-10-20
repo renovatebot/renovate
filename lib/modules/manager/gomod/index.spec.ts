@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { readLocalFile } from '../../../util/fs';
+import type { ExtractConfig } from '../types';
 import { extractPackageFile } from './extract';
 import { extractAllPackageFiles } from './index';
 
@@ -173,13 +174,11 @@ describe('modules/manager/gomod/index', () => {
         return null;
       });
 
-      const result = await extractAllPackageFiles(
-        {
-          manager: 'gomod',
-          fileList: ['go.mod', 'invalid/go.mod', 'empty/go.mod'],
-        },
-        ['go.mod', 'invalid/go.mod', 'empty/go.mod'],
-      );
+      const result = await extractAllPackageFiles(defaultExtractConfig, [
+        'go.mod',
+        'invalid/go.mod',
+        'empty/go.mod',
+      ]);
 
       expect(result).toEqual([
         {

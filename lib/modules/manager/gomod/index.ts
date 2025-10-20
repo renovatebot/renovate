@@ -1,9 +1,9 @@
 import type { Category } from '../../../constants';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
-import type { ExtractConfig, PackageFile } from '../types';
 import { GoDatasource } from '../../datasource/go';
 import { GolangVersionDatasource } from '../../datasource/golang-version';
+import type { ExtractConfig, PackageFile } from '../types';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 import { updateDependency } from './update';
@@ -28,7 +28,7 @@ export const supportedDatasources = [
  * Extract all package files for gomod
  */
 export async function extractAllPackageFiles(
-  config: ExtractConfig,
+  _config: ExtractConfig,
   fileList: string[],
 ): Promise<PackageFile[] | null> {
   logger.debug(`gomod.extractAllPackageFiles(${fileList.length} files)`);
