@@ -41,6 +41,7 @@ describe('workers/repository/reconfigure/utils', () => {
         errMessage: 'Validation Failed - Unparsable config file',
         configFileName: 'renovate.json',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { err: expect.any(Object) },
         'Error while parsing config file',

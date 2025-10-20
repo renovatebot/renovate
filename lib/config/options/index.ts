@@ -239,6 +239,17 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'configFileNames',
+    description: 'List of filenames where repository config will be stored.',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    globalOnly: true,
+    inheritConfigSupport: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'onboardingConfigFileName',
     description:
       'Change this value to override the default onboarding config file name.',
@@ -592,7 +603,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.8.23',
+    default: 'ghcr.io/containerbase/sidecar:13.23.6',
     globalOnly: true,
   },
   {
@@ -1134,7 +1145,7 @@ const options: RenovateOptions[] = [
   {
     name: 'useBaseBranchConfig',
     description:
-      'Whether to read configuration from `baseBranches` instead of only the default branch.',
+      'Whether to read configuration from base branches instead of only the default branch.',
     type: 'string',
     allowedValues: ['merge', 'none'],
     default: 'none',
@@ -1977,6 +1988,14 @@ const options: RenovateOptions[] = [
     description: 'Time required before a new release is considered stable.',
     type: 'string',
     default: null,
+  },
+  {
+    name: 'minimumReleaseAgeBehaviour',
+    description:
+      'When set in conjunction with `minimumReleaseAge`, controls whether the `releaseTimestamp` for a dependency update is required.',
+    type: 'string',
+    default: 'timestamp-optional',
+    allowedValues: ['timestamp-required', 'timestamp-optional'],
   },
   {
     name: 'abandonmentThreshold',

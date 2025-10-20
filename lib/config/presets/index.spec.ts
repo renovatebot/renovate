@@ -95,6 +95,7 @@ describe('config/presets/index', () => {
         foo: 1,
       });
       expect(local.getPreset).toHaveBeenCalledTimes(3);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Already seen preset local>some/repo:c in [local>some/repo:a, local>some/repo:c]',
       );
@@ -343,7 +344,12 @@ describe('config/presets/index', () => {
       const res = await presets.resolveConfigPresets(config);
 
       expect(res.labels).toEqual(['self-hosted with template resolved']);
-      expect(local.getPreset).toHaveBeenCalledOnce();
+      expect(local.getPreset).toHaveBeenCalledExactlyOnceWith({
+        presetName: 'default',
+        presetPath: undefined,
+        repo: 'username/preset-repo',
+        tag: 'abc123',
+      });
     });
 
     it('resolves self-hosted transitive presets without baseConfig', async () => {
