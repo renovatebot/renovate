@@ -1,10 +1,9 @@
 import type { Category } from '../../../constants';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
-import type { WorkerExtractConfig } from '../../../workers/types';
+import type { ExtractConfig, PackageFile } from '../types';
 import { GoDatasource } from '../../datasource/go';
 import { GolangVersionDatasource } from '../../datasource/golang-version';
-import type { PackageFile } from '../types';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 import { updateDependency } from './update';
@@ -26,10 +25,10 @@ export const supportedDatasources = [
 ];
 
 /**
- * Extract all package files and build dependency graph for gomodTidyAll
+ * Extract all package files for gomod
  */
 export async function extractAllPackageFiles(
-  config: WorkerExtractConfig,
+  config: ExtractConfig,
   fileList: string[],
 ): Promise<PackageFile[] | null> {
   logger.debug(`gomod.extractAllPackageFiles(${fileList.length} files)`);
@@ -48,23 +47,6 @@ export async function extractAllPackageFiles(
       }
     } else {
       logger.debug(`${packageFile} has no content`);
-    }
-  }
-
-  const isGomodTidyAllEnabled =
-    config.postUpdateOptions?.includes('gomodTidyAll');
-  if (isGomodTidyAllEnabled && packageFiles.length > 0) {
-    try {
-      const { buildGoModDependencyGraph } = await import('./package-tree.js');
-      const graph = await buildGoModDependencyGraph(fileList);
-
-      (globalThis as any).gomodDependencyGraph = graph;
-
-      logger.debug(
-        `Built Go module dependency graph with ${graph.nodes.size} modules`,
-      );
-    } catch (error) {
-      logger.warn({ error }, 'Failed to build Go module dependency graph');
     }
   }
 

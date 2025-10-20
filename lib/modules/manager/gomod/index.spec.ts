@@ -19,6 +19,10 @@ const adminConfig: RepoGlobalConfig = {
   dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
+const defaultExtractConfig = {
+  skipInstalls: null,
+} satisfies ExtractConfig;
+
 const sampleGoMod = codeBlock`
   module github.com/example/project
 
@@ -49,10 +53,7 @@ describe('modules/manager/gomod/index', () => {
 
   describe('extractAllPackageFiles', () => {
     it('returns null when no package files are provided', async () => {
-      const result = await extractAllPackageFiles(
-        { manager: 'gomod', fileList: [] },
-        [],
-      );
+      const result = await extractAllPackageFiles(defaultExtractConfig, []);
 
       expect(result).toBeNull();
     });
@@ -60,10 +61,10 @@ describe('modules/manager/gomod/index', () => {
     it('returns null when all files have no content', async () => {
       mockReadLocalFile.mockResolvedValue(null);
 
-      const result = await extractAllPackageFiles(
-        { manager: 'gomod', fileList: ['go.mod', 'submodule/go.mod'] },
-        ['go.mod', 'submodule/go.mod'],
-      );
+      const result = await extractAllPackageFiles(defaultExtractConfig, [
+        'go.mod',
+        'submodule/go.mod',
+      ]);
 
       expect(result).toBeNull();
       expect(mockReadLocalFile).toHaveBeenCalledTimes(2);
@@ -87,10 +88,10 @@ describe('modules/manager/gomod/index', () => {
       });
       mockExtractPackageFile.mockReturnValue(null);
 
-      const result = await extractAllPackageFiles(
-        { manager: 'gomod', fileList: ['go.mod', 'submodule/go.mod'] },
-        ['go.mod', 'submodule/go.mod'],
-      );
+      const result = await extractAllPackageFiles(defaultExtractConfig, [
+        'go.mod',
+        'submodule/go.mod',
+      ]);
 
       expect(result).toBeNull();
       expect(mockExtractPackageFile).toHaveBeenCalledTimes(2);
@@ -127,10 +128,10 @@ describe('modules/manager/gomod/index', () => {
         return null;
       });
 
-      const result = await extractAllPackageFiles(
-        { manager: 'gomod', fileList: ['go.mod', 'submodule/go.mod'] },
-        ['go.mod', 'submodule/go.mod'],
-      );
+      const result = await extractAllPackageFiles(defaultExtractConfig, [
+        'go.mod',
+        'submodule/go.mod',
+      ]);
 
       expect(result).toEqual([
         {
@@ -186,109 +187,6 @@ describe('modules/manager/gomod/index', () => {
           packageFile: 'go.mod',
         },
       ]);
-    });
-
-    describe('with gomodTidyAll enabled', () => {
-      it('builds dependency graph when gomodTidyAll is enabled', async () => {
-        mockReadLocalFile.mockResolvedValue(sampleGoMod);
-        mockExtractPackageFile.mockReturnValue({
-          deps: [{ depName: 'github.com/pkg/errors', currentValue: 'v0.7.0' }],
-        });
-
-        // Mock the package-tree module
-        const mockBuildGoModDependencyGraph = vi.fn().mockResolvedValue({
-          nodes: new Map([['go.mod', { path: 'go.mod' }]]),
-          edges: [],
-        });
-
-        vi.doMock('./package-tree', () => ({
-          buildGoModDependencyGraph: mockBuildGoModDependencyGraph,
-        }));
-
-        const result = await extractAllPackageFiles(
-          {
-            manager: 'gomod',
-            fileList: ['go.mod'],
-            postUpdateOptions: ['gomodTidyAll'],
-          },
-          ['go.mod'],
-        );
-
-        expect(result).toEqual([
-          {
-            deps: [
-              { depName: 'github.com/pkg/errors', currentValue: 'v0.7.0' },
-            ],
-            packageFile: 'go.mod',
-          },
-        ]);
-
-        // Verify the dependency graph was built
-        expect(mockBuildGoModDependencyGraph).toHaveBeenCalledExactlyOnceWith([
-          'go.mod',
-        ]);
-      });
-
-      it('handles dependency graph building errors gracefully', async () => {
-        mockReadLocalFile.mockResolvedValue(sampleGoMod);
-        mockExtractPackageFile.mockReturnValue({
-          deps: [{ depName: 'github.com/pkg/errors', currentValue: 'v0.7.0' }],
-        });
-
-        // Mock the package-tree module to throw an error
-        vi.doMock('./package-tree', () => ({
-          buildGoModDependencyGraph: vi
-            .fn()
-            .mockRejectedValue(new Error('Graph building failed')),
-        }));
-
-        const result = await extractAllPackageFiles(
-          {
-            manager: 'gomod',
-            fileList: ['go.mod'],
-            postUpdateOptions: ['gomodTidyAll'],
-          },
-          ['go.mod'],
-        );
-
-        // Should still return the extracted package files despite graph error
-        expect(result).toEqual([
-          {
-            deps: [
-              { depName: 'github.com/pkg/errors', currentValue: 'v0.7.0' },
-            ],
-            packageFile: 'go.mod',
-          },
-        ]);
-      });
-
-      it('skips dependency graph building when gomodTidyAll is not enabled', async () => {
-        mockReadLocalFile.mockResolvedValue(sampleGoMod);
-        mockExtractPackageFile.mockReturnValue({
-          deps: [{ depName: 'github.com/pkg/errors', currentValue: 'v0.7.0' }],
-        });
-
-        const result = await extractAllPackageFiles(
-          {
-            manager: 'gomod',
-            fileList: ['go.mod'],
-            postUpdateOptions: ['otherOption'],
-          }, // Not gomodTidyAll
-          ['go.mod'],
-        );
-
-        expect(result).toEqual([
-          {
-            deps: [
-              { depName: 'github.com/pkg/errors', currentValue: 'v0.7.0' },
-            ],
-            packageFile: 'go.mod',
-          },
-        ]);
-
-        // The dependency graph should not be set
-        expect((globalThis as any).gomodDependencyGraph).toBeUndefined();
-      });
     });
   });
 });
