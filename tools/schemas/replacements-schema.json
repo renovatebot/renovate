@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
+    "$schema": { "type": "string" },
     "all": {
       "type": "object",
       "properties": {
