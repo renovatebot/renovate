@@ -247,6 +247,8 @@ export interface RenovateConfig
   depName?: string;
   /** user configurable base branch patterns*/
   baseBranchPatterns?: string[];
+  /** computed base branch from patterns - for internal use only */
+  baseBranches?: string[];
   commitBody?: string;
   useBaseBranchConfig?: UseBaseBranchConfigType;
   baseBranch?: string;
