@@ -175,6 +175,7 @@ export interface RepoGlobalConfig {
   s3Endpoint?: string;
   s3PathStyle?: boolean;
   cachePrivatePackages?: boolean;
+  configFileNames?: string[];
   ignorePrAuthor?: boolean;
 }
 
@@ -329,7 +330,7 @@ export interface RenovateConfig
   additionalBranchPrefix?: string;
   sharedVariableName?: string;
   minimumGroupSize?: number;
-
+  configFileNames?: string[];
   minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
 }
 
