@@ -129,7 +129,7 @@ describe('modules/platform/scm-manager/index', () => {
         repoFingerprint: expectedFingerprint,
       });
 
-      expect(git.initRepo).toHaveBeenCalledWith({
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
         url: `https://${user.name}:${token}@localhost:8080/scm/default/repo`,
         repository,
         defaultBranch: expectedDefaultBranch,
