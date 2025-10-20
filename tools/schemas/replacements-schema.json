@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft-04/schema#",
+  "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
     "$schema": { "type": "string" },
@@ -20,7 +20,7 @@
     }
   },
   "patternProperties": {
-    "^[a-zA-Z0-9-]+$": {
+    "^(?!all$)[a-zA-Z0-9-]+$": {
       "type": "object",
       "properties": {
         "description": { "type": "string" },
