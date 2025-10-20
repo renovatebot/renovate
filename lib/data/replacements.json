@@ -686,8 +686,8 @@
     "description": "`google-github-action/release-please` was renamed to `googleapis/release-please`.",
     "packageRules": [
       {
-        "matchDatasources": ["github-actions"],
-        "matchPackageNames": ["google-github-action/release-please"],
+        "matchDatasources": ["github-tags"],
+        "matchPackageNames": ["google-github-actions/release-please-action"],
         "replacementName": "googleapis/release-please"
       }
     ]
