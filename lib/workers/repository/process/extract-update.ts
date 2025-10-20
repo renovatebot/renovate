@@ -178,8 +178,8 @@ export async function extract(
     }
 
     // Clean up cached branch extracts
-    const baseBranches = is.nonEmptyArray(config.baseBranchPatterns)
-      ? config.baseBranchPatterns
+    const baseBranches = is.nonEmptyArray(config.baseBranches)
+      ? config.baseBranches
       : [baseBranch];
     Object.keys(cache.scan).forEach((branchName) => {
       if (!baseBranches.includes(branchName)) {
