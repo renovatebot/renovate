@@ -48,6 +48,8 @@ When a package gets renamed, you need to tell Renovate:
 - the last version available for the old package name -> `matchCurrentVersion`
 - the first version available for the new package name -> `replacementVersion`
 
+You can omit `replacementVersion` if the current version is the same as the new version.
+
 Example:
 
 ```json
