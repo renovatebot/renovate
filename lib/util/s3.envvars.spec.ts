@@ -1,7 +1,6 @@
 import { getS3Client } from './s3';
 
 describe('util/s3.envvars', () => {
-
   beforeEach(() => {
     vi.resetModules();
     delete process.env.RENOVATE_S3_AWS_ACCESS_KEY_ID;
