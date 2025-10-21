@@ -4,7 +4,6 @@ import { regEx } from '../../../util/regex';
 import { Result } from '../../../util/result';
 import { parseYaml } from '../../../util/yaml';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import { id as semverPartialId } from '../../versioning/semver-partial';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -58,7 +57,6 @@ function extractDepFromIncludeComponent(
     depType: 'repository',
     currentValue: componentReference.specificVersion,
     registryUrls: [`https://${componentReference.fqdn}`],
-    versioning: semverPartialId,
   };
   if (dep.currentValue === componentReferenceLatestVersion) {
     logger.debug(

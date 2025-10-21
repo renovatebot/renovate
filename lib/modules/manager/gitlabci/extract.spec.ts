@@ -328,7 +328,6 @@ describe('modules/manager/gitlabci/extract', () => {
           depName: 'an-org/a-project',
           depType: 'repository',
           registryUrls: ['https://gitlab.example.com'],
-          versioning: 'semver-partial',
         },
         {
           currentValue: 'e3262fdd0914fa823210cdb79a8c421e2cef79d8',
@@ -336,7 +335,6 @@ describe('modules/manager/gitlabci/extract', () => {
           depName: 'an-org/a-subgroup/a-project',
           depType: 'repository',
           registryUrls: ['https://gitlab.example.com'],
-          versioning: 'semver-partial',
         },
         {
           currentValue: 'main',
@@ -344,7 +342,6 @@ describe('modules/manager/gitlabci/extract', () => {
           depName: 'an-org/a-subgroup/another-project',
           depType: 'repository',
           registryUrls: ['https://gitlab.example.com'],
-          versioning: 'semver-partial',
         },
         {
           currentValue: '~latest',
@@ -352,7 +349,6 @@ describe('modules/manager/gitlabci/extract', () => {
           depName: 'another-org/a-project',
           depType: 'repository',
           registryUrls: ['https://gitlab.example.com'],
-          versioning: 'semver-partial',
           skipReason: 'unsupported-version',
         },
         {
@@ -361,7 +357,6 @@ describe('modules/manager/gitlabci/extract', () => {
           depName: 'an-org/a-project',
           depType: 'repository',
           registryUrls: ['https://other-gitlab.example.com'],
-          versioning: 'semver-partial',
         },
         {
           currentValue: '1.0',
@@ -369,7 +364,6 @@ describe('modules/manager/gitlabci/extract', () => {
           depName: 'a-group/a-project',
           depType: 'repository',
           registryUrls: ['https://gitlab.example.com'],
-          versioning: 'semver-partial',
         },
       ]);
     });
@@ -399,7 +393,6 @@ describe('modules/manager/gitlabci/extract', () => {
           depName: 'an-org/a-project',
           depType: 'repository',
           registryUrls: ['https://gitlab.example.com'],
-          versioning: 'semver-partial',
         },
         {
           currentValue: 'e3262fdd0914fa823210cdb79a8c421e2cef79d8',
@@ -407,7 +400,6 @@ describe('modules/manager/gitlabci/extract', () => {
           depName: 'an-org/a-subgroup/a-project',
           depType: 'repository',
           registryUrls: ['https://gitlab.example.com'],
-          versioning: 'semver-partial',
         },
         {
           currentValue: 'main',
@@ -415,7 +407,6 @@ describe('modules/manager/gitlabci/extract', () => {
           depName: 'an-org/a-subgroup/another-project',
           depType: 'repository',
           registryUrls: ['https://gitlab.example.com'],
-          versioning: 'semver-partial',
         },
         {
           currentValue: '~latest',
@@ -423,7 +414,6 @@ describe('modules/manager/gitlabci/extract', () => {
           depName: 'another-org/a-project',
           depType: 'repository',
           registryUrls: ['https://gitlab.example.com'],
-          versioning: 'semver-partial',
           skipReason: 'unsupported-version',
         },
         {
@@ -431,7 +421,6 @@ describe('modules/manager/gitlabci/extract', () => {
           datasource: 'gitlab-tags',
           depName: 'an-org/a-project',
           depType: 'repository',
-          versioning: 'semver-partial',
           registryUrls: ['https://other-gitlab.example.com'],
         },
       ]);
