@@ -1274,7 +1274,7 @@ Renovate uses the [AWS SDK for JavaScript V3](https://docs.aws.amazon.com/sdk-fo
 Therefore, Renovate supports all the authentication methods supported by the AWS SDK.
 Read more about [the default credential provider chain for AWS SDK for JavaScript V3](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromnodeproviderchain).
 
-**Authentication:**
+### Authentication
 
 - In cases where the default AWS credentials are already used for another purpose (such as AWS ECR lookups), you may need to specify separate credentials for S3 repository, Renovate supports the following S3-specific environment variables for this purpose:
   - `RENOVATE_S3_AWS_ACCESS_KEY_ID`

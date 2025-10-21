@@ -1,18 +1,12 @@
 import { getS3Client } from './s3';
 
 describe('util/s3.envvars', () => {
-  const OLD_ENV = process.env;
 
   beforeEach(() => {
     vi.resetModules();
-    process.env = { ...OLD_ENV };
     delete process.env.RENOVATE_S3_AWS_ACCESS_KEY_ID;
     delete process.env.RENOVATE_S3_AWS_SECRET_ACCESS_KEY;
     delete process.env.RENOVATE_S3_AWS_REGION;
-  });
-
-  afterEach(() => {
-    process.env = OLD_ENV;
   });
 
   it('uses RENOVATE_S3_AWS_ACCESS_KEY_ID and RENOVATE_S3_AWS_SECRET_ACCESS_KEY if set', async () => {
