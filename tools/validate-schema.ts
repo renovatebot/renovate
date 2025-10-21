@@ -3,7 +3,7 @@ import ajv from 'ajv';
 import draft7MetaSchema from 'ajv/lib/refs/json-schema-draft-07.json';
 import { glob } from 'glob';
 
-async function validateFileAgainstDraft07Schema(
+async function validateFileAgainstSchema(
   validate: ajv.ValidateFunction,
   filename: string,
 ): Promise<ajv.ErrorObject[] | null | undefined> {
@@ -14,7 +14,7 @@ async function validateFileAgainstDraft07Schema(
   }
 }
 
-async function validateFileAgainstDraft07SchemaFromFile(
+async function validateFileAgainstSchemaFromFile(
   schemaFilename: string,
   filename: string,
 ): Promise<ajv.ErrorObject[] | null | undefined> {
@@ -29,7 +29,7 @@ async function validateFileAgainstDraft07SchemaFromFile(
   }
 }
 
-async function validateDraft07Schemas(): Promise<void> {
+async function validateSchemas(): Promise<void> {
   const validator = new ajv({ schemaId: 'auto', meta: false });
   validator.addMetaSchema(draft7MetaSchema);
   const validate = validator.compile(draft7MetaSchema);
@@ -44,7 +44,7 @@ async function validateDraft07Schemas(): Promise<void> {
   ).flat();
 
   for (const filename of expandedFiles) {
-    const errors = await validateFileAgainstDraft07Schema(validate, filename);
+    const errors = await validateFileAgainstSchema(validate, filename);
     if (errors) {
       failed.push({ filename, errors });
     } else {
@@ -95,7 +95,7 @@ async function validateDataFilesAgainstSchemas(): Promise<void> {
   }[] = [];
 
   for (const filename of filesAndSchemasToValidate) {
-    const errors = await validateFileAgainstDraft07SchemaFromFile(
+    const errors = await validateFileAgainstSchemaFromFile(
       filename.schemaFilename,
       filename.filename,
     );
@@ -121,6 +121,6 @@ async function validateDataFilesAgainstSchemas(): Promise<void> {
 }
 
 void (async () => {
-  await validateDraft07Schemas();
+  await validateSchemas();
   await validateDataFilesAgainstSchemas();
 })();
