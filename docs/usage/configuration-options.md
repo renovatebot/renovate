@@ -651,7 +651,7 @@ This name will appear in Renovate logs, making it easier to debug or trace speci
 
 Enabling this option will mean that detected Git submodules will be cloned at time of repository clone.
 By default all will be cloned, but this can be customized by configuring `cloneSubmodulesFilter` too.
-Submodules are always cloned recursively by default.
+Submodules are always cloned recursively by default (see [`cloneSubmodulesRecursive`](#clonesubmodulesrecursive)).
 
 Important: private submodules aren't supported by Renovate, unless the underlying `ssh` layer already has the correct permissions.
 
