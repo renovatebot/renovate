@@ -388,8 +388,8 @@ importers:
         specifier: 7.1.0
         version: 7.1.0(semantic-release@24.2.9(typescript@5.9.3))
       '@smithy/util-stream':
-        specifier: 4.5.1
-        version: 4.5.1
+        specifier: 4.5.2
+        version: 4.5.2
       '@types/auth-header':
         specifier: 1.0.6
         version: 1.0.6
@@ -2015,8 +2015,8 @@ packages:
     resolution: {integrity: sha512-lLPWnakjC0q9z+OtiXk+9RPQiYPNAovt2IXD3CP4LkOnd9NpUsxOjMx1SnoUVB7Orb7fZp67cQMtTBKMFDvOGg==}
     engines: {node: '>=18.0.0'}
 
-  '@smithy/util-stream@4.5.1':
-    resolution: {integrity: sha512-kVnOiYDDb84ZUGwpQBiVQROWR7epNXikxMGw971Mww3+eufKl2NHYyao2Gg4Wd3iG+D9hF/d9VrmMBxBcVprXw==}
+  '@smithy/util-stream@4.5.2':
+    resolution: {integrity: sha512-RWYVuQVKtNbr7E0IxV8XHDId714yHPTxU6dHScd6wSMWAXboErzTG7+xqcL+K3r0Xg0cZSlfuNhl1J0rzMLSSw==}
     engines: {node: '>=18.0.0'}
 
   '@smithy/util-stream@4.5.3':
@@ -6967,7 +6967,7 @@ snapshots:
       '@smithy/util-endpoints': 3.2.3
       '@smithy/util-middleware': 4.2.3
       '@smithy/util-retry': 4.2.3
-      '@smithy/util-stream': 4.5.1
+      '@smithy/util-stream': 4.5.2
       '@smithy/util-utf8': 4.2.0
       '@smithy/util-waiter': 4.2.3
       '@smithy/uuid': 1.1.0
@@ -7062,7 +7062,7 @@ snapshots:
       '@smithy/protocol-http': 5.3.3
       '@smithy/smithy-client': 4.9.0
       '@smithy/types': 4.8.0
-      '@smithy/util-stream': 4.5.1
+      '@smithy/util-stream': 4.5.2
       tslib: 2.8.1
 
   '@aws-sdk/credential-provider-ini@3.899.0':
@@ -7187,7 +7187,7 @@ snapshots:
       '@smithy/protocol-http': 5.3.3
       '@smithy/types': 4.8.0
       '@smithy/util-middleware': 4.2.3
-      '@smithy/util-stream': 4.5.1
+      '@smithy/util-stream': 4.5.2
       '@smithy/util-utf8': 4.2.0
       tslib: 2.8.1
 
@@ -7252,7 +7252,7 @@ snapshots:
       '@smithy/types': 4.8.0
       '@smithy/util-config-provider': 4.2.0
       '@smithy/util-middleware': 4.2.3
-      '@smithy/util-stream': 4.5.1
+      '@smithy/util-stream': 4.5.2
       '@smithy/util-utf8': 4.2.0
       tslib: 2.8.1
 
@@ -8693,7 +8693,7 @@ snapshots:
       '@smithy/types': 4.8.0
       tslib: 2.8.1
 
-  '@smithy/util-stream@4.5.1':
+  '@smithy/util-stream@4.5.2':
     dependencies:
       '@smithy/fetch-http-handler': 5.3.4
       '@smithy/node-http-handler': 4.4.2
