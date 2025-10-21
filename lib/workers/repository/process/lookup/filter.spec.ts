@@ -1,3 +1,4 @@
+import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import type { Release } from '../../../../modules/datasource/types';
 import * as allVersioning from '../../../../modules/versioning';
 import type { Timestamp } from '../../../../util/timestamp';
@@ -55,6 +56,86 @@ describe('workers/repository/process/lookup/filter', () => {
         { version: '2.0.0', releaseTimestamp: '2021-01-05T00:00:00.000Z' },
         { version: '2.1.0', releaseTimestamp: '2021-01-07T00:00:00.000Z' },
       ]);
+    });
+
+    it('should filter versions allowed by allowedMinimumReleaseAge', () => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      const lastWeek = new Date();
+      lastWeek.setDate(lastWeek.getDate() - 7);
+
+      const releases = [
+        {
+          version: '1.0.1',
+          // No releaseTimestamp means we cannot filter it out
+        },
+        {
+          version: '1.0.2',
+          releaseTimestamp: lastWeek.toISOString() as Timestamp,
+        },
+        {
+          version: '1.2.0',
+          releaseTimestamp: yesterday.toISOString() as Timestamp,
+        },
+      ] satisfies Release[];
+
+      const config = partial<FilterConfig>({
+        ignoreUnstable: false,
+        ignoreDeprecated: false,
+        respectLatest: false,
+        allowedMinimumReleaseAge: '3 days',
+      });
+      const currentVersion = '1.0.0';
+      const latestVersion = '1.2.0';
+
+      const filteredVersions = filterVersions(
+        config,
+        currentVersion,
+        latestVersion,
+        releases,
+        versioning,
+      );
+
+      expect(filteredVersions).toEqual([
+        { version: '1.0.1' },
+        {
+          version: '1.0.2',
+          releaseTimestamp: lastWeek.toISOString() as Timestamp,
+        },
+      ]);
+    });
+
+    it('throws if allowedMinimumReleaseAge has an invalid value', () => {
+      const releases = [
+        {
+          version: '1.0.1',
+          releaseTimestamp: '2021-01-01T00:00:01.000Z' as Timestamp,
+        },
+        {
+          version: '1.2.0',
+          releaseTimestamp: '2021-01-03T00:00:00.000Z' as Timestamp,
+        },
+      ] satisfies Release[];
+
+      const config = partial<FilterConfig>({
+        ignoreUnstable: false,
+        ignoreDeprecated: false,
+        respectLatest: false,
+        allowedMinimumReleaseAge: 'not a duration',
+      });
+      const currentVersion = '1.0.0';
+      const latestVersion = '1.2.0';
+
+      expect(() =>
+        filterVersions(
+          config,
+          currentVersion,
+          latestVersion,
+          releases,
+          versioning,
+        ),
+      ).toThrow(CONFIG_VALIDATION);
     });
 
     it('allows unstable major upgrades', () => {

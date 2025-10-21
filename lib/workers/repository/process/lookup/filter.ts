@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import semver from 'semver';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
@@ -6,6 +7,9 @@ import type { VersioningApi } from '../../../../modules/versioning';
 import * as npmVersioning from '../../../../modules/versioning/npm';
 import * as pep440 from '../../../../modules/versioning/pep440';
 import * as poetryVersioning from '../../../../modules/versioning/poetry';
+import { getElapsedMs } from '../../../../util/date';
+import { coerceNumber } from '../../../../util/number';
+import { toMs } from '../../../../util/pretty-time';
 import { getRegexPredicate } from '../../../../util/string-match';
 import type { FilterConfig } from './types';
 
@@ -31,8 +35,13 @@ export function filterVersions(
   releases: Release[],
   versioningApi: VersioningApi,
 ): Release[] {
-  const { ignoreUnstable, ignoreDeprecated, respectLatest, allowedVersions } =
-    config;
+  const {
+    ignoreUnstable,
+    ignoreDeprecated,
+    respectLatest,
+    allowedVersions,
+    allowedMinimumReleaseAge,
+  } = config;
 
   // istanbul ignore if: shouldn't happen
   if (!currentVersion) {
@@ -114,6 +123,33 @@ export function filterVersions(
         JSON.stringify(allowedVersions);
       throw error;
     }
+  }
+
+  if (allowedMinimumReleaseAge) {
+    const allowedVersionsMinimumAge = coerceNumber(
+      toMs(allowedMinimumReleaseAge),
+      0,
+    );
+
+    if (allowedVersionsMinimumAge <= 0) {
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationSource = 'config';
+      error.validationError = 'Invalid `allowedMinimumReleaseAge`';
+      error.validationMessage =
+        'The following allowedMinimumReleaseAge does not parse as a valid duration: ' +
+        JSON.stringify(allowedMinimumReleaseAge);
+      throw error;
+    }
+
+    filteredReleases = filteredReleases.filter((r) => {
+      // If we don't have a release timestamp, then we cannot filter it out
+      if (!r.releaseTimestamp || is.emptyString(r.releaseTimestamp)) {
+        return true;
+      }
+
+      const timeElapsed = getElapsedMs(r.releaseTimestamp);
+      return timeElapsed > allowedVersionsMinimumAge;
+    });
   }
 
   if (config.followTag) {
