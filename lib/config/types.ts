@@ -175,6 +175,7 @@ export interface RepoGlobalConfig {
   s3Endpoint?: string;
   s3PathStyle?: boolean;
   cachePrivatePackages?: boolean;
+  configFileNames?: string[];
   ignorePrAuthor?: boolean;
 }
 
@@ -219,6 +220,9 @@ export type RenovateRepository =
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
+export type MinimumReleaseAgeBehaviour =
+  | 'timestamp-optional'
+  | 'timestamp-required';
 
 export const allowedStatusCheckStrings = [
   'minimumReleaseAge',
@@ -243,6 +247,8 @@ export interface RenovateConfig
   depName?: string;
   /** user configurable base branch patterns*/
   baseBranchPatterns?: string[];
+  /** computed base branch from patterns - for internal use only */
+  baseBranches?: string[];
   commitBody?: string;
   useBaseBranchConfig?: UseBaseBranchConfigType;
   baseBranch?: string;
@@ -326,6 +332,8 @@ export interface RenovateConfig
   additionalBranchPrefix?: string;
   sharedVariableName?: string;
   minimumGroupSize?: number;
+  configFileNames?: string[];
+  minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
 }
 
 const CustomDatasourceFormats = [

@@ -3,26 +3,9 @@ import type {
   RenovateOptions,
   RenovateRequiredOption,
 } from '../../lib/config/types';
+import { pkg } from '../../lib/expose.cjs';
 import { hasKey } from '../../lib/util/object';
 import { updateFile } from '../utils';
-
-const schema = {
-  title: 'JSON schema for Renovate config files (https://renovatebot.com/)',
-  $schema: 'http://json-schema.org/draft-04/schema#',
-  type: 'object',
-  properties: {},
-};
-const options = getOptions();
-options.sort((a, b) => {
-  if (a.name < b.name) {
-    return -1;
-  }
-  if (a.name > b.name) {
-    return 1;
-  }
-  return 0;
-});
-const properties = schema.properties as Record<string, any>;
 
 type JsonSchemaBasicType =
   | 'string'
@@ -94,7 +77,10 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
   return temp;
 }
 
-function createSchemaForParentConfigs(): void {
+function createSchemaForParentConfigs(
+  options: RenovateOptions[],
+  properties: Record<string, any>,
+): void {
   for (const option of options) {
     if (!option.parents || option.parents.includes('.')) {
       properties[option.name] = createSingleConfig(option);
@@ -102,7 +88,10 @@ function createSchemaForParentConfigs(): void {
   }
 }
 
-function addChildrenArrayInParents(): void {
+function addChildrenArrayInParents(
+  options: RenovateOptions[],
+  properties: Record<string, any>,
+): void {
   for (const option of options) {
     if (option.parents) {
       for (const parent of option.parents.filter((parent) => parent !== '.')) {
@@ -158,7 +147,10 @@ function toRequiredPropertiesRule(
   };
 }
 
-function createSchemaForChildConfigs(): void {
+function createSchemaForChildConfigs(
+  options: RenovateOptions[],
+  properties: Record<string, any>,
+): void {
   for (const option of options) {
     if (option.parents) {
       for (const parent of option.parents.filter((parent) => parent !== '.')) {
@@ -175,10 +167,33 @@ function createSchemaForChildConfigs(): void {
   }
 }
 
-export async function generateSchema(dist: string): Promise<void> {
-  createSchemaForParentConfigs();
-  addChildrenArrayInParents();
-  createSchemaForChildConfigs();
+export async function generateSchema(
+  dist: string,
+  version: string = pkg.version,
+): Promise<void> {
+  const schema = {
+    title: `JSON schema for Renovate ${version} config files (https://renovatebot.com/)`,
+    $schema: 'http://json-schema.org/draft-07/schema#',
+    'x-renovate-version': `${version}`,
+    allowComments: true,
+    type: 'object',
+    properties: {},
+  };
+  const options = getOptions();
+  options.sort((a, b) => {
+    if (a.name < b.name) {
+      return -1;
+    }
+    if (a.name > b.name) {
+      return 1;
+    }
+    return 0;
+  });
+  const properties = schema.properties as Record<string, any>;
+
+  createSchemaForParentConfigs(options, properties);
+  addChildrenArrayInParents(options, properties);
+  createSchemaForChildConfigs(options, properties);
   await updateFile(
     `${dist}/renovate-schema.json`,
     `${JSON.stringify(schema, null, 2)}\n`,
