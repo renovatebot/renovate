@@ -1243,7 +1243,9 @@ Defines how the report is exposed:
 - `<unset>` If unset, no report will be provided, though the debug logs will still have partial information of the report
 - `logging` The report will be printed as part of the log messages on `INFO` level
 - `file` The report will be written to a path provided by [`reportPath`](#reportpath)
-- `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`s3Endpoint`](#s3endpoint) and [`s3PathStyle`](#s3pathstyle). For authentication, the default credential provider chain for the AWS SDK is used, or if set, the `RENOVATE_S3_*` environment variables. For more details on authentication, see the [repository cache authentication section](#repositorycachetype).
+- `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`s3Endpoint`](#s3endpoint) and [`s3PathStyle`](#s3pathstyle)
+
+Authentication for `s3`: The default credential provider chain for the AWS SDK is used, or if set, the `RENOVATE_S3_*` environment variables. For more details on authentication, see the [repository cache authentication section](#repositorycachetype).
 
 ## repositories
 
