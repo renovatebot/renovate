@@ -169,6 +169,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'Cannot map datasource docker to OSV ecosystem',
       );
@@ -189,6 +190,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'No vulnerabilities found in OSV database for lodash',
       );
@@ -241,6 +243,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'Skipping withdrawn vulnerability GHSA-x5rq-j2xg-h7qm',
       );
@@ -268,6 +271,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Skipping vulnerability lookup for package lodash due to unsupported version #4.17.11',
       );
@@ -295,6 +299,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { err, packageName: 'lodash' },
         'Error fetching vulnerability information for package',
@@ -343,6 +348,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { event },
         'Skipping OSV event with invalid version',
@@ -407,6 +413,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'No fixed version available for vulnerability GHSA-xxxx-yyyy-zzzz in fake 4.17.11',
       );
@@ -449,6 +456,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'No fixed version available for vulnerability GHSA-xxxx-yyyy-zzzz in fake 1.5.1',
       );
@@ -498,9 +506,11 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Vulnerability GO-2022-0187 affects stdlib 1.7.5',
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Setting allowed version >= 1.7.6 to fix vulnerability GO-2022-0187 in stdlib 1.7.5',
       );
@@ -934,7 +944,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+      expect(logger.logger.debug).not.toHaveBeenCalledExactlyOnceWith(
         'OSV advisory GHSA-xxxx-yyyy-zzzz lists quokka 1.2.3 as vulnerable',
       );
       expect(config.packageRules).toHaveLength(0);
@@ -1239,6 +1249,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         packageFiles,
       );
 
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Error processing CVSS vector some-invalid-score',
       );
@@ -1271,6 +1282,97 @@ describe('workers/repository/process/vulnerabilities', () => {
               No references.
 
               This data is provided by [OSV](https://osv.dev/vulnerability/PYSEC-2022-303) and the [PyPI Advisory Database](https://github.com/pypa/advisory-database) ([CC-BY 4.0](https://github.com/pypa/advisory-database/blob/main/LICENSE)).
+              </details>
+            `,
+          ],
+        },
+      ]);
+    });
+
+    it('prefer CVSS_V4 scores over CVSS_V3', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'mattermost-desktop',
+                currentValue: '5.8.0',
+                datasource: 'npm',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-xgq9-7gw6-jr5r',
+          modified: '',
+          affected: [
+            {
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0' }, { fixed: '5.9.0' }],
+                },
+              ],
+              package: { name: 'mattermost-desktop', ecosystem: 'npm' },
+            },
+          ],
+          severity: [
+            {
+              type: 'CVSS_V3',
+              score: 'CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:L/I:N/A:N',
+            },
+            {
+              type: 'CVSS_V4',
+              score:
+                'CVSS:4.0/AV:L/AC:H/AT:N/PR:L/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N',
+            },
+          ],
+          references: [
+            {
+              type: 'ADVISORY',
+              url: 'https://nvd.nist.gov/vuln/detail/CVE-2024-45835',
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['mattermost-desktop'],
+          matchCurrentVersion: '5.8.0',
+          allowedVersions: '>= 5.9.0',
+          isVulnerabilityAlert: true,
+          prBodyNotes: [
+            '\n\n' +
+              codeBlock`
+              ---
+
+              ### [GHSA-xgq9-7gw6-jr5r](https://github.com/advisories/GHSA-xgq9-7gw6-jr5r)
+
+              <details>
+              <summary>More information</summary>
+
+              #### Details
+              No details.
+
+              #### Severity
+              - CVSS Score: 2.0 / 10 (Low)
+              - Vector String: \`CVSS:4.0/AV:L/AC:H/AT:N/PR:L/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N\`
+
+              #### References
+              - [https://nvd.nist.gov/vuln/detail/CVE-2024-45835](https://nvd.nist.gov/vuln/detail/CVE-2024-45835)
+
+              This data is provided by [OSV](https://osv.dev/vulnerability/GHSA-xgq9-7gw6-jr5r) and the [GitHub Advisory Database](https://github.com/github/advisory-database) ([CC-BY 4.0](https://github.com/github/advisory-database/blob/main/LICENSE.md)).
               </details>
             `,
           ],
@@ -1432,6 +1534,21 @@ describe('workers/repository/process/vulnerabilities', () => {
           ],
         },
       ]);
+    });
+  });
+
+  describe('evaluateCvssVector', () => {
+    it.each`
+      input                                                                | output
+      ${'some-invalid-vector'}                                             | ${['', '']}
+      ${'CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:N/VI:L/VA:N/SC:N/SI:L/SA:N'} | ${['5.3', 'MEDIUM']}
+      ${'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H'}                    | ${['9.8', 'CRITICAL']}
+      ${'CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L'}                    | ${['5.3', 'MEDIUM']}
+      ${'AV:N/AC:L/Au:N/C:P/I:P/A:P'}                                      | ${['7.5', 'UNKNOWN']}
+      ${'AV:N'}                                                            | ${['0.0', 'UNKNOWN']}
+      ${'CVSS:3.1/AV:N'}                                                   | ${['0.0', 'NONE']}
+    `('$input', ({ input, output }) => {
+      expect(Vulnerabilities.evaluateCvssVector(input)).toMatchObject(output);
     });
   });
 });

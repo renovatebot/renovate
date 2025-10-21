@@ -1,8 +1,8 @@
 import { AutomergeTypeMigration } from './automerge-type-migration';
 
 describe('config/migrations/custom/automerge-type-migration', () => {
-  it('should migrate string like "branch-" to "branch"', () => {
-    expect(AutomergeTypeMigration).toMigrate(
+  it('should migrate string like "branch-" to "branch"', async () => {
+    await expect(AutomergeTypeMigration).toMigrate(
       {
         automergeType: 'branch-test',
       },
@@ -12,8 +12,8 @@ describe('config/migrations/custom/automerge-type-migration', () => {
     );
   });
 
-  it('should not migrate another string value', () => {
-    expect(AutomergeTypeMigration).toMigrate(
+  it('should not migrate another string value', async () => {
+    await expect(AutomergeTypeMigration).toMigrate(
       {
         automergeType: 'test',
       },
@@ -24,8 +24,8 @@ describe('config/migrations/custom/automerge-type-migration', () => {
     );
   });
 
-  it('should not migrate non string value', () => {
-    expect(AutomergeTypeMigration).toMigrate(
+  it('should not migrate non string value', async () => {
+    await expect(AutomergeTypeMigration).toMigrate(
       {
         automergeType: true,
       },

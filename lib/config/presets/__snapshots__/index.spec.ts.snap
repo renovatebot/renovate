@@ -103,6 +103,12 @@ exports[`config/presets/index > resolvePreset > migrates automerge in presets 1`
       "semanticCommitType": "fix",
     },
     {
+      "matchJsonata": [
+        "isLockfileUpdate = true",
+      ],
+      "semanticCommitType": "chore",
+    },
+    {
       "matchPackageNames": [
         "*",
       ],

@@ -1,8 +1,8 @@
 import { IgnoreNpmrcFileMigration } from './ignore-npmrc-file-migration';
 
 describe('config/migrations/custom/ignore-npmrc-file-migration', () => {
-  it('should init npmrc field', () => {
-    expect(IgnoreNpmrcFileMigration).toMigrate(
+  it('should init npmrc field', async () => {
+    await expect(IgnoreNpmrcFileMigration).toMigrate(
       {
         ignoreNpmrcFile: true,
       },
@@ -12,8 +12,8 @@ describe('config/migrations/custom/ignore-npmrc-file-migration', () => {
     );
   });
 
-  it('should not change npmrc field if it represents string value', () => {
-    expect(IgnoreNpmrcFileMigration).toMigrate(
+  it('should not change npmrc field if it represents string value', async () => {
+    await expect(IgnoreNpmrcFileMigration).toMigrate(
       {
         ignoreNpmrcFile: true,
         npmrc: '',
@@ -24,8 +24,8 @@ describe('config/migrations/custom/ignore-npmrc-file-migration', () => {
     );
   });
 
-  it('should change npmrc field if it not represents string value', () => {
-    expect(IgnoreNpmrcFileMigration).toMigrate(
+  it('should change npmrc field if it not represents string value', async () => {
+    await expect(IgnoreNpmrcFileMigration).toMigrate(
       {
         ignoreNpmrcFile: true,
         npmrc: true,

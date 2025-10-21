@@ -43,7 +43,7 @@ describe('logger/index', () => {
   it('uses an auto-generated log context', () => {
     logger.debug('');
 
-    expect(bunyanDebugSpy).toHaveBeenCalledWith({ logContext }, '');
+    expect(bunyanDebugSpy).toHaveBeenCalledExactlyOnceWith({ logContext }, '');
   });
 
   it('sets and gets context', () => {
@@ -54,7 +54,7 @@ describe('logger/index', () => {
     logger.debug(msg);
 
     expect(getContext()).toBe(logContext);
-    expect(bunyanDebugSpy).toHaveBeenCalledWith({ logContext }, msg);
+    expect(bunyanDebugSpy).toHaveBeenCalledExactlyOnceWith({ logContext }, msg);
   });
 
   it('supports logging with metadata', () => {
@@ -81,7 +81,7 @@ describe('logger/index', () => {
 
       logger.debug({ baz: 'baz' }, 'message');
 
-      expect(bunyanDebugSpy).toHaveBeenCalledWith(
+      expect(bunyanDebugSpy).toHaveBeenCalledExactlyOnceWith(
         {
           logContext,
           // `foo` key was rewritten
@@ -99,7 +99,7 @@ describe('logger/index', () => {
 
       logger.debug({ baz: 'baz' }, 'message');
 
-      expect(bunyanDebugSpy).toHaveBeenCalledWith(
+      expect(bunyanDebugSpy).toHaveBeenCalledExactlyOnceWith(
         {
           logContext,
           foo: 'foo',
@@ -119,7 +119,7 @@ describe('logger/index', () => {
 
       logger.debug({ baz: 'baz' }, 'message');
 
-      expect(bunyanDebugSpy).toHaveBeenCalledWith(
+      expect(bunyanDebugSpy).toHaveBeenCalledExactlyOnceWith(
         {
           logContext,
           foo: 'foo',
@@ -134,7 +134,7 @@ describe('logger/index', () => {
 
       logger.debug({ baz: 'baz' }, 'message');
 
-      expect(bunyanDebugSpy).toHaveBeenCalledWith(
+      expect(bunyanDebugSpy).toHaveBeenLastCalledWith(
         {
           logContext,
           foo: 'foo',
@@ -150,7 +150,8 @@ describe('logger/index', () => {
 
       withMeta({ bar: 'bar' }, () => {
         logger.debug({ baz: 'baz' }, 'message');
-        expect(bunyanDebugSpy).toHaveBeenCalledWith(
+        expect(bunyanDebugSpy).toHaveBeenNthCalledWith(
+          1,
           {
             logContext,
             foo: 'foo',
@@ -162,11 +163,11 @@ describe('logger/index', () => {
       });
 
       logger.debug({ baz: 'baz' }, 'message');
-      expect(bunyanDebugSpy).toHaveBeenCalledWith(
+      expect(bunyanDebugSpy).toHaveBeenNthCalledWith(
+        2,
         {
           logContext,
           foo: 'foo',
-          bar: 'bar',
           baz: 'baz',
         },
         'message',
@@ -184,11 +185,11 @@ describe('logger/index', () => {
       ).toThrow('test error');
 
       logger.debug({ baz: 'baz' }, 'message');
-      expect(bunyanDebugSpy).toHaveBeenCalledWith(
+      expect(bunyanDebugSpy).toHaveBeenNthCalledWith(
+        2,
         {
           logContext,
           foo: 'foo',
-          bar: 'bar',
           baz: 'baz',
         },
         'message',
@@ -277,7 +278,7 @@ describe('logger/index', () => {
 
     expect(loggerSpy).toHaveBeenCalledTimes(0);
     expect(childLoggerSpy).toHaveBeenCalledTimes(1);
-    expect(childLoggerSpy).toHaveBeenCalledWith('test');
+    expect(childLoggerSpy).toHaveBeenCalledExactlyOnceWith('test');
   });
 
   it('saves problems', () => {
@@ -421,5 +422,44 @@ describe('logger/index', () => {
     expect(logged.secrets.foo).toBe('***********');
     expect(logged.someFn).toBe('[function]');
     expect(logged.someObject.field).toBe('**redacted**');
+  });
+
+  it('sanitizes secrets in object keys', () => {
+    let logged: Record<string, any> = {};
+    vi.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
+      partial<WriteStream>({
+        writable: true,
+        write(x: string): boolean {
+          logged = JSON.parse(x);
+          return true;
+        },
+      }),
+    );
+
+    addStream({
+      name: 'logfile',
+      path: 'file.log',
+      level: 'debug',
+    });
+
+    const secret = 'https://secret@example.com';
+    const data: Record<string, any> = {
+      [secret]: { nested: secret },
+    };
+
+    logger.debug(
+      {
+        data,
+        secret,
+      },
+      'logs secrets in keys',
+    );
+
+    expect(logged.data).toStrictEqual({
+      'https://**redacted**@example.com': {
+        nested: 'https://**redacted**@example.com',
+      },
+    });
+    expect(logged.secret).toBe('https://**redacted**@example.com');
   });
 });

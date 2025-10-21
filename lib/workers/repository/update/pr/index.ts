@@ -117,6 +117,38 @@ function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
   return is.nonEmptyArray(pr.reviewers);
 }
 
+function addPullRequestNoteIfAttestationHasBeenLost(
+  upgrade: BranchUpgradeConfig,
+): void {
+  const { packageName, depName, currentVersion, newVersion } = upgrade;
+  const name = packageName ?? depName;
+
+  const currentRelease = upgrade.releases?.find(
+    (release) => release.version === currentVersion,
+  );
+  const newRelease = upgrade.releases?.find(
+    (release) => release.version === newVersion,
+  );
+
+  if (
+    currentRelease &&
+    newRelease &&
+    currentRelease.attestation === true &&
+    newRelease.attestation !== true
+  ) {
+    upgrade.prBodyNotes ??= [];
+    upgrade.prBodyNotes.push(
+      [
+        '> :exclamation: **Warning**',
+        '>',
+        `> ${name} ${currentVersion} was released with an attestation, but ${newVersion} has no attestation.`,
+        `> Verify that release ${newVersion} was published by the expected author.`,
+        '\n',
+      ].join('\n'),
+    );
+  }
+}
+
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
   prConfig: BranchConfig,
@@ -141,7 +173,7 @@ export async function ensurePr(
   // Check if PR already exists
   const existingPr =
     (await platform.getBranchPr(branchName, config.baseBranch)) ??
-    (await tryReuseAutoclosedPr(branchName));
+    (await tryReuseAutoclosedPr(branchName, prTitle));
   const prCache = getPrCache(branchName);
   if (existingPr) {
     logger.debug('Found existing PR');
@@ -290,8 +322,7 @@ export async function ensurePr(
         }
       } else if (logJSON.error === 'MissingGithubToken') {
         upgrade.prBodyNotes ??= [];
-        upgrade.prBodyNotes = [
-          ...upgrade.prBodyNotes,
+        upgrade.prBodyNotes.push(
           [
             '> :exclamation: **Important**',
             '> ',
@@ -299,9 +330,12 @@ export async function ensurePr(
             '> If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).',
             '\n',
           ].join('\n'),
-        ];
+        );
       }
     }
+
+    addPullRequestNoteIfAttestationHasBeenLost(upgrade);
+
     config.upgrades.push(upgrade);
   }
 

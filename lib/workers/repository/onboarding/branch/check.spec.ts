@@ -37,6 +37,7 @@ describe('workers/repository/onboarding/branch/check', () => {
       .mockReturnValueOnce('onboarding-sha' as LongCommitSha);
     const res = await isOnboarded(config);
     expect(res).toBeFalse();
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.debug).toHaveBeenCalledWith(
       'Onboarding cache is valid. Repo is not onboarded',
     );
@@ -53,7 +54,7 @@ describe('workers/repository/onboarding/branch/check', () => {
     });
     scm.getFileList.mockResolvedValue([]);
     await isOnboarded(config);
-    expect(logger.debug).not.toHaveBeenCalledWith(
+    expect(logger.debug).not.toHaveBeenCalledExactlyOnceWith(
       'Onboarding cache is valid. Repo is not onboarded',
     );
   });
@@ -65,5 +66,14 @@ describe('workers/repository/onboarding/branch/check', () => {
     await expect(isOnboarded(config)).rejects.toThrow(
       REPOSITORY_CLOSED_ONBOARDING,
     );
+  });
+
+  it('checks git file list for config file when in fork mode', async () => {
+    config.forkToken = 'token';
+    cache.getCache.mockReturnValue({ configFileName: 'renovate.json' });
+    scm.getFileList.mockResolvedValue([]);
+    await isOnboarded(config);
+    expect(platform.getJsonFile).not.toHaveBeenCalled();
+    expect(scm.getFileList).toHaveBeenCalled();
   });
 });

@@ -13,10 +13,9 @@ Thank you for your time and effort!
 
 Renovate is maintained by:
 
-- [@rarkins](https://github.com/rarkins)
 - [@viceice](https://github.com/viceice)
-- [@JamieMagee](https://github.com/JamieMagee)
 - [@secustor](https://github.com/secustor)
+- [@jamietanna](https://github.com/jamietanna)
 
 ### Maintainers for features
 
@@ -33,6 +32,8 @@ Next up, we have these people who help maintain parts of Renovate:
 We want to highlight these valuable contributions, even if they are one-offs.
 Some features made a lot of people happy, and efficient!
 
+- [@rarkins](https://github.com/rarkins) created Renovate and maintained it through to August 2025
+- [@JamieMagee](https://github.com/JamieMagee) was an active maintainer for years, contributing many features
 - [@HonkingGoose](https://github.com/HonkingGoose) worked on the documentation and helped manage the community
 - [@ikesyo](https://github.com/ikesyo) regularly helpful
 - [@astellingwerf](https://github.com/astellingwerf) reviews PRs

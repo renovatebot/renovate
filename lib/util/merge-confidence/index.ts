@@ -140,7 +140,9 @@ async function queryApi(
     return 'neutral';
   }
 
-  const escapedPackageName = packageName.replace(regEx(/\//g), '%2f');
+  const escapedPackageName = packageName
+    .replace(regEx(/\//g), '%2f')
+    .replace(regEx(/:/g), '%3A');
   const url = joinUrlParts(
     apiBaseUrl,
     'api/mc/json',

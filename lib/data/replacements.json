@@ -16,7 +16,9 @@
       "replacements:eslint-plugin-vitest-to-scoped",
       "replacements:fakerjs-to-scoped",
       "replacements:fastify-to-scoped",
+      "replacements:framer-motion-to-motion",
       "replacements:hapi-to-scoped",
+      "replacements:google-github-action-release-please-to-googleapis",
       "replacements:jade-to-pug",
       "replacements:joi-to-scoped",
       "replacements:joi-to-unscoped",
@@ -132,6 +134,17 @@
         "matchPackageNames": ["babel-eslint"],
         "replacementName": "@babel/eslint-parser",
         "replacementVersion": "7.11.0"
+      }
+    ]
+  },
+  "clang-format-to-maintenance-fork": {
+    "description": "Maintenance fork of `clang-format`",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["clang-format"],
+        "replacementName": "clang-format-node",
+        "replacementVersion": "2.0.0"
       }
     ]
   },
@@ -667,6 +680,27 @@
         "matchPackageNames": ["fastify-zipkin"],
         "replacementName": "@fastify/zipkin",
         "replacementVersion": "3.0.0"
+      }
+    ]
+  },
+  "framer-motion-to-motion": {
+    "description": "`framer-motion` and Motion One have merged under the package name `motion`, though `framer-motion` is still being published. `motion` is now the recommended name.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=11.11.12",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["framer-motion"],
+        "replacementName": "motion"
+      }
+    ]
+  },
+  "google-github-action-release-please-to-googleapis": {
+    "description": "`google-github-action/release-please` was renamed to `googleapis/release-please`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["github-tags"],
+        "matchPackageNames": ["google-github-actions/release-please-action"],
+        "replacementName": "googleapis/release-please"
       }
     ]
   },

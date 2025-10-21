@@ -1,8 +1,8 @@
 import { SeparateMultipleMajorMigration } from './separate-multiple-major-migration';
 
 describe('config/migrations/custom/separate-multiple-major-migration', () => {
-  it('should remove if separateMajorReleases exists', () => {
-    expect(SeparateMultipleMajorMigration).toMigrate(
+  it('should remove if separateMajorReleases exists', async () => {
+    await expect(SeparateMultipleMajorMigration).toMigrate(
       {
         separateMajorReleases: true,
         separateMultipleMajor: true,
@@ -13,8 +13,8 @@ describe('config/migrations/custom/separate-multiple-major-migration', () => {
     );
   });
 
-  it('should skip if separateMajorReleases does not exist', () => {
-    expect(SeparateMultipleMajorMigration).toMigrate(
+  it('should skip if separateMajorReleases does not exist', async () => {
+    await expect(SeparateMultipleMajorMigration).toMigrate(
       {
         separateMultipleMajor: true,
       },

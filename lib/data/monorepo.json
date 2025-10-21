@@ -17,6 +17,10 @@
     "angular-eslint": "https://github.com/angular-eslint/angular-eslint",
     "angularfire": "https://github.com/angular/angularfire",
     "angularjs": "https://github.com/angular/angular.js",
+    "apache-lucene": [
+      "https://gitbox.apache.org/repos/asf?p=lucene.git",
+      "https://github.com/apache/lucene"
+    ],
     "apollo-server": "https://github.com/apollographql/apollo-server",
     "apolloclient": "https://github.com/apollographql/apollo-client",
     "applicationinsights-dotnet": "https://github.com/Microsoft/ApplicationInsights-dotnet",
@@ -42,6 +46,7 @@
     ],
     "avalonia": "https://github.com/AvaloniaUI/Avalonia",
     "aws-cdk": "https://github.com/aws/aws-cdk",
+    "aws-lambda-dotnet": "https://github.com/aws/aws-lambda-dotnet",
     "aws-lambda-powertools-typescript": [
       "https://github.com/awslabs/aws-lambda-powertools-typescript",
       "https://github.com/aws-powertools/powertools-lambda-typescript"
@@ -291,6 +296,7 @@
     "dotnet-azure-ad-identitymodel-extensions": "https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet",
     "dotnet-azure-ad-microsoft-identity-web": "https://github.com/AzureAD/microsoft-identity-web",
     "dotnet-wcf": "https://github.com/dotnet/wcf",
+    "dotnetcore-cap": "https://github.com/dotnetcore/CAP",
     "dropwizard": "https://github.com/dropwizard/dropwizard",
     "duende-identityserver": "https://github.com/DuendeSoftware/IdentityServer",
     "elastic-apm-agent-rum-js": "https://github.com/elastic/apm-agent-rum-js",
@@ -436,6 +442,7 @@
     "ml-dotnet": "https://github.com/dotnet/machinelearning",
     "mockito": "https://github.com/mockito/mockito",
     "mongo-csharp-driver": "https://github.com/mongodb/mongo-csharp-driver",
+    "mongo-java-driver": "https://github.com/mongodb/mongo-java-driver",
     "mstest": "https://github.com/microsoft/testfx",
     "mutation-testing-elements": "https://github.com/stryker-mutator/mutation-testing-elements",
     "nest": [
@@ -634,7 +641,9 @@
     "ui5-webcomponents": [
       "https://github.com/SAP/ui5-webcomponents",
       "https://github.com/SAP/ui5-webcomponents-react",
-      "https://github.com/SAP/ui5-webcomponents-ngx"
+      "https://github.com/SAP/ui5-webcomponents-ngx",
+      "https://github.com/UI5/webcomponents",
+      "https://github.com/UI5/webcomponents-react"
     ],
     "unhead": "https://github.com/unjs/unhead",
     "unocss": "https://github.com/unocss/unocss",
