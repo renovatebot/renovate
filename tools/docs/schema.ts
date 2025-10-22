@@ -173,7 +173,7 @@ export async function generateSchema(
 ): Promise<void> {
   const schema = {
     title: `JSON schema for Renovate ${version} config files (https://renovatebot.com/)`,
-    $schema: 'http://json-schema.org/draft-04/schema#',
+    $schema: 'http://json-schema.org/draft-07/schema#',
     'x-renovate-version': `${version}`,
     allowComments: true,
     type: 'object',
