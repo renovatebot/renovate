@@ -1,7 +1,8 @@
 import { format } from 'node:util';
 import type { ValidateFunction } from 'ajv';
-import ajv from 'ajv';
-import draft07 from 'ajv/lib/refs/json-schema-draft-07.json';
+import { Ajv } from 'ajv';
+import draft7MetaSchema from 'ajv/lib/refs/json-schema-draft-07.json';
+import addFormats from 'ajv-formats';
 import fs from 'fs-extra';
 import { glob } from 'glob';
 import type { Token } from 'markdown-it';
@@ -49,7 +50,7 @@ function checkSchemaCompliantJson(
     return value as RenovateConfig;
   }
   for (const error of validate.errors ?? []) {
-    reportIssue(file, token, `${error.dataPath} ${error.message}`);
+    reportIssue(file, token, `${error.instancePath} ${error.message}`);
   }
 }
 
@@ -96,13 +97,11 @@ async function processFile(file: string): Promise<void> {
 }
 
 void (async () => {
-  validate = new ajv({
-    extendRefs: true,
-    meta: false,
-    schemaId: 'auto',
-  })
-    .addMetaSchema(draft07)
-    .compile(await fs.readJson('renovate-schema.json'));
+  const validator = new Ajv({ schemaId: '$id', meta: false }).addMetaSchema(
+    draft7MetaSchema,
+  );
+  addFormats(validator);
+  validate = validator.compile(draft7MetaSchema);
 
   const files = await glob(markdownGlob);
 
