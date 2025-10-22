@@ -36,7 +36,11 @@ async function validateSchemas(): Promise<void> {
 
   const failed: { filename: string; errors: ajv.ErrorObject[] }[] = [];
 
-  const fileGlobsToValidate = ['renovate-schema.json', 'tools/schemas/*.json'];
+  const fileGlobsToValidate = [
+    'renovate-schema.json',
+    'renovate-global-schema.json',
+    'tools/schemas/*.json',
+  ];
   const expandedFiles: string[] = (
     await Promise.all(
       fileGlobsToValidate.map(async (pattern) => await glob(pattern)),
