@@ -142,8 +142,8 @@
     "pnpm": "^10.0.0"
   },
   "volta": {
-    "node": "22.20.0",
-    "pnpm": "10.18.2"
+    "node": "22.21.0",
+    "pnpm": "10.18.3"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.899.0",
@@ -279,7 +279,7 @@
     "@ls-lint/ls-lint": "2.3.1",
     "@openpgp/web-stream-tools": "0.2.0",
     "@semantic-release/exec": "7.1.0",
-    "@smithy/util-stream": "4.5.1",
+    "@smithy/util-stream": "4.5.2",
     "@types/auth-header": "1.0.6",
     "@types/aws4": "1.11.6",
     "@types/better-sqlite3": "7.6.13",
@@ -325,7 +325,7 @@
     "common-tags": "1.8.2",
     "conventional-changelog-conventionalcommits": "9.1.0",
     "emojibase-data": "16.0.3",
-    "esbuild": "0.25.10",
+    "esbuild": "0.25.11",
     "eslint": "9.35.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-formatter-gha": "1.6.0",
@@ -357,7 +357,7 @@
     "vitest": "3.2.4",
     "vitest-mock-extended": "3.1.0"
   },
-  "packageManager": "pnpm@10.18.2",
+  "packageManager": "pnpm@10.18.3",
   "files": [
     "dist",
     "renovate-schema.json"
@@ -380,7 +380,7 @@
       "re2"
     ],
     "overrides": {
-      "esbuild": "0.25.10"
+      "esbuild": "0.25.11"
     }
   }
 }

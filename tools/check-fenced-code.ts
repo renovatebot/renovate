@@ -1,7 +1,7 @@
 import { format } from 'node:util';
 import type { ValidateFunction } from 'ajv';
 import ajv from 'ajv';
-import draft04 from 'ajv/lib/refs/json-schema-draft-04.json';
+import draft07 from 'ajv/lib/refs/json-schema-draft-07.json';
 import fs from 'fs-extra';
 import { glob } from 'glob';
 import type { Token } from 'markdown-it';
@@ -99,9 +99,9 @@ void (async () => {
   validate = new ajv({
     extendRefs: true,
     meta: false,
-    schemaId: 'id',
+    schemaId: 'auto',
   })
-    .addMetaSchema(draft04)
+    .addMetaSchema(draft07)
     .compile(await fs.readJson('renovate-schema.json'));
 
   const files = await glob(markdownGlob);

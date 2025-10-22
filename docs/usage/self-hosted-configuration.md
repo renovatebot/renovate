@@ -15,6 +15,8 @@ The config options below _must_ be configured in the bot/admin config, so in eit
 !!! note
      Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
 
+For information about how to configure Renovate with a `config.js` see the [Using `config.js` documentation](./getting-started/running.md#using-configjs).
+
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
 <!-- prettier-ignore -->

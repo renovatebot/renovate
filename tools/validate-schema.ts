@@ -1,9 +1,9 @@
 import { promises } from 'fs';
 import ajv from 'ajv';
-import draft4MetaSchema from 'ajv/lib/refs/json-schema-draft-04.json';
+import draft7MetaSchema from 'ajv/lib/refs/json-schema-draft-07.json';
 import { glob } from 'glob';
 
-async function validateFileAgainstDraft04Schema(
+async function validateFileAgainstSchema(
   validate: ajv.ValidateFunction,
   filename: string,
 ): Promise<ajv.ErrorObject[] | null | undefined> {
@@ -14,14 +14,14 @@ async function validateFileAgainstDraft04Schema(
   }
 }
 
-async function validateFileAgainstDraft04SchemaFromFile(
+async function validateFileAgainstSchemaFromFile(
   schemaFilename: string,
   filename: string,
 ): Promise<ajv.ErrorObject[] | null | undefined> {
   const data = JSON.parse(await promises.readFile(filename, 'utf-8'));
   const schema = JSON.parse(await promises.readFile(schemaFilename, 'utf-8'));
   const validator = new ajv({ schemaId: 'auto', meta: false });
-  validator.addMetaSchema(draft4MetaSchema);
+  validator.addMetaSchema(draft7MetaSchema);
   const validate = validator.compile(schema);
   const valid = await validate(data);
   if (!valid) {
@@ -29,10 +29,10 @@ async function validateFileAgainstDraft04SchemaFromFile(
   }
 }
 
-async function validateDraft04Schemas(): Promise<void> {
+async function validateSchemas(): Promise<void> {
   const validator = new ajv({ schemaId: 'auto', meta: false });
-  validator.addMetaSchema(draft4MetaSchema);
-  const validate = validator.compile(draft4MetaSchema);
+  validator.addMetaSchema(draft7MetaSchema);
+  const validate = validator.compile(draft7MetaSchema);
 
   const failed: { filename: string; errors: ajv.ErrorObject[] }[] = [];
 
@@ -44,7 +44,7 @@ async function validateDraft04Schemas(): Promise<void> {
   ).flat();
 
   for (const filename of expandedFiles) {
-    const errors = await validateFileAgainstDraft04Schema(validate, filename);
+    const errors = await validateFileAgainstSchema(validate, filename);
     if (errors) {
       failed.push({ filename, errors });
     } else {
@@ -95,7 +95,7 @@ async function validateDataFilesAgainstSchemas(): Promise<void> {
   }[] = [];
 
   for (const filename of filesAndSchemasToValidate) {
-    const errors = await validateFileAgainstDraft04SchemaFromFile(
+    const errors = await validateFileAgainstSchemaFromFile(
       filename.schemaFilename,
       filename.filename,
     );
@@ -121,6 +121,6 @@ async function validateDataFilesAgainstSchemas(): Promise<void> {
 }
 
 void (async () => {
-  await validateDraft04Schemas();
+  await validateSchemas();
   await validateDataFilesAgainstSchemas();
 })();
