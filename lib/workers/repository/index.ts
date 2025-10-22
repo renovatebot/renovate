@@ -51,12 +51,14 @@ export async function renovateRepository(
   splitInit();
 
   let repoResult: ProcessResult | undefined;
-  const { config, localDir } = await instrument(
+  const { config, localDir, errorRes } = await instrument(
     'init',
     async (): Promise<{
       config: RenovateConfig;
       localDir: string;
+      errorRes?: string;
     }> => {
+      let errorRes: string | undefined;
       let config = GlobalConfig.set(
         applySecretsAndVariablesToConfig({
           config: repoConfig,
@@ -79,7 +81,7 @@ export async function renovateRepository(
         addSplit('init');
       } catch (err) /* istanbul ignore next */ {
         setMeta({ repository: config.repository });
-        const errorRes = await handleError(config, err);
+        errorRes = await handleError(config, err);
         const pruneWhenErrors = [
           REPOSITORY_DISABLED_BY_CONFIG,
           REPOSITORY_FORKED,
@@ -91,11 +93,16 @@ export async function renovateRepository(
         repoResult = processResult(config, errorRes);
       }
 
-      return { config, localDir };
+      return { config, localDir, errorRes };
     },
   );
 
   try {
+    // only continue if init stage was successful
+    if (errorRes) {
+      throw new Error(errorRes);
+    }
+
     const performExtract =
       config.repoIsOnboarded! ||
       !OnboardingState.onboardingCacheValid ||

@@ -223,6 +223,8 @@ jobs:
 
       - name: Lint
         run: pnpm eslint-ci
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
 
       - name: Save eslint cache
         if: github.event_name == 'push'
@@ -708,7 +710,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@fe770ba6b0bf4b72cb2e3e691f6e4e2974d5c80a # v3.14.4
+        uses: containerbase/internal-tools@ea80a3be1d45607f486ebac45c86541c3eabf136 # v3.14.5
         with:
           command: docker-config
 
@@ -721,7 +723,7 @@ jobs:
       - name: Install newer npm
         run: npm install -g npm
 
-      - uses: sigstore/cosign-installer@7e8b541eb2e61bf99390e1afd4be13a184e9ebc5 # v3.10.1
+      - uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
 
       - name: Docker registry login
         run: |
