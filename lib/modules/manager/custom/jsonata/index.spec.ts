@@ -15,6 +15,7 @@ describe('modules/manager/custom/jsonata/index', () => {
       fileFormat: 'json',
     } as JsonataExtractConfig);
     expect(res).toBeNull();
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.logger.debug).toHaveBeenCalledWith(
       expect.anything(),
       'Error while parsing file',
@@ -250,6 +251,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     const res = await extractPackageFile(json, 'unused', config);
 
     expect(res).toBeNull();
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.logger.warn).toHaveBeenCalledWith(
       expect.anything(),
       'Query results failed schema validation',
@@ -264,6 +266,7 @@ describe('modules/manager/custom/jsonata/index', () => {
       ],
     };
     const res = await extractPackageFile('{}', 'unused', config);
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.logger.debug).toHaveBeenCalledWith(
       {
         packageFile: 'unused',
@@ -285,6 +288,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     };
     const res = await extractPackageFile('{}', 'unused', config);
     expect(res).toBeNull();
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.logger.debug).toHaveBeenCalledWith(
       expect.anything(),
       'Error compiling template for JSONata manager',
@@ -301,6 +305,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     };
     const res = await extractPackageFile('{}', 'unused', config);
     expect(res).not.toBeNull();
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.logger.debug).toHaveBeenCalledWith(
       { url: 'this-is-not-a-valid-url-foo' },
       'Invalid JSONata manager registryUrl',
@@ -340,6 +345,7 @@ describe('modules/manager/custom/jsonata/index', () => {
       datasourceTemplate: 'npm',
     };
     const res = await extractPackageFile('{}', 'unused', config);
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.logger.debug).toHaveBeenCalledWith(
       {
         packageFile: 'unused',

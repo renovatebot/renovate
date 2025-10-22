@@ -469,6 +469,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         mockPR.head!.label,
       );
       expect(res).toBeNull();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           err: expect.any(Object),

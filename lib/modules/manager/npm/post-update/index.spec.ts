@@ -200,7 +200,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       expect(fs.deleteLocalFile).not.toHaveBeenCalled();
-      expect(git.getFile).toHaveBeenCalledOnce();
+      expect(git.getFile).toHaveBeenCalledExactlyOnceWith('package-lock.json');
     });
 
     it('writes .npmrc files', async () => {
@@ -217,8 +217,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ],
       });
 
-      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
-      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+      expect(fs.writeLocalFile).toHaveBeenCalledExactlyOnceWith(
         'packages/core/.npmrc',
         '#dummy\n',
       );
@@ -241,8 +240,7 @@ describe('modules/manager/npm/post-update/index', () => {
         },
       );
 
-      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
-      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+      expect(fs.writeLocalFile).toHaveBeenCalledExactlyOnceWith(
         'packages/core/.npmrc',
         '#dummy\n',
       );
@@ -258,7 +256,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       expect(fs.deleteLocalFile).not.toHaveBeenCalled();
-      expect(git.getFile).toHaveBeenCalledOnce();
+      expect(git.getFile).toHaveBeenCalledExactlyOnceWith('package-lock.json');
     });
 
     it('has no npm files', async () => {
@@ -421,7 +419,9 @@ describe('modules/manager/npm/post-update/index', () => {
         ],
       });
 
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(fs.readLocalFile).toHaveBeenCalledWith('.npmrc', 'utf8');
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(fs.writeLocalFile).toHaveBeenCalledWith('.npmrc', '# dummy');
       expect(fs.deleteLocalFile.mock.calls).toMatchObject([
         ['randomFolder/.npmrc'],
@@ -578,6 +578,7 @@ describe('modules/manager/npm/post-update/index', () => {
         updatedArtifacts: [],
       });
       expect(spyNpm).not.toHaveBeenCalled();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Skipping lock file generation',
       );
@@ -706,6 +707,7 @@ describe('modules/manager/npm/post-update/index', () => {
           },
           additionalFiles,
         );
+        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(fs.writeLocalFile).toHaveBeenCalledWith(
           '.yarnrc.yml',
           'npmRegistries:\n' +
@@ -744,6 +746,7 @@ describe('modules/manager/npm/post-update/index', () => {
           ),
         ).rejects.toThrow();
 
+        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.logger.warn).toHaveBeenCalledWith(
           expect.anything(),
           'Error appending .yarnrc.yml content',

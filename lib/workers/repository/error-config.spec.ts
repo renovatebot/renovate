@@ -36,6 +36,7 @@ describe('workers/repository/error-config', () => {
       );
 
       expect(res).toBeUndefined();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         'Config warning issues are not created, updated or closed when mode=silent',
       );
@@ -57,11 +58,12 @@ Message: some-message
       const res = await raiseCredentialsWarningIssue(config, error);
 
       expect(res).toBeUndefined();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.warn).toHaveBeenCalledWith(
         { configError: error, res: 'created' },
         'Configuration Warning',
       );
-      expect(platform.ensureIssue).toHaveBeenCalledWith(
+      expect(platform.ensureIssue).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ body: expectedBody }),
       );
     });
@@ -76,6 +78,7 @@ Message: some-message
       const res = await raiseConfigWarningIssue(config, error);
 
       expect(res).toBeUndefined();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.info).toHaveBeenCalledWith(
         { configError: error },
         'DRY-RUN: Would ensure configuration error issue',
@@ -96,7 +99,7 @@ Message: some-message
       const res = await raiseConfigWarningIssue(config, error);
 
       expect(res).toBeUndefined();
-      expect(platform.updatePr).toHaveBeenCalledWith(
+      expect(platform.updatePr).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ prTitle: pr.title, number: pr.number }),
       );
     });
@@ -115,6 +118,7 @@ Message: some-message
       const res = await raiseConfigWarningIssue(config, error);
 
       expect(res).toBeUndefined();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.info).toHaveBeenCalledWith(
         `DRY-RUN: Would update PR #${pr.number}`,
       );
@@ -135,6 +139,7 @@ Message: some-message
       const res = await raiseConfigWarningIssue(config, error);
 
       expect(res).toBeUndefined();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.info).toHaveBeenCalledWith(
         { notificationName },
         'Configuration failure, issues will be suppressed',

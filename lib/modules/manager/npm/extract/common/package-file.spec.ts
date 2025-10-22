@@ -21,6 +21,7 @@ describe('modules/manager/npm/extract/common/package-file', () => {
     });
     await expect(hasPackageManager('/repo')).resolves.toBe(true);
 
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.trace).toHaveBeenCalledWith(
       'npm.hasPackageManager from package.json',
     );

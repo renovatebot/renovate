@@ -144,12 +144,12 @@ describe('modules/manager/npm/post-update/npm', () => {
       { skipInstalls, constraints: { npm: '^6.0.0' } },
     );
     expect(fs.renameLocalFile).toHaveBeenCalledTimes(1);
-    expect(fs.renameLocalFile).toHaveBeenCalledWith(
+    expect(fs.renameLocalFile).toHaveBeenCalledExactlyOnceWith(
       upath.join('some-dir', 'package-lock.json'),
       upath.join('some-dir', 'npm-shrinkwrap.json'),
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(fs.readLocalFile).toHaveBeenCalledWith(
+    expect(fs.readLocalFile).toHaveBeenCalledExactlyOnceWith(
       'some-dir/npm-shrinkwrap.json',
       'utf8',
     );
@@ -172,7 +172,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     );
     expect(fs.renameLocalFile).toHaveBeenCalledTimes(0);
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(fs.readLocalFile).toHaveBeenCalledWith(
+    expect(fs.readLocalFile).toHaveBeenCalledExactlyOnceWith(
       'some-dir/npm-shrinkwrap.json',
       'utf8',
     );
@@ -289,6 +289,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(fs.readLocalFile).toHaveBeenCalledWith(
       'some-dir/npm-shrinkwrap.json',
       'utf8',

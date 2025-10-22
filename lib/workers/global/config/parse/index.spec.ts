@@ -128,7 +128,10 @@ describe('workers/global/config/parse/index', () => {
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
 
       expect(parsedConfig.privateKey).toBeUndefined();
-      expect(decrypt.setPrivateKeys).toHaveBeenCalledWith(expected, undefined);
+      expect(decrypt.setPrivateKeys).toHaveBeenCalledExactlyOnceWith(
+        expected,
+        undefined,
+      );
     });
 
     it('supports Bitbucket username/password', async () => {
