@@ -35,6 +35,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'cocoapods',
     versioning: rubyVersioningId,
   },
+  conan: {
+    datasource: 'pypi',
+    packageName: 'conan',
+    versioning: pep440VersioningId,
+  },
   composer: {
     datasource: 'github-releases',
     packageName: 'containerbase/composer-prebuild',
