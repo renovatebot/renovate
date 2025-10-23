@@ -205,7 +205,8 @@ async function releaseNotesResult(
   }
   const { baseUrl, repository } = project;
   const releaseNotes: ChangeLogNotes = releaseMatch;
-  if (detectPlatform(baseUrl) === 'gitlab') {
+  const platform = detectPlatform(baseUrl);
+  if (platform === 'gitlab') {
     releaseNotes.url = `${baseUrl}${repository}/tags/${releaseMatch.tag!}`;
   } else {
     releaseNotes.url = releaseMatch.url
@@ -218,7 +219,7 @@ async function releaseNotesResult(
   releaseNotes.name = massageName(releaseNotes.name, releaseNotes.tag);
   if (releaseNotes.body.length || releaseNotes.name?.length) {
     try {
-      if (baseUrl !== 'https://gitlab.com/') {
+      if (platform !== 'gitlab') {
         releaseNotes.body = await linkify(releaseNotes.body, {
           repository: `${baseUrl}${repository}`,
         });
