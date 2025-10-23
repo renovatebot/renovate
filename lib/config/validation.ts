@@ -16,7 +16,7 @@ import {
   hasValidSchedule,
   hasValidTimezone,
 } from '../workers/repository/update/branch/schedule';
-import { configFileNames } from './app-strings';
+import { getConfigFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
@@ -250,9 +250,8 @@ export async function validateConfig(
         !optionParents[key].includes(parentName as AllowedParents)
       ) {
         // TODO: types (#22198)
-        const message = `${key} should only be configured within one of "${optionParents[
-          key
-        ]?.join(' or ')}" objects. Was found in ${parentName}`;
+        const options = optionParents[key]?.sort().join(', ');
+        const message = `"${key}" can't be used in "${parentName}". Allowed objects: ${options}.`;
         warnings.push({
           topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
           message,
@@ -817,11 +816,11 @@ async function validateGlobalConfig(
       if (is.string(val)) {
         if (
           key === 'onboardingConfigFileName' &&
-          !configFileNames.includes(val)
+          !getConfigFileNames().includes(val)
         ) {
           warnings.push({
             topic: 'Configuration Error',
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${configFileNames.join(', ')}.`,
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${getConfigFileNames().join(', ')}.`,
           });
         } else if (
           key === 'repositoryCache' &&

@@ -1,8 +1,8 @@
 import { AutomergeMigration } from './automerge-migration';
 
 describe('config/migrations/custom/automerge-migration', () => {
-  it('should migrate none', () => {
-    expect(AutomergeMigration).toMigrate(
+  it('should migrate none', async () => {
+    await expect(AutomergeMigration).toMigrate(
       {
         automerge: 'none',
       } as any,
@@ -12,8 +12,8 @@ describe('config/migrations/custom/automerge-migration', () => {
     );
   });
 
-  it('should migrate patch', () => {
-    expect(AutomergeMigration).toMigrate(
+  it('should migrate patch', async () => {
+    await expect(AutomergeMigration).toMigrate(
       {
         automerge: 'patch',
       } as any,
@@ -31,8 +31,8 @@ describe('config/migrations/custom/automerge-migration', () => {
     );
   });
 
-  it('should migrate minor', () => {
-    expect(AutomergeMigration).toMigrate(
+  it('should migrate minor', async () => {
+    await expect(AutomergeMigration).toMigrate(
       {
         automerge: 'minor',
       } as any,
@@ -47,8 +47,8 @@ describe('config/migrations/custom/automerge-migration', () => {
     );
   });
 
-  it('should migrate any', () => {
-    expect(AutomergeMigration).toMigrate(
+  it('should migrate any', async () => {
+    await expect(AutomergeMigration).toMigrate(
       {
         automerge: 'any',
       } as any,

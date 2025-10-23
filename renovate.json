@@ -1,7 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>renovatebot/.github"],
-  "assignees": ["rarkins", "viceice"],
+  "assignees": ["viceice", "secustor", "jamietanna"],
+  "reviewers": ["@renovatebot/maintainers"],
   "semanticCommitScope": "deps",
   "automergeType": "pr",
   "prCreation": "immediate",
@@ -90,7 +91,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["config/options/index.ts"],
+      "managerFilePatterns": ["lib/config/options/index.ts"],
       "matchStrings": [
         "default: '(?<depName>ghcr.io/containerbase/sidecar):(?<currentValue>.*)'"
       ],

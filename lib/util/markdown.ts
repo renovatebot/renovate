@@ -1,4 +1,5 @@
 import { remark } from 'remark';
+import gfm from 'remark-gfm';
 import type { Options as RemarkGithubOptions } from 'remark-github';
 import github from 'remark-github';
 import { regEx } from './regex';
@@ -39,9 +40,8 @@ export async function linkify(
   // https://github.com/syntax-tree/mdast-util-to-markdown#optionsbullet
   const output = await remark()
     .use({ settings: { bullet: '-' } })
+    .use(gfm)
     .use(github, { mentionStrong: false, ...options })
     .process(content);
-  return output
-    .toString()
-    .replace(regEx(/-\/merge\\_requests\/(\d+)/g), '-/merge_requests/$1');
+  return output.toString();
 }

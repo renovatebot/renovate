@@ -1,8 +1,8 @@
 import { BranchPrefixMigration } from './branch-prefix-migration';
 
 describe('config/migrations/custom/branch-prefix-migration', () => {
-  it('should migrate template', () => {
-    expect(BranchPrefixMigration).toMigrate(
+  it('should migrate template', async () => {
+    await expect(BranchPrefixMigration).toMigrate(
       {
         branchPrefix: 'renovate/{{parentDir}}-',
       },
@@ -13,8 +13,8 @@ describe('config/migrations/custom/branch-prefix-migration', () => {
     );
   });
 
-  it('should ignore string without template', () => {
-    expect(BranchPrefixMigration).toMigrate(
+  it('should ignore string without template', async () => {
+    await expect(BranchPrefixMigration).toMigrate(
       {
         branchPrefix: 'test',
       },
@@ -25,8 +25,8 @@ describe('config/migrations/custom/branch-prefix-migration', () => {
     );
   });
 
-  it('should ignore non string without template', () => {
-    expect(BranchPrefixMigration).toMigrate(
+  it('should ignore non string without template', async () => {
+    await expect(BranchPrefixMigration).toMigrate(
       {
         branchPrefix: true,
       } as any,

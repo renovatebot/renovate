@@ -6,6 +6,8 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
+
+import { PackageJson } from './schema';
 import type { LockFile, ParseLockFileResult } from './types';
 
 export function parseLockFile(lockFile: string): ParseLockFileResult {
@@ -81,4 +83,16 @@ export async function resetNpmrcContent(
       logger.warn('Unable to delete custom npmrc');
     } /* v8 ignore stop -- needs test */
   }
+}
+
+export async function loadPackageJson(parentDir: string): Promise<PackageJson> {
+  const json = await readLocalFile(
+    upath.join(parentDir, 'package.json'),
+    'utf8',
+  );
+  const res = PackageJson.safeParse(json);
+  if (res.success) {
+    return res.data;
+  }
+  return {};
 }

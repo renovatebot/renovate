@@ -164,7 +164,7 @@ export const presets: Record<string, Preset> = {
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+)(LTS)?)?(-(?<compatibility>.*))?$',
       },
       {
-        allowedVersions: '/^(?:8|11|17|21)(?:\\.|-|$)/',
+        allowedVersions: '/^(?:8|11|17|21|25)(?:\\.|-|$)/',
         description:
           'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
         matchDatasources: ['docker', 'java-version'],
@@ -181,7 +181,7 @@ export const presets: Record<string, Preset> = {
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+)(LTS)?)?(-(?<compatibility>.*))?$',
       },
       {
-        allowedVersions: '/^(?:jdk|jdk-all|jre)-(?:8|11|17|21)(?:\\.|-|$)/',
+        allowedVersions: '/^(?:jdk|jdk-all|jre)-(?:8|11|17|21|25)(?:\\.|-|$)/',
         description:
           'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
         matchDatasources: ['docker'],

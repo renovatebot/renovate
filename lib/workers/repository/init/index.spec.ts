@@ -60,10 +60,12 @@ describe('workers/repository/init/index', () => {
         partial<RenovateConfig>(),
       );
       await initRepo({});
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { platform: undefined },
         "Configuration option 'filterUnavailableUsers' is not supported on the current platform.",
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { platform: undefined },
         "Configuration option 'expandCodeOwnersGroups' is not supported on the current platform.",

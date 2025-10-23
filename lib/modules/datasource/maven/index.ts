@@ -49,6 +49,16 @@ function extractVersions(metadata: XmlDocument): MetadataResults {
     return res;
   }
   res.versions = elements.map((el) => el.val);
+  const latest = metadata.descendantWithPath('versioning.latest');
+  if (latest?.val) {
+    res.tags ??= {};
+    res.tags.latest = latest.val;
+  }
+  const release = metadata.descendantWithPath('versioning.release');
+  if (release?.val) {
+    res.tags ??= {};
+    res.tags.release = release.val;
+  }
 
   return res;
 }
@@ -134,6 +144,10 @@ export class MavenDatasource extends Datasource {
     };
     if (metadata.tags) {
       result.tags = metadata.tags;
+      if (result.tags.latest) {
+        logger.debug(`Setting respectLatest=false for maven ${packageName}`);
+        result.respectLatest = false;
+      }
     }
 
     if (!this.defaultRegistryUrls.includes(registryUrl)) {

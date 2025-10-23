@@ -26,6 +26,7 @@ describe('modules/versioning/pep440/range', () => {
       currentVersion: '1.25.0',
     });
     expect(res).toBeNull();
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.debug).toHaveBeenCalledWith(
       'Cannot calculate new value as the newVersion:`1.32.0` is excluded from range: `>=1.25.0,<2,!=1.32.0`',
     );

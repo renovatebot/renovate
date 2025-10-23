@@ -1,8 +1,8 @@
 import { AzureGitLabAutomergeMigration } from './azure-gitlab-automerge-migration';
 
 describe('config/migrations/custom/azure-gitlab-automerge-migration', () => {
-  it('should migrate non undefined gitLabAutomerge', () => {
-    expect(AzureGitLabAutomergeMigration).toMigrate(
+  it('should migrate non undefined gitLabAutomerge', async () => {
+    await expect(AzureGitLabAutomergeMigration).toMigrate(
       {
         gitLabAutomerge: true,
       },
@@ -12,8 +12,8 @@ describe('config/migrations/custom/azure-gitlab-automerge-migration', () => {
     );
   });
 
-  it('should just remove undefined gitLabAutomerge', () => {
-    expect(AzureGitLabAutomergeMigration).toMigrate(
+  it('should just remove undefined gitLabAutomerge', async () => {
+    await expect(AzureGitLabAutomergeMigration).toMigrate(
       {
         gitLabAutomerge: undefined,
       },
@@ -21,8 +21,8 @@ describe('config/migrations/custom/azure-gitlab-automerge-migration', () => {
     );
   });
 
-  it('should override platformAutomerge when gitLabAutomerge defined', () => {
-    expect(AzureGitLabAutomergeMigration).toMigrate(
+  it('should override platformAutomerge when gitLabAutomerge defined', async () => {
+    await expect(AzureGitLabAutomergeMigration).toMigrate(
       {
         gitLabAutomerge: true,
         platformAutomerge: false,
@@ -33,8 +33,8 @@ describe('config/migrations/custom/azure-gitlab-automerge-migration', () => {
     );
   });
 
-  it('should migrate non undefined azureAutoComplete', () => {
-    expect(AzureGitLabAutomergeMigration).toMigrate(
+  it('should migrate non undefined azureAutoComplete', async () => {
+    await expect(AzureGitLabAutomergeMigration).toMigrate(
       {
         azureAutoComplete: true,
       },
@@ -44,8 +44,8 @@ describe('config/migrations/custom/azure-gitlab-automerge-migration', () => {
     );
   });
 
-  it('should just remove undefined azureAutoComplete', () => {
-    expect(AzureGitLabAutomergeMigration).toMigrate(
+  it('should just remove undefined azureAutoComplete', async () => {
+    await expect(AzureGitLabAutomergeMigration).toMigrate(
       {
         azureAutoComplete: undefined,
       },
@@ -53,8 +53,8 @@ describe('config/migrations/custom/azure-gitlab-automerge-migration', () => {
     );
   });
 
-  it('should override platformAutomerge when azureAutoComplete defined', () => {
-    expect(AzureGitLabAutomergeMigration).toMigrate(
+  it('should override platformAutomerge when azureAutoComplete defined', async () => {
+    await expect(AzureGitLabAutomergeMigration).toMigrate(
       {
         azureAutoComplete: true,
         platformAutomerge: false,

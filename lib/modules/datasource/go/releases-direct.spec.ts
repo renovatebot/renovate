@@ -66,6 +66,67 @@ describe('modules/datasource/go/releases-direct', () => {
       });
     });
 
+    it('support forgejo', async () => {
+      getDatasourceSpy.mockResolvedValueOnce({
+        datasource: 'forgejo-tags',
+        registryUrl: 'https://code.forgejo.org',
+        packageName: 'go-chi/cache',
+      });
+      httpMock
+        .scope('https://code.forgejo.org/')
+        .get('/api/v1/repos/go-chi/cache/tags')
+        .reply(200, [
+          {
+            name: 'v0.1.0',
+            commit: {
+              sha: 'd73d815ec22c421e7192a414594ac798c73c89e5',
+              created: '2022-05-15T16:29:42Z',
+            },
+          },
+          {
+            name: 'v0.2.0',
+            commit: {
+              sha: '3976707232cb68751ff2ddf42547ff95c6878a97',
+              created: '2022-05-15T17:23:28Z',
+            },
+          },
+          {
+            name: 'v0.2.1',
+            commit: {
+              sha: '2963b104773ead7ed28c00181c03318885d909dc',
+              created: '2024-09-06T23:44:34Z',
+            },
+          },
+        ]);
+      const res = await datasource.getReleases({
+        packageName: 'code.forgejo.org/go-chi/cache',
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://code.forgejo.org',
+        releases: [
+          {
+            gitRef: 'v0.1.0',
+            newDigest: 'd73d815ec22c421e7192a414594ac798c73c89e5',
+            releaseTimestamp: '2022-05-15T16:29:42.000Z',
+            version: 'v0.1.0',
+          },
+          {
+            gitRef: 'v0.2.0',
+            newDigest: '3976707232cb68751ff2ddf42547ff95c6878a97',
+            releaseTimestamp: '2022-05-15T17:23:28.000Z',
+            version: 'v0.2.0',
+          },
+          {
+            gitRef: 'v0.2.1',
+            newDigest: '2963b104773ead7ed28c00181c03318885d909dc',
+            releaseTimestamp: '2024-09-06T23:44:34.000Z',
+            version: 'v0.2.1',
+          },
+        ],
+        sourceUrl: 'https://code.forgejo.org/go-chi/cache',
+      });
+    });
+
     it('support gitlab', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'gitlab-tags',
@@ -141,7 +202,7 @@ describe('modules/datasource/go/releases-direct', () => {
             version: 'v0.2.1',
           },
         ],
-        sourceUrl: null,
+        sourceUrl: 'https://gitea.com/go-chi/cache',
       });
     });
 

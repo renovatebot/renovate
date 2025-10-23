@@ -108,18 +108,23 @@ export class CrateDatasource extends Datasource {
     }
 
     result.releases = lines
-      .map((version) => {
-        const release: Release = {
-          version: version.vers.replace(/\+.*$/, ''),
-        };
-        if (version.yanked) {
+      .map((line) => {
+        const versionOrig = line.vers;
+        const version = versionOrig.replace(/\+.*$/, '');
+        const release: Release = { version };
+
+        if (versionOrig !== version) {
+          release.versionOrig = versionOrig;
+        }
+
+        if (line.yanked) {
           release.isDeprecated = true;
         }
-        if (version.rust_version) {
-          release.constraints = {
-            rust: [version.rust_version],
-          };
+
+        if (line.rust_version) {
+          release.constraints = { rust: [line.rust_version] };
         }
+
         return release;
       })
       .filter((release) => release.version);
@@ -438,7 +443,7 @@ export class CrateDatasource extends Datasource {
       return release;
     }
 
-    const url = `https://crates.io/api/v1/crates/${packageName}/${release.version}`;
+    const url = `https://crates.io/api/v1/crates/${packageName}/${release.versionOrig ?? release.version}`;
     const { body: releaseTimestamp } = await this.http.getJson(
       url,
       { cacheProvider: memCacheProvider },

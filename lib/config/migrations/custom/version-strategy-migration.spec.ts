@@ -1,8 +1,8 @@
 import { VersionStrategyMigration } from './version-strategy-migration';
 
 describe('config/migrations/custom/version-strategy-migration', () => {
-  it('should migrate versionStrategy="widen" to rangeStrategy="widen"', () => {
-    expect(VersionStrategyMigration).toMigrate(
+  it('should migrate versionStrategy="widen" to rangeStrategy="widen"', async () => {
+    await expect(VersionStrategyMigration).toMigrate(
       {
         versionStrategy: 'widen',
       },
@@ -12,8 +12,8 @@ describe('config/migrations/custom/version-strategy-migration', () => {
     );
   });
 
-  it('should just remove property when versionStrategy not equals to "widen"', () => {
-    expect(VersionStrategyMigration).toMigrate(
+  it('should just remove property when versionStrategy not equals to "widen"', async () => {
+    await expect(VersionStrategyMigration).toMigrate(
       {
         versionStrategy: 'test',
       },

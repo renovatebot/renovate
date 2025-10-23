@@ -44,6 +44,7 @@ describe('workers/repository/extract/index', () => {
       config.enabledManagers = ['npm', 'custom.regex'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([]);
       expect((await extractAllDependencies(config)).packageFiles).toEqual({});
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         { manager: 'custom.regex' },
         `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`,

@@ -1158,7 +1158,13 @@ describe('modules/manager/pipenv/artifacts', () => {
       FOO: '1',
     };
     addExtraEnvVariable(extraEnv, 'FOO', '2');
-    expect(logger.warn).toHaveBeenCalledOnce();
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+    expect(logger.warn).toHaveBeenCalledWith(
+      {
+        envVar: 'FOO',
+      },
+      'Possible misconfiguration, environment variable already set to a different value',
+    );
   });
 
   it('updates extraEnv if variable names differ from default', async () => {

@@ -14,10 +14,11 @@ jobs:
     steps:
       - name: Post to Slack
         id: slack
-        uses: slackapi/slack-github-action@fcfb566f8b0aab22203f066d80ca1d7e4b5d05b3 # v1.27.1
+        uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
         with:
-          channel-id: 'C05NLTMGCJC'
-          # For posting a simple plain text message
-          slack-message: '<${{ github.event.discussion.html_url }}|${{ github.event.discussion.title }}>'
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          method: chat.postMessage
+          payload: |
+            channel: 'C05NLTMGCJC'
+            text: '<${{ github.event.discussion.html_url }}|${{ github.event.discussion.title }}> (${{ github.event.discussion.created_at }})'
+          errors: true
+          token: ${{ secrets.SLACK_BOT_TOKEN }}

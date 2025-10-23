@@ -1,8 +1,8 @@
 import { BranchNameMigration } from './branch-name-migration';
 
 describe('config/migrations/custom/branch-name-migration', () => {
-  it('should replace pattern', () => {
-    expect(BranchNameMigration).toMigrate(
+  it('should replace pattern', async () => {
+    await expect(BranchNameMigration).toMigrate(
       {
         branchName: 'test {{managerBranchPrefix}} test',
       },
@@ -12,8 +12,8 @@ describe('config/migrations/custom/branch-name-migration', () => {
     );
   });
 
-  it('should not replace another string', () => {
-    expect(BranchNameMigration).toMigrate(
+  it('should not replace another string', async () => {
+    await expect(BranchNameMigration).toMigrate(
       {
         branchName: 'test',
       },
@@ -24,8 +24,8 @@ describe('config/migrations/custom/branch-name-migration', () => {
     );
   });
 
-  it('should not replace non string value', () => {
-    expect(BranchNameMigration).toMigrate(
+  it('should not replace non string value', async () => {
+    await expect(BranchNameMigration).toMigrate(
       {
         branchName: true,
       } as any,

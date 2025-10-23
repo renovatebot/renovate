@@ -1,42 +1,70 @@
 import { logger } from '../../../logger';
-import { newlineRegex } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { isVersion } from '../../versioning/ruby';
 
-const DEP_REGEX = new RegExp('(?<=\\().*(?=\\))'); // TODO #12872  (?<=re)	after text matching
+const DEP_REGEX = regEx(/\((?<version>.*)\)/);
+
+function stripPlatformSuffix(version: string, platforms: string[]): string {
+  for (const platform of platforms) {
+    if (version.endsWith(`-${platform}`)) {
+      return version.slice(0, -platform.length - 1);
+    }
+  }
+  return version;
+}
+
+function extractPlatforms(content: string): string[] {
+  const platforms: string[] = [];
+  let inPlatformsSection = false;
+
+  for (const line of content.split(newlineRegex)) {
+    const trimmed = line.trim();
+    const indent = line.indexOf(trimmed);
+
+    if (indent === 0 && trimmed === 'PLATFORMS') {
+      inPlatformsSection = true;
+    } else if (indent === 0 && trimmed && inPlatformsSection) {
+      break;
+    } else if (indent === 2 && inPlatformsSection && trimmed) {
+      platforms.push(trimmed);
+    }
+  }
+
+  return platforms;
+}
+
 export function extractLockFileEntries(
   lockFileContent: string,
 ): Map<string, string> {
   const gemLock = new Map<string, string>();
+
   try {
-    let parsingGemSection = false;
-    lockFileContent.split(newlineRegex).forEach((eachLine) => {
-      const whitespace = eachLine.indexOf(eachLine.trim());
-      const isGemLine = eachLine.trim().startsWith('GEM');
-      if (parsingGemSection === false && whitespace === 0 && isGemLine) {
-        parsingGemSection = isGemLine;
-      }
-      if (parsingGemSection === true && whitespace === 0 && !isGemLine) {
-        parsingGemSection = false;
-      }
-      // as per original ruby lockfile parser,a line whitespace 2,4,6 contains dependencies.
-      if (whitespace === 4 && parsingGemSection) {
-        // checking if the dependency string has version or not
-        const depString = DEP_REGEX.exec(eachLine);
-        if (depString) {
-          const depValue = depString[0];
-          const depName = eachLine
-            .replace(depValue, '')
-            .replace('()', '')
-            .trim();
-          const isValidVersion = isVersion(depValue);
-          if (!gemLock.get(depName) && isValidVersion) {
-            gemLock.set(depName, depValue);
+    const platforms = extractPlatforms(lockFileContent);
+    let inGemSection = false;
+
+    for (const line of lockFileContent.split(newlineRegex)) {
+      const trimmed = line.trim();
+      const indent = line.indexOf(trimmed);
+
+      if (indent === 0 && trimmed === 'GEM') {
+        inGemSection = true;
+      } else if (indent === 0 && trimmed && inGemSection) {
+        inGemSection = false;
+      } else if (indent === 4 && inGemSection) {
+        const version = line.match(DEP_REGEX)?.groups?.version;
+        if (version) {
+          const name = line.replace(`(${version})`, '').trim();
+          const cleanedVersion = stripPlatformSuffix(version, platforms);
+
+          if (!gemLock.has(name) && isVersion(cleanedVersion)) {
+            gemLock.set(name, cleanedVersion);
           }
         }
       }
-    });
+    }
   } catch (err) {
     logger.warn({ err }, `Failed to parse Bundler lockfile`);
   }
+
   return gemLock;
 }

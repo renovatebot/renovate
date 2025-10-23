@@ -273,7 +273,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'jqlang/jq',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^jq-v(?<version>\\S+)',
+      extractVersion: '^jq-(?<version>\\S+)',
     },
   },
   kafka: {

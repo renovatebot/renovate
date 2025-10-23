@@ -167,7 +167,7 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '1.7.1',
             datasource: 'github-releases',
             depName: 'jq',
-            extractVersion: '^jq-v(?<version>\\S+)',
+            extractVersion: '^jq-(?<version>\\S+)',
             packageName: 'jqlang/jq',
           },
           {

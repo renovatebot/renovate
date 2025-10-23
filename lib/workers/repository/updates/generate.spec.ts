@@ -99,6 +99,7 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res.minimumGroupSize).toBe(3);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Multiple minimumGroupSize values found for this branch, using highest.',
       );
@@ -1834,6 +1835,7 @@ describe('workers/repository/updates/generate', () => {
         expect(res).toMatchObject({
           skipArtifactsUpdate: false,
         });
+        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.logger.debug).toHaveBeenCalledWith(
           {
             upgrades: [

@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -36,8 +37,8 @@ describe('modules/manager/pip-compile/extract', () => {
   });
 
   describe('extractPackageFile()', () => {
-    it('returns object for requirements.in', () => {
-      const packageFile = extractPackageFile(
+    it('returns object for requirements.in', async () => {
+      const packageFile = await extractPackageFile(
         Fixtures.get('requirementsWithHashes.txt'),
         'requirements.in',
         {},
@@ -46,8 +47,8 @@ describe('modules/manager/pip-compile/extract', () => {
       expect(packageFile?.deps[0]).toHaveProperty('depName', 'attrs');
     });
 
-    it('returns object for setup.py', () => {
-      const packageFile = extractPackageFile(
+    it('returns object for setup.py', async () => {
+      const packageFile = await extractPackageFile(
         Fixtures.get('setup.py', '../pip_setup'),
         'lib/setup.py',
         {},
@@ -56,15 +57,47 @@ describe('modules/manager/pip-compile/extract', () => {
       expect(packageFile?.deps[0]).toHaveProperty('depName', 'celery');
     });
 
+    it('returns object for pyproject.toml', async () => {
+      const pyproject = codeBlock`
+        [build-system]
+        requires = ["setuptools", "wheel"]
+        build-backend = "setuptools.build_meta"
+
+        [project]
+        name = "test-project"
+        requires-python = ">=3.11"
+        version = "1.2.3"
+        description = "Test project for pip-compile with setuptools"
+        readme = "README.md"
+        dependencies = [
+          "aiohttp",
+          "pydantic>=2.0.0",
+        ]
+
+        [project.optional-dependencies]
+        dev = [
+          "black",
+          "flake8",
+        ]
+      `;
+      const packageFile = await extractPackageFile(
+        pyproject,
+        'pyproject.toml',
+        {},
+      );
+      expect(packageFile).toHaveProperty('deps');
+      expect(packageFile?.deps[0]).toHaveProperty('depType', 'requires-python');
+      expect(packageFile?.deps[1]).toHaveProperty('depName', 'aiohttp');
+    });
+
     it.each([
       'random.py',
       'app.cfg',
       'already_locked.txt',
       // TODO(not7cd)
-      'pyproject.toml',
       'setup.cfg',
-    ])('returns null on not supported package files', (file: string) => {
-      expect(extractPackageFile('some content', file, {})).toBeNull();
+    ])('returns null on not supported package files', async (file: string) => {
+      expect(await extractPackageFile('some content', file, {})).toBeNull();
     });
   });
 
@@ -360,6 +393,7 @@ describe('modules/manager/pip-compile/extract', () => {
     expect(packageFiles).toBeDefined();
     const packageFile = packageFiles!.pop();
     expect(packageFile!.deps).toHaveLength(2);
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.warn).toHaveBeenCalledWith(
       { depName: 'bar', lockFile: 'requirements.txt' },
       'pip-compile: dependency not found in lock file',
@@ -472,6 +506,7 @@ describe('modules/manager/pip-compile/extract', () => {
     const lockFiles = ['reqs-no-headers.txt', '2.txt'];
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
     expect(packageFiles?.map((p) => p.lockFiles)).toEqual([['2.txt']]);
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.warn).toHaveBeenCalledWith(
       { packageFile: '1.in', requirementsFile: 'reqs-no-headers.txt' },
       'pip-compile: Package file references a file which does not appear to be a requirements file managed by pip-compile',
@@ -494,6 +529,7 @@ describe('modules/manager/pip-compile/extract', () => {
     const lockFiles = ['2.txt'];
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
     expect(packageFiles?.map((p) => p.lockFiles)).toEqual([['2.txt']]);
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.warn).toHaveBeenCalledWith(
       { packageFile: '1.in', requirementsFile: 'unmanaged-file.txt' },
       'pip-compile: Package file references a file which does not appear to be a requirements file managed by pip-compile',
@@ -648,6 +684,34 @@ describe('modules/manager/pip-compile/extract', () => {
       } else if (name === 'dir/2.txt') {
         return getSimpleRequirementsFile(
           'pip-compile --output-file=2.txt 2.in',
+          ['foo==1.0.1', 'bar==2.0.0'],
+        );
+      }
+      return null;
+    });
+
+    const lockFiles = ['common/1.txt', 'dir/2.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles).toMatchObject([
+      { packageFile: 'common/1.in', lockFiles: ['common/1.txt', 'dir/2.txt'] },
+      { packageFile: 'dir/2.in', lockFiles: ['dir/2.txt'] },
+    ]);
+  });
+
+  it('handles -r dependency on file with relative path above with path', async () => {
+    fs.readLocalFile.mockImplementation((name): any => {
+      if (name === 'common/1.in') {
+        return 'foo';
+      } else if (name === 'dir/2.in') {
+        return '-r ../common/1.in\nbar';
+      } else if (name === 'common/1.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=common/1.txt common/1.in',
+          ['foo==1.0.1'],
+        );
+      } else if (name === 'dir/2.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=dir/2.txt dir/2.in',
           ['foo==1.0.1', 'bar==2.0.0'],
         );
       }

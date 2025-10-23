@@ -205,6 +205,7 @@ export async function lookupUpdates(
         'packageScope',
         'mostRecentTimestamp',
         'isAbandoned',
+        'respectLatest',
       ]);
 
       const latestVersion = dependency.tags?.latest;
@@ -247,12 +248,16 @@ export async function lookupUpdates(
               versioningApi.isGreaterThan(taggedVersion, compareValue)),
         );
       }
+
+      const inRangeOnlyStrategy = config.rangeStrategy === 'in-range-only';
       // Check that existing constraint can be satisfied
-      const allSatisfyingVersions = allVersions.filter(
-        (v) =>
-          // TODO #22198
-          unconstrainedValue || versioningApi.matches(v.version, compareValue!),
-      );
+      const allSatisfyingVersions =
+        (inRangeOnlyStrategy || config.rollbackPrs) && !unconstrainedValue
+          ? allVersions.filter((v) =>
+              // TODO #22198
+              versioningApi.matches(v.version, compareValue!),
+            )
+          : allVersions;
       if (!allSatisfyingVersions.length) {
         logger.debug(
           `Found no satisfying versions with '${config.versioning}' versioning`,
@@ -390,9 +395,7 @@ export async function lookupUpdates(
         config,
         currentVersion!,
         latestVersion!,
-        config.rangeStrategy === 'in-range-only'
-          ? allSatisfyingVersions
-          : allVersions,
+        inRangeOnlyStrategy ? allSatisfyingVersions : allVersions,
         versioningApi,
       ).filter(
         (v) =>

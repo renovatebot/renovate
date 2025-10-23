@@ -78,6 +78,7 @@ describe('workers/repository/process/extract-update', () => {
     it('runs with baseBranchPatterns', async () => {
       const config = {
         baseBranchPatterns: ['master', 'dev'],
+        baseBranches: ['master', 'dev'],
         repoIsOnboarded: true,
         enabledManagers: ['npm'],
         javascript: {
@@ -131,8 +132,16 @@ describe('workers/repository/process/extract-update', () => {
       const packageFiles = await extract(config);
       await lookup(config, packageFiles);
 
-      expect(createVulnerabilitiesMock).toHaveBeenCalledOnce();
-      expect(appendVulnerabilityPackageRulesMock).toHaveBeenCalledOnce();
+      expect(createVulnerabilitiesMock).toHaveBeenCalledExactlyOnceWith();
+      expect(
+        appendVulnerabilityPackageRulesMock,
+      ).toHaveBeenCalledExactlyOnceWith(
+        {
+          repoIsOnboarded: true,
+          osvVulnerabilityAlerts: true,
+        },
+        undefined,
+      );
     });
 
     it('handles exception when fetching vulnerabilities', async () => {
@@ -147,7 +156,7 @@ describe('workers/repository/process/extract-update', () => {
       const packageFiles = await extract(config);
       await lookup(config, packageFiles);
 
-      expect(createVulnerabilitiesMock).toHaveBeenCalledOnce();
+      expect(createVulnerabilitiesMock).toHaveBeenCalledExactlyOnceWith();
     });
   });
 
@@ -189,6 +198,7 @@ describe('workers/repository/process/extract-update', () => {
     it('sha mismatch', () => {
       cachedExtract.configHash = 'hash';
       expect(isCacheExtractValid('new_sha', 'hash', cachedExtract)).toBe(false);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Cached extract result cannot be used due to base branch SHA change (old=sha, new=new_sha)`,
       );
@@ -198,6 +208,7 @@ describe('workers/repository/process/extract-update', () => {
     it('config change', () => {
       cachedExtract.configHash = 'hash';
       expect(isCacheExtractValid('sha', 'new_hash', cachedExtract)).toBe(false);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Cached extract result cannot be used due to config change',
       );
@@ -214,6 +225,7 @@ describe('workers/repository/process/extract-update', () => {
           restOfCache as never as BaseBranchCache,
         ),
       ).toBe(false);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Cached extract is missing extractionFingerprints, so cannot be used',
       );
@@ -230,6 +242,7 @@ describe('workers/repository/process/extract-update', () => {
     it('valid cache and config', () => {
       cachedExtract.configHash = 'hash';
       expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(true);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Cached extract for sha=sha is valid and can be used',
       );

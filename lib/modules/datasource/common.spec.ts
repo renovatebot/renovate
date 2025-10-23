@@ -40,6 +40,7 @@ describe('modules/datasource/common', () => {
 
     it('returns default versioning for unknown datasource', () => {
       expect(getDefaultVersioning('foobar')).toBe(defaultVersioning.id);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { datasourceName: 'foobar' },
         'Missing datasource!',
@@ -186,6 +187,7 @@ describe('modules/datasource/common', () => {
       expect(result).toEqual({
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { datasourceName: 'foobar' },
         'Missing datasource!',

@@ -50,6 +50,39 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('runs npm install twice', async () => {
+    const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const packageLockContents = JSON.stringify({
+      packages: {},
+      lockfileVersion: 3,
+    });
+    fs.readLocalFile
+      .mockResolvedValueOnce(packageLockContents)
+      .mockResolvedValueOnce(packageLockContents);
+    const skipInstalls = true;
+    const postUpdateOptions = ['npmInstallTwice'];
+    const updates = [
+      { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: false },
+    ];
+    await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { skipInstalls, postUpdateOptions },
+      updates,
+    );
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
+  });
+
   it('performs lock file updates', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
@@ -111,12 +144,12 @@ describe('modules/manager/npm/post-update/npm', () => {
       { skipInstalls, constraints: { npm: '^6.0.0' } },
     );
     expect(fs.renameLocalFile).toHaveBeenCalledTimes(1);
-    expect(fs.renameLocalFile).toHaveBeenCalledWith(
+    expect(fs.renameLocalFile).toHaveBeenCalledExactlyOnceWith(
       upath.join('some-dir', 'package-lock.json'),
       upath.join('some-dir', 'npm-shrinkwrap.json'),
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(fs.readLocalFile).toHaveBeenCalledWith(
+    expect(fs.readLocalFile).toHaveBeenCalledExactlyOnceWith(
       'some-dir/npm-shrinkwrap.json',
       'utf8',
     );
@@ -139,7 +172,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     );
     expect(fs.renameLocalFile).toHaveBeenCalledTimes(0);
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(fs.readLocalFile).toHaveBeenCalledWith(
+    expect(fs.readLocalFile).toHaveBeenCalledExactlyOnceWith(
       'some-dir/npm-shrinkwrap.json',
       'utf8',
     );
@@ -256,6 +289,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(fs.readLocalFile).toHaveBeenCalledWith(
       'some-dir/npm-shrinkwrap.json',
       'utf8',

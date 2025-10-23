@@ -33,10 +33,11 @@ describe('util/check-token', () => {
     it('returns early if GitHub token is found', () => {
       hostRules.find.mockReturnValueOnce({ token: '123' });
       checkGithubToken({});
-      expect(hostRules.find).toHaveBeenCalledWith({
+      expect(hostRules.find).toHaveBeenCalledExactlyOnceWith({
         hostType: 'github',
         url: 'https://api.github.com',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.trace).toHaveBeenCalledWith('GitHub token is found');
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
@@ -45,10 +46,11 @@ describe('util/check-token', () => {
       GlobalConfig.set({ githubTokenWarn: false });
       hostRules.find.mockReturnValueOnce({});
       checkGithubToken({});
-      expect(hostRules.find).toHaveBeenCalledWith({
+      expect(hostRules.find).toHaveBeenCalledExactlyOnceWith({
         hostType: 'github',
         url: 'https://api.github.com',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'GitHub token warning is disabled',
       );
@@ -116,7 +118,13 @@ describe('util/check-token', () => {
         ],
       };
       checkGithubToken(packageFiles);
-      expect(logger.logger.warn).toHaveBeenCalledOnce();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        {
+          githubDeps: ['foo/foo', 'bar/bar'],
+        },
+        'GitHub token is required for some dependencies',
+      );
     });
   });
 

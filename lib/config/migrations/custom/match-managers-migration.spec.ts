@@ -1,8 +1,8 @@
 import { MatchManagersMigration } from './match-managers-migration';
 
 describe('config/migrations/custom/match-managers-migration', () => {
-  it('migrates old custom manager syntax to new one', () => {
-    expect(MatchManagersMigration).toMigrate(
+  it('migrates old custom manager syntax to new one', async () => {
+    await expect(MatchManagersMigration).toMigrate(
       {
         matchManagers: ['npm', 'regex', 'custom.regex', 'custom.someMgr'],
       },
@@ -18,8 +18,8 @@ describe('config/migrations/custom/match-managers-migration', () => {
   });
 
   // coverage
-  it('only migrates when necessary', () => {
-    expect(MatchManagersMigration).not.toMigrate(
+  it('only migrates when necessary', async () => {
+    await expect(MatchManagersMigration).not.toMigrate(
       {
         matchManagers: undefined,
       },

@@ -1,8 +1,8 @@
 import { UpgradeInRangeMigration } from './upgrade-in-range-migration';
 
 describe('config/migrations/custom/upgrade-in-range-migration', () => {
-  it('should migrate upgradeInRange=true to rangeStrategy="bump"', () => {
-    expect(UpgradeInRangeMigration).toMigrate(
+  it('should migrate upgradeInRange=true to rangeStrategy="bump"', async () => {
+    await expect(UpgradeInRangeMigration).toMigrate(
       {
         upgradeInRange: true,
       },
@@ -12,8 +12,8 @@ describe('config/migrations/custom/upgrade-in-range-migration', () => {
     );
   });
 
-  it('should just remove property when upgradeInRange not equals to true', () => {
-    expect(UpgradeInRangeMigration).toMigrate(
+  it('should just remove property when upgradeInRange not equals to true', async () => {
+    await expect(UpgradeInRangeMigration).toMigrate(
       {
         upgradeInRange: false,
       },

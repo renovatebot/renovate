@@ -1,4 +1,4 @@
-import { configFileNames } from '../../../../config/app-strings';
+import { getConfigFileNames } from '../../../../config/app-strings';
 import type { RenovateConfig } from '../../../../config/types';
 import {
   REPOSITORY_CLOSED_ONBOARDING,
@@ -21,7 +21,7 @@ async function findFile(fileName: string): Promise<boolean> {
 }
 
 async function configFileExists(): Promise<boolean> {
-  for (const fileName of configFileNames) {
+  for (const fileName of getConfigFileNames()) {
     if (fileName !== 'package.json' && (await findFile(fileName))) {
       logger.debug(`Config file exists, fileName: ${fileName}`);
       return true;
@@ -88,7 +88,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   const closedOnboardingPr = await closedPrExists(config);
   const cache = getCache();
   const onboardingBranchCache = cache?.onboardingBranchCache;
-  // if onboarding cache is present and base branch has not been updated branch is not onboarded
+  // if onboarding cache is present and base branch has not been updated; branch is not onboarded
   // if closed pr exists then presence of onboarding cache doesn't matter as we need to skip onboarding
   if (
     config.onboarding &&
@@ -101,7 +101,9 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
     return false;
   }
 
-  if (cache.configFileName) {
+  // when bot is ran is fork mode ... do not fetch file using api call instead use the git.fileList so we get sync first and get the latest config
+  // prevents https://github.com/renovatebot/renovate/discussions/37328
+  if (cache.configFileName && !config.forkToken) {
     logger.debug('Checking cached config file name');
     try {
       const configFileContent = await platform.getJsonFile(

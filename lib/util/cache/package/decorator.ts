@@ -92,25 +92,39 @@ export function cache<T>({
         finalKey,
       );
 
-      const ttlValues = resolveTtlValues(finalNamespace, ttlMinutes);
-      const softTtl = ttlValues.softTtlMinutes;
-      const hardTtl =
-        methodName === 'getReleases' || methodName === 'getDigest'
-          ? ttlValues.hardTtlMinutes
-          : // Skip two-tier TTL for any intermediate data fetching
-            softTtl;
+      // eslint-disable-next-line prefer-const
+      let { softTtlMinutes, hardTtlMinutes } = resolveTtlValues(
+        finalNamespace,
+        ttlMinutes,
+      );
+
+      // The separation between "soft" and "hard" TTL allows us to treat
+      // data as obsolete according to the "soft" TTL while physically storing it
+      // according to the "hard" TTL.
+      //
+      // This helps us return obsolete data in case of upstream server errors,
+      // which is more useful than throwing exceptions ourselves.
+      //
+      // However, since the default hard TTL is one week, it could create
+      // unnecessary pressure on storage volume. Therefore,
+      // we cache only `getReleases` and `getDigest` results for an extended period.
+      //
+      // For other method names being decorated, the "soft" just equals the "hard" ttl.
+      if (methodName !== 'getReleases' && methodName !== 'getDigest') {
+        hardTtlMinutes = softTtlMinutes;
+      }
 
       let oldData: unknown;
       if (oldRecord) {
         const now = DateTime.local();
         const cachedAt = DateTime.fromISO(oldRecord.cachedAt);
 
-        const softDeadline = cachedAt.plus({ minutes: softTtl });
+        const softDeadline = cachedAt.plus({ minutes: softTtlMinutes });
         if (now < softDeadline) {
           return oldRecord.value;
         }
 
-        const hardDeadline = cachedAt.plus({ minutes: hardTtl });
+        const hardDeadline = cachedAt.plus({ minutes: hardTtlMinutes });
         if (now < hardDeadline) {
           oldData = oldRecord.value;
         }
@@ -140,7 +154,7 @@ export function cache<T>({
           finalNamespace,
           finalKey,
           newRecord,
-          hardTtl,
+          hardTtlMinutes,
         );
       }
 

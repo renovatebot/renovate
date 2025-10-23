@@ -15,6 +15,8 @@ The config options below _must_ be configured in the bot/admin config, so in eit
 !!! note
      Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
 
+For information about how to configure Renovate with a `config.js` see the [Using `config.js` documentation](./getting-started/running.md#using-configjs).
+
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
 <!-- prettier-ignore -->
@@ -279,14 +281,32 @@ For example:
 
 ## cacheHardTtlMinutes
 
-This experimental feature is used to implement the concept of a "soft" cache expiry for datasources, starting with `npm`.
-It should be set to a non-zero value, recommended to be at least 60 (i.e. one hour).
+This experimental feature configures the physical lifetime of cache entries.
+Renovate internally uses two types of Time-to-Live (TTL) for its cache:
 
-When this value is set, the `npm` datasource will use the `cacheHardTtlMinutes` value for cache expiry, instead of its default expiry of 15 minutes, which becomes the "soft" expiry value.
-Results which are soft expired are reused in the following manner:
+- **Soft TTL (logical):** When a cache entry's soft TTL expires, Renovate tries to refresh the data from the upstream source.
+- **Hard TTL (physical):** When a cache entry's hard TTL expires, Renovate permanently removes the data from the cache.
 
-- The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
-- If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
+This two-level cache expiry is used for:
+
+1. [HTTP caching](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching) with `ETag`, `Last-Modified`, and `If-Modified-Since` headers
+2. `getReleases` and `getDigest` datasource methods, i.e. the package release data
+
+If an upstream request fails, Renovate can still use stale data from the cache as long as its hard TTL has not expired.
+
+The `cacheHardTtlMinutes` option lets you configure the hard TTL.
+Set this to a non-zero value, the recommended minimum is 60 (one hour).
+
+If the soft TTL for a cache entry is longer than the hard TTL, Renovate uses the soft TTL value for both.
+The soft TTL is hard-coded but can be overridden with [`cacheTtlOverride`](./self-hosted-configuration.md#cachettloverride).
+
+**Example:**
+
+The `npm` datasource has a default soft TTL of 15 minutes.
+When `cacheHardTtlMinutes` is set, for example to 60, Renovate will use the stale `npm` data in the following ways:
+
+- The `ETag` from the cached result is used in new requests. If the upstream server returns a `304 Not Modified` response, the cached data is revalidated and used.
+- If an error occurs when querying the `npmjs` registry, Renovate will use the stale data from the cache as long as it has been cached for less than 60 minutes.
 
 ## cachePrivatePackages
 
@@ -294,7 +314,12 @@ In the self-hosted setup, use option to enable caching of private packages to im
 
 ## cacheTtlOverride
 
-Utilize this key-value map to override the default package cache TTL values for a specific namespace. This object contains pairs of namespaces and their corresponding TTL values in minutes.
+Use this key-value map to override the default package cache TTL values for a specific namespace.
+This object contains pairs of namespaces and their corresponding TTL values in minutes.
+
+Internally, Renovate has the notion of soft TTL and hard TTL.
+In some contexts they are equal, but when they differ, this option overrides the soft TTL.
+See [`cacheHardTtlMinutes`](./self-hosted-configuration.md#cachehardttlminutes) for more information.
 
 You can use:
 
@@ -403,6 +428,7 @@ Other valid cache namespaces are as follows:
 - `datasource-hexpm-bob`
 - `datasource-java-version`
 - `datasource-jenkins-plugins`
+- `datasource-jsr`
 - `datasource-maven:cache-provider`
 - `datasource-maven:postprocess-reject`
 - `datasource-node-version`
@@ -420,6 +446,8 @@ Other valid cache namespaces are as follows:
 - `datasource-terraform-module`
 - `datasource-terraform-provider`
 - `datasource-terraform`
+- `datasource-typst:cache-provider`
+- `datasource-typst:releases`
 - `datasource-unity3d`
 - `datasource-unity3d-packages`
 - `github-releases-datasource-v2`
@@ -439,6 +467,24 @@ It has been designed with the intention of being run on one repository, in a one
 It is highly unlikely that you should ever need to add this to your permanent global config.
 
 Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/checked` will rebase the `renovate/chalk-4.x` branch in the `renovate-reproductions/checked` repository.`
+
+## configFileNames
+
+A list of filenames where repository config can be stored.
+
+This list doesn't replace the existing list of default config filenames used internally, instead these filenames are prepended to the list.
+
+Example:
+
+```json
+{
+  "configFileNames": ["myrenovate.json"]
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+    If you want renovate to use a custom filename for the onboarding branch you also need to change the [`onboardingConfigFileName`](#onboardingconfigfilename).
 
 ## containerbaseDir
 
@@ -827,6 +873,16 @@ Value of `0` means no caching.
 !!! warning
     When you set `httpCacheTtlDays` to `0`, Renovate will remove the cached HTTP data.
 
+## ignorePrAuthor
+
+This is usually needed if someone needs to migrate bot accounts, including from the Mend Renovate App to self-hosted.
+An additional use case is for GitLab users of project or group access tokens who need to rotate them.
+
+If `ignorePrAuthor` is configured to true, it means Renovate will fetch the entire list of repository PRs instead of optimizing to fetch only those PRs which it created itself.
+You should only want to enable this if you are changing the bot account (e.g. from `@old-bot` to `@new-bot`) and want `@new-bot` to find and update any existing PRs created by `@old-bot`.
+
+Setting this field to `true` in Github or GitLab will also mean that all Issues will be fetched instead of only those by the bot itself.
+
 ## includeMirrors
 
 By default, Renovate does not autodiscover repositories that are mirrors.
@@ -919,7 +975,7 @@ If you use the Mend Renovate Enterprise Edition (Renovate EE) and:
 
 Then you must set this variable at the _server_ and the _workers_.
 
-But if you have specified the token as a [`matchConfidence`](configuration-options.md#matchconfidence) `hostRule`, you only need to set this variable at the _workers_.
+But if you have specified the token as a [`matchConfidence`](configuration-options.md#matchconfidence) `packageRule`, you only need to set this variable at the _workers_.
 
 This feature is in private beta.
 
@@ -972,6 +1028,10 @@ If `commitMessagePrefix` or `semanticCommits` values are set then they will be p
 
 If set to one of the valid [config file names](./configuration-options.md), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
 Falls back to `renovate.json` if the name provided is not valid.
+
+<!-- prettier-ignore -->
+!!! note
+    If you want renovate to use a custom filename for the onboarding branch you need add allow that filename using the [`configFileNames`](#configfilenames) option.
 
 ## onboardingNoDeps
 
@@ -1436,6 +1496,8 @@ Known use cases consist, among other things, of horizontal scaling setups.
 See [Scaling Renovate Bot on self-hosted GitLab](https://github.com/renovatebot/renovate/discussions/13172).
 
 Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
+
+<!-- schema-validation-disable-next-block -->
 
 ```json
 ["myOrg/myRepo", "myOrg/anotherRepo"]

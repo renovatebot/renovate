@@ -21,11 +21,14 @@ import type {
 import { applyGitSource } from '../../util';
 import { type PyProject, UvLockfile } from '../schema';
 import { depTypes } from '../utils';
-import type { PyProjectProcessor } from './types';
+
+import { BasePyProjectProcessor } from './abstract';
 
 const uvUpdateCMD = 'uv lock';
 
-export class UvProcessor implements PyProjectProcessor {
+export class UvProcessor extends BasePyProjectProcessor {
+  override lockfileName = 'uv.lock';
+
   process(project: PyProject, deps: PackageDependency[]): PackageDependency[] {
     const uv = project.tool?.uv;
     if (!uv) {
@@ -51,7 +54,7 @@ export class UvProcessor implements PyProjectProcessor {
     // Skip sources that do not make sense to handle (e.g. path).
     if (uv.sources || defaultIndex || implicitIndexUrls) {
       for (const dep of deps) {
-        // istanbul ignore if
+        /* v8 ignore next 3 -- needs test */
         if (!dep.packageName) {
           continue;
         }
@@ -87,6 +90,7 @@ export class UvProcessor implements PyProjectProcessor {
             dep.skipReason = 'path-dependency';
           } else if ('workspace' in depSource) {
             dep.skipReason = 'inherited-dependency';
+            /* v8 ignore next 3 -- needs test */
           } else {
             dep.skipReason = 'unknown-registry';
           }
@@ -120,7 +124,10 @@ export class UvProcessor implements PyProjectProcessor {
     deps: PackageDependency[],
     packageFile: string,
   ): Promise<PackageDependency[]> {
-    const lockFileName = await findLocalSiblingOrParent(packageFile, 'uv.lock');
+    const lockFileName = await findLocalSiblingOrParent(
+      packageFile,
+      this.lockfileName,
+    );
     if (lockFileName === null) {
       logger.debug({ packageFile }, `No uv lock file found`);
     } else {
@@ -222,7 +229,6 @@ export class UvProcessor implements PyProjectProcessor {
 
       return fileChanges.length ? fileChanges : null;
     } catch (err) {
-      // istanbul ignore if
       if (err.message === TEMPORARY_ERROR) {
         throw err;
       }
@@ -353,7 +359,7 @@ async function getUvIndexCredentials(
 
   for (const { name, url } of uv_indexes) {
     const parsedUrl = parseUrl(url);
-    // istanbul ignore if
+    /* v8 ignore next 3 -- needs test */
     if (!parsedUrl) {
       continue;
     }

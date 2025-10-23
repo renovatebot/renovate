@@ -4,7 +4,7 @@ import type { PackageDependency, PackageFileContent } from '../types';
 import { isComment } from './common';
 
 const regex = regEx(
-  `(?<name>[-_a-zA-Z0-9]+)/(?<version>[^@#\n{*"']+)(?<userChannel>@[-_a-zA-Z0-9]+(?:/[^#\n.{*"' ]+|))?#?(?<revision>[-_a-f0-9]+[^\n{*"'])?`,
+  `(?:^|["'])(?<name>[-\\w]+)/(?<version>[^@#\n{*"']+)(?<userChannel>@[-\\w]+(?:/[^#\n.{*"' ]+|))?#?(?<revision>[-_a-f0-9]+[^\n{*"'])?`,
 );
 
 function setDepType(content: string, originalType: string): string {

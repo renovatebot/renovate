@@ -109,10 +109,10 @@ export class SqlitePackageCache {
     namespace: PackageCacheNamespace,
     key: string,
     value: unknown,
-    ttlMinutes = 5,
+    hardTtlMinutes = 5,
   ): Promise<void> {
     const data = await compress(value);
-    const ttlSeconds = ttlMinutes * 60;
+    const ttlSeconds = hardTtlMinutes * 60;
     this.upsertStatement.run({ namespace, key, data, ttlSeconds });
     return Promise.resolve();
   }

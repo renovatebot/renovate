@@ -172,13 +172,18 @@ describe('modules/datasource/npm/npmrc', () => {
 
   it('sanitize _auth', () => {
     setNpmrc('_auth=test');
-    expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith('test');
-    expect(sanitize.addSecretForSanitizing).toHaveBeenCalledTimes(1);
+    expect(sanitize.addSecretForSanitizing).toHaveBeenCalledExactlyOnceWith(
+      'test',
+    );
   });
 
   it('sanitize _authtoken', () => {
     setNpmrc('//registry.test.com:_authToken=test\n_authToken=${NPM_TOKEN}');
-    expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith('test');
+    expect(sanitize.addSecretForSanitizing).toHaveBeenNthCalledWith(1, 'test');
+    expect(sanitize.addSecretForSanitizing).toHaveBeenNthCalledWith(
+      2,
+      '${NPM_TOKEN}',
+    );
     expect(sanitize.addSecretForSanitizing).toHaveBeenCalledTimes(2);
   });
 
@@ -200,8 +205,9 @@ describe('modules/datasource/npm/npmrc', () => {
     setNpmrc(
       '//registry.test.com:_authToken=${TEST_TOKEN}\n_authToken=\nregistry=http://localhost',
     );
-    expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith('test');
-    expect(sanitize.addSecretForSanitizing).toHaveBeenCalledTimes(1);
+    expect(sanitize.addSecretForSanitizing).toHaveBeenCalledExactlyOnceWith(
+      'test',
+    );
   });
 
   it('ignores localhost', () => {

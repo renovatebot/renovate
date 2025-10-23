@@ -3,8 +3,10 @@ import type {
   ArrayFragment,
   ExtensionTagFragment,
   PreparedExtensionTagFragment,
+  RepoRuleCallFragment,
   ResultFragment,
   RuleFragment,
+  UseRepoRuleFragment,
 } from './fragments';
 import * as fragments from './fragments';
 
@@ -67,6 +69,22 @@ export class Ctx implements CtxCompatible {
     throw new Error('Requested current extension tag, but does not exist.');
   }
 
+  private get currentUseRepoRule(): UseRepoRuleFragment {
+    const current = this.current;
+    if (current.type === 'useRepoRule') {
+      return current;
+    }
+    throw new Error('Requested current use repo rule, but does not exist.');
+  }
+
+  private get currentRepoRuleCall(): RepoRuleCallFragment {
+    const current = this.current;
+    if (current.type === 'repoRuleCall') {
+      return current;
+    }
+    throw new Error('Requested current repo rule call, but does not exist.');
+  }
+
   private get currentArray(): ArrayFragment {
     const current = this.current;
     if (current.type === 'array') {
@@ -110,14 +128,21 @@ export class Ctx implements CtxCompatible {
         return true;
       }
       if (
-        (parent.type === 'rule' || parent.type === 'extensionTag') &&
+        (parent.type === 'rule' ||
+          parent.type === 'extensionTag' ||
+          parent.type === 'repoRuleCall') &&
         current.type === 'attribute' &&
         current.value !== undefined
       ) {
         parent.children[current.name] = current.value;
         return true;
       }
-    } else if (current.type === 'rule' || current.type === 'extensionTag') {
+    } else if (
+      current.type === 'rule' ||
+      current.type === 'extensionTag' ||
+      current.type === 'useRepoRule' ||
+      current.type === 'repoRuleCall'
+    ) {
       this.results.push(current);
       return true;
     }
@@ -185,6 +210,35 @@ export class Ctx implements CtxCompatible {
     const tag = this.currentExtensionTag;
     tag.isComplete = true;
     tag.rawString = this.source.slice(tag.offset, offset);
+    return this.processStack();
+  }
+
+  startUseRepoRule(
+    variableName: string,
+    bzlFile: string,
+    ruleName: string,
+  ): Ctx {
+    const useRepoRule = fragments.useRepoRule(variableName, bzlFile, ruleName);
+    this.stack.push(useRepoRule);
+    return this;
+  }
+
+  endUseRepoRule(): Ctx {
+    const useRepoRule = this.currentUseRepoRule;
+    useRepoRule.isComplete = true;
+    return this.processStack();
+  }
+
+  startRepoRuleCall(functionName: string, offset: number): Ctx {
+    const repoRuleCall = fragments.repoRuleCall(functionName, offset);
+    this.stack.push(repoRuleCall);
+    return this;
+  }
+
+  endRepoRuleCall(offset: number): Ctx {
+    const repoRuleCall = this.currentRepoRuleCall;
+    repoRuleCall.isComplete = true;
+    repoRuleCall.rawString = this.source.slice(repoRuleCall.offset, offset);
     return this.processStack();
   }
 

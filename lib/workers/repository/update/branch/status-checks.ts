@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
@@ -44,6 +45,12 @@ async function setStatusCheck(
   if (existingState === state) {
     logger.debug(`Status check ${context} is already up-to-date`);
   } else {
+    if (GlobalConfig.get('dryRun')) {
+      logger.info(
+        `DRY-RUN: Would update ${context} status check state to ${state}`,
+      );
+      return;
+    }
     logger.debug(`Updating ${context} status check state to ${state}`);
     await platform.setBranchStatus({
       branchName,

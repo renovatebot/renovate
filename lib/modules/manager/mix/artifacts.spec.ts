@@ -561,6 +561,9 @@ describe('modules/manager/mix/artifacts', () => {
     ).toBeNull();
 
     expect(execSnapshots).toHaveLength(0);
-    expect(fs.writeLocalFile).toHaveBeenCalledWith('mix.exs', 'New mix.exs');
+    expect(fs.writeLocalFile).toHaveBeenCalledExactlyOnceWith(
+      'mix.exs',
+      'New mix.exs',
+    );
   });
 });

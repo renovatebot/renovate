@@ -1,5 +1,5 @@
 import { mock } from 'vitest-mock-extended';
-import { configFileNames } from '../../../../config/app-strings';
+import { getConfigFileNames } from '../../../../config/app-strings';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import {
@@ -143,10 +143,9 @@ describe('workers/repository/onboarding/branch/index', () => {
       delete expectConfig.env;
       delete expectConfig.extends;
       delete expectConfig.ignorePresets;
-      expect(configModule.getOnboardingConfigContents).toHaveBeenCalledWith(
-        expectConfig,
-        configFileNames[0],
-      );
+      expect(
+        configModule.getOnboardingConfigContents,
+      ).toHaveBeenCalledExactlyOnceWith(expectConfig, getConfigFileNames()[0]);
       const file = scm.commitAndPush.mock.calls[0][0].files[0] as FileAddition;
       const contents = file.contents?.toString();
       expect(contents).toBeJsonString();
@@ -206,12 +205,15 @@ describe('workers/repository/onboarding/branch/index', () => {
       cache.getCache.mockReturnValue({ configFileName: '.renovaterc' });
       platform.getJsonFile.mockResolvedValueOnce({});
       const res = await checkOnboardingBranch(config);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         'Checking cached config file name',
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         'Existing config file confirmed',
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         {
           fileName: '.renovaterc',
@@ -227,12 +229,15 @@ describe('workers/repository/onboarding/branch/index', () => {
       platform.getJsonFile.mockResolvedValueOnce({ renovate: {} });
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const res = await checkOnboardingBranch(config);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         'Checking cached config file name',
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         'Existing config file confirmed',
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         {
           fileName: 'package.json',
@@ -291,11 +296,14 @@ describe('workers/repository/onboarding/branch/index', () => {
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeFalse();
       expect(res.branchList).toEqual(['renovate/configure']);
-      expect(scm.mergeToLocal).toHaveBeenCalledOnce();
+      expect(scm.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
+        'renovate/configure',
+      );
       expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
-      expect(logger.debug).not.toHaveBeenCalledWith(
+      expect(logger.debug).not.toHaveBeenCalledExactlyOnceWith(
         'Skip processing since the onboarding branch is up to date and default branch has not changed',
       ); // onboarding cache no longer valid
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.info).toHaveBeenCalledWith(
         {
           branch: config.onboardingBranch,
@@ -356,8 +364,12 @@ describe('workers/repository/onboarding/branch/index', () => {
       onboardingCache.hasOnboardingBranchChanged.mockReturnValueOnce(true);
       onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(false);
       await checkOnboardingBranch(config);
-      expect(scm.mergeToLocal).toHaveBeenCalledOnce();
-      expect(onboardingCache.setOnboardingCache).toHaveBeenCalledWith(
+      expect(scm.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
+        'renovate/configure',
+      );
+      expect(
+        onboardingCache.setOnboardingCache,
+      ).toHaveBeenCalledExactlyOnceWith(
         'default-sha',
         'new-onboarding-sha',
         false,
@@ -381,7 +393,9 @@ describe('workers/repository/onboarding/branch/index', () => {
       onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(true);
       await checkOnboardingBranch(config);
       expect(scm.mergeToLocal).not.toHaveBeenCalled();
-      expect(onboardingCache.setOnboardingCache).toHaveBeenCalledWith(
+      expect(
+        onboardingCache.setOnboardingCache,
+      ).toHaveBeenCalledExactlyOnceWith(
         'default-sha',
         'onboarding-sha',
         true,
@@ -399,7 +413,9 @@ describe('workers/repository/onboarding/branch/index', () => {
       onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(false);
       await checkOnboardingBranch(config);
       expect(scm.mergeToLocal).toHaveBeenCalled();
-      expect(onboardingCache.setOnboardingCache).toHaveBeenCalledWith(
+      expect(
+        onboardingCache.setOnboardingCache,
+      ).toHaveBeenCalledExactlyOnceWith(
         'default-sha',
         'onboarding-sha',
         false,
@@ -424,11 +440,14 @@ describe('workers/repository/onboarding/branch/index', () => {
 
         await checkOnboardingBranch(config);
 
+        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.trace).toHaveBeenCalledWith(
           `Platform '${pl}' does not support extended markdown`,
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
-        expect(scm.mergeToLocal).toHaveBeenCalledOnce();
+        expect(scm.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
+          config.onboardingBranch,
+        );
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
 
@@ -438,11 +457,14 @@ describe('workers/repository/onboarding/branch/index', () => {
 
         await checkOnboardingBranch(config);
 
+        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.debug).toHaveBeenCalledWith(
           `No rebase checkbox was found in the onboarding PR`,
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
-        expect(scm.mergeToLocal).toHaveBeenCalledOnce();
+        expect(scm.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
+          config.onboardingBranch,
+        );
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
 
@@ -452,11 +474,14 @@ describe('workers/repository/onboarding/branch/index', () => {
 
         await checkOnboardingBranch(config);
 
+        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.debug).toHaveBeenCalledWith(
           `Manual onboarding PR update requested`,
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
-        expect(scm.mergeToLocal).toHaveBeenCalledOnce();
+        expect(scm.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
+          config.onboardingBranch,
+        );
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
 
@@ -467,7 +492,9 @@ describe('workers/repository/onboarding/branch/index', () => {
         await checkOnboardingBranch(config);
 
         expect(OnboardingState.prUpdateRequested).toBeFalse();
-        expect(scm.mergeToLocal).toHaveBeenCalledOnce();
+        expect(scm.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
+          config.onboardingBranch,
+        );
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
     });

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { Json } from '../../../util/schema-utils';
 
 const InputType = z.enum([
+  'file',
   'git',
   'github',
   'gitlab',
@@ -13,7 +14,7 @@ const InputType = z.enum([
 
 const LockedInput = z.object({
   ref: z.string().optional(),
-  rev: z.string(),
+  rev: z.string().optional(),
   type: InputType,
 });
 

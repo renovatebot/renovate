@@ -13,6 +13,7 @@ import {
   RuleToBazelModulePackageDep,
 } from './rules';
 import * as rules from './rules';
+import { transformRulesImgCalls } from './rules-img';
 
 export async function extractPackageFile(
   content: string,
@@ -24,6 +25,7 @@ export async function extractPackageFile(
     const gitRepositoryDeps = extractGitRepositoryDeps(records);
     const mavenDeps = extractMavenDeps(records);
     const dockerDeps = LooseArray(RuleToDockerPackageDep).parse(records);
+    const rulesImgDeps = transformRulesImgCalls(records);
 
     if (gitRepositoryDeps.length) {
       pfc.deps.push(...gitRepositoryDeps);
@@ -35,6 +37,10 @@ export async function extractPackageFile(
 
     if (dockerDeps.length) {
       pfc.deps.push(...dockerDeps);
+    }
+
+    if (rulesImgDeps.length) {
+      pfc.deps.push(...rulesImgDeps);
     }
 
     return pfc.deps.length ? pfc : null;

@@ -111,6 +111,7 @@ To let Renovate use the Azure DevOps internal API, you must set these variables 
 - `hostRules.hostType` = `azure-pipelines-tasks`
 
 ```json title="Example config file in JSON format"
+{
   "platform": "azure",
   "endpoint": "https://dev.azure.com/ORG_NAME",
   "azure-pipelines": {
@@ -118,7 +119,7 @@ To let Renovate use the Azure DevOps internal API, you must set these variables 
   },
   "repositories": ["PROJECT_NAME/REPO_NAME"],
   "prHourlyLimit": 0,
-  "baseBranches": ["main"],
+  "baseBranchPatterns": ["main"],
   "hostRules": [
     {
       "matchHost": "https://dev.azure.com/",
