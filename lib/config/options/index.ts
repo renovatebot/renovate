@@ -1,3 +1,4 @@
+import { AZURE_POLICY_TYPES } from '../../constants';
 import { AllManagersListLiteral } from '../../manager-list.generated';
 import { getManagers } from '../../modules/manager';
 import { getCustomManagers } from '../../modules/manager/custom';
@@ -1315,6 +1316,28 @@ const options: RenovateOptions[] = [
       'The id of an existing work item on Azure Boards to link to each PR.',
     type: 'integer',
     default: 0,
+    supportedPlatforms: ['azure'],
+  },
+  {
+    name: 'azureBypassPolicyTypes',
+    description: 'A list of policy type UUIDs allowed to be bypassed.',
+    type: 'array',
+    globalOnly: true,
+    subType: 'string',
+    allowString: true,
+    allowedValues: [
+      ...Object.values(AZURE_POLICY_TYPES),
+      ...Object.keys(AZURE_POLICY_TYPES),
+    ],
+    default: [],
+    supportedPlatforms: ['azure'],
+  },
+  {
+    name: 'azureBypassPolicyReason',
+    description: 'The reason to set when bypassing policies.',
+    type: 'string',
+    globalOnly: true,
+    default: 'Auto-merge by Renovate',
     supportedPlatforms: ['azure'],
   },
   {
