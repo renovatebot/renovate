@@ -15,7 +15,7 @@
     "clean-cache": "node tools/clean-cache.mjs",
     "compile:ts": "tsc -p tsconfig.app.json",
     "config-validator": "tsx lib/config-validator.ts",
-    "create-json-schema": "tsx tools/generate-schema.ts && prettier --write --cache 'renovate-schema.json'",
+    "create-json-schema": "tsx tools/generate-schema.ts && prettier --write --cache 'renovate-schema.json' renovate-global-schema.json",
     "debug": "tsx --inspect-brk lib/renovate.ts",
     "doc-fix": "run-s markdown-lint-fix prettier-fix",
     "doc-fix-everything": "run-s doc-fix doc-fence-check lint-documentation",
