@@ -693,10 +693,29 @@ If you want Renovate to sign off its commits, add the [`:gitSignOff` preset](./p
 
 This config option limits the number of branches Renovate creates or rebases automatically per hour.
 
-This can be helpful when you're onboarding a repository with many dependencies or when you have frequent rebasing that triggers excessive CI runs.
+Use `commitHourlyLimit` to strictly control the rate of CI runs triggered by Renovate.
+Each branch creation or automatic rebase triggers a CI run, so limiting these operations directly controls your CI load.
 
-To prevent excessive CI runs you can set `commitHourlyLimit` to a value like `5` or `10`.
-Renovate will create or rebase a maximum of that many branches within each hourly period (`:00` through `:59`).
+**Example scenario:**
+
+With `commitHourlyLimit: 2`, in a given hour Renovate might:
+
+1. Create 2 new branches (triggering 2 CI runs)
+2. Stop creating branches until the next hour, even if the PRs were merged
+
+Or it might:
+
+1. Create 1 new branch (1 CI run)
+2. Automatically rebase 1 existing branch (1 CI run)
+3. Stop until the next hour
+
+**Difference from `prHourlyLimit`:**
+
+- `prHourlyLimit` only limits PR _creation_. Renovate can still rebase existing branches, triggering additional CI runs
+- `commitHourlyLimit` limits both branch creation _and_ automatic rebasing, giving you stricter control over CI usage
+
+For strict CI control, use `commitHourlyLimit`.
+For controlling only the rate of new PRs, use `prHourlyLimit`.
 
 <!-- prettier-ignore -->
 !!! tip
