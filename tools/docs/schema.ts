@@ -167,10 +167,17 @@ function createSchemaForChildConfigs(
   }
 }
 
+interface GenerateSchemaOpts {
+  filename?: string;
+  version?: string;
+}
+
 export async function generateSchema(
   dist: string,
-  filename = 'renovate-schema.json',
-  version: string = pkg.version,
+  {
+    filename = 'renovate-schema.json',
+    version = pkg.version,
+  }: GenerateSchemaOpts = {},
 ): Promise<void> {
   const schema = {
     title: `JSON schema for Renovate ${version} config files (https://renovatebot.com/)`,
@@ -180,8 +187,8 @@ export async function generateSchema(
     type: 'object',
     properties: {},
   };
-  const options = getOptions();
-  options.sort((a, b) => {
+  const configurationOptions = getOptions();
+  configurationOptions.sort((a, b) => {
     if (a.name < b.name) {
       return -1;
     }
@@ -192,9 +199,9 @@ export async function generateSchema(
   });
   const properties = schema.properties as Record<string, any>;
 
-  createSchemaForParentConfigs(options, properties);
-  addChildrenArrayInParents(options, properties);
-  createSchemaForChildConfigs(options, properties);
+  createSchemaForParentConfigs(configurationOptions, properties);
+  addChildrenArrayInParents(configurationOptions, properties);
+  createSchemaForChildConfigs(configurationOptions, properties);
   await updateFile(
     `${dist}/${filename}`,
     `${JSON.stringify(schema, null, 2)}\n`,
