@@ -691,36 +691,29 @@ If you want Renovate to sign off its commits, add the [`:gitSignOff` preset](./p
 
 ## commitHourlyLimit
 
-This config option limits the number of branches Renovate creates or rebases automatically per hour.
+This config option limits the maximum number of branches Renovate creates or rebases per hour.
 
-Use `commitHourlyLimit` to strictly control the rate of CI runs triggered by Renovate.
-Each branch creation or automatic rebase triggers a CI run, so limiting these operations directly controls your CI load.
+Use `commitHourlyLimit` to strictly control the rate at which Renovate triggers CI runs.
+Both branch creation and automatic rebasing trigger CI runs, so limiting these operations helps you control your CI load.
 
-**Example scenario:**
+For example, with `commitHourlyLimit: 2`, in a given hour Renovate might:
 
-With `commitHourlyLimit: 2`, in a given hour Renovate might:
+- Create 2 new branches (triggering 2 CI runs), then stop until the next hour, or
+- Create 1 new branch and automatically rebase 1 existing branch (2 CI runs total), then stop
 
-1. Create 2 new branches (triggering 2 CI runs)
-2. Stop creating branches until the next hour, even if the PRs were merged
+This limit is enforced on a per-repository basis and per hourly period (`:00` through `:59`).
 
-Or it might:
+This setting differs from `prHourlyLimit` in an important way:
 
-1. Create 1 new branch (1 CI run)
-2. Automatically rebase 1 existing branch (1 CI run)
-3. Stop until the next hour
-
-**Difference from `prHourlyLimit`:**
-
-- `prHourlyLimit` only limits PR _creation_. Renovate can still rebase existing branches, triggering additional CI runs
+- `prHourlyLimit` only limits PR creation. Renovate can still rebase existing branches, which triggers additional CI runs
 - `commitHourlyLimit` limits both branch creation _and_ automatic rebasing, giving you stricter control over CI usage
 
-For strict CI control, use `commitHourlyLimit`.
-For controlling only the rate of new PRs, use `prHourlyLimit`.
+If you want strict control over CI load, use `commitHourlyLimit`.
+If you only want to limit the rate of new PRs, use `prHourlyLimit`.
 
 <!-- prettier-ignore -->
 !!! tip
-    The `commitHourlyLimit` setting is enforced on a per-repository basis.
-    Manual rebases (requested via checkbox, dependency dashboard, or rebase label) always bypass this limit.
+    Manual rebases (requested via checkbox, Dependency Dashboard, or rebase label) always bypass this limit.
 
 ## commitMessage
 
@@ -4783,7 +4776,7 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
 
 <!-- prettier-ignore -->
 !!! note
-    When Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `prConcurrentLimit`, `branchConcurrentLimit`, `prHourlyLimit`, or `schedule`.
+    When Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `prConcurrentLimit`, `branchConcurrentLimit`, `prHourlyLimit`, `commitHourlyLimit`, or `schedule`.
     This means that Renovate _always_ tries to create a `vulnerabilityAlerts` PR.
     In short: vulnerability alerts "skip the line".
 

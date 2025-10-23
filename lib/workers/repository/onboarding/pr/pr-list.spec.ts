@@ -176,7 +176,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       config.commitHourlyLimit = 1;
       const res = getExpectedPrList(config, branches);
       expect(res).toContain(
-        'Branch creation and automatic rebasing will be limited to maximum 1 per hour',
+        'Branch creation and rebasing will be limited to maximum 1 per hour',
       );
       expect(res).toContain('commitHourlyLimit');
     });
