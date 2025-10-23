@@ -238,14 +238,19 @@ describe('modules/platform/gerrit/scm', () => {
         expectedDate,
       );
 
-      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
-        branchName: 'myBranchName',
-        state: 'open',
-        limit: 1,
-        refreshCache: true,
-        requestDetails: ['CURRENT_REVISION'],
-      });
-      expect(git.getBranchUpdateDate).toHaveBeenCalledWith('myBranchName');
+      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        {
+          branchName: 'myBranchName',
+          state: 'open',
+          limit: 1,
+          refreshCache: true,
+          requestDetails: ['CURRENT_REVISION'],
+        },
+      );
+      expect(git.getBranchUpdateDate).toHaveBeenCalledExactlyOnceWith(
+        'myBranchName',
+      );
     });
 
     it('open change found for branchname -> return DateTime from Gerrit change', async () => {
