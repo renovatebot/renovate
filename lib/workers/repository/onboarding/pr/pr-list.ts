@@ -80,7 +80,7 @@ export function getExpectedPrList(
     commitHourlyLimit < branches.length
   ) {
     prDesc += emojify(
-      `\n\n:children_crossing: Commit creation or rebasing will be limited to maximum ${commitHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See docs for \`commitHourlyLimit\` for details.\n\n`,
+      `\n\n:children_crossing: Branch creation and automatic rebasing will be limited to maximum ${commitHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See docs for \`commitHourlyLimit\` for details.\n\n`,
     );
   }
   return prDesc;
