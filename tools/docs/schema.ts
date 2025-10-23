@@ -169,6 +169,7 @@ function createSchemaForChildConfigs(
 
 export async function generateSchema(
   dist: string,
+  filename = 'renovate-schema.json',
   version: string = pkg.version,
 ): Promise<void> {
   const schema = {
@@ -195,7 +196,7 @@ export async function generateSchema(
   addChildrenArrayInParents(options, properties);
   createSchemaForChildConfigs(options, properties);
   await updateFile(
-    `${dist}/renovate-schema.json`,
+    `${dist}/${filename}`,
     `${JSON.stringify(schema, null, 2)}\n`,
   );
 }
