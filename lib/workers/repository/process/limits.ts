@@ -4,6 +4,7 @@ import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import { scm } from '../../../modules/platform/scm';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { getCache } from '../../../util/cache/repository';
 import type { BranchConfig } from '../../types';
 
 export async function getPrHourlyCount(
@@ -72,11 +73,30 @@ export async function getCommitsHourlyCount(
     logger.debug(
       `Calculating commits so far in this hour currentHourStart=${String(currentHourStart)}`,
     );
+
+    const cache = getCache();
+    const cachedBranches = cache.branches ?? [];
+
     let soFarThisHour = 0;
     for (const branch of branches) {
-      const updateDate = await scm.getBranchUpdateDate(branch.branchName);
-      if (updateDate && updateDate > currentHourStart) {
-        soFarThisHour++;
+      // First try to get from cache
+      const branchCache = cachedBranches.find(
+        (b) => b.branchName === branch.branchName,
+      );
+
+      if (branchCache?.commitTimestamp) {
+        const commitTime = DateTime.fromISO(branchCache.commitTimestamp, {
+          zone: 'utc',
+        });
+        if (commitTime > currentHourStart) {
+          soFarThisHour++;
+        }
+      } else {
+        // Fallback to SCM if not in cache (shouldn't happen often after initial run)
+        const updateDate = await scm.getBranchUpdateDate(branch.branchName);
+        if (updateDate && updateDate > currentHourStart) {
+          soFarThisHour++;
+        }
       }
     }
     logger.debug(`${soFarThisHour} commits so far in this hour.`);

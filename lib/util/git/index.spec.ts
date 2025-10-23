@@ -429,15 +429,14 @@ describe('util/git/index', { timeout: 10000 }, () => {
     it('should return same value for equal refs', async () => {
       await git.checkoutBranchFromRemote('renovate/equal_branch', 'origin');
       await git.fetchBranch(defaultBranch);
-      const date = git.getBranchUpdateDate('renovate/equal_branch');
-      expect(date!.toISO()).toBe(
-        git.getBranchUpdateDate(defaultBranch)!.toISO(),
-      );
+      const date = await git.getBranchUpdateDate('renovate/equal_branch');
+      const defaultDate = await git.getBranchUpdateDate(defaultBranch);
+      expect(date!.toISO()).toBe(defaultDate!.toISO());
       expect(date).toBeInstanceOf(DateTime);
     });
 
-    it('should return null', () => {
-      expect(git.getBranchUpdateDate('not_found')).toBeNull();
+    it('should return null', async () => {
+      expect(await git.getBranchUpdateDate('not_found')).toBeNull();
     });
   });
 

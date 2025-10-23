@@ -109,6 +109,15 @@ export async function syncBranchState(
     delete branchState.isModified;
     delete branchState.commitFingerprint;
 
+    // Update commit timestamp when SHA changes
+    const commitDate = await scm.getBranchUpdateDate(branchName);
+    if (commitDate) {
+      const isoString = commitDate.toISO();
+      if (isoString) {
+        branchState.commitTimestamp = isoString;
+      }
+    }
+
     // update cached branchSha
     branchState.sha = branchSha;
     branchState.pristine = false;
@@ -178,7 +187,14 @@ export async function writeUpdates(
       : branchState.commitFingerprint;
 
     if (res?.commitSha) {
-      setBranchNewCommit(branchName, baseBranch, res.commitSha);
+      // Get the commit timestamp for the new commit
+      const commitDate = await scm.getBranchUpdateDate(branchName);
+      setBranchNewCommit(
+        branchName,
+        baseBranch,
+        res.commitSha,
+        commitDate ?? undefined,
+      );
     }
     if (
       branch.result === 'automerged' &&
