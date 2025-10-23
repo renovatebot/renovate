@@ -725,7 +725,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
         updatesVerified: true,
-        prNo: 5, // PR is created because commit limit doesn't block PR creation
+        prNo: 5,
         result: 'pr-created',
         commitSha: '123test',
       });
