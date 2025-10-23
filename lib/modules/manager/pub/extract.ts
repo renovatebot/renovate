@@ -34,7 +34,6 @@ function extractFromSection(
     let skipReason: SkipReason | undefined;
     let registryUrls: string[] | undefined;
     let gitUrl: string | undefined;
-    let tagPattern: string | undefined;
 
     if (!is.string(currentValue)) {
       const version = currentValue.version;
@@ -71,10 +70,6 @@ function extractFromSection(
       } else {
         currentValue = '';
       }
-
-      if (is.object(git) && is.string(git?.tag_pattern)) {
-        tagPattern = git.tag_pattern;
-      }
     }
 
     if (gitUrl === undefined) {
@@ -92,7 +87,6 @@ function extractFromSection(
         depType: sectionKey,
         packageName: gitUrl,
         datasource: GitRefsDatasource.id,
-        extractVersion: tagPattern,
         currentValue,
         skipReason,
       });
