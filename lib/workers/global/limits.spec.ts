@@ -306,7 +306,7 @@ describe('workers/global/limits', () => {
       ).toBe(true);
     });
 
-    it('returns true when commit hourly limit is reached', () => {
+    it('returns true when commit hourly limit is reached for HourlyCommits check', () => {
       setCount('Branches', 2);
       setCount('ConcurrentPRs', 2);
       setCount('HourlyCommits', 3);
@@ -331,12 +331,18 @@ describe('workers/global/limits', () => {
           prConcurrentLimit: 3,
         },
       ]);
+      // Commit hourly limit should only affect HourlyCommits check
+      expect(
+        isLimitReached('HourlyCommits', partial<BranchConfig>({ upgrades })),
+      ).toBe(true);
+      // Commit hourly limit should NOT affect Branches check
       expect(
         isLimitReached('Branches', partial<BranchConfig>({ upgrades })),
-      ).toBe(true);
+      ).toBe(false);
+      // Commit hourly limit should NOT affect ConcurrentPRs check
       expect(
         isLimitReached('ConcurrentPRs', partial<BranchConfig>({ upgrades })),
-      ).toBe(true);
+      ).toBe(false);
     });
 
     it('returns true when concurrent limit is reached', () => {
@@ -370,6 +376,33 @@ describe('workers/global/limits', () => {
       expect(
         isLimitReached('ConcurrentPRs', partial<BranchConfig>({ upgrades })),
       ).toBe(true);
+    });
+
+    it('commit hourly limit does not block branch or PR creation', () => {
+      setCount('Branches', 0);
+      setCount('ConcurrentPRs', 1);
+      setCount('HourlyCommits', 2); // Commit limit reached
+      setCount('HourlyPRs', 0); // PR limit not reached
+      const upgrades = partial<BranchUpgradeConfig>([
+        {
+          commitHourlyLimit: 2, // Limit reached
+          prHourlyLimit: 10, // Limit not reached
+          branchConcurrentLimit: 10,
+          prConcurrentLimit: 0, // Unlimited
+        },
+      ]);
+      // Commit limit should only block HourlyCommits
+      expect(
+        isLimitReached('HourlyCommits', partial<BranchConfig>({ upgrades })),
+      ).toBe(true);
+      // Should NOT block branch creation check (concurrent branch limit still OK)
+      expect(
+        isLimitReached('Branches', partial<BranchConfig>({ upgrades })),
+      ).toBe(false);
+      // Should NOT block PR creation
+      expect(
+        isLimitReached('ConcurrentPRs', partial<BranchConfig>({ upgrades })),
+      ).toBe(false);
     });
   });
 });

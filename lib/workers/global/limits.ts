@@ -77,16 +77,17 @@ function handleConcurrentLimits(
   key: Exclude<CountName, 'HourlyPRs'>,
   config: BranchConfig,
 ): boolean {
-  // calculate the remaining hourly commit limit
-  const hourlyCommitLimit = calcLimit(config.upgrades, 'commitHourlyLimit');
-  const hourlyCommitCount = getCount('HourlyCommits');
-
-  // if a limit is defined ( >0 ) and limit reached return true ie. limit has been reached
-  if (hourlyCommitLimit && hourlyCommitCount >= hourlyCommitLimit) {
-    return true;
-  }
-
+  // Only check hourly commit limit when specifically checking HourlyCommits
   if (key === 'HourlyCommits') {
+    // calculate the remaining hourly commit limit
+    const hourlyCommitLimit = calcLimit(config.upgrades, 'commitHourlyLimit');
+    const hourlyCommitCount = getCount('HourlyCommits');
+
+    // if a limit is defined ( >0 ) and limit reached return true ie. limit has been reached
+    if (hourlyCommitLimit && hourlyCommitCount >= hourlyCommitLimit) {
+      return true;
+    }
+
     return false;
   }
 
