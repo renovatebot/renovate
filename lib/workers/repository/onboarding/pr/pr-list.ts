@@ -64,15 +64,6 @@ export function getExpectedPrList(
   }
   // TODO: type (#22198)
   const prHourlyLimit = config.prHourlyLimit!;
-  if (
-    prHourlyLimit > 0 &&
-    prHourlyLimit < 5 &&
-    prHourlyLimit < branches.length
-  ) {
-    prDesc += emojify(
-      `\n\n:children_crossing: PR creation will be limited to maximum ${prHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See docs for \`prHourlyLimit\` for details.\n\n`,
-    );
-  }
   const commitHourlyLimit = config.commitHourlyLimit!;
   if (
     commitHourlyLimit > 0 &&
@@ -81,6 +72,14 @@ export function getExpectedPrList(
   ) {
     prDesc += emojify(
       `\n\n:children_crossing: Branch creation and automatic rebasing will be limited to maximum ${commitHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See docs for \`commitHourlyLimit\` for details.\n\n`,
+    );
+  } else if (
+    prHourlyLimit > 0 &&
+    prHourlyLimit < 5 &&
+    prHourlyLimit < branches.length
+  ) {
+    prDesc += emojify(
+      `\n\n:children_crossing: PR creation will be limited to maximum ${prHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See docs for \`prHourlyLimit\` for details.\n\n`,
     );
   }
   return prDesc;

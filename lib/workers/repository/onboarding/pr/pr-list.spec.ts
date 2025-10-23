@@ -202,5 +202,43 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       const res = getExpectedPrList(config, branches);
       expect(res).not.toContain('commitHourlyLimit');
     });
+
+    it('shows only commitHourlyLimit message when both limits are set', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Update a to v1',
+          branchName: 'renovate/a-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'a',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update b to v1',
+          branchName: 'renovate/b-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'b',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+      ];
+      config.prHourlyLimit = 1;
+      config.commitHourlyLimit = 1;
+      const res = getExpectedPrList(config, branches);
+      expect(res).toContain('commitHourlyLimit');
+      expect(res).not.toContain('prHourlyLimit');
+    });
   });
 });
