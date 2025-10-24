@@ -236,6 +236,7 @@ export interface UpdateArtifact<T = Record<string, unknown>> {
 export interface UpdateDependencyConfig<T = Record<string, any>> {
   fileContent: string;
   upgrade: Upgrade<T>;
+  packageFile?: string;
 }
 
 export interface BumpPackageVersionResult {
@@ -300,7 +301,6 @@ export interface ManagerApi extends ModuleApi {
 
   updateDependency?(
     updateDependencyConfig: UpdateDependencyConfig,
-    packageFile?: string,
   ): MaybePromise<string | null>;
 
   updateLockedDependency?(

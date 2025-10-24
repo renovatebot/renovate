@@ -126,11 +126,12 @@ function replaceAsString(
   throw new Error();
 }
 
-export function updateDependency(
-  { fileContent, upgrade }: UpdateDependencyConfig,
-  fileName = 'package.json',
-): string | null {
-  const isYaml = /\.ya?ml$/.test(fileName);
+export function updateDependency({
+  fileContent,
+  upgrade,
+  packageFile = 'package.json',
+}: UpdateDependencyConfig): string | null {
+  const isYaml = /\.ya?ml$/.test(packageFile);
   if (upgrade.depType?.startsWith('pnpm.catalog')) {
     return updatePnpmCatalogDependency({ fileContent, upgrade });
   }
@@ -149,7 +150,7 @@ export function updateDependency(
   try {
     const parsedContents: NpmPackage = isYaml
       ? parseSingleYaml(fileContent)
-      : (parseJsonWithFallback(fileContent, fileName) as NpmPackage);
+      : (parseJsonWithFallback(fileContent, packageFile) as NpmPackage);
     let overrideDepParents: string[] | undefined = undefined;
     // Save the old version
     let oldVersion: string | undefined;
@@ -189,7 +190,7 @@ export function updateDependency(
         depName,
         oldVersion!,
         `npm:${upgrade.newName}@${newValue}`,
-        fileName,
+        packageFile,
         overrideDepParents,
       );
     } else {
@@ -200,7 +201,7 @@ export function updateDependency(
         depName,
         oldVersion!,
         newValue!,
-        fileName,
+        packageFile,
         overrideDepParents,
       );
       if (upgrade.newName) {
@@ -211,7 +212,7 @@ export function updateDependency(
           depName,
           depName,
           upgrade.newName,
-          fileName,
+          packageFile,
           overrideDepParents,
         );
       }
@@ -254,7 +255,7 @@ export function updateDependency(
           parsedContents.resolutions[depKey]!,
           // TODO #22198
           newValue!,
-          fileName,
+          packageFile,
         );
         if (upgrade.newName) {
           if (depKey === `**/${depName}`) {
@@ -268,7 +269,7 @@ export function updateDependency(
             depKey,
             depKey,
             upgrade.newName,
-            fileName,
+            packageFile,
           );
         }
       }
@@ -284,7 +285,7 @@ export function updateDependency(
             depKey,
             // TODO: types (#22198)
             `${depName}@${newValue}`,
-            fileName,
+            packageFile,
           );
         }
       }

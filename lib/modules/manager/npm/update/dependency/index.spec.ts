@@ -32,13 +32,11 @@ describe('modules/manager/npm/update/dependency/index', () => {
         depName: 'cheerio',
         newValue: '0.22.1',
       };
-      const testContent = npmUpdater.updateDependency(
-        {
-          fileContent: input01YamlContent,
-          upgrade,
-        },
-        'outputs/011.yml',
-      );
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01YamlContent,
+        upgrade,
+        packageFile: 'outputs/011.yml',
+      });
       expect(testContent).toContain('cheerio: "0.22.1"');
     });
 
@@ -74,13 +72,11 @@ describe('modules/manager/npm/update/dependency/index', () => {
         depName: 'lodash',
         newValue: '4.17.0',
       };
-      const testContent = npmUpdater.updateDependency(
-        {
-          fileContent: input,
-          upgrade,
-        },
-        'outputs/011.yml',
-      );
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input,
+        upgrade,
+        packageFile: 'outputs/011.yml',
+      });
       expect(testContent).toEqual(expectedOutput);
     });
 
@@ -90,13 +86,11 @@ describe('modules/manager/npm/update/dependency/index', () => {
         depName: 'bower',
         newValue: '~2.0.0',
       };
-      const testContent = npmUpdater.updateDependency(
-        {
-          fileContent: input01YamlContent,
-          upgrade,
-        },
-        'outputs/012.yaml',
-      );
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01YamlContent,
+        upgrade,
+        packageFile: 'outputs/012.yaml',
+      });
       expect(testContent).toContain('bower: ~2.0.0');
     });
 

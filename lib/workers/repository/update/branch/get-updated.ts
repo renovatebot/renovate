@@ -260,13 +260,11 @@ export async function getUpdatedPackageFiles(
         logger.error({ packageFile, depName }, 'Could not autoReplace');
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
-      let newContent = await updateDependency(
-        {
-          fileContent: packageFileContent!,
-          upgrade,
-        },
+      let newContent = await updateDependency({
+        fileContent: packageFileContent!,
+        upgrade,
         packageFile,
-      );
+      });
       newContent = await applyManagerBumpPackageVersion(newContent, upgrade);
       if (!newContent) {
         if (reuseExistingBranch) {
