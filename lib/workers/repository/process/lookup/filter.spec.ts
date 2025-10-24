@@ -156,9 +156,6 @@ describe('workers/repository/process/lookup/filter', () => {
       ] satisfies Release[];
 
       const config = partial<FilterConfig>({
-        ignoreUnstable: false,
-        ignoreDeprecated: false,
-        respectLatest: false,
         maxMajorIncrement: 50,
       });
       const currentVersion = '19.2.0';
@@ -186,9 +183,6 @@ describe('workers/repository/process/lookup/filter', () => {
       ] satisfies Release[];
 
       const config = partial<FilterConfig>({
-        ignoreUnstable: false,
-        ignoreDeprecated: false,
-        respectLatest: false,
         maxMajorIncrement: 0,
       });
       const currentVersion = '19.2.0';
@@ -217,9 +211,6 @@ describe('workers/repository/process/lookup/filter', () => {
       ] satisfies Release[];
 
       const config = partial<FilterConfig>({
-        ignoreUnstable: false,
-        ignoreDeprecated: false,
-        respectLatest: false,
         maxMajorIncrement: 1,
       });
       const currentVersion = '1.0.0';
@@ -249,9 +240,6 @@ describe('workers/repository/process/lookup/filter', () => {
       ] satisfies Release[];
 
       const config = partial<FilterConfig>({
-        ignoreUnstable: false,
-        ignoreDeprecated: false,
-        respectLatest: false,
         maxMajorIncrement: 1,
       });
       const currentVersion = '0.0.1';
