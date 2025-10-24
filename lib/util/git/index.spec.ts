@@ -435,8 +435,39 @@ describe('util/git/index', { timeout: 10000 }, () => {
       expect(date).toBeInstanceOf(DateTime);
     });
 
-    it('should return null', async () => {
+    it('should return null when branch does not exist', async () => {
       expect(await git.getBranchUpdateDate('not_found')).toBeNull();
+    });
+
+    it('should return null and log error when git show fails', async () => {
+      // Create a valid branch first
+      const branchName = 'renovate/test_error_branch';
+      await git.commitFiles({
+        branchName,
+        files: [
+          {
+            type: 'addition',
+            path: 'error-test-file',
+            contents: 'test content',
+          },
+        ],
+        message: 'Test commit',
+      });
+
+      // Spy on DateTime.fromISO to simulate an error in getCommitDate
+      const fromISOSpy = vi
+        .spyOn(DateTime, 'fromISO')
+        .mockImplementationOnce(() => {
+          throw new Error('simulated git show error');
+        });
+
+      const result = await git.getBranchUpdateDate(branchName);
+
+      expect(result).toBeNull();
+      expect(fromISOSpy).toHaveBeenCalled();
+
+      // Restore original implementation
+      fromISOSpy.mockRestore();
     });
   });
 
