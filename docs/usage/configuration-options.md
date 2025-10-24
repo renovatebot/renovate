@@ -2475,6 +2475,13 @@ In that case you will usually also want to set `respectLatest` to `false` so tha
 
 Also check out the `followTag` configuration option above if you wish Renovate to keep you pinned to a particular release tag.
 
+## maxMajorIncrement
+
+By default, Renovate limits major version increments to 50 to avoid accidentally upgrading to date-based versioning or other high version numbers.
+For example, if you're on version `19.2.0`, Renovate will upgrade to `21.0.0` but filter out `2023.3.3`.
+
+Set to `0` to disable this filtering entirely.
+
 ## includePaths
 
 If you wish for Renovate to process only select paths in the repository, use `includePaths`.
