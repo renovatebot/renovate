@@ -61,4 +61,3 @@ To enable it you need to extend the `managerFilePatterns` for the npm manager as
   }
 }
 ```
-
