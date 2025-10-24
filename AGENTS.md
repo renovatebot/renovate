@@ -1,0 +1,16 @@
+# General
+
+- This project uses `pnpm`, use it instead of `npm`, `yarn`, `npx`, etc.
+
+# Running tests
+
+Run `pnpm vitest path/to/file.spec.ts`.
+This is alias for `pnpm run vitest` defined in `package.json`.
+
+# Code style
+
+- Avoid excessive nesting by using "early exit" style of functions (`return`) and loops (`break` and `continue`).
+
+# Markdown
+
+- In Markdown files, generate each sentence on separate line.
