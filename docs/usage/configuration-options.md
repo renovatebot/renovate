@@ -2565,6 +2565,7 @@ Supported lock files:
 
 | Manager           | Lockfile                                           |
 | ----------------- | -------------------------------------------------- |
+| `apko`            | `apko.lock.json`                                   |
 | `bun`             | `bun.lockb`, `bun.lock`                            |
 | `bundler`         | `Gemfile.lock`                                     |
 | `cargo`           | `Cargo.lock`                                       |
