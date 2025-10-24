@@ -1,3 +1,4 @@
+import * as hostRules from '../../util/host-rules';
 import { GitRefsDatasource } from '../datasource/git-refs';
 import { GitTagsDatasource } from '../datasource/git-tags';
 import { GithubTagsDatasource } from '../datasource/github-tags';
@@ -6,6 +7,10 @@ import { type PackageDependency } from './types';
 import { applyGitSource } from './util';
 
 describe('modules/manager/util', () => {
+  beforeEach(() => {
+    hostRules.clear();
+  });
+
   it('applies GitHub source for tag', () => {
     const dependency: PackageDependency = {};
     const git = 'https://github.com/foo/bar';
@@ -49,6 +54,26 @@ describe('modules/manager/util', () => {
       datasource: GitTagsDatasource.id,
       packageName: git,
       currentValue: tag,
+      skipReason: undefined,
+    });
+  });
+
+  it('applies git source with subdomain', () => {
+    const dependency: PackageDependency = {};
+    const git = 'https://git.example.com/foo/bar';
+    const tag = 'v1.2.3';
+
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'git.example.com',
+    });
+    applyGitSource(dependency, git, undefined, tag, undefined);
+
+    expect(dependency).toStrictEqual({
+      datasource: GithubTagsDatasource.id,
+      packageName: 'foo/bar',
+      currentValue: tag,
+      registryUrls: ['https://git.example.com'],
       skipReason: undefined,
     });
   });
