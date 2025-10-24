@@ -505,8 +505,11 @@ importers:
         specifier: 1.3.16
         version: 1.3.16(eslint@9.35.0)(typescript@5.9.3)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.18.11)(tsx@4.20.6)(yaml@2.8.1))
       ajv:
-        specifier: 6.12.6
-        version: 6.12.6
+        specifier: 8.17.1
+        version: 8.17.1
+      ajv-formats:
+        specifier: 3.0.1
+        version: 3.0.1(ajv@8.17.1)
       aws-sdk-client-mock:
         specifier: 4.1.0
         version: 4.1.0
@@ -2563,8 +2566,19 @@ packages:
     resolution: {integrity: sha512-gOsf2YwSlleG6IjRYG2A7k0HmBMEo6qVNk9Bp/EaLgAJT5ngH6PXbqa4ItvnEwCm/velL5jAnQgsHsWnjhGmvw==}
     engines: {node: '>=18'}
 
+  ajv-formats@3.0.1:
+    resolution: {integrity: sha512-8iUql50EUR+uUcdRQ3HDqa6EVyo3docL8g5WJ3FNcWmu62IbkGUue/pEyLBW8VGKKucTPgqeks4fIU1DA4yowQ==}
+    peerDependencies:
+      ajv: ^8.0.0
+    peerDependenciesMeta:
+      ajv:
+        optional: true
+
   ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
+
+  ajv@8.17.1:
+    resolution: {integrity: sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g==}
 
   ansi-escapes@7.1.1:
     resolution: {integrity: sha512-Zhl0ErHcSRUaVfGUeUdDuLgpkEo8KIFjB4Y9uAc46ScOpdDiU1Dbyplh7qWJeJ/ZHpbyMSM26+X3BySgnIz40Q==}
@@ -3514,6 +3528,9 @@ packages:
   fast-levenshtein@2.0.6:
     resolution: {integrity: sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw==}
 
+  fast-uri@3.1.0:
+    resolution: {integrity: sha512-iPeeDKJSWf4IEOasVVrknXpaBV0IApz/gp7S2bb7Z4Lljbl2MGJRqInZiUrQwV16cpzw/D3S5j5Julj/gT52AA==}
+
   fast-xml-parser@5.2.5:
     resolution: {integrity: sha512-pfX9uG9Ki0yekDHx2SiuRIyFdyAr1kMIMitPvb0YBo8SUfKvia7w7FIyd/l6av85pFYRhZscS75MwMnbvY+hcQ==}
     hasBin: true
@@ -4354,6 +4371,9 @@ packages:
 
   json-schema-traverse@0.4.1:
     resolution: {integrity: sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg==}
+
+  json-schema-traverse@1.0.0:
+    resolution: {integrity: sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==}
 
   json-stable-stringify-without-jsonify@1.0.1:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
@@ -5533,6 +5553,10 @@ packages:
 
   require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
+    engines: {node: '>=0.10.0'}
+
+  require-from-string@2.0.2:
+    resolution: {integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==}
     engines: {node: '>=0.10.0'}
 
   require-in-the-middle@8.0.0:
@@ -9307,12 +9331,23 @@ snapshots:
       clean-stack: 5.3.0
       indent-string: 5.0.0
 
+  ajv-formats@3.0.1(ajv@8.17.1):
+    optionalDependencies:
+      ajv: 8.17.1
+
   ajv@6.12.6:
     dependencies:
       fast-deep-equal: 3.1.3
       fast-json-stable-stringify: 2.1.0
       json-schema-traverse: 0.4.1
       uri-js: 4.4.1
+
+  ajv@8.17.1:
+    dependencies:
+      fast-deep-equal: 3.1.3
+      fast-uri: 3.1.0
+      json-schema-traverse: 1.0.0
+      require-from-string: 2.0.2
 
   ansi-escapes@7.1.1:
     dependencies:
@@ -10394,6 +10429,8 @@ snapshots:
 
   fast-levenshtein@2.0.6: {}
 
+  fast-uri@3.1.0: {}
+
   fast-xml-parser@5.2.5:
     dependencies:
       strnum: 2.1.1
@@ -11277,6 +11314,8 @@ snapshots:
   json-parse-even-better-errors@4.0.0: {}
 
   json-schema-traverse@0.4.1: {}
+
+  json-schema-traverse@1.0.0: {}
 
   json-stable-stringify-without-jsonify@1.0.1: {}
 
@@ -12713,6 +12752,8 @@ snapshots:
       - supports-color
 
   require-directory@2.1.1: {}
+
+  require-from-string@2.0.2: {}
 
   require-in-the-middle@8.0.0:
     dependencies:

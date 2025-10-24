@@ -1,14 +1,16 @@
 import { promises } from 'fs';
-import ajv from 'ajv';
+import type { ErrorObject, ValidateFunction } from 'ajv';
+import { Ajv } from 'ajv';
 import draft7MetaSchema from 'ajv/lib/refs/json-schema-draft-07.json';
+import addFormats from 'ajv-formats';
 import { glob } from 'glob';
 
 async function validateFileAgainstSchema(
-  validate: ajv.ValidateFunction,
+  validate: ValidateFunction,
   filename: string,
-): Promise<ajv.ErrorObject[] | null | undefined> {
+): Promise<ErrorObject[] | null | undefined> {
   const schema = JSON.parse(await promises.readFile(filename, 'utf-8'));
-  const valid = await validate(schema);
+  const valid = validate(schema);
   if (!valid) {
     return validate.errors;
   }
@@ -17,24 +19,26 @@ async function validateFileAgainstSchema(
 async function validateFileAgainstSchemaFromFile(
   schemaFilename: string,
   filename: string,
-): Promise<ajv.ErrorObject[] | null | undefined> {
+): Promise<ErrorObject[] | null | undefined> {
   const data = JSON.parse(await promises.readFile(filename, 'utf-8'));
   const schema = JSON.parse(await promises.readFile(schemaFilename, 'utf-8'));
-  const validator = new ajv({ schemaId: 'auto', meta: false });
+  const validator = new Ajv({ schemaId: '$id', meta: false });
+  addFormats(validator);
   validator.addMetaSchema(draft7MetaSchema);
   const validate = validator.compile(schema);
-  const valid = await validate(data);
+  const valid = validate(data);
   if (!valid) {
     return validate.errors;
   }
 }
 
 async function validateSchemas(): Promise<void> {
-  const validator = new ajv({ schemaId: 'auto', meta: false });
+  const validator = new Ajv({ schemaId: '$id', meta: false });
   validator.addMetaSchema(draft7MetaSchema);
+  addFormats(validator);
   const validate = validator.compile(draft7MetaSchema);
 
-  const failed: { filename: string; errors: ajv.ErrorObject[] }[] = [];
+  const failed: { filename: string; errors: ErrorObject[] }[] = [];
 
   const fileGlobsToValidate = [
     'renovate-schema.json',
@@ -95,7 +99,7 @@ async function validateDataFilesAgainstSchemas(): Promise<void> {
   const failed: {
     schemaFilename: string;
     filename: string;
-    errors: ajv.ErrorObject[];
+    errors: ErrorObject[];
   }[] = [];
 
   for (const filename of filesAndSchemasToValidate) {
