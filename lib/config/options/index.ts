@@ -2119,6 +2119,15 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['bitbucket'],
   },
   {
+    name: 'bbMendAppDashboardStatus',
+    description: `Creates a main branch status linked to the repository's Mend App Dashboard.`,
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['bitbucket'],
+    globalOnly: true,
+    inheritConfigSupport: true,
+  },
+  {
     name: 'bbUseDefaultReviewers',
     description: 'Use the default reviewers (Bitbucket only).',
     type: 'boolean',
