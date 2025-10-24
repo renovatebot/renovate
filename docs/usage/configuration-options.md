@@ -1856,6 +1856,11 @@ Under the hood, it creates a MR-level approval rule where `approvals_required` i
 This option works only when `automerge=true` and either `automergeType=pr` or `automergeType=branch`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
 
+## gitLabNotesMerge
+
+Uses the [Gitlab Notes API](https://docs.gitlab.com/api/notes/#create-new-merge-request-note) to send the [`/merge` quick action](https://docs.gitlab.com/user/project/quick_actions/).
+By default, Renovate uses [the Merge requests API](https://docs.gitlab.com/api/merge_requests/#merge-a-merge-request) to do this, but [this doesn't support Merge Trains yet](https://gitlab.com/gitlab-org/gitlab/-/issues/32665).
+
 ## goGetDirs
 
 By default, Renovate will run `go get -d -t ./...` to update the `go.sum`.
