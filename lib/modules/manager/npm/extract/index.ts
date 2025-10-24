@@ -270,12 +270,12 @@ export async function extractAllPackageFiles(
 
           const yarnConfig = loadConfigFromYarnrcYml(content);
 
-          if (yarnConfig?.catalogs) {
+          if (yarnConfig?.catalogs || yarnConfig?.catalog) {
             const hasPackageManagerResult = await hasPackageManager(
               upath.dirname(packageFile),
             );
             const catalogsDeps = await extractYarnCatalogs(
-              yarnConfig.catalogs,
+              { catalog: yarnConfig.catalog, catalogs: yarnConfig.catalogs },
               packageFile,
               hasPackageManagerResult,
             );
