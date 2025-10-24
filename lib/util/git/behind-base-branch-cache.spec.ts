@@ -195,6 +195,7 @@ describe('util/git/behind-base-branch-cache', () => {
     it('returns without updating when cache not populated', () => {
       setCachedBehindBaseResult('foo', false);
       expect(repoCache).toEqual({});
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'setCachedBehindBaseResult(): Branch cache not present',
       );
@@ -203,6 +204,7 @@ describe('util/git/behind-base-branch-cache', () => {
     it('returns without updating when branch not found', () => {
       setCachedBehindBaseResult('foo', false);
       expect(repoCache).toEqual({});
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'setCachedBehindBaseResult(): Branch cache not present',
       );

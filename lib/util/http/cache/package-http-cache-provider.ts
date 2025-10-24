@@ -34,9 +34,9 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   }: PackageHttpCacheProviderOptions) {
     super();
     this.namespace = namespace;
-    const ttl = resolveTtlValues(this.namespace, softTtlMinutes);
-    this.softTtlMinutes = ttl.softTtlMinutes;
-    this.hardTtlMinutes = ttl.hardTtlMinutes;
+    const ttlValues = resolveTtlValues(this.namespace, softTtlMinutes);
+    this.softTtlMinutes = ttlValues.softTtlMinutes;
+    this.hardTtlMinutes = ttlValues.hardTtlMinutes;
     this.checkCacheControlHeader = checkCacheControlHeader;
     this.checkAuthorizationHeader = checkAuthorizationHeader;
   }

@@ -98,6 +98,9 @@ If you don't want a `renovate.json` file in your repository you can use one of t
 - `.renovaterc.json5`
 - `package.json` (deprecated)
 
+Or in a custom file present within the [`configFileNames`](../self-hosted-configuration.md#configfilenames).
+The bot first checks all the files in the `configFileNames` array before checking from the above file list.
+
 #### package.json
 
 <!-- prettier-ignore -->

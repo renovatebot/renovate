@@ -109,6 +109,15 @@ export async function getLockedVersions(
       const relativeDir = upath.relative(npmRootDir, packageDir);
 
       for (const dep of packageFile.deps) {
+        // Skip dependency types which are not locked in the lock file
+        if (
+          dep.depType === 'engines' ||
+          dep.depType === 'packageManager' ||
+          dep.depType === 'volta'
+        ) {
+          continue;
+        }
+
         // TODO: types (#22198)
         let lockedDepName = dep.depName!;
         if (relativeDir && relativeDir !== '.') {

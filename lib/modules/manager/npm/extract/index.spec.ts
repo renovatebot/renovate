@@ -330,6 +330,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig,
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.warn).toHaveBeenCalledWith(
         'Updating multiple npm lock files is deprecated and support will be removed in future versions.',
       );
@@ -983,6 +984,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig,
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         'Invalid npm package alias for dependency: "g":"npm:@foo/@bar/@1.2.3"',
       );

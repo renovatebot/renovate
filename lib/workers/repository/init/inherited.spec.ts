@@ -1,3 +1,7 @@
+import {
+  getConfigFileNames,
+  setUserConfigFileNames,
+} from '../../../config/app-strings';
 import * as decrypt from '../../../config/decrypt';
 import * as presets_ from '../../../config/presets';
 import type { RenovateConfig } from '../../../config/types';
@@ -186,6 +190,7 @@ describe('workers/repository/init/inherited', () => {
     expect(res.labels).toEqual(['test']);
     expect(res.onboarding).toBeFalse();
     expect(logger.warn).not.toHaveBeenCalled();
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.debug).toHaveBeenCalledWith(
       'Resolving presets found in inherited config',
     );
@@ -216,6 +221,7 @@ describe('workers/repository/init/inherited', () => {
     });
     const res = await mergeInheritedConfig(config);
     expect(res.binarySource).toBeUndefined();
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.warn).toHaveBeenCalledWith(
       {
         warnings: [
@@ -254,6 +260,7 @@ describe('workers/repository/init/inherited', () => {
     await expect(mergeInheritedConfig(config)).rejects.toThrow(
       CONFIG_VALIDATION,
     );
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.warn).toHaveBeenCalledWith(
       {
         errors: [
@@ -283,6 +290,7 @@ describe('workers/repository/init/inherited', () => {
     const res = await mergeInheritedConfig(config);
     expect(res.labels).toEqual(['test']);
     expect(logger.warn).not.toHaveBeenCalled();
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.debug).toHaveBeenCalledWith(
       {
         inheritedConfig: {
@@ -297,5 +305,31 @@ describe('workers/repository/init/inherited', () => {
       },
       'Removed global config from inherited config presets.',
     );
+  });
+
+  it('overwrites configFileNames set by admin config', async () => {
+    config.inheritConfigFileName = 'some-other-file.json';
+    // imitate setting of configFileNames by admin config
+    setUserConfigFileNames(['some-file.json']);
+    platform.getRawFile.mockResolvedValue(
+      '{"onboarding":false,"labels":["test"],"configFileNames":["some-other-file.json"]}',
+    );
+    const res = await mergeInheritedConfig(config);
+    expect(res.labels).toEqual(['test']);
+    expect(res.onboarding).toBeFalse();
+    expect(getConfigFileNames()[0]).toBe('some-other-file.json');
+  });
+
+  it('does not modify configFileNames set by admin config if configFileNames is not present in inherited config', async () => {
+    config.inheritConfigFileName = 'some-other-file.json';
+    // imitate setting of configFileNames by admin config
+    setUserConfigFileNames(['some-file.json']);
+    platform.getRawFile.mockResolvedValue(
+      '{"onboarding":false,"labels":["test"]}',
+    );
+    const res = await mergeInheritedConfig(config);
+    expect(res.labels).toEqual(['test']);
+    expect(res.onboarding).toBeFalse();
+    expect(getConfigFileNames()[0]).toBe('some-file.json');
   });
 });

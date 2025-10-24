@@ -2,8 +2,8 @@ import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { HostRulesMigration } from './host-rules-migration';
 
 describe('config/migrations/custom/host-rules-migration', () => {
-  it('should migrate array', () => {
-    expect(HostRulesMigration).toMigrate(
+  it('should migrate array', async () => {
+    await expect(HostRulesMigration).toMigrate(
       {
         hostRules: [
           {
