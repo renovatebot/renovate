@@ -248,6 +248,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       it('sets non-master base branch with submodule update', async () => {
         await git.initRepo({
           cloneSubmodules: true,
+          cloneSubmodulesRecursive: true,
           url: base.path,
         });
         expect((await git.getRepoStatus()).isClean()).toBeTrue();
@@ -283,6 +284,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       await repo.commit('Add submodules');
       await git.initRepo({
         cloneSubmodules: true,
+        cloneSubmodulesRecursive: true,
         cloneSubmodulesFilter: ['file'],
         url: base.path,
       });
@@ -938,6 +940,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       await repo.commit('Add submodule');
       await git.initRepo({
         cloneSubmodules: true,
+        cloneSubmodulesRecursive: true,
         url: base.path,
       });
       await git.syncGit();
