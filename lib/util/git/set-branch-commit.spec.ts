@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
 import { setBranchNewCommit } from './set-branch-commit';
@@ -61,6 +62,98 @@ describe('util/git/set-branch-commit', () => {
           branchName: 'branch_name',
           baseBranch: 'base_branch',
           sha: 'SHA',
+          baseBranchSha: 'base_SHA',
+          isBehindBase: false,
+          isModified: false,
+          isConflicted: false,
+          pristine: true,
+        },
+      ]);
+    });
+
+    it('sets commitTimestamp when DateTime is provided', () => {
+      repoCache = {
+        branches: [
+          partial<BranchCache>({
+            branchName: 'branch_name',
+            baseBranch: 'base_branch',
+            sha: 'old_SHA',
+            baseBranchSha: 'base_SHA',
+          }),
+        ],
+      };
+      const commitDate = DateTime.fromISO('2023-05-20T14:25:30.123Z', {
+        zone: 'utc',
+      });
+      git.getBranchCommit.mockReturnValueOnce('base_SHA' as LongCommitSha);
+      repositoryCache.getCache.mockReturnValue(repoCache);
+      setBranchNewCommit('branch_name', 'base_branch', 'new_SHA', commitDate);
+      expect(repoCache.branches).toEqual([
+        {
+          branchName: 'branch_name',
+          baseBranch: 'base_branch',
+          sha: 'new_SHA',
+          baseBranchSha: 'base_SHA',
+          isBehindBase: false,
+          isModified: false,
+          isConflicted: false,
+          pristine: true,
+          commitTimestamp: '2023-05-20T14:25:30.123Z',
+        },
+      ]);
+    });
+
+    it('does not set commitTimestamp when DateTime is not provided', () => {
+      repoCache = {
+        branches: [
+          partial<BranchCache>({
+            branchName: 'branch_name',
+            baseBranch: 'base_branch',
+            sha: 'old_SHA',
+            baseBranchSha: 'base_SHA',
+            commitTimestamp: 'old_timestamp',
+          }),
+        ],
+      };
+      git.getBranchCommit.mockReturnValueOnce('base_SHA' as LongCommitSha);
+      repositoryCache.getCache.mockReturnValue(repoCache);
+      setBranchNewCommit('branch_name', 'base_branch', 'new_SHA');
+      expect(repoCache.branches).toEqual([
+        {
+          branchName: 'branch_name',
+          baseBranch: 'base_branch',
+          sha: 'new_SHA',
+          baseBranchSha: 'base_SHA',
+          isBehindBase: false,
+          isModified: false,
+          isConflicted: false,
+          pristine: true,
+          commitTimestamp: 'old_timestamp',
+        },
+      ]);
+    });
+
+    it('handles DateTime with null toISO() result', () => {
+      repoCache = {
+        branches: [
+          partial<BranchCache>({
+            branchName: 'branch_name',
+            baseBranch: 'base_branch',
+            sha: 'old_SHA',
+            baseBranchSha: 'base_SHA',
+          }),
+        ],
+      };
+      // Create an invalid DateTime that returns null from toISO()
+      const invalidDate = DateTime.invalid('test invalid');
+      git.getBranchCommit.mockReturnValueOnce('base_SHA' as LongCommitSha);
+      repositoryCache.getCache.mockReturnValue(repoCache);
+      setBranchNewCommit('branch_name', 'base_branch', 'new_SHA', invalidDate);
+      expect(repoCache.branches).toEqual([
+        {
+          branchName: 'branch_name',
+          baseBranch: 'base_branch',
+          sha: 'new_SHA',
           baseBranchSha: 'base_SHA',
           isBehindBase: false,
           isModified: false,
