@@ -19,7 +19,7 @@ export const id = 'ruby';
 export const displayName = 'Ruby';
 export const urls = [
   'https://guides.rubygems.org/patterns/',
-  'https://bundler.io/v1.5/gemfile.html',
+  'https://bundler.io/guides/gemfile.html',
   'https://www.devalot.com/articles/2012/04/gem-versions.html',
 ];
 export const supportsRanges = true;
