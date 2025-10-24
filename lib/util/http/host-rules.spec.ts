@@ -349,6 +349,23 @@ describe('util/http/host-rules', () => {
       hostType: 'pod',
       token: 'token',
     });
+
+    // in the case that an API URL is used for GitHub.com, auto-detect it as a `hostType=github`
+    {
+      const url = 'https://api.github.com/renovatebot/renovate';
+
+      opts = {};
+      hostRule = findMatchingRule(url, opts);
+      expect(hostRule).toEqual({
+        token: 'token',
+      });
+      expect(applyHostRule(url, opts, hostRule)).toEqual({
+        context: {
+          authType: undefined,
+        },
+        token: 'token',
+      });
+    }
   });
 
   it('no fallback to gitlab', () => {

@@ -69,6 +69,17 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
     };
   }
 
+  // in the case that an API URL is used for GitHub.com, fallback to `github` hostType
+  if (url.startsWith('https://api.github.com/')) {
+    res = {
+      ...hostRules.find({
+        hostType: 'github',
+        url,
+      }),
+      ...res,
+    };
+  }
+
   // Fallback to `gitlab` hostType
   if (
     hostType &&
