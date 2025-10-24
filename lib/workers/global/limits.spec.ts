@@ -273,6 +273,30 @@ describe('workers/global/limits', () => {
       ).toBe(false);
     });
 
+    it('returns false when commit hourly limit is 0 (unlimited)', () => {
+      setCount('HourlyCommits', 100);
+      const upgrades = partial<BranchUpgradeConfig>([
+        {
+          commitHourlyLimit: 0, // Unlimited
+        },
+      ]);
+      expect(
+        isLimitReached('HourlyCommits', partial<BranchConfig>({ upgrades })),
+      ).toBe(false);
+    });
+
+    it('returns false when commit hourly limit is not reached', () => {
+      setCount('HourlyCommits', 2);
+      const upgrades = partial<BranchUpgradeConfig>([
+        {
+          commitHourlyLimit: 5,
+        },
+      ]);
+      expect(
+        isLimitReached('HourlyCommits', partial<BranchConfig>({ upgrades })),
+      ).toBe(false);
+    });
+
     it('returns true when pr hourly limit is reached', () => {
       setCount('Branches', 2);
       setCount('ConcurrentPRs', 2);
@@ -403,6 +427,62 @@ describe('workers/global/limits', () => {
       expect(
         isLimitReached('ConcurrentPRs', partial<BranchConfig>({ upgrades })),
       ).toBe(false);
+    });
+
+    it('returns false for branches when hourly PR limit is 0 (unlimited)', () => {
+      setCount('Branches', 5);
+      setCount('HourlyPRs', 100);
+      const upgrades = partial<BranchUpgradeConfig>([
+        {
+          prHourlyLimit: 0, // Unlimited
+          branchConcurrentLimit: 10,
+        },
+      ]);
+      expect(
+        isLimitReached('Branches', partial<BranchConfig>({ upgrades })),
+      ).toBe(false);
+    });
+
+    it('returns false for concurrent PRs when hourly PR limit is 0 (unlimited)', () => {
+      setCount('ConcurrentPRs', 5);
+      setCount('HourlyPRs', 100);
+      const upgrades = partial<BranchUpgradeConfig>([
+        {
+          prHourlyLimit: 0, // Unlimited
+          prConcurrentLimit: 10,
+        },
+      ]);
+      expect(
+        isLimitReached('ConcurrentPRs', partial<BranchConfig>({ upgrades })),
+      ).toBe(false);
+    });
+
+    it('returns true when concurrent branch limit reached but not hourly PR limit', () => {
+      setCount('Branches', 5);
+      setCount('HourlyPRs', 1);
+      const upgrades = partial<BranchUpgradeConfig>([
+        {
+          prHourlyLimit: 10,
+          branchConcurrentLimit: 5,
+        },
+      ]);
+      expect(
+        isLimitReached('Branches', partial<BranchConfig>({ upgrades })),
+      ).toBe(true);
+    });
+
+    it('returns true when concurrent PR limit reached but not hourly PR limit', () => {
+      setCount('ConcurrentPRs', 3);
+      setCount('HourlyPRs', 1);
+      const upgrades = partial<BranchUpgradeConfig>([
+        {
+          prHourlyLimit: 10,
+          prConcurrentLimit: 3,
+        },
+      ]);
+      expect(
+        isLimitReached('ConcurrentPRs', partial<BranchConfig>({ upgrades })),
+      ).toBe(true);
     });
   });
 });
