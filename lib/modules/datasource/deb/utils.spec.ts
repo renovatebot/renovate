@@ -2,13 +2,13 @@ import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
-import { extract } from './file';
+import { extract } from './utils';
 import { Fixtures } from '~test/fixtures';
 import { fs } from '~test/util';
 
 const fixturePackagesArchivePath = Fixtures.getPath(`Packages.gz`);
 
-describe('modules/datasource/deb/file', () => {
+describe('modules/datasource/deb/utils', () => {
   let cacheDir: DirectoryResult | null;
   let extractedPackageFile: string;
 
