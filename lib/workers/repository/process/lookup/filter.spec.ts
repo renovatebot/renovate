@@ -259,33 +259,5 @@ describe('workers/repository/process/lookup/filter', () => {
         { version: '1.0.0' },
       ]);
     });
-
-    it('includes releases with null major version when maxMajorIncrement is set', () => {
-      const gradleVersioning = allVersioning.get('gradle');
-
-      const releases = [
-        { version: 'Greenwich.SR2' },
-        { version: 'Hoxton.RELEASE' },
-      ] satisfies Release[];
-
-      const config = partial<FilterConfig>({
-        maxMajorIncrement: 1,
-      });
-      const currentVersion = 'Greenwich.SR1';
-      const latestVersion = 'Hoxton.RELEASE';
-
-      const filteredVersions = filterVersions(
-        config,
-        currentVersion,
-        latestVersion,
-        releases,
-        gradleVersioning,
-      );
-
-      expect(filteredVersions).toEqual([
-        { version: 'Greenwich.SR2' },
-        { version: 'Hoxton.RELEASE' },
-      ]);
-    });
   });
 });

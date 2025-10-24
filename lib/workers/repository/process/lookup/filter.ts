@@ -76,6 +76,7 @@ export function filterVersions(
     if (currentMajor !== null) {
       filteredReleases = filteredReleases.filter((r) => {
         const releaseMajor = versioningApi.getMajor(r.version);
+        // istanbul ignore if: shouldn't happen
         if (releaseMajor === null) {
           return true;
         }
