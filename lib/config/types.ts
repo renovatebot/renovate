@@ -221,8 +221,8 @@ export type RenovateRepository =
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
 export type MinimumReleaseAgeBehaviour =
-  | 'timestamp-optional'
-  | 'timestamp-required';
+  | 'timestamp-required'
+  | 'timestamp-optional';
 
 export const allowedStatusCheckStrings = [
   'minimumReleaseAge',
