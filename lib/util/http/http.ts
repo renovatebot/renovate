@@ -67,7 +67,7 @@ export function applyDefaultHeaders(options: Options): void {
     ...options.headers,
     'user-agent':
       GlobalConfig.get('userAgent') ??
-      `RenovateBot/${renovateVersion} (https://github.com/renovatebot/renovate)`,
+      `Renovate/${renovateVersion} (https://github.com/renovatebot/renovate)`,
   };
 }
 
