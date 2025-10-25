@@ -268,10 +268,21 @@ export async function processBranch(
 
       const prRebaseChecked = !!branchPr?.bodyStruct?.rebaseRequested;
 
-      if (branchExists && !dependencyDashboardCheck && config.stopUpdating) {
-        if (!prRebaseChecked) {
+      if (branchExists && !dependencyDashboardCheck) {
+        if (config.stopUpdating && !prRebaseChecked) {
           logger.info(
             'Branch updating is skipped because stopUpdatingLabel is present in config',
+          );
+          return {
+            branchExists: true,
+            prNo: branchPr?.number,
+            result: 'no-work',
+          };
+        }
+
+        if (config.pendingChecks) {
+          logger.info(
+            'Branch updating is skipped because it contains updates with unmet release age',
           );
           return {
             branchExists: true,
