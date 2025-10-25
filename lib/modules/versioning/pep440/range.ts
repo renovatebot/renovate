@@ -98,6 +98,10 @@ interface Range {
   version: string;
 }
 
+export function getPinnedValue(newVersion: string): string {
+  return `==${newVersion}`;
+}
+
 export function getNewValue({
   currentValue,
   rangeStrategy,
@@ -107,9 +111,6 @@ export function getNewValue({
 }: NewValueConfig): string | null {
   let ranges: Range[];
   let updatedRange: (string | null)[];
-  if (rangeStrategy === 'pin' && !isReplacement) {
-    return '==' + newVersion;
-  }
 
   // no symbol: accept only that specific version specified
   if (currentValue === currentVersion || isReplacement) {
