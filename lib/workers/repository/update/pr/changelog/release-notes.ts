@@ -26,7 +26,7 @@ import type {
 } from './types';
 
 const markdown = new MarkdownIt('zero');
-markdown.enable(['heading', 'lheading']);
+markdown.enable(['heading', 'lheading', 'fence']);
 
 const repositoriesToSkipMdFetching = ['facebook/react-native'];
 
