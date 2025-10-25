@@ -70,6 +70,31 @@ describe('modules/manager/npm/post-update/node-version', () => {
       );
       expect(res).toBe('^12.16.3');
     });
+
+    it('returns from package.json volta', async () => {
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() => Promise.resolve({ volta: { node: '14.17.0' } })),
+      );
+      expect(res).toBe('14.17.0');
+    });
+
+    it('prefers volta over engines', async () => {
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() =>
+          Promise.resolve({
+            volta: { node: '14.17.0' },
+            engines: { node: '^12.16.3' },
+          }),
+        ),
+      );
+      expect(res).toBe('14.17.0');
+    });
   });
 
   describe('getNodeUpdate()', () => {
