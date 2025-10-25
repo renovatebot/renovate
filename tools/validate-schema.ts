@@ -1,42 +1,50 @@
 import { promises } from 'fs';
-import ajv from 'ajv';
-import draft4MetaSchema from 'ajv/lib/refs/json-schema-draft-04.json';
+import type { ErrorObject, ValidateFunction } from 'ajv';
+import { Ajv } from 'ajv';
+import draft7MetaSchema from 'ajv/lib/refs/json-schema-draft-07.json';
+import addFormats from 'ajv-formats';
 import { glob } from 'glob';
 
-async function validateFileAgainstDraft04Schema(
-  validate: ajv.ValidateFunction,
+async function validateFileAgainstSchema(
+  validate: ValidateFunction,
   filename: string,
-): Promise<ajv.ErrorObject[] | null | undefined> {
+): Promise<ErrorObject[] | null | undefined> {
   const schema = JSON.parse(await promises.readFile(filename, 'utf-8'));
-  const valid = await validate(schema);
+  const valid = validate(schema);
   if (!valid) {
     return validate.errors;
   }
 }
 
-async function validateFileAgainstDraft04SchemaFromFile(
+async function validateFileAgainstSchemaFromFile(
   schemaFilename: string,
   filename: string,
-): Promise<ajv.ErrorObject[] | null | undefined> {
+): Promise<ErrorObject[] | null | undefined> {
   const data = JSON.parse(await promises.readFile(filename, 'utf-8'));
   const schema = JSON.parse(await promises.readFile(schemaFilename, 'utf-8'));
-  const validator = new ajv({ schemaId: 'auto', meta: false });
-  validator.addMetaSchema(draft4MetaSchema);
+  const validator = new Ajv({ schemaId: '$id', meta: false });
+  addFormats(validator);
+  validator.addMetaSchema(draft7MetaSchema);
   const validate = validator.compile(schema);
-  const valid = await validate(data);
+  const valid = validate(data);
   if (!valid) {
     return validate.errors;
   }
 }
 
-async function validateDraft04Schemas(): Promise<void> {
-  const validator = new ajv({ schemaId: 'auto', meta: false });
-  validator.addMetaSchema(draft4MetaSchema);
-  const validate = validator.compile(draft4MetaSchema);
+async function validateSchemas(): Promise<void> {
+  const validator = new Ajv({ schemaId: '$id', meta: false });
+  validator.addMetaSchema(draft7MetaSchema);
+  addFormats(validator);
+  const validate = validator.compile(draft7MetaSchema);
 
-  const failed: { filename: string; errors: ajv.ErrorObject[] }[] = [];
+  const failed: { filename: string; errors: ErrorObject[] }[] = [];
 
-  const fileGlobsToValidate = ['renovate-schema.json', 'tools/schemas/*.json'];
+  const fileGlobsToValidate = [
+    'renovate-schema.json',
+    'renovate-global-schema.json',
+    'tools/schemas/*.json',
+  ];
   const expandedFiles: string[] = (
     await Promise.all(
       fileGlobsToValidate.map(async (pattern) => await glob(pattern)),
@@ -44,7 +52,7 @@ async function validateDraft04Schemas(): Promise<void> {
   ).flat();
 
   for (const filename of expandedFiles) {
-    const errors = await validateFileAgainstDraft04Schema(validate, filename);
+    const errors = await validateFileAgainstSchema(validate, filename);
     if (errors) {
       failed.push({ filename, errors });
     } else {
@@ -91,11 +99,11 @@ async function validateDataFilesAgainstSchemas(): Promise<void> {
   const failed: {
     schemaFilename: string;
     filename: string;
-    errors: ajv.ErrorObject[];
+    errors: ErrorObject[];
   }[] = [];
 
   for (const filename of filesAndSchemasToValidate) {
-    const errors = await validateFileAgainstDraft04SchemaFromFile(
+    const errors = await validateFileAgainstSchemaFromFile(
       filename.schemaFilename,
       filename.filename,
     );
@@ -121,6 +129,6 @@ async function validateDataFilesAgainstSchemas(): Promise<void> {
 }
 
 void (async () => {
-  await validateDraft04Schemas();
+  await validateSchemas();
   await validateDataFilesAgainstSchemas();
 })();
