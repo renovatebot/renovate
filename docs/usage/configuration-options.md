@@ -2630,6 +2630,13 @@ Be careful with remapping `warn` or `error` messages to lower log levels, as it 
 
 Add to this object if you wish to define rules that apply only to major updates.
 
+## maxMajorIncrement
+
+By default, Renovate limits major version increments to 50 to avoid accidentally upgrading to date-based versioning or other high version numbers.
+For example, if you're on version `19.2.0`, Renovate will upgrade to `21.0.0` but filter out `2023.3.3`.
+
+Set to `0` to disable this filtering entirely.
+
 ## managerFilePatterns
 
 Formerly known as `fileMatch`, which supported regex-only.
