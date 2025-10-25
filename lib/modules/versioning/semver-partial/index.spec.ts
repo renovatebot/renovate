@@ -3,14 +3,18 @@ import semverPartial from '.';
 describe('modules/versioning/semver-partial/index', () => {
   describe('.isValid()', () => {
     it.each`
-      version          | expected
-      ${'1'}           | ${true}
-      ${'1.2'}         | ${true}
-      ${'1.2.3'}       | ${true}
-      ${'~latest'}     | ${true}
-      ${'1.2.3-alpha'} | ${true}
-      ${'invalid'}     | ${false}
-      ${''}            | ${false}
+      version           | expected
+      ${'1'}            | ${true}
+      ${'1.2'}          | ${true}
+      ${'1.2.3'}        | ${true}
+      ${'~latest'}      | ${true}
+      ${'1.2.3-alpha'}  | ${true}
+      ${'v1'}           | ${true}
+      ${'v1.2'}         | ${true}
+      ${'v1.2.3'}       | ${true}
+      ${'v1.2.3-alpha'} | ${true}
+      ${'invalid'}      | ${false}
+      ${''}             | ${false}
     `('isValid("$version") === $expected', ({ version, expected }) => {
       expect(semverPartial.isValid(version)).toBe(expected);
     });
@@ -18,17 +22,22 @@ describe('modules/versioning/semver-partial/index', () => {
 
   describe('.isVersion()', () => {
     it.each`
-      version          | expected
-      ${'1'}           | ${false}
-      ${'1.2'}         | ${false}
-      ${'1.2.3'}       | ${true}
-      ${'~latest'}     | ${false}
-      ${'1.2.3-alpha'} | ${true}
-      ${'1.2.3-rc.1'}  | ${true}
-      ${'invalid'}     | ${false}
-      ${''}            | ${false}
-      ${'#1.0.0'}      | ${false}
-      ${'x1.0.0'}      | ${false}
+      version           | expected
+      ${'1'}            | ${false}
+      ${'1.2'}          | ${false}
+      ${'1.2.3'}        | ${true}
+      ${'~latest'}      | ${false}
+      ${'1.2.3-alpha'}  | ${true}
+      ${'1.2.3-rc.1'}   | ${true}
+      ${'v1'}           | ${false}
+      ${'v1.2'}         | ${false}
+      ${'v1.2.3'}       | ${true}
+      ${'v1.2.3-alpha'} | ${true}
+      ${'v1.2.3-rc.1'}  | ${true}
+      ${'invalid'}      | ${false}
+      ${''}             | ${false}
+      ${'#1.0.0'}       | ${false}
+      ${'x1.0.0'}       | ${false}
     `('isVersion("$version") === $expected', ({ version, expected }) => {
       expect(semverPartial.isVersion(version)).toBe(expected);
     });
@@ -48,6 +57,8 @@ describe('modules/versioning/semver-partial/index', () => {
       ${'1.0.0-1'}        | ${false}
       ${'1.0.0-build.1'}  | ${false}
       ${'1.0.0'}          | ${true}
+      ${'v1.0.0'}         | ${true}
+      ${'v1.0.0-alpha'}   | ${false}
       ${'1'}              | ${false}
       ${'not-a-version'}  | ${false}
     `('isStable("$version") === $expected', ({ version, expected }) => {
@@ -57,12 +68,16 @@ describe('modules/versioning/semver-partial/index', () => {
 
   describe('.isSingleVersion()', () => {
     it.each`
-      version          | expected
-      ${'1'}           | ${false}
-      ${'1.2'}         | ${false}
-      ${'1.2.3'}       | ${true}
-      ${'~latest'}     | ${false}
-      ${'1.2.3-alpha'} | ${true}
+      version           | expected
+      ${'1'}            | ${false}
+      ${'1.2'}          | ${false}
+      ${'1.2.3'}        | ${true}
+      ${'~latest'}      | ${false}
+      ${'1.2.3-alpha'}  | ${true}
+      ${'v1'}           | ${false}
+      ${'v1.2'}         | ${false}
+      ${'v1.2.3'}       | ${true}
+      ${'v1.2.3-alpha'} | ${true}
     `('isSingleVersion("$version") === $expected', ({ version, expected }) => {
       expect(semverPartial.isSingleVersion(version)).toBe(expected);
     });
@@ -96,6 +111,26 @@ describe('modules/versioning/semver-partial/index', () => {
       ${'not-semver-ver'} | ${'1'}       | ${false}
       ${'1.0.0-alpha'}    | ${'1'}       | ${false}
       ${'1.0.0-beta'}     | ${'1.0'}     | ${false}
+      ${'v1.0.0'}         | ${'v1'}      | ${true}
+      ${'v1.2.0'}         | ${'v1'}      | ${true}
+      ${'v1.1.0'}         | ${'v1.1'}    | ${true}
+      ${'v1.2.3'}         | ${'v1.2.3'}  | ${true}
+      ${'v2.0.0'}         | ${'v1'}      | ${false}
+      ${'v1.0.0'}         | ${'1'}       | ${true}
+      ${'1.0.0'}          | ${'v1'}      | ${true}
+      ${'v1.1.5'}         | ${'1.1'}     | ${true}
+      ${'1.1.5'}          | ${'v1.1'}    | ${true}
+      ${'v2.1.0'}         | ${'2'}       | ${true}
+      ${'2.1.0'}          | ${'v2'}      | ${true}
+      ${'v1.2.0'}         | ${'1.1'}     | ${false}
+      ${'1.2.0'}          | ${'v1.1'}    | ${false}
+      ${'v1.0.0-rc'}      | ${'v1'}      | ${false}
+      ${'1.0.0-rc'}       | ${'v1'}      | ${false}
+      ${'v1.0.0-rc'}      | ${'1'}       | ${false}
+      ${'v1.2.4'}         | ${'1.2.3'}   | ${false}
+      ${'1.2.4'}          | ${'v1.2.3'}  | ${false}
+      ${'v1.2.3'}         | ${'1.2.3'}   | ${true}
+      ${'1.2.3'}          | ${'v1.2.3'}  | ${true}
     `(
       'matches("$version", "$range") === $expected',
       ({ version, range, expected }) => {
@@ -127,6 +162,15 @@ describe('modules/versioning/semver-partial/index', () => {
       ${['not-valid', 'also-bad']}                                 | ${'1'}       | ${null}
       ${['1.0.0', '1.0.1-alpha', '1.0.2', '1.1.0-beta', '1.1.1']}  | ${'1'}       | ${'1.1.1'}
       ${['1.0.0', '1.0.1-alpha', '1.0.2', '1.1.0-beta', '1.1.1']}  | ${'1.0'}     | ${'1.0.2'}
+      ${['v1.0.0', 'v1.1.0', 'v1.1.1', 'v1.2.0', 'v2.0.0']}        | ${'v1'}      | ${'v1.2.0'}
+      ${['v1.0.0', 'v1.1.0', 'v1.1.1']}                            | ${'v1.1'}    | ${'v1.1.1'}
+      ${['v1.0.0', 'v2.0.0', 'v3.0.0']}                            | ${'v2'}      | ${'v2.0.0'}
+      ${['1.0.0', 'v1.1.0', '1.1.1', 'v1.2.0', '2.0.0']}           | ${'1'}       | ${'v1.2.0'}
+      ${['v1.0.0', '1.1.0', 'v1.1.1']}                             | ${'v1.1'}    | ${'v1.1.1'}
+      ${['1.0.0', 'v1.1.0', '1.1.1']}                              | ${'1'}       | ${'1.1.1'}
+      ${['v1.0.0', '1.1.0', 'v1.1.1']}                             | ${'1'}       | ${'v1.1.1'}
+      ${['1.0.0', '1.1.0', '1.2.0']}                               | ${'v1'}      | ${'1.2.0'}
+      ${['v1.0.0', 'v1.1.0', '1.2.0']}                             | ${'1'}       | ${'1.2.0'}
     `(
       'getSatisfyingVersion($versions, "$range") === $expected',
       ({ versions, range, expected }) => {
@@ -146,6 +190,11 @@ describe('modules/versioning/semver-partial/index', () => {
       ${['1.0.0', '1.1.0', '1.2.0', '2.0.0', '2.0.1', '2.1.0']} | ${'~latest'} | ${'1.0.0'}
       ${['1.0.0', '1.0.1-rc', '1.1.0']}                         | ${'1.0'}     | ${'1.0.0'}
       ${['0.5.0', '1.0.0', '2.0.0']}                            | ${'3'}       | ${null}
+      ${['v0.5.0', 'v1.0.0', 'v2.0.0']}                         | ${'v3'}      | ${null}
+      ${['v1.0.0', '1.1.0', 'v1.2.0']}                          | ${'1'}       | ${'v1.0.0'}
+      ${['1.0.0', 'v1.1.0', '1.2.0']}                           | ${'v1'}      | ${'1.0.0'}
+      ${['v1.0.0', 'v1.1.0', '1.2.0', 'v2.0.0']}                | ${'v1'}      | ${'v1.0.0'}
+      ${['1.0.0', '1.1.0', 'v1.2.0', '2.0.0']}                  | ${'1'}       | ${'1.0.0'}
     `(
       'minSatisfyingVersion($versions, "$range") === $expected',
       ({ versions, range, expected }) => {
@@ -170,6 +219,15 @@ describe('modules/versioning/semver-partial/index', () => {
       ${'1.0.0'}   | ${'~latest'} | ${false}
       ${'1.5.0'}   | ${'1'}       | ${false}
       ${'invalid'} | ${'1'}       | ${false}
+      ${'v0.9.0'}  | ${'v1'}      | ${true}
+      ${'v1.0.0'}  | ${'v1'}      | ${false}
+      ${'v1.0.0'}  | ${'v1.1'}    | ${true}
+      ${'0.9.0'}   | ${'v1'}      | ${true}
+      ${'v0.9.0'}  | ${'1'}       | ${true}
+      ${'1.0.0'}   | ${'v1.1'}    | ${true}
+      ${'v1.0.0'}  | ${'1.1'}     | ${true}
+      ${'v2.0.0'}  | ${'1'}       | ${false}
+      ${'2.0.0'}   | ${'v1'}      | ${false}
     `(
       'isLessThanRange("$version", "$range") === $expected',
       ({ version, range, expected }) => {
@@ -186,6 +244,12 @@ describe('modules/versioning/semver-partial/index', () => {
       ${'invalid'} | ${'1.0.0'}   | ${false}
       ${'1.0.0'}   | ${'invalid'} | ${false}
       ${'invalid'} | ${'invalid'} | ${false}
+      ${'v1.0.0'}  | ${'v1.0.0'}  | ${true}
+      ${'v1.0.0'}  | ${'v1.0.1'}  | ${false}
+      ${'v1.0.0'}  | ${'1.0.0'}   | ${true}
+      ${'1.0.0'}   | ${'v1.0.0'}  | ${true}
+      ${'v1.0.0'}  | ${'1.0.1'}   | ${false}
+      ${'1.0.1'}   | ${'v1.0.0'}  | ${false}
     `(
       'equals("$version", "$other") === $expected',
       ({ version, other, expected }) => {
@@ -199,6 +263,8 @@ describe('modules/versioning/semver-partial/index', () => {
       version      | expected
       ${'1.0.0'}   | ${1}
       ${'2.3.4'}   | ${2}
+      ${'v1.0.0'}  | ${1}
+      ${'v2.3.4'}  | ${2}
       ${'invalid'} | ${null}
     `('getMajor("$version") === $expected', ({ version, expected }) => {
       expect(semverPartial.getMajor(version)).toBe(expected);
@@ -210,6 +276,8 @@ describe('modules/versioning/semver-partial/index', () => {
       version      | expected
       ${'1.0.0'}   | ${0}
       ${'2.3.4'}   | ${3}
+      ${'v1.0.0'}  | ${0}
+      ${'v2.3.4'}  | ${3}
       ${'invalid'} | ${null}
     `('getMinor("$version") === $expected', ({ version, expected }) => {
       expect(semverPartial.getMinor(version)).toBe(expected);
@@ -221,6 +289,8 @@ describe('modules/versioning/semver-partial/index', () => {
       version      | expected
       ${'1.0.0'}   | ${0}
       ${'2.3.4'}   | ${4}
+      ${'v1.0.0'}  | ${0}
+      ${'v2.3.4'}  | ${4}
       ${'invalid'} | ${null}
     `('getPatch("$version") === $expected', ({ version, expected }) => {
       expect(semverPartial.getPatch(version)).toBe(expected);
@@ -235,6 +305,15 @@ describe('modules/versioning/semver-partial/index', () => {
       ${'2.0.0'}   | ${'1.9.9'}   | ${true}
       ${'invalid'} | ${'1.0.0'}   | ${false}
       ${'1.0.0'}   | ${'invalid'} | ${false}
+      ${'v1.0.1'}  | ${'v1.0.0'}  | ${true}
+      ${'v1.0.0'}  | ${'v1.0.1'}  | ${false}
+      ${'v2.0.0'}  | ${'v1.9.9'}  | ${true}
+      ${'v1.0.0'}  | ${'1.0.1'}   | ${false}
+      ${'1.0.1'}   | ${'v1.0.0'}  | ${true}
+      ${'v2.0.0'}  | ${'1.0.0'}   | ${true}
+      ${'2.0.0'}   | ${'v1.0.0'}  | ${true}
+      ${'v1.9.9'}  | ${'1.9.8'}   | ${true}
+      ${'1.9.9'}   | ${'v1.9.8'}  | ${true}
     `(
       'isGreaterThan("$version", "$other") === $expected',
       ({ version, other, expected }) => {
@@ -253,6 +332,13 @@ describe('modules/versioning/semver-partial/index', () => {
       ${'invalid'} | ${'1.0.0'}   | ${0}
       ${'1.0.0'}   | ${'invalid'} | ${0}
       ${'invalid'} | ${'invalid'} | ${0}
+      ${'v1.0.0'}  | ${'v1.0.0'}  | ${0}
+      ${'v1.0.0'}  | ${'v1.0.1'}  | ${-1}
+      ${'v1.0.1'}  | ${'v1.0.0'}  | ${1}
+      ${'v1.0.0'}  | ${'1.0.0'}   | ${0}
+      ${'1.0.0'}   | ${'v1.0.0'}  | ${0}
+      ${'v1.0.0'}  | ${'1.0.1'}   | ${-1}
+      ${'1.0.1'}   | ${'v1.0.0'}  | ${1}
     `('sortVersions("$a", "$b") === $expected', ({ a, b, expected }) => {
       expect(semverPartial.sortVersions(a, b)).toBe(expected);
     });
@@ -269,6 +355,15 @@ describe('modules/versioning/semver-partial/index', () => {
       ${'1.0.0'}   | ${'0.9.0'}   | ${true}
       ${'invalid'} | ${'1.0.0'}   | ${false}
       ${'1.0.0'}   | ${'invalid'} | ${false}
+      ${'v2.0.0'}  | ${'v1.0.0'}  | ${true}
+      ${'v1.1.0'}  | ${'v1.0.0'}  | ${false}
+      ${'v0.2.0'}  | ${'v0.1.0'}  | ${true}
+      ${'v2.0.0'}  | ${'1.0.0'}   | ${true}
+      ${'2.0.0'}   | ${'v1.0.0'}  | ${true}
+      ${'1.1.0'}   | ${'v1.0.0'}  | ${false}
+      ${'v1.1.0'}  | ${'1.0.0'}   | ${false}
+      ${'v1.0.0'}  | ${'0.9.0'}   | ${true}
+      ${'1.0.0'}   | ${'v0.9.0'}  | ${true}
     `(
       'isBreaking("$version", "$current") === $expected',
       ({ version, current, expected }) => {
@@ -283,6 +378,8 @@ describe('modules/versioning/semver-partial/index', () => {
       ${'1.0.0'}   | ${true}
       ${'1'}       | ${true}
       ${'~latest'} | ${true}
+      ${'v1.0.0'}  | ${true}
+      ${'v1'}      | ${true}
       ${'invalid'} | ${false}
     `('isCompatible("$version") === $expected', ({ version, expected }) => {
       expect(semverPartial.isCompatible(version)).toBe(expected);
@@ -300,6 +397,13 @@ describe('modules/versioning/semver-partial/index', () => {
       ${'10'}      | ${'pin'}      | ${'10.0.0'}    | ${'10.1.0'}  | ${'10.1.0'}
       ${'~latest'} | ${'pin'}      | ${'1.0.0'}     | ${'1.1.0'}   | ${'1.1.0'}
       ${'1.0.0'}   | ${'pin'}      | ${'1.0.0'}     | ${'1.1.0'}   | ${'1.1.0'}
+      ${'v1'}      | ${'pin'}      | ${'v1.0.0'}    | ${'v1.1.0'}  | ${'v1.1.0'}
+      ${'v1.2'}    | ${'pin'}      | ${'v1.2.0'}    | ${'v1.2.1'}  | ${'v1.2.1'}
+      ${'v1.2.3'}  | ${'pin'}      | ${'v1.2.3'}    | ${'v1.2.4'}  | ${'v1.2.4'}
+      ${'v1'}      | ${'pin'}      | ${'v1.0.0'}    | ${'1.1.0'}   | ${'1.1.0'}
+      ${'v1.2.3'}  | ${'pin'}      | ${'v1.2.3'}    | ${'1.2.4'}   | ${'1.2.4'}
+      ${'1'}       | ${'pin'}      | ${'1.0.0'}     | ${'v1.1.0'}  | ${'v1.1.0'}
+      ${'1.2.3'}   | ${'pin'}      | ${'1.2.3'}     | ${'v1.2.4'}  | ${'v1.2.4'}
       ${'1'}       | ${'replace'}  | ${'1.0.0'}     | ${'1.1.0'}   | ${'1'}
       ${'1'}       | ${'replace'}  | ${'1.0.0'}     | ${'2.0.0'}   | ${'2'}
       ${'1.2'}     | ${'replace'}  | ${'1.2.0'}     | ${'1.2.1'}   | ${'1.2'}
@@ -314,6 +418,20 @@ describe('modules/versioning/semver-partial/index', () => {
       ${'~latest'} | ${'replace'}  | ${'1.0.0'}     | ${'2.0.0'}   | ${'~latest'}
       ${'1.0.0'}   | ${'replace'}  | ${'1.0.0'}     | ${'1.1.0'}   | ${'1.1.0'}
       ${'1'}       | ${'replace'}  | ${'1.0.0'}     | ${'invalid'} | ${'invalid'}
+      ${'v1'}      | ${'replace'}  | ${'v1.0.0'}    | ${'v1.1.0'}  | ${'v1'}
+      ${'v1'}      | ${'replace'}  | ${'v1.0.0'}    | ${'v2.0.0'}  | ${'v2'}
+      ${'v1.2'}    | ${'replace'}  | ${'v1.2.0'}    | ${'v1.2.1'}  | ${'v1.2'}
+      ${'v1.2'}    | ${'replace'}  | ${'v1.2.0'}    | ${'v1.3.0'}  | ${'v1.3'}
+      ${'v1.2.3'}  | ${'replace'}  | ${'v1.2.3'}    | ${'v1.2.4'}  | ${'v1.2.4'}
+      ${'v1.2.3'}  | ${'replace'}  | ${'v1.2.3'}    | ${'v1.3.0'}  | ${'v1.3.0'}
+      ${'v1'}      | ${'replace'}  | ${'v1.0.0'}    | ${'v1.2.0'}  | ${'v1'}
+      ${'v2'}      | ${'replace'}  | ${'v2.0.0'}    | ${'v3.0.0'}  | ${'v3'}
+      ${'v1'}      | ${'replace'}  | ${'v1.0.0'}    | ${'1.1.0'}   | ${'v1'}
+      ${'v1'}      | ${'replace'}  | ${'v1.0.0'}    | ${'2.0.0'}   | ${'v2'}
+      ${'v1.2.3'}  | ${'replace'}  | ${'v1.2.3'}    | ${'1.2.4'}   | ${'1.2.4'}
+      ${'1'}       | ${'replace'}  | ${'1.0.0'}     | ${'v1.1.0'}  | ${'1'}
+      ${'1'}       | ${'replace'}  | ${'1.0.0'}     | ${'v2.0.0'}  | ${'2'}
+      ${'1.2.3'}   | ${'replace'}  | ${'1.2.3'}     | ${'v1.2.4'}  | ${'v1.2.4'}
     `(
       'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
       ({
