@@ -111,14 +111,14 @@ export function massageBody(
   );
   // Reduce headings size
   body = body
-    .split(/(```[\s\S]*?```)/g)
+    .split(regEx(/(```[\s\S]*?```)/g))
     .map((part) =>
       part.startsWith('```') // do not modify # inside of codeblocks
         ? part
         : part
-            .replace(/\n\s*####? /g, '\n##### ')
-            .replace(/\n\s*## /g, '\n#### ')
-            .replace(/\n\s*# /g, '\n### '),
+            .replace(regEx(/\n\s*####? /g), '\n##### ')
+            .replace(regEx(/\n\s*## /g), '\n#### ')
+            .replace(regEx(/\n\s*# /g), '\n### '),
     )
     .join('');
   // Trim whitespace
