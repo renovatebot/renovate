@@ -111,9 +111,16 @@ export function massageBody(
   );
   // Reduce headings size
   body = body
-    .replace(regEx(/\n\s*####? /g), '\n##### ')
-    .replace(regEx(/\n\s*## /g), '\n#### ')
-    .replace(regEx(/\n\s*# /g), '\n### ');
+    .split(/(```[\s\S]*?```)/g)
+    .map((part) =>
+      part.startsWith('```') // do not modify # inside of codeblocks
+        ? part
+        : part
+            .replace(/\n\s*####? /g, '\n##### ')
+            .replace(/\n\s*## /g, '\n#### ')
+            .replace(/\n\s*# /g, '\n### '),
+    )
+    .join('');
   // Trim whitespace
   return body.trim();
 }
@@ -481,7 +488,7 @@ export async function addReleaseNotes(
   for (const v of input.versions) {
     let releaseNotes: ChangeLogNotes | null | undefined;
     const cacheKey = `${cacheKeyPrefix}:${v.version}`;
-    releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
+    releaseNotes = undefined;
     releaseNotes ??= await getReleaseNotesMd(input.project, v);
     releaseNotes ??= await getReleaseNotes(input.project, v, config);
 
