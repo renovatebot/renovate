@@ -287,7 +287,7 @@ export async function processBranch(
           return {
             branchExists: true,
             prNo: branchPr?.number,
-            result: 'no-work',
+            result: 'pending',
           };
         }
       }

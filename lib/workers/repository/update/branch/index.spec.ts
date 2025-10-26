@@ -742,7 +742,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
         prNo: 5,
-        result: 'no-work',
+        result: 'pending',
       });
     });
 
