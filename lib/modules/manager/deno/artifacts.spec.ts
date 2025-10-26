@@ -223,7 +223,7 @@ describe('modules/manager/deno/artifacts', () => {
 
     await updateArtifacts(updateArtifact);
 
-    expect(exec).toHaveBeenCalledWith('deno install', {
+    expect(exec).toHaveBeenCalledExactlyOnceWith('deno install', {
       cwdFile: '',
       docker: {},
       toolConstraints: [
