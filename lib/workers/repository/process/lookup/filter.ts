@@ -24,6 +24,35 @@ function isReleaseStable(
   return true;
 }
 
+function filterByMaxMajorIncrement(
+  releases: Release[],
+  currentVersion: string,
+  maxMajorIncrement: number,
+  versioningApi: VersioningApi,
+  depName: string,
+): Release[] {
+  const currentMajor = versioningApi.getMajor(currentVersion);
+  if (currentMajor === null) {
+    return releases;
+  }
+
+  return releases.filter((r) => {
+    const releaseMajor = versioningApi.getMajor(r.version);
+    // istanbul ignore if: shouldn't happen
+    if (releaseMajor === null) {
+      return true;
+    }
+    const majorIncrement = releaseMajor - currentMajor;
+    if (majorIncrement > maxMajorIncrement) {
+      logger.trace(
+        `Skipping ${depName}@${r.version} because major increment ${majorIncrement} exceeds maxMajorIncrement ${maxMajorIncrement}`,
+      );
+      return false;
+    }
+    return true;
+  });
+}
+
 export function filterVersions(
   config: FilterConfig,
   currentVersion: string,
@@ -72,24 +101,13 @@ export function filterVersions(
   }
 
   if (maxMajorIncrement && maxMajorIncrement > 0) {
-    const currentMajor = versioningApi.getMajor(currentVersion);
-    if (currentMajor !== null) {
-      filteredReleases = filteredReleases.filter((r) => {
-        const releaseMajor = versioningApi.getMajor(r.version);
-        // istanbul ignore if: shouldn't happen
-        if (releaseMajor === null) {
-          return true;
-        }
-        const majorIncrement = releaseMajor - currentMajor;
-        if (majorIncrement > maxMajorIncrement) {
-          logger.trace(
-            `Skipping ${config.depName!}@${r.version} because major increment ${majorIncrement} exceeds maxMajorIncrement ${maxMajorIncrement}`,
-          );
-          return false;
-        }
-        return true;
-      });
-    }
+    filteredReleases = filterByMaxMajorIncrement(
+      filteredReleases,
+      currentVersion,
+      maxMajorIncrement,
+      versioningApi,
+      config.depName!,
+    );
   }
 
   if (allowedVersions) {
