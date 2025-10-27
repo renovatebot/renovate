@@ -68,7 +68,7 @@ export function filterVersions(
     maxMajorIncrement,
   } = config;
 
-  // istanbul ignore if: shouldn't happen
+  /* v8 ignore next 3 -- shouldn't happen */
   if (!currentVersion) {
     return [];
   }
