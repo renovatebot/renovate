@@ -562,8 +562,8 @@ importers:
         specifier: 6.0.0
         version: 6.0.0(typescript@5.9.3)
       lint-staged:
-        specifier: 16.2.4
-        version: 16.2.4
+        specifier: 16.2.5
+        version: 16.2.5
       markdownlint-cli2:
         specifier: 0.18.1
         version: 0.18.1
@@ -4456,8 +4456,8 @@ packages:
   linkify-it@5.0.0:
     resolution: {integrity: sha512-5aHCbzQRADcdP+ATqnDuhhJ/MRIqDkZX5pyjFHRRysS8vZ5AbqGEoFIb6pYHPZ+L/OC2Lc+xT8uHVVR5CAK/wQ==}
 
-  lint-staged@16.2.4:
-    resolution: {integrity: sha512-Pkyr/wd90oAyXk98i/2KwfkIhoYQUMtss769FIT9hFM5ogYZwrk+GRE46yKXSg2ZGhcJ1p38Gf5gmI5Ohjg2yg==}
+  lint-staged@16.2.5:
+    resolution: {integrity: sha512-o36wH3OX0jRWqDw5dOa8a8x6GXTKaLM+LvhRaucZxez0IxA+KNDUCiyjBfNgsMNmchwSX6urLSL7wShcUqAang==}
     engines: {node: '>=20.17'}
     hasBin: true
 
@@ -11417,7 +11417,7 @@ snapshots:
     dependencies:
       uc.micro: 2.1.0
 
-  lint-staged@16.2.4:
+  lint-staged@16.2.5:
     dependencies:
       commander: 14.0.1
       listr2: 9.0.5
