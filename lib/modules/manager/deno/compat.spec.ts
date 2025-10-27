@@ -14,7 +14,7 @@ vi.mock('find-packages', () => ({
 
 describe('modules/manager/deno/compat', () => {
   describe('extractDenoCompatiblePackageJson()', () => {
-    it('invalid package.json', async () => {
+    it('returns null if invalid package.json', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('package.json');
       fs.readLocalFile.mockResolvedValueOnce('invalid');
       const result = await extractDenoCompatiblePackageJson('package.json');
