@@ -1732,7 +1732,7 @@ const options: RenovateOptions[] = [
   {
     name: 'maxMajorIncrement',
     description:
-      'Maximum allowed major version increment for dependency upgrades. Helps avoid upgrading from normal-looking versions to high version numbers like daily releases (e.g., from 19.2 to 2023.03.03). Set to 0 to disable this filtering.',
+      'Limit the maximum major version increment allowed. Set to 0 to disable.',
     stage: 'package',
     type: 'integer',
     default: 50,
