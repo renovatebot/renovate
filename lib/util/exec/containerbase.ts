@@ -40,6 +40,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'containerbase/composer-prebuild',
     versioning: composerVersioningId,
   },
+  conan: {
+    datasource: 'pypi',
+    packageName: 'conan',
+    versioning: pep440VersioningId,
+  },
   copier: {
     datasource: 'pypi',
     packageName: 'copier',
