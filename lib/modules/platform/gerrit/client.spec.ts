@@ -171,7 +171,7 @@ describe('modules/platform/gerrit/client', () => {
       ).resolves.toEqual([{ _number: 1 }]);
     });
 
-    it('sets query.n as 50 if limit is not provided', async () => {
+    it('sets query.n as 50 if pageLimit is not provided', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
@@ -184,7 +184,7 @@ describe('modules/platform/gerrit/client', () => {
       ).resolves.toEqual([{ _number: 1 }]);
     });
 
-    it('sets query.n with limit if provided', async () => {
+    it('sets query.n with pageLimit if provided', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
