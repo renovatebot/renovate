@@ -38,7 +38,7 @@ function filterByMaxMajorIncrement(
 
   return releases.filter((r) => {
     const releaseMajor = versioningApi.getMajor(r.version);
-    // istanbul ignore if: shouldn't happen
+    /* v8 ignore next 3 -- shouldn't happen */
     if (releaseMajor === null) {
       return true;
     }
