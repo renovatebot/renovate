@@ -32,10 +32,10 @@ function filterByMaxMajorIncrement(
   depName: string,
 ): Release[] {
   const currentMajor = versioningApi.getMajor(currentVersion);
+  /* v8 ignore next 3 -- shouldn't happen */
   if (currentMajor === null) {
     return releases;
   }
-
   return releases.filter((r) => {
     const releaseMajor = versioningApi.getMajor(r.version);
     /* v8 ignore next 3 -- shouldn't happen */
