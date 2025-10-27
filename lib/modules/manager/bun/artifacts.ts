@@ -38,7 +38,7 @@ export async function updateArtifacts(
     config.lockFiles?.[0];
 
   if (!lockFileName) {
-    logger.debug(`No lock file found for bun`);
+    logger.debug(`bun: No lock file found`);
     return null;
   }
 
