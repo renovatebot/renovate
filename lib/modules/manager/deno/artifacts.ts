@@ -91,6 +91,7 @@ export async function updateArtifacts(
     ) {
       return null;
     }
+    
     return [
       {
         file: {
