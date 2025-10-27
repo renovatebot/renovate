@@ -47,7 +47,6 @@ export function getLockedVersion(
   }
   const { datasource, currentRawValue, currentValue, depName } = deps;
 
-  // deno datasource
   if (datasource === 'deno') {
     // "remote": {
     //   "https://deno.land/std@0.223.0/fs/mod.ts": "c25e6802cbf27f3050f60b26b00c2d8dba1cb7fcdafe34c66006a7473b7b34d4",
