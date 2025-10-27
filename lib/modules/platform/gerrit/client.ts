@@ -58,10 +58,12 @@ class GerritClient {
     /* v8 ignore stop */
 
     const startOffset = findPRConfig.startOffset ?? 0;
-    const limit = findPRConfig.singleChange ? 1 : (findPRConfig.limit ?? 50);
+    const pageLimit = findPRConfig.singleChange
+      ? 1
+      : (findPRConfig.pageLimit ?? 50);
 
     const query: Record<string, any> = {
-      n: limit,
+      n: pageLimit,
     };
     if (findPRConfig.requestDetails) {
       query.o = findPRConfig.requestDetails;

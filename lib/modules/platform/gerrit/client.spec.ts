@@ -166,7 +166,7 @@ describe('modules/platform/gerrit/client', () => {
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
           singleChange: true,
-          limit: 5, // should be ignored
+          pageLimit: 5, // should be ignored
         }),
       ).resolves.toEqual([{ _number: 1 }]);
     });
@@ -193,7 +193,7 @@ describe('modules/platform/gerrit/client', () => {
       await expect(
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
-          limit: 5,
+          pageLimit: 5,
         }),
       ).resolves.toEqual([{ _number: 1 }]);
     });
@@ -258,7 +258,7 @@ describe('modules/platform/gerrit/client', () => {
       await expect(
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
-          limit: 2, // to keep the test short
+          pageLimit: 2, // to keep the test short
         }),
       ).resolves.toEqual([
         { _number: 1 },
@@ -293,7 +293,7 @@ describe('modules/platform/gerrit/client', () => {
       await expect(
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
-          limit: 2,
+          pageLimit: 2,
           startOffset: 2,
         }),
       ).resolves.toEqual([
@@ -321,7 +321,7 @@ describe('modules/platform/gerrit/client', () => {
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
           noPagination: true,
-          limit: 2,
+          pageLimit: 2,
         }),
       ).resolves.toEqual([{ _number: 1 }, { _number: 2 }]);
     });

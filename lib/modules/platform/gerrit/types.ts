@@ -18,7 +18,7 @@ export interface GerritFindPRConfig extends FindPRConfig {
    * Default is 50.
    * Useful when handling pagination manually.
    */
-  limit?: number;
+  pageLimit?: number;
   /**
    * How many changes to skip from the beginning.
    * Default is 0.
