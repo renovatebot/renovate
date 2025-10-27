@@ -1721,6 +1721,15 @@ const options: RenovateOptions[] = [
     default: true,
   },
   {
+    name: 'followTag',
+    description: 'If defined, packages will follow this release tag exactly.',
+    stage: 'package',
+    type: 'string',
+    cli: false,
+    env: false,
+    advancedUse: true,
+  },
+  {
     name: 'maxMajorIncrement',
     description:
       'Maximum allowed major version increment for dependency upgrades. Helps avoid upgrading from normal-looking versions to high version numbers like daily releases (e.g., from 19.2 to 2023.03.03). Set to 0 to disable this filtering.',
@@ -1729,15 +1738,6 @@ const options: RenovateOptions[] = [
     default: 50,
     cli: false,
     env: false,
-  },
-  {
-    name: 'followTag',
-    description: 'If defined, packages will follow this release tag exactly.',
-    stage: 'package',
-    type: 'string',
-    cli: false,
-    env: false,
-    advancedUse: true,
   },
   {
     name: 'respectLatest',
