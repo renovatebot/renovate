@@ -37,7 +37,7 @@ describe('modules/manager/deno/compat', () => {
   });
 
   describe('detectNodeCompatWorkspaces()', () => {
-    it('handle no packageFile', async () => {
+    it('returns null if no packageFile', async () => {
       const result = await detectNodeCompatWorkspaces({
         packageFile: undefined,
       });
