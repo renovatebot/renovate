@@ -1,14 +1,14 @@
-import { remark } from 'remark';
-import type { Processor } from 'unified';
 import type { Root } from 'mdast';
+import { remark } from 'remark';
 import gfm from 'remark-gfm';
 import type {
-  Options as RemarkGithubOptions,
   BuildUrlValues as BuildGithubUrlValues,
+  Options as RemarkGithubOptions,
 } from 'remark-github';
 import github, {
   defaultBuildUrl as defaultBuildGithubUrl,
 } from 'remark-github';
+import type { Processor } from 'unified';
 import { detectPlatform } from './common';
 import { regEx } from './regex';
 
@@ -53,21 +53,18 @@ export async function linkify(
     .use({ settings: { bullet: '-' } })
     .use(gfm) as Processor<Root, Root, undefined, Root, string>;
 
-  if (!baseUrl.endsWith('/')) {
-    baseUrl = `${baseUrl}/`;
-  }
-
   if (detectPlatform(baseUrl) === 'github') {
     pipeline = pipeline.use(github, {
       mentionStrong: false,
       repository,
       // Override URL building to support GitHub Enterprise with custom domains
-      buildUrl: (values: Readonly<BuildGithubUrlValues>) =>
-        defaultBuildGithubUrl(values).replace(
+      buildUrl(values: Readonly<BuildGithubUrlValues>) {
+        return defaultBuildGithubUrl(values).replace(
           /^https:\/\/github.com\//,
-          baseUrl,
-        ),
-      ...(extraGithubOptions || {}),
+          baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`,
+        );
+      },
+      ...(extraGithubOptions ?? {}),
     });
   }
 
