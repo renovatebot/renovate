@@ -93,8 +93,8 @@ importers:
         specifier: 1.2.4
         version: 1.2.4
       '@renovatebot/kbpgp':
-        specifier: 4.0.3
-        version: 4.0.3
+        specifier: 4.0.4
+        version: 4.0.4
       '@renovatebot/osv-offline':
         specifier: 1.7.9
         version: 1.7.9
@@ -1622,9 +1622,9 @@ packages:
   '@renovatebot/detect-tools@1.2.4':
     resolution: {integrity: sha512-qKkRWDmwfgPN5vrD6QzMa6UNqb06VXaZL1hxxLFsOauiSTAxz/TVKPhb/hFyf27yu35JyXIN40PiNQR+bidKbQ==}
 
-  '@renovatebot/kbpgp@4.0.3':
-    resolution: {integrity: sha512-RMj9zekThsU/rCZxY0DeXl4hXU0rJOJm9wrFfLoFJnNsLQO1v2nfkK7sdYiMe/9+i99W/JWCtGDfySxIhC8CmA==}
-    engines: {node: ^20.9.0 || ^22.11.0, pnpm: ^10.0.0}
+  '@renovatebot/kbpgp@4.0.4':
+    resolution: {integrity: sha512-jHC+jEbW/IMgppTfltGvheNv2WDPlYR/Jm+vcfRsCAO0JEfMAyh/aPYQ6ttRiB5GJlstxZiJpxGcMSS/7uDb1A==}
+    engines: {node: ^20.9.0 || ^22.11.0 || >=24.10.0, pnpm: ^10.0.0}
 
   '@renovatebot/osv-offline-db@1.7.9':
     resolution: {integrity: sha512-4mHlGm6MvWcCmf7y34Uu6CgfLcAcdABEaplhbAJc1ZluvOsHh3ymQ4AN1MaBxK7iOFmSusnla7ch7/zEfo63aA==}
@@ -8207,7 +8207,7 @@ snapshots:
       upath: 2.0.1
       zod: 3.25.76
 
-  '@renovatebot/kbpgp@4.0.3':
+  '@renovatebot/kbpgp@4.0.4':
     dependencies:
       bn: 1.0.5
       bzip-deflate: 1.0.0
