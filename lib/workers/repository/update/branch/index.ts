@@ -282,7 +282,7 @@ export async function processBranch(
 
         if (config.pendingChecks) {
           logger.info(
-            'Branch updating is skipped because it contains updates with pendingChecks=true',
+            'Branch updating is skipped because internalChecksFilter was not met',
           );
           return {
             branchExists: true,
