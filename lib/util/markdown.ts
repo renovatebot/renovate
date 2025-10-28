@@ -1,9 +1,16 @@
 import { remark } from 'remark';
+import type { Processor } from 'unified';
+import type { Root } from 'mdast';
 import gfm from 'remark-gfm';
-import type { Options as RemarkGithubOptions } from 'remark-github';
-import github, { defaultBuildUrl } from 'remark-github';
-import { regEx } from './regex';
+import type {
+  Options as RemarkGithubOptions,
+  BuildUrlValues as BuildGithubUrlValues,
+} from 'remark-github';
+import github, {
+  defaultBuildUrl as defaultBuildGithubUrl,
+} from 'remark-github';
 import { detectPlatform } from './common';
+import { regEx } from './regex';
 
 // Generic replacements/link-breakers
 export function sanitizeMarkdown(markdown: string): string {
@@ -44,7 +51,7 @@ export async function linkify(
   // https://github.com/syntax-tree/mdast-util-to-markdown#optionsbullet
   let pipeline = remark()
     .use({ settings: { bullet: '-' } })
-    .use(gfm);
+    .use(gfm) as Processor<Root, Root, undefined, Root, string>;
 
   if (!baseUrl.endsWith('/')) {
     baseUrl = `${baseUrl}/`;
@@ -55,8 +62,11 @@ export async function linkify(
       mentionStrong: false,
       repository,
       // Override URL building to support GitHub Enterprise with custom domains
-      buildUrl: (values) =>
-        defaultBuildUrl(values).replace(/^https:\/\/github.com\//, baseUrl),
+      buildUrl: (values: Readonly<BuildGithubUrlValues>) =>
+        defaultBuildGithubUrl(values).replace(
+          /^https:\/\/github.com\//,
+          baseUrl,
+        ),
       ...(extraGithubOptions || {}),
     });
   }
