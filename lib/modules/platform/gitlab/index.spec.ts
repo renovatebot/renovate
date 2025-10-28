@@ -1103,6 +1103,7 @@ describe('modules/platform/gitlab/index', () => {
         state: 'green',
         url: 'some-url',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Failed to get the branch commit SHA',
       );
@@ -1134,6 +1135,7 @@ describe('modules/platform/gitlab/index', () => {
         state: 'green',
         url: 'some-url',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Failed to retrieve commit pipeline',
       );
@@ -1262,12 +1264,15 @@ describe('modules/platform/gitlab/index', () => {
 
       expect(timers.setTimeout.mock.calls).toHaveLength(retry + 1);
       expect(timers.setTimeout.mock.calls[0][0]).toBe(delay);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Pipeline not yet created. Retrying 1`,
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Pipeline not yet created. Retrying 2`,
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Pipeline not yet created after 3 attempts`,
       );
@@ -1606,12 +1611,14 @@ describe('modules/platform/gitlab/index', () => {
       await expect(
         gitlab.addAssignees(42, ['someuser', 'someotheruser']),
       ).toResolve();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         {
           assignee: 'someuser',
         },
         'Failed to add assignee - could not get ID',
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           assignee: 'someuser',
@@ -1629,6 +1636,7 @@ describe('modules/platform/gitlab/index', () => {
       it('should not be supported in too low version', async () => {
         await initFakePlatform('13.8.0');
         await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
+        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { version: '13.8.0' },
           'Adding reviewers is only available in GitLab 13.9 and onwards',
@@ -2293,12 +2301,15 @@ describe('modules/platform/gitlab/index', () => {
         sourceBranch: 'some-branch',
         title: 'some title',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 1',
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 2',
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 3',
       );
@@ -2353,12 +2364,15 @@ describe('modules/platform/gitlab/index', () => {
         sourceBranch: 'some-branch',
         title: 'some title',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 1',
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 2',
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 3',
       );
@@ -2412,19 +2426,24 @@ describe('modules/platform/gitlab/index', () => {
         sourceBranch: 'some-branch',
         title: 'some title',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 1',
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 2',
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 3',
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.any(Object),
         'Automerge on PR creation failed. Retrying 1',
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.any(Object),
         'Automerge on PR creation failed. Retrying 2',
@@ -3619,14 +3638,17 @@ These updates have all been created already. Click a checkbox below to force a r
     it('returns updated pr body', async () => {
       await initFakePlatform('13.4.0');
       expect(gitlab.massageMarkdown(prBody)).toMatchSnapshot();
-      expect(prBodyModule.smartTruncate).toHaveBeenCalledOnce();
+      expect(prBodyModule.smartTruncate).toHaveBeenCalledExactlyOnceWith(
+        expect.any(String),
+        expect.any(Number),
+      );
     });
 
     it('truncates description if too low API version', async () => {
       await initFakePlatform('13.3.0');
       gitlab.massageMarkdown(prBody);
       expect(prBodyModule.smartTruncate).toHaveBeenCalledTimes(1);
-      expect(prBodyModule.smartTruncate).toHaveBeenCalledWith(
+      expect(prBodyModule.smartTruncate).toHaveBeenCalledExactlyOnceWith(
         expect.any(String),
         25000,
       );
@@ -3636,7 +3658,7 @@ These updates have all been created already. Click a checkbox below to force a r
       await initFakePlatform('13.4.1');
       gitlab.massageMarkdown(prBody);
       expect(prBodyModule.smartTruncate).toHaveBeenCalledTimes(1);
-      expect(prBodyModule.smartTruncate).toHaveBeenCalledWith(
+      expect(prBodyModule.smartTruncate).toHaveBeenCalledExactlyOnceWith(
         expect.any(String),
         1000000,
       );
@@ -3847,6 +3869,7 @@ These updates have all been created already. Click a checkbox below to force a r
         '@group',
       ]);
       expect(expandedGroupMembers).toEqual(['group']);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.any(Object),
         'Unable to fetch group',

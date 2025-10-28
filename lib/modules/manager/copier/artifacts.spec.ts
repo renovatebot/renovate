@@ -84,6 +84,35 @@ describe('modules/manager/copier/artifacts', () => {
       expect(execSnapshots).toEqual([]);
     });
 
+    it('uses newValue for vcs-ref when both newValue and newVersion are provided', async () => {
+      const execSnapshots = mockExecAll();
+
+      const upgradeWithPrefixedTag = [
+        {
+          depName: 'https://github.com/foo/bar',
+          currentValue: 'foobar-v1.0.0',
+          newValue: 'foobar-v1.2.3',
+          newVersion: '1.2.3',
+        },
+      ];
+
+      await updateArtifacts({
+        packageFileName: '.copier-answers.yml',
+        updatedDeps: upgradeWithPrefixedTag,
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'copier update --skip-answered --defaults --answers-file .copier-answers.yml --vcs-ref foobar-v1.2.3',
+          options: {
+            cwd: '/tmp/github/some/repo',
+          },
+        },
+      ]);
+    });
+
     it('reports an error if no upgrade is specified', async () => {
       const execSnapshots = mockExecAll();
 
@@ -414,6 +443,7 @@ describe('modules/manager/copier/artifacts', () => {
         newPackageFileContent: '',
         config,
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         {
           depName: 'https://github.com/foo/bar',

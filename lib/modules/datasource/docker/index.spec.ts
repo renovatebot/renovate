@@ -787,6 +787,7 @@ describe('modules/datasource/docker/index', () => {
         'some-new-value',
       );
 
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Current digest ${currentDigest} relates to architecture amd64`,
       );
@@ -866,6 +867,7 @@ describe('modules/datasource/docker/index', () => {
         'some-new-value',
       );
 
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Current digest ${currentDigest} relates to architecture amd64`,
       );
@@ -963,6 +965,7 @@ describe('modules/datasource/docker/index', () => {
         'some-new-value',
       );
 
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Current digest ${currentDigest} relates to architecture null`,
       );
@@ -1044,6 +1047,7 @@ describe('modules/datasource/docker/index', () => {
         'some-new-value',
       );
 
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Current digest ${currentDigest} relates to architecture amd64`,
       );
@@ -1115,6 +1119,7 @@ describe('modules/datasource/docker/index', () => {
         'some-new-value',
       );
 
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Current digest ${currentDigest} relates to architecture amd64`,
       );
@@ -1555,6 +1560,7 @@ describe('modules/datasource/docker/index', () => {
       expect(res?.releases).toHaveLength(2);
 
       // Verify the debug log for fallback was called
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.objectContaining({
           registryHost: 'https://quay.io',
@@ -2142,6 +2148,56 @@ describe('modules/datasource/docker/index', () => {
       ]);
     });
 
+    it('sets releaseTimestamp on digests from Docker Hub', async () => {
+      httpMock
+        .scope(dockerHubUrl)
+        .get('/library/node/tags?page_size=1000&ordering=last_updated')
+        .reply(200, {
+          next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000&ordering=last_updated`,
+          count: 2,
+          results: [
+            {
+              id: 2,
+              last_updated: '2021-01-01T00:00:00.000Z',
+              name: '1.0.0',
+              // no tag_last_pushed
+              digest: 'aaa',
+            },
+          ],
+        })
+        .get('/library/node/tags?page=2&page_size=1000&ordering=last_updated')
+        .reply(200, {
+          count: 2,
+          results: [
+            {
+              id: 1,
+              last_updated: '2020-01-01T00:00:00.000Z',
+              name: '0.9.0',
+              tag_last_pushed: '2020-01-01T00:00:00.000Z',
+              digest: 'bbb',
+            },
+          ],
+        });
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'docker.io/node',
+      });
+      expect(res?.releases).toMatchObject([
+        {
+          version: '0.9.0',
+          newDigest: 'bbb',
+          releaseTimestamp: '2020-01-01T00:00:00.000Z',
+        },
+        {
+          version: '1.0.0',
+          newDigest: 'aaa',
+          // no releaseTimestamp
+        },
+      ]);
+
+      expect(res?.releases[1].releaseTimestamp).toBeUndefined();
+    });
+
     it('adds no library/ prefix for other registries', async () => {
       const tags = ['1.0.0'];
       httpMock
@@ -2337,11 +2393,12 @@ describe('modules/datasource/docker/index', () => {
           },
         ],
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.anything(),
         `manifest blob response body missing the "config" property`,
       );
-      expect(logger.logger.info).not.toHaveBeenCalledWith(
+      expect(logger.logger.info).not.toHaveBeenCalledExactlyOnceWith(
         expect.anything(),
         'Unknown error getting Docker labels',
       );

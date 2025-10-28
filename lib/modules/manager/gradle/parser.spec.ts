@@ -904,6 +904,7 @@ describe('modules/manager/gradle/parser', () => {
             }
           `;
           parseGradle(input);
+          // eslint-disable-next-line vitest/prefer-called-exactly-once-with
           expect(logger.logger.debug).toHaveBeenCalledWith(
             expect.stringContaining(
               `Skipping content descriptor with unsupported regExp pattern for ${fieldName}`,
@@ -1284,6 +1285,7 @@ describe('modules/manager/gradle/parser', () => {
         fileContents,
         3,
       );
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Max recursion depth reached in script file: foo/bar.gradle',
       );
@@ -1327,13 +1329,15 @@ describe('modules/manager/gradle/parser', () => {
 
   describe('implicit gradle test suite dependencies', () => {
     it.each`
-      def                | input                                                   | output
-      ${''}              | ${'testing.suites.test { useJunit("1.2.3") } } }'}      | ${{ depName: 'useJunit', packageName: GRADLE_TEST_SUITES.useJunit, currentValue: '1.2.3' }}
-      ${'baz = "1.2.3"'} | ${'testing.suites.test { useJUnitJupiter(baz) } } }'}   | ${{ depName: 'useJUnitJupiter', packageName: GRADLE_TEST_SUITES.useJUnitJupiter, currentValue: '1.2.3' }}
-      ${''}              | ${'testing.suites.test { useKotlinTest("1.2.3") } } }'} | ${{ depName: 'useKotlinTest', packageName: GRADLE_TEST_SUITES.useKotlinTest, currentValue: '1.2.3' }}
-      ${'baz = "1.2.3"'} | ${'testing { suites { test { useSpock(baz) } } }'}      | ${{ depName: 'useSpock', packageName: GRADLE_TEST_SUITES.useSpock, currentValue: '1.2.3' }}
-      ${''}              | ${'testing.suites.test { useSpock("1.2.3") } } }'}      | ${{ depName: 'useSpock', packageName: GRADLE_TEST_SUITES.useSpock, currentValue: '1.2.3' }}
-      ${''}              | ${'testing.suites.test { useTestNG("1.2.3") } } }'}     | ${{ depName: 'useTestNG', packageName: GRADLE_TEST_SUITES.useTestNG, currentValue: '1.2.3' }}
+      def                | input                                                                                      | output
+      ${''}              | ${'testing.suites.test { useJunit("1.2.3") } } }'}                                         | ${{ depName: 'useJunit', packageName: GRADLE_TEST_SUITES.useJunit, currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'} | ${'testing.suites.test { useJUnitJupiter(baz) } } }'}                                      | ${{ depName: 'useJUnitJupiter', packageName: GRADLE_TEST_SUITES.useJUnitJupiter, currentValue: '1.2.3' }}
+      ${''}              | ${'testing.suites.test { useKotlinTest("1.2.3") } } }'}                                    | ${{ depName: 'useKotlinTest', packageName: GRADLE_TEST_SUITES.useKotlinTest, currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'} | ${'testing { suites { test { useSpock(baz) } } }'}                                         | ${{ depName: 'useSpock', packageName: GRADLE_TEST_SUITES.useSpock, currentValue: '1.2.3' }}
+      ${''}              | ${'testing.suites.test { useSpock("1.2.3") } } }'}                                         | ${{ depName: 'useSpock', packageName: GRADLE_TEST_SUITES.useSpock, currentValue: '1.2.3' }}
+      ${''}              | ${'testing.suites.test { useTestNG("1.2.3") } } }'}                                        | ${{ depName: 'useTestNG', packageName: GRADLE_TEST_SUITES.useTestNG, currentValue: '1.2.3' }}
+      ${''}              | ${'testing { suites.withType(JvmTestSuite).configureEach { useJUnitJupiter("5.13.4") } }'} | ${{ depName: 'useJUnitJupiter', packageName: GRADLE_TEST_SUITES.useJUnitJupiter, currentValue: '5.13.4' }}
+      ${''}              | ${'testing { suites.withType(JvmTestSuite::class).configureEach { useSpock("2.3") } }'}    | ${{ depName: 'useSpock', packageName: GRADLE_TEST_SUITES.useSpock, currentValue: '2.3' }}
     `('$def | $input', ({ def, input, output }) => {
       const { deps } = parseGradle([def, input].join('\n'));
       expect(deps).toMatchObject([output]);

@@ -101,6 +101,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     it('dryRun=full', async () => {
       GlobalConfig.set({ localDir: '', dryRun: 'full', platform: 'github' });
       await rebaseOnboardingBranch(config, hash);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would rebase files in onboarding branch',
       );
@@ -119,6 +120,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       const res = await rebaseOnboardingBranch(config, hash);
       expect(res).toBeNull();
       expect(scm.commitAndPush).not.toHaveBeenCalled();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         `Skipping rebase as ${platform} does not support html comments`,
       );
