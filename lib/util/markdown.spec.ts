@@ -35,6 +35,11 @@ describe('util/markdown', () => {
       expect(res).toEqual(after);
     });
 
+    it('works with base url without trailing slash', async () => {
+      const res = await linkify('https://github.com', 'some/repo', before);
+      expect(res).toEqual(after);
+    });
+
     it('works with gitlab', async () => {
       const res = await linkify(
         'https://company.gitlab.local',
