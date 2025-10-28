@@ -86,3 +86,4 @@ Renovate also supports some commonly used community actions:
 - `jaxxstorm/action-install-gh-release`
 - `sigoden/install-binary`
 - `prefix-dev/setup-pixi`
+- `pypa/hatch@install`

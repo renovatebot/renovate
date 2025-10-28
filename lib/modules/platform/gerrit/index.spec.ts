@@ -174,7 +174,7 @@ describe('modules/platform/gerrit/index', () => {
           branchName: 'branch',
           state: 'open',
           targetBranch: 'master',
-          limit: 1,
+          singleChange: true,
           requestDetails: REQUEST_DETAILS_FOR_PRS,
         },
       );
@@ -367,7 +367,7 @@ describe('modules/platform/gerrit/index', () => {
         {
           branchName: 'renovate/dependency-1.x',
           state: 'open',
-          limit: 1,
+          singleChange: true,
           refreshCache: undefined,
           requestDetails: REQUEST_DETAILS_FOR_PRS,
         },
@@ -393,7 +393,7 @@ describe('modules/platform/gerrit/index', () => {
         {
           state: 'open',
           branchName: 'renovate/dependency-1.x',
-          limit: 1,
+          singleChange: true,
           targetBranch: 'master',
           requestDetails: REQUEST_DETAILS_FOR_PRS,
         },
@@ -419,7 +419,7 @@ describe('modules/platform/gerrit/index', () => {
         {
           state: 'open',
           branchName: 'renovate/dependency-1.x',
-          limit: 1,
+          singleChange: true,
           targetBranch: undefined,
           requestDetails: REQUEST_DETAILS_FOR_PRS,
         },
