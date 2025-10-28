@@ -553,6 +553,7 @@ describe('modules/versioning/maven/compare', () => {
       ${'[1.2.3,1.2.4)'}         | ${'1.2.4'}   | ${'[1.2.4,1.2.5)'}
       ${'[1.2.1,1.2.4)'}         | ${'1.2.4'}   | ${'[1.2.1,1.2.5)'}
       ${'[1,1.2.3)'}             | ${'1.2.3'}   | ${'[1,1.2.4)'}
+      ${'[3,4-alpha)'}           | ${'4.3.2'}   | ${'[4,5-alpha)'}
     `(
       'autoExtendMavenRange("$range", "$version") === $expected',
       ({ range, version, expected }) => {

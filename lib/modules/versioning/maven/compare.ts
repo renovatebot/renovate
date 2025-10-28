@@ -524,6 +524,16 @@ function autoExtendMavenRange(
       interval.leftValue = coerceRangeValue(leftValue, newValue);
       interval.rightValue = incrementRangeValue(interval.leftValue);
     }
+  } else if (
+    leftValue !== null &&
+    rightValue !== null &&
+    incrementRangeValue(leftValue) + '-alpha' ===
+      coerceRangeValue(rightValue, rightValue)
+  ) {
+    if (compare(newValue, leftValue) !== -1) {
+      interval.leftValue = coerceRangeValue(leftValue, newValue);
+      interval.rightValue = incrementRangeValue(interval.leftValue) + '-alpha';
+    }
   } else if (rightValue !== null) {
     if (interval.rightType === INCLUDING_POINT) {
       const tokens = tokenize(rightValue);
