@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
+import { defaultBuildUrl as remarkBuildGitHubUrl } from 'remark-github';
 import { logger } from '../../../../../logger';
 import * as memCache from '../../../../../util/cache/memory';
 import * as packageCache from '../../../../../util/cache/package';
@@ -215,18 +216,9 @@ async function releaseNotesResult(
         `${baseUrl}${repository}/releases/${releaseMatch.tag!}`;
   }
   // set body for release notes
-  releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
   releaseNotes.name = massageName(releaseNotes.name, releaseNotes.tag);
-  if (releaseNotes.body.length || releaseNotes.name?.length) {
-    try {
-      if (platform !== 'gitlab') {
-        releaseNotes.body = await linkify(releaseNotes.body, {
-          repository: `${baseUrl}${repository}`,
-        });
-      }
-    } catch (err) /* istanbul ignore next */ {
-      logger.warn({ err, baseUrl, repository }, 'Error linkifying');
-    }
+  if (releaseNotes.body?.length || releaseNotes.name?.length) {
+    releaseNotes.body = await linkifyBody(project, releaseNotes.body);
   } else {
     return null;
   }
@@ -549,16 +541,29 @@ function getNotesSourceUrl(
 
 async function linkifyBody(
   { baseUrl, repository }: ChangeLogProject,
-  bodyStr: string,
+  bodyStr: string | undefined | null,
 ): Promise<string> {
   const body = massageBody(bodyStr, baseUrl);
+  const platform = detectPlatform(baseUrl);
+
+  // Remark only supports GitHub-style references to commits, mentions, etc.
+  if (platform !== 'github') {
+    return body;
+  }
+
   if (body?.length) {
     try {
       return await linkify(body, {
-        repository: `${baseUrl}${repository}`,
+        // Override URL building to support GitHub Enterprise with custom domains
+        buildUrl: (values) =>
+          remarkBuildGitHubUrl(values).replace(
+            /^https:\/\/github.com\//,
+            baseUrl,
+          ),
+        repository,
       });
     } catch (err) /* istanbul ignore next */ {
-      logger.warn({ body, err }, 'linkify error');
+      logger.warn({ body, err, baseUrl, repository }, 'linkify error');
     }
   }
   return body;
