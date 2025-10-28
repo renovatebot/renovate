@@ -515,14 +515,15 @@ function autoExtendMavenRange(
   }
 
   const { leftValue, rightValue } = interval;
+  const vPrefix = (leftValue ?? rightValue)?.startsWith('v') ? 'v' : '';
   if (
     leftValue !== null &&
     rightValue !== null &&
     incrementRangeValue(leftValue) === coerceRangeValue(rightValue, rightValue)
   ) {
     if (compare(newValue, leftValue) !== -1) {
-      interval.leftValue = coerceRangeValue(leftValue, newValue);
-      interval.rightValue = incrementRangeValue(interval.leftValue);
+      interval.leftValue = vPrefix + coerceRangeValue(leftValue, newValue);
+      interval.rightValue = vPrefix + incrementRangeValue(interval.leftValue);
     }
   } else if (
     leftValue !== null &&
@@ -531,25 +532,25 @@ function autoExtendMavenRange(
       coerceRangeValue(rightValue, rightValue)
   ) {
     if (compare(newValue, leftValue) !== -1) {
-      interval.leftValue = coerceRangeValue(leftValue, newValue);
-      interval.rightValue = incrementRangeValue(interval.leftValue) + '-alpha';
+      interval.leftValue = vPrefix + coerceRangeValue(leftValue, newValue);
+      interval.rightValue =
+        vPrefix + incrementRangeValue(interval.leftValue) + '-alpha';
     }
   } else if (rightValue !== null) {
     if (interval.rightType === INCLUDING_POINT) {
       const tokens = tokenize(rightValue);
       const lastToken = tokens[tokens.length - 1];
       if (typeof lastToken.val === 'number') {
-        interval.rightValue = coerceRangeValue(rightValue, newValue);
+        interval.rightValue = vPrefix + coerceRangeValue(rightValue, newValue);
       } else {
         interval.rightValue = newValue;
       }
     } else {
-      interval.rightValue = incrementRangeValue(
-        coerceRangeValue(rightValue, newValue),
-      );
+      interval.rightValue =
+        vPrefix + incrementRangeValue(coerceRangeValue(rightValue, newValue));
     }
   } else if (leftValue !== null) {
-    interval.leftValue = coerceRangeValue(leftValue, newValue);
+    interval.leftValue = vPrefix + coerceRangeValue(leftValue, newValue);
   }
 
   return rangeToStr(range);
