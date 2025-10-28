@@ -58,6 +58,7 @@ describe('workers/repository/update/branch/status-checks', () => {
           minimumReleaseAge: null,
         }),
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
       );
@@ -72,6 +73,7 @@ describe('workers/repository/update/branch/status-checks', () => {
           minimumReleaseAge: '',
         }),
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
       );
@@ -84,6 +86,7 @@ describe('workers/repository/update/branch/status-checks', () => {
         ...config,
         statusCheckNames: undefined as never,
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
       );
@@ -94,6 +97,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       GlobalConfig.set({ dryRun: 'full' });
       config.stabilityStatus = 'green';
       await setStability(config);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would update renovate/stability-days status check state to green',
       );
@@ -153,6 +157,7 @@ describe('workers/repository/update/branch/status-checks', () => {
           mergeConfidence: null,
         }),
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
       );
@@ -168,6 +173,7 @@ describe('workers/repository/update/branch/status-checks', () => {
           mergeConfidence: '',
         }),
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
       );
@@ -181,6 +187,7 @@ describe('workers/repository/update/branch/status-checks', () => {
         ...config,
         statusCheckNames: undefined as never,
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
       );
@@ -192,6 +199,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       config.minimumConfidence = 'high';
       config.confidenceStatus = 'yellow';
       await setConfidence(config);
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would update renovate/merge-confidence status check state to yellow',
       );

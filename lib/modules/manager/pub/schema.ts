@@ -8,6 +8,15 @@ const PubspecDependency = LooseRecord(
     z.object({
       version: z.string().optional(),
       path: z.string().optional(),
+      git: z.union([
+        z.string().optional(),
+        z.object({
+          url: z.string().optional(),
+          ref: z.string().optional(),
+          path: z.string().optional(),
+          tag_pattern: z.string().optional(),
+        }),
+      ]),
       hosted: z.union([
         z.string().optional(),
         z.object({ name: z.string().optional(), url: z.string().optional() }),

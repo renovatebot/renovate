@@ -132,6 +132,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         },
       }),
     ).toBeNull();
+    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
     expect(logger.warn).toHaveBeenCalledWith(
       { packageFileName: 'requirements.in' },
       'pip-compile: No lock files associated with a package file',

@@ -33,6 +33,8 @@ describe('config/presets/internal/custom-managers', () => {
                   TERRAFORM_VERSION: 1.5.7
                   # renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$
                   KUSTOMIZE_VERSION: kustomize/v5.2.1
+                  # renovate: datasource=deb depName=docker-ce-cli versioning=deb registryUrl=https://download.docker.com/linux/ubuntu?suite=noble&components=stable&binaryArch=amd64
+                  DOCKER_CE_CLI_VERSION: '5:28.5.1-1~ubuntu.24.04~noble'
               - script: echo Hello, world!
                 displayName: 'Run a one-line script'
       `;
@@ -91,6 +93,17 @@ describe('config/presets/internal/custom-managers', () => {
             '# renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$\n          KUSTOMIZE_VERSION: kustomize/v5.2.1\n',
           versioning:
             'regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
+        },
+        {
+          currentValue: '5:28.5.1-1~ubuntu.24.04~noble',
+          datasource: 'deb',
+          depName: 'docker-ce-cli',
+          replaceString:
+            "# renovate: datasource=deb depName=docker-ce-cli versioning=deb registryUrl=https://download.docker.com/linux/ubuntu?suite=noble&components=stable&binaryArch=amd64\n          DOCKER_CE_CLI_VERSION: '5:28.5.1-1~ubuntu.24.04~noble'\n",
+          versioning: 'deb',
+          registryUrls: [
+            'https://download.docker.com/linux/ubuntu?suite=noble&components=stable&binaryArch=amd64',
+          ],
         },
       ]);
     });
@@ -420,6 +433,8 @@ describe('config/presets/internal/custom-managers', () => {
           TERRAFORM_VERSION: 1.5.7
           # renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$
           KUSTOMIZE_VERSION: kustomize/v5.2.1
+          # renovate: datasource=deb depName=docker-ce-cli versioning=deb registryUrl=https://download.docker.com/linux/ubuntu?suite=noble&components=stable&binaryArch=amd64
+          DOCKER_CE_CLI_VERSION: '5:28.5.1-1~ubuntu.24.04~noble'
 
         jobs:
           lint:
@@ -487,6 +502,17 @@ describe('config/presets/internal/custom-managers', () => {
             '# renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$\n  KUSTOMIZE_VERSION: kustomize/v5.2.1\n',
           versioning:
             'regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
+        },
+        {
+          currentValue: '5:28.5.1-1~ubuntu.24.04~noble',
+          datasource: 'deb',
+          depName: 'docker-ce-cli',
+          replaceString:
+            "# renovate: datasource=deb depName=docker-ce-cli versioning=deb registryUrl=https://download.docker.com/linux/ubuntu?suite=noble&components=stable&binaryArch=amd64\n  DOCKER_CE_CLI_VERSION: '5:28.5.1-1~ubuntu.24.04~noble'\n",
+          versioning: 'deb',
+          registryUrls: [
+            'https://download.docker.com/linux/ubuntu?suite=noble&components=stable&binaryArch=amd64',
+          ],
         },
       ]);
     });

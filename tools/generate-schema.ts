@@ -16,6 +16,10 @@ process.on('unhandledRejection', (err) => {
     // json-schema
     logger.info('Generating json-schema');
     await generateSchema(dist);
+    await generateSchema(dist, {
+      filename: 'renovate-global-schema.json',
+      isGlobal: true,
+    });
   } catch (err) {
     logger.error({ err }, 'Unexpected error');
   } finally {

@@ -67,6 +67,7 @@ describe('workers/repository/reconfigure/comment', () => {
           reconfigurePr,
         ),
       ).toBeTrue();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would check branch renovate/reconfigure',
       );

@@ -179,7 +179,11 @@ export class NugetV3Api {
         if (releaseTimestamp) {
           release.releaseTimestamp = releaseTimestamp;
         }
-        if (versioning.isValid(version) && versioning.isStable(version)) {
+        if (
+          versioning.isValid(version) &&
+          versioning.isStable(version) &&
+          listed
+        ) {
           latestStable = removeBuildMeta(version);
           homepage = projectUrl ? massageUrl(projectUrl) : homepage;
           nupkgUrl = massageUrl(packageContent);

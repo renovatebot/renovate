@@ -31,12 +31,14 @@ export async function updateArtifacts(
     return null;
   }
 
-  // Find the first bun dependency in order to handle mixed manager updates
-  const lockFileName = updatedDeps.find((dep) => dep.manager === 'bun')
-    ?.lockFiles?.[0];
+  // Find the first bun dependency in order to handle mixed manager updates,
+  // eventually falling back to the first lock file from config.
+  const lockFileName =
+    updatedDeps.find((dep) => dep.manager === 'bun')?.lockFiles?.[0] ??
+    config.lockFiles?.[0];
 
   if (!lockFileName) {
-    logger.debug(`No ${lockFileName} found`);
+    logger.debug(`bun: No lock file found`);
     return null;
   }
 
