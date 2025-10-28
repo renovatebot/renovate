@@ -912,7 +912,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         partial<BranchUpgradeConfig>(),
       );
       expect(res).toEqual({
-        body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+        body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)\n',
         name: undefined,
         notesSourceUrl:
           'https://api.gitlab.com/projects/some%2Fother-repository/releases',
@@ -949,7 +949,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         partial<BranchUpgradeConfig>(),
       );
       expect(res).toEqual({
-        body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+        body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)\n',
         name: undefined,
         notesSourceUrl:
           'https://api.gitlab.com/projects/some%2Fother-repository/releases',
@@ -986,7 +986,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         partial<BranchUpgradeConfig>(),
       );
       expect(res).toEqual({
-        body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+        body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)\n',
         name: undefined,
         notesSourceUrl:
           'https://api.gitlab.com/projects/some%2Fother-repository/releases',

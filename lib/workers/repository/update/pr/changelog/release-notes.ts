@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
-import { defaultBuildUrl as remarkBuildGitHubUrl } from 'remark-github';
 import { logger } from '../../../../../logger';
 import * as memCache from '../../../../../util/cache/memory';
 import * as packageCache from '../../../../../util/cache/package';
@@ -544,24 +543,10 @@ async function linkifyBody(
   bodyStr: string | undefined | null,
 ): Promise<string> {
   const body = massageBody(bodyStr, baseUrl);
-  const platform = detectPlatform(baseUrl);
-
-  // Remark only supports GitHub-style references to commits, mentions, etc.
-  if (platform !== 'github') {
-    return body;
-  }
 
   if (body?.length) {
     try {
-      return await linkify(body, {
-        // Override URL building to support GitHub Enterprise with custom domains
-        buildUrl: (values) =>
-          remarkBuildGitHubUrl(values).replace(
-            /^https:\/\/github.com\//,
-            baseUrl,
-          ),
-        repository,
-      });
+      return await linkify(baseUrl, repository, body);
     } catch (err) /* istanbul ignore next */ {
       logger.warn({ body, err, baseUrl, repository }, 'linkify error');
     }

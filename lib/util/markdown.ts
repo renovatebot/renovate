@@ -1,8 +1,9 @@
 import { remark } from 'remark';
 import gfm from 'remark-gfm';
 import type { Options as RemarkGithubOptions } from 'remark-github';
-import github from 'remark-github';
+import github, { defaultBuildUrl } from 'remark-github';
 import { regEx } from './regex';
+import { detectPlatform } from './common';
 
 // Generic replacements/link-breakers
 export function sanitizeMarkdown(markdown: string): string {
@@ -28,20 +29,38 @@ export function sanitizeMarkdown(markdown: string): string {
 }
 
 /**
- *
+ * @param baseUrl base URL of the Git platform hosting the repository to link to
+ * @param repository repository that all references to linkify are relative to
  * @param content content to process
- * @param options github options
+ * @param extraGithubOptions github options
  * @returns linkified content
  */
 export async function linkify(
+  baseUrl: string,
+  repository: string,
   content: string,
-  options: RemarkGithubOptions,
+  extraGithubOptions?: RemarkGithubOptions,
 ): Promise<string> {
   // https://github.com/syntax-tree/mdast-util-to-markdown#optionsbullet
-  const output = await remark()
+  let pipeline = remark()
     .use({ settings: { bullet: '-' } })
-    .use(gfm)
-    .use(github, { mentionStrong: false, ...options })
-    .process(content);
+    .use(gfm);
+
+  if (!baseUrl.endsWith('/')) {
+    baseUrl = `${baseUrl}/`;
+  }
+
+  if (detectPlatform(baseUrl) === 'github') {
+    pipeline = pipeline.use(github, {
+      mentionStrong: false,
+      repository,
+      // Override URL building to support GitHub Enterprise with custom domains
+      buildUrl: (values) =>
+        defaultBuildUrl(values).replace(/^https:\/\/github.com\//, baseUrl),
+      ...(extraGithubOptions || {}),
+    });
+  }
+
+  const output = await pipeline.process(content);
   return output.toString();
 }
