@@ -518,7 +518,7 @@ function autoExtendMavenRange(
   if (
     leftValue !== null &&
     rightValue !== null &&
-    incrementRangeValue(leftValue) === rightValue
+    incrementRangeValue(leftValue) === coerceRangeValue(rightValue, rightValue)
   ) {
     if (compare(newValue, leftValue) !== -1) {
       interval.leftValue = coerceRangeValue(leftValue, newValue);
