@@ -5,19 +5,19 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:10.67.9@sha256:c3935b857d7df80f786f5893e2a2f2b2d9258240aa5cdffac5e02828e0c841b2 AS slim-base
+FROM ghcr.io/renovatebot/base-image:10.67.10@sha256:9df2470d3e753f64f5ba52e0296a51582b18e92d584068f21c24804f2b5a8c62 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:10.67.9-full@sha256:b639a31e34bd55e3fcf2789adf0fd49f7030a1498d7755d0739b676e54986e71 AS full-base
+FROM ghcr.io/renovatebot/base-image:10.67.10-full@sha256:74c0bea4c4e7d66ebaa50bb396e7ed81cd51a8ec6f94f6c37953e9d005e59242 AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:10.67.9@sha256:c3935b857d7df80f786f5893e2a2f2b2d9258240aa5cdffac5e02828e0c841b2 AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:10.67.10@sha256:9df2470d3e753f64f5ba52e0296a51582b18e92d584068f21c24804f2b5a8c62 AS build
 
 # We want a specific node version here
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
