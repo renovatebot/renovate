@@ -248,6 +248,7 @@ describe('modules/datasource/custom/index', () => {
         },
       });
       expect(result).toBeNull();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.once.warn).toHaveBeenCalledWith(
         { errorMessage: 'The symbol "." cannot be used as a unary operator' },
         'Invalid JSONata expression: $[.name = "Alice" and',
@@ -273,6 +274,7 @@ describe('modules/datasource/custom/index', () => {
         },
       });
       expect(result).toBeNull();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.once.warn).toHaveBeenCalledWith(
         { err: expect.any(Object) },
         'Error while evaluating JSONata expression: $notafunction()',

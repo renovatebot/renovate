@@ -182,7 +182,7 @@ export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
   const change = (
     await client.findChanges(config.repository!, {
       ...findPRConfig,
-      limit: 1,
+      singleChange: true,
       requestDetails: REQUEST_DETAILS_FOR_PRS,
     })
   ).pop();
@@ -269,7 +269,7 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       branchName: prConfig.sourceBranch,
       targetBranch: prConfig.targetBranch,
       state: 'open',
-      limit: 1,
+      singleChange: true,
       requestDetails: REQUEST_DETAILS_FOR_PRS,
     })
   ).pop();
@@ -385,7 +385,7 @@ export async function getBranchStatus(
     await client.findChanges(config.repository!, {
       state: 'open',
       branchName,
-      limit: 1,
+      singleChange: true,
       requestDetails: ['LABELS', 'SUBMITTABLE', 'CHECK'],
     })
   ).pop();
@@ -423,7 +423,7 @@ export async function getBranchStatusCheck(
       await client.findChanges(config.repository!, {
         branchName,
         state: 'open',
-        limit: 1,
+        singleChange: true,
         requestDetails: ['LABELS'],
       })
     ).pop();
@@ -459,7 +459,7 @@ export async function setBranchStatus(
       await client.findChanges(config.repository!, {
         branchName: branchStatusConfig.branchName,
         state: 'open',
-        limit: 1,
+        singleChange: true,
         requestDetails: ['LABELS'],
       })
     ).pop();

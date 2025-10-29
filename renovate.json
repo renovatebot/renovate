@@ -2,6 +2,7 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>renovatebot/.github"],
   "assignees": ["viceice", "secustor", "jamietanna"],
+  "reviewers": ["@renovatebot/maintainers"],
   "semanticCommitScope": "deps",
   "automergeType": "pr",
   "prCreation": "immediate",
@@ -64,7 +65,7 @@
     },
     {
       "description": "set branch prefix for node major updates to split from minor updates",
-      "matchPackageNames": ["node"],
+      "matchPackageNames": ["node", "containerbase/node-prebuild"],
       "matchUpdateTypes": ["major"],
       "additionalBranchPrefix": "major"
     },

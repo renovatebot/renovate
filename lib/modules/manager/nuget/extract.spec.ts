@@ -33,6 +33,7 @@ describe('modules/manager/nuget/extract', () => {
         ),
       ).toBeNull();
 
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.anything(),
         'Failed to parse XML',
@@ -51,6 +52,7 @@ describe('modules/manager/nuget/extract', () => {
           config,
         ),
       ).toBeNull();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'NuGet: Skipping versions.props as it is not XML',
       );

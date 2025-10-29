@@ -386,6 +386,7 @@
       "https://github.com/FasterXML/jackson-module-scala"
     ],
     "jasmine": "https://github.com/jasmine/jasmine",
+    "javafx": "https://github.com/openjdk/jfx",
     "javahamcrest": "https://github.com/hamcrest/JavaHamcrest",
     "javascriptengineswitcher": "https://github.com/Taritsyn/JavaScriptEngineSwitcher",
     "jaxb-ri": "https://github.com/eclipse-ee4j/jaxb-ri",

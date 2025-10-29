@@ -2,11 +2,9 @@ import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
-import { hashBody } from '../pr-body';
-import type { Pr } from '../types';
 import { repoFingerprint } from '../util';
 import { client as _client } from './client';
-import * as prCache from './pr-cache';
+import { reset as resetPrCache } from './pr-cache';
 import type {
   GerritAccountInfo,
   GerritChange,
@@ -66,7 +64,7 @@ describe('modules/platform/gerrit/index', () => {
       username: 'user',
       password: 'pass',
     });
-    prCache.reset();
+    resetPrCache();
   });
 
   describe('initPlatform()', () => {
@@ -128,7 +126,7 @@ describe('modules/platform/gerrit/index', () => {
         isFork: false,
         repoFingerprint: repoFingerprint('test/repo', `${gerritEndpointUrl}/`),
       });
-      expect(git.initRepo).toHaveBeenCalledWith({
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
         url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
       });
     });
@@ -173,14 +171,16 @@ describe('modules/platform/gerrit/index', () => {
           refreshCache: true,
         }),
       ).resolves.toBeNull();
-      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
-        branchName: 'branch',
-        state: 'open',
-        targetBranch: 'master',
-        limit: 1,
-        requestDetails: REQUEST_DETAILS_FOR_PRS,
-        refreshCache: true,
-      });
+      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        {
+          branchName: 'branch',
+          state: 'open',
+          targetBranch: 'master',
+          singleChange: true,
+          requestDetails: REQUEST_DETAILS_FOR_PRS,
+        },
+      );
     });
 
     it('findPr() - found', async () => {
@@ -242,7 +242,7 @@ describe('modules/platform/gerrit/index', () => {
       await expect(gerrit.getPr(123456, true)).resolves.toEqual(
         mapGerritChangeToPr(change),
       );
-      expect(clientMock.getChange).toHaveBeenCalledWith(
+      expect(clientMock.getChange).toHaveBeenCalledExactlyOnceWith(
         123456,
         REQUEST_DETAILS_FOR_PRS,
       );
@@ -314,15 +314,6 @@ describe('modules/platform/gerrit/index', () => {
     beforeAll(() => {
       gerrit.writeToConfig({ labels: {} });
     });
-    beforeEach(() => {
-      prCache.set('test/repo', [
-        partial<Pr>({
-          number: 123456,
-          state: 'open',
-          sourceBranch: 'renovate/dependency-3.x',
-        }),
-      ]);
-    });
 
     it('updatePr() - closed => abandon the change', async () => {
       const change = partial<GerritChange>({});
@@ -332,8 +323,7 @@ describe('modules/platform/gerrit/index', () => {
         prTitle: change.subject,
         state: 'closed',
       });
-      expect(clientMock.abandonChange).toHaveBeenCalledWith(123456);
-      expect(prCache.get('test/repo', 123456)?.state).toBe('closed');
+      expect(clientMock.abandonChange).toHaveBeenCalledExactlyOnceWith(123456);
     });
 
     it('updatePr() - existing prBody found in change.messages => nothing todo...', async () => {
@@ -369,13 +359,12 @@ describe('modules/platform/gerrit/index', () => {
         prTitle: change.subject,
         prBody: 'NEW PR-Body',
       });
-      expect(clientMock.addMessageIfNotAlreadyExists).toHaveBeenCalledWith(
+      expect(
+        clientMock.addMessageIfNotAlreadyExists,
+      ).toHaveBeenCalledExactlyOnceWith(
         123456,
         'NEW PR-Body',
         TAG_PULL_REQUEST_BODY,
-      );
-      expect(prCache.get('test/repo', 123456)?.bodyStruct?.hash).toBe(
-        hashBody('NEW PR-Body'),
       );
     });
   });
@@ -440,7 +429,9 @@ describe('modules/platform/gerrit/index', () => {
         },
       });
       expect(pr).toHaveProperty('number', 123456);
-      expect(clientMock.addMessageIfNotAlreadyExists).toHaveBeenCalledWith(
+      expect(
+        clientMock.addMessageIfNotAlreadyExists,
+      ).toHaveBeenCalledExactlyOnceWith(
         123456,
         'body',
         TAG_PULL_REQUEST_BODY,
@@ -455,10 +446,16 @@ describe('modules/platform/gerrit/index', () => {
       await expect(
         gerrit.getBranchPr('renovate/dependency-1.x'),
       ).resolves.toBeNull();
-      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
-        branchName: '',
-        requestDetails: REQUEST_DETAILS_FOR_PRS,
-      });
+      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        {
+          branchName: 'renovate/dependency-1.x',
+          state: 'open',
+          singleChange: true,
+          targetBranch: undefined,
+          requestDetails: REQUEST_DETAILS_FOR_PRS,
+        },
+      );
     });
 
     it('getBranchPr() - found', async () => {
@@ -480,7 +477,10 @@ describe('modules/platform/gerrit/index', () => {
       expect(clientMock.findChanges.mock.lastCall).toEqual([
         'test/repo',
         {
-          branchName: '',
+          state: 'open',
+          branchName: 'renovate/dependency-1.x',
+          singleChange: true,
+          targetBranch: 'master',
           requestDetails: REQUEST_DETAILS_FOR_PRS,
         },
       ]);
@@ -504,7 +504,10 @@ describe('modules/platform/gerrit/index', () => {
       expect(clientMock.findChanges.mock.lastCall).toEqual([
         'test/repo',
         {
-          branchName: '',
+          state: 'open',
+          branchName: 'renovate/dependency-1.x',
+          singleChange: true,
+          targetBranch: undefined,
           requestDetails: REQUEST_DETAILS_FOR_PRS,
         },
       ]);
@@ -537,7 +540,7 @@ describe('modules/platform/gerrit/index', () => {
     it('refreshPr()', async () => {
       clientMock.getChange.mockResolvedValueOnce(partial<GerritChange>({}));
       await expect(gerrit.refreshPr(123456)).toResolve();
-      expect(clientMock.getChange).toHaveBeenCalledWith(
+      expect(clientMock.getChange).toHaveBeenCalledExactlyOnceWith(
         123456,
         REQUEST_DETAILS_FOR_PRS,
       );
@@ -548,10 +551,13 @@ describe('modules/platform/gerrit/index', () => {
     it('getPrList() - empty list', async () => {
       clientMock.findChanges.mockResolvedValueOnce([]);
       await expect(gerrit.getPrList()).resolves.toEqual([]);
-      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
-        branchName: '',
-        requestDetails: REQUEST_DETAILS_FOR_PRS,
-      });
+      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        {
+          branchName: '',
+          requestDetails: REQUEST_DETAILS_FOR_PRS,
+        },
+      );
     });
 
     it('getPrList() - multiple results', async () => {
@@ -626,23 +632,13 @@ describe('modules/platform/gerrit/index', () => {
   });
 
   describe('mergePr()', () => {
-    beforeEach(() => {
-      prCache.set('test/repo', [
-        partial<Pr>({
-          number: 123456,
-          state: 'open',
-          sourceBranch: 'renovate/dependency-3.x',
-        }),
-      ]);
-    });
-
     it('mergePr() - blocked by Verified', async () => {
       clientMock.submitChange.mockRejectedValueOnce({
         statusCode: 409,
         message: 'blocked by Verified',
       });
       await expect(gerrit.mergePr({ id: 123456 })).resolves.toBeFalse();
-      expect(clientMock.submitChange).toHaveBeenCalledWith(123456);
+      expect(clientMock.submitChange).toHaveBeenCalledExactlyOnceWith(123456);
     });
 
     it('mergePr() - success', async () => {
@@ -650,7 +646,6 @@ describe('modules/platform/gerrit/index', () => {
         partial<GerritChange>({ status: 'MERGED' }),
       );
       await expect(gerrit.mergePr({ id: 123456 })).resolves.toBeTrue();
-      expect(prCache.get('test/repo', 123456)!.state).toBe('merged');
     });
 
     it('mergePr() - other errors', async () => {
@@ -895,7 +890,7 @@ describe('modules/platform/gerrit/index', () => {
             state: branchState,
             description: 'desc',
           });
-          expect(clientMock.setLabel).toHaveBeenCalledWith(
+          expect(clientMock.setLabel).toHaveBeenCalledExactlyOnceWith(
             123456,
             expectedLabel,
             expectedVote,
@@ -945,7 +940,10 @@ describe('modules/platform/gerrit/index', () => {
       const pro = gerrit.deleteLabel(123456, 'hashtag1');
       await expect(pro).resolves.toBeUndefined();
       expect(clientMock.deleteHashtag).toHaveBeenCalledTimes(1);
-      expect(clientMock.deleteHashtag).toHaveBeenCalledWith(123456, 'hashtag1');
+      expect(clientMock.deleteHashtag).toHaveBeenCalledExactlyOnceWith(
+        123456,
+        'hashtag1',
+      );
     });
   });
 
@@ -955,7 +953,7 @@ describe('modules/platform/gerrit/index', () => {
         gerrit.addReviewers(123456, ['user1', 'user2']),
       ).resolves.toBeUndefined();
       expect(clientMock.addReviewers).toHaveBeenCalledTimes(1);
-      expect(clientMock.addReviewers).toHaveBeenCalledWith(123456, [
+      expect(clientMock.addReviewers).toHaveBeenCalledExactlyOnceWith(123456, [
         'user1',
         'user2',
       ]);
@@ -968,7 +966,10 @@ describe('modules/platform/gerrit/index', () => {
         gerrit.addAssignees(123456, ['user1', 'user2']),
       ).resolves.toBeUndefined();
       expect(clientMock.addAssignee).toHaveBeenCalledTimes(1);
-      expect(clientMock.addAssignee).toHaveBeenCalledWith(123456, 'user1');
+      expect(clientMock.addAssignee).toHaveBeenCalledExactlyOnceWith(
+        123456,
+        'user1',
+      );
     });
   });
 
@@ -981,11 +982,9 @@ describe('modules/platform/gerrit/index', () => {
           content: 'My-Comment-Msg',
         }),
       ).resolves.toBeTrue();
-      expect(clientMock.addMessageIfNotAlreadyExists).toHaveBeenCalledWith(
-        123456,
-        'My-Comment-Msg',
-        undefined,
-      );
+      expect(
+        clientMock.addMessageIfNotAlreadyExists,
+      ).toHaveBeenCalledExactlyOnceWith(123456, 'My-Comment-Msg', undefined);
     });
 
     it('ensureComment() - with tag', async () => {
@@ -996,11 +995,9 @@ describe('modules/platform/gerrit/index', () => {
           content: 'My-Comment-Msg',
         }),
       ).resolves.toBeTrue();
-      expect(clientMock.addMessageIfNotAlreadyExists).toHaveBeenCalledWith(
-        123456,
-        'My-Comment-Msg',
-        'myTopic',
-      );
+      expect(
+        clientMock.addMessageIfNotAlreadyExists,
+      ).toHaveBeenCalledExactlyOnceWith(123456, 'My-Comment-Msg', 'myTopic');
     });
   });
 
@@ -1013,7 +1010,7 @@ describe('modules/platform/gerrit/index', () => {
       await expect(
         gerrit.getRawFile('renovate.json', 'test/repo', 'main'),
       ).resolves.toBe('{}');
-      expect(clientMock.getFile).toHaveBeenCalledWith(
+      expect(clientMock.getFile).toHaveBeenCalledExactlyOnceWith(
         'test/repo',
         'main',
         'renovate.json',
@@ -1027,7 +1024,7 @@ describe('modules/platform/gerrit/index', () => {
         labels: {},
       });
       await expect(gerrit.getRawFile('renovate.json')).resolves.toBe('{}');
-      expect(clientMock.getFile).toHaveBeenCalledWith(
+      expect(clientMock.getFile).toHaveBeenCalledExactlyOnceWith(
         'repo',
         'master',
         'renovate.json',
@@ -1041,7 +1038,7 @@ describe('modules/platform/gerrit/index', () => {
         labels: {},
       });
       await expect(gerrit.getRawFile('renovate.json')).resolves.toBe('{}');
-      expect(clientMock.getFile).toHaveBeenCalledWith(
+      expect(clientMock.getFile).toHaveBeenCalledExactlyOnceWith(
         'repo',
         'HEAD',
         'renovate.json',
