@@ -3,8 +3,8 @@ import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
-import type { GerritHttp } from '../../../util/http/gerrit';
 import type { Pr } from '../types';
+import { client } from './client';
 import type { GerritChange } from './types';
 import { REQUEST_DETAILS_FOR_PRS, mapGerritChangeToPr } from './utils';
 
@@ -17,10 +17,7 @@ export class GerritPrCache {
   private cache: GerritPrCacheData;
   private items: Pr[] = [];
 
-  private constructor(
-    private http: GerritHttp,
-    private repository: string,
-  ) {
+  private constructor(private repository: string) {
     const repoCache = getCache();
     repoCache.platform ??= {};
     (repoCache.platform as any).gerrit ??= {};
@@ -37,11 +34,8 @@ export class GerritPrCache {
     this.updateItems();
   }
 
-  private static async init(
-    http: GerritHttp,
-    repository: string,
-  ): Promise<GerritPrCache> {
-    const res = new GerritPrCache(http, repository);
+  private static async init(repository: string): Promise<GerritPrCache> {
+    const res = new GerritPrCache(repository);
     const isSynced = memCache.get<true | undefined>('gerrit-pr-cache-synced');
 
     if (!isSynced) {
@@ -56,8 +50,8 @@ export class GerritPrCache {
     return this.items;
   }
 
-  static async getPrs(http: GerritHttp, repository: string): Promise<Pr[]> {
-    const prCache = await GerritPrCache.init(http, repository);
+  static async getPrs(repository: string): Promise<Pr[]> {
+    const prCache = await GerritPrCache.init(repository);
     return prCache.getPrs();
   }
 
@@ -66,12 +60,8 @@ export class GerritPrCache {
     this.updateItems();
   }
 
-  static async setPr(
-    http: GerritHttp,
-    repository: string,
-    item: Pr,
-  ): Promise<void> {
-    const prCache = await GerritPrCache.init(http, repository);
+  static async setPr(repository: string, item: Pr): Promise<void> {
+    const prCache = await GerritPrCache.init(repository);
     prCache.setPr(item);
   }
 
@@ -101,9 +91,9 @@ export class GerritPrCache {
 
       items[id] = newItem;
 
-      const itemTime = DateTime.fromISO(change.created.replace(' ', 'T'));
+      const itemTime = DateTime.fromISO(change.updated.replace(' ', 'T'));
       if (!cacheTime || itemTime > cacheTime) {
-        updatedDate = change.created;
+        updatedDate = change.updated;
       }
     }
 
@@ -119,24 +109,26 @@ export class GerritPrCache {
       this.cache.updatedDate = null;
     }
 
-    // Use pagination-like behavior similar to bitbucket-server
-    // TODO: implement proper pagination when Gerrit supports it better
-    const changes = await this.http.getJsonUnchecked<GerritChange[]>(
-      `a/changes/?q=owner:self+project:${this.repository}+-is:wip+-is:private&no-limit&o=${REQUEST_DETAILS_FOR_PRS.join('&o=')}`,
-    );
+    // Use client.findChanges with pagination and early termination via reconcile
+    await client.findChanges(this.repository, {
+      branchName: '',
+      state: 'all',
+      pageLimit: this.items.length ? 20 : 100,
+      requestDetails: REQUEST_DETAILS_FOR_PRS,
+      shouldFetchNextPage: (changes: GerritChange[]) => {
+        // reconcile returns true if we need the next page
+        return this.reconcile(changes);
+      },
+    });
 
-    this.reconcile(changes.body);
     this.updateItems();
 
     return this;
   }
 
-  static async forceRefresh(
-    http: GerritHttp,
-    repository: string,
-  ): Promise<void> {
+  static async forceRefresh(repository: string): Promise<void> {
     memCache.set('gerrit-pr-cache-synced', undefined);
-    const prCache = await GerritPrCache.init(http, repository);
+    const prCache = await GerritPrCache.init(repository);
     await prCache.sync(true);
   }
 

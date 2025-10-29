@@ -17,10 +17,6 @@ import { mapPrStateToGerritFilter } from './utils';
 class GerritClient {
   private gerritHttp = new GerritHttp({ memCache: false });
 
-  get http(): GerritHttp {
-    return this.gerritHttp;
-  }
-
   async getRepos(): Promise<string[]> {
     const res = await this.gerritHttp.getJsonUnchecked<string[]>(
       'a/projects/?type=CODE&state=ACTIVE',
@@ -50,7 +46,6 @@ class GerritClient {
     repository: string,
     findPRConfig: GerritFindPRConfig,
   ): Promise<GerritChange[]> {
-    const startOffset = findPRConfig.startOffset ?? 0;
     const pageLimit = findPRConfig.singleChange
       ? 1
       : (findPRConfig.pageLimit ?? 50);
@@ -67,7 +62,7 @@ class GerritClient {
     const allChanges: GerritChange[] = [];
 
     while (true) {
-      query.S = allChanges.length + startOffset;
+      query.S = allChanges.length;
       const queryString = `q=${filters.join('+')}&${getQueryString(query)}`;
       const changes = await this.gerritHttp.getJsonUnchecked<GerritChange[]>(
         `a/changes/?${queryString}`,
@@ -86,11 +81,15 @@ class GerritClient {
 
       allChanges.push(...changes.body);
 
-      if (
-        findPRConfig.singleChange ||
-        findPRConfig.noPagination ||
-        !hasMoreChanges
-      ) {
+      // Honor predicate if it is provided
+      if (findPRConfig.shouldFetchNextPage) {
+        const shouldContinue = findPRConfig.shouldFetchNextPage?.(changes.body);
+        if (!shouldContinue) {
+          break;
+        }
+      }
+
+      if (findPRConfig.singleChange || !hasMoreChanges) {
         break;
       }
     }
