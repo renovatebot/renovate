@@ -7,6 +7,7 @@ import * as npmVersioning from '../../../../modules/versioning/npm';
 import * as pep440 from '../../../../modules/versioning/pep440';
 import * as poetryVersioning from '../../../../modules/versioning/poetry';
 import { getRegexPredicate } from '../../../../util/string-match';
+import * as template from '../../../../util/template';
 import type { FilterConfig } from './types';
 
 function isReleaseStable(
@@ -66,23 +67,43 @@ export function filterVersions(
     });
   }
 
+  const currentMajor = versioningApi.getMajor(currentVersion);
+  const currentMinor = versioningApi.getMinor(currentVersion);
+  const currentPatch = versioningApi.getPatch(currentVersion);
+
   if (allowedVersions) {
-    const isAllowedPred = getRegexPredicate(allowedVersions);
+    // allowedVersions tempalte support
+    const computedAllowedVersions = template.compile(allowedVersions, {
+      currentVersion,
+      major: currentMajor,
+      minor: currentMinor,
+      patch: currentPatch,
+    });
+
+    // eslint-disable-next-line
+    console.log({
+      currentVersion,
+      major: currentMajor,
+      minor: currentMinor,
+      patch: currentPatch,
+      computedAllowedVersions,
+    });
+    const isAllowedPred = getRegexPredicate(computedAllowedVersions);
     if (isAllowedPred) {
       filteredReleases = filteredReleases.filter(({ version }) =>
         isAllowedPred(version),
       );
-    } else if (versioningApi.isValid(allowedVersions)) {
+    } else if (versioningApi.isValid(computedAllowedVersions)) {
       filteredReleases = filteredReleases.filter((r) =>
-        versioningApi.matches(r.version, allowedVersions),
+        versioningApi.matches(r.version, computedAllowedVersions),
       );
     } else if (
       config.versioning !== npmVersioning.id &&
-      semver.validRange(allowedVersions)
+      semver.validRange(computedAllowedVersions)
     ) {
       logger.debug(
         { depName: config.depName },
-        'Falling back to npm semver syntax for allowedVersions',
+        'Falling back to npm semver syntax for computedAllowedVersions',
       );
       filteredReleases = filteredReleases.filter((r) =>
         semver.satisfies(
@@ -91,27 +112,27 @@ export function filterVersions(
             : /* istanbul ignore next: not reachable, but it's safer to preserve it */ semver.coerce(
                 r.version,
               )!,
-          allowedVersions,
+          computedAllowedVersions,
         ),
       );
     } else if (
       config.versioning === poetryVersioning.id &&
-      pep440.isValid(allowedVersions)
+      pep440.isValid(computedAllowedVersions)
     ) {
       logger.debug(
         { depName: config.depName },
-        'Falling back to pypi syntax for allowedVersions',
+        'Falling back to pypi syntax for computedAllowedVersions',
       );
       filteredReleases = filteredReleases.filter((r) =>
-        pep440.matches(r.version, allowedVersions),
+        pep440.matches(r.version, computedAllowedVersions),
       );
     } else {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'config';
-      error.validationError = 'Invalid `allowedVersions`';
+      error.validationError = 'Invalid `computedAllowedVersions`';
       error.validationMessage =
-        'The following allowedVersions does not parse as a valid version or range: ' +
-        JSON.stringify(allowedVersions);
+        'The following computedAllowedVersions does not parse as a valid version or range: ' +
+        JSON.stringify(computedAllowedVersions);
       throw error;
     }
   }
@@ -138,9 +159,9 @@ export function filterVersions(
     return filteredReleases.filter((r) => isReleaseStable(r, versioningApi));
   }
 
-  const currentMajor = versioningApi.getMajor(currentVersion);
-  const currentMinor = versioningApi.getMinor(currentVersion);
-  const currentPatch = versioningApi.getPatch(currentVersion);
+  // const currentMajor = versioningApi.getMajor(currentVersion);
+  // const currentMinor = versioningApi.getMinor(currentVersion);
+  // const currentPatch = versioningApi.getPatch(currentVersion);
 
   return filteredReleases.filter((r) => {
     if (isReleaseStable(r, versioningApi)) {
