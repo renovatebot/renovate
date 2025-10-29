@@ -57,7 +57,7 @@ describe('workers/repository/process/lookup/filter', () => {
       ]);
     });
 
-    it.only('should filter versions when allowedVersions templating is used', () => {
+    it('should filter versions when allowedVersions templating is used', () => {
       const releases = [
         {
           version: '1.1.0',
