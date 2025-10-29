@@ -3,7 +3,11 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import { readLocalFile, writeLocalFile } from '../../../util/fs';
+import {
+  deleteLocalFile,
+  readLocalFile,
+  writeLocalFile,
+} from '../../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type { DenoManagerData } from './types';
 
@@ -61,6 +65,9 @@ export async function updateArtifacts(
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
+    if (isLockFileMaintenance) {
+      await deleteLocalFile(lockFileName);
+    }
 
     // run from its referred deno.json/deno.jsonc location if import map is used
     const importMapReferrerDep = updatedDeps.find(
