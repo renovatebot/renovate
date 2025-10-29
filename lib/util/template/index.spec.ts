@@ -214,6 +214,12 @@ describe('util/template/index', () => {
     expect(output).toBe('ghc/dep');
   });
 
+  it('add', () => {
+    const userTemplate = '{{add 1 2}}';
+    const output = template.compile(userTemplate, undefined as never);
+    expect(output).toBe('3');
+  });
+
   describe('proxyCompileInput', () => {
     const allowedField = 'body';
     const allowedArrayField = 'prBodyNotes';

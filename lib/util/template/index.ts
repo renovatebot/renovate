@@ -13,6 +13,9 @@ type Options = HelperOptions & {
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
+handlebars.registerHelper('add', function (a, b) {
+  return a + b;
+});
 
 handlebars.registerHelper('encodeBase64', (str: string) =>
   Buffer.from(str ?? '').toString('base64'),
@@ -205,6 +208,12 @@ export const allowedFields = {
     'The minor version of the new version. e.g. "1" if the new version is "3.1.0"',
   newPatch:
     'The patch version of the new version. e.g. "0" if the new version is "3.1.0"',
+  major:
+    'The major version of the current version. e.g. "3" if the current version is "3.1.0"',
+  minor:
+    'The minor version of the current version. e.g. "1" if the current version is "3.1.0"',
+  patch:
+    'The patch version of the current version. e.g. "0" if the current version is "3.1.0"',
   newName:
     'The name of the new dependency that replaces the current deprecated dependency',
   newNameLinked:
