@@ -159,10 +159,6 @@ export function filterVersions(
     return filteredReleases.filter((r) => isReleaseStable(r, versioningApi));
   }
 
-  // const currentMajor = versioningApi.getMajor(currentVersion);
-  // const currentMinor = versioningApi.getMinor(currentVersion);
-  // const currentPatch = versioningApi.getPatch(currentVersion);
-
   return filteredReleases.filter((r) => {
     if (isReleaseStable(r, versioningApi)) {
       return true;
