@@ -2986,7 +2986,7 @@ For example, if you want to upgrade to Angular v1.5.0 but _not_ to `angular` v1.
   "packageRules": [
     {
       "matchPackageNames": ["angular"],
-      "allowedVersions": "<{{major}}.{{add minor 1}}"
+      "allowedVersions": "<{{major}}.{{add minor 2}}"
     }
   ]
 }
