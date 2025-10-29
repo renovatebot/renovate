@@ -5,6 +5,7 @@ import {
   gitTagsRefMatchRegex,
   githubRefMatchRegex,
   hostnameMatchRegex,
+  ociRefMatchRegex,
 } from './modules.ts';
 
 describe('modules/manager/terraform/extractors/others/modules', () => {
@@ -336,6 +337,64 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
       });
       expect(host2).toEqual({
         hostname: 'example.com',
+      });
+    });
+  });
+
+  describe('ociRefMatchRegex', () => {
+    it('should extract registry and repository from OCI source', () => {
+      const simple = ociRefMatchRegex.exec(
+        'oci://registry.example.com/namespace/module',
+      )?.groups;
+      const ghcr = ociRefMatchRegex.exec(
+        'oci://ghcr.io/myorg/terraform-modules/vpc',
+      )?.groups;
+      const dockerHub = ociRefMatchRegex.exec(
+        'oci://docker.io/terraform/modules',
+      )?.groups;
+
+      expect(simple).toEqual({
+        registry: 'registry.example.com',
+        repository: 'namespace/module',
+        tag: undefined,
+      });
+      expect(ghcr).toEqual({
+        registry: 'ghcr.io',
+        repository: 'myorg/terraform-modules/vpc',
+        tag: undefined,
+      });
+      expect(dockerHub).toEqual({
+        registry: 'docker.io',
+        repository: 'terraform/modules',
+        tag: undefined,
+      });
+    });
+
+    it('should extract version tag from OCI source URL', () => {
+      const withVersion = ociRefMatchRegex.exec(
+        'oci://registry.example.com/namespace/module:1.2.3',
+      )?.groups;
+      const withDigest = ociRefMatchRegex.exec(
+        'oci://ghcr.io/org/module:sha256:abc123def456',
+      )?.groups;
+      const withComplexTag = ociRefMatchRegex.exec(
+        'oci://docker.io/modules/app:v2.0.0-beta.1',
+      )?.groups;
+
+      expect(withVersion).toEqual({
+        registry: 'registry.example.com',
+        repository: 'namespace/module',
+        tag: '1.2.3',
+      });
+      expect(withDigest).toEqual({
+        registry: 'ghcr.io',
+        repository: 'org/module',
+        tag: 'sha256:abc123def456',
+      });
+      expect(withComplexTag).toEqual({
+        registry: 'docker.io',
+        repository: 'modules/app',
+        tag: 'v2.0.0-beta.1',
       });
     });
   });

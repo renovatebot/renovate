@@ -1,5 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider/index.ts';
 import type { ExtractConfig, PackageDependency } from '../types.ts';
 import type { TerraformDefinitionFile } from './hcl/types.ts';
@@ -29,6 +30,9 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
   sourceExtractionRegex = regEx(
     /^(?:(?<hostname>(?:[a-zA-Z0-9-_]+\.+)+[a-zA-Z0-9-_]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/,
   );
+  ociRefMatchRegex = regEx(
+    /^oci:\/\/(?<registry>[^/:]+)\/(?<repository>[^:]+?)(?::(?<tag>.+))?$/,
+  );
 
   protected analyzeTerraformProvider(
     dep: PackageDependency,
@@ -41,20 +45,31 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
 
     if (isNonEmptyString(dep.managerData?.source)) {
       // TODO #22198
-      const source = this.sourceExtractionRegex.exec(dep.managerData.source);
-      if (!source?.groups) {
-        dep.skipReason = 'unsupported-url';
-        return dep;
-      }
-
-      // buildin providers https://github.com/terraform-providers
-      if (source.groups.namespace === 'terraform-providers') {
-        dep.registryUrls = [`https://releases.hashicorp.com`];
-      } else if (source.groups.hostname) {
-        dep.registryUrls = [`https://${source.groups.hostname}`];
-        dep.packageName = `${source.groups.namespace}/${source.groups.type}`;
+      const ociMatch = this.ociRefMatchRegex.exec(dep.managerData.source);
+      if (ociMatch?.groups) {
+        const { registry, repository, tag } = ociMatch.groups;
+        dep.packageName = `${registry}/${repository}`;
+        dep.registryUrls = [`https://${registry}`];
+        dep.datasource = DockerDatasource.id;
+        if (tag) {
+          dep.currentValue = tag;
+        }
       } else {
-        dep.packageName = dep.managerData?.source;
+        const source = this.sourceExtractionRegex.exec(dep.managerData.source);
+        if (!source?.groups) {
+          dep.skipReason = 'unsupported-url';
+          return dep;
+        }
+
+        // buildin providers https://github.com/terraform-providers
+        if (source.groups.namespace === 'terraform-providers') {
+          dep.registryUrls = [`https://releases.hashicorp.com`];
+        } else if (source.groups.hostname) {
+          dep.registryUrls = [`https://${source.groups.hostname}`];
+          dep.packageName = `${source.groups.namespace}/${source.groups.type}`;
+        } else {
+          dep.packageName = dep.managerData?.source;
+        }
       }
     }
     massageProviderLookupName(dep);

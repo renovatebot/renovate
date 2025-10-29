@@ -10,6 +10,7 @@ import { extractPackageFile } from './index.ts';
 const modules = Fixtures.get('modules.tf');
 const bitbucketModules = Fixtures.get('bitbucketModules.tf');
 const azureDevOpsModules = Fixtures.get('azureDevOpsModules.tf');
+const ociModules = Fixtures.get('oci.tf');
 const providers = Fixtures.get('providers.tf');
 const docker = Fixtures.get('docker.tf');
 const kubernetes = Fixtures.get('kubernetes.tf');
@@ -331,6 +332,82 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'MyOrg/MyProject/MyRepository//some-module/path',
           depType: 'module',
           packageName: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
+        },
+      ]);
+    });
+
+    it('extracts OCI modules and providers', async () => {
+      const res = await extractPackageFile(ociModules, 'oci.tf', {});
+      expect(res?.deps).toHaveLength(9);
+      expect(res?.deps).toIncludeAllPartialMembers([
+        {
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'registry.example.com/terraform-modules/vpc',
+          depType: 'module',
+          packageName: 'registry.example.com/terraform-modules/vpc',
+          registryUrls: ['https://registry.example.com'],
+        },
+        {
+          currentValue: '2.0.0',
+          datasource: 'docker',
+          depName: 'ghcr.io/myorg/terraform-modules/networking',
+          depType: 'module',
+          packageName: 'ghcr.io/myorg/terraform-modules/networking',
+          registryUrls: ['https://ghcr.io'],
+        },
+        {
+          currentValue: '3.1.0',
+          datasource: 'docker',
+          depName: 'docker.io/terraform-modules/storage',
+          depType: 'module',
+          packageName: 'docker.io/terraform-modules/storage',
+          registryUrls: ['https://docker.io'],
+        },
+        {
+          currentValue: 'sha256:abc123',
+          datasource: 'docker',
+          depName: 'registry.example.com/terraform-modules/database',
+          depType: 'module',
+          packageName: 'registry.example.com/terraform-modules/database',
+          registryUrls: ['https://registry.example.com'],
+        },
+        {
+          currentValue: '0.1.0',
+          datasource: 'terraform-module',
+          depName: 'hashicorp/consul/aws',
+          depType: 'module',
+        },
+        {
+          currentValue: '1.0.0',
+          datasource: 'docker',
+          depName: 'custom_oci',
+          depType: 'required_provider',
+          packageName: 'registry.example.com/providers/custom',
+          registryUrls: ['https://registry.example.com'],
+        },
+        {
+          currentValue: '2.5.0',
+          datasource: 'docker',
+          depName: 'another_oci',
+          depType: 'required_provider',
+          packageName: 'ghcr.io/mycompany/providers/mycloud',
+          registryUrls: ['https://ghcr.io'],
+        },
+        {
+          currentValue: '4.2.0',
+          datasource: 'docker',
+          depName: 'tagged_oci',
+          depType: 'required_provider',
+          packageName: 'registry.example.com/providers/tagged',
+          registryUrls: ['https://registry.example.com'],
+        },
+        {
+          currentValue: '4.0.0',
+          datasource: 'terraform-provider',
+          depName: 'aws',
+          depType: 'required_provider',
+          packageName: 'hashicorp/aws',
         },
       ]);
     });
