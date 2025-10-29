@@ -13,13 +13,11 @@ async function getAddedHandlebarsHelpers(): Promise<string[]> {
 }
 
 async function getDocumentedHandlebarsHelpers(): Promise<string[]> {
-  // Read and parse the docs section to collect documented helpers
   const docsPath = path.resolve(__dirname, '../../docs/usage/templates.md');
   const md = await fs.readFile(docsPath, 'utf8');
   const markdown = new MarkdownIt('zero').enable(['heading']);
   const tokens = markdown.parse(md, undefined);
 
-  // Find the start index of the "## Additional Handlebars helpers" section
   let inHelpersSection = false;
   const documented: string[] = [];
 
