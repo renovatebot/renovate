@@ -7,7 +7,7 @@ import fs from 'fs-extra';
 import { glob } from 'glob';
 import type { Token } from 'markdown-it';
 import MarkdownIt from 'markdown-it';
-import { MigrationsService } from '../lib/config/migrations';
+import { migrateConfig } from '../lib/config/migration';
 import type { RenovateConfig } from '../lib/config/types';
 
 const errorTitle = 'Invalid JSON in fenced code block';
@@ -59,12 +59,12 @@ function checkMigrationStatus(
   token: Token,
   original: RenovateConfig,
 ): void {
-  const migrated = MigrationsService.run(original);
-  if (MigrationsService.isMigrated(original, migrated)) {
+  const { isMigrated, migratedConfig } = migrateConfig(original);
+  if (isMigrated) {
     reportIssue(
       file,
       token,
-      `The JSON contains unmigrated configuration. Migrated JSON: ${JSON.stringify(migrated)}`,
+      `The JSON contains unmigrated configuration. Migrated JSON: ${JSON.stringify(migratedConfig)}`,
     );
   }
 }
