@@ -17,6 +17,10 @@ import { mapPrStateToGerritFilter } from './utils';
 class GerritClient {
   private gerritHttp = new GerritHttp({ memCache: false });
 
+  get http(): GerritHttp {
+    return this.gerritHttp;
+  }
+
   async getRepos(): Promise<string[]> {
     const res = await this.gerritHttp.getJsonUnchecked<string[]>(
       'a/projects/?type=CODE&state=ACTIVE',
