@@ -698,7 +698,6 @@ export async function initializeBranchesFromRefspecs(
       await gitRetry(() =>
         git.fetch(['--no-tags', '--force', 'origin', ...batch]),
       );
-      logger.debug(`Successfully fetched batch ${batchNum}/${totalBatches}`);
     } catch (err) {
       const errChecked = checkForPlatformFailure(err);
       /* v8 ignore next 3 -- hard to test */
@@ -710,25 +709,15 @@ export async function initializeBranchesFromRefspecs(
     }
   }
 
-  logger.debug(`Fetched ${refspecs.length} branches successfully`);
+  logger.debug(`Fetched ${refspecs.length} refspecs successfully`);
 
   // Update branchCommits for each branch
   for (const branchName of refspecMap.values()) {
-    try {
-      const branchSha = (
-        await git.revparse(`origin/${branchName}`)
-      ).trim() as LongCommitSha;
-      config.branchCommits[branchName] = branchSha;
-      logger.trace(
-        { branchName, branchSha },
-        'Initialized branch from refspec',
-      );
-    } catch (err) {
-      logger.debug(
-        { err, branchName },
-        'Failed to get SHA for branch after fetch',
-      );
-    }
+    const branchSha = (
+      await git.revparse(`origin/${branchName}`)
+    ).trim() as LongCommitSha;
+    config.branchCommits[branchName] = branchSha;
+    logger.trace({ branchName, branchSha }, 'Initialized branch from refspec');
   }
 }
 
