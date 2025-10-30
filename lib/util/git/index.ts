@@ -675,46 +675,60 @@ export async function initializeBranchesFromRefspecs(
 ): Promise<void> {
   logger.debug(`Initializing ${refspecMap.size} branches from refspecs`);
   await syncGit();
-  try {
-    // Build the fetch command with all refspecs at once
-    // Format: refspec:refs/remotes/origin/branchName
-    const refspecs: string[] = [];
-    for (const [refspec, branchName] of refspecMap) {
-      refspecs.push(`${refspec}:refs/remotes/origin/${branchName}`);
-    }
 
-    // Execute single fetch with all refspecs
-    await gitRetry(() =>
-      git.fetch(['--no-tags', '--force', 'origin', ...refspecs]),
-    );
-    logger.debug(`Fetched ${refspecs.length} branches successfully`);
+  // Build the fetch command with all refspecs
+  // Format: refspec:refs/remotes/origin/branchName
+  const refspecs: string[] = [];
+  for (const [refspec, branchName] of refspecMap) {
+    refspecs.push(`${refspec}:refs/remotes/origin/${branchName}`);
+  }
 
-    // Update branchCommits for each branch
-    for (const branchName of refspecMap.values()) {
-      try {
-        const branchSha = (
-          await git.revparse(`origin/${branchName}`)
-        ).trim() as LongCommitSha;
-        config.branchCommits[branchName] = branchSha;
-        logger.trace(
-          { branchName, branchSha },
-          'Initialized branch from refspec',
-        );
-      } catch (err) {
-        logger.debug(
-          { err, branchName },
-          'Failed to get SHA for branch after fetch',
-        );
+  // Fetch in batches to avoid command-line length limits
+  const BATCH_SIZE = 50;
+  const totalBatches = Math.ceil(refspecs.length / BATCH_SIZE);
+
+  for (let i = 0; i < refspecs.length; i += BATCH_SIZE) {
+    const batch = refspecs.slice(i, i + BATCH_SIZE);
+    const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+
+    try {
+      logger.debug(
+        `Fetching batch ${batchNum}/${totalBatches} (${batch.length} refspecs)`,
+      );
+      await gitRetry(() =>
+        git.fetch(['--no-tags', '--force', 'origin', ...batch]),
+      );
+      logger.debug(`Successfully fetched batch ${batchNum}/${totalBatches}`);
+    } catch (err) {
+      const errChecked = checkForPlatformFailure(err);
+      /* v8 ignore next 3 -- hard to test */
+      if (errChecked) {
+        throw errChecked;
       }
+      logger.warn({ err, batchNum }, 'Failed to fetch refspec batch');
+      throw err;
     }
-  } catch (err) {
-    const errChecked = checkForPlatformFailure(err);
-    /* v8 ignore next 3 -- hard to test */
-    if (errChecked) {
-      throw errChecked;
+  }
+
+  logger.debug(`Fetched ${refspecs.length} branches successfully`);
+
+  // Update branchCommits for each branch
+  for (const branchName of refspecMap.values()) {
+    try {
+      const branchSha = (
+        await git.revparse(`origin/${branchName}`)
+      ).trim() as LongCommitSha;
+      config.branchCommits[branchName] = branchSha;
+      logger.trace(
+        { branchName, branchSha },
+        'Initialized branch from refspec',
+      );
+    } catch (err) {
+      logger.debug(
+        { err, branchName },
+        'Failed to get SHA for branch after fetch',
+      );
     }
-    logger.warn({ err }, 'Failed to initialize branches from refspecs');
-    throw err;
   }
 }
 
