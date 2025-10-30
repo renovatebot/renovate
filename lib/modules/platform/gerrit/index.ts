@@ -173,7 +173,7 @@ export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
       }
       return true;
     });
-    logger.debug(
+    logger.trace(
       `findPr: using cached gerrit change ${cached?.number} for ${findPRConfig.branchName}`,
     );
     return cached ?? null;
@@ -206,7 +206,7 @@ export async function getPr(
   if (!refreshCache) {
     const prs = await GerritPrCache.getPrs(config.repository!);
     const cached = prs.find((pr) => pr.number === number) ?? null;
-    logger.debug(
+    logger.trace(
       `getPr: using cached gerrit change ${cached?.sourceBranch} for ${number}`,
     );
     return cached;
@@ -319,7 +319,7 @@ export async function getBranchPr(
     }
     return true;
   });
-  logger.debug(
+  logger.trace(
     `getBranchPr: using cached gerrit change ${cached?.number} for ${branchName}`,
   );
   return cached ?? null;
@@ -332,6 +332,7 @@ export async function refreshPr(number: number): Promise<void> {
 
 export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
   if (refreshCache) {
+    logger.debug('Refreshing PR list cache');
     await GerritPrCache.forceRefresh(config.repository!);
   }
 

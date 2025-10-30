@@ -15,6 +15,7 @@ import type {
 import { mapPrStateToGerritFilter } from './utils';
 
 class GerritClient {
+  // memCache is disabled because GerritPrCache provides smarter caching
   private gerritHttp = new GerritHttp({ memCache: false });
 
   async getRepos(): Promise<string[]> {
@@ -83,7 +84,7 @@ class GerritClient {
 
       // Honor predicate if it is provided
       if (findPRConfig.shouldFetchNextPage) {
-        const shouldContinue = findPRConfig.shouldFetchNextPage?.(changes.body);
+        const shouldContinue = findPRConfig.shouldFetchNextPage(changes.body);
         if (!shouldContinue) {
           break;
         }

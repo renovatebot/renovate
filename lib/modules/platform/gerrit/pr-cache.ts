@@ -8,11 +8,32 @@ import { client } from './client';
 import type { GerritChange } from './types';
 import { REQUEST_DETAILS_FOR_PRS, mapGerritChangeToPr } from './utils';
 
+/**
+ * Page size for initial cache population (when cache is empty).
+ */
+const INITIAL_SYNC_PAGE_SIZE = 100;
+
+/**
+ * Page size for incremental cache updates (when cache exists).
+ */
+const INCREMENTAL_PAGE_SIZE = 20;
+
 export interface GerritPrCacheData {
   items: Record<number, Pr>;
   updatedDate: string | null;
 }
 
+interface GerritPlatformCache {
+  gerrit?: {
+    pullRequestsCache?: GerritPrCacheData;
+  };
+}
+
+/**
+ * Smart cache for Gerrit pull requests (changes).
+ * Uses the Gerrit API's sorting by update time to efficiently sync changes.
+ * Only fetches changes until we encounter ones that match our cache.
+ */
 export class GerritPrCache {
   private cache: GerritPrCacheData;
   private items: Pr[] = [];
@@ -20,17 +41,13 @@ export class GerritPrCache {
   private constructor(private repository: string) {
     const repoCache = getCache();
     repoCache.platform ??= {};
-    (repoCache.platform as any).gerrit ??= {};
-    let pullRequestCache = (repoCache.platform as any).gerrit
-      .pullRequestsCache as GerritPrCacheData;
-    if (!pullRequestCache) {
-      pullRequestCache = {
-        items: {},
-        updatedDate: null,
-      };
-    }
-    (repoCache.platform as any).gerrit.pullRequestsCache = pullRequestCache;
-    this.cache = pullRequestCache;
+    const platformCache = repoCache.platform as GerritPlatformCache;
+    platformCache.gerrit ??= {};
+    platformCache.gerrit.pullRequestsCache ??= {
+      items: {},
+      updatedDate: null,
+    };
+    this.cache = platformCache.gerrit.pullRequestsCache;
     this.updateItems();
   }
 
@@ -47,6 +64,7 @@ export class GerritPrCache {
   }
 
   private getPrs(): Pr[] {
+    logger.trace(`Returning ${this.items.length} PRs from cache`);
     return this.items;
   }
 
@@ -56,6 +74,7 @@ export class GerritPrCache {
   }
 
   private setPr(item: Pr): void {
+    logger.trace(`Updating PR ${item.number} in cache`);
     this.cache.items[item.number] = item;
     this.updateItems();
   }
@@ -65,15 +84,22 @@ export class GerritPrCache {
     prCache.setPr(item);
   }
 
+  /**
+   * Reconciles a page of changes with the cache.
+   * Gerrit API returns changes sorted by last update time (most recent first).
+   * If we encounter a change that matches our cache, we can stop fetching more pages.
+   *
+   * @param changes - Page of changes from Gerrit API (sorted newest first)
+   * @returns true if more pages should be fetched, false to stop pagination
+   */
   private reconcile(changes: GerritChange[]): boolean {
-    logger.debug('reconciled');
     const { items } = this.cache;
     let { updatedDate } = this.cache;
     const cacheTime = updatedDate
       ? DateTime.fromISO(updatedDate.replace(' ', 'T'))
       : null;
 
-    let needNextPage = true;
+    let changeCount = 0;
 
     for (const change of changes) {
       const id = change._number;
@@ -85,11 +111,15 @@ export class GerritPrCache {
 
       const oldItem = items[id];
       if (dequal(oldItem, newItem)) {
-        needNextPage = false;
-        continue;
+        // Found unchanged item - cache is up to date, stop fetching more pages
+        logger.debug(
+          `Reconciled ${changeCount} changes before hitting cached item ${id}`,
+        );
+        return false;
       }
 
       items[id] = newItem;
+      changeCount++;
 
       const itemTime = DateTime.fromISO(change.updated.replace(' ', 'T'));
       if (!cacheTime || itemTime > cacheTime) {
@@ -99,21 +129,31 @@ export class GerritPrCache {
 
     this.cache.updatedDate = updatedDate;
 
-    return needNextPage;
+    logger.debug(`Reconciled ${changeCount} changes, fetching next page`);
+    return true;
   }
 
   private async sync(forceRefresh = false): Promise<GerritPrCache> {
     if (forceRefresh) {
-      // Clear the cache to force a full refresh
+      logger.debug('Force refreshing Gerrit PR cache');
       this.cache.items = {};
       this.cache.updatedDate = null;
+    } else {
+      logger.debug('Syncing Gerrit PR cache');
     }
 
-    // Use client.findChanges with pagination and early termination via reconcile
+    // Determine page size based on whether cache exists
+    const pageLimit = this.items.length
+      ? INCREMENTAL_PAGE_SIZE
+      : INITIAL_SYNC_PAGE_SIZE;
+
+    // Use client.findChanges with pagination and early termination via reconcile.
+    // Gerrit API returns changes sorted by update time (newest first),
+    // so we can stop fetching once we hit cached items.
     await client.findChanges(this.repository, {
       branchName: '',
       state: 'all',
-      pageLimit: this.items.length ? 20 : 100,
+      pageLimit,
       requestDetails: REQUEST_DETAILS_FOR_PRS,
       shouldFetchNextPage: (changes: GerritChange[]) => {
         // reconcile returns true if we need the next page
@@ -123,6 +163,7 @@ export class GerritPrCache {
 
     this.updateItems();
 
+    logger.debug(`Synced ${this.items.length} changes to cache`);
     return this;
   }
 
@@ -133,23 +174,9 @@ export class GerritPrCache {
   }
 
   /**
-   * Ensure the pr cache starts with the most recent PRs.
-   * JavaScript ensures that the cache is sorted by PR number.
+   * Converts the cache items map to an array.
    */
   private updateItems(): void {
-    this.items = Object.values(this.cache.items).reverse();
+    this.items = Object.values(this.cache.items);
   }
-}
-
-// Only used in tests
-export function reset(): void {
-  const repoCache = getCache();
-  const platform = repoCache.platform as any;
-  if (platform?.gerrit) {
-    platform.gerrit.pullRequestsCache = {
-      items: {},
-      updatedDate: null,
-    };
-  }
-  memCache.set('gerrit-pr-cache-synced', undefined);
 }
