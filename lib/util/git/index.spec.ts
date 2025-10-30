@@ -1454,4 +1454,240 @@ describe('util/git/index', { timeout: 10000 }, () => {
       await expect(git.syncForkWithUpstream(defaultBranch)).toResolve();
     });
   });
+
+  describe('initializeBranchesFromRefspecs()', () => {
+    it('should fetch refspecs and populate branchCommits', async () => {
+      // Create a separate Gerrit-style remote repository
+      const gerritRemote = await tmp.dir({ unsafeCleanup: true });
+      const gerritRepo = Git(gerritRemote.path);
+      await gerritRepo.init();
+      await gerritRepo.addConfig('user.email', 'test@example.com');
+      await gerritRepo.addConfig('user.name', 'Test');
+      await gerritRepo.addConfig('commit.gpgsign', 'false');
+
+      // Create a commit for the Gerrit change
+      await fs.writeFile(
+        gerritRemote.path + '/package.json',
+        '{"name": "lodash", "version": "4.0.0"}',
+      );
+      await gerritRepo.add(['package.json']);
+      await gerritRepo.commit('Update lodash to 4.x');
+
+      // Create Gerrit-style ref
+      const commit = await gerritRepo.revparse(['HEAD']);
+      await gerritRepo.raw(['update-ref', 'refs/changes/42/12345/1', commit]);
+
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({ localDir: tmpDir.path });
+
+      await git.initRepo({
+        url: gerritRemote.path,
+        defaultBranch,
+      });
+
+      // Use Gerrit-style refspec
+      const refspecMap = new Map([
+        [`refs/changes/42/12345/1`, 'renovate/npm-lodash-4.x'],
+      ]);
+
+      await git.initializeBranchesFromRefspecs(refspecMap);
+
+      // Verify the branch was initialized
+      expect(git.branchExists('renovate/npm-lodash-4.x')).toBe(true);
+      expect(git.getBranchCommit('renovate/npm-lodash-4.x')).toBeTruthy();
+
+      await gerritRemote.cleanup();
+    });
+
+    it('should handle multiple refspecs in batches', async () => {
+      // Create a separate Gerrit-style remote repository
+      const gerritRemote = await tmp.dir({ unsafeCleanup: true });
+      const gerritRepo = Git(gerritRemote.path);
+      await gerritRepo.init();
+      await gerritRepo.addConfig('user.email', 'test@example.com');
+      await gerritRepo.addConfig('user.name', 'Test');
+      await gerritRepo.addConfig('commit.gpgsign', 'false');
+
+      // Create commits for each Gerrit change
+      await fs.writeFile(
+        gerritRemote.path + '/package.json',
+        '{"dependencies": {"express": "4.0.0"}}',
+      );
+      await gerritRepo.add(['package.json']);
+      await gerritRepo.commit('Update express to 4.x');
+      const commit1 = await gerritRepo.revparse(['HEAD']);
+      await gerritRepo.raw(['update-ref', 'refs/changes/01/10001/1', commit1]);
+
+      await fs.writeFile(gerritRemote.path + '/Dockerfile', 'FROM node:20');
+      await gerritRepo.add(['Dockerfile']);
+      await gerritRepo.commit('Update node to 20.x');
+      const commit2 = await gerritRepo.revparse(['HEAD']);
+      await gerritRepo.raw(['update-ref', 'refs/changes/02/10002/2', commit2]);
+
+      await fs.writeFile(
+        gerritRemote.path + '/tsconfig.json',
+        '{"compilerOptions": {"target": "ES2020"}}',
+      );
+      await gerritRepo.add(['tsconfig.json']);
+      await gerritRepo.commit('Update typescript to 5.x');
+      const commit3 = await gerritRepo.revparse(['HEAD']);
+      await gerritRepo.raw(['update-ref', 'refs/changes/03/10003/3', commit3]);
+
+      await fs.writeFile(
+        gerritRemote.path + '/.eslintrc.json',
+        '{"extends": "eslint:recommended"}',
+      );
+      await gerritRepo.add(['.eslintrc.json']);
+      await gerritRepo.commit('Update eslint to 9.x');
+      const commit4 = await gerritRepo.revparse(['HEAD']);
+      await gerritRepo.raw(['update-ref', 'refs/changes/04/10004/4', commit4]);
+
+      await fs.writeFile(gerritRemote.path + '/.prettierrc', '{"semi": false}');
+      await gerritRepo.add(['.prettierrc']);
+      await gerritRepo.commit('Update prettier to 3.x');
+      const commit5 = await gerritRepo.revparse(['HEAD']);
+      await gerritRepo.raw(['update-ref', 'refs/changes/05/10005/5', commit5]);
+
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({ localDir: tmpDir.path });
+
+      await git.initRepo({
+        url: gerritRemote.path,
+        defaultBranch,
+      });
+
+      const refspecMap = new Map<string, string>();
+
+      // Use Gerrit-style refspecs with realistic dependency names
+      refspecMap.set('refs/changes/01/10001/1', 'renovate/npm-express-4.x');
+      refspecMap.set('refs/changes/02/10002/2', 'renovate/docker-node-20.x');
+      refspecMap.set('refs/changes/03/10003/3', 'renovate/npm-typescript-5.x');
+      refspecMap.set('refs/changes/04/10004/4', 'renovate/npm-eslint-9.x');
+      refspecMap.set('refs/changes/05/10005/5', 'renovate/npm-prettier-3.x');
+
+      await git.initializeBranchesFromRefspecs(refspecMap);
+
+      // Verify all branches were initialized
+      expect(git.branchExists('renovate/npm-express-4.x')).toBe(true);
+      expect(git.branchExists('renovate/docker-node-20.x')).toBe(true);
+      expect(git.branchExists('renovate/npm-typescript-5.x')).toBe(true);
+      expect(git.branchExists('renovate/npm-eslint-9.x')).toBe(true);
+      expect(git.branchExists('renovate/npm-prettier-3.x')).toBe(true);
+
+      await gerritRemote.cleanup();
+    });
+
+    it('should throw on fetch error', async () => {
+      // Create a separate Gerrit-style remote repository without the nonexistent ref
+      const gerritRemote = await tmp.dir({ unsafeCleanup: true });
+      const gerritRepo = Git(gerritRemote.path);
+      await gerritRepo.init();
+      await gerritRepo.addConfig('user.email', 'test@example.com');
+      await gerritRepo.addConfig('user.name', 'Test');
+      await gerritRepo.addConfig('commit.gpgsign', 'false');
+
+      // Create initial commit
+      await fs.writeFile(gerritRemote.path + '/README.md', '# Test');
+      await gerritRepo.add(['README.md']);
+      await gerritRepo.commit('Initial commit');
+
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({ localDir: tmpDir.path });
+
+      await git.initRepo({
+        url: gerritRemote.path,
+        defaultBranch,
+      });
+
+      const refspecMap = new Map([
+        ['refs/changes/99/99999/1', 'renovate/npm-nonexistent-1.x'],
+      ]);
+
+      await expect(
+        git.initializeBranchesFromRefspecs(refspecMap),
+      ).rejects.toThrow();
+
+      await gerritRemote.cleanup();
+    });
+  });
+
+  describe('deleteBranchCreatedFromRefspec()', () => {
+    it('should delete local branch and remote tracking ref', async () => {
+      // Create a separate Gerrit-style remote repository
+      const gerritRemote = await tmp.dir({ unsafeCleanup: true });
+      const gerritRepo = Git(gerritRemote.path);
+      await gerritRepo.init();
+      await gerritRepo.addConfig('user.email', 'test@example.com');
+      await gerritRepo.addConfig('user.name', 'Test');
+      await gerritRepo.addConfig('commit.gpgsign', 'false');
+
+      // Create a commit for the Gerrit change
+      await fs.writeFile(
+        gerritRemote.path + '/package.json',
+        '{"dependencies": {"axios": "1.0.0"}}',
+      );
+      await gerritRepo.add(['package.json']);
+      await gerritRepo.commit('Update axios to 1.x');
+
+      // Create Gerrit-style ref
+      const commit = await gerritRepo.revparse(['HEAD']);
+      await gerritRepo.raw(['update-ref', 'refs/changes/50/12350/1', commit]);
+
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({ localDir: tmpDir.path });
+
+      await git.initRepo({
+        url: gerritRemote.path,
+        defaultBranch,
+      });
+
+      // Initialize branch from refspec using Gerrit-style refspec
+      const refspecMap = new Map([
+        ['refs/changes/50/12350/1', 'renovate/npm-axios-1.x'],
+      ]);
+      await git.initializeBranchesFromRefspecs(refspecMap);
+
+      // Verify branch exists
+      expect(git.branchExists('renovate/npm-axios-1.x')).toBe(true);
+
+      // Delete the branch
+      await git.deleteBranchCreatedFromRefspec('renovate/npm-axios-1.x');
+
+      // Verify branch is removed from tracking
+      expect(git.branchExists('renovate/npm-axios-1.x')).toBe(false);
+      expect(git.getBranchCommit('renovate/npm-axios-1.x')).toBeNull();
+
+      await gerritRemote.cleanup();
+    });
+
+    it('should handle non-existent local branch', async () => {
+      // Create a separate Gerrit-style remote repository
+      const gerritRemote = await tmp.dir({ unsafeCleanup: true });
+      const gerritRepo = Git(gerritRemote.path);
+      await gerritRepo.init();
+      await gerritRepo.addConfig('user.email', 'test@example.com');
+      await gerritRepo.addConfig('user.name', 'Test');
+      await gerritRepo.addConfig('commit.gpgsign', 'false');
+
+      // Create initial commit
+      await fs.writeFile(gerritRemote.path + '/README.md', '# Test');
+      await gerritRepo.add(['README.md']);
+      await gerritRepo.commit('Initial commit');
+
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({ localDir: tmpDir.path });
+
+      await git.initRepo({
+        url: gerritRemote.path,
+        defaultBranch,
+      });
+
+      // Should not throw when deleting non-existent branch
+      await expect(
+        git.deleteBranchCreatedFromRefspec('renovate/npm-nonexistent-1.x'),
+      ).toResolve();
+
+      await gerritRemote.cleanup();
+    });
+  });
 });
