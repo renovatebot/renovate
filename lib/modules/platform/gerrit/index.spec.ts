@@ -3,8 +3,8 @@ import { DateTime } from 'luxon';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
 import { repoFingerprint } from '../util';
-import { GerritChangeCache as _GerritChangeCache } from './change-cache';
 import { client as _client } from './client';
+import { GerritPrCache as _GerritPrCache } from './pr-cache';
 import type {
   GerritAccountInfo,
   GerritChange,
@@ -37,9 +37,9 @@ const codeReviewLabel: GerritLabelTypeInfo = {
 
 vi.mock('../../../util/host-rules');
 vi.mock('./client');
-vi.mock('./change-cache');
+vi.mock('./pr-cache');
 const clientMock = vi.mocked(_client);
-const changeCacheMock = vi.mocked(_GerritChangeCache);
+const prCacheMock = vi.mocked(_GerritPrCache);
 
 describe('modules/platform/gerrit/index', () => {
   const t0 = DateTime.fromISO('2025-04-14T16:33:37.000000000', {
@@ -162,7 +162,7 @@ describe('modules/platform/gerrit/index', () => {
 
   describe('findPr()', () => {
     it('findPr() - no results from cache', async () => {
-      changeCacheMock.getChanges.mockResolvedValueOnce([]);
+      prCacheMock.getPrs.mockResolvedValueOnce([]);
       await expect(
         gerrit.findPr({
           branchName: 'branch',
@@ -170,25 +170,26 @@ describe('modules/platform/gerrit/index', () => {
           targetBranch: 'master',
         }),
       ).resolves.toBeNull();
-      expect(changeCacheMock.getChanges).toHaveBeenCalledExactlyOnceWith(
-        'test/repo',
-      );
+      expect(prCacheMock.getPrs).toHaveBeenCalledExactlyOnceWith('test/repo');
       expect(clientMock.findChanges).not.toHaveBeenCalled();
     });
 
     it('findPr() - found in cache', async () => {
-      const change = partial<GerritChange>({
-        _number: 123456,
-        status: 'NEW',
-        branch: 'master',
-        current_revision: 'some-revision',
-        revisions: {
-          'some-revision': partial<GerritRevisionInfo>({
-            commit_with_footers: 'Renovate-Branch: branch',
-          }),
-        },
-      });
-      changeCacheMock.getChanges.mockResolvedValueOnce([change]);
+      const pr = mapGerritChangeToPr(
+        partial<GerritChange>({
+          _number: 123456,
+          status: 'NEW',
+          branch: 'master',
+          current_revision: 'some-revision',
+          revisions: {
+            'some-revision': partial<GerritRevisionInfo>({
+              commit_with_footers: 'Renovate-Branch: branch',
+            }),
+          },
+        }),
+        { sourceBranch: 'branch' },
+      )!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
       await expect(
         gerrit.findPr({
           branchName: 'branch',
@@ -196,9 +197,7 @@ describe('modules/platform/gerrit/index', () => {
           targetBranch: 'master',
         }),
       ).resolves.toHaveProperty('number', 123456);
-      expect(changeCacheMock.getChanges).toHaveBeenCalledExactlyOnceWith(
-        'test/repo',
-      );
+      expect(prCacheMock.getPrs).toHaveBeenCalledExactlyOnceWith('test/repo');
       expect(clientMock.findChanges).not.toHaveBeenCalled();
     });
 
@@ -222,7 +221,7 @@ describe('modules/platform/gerrit/index', () => {
           requestDetails: REQUEST_DETAILS_FOR_PRS,
         }),
       );
-      expect(changeCacheMock.getChanges).not.toHaveBeenCalled();
+      expect(prCacheMock.getPrs).not.toHaveBeenCalled();
     });
 
     it('findPr() - refreshCache found and saves to cache', async () => {
@@ -236,7 +235,7 @@ describe('modules/platform/gerrit/index', () => {
         },
       });
       clientMock.findChanges.mockResolvedValueOnce([change]);
-      changeCacheMock.setChange.mockResolvedValueOnce();
+      prCacheMock.setPr.mockResolvedValueOnce();
       await expect(
         gerrit.findPr({
           branchName: 'branch',
@@ -245,9 +244,9 @@ describe('modules/platform/gerrit/index', () => {
           refreshCache: true,
         }),
       ).resolves.toHaveProperty('number', 123456);
-      expect(changeCacheMock.setChange).toHaveBeenCalledExactlyOnceWith(
+      expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
         'test/repo',
-        expect.objectContaining({ _number: 123456 }),
+        expect.objectContaining({ number: 123456 }),
       );
     });
   });
@@ -263,21 +262,17 @@ describe('modules/platform/gerrit/index', () => {
           }),
         },
       });
-      changeCacheMock.getChanges.mockResolvedValueOnce([change]);
       const pr = mapGerritChangeToPr(change)!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
       await expect(gerrit.getPr(123456)).resolves.toEqual(pr);
-      expect(changeCacheMock.getChanges).toHaveBeenCalledExactlyOnceWith(
-        'test/repo',
-      );
+      expect(prCacheMock.getPrs).toHaveBeenCalledExactlyOnceWith('test/repo');
       expect(clientMock.getChange).not.toHaveBeenCalled();
     });
 
     it('getPr() - not found in cache', async () => {
-      changeCacheMock.getChanges.mockResolvedValueOnce([]);
+      prCacheMock.getPrs.mockResolvedValueOnce([]);
       await expect(gerrit.getPr(123456)).resolves.toBeNull();
-      expect(changeCacheMock.getChanges).toHaveBeenCalledExactlyOnceWith(
-        'test/repo',
-      );
+      expect(prCacheMock.getPrs).toHaveBeenCalledExactlyOnceWith('test/repo');
       expect(clientMock.getChange).not.toHaveBeenCalled();
     });
 
@@ -299,7 +294,7 @@ describe('modules/platform/gerrit/index', () => {
         123456,
         REQUEST_DETAILS_FOR_PRS,
       );
-      expect(changeCacheMock.getChanges).not.toHaveBeenCalled();
+      expect(prCacheMock.getPrs).not.toHaveBeenCalled();
     });
 
     it('getPr() - refreshCache saves to cache after fetching', async () => {
@@ -313,11 +308,11 @@ describe('modules/platform/gerrit/index', () => {
         },
       });
       clientMock.getChange.mockResolvedValueOnce(change);
-      changeCacheMock.setChange.mockResolvedValueOnce();
+      prCacheMock.setPr.mockResolvedValueOnce();
       await gerrit.getPr(123456, true);
-      expect(changeCacheMock.setChange).toHaveBeenCalledExactlyOnceWith(
+      expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
         'test/repo',
-        expect.objectContaining({ _number: 123456 }),
+        expect.objectContaining({ number: 123456 }),
       );
     });
 
@@ -347,22 +342,23 @@ describe('modules/platform/gerrit/index', () => {
           }),
         },
       });
-      changeCacheMock.getChanges.mockResolvedValueOnce([change]);
-      changeCacheMock.setChange.mockResolvedValueOnce();
+      const pr = mapGerritChangeToPr(change)!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      prCacheMock.setPr.mockResolvedValueOnce();
       await gerrit.updatePr({
         number: 123456,
         prTitle: change.subject,
         state: 'closed',
       });
       expect(clientMock.abandonChange).toHaveBeenCalledExactlyOnceWith(123456);
-      expect(changeCacheMock.setChange).toHaveBeenCalledExactlyOnceWith(
+      expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
         'test/repo',
-        expect.objectContaining({ _number: 123456, status: 'ABANDONED' }),
+        expect.objectContaining({ number: 123456, state: 'closed' }),
       );
     });
 
     it('updatePr() - PR not found in cache', async () => {
-      changeCacheMock.getChanges.mockResolvedValueOnce([]);
+      prCacheMock.getPrs.mockResolvedValueOnce([]);
       await gerrit.updatePr({
         number: 123456,
         prTitle: 'title',
@@ -381,8 +377,9 @@ describe('modules/platform/gerrit/index', () => {
           }),
         },
       });
-      changeCacheMock.getChanges.mockResolvedValueOnce([change]);
-      changeCacheMock.setChange.mockResolvedValueOnce();
+      const pr = mapGerritChangeToPr(change)!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      prCacheMock.setPr.mockResolvedValueOnce();
       await gerrit.updatePr({
         number: 123456,
         prTitle: change.subject,
@@ -395,9 +392,9 @@ describe('modules/platform/gerrit/index', () => {
         'NEW PR-Body',
         TAG_PULL_REQUEST_BODY,
       );
-      expect(changeCacheMock.setChange).toHaveBeenCalledExactlyOnceWith(
+      expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
         'test/repo',
-        expect.objectContaining({ _number: 123456 }),
+        expect.objectContaining({ number: 123456 }),
       );
     });
   });
@@ -452,7 +449,6 @@ describe('modules/platform/gerrit/index', () => {
         messages: [],
       });
       clientMock.findChanges.mockResolvedValueOnce([change]);
-      changeCacheMock.setChange.mockResolvedValueOnce();
       const pr = await gerrit.createPr({
         sourceBranch: 'source',
         targetBranch: 'target',
@@ -471,22 +467,20 @@ describe('modules/platform/gerrit/index', () => {
         TAG_PULL_REQUEST_BODY,
         [],
       );
-      expect(changeCacheMock.setChange).toHaveBeenCalledExactlyOnceWith(
+      expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
         'test/repo',
-        expect.objectContaining({ _number: 123456 }),
+        expect.objectContaining({ number: 123456 }),
       );
     });
   });
 
   describe('getBranchPr()', () => {
     it('getBranchPr() - no result from cache', async () => {
-      changeCacheMock.getChanges.mockResolvedValueOnce([]);
+      prCacheMock.getPrs.mockResolvedValueOnce([]);
       await expect(
         gerrit.getBranchPr('renovate/dependency-1.x'),
       ).resolves.toBeNull();
-      expect(changeCacheMock.getChanges).toHaveBeenCalledExactlyOnceWith(
-        'test/repo',
-      );
+      expect(prCacheMock.getPrs).toHaveBeenCalledExactlyOnceWith('test/repo');
       expect(clientMock.findChanges).not.toHaveBeenCalled();
     });
 
@@ -502,13 +496,14 @@ describe('modules/platform/gerrit/index', () => {
           }),
         },
       });
-      changeCacheMock.getChanges.mockResolvedValueOnce([change]);
+      const pr = mapGerritChangeToPr(change, {
+        sourceBranch: 'renovate/dependency-1.x',
+      })!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
       await expect(
         gerrit.getBranchPr('renovate/dependency-1.x', 'master'),
       ).resolves.toHaveProperty('number', 123456);
-      expect(changeCacheMock.getChanges).toHaveBeenCalledExactlyOnceWith(
-        'test/repo',
-      );
+      expect(prCacheMock.getPrs).toHaveBeenCalledExactlyOnceWith('test/repo');
       expect(clientMock.findChanges).not.toHaveBeenCalled();
     });
 
@@ -523,13 +518,14 @@ describe('modules/platform/gerrit/index', () => {
           }),
         },
       });
-      changeCacheMock.getChanges.mockResolvedValueOnce([change]);
+      const pr = mapGerritChangeToPr(change, {
+        sourceBranch: 'renovate/dependency-1.x',
+      })!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
       await expect(
         gerrit.getBranchPr('renovate/dependency-1.x'),
       ).resolves.toHaveProperty('number', 123456);
-      expect(changeCacheMock.getChanges).toHaveBeenCalledExactlyOnceWith(
-        'test/repo',
-      );
+      expect(prCacheMock.getPrs).toHaveBeenCalledExactlyOnceWith('test/repo');
       expect(clientMock.findChanges).not.toHaveBeenCalled();
     });
   });
@@ -546,23 +542,21 @@ describe('modules/platform/gerrit/index', () => {
         },
       });
       clientMock.getChange.mockResolvedValueOnce(change);
-      changeCacheMock.setChange.mockResolvedValueOnce();
+      prCacheMock.setPr.mockResolvedValueOnce();
       await expect(gerrit.refreshPr(123456)).toResolve();
       expect(clientMock.getChange).toHaveBeenCalledExactlyOnceWith(
         123456,
         REQUEST_DETAILS_FOR_PRS,
       );
-      expect(changeCacheMock.setChange).toHaveBeenCalled();
+      expect(prCacheMock.setPr).toHaveBeenCalled();
     });
   });
 
   describe('getPrList()', () => {
     it('getPrList() - empty list from cache', async () => {
-      changeCacheMock.getChanges.mockResolvedValueOnce([]);
+      prCacheMock.getPrs.mockResolvedValueOnce([]);
       await expect(gerrit.getPrList()).resolves.toEqual([]);
-      expect(changeCacheMock.getChanges).toHaveBeenCalledExactlyOnceWith(
-        'test/repo',
-      );
+      expect(prCacheMock.getPrs).toHaveBeenCalledExactlyOnceWith('test/repo');
       expect(clientMock.findChanges).not.toHaveBeenCalled();
     });
 
@@ -575,18 +569,15 @@ describe('modules/platform/gerrit/index', () => {
           }),
         },
       });
-      changeCacheMock.getChanges.mockResolvedValueOnce([
-        change,
-        change,
-        change,
-      ]);
+      const pr = mapGerritChangeToPr(change)!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr, pr, pr]);
       await expect(gerrit.getPrList()).resolves.toHaveLength(3);
     });
 
     it('getPrList() - refreshCache calls forceRefresh', async () => {
-      changeCacheMock.getChanges.mockResolvedValueOnce([]);
+      prCacheMock.getPrs.mockResolvedValueOnce([]);
       await expect(gerrit.getPrList(true)).resolves.toEqual([]);
-      expect(changeCacheMock.forceRefresh).toHaveBeenCalledExactlyOnceWith(
+      expect(prCacheMock.forceRefresh).toHaveBeenCalledExactlyOnceWith(
         'test/repo',
       );
     });
@@ -603,7 +594,8 @@ describe('modules/platform/gerrit/index', () => {
           }),
         },
       });
-      changeCacheMock.getChanges.mockResolvedValueOnce([change]);
+      const pr = mapGerritChangeToPr(change)!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
       clientMock.submitChange.mockRejectedValueOnce({
         statusCode: 409,
         message: 'blocked by Verified',
@@ -622,20 +614,21 @@ describe('modules/platform/gerrit/index', () => {
           }),
         },
       });
-      changeCacheMock.getChanges.mockResolvedValueOnce([change]);
-      changeCacheMock.setChange.mockResolvedValueOnce();
+      const pr = mapGerritChangeToPr(change)!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      prCacheMock.setPr.mockResolvedValueOnce();
       clientMock.submitChange.mockResolvedValueOnce(
         partial<GerritChange>({ status: 'MERGED' }),
       );
       await expect(gerrit.mergePr({ id: 123456 })).resolves.toBeTrue();
-      expect(changeCacheMock.setChange).toHaveBeenCalledExactlyOnceWith(
+      expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
         'test/repo',
-        expect.objectContaining({ _number: 123456, status: 'MERGED' }),
+        expect.objectContaining({ number: 123456, state: 'merged' }),
       );
     });
 
     it('mergePr() - PR not found in cache', async () => {
-      changeCacheMock.getChanges.mockResolvedValueOnce([]);
+      prCacheMock.getPrs.mockResolvedValueOnce([]);
       await expect(gerrit.mergePr({ id: 123456 })).resolves.toBeFalse();
       expect(clientMock.submitChange).not.toHaveBeenCalled();
     });
@@ -650,7 +643,8 @@ describe('modules/platform/gerrit/index', () => {
           }),
         },
       });
-      changeCacheMock.getChanges.mockResolvedValueOnce([change]);
+      const pr = mapGerritChangeToPr(change)!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
       clientMock.submitChange.mockRejectedValueOnce(
         new Error('any other error'),
       );
