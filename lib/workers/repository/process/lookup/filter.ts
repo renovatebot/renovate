@@ -6,6 +6,7 @@ import type { VersioningApi } from '../../../../modules/versioning';
 import * as npmVersioning from '../../../../modules/versioning/npm';
 import * as pep440 from '../../../../modules/versioning/pep440';
 import * as poetryVersioning from '../../../../modules/versioning/poetry';
+import { regEx } from '../../../../util/regex';
 import { getRegexPredicate } from '../../../../util/string-match';
 import * as template from '../../../../util/template';
 import type { FilterConfig } from './types';
@@ -32,8 +33,7 @@ export function filterVersions(
   releases: Release[],
   versioningApi: VersioningApi,
 ): Release[] {
-  const { ignoreUnstable, ignoreDeprecated, respectLatest, allowedVersions } =
-    config;
+  const { ignoreUnstable, ignoreDeprecated, respectLatest } = config;
 
   // istanbul ignore if: shouldn't happen
   if (!currentVersion) {
@@ -71,39 +71,32 @@ export function filterVersions(
   const currentMinor = versioningApi.getMinor(currentVersion);
   const currentPatch = versioningApi.getPatch(currentVersion);
 
-  if (allowedVersions) {
-    // allowedVersions tempalte support
-    const computedAllowedVersions = template.compile(allowedVersions, {
+  if (config.allowedVersions) {
+    const input = {
       currentVersion,
       major: currentMajor,
       minor: currentMinor,
       patch: currentPatch,
-    });
+    };
+    warnIfFlakyTemplate(config.allowedVersions, input);
+    const allowedVersions = template.compile(config.allowedVersions, input);
 
-    // eslint-disable-next-line
-    console.log({
-      currentVersion,
-      major: currentMajor,
-      minor: currentMinor,
-      patch: currentPatch,
-      computedAllowedVersions,
-    });
-    const isAllowedPred = getRegexPredicate(computedAllowedVersions);
+    const isAllowedPred = getRegexPredicate(allowedVersions);
     if (isAllowedPred) {
       filteredReleases = filteredReleases.filter(({ version }) =>
         isAllowedPred(version),
       );
-    } else if (versioningApi.isValid(computedAllowedVersions)) {
+    } else if (versioningApi.isValid(allowedVersions)) {
       filteredReleases = filteredReleases.filter((r) =>
-        versioningApi.matches(r.version, computedAllowedVersions),
+        versioningApi.matches(r.version, allowedVersions),
       );
     } else if (
       config.versioning !== npmVersioning.id &&
-      semver.validRange(computedAllowedVersions)
+      semver.validRange(allowedVersions)
     ) {
       logger.debug(
         { depName: config.depName },
-        'Falling back to npm semver syntax for computedAllowedVersions',
+        'Falling back to npm semver syntax for allowedVersions',
       );
       filteredReleases = filteredReleases.filter((r) =>
         semver.satisfies(
@@ -112,27 +105,27 @@ export function filterVersions(
             : /* istanbul ignore next: not reachable, but it's safer to preserve it */ semver.coerce(
                 r.version,
               )!,
-          computedAllowedVersions,
+          allowedVersions,
         ),
       );
     } else if (
       config.versioning === poetryVersioning.id &&
-      pep440.isValid(computedAllowedVersions)
+      pep440.isValid(allowedVersions)
     ) {
       logger.debug(
         { depName: config.depName },
-        'Falling back to pypi syntax for computedAllowedVersions',
+        'Falling back to pypi syntax for allowedVersions',
       );
       filteredReleases = filteredReleases.filter((r) =>
-        pep440.matches(r.version, computedAllowedVersions),
+        pep440.matches(r.version, allowedVersions),
       );
     } else {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'config';
-      error.validationError = 'Invalid `computedAllowedVersions`';
+      error.validationError = 'Invalid `allowedVersions`';
       error.validationMessage =
-        'The following computedAllowedVersions does not parse as a valid version or range: ' +
-        JSON.stringify(computedAllowedVersions);
+        'The following allowedVersions does not parse as a valid version or range: ' +
+        JSON.stringify(allowedVersions);
       throw error;
     }
   }
@@ -179,4 +172,33 @@ export function filterVersions(
 
     return minor === currentMinor && patch === currentPatch;
   });
+}
+
+function warnIfFlakyTemplate(
+  templateStr: string,
+  values: Record<
+    'major' | 'minor' | 'patch' | 'currentVersion',
+    string | number | null
+  >,
+): void {
+  // return early if it's not a template
+  if (!regEx(/\{\{[^}]+\}\}/).test(templateStr)) {
+    return;
+  }
+
+  const allowedFields = ['currentVersion', 'major', 'minor', 'patch'];
+  for (const field of allowedFields) {
+    if (
+      templateStr.includes(field) &&
+      values[field as keyof typeof values] === null
+    ) {
+      logger.warn(
+        {
+          allowedVersions: templateStr,
+          currentVersion: values.currentVersion,
+        },
+        `allowedVersions template contains '${field}' but its value is null`,
+      );
+    }
+  }
 }

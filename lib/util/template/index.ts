@@ -14,7 +14,7 @@ type Options = HelperOptions & {
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
 handlebars.registerHelper('add', function (a, b) {
-  return a + b;
+  return parseInt(a) + parseInt(b);
 });
 
 handlebars.registerHelper('encodeBase64', (str: string) =>
