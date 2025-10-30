@@ -199,6 +199,11 @@ export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
   return pr;
 }
 
+export async function refreshPr(number: number): Promise<void> {
+  // refresh cache
+  await getPr(number, true);
+}
+
 export async function getPr(
   number: number,
   refreshCache?: boolean,
@@ -323,11 +328,6 @@ export async function getBranchPr(
     `getBranchPr: using cached gerrit change ${cached?.number} for ${branchName}`,
   );
   return cached ?? null;
-}
-
-export async function refreshPr(number: number): Promise<void> {
-  // refresh cache
-  await getPr(number, true);
 }
 
 export async function getPrList(): Promise<Pr[]> {
