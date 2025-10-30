@@ -9,7 +9,7 @@ import type { GerritFindPRConfig } from './types';
 import { extractSourceBranch } from './utils';
 
 let repository: string;
-export function configureScm(repo: string, login: string): void {
+export function configureScm(repo: string): void {
   repository = repo;
 
   // Register hook to initialize branches before fetchBranchCommits

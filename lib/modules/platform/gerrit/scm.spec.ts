@@ -11,7 +11,7 @@ describe('modules/platform/gerrit/scm', () => {
   const gerritScm = new GerritScm();
 
   beforeEach(() => {
-    configureScm('test/repo', 'user');
+    configureScm('test/repo');
   });
 
   it('deleteBranch()', async () => {
