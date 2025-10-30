@@ -73,3 +73,8 @@ You may encrypt your `password` only, but you can encrypt your `username` as wel
 
 By default, Renovate will invoke `composer update` with the `--with-dependencies` flag.
 Add `composerWithAll` to your `postUpdateOptions` array to use the `--with-all-dependencies` flag instead.
+
+## Composer bump
+
+Add `composerBump` to your `postUpdateOptions` array to run `composer bump` after dependency updates.
+This command updates the requirement constraints in your `composer.json` to match the currently installed versions, preventing accidental downgrades and improving dependency resolution performance.
