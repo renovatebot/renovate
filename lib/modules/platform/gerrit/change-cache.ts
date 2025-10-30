@@ -3,10 +3,9 @@ import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
-import type { Pr } from '../types';
 import { client } from './client';
 import type { GerritChange } from './types';
-import { REQUEST_DETAILS_FOR_PRS, mapGerritChangeToPr } from './utils';
+import { REQUEST_DETAILS_FOR_PRS } from './utils';
 
 /**
  * Page size for initial cache population (when cache is empty).
@@ -18,70 +17,75 @@ const INITIAL_SYNC_PAGE_SIZE = 100;
  */
 const INCREMENTAL_PAGE_SIZE = 20;
 
-export interface GerritPrCacheData {
-  items: Record<number, Pr>;
+export interface GerritChangeCacheData {
+  items: Record<number, GerritChange>;
   updatedDate: string | null;
 }
 
 interface GerritPlatformCache {
   gerrit?: {
-    pullRequestsCache?: GerritPrCacheData;
+    changesCache?: GerritChangeCacheData;
   };
 }
 
 /**
- * Smart cache for Gerrit pull requests (changes).
+ * Smart cache for Gerrit changes.
  * Uses the Gerrit API's sorting by update time to efficiently sync changes.
  * Only fetches changes until we encounter ones that match our cache.
  */
-export class GerritPrCache {
-  private cache: GerritPrCacheData;
-  private items: Pr[] = [];
+export class GerritChangeCache {
+  private cache: GerritChangeCacheData;
+  private items: GerritChange[] = [];
 
   private constructor(private repository: string) {
     const repoCache = getCache();
     repoCache.platform ??= {};
     const platformCache = repoCache.platform as GerritPlatformCache;
     platformCache.gerrit ??= {};
-    platformCache.gerrit.pullRequestsCache ??= {
+    platformCache.gerrit.changesCache ??= {
       items: {},
       updatedDate: null,
     };
-    this.cache = platformCache.gerrit.pullRequestsCache;
+    this.cache = platformCache.gerrit.changesCache;
     this.updateItems();
   }
 
-  private static async init(repository: string): Promise<GerritPrCache> {
-    const res = new GerritPrCache(repository);
-    const isSynced = memCache.get<true | undefined>('gerrit-pr-cache-synced');
+  private static async init(repository: string): Promise<GerritChangeCache> {
+    const res = new GerritChangeCache(repository);
+    const isSynced = memCache.get<true | undefined>(
+      'gerrit-change-cache-synced',
+    );
 
     if (!isSynced) {
       await res.sync();
-      memCache.set('gerrit-pr-cache-synced', true);
+      memCache.set('gerrit-change-cache-synced', true);
     }
 
     return res;
   }
 
-  private getPrs(): Pr[] {
-    logger.trace(`Returning ${this.items.length} PRs from cache`);
+  private getChanges(): GerritChange[] {
+    logger.trace(`Returning ${this.items.length} changes from cache`);
     return this.items;
   }
 
-  static async getPrs(repository: string): Promise<Pr[]> {
-    const prCache = await GerritPrCache.init(repository);
-    return prCache.getPrs();
+  static async getChanges(repository: string): Promise<GerritChange[]> {
+    const changeCache = await GerritChangeCache.init(repository);
+    return changeCache.getChanges();
   }
 
-  private setPr(item: Pr): void {
-    logger.trace(`Updating PR ${item.number} in cache`);
-    this.cache.items[item.number] = item;
+  private setChange(item: GerritChange): void {
+    logger.trace(`Updating change ${item._number} in cache`);
+    this.cache.items[item._number] = item;
     this.updateItems();
   }
 
-  static async setPr(repository: string, item: Pr): Promise<void> {
-    const prCache = await GerritPrCache.init(repository);
-    prCache.setPr(item);
+  static async setChange(
+    repository: string,
+    item: GerritChange,
+  ): Promise<void> {
+    const changeCache = await GerritChangeCache.init(repository);
+    changeCache.setChange(item);
   }
 
   /**
@@ -104,13 +108,8 @@ export class GerritPrCache {
     for (const change of changes) {
       const id = change._number;
 
-      const newItem = mapGerritChangeToPr(change);
-      if (!newItem) {
-        continue;
-      }
-
       const oldItem = items[id];
-      if (dequal(oldItem, newItem)) {
+      if (dequal(oldItem, change)) {
         // Found unchanged item - cache is up to date, stop fetching more pages
         logger.debug(
           `Reconciled ${changeCount} changes before hitting cached item ${id}`,
@@ -118,7 +117,7 @@ export class GerritPrCache {
         return false;
       }
 
-      items[id] = newItem;
+      items[id] = change;
       changeCount++;
 
       const itemTime = DateTime.fromISO(change.updated.replace(' ', 'T'));
@@ -133,13 +132,13 @@ export class GerritPrCache {
     return true;
   }
 
-  private async sync(forceRefresh = false): Promise<GerritPrCache> {
+  private async sync(forceRefresh = false): Promise<GerritChangeCache> {
     if (forceRefresh) {
-      logger.debug('Force refreshing Gerrit PR cache');
+      logger.debug('Force refreshing Gerrit change cache');
       this.cache.items = {};
       this.cache.updatedDate = null;
     } else {
-      logger.debug('Syncing Gerrit PR cache');
+      logger.debug('Syncing Gerrit change cache');
     }
 
     // Determine page size based on whether cache exists
@@ -168,9 +167,9 @@ export class GerritPrCache {
   }
 
   static async forceRefresh(repository: string): Promise<void> {
-    memCache.set('gerrit-pr-cache-synced', undefined);
-    const prCache = await GerritPrCache.init(repository);
-    await prCache.sync(true);
+    memCache.set('gerrit-change-cache-synced', undefined);
+    const changeCache = await GerritChangeCache.init(repository);
+    await changeCache.sync(true);
   }
 
   /**

@@ -15,7 +15,7 @@ import type {
 import { mapPrStateToGerritFilter } from './utils';
 
 class GerritClient {
-  // memCache is disabled because GerritPrCache provides smarter caching
+  // memCache is disabled because GerritChangeCache provides smarter caching
   private gerritHttp = new GerritHttp({ memCache: false });
 
   async getRepos(): Promise<string[]> {
