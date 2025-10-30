@@ -246,7 +246,7 @@ describe('modules/versioning/maven/compare', () => {
 
   describe('tokenize', () => {
     const zeroToken = {
-      prefix: 'PREFIX_HYPHEN',
+      prefix: '',
       type: 'TYPE_NUMBER',
       val: 0,
       isTransition: false,
@@ -257,7 +257,7 @@ describe('modules/versioning/maven/compare', () => {
         expected: [
           {
             isTransition: false,
-            prefix: 'PREFIX_HYPHEN',
+            prefix: '',
             type: 'TYPE_NUMBER',
             val: 1,
           },
@@ -276,11 +276,57 @@ describe('modules/versioning/maven/compare', () => {
         ],
       },
       {
+        input: 'v1.2.3',
+        expected: [
+          {
+            isTransition: false,
+            prefix: 'v',
+            type: 'TYPE_NUMBER',
+            val: 1,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 2,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 3,
+          },
+        ],
+      },
+      {
+        input: 'version2.3',
+        expected: [
+          {
+            isTransition: true,
+            prefix: '',
+            type: 'TYPE_QUALIFIER',
+            val: 'version',
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_HYPHEN',
+            type: 'TYPE_NUMBER',
+            val: 2,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 3,
+          },
+        ],
+      },
+      {
         input: 'alpha.beta.rc',
         expected: [
           {
             isTransition: false,
-            prefix: 'PREFIX_HYPHEN',
+            prefix: '',
             type: 'TYPE_QUALIFIER',
             val: 'alpha',
           },
@@ -303,7 +349,7 @@ describe('modules/versioning/maven/compare', () => {
         expected: [
           {
             isTransition: false,
-            prefix: 'PREFIX_HYPHEN',
+            prefix: '',
             type: 'TYPE_NUMBER',
             val: 1,
           },
@@ -338,7 +384,7 @@ describe('modules/versioning/maven/compare', () => {
         expected: [
           {
             isTransition: false,
-            prefix: 'PREFIX_HYPHEN',
+            prefix: '',
             type: 'TYPE_NUMBER',
             val: 1,
           },
@@ -367,7 +413,7 @@ describe('modules/versioning/maven/compare', () => {
         expected: [
           {
             isTransition: false,
-            prefix: 'PREFIX_HYPHEN',
+            prefix: '',
             type: 'TYPE_NUMBER',
             val: 0,
           },
@@ -390,7 +436,7 @@ describe('modules/versioning/maven/compare', () => {
         expected: [
           {
             isTransition: false,
-            prefix: 'PREFIX_HYPHEN',
+            prefix: '',
             type: 'TYPE_QUALIFIER',
             val: 'invalid',
           },
@@ -553,9 +599,7 @@ describe('modules/versioning/maven/compare', () => {
       ${'[1.2.3,1.2.4)'}         | ${'1.2.4'}   | ${'[1.2.4,1.2.5)'}
       ${'[1.2.1,1.2.4)'}         | ${'1.2.4'}   | ${'[1.2.1,1.2.5)'}
       ${'[1,1.2.3)'}             | ${'1.2.3'}   | ${'[1,1.2.4)'}
-      ${'[3,4-alpha)'}           | ${'4.3.2'}   | ${'[4,5-alpha)'}
       ${'[v3,v4)'}               | ${'v4.3.2'}  | ${'[v4,v5)'}
-      ${'[v3,v4-alpha)'}         | ${'v4.3.2'}  | ${'[v4,v5-alpha)'}
       ${'],v1.0]'}               | ${'v2.0'}    | ${'],v2.0]'}
       ${'(,v1.0)'}               | ${'v2.0'}    | ${'(,v3.0)'}
       ${'[v1.2.3,]'}             | ${'v1.2.4'}  | ${'[v1.2.3,]'}

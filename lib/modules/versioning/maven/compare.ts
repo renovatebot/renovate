@@ -55,7 +55,7 @@ function isTransition(prevChar: string, nextChar: string): boolean {
 }
 
 function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
-  let currentPrefix = PREFIX_HYPHEN;
+  let currentPrefix = '';
   let currentVal = '';
 
   function yieldToken(transition = false): void {
@@ -88,12 +88,23 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
       yieldToken();
       currentPrefix = PREFIX_DOT;
       currentVal = '';
-    } else if (prevChar !== null && isTransition(prevChar, nextChar)) {
-      yieldToken(true);
-      currentPrefix = PREFIX_HYPHEN;
-      currentVal = nextChar;
+    } else if (prevChar === null && (nextChar === 'v' || nextChar === 'V')) {
+      currentPrefix = nextChar;
     } else {
-      currentVal = currentVal.concat(nextChar);
+      if (currentVal !== '' && isTransition(prevChar!, nextChar)) {
+        yieldToken(true);
+        currentPrefix = PREFIX_HYPHEN;
+        currentVal = nextChar;
+      } else if (
+        currentVal === '' &&
+        (currentPrefix === 'v' || currentPrefix === 'V') &&
+        !isDigit(nextChar)
+      ) {
+        currentVal = currentVal.concat(currentPrefix, nextChar);
+        currentPrefix = '';
+      } else {
+        currentVal = currentVal.concat(nextChar);
+      }
     }
   });
 }
@@ -115,7 +126,7 @@ function tokenize(versionStr: string, preserveMinorZeroes = false): Token[] {
   let buf: Token[] = [];
   let result: Token[] = [];
   let leadingZero = true;
-  iterateTokens(versionStr.toLowerCase().replace(regEx(/^v/i), ''), (token) => {
+  iterateTokens(versionStr.toLowerCase(), (token) => {
     if (token.prefix === PREFIX_HYPHEN || token.type === TYPE_QUALIFIER) {
       buf = [];
     }
@@ -450,10 +461,13 @@ function rangeToStr(fullRange: Range[] | null): string | null {
 
 function tokensToStr(tokens: Token[]): string {
   return tokens.reduce((result: string, token: Token, idx) => {
-    const prefix = token.prefix === PREFIX_DOT ? '.' : '-';
-    return `${result}${idx !== 0 && token.val !== '' ? prefix : ''}${
-      token.val
-    }`;
+    const prefix =
+      token.prefix === PREFIX_DOT
+        ? '.'
+        : token.prefix === PREFIX_HYPHEN
+          ? '-'
+          : token.prefix;
+    return `${result}${prefix}${token.val}`;
   }, '');
 }
 
@@ -515,42 +529,31 @@ function autoExtendMavenRange(
   }
 
   const { leftValue, rightValue } = interval;
-  const vPrefix = (leftValue ?? rightValue)?.startsWith('v') ? 'v' : '';
   if (
     leftValue !== null &&
     rightValue !== null &&
-    incrementRangeValue(leftValue) === coerceRangeValue(rightValue, rightValue)
+    incrementRangeValue(leftValue) === rightValue
   ) {
     if (compare(newValue, leftValue) !== -1) {
-      interval.leftValue = vPrefix + coerceRangeValue(leftValue, newValue);
-      interval.rightValue = vPrefix + incrementRangeValue(interval.leftValue);
-    }
-  } else if (
-    leftValue !== null &&
-    rightValue !== null &&
-    incrementRangeValue(leftValue) + '-alpha' ===
-      coerceRangeValue(rightValue, rightValue)
-  ) {
-    if (compare(newValue, leftValue) !== -1) {
-      interval.leftValue = vPrefix + coerceRangeValue(leftValue, newValue);
-      interval.rightValue =
-        vPrefix + incrementRangeValue(interval.leftValue) + '-alpha';
+      interval.leftValue = coerceRangeValue(leftValue, newValue);
+      interval.rightValue = incrementRangeValue(interval.leftValue);
     }
   } else if (rightValue !== null) {
     if (interval.rightType === INCLUDING_POINT) {
       const tokens = tokenize(rightValue);
       const lastToken = tokens[tokens.length - 1];
       if (typeof lastToken.val === 'number') {
-        interval.rightValue = vPrefix + coerceRangeValue(rightValue, newValue);
+        interval.rightValue = coerceRangeValue(rightValue, newValue);
       } else {
         interval.rightValue = newValue;
       }
     } else {
-      interval.rightValue =
-        vPrefix + incrementRangeValue(coerceRangeValue(rightValue, newValue));
+      interval.rightValue = incrementRangeValue(
+        coerceRangeValue(rightValue, newValue),
+      );
     }
   } else if (leftValue !== null) {
-    interval.leftValue = vPrefix + coerceRangeValue(leftValue, newValue);
+    interval.leftValue = coerceRangeValue(leftValue, newValue);
   }
 
   return rangeToStr(range);
