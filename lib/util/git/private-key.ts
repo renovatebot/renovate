@@ -7,15 +7,29 @@ import { logger } from '../../logger';
 import { exec } from '../exec';
 import { newlineRegex, regEx } from '../regex';
 import { addSecretForSanitizing } from '../sanitize';
+import { fromBase64, toBase64 } from '../string';
 
 type PrivateKeyFormat = 'gpg' | 'ssh';
 
 const sshKeyRegex = regEx(
-  /-----BEGIN ([A-Z ]+ )?PRIVATE KEY-----.*?-----END ([A-Z]+ )?PRIVATE KEY-----/,
+  /-----BEGIN (?:[A-Z ]+ )?PRIVATE KEY-----.*?-----END (?:[A-Z]+ )?PRIVATE KEY-----/,
   's',
 );
 
 let gitPrivateKey: PrivateKey | undefined;
+
+/**
+ * Decodes Base64 string if roundtrip encoding matches
+ */
+function tryBase64(value: string): string | null {
+  const decodedValue = fromBase64(value);
+  const encodedValue = toBase64(decodedValue);
+  if (value !== encodedValue) {
+    return null;
+  }
+
+  return decodedValue;
+}
 
 abstract class PrivateKey {
   protected readonly key: string;
@@ -24,9 +38,18 @@ abstract class PrivateKey {
   protected abstract readonly gpgFormat: string;
 
   constructor(key: string, passphrase: string | undefined) {
-    this.key = key;
-    this.passphrase = passphrase;
+    const decodedKey = tryBase64(key);
+
+    if (decodedKey) {
+      this.key = decodedKey;
+      addSecretForSanitizing(key, 'global');
+      logger.debug('gitPrivateKey: decoded key from Base64');
+    } else {
+      this.key = key;
+    }
     addSecretForSanitizing(this.key, 'global');
+
+    this.passphrase = passphrase;
     if (this.passphrase) {
       addSecretForSanitizing(this.passphrase, 'global');
     }

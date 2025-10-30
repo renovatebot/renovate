@@ -1,3 +1,4 @@
+import ini from 'ini';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import type { JsonArray, JsonValue } from 'type-fest';
@@ -285,6 +286,15 @@ export const Toml = z.string().transform((str, ctx) => {
   }
 });
 
+export const Ini = z.string().transform((str, ctx): Record<string, unknown> => {
+  try {
+    return ini.parse(str);
+  } catch {
+    ctx.addIssue({ code: 'custom', message: 'Invalid INI' });
+    return z.NEVER;
+  }
+});
+
 export function withDepType<
   Output extends PackageDependency[],
   Schema extends ZodType<Output, ZodTypeDef, unknown>,
@@ -362,3 +372,10 @@ export const NotCircular = z.unknown().superRefine((val, ctx) => {
     return z.NEVER;
   }
 });
+
+export const EmailAddress = z.string().email();
+export type EmailAddress = z.infer<typeof EmailAddress>;
+
+export function isEmailAdress(value: string): boolean {
+  return EmailAddress.safeParse(value).success;
+}

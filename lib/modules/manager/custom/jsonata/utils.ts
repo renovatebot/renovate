@@ -7,7 +7,7 @@ import { parseUrl } from '../../../../util/url';
 import type { PackageDependency } from '../../types';
 import type { ValidMatchFields } from '../utils';
 import { checkIsValidDependency, validMatchFields } from '../utils';
-import { QueryResultZodSchema } from './schema';
+import { QueryResultZod } from './schema';
 import type { JSONataManagerTemplates, JsonataExtractConfig } from './types';
 
 export async function handleMatching(
@@ -33,10 +33,10 @@ export async function handleMatching(
         },
         'The jsonata query returned no matches. Possible error, please check your query. Skipping',
       );
-      return [];
+      continue;
     }
 
-    const parsed = QueryResultZodSchema.safeParse(queryResult);
+    const parsed = QueryResultZod.safeParse(queryResult);
     if (parsed.success) {
       results = results.concat(parsed.data);
     } else {
@@ -44,7 +44,7 @@ export async function handleMatching(
         { err: parsed.error, jsonataQuery: query, packageFile, queryResult },
         'Query results failed schema validation',
       );
-      return [];
+      continue;
     }
   }
 

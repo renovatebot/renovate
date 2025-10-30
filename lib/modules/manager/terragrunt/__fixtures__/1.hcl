@@ -42,3 +42,8 @@ terraform {
 terraform {
   source = "tfr://registry.domain.com/abc/helloworld/aws?version=1.0.0"
 }
+
+#with comment
+terraform {
+  source = "tfr://registry.domain.com/abc/helloworld/aws?version=1.0.0" # inline comment
+}

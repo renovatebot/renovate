@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { z } from 'zod';
 import {
+  Ini,
   Json,
   Json5,
   Jsonc,
@@ -520,6 +521,37 @@ describe('util/schema-utils/index', () => {
     });
   });
 
+  describe('Ini', () => {
+    const Schema = Ini.pipe(
+      z.object({ foo: z.object({ bar: z.literal('baz') }) }),
+    );
+
+    it('parses valid ini', () => {
+      const content = codeBlock`
+        [foo]
+        bar = "baz"
+      `;
+      expect(Schema.parse(content)).toEqual({
+        foo: { bar: 'baz' },
+      });
+    });
+
+    it('throws error for invalid schema', () => {
+      expect(Schema.safeParse('clearly_invalid')).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Required',
+              code: 'invalid_type',
+              path: ['foo'],
+            },
+          ],
+        },
+        success: false,
+      });
+    });
+  });
+
   describe('logging utils', () => {
     it('logs debug message and returns fallback value', () => {
       const Schema = z
@@ -529,6 +561,7 @@ describe('util/schema-utils/index', () => {
       const result = Schema.parse(42);
 
       expect(result).toBe('default string');
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { err: expect.any(z.ZodError) },
         'Debug message',
@@ -543,6 +576,7 @@ describe('util/schema-utils/index', () => {
       const result = Schema.parse(42);
 
       expect(result).toBe('default string');
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.trace).toHaveBeenCalledWith(
         { err: expect.any(z.ZodError) },
         'Trace message',

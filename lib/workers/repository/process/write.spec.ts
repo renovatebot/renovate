@@ -132,11 +132,11 @@ describe('workers/repository/process/write', () => {
       config.baseBranchPatterns = ['main', 'dev'];
       await writeUpdates(config, branches);
       expect(counts.get('Branches')).toBe(1);
-      expect(addMeta).toHaveBeenCalledWith({
+      expect(addMeta).toHaveBeenNthCalledWith(1, {
         baseBranch: 'main',
         branch: branchName,
       });
-      expect(addMeta).toHaveBeenCalledWith({
+      expect(addMeta).toHaveBeenNthCalledWith(2, {
         baseBranch: 'dev',
         branch: branchName,
       });

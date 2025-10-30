@@ -6,7 +6,7 @@ import semver from 'semver';
 import type { Options, SimpleGit, TaskOptions } from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
 import upath from 'upath';
-import { configFileNames } from '../../config/app-strings';
+import { getConfigFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
@@ -25,8 +25,10 @@ import type { GitProtocol } from '../../types/git';
 import { incLimitedValue } from '../../workers/global/limits';
 import { getCache } from '../cache/repository';
 import { getEnv } from '../env';
+import { getChildEnv } from '../exec/utils';
 import { newlineRegex, regEx } from '../regex';
 import { matchRegexOrGlobList } from '../string-match';
+import { getGitEnvironmentVariables } from './auth';
 import { parseGitAuthor } from './author';
 import {
   getCachedBehindBaseResult,
@@ -368,6 +370,7 @@ export async function cloneSubmodules(
     return;
   }
   submodulesInitizialized = true;
+  const gitEnv = getChildEnv({ env: getGitEnvironmentVariables() });
   await syncGit();
   const submodules = await getSubmodules();
   for (const submodule of submodules) {
@@ -381,7 +384,7 @@ export async function cloneSubmodules(
     try {
       logger.debug(`Cloning git submodule at ${submodule}`);
       await gitRetry(() =>
-        git.submoduleUpdate(['--init', '--recursive', submodule]),
+        git.env(gitEnv).submoduleUpdate(['--init', '--recursive', submodule]),
       );
     } catch (err) {
       logger.warn({ err, submodule }, `Unable to initialise git submodule`);
@@ -551,7 +554,7 @@ export function branchExists(branchName: string): boolean {
 
 // Return the commit SHA for a branch
 export function getBranchCommit(branchName: string): LongCommitSha | null {
-  return config.branchCommits[branchName] || null;
+  return config.branchCommits?.[branchName] || null;
 }
 
 export async function getCommitMessages(): Promise<string[]> {
@@ -1186,7 +1189,7 @@ export async function prepareCommit({
         try {
           /* v8 ignore next 2 -- TODO: add test */
           const addParams =
-            fileName === configFileNames[0] ? ['-f', fileName] : fileName;
+            fileName === getConfigFileNames()[0] ? ['-f', fileName] : fileName;
           await git.add(addParams);
           if (file.isExecutable) {
             await git.raw(['update-index', '--chmod=+x', fileName]);

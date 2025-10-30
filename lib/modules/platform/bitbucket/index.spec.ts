@@ -72,6 +72,7 @@ describe('modules/platform/bitbucket/index', () => {
         username: 'abc',
         password: '123',
       });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Init: Bitbucket Cloud endpoint should generally be https://api.bitbucket.org/ but is being configured to a different value. Did you mean to use Bitbucket Server?',
       );
@@ -110,6 +111,7 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/user')
         .reply(403, { error: { detail: { required: ['account'] } } });
       await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         `Bitbucket: missing 'account' scope for password`,
       );
@@ -520,18 +522,7 @@ describe('modules/platform/bitbucket/index', () => {
           },
         })
         .post('/2.0/repositories/some/repo/commit/branch_hash/statuses/build')
-        .reply(200)
-        .get(
-          '/2.0/repositories/some/repo/commit/branch_hash/statuses?pagelen=100',
-        )
-        .reply(200, {
-          values: [
-            {
-              key: 'foo',
-              state: 'SUCCESSFUL',
-            },
-          ],
-        });
+        .reply(200);
       await expect(
         bitbucket.setBranchStatus({
           branchName: 'branch',

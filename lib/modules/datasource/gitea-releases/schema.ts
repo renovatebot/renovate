@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { MaybeTimestamp } from '../../../util/timestamp';
 
-export const ReleaseSchema = z.object({
+export const Release = z.object({
   name: z.string(),
   tag_name: z.string(),
   body: z.string(),
@@ -9,4 +9,4 @@ export const ReleaseSchema = z.object({
   published_at: MaybeTimestamp,
 });
 
-export const ReleasesSchema = z.array(ReleaseSchema);
+export const Releases = z.array(Release);

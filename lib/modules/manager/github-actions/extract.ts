@@ -18,7 +18,7 @@ import type {
 } from '../types';
 import { CommunityActions } from './community';
 import type { Steps } from './schema';
-import { WorkflowSchema } from './schema';
+import { Workflow } from './schema';
 
 const dockerActionRe = regEx(/^\s+uses\s*: ['"]?docker:\/\/([^'"]+)\s*$/);
 const actionRe = regEx(
@@ -175,10 +175,12 @@ function extractRunner(runner: string): PackageDependency | null {
   return dependency;
 }
 
+// For official https://github.com/actions
 const versionedActions: Record<string, string> = {
   go: npmVersioning.id,
   node: nodeVersioning.id,
   python: npmVersioning.id,
+
   // Not covered yet because they use different datasources/packageNames:
   // - dotnet
   // - java
@@ -224,7 +226,7 @@ function extractWithYAMLParser(
   logger.trace('github-actions.extractWithYAMLParser()');
   const deps: PackageDependency[] = [];
 
-  const obj = withMeta({ packageFile }, () => WorkflowSchema.parse(content));
+  const obj = withMeta({ packageFile }, () => Workflow.parse(content));
 
   if (!obj) {
     return deps;

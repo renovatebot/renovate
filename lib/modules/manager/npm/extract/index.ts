@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import {
@@ -14,14 +15,14 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../../types';
-import type { YarnrcConfig } from '../schema';
+import type { YarnConfig } from '../schema';
 import type { NpmLockFiles, NpmManagerData } from '../types';
 import { getExtractedConstraints } from './common/dependency';
-import { extractPackageJson } from './common/package-file';
+import { extractPackageJson, hasPackageManager } from './common/package-file';
 import { extractPnpmWorkspaceFile, tryParsePnpmWorkspaceYaml } from './pnpm';
 import { postExtract } from './post';
 import type { NpmPackage } from './types';
-import { isZeroInstall } from './yarn';
+import { extractYarnCatalogs, isZeroInstall } from './yarn';
 import {
   loadConfigFromLegacyYarnrc,
   loadConfigFromYarnrcYml,
@@ -137,7 +138,7 @@ export async function extractPackageFile(
     ? await isZeroInstall(yarnrcYmlFileName)
     : false;
 
-  let yarnrcConfig: YarnrcConfig | null = null;
+  let yarnrcConfig: YarnConfig | null = null;
   const repoYarnrcYml = yarnrcYmlFileName
     ? await readLocalFile(yarnrcYmlFileName, 'utf8')
     : null;
@@ -254,13 +255,37 @@ export async function extractAllPackageFiles(
           });
         }
       } else {
-        logger.trace({ packageFile }, `Extracting as a package.json file`);
-        const deps = await extractPackageFile(content, packageFile, config);
-        if (deps) {
-          npmFiles.push({
-            ...deps,
-            packageFile,
-          });
+        if (packageFile.endsWith('json')) {
+          logger.trace({ packageFile }, `Extracting as a package.json file`);
+
+          const deps = await extractPackageFile(content, packageFile, config);
+          if (deps) {
+            npmFiles.push({
+              ...deps,
+              packageFile,
+            });
+          }
+        } else {
+          logger.trace({ packageFile }, `Extracting as a .yarnrc.yml file`);
+
+          const yarnConfig = loadConfigFromYarnrcYml(content);
+
+          if (yarnConfig?.catalogs) {
+            const hasPackageManagerResult = await hasPackageManager(
+              upath.dirname(packageFile),
+            );
+            const catalogsDeps = await extractYarnCatalogs(
+              yarnConfig.catalogs,
+              packageFile,
+              hasPackageManagerResult,
+            );
+            if (catalogsDeps) {
+              npmFiles.push({
+                ...catalogsDeps,
+                packageFile,
+              });
+            }
+          }
         }
       }
     } else {

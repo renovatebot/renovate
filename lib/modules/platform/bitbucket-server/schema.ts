@@ -1,13 +1,14 @@
 import { z } from 'zod';
+import { EmailAddress } from '../../../util/schema-utils';
 
-export const UserSchema = z.object({
+export const User = z.object({
   displayName: z.string(),
-  emailAddress: z.string(),
+  emailAddress: EmailAddress.catch(''),
   active: z.boolean(),
   slug: z.string(),
 });
 
-export const UsersSchema = z.array(UserSchema);
+export const Users = z.array(User);
 
 export const Files = z.array(z.string());
 
@@ -37,15 +38,9 @@ export type PullRequestActivity = z.infer<typeof PullRequestActivity>;
 
 export const ReviewerGroup = z.object({
   name: z.string(),
-  users: z.array(UserSchema),
+  users: z.array(User),
   scope: z.object({
     type: z.union([z.literal('REPOSITORY'), z.literal('PROJECT')]),
   }),
 });
-
 export const ReviewerGroups = z.array(ReviewerGroup);
-
-const EmailSchema = z.string().email();
-
-export const isEmail = (value: string): boolean =>
-  EmailSchema.safeParse(value).success;

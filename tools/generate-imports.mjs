@@ -191,7 +191,7 @@ async function generateHash() {
     }
 
     //add manager hashes to hashMap {key->manager, value->hash}
-    const hashStrings = (await Promise.all(hashes)).map(
+    const hashStrings = hashes.map(
       ({ manager, hash }) => `hashMap.set('${manager}','${hash}');`,
     );
 

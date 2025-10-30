@@ -3,6 +3,7 @@ import type { SkipReason } from '../../../types';
 import { Toml, withDepType } from '../../../util/schema-utils';
 import { CrateDatasource } from '../../datasource/crate';
 import type { PackageDependency } from '../types';
+import { applyGitSource } from '../util';
 import type { CargoManagerData } from './types';
 
 const CargoDep = z.union([
@@ -12,6 +13,12 @@ const CargoDep = z.union([
       path: z.string().optional(),
       /** Git URL for the dependency */
       git: z.string().optional(),
+      /** Git tag for the dependency */
+      tag: z.string().optional(),
+      /** Git revision for the dependency */
+      rev: z.string().optional(),
+      /** Git branch for the dependency */
+      branch: z.string().optional(),
       /** Semver version */
       version: z.string().optional(),
       /** Name of a registry whose URL is configured in `.cargo/config.toml` or `.cargo/config` */
@@ -25,13 +32,16 @@ const CargoDep = z.union([
       ({
         path,
         git,
+        tag,
+        rev,
+        branch,
         version,
         registry,
         package: pkg,
         workspace,
       }): PackageDependency<CargoManagerData> => {
         let skipReason: SkipReason | undefined;
-        let currentValue: string | undefined;
+        let currentValue: string;
         let nestedVersion = false;
 
         if (version) {
@@ -39,15 +49,6 @@ const CargoDep = z.union([
           nestedVersion = true;
         } else {
           currentValue = '';
-          skipReason = 'invalid-dependency-specification';
-        }
-
-        if (path) {
-          skipReason = 'path-dependency';
-        } else if (git) {
-          skipReason = 'git-dependency';
-        } else if (workspace) {
-          skipReason = 'inherited-dependency';
         }
 
         const dep: PackageDependency<CargoManagerData> = {
@@ -55,6 +56,16 @@ const CargoDep = z.union([
           managerData: { nestedVersion },
           datasource: CrateDatasource.id,
         };
+
+        if (path) {
+          skipReason = 'path-dependency';
+        } else if (workspace) {
+          skipReason = 'inherited-dependency';
+        } else if (git) {
+          applyGitSource(dep, git, rev, tag, branch);
+        } else if (!version) {
+          skipReason = 'invalid-dependency-specification';
+        }
 
         if (skipReason) {
           dep.skipReason = skipReason;
@@ -108,7 +119,7 @@ const CargoWorkspace = z.object({
 
 const CargoTarget = z.record(z.string(), CargoSection);
 
-export const CargoManifestSchema = Toml.pipe(
+export const CargoManifest = Toml.pipe(
   CargoSection.extend({
     package: z
       .object({
@@ -131,25 +142,25 @@ const CargoConfigSource = z.object({
   registry: z.string().optional(),
 });
 
-export const CargoConfigSchema = Toml.pipe(
+export const CargoConfig = Toml.pipe(
   z.object({
     registries: z.record(z.string(), CargoConfigRegistry).optional(),
     source: z.record(z.string(), CargoConfigSource).optional(),
   }),
 );
 
-export type CargoConfig = z.infer<typeof CargoConfigSchema>;
+export type CargoConfig = z.infer<typeof CargoConfig>;
 
-const CargoLockPackageSchema = z.object({
+const CargoLockPackage = z.object({
   name: z.string(),
   version: z.string(),
   source: z.string().optional(),
 });
 
-export const CargoLockSchema = z.object({
-  package: z.array(CargoLockPackageSchema).optional(),
-});
+export const CargoLock = Toml.pipe(
+  z.object({
+    package: z.array(CargoLockPackage).optional(),
+  }),
+);
 
-export type CargoLockSchema = z.infer<typeof CargoLockSchema>;
-
-export const CargoLockSchemaToml = Toml.pipe(CargoLockSchema);
+export type CargoLock = z.infer<typeof CargoLock>;

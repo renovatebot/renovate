@@ -25,6 +25,7 @@ import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { sampleSize } from '../../../util/sample';
 import { sanitize } from '../../../util/sanitize';
+import { isEmailAdress } from '../../../util/schema-utils';
 import { ensureTrailingSlash, getQueryString } from '../../../util/url';
 import type {
   BranchStatusConfig,
@@ -52,7 +53,7 @@ import type {
   PullRequestActivity,
   PullRequestCommentActivity,
 } from './schema';
-import { ReviewerGroups, UserSchema, UsersSchema, isEmail } from './schema';
+import { ReviewerGroups, User, Users } from './schema';
 import type {
   BbsConfig,
   BbsPr,
@@ -165,11 +166,11 @@ export async function initPlatform({
         await bitbucketServerHttp.getJson(
           `./rest/api/1.0/users/${username}`,
           options,
-          UserSchema,
+          User,
         )
       ).body;
 
-      if (!emailAddress.length) {
+      if (!emailAddress?.length) {
         throw new Error(`No email address configured for username ${username}`);
       }
 
@@ -694,7 +695,7 @@ export async function addReviewers(
 
   for (const entry of reviewers) {
     // If entry is an email-address, resolve userslugs
-    if (isEmail(entry)) {
+    if (isEmailAdress(entry)) {
       const slugs = await getUserSlugsByEmail(entry);
       for (const slug of slugs) {
         reviewerSlugs.add(slug);
@@ -728,8 +729,8 @@ export async function getUserSlugsByEmail(
 
     const users = await bitbucketServerHttp.getJson(
       filterUrl,
-      { limit: 100 },
-      UsersSchema,
+      { paginate: true, limit: 100 },
+      Users,
     );
 
     if (users.body.length) {
@@ -1304,7 +1305,7 @@ async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
   if (repoGroup) {
     return repoGroup.users
       .filter((user) => user.active)
-      .map((user) => user.emailAddress);
+      .map((user) => user.slug);
   }
 
   // If no repo-level group, fall back to project-level group
@@ -1315,7 +1316,7 @@ async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
   if (projectGroup) {
     return projectGroup.users
       .filter((user) => user.active)
-      .map((user) => user.emailAddress);
+      .map((user) => user.slug);
   }
 
   // Group not found at either level

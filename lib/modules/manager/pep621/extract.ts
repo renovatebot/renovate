@@ -8,7 +8,7 @@ import type {
   PackageFileContent,
 } from '../types';
 import { processors } from './processors';
-import { type PyProject, PyProjectSchema } from './schema';
+import { PyProject } from './schema';
 
 export function parsePyProject(
   content: string,
@@ -16,7 +16,7 @@ export function parsePyProject(
 ): PyProject | null {
   try {
     const jsonMap = parseToml(massageToml(content));
-    return PyProjectSchema.parse(jsonMap);
+    return PyProject.parse(jsonMap);
   } catch (err) {
     logger.debug(
       { packageFile, err },
@@ -76,6 +76,7 @@ export async function extractPackageFile(
 
   // process specific tool sets
   let processedDeps = deps;
+  const lockFiles: string[] = [];
   for (const processor of processors) {
     processedDeps = processor.process(def, processedDeps);
     processedDeps = await processor.extractLockedVersions(
@@ -83,10 +84,18 @@ export async function extractPackageFile(
       processedDeps,
       packageFile,
     );
+
+    const processedLockFiles = await processor.getLockfiles(def, packageFile);
+    lockFiles.push(...processedLockFiles);
   }
 
   const packageFileVersion = def.project?.version;
-  return processedDeps.length
-    ? { extractedConstraints, deps: processedDeps, packageFileVersion }
+  return processedDeps.length || lockFiles.length
+    ? {
+        extractedConstraints,
+        deps: processedDeps,
+        packageFileVersion,
+        lockFiles,
+      }
     : null;
 }

@@ -3,18 +3,19 @@ import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
+import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import { GitRefsDatasource } from '../../../datasource/git-refs';
 import { GitTagsDatasource } from '../../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags';
 import { PypiDatasource } from '../../../datasource/pypi';
-import type { UpdateArtifactsConfig } from '../../types';
+import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types';
 import { parsePyProject } from '../extract';
 import { depTypes } from '../utils';
 import { UvProcessor } from './uv';
 import { mockExecAll } from '~test/exec-util';
-import { fs, hostRules } from '~test/util';
+import { fs, hostRules, logger, partial } from '~test/util';
 
 vi.mock('google-auth-library');
 vi.mock('../../../../util/fs');
@@ -76,10 +77,9 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       ]);
     });
-  });
 
-  it('applies git sources', () => {
-    const pyproject = parsePyProject(codeBlock`
+    it('applies git sources', () => {
+      const pyproject = parsePyProject(codeBlock`
       [tool.uv]
       dev-dependencies = ["dep3", "dep4", "dep5"]
 
@@ -91,64 +91,64 @@ describe('modules/manager/pep621/processors/uv', () => {
       dep5 = { git = "https://github.com/foo/dep5", branch = "master" }
     `)!;
 
-    const dependencies = [
-      {
-        depName: 'dep1',
-        packageName: 'dep1',
-      },
-      {
-        depName: 'dep2',
-        packageName: 'dep2',
-      },
-    ];
+      const dependencies = [
+        {
+          depName: 'dep1',
+          packageName: 'dep1',
+        },
+        {
+          depName: 'dep2',
+          packageName: 'dep2',
+        },
+      ];
 
-    const result = processor.process(pyproject, dependencies);
+      const result = processor.process(pyproject, dependencies);
 
-    expect(result).toEqual([
-      {
-        depName: 'dep1',
-        depType: depTypes.uvSources,
-        datasource: GithubTagsDatasource.id,
-        registryUrls: ['https://github.com'],
-        packageName: 'foo/dep1',
-        currentValue: '0.1.0',
-      },
-      {
-        depName: 'dep2',
-        depType: depTypes.uvSources,
-        datasource: GitlabTagsDatasource.id,
-        registryUrls: ['https://gitlab.com'],
-        packageName: 'foo/dep2',
-        currentValue: '0.2.0',
-      },
-      {
-        depName: 'dep3',
-        depType: depTypes.uvSources,
-        datasource: GitTagsDatasource.id,
-        packageName: 'https://codeberg.org/foo/dep3.git',
-        currentValue: '0.3.0',
-      },
-      {
-        depName: 'dep4',
-        depType: depTypes.uvSources,
-        datasource: GitRefsDatasource.id,
-        packageName: 'https://github.com/foo/dep4',
-        currentDigest: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
-        replaceString: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
-      },
-      {
-        depName: 'dep5',
-        depType: depTypes.uvSources,
-        datasource: GitRefsDatasource.id,
-        packageName: 'https://github.com/foo/dep5',
-        currentValue: 'master',
-        skipReason: 'git-dependency',
-      },
-    ]);
-  });
+      expect(result).toEqual([
+        {
+          depName: 'dep1',
+          depType: depTypes.uvSources,
+          datasource: GithubTagsDatasource.id,
+          registryUrls: ['https://github.com'],
+          packageName: 'foo/dep1',
+          currentValue: '0.1.0',
+        },
+        {
+          depName: 'dep2',
+          depType: depTypes.uvSources,
+          datasource: GitlabTagsDatasource.id,
+          registryUrls: ['https://gitlab.com'],
+          packageName: 'foo/dep2',
+          currentValue: '0.2.0',
+        },
+        {
+          depName: 'dep3',
+          depType: depTypes.uvSources,
+          datasource: GitTagsDatasource.id,
+          packageName: 'https://codeberg.org/foo/dep3.git',
+          currentValue: '0.3.0',
+        },
+        {
+          depName: 'dep4',
+          depType: depTypes.uvSources,
+          datasource: GitRefsDatasource.id,
+          packageName: 'https://github.com/foo/dep4',
+          currentDigest: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
+          replaceString: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
+        },
+        {
+          depName: 'dep5',
+          depType: depTypes.uvSources,
+          datasource: GitRefsDatasource.id,
+          packageName: 'https://github.com/foo/dep5',
+          currentValue: 'master',
+          skipReason: 'git-dependency',
+        },
+      ]);
+    });
 
-  it('pinned to non-default index', () => {
-    const pyproject = parsePyProject(codeBlock`
+    it('pinned to non-default index', () => {
+      const pyproject = parsePyProject(codeBlock`
       [tool.uv.sources]
       dep1 = { index = "foo" }
       dep2 = { index = "bar" }
@@ -172,90 +172,90 @@ describe('modules/manager/pep621/processors/uv', () => {
       explicit = false
     `)!;
 
-    const dependencies = [
-      {
-        depName: 'dep1',
-        packageName: 'dep1',
-      },
-      {
-        depName: 'dep2',
-        packageName: 'dep2',
-      },
-      {
-        depName: 'dep3',
-        packageName: 'dep3',
-      },
-      {
-        depName: 'dep4',
-        packageName: 'dep4',
-      },
-    ];
+      const dependencies = [
+        {
+          depName: 'dep1',
+          packageName: 'dep1',
+        },
+        {
+          depName: 'dep2',
+          packageName: 'dep2',
+        },
+        {
+          depName: 'dep3',
+          packageName: 'dep3',
+        },
+        {
+          depName: 'dep4',
+          packageName: 'dep4',
+        },
+      ];
 
-    const result = processor.process(pyproject, dependencies);
+      const result = processor.process(pyproject, dependencies);
 
-    expect(result).toEqual([
-      {
-        depName: 'dep1',
-        depType: depTypes.uvSources,
-        registryUrls: ['https://foo.com/simple'],
-        packageName: 'dep1',
-      },
-      {
-        depName: 'dep2',
-        depType: depTypes.uvSources,
-        registryUrls: ['https://bar.com/simple'],
-        packageName: 'dep2',
-      },
-      {
-        depName: 'dep3',
-        packageName: 'dep3',
-        registryUrls: ['https://baz.com/simple', 'https://pypi.org/pypi/'],
-      },
-      {
-        depName: 'dep4',
-        registryUrls: ['https://baz.com/simple', 'https://pypi.org/pypi/'],
-        packageName: 'dep4',
-      },
-    ]);
-  });
+      expect(result).toEqual([
+        {
+          depName: 'dep1',
+          depType: depTypes.uvSources,
+          registryUrls: ['https://foo.com/simple'],
+          packageName: 'dep1',
+        },
+        {
+          depName: 'dep2',
+          depType: depTypes.uvSources,
+          registryUrls: ['https://bar.com/simple'],
+          packageName: 'dep2',
+        },
+        {
+          depName: 'dep3',
+          packageName: 'dep3',
+          registryUrls: ['https://baz.com/simple', 'https://pypi.org/pypi/'],
+        },
+        {
+          depName: 'dep4',
+          registryUrls: ['https://baz.com/simple', 'https://pypi.org/pypi/'],
+          packageName: 'dep4',
+        },
+      ]);
+    });
 
-  it('index with optional name', () => {
-    const pyproject = parsePyProject(codeBlock`
+    it('index with optional name', () => {
+      const pyproject = parsePyProject(codeBlock`
       [[tool.uv.index]]
       url = "https://foo.com/simple"
       default = true
       explicit = false
     `)!;
 
-    const dependencies = [
-      {
-        depName: 'dep1',
-        packageName: 'dep1',
-      },
-      {
-        depName: 'dep2',
-        packageName: 'dep2',
-      },
-    ];
+      const dependencies = [
+        {
+          depName: 'dep1',
+          packageName: 'dep1',
+        },
+        {
+          depName: 'dep2',
+          packageName: 'dep2',
+        },
+      ];
 
-    const result = processor.process(pyproject, dependencies);
+      const result = processor.process(pyproject, dependencies);
 
-    expect(result).toEqual([
-      {
-        depName: 'dep1',
-        registryUrls: ['https://foo.com/simple'],
-        packageName: 'dep1',
-      },
-      {
-        depName: 'dep2',
-        registryUrls: ['https://foo.com/simple'],
-        packageName: 'dep2',
-      },
-    ]);
-  });
+      expect(result).toEqual([
+        {
+          depName: 'dep1',
+          registryUrls: ['https://foo.com/simple'],
+          packageName: 'dep1',
+        },
+        {
+          depName: 'dep2',
+          registryUrls: ['https://foo.com/simple'],
+          packageName: 'dep2',
+        },
+      ]);
+    });
 
-  it('override implicit default index', () => {
-    const pyproject = parsePyProject(codeBlock`
+    it('override implicit default index', () => {
+      const pyproject = parsePyProject(codeBlock`
       [[tool.uv.index]]
       name = "foo"
       url = "https://foo.com/simple"
@@ -263,45 +263,45 @@ describe('modules/manager/pep621/processors/uv', () => {
       explicit = false
     `)!;
 
-    const dependencies = [
-      {
-        depName: 'python',
-        packageName: 'python',
-        depType: 'requires-python',
-      },
-      {
-        depName: 'dep1',
-        packageName: 'dep1',
-      },
-      {
-        depName: 'dep2',
-        packageName: 'dep2',
-      },
-    ];
+      const dependencies = [
+        {
+          depName: 'python',
+          packageName: 'python',
+          depType: 'requires-python',
+        },
+        {
+          depName: 'dep1',
+          packageName: 'dep1',
+        },
+        {
+          depName: 'dep2',
+          packageName: 'dep2',
+        },
+      ];
 
-    const result = processor.process(pyproject, dependencies);
+      const result = processor.process(pyproject, dependencies);
 
-    expect(result).toEqual([
-      {
-        depName: 'python',
-        depType: 'requires-python',
-        packageName: 'python',
-      },
-      {
-        depName: 'dep1',
-        registryUrls: ['https://foo.com/simple'],
-        packageName: 'dep1',
-      },
-      {
-        depName: 'dep2',
-        registryUrls: ['https://foo.com/simple'],
-        packageName: 'dep2',
-      },
-    ]);
-  });
+      expect(result).toEqual([
+        {
+          depName: 'python',
+          depType: 'requires-python',
+          packageName: 'python',
+        },
+        {
+          depName: 'dep1',
+          registryUrls: ['https://foo.com/simple'],
+          packageName: 'dep1',
+        },
+        {
+          depName: 'dep2',
+          registryUrls: ['https://foo.com/simple'],
+          packageName: 'dep2',
+        },
+      ]);
+    });
 
-  it('override explicit default index', () => {
-    const pyproject = parsePyProject(codeBlock`
+    it('override explicit default index', () => {
+      const pyproject = parsePyProject(codeBlock`
       [tool.uv.sources]
       dep1 = { index = "foo" }
 
@@ -312,35 +312,76 @@ describe('modules/manager/pep621/processors/uv', () => {
       explicit = true
     `)!;
 
-    const dependencies = [
-      {
-        depName: 'dep1',
-        packageName: 'dep1',
-      },
-      {
-        depName: 'dep2',
-        packageName: 'dep2',
-      },
-    ];
+      const dependencies = [
+        {
+          depName: 'dep1',
+          packageName: 'dep1',
+        },
+        {
+          depName: 'dep2',
+          packageName: 'dep2',
+        },
+      ];
 
-    const result = processor.process(pyproject, dependencies);
+      const result = processor.process(pyproject, dependencies);
 
-    expect(result).toEqual([
-      {
-        depName: 'dep1',
-        depType: depTypes.uvSources,
-        registryUrls: ['https://foo.com/simple'],
-        packageName: 'dep1',
-      },
-      {
-        depName: 'dep2',
-        registryUrls: [],
-        packageName: 'dep2',
-      },
-    ]);
+      expect(result).toEqual([
+        {
+          depName: 'dep1',
+          depType: depTypes.uvSources,
+          registryUrls: ['https://foo.com/simple'],
+          packageName: 'dep1',
+        },
+        {
+          depName: 'dep2',
+          registryUrls: [],
+          packageName: 'dep2',
+        },
+      ]);
+    });
+  });
+
+  describe('extractLockedVersions()', () => {
+    it('returns if no lockfile found', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      const result = await processor.extractLockedVersions(
+        partial(),
+        [],
+        'pyproject.toml',
+      );
+      expect(result).toBeEmptyArray();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { packageFile: 'pyproject.toml' },
+        'No uv lock file found',
+      );
+    });
   });
 
   describe('updateArtifacts()', () => {
+    it('throws TEMPORARY_ERROR', async () => {
+      fs.readLocalFile.mockRejectedValueOnce(new Error(TEMPORARY_ERROR));
+      const result = processor.updateArtifacts(
+        partial<UpdateArtifact>({ config: {} }),
+        partial(),
+      );
+      await expect(result).rejects.toThrow(TEMPORARY_ERROR);
+    });
+
+    it('returns if no lockfile found', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      const result = await processor.updateArtifacts(
+        partial<UpdateArtifact>({ config: {} }),
+        partial(),
+      );
+      expect(result).toBeNull();
+      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { packageFileName: undefined },
+        'No uv lock file found',
+      );
+    });
+
     it('returns null if there is no lock file', async () => {
       fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       const updatedDeps = [{ packageName: 'dep1' }];
