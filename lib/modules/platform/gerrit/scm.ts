@@ -6,105 +6,63 @@ import { hash } from '../../../util/hash';
 import { DefaultGitScm } from '../default-scm';
 import { client } from './client';
 import type { GerritFindPRConfig } from './types';
+import { extractSourceBranch } from './utils';
 
 let repository: string;
-let username: string;
 export function configureScm(repo: string, login: string): void {
   repository = repo;
-  username = login;
+
+  // Register hook to initialize branches before fetchBranchCommits
+  git.setAfterFetchBranchCommits(() => initializeBranchesFromChanges(repo));
+}
+
+/**
+ * Initialize local branches for all open Gerrit changes.
+ * This allows the DefaultGitScm to work with Gerrit changes as if they were regular Git branches.
+ */
+export async function initializeBranchesFromChanges(
+  repo: string,
+): Promise<void> {
+  logger.debug('Initializing local branches from open Gerrit changes');
+  const openChanges = await client.findChanges(repo, {
+    branchName: '',
+    state: 'open',
+    requestDetails: ['CURRENT_REVISION', 'COMMIT_FOOTERS'],
+  });
+
+  logger.debug(`Found ${openChanges.length} open Gerrit changes`);
+
+  // Build a map of refspecs to branch names for bulk fetching
+  const refspecMap = new Map<string, string>();
+  for (const change of openChanges) {
+    const sourceBranch = extractSourceBranch(change);
+    if (sourceBranch && change.current_revision) {
+      const currentRevision = change.revisions![change.current_revision];
+      const refSpec = currentRevision.ref;
+      refspecMap.set(refSpec, sourceBranch);
+      logger.debug(
+        { sourceBranch, changeNumber: change._number, refSpec },
+        'Mapped Gerrit change to branch',
+      );
+    }
+  }
+
+  if (refspecMap.size > 0) {
+    try {
+      await git.initializeBranchesFromRefspecs(refspecMap);
+      logger.debug('Finished initializing branches from Gerrit changes');
+    } catch (err) {
+      logger.debug(
+        { err },
+        'Failed to initialize branches from Gerrit changes',
+      );
+    }
+  } else {
+    logger.debug('No Gerrit changes to initialize');
+  }
 }
 
 export class GerritScm extends DefaultGitScm {
-  override async branchExists(branchName: string): Promise<boolean> {
-    const searchConfig: GerritFindPRConfig = {
-      state: 'open',
-      branchName,
-      singleChange: true,
-    };
-    const change = (await client.findChanges(repository, searchConfig)).pop();
-    if (change) {
-      return true;
-    }
-    return git.branchExists(branchName);
-  }
-
-  override async getBranchCommit(
-    branchName: string,
-  ): Promise<LongCommitSha | null> {
-    const searchConfig: GerritFindPRConfig = {
-      state: 'open',
-      branchName,
-      singleChange: true,
-      requestDetails: ['CURRENT_REVISION'],
-    };
-    const change = (await client.findChanges(repository, searchConfig)).pop();
-    if (change) {
-      return change.current_revision as LongCommitSha;
-    }
-    return git.getBranchCommit(branchName);
-  }
-
-  override async isBranchBehindBase(
-    branchName: string,
-    baseBranch: string,
-  ): Promise<boolean> {
-    const searchConfig: GerritFindPRConfig = {
-      state: 'open',
-      branchName,
-      targetBranch: baseBranch,
-      singleChange: true,
-      requestDetails: ['CURRENT_REVISION', 'CURRENT_ACTIONS'],
-    };
-    const change = (await client.findChanges(repository, searchConfig)).pop();
-    if (change) {
-      const currentRevision = change.revisions![change.current_revision!];
-      return currentRevision.actions!.rebase.enabled === true;
-    }
-    return true;
-  }
-
-  override async isBranchConflicted(
-    baseBranch: string,
-    branch: string,
-  ): Promise<boolean> {
-    const searchConfig: GerritFindPRConfig = {
-      state: 'open',
-      branchName: branch,
-      targetBranch: baseBranch,
-      singleChange: true,
-    };
-    const change = (await client.findChanges(repository, searchConfig)).pop();
-    if (change) {
-      const mergeInfo = await client.getMergeableInfo(change);
-      return !mergeInfo.mergeable;
-    } else {
-      logger.warn(
-        { branch, baseBranch },
-        'There is no open change with this branch',
-      );
-      return true;
-    }
-  }
-
-  override async isBranchModified(
-    branchName: string,
-    baseBranch: string,
-  ): Promise<boolean> {
-    const searchConfig: GerritFindPRConfig = {
-      state: 'open',
-      branchName,
-      targetBranch: baseBranch,
-      singleChange: true,
-      requestDetails: ['CURRENT_REVISION', 'DETAILED_ACCOUNTS'],
-    };
-    const change = (await client.findChanges(repository, searchConfig)).pop();
-    if (change) {
-      const currentRevision = change.revisions![change.current_revision!];
-      return currentRevision.uploader.username !== username;
-    }
-    return false;
-  }
-
   override async commitAndPush(
     commit: CommitFilesConfig,
   ): Promise<LongCommitSha | null> {
@@ -170,23 +128,10 @@ export class GerritScm extends DefaultGitScm {
     return null; // empty commit, no changes in this Gerrit Change
   }
 
-  override deleteBranch(branchName: string): Promise<void> {
-    return Promise.resolve();
-  }
-
-  override async mergeToLocal(branchName: string): Promise<void> {
-    const searchConfig: GerritFindPRConfig = {
-      state: 'open',
-      branchName,
-      singleChange: true,
-      requestDetails: ['CURRENT_REVISION'],
-    };
-    const change = (await client.findChanges(repository, searchConfig)).pop();
-    if (change) {
-      const currentRevision = change.revisions![change.current_revision!];
-      return super.mergeToLocal(currentRevision.ref);
-    }
-    return super.mergeToLocal(branchName);
+  // Delete local branch and remote-tracking ref created from Gerrit change
+  // Note: Gerrit changes themselves are abandoned through the API, not deleted as branches
+  override async deleteBranch(branchName: string): Promise<void> {
+    await git.deleteBranchCreatedFromRefspec(branchName);
   }
 }
 

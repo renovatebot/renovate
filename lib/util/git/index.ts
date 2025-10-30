@@ -63,6 +63,14 @@ import type {
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
 
+/**
+ * Set a hook to be called after fetchBranchCommits populates branchCommits.
+ * Used by platforms like Gerrit to initialize branches from platform-specific sources.
+ */
+export function setAfterFetchBranchCommits(hook: () => Promise<void>): void {
+  config.afterFetchBranchCommits = hook;
+}
+
 // Retry parameters
 const retryCount = 5;
 const delaySeconds = 3;
@@ -237,6 +245,11 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
     }
     throw err;
   }
+
+  // Call platform-specific hook after populating branchCommits
+  if (config.afterFetchBranchCommits) {
+    await config.afterFetchBranchCommits();
+  }
 }
 
 export async function fetchRevSpec(revSpec: string): Promise<void> {
@@ -244,10 +257,15 @@ export async function fetchRevSpec(revSpec: string): Promise<void> {
 }
 
 export async function initRepo(args: StorageConfig): Promise<void> {
+  // Preserve the beforeFetchBranchCommits hook if it was set before initRepo
+  const existingHook = config.afterFetchBranchCommits;
   config = { ...args } as any;
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
+  if (existingHook) {
+    config.afterFetchBranchCommits = existingHook;
+  }
   // TODO: safe to pass all env variables? use `getChildEnv` instead?
   git = simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env({
     ...getEnv(),
@@ -643,6 +661,99 @@ export async function checkoutBranchFromRemote(
     }
     throw err;
   }
+}
+
+/**
+ * Initialize branches from arbitrary refspecs by fetching them as remote-tracking refs.
+ * This is useful for platforms that use non-standard ref formats (e.g., Gerrit changes).
+ * Creates refs/remotes/origin/branchName refs that can be used by standard Git operations.
+ *
+ * @param refspecMap Map of refspec to branch name (e.g., 'refs/changes/72/19122672/50' -> 'deps/1234')
+ */
+export async function initializeBranchesFromRefspecs(
+  refspecMap: Map<string, string>,
+): Promise<void> {
+  logger.debug(`Initializing ${refspecMap.size} branches from refspecs`);
+  await syncGit();
+  try {
+    // Build the fetch command with all refspecs at once
+    // Format: refspec:refs/remotes/origin/branchName
+    const refspecs: string[] = [];
+    for (const [refspec, branchName] of refspecMap) {
+      refspecs.push(`${refspec}:refs/remotes/origin/${branchName}`);
+    }
+
+    // Execute single fetch with all refspecs
+    await gitRetry(() =>
+      git.fetch(['--no-tags', '--force', 'origin', ...refspecs]),
+    );
+    logger.debug(`Fetched ${refspecs.length} branches successfully`);
+
+    // Update branchCommits for each branch
+    for (const branchName of refspecMap.values()) {
+      try {
+        const branchSha = (
+          await git.revparse(`origin/${branchName}`)
+        ).trim() as LongCommitSha;
+        config.branchCommits[branchName] = branchSha;
+        logger.trace(
+          { branchName, branchSha },
+          'Initialized branch from refspec',
+        );
+      } catch (err) {
+        logger.debug(
+          { err, branchName },
+          'Failed to get SHA for branch after fetch',
+        );
+      }
+    }
+  } catch (err) {
+    const errChecked = checkForPlatformFailure(err);
+    /* v8 ignore next 3 -- hard to test */
+    if (errChecked) {
+      throw errChecked;
+    }
+    logger.warn({ err }, 'Failed to initialize branches from refspecs');
+    throw err;
+  }
+}
+
+/**
+ * Delete a branch that was created from a refspec via initializeBranchesFromRefspecs.
+ * Removes the remote-tracking ref and cleans up branch commit tracking.
+ * Does not attempt to push deletion to remote (these refs are local constructs).
+ *
+ * @param branchName The branch name to delete
+ */
+export async function deleteBranchCreatedFromRefspec(
+  branchName: string,
+): Promise<void> {
+  await syncGit();
+  // Delete local branch if it exists
+  try {
+    await deleteLocalBranch(branchName);
+    logger.debug(`Deleted local branch: ${branchName}`);
+  } catch (err) {
+    const errChecked = checkForPlatformFailure(err);
+    /* v8 ignore next 3 -- TODO: add test */
+    if (errChecked) {
+      throw errChecked;
+    }
+    logger.debug(
+      { err, branchName },
+      `No local branch to delete with name: ${branchName}`,
+    );
+  }
+
+  // Delete remote-tracking ref that was created from refspec
+  // Note: git update-ref -d succeeds even if ref doesn't exist
+  await git.raw(['update-ref', '-d', `refs/remotes/origin/${branchName}`]);
+  logger.debug(
+    `Deleted remote-tracking ref: refs/remotes/origin/${branchName}`,
+  );
+
+  // Clean up branch commit tracking
+  delete config.branchCommits[branchName];
 }
 
 export async function resetHardFromRemote(
