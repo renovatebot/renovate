@@ -8,11 +8,19 @@ import { client } from './client';
 import type { GerritFindPRConfig } from './types';
 import { extractSourceBranch } from './utils';
 
+/**
+ * Gerrit SCM strategy:
+ * Instead of implementing custom branch operations, we fetch all open Gerrit changes
+ * as Git refs (refs/remotes/origin/branchName) after repository initialization.
+ * This allows us to leverage DefaultGitScm for most operations, treating Gerrit changes
+ * as regular Git branches, while minimizing Gerrit API requests.
+ */
+
 let repository: string;
 export function configureScm(repo: string): void {
   repository = repo;
 
-  // Register hook to initialize branches before fetchBranchCommits
+  // Register hook to initialize branches after fetchBranchCommits
   git.setAfterFetchBranchCommits(() => initializeBranchesFromChanges(repo));
 }
 
@@ -48,15 +56,8 @@ export async function initializeBranchesFromChanges(
   }
 
   if (refspecMap.size > 0) {
-    try {
-      await git.initializeBranchesFromRefspecs(refspecMap);
-      logger.debug('Finished initializing branches from Gerrit changes');
-    } catch (err) {
-      logger.debug(
-        { err },
-        'Failed to initialize branches from Gerrit changes',
-      );
-    }
+    await git.initializeBranchesFromRefspecs(refspecMap);
+    logger.debug(`Initialized ${refspecMap.size} branches from Gerrit changes`);
   } else {
     logger.debug('No Gerrit changes to initialize');
   }

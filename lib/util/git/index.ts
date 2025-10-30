@@ -257,7 +257,7 @@ export async function fetchRevSpec(revSpec: string): Promise<void> {
 }
 
 export async function initRepo(args: StorageConfig): Promise<void> {
-  // Preserve the beforeFetchBranchCommits hook if it was set before initRepo
+  // Preserve the afterFetchBranchCommits hook if it was set before initRepo
   const existingHook = config.afterFetchBranchCommits;
   config = { ...args } as any;
   config.ignoredAuthors = [];
@@ -704,7 +704,10 @@ export async function initializeBranchesFromRefspecs(
       if (errChecked) {
         throw errChecked;
       }
-      logger.warn({ err, batchNum }, 'Failed to fetch refspec batch');
+      logger.warn(
+        { err, batchNum, totalBatches, batchSize: batch.length },
+        'Failed to fetch refspec batch',
+      );
       throw err;
     }
   }
