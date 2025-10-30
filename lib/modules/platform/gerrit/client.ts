@@ -57,24 +57,53 @@ class GerritClient {
     }
     /* v8 ignore stop */
 
-    const query: Record<string, any> = {};
+    const startOffset = findPRConfig.startOffset ?? 0;
+    const pageLimit = findPRConfig.singleChange
+      ? 1
+      : (findPRConfig.pageLimit ?? 50);
+
+    const query: Record<string, any> = {
+      n: pageLimit,
+    };
     if (findPRConfig.requestDetails) {
       query.o = findPRConfig.requestDetails;
     }
-    if (findPRConfig.limit) {
-      query.n = findPRConfig.limit;
-    } else {
-      // TODO: handle pagination instead
-      query['no-limit'] = true;
-    }
+
     const filters = GerritClient.buildSearchFilters(repository, findPRConfig);
-    const queryString = `q=${filters.join('+')}&${getQueryString(query)}`;
-    const changes = await this.gerritHttp.getJsonUnchecked<GerritChange[]>(
-      `a/changes/?${queryString}`,
-      opts,
-    );
-    logger.trace(`findChanges(${queryString}) => ${changes.body.length}`);
-    return changes.body;
+
+    const allChanges: GerritChange[] = [];
+
+    while (true) {
+      query.S = allChanges.length + startOffset;
+      const queryString = `q=${filters.join('+')}&${getQueryString(query)}`;
+      const changes = await this.gerritHttp.getJsonUnchecked<GerritChange[]>(
+        `a/changes/?${queryString}`,
+        opts,
+      );
+
+      logger.trace(
+        `findChanges(${queryString},start=${query.S},limit=${query.n}) => ${changes.body.length}`,
+      );
+
+      const lastChange = changes.body.at(-1);
+      let hasMoreChanges = false;
+      if (lastChange?._more_changes) {
+        hasMoreChanges = true;
+        delete lastChange._more_changes;
+      }
+
+      allChanges.push(...changes.body);
+
+      if (
+        findPRConfig.singleChange ||
+        findPRConfig.noPagination ||
+        !hasMoreChanges
+      ) {
+        break;
+      }
+    }
+
+    return allChanges;
   }
 
   async getChange(

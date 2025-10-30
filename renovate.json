@@ -65,7 +65,7 @@
     },
     {
       "description": "set branch prefix for node major updates to split from minor updates",
-      "matchPackageNames": ["node"],
+      "matchPackageNames": ["node", "containerbase/node-prebuild"],
       "matchUpdateTypes": ["major"],
       "additionalBranchPrefix": "major"
     },

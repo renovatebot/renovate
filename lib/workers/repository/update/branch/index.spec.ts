@@ -723,6 +723,29 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    it('returns if pending checks - but branch exists', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 5,
+          state: 'open',
+        }),
+      );
+      config.pendingChecks = true;
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        prNo: 5,
+        result: 'pending',
+      });
+    });
+
     // automerge should respect only automergeSchedule
     // mock a case where branchPr does not exist, pr-creation is off-schedule, and the branch is configured for automerge
     it('automerges when there is no pr and, pr-creation is off-schedule', async () => {

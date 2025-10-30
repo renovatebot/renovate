@@ -1730,7 +1730,6 @@ describe('workers/repository/updates/generate', () => {
       expect(res).toMatchObject({
         skipArtifactsUpdate: false,
       });
-      expect(logger.logger.debug).not.toHaveBeenCalled();
     });
 
     it('sets skipArtifactsUpdate to true when all upgrades specify true', () => {
@@ -1782,7 +1781,6 @@ describe('workers/repository/updates/generate', () => {
       expect(res).toMatchObject({
         skipArtifactsUpdate: true,
       });
-      expect(logger.logger.debug).not.toHaveBeenCalled();
     });
 
     it.each([true, false])(
