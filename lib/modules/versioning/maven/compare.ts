@@ -530,8 +530,7 @@ function autoExtendMavenRange(
   } else if (
     leftValue !== null &&
     rightValue !== null &&
-    incrementRangeValue(leftValue) + '-alpha' ===
-      coerceRangeValue(rightValue, rightValue)
+    incrementRangeValue(leftValue) + '-alpha' === rightValue
   ) {
     // same as last if, but properly considering Maven ordering specification documented at
     // https://maven.apache.org/pom.html#Version_Order_Specification
