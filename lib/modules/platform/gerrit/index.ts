@@ -330,16 +330,9 @@ export async function refreshPr(number: number): Promise<void> {
   await getPr(number, true);
 }
 
-export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
-  if (refreshCache) {
-    logger.debug('Refreshing PR list cache');
-    await GerritPrCache.forceRefresh(config.repository!);
-  }
-
+export async function getPrList(): Promise<Pr[]> {
   const cached = await GerritPrCache.getPrs(config.repository!);
-  logger.debug(
-    `getPrList: ${refreshCache ? 'refreshed' : 'using'} ${cached.length} cached changes`,
-  );
+  logger.debug(`getPrList: using ${cached.length} cached changes`);
   return cached;
 }
 

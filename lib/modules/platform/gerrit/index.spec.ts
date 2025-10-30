@@ -323,7 +323,7 @@ describe('modules/platform/gerrit/index', () => {
 
     it('getPr() - other error', async () => {
       clientMock.getChange.mockRejectedValueOnce(new Error('other error'));
-      await expect(gerrit.getPr(123456, true)).rejects.toThrow();
+      await expect(gerrit.getPr(123456)).rejects.toThrow();
     });
   });
 
@@ -572,14 +572,6 @@ describe('modules/platform/gerrit/index', () => {
       const pr = mapGerritChangeToPr(change)!;
       prCacheMock.getPrs.mockResolvedValueOnce([pr, pr, pr]);
       await expect(gerrit.getPrList()).resolves.toHaveLength(3);
-    });
-
-    it('getPrList() - refreshCache calls forceRefresh', async () => {
-      prCacheMock.getPrs.mockResolvedValueOnce([]);
-      await expect(gerrit.getPrList(true)).resolves.toEqual([]);
-      expect(prCacheMock.forceRefresh).toHaveBeenCalledExactlyOnceWith(
-        'test/repo',
-      );
     });
   });
 
