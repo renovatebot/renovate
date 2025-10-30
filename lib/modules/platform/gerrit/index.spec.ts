@@ -210,7 +210,6 @@ describe('modules/platform/gerrit/index', () => {
       );
       expect(clientMock.getChange).toHaveBeenCalledExactlyOnceWith(
         123456,
-        undefined,
         REQUEST_DETAILS_FOR_PRS,
       );
     });
@@ -368,7 +367,6 @@ describe('modules/platform/gerrit/index', () => {
           branchName: 'renovate/dependency-1.x',
           state: 'open',
           singleChange: true,
-          refreshCache: undefined,
           requestDetails: REQUEST_DETAILS_FOR_PRS,
         },
       );
@@ -433,7 +431,6 @@ describe('modules/platform/gerrit/index', () => {
       await expect(gerrit.refreshPr(123456)).toResolve();
       expect(clientMock.getChange).toHaveBeenCalledExactlyOnceWith(
         123456,
-        true,
         REQUEST_DETAILS_FOR_PRS,
       );
     });
