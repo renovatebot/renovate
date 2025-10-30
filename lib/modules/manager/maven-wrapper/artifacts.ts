@@ -9,7 +9,9 @@ import type { ExecOptions, ExtraEnv } from '../../../util/exec/types';
 import { chmodLocalFile, readLocalFile, statLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { StatusResult } from '../../../util/git/types';
+import { find as findHostRules } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
+import { MavenDatasource } from '../../datasource/maven';
 import mavenVersioning from '../../versioning/maven';
 import type {
   PackageDependency,
@@ -166,11 +168,67 @@ async function executeWrapperCommand(
 }
 
 function getExtraEnvOptions(deps: PackageDependency[]): ExtraEnv {
+  const extraEnv: ExtraEnv = {};
+
+  // Set custom Maven wrapper repository URL if present
   const customMavenWrapperUrl = getCustomMavenWrapperRepoUrl(deps);
   if (customMavenWrapperUrl) {
-    return { MVNW_REPOURL: customMavenWrapperUrl };
+    extraEnv.MVNW_REPOURL = customMavenWrapperUrl;
   }
-  return {};
+
+  // Set credentials for Maven wrapper repository
+  const registryUrls = getRegistryUrls(deps);
+  for (const registryUrl of registryUrls) {
+    const { username, password } = findHostRules({
+      hostType: MavenDatasource.id,
+      url: registryUrl,
+    });
+
+    if (username || password) {
+      if (username) {
+        extraEnv.MVNW_USERNAME = username;
+      }
+      if (password) {
+        extraEnv.MVNW_PASSWORD = password;
+      }
+      logger.debug(
+        { registryUrl },
+        'Using MVNW_USERNAME and MVNW_PASSWORD for private repository',
+      );
+      // Use the first registry with credentials
+      break;
+    }
+  }
+
+  return extraEnv;
+}
+
+function getRegistryUrls(deps: PackageDependency[]): string[] {
+  const registryUrls: string[] = [];
+
+  // Add custom Maven wrapper repository URL first (highest priority)
+  const customUrl = getCustomMavenWrapperRepoUrl(deps);
+  if (customUrl) {
+    registryUrls.push(customUrl);
+  }
+
+  // Get registryUrls from dependencies
+  for (const dep of deps) {
+    if (dep.registryUrls) {
+      for (const url of dep.registryUrls) {
+        if (!registryUrls.includes(url)) {
+          registryUrls.push(url);
+        }
+      }
+    }
+  }
+
+  // Add default Maven Central if no other registries are configured
+  if (registryUrls.length === 0) {
+    registryUrls.push(DEFAULT_MAVEN_REPO_URL);
+  }
+
+  return registryUrls;
 }
 
 function getCustomMavenWrapperRepoUrl(
