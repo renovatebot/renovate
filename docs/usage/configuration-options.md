@@ -2636,6 +2636,20 @@ This is particularly useful for preventing upgrades from [SemVer](https://semver
 
 For example, if you're on version `19.2.0`, Renovate will upgrade to `21.0.0` but filter out `2023.3.3`.
 
+You can use `packageRules` to customize this behavior for specific packages:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Allow to upgrade Home Assistant from 0.x to 2025.x",
+      "matchPackageNames": ["homeassistant"],
+      "maxMajorIncrement": 0
+    }
+  ]
+}
+```
+
 ## managerFilePatterns
 
 Formerly known as `fileMatch`, which supported regex-only.
