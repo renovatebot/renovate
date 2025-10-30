@@ -20,7 +20,6 @@ export class GerritScm extends DefaultGitScm {
       state: 'open',
       branchName,
       singleChange: true,
-      refreshCache: true,
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();
     if (change) {
@@ -36,7 +35,6 @@ export class GerritScm extends DefaultGitScm {
       state: 'open',
       branchName,
       singleChange: true,
-      refreshCache: true,
       requestDetails: ['CURRENT_REVISION'],
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();
@@ -55,7 +53,6 @@ export class GerritScm extends DefaultGitScm {
       branchName,
       targetBranch: baseBranch,
       singleChange: true,
-      refreshCache: true,
       requestDetails: ['CURRENT_REVISION', 'CURRENT_ACTIONS'],
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();
@@ -98,7 +95,6 @@ export class GerritScm extends DefaultGitScm {
       branchName,
       targetBranch: baseBranch,
       singleChange: true,
-      refreshCache: true,
       requestDetails: ['CURRENT_REVISION', 'DETAILED_ACCOUNTS'],
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();
@@ -118,7 +114,6 @@ export class GerritScm extends DefaultGitScm {
       branchName: commit.branchName,
       targetBranch: commit.baseBranch,
       singleChange: true,
-      refreshCache: true,
       requestDetails: ['CURRENT_REVISION'],
     };
     const existingChange = (
@@ -184,7 +179,6 @@ export class GerritScm extends DefaultGitScm {
       state: 'open',
       branchName,
       singleChange: true,
-      refreshCache: true,
       requestDetails: ['CURRENT_REVISION'],
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();
