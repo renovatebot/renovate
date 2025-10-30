@@ -238,11 +238,6 @@ export async function getBranchPr(
     : null;
 }
 
-export async function refreshPr(number: number): Promise<void> {
-  // refresh cache
-  await getPr(number);
-}
-
 export async function getPrList(): Promise<Pr[]> {
   const changes = await client.findChanges(config.repository!, {
     branchName: '',

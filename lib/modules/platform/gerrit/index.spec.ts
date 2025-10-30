@@ -425,17 +425,6 @@ describe('modules/platform/gerrit/index', () => {
     });
   });
 
-  describe('refreshPr()', () => {
-    it('refreshPr()', async () => {
-      clientMock.getChange.mockResolvedValueOnce(partial<GerritChange>({}));
-      await expect(gerrit.refreshPr(123456)).toResolve();
-      expect(clientMock.getChange).toHaveBeenCalledExactlyOnceWith(
-        123456,
-        REQUEST_DETAILS_FOR_PRS,
-      );
-    });
-  });
-
   describe('getPrList()', () => {
     it('getPrList() - empty list', async () => {
       clientMock.findChanges.mockResolvedValueOnce([]);
