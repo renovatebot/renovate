@@ -342,6 +342,9 @@ describe('modules/manager/npm/post-update/npm', () => {
 
   it('finds npm globally', async () => {
     const execSnapshots = mockExecAll();
+    const updates = [
+      { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: false },
+    ];
     // package.json
     fs.readLocalFile.mockResolvedValue('{}');
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
@@ -349,11 +352,17 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
+      {},
+      updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
     expect(res.lockFile).toBe('package-lock-contents');
-    // TODO: is that right?
-    expect(execSnapshots).toEqual([]);
+    // since there are no install npm commands, it means we are using the global npm
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
   });
 
   it('uses docker npm', async () => {
