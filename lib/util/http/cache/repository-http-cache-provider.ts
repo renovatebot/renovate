@@ -82,8 +82,7 @@ export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
       return null;
     }
 
-    const cache = await this.load(method, url);
-    const httpCache = HttpCache.parse(cache);
+    const httpCache = await this.get(method, url);
     if (!httpCache) {
       return null;
     }
