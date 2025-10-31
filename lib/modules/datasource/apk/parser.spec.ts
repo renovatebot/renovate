@@ -83,7 +83,7 @@ t:1700000001`;
       expect(result[2].name).toBe('nginx');
 
       // Should have warned about incomplete package (missing version)
-      expect(loggerWarnSpy).toHaveBeenCalledWith(
+      expect(loggerWarnSpy).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           packageInfo: expect.objectContaining({
             name: 'incomplete-package',
@@ -108,7 +108,7 @@ t:1700000001`;
       const result = parseApkIndex(indexContent);
 
       expect(result).toEqual([]);
-      expect(loggerWarnSpy).toHaveBeenCalledWith(
+      expect(loggerWarnSpy).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           err: expect.any(Error),
         }),

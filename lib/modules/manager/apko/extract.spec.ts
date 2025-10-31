@@ -681,7 +681,7 @@ describe('modules/manager/apko/extract', () => {
       });
 
       // Verify that getSiblingFileName was called with the correct lockfile name
-      expect(getSiblingFileName).toHaveBeenCalledWith(
+      expect(getSiblingFileName).toHaveBeenCalledExactlyOnceWith(
         'image.yaml',
         'image.lock.json',
       );

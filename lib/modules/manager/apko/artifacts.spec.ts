@@ -290,7 +290,7 @@ describe('modules/manager/apko/artifacts', () => {
       ]);
 
       // Verify that getSiblingFileName was called with the correct lockfile name
-      expect(fs.getSiblingFileName).toHaveBeenCalledWith(
+      expect(fs.getSiblingFileName).toHaveBeenCalledExactlyOnceWith(
         'config/apko.yml',
         'apko.lock.json',
       );
@@ -334,7 +334,7 @@ describe('modules/manager/apko/artifacts', () => {
       ]);
 
       // Verify that getSiblingFileName was called with the correct lockfile name
-      expect(fs.getSiblingFileName).toHaveBeenCalledWith(
+      expect(fs.getSiblingFileName).toHaveBeenCalledExactlyOnceWith(
         'image.yaml',
         'image.lock.json',
       );

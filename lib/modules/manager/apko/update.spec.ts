@@ -26,7 +26,7 @@ describe('modules/manager/apko/update', () => {
       });
 
       expect(result).toBeNull();
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
         'Missing required fields for APK update',
       );
     });
@@ -42,7 +42,7 @@ describe('modules/manager/apko/update', () => {
       });
 
       expect(result).toBeNull();
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
         'Missing required fields for APK update',
       );
     });
@@ -58,7 +58,7 @@ describe('modules/manager/apko/update', () => {
       });
 
       expect(result).toBeNull();
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
         'Missing required fields for APK update',
       );
     });
@@ -74,7 +74,7 @@ describe('modules/manager/apko/update', () => {
       });
 
       expect(result).toBeNull();
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
         {
           depName: 'package',
           currentValue: '1.0.0',
@@ -95,7 +95,7 @@ describe('modules/manager/apko/update', () => {
       });
 
       expect(result).toBeNull();
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
         'No changes made to package file',
       );
     });
@@ -112,7 +112,7 @@ describe('modules/manager/apko/update', () => {
       });
 
       expect(result).toBe('package=1.0.1\nother-package=2.0.0');
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
         { depName: 'package', currentValue: '1.0.0', newValue: '1.0.1' },
         'Successfully updated APK package version',
       );
@@ -164,7 +164,7 @@ archs:
       });
 
       expect(result).toBeNull();
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
         'No changes made to package file',
       );
     });
