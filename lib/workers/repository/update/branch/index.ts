@@ -473,7 +473,7 @@ export async function processBranch(
         );
       }
       if (depNamesWithoutReleaseTimestamp['timestamp-optional'].length) {
-        logger.warn(
+        logger.debug(
           { depNames: depNamesWithoutReleaseTimestamp['timestamp-optional'] },
           `${depNamesWithoutReleaseTimestamp['timestamp-optional'].length} upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding`,
         );
