@@ -1,6 +1,7 @@
 import type { LongCommitSha } from '../../../util/git/types';
 import { client as _client } from './client';
 import { GerritScm, configureScm, initializeBranchesFromChanges } from './scm';
+
 import type { GerritChange, GerritRevisionInfo } from './types';
 import { git, partial } from '~test/util';
 
