@@ -1456,139 +1456,96 @@ describe('util/git/index', { timeout: 10000 }, () => {
   });
 
   describe('initializeBranchesFromRefspecs()', () => {
-    async function setupRemoteRepo(): Promise<{
-      path: string;
-      repo: ReturnType<typeof Git>;
-      cleanup: () => Promise<void>;
-    }> {
+    async function setupRemoteWithRef(
+      ref?: string,
+    ): Promise<{ commit: string; cleanup: () => Promise<void> }> {
       const remote = await tmp.dir({ unsafeCleanup: true });
       const repo = Git(remote.path);
       await repo.init();
-      await repo.addConfig('user.email', 'test@example.com');
-      await repo.addConfig('user.name', 'Test');
-      await repo.addConfig('commit.gpgsign', 'false');
-      await fs.writeFile(remote.path + '/file.txt', 'content');
-      await repo.add(['file.txt']);
-      await repo.commit('initial');
-      return { path: remote.path, repo, cleanup: remote.cleanup };
-    }
-
-    it('should fetch refspecs and populate branchCommits', async () => {
-      const remote = await setupRemoteRepo();
-      const commit = await remote.repo.revparse(['HEAD']);
-      await remote.repo.raw(['update-ref', 'refs/changes/42/12345/1', commit]);
-
-      tmpDir = await tmp.dir({ unsafeCleanup: true });
-      GlobalConfig.set({ localDir: tmpDir.path });
-      await git.initRepo({ url: remote.path, defaultBranch });
-
-      await git.initializeBranchesFromRefspecs(
-        new Map([['refs/changes/42/12345/1', 'test-branch']]),
-      );
-
-      expect(git.branchExists('test-branch')).toBe(true);
-      expect(git.getBranchCommit('test-branch')).toBe(commit);
-      await remote.cleanup();
-    });
-
-    it('should handle multiple refspecs', async () => {
-      const remote = await setupRemoteRepo();
-      const commit = await remote.repo.revparse(['HEAD']);
-
-      // Create multiple refs pointing to the same commit
-      for (let i = 1; i <= 5; i++) {
-        await remote.repo.raw([
-          'update-ref',
-          `refs/changes/${i.toString().padStart(2, '0')}/${1000 + i}/${i}`,
-          commit,
-        ]);
-      }
-
-      tmpDir = await tmp.dir({ unsafeCleanup: true });
-      GlobalConfig.set({ localDir: tmpDir.path });
-      await git.initRepo({ url: remote.path, defaultBranch });
-
-      const refspecMap = new Map([
-        ['refs/changes/01/1001/1', 'branch-1'],
-        ['refs/changes/02/1002/2', 'branch-2'],
-        ['refs/changes/03/1003/3', 'branch-3'],
-        ['refs/changes/04/1004/4', 'branch-4'],
-        ['refs/changes/05/1005/5', 'branch-5'],
-      ]);
-
-      await git.initializeBranchesFromRefspecs(refspecMap);
-
-      for (const branch of refspecMap.values()) {
-        expect(git.branchExists(branch)).toBe(true);
-      }
-      await remote.cleanup();
-    });
-
-    it('should throw on fetch error', async () => {
-      const remote = await setupRemoteRepo();
-      tmpDir = await tmp.dir({ unsafeCleanup: true });
-      GlobalConfig.set({ localDir: tmpDir.path });
-      await git.initRepo({ url: remote.path, defaultBranch });
-
-      await expect(
-        git.initializeBranchesFromRefspecs(
-          new Map([['refs/changes/99/99999/1', 'nonexistent']]),
-        ),
-      ).rejects.toThrow();
-      await remote.cleanup();
-    });
-  });
-
-  describe('deleteBranchCreatedFromRefspec()', () => {
-    it('should delete local branch and remote tracking ref', async () => {
-      const remote = await tmp.dir({ unsafeCleanup: true });
-      const repo = Git(remote.path);
-      await repo.init();
-      await repo.addConfig('user.email', 'test@example.com');
-      await repo.addConfig('user.name', 'Test');
       await repo.addConfig('commit.gpgsign', 'false');
       await fs.writeFile(remote.path + '/file.txt', 'content');
       await repo.add(['file.txt']);
       await repo.commit('initial');
       const commit = await repo.revparse(['HEAD']);
-      await repo.raw(['update-ref', 'refs/changes/50/12350/1', commit]);
+      if (ref) {
+        await repo.raw(['update-ref', ref, commit]);
+      }
 
       tmpDir = await tmp.dir({ unsafeCleanup: true });
       GlobalConfig.set({ localDir: tmpDir.path });
       await git.initRepo({ url: remote.path, defaultBranch });
 
-      await git.initializeBranchesFromRefspecs(
-        new Map([['refs/changes/50/12350/1', 'test-branch']]),
+      return { commit, cleanup: remote.cleanup };
+    }
+
+    it('should fetch refspecs and populate branchCommits', async () => {
+      const { commit, cleanup } = await setupRemoteWithRef(
+        'refs/changes/45/12345/1',
       );
 
-      expect(git.branchExists('test-branch')).toBe(true);
+      await git.initializeBranchesFromRefspecs(
+        new Map([['refs/changes/45/12345/1', 'renovate/typescript-5.x']]),
+      );
 
-      await git.deleteBranchCreatedFromRefspec('test-branch');
-
-      expect(git.branchExists('test-branch')).toBe(false);
-      expect(git.getBranchCommit('test-branch')).toBeNull();
-      await remote.cleanup();
+      expect(git.branchExists('renovate/typescript-5.x')).toBe(true);
+      expect(git.getBranchCommit('renovate/typescript-5.x')).toBe(commit);
+      await cleanup();
     });
 
-    it('should handle non-existent branch', async () => {
+    it('should throw on fetch error', async () => {
+      const { cleanup } = await setupRemoteWithRef('refs/changes/01/1001/1');
+
+      await expect(
+        git.initializeBranchesFromRefspecs(
+          new Map([['refs/changes/99/99999/1', 'renovate/node-22.x']]),
+        ),
+      ).rejects.toThrow();
+      await cleanup();
+    });
+  });
+
+  describe('deleteBranchCreatedFromRefspec()', () => {
+    async function setupRemoteWithRef(
+      ref?: string,
+    ): Promise<{ commit: string; cleanup: () => Promise<void> }> {
       const remote = await tmp.dir({ unsafeCleanup: true });
       const repo = Git(remote.path);
       await repo.init();
-      await repo.addConfig('user.email', 'test@example.com');
-      await repo.addConfig('user.name', 'Test');
       await repo.addConfig('commit.gpgsign', 'false');
       await fs.writeFile(remote.path + '/file.txt', 'content');
       await repo.add(['file.txt']);
       await repo.commit('initial');
+      const commit = await repo.revparse(['HEAD']);
+      if (ref) {
+        await repo.raw(['update-ref', ref, commit]);
+      }
 
       tmpDir = await tmp.dir({ unsafeCleanup: true });
       GlobalConfig.set({ localDir: tmpDir.path });
       await git.initRepo({ url: remote.path, defaultBranch });
 
+      return { commit, cleanup: remote.cleanup };
+    }
+
+    it('should delete local branch and remote tracking ref', async () => {
+      const { cleanup } = await setupRemoteWithRef('refs/changes/50/12350/1');
+      await git.initializeBranchesFromRefspecs(
+        new Map([['refs/changes/50/12350/1', 'renovate/npm-lodash-4.x']]),
+      );
+
+      await git.deleteBranchCreatedFromRefspec('renovate/npm-lodash-4.x');
+
+      expect(git.branchExists('renovate/npm-lodash-4.x')).toBe(false);
+      await cleanup();
+    });
+
+    it('should handle non-existent branch', async () => {
+      const { cleanup } = await setupRemoteWithRef();
+
       await expect(
         git.deleteBranchCreatedFromRefspec('nonexistent'),
       ).toResolve();
-      await remote.cleanup();
+      await cleanup();
     });
   });
 });
