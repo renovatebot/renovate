@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isPlainObject } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { HttpCacheStats } from '../../stats';
 import type { GotOptions, HttpResponse } from '../types';
@@ -21,7 +21,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       return null;
     }
 
-    if (is.plainObject(httpCache.httpResponse)) {
+    if (isPlainObject(httpCache.httpResponse)) {
       httpCache.httpResponse.cached = true;
     }
 
