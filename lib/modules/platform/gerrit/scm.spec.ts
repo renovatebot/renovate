@@ -1,6 +1,6 @@
 import type { LongCommitSha } from '../../../util/git/types';
 import { client as _client } from './client';
-import { GerritScm, configureScm, initializeBranchesFromChanges } from './scm';
+import { GerritScm, configureScm } from './scm';
 
 import type { GerritChange, GerritRevisionInfo } from './types';
 import { git, partial } from '~test/util';
@@ -13,92 +13,6 @@ describe('modules/platform/gerrit/scm', () => {
 
   beforeEach(() => {
     configureScm('test/repo');
-  });
-
-  describe('initializeBranchesFromChanges()', () => {
-    it('should fetch and initialize branches from open Gerrit changes', async () => {
-      const changes = [
-        partial<GerritChange>({
-          _number: 12345,
-          current_revision: 'sha123',
-          revisions: {
-            sha123: partial<GerritRevisionInfo>({
-              ref: 'refs/changes/45/12345/1',
-              commit_with_footers:
-                'commit message\n\nRenovate-Branch: renovate/dep-1',
-            }),
-          },
-        }),
-        partial<GerritChange>({
-          _number: 12346,
-          current_revision: 'sha456',
-          revisions: {
-            sha456: partial<GerritRevisionInfo>({
-              ref: 'refs/changes/46/12346/1',
-              commit_with_footers:
-                'commit message\n\nRenovate-Branch: renovate/dep-2',
-            }),
-          },
-        }),
-      ];
-      clientMock.findChanges.mockResolvedValueOnce(changes);
-      git.initializeBranchesFromRefspecs.mockResolvedValueOnce();
-
-      await initializeBranchesFromChanges('test/repo');
-
-      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
-        'test/repo',
-        {
-          branchName: '',
-          state: 'open',
-          requestDetails: ['CURRENT_REVISION', 'COMMIT_FOOTERS'],
-        },
-      );
-      expect(
-        git.initializeBranchesFromRefspecs,
-      ).toHaveBeenCalledExactlyOnceWith(
-        new Map([
-          ['refs/changes/45/12345/1', 'renovate/dep-1'],
-          ['refs/changes/46/12346/1', 'renovate/dep-2'],
-        ]),
-      );
-    });
-
-    it('should handle no open changes', async () => {
-      clientMock.findChanges.mockResolvedValueOnce([]);
-
-      await initializeBranchesFromChanges('test/repo');
-
-      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
-        'test/repo',
-        {
-          branchName: '',
-          state: 'open',
-          requestDetails: ['CURRENT_REVISION', 'COMMIT_FOOTERS'],
-        },
-      );
-      expect(git.initializeBranchesFromRefspecs).not.toHaveBeenCalled();
-    });
-
-    it('should skip changes without source branch in footers', async () => {
-      const changes = [
-        partial<GerritChange>({
-          _number: 12345,
-          current_revision: 'sha123',
-          revisions: {
-            sha123: partial<GerritRevisionInfo>({
-              ref: 'refs/changes/45/12345/1',
-              commit_with_footers: 'commit message without renovate branch',
-            }),
-          },
-        }),
-      ];
-      clientMock.findChanges.mockResolvedValueOnce(changes);
-
-      await initializeBranchesFromChanges('test/repo');
-
-      expect(git.initializeBranchesFromRefspecs).not.toHaveBeenCalled();
-    });
   });
 
   describe('deleteBranch()', () => {

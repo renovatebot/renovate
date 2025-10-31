@@ -118,7 +118,8 @@ describe('modules/platform/gerrit/index', () => {
 
     it('initRepo() - active', async () => {
       clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
-      clientMock.findChanges.mockResolvedValueOnce([]);
+      clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
+      clientMock.findChanges.mockResolvedValueOnce([]); // open changes for branch initialization
       expect(await gerrit.initRepo({ repository: 'test/repo' })).toEqual({
         defaultBranch: 'main',
         isFork: false,
@@ -127,6 +128,7 @@ describe('modules/platform/gerrit/index', () => {
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
         url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
       });
+      expect(git.initializeBranchesFromRefspecs).not.toHaveBeenCalled();
     });
 
     it('initRepo() - abandon rejected changes', async () => {
@@ -138,6 +140,7 @@ describe('modules/platform/gerrit/index', () => {
         partial<GerritChange>({ _number: 1 }),
         partial<GerritChange>({ _number: 2 }),
       ]);
+      clientMock.findChanges.mockResolvedValueOnce([]); // open changes for branch initialization
 
       await gerrit.initRepo({ repository: 'test/repo' });
 
@@ -155,6 +158,54 @@ describe('modules/platform/gerrit/index', () => {
           'This change has been abandoned as it was voted with Code-Review -2.',
         ],
       ]);
+    });
+
+    it('initRepo() - initialize branches from open changes', async () => {
+      clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
+      clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
+      clientMock.findChanges.mockResolvedValueOnce([
+        partial<GerritChange>({
+          _number: 12345,
+          current_revision: 'sha123',
+          revisions: {
+            sha123: partial<GerritRevisionInfo>({
+              ref: 'refs/changes/45/12345/1',
+              commit_with_footers:
+                'commit message\n\nRenovate-Branch: renovate/dep-1',
+            }),
+          },
+        }),
+        partial<GerritChange>({
+          _number: 12346,
+          current_revision: 'sha456',
+          revisions: {
+            sha456: partial<GerritRevisionInfo>({
+              ref: 'refs/changes/46/12346/1',
+              commit_with_footers:
+                'commit message\n\nRenovate-Branch: renovate/dep-2',
+            }),
+          },
+        }),
+      ]);
+
+      await gerrit.initRepo({ repository: 'test/repo' });
+
+      expect(clientMock.findChanges.mock.calls[1]).toEqual([
+        'test/repo',
+        {
+          branchName: '',
+          state: 'open',
+          requestDetails: ['CURRENT_REVISION', 'COMMIT_FOOTERS'],
+        },
+      ]);
+      expect(
+        git.initializeBranchesFromRefspecs,
+      ).toHaveBeenCalledExactlyOnceWith(
+        new Map([
+          ['refs/changes/45/12345/1', 'renovate/dep-1'],
+          ['refs/changes/46/12346/1', 'renovate/dep-2'],
+        ]),
+      );
     });
   });
 
