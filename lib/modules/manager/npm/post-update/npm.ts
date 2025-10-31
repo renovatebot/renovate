@@ -57,7 +57,7 @@ async function getNpmConstraintFromPackageLock(
   logger.debug(
     `Using npm constraint >=9 for lockfileVersion=${lockfileVersion}`,
   );
-  return `>=9`;
+  return null;
 }
 
 export async function generateLockFile(
