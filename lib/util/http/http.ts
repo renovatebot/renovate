@@ -199,8 +199,6 @@ export abstract class HttpBase<
 
       const startTime = Date.now();
       const httpTask: GotTask = async () => {
-        const queueMs = Date.now() - startTime;
-
         const cachedResponse = await cacheProvider?.bypassServer<unknown>(
           options.method,
           url,
@@ -209,6 +207,7 @@ export abstract class HttpBase<
           return cachedResponse;
         }
 
+        const queueMs = Date.now() - startTime;
         return fetch(url, options, { queueMs });
       };
 
