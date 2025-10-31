@@ -353,10 +353,7 @@ describe('modules/platform/gerrit/client', () => {
         .get('/a/changes/123456?o=CURRENT_REVISION&o=COMMIT_FOOTERS')
         .reply(200, gerritRestResponse(change), jsonResultHeader);
       await expect(
-        client.getChange(123456, undefined, [
-          'CURRENT_REVISION',
-          'COMMIT_FOOTERS',
-        ]),
+        client.getChange(123456, ['CURRENT_REVISION', 'COMMIT_FOOTERS']),
       ).resolves.toEqual(change);
     });
   });
