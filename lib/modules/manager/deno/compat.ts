@@ -32,15 +32,13 @@ export async function extractDenoCompatiblePackageJson(
     return null;
   }
 
-  const res: PackageFile<DenoManagerData> = {
-    ...extracted,
-    managerData: {
-      packageName: extracted.managerData?.packageJsonName,
-      workspaces: extracted.managerData?.workspaces,
-    },
-    packageFile,
+  const result = extracted as PackageFile<DenoManagerData>;
+  result.managerData = {
+    packageName: extracted.managerData?.packageJsonName,
+    workspaces: extracted.managerData?.workspaces,
   };
-  return res;
+  result.packageFile = packageFile;
+  return result;
 }
 
 // referring to lib/modules/manager/npm/extract/pnpm.ts detectPnpmWorkspaces()
