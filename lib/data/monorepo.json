@@ -558,7 +558,7 @@
     "ruby-on-rails": "https://github.com/rails/rails",
     "rust-analyzer": "https://github.com/rust-lang/rust-analyzer",
     "rust-futures": "https://github.com/rust-lang/futures-rs",
-    "rust-wasm-bindgen": "https://github.com/rustwasm/wasm-bindgen",
+    "rust-wasm-bindgen": "https://github.com/wasm-bindgen/wasm-bindgen",
     "sanity": "https://github.com/sanity-io/sanity",
     "serilog-ui": "https://github.com/serilog-contrib/serilog-ui",
     "scaffdog": "https://github.com/scaffdog/scaffdog",
