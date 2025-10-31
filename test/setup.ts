@@ -33,5 +33,6 @@ declare global {
 }
 
 vi.mock('../lib/util/mutex', () => ({
-  acquireLock: () => Promise.resolve(() => undefined),
+  initMutexes: () => vi.fn(),
+  acquireLock: () => vi.fn().mockImplementation(() => () => undefined),
 }));
