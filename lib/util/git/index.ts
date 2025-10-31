@@ -725,11 +725,11 @@ export async function initializeBranchesFromRefspecs(
 }
 
 /**
- * Delete a branch that was created from a refspec via initializeBranchesFromRefspecs.
- * Removes the remote-tracking ref and cleans up branch commit tracking.
- * Does not attempt to push deletion to remote (these refs are local constructs).
+ * Remove a branch initialized by initializeBranchesFromRefspecs.
+ * Useful for platforms that represent branches in non-standard ways (e.g. Gerrit changes),
+ * so they can be cleaned up after use.
  *
- * @param branchName The branch name to delete
+ * @param branchName Branch name to clean up
  */
 export async function deleteBranchCreatedFromRefspec(
   branchName: string,
