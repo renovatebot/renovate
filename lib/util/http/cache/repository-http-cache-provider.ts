@@ -3,7 +3,7 @@ import { getCache } from '../../cache/repository';
 import type { HttpResponse } from '../types';
 import { copyResponse } from '../util';
 import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
-import { HttpCache } from './schema';
+import type { HttpCache } from './schema';
 
 export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
   constructor(private aggressive = false) {
