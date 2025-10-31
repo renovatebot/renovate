@@ -202,7 +202,10 @@ export abstract class HttpBase<
       const httpTask: GotTask = async () => {
         let releaseLock: undefined | (() => void);
         if (isReadMethod) {
-          releaseLock = await acquireLock(url, 'http-mutex');
+          releaseLock = await acquireLock(
+            `${options.method} ${url}`,
+            'http-mutex',
+          );
         }
         try {
           const cachedResponse = await cacheProvider?.bypassServer<unknown>(
