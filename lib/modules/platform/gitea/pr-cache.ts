@@ -26,7 +26,7 @@ export class GiteaPrCache {
     let pullRequestCache = repoCache.platform.gitea.pullRequestsCache as
       | GiteaPrCacheData
       | undefined;
-    if (!pullRequestCache || pullRequestCache.author !== author) {
+    if (pullRequestCache?.author !== author) {
       pullRequestCache = {
         items: {},
         updated_at: null,

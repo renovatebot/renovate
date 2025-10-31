@@ -24,7 +24,7 @@ export class BbsPrCache {
     repoCache.platform.bitbucketServer ??= {};
     let pullRequestCache = repoCache.platform.bitbucketServer
       .pullRequestsCache as BbsPrCacheData;
-    if (!pullRequestCache || pullRequestCache.author !== author) {
+    if (pullRequestCache?.author !== author) {
       pullRequestCache = {
         items: {},
         updatedDate: null,

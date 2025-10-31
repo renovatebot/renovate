@@ -38,7 +38,7 @@ function parseDynamicRevision(str: string): Revision | null {
   }
 
   const range = parseRange(str);
-  if (range && range.length === 1) {
+  if (range?.length === 1) {
     const rangeValue = rangeToStr(range);
     if (rangeValue) {
       return {

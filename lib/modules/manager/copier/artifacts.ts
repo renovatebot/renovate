@@ -56,7 +56,7 @@ export async function updateArtifacts({
   updatedDeps,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  if (!updatedDeps || updatedDeps.length !== 1) {
+  if (updatedDeps?.length !== 1) {
     // Each answers file (~ packageFileName) has exactly one dependency to update.
     return artifactError(
       packageFileName,

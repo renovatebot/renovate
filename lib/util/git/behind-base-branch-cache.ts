@@ -14,8 +14,7 @@ export function getCachedBehindBaseResult(
   );
 
   if (
-    branch &&
-    branch.sha === branchSha &&
+    branch?.sha === branchSha &&
     branch.baseBranch === baseBranch &&
     branch.baseBranchSha === baseBranchSha &&
     branch.isBehindBase !== undefined

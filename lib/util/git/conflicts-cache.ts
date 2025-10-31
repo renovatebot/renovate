@@ -10,8 +10,7 @@ export function getCachedConflictResult(
   const cache = getCache();
   const branch = cache?.branches?.find((br) => br.branchName === branchName);
   if (
-    branch &&
-    branch.baseBranch === baseBranch &&
+    branch?.baseBranch === baseBranch &&
     branch.baseBranchSha === baseBranchSha &&
     branch.sha === branchSha &&
     branch.isConflicted !== undefined

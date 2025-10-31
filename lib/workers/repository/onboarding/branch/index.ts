@@ -174,8 +174,8 @@ function isOnboardingCacheValid(
   const cache = getCache();
   const onboardingBranchCache = cache?.onboardingBranchCache;
   return !!(
-    onboardingBranchCache &&
-    onboardingBranchCache.defaultBranchSha === getBranchCommit(defaultBranch) &&
+    onboardingBranchCache?.defaultBranchSha ===
+      getBranchCommit(defaultBranch) &&
     onboardingBranchCache.onboardingBranchSha ===
       getBranchCommit(onboardingBranch) &&
     onboardingBranchCache.configFileName &&

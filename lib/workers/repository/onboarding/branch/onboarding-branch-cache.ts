@@ -69,8 +69,7 @@ export async function isOnboardingBranchModified(
   let isModified = false;
 
   if (
-    onboardingCache &&
-    onboardingSha === onboardingCache.onboardingBranchSha &&
+    onboardingSha === onboardingCache?.onboardingBranchSha &&
     !is.undefined(onboardingCache.isModified)
   ) {
     return onboardingCache.isModified;
@@ -113,8 +112,7 @@ export async function isOnboardingBranchConflicted(
   let isConflicted = false;
 
   if (
-    onboardingCache &&
-    defaultBranchSha === onboardingCache.defaultBranchSha &&
+    defaultBranchSha === onboardingCache?.defaultBranchSha &&
     onboardingSha === onboardingCache.onboardingBranchSha &&
     !is.undefined(onboardingCache.isConflicted)
   ) {
