@@ -76,7 +76,7 @@ describe('workers/repository/init/merge', () => {
       scm.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       expect(await detectRepoFileConfig()).toEqual({});
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Existing config file no longer exists',
       );
@@ -600,7 +600,7 @@ describe('workers/repository/init/merge', () => {
           );
 
           expect(resolved).toStrictEqual(invalidConfig);
-          // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
           expect(logger.logger.info).toHaveBeenCalledWith(
             {
               errors: [
