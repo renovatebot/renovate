@@ -23,7 +23,7 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
       fileName,
     );
     expect(commitMessageFactory.getPrTitle()).toBe(
-      'chore(config): migrate renovate config',
+      'chore(config): migrate Renovate config',
     );
   });
 
