@@ -6,7 +6,6 @@ import { hash } from '../../../util/hash';
 import { DefaultGitScm } from '../default-scm';
 import { client } from './client';
 import type { GerritFindPRConfig } from './types';
-import { extractSourceBranch } from './utils';
 
 /**
  * Gerrit SCM strategy:
@@ -19,45 +18,6 @@ import { extractSourceBranch } from './utils';
 let repository: string;
 export function configureScm(repo: string): void {
   repository = repo;
-
-  // Register hook to initialize branches after fetchBranchCommits
-  git.setAfterFetchBranchCommits(() => initializeBranchesFromChanges(repo));
-}
-
-/**
- * Initialize local branches for all open Gerrit changes.
- * This allows the DefaultGitScm to work with Gerrit changes as if they were regular Git branches.
- */
-export async function initializeBranchesFromChanges(
-  repo: string,
-): Promise<void> {
-  logger.debug('Initializing local branches from open Gerrit changes');
-  const openChanges = await client.findChanges(repo, {
-    branchName: '',
-    state: 'open',
-    requestDetails: ['CURRENT_REVISION', 'COMMIT_FOOTERS'],
-  });
-
-  logger.debug(`Found ${openChanges.length} open Gerrit changes`);
-
-  // Build a map of refspecs to branch names for bulk fetching
-  const refspecMap = new Map<string, string>();
-  for (const change of openChanges) {
-    const sourceBranch = extractSourceBranch(change);
-    if (sourceBranch && change.current_revision) {
-      const currentRevision = change.revisions![change.current_revision];
-      const refSpec = currentRevision.ref;
-      refspecMap.set(refSpec, sourceBranch);
-    }
-  }
-  logger.trace({ refspecMap }, 'Mapped Gerrit changes to branches');
-
-  if (refspecMap.size > 0) {
-    await git.initializeBranchesFromRefspecs(refspecMap);
-    logger.debug(`Initialized ${refspecMap.size} branches from Gerrit changes`);
-  } else {
-    logger.debug('No Gerrit changes to initialize');
-  }
 }
 
 export class GerritScm extends DefaultGitScm {

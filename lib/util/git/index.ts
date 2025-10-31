@@ -63,14 +63,6 @@ import type {
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
 
-/**
- * Set a hook to be called after fetchBranchCommits populates branchCommits.
- * Used by platforms like Gerrit to initialize branches from platform-specific sources.
- */
-export function setAfterFetchBranchCommits(hook: () => Promise<void>): void {
-  config.afterFetchBranchCommits = hook;
-}
-
 // Retry parameters
 const retryCount = 5;
 const delaySeconds = 3;
@@ -245,11 +237,6 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
     }
     throw err;
   }
-
-  // Call platform-specific hook after populating branchCommits
-  if (config.afterFetchBranchCommits) {
-    await config.afterFetchBranchCommits();
-  }
 }
 
 export async function fetchRevSpec(revSpec: string): Promise<void> {
@@ -257,15 +244,10 @@ export async function fetchRevSpec(revSpec: string): Promise<void> {
 }
 
 export async function initRepo(args: StorageConfig): Promise<void> {
-  // Preserve the afterFetchBranchCommits hook if it was set before initRepo
-  const existingHook = config.afterFetchBranchCommits;
   config = { ...args } as any;
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
-  if (existingHook) {
-    config.afterFetchBranchCommits = existingHook;
-  }
   // TODO: safe to pass all env variables? use `getChildEnv` instead?
   git = simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env({
     ...getEnv(),

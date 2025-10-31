@@ -40,6 +40,7 @@ import type {
 import {
   REQUEST_DETAILS_FOR_PRS,
   TAG_PULL_REQUEST_BODY,
+  extractSourceBranch,
   getGerritRepoUrl,
   mapBranchStatusToLabel,
   mapGerritChangeToPr,
@@ -115,13 +116,14 @@ export async function initRepo({
     config: projectInfo,
     labels: projectInfo.labels ?? {},
   };
+
   const baseUrl = defaults.endpoint!;
   const url = getGerritRepoUrl(repository, baseUrl);
   configureScm(repository);
   await git.initRepo({ url });
 
   //abandon "open" and "rejected" changes at startup
-  const rejectedChanges = await client.findChanges(config.repository!, {
+  const rejectedChanges = await client.findChanges(repository, {
     branchName: '',
     state: 'open',
     label: '-2',
@@ -135,6 +137,30 @@ export async function initRepo({
       `Abandoned change ${change._number} with Code-Review -2 in repository ${repository}`,
     );
   }
+
+  // Initialize Gerrit changes as remote-tracking branches.
+  // This allows the DefaultGitScm to work with Gerrit changes as if they were regular Git branches.
+  const openChanges = await client.findChanges(repository, {
+    branchName: '',
+    state: 'open',
+    requestDetails: ['CURRENT_REVISION', 'COMMIT_FOOTERS'],
+  });
+  const refspecMap = new Map<string, string>();
+  for (const change of openChanges) {
+    const sourceBranch = extractSourceBranch(change);
+    if (sourceBranch && change.current_revision) {
+      const currentRevision = change.revisions![change.current_revision];
+      const refSpec = currentRevision.ref;
+      refspecMap.set(refSpec, sourceBranch);
+    }
+  }
+  if (refspecMap.size > 0) {
+    await git.initializeBranchesFromRefspecs(refspecMap);
+    logger.debug(
+      `Initialized ${refspecMap.size} Gerrit changes as remote-tracking branches`,
+    );
+  }
+
   const repoConfig: RepoResult = {
     defaultBranch: config.head!,
     isFork: false,
