@@ -44,7 +44,7 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
       config,
       fileName,
     );
-    expect(commitMessageFactory.getPrTitle()).toBe('Migrate renovate config');
+    expect(commitMessageFactory.getPrTitle()).toBe('Migrate Renovate config');
   });
 
   it('returns default values when commitMessage template string is empty', () => {
@@ -54,6 +54,6 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
       config,
       fileName,
     );
-    expect(commitMessageFactory.getPrTitle()).toBe('Migrate renovate config');
+    expect(commitMessageFactory.getPrTitle()).toBe('Migrate Renovate config');
   });
 });
