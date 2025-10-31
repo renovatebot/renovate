@@ -91,33 +91,27 @@ export async function collectPackageJson(
   const rootPackageFile =
     await extractDenoCompatiblePackageJson(rootPackageJson);
   if (rootPackageFile) {
-    const pkg = {
-      ...rootPackageFile,
-      lockFiles,
-    };
+    rootPackageFile.lockFiles = lockFiles;
 
     // detect node compat workspaces
-    const result = await detectNodeCompatWorkspaces(pkg);
+    const result = await detectNodeCompatWorkspaces(rootPackageFile);
     /* v8 ignore next 3: hard to test */
     if (!result) {
       return null;
     }
     const { workspaces, packagePaths } = result;
-    pkg.managerData = {
-      ...pkg.managerData,
+    rootPackageFile.managerData = {
+      packageName: rootPackageFile.managerData?.packageName,
       // override workspace
       workspaces,
     };
-    packageFiles.push(pkg);
+    packageFiles.push(rootPackageFile);
 
     for (const packagePath of packagePaths) {
       const packageFile = await extractDenoCompatiblePackageJson(packagePath);
       if (packageFile) {
-        const pkg = {
-          ...packageFile,
-          lockFiles,
-        };
-        packageFiles.push(pkg);
+        packageFile.lockFiles = lockFiles;
+        packageFiles.push(packageFile);
       }
     }
   }
