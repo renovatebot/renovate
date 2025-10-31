@@ -46,12 +46,12 @@ export class TypstDatasource extends Datasource {
       Registry,
     );
 
-    const releases = registry[pkg];
-    if (!releases) {
+    const result = registry[pkg];
+    if (!result) {
       return null;
     }
 
-    const result: ReleaseResult = { registryUrl, releases };
+    result.registryUrl = registryUrl;
     return result;
   }
 }

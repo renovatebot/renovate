@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { LooseArray } from '../../../util/schema-utils';
 import { asTimestamp } from '../../../util/timestamp';
-import type { Release } from '../types';
+import type { ReleaseResult } from '../types';
 
 const ReleaseItem = z
   .object({
@@ -18,11 +18,12 @@ const ReleaseItem = z
   );
 
 export const Registry = LooseArray(ReleaseItem).transform((items) => {
-  const result: Record<string, Release[]> = {};
+  const result: Record<string, ReleaseResult> = {};
   for (const item of items) {
-    const { packageName, ...release } = item;
-    result[packageName] ??= [];
-    result[packageName].push(release);
+    const { packageName, sourceUrl, ...release } = item;
+    result[packageName] ??= { releases: [] };
+    result[packageName].releases.push(release);
+    result[packageName].sourceUrl = sourceUrl;
   }
   return result;
 });

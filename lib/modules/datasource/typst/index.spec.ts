@@ -53,20 +53,18 @@ describe('modules/datasource/typst/index', () => {
 
       expect(res).toEqual({
         registryUrl: 'https://packages.typst.org/preview/index.json',
+        sourceUrl: 'https://github.com/example/repo',
         releases: [
           {
             version: '0.1.0',
-            sourceUrl: 'https://github.com/example/repo',
             releaseTimestamp: '2024-01-08T10:13:47.000Z',
           },
           {
             version: '0.2.0',
-            sourceUrl: 'https://github.com/example/repo',
             releaseTimestamp: '2024-01-09T14:00:27.000Z',
           },
           {
             version: '1.0.0',
-            sourceUrl: 'https://github.com/example/repo',
             releaseTimestamp: '2024-01-10T17:47:07.000Z',
           },
         ],
@@ -147,16 +145,16 @@ describe('modules/datasource/typst/index', () => {
       });
 
       expect(res).toEqual({
+        registryUrl: 'https://packages.typst.org/preview/index.json',
+        sourceUrl: 'https://github.com/example/multi',
         releases: [
           {
             version: '0.1.0',
-            sourceUrl: 'https://github.com/example/multi',
-            releaseTimestamp: '2024-01-08T12:00:27.000Z',
+            releaseTimestamp: '2024-01-08T10:13:47.000Z',
           },
           {
             version: '0.2.0',
-            sourceUrl: 'https://github.com/example/multi',
-            releaseTimestamp: '2024-01-09T15:47:07.000Z',
+            releaseTimestamp: '2024-01-09T14:00:27.000Z',
           },
         ],
       });
@@ -170,12 +168,12 @@ describe('modules/datasource/typst/index', () => {
         .get('/preview/index.json')
         .reply(500);
 
-      await expect(
-        getPkgReleases({
-          datasource: TypstDatasource.id,
-          packageName,
-        }),
-      ).rejects.toThrow('external-host-error');
+      const res = await getPkgReleases({
+        datasource: TypstDatasource.id,
+        packageName,
+      });
+
+      expect(res).toBeNull();
     });
 
     it('handles empty registry response', async () => {
