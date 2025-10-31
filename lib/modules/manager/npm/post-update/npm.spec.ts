@@ -340,22 +340,6 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(execSnapshots).toEqual([]);
   });
 
-  it('finds npm globally', async () => {
-    const execSnapshots = mockExecAll();
-    // package.json
-    fs.readLocalFile.mockResolvedValue('{}');
-    fs.readLocalFile.mockResolvedValue('package-lock-contents');
-    const res = await npmHelper.generateLockFile(
-      'some-dir',
-      {},
-      'package-lock.json',
-    );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
-    expect(res.lockFile).toBe('package-lock-contents');
-    // TODO: is that right?
-    expect(execSnapshots).toEqual([]);
-  });
-
   it('uses docker npm', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
@@ -452,6 +436,31 @@ describe('modules/manager/npm/post-update/npm', () => {
       { cmd: 'install-tool node 16.16.0' },
       { cmd: 'install-tool npm 6.0.0' },
       { cmd: 'hash -d npm 2>/dev/null || true' },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
+  });
+
+  it('does not install npm if no constraints specified', async () => {
+    GlobalConfig.set({
+      localDir: '',
+      cacheDir: '/tmp',
+      binarySource: 'install',
+    });
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { constraints: {} },
+      [{ isLockFileMaintenance: true }],
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0' },
       {
         cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
       },
