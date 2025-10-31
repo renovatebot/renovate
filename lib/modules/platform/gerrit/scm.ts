@@ -48,12 +48,9 @@ export async function initializeBranchesFromChanges(
       const currentRevision = change.revisions![change.current_revision];
       const refSpec = currentRevision.ref;
       refspecMap.set(refSpec, sourceBranch);
-      logger.debug(
-        { sourceBranch, changeNumber: change._number, refSpec },
-        'Mapped Gerrit change to branch',
-      );
     }
   }
+  logger.trace({ refspecMap }, 'Mapped Gerrit changes to branches');
 
   if (refspecMap.size > 0) {
     await git.initializeBranchesFromRefspecs(refspecMap);
