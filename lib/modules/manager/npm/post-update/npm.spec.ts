@@ -340,6 +340,22 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(execSnapshots).toEqual([]);
   });
 
+  it('finds npm globally', async () => {
+    const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValue('{}');
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+    expect(res.lockFile).toBe('package-lock-contents');
+    // TODO: is that right?
+    expect(execSnapshots).toEqual([]);
+  });
+
   it('uses docker npm', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
