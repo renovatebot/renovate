@@ -110,13 +110,10 @@ export async function initRepo({
     config: projectInfo,
     labels: projectInfo.labels ?? {},
   };
-  const baseUrl = defaults.endpoint!;
-  const url = getGerritRepoUrl(repository, baseUrl);
-  configureScm(repository);
-  await git.initRepo({ url });
 
-  //abandon "open" and "rejected" changes at startup
-  const rejectedChanges = await client.findChanges(config.repository!, {
+  // Abandon open changes voted with Code-Review -2 before initRepo to avoid
+  // having them initialized as branches
+  const rejectedChanges = await client.findChanges(repository, {
     branchName: '',
     state: 'open',
     label: '-2',
@@ -130,6 +127,12 @@ export async function initRepo({
       `Abandoned change ${change._number} with Code-Review -2 in repository ${repository}`,
     );
   }
+
+  const baseUrl = defaults.endpoint!;
+  const url = getGerritRepoUrl(repository, baseUrl);
+  configureScm(repository);
+  await git.initRepo({ url });
+
   const repoConfig: RepoResult = {
     defaultBranch: config.head!,
     isFork: false,
