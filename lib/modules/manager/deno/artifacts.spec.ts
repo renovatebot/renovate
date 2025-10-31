@@ -1,17 +1,15 @@
 import _fs from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import tmp from 'tmp-promise';
+import { mockExecAll } from '../../../../test/exec-util';
 import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { exec as _exec } from '../../../util/exec';
 import { ExecError } from '../../../util/exec/exec-error';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from './artifacts';
 
-vi.mock('../../../util/exec');
 vi.mock('fs-extra');
 
-const exec = vi.mocked(_exec);
 const fs = vi.mocked(_fs);
 
 const updateArtifact: UpdateArtifact = {
@@ -65,6 +63,7 @@ describe('modules/manager/deno/artifacts', () => {
       const oldLock = Buffer.from('old');
       fs.readFile.mockResolvedValueOnce(oldLock as never);
       fs.readFile.mockResolvedValueOnce(oldLock as never);
+      mockExecAll();
       expect(await updateArtifacts(updateArtifact)).toBeNull();
     });
 
@@ -74,6 +73,7 @@ describe('modules/manager/deno/artifacts', () => {
       fs.readFile.mockResolvedValueOnce(oldLock as never);
       const newLock = Buffer.from('new');
       fs.readFile.mockResolvedValueOnce(newLock as never);
+      mockExecAll();
       expect(await updateArtifacts(updateArtifact)).toEqual([
         {
           file: {
@@ -98,6 +98,7 @@ describe('modules/manager/deno/artifacts', () => {
       fs.readFile.mockResolvedValueOnce(oldLock as never);
       const newLock = Buffer.from('new');
       fs.readFile.mockResolvedValueOnce(newLock as never);
+      mockExecAll();
       expect(await updateArtifacts(updateArtifact)).toEqual([
         {
           file: {
@@ -116,6 +117,7 @@ describe('modules/manager/deno/artifacts', () => {
       fs.readFile.mockResolvedValueOnce(oldLock as never);
       const newLock = Buffer.from('new');
       fs.readFile.mockResolvedValueOnce(newLock as never);
+      mockExecAll();
       expect(await updateArtifacts(updateArtifact)).toEqual([
         {
           file: {
@@ -137,7 +139,7 @@ describe('modules/manager/deno/artifacts', () => {
       updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
       const oldLock = Buffer.from('old');
       fs.readFile.mockResolvedValueOnce(oldLock as never);
-      exec.mockRejectedValueOnce(execError);
+      mockExecAll(execError);
       await expect(updateArtifacts(updateArtifact)).rejects.toThrow(
         TEMPORARY_ERROR,
       );
@@ -153,7 +155,7 @@ describe('modules/manager/deno/artifacts', () => {
       updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
       const oldLock = Buffer.from('old');
       fs.readFile.mockResolvedValueOnce(oldLock as never);
-      exec.mockRejectedValueOnce(execError);
+      mockExecAll(execError);
       expect(await updateArtifacts(updateArtifact)).toEqual([
         { artifactError: { lockFile: 'deno.lock', stderr: 'nope' } },
       ]);
@@ -216,6 +218,7 @@ describe('modules/manager/deno/artifacts', () => {
     fs.readFile.mockResolvedValueOnce(oldLock as never);
     const newLock = Buffer.from('new');
     fs.readFile.mockResolvedValueOnce(newLock as never);
+    mockExecAll();
     expect(await updateArtifacts(updateArtifact)).toEqual([
       {
         file: {
@@ -239,18 +242,13 @@ describe('modules/manager/deno/artifacts', () => {
     fs.readFile.mockResolvedValueOnce(oldLock as never);
     const newLock = Buffer.from('new');
     fs.readFile.mockResolvedValueOnce(newLock as never);
+    const execSnapshots = mockExecAll();
 
     await updateArtifacts(updateArtifact);
-
-    expect(exec).toHaveBeenCalledExactlyOnceWith('deno install', {
-      cwdFile: '',
-      docker: {},
-      toolConstraints: [
-        {
-          toolName: 'deno',
-        },
-      ],
-      userConfiguredEnv: undefined,
-    });
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'deno install',
+      },
+    ]);
   });
 });
