@@ -119,7 +119,9 @@ export async function generateLockFile(
       extraEnv,
       toolConstraints: [
         await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPkgJson),
-        npmToolConstraint,
+        ...(is.nonEmptyString(npmToolConstraint.constraint)
+          ? [npmToolConstraint]
+          : []),
       ],
       docker: {},
     };
