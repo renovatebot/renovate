@@ -664,11 +664,11 @@ export async function checkoutBranchFromRemote(
 }
 
 /**
- * Initialize branches from arbitrary refspecs by fetching them as remote-tracking refs.
- * This is useful for platforms that use non-standard ref formats (e.g., Gerrit changes).
- * Creates refs/remotes/origin/branchName refs that can be used by standard Git operations.
+ * Initialize remote-tracking branches from arbitrary refspecs.
+ * Useful for platforms that represent branches in non-standard ways (e.g. Gerrit changes),
+ * so they can be materialized as standard `refs/remotes/origin/<branchName>` for normal Git operations.
  *
- * @param refspecMap Map of refspec to branch name (e.g., 'refs/changes/72/19122672/50' -> 'deps/1234')
+ * @param refspecMap Map of refspec to desired branch name (e.g., 'refs/changes/72/19122672/50' -> 'renovate/node-22.x')
  */
 export async function initializeBranchesFromRefspecs(
   refspecMap: Map<string, string>,
