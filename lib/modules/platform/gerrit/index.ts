@@ -122,7 +122,8 @@ export async function initRepo({
   configureScm(repository);
   await git.initRepo({ url });
 
-  //abandon "open" and "rejected" changes at startup
+  // Abandon all changes voted with Code-Review -2
+  // The GerritPrCache cannot be used here otherwise initializeCaches(), which is not called yet, would erase it later
   const rejectedChanges = await client.findChanges(repository, {
     branchName: '',
     state: 'open',
@@ -140,6 +141,7 @@ export async function initRepo({
 
   // Initialize Gerrit changes as remote-tracking branches.
   // This allows the DefaultGitScm to work with Gerrit changes as if they were regular Git branches.
+  // The GerritPrCache cannot be used here otherwise initializeCaches(), which is not called yet, would erase it later
   const openChanges = await client.findChanges(repository, {
     branchName: '',
     state: 'open',
