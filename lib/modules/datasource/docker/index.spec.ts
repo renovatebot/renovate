@@ -787,7 +787,6 @@ describe('modules/datasource/docker/index', () => {
         'some-new-value',
       );
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Current digest ${currentDigest} relates to architecture amd64`,
       );
@@ -867,7 +866,6 @@ describe('modules/datasource/docker/index', () => {
         'some-new-value',
       );
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Current digest ${currentDigest} relates to architecture amd64`,
       );
@@ -965,7 +963,6 @@ describe('modules/datasource/docker/index', () => {
         'some-new-value',
       );
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Current digest ${currentDigest} relates to architecture null`,
       );
@@ -1047,7 +1044,6 @@ describe('modules/datasource/docker/index', () => {
         'some-new-value',
       );
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Current digest ${currentDigest} relates to architecture amd64`,
       );
@@ -1119,7 +1115,6 @@ describe('modules/datasource/docker/index', () => {
         'some-new-value',
       );
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Current digest ${currentDigest} relates to architecture amd64`,
       );
@@ -1560,7 +1555,7 @@ describe('modules/datasource/docker/index', () => {
       expect(res?.releases).toHaveLength(2);
 
       // Verify the debug log for fallback was called
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.objectContaining({
           registryHost: 'https://quay.io',
@@ -2393,7 +2388,7 @@ describe('modules/datasource/docker/index', () => {
           },
         ],
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.anything(),
         `manifest blob response body missing the "config" property`,

@@ -289,7 +289,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(fs.readLocalFile).toHaveBeenCalledWith(
       'some-dir/npm-shrinkwrap.json',
       'utf8',
