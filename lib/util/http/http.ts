@@ -200,10 +200,10 @@ export abstract class HttpBase<
 
       const startTime = Date.now();
       const httpTask: GotTask = async () => {
-        const releaseLock = await acquireLock(
-          `${options.method} ${url}`,
-          'http-mutex',
-        );
+        let releaseLock: undefined | (() => void);
+        if (isReadMethod) {
+          releaseLock = await acquireLock(url, 'http-mutex');
+        }
         try {
           const cachedResponse = await cacheProvider?.bypassServer<unknown>(
             options.method,
@@ -216,7 +216,7 @@ export abstract class HttpBase<
           const queueMs = Date.now() - startTime;
           return fetch(url, options, { queueMs });
         } finally {
-          releaseLock();
+          releaseLock?.();
         }
       };
 
