@@ -208,6 +208,25 @@ describe('modules/manager/deno/artifacts', () => {
     ]);
   });
 
+  it('supports lockFileMaintenance (without updated deps)', async () => {
+    updateArtifact.updatedDeps = [];
+    updateArtifact.config.lockFiles = ['deno.lock'];
+    updateArtifact.config.isLockFileMaintenance = true;
+    const oldLock = Buffer.from('old');
+    fs.readFile.mockResolvedValueOnce(oldLock as never);
+    const newLock = Buffer.from('new');
+    fs.readFile.mockResolvedValueOnce(newLock as never);
+    expect(await updateArtifacts(updateArtifact)).toEqual([
+      {
+        file: {
+          path: 'deno.lock',
+          type: 'addition',
+          contents: newLock,
+        },
+      },
+    ]);
+  });
+
   it('deno command execution', async () => {
     const updateArtifact: UpdateArtifact = {
       config: {},

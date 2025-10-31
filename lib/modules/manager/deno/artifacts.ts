@@ -24,7 +24,8 @@ export async function updateArtifacts(
     return null;
   }
 
-  const lockFileName = updatedDeps[0].lockFiles?.[0];
+  // falling back for lockFileMaintenance
+  const lockFileName = updatedDeps[0]?.lockFiles?.[0] ?? config.lockFiles?.[0];
 
   if (!lockFileName) {
     logger.debug('No lock file found. Skipping artifact update.');
