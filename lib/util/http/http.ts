@@ -179,14 +179,6 @@ export abstract class HttpBase<
           )
         : null;
 
-    const cachedResponse = await cacheProvider?.bypassServer<unknown>(
-      method,
-      url,
-    );
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-
     let resPromise: Promise<HttpResponse<unknown>> | null = null;
 
     // Cache GET requests unless memCache=false
@@ -206,8 +198,17 @@ export abstract class HttpBase<
       }
 
       const startTime = Date.now();
-      const httpTask: GotTask = () => {
+      const httpTask: GotTask = async () => {
         const queueMs = Date.now() - startTime;
+
+        const cachedResponse = await cacheProvider?.bypassServer<unknown>(
+          options.method,
+          url,
+        );
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
         return fetch(url, options, { queueMs });
       };
 
