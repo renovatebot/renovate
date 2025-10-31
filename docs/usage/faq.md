@@ -217,7 +217,7 @@ As above, but apply a `groupName`:
   "packageRules": [
     {
       "matchPackageNames": "abc**",
-      "groupName": ["abc packages"]
+      "groupName": "abc packages"
     }
   ]
 }

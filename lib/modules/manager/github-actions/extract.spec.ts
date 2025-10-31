@@ -1174,6 +1174,37 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'pypa/hatch@install',
+        with: { version: '1.14.2' },
+      },
+      expected: [
+        {
+          currentValue: '1.14.2',
+          datasource: 'github-releases',
+          depName: 'pypa/hatch',
+          depType: 'uses-with',
+          packageName: 'pypa/hatch',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pypa/hatch@install',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'pypa/hatch',
+          depType: 'uses-with',
+          packageName: 'pypa/hatch',
+        },
+      ],
+    },
   ])('extract from $step.uses', ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 

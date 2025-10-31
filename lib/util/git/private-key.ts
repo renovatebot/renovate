@@ -12,7 +12,7 @@ import { fromBase64, toBase64 } from '../string';
 type PrivateKeyFormat = 'gpg' | 'ssh';
 
 const sshKeyRegex = regEx(
-  /-----BEGIN ([A-Z ]+ )?PRIVATE KEY-----.*?-----END ([A-Z]+ )?PRIVATE KEY-----/,
+  /-----BEGIN (?:[A-Z ]+ )?PRIVATE KEY-----.*?-----END (?:[A-Z]+ )?PRIVATE KEY-----/,
   's',
 );
 

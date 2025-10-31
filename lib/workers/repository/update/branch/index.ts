@@ -268,8 +268,8 @@ export async function processBranch(
 
       const prRebaseChecked = !!branchPr?.bodyStruct?.rebaseRequested;
 
-      if (branchExists && !dependencyDashboardCheck && config.stopUpdating) {
-        if (!prRebaseChecked) {
+      if (branchExists && !dependencyDashboardCheck && !prRebaseChecked) {
+        if (config.stopUpdating) {
           logger.info(
             'Branch updating is skipped because stopUpdatingLabel is present in config',
           );
@@ -277,6 +277,17 @@ export async function processBranch(
             branchExists: true,
             prNo: branchPr?.number,
             result: 'no-work',
+          };
+        }
+
+        if (config.pendingChecks) {
+          logger.info(
+            'Branch updating is skipped because internalChecksFilter was not met',
+          );
+          return {
+            branchExists: true,
+            prNo: branchPr?.number,
+            result: 'pending',
           };
         }
       }
