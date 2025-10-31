@@ -117,7 +117,7 @@ export async function initRepo({
   };
   const baseUrl = defaults.endpoint!;
   const url = getGerritRepoUrl(repository, baseUrl);
-  configureScm(repository, config.gerritUsername!);
+  configureScm(repository);
   await git.initRepo({ url });
 
   //abandon "open" and "rejected" changes at startup

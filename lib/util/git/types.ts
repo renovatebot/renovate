@@ -39,6 +39,12 @@ export interface LocalConfig extends StorageConfig {
   gitAuthorEmail?: EmailAddress;
 
   writeGitDone?: boolean;
+
+  /**
+   * Optional hook called after fetchBranchCommits populates branchCommits.
+   * Used by platforms like Gerrit to initialize branches from platform-specific sources.
+   */
+  afterFetchBranchCommits?: () => Promise<void>;
 }
 
 export interface FileAddition {
