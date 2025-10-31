@@ -1,3 +1,4 @@
+import { findPackages } from 'find-packages';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import {
@@ -48,7 +49,6 @@ describe('modules/manager/deno/compat', () => {
   describe('collectPackageJson()', () => {
     it('node-compat package.json', async () => {
       GlobalConfig.set({ localDir: '' });
-      const { findPackages } = await import('find-packages');
       vi.mocked(findPackages).mockResolvedValue([
         { dir: '.', manifest: {}, writeProjectManifest: Promise.resolve },
       ]);

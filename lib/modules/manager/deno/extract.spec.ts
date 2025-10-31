@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { findPackages } from 'find-packages';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import {
@@ -320,7 +321,6 @@ describe('modules/manager/deno/extract', () => {
     describe('workspaces', () => {
       it('npm workspace compatible', async () => {
         GlobalConfig.set({ localDir: '' });
-        const { findPackages } = await import('find-packages');
         vi.mocked(findPackages).mockResolvedValue([
           {
             dir: 'sub',

@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { findPackages } from 'find-packages';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import {
@@ -202,7 +203,6 @@ describe('modules/manager/deno/post', () => {
   describe('collectPackageJsonAsWorkspaceMember()', () => {
     it('should collect package.json files as deno workspace members', async () => {
       GlobalConfig.set({ localDir: '' });
-      const { findPackages } = await import('find-packages');
       vi.mocked(findPackages).mockResolvedValue([
         {
           dir: 'node',
