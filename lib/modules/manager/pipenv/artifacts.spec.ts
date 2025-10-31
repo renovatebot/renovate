@@ -1158,7 +1158,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       FOO: '1',
     };
     addExtraEnvVariable(extraEnv, 'FOO', '2');
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.warn).toHaveBeenCalledWith(
       {
         envVar: 'FOO',

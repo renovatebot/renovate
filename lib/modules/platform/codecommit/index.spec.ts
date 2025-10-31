@@ -340,7 +340,7 @@ describe('modules/platform/codecommit/index', () => {
         state: 'open',
       });
       expect(res).toBeNull();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.error).toHaveBeenCalledWith({ err }, 'findPr error');
     });
 
@@ -1068,7 +1068,7 @@ describe('modules/platform/codecommit/index', () => {
         content: 'some\ncontent',
       });
       expect(res).toBeTrue();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.info).toHaveBeenCalledWith(
         { repository: 'repositoryName', prNo: 42, topic: 'some-subject' },
         'Comment added',
@@ -1102,7 +1102,7 @@ describe('modules/platform/codecommit/index', () => {
         content: 'some\ncontent',
       });
       expect(res).toBeTrue();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { repository: 'repositoryName', prNo: 42, topic: 'some-subject' },
         'Comment updated',
@@ -1135,7 +1135,7 @@ describe('modules/platform/codecommit/index', () => {
         content: 'my comment content',
       });
       expect(res).toBeTrue();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { repository: 'repositoryName', prNo: 42, topic: 'some-subject' },
         'Comment is already update-to-date',
@@ -1168,7 +1168,7 @@ describe('modules/platform/codecommit/index', () => {
         content: 'my comment content',
       });
       expect(res).toBeTrue();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { repository: 'repositoryName', prNo: 42, topic: null },
         'Comment is already update-to-date',
@@ -1184,7 +1184,7 @@ describe('modules/platform/codecommit/index', () => {
         content: 'my comment content',
       });
       expect(res).toBeFalse();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { err },
         'Unable to retrieve pr comments',
@@ -1268,7 +1268,7 @@ describe('modules/platform/codecommit/index', () => {
         number: 42,
         topic: 'some-subject',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'comment "some-subject" in PR #42 was removed',
       );
@@ -1282,7 +1282,7 @@ describe('modules/platform/codecommit/index', () => {
         number: 42,
         topic: 'some-subject',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'commentsForPullRequestData not found',
       );
@@ -1308,7 +1308,7 @@ describe('modules/platform/codecommit/index', () => {
         number: 42,
         topic: 'some-subject',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'comments object not found under commentsForPullRequestData',
       );
@@ -1340,7 +1340,7 @@ describe('modules/platform/codecommit/index', () => {
         number: 42,
         content: 'my comment content',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'comment "my comment content" in PR #42 was removed',
       );
@@ -1354,7 +1354,7 @@ describe('modules/platform/codecommit/index', () => {
         number: 42,
         content: 'my comment content',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { err },
         'Unable to retrieve pr comments',
@@ -1384,7 +1384,7 @@ describe('modules/platform/codecommit/index', () => {
           'arn:aws:iam::someUser:user/ReviewerUser',
         ]),
       ).toResolve();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         res,
         'Approval Rule Added to PR #13:',
