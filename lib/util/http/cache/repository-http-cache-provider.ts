@@ -87,6 +87,9 @@ export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
       return null;
     }
 
+    // Deep copy is needed because the underlying storage for repository cache is the plain object.
+    // This object gets persisted at the end of the run.
+    // However, during the run, we don't want to accidentally return the same response objects.
     return copyResponse(httpCache.httpResponse as HttpResponse<T>, true);
   }
 }
