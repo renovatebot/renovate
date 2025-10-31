@@ -8981,7 +8981,7 @@ snapshots:
 
   '@types/tar-stream@3.1.4':
     dependencies:
-      '@types/node': 22.18.10
+      '@types/node': 22.18.12
 
   '@types/tar@6.1.13':
     dependencies:
