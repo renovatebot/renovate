@@ -89,9 +89,15 @@ Read the [MDN Web Docs, encodeURIComponent()](https://developer.mozilla.org/en-U
 
 ### equals
 
-Returns `true` if two values equals (checks strict equality, i.e. `===`).
+Returns `true` if two values are equal (checks strict equality, i.e. `===`).
 
 `{{#if (equals datasource 'git-refs')}}git-refs{{else}}Other{{/if}}`
+
+### includes
+
+Returns `true` if an array contains a given string element.
+
+`{{#if (includes labels 'ci')}}Has CI label{{else}}No CI label{{/if}}`
 
 ### lookupArray
 
