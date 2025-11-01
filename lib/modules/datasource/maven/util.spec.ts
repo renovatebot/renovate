@@ -119,7 +119,7 @@ describe('modules/datasource/maven/util', () => {
         ok: false,
         err: { type: 'temporary-error' } satisfies MavenFetchError,
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.any(Object),
         'Temporary error',
@@ -147,7 +147,7 @@ describe('modules/datasource/maven/util', () => {
         await expect(
           downloadHttpProtocol(http, MAVEN_REPO + '/some/path'),
         ).rejects.toThrow(ExternalHostError);
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.once.warn).toHaveBeenCalledWith(
           { failedUrl: MAVEN_REPO + '/some/path' },
           'Maven Central rate limiting detected despite Redis caching.',
@@ -168,7 +168,7 @@ describe('modules/datasource/maven/util', () => {
         await expect(
           downloadHttpProtocol(http, MAVEN_REPO + '/some/path'),
         ).rejects.toThrow(ExternalHostError);
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.once.warn).toHaveBeenCalledWith(
           { failedUrl: MAVEN_REPO + '/some/path' },
           'Maven Central rate limiting detected. Persistent caching required.',
@@ -182,7 +182,7 @@ describe('modules/datasource/maven/util', () => {
         await expect(
           downloadHttpProtocol(http, MAVEN_REPO + '/some/path'),
         ).rejects.toThrow(ExternalHostError);
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.debug).toHaveBeenCalledWith(
           { failedUrl: MAVEN_REPO + '/some/path', err: expect.any(HttpError) },
           'Temporary error',

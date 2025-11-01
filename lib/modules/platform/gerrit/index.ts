@@ -153,16 +153,9 @@ export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
     : null;
 }
 
-export async function getPr(
-  number: number,
-  refreshCache?: boolean,
-): Promise<Pr | null> {
+export async function getPr(number: number): Promise<Pr | null> {
   try {
-    const change = await client.getChange(
-      number,
-      refreshCache,
-      REQUEST_DETAILS_FOR_PRS,
-    );
+    const change = await client.getChange(number, REQUEST_DETAILS_FOR_PRS);
     return mapGerritChangeToPr(change);
   } catch (err) {
     if (err.statusCode === 404) {
@@ -198,7 +191,6 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       targetBranch: prConfig.targetBranch,
       state: 'open',
       singleChange: true,
-      refreshCache: true,
       requestDetails: REQUEST_DETAILS_FOR_PRS,
     })
   ).pop();
@@ -246,11 +238,6 @@ export async function getBranchPr(
     : null;
 }
 
-export async function refreshPr(number: number): Promise<void> {
-  // refresh cache
-  await getPr(number, true);
-}
-
 export async function getPrList(): Promise<Pr[]> {
   const changes = await client.findChanges(config.repository!, {
     branchName: '',
@@ -291,7 +278,6 @@ export async function getBranchStatus(
       state: 'open',
       branchName,
       singleChange: true,
-      refreshCache: true,
       requestDetails: ['LABELS', 'SUBMITTABLE', 'CHECK'],
     })
   ).pop();
@@ -330,7 +316,6 @@ export async function getBranchStatusCheck(
         branchName,
         state: 'open',
         singleChange: true,
-        refreshCache: true,
         requestDetails: ['LABELS'],
       })
     ).pop();

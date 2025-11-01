@@ -395,7 +395,7 @@ describe('workers/repository/update/branch/index', () => {
       checkExisting.prAlreadyExisted.mockResolvedValueOnce(pr);
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         `Matching PR #${pr.number} was merged previously`,
       );
@@ -452,7 +452,7 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pr-edited',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         `PR has been edited, PrNo:${pr.number}`,
       );
@@ -484,7 +484,7 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pr-edited',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         `PR has been edited, PrNo:${pr.number}`,
       );
@@ -510,7 +510,7 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pr-edited',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         `PR has been edited, PrNo:${pr.number}`,
       );
@@ -544,7 +544,7 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pr-edited',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         `PR has been edited, PrNo:${pr.number}`,
       );
@@ -1194,7 +1194,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'not-scheduled',
         commitSha: null,
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Branch cannot automerge now because automergeSchedule is off schedule - skipping',
       );
@@ -1491,7 +1491,7 @@ describe('workers/repository/update/branch/index', () => {
         baseBranch: 'new_base',
         cacheFingerprintMatch: 'matched',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Base branch changed by user, rebasing the branch onto new base',
       );
@@ -1530,7 +1530,7 @@ describe('workers/repository/update/branch/index', () => {
         reuseExistingBranch: true,
         cacheFingerprintMatch: 'no-fingerprint',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Existing branch needs updating. Restarting processBranch() with a clean branch',
       );
@@ -1566,7 +1566,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
         cacheFingerprintMatch: 'no-fingerprint',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Existing branch needs updating. Restarting processBranch() with a clean branch',
       );
@@ -1629,7 +1629,7 @@ describe('workers/repository/update/branch/index', () => {
         prNo: 1,
         result: 'pr-edited',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.info).toHaveBeenCalledWith(
         `DRY-RUN: Would ensure edited/blocked PR comment in PR #${pr.number}`,
       );
@@ -1675,7 +1675,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.info).toHaveBeenCalledWith(
         `DRY-RUN: Would remove edited/blocked PR comment in PR #${pr.number}`,
       );
@@ -1723,7 +1723,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would ensure comment removal in PR #undefined',
       );
@@ -2826,9 +2826,9 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: '123test',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'No package files need updating',
       );
@@ -2865,7 +2865,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
       expect(logger.debug).not.toHaveBeenCalledWith(
         'No package files need updating',
@@ -3049,7 +3049,7 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
       await branchWorker.processBranch(config);
       expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would reattempt platform automerge for PR #123',
       );

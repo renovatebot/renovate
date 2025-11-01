@@ -29,7 +29,6 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
         upgrade,
       });
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.error).toHaveBeenCalledWith(
         'No catalogName was found; this is likely an extraction error.',
       );
@@ -115,7 +114,6 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
         upgrade,
       });
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'npm.updateYarnrcCatalogDependency(): yarn.catalog.default::default.react = 19.0.0',
       );
