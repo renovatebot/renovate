@@ -2650,6 +2650,22 @@ You can use `packageRules` to customize this behavior for specific packages:
 }
 ```
 
+The above allows unlimited major version upgrades by setting `maxMajorIncrement` to `0`.
+
+Alternatively, to limit major upgrades to within 10 versions:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Limit xmldoc major upgrades to within 10 versions",
+      "matchPackageNames": ["xmldoc"],
+      "maxMajorIncrement": 10
+    }
+  ]
+}
+```
+
 ## managerFilePatterns
 
 Formerly known as `fileMatch`, which supported regex-only.
