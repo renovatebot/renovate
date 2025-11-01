@@ -276,6 +276,7 @@ export const presets: Record<string, Preset> = {
         encrypted: {
           token: '{{arg0}}',
         },
+        hostType: 'github',
         matchHost: 'github.com',
       },
     ],
