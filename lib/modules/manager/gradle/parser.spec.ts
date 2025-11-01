@@ -617,12 +617,14 @@ describe('modules/manager/gradle/parser', () => {
         ${''}               | ${'id("foo.bar").version("1.2.3")'}        | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'id(["foo.bar"]) version "1.2.3"'}       | ${null}
         ${''}               | ${'id("foo", "bar") version "1.2.3"'}      | ${null}
+        ${''}               | ${'id(foo) version "1.2.3"'}               | ${null}
         ${''}               | ${'id "foo".version("1.2.3")'}             | ${null}
         ${''}               | ${'id("foo.bar") version("1.2.3")'}        | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'id("foo.bar") version "1.2.3"'}         | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'id "foo.bar" version "$baz"'}           | ${{ depName: 'foo.bar', skipReason: 'unspecified-version', currentValue: 'baz' }}
         ${'baz = "1.2.3"'}  | ${'id "foo.bar" version "$baz"'}           | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3', sharedVariableName: 'baz' }}
         ${'baz = "1.2.3"'}  | ${'id("foo.bar") version "$baz"'}          | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
+        ${'foo = "bar"'}    | ${'id(foo + ".baz") version "1.2.3"'}      | ${{ depName: 'bar.baz', packageName: 'bar.baz:bar.baz.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'id "foo.bar" version "x${ab}cd"'}       | ${{ depName: 'foo.bar', skipReason: 'unspecified-version' }}
         ${''}               | ${'id("foo.bar") version "$baz"'}          | ${{ depName: 'foo.bar', skipReason: 'unspecified-version', currentValue: 'baz' }}
         ${''}               | ${'id("foo.bar") version "x${ab}cd"'}      | ${{ depName: 'foo.bar', skipReason: 'unspecified-version' }}
