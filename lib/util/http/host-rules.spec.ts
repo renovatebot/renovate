@@ -371,6 +371,91 @@ describe('util/http/host-rules', () => {
       hostType: 'pod',
       token: 'token',
     });
+
+    // in the case that an API URL is used for GitHub.com, auto-detect it as a `hostType=github`, and use the `url`'s host to find a `matchHost: github.com`
+    {
+      const url = 'https://api.github.com/renovatebot/renovate';
+
+      {
+        opts = {};
+        hostRule = findMatchingRule(url, opts);
+        expect(hostRule).toEqual({
+          token: 'dotcom-api-token',
+        });
+        expect(applyHostRule(url, opts, hostRule)).toEqual({
+          context: {
+            authType: undefined,
+          },
+          token: 'dotcom-api-token',
+        });
+      }
+
+      // in the case a Datasource uses GitHub APIs, but doesn't have an explicit wiring in via GITHUB_API_USING_HOST_TYPES, we should also auto-detect
+      // See #30490 #38725
+      {
+        const url =
+          'https://api.github.com/repos/bitrise-io/bitrise-steplib/contents';
+
+        opts = { hostType: 'bitrise' };
+        hostRule = findMatchingRule(url, opts);
+        expect(hostRule).toEqual({
+          token: 'dotcom-api-token',
+        });
+        expect(applyHostRule(url, opts, hostRule)).toEqual({
+          context: {
+            authType: undefined,
+          },
+          hostType: 'bitrise',
+          token: 'dotcom-api-token',
+        });
+      }
+
+      // and validate that this has lowest precedence compared to other rules
+      {
+        hostRules.clear();
+        hostRules.add({
+          hostType: 'github-changelog',
+          token: 'changelogtoken',
+        });
+        hostRules.add({
+          hostType: 'github',
+          token: 'token',
+        });
+        hostRules.add({
+          matchHost: 'api.github.com',
+          token: 'dotcom-api-token',
+        });
+
+        // the specific `hostType` does not win we use that
+        opts = { hostType: 'github-changelog' };
+        hostRule = findMatchingRule('https://github.com/chalk/chalk', opts);
+        expect(hostRule).toEqual({
+          token: 'changelogtoken',
+        });
+        expect(
+          applyHostRule('https://github.com/chalk/chalk', opts, hostRule),
+        ).toEqual({
+          context: {
+            authType: undefined,
+          },
+          hostType: 'github-changelog',
+          token: 'changelogtoken',
+        });
+
+        // but if no `hostType` matching, we'll use our `hostType: github` for `github.com`
+        opts = {};
+        hostRule = findMatchingRule(url, opts);
+        expect(hostRule).toEqual({
+          token: 'dotcom-api-token',
+        });
+        expect(applyHostRule(url, opts, hostRule)).toEqual({
+          context: {
+            authType: undefined,
+          },
+          token: 'dotcom-api-token',
+        });
+      }
+    }
   });
 
   it('when multiple GitHub host types are set', () => {
