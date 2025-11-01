@@ -4,6 +4,7 @@ import type { BranchStatus } from '../../../types';
 import { clone } from '../../../util/clone';
 import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
+import type { VirtualBranch } from '../../../util/git/types';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
@@ -118,11 +119,6 @@ export async function initRepo({
     labels: projectInfo.labels ?? {},
   };
 
-  const baseUrl = defaults.endpoint!;
-  const url = getGerritRepoUrl(repository, baseUrl);
-  configureScm(repository);
-  await git.initRepo({ url });
-
   // Abandon all changes voted with Code-Review -2
   // The GerritPrCache cannot be used here otherwise initializeCaches(), which is not called yet, would erase it later
   const rejectedChanges = await client.findChanges(repository, {
@@ -140,7 +136,7 @@ export async function initRepo({
     );
   }
 
-  // Initialize Gerrit changes as remote-tracking branches.
+  // Collect open Gerrit changes to initialize as virtual branches
   // This allows the DefaultGitScm to work with Gerrit changes as if they were regular Git branches.
   // The GerritPrCache cannot be used here otherwise initializeCaches(), which is not called yet, would erase it later
   const openChanges = await client.findChanges(repository, {
@@ -148,21 +144,34 @@ export async function initRepo({
     state: 'open',
     requestDetails: ['CURRENT_REVISION', 'COMMIT_FOOTERS'],
   });
-  const refspecMap = new Map<string, string>();
+  const virtualBranches: VirtualBranch[] = [];
   for (const change of openChanges) {
-    const sourceBranch = extractSourceBranch(change);
-    if (sourceBranch && change.current_revision) {
-      const currentRevision = change.revisions![change.current_revision];
-      const refSpec = currentRevision.ref;
-      refspecMap.set(refSpec, sourceBranch);
+    const branchName = extractSourceBranch(change);
+    if (!branchName) {
+      continue;
     }
+    const sha = change.current_revision!;
+    const ref = change.revisions![sha].ref;
+    virtualBranches.push({
+      name: branchName,
+      ref,
+      sha,
+    });
   }
-  if (refspecMap.size > 0) {
-    await git.initializeBranchesFromRefspecs(refspecMap);
+
+  if (virtualBranches.length > 0) {
     logger.debug(
-      `Initialized ${refspecMap.size} Gerrit changes as remote-tracking branches`,
+      `Will fetch ${virtualBranches.length} Gerrit changes as virtual branches`,
     );
   }
+
+  const baseUrl = defaults.endpoint!;
+  const url = getGerritRepoUrl(repository, baseUrl);
+  configureScm(repository);
+  await git.initRepo({
+    url,
+    virtualBranches,
+  });
 
   const repoConfig: RepoResult = {
     defaultBranch: config.head!,

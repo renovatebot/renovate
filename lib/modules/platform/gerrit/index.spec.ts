@@ -129,8 +129,8 @@ describe('modules/platform/gerrit/index', () => {
       });
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
         url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+        virtualBranches: [],
       });
-      expect(git.initializeBranchesFromRefspecs).not.toHaveBeenCalled();
     });
 
     it('initRepo() - abandon rejected changes', async () => {
@@ -200,14 +200,21 @@ describe('modules/platform/gerrit/index', () => {
           requestDetails: ['CURRENT_REVISION', 'COMMIT_FOOTERS'],
         },
       ]);
-      expect(
-        git.initializeBranchesFromRefspecs,
-      ).toHaveBeenCalledExactlyOnceWith(
-        new Map([
-          ['refs/changes/45/12345/1', 'renovate/dep-1'],
-          ['refs/changes/46/12346/1', 'renovate/dep-2'],
-        ]),
-      );
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
+        url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+        virtualBranches: [
+          {
+            name: 'renovate/dep-1',
+            ref: 'refs/changes/45/12345/1',
+            sha: 'sha123',
+          },
+          {
+            name: 'renovate/dep-2',
+            ref: 'refs/changes/46/12346/1',
+            sha: 'sha456',
+          },
+        ],
+      });
     });
   });
 

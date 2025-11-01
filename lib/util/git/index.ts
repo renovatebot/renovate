@@ -224,6 +224,13 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
         config.branchCommits[ref.replace('refs/heads/', '')] =
           sha as LongCommitSha;
       });
+
+    if (config.virtualBranches?.length) {
+      for (const branch of config.virtualBranches) {
+        config.branchCommits[branch.name] = branch.sha;
+      }
+    }
+
     logger.trace({ branchCommits: config.branchCommits }, 'branch commits');
     /* v8 ignore next 11 -- TODO: add test */
   } catch (err) {
@@ -239,8 +246,8 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
   }
 }
 
-export async function fetchRevSpec(revSpec: string): Promise<void> {
-  await gitRetry(() => git.fetch(['origin', revSpec]));
+export async function fetchRevSpec(...revSpec: string[]): Promise<void> {
+  await gitRetry(() => git.fetch(['origin', ...revSpec]));
 }
 
 export async function initRepo(args: StorageConfig): Promise<void> {
@@ -525,6 +532,14 @@ export async function syncGit(): Promise<void> {
     await fetchBranchCommits(false);
   }
 
+  if (config.virtualBranches?.length) {
+    const refspecs = config.virtualBranches.map(
+      (branch) => `${branch.ref}:refs/remotes/origin/${branch.name}`,
+    );
+    await fetchRevSpec(...refspecs);
+    logger.debug(`Fetched ${config.virtualBranches.length} virtual branches`);
+  }
+
   config.currentBranchSha = (
     await git.revparse('HEAD')
   ).trim() as LongCommitSha;
@@ -646,76 +661,12 @@ export async function checkoutBranchFromRemote(
 }
 
 /**
- * Initialize remote-tracking branches from arbitrary refspecs.
- * Useful for platforms that represent branches in non-standard ways (e.g. Gerrit changes),
- * so they can be materialized as standard `refs/remotes/origin/<branchName>` for normal Git operations.
+ * Delete a virtual branch that was initialized from a non-standard ref.
+ * Used by platforms like Gerrit where changes are represented as refs instead of regular branches.
  *
- * @param refspecMap Map of refspec to desired branch name (e.g., 'refs/changes/72/19122672/50' -> 'renovate/node-22.x')
+ * @param branchName Virtual branch name to delete
  */
-export async function initializeBranchesFromRefspecs(
-  refspecMap: Map<string, string>,
-): Promise<void> {
-  logger.debug(`Initializing ${refspecMap.size} branches from refspecs`);
-  await syncGit();
-
-  // Build the fetch command with all refspecs
-  // Format: refspec:refs/remotes/origin/branchName
-  const refspecs: string[] = [];
-  for (const [refspec, branchName] of refspecMap) {
-    refspecs.push(`${refspec}:refs/remotes/origin/${branchName}`);
-  }
-
-  // Fetch in batches to avoid command-line length limits
-  const BATCH_SIZE = 50;
-  const totalBatches = Math.ceil(refspecs.length / BATCH_SIZE);
-
-  for (let i = 0; i < refspecs.length; i += BATCH_SIZE) {
-    const batch = refspecs.slice(i, i + BATCH_SIZE);
-    const batchNum = Math.floor(i / BATCH_SIZE) + 1;
-
-    try {
-      logger.debug(
-        `Fetching batch ${batchNum}/${totalBatches} (${batch.length} refspecs)`,
-      );
-      await gitRetry(() =>
-        git.fetch(['--no-tags', '--force', 'origin', ...batch]),
-      );
-    } catch (err) {
-      const errChecked = checkForPlatformFailure(err);
-      /* v8 ignore next 3 -- hard to test */
-      if (errChecked) {
-        throw errChecked;
-      }
-      logger.warn(
-        { err, batchNum, totalBatches, batchSize: batch.length },
-        'Failed to fetch refspec batch',
-      );
-      throw err;
-    }
-  }
-
-  logger.debug(`Fetched ${refspecs.length} refspecs successfully`);
-
-  // Update branchCommits for each branch
-  for (const branchName of refspecMap.values()) {
-    const branchSha = (
-      await git.revparse(`origin/${branchName}`)
-    ).trim() as LongCommitSha;
-    config.branchCommits[branchName] = branchSha;
-    logger.trace({ branchName, branchSha }, 'Initialized branch from refspec');
-  }
-}
-
-/**
- * Remove a branch initialized by initializeBranchesFromRefspecs.
- * Useful for platforms that represent branches in non-standard ways (e.g. Gerrit changes),
- * so they can be cleaned up after use.
- *
- * @param branchName Branch name to clean up
- */
-export async function deleteBranchCreatedFromRefspec(
-  branchName: string,
-): Promise<void> {
+export async function deleteVirtualBranch(branchName: string): Promise<void> {
   await syncGit();
   // Delete local branch if it exists
   try {

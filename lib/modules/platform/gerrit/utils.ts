@@ -1,7 +1,6 @@
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
-import type { LongCommitSha } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { joinUrlParts, parseUrl } from '../../../util/url';
@@ -96,7 +95,7 @@ export function mapGerritChangeToPr(
     bodyStruct: {
       hash: hashBody(knownProperties?.prBody ?? findPullRequestBody(change)),
     },
-    sha: change.current_revision as LongCommitSha,
+    sha: change.current_revision,
   };
 }
 
