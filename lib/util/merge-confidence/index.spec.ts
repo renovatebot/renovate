@@ -248,7 +248,7 @@ describe('util/merge-confidence/index', () => {
             'minor',
           ),
         ).toBe('neutral');
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.warn).toHaveBeenCalledWith(
           expect.anything(),
           'error fetching merge confidence data',
@@ -276,7 +276,7 @@ describe('util/merge-confidence/index', () => {
             'minor',
           ),
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
           'merge confidence API token rejected - aborting run',
@@ -304,7 +304,7 @@ describe('util/merge-confidence/index', () => {
             'minor',
           ),
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
           'merge confidence API failure: 5xx - aborting run',
@@ -336,7 +336,7 @@ describe('util/merge-confidence/index', () => {
           .reply(200);
 
         await expect(initMergeConfidence({})).toResolve();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.debug).toHaveBeenCalledWith(
           {
             supportedDatasources: [
@@ -362,12 +362,12 @@ describe('util/merge-confidence/index', () => {
         await expect(
           initMergeConfidence({ mergeConfidenceEndpoint: 'invalid-url.com' }),
         ).toResolve();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.warn).toHaveBeenCalledWith(
           expect.anything(),
           'invalid merge confidence API base URL found in environment variables - using default value instead',
         );
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.debug).toHaveBeenCalledWith(
           expect.anything(),
           'merge confidence API - successfully authenticated',
@@ -385,12 +385,11 @@ describe('util/merge-confidence/index', () => {
           }),
         ).toResolve();
 
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.trace).toHaveBeenCalledWith(
           expect.anything(),
           'using merge confidence API base found in environment variables',
         );
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.debug).toHaveBeenCalledWith(
           {
             supportedDatasources: ['go'],
@@ -403,7 +402,7 @@ describe('util/merge-confidence/index', () => {
         hostRules.clear();
 
         await expect(initMergeConfidence({})).toResolve();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.trace).toHaveBeenCalledWith(
           'merge confidence API usage is disabled',
         );
@@ -415,7 +414,7 @@ describe('util/merge-confidence/index', () => {
         await expect(
           initMergeConfidence({ mergeConfidenceEndpoint: apiBaseUrl }),
         ).toResolve();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.debug).toHaveBeenCalledWith(
           expect.anything(),
           'merge confidence API - successfully authenticated',
@@ -428,7 +427,7 @@ describe('util/merge-confidence/index', () => {
         await expect(
           initMergeConfidence({ mergeConfidenceEndpoint: apiBaseUrl }),
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
           'merge confidence API token rejected - aborting run',
@@ -441,7 +440,7 @@ describe('util/merge-confidence/index', () => {
         await expect(
           initMergeConfidence({ mergeConfidenceEndpoint: apiBaseUrl }),
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
           'merge confidence API failure: 5xx - aborting run',
@@ -457,7 +456,7 @@ describe('util/merge-confidence/index', () => {
         await expect(
           initMergeConfidence({ mergeConfidenceEndpoint: apiBaseUrl }),
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
           'merge confidence API request failed - aborting run',

@@ -904,7 +904,6 @@ describe('modules/platform/forgejo/index', () => {
         }),
       ).toResolve();
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         {
           err: expect.any(Error),
@@ -1809,7 +1808,7 @@ describe('modules/platform/forgejo/index', () => {
         number: 42,
         title: 'pr-title',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42 }),
         'Forgejo-native automerge: fail',
@@ -1837,7 +1836,7 @@ describe('modules/platform/forgejo/index', () => {
         number: 42,
         title: 'pr-title',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42 }),
         'Forgejo-native automerge: not supported on this version of Forgejo. Use 10.0.0 or newer.',
@@ -2099,7 +2098,7 @@ describe('modules/platform/forgejo/index', () => {
           labels: ['some-label', 'unavailable-label'],
         }),
       ).toResolve();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Some labels could not be looked up. Renovate may halt label updates assuming changes by others.',
       );
@@ -2559,7 +2558,6 @@ describe('modules/platform/forgejo/index', () => {
         once: false,
       });
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { err: expect.any(Error) },
         'Could not ensure issue',
@@ -2635,7 +2633,6 @@ describe('modules/platform/forgejo/index', () => {
 
       await expect(forgejo.deleteLabel(42, 'missing')).toResolve();
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { issue: 42, labelName: 'missing' },
         'Failed to lookup label for deletion',
@@ -2737,7 +2734,7 @@ describe('modules/platform/forgejo/index', () => {
       });
 
       expect(res).toBe(false);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { err: expect.any(Error), issue: 1, subject: 'some-topic' },
         'Error ensuring comment',
@@ -2800,7 +2797,6 @@ describe('modules/platform/forgejo/index', () => {
         topic: 'some-topic',
       });
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         {
           config: { number: 1, topic: 'some-topic', type: 'by-topic' },
@@ -2902,7 +2898,7 @@ describe('modules/platform/forgejo/index', () => {
       await initFakeRepo(scope);
       ///
       await expect(forgejo.addReviewers(1, ['me', 'you'])).toResolve();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { err: expect.any(Error), number: 1, reviewers: ['me', 'you'] },
         'Failed to assign reviewer',

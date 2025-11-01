@@ -302,7 +302,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             username: 'abc',
             password: '123',
           });
-          // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
           expect(logger.logger.debug).toHaveBeenCalledWith(
             expect.any(Object),
             'Error authenticating with Bitbucket. Check that your token includes "api" permissions',
@@ -328,7 +328,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           ).toEqual({
             endpoint: ensureTrailingSlash(url.href),
           });
-          // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
           expect(logger.logger.debug).toHaveBeenCalledWith(
             expect.any(Object),
             'Failed to get user info, fallback gitAuthor will be used',
@@ -430,7 +430,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           ).toEqual({
             endpoint: ensureTrailingSlash(url.href),
           });
-          // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
           expect(logger.logger.debug).toHaveBeenCalledWith(
             {
               err: new Error('No email address configured for username abc'),

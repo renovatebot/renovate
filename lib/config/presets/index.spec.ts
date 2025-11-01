@@ -95,7 +95,7 @@ describe('config/presets/index', () => {
         foo: 1,
       });
       expect(local.getPreset).toHaveBeenCalledTimes(3);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Already seen preset local>some/repo:c in [local>some/repo:a, local>some/repo:c]',
       );

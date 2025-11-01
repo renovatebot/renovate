@@ -76,7 +76,6 @@ describe('workers/repository/process/index', () => {
         packageFiles: undefined,
       });
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(platform.getJsonFile).toHaveBeenCalledWith(
         'renovate.json',
         undefined,
@@ -157,7 +156,6 @@ describe('workers/repository/process/index', () => {
         packageFiles: undefined,
       });
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           baseBranches: [
@@ -170,7 +168,7 @@ describe('workers/repository/process/index', () => {
         },
         'baseBranches',
       );
-      /* eslint-disable vitest/prefer-called-exactly-once-with */
+
       expect(addMeta).toHaveBeenCalledWith({
         baseBranch: 'RELEASE/v0',
       });
@@ -184,7 +182,6 @@ describe('workers/repository/process/index', () => {
       expect(addMeta).toHaveBeenCalledWith({
         baseBranch: 'some-other',
       });
-      /* eslint-enable vitest/prefer-called-exactly-once-with */
     });
 
     it('maps $default to defaultBranch', async () => {

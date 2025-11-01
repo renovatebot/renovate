@@ -964,7 +964,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
     ];
     await getLockedVersions(packageFiles);
     expect(packageFiles).toEqual(packageFiles);
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.logger.warn).toHaveBeenCalledWith(
       {
         lockfileVersion: 99,

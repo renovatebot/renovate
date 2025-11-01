@@ -96,7 +96,6 @@ describe('modules/manager/gradle/artifacts', () => {
         }),
       ).toBeNull();
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'No Gradle dependency lockfiles or verification metadata found - skipping update',
       );
@@ -116,7 +115,6 @@ describe('modules/manager/gradle/artifacts', () => {
         }),
       ).toBeNull();
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Found Gradle dependency lockfiles but no gradlew - aborting update',
       );
@@ -258,7 +256,6 @@ describe('modules/manager/gradle/artifacts', () => {
         }),
       ).toBeNull();
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'No build.gradle(.kts) file or not in root project - skipping lock file maintenance',
       );

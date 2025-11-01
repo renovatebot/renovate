@@ -236,7 +236,6 @@ describe('modules/datasource/index', () => {
         registryUrls,
       });
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { datasource: 'dummy', registryUrls, defaultRegistryUrls: undefined },
         'Custom registries are not allowed for this datasource and will be ignored',
@@ -457,7 +456,7 @@ describe('modules/datasource/index', () => {
             releases: [{ version: '1.0.0' }],
             registryUrl: 'https://reg1.com',
           });
-          // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
           expect(logger.logger.warn).toHaveBeenCalledWith(
             {
               datasource: 'dummy',
@@ -483,7 +482,7 @@ describe('modules/datasource/index', () => {
           });
 
           expect(res).toBeNull();
-          // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
           expect(logger.logger.warn).toHaveBeenCalledWith(
             { datasource, packageName, registryUrls },
             'Excess registryUrls found for datasource lookup - using first configured only',

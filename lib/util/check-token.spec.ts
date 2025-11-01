@@ -37,7 +37,7 @@ describe('util/check-token', () => {
         hostType: 'github',
         url: 'https://api.github.com',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.trace).toHaveBeenCalledWith('GitHub token is found');
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
@@ -50,7 +50,7 @@ describe('util/check-token', () => {
         hostType: 'github',
         url: 'https://api.github.com',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'GitHub token warning is disabled',
       );
@@ -118,7 +118,7 @@ describe('util/check-token', () => {
         ],
       };
       checkGithubToken(packageFiles);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         {
           githubDeps: ['foo/foo', 'bar/bar'],

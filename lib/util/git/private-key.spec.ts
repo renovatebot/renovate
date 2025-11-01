@@ -69,16 +69,16 @@ describe('util/git/private-key', () => {
       setPrivateKey('some-key', undefined);
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey(repoDir)).resolves.not.toThrow();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(exec.exec).toHaveBeenCalledWith(
         `git config user.signingkey ${publicKey}`,
         { cwd: repoDir },
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(exec.exec).toHaveBeenCalledWith('git config commit.gpgsign true', {
         cwd: repoDir,
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(exec.exec).toHaveBeenCalledWith('git config gpg.format openpgp', {
         cwd: repoDir,
       });
@@ -142,11 +142,10 @@ some-private-key with-passphrase
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey(repoDir)).resolves.not.toThrow();
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(exec.exec).toHaveBeenCalledWith(
         `ssh-keygen -p -f ${privateKeyFile} -P "${passphrase}" -N ""`,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(exec.exec).toHaveBeenCalledWith(
         `git config user.signingkey ${privateKeyFile}`,
         { cwd: repoDir },
@@ -156,7 +155,6 @@ some-private-key with-passphrase
     it('warns about GPG key passphrase being ignored', () => {
       setPrivateKey('some-gpg-key', 'test-passphrase');
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Passphrase is not yet supported for GPG keys, it will be ignored',
       );
@@ -195,7 +193,7 @@ some-private-key
       setPrivateKey(privateKey, undefined);
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey(repoDir)).resolves.not.toThrow();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(exec.exec).toHaveBeenCalledWith(
         `git config user.signingkey ${privateKeyFile}`,
         { cwd: repoDir },
@@ -206,11 +204,11 @@ some-private-key
         privateKey,
       );
       expect((await fs.readFile(publicKeyFile)).toString()).toEqual(publicKey);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(exec.exec).toHaveBeenCalledWith('git config commit.gpgsign true', {
         cwd: repoDir,
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(exec.exec).toHaveBeenCalledWith('git config gpg.format ssh', {
         cwd: repoDir,
       });
@@ -276,16 +274,15 @@ some-private-key
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey(repoDir)).resolves.not.toThrow();
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(exec.exec).toHaveBeenCalledWith(
         `git config user.signingkey ${publicKey}`,
         { cwd: repoDir },
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(exec.exec).toHaveBeenCalledWith('git config commit.gpgsign true', {
         cwd: repoDir,
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(exec.exec).toHaveBeenCalledWith('git config gpg.format openpgp', {
         cwd: repoDir,
       });
@@ -316,16 +313,15 @@ some-private-key
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey(repoDir)).resolves.not.toThrow();
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(exec.exec).toHaveBeenCalledWith(
         `git config user.signingkey ${publicKey}`,
         { cwd: repoDir },
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(exec.exec).toHaveBeenCalledWith('git config commit.gpgsign true', {
         cwd: repoDir,
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(exec.exec).toHaveBeenCalledWith('git config gpg.format openpgp', {
         cwd: repoDir,
       });
@@ -350,7 +346,6 @@ some-private-key
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey(repoDir)).resolves.not.toThrow();
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(exec.exec).toHaveBeenCalledWith(
         `git config user.signingkey ${publicKey}`,
         { cwd: repoDir },
@@ -376,7 +371,6 @@ some-private-key
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey(repoDir)).resolves.not.toThrow();
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(exec.exec).toHaveBeenCalledWith(
         `git config user.signingkey ${publicKey}`,
         { cwd: repoDir },
@@ -409,12 +403,11 @@ some-private-key
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey(repoDir)).resolves.not.toThrow();
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(exec.exec).toHaveBeenCalledWith(
         `git config user.signingkey ${publicKey}`,
         { cwd: repoDir },
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Passphrase is not yet supported for GPG keys, it will be ignored',
       );
@@ -443,12 +436,11 @@ some-private-key
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey(repoDir)).resolves.not.toThrow();
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(exec.exec).toHaveBeenCalledWith(
         `git config user.signingkey ${privateKeyFile}`,
         { cwd: repoDir },
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(exec.exec).toHaveBeenCalledWith('git config gpg.format ssh', {
         cwd: repoDir,
       });
@@ -463,12 +455,11 @@ some-private-key
 
       setPrivateKey(base64Key, undefined);
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith(
         base64Key,
         'global',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith(
         originalKey,
         'global',
@@ -482,17 +473,16 @@ some-private-key
 
       setPrivateKey(base64Key, passphrase);
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith(
         base64Key,
         'global',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith(
         originalKey,
         'global',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith(
         passphrase,
         'global',

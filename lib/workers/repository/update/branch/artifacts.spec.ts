@@ -42,7 +42,7 @@ describe('workers/repository/update/branch/artifacts', () => {
           artifactError: null,
         }),
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
       );
@@ -56,7 +56,7 @@ describe('workers/repository/update/branch/artifacts', () => {
           artifactError: '',
         }),
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
       );
@@ -68,7 +68,7 @@ describe('workers/repository/update/branch/artifacts', () => {
         ...config,
         statusCheckNames: undefined,
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
       );

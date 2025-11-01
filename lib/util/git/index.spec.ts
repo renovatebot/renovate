@@ -338,7 +338,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     it('returns cached value', async () => {
       behindBaseCache.getCachedBehindBaseResult.mockReturnValue(true);
       expect(await git.isBranchBehindBase('develop', defaultBranch)).toBeTrue();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'branch.isBehindBase(): using cached result "true"',
       );
@@ -1359,7 +1359,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
         await git.syncGit();
         await expect(git.syncForkWithUpstream('develop')).toResolve();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'Checking out branch develop from remote renovate-fork-upstream',
         );

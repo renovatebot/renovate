@@ -169,7 +169,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'Cannot map datasource docker to OSV ecosystem',
       );
@@ -190,7 +190,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'No vulnerabilities found in OSV database for lodash',
       );
@@ -243,7 +243,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'Skipping withdrawn vulnerability GHSA-x5rq-j2xg-h7qm',
       );
@@ -271,7 +271,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Skipping vulnerability lookup for package lodash due to unsupported version #4.17.11',
       );
@@ -299,7 +299,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { err, packageName: 'lodash' },
         'Error fetching vulnerability information for package',
@@ -348,7 +348,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { event },
         'Skipping OSV event with invalid version',
@@ -413,7 +413,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'No fixed version available for vulnerability GHSA-xxxx-yyyy-zzzz in fake 4.17.11',
       );
@@ -456,7 +456,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'No fixed version available for vulnerability GHSA-xxxx-yyyy-zzzz in fake 1.5.1',
       );
@@ -506,11 +506,11 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Vulnerability GO-2022-0187 affects stdlib 1.7.5',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Setting allowed version >= 1.7.6 to fix vulnerability GO-2022-0187 in stdlib 1.7.5',
       );
@@ -1249,7 +1249,6 @@ describe('workers/repository/process/vulnerabilities', () => {
         packageFiles,
       );
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Error processing CVSS vector some-invalid-score',
       );

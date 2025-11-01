@@ -296,7 +296,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
       expect(res.updatedArtifacts).toHaveLength(0);
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(1);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { file: 'not-a-txt-file' },
         'Post-upgrade file did not match any file filters',

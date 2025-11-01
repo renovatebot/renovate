@@ -94,19 +94,19 @@ describe('workers/repository/process/libyear', () => {
         ],
       };
       calculateLibYears(config, packageFiles);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.once.debug).toHaveBeenCalledWith(
         'No currentVersionTimestamp for some/image',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.once.debug).toHaveBeenCalledWith(
         'No releaseTimestamp for dep1 update to 3.0.0',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.once.debug).toHaveBeenCalledWith(
         'No currentVersionTimestamp for dep3',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           libYears: {
@@ -200,7 +200,7 @@ describe('workers/repository/process/libyear', () => {
         ],
       };
       calculateLibYears(config, packageFiles);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           libYears: {

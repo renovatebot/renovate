@@ -145,7 +145,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
       await bumpVersions(config);
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'bumpVersions: filePatterns did not match any files',
       );
@@ -184,12 +183,11 @@ describe('workers/repository/update/branch/bump-versions', () => {
       fs.readLocalFile.mockResolvedValueOnce('1.0.0');
       await bumpVersions(config);
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.trace).toHaveBeenCalledWith(
         { files: ['.release-version'] },
         'bumpVersions(ipsum): Found 1 files to bump versions',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { file: '.release-version' },
         'bumpVersions(ipsum): No match found for bumping version',
@@ -499,7 +497,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
       await bumpVersions(config);
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { file: 'foo-bar' },
         'bumpVersions(foo): Could not read file: an error',
