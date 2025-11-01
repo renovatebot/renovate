@@ -19,6 +19,7 @@ vi.mock('../../../modules/platform', () => ({
   platform: { initRepo: vi.fn() },
   getPlatformList: vi.fn(),
 }));
+vi.unmock('../../../util/mutex');
 
 const apis = vi.mocked(_apis);
 const config = vi.mocked(_config);

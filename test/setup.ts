@@ -31,3 +31,8 @@ Object.defineProperty(global, 'fixtures', { value: _fixtures });
 declare global {
   const fixtures: typeof _fixtures;
 }
+
+vi.mock('../lib/util/mutex', () => ({
+  initMutexes: () => vi.fn(),
+  acquireLock: () => vi.fn().mockImplementation(() => () => undefined),
+}));

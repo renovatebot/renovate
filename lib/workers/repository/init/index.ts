@@ -8,6 +8,7 @@ import * as memCache from '../../../util/cache/memory';
 import { clone } from '../../../util/clone';
 import { cloneSubmodules, setUserRepoConfig } from '../../../util/git';
 import { getAll } from '../../../util/host-rules';
+import { initMutexes } from '../../../util/mutex';
 import { checkIfConfigured } from '../configured';
 import { PackageFiles } from '../package-files';
 import type { WorkerPlatformConfig } from './apis';
@@ -53,6 +54,7 @@ export async function initRepo(
   await resetCaches();
   logger.once.reset();
   memCache.init();
+  initMutexes();
   config = await initApis(config);
   await initializeCaches(config as WorkerPlatformConfig);
   config = await getRepoConfig(config);
