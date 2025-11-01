@@ -1,12 +1,14 @@
-import { isTruthy } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
+import { clone } from '../../../util/clone';
 import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
+import type { VirtualBranch } from '../../../util/git/types';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
+import { hashBody } from '../pr-body';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -30,11 +32,17 @@ import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import { client } from './client';
+import { GerritPrCache } from './pr-cache';
 import { configureScm } from './scm';
-import type { GerritLabelTypeInfo, GerritProjectInfo } from './types';
+import type {
+  GerritChange,
+  GerritLabelTypeInfo,
+  GerritProjectInfo,
+} from './types';
 import {
   REQUEST_DETAILS_FOR_PRS,
   TAG_PULL_REQUEST_BODY,
+  extractSourceBranch,
   getGerritRepoUrl,
   mapBranchStatusToLabel,
   mapGerritChangeToPr,
@@ -110,13 +118,10 @@ export async function initRepo({
     config: projectInfo,
     labels: projectInfo.labels ?? {},
   };
-  const baseUrl = defaults.endpoint!;
-  const url = getGerritRepoUrl(repository, baseUrl);
-  configureScm(repository, config.gerritUsername!);
-  await git.initRepo({ url });
 
-  //abandon "open" and "rejected" changes at startup
-  const rejectedChanges = await client.findChanges(config.repository!, {
+  // Abandon all changes voted with Code-Review -2
+  // The GerritPrCache cannot be used here otherwise initializeCaches(), which is not called yet, would erase it later
+  const rejectedChanges = await client.findChanges(repository, {
     branchName: '',
     state: 'open',
     label: '-2',
@@ -130,6 +135,44 @@ export async function initRepo({
       `Abandoned change ${change._number} with Code-Review -2 in repository ${repository}`,
     );
   }
+
+  // Collect open Gerrit changes to initialize as virtual branches
+  // This allows the DefaultGitScm to work with Gerrit changes as if they were regular Git branches.
+  // The GerritPrCache cannot be used here otherwise initializeCaches(), which is not called yet, would erase it later
+  const openChanges = await client.findChanges(repository, {
+    branchName: '',
+    state: 'open',
+    requestDetails: ['CURRENT_REVISION', 'COMMIT_FOOTERS'],
+  });
+  const virtualBranches: VirtualBranch[] = [];
+  for (const change of openChanges) {
+    const branchName = extractSourceBranch(change);
+    if (!branchName) {
+      continue;
+    }
+    const sha = change.current_revision!;
+    const ref = change.revisions![sha].ref;
+    virtualBranches.push({
+      name: branchName,
+      ref,
+      sha,
+    });
+  }
+
+  if (virtualBranches.length > 0) {
+    logger.debug(
+      `Will fetch ${virtualBranches.length} Gerrit changes as virtual branches`,
+    );
+  }
+
+  const baseUrl = defaults.endpoint!;
+  const url = getGerritRepoUrl(repository, baseUrl);
+  configureScm(repository);
+  await git.initRepo({
+    url,
+    virtualBranches,
+  });
+
   const repoConfig: RepoResult = {
     defaultBranch: config.head!,
     isFork: false,
@@ -139,6 +182,41 @@ export async function initRepo({
 }
 
 export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
+  if (!findPRConfig.refreshCache) {
+    const prs = await GerritPrCache.getPrs(config.repository!);
+    // Find matching PR from cache
+    const cached = prs.find((pr) => {
+      if (
+        findPRConfig.branchName &&
+        pr.sourceBranch !== findPRConfig.branchName
+      ) {
+        return false;
+      }
+      if (
+        findPRConfig.targetBranch &&
+        pr.targetBranch !== findPRConfig.targetBranch
+      ) {
+        return false;
+      }
+      if (findPRConfig.prTitle && pr.title !== findPRConfig.prTitle) {
+        return false;
+      }
+      if (
+        findPRConfig.state !== undefined &&
+        findPRConfig.state !== 'all' &&
+        pr.state !== findPRConfig.state &&
+        !(findPRConfig.state === '!open' && pr.state !== 'open')
+      ) {
+        return false;
+      }
+      return true;
+    });
+    logger.trace(
+      `findPr: using cached gerrit change ${cached?.number} for ${findPRConfig.branchName}`,
+    );
+    return cached ?? null;
+  }
+
   const change = (
     await client.findChanges(config.repository!, {
       ...findPRConfig,
@@ -146,36 +224,98 @@ export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
       requestDetails: REQUEST_DETAILS_FOR_PRS,
     })
   ).pop();
-  return change
-    ? mapGerritChangeToPr(change, {
-        sourceBranch: findPRConfig.branchName,
-      })
-    : null;
+  if (!change) {
+    return null;
+  }
+  const pr = mapGerritChangeToPr(change, {
+    sourceBranch: findPRConfig.branchName,
+  })!;
+
+  logger.debug(`findPr: saving gerrit change ${pr.number} to cache`);
+  await GerritPrCache.setPr(config.repository!, pr);
+
+  return pr;
 }
 
-export async function getPr(number: number): Promise<Pr | null> {
+export async function refreshPr(number: number): Promise<void> {
+  // refresh cache
+  await getPr(number, true);
+}
+
+export async function getPr(
+  number: number,
+  refreshCache?: boolean,
+): Promise<Pr | null> {
+  if (!refreshCache) {
+    const prs = await GerritPrCache.getPrs(config.repository!);
+    const cached = prs.find((pr) => pr.number === number) ?? null;
+    logger.trace(
+      `getPr: using cached gerrit change ${cached?.sourceBranch} for ${number}`,
+    );
+    return cached;
+  }
+
+  let change: GerritChange;
   try {
-    const change = await client.getChange(number, REQUEST_DETAILS_FOR_PRS);
-    return mapGerritChangeToPr(change);
+    change = await client.getChange(number, REQUEST_DETAILS_FOR_PRS);
   } catch (err) {
     if (err.statusCode === 404) {
       return null;
     }
     throw err;
   }
+  const pr = mapGerritChangeToPr(change);
+  if (!pr) {
+    return null;
+  }
+
+  logger.debug(`getPr: saving gerrit change ${number} to cache`);
+  await GerritPrCache.setPr(config.repository!, pr);
+
+  return pr;
 }
 
 export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prConfig.number}, ${prConfig.prTitle})`);
+  const prs = await GerritPrCache.getPrs(config.repository!);
+  const cached = prs.find((pr) => pr.number === prConfig.number);
+  if (!cached) {
+    logger.warn(`updatePr: PR ${prConfig.number} not found in cache`);
+    return;
+  }
+
+  const pr = clone(cached);
+  let hasChanges = false;
+
+  // TODO: compare against cached.bodyStruct.hash to save API calls
   if (prConfig.prBody) {
-    await client.addMessageIfNotAlreadyExists(
+    const messageAdded = await client.addMessageIfNotAlreadyExists(
       prConfig.number,
       prConfig.prBody,
       TAG_PULL_REQUEST_BODY,
     );
+    if (messageAdded) {
+      // TODO: should the body be normalized before hashing?
+      pr.bodyStruct = {
+        hash: hashBody(prConfig.prBody),
+      };
+      pr.updatedAt = new Date().toISOString();
+      hasChanges = true;
+    }
   }
+
   if (prConfig.state && prConfig.state === 'closed') {
-    await client.abandonChange(prConfig.number);
+    const change = await client.abandonChange(prConfig.number);
+    pr.state = 'closed';
+    pr.updatedAt = change.updated.replace(' ', 'T');
+    hasChanges = true;
+  }
+
+  if (hasChanges) {
+    logger.debug(
+      `updatePr: updating gerrit change ${prConfig.number} in cache`,
+    );
+    await GerritPrCache.setPr(config.repository!, pr);
   }
 }
 
@@ -212,47 +352,63 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
     TAG_PULL_REQUEST_BODY,
     change.messages,
   );
-  return mapGerritChangeToPr(change, {
+  const pr = mapGerritChangeToPr(change, {
     sourceBranch: prConfig.sourceBranch,
     prBody: prConfig.prBody,
-  });
+  })!;
+
+  logger.debug(`createPr: saving gerrit change ${pr.number} to cache`);
+  await GerritPrCache.setPr(config.repository!, pr);
+
+  return pr;
 }
 
 export async function getBranchPr(
   branchName: string,
   targetBranch?: string,
 ): Promise<Pr | null> {
-  const change = (
-    await client.findChanges(config.repository!, {
-      branchName,
-      state: 'open',
-      targetBranch,
-      singleChange: true,
-      requestDetails: REQUEST_DETAILS_FOR_PRS,
-    })
-  ).pop();
-  return change
-    ? mapGerritChangeToPr(change, {
-        sourceBranch: branchName,
-      })
-    : null;
+  const prs = await GerritPrCache.getPrs(config.repository!);
+  const cached = prs.find((pr) => {
+    if (pr.sourceBranch !== branchName) {
+      return false;
+    }
+    if (pr.state !== 'open') {
+      return false;
+    }
+    if (targetBranch && pr.targetBranch !== targetBranch) {
+      return false;
+    }
+    return true;
+  });
+  logger.trace(
+    `getBranchPr: using cached gerrit change ${cached?.number} for ${branchName}`,
+  );
+  return cached ?? null;
 }
 
 export async function getPrList(): Promise<Pr[]> {
-  const changes = await client.findChanges(config.repository!, {
-    branchName: '',
-    requestDetails: REQUEST_DETAILS_FOR_PRS,
-  });
-  return changes.map((change) => mapGerritChangeToPr(change)).filter(isTruthy);
+  const cached = await GerritPrCache.getPrs(config.repository!);
+  logger.debug(`getPrList: using ${cached.length} cached changes`);
+  return cached;
 }
 
-export async function mergePr(config: MergePRConfig): Promise<boolean> {
+export async function mergePr(mergeConfig: MergePRConfig): Promise<boolean> {
   logger.debug(
-    `mergePr(${config.id}, ${config.branchName!}, ${config.strategy!})`,
+    `mergePr(${mergeConfig.id}, ${mergeConfig.branchName!}, ${mergeConfig.strategy!})`,
   );
+  const prs = await GerritPrCache.getPrs(config.repository!);
+  const cached = prs.find((pr) => pr.number === mergeConfig.id);
+  if (!cached) {
+    logger.warn(`mergePr: PR ${mergeConfig.id} not found in cache`);
+    return false;
+  }
+
+  let change: GerritChange;
   try {
-    const change = await client.submitChange(config.id);
-    return change.status === 'MERGED';
+    change = await client.submitChange(mergeConfig.id);
+    if (change.status !== 'MERGED') {
+      return false;
+    }
   } catch (err) {
     if (err.statusCode === 409) {
       logger.warn(
@@ -263,6 +419,13 @@ export async function mergePr(config: MergePRConfig): Promise<boolean> {
     }
     throw err;
   }
+
+  const pr = clone(cached);
+  pr.state = 'merged';
+  pr.updatedAt = change.updated.replace(' ', 'T');
+  logger.debug(`mergePr: updating gerrit change ${mergeConfig.id} in cache`);
+  await GerritPrCache.setPr(config.repository!, pr);
+  return true;
 }
 
 /**
