@@ -161,7 +161,7 @@ export async function filterInternalChecks(
     }
 
     if (candidateVersionsWithoutReleaseTimestamp['timestamp-optional'].length) {
-      logger.warn(
+      logger.debug(
         {
           depName,
           versions:
