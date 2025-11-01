@@ -3630,7 +3630,6 @@ Managers which do not support replacement:
 - `gradle`
 - `homebrew`
 - `regex`
-- `sbt`
 
 Use the `replacementName` config option to set the name of a replacement package.
 
