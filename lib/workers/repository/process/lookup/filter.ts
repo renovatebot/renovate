@@ -6,7 +6,9 @@ import type { VersioningApi } from '../../../../modules/versioning';
 import * as npmVersioning from '../../../../modules/versioning/npm';
 import * as pep440 from '../../../../modules/versioning/pep440';
 import * as poetryVersioning from '../../../../modules/versioning/poetry';
+import { regEx } from '../../../../util/regex';
 import { getRegexPredicate } from '../../../../util/string-match';
+import * as template from '../../../../util/template';
 import type { FilterConfig } from './types';
 
 function isReleaseStable(
@@ -31,8 +33,7 @@ export function filterVersions(
   releases: Release[],
   versioningApi: VersioningApi,
 ): Release[] {
-  const { ignoreUnstable, ignoreDeprecated, respectLatest, allowedVersions } =
-    config;
+  const { ignoreUnstable, ignoreDeprecated, respectLatest } = config;
 
   // istanbul ignore if: shouldn't happen
   if (!currentVersion) {
@@ -66,7 +67,20 @@ export function filterVersions(
     });
   }
 
-  if (allowedVersions) {
+  const currentMajor = versioningApi.getMajor(currentVersion);
+  const currentMinor = versioningApi.getMinor(currentVersion);
+  const currentPatch = versioningApi.getPatch(currentVersion);
+
+  if (config.allowedVersions) {
+    const input = {
+      currentVersion,
+      major: currentMajor,
+      minor: currentMinor,
+      patch: currentPatch,
+    };
+    warnIfFlakyTemplate(config.allowedVersions, input);
+    const allowedVersions = template.compile(config.allowedVersions, input);
+
     const isAllowedPred = getRegexPredicate(allowedVersions);
     if (isAllowedPred) {
       filteredReleases = filteredReleases.filter(({ version }) =>
@@ -138,10 +152,6 @@ export function filterVersions(
     return filteredReleases.filter((r) => isReleaseStable(r, versioningApi));
   }
 
-  const currentMajor = versioningApi.getMajor(currentVersion);
-  const currentMinor = versioningApi.getMinor(currentVersion);
-  const currentPatch = versioningApi.getPatch(currentVersion);
-
   return filteredReleases.filter((r) => {
     if (isReleaseStable(r, versioningApi)) {
       return true;
@@ -162,4 +172,33 @@ export function filterVersions(
 
     return minor === currentMinor && patch === currentPatch;
   });
+}
+
+function warnIfFlakyTemplate(
+  templateStr: string,
+  values: Record<
+    'major' | 'minor' | 'patch' | 'currentVersion',
+    string | number | null
+  >,
+): void {
+  // return early if it's not a template
+  if (!regEx(/\{\{[^}]+\}\}/).test(templateStr)) {
+    return;
+  }
+
+  const allowedFields = ['currentVersion', 'major', 'minor', 'patch'];
+  for (const field of allowedFields) {
+    if (
+      templateStr.includes(field) &&
+      values[field as keyof typeof values] === null
+    ) {
+      logger.warn(
+        {
+          allowedVersions: templateStr,
+          currentVersion: values.currentVersion,
+        },
+        `allowedVersions template contains '${field}' but its value is null`,
+      );
+    }
+  }
 }
