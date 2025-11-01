@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
+import { clone } from '../../../util/clone';
 import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gerrit';
@@ -273,22 +274,40 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
     logger.warn(`updatePr: PR ${prConfig.number} not found in cache`);
     return;
   }
+
+  const pr = clone(cached);
+  let hasChanges = false;
+
+  // TODO: compare against cached.bodyStruct.hash to save API calls
   if (prConfig.prBody) {
-    await client.addMessageIfNotAlreadyExists(
+    const messageAdded = await client.addMessageIfNotAlreadyExists(
       prConfig.number,
       prConfig.prBody,
       TAG_PULL_REQUEST_BODY,
     );
-    cached.bodyStruct = {
-      hash: hashBody(prConfig.prBody),
-    };
+    if (messageAdded) {
+      // TODO: should the body be normalized before hashing?
+      pr.bodyStruct = {
+        hash: hashBody(prConfig.prBody),
+      };
+      pr.updatedAt = new Date().toISOString();
+      hasChanges = true;
+    }
   }
+
   if (prConfig.state && prConfig.state === 'closed') {
-    await client.abandonChange(prConfig.number);
-    cached.state = 'closed';
+    const change = await client.abandonChange(prConfig.number);
+    pr.state = 'closed';
+    pr.updatedAt = change.updated.replace(' ', 'T');
+    hasChanges = true;
   }
-  logger.debug(`updatePr: updating gerrit change ${prConfig.number} in cache`);
-  await GerritPrCache.setPr(config.repository!, cached);
+
+  if (hasChanges) {
+    logger.debug(
+      `updatePr: updating gerrit change ${prConfig.number} in cache`,
+    );
+    await GerritPrCache.setPr(config.repository!, pr);
+  }
 }
 
 export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
@@ -374,8 +393,10 @@ export async function mergePr(mergeConfig: MergePRConfig): Promise<boolean> {
     logger.warn(`mergePr: PR ${mergeConfig.id} not found in cache`);
     return false;
   }
+
+  let change: GerritChange;
   try {
-    const change = await client.submitChange(mergeConfig.id);
+    change = await client.submitChange(mergeConfig.id);
     if (change.status !== 'MERGED') {
       return false;
     }
@@ -389,9 +410,12 @@ export async function mergePr(mergeConfig: MergePRConfig): Promise<boolean> {
     }
     throw err;
   }
-  cached.state = 'merged';
+
+  const pr = clone(cached);
+  pr.state = 'merged';
+  pr.updatedAt = change.updated.replace(' ', 'T');
   logger.debug(`mergePr: updating gerrit change ${mergeConfig.id} in cache`);
-  await GerritPrCache.setPr(config.repository!, cached);
+  await GerritPrCache.setPr(config.repository!, pr);
   return true;
 }
 

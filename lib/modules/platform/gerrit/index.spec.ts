@@ -387,6 +387,7 @@ describe('modules/platform/gerrit/index', () => {
       const change = partial<GerritChange>({
         _number: 123456,
         current_revision: 'some-revision',
+        updated: '2025-04-14 16:40:00.000000000',
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: branch',
@@ -396,6 +397,11 @@ describe('modules/platform/gerrit/index', () => {
       const pr = mapGerritChangeToPr(change)!;
       prCacheMock.getPrs.mockResolvedValueOnce([pr]);
       prCacheMock.setPr.mockResolvedValueOnce();
+      clientMock.abandonChange.mockResolvedValueOnce(
+        partial<GerritChange>({
+          updated: '2025-04-14 16:45:00.000000000',
+        }),
+      );
       await gerrit.updatePr({
         number: 123456,
         prTitle: change.subject,
@@ -404,7 +410,11 @@ describe('modules/platform/gerrit/index', () => {
       expect(clientMock.abandonChange).toHaveBeenCalledExactlyOnceWith(123456);
       expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
         'test/repo',
-        expect.objectContaining({ number: 123456, state: 'closed' }),
+        expect.objectContaining({
+          number: 123456,
+          state: 'closed',
+          updatedAt: '2025-04-14T16:45:00.000000000',
+        }),
       );
     });
 
@@ -416,6 +426,7 @@ describe('modules/platform/gerrit/index', () => {
         state: 'closed',
       });
       expect(clientMock.abandonChange).not.toHaveBeenCalled();
+      expect(prCacheMock.setPr).not.toHaveBeenCalled();
     });
 
     it('updatePr() - new prBody => add as message and update cache', async () => {
@@ -431,6 +442,7 @@ describe('modules/platform/gerrit/index', () => {
       const pr = mapGerritChangeToPr(change)!;
       prCacheMock.getPrs.mockResolvedValueOnce([pr]);
       prCacheMock.setPr.mockResolvedValueOnce();
+      clientMock.addMessageIfNotAlreadyExists.mockResolvedValueOnce(true);
       await gerrit.updatePr({
         number: 123456,
         prTitle: change.subject,
@@ -445,8 +457,39 @@ describe('modules/platform/gerrit/index', () => {
       );
       expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
         'test/repo',
-        expect.objectContaining({ number: 123456 }),
+        expect.objectContaining({
+          number: 123456,
+          updatedAt: expect.any(String),
+        }),
       );
+    });
+
+    it('updatePr() - prBody already exists => no cache update', async () => {
+      const change = partial<GerritChange>({
+        _number: 123456,
+        current_revision: 'some-revision',
+        revisions: {
+          'some-revision': partial<GerritRevisionInfo>({
+            commit_with_footers: 'Renovate-Branch: branch',
+          }),
+        },
+      });
+      const pr = mapGerritChangeToPr(change)!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      clientMock.addMessageIfNotAlreadyExists.mockResolvedValueOnce(false);
+      await gerrit.updatePr({
+        number: 123456,
+        prTitle: change.subject,
+        prBody: 'Existing PR-Body',
+      });
+      expect(
+        clientMock.addMessageIfNotAlreadyExists,
+      ).toHaveBeenCalledExactlyOnceWith(
+        123456,
+        'Existing PR-Body',
+        TAG_PULL_REQUEST_BODY,
+      );
+      expect(prCacheMock.setPr).not.toHaveBeenCalled();
     });
   });
 
@@ -661,12 +704,19 @@ describe('modules/platform/gerrit/index', () => {
       prCacheMock.getPrs.mockResolvedValueOnce([pr]);
       prCacheMock.setPr.mockResolvedValueOnce();
       clientMock.submitChange.mockResolvedValueOnce(
-        partial<GerritChange>({ status: 'MERGED' }),
+        partial<GerritChange>({
+          status: 'MERGED',
+          updated: '2025-04-14 16:50:00.000000000',
+        }),
       );
       await expect(gerrit.mergePr({ id: 123456 })).resolves.toBeTrue();
       expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
         'test/repo',
-        expect.objectContaining({ number: 123456, state: 'merged' }),
+        expect.objectContaining({
+          number: 123456,
+          state: 'merged',
+          updatedAt: '2025-04-14T16:50:00.000000000',
+        }),
       );
     });
 

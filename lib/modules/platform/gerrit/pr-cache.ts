@@ -1,5 +1,3 @@
-import { dequal } from 'dequal';
-import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
@@ -20,7 +18,6 @@ const INCREMENTAL_PAGE_SIZE = 20;
 
 export interface GerritPrCacheData {
   items: Record<number, Pr>;
-  updatedDate: string | null;
 }
 
 interface GerritPlatformCache {
@@ -45,7 +42,6 @@ export class GerritPrCache {
     platformCache.gerrit ??= {};
     platformCache.gerrit.pullRequestsCache ??= {
       items: {},
-      updatedDate: null,
     };
     this.cache = platformCache.gerrit.pullRequestsCache;
     this.updateItems();
@@ -86,50 +82,41 @@ export class GerritPrCache {
 
   /**
    * Reconciles a page of changes with the cache.
-   * Gerrit API returns changes sorted by last update time (most recent first).
-   * If we encounter a change that matches our cache, we can stop fetching more pages.
    *
-   * @param changes - Page of changes from Gerrit API (sorted newest first)
-   * @returns true if more pages should be fetched, false to stop pagination
+   * Gerrit API returns changes sorted by last update time (most recent first).
+   * We stop processing when we encounter a change whose "updated" timestamp
+   * matches our cached Pr's updatedAt, as all subsequent changes will be even older.
+   *
+   * @param changes - Page of changes from Gerrit API
+   * @returns true if more pages can be fetched, false if not needed
    */
   private reconcile(changes: GerritChange[]): boolean {
     const { items } = this.cache;
-    let { updatedDate } = this.cache;
-    const cacheTime = updatedDate
-      ? DateTime.fromISO(updatedDate.replace(' ', 'T'))
-      : null;
-
     let changeCount = 0;
 
     for (const change of changes) {
-      const id = change._number;
+      const cachedPr = items[change._number];
+      const cachedUpdated = cachedPr?.updatedAt?.replace('T', ' ');
 
-      const newItem = mapGerritChangeToPr(change);
-      if (!newItem) {
-        continue;
-      }
-
-      const oldItem = items[id];
-      if (dequal(oldItem, newItem)) {
-        // Found unchanged item - cache is up to date, stop fetching more pages
+      // If this change exists in cache and has the same updated timestamp,
+      // it hasn't been modified. Since changes are sorted by update time,
+      // all subsequent changes are also unchanged.
+      if (cachedUpdated === change.updated) {
         logger.debug(
-          `Reconciled ${changeCount} changes before hitting cached item ${id}`,
+          `Reconciled ${changeCount} changes before hitting unchanged change ${change._number}`,
         );
         return false;
       }
 
-      items[id] = newItem;
-      changeCount++;
-
-      const itemTime = DateTime.fromISO(change.updated.replace(' ', 'T'));
-      if (!cacheTime || itemTime > cacheTime) {
-        updatedDate = change.updated;
+      const pr = mapGerritChangeToPr(change);
+      if (!pr) {
+        continue;
       }
+
+      items[change._number] = pr;
+      changeCount++;
     }
 
-    this.cache.updatedDate = updatedDate;
-
-    logger.debug(`Reconciled ${changeCount} changes, fetching next page`);
     return true;
   }
 
@@ -137,7 +124,6 @@ export class GerritPrCache {
     if (forceRefresh) {
       logger.debug('Force refreshing Gerrit PR cache');
       this.cache.items = {};
-      this.cache.updatedDate = null;
     } else {
       logger.debug('Syncing Gerrit PR cache');
     }
@@ -149,7 +135,7 @@ export class GerritPrCache {
 
     // Use client.findChanges with pagination and early termination via reconcile.
     // Gerrit API returns changes sorted by update time (newest first),
-    // so we can stop fetching once we hit cached items.
+    // so we can stop fetching once we hit the cached timestamp.
     await client.findChanges(this.repository, {
       branchName: '',
       state: 'all',
@@ -174,9 +160,15 @@ export class GerritPrCache {
   }
 
   /**
-   * Converts the cache items map to an array.
+   * Converts the cache items map to an array and sorts by updatedAt (most recent first).
    */
   private updateItems(): void {
-    this.items = Object.values(this.cache.items);
+    this.items = Object.values(this.cache.items).sort((a, b) => {
+      // Sort by updatedAt descending (most recent first)
+      if (!a.updatedAt || !b.updatedAt) {
+        return 0;
+      }
+      return b.updatedAt.localeCompare(a.updatedAt);
+    });
   }
 }

@@ -427,25 +427,27 @@ describe('modules/platform/gerrit/client', () => {
 
   describe('abandonChange()', () => {
     it('abandon', async () => {
+      const change = partial<GerritChange>({});
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/abandon', {
           notify: 'OWNER_REVIEWERS',
         })
-        .reply(200, gerritRestResponse({}), jsonResultHeader);
-      await expect(client.abandonChange(123456)).toResolve();
+        .reply(200, gerritRestResponse(change), jsonResultHeader);
+      await expect(client.abandonChange(123456)).resolves.toEqual(change);
     });
     it('abandon with message', async () => {
+      const change = partial<GerritChange>({});
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/abandon', {
           message: 'The abandon reason is important.',
           notify: 'OWNER_REVIEWERS',
         })
-        .reply(200, gerritRestResponse({}), jsonResultHeader);
+        .reply(200, gerritRestResponse(change), jsonResultHeader);
       await expect(
         client.abandonChange(123456, 'The abandon reason is important.'),
-      ).toResolve();
+      ).resolves.toEqual(change);
     });
   });
 
@@ -576,7 +578,7 @@ describe('modules/platform/gerrit/client', () => {
           ' new trimmed message\n',
           'TAG',
         ),
-      ).toResolve();
+      ).resolves.toBe(true);
     });
 
     it('msg already exists', async () => {
@@ -593,7 +595,7 @@ describe('modules/platform/gerrit/client', () => {
 
       await expect(
         client.addMessageIfNotAlreadyExists(123456, 'msg1\n', 'TAG'),
-      ).toResolve();
+      ).resolves.toBe(false);
     });
   });
 

@@ -89,6 +89,7 @@ export function mapGerritChangeToPr(
     targetBranch: change.branch,
     title: change.subject,
     createdAt: change.created?.replace(' ', 'T'),
+    updatedAt: change.updated?.replace(' ', 'T'),
     labels: change.hashtags,
     reviewers:
       change.reviewers?.REVIEWER?.map((reviewer) => reviewer.username!) ?? [],
