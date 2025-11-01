@@ -14,6 +14,10 @@ const concurrencyDefaults: ConcurrencyLimitRule[] = [
     concurrency: 1,
   },
   {
+    matchHost: 'packages.typst.org',
+    concurrency: 1,
+  },
+  {
     matchHost: '*',
     concurrency: 16,
   },
