@@ -2729,6 +2729,13 @@ You can confirm if your datasource supports the release timestamp by viewing [th
 
 <!-- prettier-ignore -->
 !!! note
+    Minimum Release Age has [a separate documentation page](./minimum-release-age.md) for more in-depth documentation about the functionality.
+    There are additional notes **??**
+
+<!-- TODO -->
+
+<!-- prettier-ignore -->
+!!! note
     If you use a custom registry, for instance as a pull-through cache, additional configuration may be required.
     The [the documentation for the datasource](./modules/datasource/index.md) provides information about which field(s) need to be returned from the registry.
     Alternatively, it may be possible to configure the `registryUrls`, like we can see in the below Maven example:
