@@ -39,11 +39,16 @@ function handleCommitsLimit(): boolean {
   return max - current <= 0;
 }
 
-export type CountName = 'ConcurrentPRs' | 'HourlyPRs' | 'Branches';
+export type CountName =
+  | 'ConcurrentPRs'
+  | 'HourlyPRs'
+  | 'Branches'
+  | 'HourlyCommits';
 
 type BranchLimitName =
   | 'branchConcurrentLimit'
   | 'prConcurrentLimit'
+  | 'commitHourlyLimit'
   | 'prHourlyLimit';
 
 export const counts = new Map<CountName, number>();
@@ -72,18 +77,32 @@ function handleConcurrentLimits(
   key: Exclude<CountName, 'HourlyPRs'>,
   config: BranchConfig,
 ): boolean {
-  const limitKey =
-    key === 'Branches' ? 'branchConcurrentLimit' : 'prConcurrentLimit';
+  // Only check hourly commit limit when specifically checking HourlyCommits
+  if (key === 'HourlyCommits') {
+    // calculate the remaining hourly commit limit
+    const hourlyCommitLimit = calcLimit(config.upgrades, 'commitHourlyLimit');
+    const hourlyCommitCount = getCount('HourlyCommits');
 
-  // calculate the limits for this branch
-  const hourlyLimit = calcLimit(config.upgrades, 'prHourlyLimit');
+    // if a limit is defined ( >0 ) and limit reached return true ie. limit has been reached
+    if (hourlyCommitLimit && hourlyCommitCount >= hourlyCommitLimit) {
+      return true;
+    }
+
+    return false;
+  }
+
+  // calculate the remaining hourly PR limit
+  const hourlyPrLimit = calcLimit(config.upgrades, 'prHourlyLimit');
   const hourlyPrCount = getCount('HourlyPRs');
 
   // if a limit is defined ( >0 ) and limit reached return true ie. limit has been reached
-  if (hourlyLimit && hourlyPrCount >= hourlyLimit) {
+  if (hourlyPrLimit && hourlyPrCount >= hourlyPrLimit) {
     return true;
   }
 
+  // calculate the branch or PR concurrent limit
+  const limitKey =
+    key === 'Branches' ? 'branchConcurrentLimit' : 'prConcurrentLimit';
   const limitValue = calcLimit(config.upgrades, limitKey);
   const currentCount = getCount(key);
 
@@ -177,11 +196,11 @@ export function hasMultipleLimits(
 
 export function isLimitReached(limit: 'Commits'): boolean;
 export function isLimitReached(
-  limit: 'Branches' | 'ConcurrentPRs',
+  limit: 'Branches' | 'ConcurrentPRs' | 'HourlyCommits',
   config: BranchConfig,
 ): boolean;
 export function isLimitReached(
-  limit: 'Commits' | 'Branches' | 'ConcurrentPRs',
+  limit: 'Commits' | 'Branches' | 'ConcurrentPRs' | 'HourlyCommits',
   config?: BranchConfig,
 ): boolean {
   if (limit === 'Commits') {
