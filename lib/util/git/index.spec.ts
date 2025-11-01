@@ -1455,55 +1455,83 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
   });
 
-  describe('initializeBranchesFromRefspecs()', () => {
+  describe('virtualBranches', () => {
     it('fetches refspecs and populates branchCommits', async () => {
       const originRepo = Git(origin.path);
-      const commit = await originRepo.revparse(['HEAD']);
+      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
       await originRepo.raw(['update-ref', 'refs/changes/45/12345/1', commit]);
 
-      await git.initializeBranchesFromRefspecs(
-        new Map([['refs/changes/45/12345/1', 'renovate/typescript-5.x']]),
-      );
+      await git.initRepo({
+        url: origin.path,
+        virtualBranches: [
+          {
+            name: 'renovate/typescript-5.x',
+            ref: 'refs/changes/45/12345/1',
+            sha: commit,
+          },
+        ],
+      });
+      await git.syncGit();
 
       expect(git.branchExists('renovate/typescript-5.x')).toBeTrue();
       expect(git.getBranchCommit('renovate/typescript-5.x')).toBe(commit);
     });
 
     it('throws on fetch error', async () => {
-      await expect(
-        git.initializeBranchesFromRefspecs(
-          new Map([['refs/changes/99/99999/1', 'renovate/node-22.x']]),
-        ),
-      ).rejects.toThrow();
+      const originRepo = Git(origin.path);
+      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
+
+      await git.initRepo({
+        url: origin.path,
+        virtualBranches: [
+          {
+            name: 'renovate/node-22.x',
+            ref: 'refs/changes/99/99999/1',
+            sha: commit,
+          },
+        ],
+      });
+
+      await expect(git.syncGit()).rejects.toThrow();
     });
 
     it('handles multiple refspecs', async () => {
       const baseRepo = Git(base.path);
-      const commits: string[] = [];
+      const commits: LongCommitSha[] = [];
 
       await fs.writeFile(base.path + '/temp_1.txt', 'content-1');
       await baseRepo.add(['temp_1.txt']);
       await baseRepo.commit('commit for ref 1');
-      const commit1 = await baseRepo.revparse(['HEAD']);
+      const commit1 = (await baseRepo.revparse(['HEAD'])) as LongCommitSha;
       commits.push(commit1);
       await baseRepo.raw(['update-ref', 'refs/changes/01/1001/1', commit1]);
 
       await fs.writeFile(base.path + '/temp_2.txt', 'content-2');
       await baseRepo.add(['temp_2.txt']);
       await baseRepo.commit('commit for ref 2');
-      const commit2 = await baseRepo.revparse(['HEAD']);
+      const commit2 = (await baseRepo.revparse(['HEAD'])) as LongCommitSha;
       commits.push(commit2);
       await baseRepo.raw(['update-ref', 'refs/changes/02/1002/1', commit2]);
 
       const originRepo = Git(origin.path);
       await originRepo.fetch(['file://' + base.path, '+refs/*:refs/*']);
 
-      await git.initializeBranchesFromRefspecs(
-        new Map([
-          ['refs/changes/01/1001/1', 'renovate/dep1'],
-          ['refs/changes/02/1002/1', 'renovate/dep2'],
-        ]),
-      );
+      await git.initRepo({
+        url: origin.path,
+        virtualBranches: [
+          {
+            name: 'renovate/dep1',
+            ref: 'refs/changes/01/1001/1',
+            sha: commit1,
+          },
+          {
+            name: 'renovate/dep2',
+            ref: 'refs/changes/02/1002/1',
+            sha: commit2,
+          },
+        ],
+      });
+      await git.syncGit();
 
       expect(git.branchExists('renovate/dep1')).toBeTrue();
       expect(git.branchExists('renovate/dep2')).toBeTrue();
@@ -1512,24 +1540,32 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
   });
 
-  describe('deleteBranchCreatedFromRefspec()', () => {
+  describe('deleteVirtualBranch()', () => {
     it('deletes local branch and remote tracking ref', async () => {
       const originRepo = Git(origin.path);
-      const commit = await originRepo.revparse(['HEAD']);
+      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
       await originRepo.raw(['update-ref', 'refs/changes/50/12350/1', commit]);
 
-      await git.initializeBranchesFromRefspecs(
-        new Map([['refs/changes/50/12350/1', 'renovate/npm-lodash-4.x']]),
-      );
+      await git.initRepo({
+        url: origin.path,
+        virtualBranches: [
+          {
+            name: 'renovate/npm-lodash-4.x',
+            ref: 'refs/changes/50/12350/1',
+            sha: commit,
+          },
+        ],
+      });
+      await git.syncGit();
 
-      await git.deleteBranchCreatedFromRefspec('renovate/npm-lodash-4.x');
+      await git.deleteVirtualBranch('renovate/npm-lodash-4.x');
 
       expect(git.branchExists('renovate/npm-lodash-4.x')).toBeFalse();
     });
 
     it('handles non-existent branch', async () => {
       await expect(
-        git.deleteBranchCreatedFromRefspec('nonexistent'),
+        git.deleteVirtualBranch('nonexistent'),
       ).resolves.not.toThrow();
     });
   });

@@ -86,10 +86,10 @@ export class GerritScm extends DefaultGitScm {
     return null; // empty commit, no changes in this Gerrit Change
   }
 
-  // Delete local branch and remote-tracking ref created from Gerrit change
+  // Delete virtual branch created from a Gerrit change ref
   // Note: Gerrit changes themselves are abandoned through the API, not deleted as branches
   override async deleteBranch(branchName: string): Promise<void> {
-    await git.deleteBranchCreatedFromRefspec(branchName);
+    await git.deleteVirtualBranch(branchName);
   }
 }
 

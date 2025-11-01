@@ -16,12 +16,12 @@ describe('modules/platform/gerrit/scm', () => {
   });
 
   describe('deleteBranch()', () => {
-    it('should call git.deleteBranchCreatedFromRefspec', async () => {
+    it('should call git.deleteVirtualBranch', async () => {
       await gerritScm.deleteBranch('renovate/test-branch');
 
-      expect(
-        git.deleteBranchCreatedFromRefspec,
-      ).toHaveBeenCalledExactlyOnceWith('renovate/test-branch');
+      expect(git.deleteVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+        'renovate/test-branch',
+      );
     });
   });
 
