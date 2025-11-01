@@ -89,7 +89,7 @@ Read the [MDN Web Docs, encodeURIComponent()](https://developer.mozilla.org/en-U
 
 ### equals
 
-Returns `true` if two values equal (checks strict equality, i.e. `===`).
+Returns `true` if two values are equal (checks strict equality, i.e. `===`).
 
 `{{#if (equals datasource 'git-refs')}}git-refs{{else}}Other{{/if}}`
 
