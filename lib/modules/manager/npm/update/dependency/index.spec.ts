@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import * as npmUpdater from '../..';
 import { type Upgrade } from '../../../types';
 import { Fixtures } from '~test/fixtures';
@@ -5,6 +6,7 @@ import { Fixtures } from '~test/fixtures';
 const readFixture = (x: string): string => Fixtures.get(x, '../..');
 
 const input01Content = readFixture('inputs/01.json');
+const input01YamlContent = readFixture('inputs/01.yaml');
 const input01GlobContent = readFixture('inputs/01-glob.json');
 const input01PMContent = readFixture('inputs/01-package-manager.json');
 
@@ -22,6 +24,74 @@ describe('modules/manager/npm/update/dependency/index', () => {
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
+    });
+
+    it('replaces a dependency of a yaml value', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'cheerio',
+        newValue: '0.22.1',
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01YamlContent,
+        upgrade,
+        packageFile: 'outputs/011.yml',
+      });
+      expect(testContent).toContain('cheerio: "0.22.1"');
+    });
+
+    it('replaces a dependency of a yaml value in resolutions', () => {
+      const input = codeBlock`
+        name: renovate-repro
+        dependencies:
+          lodash: "^4.16.0"
+          mermaid: 8.8.1
+        resolutions:
+          lodash: patch:lodash@npm:4.16.0#patches/lodash.patch
+        dependenciesMeta:
+          lodash@4.16.0:
+            unplugged: true
+          mermaid@8.8.1:
+            optional: true
+        `;
+      const expectedOutput = codeBlock`
+        name: renovate-repro
+        dependencies:
+          lodash: "^4.16.0"
+          mermaid: 8.8.1
+        resolutions:
+          lodash: patch:lodash@npm:4.17.0#patches/lodash.patch
+        dependenciesMeta:
+          lodash@4.17.0:
+            unplugged: true
+          mermaid@8.8.1:
+            optional: true
+        `;
+      const upgrade = {
+        depType: 'resolutions',
+        depName: 'lodash',
+        newValue: '4.17.0',
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input,
+        upgrade,
+        packageFile: 'outputs/011.yml',
+      });
+      expect(testContent).toEqual(expectedOutput);
+    });
+
+    it('replaces a dependency of a yaml value when the source do not have quotes', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'bower',
+        newValue: '~2.0.0',
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01YamlContent,
+        upgrade,
+        packageFile: 'outputs/012.yaml',
+      });
+      expect(testContent).toContain('bower: ~2.0.0');
     });
 
     it('replaces a github dependency value', () => {
@@ -111,7 +181,9 @@ describe('modules/manager/npm/update/dependency/index', () => {
         fileContent: input,
         upgrade,
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toMatch(
+        '{"dependencies":{"n":"git+https://github.com/owner/n#v1.1.0"}}',
+      );
       expect(res).toContain('v1.1.0');
     });
 
