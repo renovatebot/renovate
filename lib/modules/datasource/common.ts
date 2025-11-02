@@ -88,6 +88,7 @@ export function applyVersionCompatibility(
       },
       'versionCompatibility: matches',
     );
+    release.versionOrig ??= release.version;
     release.version = regexResult.groups.version;
     return release;
   });
