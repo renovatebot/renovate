@@ -225,7 +225,7 @@ describe('docs/documentation', () => {
       });
     });
 
-    describe('docs/usage/templates.md', () => {
+    describe('docs/usage/templates.md', async () => {
       async function getAdditionalHandlebarsHelpersHeaders(): Promise<
         string[]
       > {
@@ -234,19 +234,18 @@ describe('docs/documentation', () => {
         return matches.map((match) => match.substring(5, match.length - 1));
       }
 
-      function getAddedHandlebarsHelpers(): string[] {
-        return [...templateHelperNames];
-      }
+      const additionalHandlebarsHelpers =
+        await getAdditionalHandlebarsHelpersHeaders();
 
-      it('has headers sorted alphabetically', async () => {
-        expect(await getAdditionalHandlebarsHelpersHeaders()).toEqual(
-          (await getAdditionalHandlebarsHelpersHeaders()).sort(),
+      it('has headers sorted alphabetically', () => {
+        expect(additionalHandlebarsHelpers).toEqual(
+          additionalHandlebarsHelpers.toSorted(),
         );
       });
 
-      it('documents all added Handlebars helpers', async () => {
-        expect(await getAdditionalHandlebarsHelpersHeaders()).toEqual(
-          getAddedHandlebarsHelpers().sort(),
+      it('documents all added Handlebars helpers', () => {
+        expect(additionalHandlebarsHelpers).toEqual(
+          templateHelperNames.toSorted(),
         );
       });
     });
