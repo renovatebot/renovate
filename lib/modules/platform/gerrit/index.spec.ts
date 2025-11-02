@@ -449,15 +449,13 @@ describe('modules/platform/gerrit/index', () => {
       const pr = mapGerritChangeToPr(change)!;
       prCacheMock.getPrs.mockResolvedValueOnce([pr]);
       prCacheMock.setPr.mockResolvedValueOnce();
-      clientMock.addMessageIfNotAlreadyExists.mockResolvedValueOnce(true);
+      clientMock.addMessage.mockResolvedValueOnce();
       await gerrit.updatePr({
         number: 123456,
         prTitle: change.subject,
         prBody: 'NEW PR-Body',
       });
-      expect(
-        clientMock.addMessageIfNotAlreadyExists,
-      ).toHaveBeenCalledExactlyOnceWith(
+      expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
         123456,
         'NEW PR-Body',
         TAG_PULL_REQUEST_BODY,
@@ -469,34 +467,6 @@ describe('modules/platform/gerrit/index', () => {
           updatedAt: expect.any(String),
         }),
       );
-    });
-
-    it('updatePr() - prBody already exists => no cache update', async () => {
-      const change = partial<GerritChange>({
-        _number: 123456,
-        current_revision: 'some-revision',
-        revisions: {
-          'some-revision': partial<GerritRevisionInfo>({
-            commit_with_footers: 'Renovate-Branch: branch',
-          }),
-        },
-      });
-      const pr = mapGerritChangeToPr(change)!;
-      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
-      clientMock.addMessageIfNotAlreadyExists.mockResolvedValueOnce(false);
-      await gerrit.updatePr({
-        number: 123456,
-        prTitle: change.subject,
-        prBody: 'Existing PR-Body',
-      });
-      expect(
-        clientMock.addMessageIfNotAlreadyExists,
-      ).toHaveBeenCalledExactlyOnceWith(
-        123456,
-        'Existing PR-Body',
-        TAG_PULL_REQUEST_BODY,
-      );
-      expect(prCacheMock.setPr).not.toHaveBeenCalled();
     });
   });
 
@@ -537,7 +507,7 @@ describe('modules/platform/gerrit/index', () => {
       ).rejects.toThrow(/it was not created in the last 5 minutes/);
     });
 
-    it('createPr() - update body and save to cache', async () => {
+    it('createPr() - add body as message and save to cache', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
         current_revision: 'some-revision',
@@ -560,13 +530,10 @@ describe('modules/platform/gerrit/index', () => {
         },
       });
       expect(pr).toHaveProperty('number', 123456);
-      expect(
-        clientMock.addMessageIfNotAlreadyExists,
-      ).toHaveBeenCalledExactlyOnceWith(
+      expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
         123456,
         'body',
         TAG_PULL_REQUEST_BODY,
-        [],
       );
       expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
         'test/repo',

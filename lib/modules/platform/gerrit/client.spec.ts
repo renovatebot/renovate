@@ -578,7 +578,7 @@ describe('modules/platform/gerrit/client', () => {
           ' new trimmed message\n',
           'TAG',
         ),
-      ).resolves.toBe(true);
+      ).toResolve();
     });
 
     it('msg already exists', async () => {
@@ -595,7 +595,7 @@ describe('modules/platform/gerrit/client', () => {
 
       await expect(
         client.addMessageIfNotAlreadyExists(123456, 'msg1\n', 'TAG'),
-      ).resolves.toBe(false);
+      ).toResolve();
     });
   });
 

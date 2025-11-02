@@ -285,38 +285,36 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   }
 
   const pr = clone(cached);
-  let hasChanges = false;
+  let updated = false;
 
-  // TODO: compare against cached.bodyStruct.hash to save API calls
   if (prConfig.prBody) {
-    const messageAdded = await client.addMessageIfNotAlreadyExists(
+    await client.addMessage(
       prConfig.number,
       prConfig.prBody,
       TAG_PULL_REQUEST_BODY,
     );
-    if (messageAdded) {
-      // TODO: should the body be normalized before hashing?
-      pr.bodyStruct = {
-        hash: hashBody(prConfig.prBody),
-      };
-      pr.updatedAt = new Date().toISOString();
-      hasChanges = true;
-    }
+    pr.bodyStruct = {
+      hash: hashBody(prConfig.prBody),
+    };
+    pr.updatedAt = new Date().toISOString();
+    updated = true;
   }
 
   if (prConfig.state && prConfig.state === 'closed') {
     const change = await client.abandonChange(prConfig.number);
     pr.state = 'closed';
     pr.updatedAt = change.updated.replace(' ', 'T');
-    hasChanges = true;
+    updated = true;
   }
 
-  if (hasChanges) {
+  if (updated) {
     logger.debug(
       `updatePr: updating gerrit change ${prConfig.number} in cache`,
     );
     await GerritPrCache.setPr(config.repository!, pr);
   }
+  // TODO: support restoring change if prConfig.state === 'open'
+  // TODO: support moving change if prConfig.targetBranch is set
 }
 
 export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
@@ -346,11 +344,10 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       `the change should have been created automatically from previous push to refs/for/${prConfig.sourceBranch}, but it was not created in the last 5 minutes (${change.created})`,
     );
   }
-  await client.addMessageIfNotAlreadyExists(
+  await client.addMessage(
     change._number,
     prConfig.prBody,
     TAG_PULL_REQUEST_BODY,
-    change.messages,
   );
   const pr = mapGerritChangeToPr(change, {
     sourceBranch: prConfig.sourceBranch,
