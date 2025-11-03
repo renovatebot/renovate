@@ -82,6 +82,13 @@ If set, Renovate will use this as a delay to proceed with an automerge.
 
 Default value: `250` (milliseconds).
 
+## `RENOVATE_X_PGP_RUNTIME`
+
+Specify which PGP runtime to use for decrypting Renovate config.
+Allowed values are `js-java`, `wasm-java` and `wasm-dotnet`.
+
+Default: `wasm-dotnet`.
+
 ## `RENOVATE_X_HARD_EXIT`
 
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
@@ -135,7 +142,7 @@ Suppress the pre-commit support warning in PR bodies.
 
 ## `RENOVATE_X_USE_OPENPGP`
 
-Use `openpgp` instead of `kbpgp` for `PGP` decryption.
+Use `openpgp` instead of bouncy castle for `PGP` decryption.
 
 ## `RENOVATE_X_YARN_PROXY`
 
