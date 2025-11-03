@@ -3,9 +3,11 @@ import util from 'node:util';
 import is from '@sindresorhus/is';
 import { findUp } from 'find-up';
 import fs from 'fs-extra';
+import tmp from 'tmp-promise';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
+import { memoize } from '../memoize';
 import { ensureCachePath, ensureLocalPath, isValidPath } from './util';
 
 export const pipeline = util.promisify(stream.pipeline);
@@ -104,14 +106,19 @@ export async function ensureCacheDir(name: string): Promise<string> {
 }
 
 /**
- * Return the path of the private cache directory. This directory is wiped
- * between repositories, so they can be used to store private registries' index
- * without risk of that information leaking to other repositories/users.
+ * Return the path of a private cache directory unique to this particular run of renovate.
+ * This directory is wiped between repositories, so it can be used to store private
+ * registries' index without risk of that information leaking to other repositories/users.
+ * The return value of the function is memoized so that calling the function repeatedly will give
+ * the same return value.
  */
-export function privateCacheDir(): string {
+export const privateCacheDir = memoize((): string => {
   const cacheDir = GlobalConfig.get('cacheDir');
-  return upath.join(cacheDir, '__renovate-private-cache');
-}
+  const tmpDirObject = tmp.dirSync({
+    template: upath.join(cacheDir, '__renovate-private-cache-XXXXXX'),
+  });
+  return tmpDirObject.name;
+});
 
 export async function localPathExists(pathName: string): Promise<boolean> {
   // Works for both files as well as directories

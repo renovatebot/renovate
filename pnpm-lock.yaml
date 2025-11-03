@@ -341,6 +341,9 @@ importers:
       strip-json-comments:
         specifier: 5.0.3
         version: 5.0.3
+      tmp-promise:
+        specifier: 3.0.3
+        version: 3.0.3
       toml-eslint-parser:
         specifier: 0.10.0
         version: 0.10.0
@@ -588,9 +591,6 @@ importers:
       tar:
         specifier: 7.5.2
         version: 7.5.2
-      tmp-promise:
-        specifier: 3.0.3
-        version: 3.0.3
       tsx:
         specifier: 4.20.6
         version: 4.20.6
