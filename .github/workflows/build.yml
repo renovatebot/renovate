@@ -398,10 +398,12 @@ jobs:
         run: |
           mkdir -p ./coverage/lcov
           mkdir -p ./coverage/json
+          mkdir -p ./coverage/junit
           for shard in ${{ matrix.shards }};
           do
             mv ./coverage/shard/$shard/lcov.info ./coverage/lcov/$shard.lcov
             mv ./coverage/shard/$shard/coverage-final.json ./coverage/json/$shard.json
+            mv ./coverage/shard/$shard/junit.xml ./coverage/junit/junit-$shard.xml
           done
 
       - name: Save coverage artifacts
@@ -412,12 +414,16 @@ jobs:
           path: |
             ./coverage/lcov
             ./coverage/json
+            ./coverage/junit
 
   codecov:
     needs: [test]
     runs-on: ubuntu-latest
     timeout-minutes: 3
     if: success() && github.event_name != 'merge_group' && github.event.pull_request.draft != true
+    permissions:
+      id-token: write # required for codecov OIDC
+
     steps:
       - name: Checkout code
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -432,11 +438,21 @@ jobs:
           path: coverage
           merge-multiple: true
 
-      - name: Codecov
+      - name: Codecov Coverage
+        if: github.event_name != 'merge_group'
         uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          use_oidc: true
           directory: coverage/lcov
+          fail_ci_if_error: github.event_name != 'pull_request'
+          verbose: true
+
+      - name: Codecov Test
+        if: github.event_name != 'merge_group'
+        uses: codecov/test-results-action@47f89e9acb64b76debcd5ea40642d25a4adced9f # v1.1.1
+        with:
+          use_oidc: true
+          directory: coverage/junit
           fail_ci_if_error: github.event_name != 'pull_request'
           verbose: true
 
