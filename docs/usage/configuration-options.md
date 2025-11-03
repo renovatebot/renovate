@@ -2725,6 +2725,14 @@ The datasource that Renovate uses must have a release timestamp for the `minimum
 Some datasources may have a release timestamp, but in a format Renovate does not support.
 In those cases a feature request needs to be implemented.
 
+You can confirm if your datasource supports the release timestamp by viewing [the documentation for the given datasource](./modules/datasource/index.md).
+
+<!-- prettier-ignore -->
+!!! note
+    If you use a custom registry, for instance as a pull-through cache, additional configuration may be required.
+    The [the documentation for the datasource](./modules/datasource/index.md) provides information about which field(s) need to be returned from the registry.
+    Alternatively, it may be possible to configure the `registryUrls`, like we can see in the below Maven example:
+
 <!-- prettier-ignore -->
 !!! warning "Warning for Maven users"
     For `minimumReleaseAge` to work, the Maven source must return reliable `last-modified` headers.
@@ -4148,7 +4156,7 @@ Behavior:
 - `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, and update nothing otherwise
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
-- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `cargo`, `composer`, `gleam`, `npm`, `yarn`, `pnpm`, `terraform` and `poetry` so far
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `cargo`, `composer`, `gleam`, `npm`, `yarn`, `pnpm`, `terraform`, `poetry` and `uv` so far
 - `in-range-only` = Update the lock file when in-range updates are available, ignore package file updates
 
 Renovate's `"auto"` strategy works like this for npm:

@@ -26,7 +26,7 @@ import type {
 } from './types';
 
 const markdown = new MarkdownIt('zero');
-markdown.enable(['heading', 'lheading']);
+markdown.enable(['heading', 'lheading', 'fence']);
 
 const repositoriesToSkipMdFetching = ['facebook/react-native'];
 
@@ -111,9 +111,16 @@ export function massageBody(
   );
   // Reduce headings size
   body = body
-    .replace(regEx(/\n\s*####? /g), '\n##### ')
-    .replace(regEx(/\n\s*## /g), '\n#### ')
-    .replace(regEx(/\n\s*# /g), '\n### ');
+    .split(regEx(/(```[\s\S]*?```)/g))
+    .map((part) =>
+      part.startsWith('```') // do not modify # inside of codeblocks
+        ? part
+        : part
+            .replace(regEx(/\n\s*####? /g), '\n##### ')
+            .replace(regEx(/\n\s*## /g), '\n#### ')
+            .replace(regEx(/\n\s*# /g), '\n### '),
+    )
+    .join('');
   // Trim whitespace
   return body.trim();
 }
