@@ -67,6 +67,10 @@ export class RenovateLogger implements Logger {
     this.log('fatal', p1, p2);
   }
 
+  addSerializers(serializers: bunyan.Serializers): void {
+    this.bunyanLogger.addSerializers(serializers);
+  }
+
   addStream(stream: bunyan.Stream): void {
     this.bunyanLogger.addStream(withSanitizer(stream));
   }
