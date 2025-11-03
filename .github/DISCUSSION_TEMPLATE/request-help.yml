@@ -31,13 +31,6 @@ body:
     validations:
       required: false
 
-  - type: input
-    id: self-hosted-version
-    attributes:
-      label: If you're self-hosting Renovate, tell us which platform (GitHub, GitLab, etc) and which version of Renovate.
-    validations:
-      required: false
-
   - type: textarea
     id: the-question
     attributes:
