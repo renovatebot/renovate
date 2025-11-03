@@ -403,7 +403,7 @@ jobs:
           do
             mv ./coverage/shard/$shard/lcov.info ./coverage/lcov/$shard.lcov
             mv ./coverage/shard/$shard/coverage-final.json ./coverage/json/$shard.json
-            mv ./coverage/shard/$shard/junit.xml ./coverage/junit/$shard.xml
+            mv ./coverage/shard/$shard/junit.xml ./coverage/junit/junit-$shard.xml
           done
 
       - name: Save coverage artifacts
