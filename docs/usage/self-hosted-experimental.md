@@ -82,11 +82,6 @@ If set, Renovate will use this as a delay to proceed with an automerge.
 
 Default value: `250` (milliseconds).
 
-## `RENOVATE_X_PGP_RUNTIME`
-
-Specify which PGP runtime to use for decrypting Renovate config.
-Allowed values are `js-java`, `wasm-java` and `wasm-dotnet`.
-
 Default: `wasm-dotnet`.
 
 ## `RENOVATE_X_HARD_EXIT`
@@ -101,6 +96,11 @@ Skip initializing `RE2` for regular expressions and instead use Node-native `Reg
 ## `RENOVATE_X_NUGET_DOWNLOAD_NUPKGS`
 
 If set to any value, Renovate will download `nupkg` files for determining package metadata.
+
+## `RENOVATE_X_PGP_RUNTIME`
+
+Specify which PGP runtime to use for decrypting Renovate config.
+Allowed values are `js-java`, `wasm-java` and `wasm-dotnet`.
 
 ## `RENOVATE_X_PLATFORM_VERSION`
 
