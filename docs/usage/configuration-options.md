@@ -4041,7 +4041,7 @@ This limit is enforced on a per-repository basis.
 This setting tells Renovate _when_ to create PRs:
 
 - `immediate` (default): Renovate creates PRs immediately after creating the corresponding branch
-- `not-pending`: Renovate waits until status checks have completed (passed or failed) before raising the PR
+- `not-pending`: Renovate waits until status checks have completed (passed or failed) before raising the PR (or creating the branch)
 - `status-success`: Renovate only creates PRs if/when the the test pass
 - `approval`: Renovate creates branches for updates immediately, but creates the PR _after_ getting Dependency Dashboard approval
 
