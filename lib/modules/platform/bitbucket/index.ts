@@ -52,6 +52,7 @@ import type {
 } from './types';
 import * as utils from './utils';
 import { mergeBodyTransformer } from './utils';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 
 export const id = 'bitbucket';
 
@@ -318,7 +319,7 @@ export async function findPr({
     const prs = (
       await bitbucketHttp.getJsonUnchecked<PagedResult<PrResponse>>(
         `/2.0/repositories/${config.repository}/pullrequests?q=source.branch.name="${branchName}"&state=open`,
-        { cacheProvider: aggressiveRepoCacheProvider },
+        { cacheProvider: memCacheProvider },
       )
     ).body.values;
 
@@ -413,7 +414,7 @@ async function getBranchCommit(
         `/2.0/repositories/${config.repository}/refs/branches/${escapeHash(
           branchName,
         )}`,
-        { cacheProvider: aggressiveRepoCacheProvider },
+        { cacheProvider: memCacheProvider },
       )
     ).body;
     return branch.target.hash;
