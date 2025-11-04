@@ -334,6 +334,7 @@ export interface RenovateConfig
   minimumGroupSize?: number;
   configFileNames?: string[];
   minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
+  minimumReleaseAgeEnforcedUpdateTypes?: UpdateType[];
 }
 
 const CustomDatasourceFormats = [
