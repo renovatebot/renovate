@@ -1987,9 +1987,11 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'minimumReleaseAgeEnforcedUpdateTypes',
-    description: '....... TODO', // TODO
+    description:
+      'When set in conjunction with `minimumReleaseAge`, controls which `updateType`s will have the `releaseTimestamp` check enforced.',
     type: 'array',
     subType: 'string',
+    allowedValues: [...UpdateTypesOptions],
     default: ['major', 'minor', 'patch'],
   },
   {
