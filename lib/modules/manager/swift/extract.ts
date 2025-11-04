@@ -1,3 +1,4 @@
+import { detectPlatform } from '../../../util/common';
 import { regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -121,22 +122,33 @@ function getMatch(str: string, state: string | null): MatchResult | null {
 
 function parseUrl(
   url: string | null,
-): { depName: string; datasource: string } | null {
+): { depName: string; datasource: string; registryUrls?: string[] } | null {
   // istanbul ignore if
   if (!url) {
     return null;
   }
   try {
-    const { host, pathname } = new URL(url);
-    if (host === 'github.com' || host === 'gitlab.com') {
+    const parsedUrl = new URL(url);
+    const { host, pathname, protocol } = parsedUrl;
+    const platform = detectPlatform(url);
+    if (platform === 'github' || platform === 'gitlab') {
       const depName = pathname
         .replace(regEx(/^\//), '')
         .replace(regEx(/\.git$/), '')
         .replace(regEx(/\/$/), '');
       const datasource =
-        host === 'github.com'
+        platform === 'github'
           ? GithubTagsDatasource.id
           : GitlabTagsDatasource.id;
+
+      const isGitHubPublic = host === 'github.com';
+      const isGitLabPublic = host === 'gitlab.com';
+
+      if (!isGitHubPublic && !isGitLabPublic) {
+        const baseUrl = `${protocol}//${host}`;
+        return { depName, datasource, registryUrls: [baseUrl] };
+      }
+
       return { depName, datasource };
     }
     return { depName: url, datasource: GitTagsDatasource.id };
@@ -169,12 +181,13 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     }
     const parsedUrl = parseUrl(packageName);
     if (parsedUrl && currentValue) {
-      const { depName, datasource } = parsedUrl;
+      const { depName, datasource, registryUrls } = parsedUrl;
 
       const dep: PackageDependency = {
         datasource,
         depName,
         currentValue,
+        registryUrls,
       };
 
       deps.push(dep);

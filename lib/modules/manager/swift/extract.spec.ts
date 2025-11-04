@@ -69,6 +69,50 @@ describe('modules/manager/swift/extract', () => {
       });
     });
 
+    it('extracts self-hosted GitHub dependencies with registryUrls', () => {
+      const content = `
+        let package = Package(
+          name: "MyPackage",
+          dependencies: [
+            .package(url: "https://github.example.com/org/repo", from: "1.0.0")
+          ]
+        )
+      `;
+      const result = extractPackageFile(content);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            datasource: 'github-tags',
+            depName: 'org/repo',
+            currentValue: 'from: "1.0.0"',
+            registryUrls: ['https://github.example.com'],
+          },
+        ],
+      });
+    });
+
+    it('extracts self-hosted GitLab dependencies with registryUrls', () => {
+      const content = `
+        let package = Package(
+          name: "MyPackage",
+          dependencies: [
+            .package(url: "https://gitlab.mycompany.com/group/project.git", from: "2.5.0")
+          ]
+        )
+      `;
+      const result = extractPackageFile(content);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            datasource: 'gitlab-tags',
+            depName: 'group/project',
+            currentValue: 'from: "2.5.0"',
+            registryUrls: ['https://gitlab.mycompany.com'],
+          },
+        ],
+      });
+    });
+
     it('extracts other dependencies with git-tags datasource', () => {
       const content = `
         let package = Package(
