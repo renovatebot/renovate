@@ -24,9 +24,9 @@ body:
   - type: input
     id: self-hosted-version
     attributes:
-      label: |
-        Which version of Renovate are you using?
-        Please do not say "latest" version (as Renovate ships many updates daily), but instead note the exact version.
+      label: Which version of Renovate are you using?
+      description: |
+        Please do not say 'latest' version (as Renovate ships many updates daily), but instead note the exact version.
         You can find it by checking the `INFO: Repository started` log line.
     validations:
       required: false
