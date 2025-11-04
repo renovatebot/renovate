@@ -258,8 +258,8 @@ importers:
         specifier: 3.0.4
         version: 3.0.4
       minimatch:
-        specifier: 10.0.3
-        version: 10.0.3
+        specifier: 10.1.0
+        version: 10.1.0
       moo:
         specifier: 0.5.2
         version: 0.5.2
@@ -4799,8 +4799,8 @@ packages:
     resolution: {integrity: sha512-ethXTt3SGGR+95gudmqJ1eNhRO7eGEGIgYA9vnPatK4/etz2MEVDno5GMCibdMTuBMyElzIlgxMna3K94XDIDQ==}
     engines: {node: 20 || >=22}
 
-  minimatch@10.0.3:
-    resolution: {integrity: sha512-IPZ167aShDZZUMdRk66cyQAW3qr0WzbHkPdMYa8bzZhlHhO3jALbKdxcaak7W9FfT2rZNpQuUu4Od7ILEpXSaw==}
+  minimatch@10.1.0:
+    resolution: {integrity: sha512-b19fOFtCjbY8n5gXaqXVt4BEfeT4t1OIH9IINtjssCOZCnXTGEcGNwWsoudT34nfa0IoMS4cc5zLNzBxQl7N5g==}
     engines: {node: 20 || >=22}
 
   minimatch@3.1.2:
@@ -10258,7 +10258,7 @@ snapshots:
       eslint: 9.37.0
       eslint-import-context: 0.1.9(unrs-resolver@1.11.1)
       is-glob: 4.0.3
-      minimatch: 10.0.3
+      minimatch: 10.1.0
       semver: 7.7.2
       stable-hash-x: 0.2.0
       unrs-resolver: 1.11.1
@@ -10753,7 +10753,7 @@ snapshots:
     dependencies:
       foreground-child: 3.3.1
       jackspeak: 4.1.1
-      minimatch: 10.0.3
+      minimatch: 10.1.0
       minipass: 7.1.2
       package-json-from-dist: 1.0.1
       path-scurry: 2.0.0
@@ -11984,7 +11984,7 @@ snapshots:
     dependencies:
       brace-expansion: 2.0.2
 
-  minimatch@10.0.3:
+  minimatch@10.1.0:
     dependencies:
       '@isaacs/brace-expansion': 5.0.0
 
