@@ -8,6 +8,7 @@ import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import type { BitbucketHttpOptions } from '../../../util/http/bitbucket';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import {
   aggressiveRepoCacheProvider,
   repoCacheProvider,
@@ -52,7 +53,6 @@ import type {
 } from './types';
 import * as utils from './utils';
 import { mergeBodyTransformer } from './utils';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 
 export const id = 'bitbucket';
 
