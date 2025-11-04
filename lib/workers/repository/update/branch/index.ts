@@ -475,7 +475,7 @@ export async function processBranch(
       if (depNamesWithoutReleaseTimestamp['timestamp-required'].length) {
         logger.debug(
           { updates: depNamesWithoutReleaseTimestamp['timestamp-required'] },
-          `Marking ${depNamesWithoutReleaseTimestamp['timestamp-required'].length} release(s) as pending, as they not have a releaseTimestamp and we're running with minimumReleaseAgeBehaviour=require-timestamp`,
+          `Marking ${depNamesWithoutReleaseTimestamp['timestamp-required'].length} release(s) as pending, as they do not have a releaseTimestamp and we're running with minimumReleaseAgeBehaviour=require-timestamp`,
         );
       }
       if (depNamesWithoutReleaseTimestamp['timestamp-optional'].length) {
