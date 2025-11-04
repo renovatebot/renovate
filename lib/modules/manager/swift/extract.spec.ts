@@ -84,7 +84,6 @@ describe('modules/manager/swift/extract', () => {
           {
             datasource: 'git-tags',
             depName: 'https://example.com/repo.git',
-            packageName: 'https://example.com/repo.git',
             currentValue: 'from: "3.0.0"',
           },
         ],

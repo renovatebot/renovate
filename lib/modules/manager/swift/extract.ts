@@ -176,9 +176,6 @@ export function extractPackageFile(content: string): PackageFileContent | null {
         depName,
         currentValue,
       };
-      if (datasource === GitTagsDatasource.id) {
-        dep.packageName = packageName;
-      }
 
       deps.push(dep);
     }
