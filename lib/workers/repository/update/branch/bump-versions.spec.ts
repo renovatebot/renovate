@@ -187,6 +187,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
         { files: ['.release-version'] },
         'bumpVersions(ipsum): Found 1 files to bump versions',
       );
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { file: '.release-version' },
         'bumpVersions(ipsum): No match found for bumping version',

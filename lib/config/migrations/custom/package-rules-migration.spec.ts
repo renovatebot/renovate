@@ -31,8 +31,8 @@ describe('config/migrations/custom/package-rules-migration', () => {
     expect(mappedProperties).toEqual(expectedMappedProperties);
   });
 
-  it('should not migrate nested packageRules', () => {
-    expect(PackageRulesMigration).toMigrate(
+  it('should not migrate nested packageRules', async () => {
+    await expect(PackageRulesMigration).toMigrate(
       {
         packageRules: [
           {
@@ -56,8 +56,8 @@ describe('config/migrations/custom/package-rules-migration', () => {
     );
   });
 
-  it('should migrate languages to categories', () => {
-    expect(PackageRulesMigration).toMigrate(
+  it('should migrate languages to categories', async () => {
+    await expect(PackageRulesMigration).toMigrate(
       {
         packageRules: [
           {
@@ -85,8 +85,8 @@ describe('config/migrations/custom/package-rules-migration', () => {
     );
   });
 
-  it('should migrate single match rule', () => {
-    expect(PackageRulesMigration).toMigrate(
+  it('should migrate single match rule', async () => {
+    await expect(PackageRulesMigration).toMigrate(
       {
         packageRules: [
           {
@@ -106,8 +106,8 @@ describe('config/migrations/custom/package-rules-migration', () => {
     );
   });
 
-  it('should migrate excludePackageNames to matchPackageNames', () => {
-    expect(PackageRulesMigration).toMigrate(
+  it('should migrate excludePackageNames to matchPackageNames', async () => {
+    await expect(PackageRulesMigration).toMigrate(
       {
         packageRules: [
           {
@@ -136,8 +136,8 @@ describe('config/migrations/custom/package-rules-migration', () => {
     );
   });
 
-  it('should migrate matchPackagePatterns to matchPackageNames', () => {
-    expect(PackageRulesMigration).toMigrate(
+  it('should migrate matchPackagePatterns to matchPackageNames', async () => {
+    await expect(PackageRulesMigration).toMigrate(
       {
         packageRules: [
           {
@@ -174,8 +174,8 @@ describe('config/migrations/custom/package-rules-migration', () => {
     );
   });
 
-  it('should migrate all match/exclude when value is of type string', () => {
-    expect(PackageRulesMigration).toMigrate(
+  it('should migrate all match/exclude when value is of type string', async () => {
+    await expect(PackageRulesMigration).toMigrate(
       {
         packageRules: [
           {
@@ -219,8 +219,8 @@ describe('config/migrations/custom/package-rules-migration', () => {
     );
   });
 
-  it('should migrate all match/exclude at once', () => {
-    expect(PackageRulesMigration).toMigrate(
+  it('should migrate all match/exclude at once', async () => {
+    await expect(PackageRulesMigration).toMigrate(
       {
         packageRules: [
           {

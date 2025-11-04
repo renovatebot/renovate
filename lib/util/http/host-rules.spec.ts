@@ -24,6 +24,11 @@ describe('util/http/host-rules', () => {
       token: 'token',
     });
     hostRules.add({
+      hostType: 'github',
+      matchHost: 'api.github.com',
+      token: 'dotcom-api-token',
+    });
+    hostRules.add({
       hostType: 'gitea',
       password: 'password',
     });
@@ -67,6 +72,23 @@ describe('util/http/host-rules', () => {
       },
       hostType: 'github',
       token: 'token',
+    });
+  });
+
+  it('adds token to an api.github.com URL', () => {
+    const url = 'https://api.github.com/user';
+
+    const opts = { ...options };
+    const hostRule = findMatchingRule(url, opts);
+    expect(hostRule).toEqual({
+      token: 'dotcom-api-token',
+    });
+    expect(applyHostRule(url, opts, hostRule)).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'github',
+      token: 'dotcom-api-token',
     });
   });
 
@@ -348,6 +370,118 @@ describe('util/http/host-rules', () => {
       },
       hostType: 'pod',
       token: 'token',
+    });
+  });
+
+  it('when multiple GitHub host types are set', () => {
+    let opts: GotOptions;
+    let hostRule: HostRule;
+
+    hostRules.clear();
+
+    // for instance, if running with GitHub Enterprise Server, this may be set as the default host rule
+    hostRules.add({
+      hostType: 'github',
+      token: 'token',
+    });
+    // and our GitHub.com authentication
+    hostRules.add({
+      // with the `hostType`
+      hostType: 'github',
+      matchHost: 'github.com',
+      token: 'dotcom-hostType-token',
+    });
+    hostRules.add({
+      // and without `hostType`
+      matchHost: 'github.com',
+      token: 'dotcom-token',
+    });
+
+    {
+      const url = 'https://github.enterprise';
+      opts = { ...options };
+      hostRule = findMatchingRule(url, opts);
+      expect(hostRule).toEqual({
+        token: 'token',
+      });
+      expect(applyHostRule(url, opts, hostRule)).toEqual({
+        context: {
+          authType: undefined,
+        },
+        hostType: 'github',
+        token: 'token',
+      });
+    }
+
+    {
+      const url = 'https://github.enterprise/api/v4';
+      opts = { ...options };
+      hostRule = findMatchingRule(url, opts);
+      expect(hostRule).toEqual({
+        token: 'token',
+      });
+      expect(applyHostRule(url, opts, hostRule)).toEqual({
+        context: {
+          authType: undefined,
+        },
+        hostType: 'github',
+        token: 'token',
+      });
+    }
+
+    {
+      const url = 'https://api.github.com/user';
+      opts = { ...options };
+      hostRule = findMatchingRule(url, opts);
+      expect(hostRule).toEqual({
+        token: 'dotcom-hostType-token',
+      });
+      expect(applyHostRule(url, opts, hostRule)).toEqual({
+        context: {
+          authType: undefined,
+        },
+        hostType: 'github',
+        token: 'dotcom-hostType-token',
+      });
+    }
+
+    opts = { ...options, hostType: 'github-tags' };
+    hostRule = findMatchingRule(url, opts);
+    expect(hostRule).toEqual({
+      token: 'dotcom-token',
+    });
+    expect(applyHostRule(url, opts, hostRule)).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'github-tags',
+      token: 'dotcom-token',
+    });
+
+    opts = { ...options, hostType: 'github-changelog' };
+    hostRule = findMatchingRule(url, opts);
+    expect(hostRule).toEqual({
+      token: 'dotcom-token',
+    });
+    expect(applyHostRule(url, opts, hostRule)).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'github-changelog',
+      token: 'dotcom-token',
+    });
+
+    opts = { ...options, hostType: 'pod' };
+    hostRule = findMatchingRule(url, opts);
+    expect(hostRule).toEqual({
+      token: 'dotcom-token',
+    });
+    expect(applyHostRule(url, opts, hostRule)).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'pod',
+      token: 'dotcom-token',
     });
   });
 

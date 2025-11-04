@@ -455,7 +455,7 @@ export async function createFork(
         body: {
           organization: forkOrg ?? undefined,
           name: config.parentRepo!.replace('/', '-_-'),
-          default_branch_only: true, // no baseBranches support yet
+          default_branch_only: true, // no baseBranchPatterns support yet
         },
       })
     ).body;
@@ -764,11 +764,6 @@ async function checkRulesetsForForceRebase(
     );
 
     return rulesets.some((rule) => {
-      if (rule.type === 'non_fast_forward') {
-        logger.debug(`Ruleset: non_fast_forward rule found for ${branchName}`);
-        return true;
-      }
-
       if (
         rule.type === 'required_status_checks' &&
         rule.parameters?.strict_required_status_checks_policy === true
@@ -1041,6 +1036,7 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
 
 export async function tryReuseAutoclosedPr(
   autoclosedPr: Pr,
+  newTitle: string,
 ): Promise<Pr | null> {
   const { sha, number, sourceBranch: branchName } = autoclosedPr;
   try {
@@ -1055,21 +1051,28 @@ export async function tryReuseAutoclosedPr(
   }
 
   try {
-    const title = autoclosedPr.title.replace(regEx(/ - autoclosed$/), '');
     const { body: ghPr } = await githubApi.patchJson<GhRestPr>(
       `repos/${config.repository}/pulls/${number}`,
       {
         body: {
           state: 'open',
-          title,
+          title: newTitle,
         },
       },
     );
     logger.info(
-      { branchName, title, number },
+      { branchName, oldTitle: autoclosedPr.title, newTitle, number },
       'Successfully reopened autoclosed PR',
     );
+
     const result = coerceRestPr(ghPr);
+
+    const localSha = git.getBranchCommit(branchName);
+    if (localSha && localSha !== sha) {
+      await git.forcePushToRemote(branchName, 'origin');
+      result.sha = localSha;
+    }
+
     cachePr(result);
     return result;
   } catch {

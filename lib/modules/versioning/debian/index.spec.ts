@@ -422,6 +422,7 @@ describe('modules/versioning/debian/index', () => {
     vi.setSystemTime(future);
     expect(debian.isStable('buster')).toBeFalse();
     expect(logger.debug).toHaveBeenCalledTimes(1);
+
     expect(logger.debug).toHaveBeenCalledWith(
       'RollingReleasesData - data written',
     );
