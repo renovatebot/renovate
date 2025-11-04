@@ -1,8 +1,6 @@
 import { extractPackageFile } from './extract';
 import { Fixtures } from '~test/fixtures';
 
-const samplePackageSwift = Fixtures.get('SamplePackage.swift');
-
 describe('modules/manager/swift/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty content', () => {
@@ -157,7 +155,7 @@ describe('modules/manager/swift/extract', () => {
     });
 
     it('extracts dependencies from sample package file', () => {
-      const result = extractPackageFile(samplePackageSwift);
+      const result = extractPackageFile(Fixtures.get('SamplePackage.swift'));
 
       expect(result?.deps).toHaveLength(9);
 
