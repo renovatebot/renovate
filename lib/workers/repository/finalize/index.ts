@@ -19,8 +19,8 @@ export async function finalizeRepo(
 ): Promise<void> {
   await checkReconfigureBranch(config, repoConfig);
   await pruneStaleBranches(config, branchList);
-  await ensureIssuesClosing();
   await repositoryCache.saveCache();
+  await ensureIssuesClosing();
   await clearRenovateRefs();
   PackageFiles.clear();
   const prList = await platform.getPrList();
