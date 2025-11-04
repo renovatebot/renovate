@@ -4,6 +4,7 @@ import { GlobalConfig } from '../../../../config/global';
 import {
   type MinimumReleaseAgeBehaviour,
   type RenovateConfig,
+  type UpdateType,
 } from '../../../../config/types';
 import {
   CONFIG_VALIDATION,
@@ -391,7 +392,10 @@ export async function processBranch(
     ) {
       const depNamesWithoutReleaseTimestamp: Record<
         MinimumReleaseAgeBehaviour,
-        string[]
+        {
+          depName: string;
+          updateType: UpdateType;
+        }[]
       > = {
         'timestamp-required': [],
         'timestamp-optional': [],
@@ -424,16 +428,18 @@ export async function processBranch(
           } else {
             // if we're set to `minimumReleaseAgeBehaviour=timestamp-required`, and there isn't a timestamp, always mark the update as pending
             if (minimumReleaseAgeBehaviour === 'timestamp-required') {
-              depNamesWithoutReleaseTimestamp['timestamp-required'].push(
-                upgrade.depName!,
-              );
+              depNamesWithoutReleaseTimestamp['timestamp-required'].push({
+                depName: upgrade.depName!,
+                updateType: upgrade.updateType!,
+              });
               config.stabilityStatus = 'yellow';
               continue;
             } else {
               // if there is no timestamp, and we're running in `optional` mode, we can allow it, but make sure to warn the user
-              depNamesWithoutReleaseTimestamp['timestamp-optional'].push(
-                upgrade.depName!,
-              );
+              depNamesWithoutReleaseTimestamp['timestamp-optional'].push({
+                depName: upgrade.depName!,
+                updateType: upgrade.updateType!,
+              });
             }
           }
         }
@@ -468,7 +474,7 @@ export async function processBranch(
 
       if (depNamesWithoutReleaseTimestamp['timestamp-required'].length) {
         logger.debug(
-          { depNames: depNamesWithoutReleaseTimestamp['timestamp-required'] },
+          { updates: depNamesWithoutReleaseTimestamp['timestamp-required'] },
           `Marking ${depNamesWithoutReleaseTimestamp['timestamp-required'].length} release(s) as pending, as they not have a releaseTimestamp and we're running with minimumReleaseAgeBehaviour=require-timestamp`,
         );
       }
@@ -477,7 +483,7 @@ export async function processBranch(
           "Some upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
         );
         logger.debug(
-          { depNames: depNamesWithoutReleaseTimestamp['timestamp-optional'] },
+          { updates: depNamesWithoutReleaseTimestamp['timestamp-optional'] },
           `${depNamesWithoutReleaseTimestamp['timestamp-optional'].length} upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding`,
         );
       }
