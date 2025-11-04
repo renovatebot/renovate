@@ -414,7 +414,7 @@ async function getBranchCommit(
         `/2.0/repositories/${config.repository}/refs/branches/${escapeHash(
           branchName,
         )}`,
-        { cacheProvider: memCacheProvider },
+        { cacheProvider: aggressiveRepoCacheProvider },
       )
     ).body;
     return branch.target.hash;
