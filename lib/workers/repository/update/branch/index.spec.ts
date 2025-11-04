@@ -247,6 +247,7 @@ describe('workers/repository/update/branch/index', () => {
             releaseTimestamp: undefined,
             minimumReleaseAge: '100 days',
             minimumReleaseAgeBehaviour: 'timestamp-required',
+            updateType: 'major',
           },
         ]);
 
@@ -266,8 +267,28 @@ describe('workers/repository/update/branch/index', () => {
             releaseTimestamp: undefined,
             minimumReleaseAge: '100 days',
             minimumReleaseAgeBehaviour: 'timestamp-optional',
+            updateType: 'major',
           },
         ]);
+        scm.isBranchModified.mockResolvedValueOnce(false);
+        await branchWorker.processBranch(config);
+        expect(reuse.shouldReuseExistingBranch).toHaveBeenCalled();
+      });
+
+      it('does not skip branch if minimumReleaseAgeBehaviour=timestamp-required, if updateType is not in minimumReleaseAgeEnforcedUpdateTypes', async () => {
+        schedule.isScheduledNow.mockReturnValueOnce(true);
+        config.prCreation = 'not-pending';
+        config.upgrades = partial<BranchUpgradeConfig>([
+          {
+            releaseTimestamp: undefined,
+            minimumReleaseAge: '100 days',
+            minimumReleaseAgeBehaviour: 'timestamp-required',
+
+            updateType: 'digest',
+            minimumReleaseAgeEnforcedUpdateTypes: ['major'],
+          },
+        ]);
+
         scm.isBranchModified.mockResolvedValueOnce(false);
         await branchWorker.processBranch(config);
         expect(reuse.shouldReuseExistingBranch).toHaveBeenCalled();
@@ -396,7 +417,7 @@ describe('workers/repository/update/branch/index', () => {
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
 
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
         `Matching PR #${pr.number} was merged previously`,
       );
     });
@@ -453,7 +474,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pr-edited',
       });
 
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
         `PR has been edited, PrNo:${pr.number}`,
       );
       expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
@@ -485,7 +506,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pr-edited',
       });
 
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
         `PR has been edited, PrNo:${pr.number}`,
       );
       expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
@@ -511,7 +532,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pr-edited',
       });
 
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
         `PR has been edited, PrNo:${pr.number}`,
       );
       expect(platform.ensureComment).toHaveBeenCalledTimes(0);
@@ -545,7 +566,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pr-edited',
       });
 
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
         `PR has been edited, PrNo:${pr.number}`,
       );
       expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
@@ -1195,7 +1216,7 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: null,
       });
 
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
         'Branch cannot automerge now because automergeSchedule is off schedule - skipping',
       );
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
@@ -1492,7 +1513,7 @@ describe('workers/repository/update/branch/index', () => {
         cacheFingerprintMatch: 'matched',
       });
 
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
         'Base branch changed by user, rebasing the branch onto new base',
       );
       expect(commit.commitFilesToBranch).toHaveBeenCalled();
@@ -1531,7 +1552,7 @@ describe('workers/repository/update/branch/index', () => {
         cacheFingerprintMatch: 'no-fingerprint',
       });
 
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
         'Existing branch needs updating. Restarting processBranch() with a clean branch',
       );
       expect(commit.commitFilesToBranch).toHaveBeenCalled();
@@ -1567,7 +1588,7 @@ describe('workers/repository/update/branch/index', () => {
         cacheFingerprintMatch: 'no-fingerprint',
       });
 
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
         'Existing branch needs updating. Restarting processBranch() with a clean branch',
       );
       expect(commit.commitFilesToBranch).toHaveBeenCalled();
@@ -1630,7 +1651,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pr-edited',
       });
 
-      expect(logger.info).toHaveBeenCalledWith(
+      expect(logger.info).toHaveBeenCalledExactlyOnceWith(
         `DRY-RUN: Would ensure edited/blocked PR comment in PR #${pr.number}`,
       );
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
@@ -1676,7 +1697,7 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: null,
       });
 
-      expect(logger.info).toHaveBeenCalledWith(
+      expect(logger.info).toHaveBeenCalledExactlyOnceWith(
         `DRY-RUN: Would remove edited/blocked PR comment in PR #${pr.number}`,
       );
     });
@@ -1724,7 +1745,7 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: null,
       });
 
-      expect(logger.info).toHaveBeenCalledWith(
+      expect(logger.info).toHaveBeenCalledExactlyOnceWith(
         'DRY-RUN: Would ensure comment removal in PR #undefined',
       );
     });
@@ -2827,9 +2848,11 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: '123test',
       });
 
-      expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
+        'Found existing branch PR',
+      );
 
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
         'No package files need updating',
       );
     });
@@ -2866,7 +2889,9 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: null,
       });
 
-      expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
+      expect(logger.debug).toHaveBeenCalledExactlyOnceWith(
+        'Found existing branch PR',
+      );
       expect(logger.debug).not.toHaveBeenCalledWith(
         'No package files need updating',
       );
@@ -3050,7 +3075,7 @@ describe('workers/repository/update/branch/index', () => {
       await branchWorker.processBranch(config);
       expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
 
-      expect(logger.info).toHaveBeenCalledWith(
+      expect(logger.info).toHaveBeenCalledExactlyOnceWith(
         'DRY-RUN: Would reattempt platform automerge for PR #123',
       );
     });

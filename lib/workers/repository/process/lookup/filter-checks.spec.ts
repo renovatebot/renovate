@@ -249,6 +249,44 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         expect(res.release?.version).toBe('1.0.3');
       });
 
+      it('returns the latest release, if minimumReleaseAgeBehaviour=timestamp-required, if updateType is not in minimumReleaseAgeEnforcedUpdateTypes', async () => {
+        const releasesWithMissingReleaseTimestamp: Release[] = [
+          {
+            version: '1.0.1',
+            releaseTimestamp: '2021-01-01T00:00:01.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.2',
+            releaseTimestamp: '2021-01-03T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.3',
+            releaseTimestamp: '2021-01-05T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.0',
+            newDigest: 'a.b.c',
+            // no releaseTimestamp
+          },
+        ];
+
+        config.currentVersion = '1.0.0';
+        config.internalChecksFilter = 'strict';
+        config.minimumReleaseAge = '100 days';
+        config.minimumReleaseAgeBehaviour = 'timestamp-required';
+        config.minimumReleaseAgeEnforcedUpdateTypes = ['major'];
+        const res = await filterInternalChecks(
+          config,
+          versioning,
+          'digest',
+          releasesWithMissingReleaseTimestamp,
+        );
+        expect(res.pendingChecks).toBeFalse();
+        expect(res.pendingReleases).toHaveLength(0);
+        expect(res.release?.version).toBe('1.0.0');
+        expect(res.release?.newDigest).toBe('a.b.c');
+      });
+
       it('returns the latest release, if minimumReleaseAgeBehaviour=timestamp-optional', async () => {
         const releasesWithMissingReleaseTimestamp: Release[] = [
           {

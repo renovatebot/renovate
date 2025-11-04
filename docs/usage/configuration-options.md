@@ -2796,6 +2796,16 @@ When set to `timestamp-optional`, Renovate will treat a release without a releas
 
 This only applies when used with [`minimumReleaseAge`](#minimumreleaseage).
 
+## minimumReleaseAgeEnforcedUpdateTypes
+
+????????
+
+????
+
+???
+
+TODO
+
 ## minor
 
 Add to this object if you wish to define rules that apply only to minor updates.

@@ -1986,6 +1986,13 @@ const options: RenovateOptions[] = [
     allowedValues: ['timestamp-required', 'timestamp-optional'],
   },
   {
+    name: 'minimumReleaseAgeEnforcedUpdateTypes',
+    description: '....... TODO', // TODO
+    type: 'array',
+    subType: 'string',
+    default: ['major', 'minor', 'patch'],
+  },
+  {
     name: 'abandonmentThreshold',
     description:
       'Flags packages that have not been updated within this period as abandoned.',

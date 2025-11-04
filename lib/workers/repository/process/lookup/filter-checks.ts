@@ -1,6 +1,9 @@
 import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
-import type { MinimumReleaseAgeBehaviour } from '../../../../config/types';
+import type {
+  MinimumReleaseAgeBehaviour,
+  UpdateType,
+} from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { Release } from '../../../../modules/datasource';
 import { postprocessRelease } from '../../../../modules/datasource/postprocess-release';
@@ -86,6 +89,13 @@ export async function filterInternalChecks(
         const minimumReleaseAgeBehaviour =
           releaseConfig.minimumReleaseAgeBehaviour;
 
+        const minimumReleaseAgeEnforcedUpdateTypes: UpdateType[] =
+          releaseConfig.minimumReleaseAgeEnforcedUpdateTypes ?? [
+            'major',
+            'minor',
+            'patch',
+          ];
+
         // if there is a releaseTimestamp, regardless of `minimumReleaseAgeBehaviour`, we should process it
         if (candidateRelease.releaseTimestamp) {
           // we should skip this if we have a timestamp that isn't passing checks:
@@ -101,25 +111,46 @@ export async function filterInternalChecks(
             pendingReleases.unshift(candidateRelease);
             continue;
           }
-        } // or if there is no timestamp, and we're running in `minimumReleaseAgeBehaviour=timestamp-required`
-        else if (
-          is.nullOrUndefined(candidateRelease.releaseTimestamp) &&
-          minimumReleaseAgeBehaviour === 'timestamp-required'
-        ) {
-          // Skip it, as we require a timestamp
-          candidateVersionsWithoutReleaseTimestamp[
-            minimumReleaseAgeBehaviour
-          ].push(candidateRelease.version);
-          pendingReleases.unshift(candidateRelease);
-          continue;
-        } // if there is no timestamp, and we're running in `optional` mode, we can allow it
-        else if (
-          is.nullOrUndefined(candidateRelease.releaseTimestamp) &&
-          minimumReleaseAgeBehaviour === 'timestamp-optional'
-        ) {
-          candidateVersionsWithoutReleaseTimestamp[
-            minimumReleaseAgeBehaviour
-          ].push(candidateRelease.version);
+        } else {
+          // if the update is an UpdateType that we're enforcing `minimumReleaseAge` on, process it accordingly ...
+          if (
+            releaseConfig.updateType &&
+            minimumReleaseAgeEnforcedUpdateTypes.includes(
+              releaseConfig.updateType,
+            )
+          ) {
+            // or if there is no timestamp, and we're running in `minimumReleaseAgeBehaviour=timestamp-required`
+            if (
+              is.nullOrUndefined(candidateRelease.releaseTimestamp) &&
+              minimumReleaseAgeBehaviour === 'timestamp-required'
+            ) {
+              // Skip it, as we require a timestamp
+              candidateVersionsWithoutReleaseTimestamp[
+                minimumReleaseAgeBehaviour
+              ].push(candidateRelease.version);
+              pendingReleases.unshift(candidateRelease);
+              continue;
+            } // if there is no timestamp, and we're running in `optional` mode, we can allow it
+            else if (
+              is.nullOrUndefined(candidateRelease.releaseTimestamp) &&
+              minimumReleaseAgeBehaviour === 'timestamp-optional'
+            ) {
+              candidateVersionsWithoutReleaseTimestamp[
+                minimumReleaseAgeBehaviour
+              ].push(candidateRelease.version);
+            }
+          }
+          // otherwise, note that this is being skipped
+          else {
+            logger.debug(
+              {
+                depName: releaseConfig.depName!,
+                updateType: releaseConfig.updateType!,
+                enforcedUpdateTypes: minimumReleaseAgeEnforcedUpdateTypes,
+              },
+              'Skipping releaseTimestamp checks on release, as it is not an enforced updateType',
+            );
+          }
         }
       }
 
