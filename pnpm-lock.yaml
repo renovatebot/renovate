@@ -382,8 +382,8 @@ importers:
         specifier: 2.3.1
         version: 2.3.1
       '@openpgp/web-stream-tools':
-        specifier: 0.2.0
-        version: 0.2.0(@types/node@22.18.13)(typescript@5.9.3)
+        specifier: 0.2.1
+        version: 0.2.1(@types/node@22.18.13)(typescript@5.9.3)
       '@semantic-release/exec':
         specifier: 7.1.0
         version: 7.1.0(semantic-release@25.0.1(typescript@5.9.3))
@@ -1372,8 +1372,8 @@ packages:
   '@open-draft/until@2.1.0':
     resolution: {integrity: sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==}
 
-  '@openpgp/web-stream-tools@0.2.0':
-    resolution: {integrity: sha512-vX5a0oZKyqcBuS4BSGCufJVHhhIgZKj5Tc0lA7fzivj6iszedbIua6yKCe5ZujVCD7sZlOaYhxSZnLO8FH8rbQ==}
+  '@openpgp/web-stream-tools@0.2.1':
+    resolution: {integrity: sha512-gE6+8mVrpKOa9RurAP+TToUo/DCGLNfpnRiq/YuA5Dq/rUAVSeM6Ejrgl25qpRiOQb/qcGyM25m1l9eE4aPdfw==}
     engines: {node: '>= 18.0.0'}
     peerDependencies:
       '@types/node': '>=18.0.0'
@@ -7968,7 +7968,7 @@ snapshots:
 
   '@open-draft/until@2.1.0': {}
 
-  '@openpgp/web-stream-tools@0.2.0(@types/node@22.18.13)(typescript@5.9.3)':
+  '@openpgp/web-stream-tools@0.2.1(@types/node@22.18.13)(typescript@5.9.3)':
     optionalDependencies:
       '@types/node': 22.18.13
       typescript: 5.9.3
