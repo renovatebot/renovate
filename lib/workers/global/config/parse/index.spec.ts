@@ -114,10 +114,13 @@ describe('workers/global/config/parse/index', () => {
 
     it('reads private key from file', async () => {
       fileConfigParser.getConfig.mockResolvedValue({});
-      const privateKeyPath = upath.join(__dirname, '__fixtures__/private.pem');
+      const privateKeyPath = upath.join(
+        __dirname,
+        '__fixtures__/private-pgp.pem',
+      );
       const privateKeyPathOld = upath.join(
         __dirname,
-        '__fixtures__/private.pem',
+        '__fixtures__/private-pgp.pem',
       );
       const env: NodeJS.ProcessEnv = {
         ...defaultEnv,

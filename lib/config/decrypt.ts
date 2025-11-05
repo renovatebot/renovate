@@ -6,10 +6,6 @@ import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
 import { ensureTrailingSlash, parseUrl, trimSlashes } from '../util/url';
 import { tryDecryptKbPgp } from './decrypt/kbpgp';
-import {
-  tryDecryptPublicKeyDefault,
-  tryDecryptPublicKeyPKCS1,
-} from './decrypt/legacy';
 import { tryDecryptOpenPgp } from './decrypt/openpgp';
 import { GlobalConfig } from './global';
 import { DecryptedObject } from './schema';
@@ -42,23 +38,10 @@ export async function tryDecrypt(
       decryptedStr = validateDecryptedValue(decryptedObjStr, repository);
     }
   } else {
-    decryptedStr = tryDecryptPublicKeyDefault(key, encryptedStr);
-    if (is.string(decryptedStr)) {
-      logger.warn(
-        { keyName },
-        'Encrypted value is using deprecated default padding, please change to using PGP encryption.',
-      );
-    } else {
-      decryptedStr = tryDecryptPublicKeyPKCS1(key, encryptedStr);
-      /* v8 ignore start -- not testable */
-      if (is.string(decryptedStr)) {
-        logger.warn(
-          { keyName },
-          'Encrypted value is using deprecated PKCS1 padding, please change to using PGP encryption.',
-        );
-      }
-      /* v8 ignore stop */
-    }
+    logger.error(
+      { keyName },
+      'Encrypted value is using deprecated default or PKCS1 padding, please change to using PGP encryption.',
+    );
   }
   return decryptedStr;
 }
