@@ -38,7 +38,7 @@ export const presets: Record<string, Preset> = {
   },
   minimumReleaseAgeNpm: {
     description:
-      'Wait until the npm package is three days old before raising the update, this prevents npm unpublishing a package you already upgraded to.',
+      'Wait until the npm package is three days old before raising the update. This a) introduces a short delay to allow for malware researchers and scanners to (possibly) detect any malicious behaviour in packages, and b) prevents the maintainer and/or NPM from unpublishing a package you already upgraded to, breaking builds.',
     npm: {
       minimumReleaseAge: '3 days',
       internalChecksFilter: 'strict',
