@@ -121,10 +121,10 @@ function escapeName(name: string): string {
   let escapedName = '';
   for (const char of name) {
     if (char.match(charactersToEscape)) {
-      escapedName += `__x${char
+      escapedName += `_x${char
         .codePointAt(0)!
         .toString(16)
-        .padStart(4, '0')}__`;
+        .padStart(4, '0')}_`;
     } else {
       escapedName += char;
     }
