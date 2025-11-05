@@ -125,6 +125,27 @@ Security updates bypass any `minimumReleaseAge` checks, and so will be raised as
 
 Renovate does not currently manage any transitive dependencies - instead leaving that to package managers and [`lockFileMaintenance`](../configuration-options.md#lockfilemaintenance).
 
+### How do I opt out dependencies from minimum release age checks?
+
+To opt out a dependency from minimum release age checks, create a package rule with `minimumReleaseAge=null`:
+
+```jsonc
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    // for instance
+    "security:minimumReleaseAgeNpm",
+  ],
+  "packageRules": [
+    {
+      "description": "Disable minimum release age checks for internal dependencies",
+      "matchPackageNames": ["@super-secret-organisation/*"],
+      "minimumReleaseAge": null,
+    },
+  ],
+}
+```
+
 ### Which datasources support release timestamps?
 
 <!-- prettier-ignore -->
