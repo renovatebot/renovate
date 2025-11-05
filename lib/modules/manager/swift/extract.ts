@@ -187,7 +187,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
         datasource,
         depName,
         currentValue,
-        registryUrls,
+        ...(registryUrls?.length && { registryUrls }),
       };
 
       deps.push(dep);
