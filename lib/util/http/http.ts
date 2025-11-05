@@ -216,7 +216,7 @@ export abstract class HttpBase<
 
       const queue = getQueue(url);
       const queuedTask = queue
-        ? () => queue.add(throttledTask, { throwOnTimeout: true })
+        ? () => queue.add(throttledTask)
         : throttledTask;
 
       const { maxRetryAfter = 60 } = hostRule;
