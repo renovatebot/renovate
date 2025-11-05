@@ -82,8 +82,6 @@ If set, Renovate will use this as a delay to proceed with an automerge.
 
 Default value: `250` (milliseconds).
 
-Default: `wasm-dotnet`.
-
 ## `RENOVATE_X_HARD_EXIT`
 
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
@@ -101,6 +99,13 @@ If set to any value, Renovate will download `nupkg` files for determining packag
 
 Specify which PGP runtime to use for decrypting Renovate config.
 Allowed values are `js-java`, `wasm-java` and `wasm-dotnet`.
+
+<!-- prettier-ignore -->
+!!! note
+    `wasm-java` will block a proper NodeJS exit. It needs NodeJS v24+ to properly clean up the WASM runtime.
+    `js-java` is not recommended due to performance reasons.
+
+Default: `wasm-dotnet`.
 
 ## `RENOVATE_X_PLATFORM_VERSION`
 
@@ -142,7 +147,7 @@ Suppress the pre-commit support warning in PR bodies.
 
 ## `RENOVATE_X_USE_OPENPGP`
 
-Use `openpgp` instead of bouncy castle for `PGP` decryption.
+Use `openpgp` instead of Bouncy Castle for `PGP` decryption.
 
 ## `RENOVATE_X_YARN_PROXY`
 
