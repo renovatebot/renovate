@@ -68,13 +68,10 @@ export function getNewValue({
   currentVersion,
   newVersion,
 }: NewValueConfig): string | null {
-  if (
-    !['pin', 'update-lockfile'].includes(rangeStrategy) &&
-    isSemVerXRange(currentValue)
-  ) {
+  if (rangeStrategy !== 'update-lockfile' && isSemVerXRange(currentValue)) {
     return null;
   }
-  if (rangeStrategy === 'pin' || isVersion(currentValue)) {
+  if (isVersion(currentValue)) {
     return newVersion;
   }
   if (rangeStrategy === 'update-lockfile') {
