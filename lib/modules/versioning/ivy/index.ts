@@ -21,7 +21,6 @@ export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
   'widen',
-  'pin',
   'replace',
 ];
 
@@ -119,7 +118,7 @@ function getNewValue({
   rangeStrategy,
   newVersion,
 }: NewValueConfig): string | null {
-  if (isVersion(currentValue) || rangeStrategy === 'pin') {
+  if (isVersion(currentValue)) {
     return newVersion;
   }
   return autoExtendMavenRange(currentValue, newVersion);
