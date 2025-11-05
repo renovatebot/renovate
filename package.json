@@ -276,7 +276,7 @@
     "@eslint/js": "9.37.0",
     "@hyrious/marshal": "0.3.3",
     "@ls-lint/ls-lint": "2.3.1",
-    "@openpgp/web-stream-tools": "0.2.0",
+    "@openpgp/web-stream-tools": "0.2.1",
     "@semantic-release/exec": "7.1.0",
     "@smithy/util-stream": "4.5.4",
     "@types/auth-header": "1.0.6",
