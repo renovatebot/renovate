@@ -408,7 +408,7 @@ export async function processBranch(
       for (const upgrade of config.upgrades) {
         if (is.nonEmptyString(upgrade.minimumReleaseAge)) {
           const minimumReleaseAgeBehaviour: MinimumReleaseAgeBehaviour =
-            upgrade.minimumReleaseAgeBehaviour ?? 'timestamp-optional';
+            upgrade.minimumReleaseAgeBehaviour ?? 'timestamp-required';
 
           // regardless of the value of `minimumReleaseAgeBehaviour`, if there is a timestamp, we will process it according to `minimumReleaseAge`
           if (upgrade.releaseTimestamp) {
