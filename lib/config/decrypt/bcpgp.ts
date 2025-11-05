@@ -1,4 +1,5 @@
-import { decrypt } from '@renovatebot/pgp';
+import type { RuntimeType } from '@renovatebot/pgp';
+import { decrypt, isSupportedRuntime } from '@renovatebot/pgp';
 import { logger } from '../../logger';
 import { getEnv } from '../../util/env';
 import { regEx } from '../../util/regex';
@@ -47,19 +48,19 @@ export async function tryDecryptBcPgp(
     return null;
   }
 }
-function runtime(): 'wasm-dotnet' | 'js-java' | 'wasm-java' {
+
+// TODO: use `wasm-java` as default when we require node v24+.
+// Node v22 hungs on exit https://github.com/nodejs/node/issues/60584
+function runtime(): RuntimeType {
   const runtime = getEnv().RENOVATE_X_PGP_RUNTIME;
-  switch (runtime) {
-    case 'js-java':
-    case 'wasm-java':
-    case 'wasm-dotnet':
+  if (runtime) {
+    if (isSupportedRuntime(runtime)) {
+      logger.trace({ runtime }, 'Using configured PGP runtime');
       return runtime;
-    case undefined:
-    case '':
-      break;
-    default:
+    } else {
       logger.once.warn({ runtime }, 'Unknown PGP runtime, using wasm-dotnet');
-      break;
+    }
   }
+  logger.trace('Using default PGP runtime: wasm-dotnet');
   return 'wasm-dotnet';
 }
