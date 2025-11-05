@@ -2708,7 +2708,12 @@ Example:
 
 ## minimumReleaseAge
 
-This feature used to be called `stabilityDays`.
+`minimumReleaseAge` is a feature that requires Renovate to wait for a specified amount of time before suggesting a dependency update.
+
+<!-- prettier-ignore -->
+!!! note
+    Minimum Release Age has [a separate documentation page](./key-concepts/minimum-release-age.md) for more in-depth documentation about the functionality.
+    This also includes documentation that was previously in this section, regarding how to specify release timestamps for custom registries.
 
 If `minimumReleaseAge` is set to a time duration _and_ the update has a release timestamp header, then Renovate will check if the set duration has passed. This behaviour can be changed using [`minimumReleaseAgeBehaviour`](#minimumreleaseagebehaviour).
 
@@ -2726,27 +2731,6 @@ Some datasources may have a release timestamp, but in a format Renovate does not
 In those cases a feature request needs to be implemented.
 
 You can confirm if your datasource supports the release timestamp by viewing [the documentation for the given datasource](./modules/datasource/index.md).
-
-<!-- prettier-ignore -->
-!!! note
-    If you use a custom registry, for instance as a pull-through cache, additional configuration may be required.
-    The [the documentation for the datasource](./modules/datasource/index.md) provides information about which field(s) need to be returned from the registry.
-    Alternatively, it may be possible to configure the `registryUrls`, like we can see in the below Maven example:
-
-<!-- prettier-ignore -->
-!!! warning "Warning for Maven users"
-    For `minimumReleaseAge` to work, the Maven source must return reliable `last-modified` headers.
-
-    <!-- markdownlint-disable MD046 -->
-    If your custom Maven source registry is **pull-through** and does _not_ support the `last-modified` header, like GAR (Google Artifact Registry's Maven implementation) then you can extend the Maven source registry URL with `https://repo1.maven.org/maven2` as the first item. Then the `currentVersionTimestamp` via `last-modified` will be taken from Maven central for public dependencies.
-
-    ```json
-    "registryUrls": [
-      "https://repo1.maven.org/maven2",
-      "https://europe-maven.pkg.dev/org-artifacts/maven-virtual"
-    ],
-    ```
-    <!-- markdownlint-enable MD046 -->
 
 <!-- prettier-ignore -->
 !!! note
