@@ -1982,7 +1982,7 @@ const options: RenovateOptions[] = [
     description:
       'When set in conjunction with `minimumReleaseAge`, controls whether the `releaseTimestamp` for a dependency update is required.',
     type: 'string',
-    default: 'timestamp-optional',
+    default: 'timestamp-required',
     allowedValues: ['timestamp-required', 'timestamp-optional'],
   },
   {
