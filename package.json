@@ -343,7 +343,7 @@
     "npm-run-all2": "8.0.4",
     "nyc": "17.1.0",
     "rimraf": "6.0.1",
-    "semantic-release": "24.2.9",
+    "semantic-release": "25.0.1",
     "tar": "7.5.2",
     "tmp-promise": "3.0.3",
     "tsx": "4.20.6",
