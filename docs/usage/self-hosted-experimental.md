@@ -147,7 +147,7 @@ Suppress the pre-commit support warning in PR bodies.
 
 ## `RENOVATE_X_USE_OPENPGP`
 
-Use `openpgp` instead of Bouncy Castle for `PGP` decryption.
+Use `openpgp` instead of [Bouncy Castle](https://www.bouncycastle.org/) for `PGP` decryption.
 
 ## `RENOVATE_X_YARN_PROXY`
 
