@@ -1,4 +1,5 @@
 import upath from 'upath';
+import { getConfigFileNames } from '../../../../config/app-strings';
 import * as _decrypt from '../../../../config/decrypt';
 import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages';
 import { getCustomEnv } from '../../../../util/env';
@@ -350,6 +351,17 @@ describe('workers/global/config/parse/index', () => {
         defaultArgv,
       );
       expect(parsedConfig.extends).toMatchObject([':pinDigests']);
+    });
+
+    it('supports setting onboardingConfigFileName and configFileNames through env', async () => {
+      fileConfigParser.getConfig.mockResolvedValue({});
+      const env: NodeJS.ProcessEnv = {
+        RENOVATE_ONBOARDING_CONFIG_FILE_NAME: 'myonboarding.json',
+        RENOVATE_CONFIG_FILE_NAMES: '["myrenovate.json"]',
+      };
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig.onboardingConfigFileName).toBe('myonboarding.json');
+      expect(getConfigFileNames()).toContain('myrenovate.json');
     });
   });
 });
