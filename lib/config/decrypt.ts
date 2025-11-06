@@ -6,10 +6,6 @@ import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
 import { ensureTrailingSlash, parseUrl, trimSlashes } from '../util/url';
 import { tryDecryptKbPgp } from './decrypt/kbpgp';
-import {
-  tryDecryptPublicKeyDefault,
-  tryDecryptPublicKeyPKCS1,
-} from './decrypt/legacy';
 import { tryDecryptOpenPgp } from './decrypt/openpgp';
 import { GlobalConfig } from './global';
 import { DecryptedObject } from './schema';
@@ -30,35 +26,14 @@ export async function tryDecrypt(
   key: string,
   encryptedStr: string,
   repository: string,
-  keyName: string,
 ): Promise<string | null> {
   let decryptedStr: string | null = null;
-  if (key?.startsWith('-----BEGIN PGP PRIVATE KEY BLOCK-----')) {
-    const decryptedObjStr =
-      getEnv().RENOVATE_X_USE_OPENPGP === 'true'
-        ? await tryDecryptOpenPgp(key, encryptedStr)
-        : await tryDecryptKbPgp(key, encryptedStr);
-    if (decryptedObjStr) {
-      decryptedStr = validateDecryptedValue(decryptedObjStr, repository);
-    }
-  } else {
-    decryptedStr = tryDecryptPublicKeyDefault(key, encryptedStr);
-    if (is.string(decryptedStr)) {
-      logger.warn(
-        { keyName },
-        'Encrypted value is using deprecated default padding, please change to using PGP encryption.',
-      );
-    } else {
-      decryptedStr = tryDecryptPublicKeyPKCS1(key, encryptedStr);
-      /* v8 ignore start -- not testable */
-      if (is.string(decryptedStr)) {
-        logger.warn(
-          { keyName },
-          'Encrypted value is using deprecated PKCS1 padding, please change to using PGP encryption.',
-        );
-      }
-      /* v8 ignore stop */
-    }
+  const decryptedObjStr =
+    getEnv().RENOVATE_X_USE_OPENPGP === 'true'
+      ? await tryDecryptOpenPgp(key, encryptedStr)
+      : await tryDecryptKbPgp(key, encryptedStr);
+  if (decryptedObjStr) {
+    decryptedStr = validateDecryptedValue(decryptedObjStr, repository);
   }
   return decryptedStr;
 }
@@ -170,20 +145,10 @@ export async function decryptConfig(
       if (privateKey) {
         for (const [eKey, eVal] of Object.entries(val)) {
           logger.debug(`Trying to decrypt ${eKey} in ${path}`);
-          let decryptedStr = await tryDecrypt(
-            privateKey,
-            eVal,
-            repository,
-            eKey,
-          );
+          let decryptedStr = await tryDecrypt(privateKey, eVal, repository);
           if (privateKeyOld && !is.nonEmptyString(decryptedStr)) {
             logger.debug(`Trying to decrypt with old private key`);
-            decryptedStr = await tryDecrypt(
-              privateKeyOld,
-              eVal,
-              repository,
-              eKey,
-            );
+            decryptedStr = await tryDecrypt(privateKeyOld, eVal, repository);
           }
           if (!is.nonEmptyString(decryptedStr)) {
             const error = new Error('config-validation');
