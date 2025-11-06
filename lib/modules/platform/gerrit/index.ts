@@ -178,8 +178,6 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   if (prConfig.state && prConfig.state === 'closed') {
     await client.abandonChange(prConfig.number);
   }
-  // TODO: support restoring change if prConfig.state === 'open'
-  // TODO: support moving change if prConfig.targetBranch is set
 }
 
 export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
