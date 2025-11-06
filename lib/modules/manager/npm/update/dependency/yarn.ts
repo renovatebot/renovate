@@ -49,10 +49,9 @@ export function updateYarnrcCatalogDependency({
 
   const oldVersion =
     catalogName === 'default'
-      ? parsedContents.catalogs?.list?.[depName!]
-      : is.object(parsedContents.catalogs?.list?.[catalogName]) &&
-          is.string(depName)
-        ? parsedContents.catalogs?.list?.[catalogName][depName]
+      ? parsedContents.catalog?.[depName!]
+      : is.object(parsedContents.catalogs?.[catalogName]) && is.string(depName)
+        ? parsedContents.catalogs?.[catalogName][depName]
         : undefined;
 
   if (oldVersion === newValue) {
@@ -135,8 +134,8 @@ function getDepPath({
   depName: string;
 }): string[] {
   if (catalogName === 'default') {
-    return ['catalogs', 'list', depName];
+    return ['catalog', depName];
   } else {
-    return ['catalogs', 'list', catalogName, depName];
+    return ['catalogs', catalogName, depName];
   }
 }
