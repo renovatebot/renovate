@@ -20,6 +20,10 @@ export function configureScm(repo: string): void {
   repository = repo;
 }
 
+// TODO: this can be optimzed further by avoiding client.findChanges() since the change was initialized locally as commit.branchName.
+// Note the change should be pushed to refs/for/<existing change branch> instead of just targetBranch, for the case when a change will be moved to a different target branch.
+// Not sure how to get the existing change branch without querying Gerrit API though. Maybe by storing this additional information when initializing the changes as branches?
+// git.fetchRevSpec() can also be replaced with some local git command.
 export class GerritScm extends DefaultGitScm {
   override async commitAndPush(
     commit: CommitFilesConfig,
