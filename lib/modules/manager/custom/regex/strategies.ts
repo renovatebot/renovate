@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../../../util/regex';
+import { extractRegexGroups } from '../../../../util/string-match';
 import type { PackageDependency } from '../../types';
 import { checkIsValidDependency } from '../utils';
 import type { RecursionParameter, RegexManagerConfig } from './types';
@@ -10,20 +11,39 @@ import {
   regexMatchAll,
 } from './utils';
 
+function getPathGroups(
+  packageFile: string,
+  config: RegexManagerConfig,
+): Record<string, string> {
+  if (!config.matchPathStrings?.length) {
+    return {};
+  }
+  for (const pattern of config.matchPathStrings) {
+    const groups = extractRegexGroups(pattern, packageFile);
+    if (groups) {
+      return groups;
+    }
+  }
+  return {};
+}
+
 export function handleAny(
   content: string,
   packageFile: string,
   config: RegexManagerConfig,
 ): PackageDependency[] {
+  const pathGroups = getPathGroups(packageFile, config);
   return config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
     .flatMap((regex) => regexMatchAll(regex, content)) // match all regex to content, get all matches, reduce to single array
     .map((matchResult) =>
       createDependency(
         {
-          groups:
+          groups: mergeGroups(
+            pathGroups,
             matchResult.groups ??
-            /* istanbul ignore next: can this happen? */ {},
+              /* istanbul ignore next: can this happen? */ {},
+          ),
           replaceString: matchResult[0],
         },
         config,
@@ -40,6 +60,7 @@ export function handleCombination(
   packageFile: string,
   config: RegexManagerConfig,
 ): PackageDependency[] {
+  const pathGroups = getPathGroups(packageFile, config);
   const matches = config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
     .flatMap((regex) => regexMatchAll(regex, content)); // match all regex to content, get all matches, reduce to single array
@@ -56,7 +77,10 @@ export function handleCombination(
           ? match[0]
           : undefined,
     }))
-    .reduce((base, addition) => mergeExtractionTemplate(base, addition));
+    .reduce((base, addition) => mergeExtractionTemplate(base, addition), {
+      groups: pathGroups,
+      replaceString: undefined,
+    });
   return [createDependency(extraction, config)]
     .filter(is.truthy)
     .filter((dep: PackageDependency) =>
@@ -69,6 +93,7 @@ export function handleRecursive(
   packageFile: string,
   config: RegexManagerConfig,
 ): PackageDependency[] {
+  const pathGroups = getPathGroups(packageFile, config);
   const regexes = config.matchStrings.map((matchString) =>
     regEx(matchString, 'g'),
   );
@@ -78,7 +103,7 @@ export function handleRecursive(
     packageFile,
     config,
     index: 0,
-    combinedGroups: {},
+    combinedGroups: pathGroups,
     regexes,
   })
     .filter(is.truthy)

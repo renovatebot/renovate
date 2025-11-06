@@ -104,3 +104,15 @@ export function getRegexPredicate(input: string): StringMatchPredicate | null {
   }
   return null;
 }
+
+export function extractRegexGroups(
+  pattern: string,
+  input: string,
+): Record<string, string> | null {
+  const regex = parseRegexMatch(pattern);
+  if (!regex) {
+    return null;
+  }
+  const match = regex.exec(input);
+  return match?.groups ?? null;
+}

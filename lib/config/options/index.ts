@@ -2955,6 +2955,16 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchPathStrings',
+    description:
+      'Regex to use to capture groups from file path. Valid only within `customManagers` object.',
+    type: 'array',
+    subType: 'string',
+    parents: ['customManagers'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchStringsStrategy',
     description: 'Strategy how to interpret matchStrings.',
     type: 'string',

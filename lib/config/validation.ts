@@ -466,6 +466,7 @@ export async function validateConfig(
                 'managerFilePatterns',
                 'matchStrings',
                 'matchStringsStrategy',
+                'matchPathStrings',
                 'depNameTemplate',
                 'packageNameTemplate',
                 'datasourceTemplate',
