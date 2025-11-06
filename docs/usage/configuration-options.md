@@ -1119,6 +1119,35 @@ Example:
 }
 ```
 
+### matchPathStrings
+
+`matchPathStrings` is an optional array of regex patterns used to extract named capture groups from the **file path** itself.
+This is useful when you need to extract context from the file location (e.g., environment, region, cluster name) and use it in templates.
+
+<!--prettier-ignore-->
+!!! note
+    `matchPathStrings` can only be used with the `regex` custom manager (`customType=regex`)!
+
+The captured groups from `matchPathStrings` are merged with groups from `matchStrings` and made available in all template fields.
+
+Example:
+
+```json title="extracting depName and environment from file path"
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^services\/.*env$/"],
+      "matchPathStrings": ["services/(?<depName>.+)/(?<environment>.+)\\.env"],
+      "matchStrings": ["TAG='(?<currentValue>.+)'"],
+      "datasourceTemplate": "docker",
+      "packageNameTemplate": "{{depName}}",
+      "depNameTemplate": "{{depName}}:{{environment}}"
+    }
+  ]
+}
+```
+
 ### matchStringsStrategy
 
 `matchStringsStrategy` controls behavior when multiple `matchStrings` values are provided.
