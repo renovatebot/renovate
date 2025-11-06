@@ -1094,31 +1094,6 @@ Only the `json`, `toml` and `yaml` formats are supported.
 }
 ```
 
-### matchStrings
-
-Each `matchStrings` must be one of the following:
-
-1. A valid regular expression, which may optionally include named capture groups (if using `customType=regex`)
-2. Or, a valid, escaped [JSONata](https://docs.jsonata.org/overview.html) query (if using `customType=json`)
-
-Example:
-
-```json title="matchStrings with a valid regular expression"
-{
-  "matchStrings": [
-    "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
-  ]
-}
-```
-
-```json title="matchStrings with a valid JSONata query"
-{
-  "matchStrings": [
-    "packages.{ \"depName\": package, \"currentValue\": version }"
-  ]
-}
-```
-
 ### matchPathStrings
 
 `matchPathStrings` is an optional array of regex patterns used to extract named capture groups from the **file path** itself.
@@ -1144,6 +1119,31 @@ Example:
       "packageNameTemplate": "{{depName}}",
       "depNameTemplate": "{{depName}}:{{environment}}"
     }
+  ]
+}
+```
+
+### matchStrings
+
+Each `matchStrings` must be one of the following:
+
+1. A valid regular expression, which may optionally include named capture groups (if using `customType=regex`)
+2. Or, a valid, escaped [JSONata](https://docs.jsonata.org/overview.html) query (if using `customType=json`)
+
+Example:
+
+```json title="matchStrings with a valid regular expression"
+{
+  "matchStrings": [
+    "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
+  ]
+}
+```
+
+```json title="matchStrings with a valid JSONata query"
+{
+  "matchStrings": [
+    "packages.{ \"depName\": package, \"currentValue\": version }"
   ]
 }
 ```
