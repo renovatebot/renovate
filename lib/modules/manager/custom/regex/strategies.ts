@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../../../util/regex';
-import { extractRegexGroups } from '../../../../util/string-match';
 import type { PackageDependency } from '../../types';
 import { checkIsValidDependency } from '../utils';
 import type { RecursionParameter, RegexManagerConfig } from './types';
@@ -19,9 +18,10 @@ function getPathGroups(
     return {};
   }
   for (const pattern of config.matchPathStrings) {
-    const groups = extractRegexGroups(pattern, packageFile);
-    if (groups) {
-      return groups;
+    const regex = regEx(pattern);
+    const match = regex.exec(packageFile);
+    if (match?.groups) {
+      return match.groups;
     }
   }
   return {};
