@@ -343,7 +343,7 @@
     "nock": "14.0.10",
     "npm-run-all2": "8.0.4",
     "nyc": "17.1.0",
-    "rimraf": "6.0.1",
+    "rimraf": "6.1.0",
     "semantic-release": "25.0.1",
     "tar": "7.5.2",
     "tmp-promise": "3.0.3",
