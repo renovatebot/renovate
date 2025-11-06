@@ -681,4 +681,119 @@ describe('modules/manager/custom/regex/index', () => {
       });
     },
   );
+
+  describe('matchPathStrings', () => {
+    it('extracts groups from file path with any strategy', async () => {
+      const config = {
+        matchPathStrings: ['^configs/(?<environment>dev|prod)/.*$'],
+        matchStrings: ['image: (?<depName>[^:]+):(?<currentValue>\\S+)'],
+        datasourceTemplate: 'docker',
+        depNameTemplate: '{{depName}}-{{environment}}',
+      };
+      const content = 'image: nginx:1.21';
+      const packageFile = 'configs/prod/app.yml';
+
+      const res = await extractPackageFile(content, packageFile, config);
+
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'nginx-prod',
+        currentValue: '1.21',
+        datasource: 'docker',
+      });
+    });
+
+    it('extracts groups from file path with combination strategy', async () => {
+      const config = {
+        matchPathStrings: ['^deployments/(?<region>us|eu)/.*$'],
+        matchStrings: [
+          'service: (?<depName>\\S+)',
+          'version: (?<currentValue>\\S+)',
+        ],
+        matchStringsStrategy: 'combination' as const,
+        datasourceTemplate: 'docker',
+        depNameTemplate: '{{depName}}-{{region}}',
+      };
+      const content = codeBlock`
+        service: app
+        version: 2.0.0
+      `;
+      const packageFile = 'deployments/eu/service.yml';
+
+      const res = await extractPackageFile(content, packageFile, config);
+
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'app-eu',
+        currentValue: '2.0.0',
+        datasource: 'docker',
+      });
+    });
+
+    it('extracts groups from file path with recursive strategy', async () => {
+      const config = {
+        matchPathStrings: ['^k8s/(?<cluster>[^/]+)/.*$'],
+        matchStrings: [
+          'containers:[\\s\\S]+',
+          'image: (?<depName>[^:]+):(?<currentValue>\\S+)',
+        ],
+        matchStringsStrategy: 'recursive' as const,
+        datasourceTemplate: 'docker',
+        depNameTemplate: '{{depName}}-{{cluster}}',
+      };
+      const content = codeBlock`
+        containers:
+          - image: redis:6.2
+      `;
+      const packageFile = 'k8s/prod-cluster/deployment.yml';
+
+      const res = await extractPackageFile(content, packageFile, config);
+
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'redis-prod-cluster',
+        currentValue: '6.2',
+        datasource: 'docker',
+      });
+    });
+
+    it('returns empty groups when path does not match', async () => {
+      const config = {
+        matchPathStrings: ['^configs/(?<environment>dev|prod)/.*$'],
+        matchStrings: ['image: (?<depName>[^:]+):(?<currentValue>\\S+)'],
+        datasourceTemplate: 'docker',
+        depNameTemplate: '{{depName}}-{{environment}}',
+      };
+      const content = 'image: nginx:1.21';
+      const packageFile = 'not/the/right/path/app.yml';
+
+      const res = await extractPackageFile(content, packageFile, config);
+
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'nginx-',
+        currentValue: '1.21',
+        datasource: 'docker',
+      });
+    });
+
+    it('prefers matchStrings groups over path groups in conflict', async () => {
+      const config = {
+        matchPathStrings: ['^(?<depName>.*)/.*$'],
+        matchStrings: ['image: (?<depName>[^:]+):(?<currentValue>\\S+)'],
+        datasourceTemplate: 'docker',
+      };
+      const content = 'image: nginx:1.21';
+      const packageFile = 'service-name/app.yml';
+
+      const res = await extractPackageFile(content, packageFile, config);
+
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'nginx',
+        currentValue: '1.21',
+        datasource: 'docker',
+      });
+    });
+  });
 });
