@@ -139,11 +139,11 @@
   },
   "homepage": "https://renovatebot.com",
   "engines": {
-    "node": "^22.13.0 || ^24.10.0",
+    "node": "^22.13.0 || ^24.11.0",
     "pnpm": "^10.0.0"
   },
   "volta": {
-    "node": "22.21.1",
+    "node": "24.11.0",
     "pnpm": "10.20.0"
   },
   "dependencies": {
