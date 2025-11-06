@@ -388,8 +388,8 @@ importers:
         specifier: 7.1.0
         version: 7.1.0(semantic-release@25.0.1(typescript@5.9.3))
       '@smithy/util-stream':
-        specifier: 4.5.4
-        version: 4.5.4
+        specifier: 4.5.5
+        version: 4.5.5
       '@types/auth-header':
         specifier: 1.0.6
         version: 1.0.6
@@ -2038,10 +2038,6 @@ packages:
 
   '@smithy/util-retry@4.2.4':
     resolution: {integrity: sha512-yQncJmj4dtv/isTXxRb4AamZHy4QFr4ew8GxS6XLWt7sCIxkPxPzINWd7WLISEFPsIan14zrKgvyAF+/yzfwoA==}
-    engines: {node: '>=18.0.0'}
-
-  '@smithy/util-stream@4.5.4':
-    resolution: {integrity: sha512-+qDxSkiErejw1BAIXUFBSfM5xh3arbz1MmxlbMCKanDDZtVEQ7PSKW9FQS0Vud1eI/kYn0oCTVKyNzRlq+9MUw==}
     engines: {node: '>=18.0.0'}
 
   '@smithy/util-stream@4.5.5':
@@ -8701,17 +8697,6 @@ snapshots:
     dependencies:
       '@smithy/service-error-classification': 4.2.4
       '@smithy/types': 4.8.1
-      tslib: 2.8.1
-
-  '@smithy/util-stream@4.5.4':
-    dependencies:
-      '@smithy/fetch-http-handler': 5.3.5
-      '@smithy/node-http-handler': 4.4.4
-      '@smithy/types': 4.8.1
-      '@smithy/util-base64': 4.3.0
-      '@smithy/util-buffer-from': 4.2.0
-      '@smithy/util-hex-encoding': 4.2.0
-      '@smithy/util-utf8': 4.2.0
       tslib: 2.8.1
 
   '@smithy/util-stream@4.5.5':
