@@ -191,6 +191,35 @@ spec:
             depName: 'somechart',
             registryUrls: ['https://git.example.com/foo/bar.git'],
           },
+          {
+            currentValue: '0.4.0',
+            datasource: 'docker',
+            depName: 'somecontainer.registry.io/org/chart',
+          },
+        ],
+      });
+    });
+
+    it('extracts OCI Helm chart without explicit chart field', () => {
+      const result = extractPackageFile(
+        `
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  source:
+    repoURL: oci://somecontainer.registry.io/org/chart
+    targetRevision: 0.4.0
+    path: .
+        `,
+        'applications.yml',
+      );
+      expect(result).toMatchObject({
+        deps: [
+          {
+            currentValue: '0.4.0',
+            datasource: 'docker',
+            depName: 'somecontainer.registry.io/org/chart',
+          },
         ],
       });
     });

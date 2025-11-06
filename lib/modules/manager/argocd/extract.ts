@@ -72,6 +72,19 @@ function processSource(source: ApplicationSource): PackageDependency[] {
     ];
   }
 
+  // Handle OCI Helm chart without explicit chart field
+  if (isOCIRegistry(source.repoURL)) {
+    const registryURL = trimTrailingSlash(removeOCIPrefix(source.repoURL));
+
+    return [
+      {
+        depName: registryURL,
+        currentValue: source.targetRevision,
+        datasource: DockerDatasource.id,
+      },
+    ];
+  }
+
   const dependencies: PackageDependency[] = [
     {
       depName: source.repoURL,
