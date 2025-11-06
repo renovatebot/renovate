@@ -424,6 +424,67 @@ describe('logger/index', () => {
     expect(logged.someObject.field).toBe('**redacted**');
   });
 
+  it('applies custom serializer while keeping default sanitizers', () => {
+    let logged: Record<string, any> = {};
+    vi.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
+      partial<WriteStream>({
+        writable: true,
+        write(x: string): boolean {
+          logged = JSON.parse(x);
+          return true;
+        },
+      }),
+    );
+
+    addStream({
+      name: 'logfile',
+      path: 'file.log',
+      level: 'error',
+    });
+    add({ password: 'secret"password' });
+
+    class SomeClass {
+      constructor(public field: string) {}
+    }
+
+    const childLogger = (logger as RenovateLogger).childLogger();
+    childLogger.addSerializers({
+      baz: (baz: string): any => {
+        return 'baz custom serializer: ' + baz;
+      },
+    });
+
+    const prBody = 'test';
+    childLogger.error({
+      foo: 'secret"password',
+      bar: ['somethingelse', 'secret"password'],
+      baz: 'baz',
+      npmToken: 'token',
+      buffer: Buffer.from('test'),
+      content: 'test',
+      prBody,
+      secrets: {
+        foo: 'barsecret',
+      },
+      someFn: () => 'secret"password',
+      someObject: new SomeClass('secret"password'),
+    });
+
+    expect(logged.baz).toContain('baz custom serializer: baz');
+
+    expect(logged.foo).not.toBe('secret"password');
+    expect(logged.bar[0]).toBe('somethingelse');
+    expect(logged.foo).toContain('redacted');
+    expect(logged.bar[1]).toContain('redacted');
+    expect(logged.npmToken).not.toBe('token');
+    expect(logged.buffer).toBe('[content]');
+    expect(logged.content).toBe('[content]');
+    expect(logged.prBody).toBe(prBody);
+    expect(logged.secrets.foo).toBe('***********');
+    expect(logged.someFn).toBe('[function]');
+    expect(logged.someObject.field).toBe('**redacted**');
+  });
+
   it('sanitizes secrets in object keys', () => {
     let logged: Record<string, any> = {};
     vi.spyOn(fs, 'createWriteStream').mockReturnValueOnce(

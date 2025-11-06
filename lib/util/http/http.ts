@@ -67,7 +67,7 @@ export function applyDefaultHeaders(options: Options): void {
     ...options.headers,
     'user-agent':
       GlobalConfig.get('userAgent') ??
-      `RenovateBot/${renovateVersion} (https://github.com/renovatebot/renovate)`,
+      `Renovate/${renovateVersion} (https://github.com/renovatebot/renovate)`,
   };
 }
 
@@ -215,9 +215,7 @@ export abstract class HttpBase<
       const throttledTask = throttle ? () => throttle.add(httpTask) : httpTask;
 
       const queue = getQueue(url);
-      const queuedTask = queue
-        ? () => queue.add(throttledTask, { throwOnTimeout: true })
-        : throttledTask;
+      const queuedTask = queue ? () => queue.add(throttledTask) : throttledTask;
 
       const { maxRetryAfter = 60 } = hostRule;
       resPromise = wrapWithRetry(queuedTask, url, getRetryAfter, maxRetryAfter);

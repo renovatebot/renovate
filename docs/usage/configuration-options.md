@@ -2708,7 +2708,12 @@ Example:
 
 ## minimumReleaseAge
 
-This feature used to be called `stabilityDays`.
+`minimumReleaseAge` is a feature that requires Renovate to wait for a specified amount of time before suggesting a dependency update.
+
+<!-- prettier-ignore -->
+!!! note
+    Minimum Release Age has [a separate documentation page](./key-concepts/minimum-release-age.md) for more in-depth documentation about the functionality.
+    This also includes documentation that was previously in this section, regarding how to specify release timestamps for custom registries.
 
 If `minimumReleaseAge` is set to a time duration _and_ the update has a release timestamp header, then Renovate will check if the set duration has passed. This behaviour can be changed using [`minimumReleaseAgeBehaviour`](#minimumreleaseagebehaviour).
 
@@ -2729,27 +2734,6 @@ You can confirm if your datasource supports the release timestamp by viewing [th
 
 <!-- prettier-ignore -->
 !!! note
-    If you use a custom registry, for instance as a pull-through cache, additional configuration may be required.
-    The [the documentation for the datasource](./modules/datasource/index.md) provides information about which field(s) need to be returned from the registry.
-    Alternatively, it may be possible to configure the `registryUrls`, like we can see in the below Maven example:
-
-<!-- prettier-ignore -->
-!!! warning "Warning for Maven users"
-    For `minimumReleaseAge` to work, the Maven source must return reliable `last-modified` headers.
-
-    <!-- markdownlint-disable MD046 -->
-    If your custom Maven source registry is **pull-through** and does _not_ support the `last-modified` header, like GAR (Google Artifact Registry's Maven implementation) then you can extend the Maven source registry URL with `https://repo1.maven.org/maven2` as the first item. Then the `currentVersionTimestamp` via `last-modified` will be taken from Maven central for public dependencies.
-
-    ```json
-    "registryUrls": [
-      "https://repo1.maven.org/maven2",
-      "https://europe-maven.pkg.dev/org-artifacts/maven-virtual"
-    ],
-    ```
-    <!-- markdownlint-enable MD046 -->
-
-<!-- prettier-ignore -->
-!!! note
     Configuring this option will add a `renovate/stability-days` option to the status checks.
 
 Examples of how you can use `minimumReleaseAge`:
@@ -2758,7 +2742,7 @@ Examples of how you can use `minimumReleaseAge`:
 
 #### Suppress branch/PR creation for X days
 
-If you use `minimumReleaseAge=3 days` and `internalChecksFilter="strict"` then Renovate only creates branches when 3 (or more days) have passed since the version was released.
+If you use `minimumReleaseAge=3 days`, `prCreation="not-pending"` and `internalChecksFilter="strict"` then Renovate only creates branches when 3 (or more days) have passed since the version was released.
 We recommend you set `dependencyDashboard=true`, so you can see these pending PRs.
 
 #### Prevent holding broken npm packages
@@ -2779,7 +2763,9 @@ Set `minimumReleaseAge` to `3 days` for npm packages to prevent relying on a pac
 
 #### Await X time duration before Automerging
 
-If you enable `automerge` _and_ `minimumReleaseAge`, Renovate will create PRs immediately, but only automerge them when the `minimumReleaseAge` time-duration has passed.
+If you enable `automerge` _and_ `minimumReleaseAge`, Renovate Renovate will create PRs immediately, but only automerge them when the `minimumReleaseAge` time-duration has passed.
+
+It's recommended to also apply `prCreation="not-pending"` and `internalChecksFilter="strict"` to make sure that branches and PRs are only created after the `minimumReleaseAge` has passed.
 
 Renovate adds a "renovate/stability-days" pending status check to each branch/PR.
 This pending check prevents the branch going green to automerge before the time has passed.
