@@ -2,13 +2,31 @@ import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { decryptConfig, setPrivateKeys } from '../decrypt';
 import { GlobalConfig } from '../global';
 import type { RenovateConfig } from '../types';
-import { tryDecryptKbPgp } from './kbpgp';
+import { tryDecryptBcPgp } from './bcpgp';
 import { Fixtures } from '~test/fixtures';
+import { logger } from '~test/util';
 
 const privateKey = Fixtures.get('private-pgp.pem', '..');
+const privateKeyEcc = `
+  -----BEGIN PGP PRIVATE KEY BLOCK-----
+
+  lFgEaIInBxYJKwYBBAHaRw8BAQdA3sIP1X2sD3ZhqCfsDK8XxYcIXWX69X/3/GNx
+  5CaBOoEAAQDDWad/QZsw8kb+Mgay806FAAz0UAgxAlZWUSavqp5zxA4RtDdXaGl0
+  ZVNvdXJjZSBSZW5vdmF0ZSA8cmVub3ZhdGVAd2hpdGVzb3VyY2Vzb2Z0d2FyZS5j
+  b20+iJMEExYKADsWIQT2bRiAlIgt3xD8h1s7X4hIOZTAnAUCaIInBwIbAwULCQgH
+  AgIiAgYVCgkICwIEFgIDAQIeBwIXgAAKCRA7X4hIOZTAnNsAAQCZEdlHC7bVp0jX
+  bleru7PkdWHLJMrM3xrsiYgmOhvMNAD/dMnoeuUq2JpTMOTGouTsFkY5yq+ue672
+  /VaWKUAgSwGcXQRogicHEgorBgEEAZdVAQUBAQdASRmOaEd461jnRjjMNYfPPU3t
+  zwgd1afFG+Yp9w7+yA8DAQgHAAD/Rk411EVr2OoJf6Xd0zoIs8E/VeZIJftG0bsY
+  HkRtD0gPk4h4BBgWCgAgFiEE9m0YgJSILd8Q/IdbO1+ISDmUwJwFAmiCJwcCGwwA
+  CgkQO1+ISDmUwJzUuAD/dHGdjs4fR3PsbjnR7Xi5j0LcOE5Q9dMjvSFQ9fBJzesB
+  ANU4vFbrMABZjdOelzYSj+Z/DRQ4UfK40J8qkQKekbYG
+  =iXr1
+  -----END PGP PRIVATE KEY BLOCK-----
+`;
 const repository = 'abc/def';
 
-describe('config/decrypt/kbpgp', () => {
+describe('config/decrypt/bcpgp', () => {
   describe('decryptConfig()', () => {
     let config: RenovateConfig;
 
@@ -16,15 +34,57 @@ describe('config/decrypt/kbpgp', () => {
       config = {};
       GlobalConfig.reset();
       setPrivateKeys(undefined, undefined);
+      delete process.env.RENOVATE_X_PGP_RUNTIME;
     });
 
     it('returns null for invalid key', async () => {
+      process.env.RENOVATE_X_PGP_RUNTIME = 'invalid-runtime';
       expect(
-        await tryDecryptKbPgp(
+        await tryDecryptBcPgp(
           'invalid-key',
           'wcFMAw+4H7SgaqGOAQ/+Lz6RlbEymbnmMhrktuaGiDPWRNPEQFuMRwwYM6/B/r0JMZa9tskAA5RpyYKxGmJJeuRtlA8GkTw02GoZomlJf/KXJZ95FwSbkXMSRJRD8LJ2402Hw2TaOTaSvfamESnm8zhNo8cok627nkKQkyrpk64heVlU5LIbO2+UgYgbiSQjuXZiW+QuJ1hVRjx011FQgEYc59+22yuKYqd8rrni7TrVqhGRlHCAqvNAGjBI4H7uTFh0sP4auunT/JjxTeTkJoNu8KgS/LdrvISpO67TkQziZo9XD5FOzSN7N3e4f8vO4N4fpjgkIDH/9wyEYe0zYz34xMAFlnhZzqrHycRqzBJuMxGqlFQcKWp9IisLMoVJhLrnvbDLuwwcjeqYkhvODjSs7UDKwTE4X4WmvZr0x4kOclOeAAz/pM6oNVnjgWJd9SnYtoa67bZVkne0k6mYjVhosie8v8icijmJ4OyLZUGWnjZCRd/TPkzQUw+B0yvsop9FYGidhCI+4MVx6W5w7SRtCctxVfCjLpmU4kWaBUUJ5YIQ5xm55yxEYuAsQkxOAYDCMFlV8ntWStYwIG1FsBgJX6VPevXuPPMjWiPNedIpJwBH2PLB4blxMfzDYuCeaIqU4daDaEWxxpuFTTK9fLdJKuipwFG6rwE3OuijeSN+2SLszi834DXtUjQdikHSTQG392+oTmZCFPeffLk/OiV2VpdXF3gGL7sr5M9hOWIZ783q0vW1l6nAElZ7UA//kW+L6QRxbnBVTJK5eCmMY6RJmL76zjqC1jQ0FC10',
         ),
       ).toBeNull();
+      expect(logger.logger.once.warn).toHaveBeenCalledExactlyOnceWith(
+        { runtime: 'invalid-runtime' },
+        'Unknown PGP runtime, using wasm-dotnet',
+      );
+    });
+
+    it('works broken PGP message', async () => {
+      process.env.RENOVATE_X_PGP_RUNTIME = 'wasm-dotnet';
+      expect(
+        await tryDecryptBcPgp(
+          privateKey,
+          'wcFMAw+4H7SgaqGOAQ/+Lz6RlbEymbnmMhrktuaGiDPWRNPEQFuMRwwYM6/B/r0JMZa9tskAA5RpyYKxGmJJeuRtlA8GkTw02GoZomlJf/KXJZ95FwSbkXMSRJRD8LJ2402Hw2TaOTaSvfamESnm8zhNo8cok627nkKQkyrpk64heVlU5LIbO2+UgYgbiSQjuXZiW+QuJ1hVRjx011FQgEYc59+22yuKYqd8rrni7TrVqhGRlHCAqvNAGjBI4H7uTFh0sP4auunT/JjxTeTkJoNu8KgS/LdrvISpO67TkQziZo9XD5FOzSN7N3e4f8vO4N4fpjgkIDH/9wyEYe0zYz34xMAFlnhZzqrHycRqzBJuMxGqlFQcKWp9IisLMoVJhLrnvbDLuwwcjeqYkhvODjSs7UDKwTE4X4WmvZr0x4kOclOeAAz/pM6oNVnjgWJd9SnYtoa67bZVkne0k6mYjVhosie8v8icijmJ4OyLZUGWnjZCRd/TPkzQUw+B0yvsop9FYGidhCI+4MVx6W5w7SRtCctxVfCjLpmU4kWaBUUJ5YIQ5xm55yxEYuAsQkxOAYDCMFlV8ntWStYwIG1FsBgJX6VPevXuPPMjWiPNedIpJwBH2PLB4blxMfzDYuCeaIqU4daDaEWxxpuFTTK9fLdJKuipwFG6rwE3OuijeSN+2SLszi834DXtUjQdikHSTQG392+oTmZCFPeffLk/OiV2VpdXF3gGL7sr5M9hOWIZ783q0vW1l6nAElZ7UA//kW+L6QRxbnBVTJK5eCmMY6RJmL76zjqC1jQ0FC10',
+        ),
+      ).toBe('{"o":"abc","r":"","v":"123"}');
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Decrypted config using bcpgp',
+      );
+      expect(logger.logger.trace).toHaveBeenCalledExactlyOnceWith(
+        { runtime: 'wasm-dotnet' },
+        'Using configured PGP runtime',
+      );
+    });
+
+    it('fails with ECC and AEAD', async () => {
+      // not supported by bouncycastle C# implementation
+      // https://github.com/bcgit/bc-csharp/issues/497
+      expect(
+        await tryDecryptBcPgp(
+          privateKeyEcc,
+          'hF4DdO67WRkDWjwSAQdAmRs+snKu04B3aKLNCF1ePqnXDQskj/Mj+neZbd0ucQgw' +
+            'TvchqMgVWv20RqhLKEdhyCp/iqnhCzDTRpbPyqjqPZ49kxDZqq9EhwvmBldiSBb5' +
+            '1F0BCQIQsycgt62mxOWtYITs3GGBnDS5s7iMxbxgOg5BlEMu2EQvgxvGETdz6n76' +
+            'h7t+FpU4y1ljrsNSLY36QPD4Jg2cGR48vMLVnPS6+eg3gFz3WfP5BAX3c6jQIOA=\n' +
+            '=C3oS',
+        ),
+      ).toBeNull(); // '{"o":"abc","r":"","v":"123"}'
+      expect(logger.logger.trace).toHaveBeenCalledExactlyOnceWith(
+        'Using default PGP runtime: wasm-dotnet',
+      );
     });
 
     it('rejects invalid PGP message', async () => {
