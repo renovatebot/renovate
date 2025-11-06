@@ -1,9 +1,10 @@
 import upath from 'upath';
-import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import * as docker from '../../../util/exec/docker';
+import * as _hostRules from '../../../util/host-rules';
+import { nugetOrg } from '../../datasource/nuget';
 import type { UpdateArtifactsConfig } from '../types';
 import * as util from './util';
 import * as nuget from '.';
@@ -12,10 +13,11 @@ import { env, fs, git, scm } from '~test/util';
 
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/fs');
-vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules');
 vi.mock('./util');
 
 const { getDefaultRegistries, findGlobalJson } = vi.mocked(util);
+const hostRules = vi.mocked(_hostRules);
 
 process.env.CONTAINERBASE = 'true';
 
@@ -34,7 +36,10 @@ describe('modules/manager/nuget/artifacts', () => {
       await vi.importActual<typeof import('../../../util/fs')>(
         '../../../util/fs',
       );
-    getDefaultRegistries.mockReturnValue([]);
+    hostRules.find.mockReturnValue({});
+    getDefaultRegistries.mockReturnValue([
+      { url: nugetOrg, name: 'nuget.org' },
+    ]);
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     fs.privateCacheDir.mockImplementation(realFs.privateCacheDir);
     scm.getFileList.mockResolvedValueOnce([]);
@@ -126,7 +131,9 @@ describe('modules/manager/nuget/artifacts', () => {
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
-        updatedDeps: [{ depName: 'dep' }],
+        updatedDeps: [
+          { depName: 'dep', registryUrls: ['https://contoso.com/packages/'] },
+        ],
         newPackageFileContent: '{}',
         config: { ...config, postUpdateOptions: ['dotnetWorkloadRestore'] },
       }),
