@@ -14,6 +14,8 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 async function conanLockUpdate(
   conanFilePath: string,
   isLockFileMaintenance: boolean | undefined,
+  conanConstraint?: string,
+  pythonConstraint?: string,
 ): Promise<void> {
   const command =
     `conan lock create ${quote(conanFilePath)}` +
@@ -21,6 +23,16 @@ async function conanLockUpdate(
 
   const execOptions: ExecOptions = {
     extraEnv: { ...getGitEnvironmentVariables(['conan']) },
+    toolConstraints: [
+      {
+        toolName: 'python',
+        constraint: pythonConstraint,
+      },
+      {
+        toolName: 'conan',
+        constraint: conanConstraint,
+      },
+    ],
     docker: {},
   };
 
@@ -61,7 +73,12 @@ export async function updateArtifacts(
     await writeLocalFile(packageFileName, newPackageFileContent);
 
     logger.trace(`Updating ${lockFileName}`);
-    await conanLockUpdate(packageFileName, isLockFileMaintenance);
+    await conanLockUpdate(
+      packageFileName,
+      isLockFileMaintenance,
+      config.constraints?.conan,
+      config.constraints?.python,
+    );
 
     const newLockFileContent = await readLocalFile(lockFileName);
     if (!newLockFileContent) {

@@ -107,9 +107,9 @@ export async function renovateRepository(
       config.repoIsOnboarded! ||
       !OnboardingState.onboardingCacheValid ||
       OnboardingState.prUpdateRequested;
-    const extractResult = performExtract
-      ? await instrument('extract', () => extractDependencies(config))
-      : emptyExtract(config);
+    const extractResult = await instrument('extract', () =>
+      performExtract ? extractDependencies(config) : emptyExtract(config),
+    );
     addExtractionStats(config, extractResult);
 
     const { branches, branchList, packageFiles } = extractResult;

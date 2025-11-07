@@ -6,59 +6,50 @@ exports[`modules/manager/swift/index > extractPackageFile() > parses multiple pa
     {
       "currentValue": ""master"
         ",
-      "datasource": "git-tags",
+      "datasource": "github-tags",
       "depName": "0x7fs/CountedSet",
-      "packageName": "https://github.com/0x7fs/CountedSet",
     },
     {
       "currentValue": "0.1.0",
-      "datasource": "git-tags",
+      "datasource": "github-tags",
       "depName": "avito-tech/GraphiteClient",
-      "packageName": "https://github.com/avito-tech/GraphiteClient.git",
     },
     {
       "currentValue": "1.0.16",
-      "datasource": "git-tags",
+      "datasource": "github-tags",
       "depName": "IBM-Swift/BlueSignals",
-      "packageName": "https://github.com/IBM-Swift/BlueSignals.git",
     },
     {
       "currentValue": "1.2.1",
-      "datasource": "git-tags",
+      "datasource": "github-tags",
       "depName": "apple/swift-argument-parser",
-      "packageName": "https://github.com/apple/swift-argument-parser",
     },
     {
       "currentValue": ""UpdateSocket"
         ",
-      "datasource": "git-tags",
+      "datasource": "github-tags",
       "depName": "beefon/Shout",
-      "packageName": "https://github.com/beefon/Shout",
     },
     {
       "currentValue": "3.0.6",
-      "datasource": "git-tags",
+      "datasource": "github-tags",
       "depName": "daltoniam/Starscream",
-      "packageName": "https://github.com/daltoniam/Starscream.git",
     },
     {
       "currentValue": "1.4.6",
-      "datasource": "git-tags",
+      "datasource": "github-tags",
       "depName": "httpswift/swifter",
-      "packageName": "https://github.com/httpswift/swifter.git",
     },
     {
       "currentValue": "from : "0.9.6"",
-      "datasource": "git-tags",
+      "datasource": "github-tags",
       "depName": "weichsel/ZIPFoundation",
-      "packageName": "https://github.com/weichsel/ZIPFoundation/",
     },
     {
       "currentValue": ""swift-5.0-branch"
     ",
-      "datasource": "git-tags",
+      "datasource": "github-tags",
       "depName": "apple/swift-package-manager",
-      "packageName": "https://github.com/apple/swift-package-manager.git",
     },
   ],
 }

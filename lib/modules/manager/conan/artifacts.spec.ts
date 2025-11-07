@@ -36,7 +36,7 @@ describe('modules/manager/conan/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.trace).toHaveBeenCalledWith(
       'No conan.lock dependencies to update',
     );
@@ -57,7 +57,7 @@ describe('modules/manager/conan/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.trace).toHaveBeenCalledWith('No conan.lock found');
   });
 
@@ -78,7 +78,7 @@ describe('modules/manager/conan/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       'conan.lock read operation failed',
     );
@@ -109,7 +109,7 @@ describe('modules/manager/conan/artifacts', () => {
       }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject(expectedInSnapshot);
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       'New conan.lock read operation failed',
     );
@@ -141,7 +141,7 @@ describe('modules/manager/conan/artifacts', () => {
       }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject(expectedInSnapshot);
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.trace).toHaveBeenCalledWith('conan.lock is unchanged');
   });
 
@@ -179,6 +179,54 @@ describe('modules/manager/conan/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject(expectedInSnapshot);
+  });
+
+  it('supports install mode', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    const updatedDeps = [
+      {
+        depName: 'dep',
+      },
+    ];
+
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('conan.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Original conan.lock');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('Updated conan.lock');
+
+    expect(
+      await conan.updateArtifacts({
+        packageFileName: 'conanfile.py',
+        updatedDeps,
+        newPackageFileContent: '',
+        config: {
+          ...config,
+          constraints: { conan: '2.0.5', python: '3.11.9' },
+        },
+      }),
+    ).toEqual([
+      {
+        file: {
+          contents: 'Updated conan.lock',
+          path: 'conan.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'install-tool python 3.11.9',
+      },
+      {
+        cmd: 'install-tool conan 2.0.5',
+      },
+      {
+        cmd: 'conan lock create conanfile.py',
+        options: {
+          cwd: '/tmp/github/some/repo',
+        },
+      },
+    ]);
   });
 
   it('returns updated conan.lock when updateType are not empty', async () => {

@@ -16,8 +16,12 @@ function isLatest(input: string): boolean {
   return input === '~latest';
 }
 
+function massageValue(input: string): string {
+  return input.trim().replace(regEx(/^v/i), '');
+}
+
 function parseVersion(input: string): SemVer | null {
-  return semver.parse(input);
+  return semver.parse(massageValue(input));
 }
 
 interface Range {
@@ -26,13 +30,14 @@ interface Range {
 }
 
 function parseRange(input: string): Range | null {
-  const coerced = semver.coerce(input);
+  const stripped = massageValue(input);
+  const coerced = semver.coerce(stripped);
   if (!coerced) {
     return null;
   }
   const { major, minor } = coerced;
 
-  if (regEx(/^\d+$/).test(input)) {
+  if (regEx(/^\d+$/).test(stripped)) {
     return { major };
   }
 
@@ -218,11 +223,13 @@ function getNewValue({
     return newVersion;
   }
 
+  const [prefix] = currentValue.split(massageValue(currentValue));
+
   if (is.undefined(range.minor)) {
-    return `${newParsed.major}`;
+    return `${prefix}${newParsed.major}`;
   }
 
-  return `${newParsed.major}.${newParsed.minor}`;
+  return `${prefix}${newParsed.major}.${newParsed.minor}`;
 }
 
 function isCompatible(version: string): boolean {

@@ -174,7 +174,7 @@ describe('modules/platform/gerrit/index', () => {
           branchName: 'branch',
           state: 'open',
           targetBranch: 'master',
-          limit: 1,
+          singleChange: true,
           requestDetails: REQUEST_DETAILS_FOR_PRS,
         },
       );
@@ -210,7 +210,6 @@ describe('modules/platform/gerrit/index', () => {
       );
       expect(clientMock.getChange).toHaveBeenCalledExactlyOnceWith(
         123456,
-        undefined,
         REQUEST_DETAILS_FOR_PRS,
       );
     });
@@ -367,8 +366,7 @@ describe('modules/platform/gerrit/index', () => {
         {
           branchName: 'renovate/dependency-1.x',
           state: 'open',
-          limit: 1,
-          refreshCache: undefined,
+          singleChange: true,
           requestDetails: REQUEST_DETAILS_FOR_PRS,
         },
       );
@@ -393,7 +391,7 @@ describe('modules/platform/gerrit/index', () => {
         {
           state: 'open',
           branchName: 'renovate/dependency-1.x',
-          limit: 1,
+          singleChange: true,
           targetBranch: 'master',
           requestDetails: REQUEST_DETAILS_FOR_PRS,
         },
@@ -419,23 +417,11 @@ describe('modules/platform/gerrit/index', () => {
         {
           state: 'open',
           branchName: 'renovate/dependency-1.x',
-          limit: 1,
+          singleChange: true,
           targetBranch: undefined,
           requestDetails: REQUEST_DETAILS_FOR_PRS,
         },
       ]);
-    });
-  });
-
-  describe('refreshPr()', () => {
-    it('refreshPr()', async () => {
-      clientMock.getChange.mockResolvedValueOnce(partial<GerritChange>({}));
-      await expect(gerrit.refreshPr(123456)).toResolve();
-      expect(clientMock.getChange).toHaveBeenCalledExactlyOnceWith(
-        123456,
-        true,
-        REQUEST_DETAILS_FOR_PRS,
-      );
     });
   });
 

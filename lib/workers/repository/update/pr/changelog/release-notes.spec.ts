@@ -11,6 +11,7 @@ import {
   getReleaseList,
   getReleaseNotes,
   getReleaseNotesMd,
+  massageBody,
   releaseNotesCacheMinutes,
   shouldSkipChangelogMd,
 } from './release-notes';
@@ -1628,6 +1629,27 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       it('should continue for other repository', () => {
         expect(shouldSkipChangelogMd('some/repo')).toBeFalse();
       });
+    });
+  });
+
+  describe('massageBody()', () => {
+    it('does not modify # inside codeblocks', () => {
+      const str =
+        '  # Version 3.2.0' +
+        '\n' +
+        '* [Chore]: always publish build scans on CI. Optionally publish them locally.' +
+        '\n' +
+        '\n' +
+        'To publish build scans, add the following, as indicated:' +
+        '```' +
+        '\n' +
+        '# ~/.gradle/gradle.properties' +
+        '\n' +
+        'dependency.analysis.scans.publish=true' +
+        '```';
+      expect(massageBody(str, 'https://github.com/foo/bar/')).toBe(
+        str.replace('  # Version 3.2.0', '### Version 3.2.0'),
+      );
     });
   });
 });

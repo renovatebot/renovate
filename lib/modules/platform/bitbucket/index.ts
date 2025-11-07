@@ -8,6 +8,7 @@ import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import type { BitbucketHttpOptions } from '../../../util/http/bitbucket';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import {
   aggressiveRepoCacheProvider,
   repoCacheProvider,
@@ -318,7 +319,7 @@ export async function findPr({
     const prs = (
       await bitbucketHttp.getJsonUnchecked<PagedResult<PrResponse>>(
         `/2.0/repositories/${config.repository}/pullrequests?q=source.branch.name="${branchName}"&state=open`,
-        { cacheProvider: aggressiveRepoCacheProvider },
+        { cacheProvider: memCacheProvider },
       )
     ).body.values;
 
