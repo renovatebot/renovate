@@ -75,3 +75,11 @@ git push
 ## Post-release
 
 - Monitor Discussions for early insights about post-release bugs that need to be resolved
+- Update GitHub Action to next major
+  - Approve and merge the major version bump from Renovate, which will release the next major of the GitHub Action
+  - NOTE that you will only see 1 PR in the future, but in the last release, we saw 2:
+    - [i.e.](https://github.com/renovatebot/github-action/pull/961)
+    - [i.e.](https://github.com/renovatebot/github-action/pull/960)
+  - Ensure that the Action's new major version shows as default [in the marketplace](https://github.com/marketplace/actions/renovate-bot-github-action)
+- Update GitLab CI configuration to next major
+  - [i.e.](https://gitlab.com/renovate-bot/renovate-runner/-/merge_requests/3334)
