@@ -93,7 +93,7 @@ All matches above are case-insensitive, even if not shown.
 
 ### Test your glob patterns
 
-If you want to test your glob patterns interactively online, we recommend [digital ocean's glob tool](https://www.digitalocean.com/community/tools/glob).
+If you want to test your glob patterns interactively online, we recommend [Digital Ocean's glob tool](https://www.digitalocean.com/community/tools/glob).
 
 ## Negative matching
 
