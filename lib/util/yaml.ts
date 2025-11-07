@@ -153,6 +153,7 @@ export function parseSingleYamlDocument(
     massagedContent,
     prepareParseOption(options),
   );
+  console.log({ rawDocument });
 
   if (rawDocument?.errors?.length) {
     throw new AggregateError(rawDocument.errors, 'Failed to parse YAML file');

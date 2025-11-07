@@ -1,6 +1,14 @@
 import is from '@sindresorhus/is';
 import type { Document } from 'yaml';
-import { CST, isCollection, isPair, isScalar, parseDocument } from 'yaml';
+import {
+  CST,
+  Scalar,
+  isCollection,
+  isPair,
+  isScalar,
+  isSeq,
+  parseDocument,
+} from 'yaml';
 import { logger } from '../../../../../logger';
 import type { UpdateDependencyConfig } from '../../../types';
 import { PnpmCatalogs } from '../../schema';
@@ -48,6 +56,34 @@ export function updatePnpmCatalogDependency({
     return null;
   }
 
+  const minimumReleaseAgeExcludeNode = document.get(
+    'minimumReleaseAgeExclude',
+    true,
+  );
+  if (minimumReleaseAgeExcludeNode && isSeq(minimumReleaseAgeExcludeNode)) {
+    //  && Array.isArray(minimumReleaseAgeExcludeNode.items)) {
+    const exclude = new Scalar(`${upgrade.depName}@${upgrade.newValue}`); // TODO check this is the right combination
+    exclude.commentBefore = 'Renovate: security upgrade';
+    minimumReleaseAgeExcludeNode.items.push(exclude);
+    console.log({ exclude });
+    if (document.contents?.srcToken) {
+      console.log(CST.stringify(document.contents.srcToken));
+    }
+  }
+
+  // document.set('minimumReleaseAgeExclude', minimumReleaseAgeExcludeNode)
+
+  // // minimumReleaseAgeExcludeNode ??= [];
+  // // if (minimumReleaseAgeExcludeNode)
+  // console.log({ minimumReleaseAgeExcludeNode })
+  // console.log({ f: document.get('catalog', true) })
+  // console.log({ f: document.getIn('catalog', true) })
+  // console.log({ f: document.get('catalog') })
+  // console.log({ f: document.getIn('catalog') })
+  //
+  // console.log({ f: document.get('minReleaseAgeExclude', true) })
+  // console.log({ f: document.get('minReleaseAgeExclude') })
+  //
   // In pnpm-workspace.yaml, the default catalog can be either `catalog` or
   // `catalog.default`, but not both (pnpm throws outright with a config error).
   // Thus, we must check which entry is being used, to reference it from / set

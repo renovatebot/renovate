@@ -9,6 +9,7 @@ import {
   extractPnpmWorkspaceFile,
   findPnpmWorkspace,
   getPnpmLock,
+  tryParsePnpmWorkspaceYaml,
 } from './pnpm';
 import { Fixtures } from '~test/fixtures';
 import { fs, getFixturePath, logger, partial } from '~test/util';
@@ -16,6 +17,37 @@ import { fs, getFixturePath, logger, partial } from '~test/util';
 vi.mock('../../../../util/fs');
 
 describe('modules/manager/npm/extract/pnpm', () => {
+  describe('jvt', () => {
+    it('modules/manager/npm/extract/pnpm', () => {
+      const content = `
+packages:
+  - packages/*
+
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - '@swc/core'
+  - esbuild
+  - puppeteer
+
+minimumReleaseAge: 4320 # 3 days
+minimumReleaseAgeExclude:
+  # foo bar baz
+  - '@ckeditor/*'
+  - '@cksource/*'
+  - '*ckeditor5*'
+
+shellEmulator: true
+shamefullyHoist: true
+preferFrozenLockfile: true
+linkWorkspacePackages: true
+`;
+
+      const parsed = tryParsePnpmWorkspaceYaml(content);
+      console.log({ parsed });
+      expect(parsed).to.be.undefined();
+    });
+  });
+
   beforeAll(() => {
     GlobalConfig.set({ localDir: getFixturePath('pnpm-monorepo/', '..') });
   });

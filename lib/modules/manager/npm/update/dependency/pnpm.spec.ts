@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import * as npmUpdater from '../..';
+import { CommitMessageFactory } from '../../../../../workers/repository/model/commit-message-factory';
 
 describe('modules/manager/npm/update/dependency/pnpm', () => {
   it('handles implicit default catalog dependency', () => {
@@ -571,4 +572,76 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     });
     expect(testContent).toBeNull();
   });
+
+  it('**??** the **??**', () => {
+    const upgrade = {
+      depType: 'pnpm.catalog.default',
+      depName: 'react',
+      newValue: '19.0.0',
+      isVulnerabilityAlert: true,
+    };
+    const pnpmWorkspaceYaml = codeBlock`
+      packages:
+        - pkg-a
+
+      catalog:
+        react: 18.3.1
+
+      minimumReleaseAgeExclude:
+      - react@1.2.3
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(codeBlock`
+      packages:
+        - pkg-a
+
+      catalog:
+        react: 19.0.0
+
+      minimumReleaseAgeExclude:
+      - react@1.2.3
+      # Renovate: security upgrade
+      - react@19.0.0
+    `);
+    //
+  });
+
+  // it('**??** the **??**', () => {
+  //   const upgrade = {
+  //     depType: 'pnpm.catalog.default',
+  //     depName: 'react',
+  //     newValue: '19.0.0',
+  //     isVulnerabilityAlert: true,
+  //   };
+  //   const pnpmWorkspaceYaml = codeBlock`
+  //     packages:
+  //       - pkg-a
+  //
+  //     catalog:
+  //       react: 18.3.1
+  //   `;
+  //   const testContent = npmUpdater.updateDependency({
+  //     fileContent: pnpmWorkspaceYaml,
+  //     upgrade,
+  //   });
+  //   expect(testContent).toEqual(codeBlock`
+  //     packages:
+  //       - pkg-a
+  //
+  //     catalog:
+  //       react: 19.0.0
+  //
+  //     minimumReleaseAgeExclude:
+  //     # Renovate: security upgrade
+  //     -
+  //   `);
+  //   //
+  // })
+
+  // TODO: when no catalog, still does it
+
+  // TODO: when no minimumReleaseAgeExclude, still does it
 });
