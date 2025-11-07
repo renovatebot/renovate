@@ -130,6 +130,10 @@ const uvOptionsWithArguments = [
   '--no-emit-package',
   '--prerelease',
   '--format',
+  '--resolution',
+  '--fork-strategy',
+  '--exclude-newer',
+  '--exclude-newer-package',
   ...commonOptionsWithArguments,
 ];
 export const optionsWithArguments = [

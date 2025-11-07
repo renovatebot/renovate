@@ -59,6 +59,10 @@ describe('modules/manager/pip-compile/common', () => {
       '--no-emit-package=cffi',
       '--prerelease=if-necessary',
       '--format=pylock.toml',
+      '--resolution=lowest',
+      '--fork-strategy=fewest',
+      '--exclude-newer=2025-11-01',
+      '--exclude-newer-package="tqdm=2022-04-04T00:00:00Z"',
     ])('returns object on correct uv options', (argument: string) => {
       expect(
         extractHeaderCommand(
