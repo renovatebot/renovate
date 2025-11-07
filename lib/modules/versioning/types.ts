@@ -106,6 +106,12 @@ export interface VersioningApi {
   getNewValue(newValueConfig: NewValueConfig): string | null;
 
   /**
+   * Convert the `newVersion` to a pinned value.
+   * @param newVersion
+   */
+  getPinnedValue?(newVersion: string): string;
+
+  /**
    * Compare two versions. Return `0` if `v1 == v2`, or `1` if `v1` is
    * greater, or `-1` if `v2` is greater.
    */
