@@ -53,8 +53,10 @@ export function createDependency(
     groups = { ...storedGroups, ...groups };
   }
 
-  dependency.managerData = dependency.managerData ?? {};
-  dependency.managerData.groups = groups;
+  if (storedGroups) {
+    dependency.managerData = dependency.managerData ?? {};
+    dependency.managerData.groups = groups;
+  }
 
   for (const field of validMatchFields) {
     const fieldTemplate = `${field}Template` as keyof RegexManagerTemplates;
