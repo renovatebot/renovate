@@ -39,8 +39,7 @@ export function getPythonConstraint(
     massageToml(pyProjectContent),
     PoetryPyProject.transform(
       ({ packageFileContent }) =>
-        packageFileContent.deps.find((dep) => dep.depName === 'python')
-          ?.currentValue,
+        packageFileContent.extractedConstraints?.python,
     ),
   ).unwrapOrNull();
   if (pyprojectPythonConstraint) {
@@ -166,9 +165,17 @@ export async function updateArtifacts({
   const cmd: string[] = [];
   if (isLockFileMaintenance) {
     cmd.push('poetry update --lock --no-interaction');
+  } else if (
+    updatedDeps.length === 1 &&
+    updatedDeps[0].depType === 'requires-python'
+  ) {
+    // refresh metadata + hash (done by poetry update when other updates exist)
+    cmd.push('poetry lock --no-interaction');
   } else {
     cmd.push(
       `poetry update --lock --no-interaction ${updatedDeps
+        // prevents 'python is not a dependency' error
+        .filter((dep) => dep.depType !== 'requires-python')
         .map((dep) => dep.depName)
         .filter(isString)
         .map((dep) => quote(dep))
