@@ -365,6 +365,14 @@ describe('workers/global/config/parse/index', () => {
       expect(getConfigFileNames()[0]).toBe('myrenovate.json');
     });
 
+    it('supports setting configFileNames through cli', async () => {
+      fileConfigParser.getConfig.mockResolvedValue({});
+      defaultArgv = defaultArgv.concat(['--config-file-names=myrenovate.json']);
+      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
+      expect(parsed.configFileNames).toBeUndefined();
+      expect(getConfigFileNames()[0]).toBe('myrenovate.json');
+    });
+
     it('supports setting configFileNames through env', async () => {
       fileConfigParser.getConfig.mockResolvedValue({});
       const env: NodeJS.ProcessEnv = {
