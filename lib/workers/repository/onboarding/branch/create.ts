@@ -38,20 +38,22 @@ export async function createOnboardingBranch(
     return null;
   }
 
-  return scm.commitAndPush({
-    baseBranch: config.baseBranch,
-    branchName: config.onboardingBranch!,
-    files: [
-      {
-        type: 'addition',
-        // TODO #22198
-        path: configFile,
-        contents,
-      },
-    ],
-    message: commitMessage,
-    platformCommit: config.platformCommit,
-    force: true,
-    labels: config.labels,
-  });
+  return scm.commitAndPush(
+    {
+      baseBranch: config.baseBranch,
+      branchName: config.onboardingBranch!,
+      files: [
+        {
+          type: 'addition',
+          // TODO #22198
+          path: configFile,
+          contents,
+        },
+      ],
+      message: commitMessage,
+      platformCommit: config.platformCommit,
+      force: true,
+    },
+    config,
+  );
 }

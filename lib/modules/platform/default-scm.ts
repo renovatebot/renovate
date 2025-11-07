@@ -1,3 +1,4 @@
+import type { RenovateConfig } from '../../config/types';
 import * as git from '../../util/git';
 import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
 import type { PlatformScm } from './types';
@@ -9,6 +10,7 @@ export class DefaultGitScm implements PlatformScm {
 
   commitAndPush(
     commitConfig: CommitFilesConfig,
+    renovateConfig: RenovateConfig,
   ): Promise<LongCommitSha | null> {
     return git.commitFiles(commitConfig);
   }

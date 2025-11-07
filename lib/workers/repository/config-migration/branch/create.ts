@@ -67,13 +67,15 @@ export async function createConfigMigrationBranch(
     });
   }
 
-  return scm.commitAndPush({
-    baseBranch: config.baseBranch,
-    branchName: getMigrationBranchName(config),
-    files,
-    message: commitMessage.toString(),
-    platformCommit: config.platformCommit,
-    force: true,
-    labels: config.labels,
-  });
+  return scm.commitAndPush(
+    {
+      baseBranch: config.baseBranch,
+      branchName: getMigrationBranchName(config),
+      files,
+      message: commitMessage.toString(),
+      platformCommit: config.platformCommit,
+      force: true,
+    },
+    config,
+  );
 }

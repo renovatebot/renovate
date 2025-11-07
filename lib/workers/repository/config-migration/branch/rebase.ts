@@ -42,20 +42,22 @@ export async function rebaseMigrationBranch(
   await scm.checkoutBranch(baseBranch);
   contents =
     await MigratedDataFactory.applyPrettierFormatting(migratedConfigData);
-  return scm.commitAndPush({
-    baseBranch: config.baseBranch,
-    branchName,
-    files: [
-      {
-        type: 'addition',
-        path: configFileName,
-        contents,
-      },
-    ],
-    message: commitMessage.toString(),
-    platformCommit: config.platformCommit,
-    labels: config.labels,
-  });
+  return scm.commitAndPush(
+    {
+      baseBranch: config.baseBranch,
+      branchName,
+      files: [
+        {
+          type: 'addition',
+          path: configFileName,
+          contents,
+        },
+      ],
+      message: commitMessage.toString(),
+      platformCommit: config.platformCommit,
+    },
+    config,
+  );
 }
 
 /**

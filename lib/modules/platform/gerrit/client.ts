@@ -209,7 +209,7 @@ class GerritClient {
 
   async addAssignee(changeNumber: number, assignee: string): Promise<void> {
     await this.gerritHttp.putJson<GerritAccountInfo>(
-      // TODO: refactor this as this API removed in Gerrit 3.8
+      // TODO: use CCs instead as Gerrit 3.8+ no longer supports assignees
       `a/changes/${changeNumber}/assignee`,
       {
         body: { assignee },

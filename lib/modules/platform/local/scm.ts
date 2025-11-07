@@ -1,5 +1,6 @@
 import { execSync } from 'node:child_process';
 import { glob } from 'glob';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
 import type { PlatformScm } from '../types';
@@ -26,6 +27,7 @@ export class LocalFs implements PlatformScm {
   }
   commitAndPush(
     commitConfig: CommitFilesConfig,
+    renovateConfig: RenovateConfig,
   ): Promise<LongCommitSha | null> {
     return Promise.resolve(null);
   }

@@ -1,11 +1,14 @@
 import { randomUUID } from 'crypto';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as git from '../../../util/git';
 import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
 import { hash } from '../../../util/hash';
+import { addParticipants } from '../../../workers/repository/update/pr/participants';
 import { DefaultGitScm } from '../default-scm';
 import { client } from './client';
 import type { GerritFindPRConfig } from './types';
+import { mapGerritChangeToPr } from './utils';
 
 let repository: string;
 let username: string;
@@ -39,7 +42,7 @@ export class GerritScm extends DefaultGitScm {
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();
     if (change) {
-      return change.current_revision as LongCommitSha;
+      return change.current_revision!;
     }
     return git.getBranchCommit(branchName);
   }
@@ -107,6 +110,7 @@ export class GerritScm extends DefaultGitScm {
 
   override async commitAndPush(
     commit: CommitFilesConfig,
+    renovateConfig: RenovateConfig,
   ): Promise<LongCommitSha | null> {
     logger.debug(`commitAndPush(${commit.branchName})`);
     const searchConfig: GerritFindPRConfig = {
@@ -125,9 +129,9 @@ export class GerritScm extends DefaultGitScm {
       typeof commit.message === 'string' ? [commit.message] : commit.message;
 
     // In Gerrit, the change subject/title is the first line of the commit message
-    if (commit.prTitle) {
+    if (renovateConfig.prTitle) {
       const firstMessageLines = message[0].split('\n');
-      firstMessageLines[0] = commit.prTitle;
+      firstMessageLines[0] = renovateConfig.prTitle as string;
       message[0] = firstMessageLines.join('\n');
     }
 
@@ -148,13 +152,27 @@ export class GerritScm extends DefaultGitScm {
       }
       if (hasChanges || commit.force) {
         const pushOptions = ['notify=NONE'];
-        if (commit.autoApprove) {
+        if (renovateConfig.autoApprove) {
           pushOptions.push('label=Code-Review+2');
         }
-        if (commit.labels) {
-          for (const label of commit.labels) {
+        if (renovateConfig.labels) {
+          for (const label of renovateConfig.labels) {
             pushOptions.push(`hashtag=${label}`);
           }
+        }
+        let pr = null;
+        if (existingChange) {
+          pr = mapGerritChangeToPr(existingChange);
+        }
+        const { reviewers, assignees } = await decideParticipants(
+          renovateConfig,
+          pr,
+        );
+        for (const reviewer of reviewers) {
+          pushOptions.push(`reviewer=${reviewer}`);
+        }
+        for (const assignee of assignees) {
+          pushOptions.push(`cc=${assignee}`);
         }
         const pushResult = await git.pushCommit({
           sourceRef: commit.branchName,

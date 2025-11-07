@@ -1,5 +1,4 @@
 import { isTruthy } from '@sindresorhus/is';
-import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { parseJson } from '../../../util/common';
@@ -9,7 +8,6 @@ import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
 import type {
   BranchStatusConfig,
-  CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfigByContent,
   EnsureCommentRemovalConfigByTopic,
@@ -177,45 +175,6 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   if (prConfig.state && prConfig.state === 'closed') {
     await client.abandonChange(prConfig.number);
   }
-}
-
-export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
-  logger.debug(
-    `createPr(${prConfig.sourceBranch}, ${prConfig.prTitle}, ${
-      prConfig.labels?.toString() ?? ''
-    })`,
-  );
-  const change = (
-    await client.findChanges(config.repository!, {
-      branchName: prConfig.sourceBranch,
-      targetBranch: prConfig.targetBranch,
-      state: 'open',
-      singleChange: true,
-      requestDetails: REQUEST_DETAILS_FOR_PRS,
-    })
-  ).pop();
-  if (change === undefined) {
-    throw new Error(
-      `the change should be created automatically from previous push to refs/for/${prConfig.sourceBranch}`,
-    );
-  }
-  const created = DateTime.fromISO(change.created.replace(' ', 'T'), {});
-  const fiveMinutesAgo = DateTime.utc().minus({ minutes: 5 });
-  if (created < fiveMinutesAgo) {
-    throw new Error(
-      `the change should have been created automatically from previous push to refs/for/${prConfig.sourceBranch}, but it was not created in the last 5 minutes (${change.created})`,
-    );
-  }
-  await client.addMessageIfNotAlreadyExists(
-    change._number,
-    prConfig.prBody,
-    TAG_PULL_REQUEST_BODY,
-    change.messages,
-  );
-  return mapGerritChangeToPr(change, {
-    sourceBranch: prConfig.sourceBranch,
-    prBody: prConfig.prBody,
-  });
 }
 
 export async function getBranchPr(
@@ -398,9 +357,6 @@ export async function addReviewers(
   await client.addReviewers(number, reviewers);
 }
 
-/**
- * add "CC" (only one possible)
- */
 export async function addAssignees(
   number: number,
   assignees: string[],

@@ -47,18 +47,20 @@ export async function rebaseOnboardingBranch(
   const commitMessage = commitMessageFactory.create();
 
   // TODO #22198
-  return scm.commitAndPush({
-    baseBranch: config.baseBranch,
-    branchName: config.onboardingBranch!,
-    files: [
-      {
-        type: 'addition',
-        path: configFile,
-        contents,
-      },
-    ],
-    message: commitMessage.toString(),
-    platformCommit: config.platformCommit,
-    labels: config.labels,
-  });
+  return scm.commitAndPush(
+    {
+      baseBranch: config.baseBranch,
+      branchName: config.onboardingBranch!,
+      files: [
+        {
+          type: 'addition',
+          path: configFile,
+          contents,
+        },
+      ],
+      message: commitMessage.toString(),
+      platformCommit: config.platformCommit,
+    },
+    config,
+  );
 }

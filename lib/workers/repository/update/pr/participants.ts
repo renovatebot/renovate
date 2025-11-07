@@ -40,6 +40,7 @@ function prepareParticipants(
   return filterUnavailableUsers(config, normalizedUsernames);
 }
 
+// TODO: convert to a function that only prepares the list of reviewers and assignees so that it can be called by Gerrit commitAndPush()
 export async function addParticipants(
   config: RenovateConfig,
   pr: Pr,
