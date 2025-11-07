@@ -45,7 +45,16 @@ export function createDependency(
   dep?: PackageDependency,
 ): PackageDependency | null {
   const dependency = dep ?? {};
-  const { groups, replaceString } = extractionTemplate;
+  let groups = extractionTemplate.groups;
+  const { replaceString } = extractionTemplate;
+
+  const storedGroups = (config as any).managerData?.groups;
+  if (storedGroups) {
+    groups = { ...storedGroups, ...groups };
+  }
+
+  dependency.managerData = dependency.managerData ?? {};
+  dependency.managerData.groups = groups;
 
   for (const field of validMatchFields) {
     const fieldTemplate = `${field}Template` as keyof RegexManagerTemplates;
