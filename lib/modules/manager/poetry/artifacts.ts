@@ -40,8 +40,7 @@ export function getPythonConstraint(
     massageToml(pyProjectContent),
     PoetryPyProject.transform(
       ({ packageFileContent }) =>
-        packageFileContent.deps.find((dep) => dep.depName === 'python')
-          ?.currentValue,
+        packageFileContent.extractedConstraints?.python,
     ),
   ).unwrapOrNull();
   if (pyprojectPythonConstraint) {
