@@ -3837,6 +3837,7 @@ Table with options:
 | `gomodUpdateImportPaths`     | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
 | `gomodSkipVendor`            | Never run `go mod vendor` after Go module updates.                                                                                                         |
 | `gomodVendor`                | Always run `go mod vendor` after Go module updates even if vendor files aren't detected.                                                                   |
+| `goGenerate`                 | Run `go generate ./...` after vendoring (if vendoring was required). This will then commit any files which were modified by vendoring                      |
 | `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                          |
 | `kustomizeInflateHelmCharts` | Inflate updated helm charts referenced in the kustomization.                                                                                               |
 | `npmDedupe`                  | Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.                                       |
