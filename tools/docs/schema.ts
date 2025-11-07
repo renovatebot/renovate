@@ -167,20 +167,47 @@ function createSchemaForChildConfigs(
   }
 }
 
+interface GenerateSchemaOpts {
+  filename?: string;
+  version?: string;
+  isGlobal?: boolean;
+}
+
 export async function generateSchema(
   dist: string,
-  version: string = pkg.version,
+  {
+    filename = 'renovate-schema.json',
+    version = pkg.version,
+    isGlobal = false,
+  }: GenerateSchemaOpts = {},
 ): Promise<void> {
   const schema = {
-    title: `JSON schema for Renovate ${version} config files (https://renovatebot.com/)`,
+    title: isGlobal
+      ? `JSON schema for Renovate ${version} global self-hosting configuration (https://renovatebot.com/)`
+      : `JSON schema for Renovate ${version} config files (https://renovatebot.com/)`,
     $schema: 'http://json-schema.org/draft-07/schema#',
     'x-renovate-version': `${version}`,
     allowComments: true,
     type: 'object',
     properties: {},
   };
-  const options = getOptions();
-  options.sort((a, b) => {
+  const configurationOptions = getOptions();
+
+  if (!isGlobal) {
+    configurationOptions.map((v) => {
+      // TODO #38728 remove any global-only options in the repository configuration schema
+      if (v.globalOnly) {
+        // NOTE that the JSON Schema version we're using does not have support for deprecating, so we need to use the `description` field
+        v.description =
+          "Deprecated: This configuration option is only intended to be used with 'global' configuration when self-hosting, not used in a repository configuration file. Renovate likely won't use the configuration, and these fields will be removed from the repository configuration documentation in Renovate v43 (https://github.com/renovatebot/renovate/issues/38728)\n\n" +
+          v.description;
+      }
+
+      return v;
+    });
+  }
+
+  configurationOptions.sort((a, b) => {
     if (a.name < b.name) {
       return -1;
     }
@@ -191,11 +218,11 @@ export async function generateSchema(
   });
   const properties = schema.properties as Record<string, any>;
 
-  createSchemaForParentConfigs(options, properties);
-  addChildrenArrayInParents(options, properties);
-  createSchemaForChildConfigs(options, properties);
+  createSchemaForParentConfigs(configurationOptions, properties);
+  addChildrenArrayInParents(configurationOptions, properties);
+  createSchemaForChildConfigs(configurationOptions, properties);
   await updateFile(
-    `${dist}/renovate-schema.json`,
+    `${dist}/${filename}`,
     `${JSON.stringify(schema, null, 2)}\n`,
   );
 }

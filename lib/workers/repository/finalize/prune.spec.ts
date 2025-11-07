@@ -100,17 +100,17 @@ describe('workers/repository/finalize/prune', () => {
         'renovate/maint/v7-a',
       );
       expect(scm.isBranchModified).toHaveBeenCalledTimes(3);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(scm.isBranchModified).toHaveBeenCalledWith(
         'renovate/main-b',
         'main',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(scm.isBranchModified).toHaveBeenCalledWith(
         'renovate/maint/v7-a',
         'maint/v7',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(scm.isBranchModified).toHaveBeenCalledWith(
         'renovate/maint/v7-b',
         'maint/v7',

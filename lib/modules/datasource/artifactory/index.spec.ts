@@ -83,7 +83,7 @@ describe('modules/datasource/artifactory/index', () => {
         packageName: testLookupName,
       });
       expect(logger.warn).toHaveBeenCalledTimes(1);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.warn).toHaveBeenCalledWith(
         { packageName: 'project' },
         'artifactory datasource requires custom registryUrl. Skipping datasource',
@@ -115,7 +115,7 @@ describe('modules/datasource/artifactory/index', () => {
         }),
       ).toBeNull();
       expect(logger.warn).toHaveBeenCalledTimes(1);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.warn).toHaveBeenCalledWith(
         {
           packageName: 'project',

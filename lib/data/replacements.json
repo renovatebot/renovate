@@ -700,7 +700,7 @@
       {
         "matchDatasources": ["github-tags"],
         "matchPackageNames": ["google-github-actions/release-please-action"],
-        "replacementName": "googleapis/release-please"
+        "replacementName": "googleapis/release-please-action"
       }
     ]
   },

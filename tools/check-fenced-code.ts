@@ -1,12 +1,13 @@
 import { format } from 'node:util';
 import type { ValidateFunction } from 'ajv';
-import ajv from 'ajv';
-import draft07 from 'ajv/lib/refs/json-schema-draft-07.json';
+import { Ajv } from 'ajv';
+import draft7MetaSchema from 'ajv/lib/refs/json-schema-draft-07.json';
+import addFormats from 'ajv-formats';
 import fs from 'fs-extra';
 import { glob } from 'glob';
 import type { Token } from 'markdown-it';
 import MarkdownIt from 'markdown-it';
-import { MigrationsService } from '../lib/config/migrations';
+import { migrateConfig } from '../lib/config/migration';
 import type { RenovateConfig } from '../lib/config/types';
 
 const errorTitle = 'Invalid JSON in fenced code block';
@@ -49,7 +50,7 @@ function checkSchemaCompliantJson(
     return value as RenovateConfig;
   }
   for (const error of validate.errors ?? []) {
-    reportIssue(file, token, `${error.dataPath} ${error.message}`);
+    reportIssue(file, token, `${error.instancePath} ${error.message}`);
   }
 }
 
@@ -58,12 +59,12 @@ function checkMigrationStatus(
   token: Token,
   original: RenovateConfig,
 ): void {
-  const migrated = MigrationsService.run(original);
-  if (MigrationsService.isMigrated(original, migrated)) {
+  const { isMigrated, migratedConfig } = migrateConfig(original);
+  if (isMigrated) {
     reportIssue(
       file,
       token,
-      `The JSON contains unmigrated configuration. Migrated JSON: ${JSON.stringify(migrated)}`,
+      `The JSON contains unmigrated configuration. Migrated JSON: ${JSON.stringify(migratedConfig)}`,
     );
   }
 }
@@ -96,13 +97,11 @@ async function processFile(file: string): Promise<void> {
 }
 
 void (async () => {
-  validate = new ajv({
-    extendRefs: true,
-    meta: false,
-    schemaId: 'auto',
-  })
-    .addMetaSchema(draft07)
-    .compile(await fs.readJson('renovate-schema.json'));
+  const validator = new Ajv({ schemaId: '$id', meta: false }).addMetaSchema(
+    draft7MetaSchema,
+  );
+  addFormats(validator);
+  validate = validator.compile(draft7MetaSchema);
 
   const files = await glob(markdownGlob);
 
