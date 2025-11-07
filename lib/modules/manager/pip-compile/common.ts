@@ -128,6 +128,8 @@ const uvOptionsWithArguments = [
   '--constraints',
   '--python-version',
   '--no-emit-package',
+  '--prerelease',
+  '--format',
   ...commonOptionsWithArguments,
 ];
 export const optionsWithArguments = [
@@ -139,10 +141,10 @@ const allowedCommonOptions = [
   '--generate-hashes',
   '--emit-index-url',
   '--index-url',
+  '--all-extras',
 ];
 export const allowedOptions: Record<CommandType, string[]> = {
   'pip-compile': [
-    '--all-extras',
     '--allow-unsafe',
     '--generate-hashes',
     '--no-emit-index-url',
