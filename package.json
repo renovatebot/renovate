@@ -178,7 +178,7 @@
     "@renovatebot/pep440": "4.2.1",
     "@renovatebot/pgp": "1.1.0",
     "@renovatebot/ruby-semver": "4.1.2",
-    "@sindresorhus/is": "7.1.0",
+    "@sindresorhus/is": "7.1.1",
     "@yarnpkg/core": "4.4.4",
     "@yarnpkg/parsers": "3.0.3",
     "ae-cvss-calculator": "1.0.9",
