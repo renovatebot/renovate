@@ -28,6 +28,8 @@ body:
       description: |
         Please do not say 'latest' version (as Renovate ships many updates daily), but instead note the exact version.
         You can find it by checking the `INFO: Repository started` log line.
+
+        You do not need to enter this if you are running on a Mend.io-hosted app.
     validations:
       required: false
 
