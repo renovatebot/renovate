@@ -3,8 +3,9 @@ import { Http } from '../../../util/http/index.ts';
 import {
   checkIfModified,
   constructComponentUrls,
-  getPackageUrl,
+  getBaseSuiteUrl,
 } from './url.ts';
+import { getPackageUrl } from './index.spec.ts';
 
 describe('modules/datasource/deb/url', () => {
   describe('constructComponentUrls', () => {
@@ -39,37 +40,56 @@ describe('modules/datasource/deb/url', () => {
     });
   });
 
+  describe('getPackagePath', () => {
+    it('returns the correct suite url', () => {
+      const basePackageUrl =
+        'https://deb.debian.org/debian/dists/bullseye/main/binary-amd64';
+      const expectedUrl = 'https://deb.debian.org/debian/dists/bullseye';
+
+      expect(getBaseSuiteUrl(basePackageUrl)).toBe(expectedUrl);
+    });
+  });
+
   describe('checkIfModified', () => {
     const debBaseUrl = 'http://deb.debian.org';
+    const packageArgs: [release: string, component: string, arch: string] = [
+      'stable',
+      'non-free',
+      'amd64',
+    ];
+
+    beforeEach(() => {
+      vi.resetAllMocks();
+    });
 
     it('should return true for different status code', async () => {
       httpMock
         .scope(debBaseUrl)
-        .head(getPackageUrl('', 'stable', 'non-free', 'amd64'))
+        .head(getPackageUrl('', ...packageArgs))
         .reply(200);
 
       await expect(
         checkIfModified(
-          getPackageUrl(debBaseUrl, 'stable', 'non-free', 'amd64'),
+          getPackageUrl(debBaseUrl, ...packageArgs),
           new Date(),
-          new Http('default'),
+          new Http('deb'),
         ),
       ).resolves.toBe(true);
     });
 
-    it('should return true if request failed', async () => {
+    it('should throw error if request failed', async () => {
       httpMock
         .scope(debBaseUrl)
-        .head(getPackageUrl('', 'stable', 'non-free', 'amd64'))
+        .head(getPackageUrl('', ...packageArgs))
         .replyWithError('Unexpected Error');
 
       await expect(
         checkIfModified(
-          getPackageUrl(debBaseUrl, 'stable', 'non-free', 'amd64'),
+          getPackageUrl(debBaseUrl, ...packageArgs),
           new Date(),
-          new Http('default'),
+          new Http('deb'),
         ),
-      ).resolves.toBe(true);
+      ).rejects.toThrow('Unexpected Error');
     });
   });
 });

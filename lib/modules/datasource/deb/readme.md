@@ -123,3 +123,13 @@ Then, add the following configuration:
   ]
 }
 ```
+
+# Considerations
+
+The Debian datasource retrieves package information from a repository suite via release and package meta information. It first attempts to fetch the `InRelease` or `Release` file, which contains metadata about the repository and its packages.
+
+Once the release file is found, the datasource fetches the associated package index, typically named Packages. This file may be compressed (`xz`, `bzip2`, `gzip`) and contains the actual version information about the Debian package.
+
+If the release file cannot be fetched, the datasource assumes the presence of a `Packages.gz` file.
+
+For further details on the structure and formats of repository indices, one can refer to the comprehensive guidelines provided by [Debian](https://wiki.debian.org/DebianRepository/Format).
