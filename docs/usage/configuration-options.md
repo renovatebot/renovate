@@ -798,6 +798,10 @@ After we changed the [`baseBranchPatterns`](#basebranchpatterns) feature, the Re
 
 For more details, read the [config migration documentation](./config-migration.md).
 
+## configValidationError
+
+If enabled, config validation errors will be reported as errors instead of warnings, and Renovate will exit with a non-zero exit code.
+
 ## configWarningReuseIssue
 
 If no existing issue is found, Renovate's default behavior is to create a new Config Warning issue.
