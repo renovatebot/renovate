@@ -109,6 +109,12 @@ export class DebDatasource extends Datasource {
     return allPackages;
   }
 
+  /**
+   * Retrieves the package index from the given component URL.
+   *
+   * @param componentUrl - The URL of the component to fetch the package index from.
+   * @returns
+   */
   @cache({
     namespace: `datasource-${DebDatasource.id}`,
     key: (componentUrl: string) => componentUrl,

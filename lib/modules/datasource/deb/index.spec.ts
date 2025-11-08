@@ -1,19 +1,15 @@
 import { createReadStream } from 'fs';
-import { copyFile, stat } from 'fs-extra';
+import { copyFile } from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { getPkgReleases } from '..';
 import { GlobalConfig } from '../../../config/global';
 import { hashStream, toSha256 } from '../../../util/hash';
+import { joinUrlParts } from '../../../util/url';
 import type { GetPkgReleasesConfig } from '../types';
 import { cacheSubDir } from './common';
-import {
-  getBaseSuiteUrl,
-  getComponentUrl,
-  getPackageUrl,
-  getRegistryUrl,
-} from './url';
+import { getBaseSuiteUrl } from './url';
 import { DebDatasource } from '.';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
@@ -33,6 +29,7 @@ describe('modules/datasource/deb/index', () => {
   let cfg: GetPkgReleasesConfig;
   let extractionFolder: string;
   let extractedPackageFile: string;
+  let packageArchiveFile: string;
 
   beforeEach(async () => {
     debDatasource = new DebDatasource();
@@ -43,6 +40,11 @@ describe('modules/datasource/deb/index', () => {
     extractedPackageFile = upath.join(
       extractionFolder,
       `${toSha256(getComponentUrl(debBaseUrl, 'stable', 'non-free', 'amd64'))}.txt`,
+    );
+
+    packageArchiveFile = upath.join(
+      extractionFolder,
+      `${toSha256(getComponentUrl(debBaseUrl, 'stable', 'non-free', 'amd64'))}.gz`,
     );
 
     cfg = {
@@ -68,19 +70,31 @@ describe('modules/datasource/deb/index', () => {
 
   describe('getReleases', () => {
     it('returns a valid version for the package `album` and does not require redownload', async () => {
+      // copy compressed package file
+      await copyFile(fixturePackagesArchivePath, packageArchiveFile);
+      // copy uncompressed package file
       await copyFile(fixturePackagesPath, extractedPackageFile);
-      const stats = await stat(extractedPackageFile);
-      const ts = stats.ctime;
 
-      httpMock
-        .scope(debBaseUrl, {
-          // ensure the rest call sets the correct request headers
-          reqheaders: {
-            'if-modified-since': ts.toUTCString(),
-          },
-        })
-        .head(getPackageUrl('', 'stable', 'non-free', 'amd64'))
-        .reply(304);
+      // mock Release files fetch
+      mockFetchInReleaseContent(
+        fixturePackagesArchiveHash2,
+        'stable',
+        'non-free',
+        'amd64',
+        true, // return error to signal that the file is not available
+        '',
+        'Release',
+      );
+
+      mockFetchInReleaseContent(
+        fixturePackagesArchiveHash2,
+        'stable',
+        'non-free',
+        'amd64',
+        true, // return error to signal that the file is not available
+        '',
+        'InRelease',
+      );
 
       const res = await getPkgReleases(cfg);
       expect(res).toEqual({
@@ -237,6 +251,28 @@ describe('modules/datasource/deb/index', () => {
           .scope(debBaseUrl)
           .get(getPackageUrl('', 'stable', 'non-free', 'amd64'))
           .reply(404);
+
+        // no InRelease file
+        mockFetchInReleaseContent(
+          fixturePackagesArchiveHash,
+          'stable',
+          'non-free',
+          'amd64',
+          true,
+          '',
+          'InRelease',
+        );
+
+        // no Release file
+        mockFetchInReleaseContent(
+          fixturePackagesArchiveHash,
+          'stable',
+          'non-free',
+          'amd64',
+          true,
+          '',
+          'Release',
+        );
       });
 
       it('returns null for the package', async () => {
@@ -362,7 +398,7 @@ describe('modules/datasource/deb/index', () => {
  * @param release - The release name (e.g., 'bullseye').
  * @param component - The component name (e.g., 'main').
  * @param arch - The architecture (e.g., 'amd64').
- * @param checkIfModified - whether it should mock the http head call of the Package Index file
+ * @param checkIfModified - whether it should mock the http head call of the Release file
  * @param packageArchivePath - path to package index
  * @param packagesArchiveHash - sha256 hash of package
  */
@@ -382,9 +418,10 @@ function mockHttpCalls(
   mockFetchInReleaseContent(packagesArchiveHash, release, component, arch);
 
   if (checkIfModified) {
+    // check if modified is used for InRelease or Release files
     httpMock
       .scope(debBaseUrl)
-      .head(getPackageUrl('', release, component, arch))
+      .head(getReleaseUrl('', release, 'InRelease'))
       .reply(200);
   }
 }
@@ -400,6 +437,8 @@ function mockHttpCalls(
  * @param component - The component name (e.g., 'main').
  * @param arch - The architecture (e.g., 'amd64').
  * @param error - Optional flag to simulate an error response (default is false).
+ * @param compression - The compression type (e.g., 'gz', 'xz', etc.) for the package index file.
+ * @param releaseFile - The name of the InRelease file (either 'InRelease' or 'Release, defaults to 'InRelease').
  */
 export function mockFetchInReleaseContent(
   packageIndexHash: string,
@@ -407,26 +446,106 @@ export function mockFetchInReleaseContent(
   component: string,
   arch: string,
   error = false,
+  compression = 'gz',
+  releaseFile = 'InRelease',
 ) {
-  const packageIndexPath = `${component}/binary-${arch}/Packages.gz`;
+  const packageIndexPath =
+    compression.length > 0
+      ? `${component}/binary-${arch}/Packages.${compression}`
+      : `${component}/binary-${arch}/Packages`;
 
   const content = `SHA256:
  3957f28db16e3f28c7b34ae84f1c929c567de6970f3f1b95dac9b498dd80fe63   738242 contrib/Contents-all
  ${packageIndexHash} 1234 ${packageIndexPath}
 `;
 
-  const mockCall = httpMock
-    .scope(debBaseUrl)
-    .get(
-      getBaseSuiteUrl(getComponentUrl('', release, component, arch)) +
-        '/InRelease',
-    );
+  const uri = joinUrlParts(
+    getBaseSuiteUrl(getComponentUrl('', release, component, arch)),
+    releaseFile,
+  );
+
+  const mockCall = httpMock.scope(debBaseUrl).get(uri);
 
   if (error) {
     mockCall.replyWithError('Unexpected Error');
   } else {
     mockCall.reply(200, content);
   }
+}
+
+/**
+ * Constructs a URL for accessing the component directory for a specific release and architecture.
+ *
+ * @param baseUrl - The base URL of the repository.
+ * @param release - The release name or codename (e.g., 'buster', 'bullseye').
+ * @param component - The component name (e.g., 'main', 'contrib', 'non-free').
+ * @param arch - The architecture name (e.g., 'amd64', 'i386').
+ * @returns The complete URL to the component directory.
+ */
+export function getComponentUrl(
+  baseUrl: string,
+  release: string,
+  component: string,
+  arch: string,
+): string {
+  return `${baseUrl}/debian/dists/${release}/${component}/binary-${arch}`;
+}
+
+/**
+ * Constructs a URL for accessing the Release or InRelease file for a specific release.
+ *
+ * @param baseUrl
+ * @param release
+ * @param releaseFile
+ * @returns
+ */
+export function getReleaseUrl(
+  baseUrl: string,
+  release: string,
+  releaseFile: string,
+): string {
+  return `${baseUrl}/debian/dists/${release}/${releaseFile}`;
+}
+
+/**
+ * Constructs a URL for accessing the Packages.gz file for a specific component, release, and architecture.
+ *
+ * @param baseUrl - The base URL of the repository.
+ * @param release - The release name or codename (e.g., 'buster', 'bullseye').
+ * @param component - The component name (e.g., 'main', 'contrib', 'non-free').
+ * @param arch - The architecture name (e.g., 'amd64', 'i386').7
+ * @param compression - The compression type (e.g., 'gz', 'xz', etc.) for the Packages file, empty string for no compression.
+ * @returns The complete URL to the Packages.gz file.
+ */
+export function getPackageUrl(
+  baseUrl: string,
+  release: string,
+  component: string,
+  arch: string,
+  compression = 'gz',
+) {
+  if (compression.length > 0) {
+    return `${getComponentUrl(baseUrl, release, component, arch)}/Packages.${compression}`;
+  }
+  return `${getComponentUrl(baseUrl, release, component, arch)}/Packages`;
+}
+
+/**
+ * Constructs a URL used generating the component url with specific release, components, and architecture.
+ *
+ * @param baseUrl - The base URL of the repository.
+ * @param release - The release name or codename (e.g., 'buster', 'bullseye').
+ * @param components - An array of component names (e.g., ['main', 'contrib', 'non-free']).
+ * @param arch - The architecture name (e.g., 'amd64', 'i386').
+ * @returns The complete URL to the package registry.
+ */
+function getRegistryUrl(
+  baseUrl: string,
+  release: string,
+  components: string[],
+  arch: string,
+) {
+  return `${baseUrl}/debian?suite=${release}&components=${components.join(',')}&binaryArch=${arch}`;
 }
 
 /**
