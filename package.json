@@ -220,8 +220,6 @@
     "handlebars": "4.7.8",
     "ignore": "7.0.5",
     "ini": "6.0.0",
-    "js@9.37.0": "link:eslint/js@9.37.0",
-    "js@9.39.0": "link:eslint/js@9.39.0",
     "json-dup-key-validator": "1.0.3",
     "json-stringify-pretty-compact": "4.0.0",
     "json5": "2.2.3",
