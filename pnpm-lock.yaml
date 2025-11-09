@@ -233,6 +233,9 @@ importers:
       js@9.37.0:
         specifier: link:eslint/js@9.37.0
         version: link:eslint/js@9.37.0
+      js@9.39.0:
+        specifier: link:eslint/js@9.39.0
+        version: link:eslint/js@9.39.0
       json-dup-key-validator:
         specifier: 1.0.3
         version: 1.0.3
