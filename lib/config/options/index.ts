@@ -2945,22 +2945,22 @@ const options: RenovateOptions[] = [
     ],
   },
   {
-    name: 'matchStrings',
-    description:
-      'Queries to use. Valid only within `bumpVersions` or `customManagers` object.',
-    type: 'array',
-    subType: 'string',
-    parents: ['bumpVersions', 'customManagers'],
-    cli: false,
-    env: false,
-  },
-  {
     name: 'matchPathStrings',
     description:
       'Regex to use to capture groups from file path. Valid only within `customManagers` object.',
     type: 'array',
     subType: 'string',
     parents: ['customManagers'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchStrings',
+    description:
+      'Queries to use. Valid only within `bumpVersions` or `customManagers` object.',
+    type: 'array',
+    subType: 'string',
+    parents: ['bumpVersions', 'customManagers'],
     cli: false,
     env: false,
   },

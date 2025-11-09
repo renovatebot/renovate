@@ -27,9 +27,9 @@ function getCustomManagerFields(
 
   return {
     autoReplaceStringTemplate: config.autoReplaceStringTemplate,
+    matchPathStrings: config.matchPathStrings,
     matchStrings: config.matchStrings,
     matchStringsStrategy: config.matchStringsStrategy,
-    matchPathStrings: config.matchPathStrings,
     ...regexFields,
   };
 }

@@ -18,9 +18,9 @@ export interface RegexManagerTemplates {
 }
 
 export interface RegexManagerConfig extends RegexManagerTemplates {
+  matchPathStrings: string[];
   matchStrings: string[];
   matchStringsStrategy?: MatchStringsStrategy;
-  matchPathStrings: string[];
   autoReplaceStringTemplate?: string;
 }
 

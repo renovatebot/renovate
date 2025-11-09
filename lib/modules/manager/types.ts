@@ -70,9 +70,9 @@ export interface PackageFileContent<T = Record<string, any>>
   npmrc?: string;
   packageFileVersion?: string;
   skipInstalls?: boolean | null;
+  matchPathStrings?: string[];
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
-  matchPathStrings?: string[];
   fileFormat?: string;
 }
 

@@ -51,8 +51,8 @@ export function extractPackageFile(
   if (deps.length) {
     const res: PackageFileContent & RegexManagerTemplates = {
       deps,
-      matchStrings: config.matchStrings,
       matchPathStrings: config.matchPathStrings,
+      matchStrings: config.matchStrings,
     };
     if (config.matchStringsStrategy) {
       res.matchStringsStrategy = config.matchStringsStrategy;
