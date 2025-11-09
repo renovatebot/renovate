@@ -17,14 +17,15 @@ function getPathGroups(
   if (!config.matchPathStrings?.length) {
     return {};
   }
+  const mergedGroups: Record<string, string> = {};
   for (const pattern of config.matchPathStrings) {
     const regex = regEx(pattern);
     const match = regex.exec(packageFile);
     if (match?.groups) {
-      return match.groups;
+      Object.assign(mergedGroups, match.groups);
     }
   }
-  return {};
+  return mergedGroups;
 }
 
 export function handleAny(
@@ -35,15 +36,11 @@ export function handleAny(
   const pathGroups = getPathGroups(packageFile, config);
   return config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
-    .flatMap((regex) => regexMatchAll(regex, content)) // match all regex to content, get all matches, reduce to single array
+    .flatMap((regex) => regexMatchAll(regex, content))
     .map((matchResult) =>
       createDependency(
         {
-          groups: mergeGroups(
-            pathGroups,
-            matchResult.groups ??
-              /* istanbul ignore next: can this happen? */ {},
-          ),
+          groups: mergeGroups(pathGroups, matchResult.groups ?? {}),
           replaceString: matchResult[0],
         },
         config,
@@ -71,14 +68,14 @@ export function handleCombination(
 
   const extraction = matches
     .map((match) => ({
-      groups: match.groups ?? /* istanbul ignore next: can this happen? */ {},
+      groups: mergeGroups(pathGroups, match.groups ?? {}),
       replaceString:
         (match?.groups?.currentValue ?? match?.groups?.currentDigest)
           ? match[0]
           : undefined,
     }))
     .reduce((base, addition) => mergeExtractionTemplate(base, addition), {
-      groups: pathGroups,
+      groups: {},
       replaceString: undefined,
     });
   return [createDependency(extraction, config)]
