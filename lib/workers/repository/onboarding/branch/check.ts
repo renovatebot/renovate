@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { getConfigFileNames } from '../../../../config/app-strings';
 import type { RenovateConfig } from '../../../../config/types';
 import {
@@ -93,7 +94,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   if (
     config.onboarding &&
     !closedOnboardingPr &&
-    onboardingBranchCache &&
+    is.nonEmptyObject(onboardingBranchCache) &&
     onboardingBranchCache.defaultBranchSha ===
       getBranchCommit(config.defaultBranch!)
   ) {

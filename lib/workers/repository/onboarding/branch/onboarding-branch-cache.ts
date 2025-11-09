@@ -69,7 +69,7 @@ export async function isOnboardingBranchModified(
   let isModified = false;
 
   if (
-    onboardingCache &&
+    is.nonEmptyObject(onboardingCache) &&
     onboardingSha === onboardingCache.onboardingBranchSha &&
     !is.undefined(onboardingCache.isModified)
   ) {
@@ -113,7 +113,7 @@ export async function isOnboardingBranchConflicted(
   let isConflicted = false;
 
   if (
-    onboardingCache &&
+    is.nonEmptyObject(onboardingCache) &&
     defaultBranchSha === onboardingCache.defaultBranchSha &&
     onboardingSha === onboardingCache.onboardingBranchSha &&
     !is.undefined(onboardingCache.isConflicted)

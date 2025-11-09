@@ -1217,7 +1217,7 @@ export async function prepareCommit({
 
     const commitRes = await git.commit(message, [], commitOptions);
     if (
-      commitRes.summary &&
+      is.nonEmptyObject(commitRes.summary) &&
       commitRes.summary.changes === 0 &&
       commitRes.summary.insertions === 0 &&
       commitRes.summary.deletions === 0
