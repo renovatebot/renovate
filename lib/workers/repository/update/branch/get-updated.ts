@@ -240,7 +240,6 @@ export async function getUpdatedPackageFiles(
           reuseExistingBranch,
           firstUpdate,
         );
-        logger.warn({ res }, 'doAutoReplace result');
         firstUpdate = false;
         if (res) {
           res = await applyManagerBumpPackageVersion(res, upgrade);
@@ -518,14 +517,6 @@ async function applyManagerBumpPackageVersion(
   upgrade: BranchUpgradeConfig,
 ): Promise<string | null> {
   const bumpPackageVersion = get(upgrade.manager, 'bumpPackageVersion');
-  logger.warn(
-    {
-      bumpPackageVersion,
-      bumpVersion: upgrade.bumpVersion,
-      packageFileVersion: upgrade.packageFileVersion,
-    },
-    'bumpPackageVersion function',
-  );
   if (
     !bumpPackageVersion ||
     !packageFileContent ||
