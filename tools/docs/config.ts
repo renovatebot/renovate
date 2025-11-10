@@ -138,7 +138,7 @@ function genTable(obj: [string, string][], type: string, def: any): string {
   });
 
   if (type === 'array') {
-    data.push(['default', '`[]`']);
+    data.push(['default', '<code>[]</code>']);
   }
   if (type === 'string' && def === undefined) {
     data.push(['default', '<code>null</code>']);
