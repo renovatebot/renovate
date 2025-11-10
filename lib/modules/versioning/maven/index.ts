@@ -85,7 +85,7 @@ const getMinor = (version: string): number | null => {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     const minorToken = tokens[1];
-    if (minorToken && minorToken.type === TYPE_NUMBER) {
+    if (minorToken?.type === TYPE_NUMBER) {
       return +minorToken.val;
     }
     return 0;

@@ -1,6 +1,6 @@
 import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
-import { isBoolean, isString } from '@sindresorhus/is';
+import { isBoolean, isNonEmptyObject, isString } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import semver from 'semver';
 import type { Options, SimpleGit, TaskOptions } from 'simple-git';
@@ -1217,7 +1217,7 @@ export async function prepareCommit({
 
     const commitRes = await git.commit(message, [], commitOptions);
     if (
-      commitRes.summary &&
+      isNonEmptyObject(commitRes.summary) &&
       commitRes.summary.changes === 0 &&
       commitRes.summary.insertions === 0 &&
       commitRes.summary.deletions === 0
