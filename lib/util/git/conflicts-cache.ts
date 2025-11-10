@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyObject } from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { getCache } from '../cache/repository';
 
@@ -11,7 +11,7 @@ export function getCachedConflictResult(
   const cache = getCache();
   const branch = cache?.branches?.find((br) => br.branchName === branchName);
   if (
-    is.nonEmptyObject(branch) &&
+    isNonEmptyObject(branch) &&
     branch.baseBranch === baseBranch &&
     branch.baseBranchSha === baseBranchSha &&
     branch.sha === branchSha &&

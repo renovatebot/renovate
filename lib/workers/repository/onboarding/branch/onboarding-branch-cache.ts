@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import is, { isNonEmptyObject } from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
@@ -69,7 +69,7 @@ export async function isOnboardingBranchModified(
   let isModified = false;
 
   if (
-    is.nonEmptyObject(onboardingCache) &&
+    isNonEmptyObject(onboardingCache) &&
     onboardingSha === onboardingCache.onboardingBranchSha &&
     !is.undefined(onboardingCache.isModified)
   ) {
@@ -113,7 +113,7 @@ export async function isOnboardingBranchConflicted(
   let isConflicted = false;
 
   if (
-    is.nonEmptyObject(onboardingCache) &&
+    isNonEmptyObject(onboardingCache) &&
     defaultBranchSha === onboardingCache.defaultBranchSha &&
     onboardingSha === onboardingCache.onboardingBranchSha &&
     !is.undefined(onboardingCache.isConflicted)

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyObject } from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { getCache } from '../cache/repository';
 import type { LongCommitSha } from './types';
@@ -15,7 +15,7 @@ export function getCachedBehindBaseResult(
   );
 
   if (
-    is.nonEmptyObject(branch) &&
+    isNonEmptyObject(branch) &&
     branch.sha === branchSha &&
     branch.baseBranch === baseBranch &&
     branch.baseBranchSha === baseBranchSha &&
