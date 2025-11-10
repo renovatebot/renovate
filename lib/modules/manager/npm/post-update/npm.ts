@@ -1,5 +1,5 @@
 // TODO: types (#22198)
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
@@ -116,7 +116,7 @@ export async function generateLockFile(
       extraEnv,
       toolConstraints: [
         await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPkgJson),
-        ...(is.nonEmptyString(npmToolConstraint.constraint)
+        ...(isNonEmptyString(npmToolConstraint.constraint)
           ? [npmToolConstraint]
           : []),
       ],
@@ -297,7 +297,7 @@ export function divideWorkspaceAndRootDeps(
     );
     if (
       upgrade.managerData.workspacesPackages?.length &&
-      is.string(upgrade.packageFile)
+      isString(upgrade.packageFile)
     ) {
       const workspacePatterns = upgrade.managerData.workspacesPackages; // glob pattern or directory name/path
       const packageFileDir = trimSlashes(
@@ -311,7 +311,7 @@ export function divideWorkspaceAndRootDeps(
           : packageFileDir,
       );
 
-      if (is.nonEmptyString(workspaceDir)) {
+      if (isNonEmptyString(workspaceDir)) {
         let workspaceName: string | undefined;
         // compare workspaceDir to workspace patterns
         // stop when the first match is found and

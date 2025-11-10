@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray } from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
@@ -143,7 +143,7 @@ export async function getConfig(
     if (option.type === 'array' && option.subType === 'object') {
       try {
         const parsed = JSON5.parse(envVal);
-        if (is.array(parsed)) {
+        if (isArray(parsed)) {
           config[option.name] = parsed;
         } else {
           logger.debug(

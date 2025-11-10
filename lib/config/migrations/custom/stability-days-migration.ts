@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isInteger } from '@sindresorhus/is';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class StabilityDaysMigration extends AbstractMigration {
@@ -6,7 +6,7 @@ export class StabilityDaysMigration extends AbstractMigration {
   override readonly propertyName = 'stabilityDays';
 
   override run(value: unknown): void {
-    if (is.integer(value)) {
+    if (isInteger(value)) {
       let newValue: null | string;
       switch (value) {
         case 0:

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
@@ -41,7 +41,7 @@ export async function checkYarnrc(
       upath.join(lockFileDir, '.yarnrc'),
       'utf8',
     );
-    if (is.string(yarnrc)) {
+    if (isString(yarnrc)) {
       const mirrorLine = yarnrc
         .split(newlineRegex)
         .find((line) => line.startsWith('yarn-offline-mirror '));
@@ -240,7 +240,7 @@ export async function generateLockFile(
         commands.push(
           `yarn upgrade ${lockUpdates
             .map((update) => update.depName)
-            .filter(is.string)
+            .filter(isString)
             .filter(uniqueStrings)
             .map(quote)
             .join(' ')}${cmdOptions}`,

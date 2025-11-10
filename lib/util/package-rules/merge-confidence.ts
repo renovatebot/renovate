@@ -1,4 +1,9 @@
-import is from '@sindresorhus/is';
+import {
+  isArray,
+  isNonEmptyString,
+  isNullOrUndefined,
+  isUndefined,
+} from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { MISSING_API_CREDENTIALS } from '../../constants/error-messages';
 import { getApiToken } from '../merge-confidence';
@@ -9,14 +14,14 @@ export class MergeConfidenceMatcher extends Matcher {
     { mergeConfidenceLevel }: PackageRuleInputConfig,
     { matchConfidence }: PackageRule,
   ): boolean | null {
-    if (is.nullOrUndefined(matchConfidence)) {
+    if (isNullOrUndefined(matchConfidence)) {
       return null;
     }
 
     /*
      * Throw an error for unauthenticated use of the matchConfidence matcher.
      */
-    if (is.undefined(getApiToken())) {
+    if (isUndefined(getApiToken())) {
       const error = new Error(MISSING_API_CREDENTIALS);
       error.validationSource = 'MatchConfidence Authenticator';
       error.validationError = 'Missing credentials';
@@ -26,8 +31,8 @@ export class MergeConfidenceMatcher extends Matcher {
     }
 
     return (
-      is.array(matchConfidence) &&
-      is.nonEmptyString(mergeConfidenceLevel) &&
+      isArray(matchConfidence) &&
+      isNonEmptyString(mergeConfidenceLevel) &&
       matchConfidence.includes(mergeConfidenceLevel)
     );
   }

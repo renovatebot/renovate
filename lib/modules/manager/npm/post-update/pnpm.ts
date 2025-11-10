@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNumber, isNumericString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
@@ -194,8 +194,8 @@ export async function getConstraintFromLockFile(
     // TODO: use schema (#9610)
     const pnpmLock = parseSingleYaml<PnpmLockFile>(lockfileContent);
     if (
-      !is.number(pnpmLock?.lockfileVersion) &&
-      !is.numericString(pnpmLock?.lockfileVersion)
+      !isNumber(pnpmLock?.lockfileVersion) &&
+      !isNumericString(pnpmLock?.lockfileVersion)
     ) {
       logger.trace(`Invalid pnpm lockfile version: ${lockFileName}`);
       return null;

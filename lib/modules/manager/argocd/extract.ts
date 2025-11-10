@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyObject, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
@@ -96,7 +96,7 @@ function processSource(source: ApplicationSource): PackageDependency[] {
   // Git repo is pointing to a Kustomize resources
   if (source.kustomize?.images) {
     dependencies.push(
-      ...source.kustomize.images.map(processKustomizeImage).filter(is.truthy),
+      ...source.kustomize.images.map(processKustomizeImage).filter(isTruthy),
     );
   }
 
@@ -113,7 +113,7 @@ function processAppSpec(
 
   const deps: PackageDependency[] = [];
 
-  if (is.nonEmptyObject(spec.source)) {
+  if (isNonEmptyObject(spec.source)) {
     deps.push(...processSource(spec.source));
   }
 

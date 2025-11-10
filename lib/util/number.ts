@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 
 /**
  * Coerces a value to a number with optional default value.
@@ -26,6 +26,6 @@ export function parseInteger(
 ): number {
   // Number.parseInt returns NaN if the value is not a finite integer.
   const parsed =
-    is.string(val) && /^\d+$/.test(val) ? Number.parseInt(val) : Number.NaN;
+    isString(val) && /^\d+$/.test(val) ? Number.parseInt(val) : Number.NaN;
   return Number.isFinite(parsed) ? parsed : (def ?? 0);
 }

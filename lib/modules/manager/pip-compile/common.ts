@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { split } from 'shlex';
 import upath from 'upath';
 import { logger } from '../../../logger';
@@ -41,7 +41,7 @@ export function getPipToolsVersionConstraint(
   const { constraints = {} } = config;
   const { pipTools } = constraints;
 
-  if (is.string(pipTools)) {
+  if (isString(pipTools)) {
     logger.debug('Using pipTools constraint from config');
     return pipTools;
   }
@@ -53,7 +53,7 @@ export function getUvVersionConstraint(config: UpdateArtifactsConfig): string {
   const { constraints = {} } = config;
   const { uv } = constraints;
 
-  if (is.string(uv)) {
+  if (isString(uv)) {
     logger.debug('Using uv constraint from config');
     return uv;
   }

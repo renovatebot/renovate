@@ -1,5 +1,5 @@
 import URL from 'node:url';
-import is from '@sindresorhus/is';
+import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
@@ -134,7 +134,7 @@ export async function getRepos(config: AutodiscoverConfig): Promise<string[]> {
     // if autodiscoverProjects is configured
     // filter the repos list
     const autodiscoverProjects = config.projects;
-    if (is.nonEmptyArray(autodiscoverProjects)) {
+    if (isNonEmptyArray(autodiscoverProjects)) {
       logger.debug(
         { autodiscoverProjects: config.projects },
         'Applying autodiscoverProjects filter',
@@ -351,7 +351,7 @@ export async function findPr({
   if (pr.state === 'closed') {
     const reopenComments = await comments.reopenComments(config, pr.number);
 
-    if (is.nonEmptyArray(reopenComments)) {
+    if (isNonEmptyArray(reopenComments)) {
       if (config.is_private) {
         // Only workspace members could have commented on a private repository
         logger.debug(
@@ -392,10 +392,10 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     ...utils.prInfo(pr),
   };
 
-  if (is.nonEmptyArray(pr.reviewers)) {
+  if (isNonEmptyArray(pr.reviewers)) {
     res.reviewers = pr.reviewers
       .map(({ uuid }) => uuid)
-      .filter(is.nonEmptyString);
+      .filter(isNonEmptyString);
   }
 
   return res;
