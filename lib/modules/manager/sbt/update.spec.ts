@@ -287,8 +287,6 @@ describe('modules/manager/sbt/update', () => {
     it('should do replacement with new value', () => {
       const simpleContent = codeBlock`libraryDependencies += "org.scalatestplus" %% "mockito-3-12" % "3.2.10.0"`;
 
-      fs.writeLocalFile.mockResolvedValueOnce();
-
       const res = sbtUpdater.updateDependency({
         fileContent: simpleContent,
         upgrade: {
