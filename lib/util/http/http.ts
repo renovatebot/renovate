@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isPlainObject, isUndefined } from '@sindresorhus/is';
 import merge from 'deepmerge';
 import type { Options, RetryObject } from 'got';
 import type { Merge, SetRequired } from 'type-fest';
@@ -98,7 +98,7 @@ export abstract class HttpBase<
           maxRetryAfter: 0, // Don't rely on `got` retry-after handling, just let it fail and then we'll handle it
         },
       },
-      { isMergeableObject: is.plainObject },
+      { isMergeableObject: isPlainObject },
     );
   }
   private async request(
@@ -133,7 +133,7 @@ export abstract class HttpBase<
         hostType: this.hostType,
       },
       httpOptions,
-      { isMergeableObject: is.plainObject },
+      { isMergeableObject: isPlainObject },
     );
 
     const method = options.method.toLowerCase();
@@ -147,7 +147,7 @@ export abstract class HttpBase<
 
     applyDefaultHeaders(options);
 
-    if (is.undefined(options.readOnly) && isReadMethod) {
+    if (isUndefined(options.readOnly) && isReadMethod) {
       options.readOnly = true;
     }
 
@@ -649,7 +649,7 @@ export abstract class HttpBase<
     applyDefaultHeaders(combinedOptions);
 
     if (
-      is.undefined(combinedOptions.readOnly) &&
+      isUndefined(combinedOptions.readOnly) &&
       ['head', 'get'].includes(combinedOptions.method)
     ) {
       combinedOptions.readOnly = true;

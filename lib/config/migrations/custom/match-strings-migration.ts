@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import { AbstractMigration } from '../base/abstract-migration';
 
@@ -8,7 +8,7 @@ export class MatchStringsMigration extends AbstractMigration {
   override run(value: unknown): void {
     if (Array.isArray(value)) {
       const newValue = value
-        .filter(is.nonEmptyString)
+        .filter(isNonEmptyString)
         .map((matchString) =>
           matchString.replace(regEx(/\(\?<lookupName>/g), '(?<packageName>'),
         );

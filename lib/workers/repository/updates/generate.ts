@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isNonEmptyString, isString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { markdownTable } from 'markdown-table';
 import semver from 'semver';
@@ -426,7 +426,7 @@ export function generateBranchConfig(
         [],
       ),
     ),
-  ].filter(is.nonEmptyString);
+  ].filter(isNonEmptyString);
   // combine excludeCommitPaths for multiple manager experience
   const hasExcludeCommitPaths = config.upgrades.some(
     (u) => u.excludeCommitPaths && u.excludeCommitPaths.length > 0,
@@ -514,7 +514,7 @@ export function generateBranchConfig(
 
   const tableRows = config.upgrades
     .map(getTableValues)
-    .filter((x): x is string[] => is.array(x, is.string));
+    .filter((x): x is string[] => isArray(x, isString));
 
   if (tableRows.length) {
     const table: string[][] = [];
@@ -536,7 +536,7 @@ export function generateBranchConfig(
     config.upgrades
       .map((upgrade) => upgrade.additionalReviewers)
       .flat()
-      .filter(is.nonEmptyString),
+      .filter(isNonEmptyString),
   );
   if (additionalReviewers.length > 0) {
     config.additionalReviewers = additionalReviewers;

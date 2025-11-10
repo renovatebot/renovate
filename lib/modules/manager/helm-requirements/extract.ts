@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { parseSingleYaml } from '../../../util/yaml';
 import { HelmDatasource } from '../../datasource/helm';
@@ -22,7 +22,7 @@ export function extractPackageFile(
     logger.debug({ packageFile }, `Failed to parse helm requirements.yaml`);
     return null;
   }
-  if (!(doc && is.array(doc.dependencies))) {
+  if (!(doc && isArray(doc.dependencies))) {
     logger.debug({ packageFile }, `requirements.yaml has no dependencies`);
     return null;
   }

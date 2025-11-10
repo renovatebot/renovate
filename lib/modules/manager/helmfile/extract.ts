@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isEmptyArray, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
@@ -106,7 +106,7 @@ export async function extractPackageFile(
         }
       }
 
-      if (!is.string(dep.version)) {
+      if (!isString(dep.version)) {
         deps.push({
           depName,
           skipReason: 'invalid-version',
@@ -127,7 +127,7 @@ export async function extractPackageFile(
       } else if (repoName) {
         res.registryUrls = [registryData[repoName]?.url]
           .concat([config.registryAliases?.[repoName]] as string[])
-          .filter(is.string);
+          .filter(isString);
       }
 
       // By definition on helm the chart name should be lowercase letter + number + -
@@ -146,7 +146,7 @@ export async function extractPackageFile(
       // Skip in case we cannot locate the registry
       if (
         res.datasource !== DockerDatasource.id &&
-        is.emptyArray(res.registryUrls)
+        isEmptyArray(res.registryUrls)
       ) {
         res.skipReason = 'unknown-registry';
       }

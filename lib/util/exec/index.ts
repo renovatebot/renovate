@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
@@ -24,7 +24,7 @@ import { getChildEnv } from './utils';
 
 function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
   const extraEnvKeys = Object.keys(extraEnv);
-  return extraEnvKeys.filter((key) => is.nonEmptyString(childEnv[key]));
+  return extraEnvKeys.filter((key) => isNonEmptyString(childEnv[key]));
 }
 
 function getCwd({ cwd, cwdFile }: ExecOptions): string | undefined {

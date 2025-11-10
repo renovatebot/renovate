@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class PostUpdateOptionsMigration extends AbstractMigration {
@@ -7,7 +7,7 @@ export class PostUpdateOptionsMigration extends AbstractMigration {
   override run(value: unknown): void {
     if (Array.isArray(value)) {
       const newValue = value
-        .filter(is.nonEmptyString)
+        .filter(isNonEmptyString)
         .filter((option) => option !== 'gomodNoMassage');
 
       this.rewrite(newValue);

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isFunction, isNonEmptyArray, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { GlobalConfig } from '../../config/global';
 import { HOST_DISABLED } from '../../constants/error-messages';
@@ -211,9 +211,9 @@ async function mergeRegistries(
           for (const tag of ['release', 'latest']) {
             const existingTag = combinedRes?.tags?.[tag];
             const newTag = res.tags?.[tag];
-            if (is.string(newTag) && releaseVersioning.isVersion(newTag)) {
+            if (isString(newTag) && releaseVersioning.isVersion(newTag)) {
               if (
-                is.string(existingTag) &&
+                isString(existingTag) &&
                 releaseVersioning.isVersion(existingTag)
               ) {
                 // We need to compare them
@@ -281,9 +281,9 @@ function resolveRegistryUrls(
 ): string[] {
   if (!datasource.customRegistrySupport) {
     if (
-      is.nonEmptyArray(registryUrls) ||
-      is.nonEmptyArray(defaultRegistryUrls) ||
-      is.nonEmptyArray(additionalRegistryUrls)
+      isNonEmptyArray(registryUrls) ||
+      isNonEmptyArray(defaultRegistryUrls) ||
+      isNonEmptyArray(additionalRegistryUrls)
     ) {
       logger.warn(
         {
@@ -295,21 +295,21 @@ function resolveRegistryUrls(
         'Custom registries are not allowed for this datasource and will be ignored',
       );
     }
-    return is.function(datasource.defaultRegistryUrls)
+    return isFunction(datasource.defaultRegistryUrls)
       ? datasource.defaultRegistryUrls()
       : (datasource.defaultRegistryUrls ?? []);
   }
   const customUrls = registryUrls?.filter(Boolean);
   let resolvedUrls: string[] = [];
-  if (is.nonEmptyArray(customUrls)) {
+  if (isNonEmptyArray(customUrls)) {
     resolvedUrls = [...customUrls];
-  } else if (is.nonEmptyArray(defaultRegistryUrls)) {
+  } else if (isNonEmptyArray(defaultRegistryUrls)) {
     resolvedUrls = [...defaultRegistryUrls];
     resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
-  } else if (is.function(datasource.defaultRegistryUrls)) {
+  } else if (isFunction(datasource.defaultRegistryUrls)) {
     resolvedUrls = [...datasource.defaultRegistryUrls()];
     resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
-  } else if (is.nonEmptyArray(datasource.defaultRegistryUrls)) {
+  } else if (isNonEmptyArray(datasource.defaultRegistryUrls)) {
     resolvedUrls = [...datasource.defaultRegistryUrls];
     resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
   }
@@ -339,10 +339,10 @@ async function fetchReleases(
     return null;
   }
   if (datasourceName === 'npm') {
-    if (is.string(config.npmrc)) {
+    if (isString(config.npmrc)) {
       setNpmrc(config.npmrc);
     }
-    if (!is.nonEmptyArray(registryUrls)) {
+    if (!isNonEmptyArray(registryUrls)) {
       registryUrls = [resolveRegistryUrl(config.packageName)];
     }
   }
@@ -362,7 +362,7 @@ async function fetchReleases(
   const registryStrategy =
     config.registryStrategy ?? datasource.registryStrategy ?? 'hunt';
   try {
-    if (is.nonEmptyArray(registryUrls)) {
+    if (isNonEmptyArray(registryUrls)) {
       if (registryStrategy === 'first') {
         dep = await firstRegistry(config, datasource, registryUrls);
       } else if (registryStrategy === 'hunt') {

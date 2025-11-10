@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { isSkipComment } from '../../../util/ignore';
 import { regEx } from '../../../util/regex';
@@ -16,7 +16,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
 
   for (const groups of [...content.matchAll(regex)]
     .map((m) => m.groups)
-    .filter(is.truthy)) {
+    .filter(isTruthy)) {
     const depName = groups.toolName.trim();
     const version = groups.version.trim();
 
