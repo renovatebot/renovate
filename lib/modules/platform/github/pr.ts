@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
@@ -59,14 +60,16 @@ export async function getPrCache(
   const prApiCache = getPrApiCache();
   const isInitial = is.emptyArray(prApiCache.getItems());
 
+  const cacheLastModified = prApiCache.lastModified;
+  let newestModified: string | undefined;
+  let oldestModified: string | undefined;
+
   try {
     let requestsTotal = 0;
     let apiQuotaAffected = false;
-    let needNextPageFetch = true;
-    let needNextPageSync = true;
 
     let pageIdx = 1;
-    while (needNextPageFetch && needNextPageSync) {
+    while (true) {
       const opts: GithubHttpOptions = { paginate: false, memCache: false };
       if (pageIdx === 1) {
         opts.cacheProvider = repoCacheProvider;
@@ -97,6 +100,9 @@ export async function getPrCache(
 
       let { body: page } = res;
 
+      newestModified = page.at(1)?.updated_at;
+      oldestModified = page.at(-1)?.updated_at;
+
       if (username) {
         const filteredPage = page.filter(
           (ghPr) => ghPr?.user?.login && ghPr.user.login === username,
@@ -111,14 +117,33 @@ export async function getPrCache(
 
       const items = page.map(coerceRestPr);
 
-      needNextPageSync = prApiCache.reconcile(items);
-      needNextPageFetch = !!parseLinkHeader(linkHeader)?.next;
+      const syncDone = prApiCache.reconcile(items);
+      if (syncDone) {
+        break;
+      }
 
-      if (pageIdx === 1) {
-        needNextPageFetch &&= !opts.paginate;
+      const hasNextPage = !!parseLinkHeader(linkHeader)?.next;
+      if (!hasNextPage) {
+        break;
+      }
+
+      if (opts.paginate) {
+        break;
+      }
+
+      if (cacheLastModified && oldestModified) {
+        const cacheLastModifiedTime = DateTime.fromISO(cacheLastModified);
+        const oldestModifiedTime = DateTime.fromISO(oldestModified);
+        if (cacheLastModifiedTime >= oldestModifiedTime) {
+          break;
+        }
       }
 
       pageIdx += 1;
+    }
+
+    if (newestModified) {
+      prApiCache.lastModified = newestModified;
     }
 
     logger.debug(

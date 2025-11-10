@@ -1,5 +1,4 @@
 import { dequal } from 'dequal';
-import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import type { ApiPageCache, ApiPageItem } from './types';
 
@@ -32,12 +31,10 @@ export class ApiCache<T extends ApiPageItem> {
    * @param cache Cache object
    * @param page List of cacheable items, sorted by `updated_at` field
    * starting from the most recently updated.
-   * @returns `true` when the next page is likely to contain fresh items,
-   * otherwise `false`.
+   * @returns `false` when the next page is guaranteed to not have any updates.
    */
   reconcile(page: T[]): boolean {
     const { items } = this.cache;
-    let { lastModified } = this.cache;
 
     let needNextPage = true;
 
@@ -45,26 +42,24 @@ export class ApiCache<T extends ApiPageItem> {
       const number = newItem.number;
       const oldItem = items[number];
 
-      const itemNewTime = DateTime.fromISO(newItem.updated_at);
-      const itemOldTime = oldItem?.updated_at
-        ? DateTime.fromISO(oldItem.updated_at)
-        : null;
-
-      if (!dequal(oldItem, newItem)) {
-        logger.trace(`PR cache: updating item ${number}`);
-        items[number] = newItem;
+      if (dequal(oldItem, newItem)) {
+        logger.trace(`PR cache: sync termination triggered by PR #${number}`);
+        needNextPage = false;
+        continue;
       }
 
-      needNextPage = itemOldTime ? itemOldTime < itemNewTime : true;
-
-      const cacheOldTime = lastModified ? DateTime.fromISO(lastModified) : null;
-      if (!cacheOldTime || itemNewTime > cacheOldTime) {
-        lastModified = newItem.updated_at;
-      }
+      logger.trace(`PR cache: updating PR #${number}`);
+      items[number] = newItem;
     }
 
-    this.cache.lastModified = lastModified;
-
     return needNextPage;
+  }
+
+  get lastModified(): string | undefined {
+    return this.cache.lastModified;
+  }
+
+  set lastModified(value: string) {
+    this.cache.lastModified = value;
   }
 }
