@@ -1,4 +1,4 @@
-import {
+import is, {
   isArray,
   isEmptyString,
   isNonEmptyArray,
