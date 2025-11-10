@@ -341,7 +341,7 @@ export async function getUpdatedPackageFiles(
   const updatedArtifacts: FileChange[] = [];
   const artifactErrors: ArtifactError[] = [];
   const artifactNotices: ArtifactNotice[] = [];
-  if (is.nonEmptyArray(filesForArtifacts)) {
+  if (isNonEmptyArray(filesForArtifacts)) {
     logger.debug('updateArtifacts for updatedPackageFiles');
     const updatedPackageFileManagers = getManagersForPackageFiles(
       filesForArtifacts,
