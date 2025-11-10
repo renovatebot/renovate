@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import is, { isNonEmptyObject } from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
@@ -174,7 +174,7 @@ function isOnboardingCacheValid(
   const cache = getCache();
   const onboardingBranchCache = cache?.onboardingBranchCache;
   return !!(
-    onboardingBranchCache &&
+    isNonEmptyObject(onboardingBranchCache) &&
     onboardingBranchCache.defaultBranchSha === getBranchCommit(defaultBranch) &&
     onboardingBranchCache.onboardingBranchSha ===
       getBranchCommit(onboardingBranch) &&

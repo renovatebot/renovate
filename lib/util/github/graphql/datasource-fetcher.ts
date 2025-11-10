@@ -315,8 +315,8 @@ export class GithubGraphqlDatasourceFetcher<
    */
   private doUniqueQuery(): Promise<ResultItem[]> {
     const cacheKey = `github-pending:${this.getCacheNs()}:${this.getCacheKey()}`;
-    const resultPromise =
-      memCache.get<Promise<ResultItem[]>>(cacheKey) ?? this.doCachedQuery();
+    let resultPromise = memCache.get<Promise<ResultItem[]>>(cacheKey);
+    resultPromise ??= this.doCachedQuery();
     memCache.set(cacheKey, resultPromise);
     return resultPromise;
   }
