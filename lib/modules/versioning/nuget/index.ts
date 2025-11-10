@@ -44,7 +44,7 @@ class NugetVersioningApi implements VersioningApi {
     }
 
     const r = parseRange(version);
-    if (!r || r.type !== 'nuget-exact-range') {
+    if (r?.type !== 'nuget-exact-range') {
       return false;
     }
 
