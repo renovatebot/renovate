@@ -192,11 +192,12 @@ describe('modules/datasource/npm/npmrc', () => {
       `registry=https://test.org\n//test.org/:username=test\n//test.org/:_password=dGVzdA==`,
     );
     expect(sanitize.addSecretForSanitizing).toHaveBeenNthCalledWith(1, 'test');
+    expect(sanitize.addSecretForSanitizing).toHaveBeenNthCalledWith(2, 'test');
     expect(sanitize.addSecretForSanitizing).toHaveBeenNthCalledWith(
-      2,
+      3,
       'dGVzdDp0ZXN0',
     );
-    expect(sanitize.addSecretForSanitizing).toHaveBeenCalledTimes(2);
+    expect(sanitize.addSecretForSanitizing).toHaveBeenCalledTimes(3);
   });
 
   it('sanitize _authtoken with high trust', () => {
