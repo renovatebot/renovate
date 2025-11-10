@@ -8996,7 +8996,6 @@ snapshots:
       '@typescript-eslint/tsconfig-utils': 8.46.3(typescript@5.9.3)
       '@typescript-eslint/types': 8.46.3
       debug: 4.4.3
-      eslint: 9.39.0
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
