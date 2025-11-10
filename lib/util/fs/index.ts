@@ -1,6 +1,6 @@
 import stream from 'node:stream';
 import util from 'node:util';
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { findUp } from 'find-up';
 import fs from 'fs-extra';
 import upath from 'upath';
@@ -86,7 +86,7 @@ export async function renameLocalFile(
 }
 
 export async function ensureDir(dirName: string): Promise<void> {
-  if (is.nonEmptyString(dirName)) {
+  if (isNonEmptyString(dirName)) {
     await fs.ensureDir(dirName);
   }
 }
@@ -219,7 +219,7 @@ export async function findUpLocal(
     type: 'file',
   });
   // Return null if nothing found
-  if (!is.nonEmptyString(res) || !is.nonEmptyString(localDir)) {
+  if (!isNonEmptyString(res) || !isNonEmptyString(localDir)) {
     return null;
   }
   const safePath = upath.normalizeSafe(res);

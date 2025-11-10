@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNull } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { joinUrlParts } from '../../../util/url';
@@ -45,7 +45,7 @@ export class JsrDatasource extends Datasource {
     }
 
     const validJsrPackageName = extractJsrPackageName(packageName);
-    if (is.null(validJsrPackageName)) {
+    if (isNull(validJsrPackageName)) {
       logger.debug(`Could not extract packageName: "${packageName}"`);
       return null;
     }

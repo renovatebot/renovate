@@ -4,14 +4,13 @@ import { replaceContent } from './utils';
 
 export async function generateTemplates(dist: string): Promise<void> {
   let exposedConfigOptionsText =
-    'The following configuration options are passed through for templating: ';
-  exposedConfigOptionsText +=
-    exposedConfigOptions
-      .map(
-        (field) =>
-          `[${field}](configuration-options.md#${field.toLowerCase()})`,
-      )
-      .join(', ') + '.';
+    'The following configuration options are passed through for templating: \n';
+  exposedConfigOptionsText += exposedConfigOptions
+    .map(
+      (field) =>
+        ` - [${field}](configuration-options.md#${field.toLowerCase()})`,
+    )
+    .join('\n');
 
   let runtimeText =
     'The following runtime values are passed through for templating: \n\n';

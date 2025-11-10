@@ -1,4 +1,11 @@
-import is from '@sindresorhus/is';
+import {
+  isArray,
+  isBoolean,
+  isNonEmptyArray,
+  isNonEmptyObject,
+  isObject,
+  isString,
+} from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
@@ -36,27 +43,27 @@ export function migrateConfig(
     const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
 
     for (const [key, val] of Object.entries(newConfig)) {
-      if (is.string(val) && val.includes('{{baseDir}}')) {
+      if (isString(val) && val.includes('{{baseDir}}')) {
         migratedConfig[key] = val.replace(
           regEx(/{{baseDir}}/g),
           '{{packageFileDir}}',
         );
-      } else if (is.string(val) && val.includes('{{lookupName}}')) {
+      } else if (isString(val) && val.includes('{{lookupName}}')) {
         migratedConfig[key] = val.replace(
           regEx(/{{lookupName}}/g),
           '{{packageName}}',
         );
-      } else if (is.string(val) && val.includes('{{depNameShort}}')) {
+      } else if (isString(val) && val.includes('{{depNameShort}}')) {
         migratedConfig[key] = val.replace(
           regEx(/{{depNameShort}}/g),
           '{{depName}}',
         );
-      } else if (is.string(val) && val.startsWith('{{semanticPrefix}}')) {
+      } else if (isString(val) && val.startsWith('{{semanticPrefix}}')) {
         migratedConfig[key] = val.replace(
           '{{semanticPrefix}}',
           '{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}',
         );
-      } else if (optionTypes[key] === 'object' && is.boolean(val)) {
+      } else if (optionTypes[key] === 'object' && isBoolean(val)) {
         migratedConfig[key] = { enabled: val };
       } else if (optionTypes[key] === 'boolean') {
         if (val === 'true') {
@@ -66,15 +73,15 @@ export function migrateConfig(
         }
       } else if (
         optionTypes[key] === 'string' &&
-        is.array(val) &&
+        isArray(val) &&
         val.length === 1
       ) {
         migratedConfig[key] = String(val[0]);
-      } else if (is.array(val)) {
-        if (is.array(migratedConfig?.[key])) {
+      } else if (isArray(val)) {
+        if (isArray(migratedConfig?.[key])) {
           const newArray = [];
           for (const item of migratedConfig[key]) {
-            if (is.object(item) && !is.array(item)) {
+            if (isObject(item) && !isArray(item)) {
               const arrMigrate = migrateConfig(item as RenovateConfig);
               newArray.push(arrMigrate.migratedConfig);
             } else {
@@ -83,7 +90,7 @@ export function migrateConfig(
           }
           migratedConfig[key] = newArray;
         }
-      } else if (is.object(val)) {
+      } else if (isObject(val)) {
         const subMigrate = migrateConfig(
           migratedConfig[key] as RenovateConfig,
           key,
@@ -101,7 +108,7 @@ export function migrateConfig(
         newVersionMinor: 'newMinor',
         toVersion: 'newVersion',
       };
-      if (is.string(migratedConfig[key])) {
+      if (isString(migratedConfig[key])) {
         for (const [from, to] of Object.entries(migratedTemplates)) {
           migratedConfig[key] = (migratedConfig[key] as string).replace(
             regEx(from, 'g'),
@@ -123,7 +130,7 @@ export function migrateConfig(
       'rust',
     ];
     for (const language of languages) {
-      if (is.nonEmptyObject(migratedConfig[language])) {
+      if (isNonEmptyObject(migratedConfig[language])) {
         migratedConfig.packageRules ??= [];
         const currentContent = migratedConfig[language] as any;
         const packageRule = {
@@ -135,11 +142,11 @@ export function migrateConfig(
       }
     }
     // Migrate nested packageRules
-    if (is.nonEmptyArray(migratedConfig.packageRules)) {
+    if (isNonEmptyArray(migratedConfig.packageRules)) {
       const existingRules = migratedConfig.packageRules;
       migratedConfig.packageRules = [];
       for (const packageRule of existingRules) {
-        if (is.array(packageRule.packageRules)) {
+        if (isArray(packageRule.packageRules)) {
           logger.debug('Flattening nested packageRules');
           // merge each subrule and add to the parent list
           for (const subrule of packageRule.packageRules) {
@@ -157,8 +164,8 @@ export function migrateConfig(
       }
     }
     if (
-      is.nonEmptyObject(migratedConfig['pip-compile']) &&
-      is.nonEmptyArray(migratedConfig['pip-compile'].managerFilePatterns)
+      isNonEmptyObject(migratedConfig['pip-compile']) &&
+      isNonEmptyArray(migratedConfig['pip-compile'].managerFilePatterns)
     ) {
       migratedConfig['pip-compile'].managerFilePatterns = migratedConfig[
         'pip-compile'
@@ -173,7 +180,7 @@ export function migrateConfig(
         return pattern.replace(/\.in\$\/$/, '.txt$/');
       });
     }
-    if (is.nonEmptyArray(migratedConfig.matchManagers)) {
+    if (isNonEmptyArray(migratedConfig.matchManagers)) {
       if (migratedConfig.matchManagers.includes('gradle-lite')) {
         if (!migratedConfig.matchManagers.includes('gradle')) {
           migratedConfig.matchManagers.push('gradle');
@@ -183,7 +190,7 @@ export function migrateConfig(
         );
       }
     }
-    if (is.nonEmptyObject(migratedConfig['gradle-lite'])) {
+    if (isNonEmptyObject(migratedConfig['gradle-lite'])) {
       migratedConfig.gradle = mergeChildConfig(
         migratedConfig.gradle ?? {},
         migratedConfig['gradle-lite'],

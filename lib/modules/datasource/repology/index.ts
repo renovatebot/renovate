@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -138,7 +138,7 @@ export class RepologyDatasource extends Datasource {
           const pkg = findPackageInResponse(response, repoName, pkgName, [
             pkgType,
           ]);
-          if (is.nonEmptyArray(pkg)) {
+          if (isNonEmptyArray(pkg)) {
             // exit immediately if package found
             return pkg;
           }
@@ -162,7 +162,7 @@ export class RepologyDatasource extends Datasource {
           pkgName,
           packageTypes,
         );
-        if (is.nonEmptyArray(pkg)) {
+        if (isNonEmptyArray(pkg)) {
           // exit immediately if package found
           return pkg;
         }

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
@@ -18,21 +18,21 @@ export class HostRulesMigration extends AbstractMigration {
 
       for (const [key, value] of Object.entries(hostRule)) {
         if (key === 'platform') {
-          if (is.string(value)) {
+          if (isString(value)) {
             newRule.hostType ??= value;
           }
           continue;
         }
 
         if (key === 'matchHost') {
-          if (is.string(value)) {
+          if (isString(value)) {
             newRule.matchHost ??= massageHostUrl(value);
           }
           continue;
         }
 
         if (key === 'hostType') {
-          if (is.string(value)) {
+          if (isString(value)) {
             newRule.hostType ??= migrateDatasource(value);
           }
           continue;
@@ -45,7 +45,7 @@ export class HostRulesMigration extends AbstractMigration {
           key === 'hostName' ||
           key === 'domainName'
         ) {
-          if (is.string(value)) {
+          if (isString(value)) {
             newRule.matchHost ??= massageHostUrl(value);
           }
           continue;
@@ -97,7 +97,7 @@ function removeUndefinedFields(
 ): Record<string, string> {
   const result: Record<string, string> = {};
   for (const key of Object.keys(obj)) {
-    if (is.string(obj[key])) {
+    if (isString(obj[key])) {
       result[key] = obj[key];
     }
   }

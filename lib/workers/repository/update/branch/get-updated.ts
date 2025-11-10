@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { get } from '../../../../modules/manager';
@@ -341,7 +341,7 @@ export async function getUpdatedPackageFiles(
   const updatedArtifacts: FileChange[] = [];
   const artifactErrors: ArtifactError[] = [];
   const artifactNotices: ArtifactNotice[] = [];
-  if (is.nonEmptyArray(filesForArtifacts)) {
+  if (isNonEmptyArray(updatedPackageFiles)) {
     logger.debug('updateArtifacts for updatedPackageFiles');
     const updatedPackageFileManagers = getManagersForPackageFiles(
       filesForArtifacts,
@@ -382,7 +382,7 @@ export async function getUpdatedPackageFiles(
     path: name,
     contents: nonUpdatedFileContents[name],
   }));
-  if (is.nonEmptyArray(nonUpdatedPackageFiles)) {
+  if (isNonEmptyArray(nonUpdatedPackageFiles)) {
     logger.debug('updateArtifacts for nonUpdatedPackageFiles');
     const nonUpdatedPackageFileManagers = getManagersForPackageFiles(
       nonUpdatedPackageFiles,
@@ -413,7 +413,7 @@ export async function getUpdatedPackageFiles(
           artifactErrors,
           artifactNotices,
         );
-        if (is.nonEmptyArray(results)) {
+        if (isNonEmptyArray(results)) {
           updatedPackageFiles.push(packageFile);
         }
       }
@@ -425,7 +425,7 @@ export async function getUpdatedPackageFiles(
         path: name,
       }));
     // Only perform lock file maintenance if it's a fresh commit
-    if (is.nonEmptyArray(lockFileMaintenanceFiles)) {
+    if (isNonEmptyArray(lockFileMaintenanceFiles)) {
       logger.debug('updateArtifacts for lockFileMaintenanceFiles');
       const lockFileMaintenanceManagers = getManagersForPackageFiles(
         lockFileMaintenancePackageFiles,
@@ -478,13 +478,13 @@ function patchConfigForArtifactsUpdate(
 ): UpdateArtifactsConfig {
   // drop any lockFiles that happen to be defined on the branch config
   const { lockFiles, ...updatedConfig } = config;
-  if (is.nonEmptyArray(updatedConfig.packageFiles?.[manager])) {
+  if (isNonEmptyArray(updatedConfig.packageFiles?.[manager])) {
     const managerPackageFiles: PackageFile[] =
       updatedConfig.packageFiles?.[manager];
     const packageFile = managerPackageFiles.find(
       (p) => p.packageFile === packageFileName,
     );
-    if (packageFile && is.nonEmptyArray(packageFile.lockFiles)) {
+    if (packageFile && isNonEmptyArray(packageFile.lockFiles)) {
       updatedConfig.lockFiles = packageFile.lockFiles;
     }
   }
@@ -517,7 +517,7 @@ function processUpdateArtifactResults(
   artifactErrors: ArtifactError[],
   artifactNotices: ArtifactNotice[],
 ): void {
-  if (is.nonEmptyArray(results)) {
+  if (isNonEmptyArray(results)) {
     for (const res of results) {
       const { file, notice, artifactError } = res;
       if (file) {

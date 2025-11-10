@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isUndefined } from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { getRegexOrGlobPredicate } from '../string-match';
 import { Matcher } from './base';
@@ -8,7 +8,7 @@ export class CurrentValueMatcher extends Matcher {
     { currentValue }: PackageRuleInputConfig,
     { matchCurrentValue }: PackageRule,
   ): boolean | null {
-    if (is.undefined(matchCurrentValue)) {
+    if (isUndefined(matchCurrentValue)) {
       return null;
     }
     const matchCurrentValuePred = getRegexOrGlobPredicate(matchCurrentValue);

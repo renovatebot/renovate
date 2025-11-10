@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { isComment } from './common';
@@ -31,7 +31,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   for (const section of sections) {
     let depType = setDepType(section, 'requires');
-    const rawLines = section.split('\n').filter(is.nonEmptyString);
+    const rawLines = section.split('\n').filter(isNonEmptyString);
 
     for (const rawLine of rawLines) {
       if (!isComment(rawLine)) {

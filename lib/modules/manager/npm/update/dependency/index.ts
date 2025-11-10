@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../../../../../logger';
 import { escapeRegExp, regEx } from '../../../../../util/regex';
@@ -298,7 +298,7 @@ function overrideDepPosition(
 
 function isOverrideObject(upgrade: Upgrade<NpmManagerData>): boolean {
   return (
-    is.array(upgrade.managerData?.parents, is.nonEmptyStringAndNotWhitespace) &&
+    isArray(upgrade.managerData?.parents, isNonEmptyStringAndNotWhitespace) &&
     upgrade.depType === 'overrides'
   );
 }

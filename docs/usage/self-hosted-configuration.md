@@ -486,6 +486,10 @@ Example:
 !!! note
     If you want renovate to use a custom filename for the onboarding branch you also need to change the [`onboardingConfigFileName`](#onboardingconfigfilename).
 
+## configValidationError
+
+If enabled, config validation errors will be reported as errors instead of warnings, and Renovate will exit with a non-zero exit code.
+
 ## containerbaseDir
 
 This directory is used to cache downloads when `binarySource=docker` or `binarySource=install`.
@@ -1437,7 +1441,7 @@ You can control if Renovate should try to access these services with the `useClo
 ## userAgent
 
 If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
-Otherwise, it will default to `RenovateBot/${renovateVersion} (https://github.com/renovatebot/renovate)`.
+Otherwise, it will default to `Renovate/${renovateVersion} (https://github.com/renovatebot/renovate)`.
 
 ## username
 

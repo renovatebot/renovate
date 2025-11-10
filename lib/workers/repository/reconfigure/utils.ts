@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
@@ -18,7 +18,7 @@ export async function setBranchStatus(
   state: BranchStatus,
   context?: string | null,
 ): Promise<void> {
-  if (!is.nonEmptyString(context)) {
+  if (!isNonEmptyString(context)) {
     // already logged this case when validating the status check
     return;
   }

@@ -1,6 +1,6 @@
 // based on https://www.python.org/dev/peps/pep-0508/#names
 import { RANGE_PATTERN } from '@renovatebot/pep440';
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { isSkipComment } from '../../../util/ignore';
 import { newlineRegex, regEx } from '../../../util/regex';
@@ -91,7 +91,7 @@ export function extractPackageFile(
       }
       return dep;
     })
-    .filter(is.truthy);
+    .filter(isTruthy);
 
   const res = extractPackageFileFlags(content);
   res.deps = deps;

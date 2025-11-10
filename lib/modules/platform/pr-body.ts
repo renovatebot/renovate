@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isUndefined } from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { stripEmojis } from '../../util/emoji';
 import { toSha256 } from '../../util/hash';
@@ -62,7 +62,7 @@ export function getPrBodyStruct(
 
   const rebaseRequested = isRebaseRequested(body);
 
-  if (!is.undefined(rebaseRequested)) {
+  if (!isUndefined(rebaseRequested)) {
     result.rebaseRequested = rebaseRequested;
   }
 

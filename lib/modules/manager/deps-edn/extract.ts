@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isPlainObject, isString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import { isHttpUrl } from '../../../util/url';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
@@ -88,7 +88,7 @@ function resolveGitPackageFromEdnVal(
   val: ParsedEdnRecord,
 ): void {
   const gitUrl = val['git/url'];
-  if (!is.string(gitUrl)) {
+  if (!isString(gitUrl)) {
     return;
   }
 
@@ -131,7 +131,7 @@ function extractDependency(
   mavenRegistries: string[],
   depType?: string,
 ): PackageDependency | null {
-  if (!is.plainObject(val)) {
+  if (!isPlainObject(val)) {
     return null;
   }
 
@@ -153,7 +153,7 @@ function extractDependency(
   }
 
   const mvnVersion = val['mvn/version'];
-  if (is.string(mvnVersion)) {
+  if (isString(mvnVersion)) {
     dep.datasource = ClojureDatasource.id;
     dep.currentValue = mvnVersion;
     dep.packageName = packageName.replace('/', ':');
@@ -166,12 +166,12 @@ function extractDependency(
 
   if (dep.datasource) {
     const gitTag = val['git/tag'];
-    if (is.string(gitTag)) {
+    if (isString(gitTag)) {
       dep.currentValue = gitTag;
     }
 
     const gitSha = val['git/sha'] ?? val.sha;
-    if (is.string(gitSha)) {
+    if (isString(gitSha)) {
       dep.currentDigest = gitSha;
       dep.currentDigestShort = gitSha.slice(0, 7);
     }
@@ -189,7 +189,7 @@ function extractSection(
   depType?: string,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
-  if (is.plainObject(section)) {
+  if (isPlainObject(section)) {
     for (const [key, val] of Object.entries(section)) {
       const dep = extractDependency(
         key,
@@ -221,12 +221,12 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     central: MAVEN_REPO,
   };
   const mavenRepos = data['mvn/repos'];
-  if (is.plainObject(mavenRepos)) {
+  if (isPlainObject(mavenRepos)) {
     for (const [repoName, repoSpec] of Object.entries(mavenRepos)) {
-      if (is.string(repoName)) {
-        if (is.plainObject(repoSpec) && is.string(repoSpec.url)) {
+      if (isString(repoName)) {
+        if (isPlainObject(repoSpec) && isString(repoSpec.url)) {
           registryMap[repoName] = repoSpec.url;
-        } else if (is.string(repoSpec) && repoSpec === 'nil') {
+        } else if (isString(repoSpec) && repoSpec === 'nil') {
           delete registryMap[repoName];
         }
       }
@@ -237,9 +237,9 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   deps.push(...extractSection(data.deps, metadata, mavenRegistries));
 
   const aliases = data.aliases;
-  if (is.plainObject(aliases)) {
+  if (isPlainObject(aliases)) {
     for (const [depType, aliasSection] of Object.entries(aliases)) {
-      if (is.plainObject(aliasSection)) {
+      if (isPlainObject(aliasSection)) {
         deps.push(
           ...extractSection(
             aliasSection['extra-deps'],
