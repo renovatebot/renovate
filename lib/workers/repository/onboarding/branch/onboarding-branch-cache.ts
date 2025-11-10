@@ -1,4 +1,8 @@
-import { isNonEmptyObject, isNonEmptyString, isUndefined } from '@sindresorhus/is';
+import {
+  isNonEmptyObject,
+  isNonEmptyString,
+  isUndefined,
+} from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
