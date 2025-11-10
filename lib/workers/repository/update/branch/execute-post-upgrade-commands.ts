@@ -217,7 +217,20 @@ export async function postUpgradeCommandsExecutor(
         `Checking ${addedOrModifiedFiles.length} added or modified files for post-upgrade changes`,
       );
 
+      const fileExcludes: string[] = [];
+      if (config.npmrc) {
+        fileExcludes.push('.npmrc');
+      }
+
       for (const relativePath of addedOrModifiedFiles) {
+        if (
+          fileExcludes.some((pattern) =>
+            minimatch(pattern, { dot: true }).match(relativePath),
+          )
+        ) {
+          continue;
+        }
+
         let fileMatched = false;
         for (const pattern of fileFilters) {
           if (minimatch(pattern, { dot: true }).match(relativePath)) {
