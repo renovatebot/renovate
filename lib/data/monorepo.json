@@ -99,7 +99,6 @@
       "https://github.com/ckeditor/ckeditor5",
       "https://github.com/ckeditor/ckeditor5-premium-features"
     ],
-    "ckeditor": "https://github.com/ckeditor/ckeditor5",
     "clarity": "https://github.com/vmware/clarity",
     "clearscript": [
       "https://github.com/microsoft/ClearScript",
