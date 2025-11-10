@@ -142,7 +142,6 @@ function firstIndexOf(
 ): number {
   const depIndex = existingContent.indexOf(depName, position);
   const valIndex = existingContent.indexOf(currentValue, position);
-  logger.warn({ depName, currentValue, depIndex, valIndex }, 'firstIndexOf');
   const index = depIndex < valIndex ? depIndex : valIndex;
   if (index < 0) {
     return position === 0 ? -1 : existingContent.length;
@@ -231,12 +230,8 @@ export async function doAutoReplace(
     (isUndefined(upgrade.replaceString) ||
       !upgrade.replaceString?.includes(depName!));
   const replaceString = upgrade.replaceString ?? currentValue ?? currentDigest;
-  logger.debug({ depName, replaceString }, 'autoReplace replaceString');
+  logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex: number;
-  logger.debug(
-    { replaceWithoutReplaceString, existingContent, depName, currentValue },
-    'plopp',
-  );
   if (replaceWithoutReplaceString) {
     searchIndex = firstIndexOf(existingContent, depName!, currentValue!);
   } else {

@@ -1,8 +1,5 @@
 import { codeBlock } from 'common-tags';
 import * as sbtUpdater from '.';
-import { fs } from '~test/util';
-
-vi.mock('../../../util/fs');
 
 describe('modules/manager/sbt/update', () => {
   describe('.bumpPackageVersion()', () => {
