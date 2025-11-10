@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 // TODO #22198
-import is from '@sindresorhus/is';
+import { isArray, isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
 import upath from 'upath';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
@@ -51,7 +51,7 @@ export async function postUpgradeCommandsExecutor(
     const commands = upgrade.postUpgradeTasks?.commands;
     const dataFileTemplate = upgrade.postUpgradeTasks?.dataFileTemplate;
     const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? ['**/*'];
-    if (is.nonEmptyArray(commands)) {
+    if (isNonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
       const previouslyModifiedFiles =
         config.updatedPackageFiles!.concat(updatedArtifacts);
@@ -129,7 +129,7 @@ export async function postUpgradeCommandsExecutor(
             logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
 
             const execOpts: ExecOptions = {
-              cwd: is.nonEmptyString(workingDir)
+              cwd: isNonEmptyString(workingDir)
                 ? workingDir
                 : GlobalConfig.get('localDir'),
               extraEnv: getGitEnvironmentVariables(),
@@ -286,9 +286,9 @@ export default async function executePostUpgradeCommands(
   config: BranchConfig,
 ): Promise<PostUpgradeCommandsExecutionResult | null> {
   const hasChangedFiles =
-    (is.array(config.updatedPackageFiles) &&
+    (isArray(config.updatedPackageFiles) &&
       config.updatedPackageFiles.length > 0) ||
-    (is.array(config.updatedArtifacts) && config.updatedArtifacts.length > 0);
+    (isArray(config.updatedArtifacts) && config.updatedArtifacts.length > 0);
 
   if (!hasChangedFiles) {
     /* Only run post-upgrade tasks if there are changes to package files... */

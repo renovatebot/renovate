@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isObject, isString } from '@sindresorhus/is';
 import type { SkipReason } from '../../../types';
 import { DartDatasource } from '../../datasource/dart';
 import { DartVersionDatasource } from '../../datasource/dart-version';
@@ -35,21 +35,21 @@ function extractFromSection(
     let registryUrls: string[] | undefined;
     let gitUrl: string | undefined;
 
-    if (!is.string(currentValue)) {
+    if (!isString(currentValue)) {
       const version = currentValue.version;
       const path = currentValue.path;
       const hosted = currentValue.hosted;
       const git = currentValue.git;
 
-      if (is.string(hosted)) {
+      if (isString(hosted)) {
         registryUrls = [hosted];
-      } else if (is.string(hosted?.url)) {
+      } else if (isString(hosted?.url)) {
         registryUrls = [hosted.url];
       }
 
-      if (is.object(git)) {
+      if (isObject(git)) {
         gitUrl = git?.url;
-      } else if (is.string(git)) {
+      } else if (isString(git)) {
         gitUrl = git;
       }
 
@@ -58,13 +58,9 @@ function extractFromSection(
       } else if (path) {
         currentValue = '';
         skipReason = 'path-dependency';
-      } else if (is.object(git) && is.string(git?.ref)) {
+      } else if (isObject(git) && isString(git?.ref)) {
         currentValue = git.ref;
-      } else if (
-        is.object(git) &&
-        !is.string(git?.ref) &&
-        !is.string(version)
-      ) {
+      } else if (isObject(git) && !isString(git?.ref) && !isString(version)) {
         currentValue = '';
         skipReason = 'unspecified-version';
       } else {

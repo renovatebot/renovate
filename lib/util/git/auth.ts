@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isEmptyString } from '@sindresorhus/is';
 import { PLATFORM_HOST_TYPES } from '../../constants/platforms';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
@@ -128,7 +128,7 @@ export function getAuthenticationRules(
     // sshPort is string, wrong type!
     // https://github.com/DefinitelyTyped/DefinitelyTyped/pull/72361
     // https://github.com/IonicaBizau/parse-path/blob/87f71f273da90f85f6845937a70b7c032eeae4e3/lib/index.js#L45
-    if (!sshPort || is.emptyString(sshPort)) {
+    if (!sshPort || isEmptyString(sshPort)) {
       // By default, bitbucket-server SSH port is 7999.
       // For non-default port, the generated auth config will likely be incorrect.
       sshPort = '7999';

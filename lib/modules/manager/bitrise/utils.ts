@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isEmptyString, isNullOrUndefined } from '@sindresorhus/is';
 import { BitriseDatasource } from '../../datasource/bitrise';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import type { PackageDependency } from '../types';
@@ -7,7 +7,7 @@ export function parseStep(
   stepRef: string,
   defaultRegistry?: string,
 ): PackageDependency | null {
-  if (is.emptyString(stepRef)) {
+  if (isEmptyString(stepRef)) {
     return null;
   }
 
@@ -21,7 +21,7 @@ export function parseStep(
   const refDep = parseStepRef(ref, defaultRegistry);
 
   // no version
-  if (is.nullOrUndefined(currentValue)) {
+  if (isNullOrUndefined(currentValue)) {
     return {
       ...dep,
       packageName: stepRef,

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isObject } from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -153,7 +153,7 @@ export class PackagistDatasource extends Datasource {
     const responses: NonNullable<unknown>[] = await Promise.all([
       pkgPromise,
       devPromise,
-    ]).then((responses) => responses.filter(is.object));
+    ]).then((responses) => responses.filter(isObject));
     return parsePackagesResponses(packageName, responses);
   }
 

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isNonEmptyObject } from '@sindresorhus/is';
 import { HttpBase, type InternalJsonUnsafeOptions } from './http';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types';
 
@@ -80,5 +80,5 @@ export class BitbucketServerHttp extends HttpBase<BitbucketServerHttpOptions> {
 }
 
 function isPagedResult(obj: unknown): obj is PagedResult {
-  return is.nonEmptyObject(obj) && is.array(obj.values);
+  return isNonEmptyObject(obj) && isArray(obj.values);
 }

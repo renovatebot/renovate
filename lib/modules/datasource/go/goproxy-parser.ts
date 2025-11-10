@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import moo from 'moo';
 import * as memCache from '../../../util/cache/memory';
 import { getEnv } from '../../../util/env';
@@ -21,7 +21,7 @@ import type { GoproxyItem } from './types';
 export function parseGoproxy(
   input: string | undefined = getEnv().GOPROXY,
 ): GoproxyItem[] {
-  if (!is.string(input)) {
+  if (!isString(input)) {
     return [];
   }
 
@@ -96,7 +96,7 @@ export function parseNoproxy(
     return env.GONOPROXY ?? env.GOPRIVATE;
   })(),
 ): RegExp | null {
-  if (!is.string(input)) {
+  if (!isString(input)) {
     return null;
   }
 

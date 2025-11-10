@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { logger } from '../../../../../logger';
 import * as allVersioning from '../../../../../modules/versioning';
 import { detectPlatform } from '../../../../../util/common';
@@ -27,7 +27,7 @@ export async function getChangeLogJSON(
 
     const platform = detectPlatform(sourceUrl);
 
-    if (is.nullOrUndefined(platform)) {
+    if (isNullOrUndefined(platform)) {
       logger.info(
         { sourceUrl, hostType: platform },
         'Unknown platform, skipping changelog fetching.',
@@ -37,7 +37,7 @@ export async function getChangeLogJSON(
 
     const changeLogSource = getChangeLogSourceFor(platform);
 
-    if (is.nullOrUndefined(changeLogSource)) {
+    if (isNullOrUndefined(changeLogSource)) {
       logger.info(
         { sourceUrl, hostType: platform },
         'Unknown changelog source, skipping changelog fetching.',

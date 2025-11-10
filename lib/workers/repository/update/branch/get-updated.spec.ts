@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray } from '@sindresorhus/is';
 import { mockDeep } from 'vitest-mock-extended';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
 import * as _batectWrapper from '../../../../modules/manager/batect-wrapper';
@@ -625,7 +625,7 @@ describe('workers/repository/update/branch/get-updated', () => {
               const updateArtifactLockfiles = updateArtifact?.config?.lockFiles;
               return (
                 updateArtifact?.packageFileName === expectedPackageFileName &&
-                is.array(updateArtifactLockfiles) &&
+                isArray(updateArtifactLockfiles) &&
                 updateArtifactLockfiles?.length === 1 &&
                 updateArtifactLockfiles?.[0] === expectedLockFileName
               );

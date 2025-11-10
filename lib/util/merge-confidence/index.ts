@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence';
 import type { AllConfig, UpdateType } from '../../config/types';
 import { logger } from '../../logger';
@@ -35,7 +35,7 @@ export function initConfig({
   supportedDatasources =
     mergeConfidenceDatasources ?? presetSupportedDatasources;
 
-  if (!is.nullOrUndefined(token)) {
+  if (!isNullOrUndefined(token)) {
     logger.debug(`Merge confidence token found for ${apiBaseUrl}`);
   }
 }
@@ -95,7 +95,7 @@ export async function getMergeConfidenceLevel(
   newVersion: string,
   updateType: UpdateType,
 ): Promise<MergeConfidence | undefined> {
-  if (is.nullOrUndefined(apiBaseUrl) || is.nullOrUndefined(token)) {
+  if (isNullOrUndefined(apiBaseUrl) || isNullOrUndefined(token)) {
     return undefined;
   }
 
@@ -136,7 +136,7 @@ async function queryApi(
   newVersion: string,
 ): Promise<MergeConfidence> {
   // istanbul ignore if: defensive, already been validated before calling this function
-  if (is.nullOrUndefined(apiBaseUrl) || is.nullOrUndefined(token)) {
+  if (isNullOrUndefined(apiBaseUrl) || isNullOrUndefined(token)) {
     return 'neutral';
   }
 
@@ -202,7 +202,7 @@ async function queryApi(
 export async function initMergeConfidence(config: AllConfig): Promise<void> {
   initConfig(config);
 
-  if (is.nullOrUndefined(apiBaseUrl) || is.nullOrUndefined(token)) {
+  if (isNullOrUndefined(apiBaseUrl) || isNullOrUndefined(token)) {
     logger.trace('merge confidence API usage is disabled');
     return;
   }

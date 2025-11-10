@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
@@ -281,7 +281,7 @@ function isStable(
   if (!versioningApi.isStable(version)) {
     return false;
   }
-  if (is.string(latest)) {
+  if (isString(latest)) {
     if (versioningApi.isGreaterThan(version, latest)) {
       return false;
     }

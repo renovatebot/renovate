@@ -1,4 +1,9 @@
-import is from '@sindresorhus/is';
+import {
+  isArray,
+  isPlainObject,
+  isPrimitive,
+  isString,
+} from '@sindresorhus/is';
 import handlebars, { type HelperOptions } from 'handlebars';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
@@ -45,13 +50,13 @@ const helpers: Record<string, handlebars.HelperDelegate> = {
   containsString: (str, subStr) => str?.includes(subStr),
   equals: (arg1, arg2) => arg1 === arg2,
   includes: (arg1: string[], arg2: string) => {
-    if (is.array(arg1, is.string) && is.string(arg2)) {
+    if (isArray(arg1, isString) && isString(arg2)) {
       return arg1.includes(arg2);
     }
     return false;
   },
   split: (str: unknown, separator: unknown): string[] => {
-    if (is.string(str) && is.string(separator)) {
+    if (isString(str) && isString(separator)) {
       return str.split(separator);
     }
     return [];
@@ -254,15 +259,15 @@ class CompileInputProxyHandler implements ProxyHandler<CompileInput> {
       return value;
     }
 
-    if (is.array(value)) {
+    if (isArray(value)) {
       return value.map((element) =>
-        is.primitive(element)
+        isPrimitive(element)
           ? element
           : proxyCompileInput(element as CompileInput, this.warnVariables),
       );
     }
 
-    if (is.plainObject(value)) {
+    if (isPlainObject(value)) {
       return proxyCompileInput(value, this.warnVariables);
     }
 

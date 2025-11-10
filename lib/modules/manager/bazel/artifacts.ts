@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { hashStream } from '../../../util/hash';
@@ -108,7 +108,7 @@ async function getHashFromUrl(url: string): Promise<string | null> {
 async function getHashFromUrls(urls: string[]): Promise<string | null> {
   const hashes = (
     await pMap(urls, (url) => getHashFromUrl(massageUrl(url)))
-  ).filter(is.truthy);
+  ).filter(isTruthy);
   if (!hashes.length) {
     logger.debug({ urls }, 'Could not calculate hash for URLs');
     return null;

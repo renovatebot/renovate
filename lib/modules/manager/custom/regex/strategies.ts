@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
 import { checkIsValidDependency } from '../utils';
@@ -30,7 +30,7 @@ export function handleAny(
         packageFile,
       ),
     )
-    .filter(is.truthy)
+    .filter(isTruthy)
     .filter((dep: PackageDependency) =>
       checkIsValidDependency(dep, packageFile, 'regex'),
     );
@@ -82,7 +82,7 @@ export function handleRecursive(
     combinedGroups: {},
     regexes,
   })
-    .filter(is.truthy)
+    .filter(isTruthy)
     .filter((dep: PackageDependency) =>
       checkIsValidDependency(dep, packageFile, 'regex'),
     );
