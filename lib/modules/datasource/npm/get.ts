@@ -1,4 +1,4 @@
-import { isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { z } from 'zod';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
