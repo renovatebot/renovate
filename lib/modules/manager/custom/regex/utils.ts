@@ -1,5 +1,6 @@
 import { URL } from 'node:url';
 import is from '@sindresorhus/is';
+import upath from 'upath';
 import { migrateDatasource } from '../../../../config/migrations/custom/datasource-migration';
 import { logger } from '../../../../logger';
 import * as template from '../../../../util/template';
@@ -42,17 +43,27 @@ function updateDependency(
 export function createDependency(
   extractionTemplate: ExtractionTemplate,
   config: RegexManagerConfig,
+  packageFile: string,
   dep?: PackageDependency,
 ): PackageDependency | null {
   const dependency = dep ?? {};
   const { groups, replaceString } = extractionTemplate;
+
+  // till this stage, packageFile is the full path
+  // so we need to extract filename and dir before passing it for template.compile
+  const packageFileExact = packageFile.split('/').pop();
+  const packageFileDir = upath.dirname(packageFile);
 
   for (const field of validMatchFields) {
     const fieldTemplate = `${field}Template` as keyof RegexManagerTemplates;
     const tmpl = config[fieldTemplate];
     if (tmpl) {
       try {
-        const compiled = template.compile(tmpl, groups, false);
+        const compiled = template.compile(
+          tmpl,
+          { ...groups, packageFile: packageFileExact, packageFileDir },
+          false,
+        );
         updateDependency(dependency, field, compiled);
       } catch {
         logger.warn(

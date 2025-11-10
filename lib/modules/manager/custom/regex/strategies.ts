@@ -27,6 +27,7 @@ export function handleAny(
           replaceString: matchResult[0],
         },
         config,
+        packageFile,
       ),
     )
     .filter(is.truthy)
@@ -57,7 +58,7 @@ export function handleCombination(
           : undefined,
     }))
     .reduce((base, addition) => mergeExtractionTemplate(base, addition));
-  return [createDependency(extraction, config)]
+  return [createDependency(extraction, config, packageFile)]
     .filter(is.truthy)
     .filter((dep: PackageDependency) =>
       checkIsValidDependency(dep, packageFile, 'regex'),
@@ -94,6 +95,7 @@ function processRecursive(parameters: RecursionParameter): PackageDependency[] {
     combinedGroups,
     regexes,
     config,
+    packageFile,
   }: RecursionParameter = parameters;
   // abort if we have no matchString anymore
   if (regexes.length === index) {
@@ -103,6 +105,7 @@ function processRecursive(parameters: RecursionParameter): PackageDependency[] {
         replaceString: content,
       },
       config,
+      packageFile,
     );
     return result ? [result] : /* istanbul ignore next: can this happen? */ [];
   }
