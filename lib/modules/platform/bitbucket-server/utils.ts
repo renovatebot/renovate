@@ -84,10 +84,15 @@ function generateUrlFromEndpoint(
   repository: string,
 ): string {
   const url = new URL(defaultEndpoint);
+  const authString =
+    opts.username && opts.password
+      ? `${opts.username}:${opts.password}`
+      : (opts.username ?? '');
+
   const generatedUrl = git.getUrl({
     protocol: url.protocol as GitProtocol,
     // TODO: types (#22198)
-    auth: `${opts.username}:${opts.password}`,
+    auth: authString,
     host: `${url.host}${url.pathname}${
       /* v8 ignore start */
       url.pathname.endsWith('/') ? '' : '/'
