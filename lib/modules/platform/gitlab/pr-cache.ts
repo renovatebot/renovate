@@ -125,8 +125,8 @@ export class GitlabPrCache {
       searchParams.updated_after = updated_after;
     }
 
-    if (!this.ignorePrAuthor) {
-      searchParams.scope = 'created_by_me';
+    if (this.ignorePrAuthor) {
+      searchParams.scope = 'all';
     }
 
     const query: string | null = getQueryString(searchParams);

@@ -87,6 +87,7 @@ let config: {
   cloneSubmodulesFilter: string[] | undefined;
   ignorePrAuthor: boolean | undefined;
   squash: boolean;
+  upstreamProjectId: string;
 } = {} as any;
 
 export function resetPlatform(): void {
@@ -322,6 +323,11 @@ export async function initRepo({
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     logger.debug('Enabling Git FS');
     const url = getRepoUrl(repository, gitUrl, res);
+
+    config.upstreamProjectId = res.body.forked_from_project?.id
+      ? res.body.forked_from_project.id.toString()
+      : res.body.id?.toString();
+
     await git.initRepo({
       ...config,
       url,
@@ -504,7 +510,7 @@ export async function getBranchStatus(
 export async function getPrList(): Promise<Pr[]> {
   return await GitlabPrCache.getPrs(
     gitlabApi,
-    config.repository,
+    config.upstreamProjectId,
     botUserName,
     !!config.ignorePrAuthor,
   );
@@ -512,7 +518,7 @@ export async function getPrList(): Promise<Pr[]> {
 
 async function ignoreApprovals(pr: number): Promise<void> {
   try {
-    const url = `projects/${config.repository}/merge_requests/${pr}/approval_rules`;
+    const url = `projects/${config.upstreamProjectId}/merge_requests/${pr}/approval_rules`;
     const { body: rules } = await gitlabApi.getJsonUnchecked<
       {
         name: string;
@@ -604,7 +610,7 @@ async function tryPrAutomerge(
           pipeline: {
             status: string;
           };
-        }>(`projects/${config.repository}/merge_requests/${pr}`, {
+        }>(`projects/${config.upstreamProjectId}/merge_requests/${pr}`, {
           memCache: false,
         });
         // detailed_merge_status is available with Gitlab >=15.6.0
@@ -633,7 +639,7 @@ async function tryPrAutomerge(
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         try {
           await gitlabApi.putJson(
-            `projects/${config.repository}/merge_requests/${pr}/merge`,
+            `projects/${config.upstreamProjectId}/merge_requests/${pr}/merge`,
             {
               body: {
                 should_remove_source_branch: true,
@@ -665,7 +671,7 @@ async function approveMr(mrNumber: number): Promise<void> {
   logger.debug(`approveMr(${mrNumber})`);
   try {
     await gitlabApi.postJson(
-      `projects/${config.repository}/merge_requests/${mrNumber}/approve`,
+      `projects/${config.upstreamProjectId}/merge_requests/${mrNumber}/approve`,
       opts,
     );
   } catch (err) {
@@ -695,6 +701,7 @@ export async function createPr({
         source_branch: sourceBranch,
         target_branch: targetBranch,
         remove_source_branch: true,
+        target_project_id: config.upstreamProjectId,
         title,
         description,
         labels: (labels ?? []).join(','),
@@ -706,7 +713,7 @@ export async function createPr({
   const pr = prInfo(res.body);
   await GitlabPrCache.setPr(
     gitlabApi,
-    config.repository,
+    config.upstreamProjectId,
     botUserName,
     pr,
     !!config.ignorePrAuthor,
@@ -723,7 +730,7 @@ export async function createPr({
 
 export async function getPr(iid: number): Promise<GitlabPr> {
   logger.debug(`getPr(${iid})`);
-  const mr = await getMR(config.repository, iid);
+  const mr = await getMR(config.upstreamProjectId, iid);
 
   // Harmonize fields with GitHub
   return prInfo(mr);
@@ -768,7 +775,7 @@ export async function updatePr({
 
   const updatedPrInfo = (
     await gitlabApi.putJson<GitLabMergeRequest>(
-      `projects/${config.repository}/merge_requests/${iid}`,
+      `projects/${config.upstreamProjectId}/merge_requests/${iid}`,
       { body },
     )
   ).body;
@@ -776,7 +783,7 @@ export async function updatePr({
   const updatedPr = prInfo(updatedPrInfo);
   await GitlabPrCache.setPr(
     gitlabApi,
-    config.repository,
+    config.upstreamProjectId,
     botUserName,
     updatedPr,
     !!config.ignorePrAuthor,
@@ -799,7 +806,7 @@ export async function reattemptPlatformAutomerge({
 export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
   try {
     await gitlabApi.putJson(
-      `projects/${config.repository}/merge_requests/${id}/merge`,
+      `projects/${config.upstreamProjectId}/merge_requests/${id}/merge`,
       {
         body: {
           should_remove_source_branch: true,
@@ -874,7 +881,7 @@ export async function findPr({
   if (includeOtherAuthors) {
     // PR might have been created by anyone, so don't use the cached Renovate MR list
     const response = await gitlabApi.getJsonUnchecked<GitLabMergeRequest[]>(
-      `projects/${config.repository}/merge_requests?source_branch=${branchName}&state=opened`,
+      `projects/${config.upstreamProjectId}/merge_requests?source_branch=${branchName}&state=opened`,
     );
 
     const { body: mrList } = response;
@@ -1015,13 +1022,13 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
       per_page: '100',
       state: 'opened',
     };
-    if (!config.ignorePrAuthor) {
-      searchParams.scope = 'created_by_me';
+    if (config.ignorePrAuthor) {
+      searchParams.scope = 'all';
     }
     const query = getQueryString(searchParams);
     const res = await gitlabApi.getJsonUnchecked<
       { iid: number; title: string; labels: string[] }[]
-    >(`projects/${config.repository}/issues?${query}`, {
+    >(`projects/${config.upstreamProjectId}/issues?${query}`, {
       memCache: false,
       paginate: true,
     });
@@ -1053,7 +1060,7 @@ export async function getIssue(
     } /* v8 ignore stop */
     const issueBody = (
       await gitlabApi.getJsonUnchecked<{ description: string }>(
-        `projects/${config.repository}/issues/${number}`,
+        `projects/${config.upstreamProjectId}/issues/${number}`,
         opts,
       )
     ).body.description;
@@ -1098,13 +1105,13 @@ export async function ensureIssue({
     if (issue) {
       const existingDescription = (
         await gitlabApi.getJsonUnchecked<{ description: string }>(
-          `projects/${config.repository}/issues/${issue.iid}`,
+          `projects/${config.upstreamProjectId}/issues/${issue.iid}`,
         )
       ).body.description;
       if (issue.title !== title || existingDescription !== description) {
         logger.debug('Updating issue');
         await gitlabApi.putJson(
-          `projects/${config.repository}/issues/${issue.iid}`,
+          `projects/${config.upstreamProjectId}/issues/${issue.iid}`,
           {
             body: {
               title,
@@ -1117,7 +1124,7 @@ export async function ensureIssue({
         return 'updated';
       }
     } else {
-      await gitlabApi.postJson(`projects/${config.repository}/issues`, {
+      await gitlabApi.postJson(`projects/${config.upstreamProjectId}/issues`, {
         body: {
           title,
           description,
@@ -1147,7 +1154,7 @@ export async function ensureIssueClosing(title: string): Promise<void> {
     if (issue.title === title) {
       logger.debug({ issue }, 'Closing issue');
       await gitlabApi.putJson(
-        `projects/${config.repository}/issues/${issue.iid}`,
+        `projects/${config.upstreamProjectId}/issues/${issue.iid}`,
         {
           body: { state_event: 'close' },
         },
@@ -1173,7 +1180,7 @@ export async function addAssignees(
       }
     }
     const url = `projects/${
-      config.repository
+      config.upstreamProjectId
     }/merge_requests/${iid}?${getQueryString({
       'assignee_ids[]': assigneeIds,
     })}`;
@@ -1200,7 +1207,7 @@ export async function addReviewers(
 
   let mr: GitLabMergeRequest;
   try {
-    mr = await getMR(config.repository, iid);
+    mr = await getMR(config.upstreamProjectId, iid);
   } catch (err) {
     logger.warn({ err }, 'Failed to get existing reviewers');
     return;
@@ -1238,7 +1245,7 @@ export async function addReviewers(
   newReviewerIDs = [...new Set(newReviewerIDs)];
 
   try {
-    await updateMR(config.repository, iid, {
+    await updateMR(config.upstreamProjectId, iid, {
       reviewer_ids: [...existingReviewerIDs, ...newReviewerIDs],
     });
   } catch (err) {
@@ -1257,7 +1264,7 @@ export async function deleteLabel(
       .filter((l: string) => l !== label)
       .join(',');
     await gitlabApi.putJson(
-      `projects/${config.repository}/merge_requests/${issueNo}`,
+      `projects/${config.upstreamProjectId}/merge_requests/${issueNo}`,
       {
         body: { labels },
       },
@@ -1270,7 +1277,7 @@ export async function deleteLabel(
 async function getComments(issueNo: number): Promise<GitlabComment[]> {
   // GET projects/:owner/:repo/merge_requests/:number/notes
   logger.debug(`Getting comments for #${issueNo}`);
-  const url = `projects/${config.repository}/merge_requests/${issueNo}/notes`;
+  const url = `projects/${config.upstreamProjectId}/merge_requests/${issueNo}/notes`;
   const comments = (
     await gitlabApi.getJsonUnchecked<GitlabComment[]>(url, { paginate: true })
   ).body;
@@ -1281,7 +1288,7 @@ async function getComments(issueNo: number): Promise<GitlabComment[]> {
 async function addComment(issueNo: number, body: string): Promise<void> {
   // POST projects/:owner/:repo/merge_requests/:number/notes
   await gitlabApi.postJson(
-    `projects/${config.repository}/merge_requests/${issueNo}/notes`,
+    `projects/${config.upstreamProjectId}/merge_requests/${issueNo}/notes`,
     {
       body: { body },
     },
@@ -1295,7 +1302,7 @@ async function editComment(
 ): Promise<void> {
   // PUT projects/:owner/:repo/merge_requests/:number/notes/:id
   await gitlabApi.putJson(
-    `projects/${config.repository}/merge_requests/${issueNo}/notes/${commentId}`,
+    `projects/${config.upstreamProjectId}/merge_requests/${issueNo}/notes/${commentId}`,
     {
       body: { body },
     },
@@ -1308,7 +1315,7 @@ async function deleteComment(
 ): Promise<void> {
   // DELETE projects/:owner/:repo/merge_requests/:number/notes/:id
   await gitlabApi.deleteJson(
-    `projects/${config.repository}/merge_requests/${issueNo}/notes/${commentId}`,
+    `projects/${config.upstreamProjectId}/merge_requests/${issueNo}/notes/${commentId}`,
   );
 }
 
@@ -1356,13 +1363,13 @@ export async function ensureComment({
   if (!commentId) {
     await addComment(number, body);
     logger.debug(
-      { repository: config.repository, issueNo: number },
+      { repository: config.upstreamProjectId, issueNo: number },
       'Added comment',
     );
   } else if (commentNeedsUpdating) {
     await editComment(number, commentId, body);
     logger.debug(
-      { repository: config.repository, issueNo: number },
+      { repository: config.upstreamProjectId, issueNo: number },
       'Updated comment',
     );
   } else {

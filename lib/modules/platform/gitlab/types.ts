@@ -56,6 +56,10 @@ export interface UpdateMergeRequest {
 
 export type MergeMethod = 'merge' | 'rebase_merge' | 'ff';
 
+export interface ForkedProject {
+  id: number;
+}
+
 export interface RepoResponse {
   id: number;
   archived: boolean;
@@ -64,7 +68,7 @@ export interface RepoResponse {
   empty_repo: boolean;
   ssh_url_to_repo: string | null;
   http_url_to_repo: string | null;
-  forked_from_project: boolean;
+  forked_from_project: ForkedProject;
   repository_access_level: 'disabled' | 'private' | 'enabled';
   merge_requests_access_level: 'disabled' | 'private' | 'enabled';
   merge_method: MergeMethod;

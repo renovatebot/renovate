@@ -73,7 +73,7 @@ describe('modules/platform/gitlab/pr-cache', () => {
     httpMock
       .scope('https://gitlab.com/api/v4/')
       .get(
-        '/projects/repo/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
+        '/projects/repo/merge_requests?per_page=100&order_by=updated_at&sort=desc',
       )
       .reply(200, [pr1]);
 
@@ -102,7 +102,7 @@ describe('modules/platform/gitlab/pr-cache', () => {
     httpMock
       .scope('https://gitlab.com/api/v4/')
       .get(
-        '/projects/repo/merge_requests?per_page=100&order_by=updated_at&sort=desc',
+        '/projects/repo/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=all',
       )
       .reply(200, [pr1]);
 
@@ -132,7 +132,7 @@ describe('modules/platform/gitlab/pr-cache', () => {
     httpMock
       .scope('https://gitlab.com/api/v4/')
       .get(
-        '/projects/repo/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
+        '/projects/repo/merge_requests?per_page=100&order_by=updated_at&sort=desc',
       )
       .reply(200, [pr1]);
 
@@ -173,7 +173,7 @@ describe('modules/platform/gitlab/pr-cache', () => {
     httpMock
       .scope('https://gitlab.com/api/v4/')
       .get(
-        '/projects/repo/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
+        '/projects/repo/merge_requests?per_page=100&order_by=updated_at&sort=desc',
       )
       .reply(200, [pr1]);
 
@@ -214,7 +214,7 @@ describe('modules/platform/gitlab/pr-cache', () => {
     httpMock
       .scope('https://gitlab.com/api/v4')
       .get(
-        '/projects/repo/merge_requests?per_page=100&order_by=updated_at&sort=desc&updated_after=2022-01-01T00%3A00%3A00Z&scope=created_by_me',
+        '/projects/repo/merge_requests?per_page=100&order_by=updated_at&sort=desc&updated_after=2022-01-01T00%3A00%3A00Z',
       )
       .reply(200, [pr2]);
 
@@ -243,7 +243,7 @@ describe('modules/platform/gitlab/pr-cache', () => {
     httpMock
       .scope('https://gitlab.com/api/v4/')
       .get(
-        '/projects/repo/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
+        '/projects/repo/merge_requests?per_page=100&order_by=updated_at&sort=desc',
       )
       .reply(200, []);
 
@@ -259,7 +259,7 @@ describe('modules/platform/gitlab/pr-cache', () => {
     httpMock
       .scope('https://gitlab.com/api/v4/')
       .get(
-        '/projects/repo/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
+        '/projects/repo/merge_requests?per_page=100&order_by=updated_at&sort=desc',
       )
       .reply(200, [pr1, pr2, pr3]);
 
@@ -277,7 +277,7 @@ describe('modules/platform/gitlab/pr-cache', () => {
     httpMock
       .scope('https://gitlab.com/api/v4/')
       .get(
-        '/projects/repo/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
+        '/projects/repo/merge_requests?per_page=100&order_by=updated_at&sort=desc',
       )
       .reply(200, [prWithMilliseconds]);
 
