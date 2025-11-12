@@ -64,7 +64,7 @@ describe('modules/platform/bitbucket-server/pr-cache', () => {
     cache = getCache();
   });
 
-  it('fetches cache', async () => {
+  it('fetches cache - author defined', async () => {
     httpMock
       .scope(urlHost)
       .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`)
@@ -97,6 +97,49 @@ describe('modules/platform/bitbucket-server/pr-cache', () => {
         bitbucketServer: {
           pullRequestsCache: {
             author: 'some-author',
+            items: {
+              '1': prInfo(pr1),
+              '2': prInfo(pr2),
+            },
+            updatedDate: 1547853840016,
+          },
+        },
+      },
+    });
+  });
+
+  it('fetches cache - author undefined', async () => {
+    httpMock
+      .scope(urlHost)
+      .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`)
+      .query(true)
+      .reply(200, { values: [pr1], nextPageStart: 2 })
+      .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`)
+      .query(true)
+      .reply(200, { values: [pr2] });
+
+    const res = await BbsPrCache.getPrs(
+      http,
+      'SOME',
+      'repo',
+      ignorePrAuthor,
+      undefined as never,
+    );
+
+    expect(res).toMatchObject([
+      {
+        number: 2,
+        title: 'title',
+      },
+      {
+        number: 1,
+        title: 'title',
+      },
+    ]);
+    expect(cache).toEqual({
+      platform: {
+        bitbucketServer: {
+          pullRequestsCache: {
             items: {
               '1': prInfo(pr1),
               '2': prInfo(pr2),
