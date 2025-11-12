@@ -1,5 +1,5 @@
 import os from 'node:os';
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { PLATFORM_GPG_FAILED } from '../../constants/error-messages';
@@ -12,7 +12,7 @@ import { fromBase64, toBase64 } from '../string';
 type PrivateKeyFormat = 'gpg' | 'ssh';
 
 const sshKeyRegex = regEx(
-  /-----BEGIN ([A-Z ]+ )?PRIVATE KEY-----.*?-----END ([A-Z]+ )?PRIVATE KEY-----/,
+  /-----BEGIN (?:[A-Z ]+ )?PRIVATE KEY-----.*?-----END (?:[A-Z]+ )?PRIVATE KEY-----/,
   's',
 );
 
@@ -166,7 +166,7 @@ export function setPrivateKey(
   key: string | undefined,
   passphrase: string | undefined,
 ): void {
-  if (!is.nonEmptyStringAndNotWhitespace(key)) {
+  if (!isNonEmptyStringAndNotWhitespace(key)) {
     return;
   }
   gitPrivateKey = createPrivateKey(key, passphrase);

@@ -2,8 +2,29 @@ import type { FindPRConfig } from '../types';
 
 export interface GerritFindPRConfig extends FindPRConfig {
   label?: string;
-  limit?: number;
   requestDetails?: GerritRequestDetail[];
+  /**
+   * Whether only one change is needed.
+   * Useful for optimizing the search request.
+   */
+  singleChange?: boolean;
+  /**
+   * Whether to disable the automatic pagination handling or not.
+   * Useful when handling pagination manually.
+   */
+  noPagination?: boolean;
+  /**
+   * How many changes to fetch per request/page.
+   * Default is 50.
+   * Useful when handling pagination manually.
+   */
+  pageLimit?: number;
+  /**
+   * How many changes to skip from the beginning.
+   * Default is 0.
+   * Useful when handling pagination manually.
+   */
+  startOffset?: number;
 }
 
 /**
@@ -71,6 +92,11 @@ export interface GerritChange {
    * Potential consistency issues with the change (not related to labels).
    * Requires o=CHECKS. */
   problems?: unknown[];
+  /**
+   *  Whether the query would deliver more results if not limited.
+   *  Only set on the last change that is returned, except when there are no more changes.
+   */
+  _more_changes?: boolean;
 }
 
 export interface GerritRevisionInfo {

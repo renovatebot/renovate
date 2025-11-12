@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import type { UpdateArtifactsConfig } from '../types';
 
@@ -8,7 +8,7 @@ export function getPythonVersionConstraint(
   const { constraints = {} } = config;
   const { python } = constraints;
 
-  if (is.nonEmptyString(python)) {
+  if (isNonEmptyString(python)) {
     logger.debug('Using python constraint from config');
     return python;
   }
@@ -22,7 +22,7 @@ export function getCopierVersionConstraint(
   const { constraints = {} } = config;
   const { copier } = constraints;
 
-  if (is.nonEmptyString(copier)) {
+  if (isNonEmptyString(copier)) {
     logger.debug('Using copier constraint from config');
     return copier;
   }

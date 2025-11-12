@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined, isPlainObject } from '@sindresorhus/is';
 import { logger } from '../../../../../logger';
 import type { PackageDependency } from '../../../types';
 import { TerraformProviderExtractor } from '../../base';
@@ -15,12 +15,12 @@ export class ProvidersExtractor extends TerraformProviderExtractor {
     locks: ProviderLock[],
   ): PackageDependency[] {
     const providerTypes = hclRoot?.provider;
-    if (is.nullOrUndefined(providerTypes)) {
+    if (isNullOrUndefined(providerTypes)) {
       return [];
     }
 
     /* v8 ignore next 7 -- needs test */
-    if (!is.plainObject(providerTypes)) {
+    if (!isPlainObject(providerTypes)) {
       logger.debug(
         { providerTypes },
         'Terraform: unexpected `providerTypes` value',

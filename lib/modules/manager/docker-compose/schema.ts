@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isObject, isString } from '@sindresorhus/is';
 import { z } from 'zod';
 
 const DockerComposeService = z.object({
@@ -44,7 +44,7 @@ const DockerComposeFileModern = z
       for (const key in rest) {
         if (key.startsWith('x-')) {
           const value = rest[key];
-          if (is.object(value) && 'image' in value && is.string(value.image)) {
+          if (isObject(value) && 'image' in value && isString(value.image)) {
             extensions ??= {};
             extensions[key] = { image: value.image };
           }

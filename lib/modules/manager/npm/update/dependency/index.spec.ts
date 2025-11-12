@@ -420,5 +420,30 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       expect(testContent).toEqual(expected);
     });
+    it('handles yarn.catalogs dependencies', () => {
+      const upgrade = {
+        depType: 'yarn.catalogs.default',
+        depName: 'typescript',
+        newValue: '0.60.0',
+      };
+
+      const overrideDependencies = `
+        nodeLinker: node-modules
+
+        catalog:
+          typescript: 0.0.5
+      `;
+      const expected = `nodeLinker: node-modules
+
+        catalog:
+          typescript: 0.60.0
+`;
+
+      const testContent = npmUpdater.updateDependency({
+        fileContent: overrideDependencies,
+        upgrade,
+      });
+      expect(testContent).toEqual(expected);
+    });
   });
 });

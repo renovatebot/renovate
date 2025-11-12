@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { logger } from '../../../logger';
 import { findGithubToken } from '../../../util/check-token';
@@ -40,10 +40,10 @@ export async function updateArtifacts({
   } else {
     const inputs = updatedDeps
       .map(({ depName }) => depName)
-      .filter(is.nonEmptyStringAndNotWhitespace)
-      .map((depName) => `--update-input ${quote(depName)}`)
+      .filter(isNonEmptyStringAndNotWhitespace)
+      .map((depName) => quote(depName))
       .join(' ');
-    cmd += `flake lock ${inputs}`;
+    cmd += `flake update ${inputs}`;
   }
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,

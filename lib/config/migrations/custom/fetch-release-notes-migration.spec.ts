@@ -1,8 +1,8 @@
 import { FetchReleaseNotesMigration } from './fetch-release-notes-migration';
 
 describe('config/migrations/custom/fetch-release-notes-migration', () => {
-  it('migrates', () => {
-    expect(FetchReleaseNotesMigration).toMigrate(
+  it('migrates', async () => {
+    await expect(FetchReleaseNotesMigration).toMigrate(
       {
         fetchReleaseNotes: false as never,
       },
@@ -10,7 +10,7 @@ describe('config/migrations/custom/fetch-release-notes-migration', () => {
         fetchChangeLogs: 'off',
       },
     );
-    expect(FetchReleaseNotesMigration).toMigrate(
+    await expect(FetchReleaseNotesMigration).toMigrate(
       {
         fetchReleaseNotes: true as never,
       },
@@ -18,7 +18,7 @@ describe('config/migrations/custom/fetch-release-notes-migration', () => {
         fetchChangeLogs: 'pr',
       },
     );
-    expect(FetchReleaseNotesMigration).toMigrate(
+    await expect(FetchReleaseNotesMigration).toMigrate(
       {
         fetchReleaseNotes: 'pr',
       },
@@ -26,7 +26,7 @@ describe('config/migrations/custom/fetch-release-notes-migration', () => {
         fetchChangeLogs: 'pr',
       },
     );
-    expect(FetchReleaseNotesMigration).toMigrate(
+    await expect(FetchReleaseNotesMigration).toMigrate(
       {
         fetchReleaseNotes: 'off',
       },
@@ -34,7 +34,7 @@ describe('config/migrations/custom/fetch-release-notes-migration', () => {
         fetchChangeLogs: 'off',
       },
     );
-    expect(FetchReleaseNotesMigration).toMigrate(
+    await expect(FetchReleaseNotesMigration).toMigrate(
       {
         fetchReleaseNotes: 'branch',
       },

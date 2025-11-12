@@ -403,6 +403,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         distributionUrl:
           'https://services.gradle.org/distributions/gradle-6.3-bin.zip',
       });
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'build.gradle or build.gradle.kts not found',
       );
@@ -415,6 +416,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
 
       const res = await updateLockFiles('', {});
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'build.gradle or build.gradle.kts not found',
       );

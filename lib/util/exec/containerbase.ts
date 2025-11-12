@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
@@ -39,6 +39,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'github-releases',
     packageName: 'containerbase/composer-prebuild',
     versioning: composerVersioningId,
+  },
+  conan: {
+    datasource: 'pypi',
+    packageName: 'conan',
+    versioning: pep440VersioningId,
   },
   copier: {
     datasource: 'pypi',
@@ -276,7 +281,7 @@ function isStable(
   if (!versioningApi.isStable(version)) {
     return false;
   }
-  if (is.string(latest)) {
+  if (isString(latest)) {
     if (versioningApi.isGreaterThan(version, latest)) {
       return false;
     }

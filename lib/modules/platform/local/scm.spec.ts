@@ -53,8 +53,7 @@ describe('modules/platform/local/scm', () => {
       execSync.mockReturnValueOnce('file1\nfile2');
       expect(await localFs.getFileList()).toHaveLength(2);
 
-      expect(execSync).toHaveBeenCalledOnce();
-      expect(execSync).toHaveBeenCalledWith('git ls-files', {
+      expect(execSync).toHaveBeenCalledExactlyOnceWith('git ls-files', {
         encoding: 'utf-8',
         maxBuffer: 1024 * 1024 * 10,
       });

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { simpleGit } from 'simple-git';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
@@ -69,7 +69,7 @@ export abstract class GitDatasource extends Datasource {
         logger.trace(`malformed ref: ${line}`);
         return null;
       })
-      .filter(is.truthy)
+      .filter(isTruthy)
       .filter((ref) => ref.type !== 'pull' && !ref.value.endsWith('^{}'));
 
     return refs;

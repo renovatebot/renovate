@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isEmptyArray, isEmptyObject, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { clone } from '../../util/clone';
@@ -48,10 +48,10 @@ export class PackageFiles {
     const data = new Map(clone(Array.from(this.data)));
 
     // filter all deps with skip reason
-    for (const managers of [...data.values()].filter(is.truthy)) {
-      for (const files of Object.values(managers).filter(is.truthy)) {
-        for (const file of files.filter((f) => is.truthy(f.deps))) {
-          file.deps = file.deps.filter(is.truthy).filter((d) => !d.skipReason);
+    for (const managers of [...data.values()].filter(isTruthy)) {
+      for (const files of Object.values(managers).filter(isTruthy)) {
+        for (const file of files.filter((f) => isTruthy(f.deps))) {
+          file.deps = file.deps.filter(isTruthy).filter((d) => !d.skipReason);
         }
       }
     }
@@ -152,7 +152,7 @@ export class PackageFiles {
     }
 
     // delete base branch listing if it has no managers left
-    if (!managers || is.emptyObject(managers)) {
+    if (!managers || isEmptyObject(managers)) {
       return data.delete(branch);
     }
 
@@ -160,13 +160,13 @@ export class PackageFiles {
     const [manager, packageFiles] = Object.entries(managers).pop()!;
 
     // delete current manager if it has no manifest files left
-    if (!packageFiles || is.emptyArray(packageFiles)) {
+    if (!packageFiles || isEmptyArray(packageFiles)) {
       return delete managers[manager];
     }
 
     // delete manifest file if it has no deps left
     const len = packageFiles.length - 1;
-    if (is.emptyArray(packageFiles[len].deps)) {
+    if (isEmptyArray(packageFiles[len].deps)) {
       return !!packageFiles.pop();
     }
 

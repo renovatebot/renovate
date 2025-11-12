@@ -1,4 +1,4 @@
-import { configFileNames } from './app-strings';
+import { getConfigFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
@@ -36,15 +36,19 @@ describe('config/validation', () => {
       const config = {
         binarySource: 'something',
         username: 'user',
+        ignorePrAuthor: true,
       };
       const { warnings } = await configValidation.validateConfig(
         'repo',
         config,
       );
-      expect(warnings).toHaveLength(2);
+      expect(warnings).toHaveLength(3);
       expect(warnings).toMatchObject([
         {
           message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+        },
+        {
+          message: `The "ignorePrAuthor" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
         {
           message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
@@ -1747,7 +1751,7 @@ describe('config/validation', () => {
         );
         expect(warnings).toEqual([
           {
-            message: `Invalid value \`invalid\` for \`onboardingConfigFileName\`. The allowed values are ${configFileNames.join(', ')}.`,
+            message: `Invalid value \`invalid\` for \`onboardingConfigFileName\`. The allowed values are ${getConfigFileNames().join(', ')}.`,
             topic: 'Configuration Error',
           },
         ]);
@@ -2132,7 +2136,7 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(2);
     });
 
-    it('allow bumpVersion ', async () => {
+    it('allow bumpVersion', async () => {
       const config = partial<RenovateConfig>({
         bumpVersion: {
           filePatterns: ['foo'],

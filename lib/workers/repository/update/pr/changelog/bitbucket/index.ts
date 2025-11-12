@@ -1,5 +1,5 @@
 import path from 'node:path';
-import is from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger';
 import { PagedSourceResults } from '../../../../../../modules/platform/bitbucket/schema';
@@ -50,7 +50,7 @@ export async function getReleaseNotesMd(
   const changelogFile = files
     .sort((a, b) => compareChangelogFilePath(a.path, b.path))
     .shift();
-  if (is.nullOrUndefined(changelogFile)) {
+  if (isNullOrUndefined(changelogFile)) {
     logger.trace('no changelog file found');
     return null;
   }

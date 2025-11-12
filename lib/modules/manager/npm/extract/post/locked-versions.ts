@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import semver from 'semver';
 import upath from 'upath';
 import { logger } from '../../../../../logger';
@@ -109,6 +109,15 @@ export async function getLockedVersions(
       const relativeDir = upath.relative(npmRootDir, packageDir);
 
       for (const dep of packageFile.deps) {
+        // Skip dependency types which are not locked in the lock file
+        if (
+          dep.depType === 'engines' ||
+          dep.depType === 'packageManager' ||
+          dep.depType === 'volta'
+        ) {
+          continue;
+        }
+
         // TODO: types (#22198)
         let lockedDepName = dep.depName!;
         if (relativeDir && relativeDir !== '.') {
@@ -144,7 +153,7 @@ export async function getLockedVersions(
             ]?.[depName!],
           );
 
-          if (is.string(lockedVersion)) {
+          if (isString(lockedVersion)) {
             dep.lockedVersion = lockedVersion;
           }
         } else {
@@ -155,7 +164,7 @@ export async function getLockedVersions(
             ]?.[depType!]?.[depName!],
           );
 
-          if (is.string(lockedVersion)) {
+          if (isString(lockedVersion)) {
             dep.lockedVersion = lockedVersion;
           }
         }

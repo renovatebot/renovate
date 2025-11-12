@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import * as bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { nanoid } from 'nanoid';
@@ -49,7 +49,7 @@ export function createDefaultStreams(
     type: 'raw',
   };
 
-  const logFileStream: bunyan.Stream | undefined = is.string(logFile)
+  const logFileStream: bunyan.Stream | undefined = isString(logFile)
     ? createLogFileStream(logFile)
     : undefined;
 
@@ -72,7 +72,7 @@ function createLogFileStream(logFile: string): bunyan.Stream {
   const logFileFormat = getEnv('LOG_FILE_FORMAT');
 
   if (
-    is.nonEmptyStringAndNotWhitespace(logFileFormat) &&
+    isNonEmptyStringAndNotWhitespace(logFileFormat) &&
     logFileFormat === 'pretty'
   ) {
     file.type = 'raw';

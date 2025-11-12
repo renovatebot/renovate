@@ -65,8 +65,7 @@ describe('config/presets/local/index', () => {
         presetName: 'default',
       });
 
-      expect(platform.getRawFile).toHaveBeenCalledOnce();
-      expect(platform.getRawFile).toHaveBeenCalledWith(
+      expect(platform.getRawFile).toHaveBeenCalledExactlyOnceWith(
         'default.json',
         'some/repo',
         undefined,
@@ -84,8 +83,7 @@ describe('config/presets/local/index', () => {
         presetName: 'default',
       });
 
-      expect(platform.getRawFile).toHaveBeenCalledOnce();
-      expect(platform.getRawFile).toHaveBeenCalledWith(
+      expect(platform.getRawFile).toHaveBeenCalledExactlyOnceWith(
         'default.json',
         'some/repo',
         undefined,
@@ -103,8 +101,7 @@ describe('config/presets/local/index', () => {
         presetName: 'default',
       });
 
-      expect(platform.getRawFile).toHaveBeenCalledOnce();
-      expect(platform.getRawFile).toHaveBeenCalledWith(
+      expect(platform.getRawFile).toHaveBeenCalledExactlyOnceWith(
         'default.json',
         'some/repo',
         undefined,
@@ -120,8 +117,7 @@ describe('config/presets/local/index', () => {
         repo: 'some/repo',
       });
 
-      expect(gitea.getPresetFromEndpoint).toHaveBeenCalledOnce();
-      expect(gitea.getPresetFromEndpoint).toHaveBeenCalledWith(
+      expect(gitea.getPresetFromEndpoint).toHaveBeenCalledExactlyOnceWith(
         'some/repo',
         'default',
         undefined,
@@ -139,8 +135,7 @@ describe('config/presets/local/index', () => {
         repo: 'some/repo',
       });
 
-      expect(forgejo.getPresetFromEndpoint).toHaveBeenCalledOnce();
-      expect(forgejo.getPresetFromEndpoint).toHaveBeenCalledWith(
+      expect(forgejo.getPresetFromEndpoint).toHaveBeenCalledExactlyOnceWith(
         'some/repo',
         'default',
         undefined,
@@ -159,8 +154,7 @@ describe('config/presets/local/index', () => {
         repo: 'some/repo',
         presetName: 'default',
       });
-      expect(gitea.getPresetFromEndpoint).toHaveBeenCalledOnce();
-      expect(gitea.getPresetFromEndpoint).toHaveBeenCalledWith(
+      expect(gitea.getPresetFromEndpoint).toHaveBeenCalledExactlyOnceWith(
         'some/repo',
         'default',
         undefined,
@@ -179,8 +173,7 @@ describe('config/presets/local/index', () => {
         repo: 'some/repo',
         presetName: 'default',
       });
-      expect(forgejo.getPresetFromEndpoint).toHaveBeenCalledOnce();
-      expect(forgejo.getPresetFromEndpoint).toHaveBeenCalledWith(
+      expect(forgejo.getPresetFromEndpoint).toHaveBeenCalledExactlyOnceWith(
         'some/repo',
         'default',
         undefined,
@@ -198,8 +191,7 @@ describe('config/presets/local/index', () => {
         repo: 'some/repo',
       });
 
-      expect(github.getPresetFromEndpoint).toHaveBeenCalledOnce();
-      expect(github.getPresetFromEndpoint).toHaveBeenCalledWith(
+      expect(github.getPresetFromEndpoint).toHaveBeenCalledExactlyOnceWith(
         'some/repo',
         'default',
         undefined,
@@ -219,8 +211,7 @@ describe('config/presets/local/index', () => {
         presetName: 'default',
       });
 
-      expect(github.getPresetFromEndpoint).toHaveBeenCalledOnce();
-      expect(github.getPresetFromEndpoint).toHaveBeenCalledWith(
+      expect(github.getPresetFromEndpoint).toHaveBeenCalledExactlyOnceWith(
         'some/repo',
         'default',
         undefined,
@@ -239,8 +230,7 @@ describe('config/presets/local/index', () => {
         tag: 'someTag',
       });
 
-      expect(github.getPresetFromEndpoint).toHaveBeenCalledOnce();
-      expect(github.getPresetFromEndpoint).toHaveBeenCalledWith(
+      expect(github.getPresetFromEndpoint).toHaveBeenCalledExactlyOnceWith(
         'some/repo',
         'default',
         undefined,
@@ -261,8 +251,7 @@ describe('config/presets/local/index', () => {
         tag: 'someTag',
       });
 
-      expect(github.getPresetFromEndpoint).toHaveBeenCalledOnce();
-      expect(github.getPresetFromEndpoint).toHaveBeenCalledWith(
+      expect(github.getPresetFromEndpoint).toHaveBeenCalledExactlyOnceWith(
         'some/repo',
         'default',
         undefined,
@@ -281,8 +270,7 @@ describe('config/presets/local/index', () => {
         presetName: 'default',
       });
 
-      expect(gitlab.getPresetFromEndpoint).toHaveBeenCalledOnce();
-      expect(gitlab.getPresetFromEndpoint).toHaveBeenCalledWith(
+      expect(gitlab.getPresetFromEndpoint).toHaveBeenCalledExactlyOnceWith(
         'some/repo',
         'default',
         undefined,
@@ -302,8 +290,7 @@ describe('config/presets/local/index', () => {
         presetName: 'default',
       });
 
-      expect(gitlab.getPresetFromEndpoint).toHaveBeenCalledOnce();
-      expect(gitlab.getPresetFromEndpoint).toHaveBeenCalledWith(
+      expect(gitlab.getPresetFromEndpoint).toHaveBeenCalledExactlyOnceWith(
         'some/repo',
         'default',
         undefined,
@@ -321,8 +308,7 @@ describe('config/presets/local/index', () => {
         tag: 'someTag',
       });
 
-      expect(gitlab.getPresetFromEndpoint).toHaveBeenCalledOnce();
-      expect(gitlab.getPresetFromEndpoint).toHaveBeenCalledWith(
+      expect(gitlab.getPresetFromEndpoint).toHaveBeenCalledExactlyOnceWith(
         'some/repo',
         'default',
         undefined,
@@ -343,8 +329,7 @@ describe('config/presets/local/index', () => {
         tag: 'someTag',
       });
 
-      expect(gitlab.getPresetFromEndpoint).toHaveBeenCalledOnce();
-      expect(gitlab.getPresetFromEndpoint).toHaveBeenCalledWith(
+      expect(gitlab.getPresetFromEndpoint).toHaveBeenCalledExactlyOnceWith(
         'some/repo',
         'default',
         undefined,

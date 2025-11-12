@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isUndefined } from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { anyMatchRegexOrGlobList, matchRegexOrGlobList } from '../string-match';
 import { Matcher } from './base';
@@ -8,7 +8,7 @@ export class DepTypesMatcher extends Matcher {
     { depTypes, depType }: PackageRuleInputConfig,
     { matchDepTypes }: PackageRule,
   ): boolean | null {
-    if (is.undefined(matchDepTypes)) {
+    if (isUndefined(matchDepTypes)) {
       return null;
     }
 

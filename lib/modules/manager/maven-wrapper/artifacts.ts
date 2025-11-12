@@ -1,6 +1,6 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
@@ -81,7 +81,7 @@ export async function updateArtifacts({
     );
     const updateArtifactsResult = (
       await getUpdatedArtifacts(status, artifactFileNames)
-    ).filter(is.truthy);
+    ).filter(isTruthy);
 
     logger.debug(
       { files: updateArtifactsResult.map((r) => r.file?.path) },
@@ -224,7 +224,10 @@ function mavenWrapperFileName(): string {
 
 function getMavenPaths(packageFileName: string): MavenWrapperPaths {
   const wrapperExecutableFileName = mavenWrapperFileName();
-  const localProjectDir = upath.join(upath.dirname(packageFileName), '../../');
+  const localProjectDir = upath.join(
+    upath.dirname(packageFileName),
+    packageFileName.includes('mvnw') ? '.' : '../../',
+  );
   const wrapperFullyQualifiedPath = upath.join(
     localProjectDir,
     wrapperExecutableFileName,

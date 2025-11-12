@@ -60,10 +60,12 @@ describe('workers/repository/init/index', () => {
         partial<RenovateConfig>(),
       );
       await initRepo({});
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { platform: undefined },
         "Configuration option 'filterUnavailableUsers' is not supported on the current platform.",
       );
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { platform: undefined },
         "Configuration option 'expandCodeOwnersGroups' is not supported on the current platform.",

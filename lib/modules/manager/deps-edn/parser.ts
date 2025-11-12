@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isPlainObject } from '@sindresorhus/is';
 import moo from 'moo';
 import { logger } from '../../../logger';
 import type {
@@ -184,7 +184,7 @@ export function parseDepsEdnFile(content: string): ParsedEdnResult | null {
     popState();
   }
 
-  if (is.plainObject(state.data)) {
+  if (isPlainObject(state.data)) {
     return { data: state.data, metadata };
   }
 

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../../../../../logger';
 import { escapeRegExp, regEx } from '../../../../../util/regex';
@@ -13,6 +13,7 @@ import type {
 import type { NpmDepType, NpmManagerData } from '../../types';
 import { getNewGitValue, getNewNpmAliasValue } from './common';
 import { updatePnpmCatalogDependency } from './pnpm';
+import { updateYarnrcCatalogDependency } from './yarn';
 
 function renameObjKey(
   oldObj: DependenciesMeta,
@@ -119,6 +120,9 @@ export function updateDependency({
 }: UpdateDependencyConfig): string | null {
   if (upgrade.depType?.startsWith('pnpm.catalog')) {
     return updatePnpmCatalogDependency({ fileContent, upgrade });
+  }
+  if (upgrade.depType?.startsWith('yarn.catalog')) {
+    return updateYarnrcCatalogDependency({ fileContent, upgrade });
   }
 
   const { depType, managerData } = upgrade;
@@ -294,7 +298,7 @@ function overrideDepPosition(
 
 function isOverrideObject(upgrade: Upgrade<NpmManagerData>): boolean {
   return (
-    is.array(upgrade.managerData?.parents, is.nonEmptyStringAndNotWhitespace) &&
+    isArray(upgrade.managerData?.parents, isNonEmptyStringAndNotWhitespace) &&
     upgrade.depType === 'overrides'
   );
 }
