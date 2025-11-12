@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isNumber } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -52,7 +52,7 @@ export async function addParticipants(
   if (assignees.length > 0) {
     try {
       assignees = await prepareParticipants(config, assignees);
-      if (is.number(config.assigneesSampleSize)) {
+      if (isNumber(config.assigneesSampleSize)) {
         assignees = sampleSize(assignees, config.assigneesSampleSize);
       }
       if (assignees.length > 0) {
@@ -79,7 +79,7 @@ export async function addParticipants(
     );
   }
   if (
-    is.array(config.additionalReviewers) &&
+    isArray(config.additionalReviewers) &&
     config.additionalReviewers.length > 0
   ) {
     logger.debug(
@@ -90,7 +90,7 @@ export async function addParticipants(
   if (reviewers.length > 0) {
     try {
       reviewers = await prepareParticipants(config, reviewers);
-      if (is.number(config.reviewersSampleSize)) {
+      if (isNumber(config.reviewersSampleSize)) {
         logger.debug(
           `Sampling reviewersSampleSize=${config.reviewersSampleSize} reviewers`,
         );

@@ -12,6 +12,22 @@ jobs:
     if: contains(github.event.label.name, 'mend-app')
     runs-on: ubuntu-latest
     steps:
+      - name: Calculate time ago
+        id: timeago
+        run: |
+          created_at="${{ github.event.discussion.created_at }}"
+          created_epoch=$(date -d "$created_at" "+%s")
+          now_epoch=$(date +%s)
+          diff=$((now_epoch - created_epoch))
+
+          if [ $diff -lt 86400 ]; then
+            hours=$((diff / 3600))
+            echo "::set-output name=ago::$hours hours ago"
+          else
+            days=$((diff / 86400))
+            echo "::set-output name=ago::$days days ago"
+          fi
+
       - name: Post to Slack
         id: slack
         uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
@@ -19,6 +35,6 @@ jobs:
           method: chat.postMessage
           payload: |
             channel: 'C05NLTMGCJC'
-            text: '<${{ github.event.discussion.html_url }}|${{ github.event.discussion.title }}> (${{ github.event.discussion.created_at }})'
+            text: '<${{ github.event.discussion.html_url }}|${{ github.event.discussion.title }}> (${{ github.event.discussion.created_at }}), ${{ steps.timeago.outputs.ago }})'
           errors: true
           token: ${{ secrets.SLACK_BOT_TOKEN }}

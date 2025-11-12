@@ -105,6 +105,7 @@
     "contentful-rich-text": "https://github.com/contentful/rich-text",
     "cspell": "https://github.com/streetsidesoftware/cspell",
     "datadog-browser-sdk": "https://github.com/DataDog/browser-sdk",
+    "datafusion": "https://github.com/apache/datafusion",
     "datatables-net": [
       "https://github.com/DataTables/Dist-DataTables",
       "https://github.com/DataTables/Dist-DataTables-Bootstrap",

@@ -1,4 +1,8 @@
-import is from '@sindresorhus/is';
+import {
+  isEmptyArray,
+  isNonEmptyArray,
+  isNonEmptyStringAndNotWhitespace,
+} from '@sindresorhus/is';
 import type { RegExpVersion } from '../regex';
 import { RegExpVersioningApi } from '../regex';
 import type { VersioningApiConstructor } from '../types';
@@ -34,7 +38,7 @@ export class NixPkgsVersioning extends RegExpVersioningApi {
       release.push(Number.parseInt(minor));
     }
 
-    const compatibility = is.nonEmptyStringAndNotWhitespace(suffix)
+    const compatibility = isNonEmptyStringAndNotWhitespace(suffix)
       ? `${prefix}-${suffix}`
       : prefix;
 
@@ -46,7 +50,7 @@ export class NixPkgsVersioning extends RegExpVersioningApi {
 
   override isStable(version: string): boolean {
     const parsed = this._parse(version);
-    return is.nonEmptyArray(parsed?.release);
+    return isNonEmptyArray(parsed?.release);
   }
 
   protected override _compare(version: string, other: string): number {
@@ -54,13 +58,13 @@ export class NixPkgsVersioning extends RegExpVersioningApi {
     const right = this._parse(other);
 
     // empty version is equal to 'unstable'
-    if (is.emptyArray(left?.release) && is.emptyArray(right?.release)) {
+    if (isEmptyArray(left?.release) && isEmptyArray(right?.release)) {
       return 0;
     }
-    if (is.emptyArray(left?.release)) {
+    if (isEmptyArray(left?.release)) {
       return 1;
     }
-    if (is.emptyArray(right?.release)) {
+    if (isEmptyArray(right?.release)) {
       return -1;
     }
     return super._compare(version, other);

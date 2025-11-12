@@ -2,7 +2,7 @@
 // https://github.com/jsr-io/jsr/blob/b8d753f4ed96f032bc494e8809065cfe8df5c641/frontend/utils/ids.ts
 // Copyright 2024 the JSR authors. All rights reserved. MIT license.
 
-import is from '@sindresorhus/is';
+import { isNull } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 
 export function extractJsrPackageName(packageName: string): {
@@ -16,10 +16,10 @@ export function extractJsrPackageName(packageName: string): {
     return null;
   }
   const [scope, name] = parts;
-  if (is.null(parseJsrScopeName(scope))) {
+  if (isNull(parseJsrScopeName(scope))) {
     return null;
   }
-  if (is.null(parseJsrPackageName(name))) {
+  if (isNull(parseJsrPackageName(name))) {
     return null;
   }
   return { scope, name };

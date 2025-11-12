@@ -1,4 +1,9 @@
-import is from '@sindresorhus/is';
+import {
+  isArray,
+  isNonEmptyString,
+  isObject,
+  isString,
+} from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
 import { logger } from '../logger';
 import { getEnv } from '../util/env';
@@ -52,13 +57,13 @@ export function validateDecryptedValue(
 
     const { o: org, r: repo, v: value } = decryptedObj.data;
 
-    if (!is.nonEmptyString(value)) {
+    if (!isNonEmptyString(value)) {
       const error = new Error('config-validation');
       error.validationError = `Encrypted value in config is missing a value.`;
       throw error;
     }
 
-    if (!is.nonEmptyString(org)) {
+    if (!isNonEmptyString(org)) {
       const error = new Error('config-validation');
       error.validationError = `Encrypted value in config is missing a scope.`;
       throw error;
@@ -67,7 +72,7 @@ export function validateDecryptedValue(
     const repositories = [repository.toUpperCase()];
 
     const azureCollection = getAzureCollection();
-    if (is.nonEmptyString(azureCollection)) {
+    if (isNonEmptyString(azureCollection)) {
       // used for full 'org/project/repo' matching
       repositories.push(`${azureCollection}/${repository}`.toUpperCase());
       // used for org prefix matching without repo
@@ -80,7 +85,7 @@ export function validateDecryptedValue(
       .map((o) => o.toUpperCase())
       .map((o) => ensureTrailingSlash(o));
 
-    if (is.nonEmptyString(repo)) {
+    if (isNonEmptyString(repo)) {
       const scopedRepos = orgPrefixes.map((orgPrefix) =>
         `${orgPrefix}${repo}`.toUpperCase(),
       );
@@ -133,12 +138,12 @@ export async function decryptConfig(
   logger.trace({ config }, 'decryptConfig()');
   const decryptedConfig = { ...config };
   for (const [key, val] of Object.entries(config)) {
-    if (key === 'encrypted' && is.object(val)) {
+    if (key === 'encrypted' && isObject(val)) {
       const path = `${existingPath}.${key}`;
       logger.debug({ config: val }, `Found encrypted config in ${path}`);
 
       const encryptedWarning = GlobalConfig.get('encryptedWarning');
-      if (is.string(encryptedWarning)) {
+      if (isString(encryptedWarning)) {
         logger.once.warn(encryptedWarning);
       }
 
@@ -146,11 +151,11 @@ export async function decryptConfig(
         for (const [eKey, eVal] of Object.entries(val)) {
           logger.debug(`Trying to decrypt ${eKey} in ${path}`);
           let decryptedStr = await tryDecrypt(privateKey, eVal, repository);
-          if (privateKeyOld && !is.nonEmptyString(decryptedStr)) {
+          if (privateKeyOld && !isNonEmptyString(decryptedStr)) {
             logger.debug(`Trying to decrypt with old private key`);
             decryptedStr = await tryDecrypt(privateKeyOld, eVal, repository);
           }
-          if (!is.nonEmptyString(decryptedStr)) {
+          if (!isNonEmptyString(decryptedStr)) {
             const error = new Error('config-validation');
             error.validationError = `Failed to decrypt field ${eKey}. Please re-encrypt and try again.`;
             throw error;
@@ -184,10 +189,10 @@ Refer to migration documents here: https://docs.renovatebot.com/mend-hosted/migr
         }
       }
       delete decryptedConfig.encrypted;
-    } else if (is.array(val)) {
+    } else if (isArray(val)) {
       decryptedConfig[key] = [];
       for (const [index, item] of val.entries()) {
-        if (is.object(item) && !is.array(item)) {
+        if (isObject(item) && !isArray(item)) {
           const path = `${existingPath}.${key}[${index}]`;
           (decryptedConfig[key] as RenovateConfig[]).push(
             await decryptConfig(item as RenovateConfig, repository, path),
@@ -196,7 +201,7 @@ Refer to migration documents here: https://docs.renovatebot.com/mend-hosted/migr
           (decryptedConfig[key] as unknown[]).push(item);
         }
       }
-    } else if (is.object(val) && key !== 'content') {
+    } else if (isObject(val) && key !== 'content') {
       const path = `${existingPath}.${key}`;
       decryptedConfig[key] = await decryptConfig(
         val as RenovateConfig,
@@ -225,7 +230,7 @@ export function getAzureCollection(): string | undefined {
   }
 
   const azureCollection = trimSlashes(endpointUrl.pathname);
-  if (!is.nonEmptyString(azureCollection)) {
+  if (!isNonEmptyString(azureCollection)) {
     logger.debug({ endpoint }, 'Unable to find azure collection name from URL');
     return undefined;
   }

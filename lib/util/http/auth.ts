@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import type { Options } from 'got';
 import {
   GITEA_API_USING_HOST_TYPES,
@@ -23,7 +23,7 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
 ): GotOptions {
   const options: GotOptions = { ...inOptions };
 
-  if (is.nonEmptyString(options.headers?.authorization) || options.noAuth) {
+  if (isNonEmptyString(options.headers?.authorization) || options.noAuth) {
     return options;
   }
 
@@ -51,7 +51,7 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
       if (options.token.startsWith('x-access-token:')) {
         const appToken = options.token.replace('x-access-token:', '');
         options.headers.authorization = `token ${appToken}`;
-        if (is.string(options.headers.accept)) {
+        if (isString(options.headers.accept)) {
           options.headers.accept = options.headers.accept.replace(
             'application/vnd.github.v3+json',
             'application/vnd.github.machine-man-preview+json',

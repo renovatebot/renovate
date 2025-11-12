@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class SemanticPrefixMigration extends AbstractMigration {
@@ -6,7 +6,7 @@ export class SemanticPrefixMigration extends AbstractMigration {
   override readonly propertyName = 'semanticPrefix';
 
   override run(value: unknown): void {
-    if (is.string(value)) {
+    if (isString(value)) {
       const [text] = value.split(':');
       const [type, scope] = text.split('(');
       this.setSafely('semanticCommitType', type);

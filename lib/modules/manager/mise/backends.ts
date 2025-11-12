@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString, isUndefined, isUrlString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import { CrateDatasource } from '../../datasource/crate';
 import { GitRefsDatasource } from '../../datasource/git-refs';
@@ -50,7 +50,7 @@ export function createCargoToolConfig(
   name: string,
   version: string,
 ): BackendToolingConfig {
-  if (!is.urlString(name)) {
+  if (!isUrlString(name)) {
     return {
       packageName: name,
       datasource: CrateDatasource.id,
@@ -59,7 +59,7 @@ export function createCargoToolConfig(
   // tag: branch: or rev: is required for git repository url
   // e.g. branch:main, tag:0.1.0, rev:abcdef
   const matchGroups = cargoGitVersionRegex.exec(version)?.groups;
-  if (is.undefined(matchGroups)) {
+  if (isUndefined(matchGroups)) {
     return {
       packageName: name,
       skipReason: 'invalid-version',
@@ -142,7 +142,7 @@ export function createPipxToolConfig(name: string): BackendToolingConfig {
   const isGitSyntax = name.startsWith('git+');
   // Does not support zip file url
   // Avoid type narrowing to prevent type error
-  if (!isGitSyntax && (is.urlString as (value: unknown) => boolean)(name)) {
+  if (!isGitSyntax && (isUrlString as (value: unknown) => boolean)(name)) {
     return {
       packageName: name,
       skipReason: 'unsupported-url',
@@ -153,7 +153,7 @@ export function createPipxToolConfig(name: string): BackendToolingConfig {
     if (isGitSyntax) {
       repoName = pipxGitHubRegex.exec(name)?.groups?.repo;
       // If the url is not a github repo, treat the version as a git ref
-      if (is.undefined(repoName)) {
+      if (isUndefined(repoName)) {
         return {
           packageName: name.replace(/^git\+/g, '').replaceAll(/\.git$/g, ''),
           datasource: GitRefsDatasource.id,
@@ -182,7 +182,7 @@ const spmGitHubRegex = regEx(/^https:\/\/github.com\/(?<repo>.+).git$/);
 export function createSpmToolConfig(name: string): BackendToolingConfig {
   let repoName: string | undefined;
   // Avoid type narrowing to prevent type error
-  if ((is.urlString as (value: unknown) => boolean)(name)) {
+  if ((isUrlString as (value: unknown) => boolean)(name)) {
     repoName = spmGitHubRegex.exec(name)?.groups?.repo;
     // spm backend only supports github repos
     if (!repoName) {
@@ -210,14 +210,14 @@ export function createUbiToolConfig(
   let extractVersion: string | undefined = undefined;
 
   const hasVPrefix = version.startsWith('v');
-  const setsTagRegex = !hasVPrefix || is.string(toolOptions.tag_regex);
+  const setsTagRegex = !hasVPrefix || isString(toolOptions.tag_regex);
 
   if (setsTagRegex) {
     // By default, use a regex that matches any tag
     let tagRegex = '.+';
     // Filter versions by tag_regex if it is specified
     // ref: https://mise.jdx.dev/dev-tools/backends/ubi.html#ubi-uses-weird-versions
-    if (is.string(toolOptions.tag_regex)) {
+    if (isString(toolOptions.tag_regex)) {
       // Remove the leading '^' if it exists to avoid duplication
       tagRegex = toolOptions.tag_regex.replace(/^\^/, '');
       if (!hasVPrefix) {
@@ -234,6 +234,6 @@ export function createUbiToolConfig(
     packageName: name,
     datasource: GithubReleasesDatasource.id,
     currentValue: version,
-    ...(is.string(extractVersion) ? { extractVersion } : {}),
+    ...(isString(extractVersion) ? { extractVersion } : {}),
   };
 }

@@ -1,5 +1,5 @@
 import url from 'node:url';
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
@@ -184,7 +184,7 @@ export class PypiDatasource extends Datasource {
         // There may be multiple releases with different requires_python, so we return all in an array
         const pythonConstraints = releases
           .map(({ requires_python }) => requires_python)
-          .filter(is.string);
+          .filter(isString);
         result.constraints = {
           python: Array.from(new Set(pythonConstraints)),
         };

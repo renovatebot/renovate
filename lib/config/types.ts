@@ -50,6 +50,7 @@ export interface RenovateSharedConfig {
   commitMessagePrefix?: string;
   commitMessageTopic?: string;
   confidential?: boolean;
+  configValidationError?: boolean;
   changelogUrl?: string;
   dependencyDashboardApproval?: boolean;
   draftPR?: boolean;

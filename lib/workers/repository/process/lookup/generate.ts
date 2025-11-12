@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import type { Release } from '../../../../modules/datasource';
 import type { LookupUpdate } from '../../../../modules/manager/types';
@@ -92,7 +92,7 @@ export async function generateUpdate(
     update.isBreaking = update.updateType === 'major';
   }
   const { datasource, packageName, packageRules } = config;
-  if (packageRules?.some((pr) => is.nonEmptyArray(pr.matchConfidence))) {
+  if (packageRules?.some((pr) => isNonEmptyArray(pr.matchConfidence))) {
     update.mergeConfidenceLevel = await getMergeConfidenceLevel(
       datasource,
       packageName,

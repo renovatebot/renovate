@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import type { ValidationMessage } from '../types';
 import type { CheckBaseBranchesArgs } from './types';
 
@@ -12,7 +12,7 @@ export function check({
 }: CheckBaseBranchesArgs): ValidationMessage[] {
   const warnings: ValidationMessage[] = [];
   if (Array.isArray(resolvedRule.matchBaseBranches)) {
-    if (!is.nonEmptyArray(baseBranchPatterns)) {
+    if (!isNonEmptyArray(baseBranchPatterns)) {
       warnings.push({
         topic: 'Configuration Error',
         message: `${currentPath}: You must configure baseBranchPatterns in order to use them inside matchBaseBranches.`,
