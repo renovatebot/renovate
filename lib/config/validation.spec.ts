@@ -1604,6 +1604,21 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('validates env against the allowedEnv regex', async () => {
+      const config = {
+        env: {
+          SOME_VAR: 'SOME_VALUE',
+        },
+        allowedEnv: ['/^SOME.*/'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
     it('validates options with different type but defaultValue=null', async () => {
       const config = {
         minimumReleaseAge: null,
