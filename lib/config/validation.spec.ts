@@ -1502,6 +1502,30 @@ describe('config/validation', () => {
       expect(errors).toBeEmptyArray();
       expect(warnings).toBeEmptyArray();
     });
+
+    it('validates values in arrays match their `allowedValues`', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchUpdateTypes: ['invalid-type'],
+            schedule: null,
+          },
+        ],
+      };
+
+      // @ts-expect-error ignore the fact that we're providing an invalid UpdateType
+      const { warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toMatchObject([
+        {
+          message:
+            'Invalid value `invalid-type` for `packageRules[0].matchUpdateTypes`. The allowed values are major, minor, patch, pin, pinDigest, digest, lockFileMaintenance, rollback, bump, replacement.',
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
   });
 
   describe('validateConfig() -> globaOnly options', () => {
@@ -1890,7 +1914,7 @@ describe('config/validation', () => {
         },
         {
           message:
-            'Invalid value for `gitNoVerify`. The allowed values are commit, push.',
+            'Invalid value `invalid` for `gitNoVerify`. The allowed values are commit, push.',
           topic: 'Configuration Error',
         },
       ]);

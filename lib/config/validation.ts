@@ -30,7 +30,6 @@ import { GlobalConfig } from './global';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
-import { supportedDatasources } from './presets/internal/merge-confidence';
 import type {
   AllowedParents,
   RenovateConfig,
@@ -785,6 +784,24 @@ export async function validateConfig(
         }
       }
     }
+
+    if (is.array(val)) {
+      // TODO validate regex via isRegexOrGlobOption ...
+      // TODO support object subtypes
+      const option = options.find((opt) => opt.name === key);
+      if (option && option.type === 'array') {
+        if (option.allowedValues) {
+          for (const value of val as string[]) {
+            if (!option.allowedValues.includes(value)) {
+              warnings.push({
+                topic: 'Configuration Error',
+                message: `Invalid value \`${value}\` for \`${currentPath}\`. The allowed values are ${option.allowedValues.join(', ')}.`,
+              });
+            }
+          }
+        }
+      }
+    }
   }
 
   function sortAll(a: ValidationMessage, b: ValidationMessage): number {
@@ -818,6 +835,7 @@ async function validateGlobalConfig(
       message: getDeprecationMessage(key)!,
     });
   }
+
   if (val !== null) {
     if (type === 'string') {
       if (isString(val)) {
@@ -909,25 +927,16 @@ async function validateGlobalConfig(
             }),
           );
         }
-        if (key === 'gitNoVerify') {
-          const allowedValues = ['commit', 'push'];
-          for (const value of val as string[]) {
-            if (!allowedValues.includes(value)) {
-              warnings.push({
-                topic: 'Configuration Error',
-                message: `Invalid value for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
-              });
-            }
-          }
-        }
-        if (key === 'mergeConfidenceDatasources') {
-          const allowedValues = supportedDatasources;
-          for (const value of val as string[]) {
-            if (!allowedValues.includes(value)) {
-              warnings.push({
-                topic: 'Configuration Error',
-                message: `Invalid value \`${value}\` for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
-              });
+        const option = options.find((opt) => opt.name === key);
+        if (option && option.type === 'array') {
+          if (option.allowedValues) {
+            for (const value of val as string[]) {
+              if (!option.allowedValues.includes(value)) {
+                warnings.push({
+                  topic: 'Configuration Error',
+                  message: `Invalid value \`${value}\` for \`${currentPath}\`. The allowed values are ${option.allowedValues.join(', ')}.`,
+                });
+              }
             }
           }
         }
