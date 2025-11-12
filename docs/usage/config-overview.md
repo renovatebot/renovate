@@ -184,11 +184,11 @@ Default values are `{{parentOrg}}/renovate-config` for repository name (`inherit
 
 Note: For Azure DevOps, `{{parentOrg}}` is the Project the repo belongs to, and for Bitbucket, the `{{parentOrg}}` is the Workspace of the repo, as shown in the table below.
 
-| Repo          | Inherited config file location                                  |
-| --------------|---------------------------------------------------------------- |
-| GitHub        | {parentOrg} / renovate-config / org-inherited-config.json       |
-| Bitbucket     | {parentWorkspace} / renovate-config / org-inherited-config.json |
-| Azure DevOps  | {parentProject} / renovate-config / org-inherited-config.json   |
+| Repo         | Inherited config file location                                  |
+| ------------ | --------------------------------------------------------------- |
+| GitHub       | {parentOrg} / renovate-config / org-inherited-config.json       |
+| Bitbucket    | {parentWorkspace} / renovate-config / org-inherited-config.json |
+| Azure DevOps | {parentProject} / renovate-config / org-inherited-config.json   |
 
 If found, Inherited config will be merged on top (i.e. override) Global config.
 Avoid putting any global-only setting in a Inherited config, as doing so will result in an error.
