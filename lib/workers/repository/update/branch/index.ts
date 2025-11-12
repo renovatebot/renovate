@@ -760,7 +760,8 @@ export async function processBranch(
     // we want to update the PR and skip the Auto merge since status checks aren't done yet
     if (!config.artifactErrors?.length && (!commitSha || config.ignoreTests)) {
       const allowBehindBase =
-        config.rebaseWhen === 'conflicted' || config.rebaseWhen === 'never';
+        config.allowBranchAutomergeBehindBase === true &&
+        (config.rebaseWhen === 'conflicted' || config.rebaseWhen === 'never');
       const mergeStatus = await tryBranchAutomerge(config, allowBehindBase);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
@@ -788,19 +789,19 @@ export async function processBranch(
       }
       if (
         mergeStatus === 'stale' &&
-        config.rebaseWhen === 'never' &&
+        !allowBehindBase &&
         /* v8 ignore next -- needs test */
         !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel))
       ) {
         logger.warn(
-          'Branch cannot automerge because it is conflicted and rebaseWhen setting disallows rebasing - raising a PR instead',
+          'Branch cannot automerge because it is stale - raising a PR instead',
         );
         config.forcePr = true;
         config.branchAutomergeFailureMessage = mergeStatus;
       }
-      if (mergeStatus === 'stale' && config.rebaseWhen === 'conflicted') {
+      if (mergeStatus === 'stale' && allowBehindBase) {
         logger.debug(
-          'Branch is stale and rebaseWhen is conflicted - rebase requested',
+          'Branch is stale but allowBranchAutomergeBehindBase is enabled - rebase requested',
         );
         config.rebaseRequested = true;
       }

@@ -94,6 +94,11 @@ You can also apply this setting selectively using `packageRules`:
 }
 ```
 
+## allowBranchAutomergeBehindBase
+
+When enabled in combination with `rebaseWhen` set to `"conflicted"` or `"never"`, Renovate will automerge branches that are behind the base branch but not conflicted.
+This option only applies when `automerge` is `true` and `automergeType` is set to `"branch"`.
+
 ## addLabels
 
 The `labels` field is non-mergeable, meaning that any config setting a list of PR labels will replace any existing list.
@@ -348,8 +353,9 @@ If you prefer that Renovate more silently automerge _without_ Pull Requests at a
 - Automerge the branch commit if it's: (a) up-to-date with the base branch, and (b) passing all tests
 - As a backup, raise a PR only if either: (a) tests fail, or (b) tests remain pending for too long (default: 24 hours)
 
-To allow automerges on branches that are behind and green, add `rebaseWhen="conflicted"` or `rebaseWhen="never"`.
-Note that this will not merge a conflicted branch.
+To allow automerges on branches that are behind the base branch but not conflicted, enable the experimental option `allowBranchAutomergeBehindBase` and set `rebaseWhen` to either `"conflicted"` or `"never"`.
+This combination will merge branches using a fast-forward merge (`--ff`) instead of requiring a fast-forward-only merge (`--ff-only`).
+Conflicted branches will still not be merged.
 
 The final value for `automergeType` is `"pr-comment"`, intended only for users who already have a "merge bot" such as [bors-ng](https://github.com/bors-ng/bors-ng) and want Renovate to _not_ actually automerge by itself and instead tell `bors-ng` to merge for it, by using a comment in the PR.
 If you're not already using `bors-ng` or similar, don't worry about this option.
