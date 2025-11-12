@@ -4,10 +4,10 @@ import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
 import { repoFingerprint } from '../util';
 import { client as _client } from './client';
+import { GerritPrCache as _GerritPrCache } from './pr-cache';
 import type {
   GerritAccountInfo,
   GerritChange,
-  GerritChangeMessageInfo,
   GerritLabelInfo,
   GerritLabelTypeInfo,
   GerritProjectInfo,
@@ -37,7 +37,9 @@ const codeReviewLabel: GerritLabelTypeInfo = {
 
 vi.mock('../../../util/host-rules');
 vi.mock('./client');
+vi.mock('./pr-cache');
 const clientMock = vi.mocked(_client);
+const prCacheMock = vi.mocked(_GerritPrCache);
 
 describe('modules/platform/gerrit/index', () => {
   const t0 = DateTime.fromISO('2025-04-14T16:33:37.000000000', {
@@ -118,7 +120,8 @@ describe('modules/platform/gerrit/index', () => {
 
     it('initRepo() - active', async () => {
       clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
-      clientMock.findChanges.mockResolvedValueOnce([]);
+      clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
+      clientMock.findChanges.mockResolvedValueOnce([]); // open changes for branch initialization
       expect(await gerrit.initRepo({ repository: 'test/repo' })).toEqual({
         defaultBranch: 'main',
         isFork: false,
@@ -126,6 +129,7 @@ describe('modules/platform/gerrit/index', () => {
       });
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
         url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+        virtualBranches: [],
       });
     });
 
@@ -138,6 +142,7 @@ describe('modules/platform/gerrit/index', () => {
         partial<GerritChange>({ _number: 1 }),
         partial<GerritChange>({ _number: 2 }),
       ]);
+      clientMock.findChanges.mockResolvedValueOnce([]); // open changes for branch initialization
 
       await gerrit.initRepo({ repository: 'test/repo' });
 
@@ -156,11 +161,66 @@ describe('modules/platform/gerrit/index', () => {
         ],
       ]);
     });
+
+    it('initRepo() - initialize branches from open changes', async () => {
+      clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
+      clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
+      clientMock.findChanges.mockResolvedValueOnce([
+        partial<GerritChange>({
+          _number: 12345,
+          current_revision: 'sha123',
+          revisions: {
+            sha123: partial<GerritRevisionInfo>({
+              ref: 'refs/changes/45/12345/1',
+              commit_with_footers:
+                'commit message\n\nRenovate-Branch: renovate/dep-1',
+            }),
+          },
+        }),
+        partial<GerritChange>({
+          _number: 12346,
+          current_revision: 'sha456',
+          revisions: {
+            sha456: partial<GerritRevisionInfo>({
+              ref: 'refs/changes/46/12346/1',
+              commit_with_footers:
+                'commit message\n\nRenovate-Branch: renovate/dep-2',
+            }),
+          },
+        }),
+      ]);
+
+      await gerrit.initRepo({ repository: 'test/repo' });
+
+      expect(clientMock.findChanges.mock.calls[1]).toEqual([
+        'test/repo',
+        {
+          branchName: '',
+          state: 'open',
+          requestDetails: ['CURRENT_REVISION', 'COMMIT_FOOTERS'],
+        },
+      ]);
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
+        url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+        virtualBranches: [
+          {
+            name: 'renovate/dep-1',
+            ref: 'refs/changes/45/12345/1',
+            sha: 'sha123',
+          },
+          {
+            name: 'renovate/dep-2',
+            ref: 'refs/changes/46/12346/1',
+            sha: 'sha456',
+          },
+        ],
+      });
+    });
   });
 
   describe('findPr()', () => {
-    it('findPr() - no results', async () => {
-      clientMock.findChanges.mockResolvedValueOnce([]);
+    it('findPr() - no results from cache', async () => {
+      prCacheMock.getPrs.mockResolvedValueOnce([]);
       await expect(
         gerrit.findPr({
           branchName: 'branch',
@@ -168,19 +228,61 @@ describe('modules/platform/gerrit/index', () => {
           targetBranch: 'master',
         }),
       ).resolves.toBeNull();
+      expect(prCacheMock.getPrs).toHaveBeenCalledExactlyOnceWith('test/repo');
+      expect(clientMock.findChanges).not.toHaveBeenCalled();
+    });
+
+    it('findPr() - found in cache', async () => {
+      const pr = mapGerritChangeToPr(
+        partial<GerritChange>({
+          _number: 123456,
+          status: 'NEW',
+          branch: 'master',
+          current_revision: 'some-revision',
+          revisions: {
+            'some-revision': partial<GerritRevisionInfo>({
+              commit_with_footers: 'Renovate-Branch: branch',
+            }),
+          },
+        }),
+        { sourceBranch: 'branch' },
+      )!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      await expect(
+        gerrit.findPr({
+          branchName: 'branch',
+          state: 'open',
+          targetBranch: 'master',
+        }),
+      ).resolves.toHaveProperty('number', 123456);
+      expect(prCacheMock.getPrs).toHaveBeenCalledExactlyOnceWith('test/repo');
+      expect(clientMock.findChanges).not.toHaveBeenCalled();
+    });
+
+    it('findPr() - refreshCache bypasses cache and queries client', async () => {
+      clientMock.findChanges.mockResolvedValueOnce([]);
+      await expect(
+        gerrit.findPr({
+          branchName: 'branch',
+          state: 'open',
+          targetBranch: 'master',
+          refreshCache: true,
+        }),
+      ).resolves.toBeNull();
       expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
         'test/repo',
-        {
+        expect.objectContaining({
           branchName: 'branch',
           state: 'open',
           targetBranch: 'master',
           singleChange: true,
           requestDetails: REQUEST_DETAILS_FOR_PRS,
-        },
+        }),
       );
+      expect(prCacheMock.getPrs).not.toHaveBeenCalled();
     });
 
-    it('findPr() - found', async () => {
+    it('findPr() - refreshCache found and saves to cache', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
         current_revision: 'some-revision',
@@ -191,32 +293,90 @@ describe('modules/platform/gerrit/index', () => {
         },
       });
       clientMock.findChanges.mockResolvedValueOnce([change]);
+      prCacheMock.setPr.mockResolvedValueOnce();
       await expect(
         gerrit.findPr({
           branchName: 'branch',
           state: 'open',
           targetBranch: 'master',
+          refreshCache: true,
         }),
       ).resolves.toHaveProperty('number', 123456);
+      expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        expect.objectContaining({ number: 123456 }),
+      );
     });
   });
 
   describe('getPr()', () => {
-    it('getPr() - found', async () => {
-      const change = partial<GerritChange>({});
+    it('getPr() - found in cache', async () => {
+      const change = partial<GerritChange>({
+        _number: 123456,
+        current_revision: 'some-revision',
+        revisions: {
+          'some-revision': partial<GerritRevisionInfo>({
+            commit_with_footers: 'Renovate-Branch: branch',
+          }),
+        },
+      });
+      const pr = mapGerritChangeToPr(change)!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      await expect(gerrit.getPr(123456)).resolves.toEqual(pr);
+      expect(prCacheMock.getPrs).toHaveBeenCalledExactlyOnceWith('test/repo');
+      expect(clientMock.getChange).not.toHaveBeenCalled();
+    });
+
+    it('getPr() - not found in cache', async () => {
+      prCacheMock.getPrs.mockResolvedValueOnce([]);
+      await expect(gerrit.getPr(123456)).resolves.toBeNull();
+      expect(prCacheMock.getPrs).toHaveBeenCalledExactlyOnceWith('test/repo');
+      expect(clientMock.getChange).not.toHaveBeenCalled();
+    });
+
+    it('getPr() - refreshCache bypasses cache and queries client', async () => {
+      const change = partial<GerritChange>({
+        _number: 123456,
+        current_revision: 'some-revision',
+        revisions: {
+          'some-revision': partial<GerritRevisionInfo>({
+            commit_with_footers: 'Renovate-Branch: branch',
+          }),
+        },
+      });
       clientMock.getChange.mockResolvedValueOnce(change);
-      await expect(gerrit.getPr(123456)).resolves.toEqual(
+      await expect(gerrit.getPr(123456, true)).resolves.toEqual(
         mapGerritChangeToPr(change),
       );
       expect(clientMock.getChange).toHaveBeenCalledExactlyOnceWith(
         123456,
         REQUEST_DETAILS_FOR_PRS,
       );
+      expect(prCacheMock.getPrs).not.toHaveBeenCalled();
     });
 
-    it('getPr() - not found', async () => {
+    it('getPr() - refreshCache saves to cache after fetching', async () => {
+      const change = partial<GerritChange>({
+        _number: 123456,
+        current_revision: 'some-revision',
+        revisions: {
+          'some-revision': partial<GerritRevisionInfo>({
+            commit_with_footers: 'Renovate-Branch: branch',
+          }),
+        },
+      });
+      clientMock.getChange.mockResolvedValueOnce(change);
+      prCacheMock.setPr.mockResolvedValueOnce();
+      await gerrit.getPr(123456, true);
+      expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        expect.objectContaining({ number: 123456 }),
+      );
+    });
+
+    it('getPr() - not found with refreshCache', async () => {
       clientMock.getChange.mockRejectedValueOnce({ statusCode: 404 });
-      await expect(gerrit.getPr(123456)).resolves.toBeNull();
+      await expect(gerrit.getPr(123456, true)).resolves.toBeNull();
     });
 
     it('getPr() - other error', async () => {
@@ -231,55 +391,81 @@ describe('modules/platform/gerrit/index', () => {
     });
 
     it('updatePr() - closed => abandon the change', async () => {
-      const change = partial<GerritChange>({});
-      clientMock.getChange.mockResolvedValueOnce(change);
+      const change = partial<GerritChange>({
+        _number: 123456,
+        current_revision: 'some-revision',
+        updated: '2025-04-14 16:40:00.000000000',
+        revisions: {
+          'some-revision': partial<GerritRevisionInfo>({
+            commit_with_footers: 'Renovate-Branch: branch',
+          }),
+        },
+      });
+      const pr = mapGerritChangeToPr(change)!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      prCacheMock.setPr.mockResolvedValueOnce();
+      clientMock.abandonChange.mockResolvedValueOnce(
+        partial<GerritChange>({
+          updated: '2025-04-14 16:45:00.000000000',
+        }),
+      );
       await gerrit.updatePr({
         number: 123456,
         prTitle: change.subject,
         state: 'closed',
       });
       expect(clientMock.abandonChange).toHaveBeenCalledExactlyOnceWith(123456);
+      expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        expect.objectContaining({
+          number: 123456,
+          state: 'closed',
+          updatedAt: '2025-04-14T16:45:00.000000000',
+        }),
+      );
     });
 
-    it('updatePr() - existing prBody found in change.messages => nothing todo...', async () => {
-      const change = partial<GerritChange>({
-        current_revision: 'some-revision',
-        revisions: {
-          'some-revision': partial<GerritRevisionInfo>({
-            commit_with_footers: 'some message',
-          }),
-        },
-      });
-      clientMock.getChange.mockResolvedValueOnce(change);
-      clientMock.getMessages.mockResolvedValueOnce([
-        partial<GerritChangeMessageInfo>({
-          tag: TAG_PULL_REQUEST_BODY,
-          message: 'Last PR-Body',
-        }),
-      ]);
+    it('updatePr() - PR not found in cache', async () => {
+      prCacheMock.getPrs.mockResolvedValueOnce([]);
       await gerrit.updatePr({
         number: 123456,
         prTitle: 'title',
-        prBody: 'Last PR-Body',
+        state: 'closed',
       });
-      expect(clientMock.addMessage).not.toHaveBeenCalled();
+      expect(clientMock.abandonChange).not.toHaveBeenCalled();
+      expect(prCacheMock.setPr).not.toHaveBeenCalled();
     });
 
-    it('updatePr() - new prBody found in change.messages => add as message', async () => {
-      const change = partial<GerritChange>({});
-      clientMock.getChange.mockResolvedValueOnce(change);
-      clientMock.getMessages.mockResolvedValueOnce([]);
+    it('updatePr() - new prBody => add as message and update cache', async () => {
+      const change = partial<GerritChange>({
+        _number: 123456,
+        current_revision: 'some-revision',
+        revisions: {
+          'some-revision': partial<GerritRevisionInfo>({
+            commit_with_footers: 'Renovate-Branch: branch',
+          }),
+        },
+      });
+      const pr = mapGerritChangeToPr(change)!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      prCacheMock.setPr.mockResolvedValueOnce();
+      clientMock.addMessage.mockResolvedValueOnce();
       await gerrit.updatePr({
         number: 123456,
         prTitle: change.subject,
         prBody: 'NEW PR-Body',
       });
-      expect(
-        clientMock.addMessageIfNotAlreadyExists,
-      ).toHaveBeenCalledExactlyOnceWith(
+      expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
         123456,
         'NEW PR-Body',
         TAG_PULL_REQUEST_BODY,
+      );
+      expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        expect.objectContaining({
+          number: 123456,
+          updatedAt: expect.any(String),
+        }),
       );
     });
   });
@@ -321,7 +507,7 @@ describe('modules/platform/gerrit/index', () => {
       ).rejects.toThrow(/it was not created in the last 5 minutes/);
     });
 
-    it('createPr() - update body', async () => {
+    it('createPr() - add body as message and save to cache', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
         current_revision: 'some-revision',
@@ -344,37 +530,33 @@ describe('modules/platform/gerrit/index', () => {
         },
       });
       expect(pr).toHaveProperty('number', 123456);
-      expect(
-        clientMock.addMessageIfNotAlreadyExists,
-      ).toHaveBeenCalledExactlyOnceWith(
+      expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
         123456,
         'body',
         TAG_PULL_REQUEST_BODY,
-        [],
+      );
+      expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        expect.objectContaining({ number: 123456 }),
       );
     });
   });
 
   describe('getBranchPr()', () => {
-    it('getBranchPr() - no result', async () => {
-      clientMock.findChanges.mockResolvedValueOnce([]);
+    it('getBranchPr() - no result from cache', async () => {
+      prCacheMock.getPrs.mockResolvedValueOnce([]);
       await expect(
         gerrit.getBranchPr('renovate/dependency-1.x'),
       ).resolves.toBeNull();
-      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
-        'test/repo',
-        {
-          branchName: 'renovate/dependency-1.x',
-          state: 'open',
-          singleChange: true,
-          requestDetails: REQUEST_DETAILS_FOR_PRS,
-        },
-      );
+      expect(prCacheMock.getPrs).toHaveBeenCalledExactlyOnceWith('test/repo');
+      expect(clientMock.findChanges).not.toHaveBeenCalled();
     });
 
-    it('getBranchPr() - found', async () => {
+    it('getBranchPr() - found in cache', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
+        status: 'NEW',
+        branch: 'master',
         current_revision: 'some-revision',
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
@@ -382,25 +564,21 @@ describe('modules/platform/gerrit/index', () => {
           }),
         },
       });
-      clientMock.findChanges.mockResolvedValueOnce([change]);
+      const pr = mapGerritChangeToPr(change, {
+        sourceBranch: 'renovate/dependency-1.x',
+      })!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
       await expect(
         gerrit.getBranchPr('renovate/dependency-1.x', 'master'),
       ).resolves.toHaveProperty('number', 123456);
-      expect(clientMock.findChanges.mock.lastCall).toEqual([
-        'test/repo',
-        {
-          state: 'open',
-          branchName: 'renovate/dependency-1.x',
-          singleChange: true,
-          targetBranch: 'master',
-          requestDetails: REQUEST_DETAILS_FOR_PRS,
-        },
-      ]);
+      expect(prCacheMock.getPrs).toHaveBeenCalledExactlyOnceWith('test/repo');
+      expect(clientMock.findChanges).not.toHaveBeenCalled();
     });
 
     it('getBranchPr() - found even without targetBranch', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
+        status: 'NEW',
         current_revision: 'some-revision',
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
@@ -408,37 +586,49 @@ describe('modules/platform/gerrit/index', () => {
           }),
         },
       });
-      clientMock.findChanges.mockResolvedValueOnce([change]);
+      const pr = mapGerritChangeToPr(change, {
+        sourceBranch: 'renovate/dependency-1.x',
+      })!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
       await expect(
-        gerrit.getBranchPr('renovate/dependency-1.x', undefined),
+        gerrit.getBranchPr('renovate/dependency-1.x'),
       ).resolves.toHaveProperty('number', 123456);
-      expect(clientMock.findChanges.mock.lastCall).toEqual([
-        'test/repo',
-        {
-          state: 'open',
-          branchName: 'renovate/dependency-1.x',
-          singleChange: true,
-          targetBranch: undefined,
-          requestDetails: REQUEST_DETAILS_FOR_PRS,
+      expect(prCacheMock.getPrs).toHaveBeenCalledExactlyOnceWith('test/repo');
+      expect(clientMock.findChanges).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('refreshPr()', () => {
+    it('refreshPr()', async () => {
+      const change = partial<GerritChange>({
+        _number: 123456,
+        current_revision: 'some-revision',
+        revisions: {
+          'some-revision': partial<GerritRevisionInfo>({
+            commit_with_footers: 'Renovate-Branch: branch',
+          }),
         },
-      ]);
+      });
+      clientMock.getChange.mockResolvedValueOnce(change);
+      prCacheMock.setPr.mockResolvedValueOnce();
+      await expect(gerrit.refreshPr(123456)).toResolve();
+      expect(clientMock.getChange).toHaveBeenCalledExactlyOnceWith(
+        123456,
+        REQUEST_DETAILS_FOR_PRS,
+      );
+      expect(prCacheMock.setPr).toHaveBeenCalled();
     });
   });
 
   describe('getPrList()', () => {
-    it('getPrList() - empty list', async () => {
-      clientMock.findChanges.mockResolvedValueOnce([]);
+    it('getPrList() - empty list from cache', async () => {
+      prCacheMock.getPrs.mockResolvedValueOnce([]);
       await expect(gerrit.getPrList()).resolves.toEqual([]);
-      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
-        'test/repo',
-        {
-          branchName: '',
-          requestDetails: REQUEST_DETAILS_FOR_PRS,
-        },
-      );
+      expect(prCacheMock.getPrs).toHaveBeenCalledExactlyOnceWith('test/repo');
+      expect(clientMock.findChanges).not.toHaveBeenCalled();
     });
 
-    it('getPrList() - multiple results', async () => {
+    it('getPrList() - multiple results from cache', async () => {
       const change = partial<GerritChange>({
         current_revision: 'abc',
         revisions: {
@@ -447,13 +637,25 @@ describe('modules/platform/gerrit/index', () => {
           }),
         },
       });
-      clientMock.findChanges.mockResolvedValueOnce([change, change, change]);
+      const pr = mapGerritChangeToPr(change)!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr, pr, pr]);
       await expect(gerrit.getPrList()).resolves.toHaveLength(3);
     });
   });
 
   describe('mergePr()', () => {
-    it('mergePr() - blocker by Verified', async () => {
+    it('mergePr() - blocked by Verified', async () => {
+      const change = partial<GerritChange>({
+        _number: 123456,
+        current_revision: 'some-revision',
+        revisions: {
+          'some-revision': partial<GerritRevisionInfo>({
+            commit_with_footers: 'Renovate-Branch: branch',
+          }),
+        },
+      });
+      const pr = mapGerritChangeToPr(change)!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
       clientMock.submitChange.mockRejectedValueOnce({
         statusCode: 409,
         message: 'blocked by Verified',
@@ -462,18 +664,60 @@ describe('modules/platform/gerrit/index', () => {
       expect(clientMock.submitChange).toHaveBeenCalledExactlyOnceWith(123456);
     });
 
-    it('mergePr() - success', async () => {
+    it('mergePr() - success and updates cache', async () => {
+      const change = partial<GerritChange>({
+        _number: 123456,
+        current_revision: 'some-revision',
+        revisions: {
+          'some-revision': partial<GerritRevisionInfo>({
+            commit_with_footers: 'Renovate-Branch: branch',
+          }),
+        },
+      });
+      const pr = mapGerritChangeToPr(change)!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      prCacheMock.setPr.mockResolvedValueOnce();
       clientMock.submitChange.mockResolvedValueOnce(
-        partial<GerritChange>({ status: 'MERGED' }),
+        partial<GerritChange>({
+          status: 'MERGED',
+          updated: '2025-04-14 16:50:00.000000000',
+        }),
       );
       await expect(gerrit.mergePr({ id: 123456 })).resolves.toBeTrue();
+      expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        expect.objectContaining({
+          number: 123456,
+          state: 'merged',
+          updatedAt: '2025-04-14T16:50:00.000000000',
+        }),
+      );
+    });
+
+    it('mergePr() - PR not found in cache', async () => {
+      prCacheMock.getPrs.mockResolvedValueOnce([]);
+      await expect(gerrit.mergePr({ id: 123456 })).resolves.toBeFalse();
+      expect(clientMock.submitChange).not.toHaveBeenCalled();
     });
 
     it('mergePr() - other errors', async () => {
+      const change = partial<GerritChange>({
+        _number: 123456,
+        current_revision: 'some-revision',
+        revisions: {
+          'some-revision': partial<GerritRevisionInfo>({
+            commit_with_footers: 'Renovate-Branch: branch',
+          }),
+        },
+      });
+      const pr = mapGerritChangeToPr(change)!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
       clientMock.submitChange.mockRejectedValueOnce(
         new Error('any other error'),
       );
-      await expect(gerrit.mergePr({ id: 123456 })).rejects.toThrow();
+      await expect(gerrit.mergePr({ id: 123456 })).rejects.toThrow(
+        'any other error',
+      );
     });
   });
 
