@@ -235,4 +235,214 @@ describe('modules/manager/npm/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([{ cmd: 'corepack use pnpm@8.15.6' }]);
   });
+
+  describe('Node.js engines.node updates', () => {
+    it('updates engines.node when .nvmrc is present with newer version', async () => {
+      const packageJsonContent = JSON.stringify({
+        name: 'test',
+        engines: { node: '>=20.0.0' },
+      });
+      const updatedPackageJsonContent = JSON.stringify({
+        name: 'test',
+        engines: { node: '>=22.19.0' },
+      });
+
+      fs.readLocalFile.mockResolvedValueOnce('22.19.0\n'); // .nvmrc read
+
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [],
+        newPackageFileContent: packageJsonContent,
+        config,
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            contents: updatedPackageJsonContent,
+            path: 'package.json',
+            type: 'addition',
+          },
+        },
+      ]);
+    });
+
+    it('updates engines.node when .node-version is present with newer version', async () => {
+      const packageJsonContent = JSON.stringify({
+        name: 'test',
+        engines: { node: '>=20.0.0' },
+      });
+      const updatedPackageJsonContent = JSON.stringify({
+        name: 'test',
+        engines: { node: '>=22.19.0' },
+      });
+
+      fs.readLocalFile
+        .mockResolvedValueOnce(null) // .nvmrc read (not found)
+        .mockResolvedValueOnce('22.19.0\n'); // .node-version read
+
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [],
+        newPackageFileContent: packageJsonContent,
+        config,
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            contents: updatedPackageJsonContent,
+            path: 'package.json',
+            type: 'addition',
+          },
+        },
+      ]);
+    });
+
+    it('preserves constraint format when updating engines.node', async () => {
+      const packageJsonContent = JSON.stringify({
+        name: 'test',
+        engines: { node: '^20.0.0' },
+      });
+      const updatedPackageJsonContent = JSON.stringify({
+        name: 'test',
+        engines: { node: '>=22.19.0' },
+      });
+
+      fs.readLocalFile
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce('22.19.0\n');
+
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [],
+        newPackageFileContent: packageJsonContent,
+        config,
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            contents: updatedPackageJsonContent,
+            path: 'package.json',
+            type: 'addition',
+          },
+        },
+      ]);
+    });
+
+    it('does not update if engines.node does not exist', async () => {
+      const packageJsonContent = JSON.stringify({
+        name: 'test',
+      });
+
+      fs.readLocalFile
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce('22.19.0\n');
+
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [],
+        newPackageFileContent: packageJsonContent,
+        config,
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('does not update if versions are the same', async () => {
+      const packageJsonContent = JSON.stringify({
+        name: 'test',
+        engines: { node: '>=22.19.0' },
+      });
+
+      fs.readLocalFile
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce('22.19.0\n');
+
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [],
+        newPackageFileContent: packageJsonContent,
+        config,
+      });
+
+      // Should return null because no update is needed
+      expect(res).toBeNull();
+    });
+
+    it('does not update if .nvmrc and .node-version do not exist', async () => {
+      const packageJsonContent = JSON.stringify({
+        name: 'test',
+        engines: { node: '>=20.0.0' },
+      });
+
+      fs.readLocalFile
+        .mockResolvedValueOnce(null) // .nvmrc
+        .mockResolvedValueOnce(null); // .node-version
+
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [],
+        newPackageFileContent: packageJsonContent,
+        config,
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('handles errors gracefully when checking Node.js version files', async () => {
+      const packageJsonContent = JSON.stringify({
+        name: 'test',
+        engines: { node: '>=20.0.0' },
+      });
+
+      fs.readLocalFile.mockRejectedValueOnce(new Error('File read error'));
+
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [],
+        newPackageFileContent: packageJsonContent,
+        config,
+      });
+
+      // Should return null, not throw
+      expect(res).toBeNull();
+    });
+
+    it('updates engines.node when both packageManager and Node.js updates are present', async () => {
+      const packageJsonContent = JSON.stringify({
+        name: 'test',
+        engines: { node: '>=20.0.0' },
+        packageManager:
+          'pnpm@8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589',
+      });
+      const updatedPackageJsonContent = JSON.stringify({
+        name: 'test',
+        engines: { node: '>=22.19.0' },
+        packageManager: 'pnpm@8.15.6+sha256.newhash',
+      });
+
+      fs.readLocalFile
+        .mockResolvedValueOnce('# dummy') // for npmrc
+        .mockResolvedValueOnce('{}') // for node constraints
+        .mockResolvedValueOnce(updatedPackageJsonContent) // after corepack
+        .mockResolvedValueOnce(null) // .nvmrc
+        .mockResolvedValueOnce('22.19.0\n'); // .node-version
+
+      const execSnapshots = mockExecAll();
+
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [validDepUpdate],
+        newPackageFileContent: packageJsonContent,
+        config: { ...config },
+      });
+
+      expect(res).toBeDefined();
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'corepack use pnpm@8.15.6' },
+      ]);
+    });
+  });
 });
