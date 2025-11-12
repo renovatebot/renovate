@@ -121,6 +121,27 @@ You can validate which update types may have release timestamps by following som
 
 Security updates bypass any `minimumReleaseAge` checks, and so will be raised as soon as Renovate detects them.
 
+### What happens if a package has multiple updates available?
+
+<!-- prettier-ignore -->
+!!! note
+    This is based on the [recommended settings above](#recommended-settings)
+
+Renovate waits for the set duration to pass for each **separate** version.
+
+If Renovate sees that a package has multiple updates available, it will only raise update(s) that are passing the `minimumReleaseAge` check.
+
+Let us consider a repository with `minimumReleaseAge=1 hour`, and with the following timeline:
+
+- 0000: Renovate runs, and sees no updates
+- 0010: Package releases 1.1.0
+- 0030: Renovate runs, and sees 1.1.0 and marks it as pending
+- 0100: Renovate runs, still sees 1.1.0 as pending
+- 0110: Package releases 1.1.1
+- 0130: Renovate runs, and sees 1.1.0 and 1.1.1 releases. As 1.1.0 is now past the `minimumReleaseAge`, Renovate raises a PR, and marks 1.1.1 as pending
+- 0200: Renovate runs, still sees 1.1.1 as pending
+- 0230: No humans have merged the PR for 1.1.0, so when Renovate runs, it sees 1.1.1 is now past the `minimumReleaseAge`, so updates the existing PR to bump the version to 1.1.1
+
 ### What happens to transitive dependencies?
 
 Renovate does not currently manage any transitive dependencies - instead leaving that to package managers and [`lockFileMaintenance`](../configuration-options.md#lockfilemaintenance).
