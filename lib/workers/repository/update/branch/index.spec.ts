@@ -786,8 +786,7 @@ describe('workers/repository/update/branch/index', () => {
       config.automergeType = 'branch';
       config.rebaseWhen = 'conflicted';
       await branchWorker.processBranch(config);
-      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
-      expect(automerge.tryBranchAutomerge).toHaveBeenCalledWith(
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledExactlyOnceWith(
         expect.any(Object),
         true,
       );
@@ -806,9 +805,9 @@ describe('workers/repository/update/branch/index', () => {
       });
       scm.branchExists.mockResolvedValue(true);
       scm.isBranchConflicted.mockResolvedValue(false);
-      platform.getBranchPr.mockResolvedValueOnce(null as any);
-      checkExisting.prAlreadyExisted.mockResolvedValueOnce(undefined as any);
-      commit.commitFilesToBranch.mockResolvedValue(null as any);
+      platform.getBranchPr.mockResolvedValueOnce(null);
+      checkExisting.prAlreadyExisted.mockResolvedValueOnce(null);
+      commit.commitFilesToBranch.mockResolvedValue(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       config.automerge = true;
       config.automergeType = 'branch';
@@ -843,8 +842,7 @@ describe('workers/repository/update/branch/index', () => {
       config.automergeType = 'branch';
       config.rebaseWhen = 'auto';
       await branchWorker.processBranch(config);
-      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
-      expect(automerge.tryBranchAutomerge).toHaveBeenCalledWith(
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledExactlyOnceWith(
         expect.any(Object),
         false,
       );
