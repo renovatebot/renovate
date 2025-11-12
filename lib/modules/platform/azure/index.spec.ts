@@ -1,5 +1,5 @@
 import { Readable } from 'node:stream';
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
 import type {
   GitPullRequest,
@@ -183,7 +183,7 @@ describe('modules/platform/azure/index', () => {
       }),
     );
 
-    if (is.string(args)) {
+    if (isString(args)) {
       return azure.initRepo({
         repository: args,
       });
@@ -238,6 +238,7 @@ describe('modules/platform/azure/index', () => {
                   status: PullRequestStatus.Active,
                 },
               ]),
+
             getPullRequestCommits: vi.fn().mockReturnValue([]),
           }) as any,
       );
@@ -279,6 +280,7 @@ describe('modules/platform/azure/index', () => {
                   status: PullRequestStatus.Completed,
                 },
               ]),
+
             getPullRequestCommits: vi.fn().mockReturnValue([]),
           }) as any,
       );
@@ -320,6 +322,7 @@ describe('modules/platform/azure/index', () => {
                   status: PullRequestStatus.Abandoned,
                 },
               ]),
+
             getPullRequestCommits: vi.fn().mockReturnValue([]),
           }) as any,
       );
@@ -361,6 +364,7 @@ describe('modules/platform/azure/index', () => {
                   status: PullRequestStatus.Abandoned,
                 },
               ]),
+
             getPullRequestCommits: vi.fn().mockReturnValue([]),
           }) as any,
       );
@@ -565,6 +569,7 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+
             getStatuses: vi.fn(() => [
               {
                 state: GitStatusState.Succeeded,
@@ -586,6 +591,7 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+
             getStatuses: vi.fn(() => [
               {
                 state: GitStatusState.NotApplicable,
@@ -607,6 +613,7 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+
             getStatuses: vi.fn(() => [
               {
                 state: GitStatusState.Failed,
@@ -628,6 +635,7 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+
             getStatuses: vi.fn(() => [
               {
                 state: GitStatusState.Error,
@@ -649,6 +657,7 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+
             getStatuses: vi.fn(() => [
               {
                 state: GitStatusState.Pending,
@@ -670,6 +679,7 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+
             getStatuses: vi.fn(() => [
               {
                 state: GitStatusState.NotSet,
@@ -713,6 +723,7 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+
             getStatuses: vi.fn(() => [
               {
                 state: GitStatusState.Pending,
@@ -736,6 +747,7 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+
             getStatuses: vi.fn(() => [
               {
                 state: GitStatusState.Succeeded,
@@ -754,6 +766,7 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+
             getStatuses: vi.fn(() => [
               {
                 state: GitStatusState.Succeeded,
@@ -837,9 +850,11 @@ describe('modules/platform/azure/index', () => {
                   pullRequestId: 1234,
                 },
               ]),
+
             getPullRequestLabels: vi
               .fn()
               .mockReturnValue([{ active: true, name: 'renovate' }]),
+
             getPullRequestCommits: vi.fn().mockReturnValue([
               {
                 author: {
@@ -863,6 +878,7 @@ describe('modules/platform/azure/index', () => {
             createPullRequest: vi.fn(() => ({
               pullRequestId: 456,
             })),
+
             createPullRequestLabel: vi.fn(() => ({})),
           }) as any,
       );
@@ -884,6 +900,7 @@ describe('modules/platform/azure/index', () => {
             createPullRequest: vi.fn(() => ({
               pullRequestId: 456,
             })),
+
             createPullRequestLabel: vi.fn(() => ({})),
           }) as any,
       );
@@ -1203,8 +1220,10 @@ describe('modules/platform/azure/index', () => {
               pullRequestId: 456,
               title: 'Title 1',
             })),
+
             createPullRequestLabel: vi.fn(() => ({})),
             getPullRequests: vi.fn(() => []),
+
             updatePullRequest: vi.fn(() => ({
               pullRequestId: 456,
               title: 'Title 2',
@@ -1303,6 +1322,7 @@ describe('modules/platform/azure/index', () => {
           ({
             updatePullRequest: vi.fn(() => prResult),
             createPullRequestReviewer: updateFn,
+
             getPullRequestById: vi.fn(() => ({
               pullRequestId: prResult.pullRequestId,
               createdBy: prResult.createdBy,
@@ -1698,6 +1718,7 @@ describe('modules/platform/azure/index', () => {
               targetRefName: 'refs/heads/ding',
               title: 'title',
             })),
+
             updatePullRequest: updatePullRequestMock,
           }) as any,
       );
@@ -1753,6 +1774,7 @@ describe('modules/platform/azure/index', () => {
                 targetRefName: 'refs/heads/ding',
                 title: 'title',
               })),
+
               updatePullRequest: updatePullRequestMock,
             }) as any,
         );
@@ -1793,6 +1815,7 @@ describe('modules/platform/azure/index', () => {
             getPullRequestById: vi.fn(() => ({
               lastMergeSourceCommit: lastMergeSourceCommitMock,
             })),
+
             updatePullRequest: vi
               .fn()
               .mockRejectedValue(new Error(`oh no pr couldn't be updated`)),
@@ -1819,6 +1842,7 @@ describe('modules/platform/azure/index', () => {
               lastMergeSourceCommit: { commitId: 'abcd1234' },
               targetRefName: 'refs/heads/ding',
             })),
+
             updatePullRequest: vi.fn(),
           }) as any,
       );
@@ -1854,6 +1878,7 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getPullRequestById: getPullRequestByIdMock,
+
             updatePullRequest: vi.fn(() => ({
               status: 1,
             })),
@@ -1886,6 +1911,7 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getPullRequestById: getPullRequestByIdMock,
+
             updatePullRequest: vi.fn(() => ({
               status: 1,
             })),
@@ -2067,6 +2093,7 @@ describe('modules/platform/azure/index', () => {
       () =>
         ({
           getItem: getItemMock,
+
           getRepositories: vi
             .fn()
             .mockResolvedValue([

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyObject, isNullOrUndefined } from '@sindresorhus/is';
 import type { PagedResult } from '../../modules/platform/bitbucket/types';
 import { HttpBase, type InternalJsonUnsafeOptions } from './http';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types';
@@ -80,9 +80,9 @@ export class BitbucketHttp extends HttpBase<BitbucketHttpOptions> {
 }
 
 function hasPagelen(url: URL): boolean {
-  return !is.nullOrUndefined(url.searchParams.get('pagelen'));
+  return !isNullOrUndefined(url.searchParams.get('pagelen'));
 }
 
 function isPagedResult<T>(obj: any): obj is PagedResult<T> {
-  return is.nonEmptyObject(obj) && Array.isArray(obj.values);
+  return isNonEmptyObject(obj) && Array.isArray(obj.values);
 }

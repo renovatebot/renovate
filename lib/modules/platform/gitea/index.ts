@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNumber, isString } from '@sindresorhus/is';
 import semver from 'semver';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -547,7 +547,7 @@ const platform: Platform = {
     targetBranch,
   }: FindPRConfig): Promise<Pr | null> {
     logger.debug(`findPr(${branchName}, ${title!}, ${state})`);
-    if (includeOtherAuthors && is.string(targetBranch)) {
+    if (includeOtherAuthors && isString(targetBranch)) {
       // do not use pr cache as it only fetches prs created by the bot account
       const pr = await helper.getPRByBranch(
         config.repository,
@@ -602,7 +602,7 @@ const platform: Platform = {
         head,
         title,
         body,
-        labels: labels.filter(is.number),
+        labels: labels.filter(isNumber),
       });
 
       if (platformPrOptions?.usePlatformAutomerge) {
@@ -727,7 +727,7 @@ const platform: Platform = {
      */
     if (Array.isArray(labels)) {
       prUpdateParams.labels = (await map(labels, lookupLabelByName)).filter(
-        is.number,
+        isNumber,
       );
       if (labels.length !== prUpdateParams.labels.length) {
         logger.warn(
@@ -839,7 +839,7 @@ const platform: Platform = {
 
       const labels = Array.isArray(labelNames)
         ? (await Promise.all(labelNames.map(lookupLabelByName))).filter(
-            is.number,
+            isNumber,
           )
         : undefined;
 

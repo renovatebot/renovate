@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../../config/global';
 import {
@@ -386,7 +386,7 @@ export async function processBranch(
     if (
       config.upgrades.some(
         (upgrade) =>
-          is.nonEmptyString(upgrade.minimumReleaseAge) ||
+          isNonEmptyString(upgrade.minimumReleaseAge) ||
           isActiveConfidenceLevel(upgrade.minimumConfidence!),
       )
     ) {
@@ -406,7 +406,7 @@ export async function processBranch(
       config.stabilityStatus = 'green';
       // Default to 'success' but set 'pending' if any update is pending
       for (const upgrade of config.upgrades) {
-        if (is.nonEmptyString(upgrade.minimumReleaseAge)) {
+        if (isNonEmptyString(upgrade.minimumReleaseAge)) {
           const minimumReleaseAgeBehaviour: MinimumReleaseAgeBehaviour =
             upgrade.minimumReleaseAgeBehaviour ?? 'timestamp-required';
 

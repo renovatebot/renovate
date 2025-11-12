@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
 import type { MinimumReleaseAgeBehaviour } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -82,7 +82,7 @@ export async function filterInternalChecks(
       // Now check for a minimumReleaseAge config
       const { minimumConfidence, minimumReleaseAge, updateType } =
         releaseConfig;
-      if (is.nonEmptyString(minimumReleaseAge)) {
+      if (isNonEmptyString(minimumReleaseAge)) {
         const minimumReleaseAgeBehaviour =
           releaseConfig.minimumReleaseAgeBehaviour;
 
@@ -103,7 +103,7 @@ export async function filterInternalChecks(
           }
         } // or if there is no timestamp, and we're running in `minimumReleaseAgeBehaviour=timestamp-required`
         else if (
-          is.nullOrUndefined(candidateRelease.releaseTimestamp) &&
+          isNullOrUndefined(candidateRelease.releaseTimestamp) &&
           minimumReleaseAgeBehaviour === 'timestamp-required'
         ) {
           // Skip it, as we require a timestamp
@@ -114,7 +114,7 @@ export async function filterInternalChecks(
           continue;
         } // if there is no timestamp, and we're running in `optional` mode, we can allow it
         else if (
-          is.nullOrUndefined(candidateRelease.releaseTimestamp) &&
+          isNullOrUndefined(candidateRelease.releaseTimestamp) &&
           minimumReleaseAgeBehaviour === 'timestamp-optional'
         ) {
           candidateVersionsWithoutReleaseTimestamp[

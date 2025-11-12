@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { miscUtils, structUtils } from '@yarnpkg/core';
 import { parseSyml } from '@yarnpkg/parsers';
 import { logger } from '../../../../logger';
@@ -91,7 +91,7 @@ export function getZeroInstallPaths(yarnrcYml: string): string[] {
 
 export async function isZeroInstall(yarnrcYmlPath: string): Promise<boolean> {
   const yarnrcYml = await readLocalFile(yarnrcYmlPath, 'utf8');
-  if (is.string(yarnrcYml)) {
+  if (isString(yarnrcYml)) {
     const paths = getZeroInstallPaths(yarnrcYml);
     for (const p of paths) {
       if (await localPathExists(getSiblingFileName(yarnrcYmlPath, p))) {

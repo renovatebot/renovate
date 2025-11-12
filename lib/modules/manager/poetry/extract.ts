@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { filterMap } from '../../../util/filter-map';
 import {
@@ -64,7 +64,7 @@ export async function extractPackageFile(
 
   const extractedConstraints: Record<string, any> = {};
 
-  if (is.nonEmptyString(pythonVersion)) {
+  if (isNonEmptyString(pythonVersion)) {
     extractedConstraints.python = pythonVersion;
   }
   res.extractedConstraints = extractedConstraints;

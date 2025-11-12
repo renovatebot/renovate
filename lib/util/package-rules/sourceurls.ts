@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isUndefined } from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { matchRegexOrGlobList } from '../string-match';
 import { Matcher } from './base';
@@ -8,7 +8,7 @@ export class SourceUrlsMatcher extends Matcher {
     { sourceUrl }: PackageRuleInputConfig,
     { matchSourceUrls }: PackageRule,
   ): boolean | null {
-    if (is.undefined(matchSourceUrls)) {
+    if (isUndefined(matchSourceUrls)) {
       return null;
     }
     if (!sourceUrl) {

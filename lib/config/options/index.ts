@@ -596,7 +596,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.24.0',
+    default: 'ghcr.io/containerbase/sidecar:13.24.1',
     globalOnly: true,
   },
   {
@@ -3257,6 +3257,14 @@ const options: RenovateOptions[] = [
     name: 'cachePrivatePackages',
     description:
       'Cache private packages in the datasource cache. This is useful for self-hosted setups',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
+    name: 'configValidationError',
+    description:
+      'If enabled, config validation errors will be reported as errors instead of warnings, and Renovate will exit with a non-zero exit code.',
     type: 'boolean',
     default: false,
     globalOnly: true,

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { parseSingleYaml } from '../../../util/yaml';
 import { NodeVersionDatasource } from '../../datasource/node-version';
@@ -18,7 +18,7 @@ export function extractPackageFile(
     return null;
   }
   let deps: PackageDependency[] = [];
-  if (doc && is.array(doc.node_js)) {
+  if (doc && isArray(doc.node_js)) {
     deps = doc.node_js.map((currentValue) => ({
       depName: 'node',
       datasource: NodeVersionDatasource.id,
@@ -34,13 +34,13 @@ export function extractPackageFile(
     matrix_include = doc.matrix.include;
   }
 
-  if (!is.array(matrix_include)) {
+  if (!isArray(matrix_include)) {
     return deps.length ? { deps } : null;
   }
 
   for (const item of matrix_include) {
     if (item?.node_js) {
-      if (is.array(item.node_js)) {
+      if (isArray(item.node_js)) {
         item.node_js.forEach((currentValue) => {
           deps.push({
             depName: 'node',
@@ -48,7 +48,7 @@ export function extractPackageFile(
             currentValue: currentValue.toString(),
           });
         });
-      } else if (is.string(item.node_js)) {
+      } else if (isString(item.node_js)) {
         deps.push({
           depName: 'node',
           datasource: NodeVersionDatasource.id,

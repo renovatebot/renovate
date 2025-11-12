@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import type * as bunyan from 'bunyan';
 import { once, reset as onceReset } from './once';
 import { getRemappedLevel } from './remap';
@@ -117,7 +117,7 @@ export class RenovateLogger implements Logger {
       const msg = getMessage(p1, p2);
       let level = _level;
 
-      if (is.string(msg)) {
+      if (isString(msg)) {
         const remappedLevel = getRemappedLevel(msg);
         /* v8 ignore next 4 -- not easily testable */
         if (remappedLevel) {
@@ -135,7 +135,7 @@ export class RenovateLogger implements Logger {
     const logOnceFn = (p1: string | Record<string, any>, p2?: string): void => {
       once(() => {
         const logFn = this[level].bind(this); // bind to the instance.
-        if (is.string(p1)) {
+        if (isString(p1)) {
           logFn(p1);
         } else {
           logFn(p1, p2);
@@ -151,7 +151,7 @@ export class RenovateLogger implements Logger {
     p2?: string,
   ): void {
     const logFn = this.logger[level];
-    if (is.string(p1)) {
+    if (isString(p1)) {
       logFn(p1);
     } else {
       logFn(p1, p2);

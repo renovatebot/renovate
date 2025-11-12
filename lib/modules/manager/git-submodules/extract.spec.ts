@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isString } from '@sindresorhus/is';
 import type { Response, SimpleGit } from 'simple-git';
 import Git from 'simple-git';
 import { mock } from 'vitest-mock-extended';
@@ -31,7 +31,7 @@ describe('modules/manager/git-submodules/extract', () => {
 
       gitMock.raw.mockImplementation((options) => {
         if (
-          (is.string(options) || is.array(options, is.string)) &&
+          (isString(options) || isArray(options, isString)) &&
           options.includes('remote.origin.url')
         ) {
           return Promise.resolve(
