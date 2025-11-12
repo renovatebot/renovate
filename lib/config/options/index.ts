@@ -172,6 +172,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'workingDirTemplate',
+    description:
+      'A template describing the working directory in which post-upgrade tasks should be executed.',
+    type: 'string',
+    parents: ['postUpgradeTasks'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'dataFileTemplate',
     description: 'A template to create post-upgrade command data file from.',
     type: 'string',
@@ -228,6 +237,17 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     inheritConfigSupport: true,
     cli: false,
+  },
+  {
+    name: 'configFileNames',
+    description: 'List of filenames where repository config will be stored.',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    globalOnly: true,
+    inheritConfigSupport: true,
+    cli: false,
+    env: false,
   },
   {
     name: 'onboardingConfigFileName',
@@ -576,7 +596,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.8.23',
+    default: 'ghcr.io/containerbase/sidecar:13.24.1',
     globalOnly: true,
   },
   {
@@ -782,6 +802,15 @@ const options: RenovateOptions[] = [
     description: 'Title for the Dependency Dashboard issue.',
     type: 'string',
     default: `Dependency Dashboard`,
+  },
+  {
+    name: 'dependencyDashboardCategory',
+    description:
+      'The category to group branches on the Dependency Dashboard issue.',
+    type: 'string',
+    default: null,
+    cli: false,
+    env: false,
   },
   {
     name: 'dependencyDashboardHeader',
@@ -1104,7 +1133,7 @@ const options: RenovateOptions[] = [
   {
     name: 'useBaseBranchConfig',
     description:
-      'Whether to read configuration from `baseBranches` instead of only the default branch.',
+      'Whether to read configuration from base branches instead of only the default branch.',
     type: 'string',
     allowedValues: ['merge', 'none'],
     default: 'none',
@@ -1947,6 +1976,14 @@ const options: RenovateOptions[] = [
     description: 'Time required before a new release is considered stable.',
     type: 'string',
     default: null,
+  },
+  {
+    name: 'minimumReleaseAgeBehaviour',
+    description:
+      'When set in conjunction with `minimumReleaseAge`, controls whether the `releaseTimestamp` for a dependency update is required.',
+    type: 'string',
+    default: 'timestamp-required',
+    allowedValues: ['timestamp-required', 'timestamp-optional'],
   },
   {
     name: 'abandonmentThreshold',
@@ -2896,6 +2933,16 @@ const options: RenovateOptions[] = [
     parents: ['customManagers'],
     cli: false,
     env: false,
+    requiredIf: [
+      {
+        siblingProperties: [
+          {
+            property: 'customType',
+            value: 'jsonata',
+          },
+        ],
+      },
+    ],
   },
   {
     name: 'matchStrings',
@@ -3026,6 +3073,7 @@ const options: RenovateOptions[] = [
     description:
       'Set to `true` to fetch the entire list of PRs instead of only those authored by the Renovate user.',
     type: 'boolean',
+    globalOnly: true,
     default: false,
   },
   {
@@ -3209,6 +3257,14 @@ const options: RenovateOptions[] = [
     name: 'cachePrivatePackages',
     description:
       'Cache private packages in the datasource cache. This is useful for self-hosted setups',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
+    name: 'configValidationError',
+    description:
+      'If enabled, config validation errors will be reported as errors instead of warnings, and Renovate will exit with a non-zero exit code.',
     type: 'boolean',
     default: false,
     globalOnly: true,

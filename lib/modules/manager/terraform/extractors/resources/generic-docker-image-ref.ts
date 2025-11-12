@@ -1,4 +1,9 @@
-import is from '@sindresorhus/is';
+import {
+  isArray,
+  isNonEmptyObject,
+  isNonEmptyString,
+  isNullOrUndefined,
+} from '@sindresorhus/is';
 import { getDep } from '../../../dockerfile/extract';
 import type { ExtractConfig, PackageDependency } from '../../../types';
 import { DependencyExtractor } from '../../base';
@@ -9,7 +14,9 @@ import { generic_image_datasource, generic_image_resource } from './utils';
 
 export class GenericDockerImageRefExtractor extends DependencyExtractor {
   getCheckList(): string[] {
-    return generic_image_resource.map((value) => `"${value.type}"`);
+    return [...generic_image_resource, ...generic_image_datasource].map(
+      (value) => `"${value.type}"`,
+    );
   }
 
   extract(
@@ -35,7 +42,7 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
     image_definitions: GenericImageResourceDef[],
     config: ExtractConfig,
   ): PackageDependency[] {
-    if (is.nullOrUndefined(typeMap)) {
+    if (isNullOrUndefined(typeMap)) {
       return [];
     }
 
@@ -45,7 +52,7 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
       const { type, path } = image_resource_def;
       const resourceInstancesMap = typeMap[type];
       // is there a resource with current looked at type ( `image_resource_def` )
-      if (!is.nonEmptyObject(resourceInstancesMap)) {
+      if (!isNonEmptyObject(resourceInstancesMap)) {
         continue;
       }
 
@@ -78,7 +85,7 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
     // if there are no path elements left, we have reached the end of the path
     if (leftPath.length === 0) {
       /* v8 ignore next 8 -- needs test */
-      if (!is.nonEmptyString(parentElement)) {
+      if (!isNonEmptyString(parentElement)) {
         return [
           {
             ...abstractDep,
@@ -98,10 +105,10 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
     const pathElement = leftPath[0];
 
     // get sub element
-    const element = is.nonEmptyObject(parentElement)
+    const element = isNonEmptyObject(parentElement)
       ? parentElement[pathElement]
       : null;
-    if (is.nullOrUndefined(element)) {
+    if (isNullOrUndefined(element)) {
       return leftPath.length === 1 // if this is the last element assume a false defined dependency
         ? [
             {
@@ -111,7 +118,7 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
           ]
         : [];
     }
-    if (is.array(element)) {
+    if (isArray(element)) {
       for (const arrayElement of element) {
         dependencies.push(
           ...this.walkPath(

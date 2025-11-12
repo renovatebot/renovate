@@ -1,6 +1,5 @@
 /node_modules
 /.pnpm-store
-/config.js*
 /coverage
 /dist
 /tmp
@@ -17,6 +16,7 @@ renovate-v0.0.0-semantic-release.tgz
 junit.xml
 /test-results
 renovate-schema.json
+renovate-global-schema.json
 **/gradle-wrapper/__fixtures__/**/.gradle
 .clinic/
 
@@ -26,7 +26,11 @@ tools/dist
 test/datasource/nuget/_fixtures/obj
 
 # testing
+/.env
+/.envrc
+/config.js*
 /docker-compose.yml
+/report*.json
 
 # pdm
 /.pdm-python

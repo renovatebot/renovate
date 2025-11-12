@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import {
   getParentDir,
@@ -68,7 +68,7 @@ export async function extractAllPackageFiles(
     // Check if package.json contains workspaces
     const workspaces = res?.managerData?.workspaces;
 
-    if (!is.array(workspaces, is.string)) {
+    if (!isArray(workspaces, isString)) {
       continue;
     }
 

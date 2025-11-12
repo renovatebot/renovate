@@ -1,8 +1,8 @@
 import { BaseBranchMigration } from './base-branch-migration';
 
 describe('config/migrations/custom/base-branch-migration', () => {
-  it('should migrate value to array', () => {
-    expect(BaseBranchMigration).toMigrate(
+  it('should migrate value to array', async () => {
+    await expect(BaseBranchMigration).toMigrate(
       {
         baseBranch: 'test',
       },
@@ -12,8 +12,8 @@ describe('config/migrations/custom/base-branch-migration', () => {
     );
   });
 
-  it('should migrate array', () => {
-    expect(BaseBranchMigration).toMigrate(
+  it('should migrate array', async () => {
+    await expect(BaseBranchMigration).toMigrate(
       {
         baseBranch: ['test'],
       } as any,
@@ -23,8 +23,8 @@ describe('config/migrations/custom/base-branch-migration', () => {
     );
   });
 
-  it('should push to existing bassBranchPatterns', () => {
-    expect(BaseBranchMigration).toMigrate(
+  it('should push to existing bassBranchPatterns', async () => {
+    await expect(BaseBranchMigration).toMigrate(
       {
         baseBranch: ['test'],
         baseBranchPatterns: ['base'],

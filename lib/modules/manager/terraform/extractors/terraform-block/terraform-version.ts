@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { GithubReleasesDatasource } from '../../../../datasource/github-releases';
 import * as hashicorp from '../../../../versioning/hashicorp';
 import type { PackageDependency } from '../../../types';
@@ -12,14 +12,14 @@ export class TerraformVersionExtractor extends DependencyExtractor {
 
   extract(hclRoot: TerraformDefinitionFile): PackageDependency[] {
     const terraformBlocks = hclRoot?.terraform;
-    if (is.nullOrUndefined(terraformBlocks)) {
+    if (isNullOrUndefined(terraformBlocks)) {
       return [];
     }
 
     const dependencies = [];
     for (const terraformBlock of terraformBlocks) {
       const requiredVersion = terraformBlock.required_version;
-      if (is.nullOrUndefined(requiredVersion)) {
+      if (isNullOrUndefined(requiredVersion)) {
         continue;
       }
 

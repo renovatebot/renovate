@@ -13,6 +13,7 @@ describe('modules/versioning/debian/common', () => {
     expect(rollingReleases.has('buster')).toBeFalse();
     expect(rollingReleases.has('trixie')).toBeFalse();
     expect(logger.debug).toHaveBeenCalledTimes(1);
+
     expect(logger.debug).toHaveBeenCalledWith(
       'RollingReleasesData - data written',
     );

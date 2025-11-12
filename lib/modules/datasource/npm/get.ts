@@ -1,4 +1,4 @@
-import is, { isString } from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { z } from 'zod';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -148,7 +148,7 @@ export async function getDependency(
         release.isDeprecated = true;
       }
       const nodeConstraint = res.versions?.[version].engines?.node;
-      if (is.nonEmptyString(nodeConstraint)) {
+      if (isNonEmptyString(nodeConstraint)) {
         release.constraints = { node: [nodeConstraint] };
       }
       const source = PackageSource.parse(res.versions?.[version].repository);

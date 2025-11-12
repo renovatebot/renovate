@@ -69,13 +69,13 @@ describe('modules/platform/default-scm', () => {
   it('delegate mergeBranch to util/git allowBehindBase=true', async () => {
     git.mergeBranch.mockResolvedValueOnce();
     await defaultGitScm.mergeAndPush('branchName', true);
-    expect(git.mergeBranch).toHaveBeenCalledWith('branchName', true);
+    expect(git.mergeBranch).toHaveBeenCalledExactlyOnceWith('branchName');
   });
 
   it('delegate mergeBranch to util/git', async () => {
     git.mergeToLocal.mockResolvedValueOnce();
     await defaultGitScm.mergeToLocal('branchName');
-    expect(git.mergeToLocal).toHaveBeenCalledWith('branchName');
+    expect(git.mergeToLocal).toHaveBeenCalledExactlyOnceWith('branchName');
   });
 
   it('syncs fork with upstream', async () => {
@@ -84,6 +84,8 @@ describe('modules/platform/default-scm', () => {
       RENOVATE_FORK_UPSTREAM,
     ]);
     await defaultGitScm.syncForkWithUpstream('branchName');
-    expect(git.syncForkWithUpstream).toHaveBeenCalledWith('branchName');
+    expect(git.syncForkWithUpstream).toHaveBeenCalledExactlyOnceWith(
+      'branchName',
+    );
   });
 });

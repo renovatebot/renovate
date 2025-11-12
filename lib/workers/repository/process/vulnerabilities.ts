@@ -1,9 +1,15 @@
 // TODO #22198
 import type { Ecosystem, Osv } from '@renovatebot/osv-offline';
 import { OsvOffline } from '@renovatebot/osv-offline';
-import is from '@sindresorhus/is';
-import type { CvssScore } from 'vuln-vects';
-import { parseCvssVector } from 'vuln-vects';
+import {
+  isEmptyArray,
+  isNonEmptyString,
+  isNullOrUndefined,
+  isTruthy,
+} from '@sindresorhus/is';
+import type { CvssVector } from 'ae-cvss-calculator';
+import { fromVector } from 'ae-cvss-calculator';
+import { z } from 'zod';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { PackageRule, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -74,7 +80,7 @@ export class Vulnerabilities {
       const groupPackageRules: PackageRule[] = [];
       for (const vulnerability of vulnerabilities) {
         const rule = this.vulnerabilityToPackageRules(vulnerability);
-        if (is.nullOrUndefined(rule)) {
+        if (isNullOrUndefined(rule)) {
           continue;
         }
         groupPackageRules.push(rule);
@@ -148,7 +154,7 @@ export class Vulnerabilities {
       'fetchManagerPackageFileVulnerabilities finished',
     );
 
-    return result.filter(is.truthy);
+    return result.filter(isTruthy);
   }
 
   private async fetchDependencyVulnerability(
@@ -173,8 +179,8 @@ export class Vulnerabilities {
         packageName,
       );
       if (
-        is.nullOrUndefined(osvVulnerabilities) ||
-        is.emptyArray(osvVulnerabilities)
+        isNullOrUndefined(osvVulnerabilities) ||
+        isEmptyArray(osvVulnerabilities)
       ) {
         logger.trace(
           `No vulnerabilities found in OSV database for ${packageName}`,
@@ -326,18 +332,18 @@ export class Vulnerabilities {
       let vulnerable = false;
       for (const event of this.sortEvents(range.events, versioningApi)) {
         if (
-          is.nonEmptyString(event.introduced) &&
+          isNonEmptyString(event.introduced) &&
           (event.introduced === '0' ||
             this.isVersionGtOrEq(depVersion, event.introduced, versioningApi))
         ) {
           vulnerable = true;
         } else if (
-          is.nonEmptyString(event.fixed) &&
+          isNonEmptyString(event.fixed) &&
           this.isVersionGtOrEq(depVersion, event.fixed, versioningApi)
         ) {
           vulnerable = false;
         } else if (
-          is.nonEmptyString(event.last_affected) &&
+          isNonEmptyString(event.last_affected) &&
           this.isVersionGt(depVersion, event.last_affected, versioningApi)
         ) {
           vulnerable = false;
@@ -383,12 +389,12 @@ export class Vulnerabilities {
 
       for (const event of range.events) {
         if (
-          is.nonEmptyString(event.fixed) &&
+          isNonEmptyString(event.fixed) &&
           versioningApi.isVersion(event.fixed)
         ) {
           fixedVersions.push(event.fixed);
         } else if (
-          is.nonEmptyString(event.last_affected) &&
+          isNonEmptyString(event.last_affected) &&
           versioningApi.isVersion(event.last_affected)
         ) {
           lastAffectedVersions.push(event.last_affected);
@@ -474,7 +480,7 @@ export class Vulnerabilities {
       datasource,
       packageFileConfig,
     } = vul;
-    if (is.nullOrUndefined(fixedVersion)) {
+    if (isNullOrUndefined(fixedVersion)) {
       logger.debug(
         `No fixed version available for vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`,
       );
@@ -504,12 +510,17 @@ export class Vulnerabilities {
     };
   }
 
-  private evaluateCvssVector(vector: string): [string, string] {
-    try {
-      const parsedCvss: CvssScore = parseCvssVector(vector);
-      const severityLevel = parsedCvss.cvss3OverallSeverityText;
+  static evaluateCvssVector(vector: string): [string, string] {
+    const CvssJsonSchema = z.object({
+      baseScore: z.number().default(0.0),
+      baseSeverity: z.string().toUpperCase().default('UNKNOWN'),
+    });
 
-      return [parsedCvss.baseScore.toFixed(1), severityLevel];
+    try {
+      const parsedCvssScore: CvssVector<any> | null = fromVector(vector);
+      const res = CvssJsonSchema.parse(parsedCvssScore?.createJsonSchema());
+
+      return [res.baseScore.toFixed(1), res.baseSeverity];
     } catch {
       logger.debug(`Error processing CVSS vector ${vector}`);
     }
@@ -592,12 +603,13 @@ export class Vulnerabilities {
     let score = 'Unknown';
 
     const cvssVector =
+      vulnerability.severity?.find((e) => e.type === 'CVSS_V4')?.score ??
       vulnerability.severity?.find((e) => e.type === 'CVSS_V3')?.score ??
-      vulnerability.severity?.[0]?.score ??
       (affected.database_specific?.cvss as string); // RUSTSEC
 
     if (cvssVector) {
-      const [baseScore, severity] = this.evaluateCvssVector(cvssVector);
+      const [baseScore, severity] =
+        Vulnerabilities.evaluateCvssVector(cvssVector);
       severityLevel = severity ? severity.toUpperCase() : 'UNKNOWN';
       score = baseScore
         ? `${baseScore} / 10 (${titleCase(severityLevel)})`

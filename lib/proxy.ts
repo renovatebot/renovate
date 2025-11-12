@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { createGlobalProxyAgent } from 'global-agent';
 import { logger } from './logger';
 
@@ -24,8 +24,8 @@ export function bootstrap(): void {
   });
 
   if (
-    is.nonEmptyString(process.env.HTTP_PROXY) ||
-    is.nonEmptyString(process.env.HTTPS_PROXY)
+    isNonEmptyString(process.env.HTTP_PROXY) ||
+    isNonEmptyString(process.env.HTTPS_PROXY)
   ) {
     createGlobalProxyAgent({
       environmentVariableNamespace: '',

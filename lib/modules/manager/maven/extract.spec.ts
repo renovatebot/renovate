@@ -240,6 +240,7 @@ describe('modules/manager/maven/extract', () => {
         'some-file',
         {},
       );
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Your pom.xml contains windows line endings. This is not supported and may result in parsing issues.',
       );

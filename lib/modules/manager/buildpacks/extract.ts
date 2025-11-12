@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { BuildpacksRegistryDatasource } from '../../datasource/buildpacks-registry';
@@ -100,7 +100,7 @@ export function extractPackageFile(
 
   if (
     descriptor.io?.buildpacks?.group &&
-    is.array(descriptor.io.buildpacks.group)
+    isArray(descriptor.io.buildpacks.group)
   ) {
     for (const group of descriptor.io.buildpacks.group) {
       if (isBuildpackByURI(group) && isDockerRef(group.uri)) {

@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 // TODO #22198
-import is from '@sindresorhus/is';
+import { isArray, isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
 import upath from 'upath';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
@@ -10,6 +10,7 @@ import { coerceArray } from '../../../../util/array';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions } from '../../../../util/exec/types';
 import {
+  ensureLocalDir,
   localPathIsFile,
   outputCacheFile,
   privateCacheDir,
@@ -17,6 +18,7 @@ import {
   writeLocalFile,
 } from '../../../../util/fs';
 import { getRepoStatus } from '../../../../util/git';
+import { getGitEnvironmentVariables } from '../../../../util/git/auth';
 import type { FileChange } from '../../../../util/git/types';
 import { minimatch } from '../../../../util/minimatch';
 import { regEx } from '../../../../util/regex';
@@ -49,7 +51,7 @@ export async function postUpgradeCommandsExecutor(
     const commands = upgrade.postUpgradeTasks?.commands;
     const dataFileTemplate = upgrade.postUpgradeTasks?.dataFileTemplate;
     const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? ['**/*'];
-    if (is.nonEmptyArray(commands)) {
+    if (isNonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
       const previouslyModifiedFiles =
         config.updatedPackageFiles!.concat(updatedArtifacts);
@@ -98,6 +100,20 @@ export async function postUpgradeCommandsExecutor(
         }
       }
 
+      const workingDirTemplate = upgrade.postUpgradeTasks?.workingDirTemplate;
+      let workingDir: string | null = null;
+
+      if (workingDirTemplate) {
+        workingDir = sanitize(
+          compile(workingDirTemplate, mergeChildConfig(config, upgrade)),
+        );
+        await ensureLocalDir(workingDir);
+        logger.trace(
+          { workingDirTemplate },
+          'Processed post-upgrade commands working directory template.',
+        );
+      }
+
       for (const cmd of commands) {
         const compiledCmd = compile(cmd, mergeChildConfig(config, upgrade));
         if (compiledCmd !== cmd) {
@@ -113,7 +129,10 @@ export async function postUpgradeCommandsExecutor(
             logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
 
             const execOpts: ExecOptions = {
-              cwd: GlobalConfig.get('localDir'),
+              cwd: isNonEmptyString(workingDir)
+                ? workingDir
+                : GlobalConfig.get('localDir'),
+              extraEnv: getGitEnvironmentVariables(),
             };
             if (dataFilePath) {
               execOpts.env = {
@@ -198,7 +217,20 @@ export async function postUpgradeCommandsExecutor(
         `Checking ${addedOrModifiedFiles.length} added or modified files for post-upgrade changes`,
       );
 
+      const fileExcludes: string[] = [];
+      if (config.npmrc) {
+        fileExcludes.push('.npmrc');
+      }
+
       for (const relativePath of addedOrModifiedFiles) {
+        if (
+          fileExcludes.some((pattern) =>
+            minimatch(pattern, { dot: true }).match(relativePath),
+          )
+        ) {
+          continue;
+        }
+
         let fileMatched = false;
         for (const pattern of fileFilters) {
           if (minimatch(pattern, { dot: true }).match(relativePath)) {
@@ -267,9 +299,9 @@ export default async function executePostUpgradeCommands(
   config: BranchConfig,
 ): Promise<PostUpgradeCommandsExecutionResult | null> {
   const hasChangedFiles =
-    (is.array(config.updatedPackageFiles) &&
+    (isArray(config.updatedPackageFiles) &&
       config.updatedPackageFiles.length > 0) ||
-    (is.array(config.updatedArtifacts) && config.updatedArtifacts.length > 0);
+    (isArray(config.updatedArtifacts) && config.updatedArtifacts.length > 0);
 
   if (!hasChangedFiles) {
     /* Only run post-upgrade tasks if there are changes to package files... */

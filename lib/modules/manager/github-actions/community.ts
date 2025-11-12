@@ -5,9 +5,11 @@ import { escapeRegExp, regEx } from '../../../util/regex';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { NpmDatasource } from '../../datasource/npm';
 import { PypiDatasource } from '../../datasource/pypi';
+import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import * as condaVersioning from '../../versioning/conda';
 import * as npmVersioning from '../../versioning/npm';
 import * as pep440versioning from '../../versioning/pep440';
+import * as rubyVersioning from '../../versioning/ruby';
 import type { PackageDependency } from '../types';
 
 function matchAction(action: string): z.Schema {
@@ -66,6 +68,87 @@ const SetupPnpm = z
       ...(skipStage && { skipStage }),
       ...(skipReason && { skipReason }),
       currentValue: val.version,
+      depType: 'uses-with',
+    };
+  });
+
+const SetupBun = z
+  .object({
+    uses: matchAction('oven-sh/setup-bun'),
+    with: z.object({
+      'bun-version': z.string().optional(),
+    }),
+  })
+  .transform(({ with: val }): PackageDependency => {
+    let skipStage: StageName | undefined;
+    let skipReason: SkipReason | undefined;
+    if (!val['bun-version']) {
+      skipStage = 'extract';
+      skipReason = 'unspecified-version';
+    }
+
+    return {
+      datasource: NpmDatasource.id,
+      depName: 'bun',
+      versioning: npmVersioning.id,
+      packageName: 'bun',
+      ...(skipStage && { skipStage }),
+      ...(skipReason && { skipReason }),
+      currentValue: val['bun-version'],
+      depType: 'uses-with',
+    };
+  });
+
+const SetupDeno = z
+  .object({
+    uses: matchAction('denoland/setup-deno'),
+    with: z.object({
+      'deno-version': z.string().optional(),
+    }),
+  })
+  .transform(({ with: val }): PackageDependency => {
+    let skipStage: StageName | undefined;
+    let skipReason: SkipReason | undefined;
+    if (!val['deno-version']) {
+      skipStage = 'extract';
+      skipReason = 'unspecified-version';
+    }
+
+    return {
+      datasource: NpmDatasource.id,
+      depName: 'deno',
+      versioning: npmVersioning.id,
+      packageName: 'deno',
+      ...(skipStage && { skipStage }),
+      ...(skipReason && { skipReason }),
+      currentValue: val['deno-version'],
+      depType: 'uses-with',
+    };
+  });
+
+const SetupRuby = z
+  .object({
+    uses: matchAction('ruby/setup-ruby'),
+    with: z.object({
+      'ruby-version': z.string().optional(),
+    }),
+  })
+  .transform(({ with: val }): PackageDependency => {
+    let skipStage: StageName | undefined;
+    let skipReason: SkipReason | undefined;
+    if (!val['ruby-version']) {
+      skipStage = 'extract';
+      skipReason = 'unspecified-version';
+    }
+
+    return {
+      datasource: RubyVersionDatasource.id,
+      depName: 'ruby',
+      versioning: rubyVersioning.id,
+      packageName: 'ruby',
+      ...(skipStage && { skipStage }),
+      ...(skipReason && { skipReason }),
+      currentValue: val['ruby-version'],
       depType: 'uses-with',
     };
   });
@@ -129,6 +212,34 @@ const SetupPixi = z
     };
   });
 
+const SetupHatch = z
+  .object({
+    // https://github.com/pypa/hatch/tree/install
+    uses: matchAction('pypa/hatch'),
+    with: z.object({ version: z.string().optional() }),
+  })
+  .transform(({ with: val }): PackageDependency => {
+    let skipStage: StageName | undefined;
+    let skipReason: SkipReason | undefined;
+
+    if (!val.version) {
+      skipStage = 'extract';
+      skipReason = 'unspecified-version';
+    }
+
+    return {
+      datasource: GithubReleasesDatasource.id,
+      depName: 'pypa/hatch',
+      packageName: 'pypa/hatch',
+      ...(skipStage && { skipStage }),
+      ...(skipReason && { skipReason }),
+      currentValue: val.version,
+      depType: 'uses-with',
+      // Strip hatch- prefix from release tags
+      extractVersion: '^hatch-(?<version>.+)$',
+    };
+  });
+
 /**
  * schema here should match the whole step,
  * there may be some actions use env as arguments version.
@@ -141,4 +252,8 @@ export const CommunityActions = z.union([
   SetupPixi,
   SetupPnpm,
   SetupUV,
+  SetupBun,
+  SetupDeno,
+  SetupRuby,
+  SetupHatch,
 ]);

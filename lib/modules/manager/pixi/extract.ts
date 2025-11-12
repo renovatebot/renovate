@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { z } from 'zod';
 
 import { logger } from '../../../logger';
@@ -159,7 +159,7 @@ function channelToRegistryUrl(channel: string): string {
 function orderChannels(channels: Channels = []): string[] {
   return channels
     .map((channel, index) => {
-      if (is.string(channel)) {
+      if (isString(channel)) {
         return { channel, priority: 0, index };
       }
 

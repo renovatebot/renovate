@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isPlainObject, isUndefined } from '@sindresorhus/is';
 import merge from 'deepmerge';
 import type { Options, RetryObject } from 'got';
 import type { Merge, SetRequired } from 'type-fest';
@@ -18,6 +18,7 @@ import { ObsoleteCacheHitLogger } from '../stats';
 import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url';
 import { parseSingleYaml } from '../yaml';
 import { applyAuthorization, removeAuthorization } from './auth';
+import type { HttpCacheProvider } from './cache/types';
 import { fetch, stream } from './got';
 import { applyHostRule, findMatchingRule } from './host-rules';
 
@@ -66,7 +67,7 @@ export function applyDefaultHeaders(options: Options): void {
     ...options.headers,
     'user-agent':
       GlobalConfig.get('userAgent') ??
-      `RenovateBot/${renovateVersion} (https://github.com/renovatebot/renovate)`,
+      `Renovate/${renovateVersion} (https://github.com/renovatebot/renovate)`,
   };
 }
 
@@ -97,7 +98,7 @@ export abstract class HttpBase<
           maxRetryAfter: 0, // Don't rely on `got` retry-after handling, just let it fail and then we'll handle it
         },
       },
-      { isMergeableObject: is.plainObject },
+      { isMergeableObject: isPlainObject },
     );
   }
   private async request(
@@ -132,10 +133,13 @@ export abstract class HttpBase<
         hostType: this.hostType,
       },
       httpOptions,
-      { isMergeableObject: is.plainObject },
+      { isMergeableObject: isPlainObject },
     );
 
-    logger.trace(`HTTP request: ${options.method.toUpperCase()} ${url}`);
+    const method = options.method.toLowerCase();
+    const isReadMethod = ['head', 'get'].includes(method);
+
+    logger.trace(`HTTP request: ${method.toUpperCase()} ${url}`);
 
     options.hooks = {
       beforeRedirect: [removeAuthorization],
@@ -143,10 +147,7 @@ export abstract class HttpBase<
 
     applyDefaultHeaders(options);
 
-    if (
-      is.undefined(options.readOnly) &&
-      ['head', 'get'].includes(options.method)
-    ) {
+    if (isUndefined(options.readOnly) && isReadMethod) {
       options.readOnly = true;
     }
 
@@ -159,23 +160,29 @@ export abstract class HttpBase<
     options = applyAuthorization(options);
     options.timeout ??= 60000;
 
-    const { cacheProvider } = options;
+    let cacheProvider: HttpCacheProvider | undefined;
+    if (isReadMethod && options.cacheProvider) {
+      cacheProvider = options.cacheProvider;
+    }
 
     const memCacheKey =
       !process.env.RENOVATE_X_DISABLE_HTTP_MEMCACHE &&
       !cacheProvider &&
       options.memCache !== false &&
-      (options.method === 'get' || options.method === 'head')
+      isReadMethod
         ? hash(
             `got-${JSON.stringify({
               url,
               headers: options.headers,
-              method: options.method,
+              method,
             })}`,
           )
         : null;
 
-    const cachedResponse = await cacheProvider?.bypassServer<unknown>(url);
+    const cachedResponse = await cacheProvider?.bypassServer<unknown>(
+      method,
+      url,
+    );
     if (cachedResponse) {
       return cachedResponse;
     }
@@ -195,7 +202,7 @@ export abstract class HttpBase<
 
     if (!resPromise) {
       if (cacheProvider) {
-        await cacheProvider.setCacheHeaders(url, options);
+        await cacheProvider.setCacheHeaders(method, url, options);
       }
 
       const startTime = Date.now();
@@ -208,9 +215,7 @@ export abstract class HttpBase<
       const throttledTask = throttle ? () => throttle.add(httpTask) : httpTask;
 
       const queue = getQueue(url);
-      const queuedTask = queue
-        ? () => queue.add(throttledTask, { throwOnTimeout: true })
-        : throttledTask;
+      const queuedTask = queue ? () => queue.add(throttledTask) : throttledTask;
 
       const { maxRetryAfter = 60 } = hostRule;
       resPromise = wrapWithRetry(queuedTask, url, getRetryAfter, maxRetryAfter);
@@ -227,7 +232,7 @@ export abstract class HttpBase<
       resCopy.authorization = !!options?.headers?.authorization;
 
       if (cacheProvider) {
-        return await cacheProvider.wrapServerResponse(url, resCopy);
+        return await cacheProvider.wrapServerResponse(method, url, resCopy);
       }
 
       return resCopy;
@@ -238,6 +243,7 @@ export abstract class HttpBase<
       }
 
       const staleResponse = await cacheProvider?.bypassServer<string | Buffer>(
+        method,
         url,
         true,
       );
@@ -265,9 +271,9 @@ export abstract class HttpBase<
     throw err;
   }
 
-  protected resolveUrl(
+  resolveUrl(
     requestUrl: string | URL,
-    options: HttpOptions | undefined,
+    options: HttpOptions | undefined = undefined,
   ): URL {
     let url = requestUrl;
 
@@ -643,7 +649,7 @@ export abstract class HttpBase<
     applyDefaultHeaders(combinedOptions);
 
     if (
-      is.undefined(combinedOptions.readOnly) &&
+      isUndefined(combinedOptions.readOnly) &&
       ['head', 'get'].includes(combinedOptions.method)
     ) {
       combinedOptions.readOnly = true;

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import type { Category } from '../../../../constants';
 import { logger } from '../../../../logger';
 import type { MaybePromise } from '../../../../types';
@@ -47,7 +47,7 @@ export function extractPackageFile(
   }
 
   // filter all null values
-  deps = deps.filter(is.truthy);
+  deps = deps.filter(isTruthy);
   if (deps.length) {
     const res: PackageFileContent & RegexManagerTemplates = {
       deps,
