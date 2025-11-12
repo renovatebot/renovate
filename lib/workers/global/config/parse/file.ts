@@ -1,6 +1,5 @@
 import {
   isEmptyStringOrWhitespace,
-  isNonEmptyArray,
   isNonEmptyObject,
   isNonEmptyString,
   isUndefined,
@@ -68,15 +67,6 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
       'processEnv keys were exported to env',
     );
     delete config.processEnv;
-  }
-
-  if (isNonEmptyArray(config.configFileNames)) {
-    logger.debug(
-      { configFileNames: config.configFileNames },
-      'Updated the config filenames list',
-    );
-    setUserConfigFileNames(config.configFileNames);
-    delete config.configFileNames;
   }
 
   return migrateAndValidateConfig(config, configFile);
