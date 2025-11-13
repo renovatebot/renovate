@@ -778,7 +778,7 @@ export async function lookupUpdates(
       return Result.err(err);
     }
 
-    logger.warn(
+    logger.error(
       {
         currentDigest: config.currentDigest,
         currentValue: config.currentValue,
