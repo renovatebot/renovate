@@ -597,6 +597,14 @@ All messages are prefixed with `bumpVersions` or `bumpVersions(<name>)` to help 
 }
 ```
 
+**short versions**
+
+It's possible to bump short versions:
+
+- `1` -> `2` (major)
+- `1.1` -> `2.0` (major)
+- `1.2` -> `1.3` (minor)
+
 ### bumpType
 
 The `bumpType` field specifies the type of version bump to apply.
