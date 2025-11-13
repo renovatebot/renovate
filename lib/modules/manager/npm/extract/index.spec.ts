@@ -14,6 +14,7 @@ const defaultExtractConfig = {
 } satisfies ExtractConfig;
 
 const input01Content = Fixtures.get('inputs/01.json', '..');
+const input01YamlContent = Fixtures.get('inputs/01.yaml', '..');
 const input02Content = Fixtures.get('inputs/02.json', '..');
 const input01PackageManager = Fixtures.get(
   'inputs/01-package-manager.json',
@@ -37,6 +38,15 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         'not json',
         'package.json',
+        defaultExtractConfig,
+      );
+      expect(res).toBeNull();
+    });
+
+    it('returns null if cannot parse the yaml', async () => {
+      const res = await npmExtract.extractPackageFile(
+        'invalid: yaml :',
+        'package.yaml',
         defaultExtractConfig,
       );
       expect(res).toBeNull();
@@ -114,6 +124,146 @@ describe('modules/manager/npm/extract/index', () => {
           { depName: 'angular', currentValue: '1.33.0' },
           { depName: 'glob', currentValue: '1.0.0' },
         ],
+      });
+    });
+
+    it('returns an array of dependencies in yaml', async () => {
+      const res = await npmExtract.extractPackageFile(
+        input01YamlContent,
+        'package.yaml',
+        defaultExtractConfig,
+      );
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: '6.5.0',
+            datasource: 'npm',
+            depName: 'autoprefixer',
+            depType: 'dependencies',
+            prettyDepType: 'dependency',
+          },
+          {
+            currentValue: '~1.6.0',
+            datasource: 'npm',
+            depName: 'bower',
+            depType: 'dependencies',
+            prettyDepType: 'dependency',
+          },
+          {
+            currentValue: '13.1.0',
+            datasource: 'npm',
+            depName: 'browserify',
+            depType: 'dependencies',
+            prettyDepType: 'dependency',
+          },
+          {
+            currentValue: '0.9.2',
+            datasource: 'npm',
+            depName: 'browserify-css',
+            depType: 'dependencies',
+            prettyDepType: 'dependency',
+          },
+          {
+            currentValue: '=0.22.0',
+            datasource: 'npm',
+            depName: 'cheerio',
+            depType: 'dependencies',
+            prettyDepType: 'dependency',
+          },
+          {
+            currentValue: '1.21.0',
+            datasource: 'npm',
+            depName: 'config',
+            depType: 'dependencies',
+            prettyDepType: 'dependency',
+          },
+          {
+            depName: 'enabled',
+            depType: 'devDependencies',
+            prettyDepType: 'devDependency',
+            skipReason: 'invalid-value',
+          },
+          {
+            currentValue: '^1.5.8',
+            datasource: 'npm',
+            depName: 'angular',
+            depType: 'devDependencies',
+            prettyDepType: 'devDependency',
+          },
+          {
+            currentValue: '1.5.8',
+            datasource: 'npm',
+            depName: 'angular-touch',
+            depType: 'devDependencies',
+            prettyDepType: 'devDependency',
+          },
+          {
+            currentValue: '1.5.8',
+            datasource: 'npm',
+            depName: 'angular-sanitize',
+            depType: 'devDependencies',
+            prettyDepType: 'devDependency',
+          },
+          {
+            currentValue: '4.0.0-beta.1',
+            datasource: 'npm',
+            depName: '@angular/core',
+            depType: 'devDependencies',
+            prettyDepType: 'devDependency',
+          },
+          {
+            currentValue: '1.21.0',
+            datasource: 'npm',
+            depName: 'config',
+            depType: 'resolutions',
+            prettyDepType: 'resolutions',
+          },
+          {
+            currentValue: '8.0.0',
+            datasource: 'npm',
+            depName: '@angular/cli',
+            depType: 'resolutions',
+            managerData: {
+              key: '**/@angular/cli',
+            },
+            prettyDepType: 'resolutions',
+          },
+          {
+            currentValue: '1.33.0',
+            datasource: 'npm',
+            depName: 'angular',
+            depType: 'resolutions',
+            managerData: {
+              key: '**/angular',
+            },
+            prettyDepType: 'resolutions',
+          },
+          {
+            currentValue: '1.0.0',
+            datasource: 'npm',
+            depName: 'glob',
+            depType: 'resolutions',
+            managerData: {
+              key: 'config/glob',
+            },
+            prettyDepType: 'resolutions',
+          },
+        ],
+        extractedConstraints: {},
+        managerData: {
+          hasPackageManager: false,
+          npmLock: undefined,
+          npmrcFileName: undefined,
+          packageJsonName: 'renovate',
+          pnpmShrinkwrap: undefined,
+          workspaces: undefined,
+          workspacesPackages: undefined,
+          yarnLock: undefined,
+          yarnZeroInstall: false,
+        },
+        npmrc: undefined,
+        packageFileVersion: '1.0.0',
+        skipInstalls: true,
       });
     });
 
