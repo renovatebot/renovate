@@ -2,9 +2,8 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { GitDatasource, GitError } from './base';
+import { GitDatasource } from './base';
 import type { RawRefs } from './types';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
 
 // git will prompt for known hosts or passwords, unless we activate BatchMode
 process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
@@ -67,17 +66,7 @@ export class GitRefsDatasource extends GitDatasource {
     { packageName }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    let rawRefs: RawRefs[] | null = null;
-
-    try {
-      rawRefs = await this.getRawRefs({ packageName });
-    } catch (err) {
-      if (err instanceof GitError) {
-        throw new ExternalHostError(err);
-      }
-
-      throw err;
-    }
+    const rawRefs: RawRefs[] | null = await this.getRawRefs({ packageName });
 
     /* v8 ignore next 3 -- TODO: add test */
     if (!rawRefs) {

@@ -1,9 +1,7 @@
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
-import { GitDatasource, GitError } from '../git-refs/base';
-import type { RawRefs } from '../git-refs/types';
+import { GitDatasource } from '../git-refs/base';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
 
 export class GitTagsDatasource extends GitDatasource {
   static override readonly id = 'git-tags';
@@ -24,17 +22,7 @@ export class GitTagsDatasource extends GitDatasource {
   async getReleases({
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    let rawRefs: RawRefs[] | null = null;
-
-    try {
-      rawRefs = await this.getRawRefs({ packageName });
-    } catch (err) {
-      if (err instanceof GitError) {
-        throw new ExternalHostError(err);
-      }
-
-      throw err;
-    }
+    const rawRefs = await this.getRawRefs({ packageName });
 
     if (rawRefs === null) {
       return null;
@@ -63,18 +51,7 @@ export class GitTagsDatasource extends GitDatasource {
     { packageName }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    let rawRefs: RawRefs[] | null = null;
-
-    try {
-      rawRefs = await this.getRawRefs({ packageName });
-    } catch (err) {
-      if (err instanceof GitError) {
-        throw new ExternalHostError(err);
-      }
-
-      throw err;
-    }
-
+    const rawRefs = await this.getRawRefs({ packageName });
     const findValue = newValue ?? 'HEAD';
     const ref = rawRefs?.find((rawRef) => rawRef.value === findValue);
     if (ref) {
