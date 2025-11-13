@@ -136,6 +136,11 @@ export const presets: Record<string, Preset> = {
     dependencyDashboardApproval: true,
     description: 'Enable Renovate Dependency Dashboard approval workflow.',
   },
+  dependencyDashboardWithAutoclose: {
+    dependencyDashboard: true,
+    dependencyDashboardAutoclose: true,
+    description: 'Enable Renovate Dependency Dashboard creation with autoclose.',
+  },
   disableDependencyDashboard: {
     dependencyDashboard: false,
     description: 'Disable Renovate Dependency Dashboard creation.',
