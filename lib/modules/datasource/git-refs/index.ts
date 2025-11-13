@@ -70,7 +70,7 @@ export class GitRefsDatasource extends GitDatasource {
 
     try {
       rawRefs = await this.getRawRefs({ packageName });
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) {
       logger.debug({ err }, 'Error getting git-refs');
     }
 
