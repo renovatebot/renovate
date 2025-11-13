@@ -621,10 +621,13 @@ describe('modules/manager/poetry/extract', () => {
     const content = codeBlock`
         [project]
         dependencies = ["click"]
+        [project.optional-dependencies]
+        other = ["zoom==1.0.0"]
         [dependency-groups]
         typing = ["mypy==1.13.0", "types-requests"]
         [tool.poetry.dependencies]
         click = { source = "artifactory" }
+        zoom = { source = "artifactory" }
         [tool.poetry.group.typing.dependencies]
         types-requests = { source = "artifactory" }
         [tool.poetry.group.typing.dependencies.mypy]
@@ -639,6 +642,15 @@ describe('modules/manager/poetry/extract', () => {
         skipReason: 'unspecified-version',
         depName: 'click',
         managerData: { sourceName: 'artifactory' },
+      },
+      {
+        packageName: 'zoom',
+        datasource: 'pypi',
+        depType: 'project.optional-dependencies',
+        currentValue: '==1.0.0',
+        currentVersion: '1.0.0',
+        depName: 'zoom',
+        managerData: { depGroup: 'other', sourceName: 'artifactory' },
       },
       {
         packageName: 'mypy',
