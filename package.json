@@ -176,7 +176,7 @@
     "@renovatebot/detect-tools": "1.2.4",
     "@renovatebot/osv-offline": "1.7.10",
     "@renovatebot/pep440": "4.2.1",
-    "@renovatebot/pgp": "1.1.0",
+    "@renovatebot/pgp": "1.1.1",
     "@renovatebot/ruby-semver": "4.1.2",
     "@sindresorhus/is": "7.1.1",
     "@yarnpkg/core": "4.4.4",
