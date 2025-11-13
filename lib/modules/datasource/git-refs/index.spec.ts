@@ -181,5 +181,14 @@ describe('modules/datasource/git-refs/index', () => {
         GIT_CONFIG_VALUE_2: 'https://git.example.com/',
       });
     });
+
+    it('returns nil if remote call throws exception', async () => {
+      gitMock.listRemote.mockRejectedValue(new Error());
+
+      const digest = await new GitRefsDatasource().getDigest({
+        packageName,
+      });
+      expect(digest).toBeNull();
+    });
   });
 });

@@ -66,7 +66,13 @@ export class GitRefsDatasource extends GitDatasource {
     { packageName }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    const rawRefs: RawRefs[] | null = await this.getRawRefs({ packageName });
+    let rawRefs: RawRefs[] | null = null;
+
+    try {
+      rawRefs = await this.getRawRefs({ packageName });
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug({ err }, 'Error getting git-refs');
+    }
 
     /* v8 ignore next 3 -- TODO: add test */
     if (!rawRefs) {
