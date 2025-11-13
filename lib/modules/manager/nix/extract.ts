@@ -116,7 +116,13 @@ export async function extractPackageFile(
 
     switch (flakeLocked.type) {
       case 'git':
-        dep.packageName = parseGitUrl(flakeOriginal.url!).toString();
+        const gitUrl = parseGitUrl(flakeOriginal.url!);
+
+        if (gitUrl.protocols.includes('file')) {
+          continue;
+        }
+
+        dep.packageName = gitUrl.toString();
         break;
 
       case 'github':
