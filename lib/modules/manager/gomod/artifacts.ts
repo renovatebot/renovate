@@ -19,7 +19,10 @@ import {
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
+import { minimatchFilter } from '../../../util/minimatch';
 import { regEx } from '../../../util/regex';
+import { getTransitiveDependents, topologicalSort } from '../../../util/tree';
+import { scm } from '../../platform/scm';
 import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,
@@ -277,13 +280,126 @@ export async function updateArtifacts({
       tidyOpts += ' -e';
     }
 
+    // Determine if any go mod tidy is needed (for use in multiple places)
     const isGoModTidyRequired =
       !mustSkipGoModTidy &&
       (config.postUpdateOptions?.includes('gomodTidy') === true ||
         config.postUpdateOptions?.includes('gomodTidy1.17') === true ||
         config.postUpdateOptions?.includes('gomodTidyE') === true ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
-    if (isGoModTidyRequired) {
+
+    // Handle gomodTidyAll first - this has special graph-aware logic
+    if (config.postUpdateOptions?.includes('gomodTidyAll')) {
+      try {
+        // Build dependency graph if not already available
+        let dependencyGraph = (globalThis as any).gomodDependencyGraph;
+        if (!dependencyGraph) {
+          try {
+            const { buildGoModDependencyGraph } = await import(
+              './package-tree.js'
+            );
+
+            // Find all go.mod files in the repository using Git-based discovery
+            const allFiles = await scm.getFileList();
+            const allGoModFiles = allFiles.filter(
+              minimatchFilter('**/go.mod', { matchBase: true }),
+            );
+
+            logger.debug(
+              `Found ${allGoModFiles.length} go.mod files in repository`,
+            );
+
+            // Build focused dependency graph starting from the updated module
+            dependencyGraph = await buildGoModDependencyGraph(
+              allGoModFiles,
+              undefined, // rootDir
+              goModFileName, // targetModulePath
+            );
+            (globalThis as any).gomodDependencyGraph = dependencyGraph;
+
+            const relevantModules =
+              (dependencyGraph as any).relevantModules || [];
+            logger.debug(
+              `Built focused Go module dependency graph with ${dependencyGraph.nodes.size} modules from ${allGoModFiles.length} total files`,
+            );
+            logger.debug(
+              `Relevant modules for gomodTidyAll: ${relevantModules.join(', ')}`,
+            );
+          } catch (error) {
+            logger.warn(
+              { error },
+              'Failed to build Go module dependency graph',
+            );
+            dependencyGraph = null;
+          }
+        }
+        if (dependencyGraph) {
+          // Get all modules that depend on the updated module
+          const transitiveDependents = getTransitiveDependents(
+            dependencyGraph,
+            goModFileName,
+            {
+              includeSelf: false,
+              direction: 'dependents',
+            },
+          );
+
+          // Start with the updated module, then add dependents in topological order
+          const modulesToTidy = [goModFileName];
+
+          if (transitiveDependents.length > 0) {
+            // Sort in topological order for correct processing
+            const allModulesSorted = topologicalSort(dependencyGraph);
+            const affectedModulesSorted = allModulesSorted.filter((module) =>
+              transitiveDependents.includes(module),
+            );
+
+            modulesToTidy.push(...affectedModulesSorted);
+            logger.debug(
+              `gomodTidyAll: processing ${affectedModulesSorted.length} dependent modules: ${affectedModulesSorted.join(', ')}`,
+            );
+          }
+
+          // Add go get and go mod tidy commands for all modules that need processing
+          for (const moduleToTidy of modulesToTidy) {
+            const moduleDir = upath.dirname(moduleToTidy);
+
+            // Add go get first to download updated dependencies for all modules
+            let getArgs = `get `;
+            if (goConstraints && !semver.intersects(goConstraints, `>=1.18`)) {
+              // For Go versions < 1.18, we need to use the -d flag to avoid builds or installs
+              getArgs += `-d `;
+            }
+            getArgs += `-t ./...`;
+
+            const getCmd =
+              moduleDir === goModDir
+                ? `${cmd} ${getArgs}`
+                : `(cd '${moduleDir}' && ${cmd} ${getArgs})`;
+            execCommands.push(getCmd);
+            logger.debug(`go get command included for module: ${moduleToTidy}`);
+
+            // Add go mod tidy command
+            const tidyCmd =
+              moduleDir === goModDir
+                ? `${cmd} mod tidy${tidyOpts}`
+                : `(cd '${moduleDir}' && ${cmd} mod tidy${tidyOpts})`;
+
+            execCommands.push(tidyCmd);
+            logger.debug(`go mod tidy command included for: ${moduleToTidy}`);
+          }
+        }
+      } catch (error) {
+        logger.warn(
+          {
+            error: error instanceof Error ? error.message : String(error),
+            goModFileName,
+            feature: 'gomodTidyAll',
+          },
+          'Failed to process gomodTidyAll - no dependent modules processed',
+        );
+      }
+    } else if (isGoModTidyRequired) {
       args = 'mod tidy' + tidyOpts;
       logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
@@ -362,6 +478,37 @@ export async function updateArtifacts({
           contents: await readLocalFile(goWorkSumFileName),
         },
       });
+    }
+
+    // Include dependent module sum files when gomodTidyAll is enabled
+    if (config.postUpdateOptions?.includes('gomodTidyAll')) {
+      const dependencyGraph = (globalThis as any).gomodDependencyGraph;
+      if (dependencyGraph) {
+        const transitiveDependentModules = getTransitiveDependents(
+          dependencyGraph,
+          goModFileName,
+          {
+            includeSelf: false,
+            direction: 'dependents',
+          },
+        );
+
+        for (const modulePath of transitiveDependentModules) {
+          const moduleSumFileName = modulePath.replace(regEx(/\.mod$/), '.sum');
+          if (status.modified.includes(moduleSumFileName)) {
+            logger.debug(
+              `Returning updated dependent module go.sum: ${moduleSumFileName}`,
+            );
+            res.push({
+              file: {
+                type: 'addition',
+                path: moduleSumFileName,
+                contents: await readLocalFile(moduleSumFileName),
+              },
+            });
+          }
+        }
+      }
     }
 
     // Include all the .go file import changes
