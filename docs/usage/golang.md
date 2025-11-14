@@ -32,7 +32,7 @@ To learn what these variables do, read the [Go Modules Reference about the`GOPRO
 ## Enabling Go Modules Updating
 
 Renovate updates Go Modules by default.
-To install Renovate Bot itself, either enable the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
+To install Renovate itself, either enable the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
 
 ## Technical Details
 
