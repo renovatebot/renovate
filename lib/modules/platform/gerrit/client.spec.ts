@@ -409,6 +409,123 @@ describe('modules/platform/gerrit/client', () => {
     });
   });
 
+  describe('moveChange()', () => {
+    it('move change to different branch', async () => {
+      const change = partial<GerritChange>({ branch: 'new-main' });
+      httpMock
+        .scope(gerritEndpointUrl)
+        .post('/a/changes/123456/move', {
+          destination_branch: 'new-main',
+        })
+        .reply(200, gerritRestResponse(change), jsonResultHeader);
+      await expect(client.moveChange(123456, 'new-main')).resolves.toEqual(
+        change,
+      );
+    });
+  });
+
+  describe('getBranchChange()', () => {
+    it('returns null when no changes found', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query(true)
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
+      await expect(
+        client.getBranchChange('test/repo', {
+          branchName: 'renovate/dependency-1.x',
+          state: 'open',
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('returns single change when only one found', async () => {
+      const change = partial<GerritChange>({
+        _number: 123,
+        branch: 'main',
+      });
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query(true)
+        .reply(200, gerritRestResponse([change]), jsonResultHeader);
+      await expect(
+        client.getBranchChange('test/repo', {
+          branchName: 'renovate/dependency-1.x',
+          state: 'open',
+        }),
+      ).resolves.toEqual(change);
+    });
+
+    it('returns first change when multiple found without targetBranch', async () => {
+      const change1 = partial<GerritChange>({
+        _number: 111,
+        branch: 'main',
+      });
+      const change2 = partial<GerritChange>({
+        _number: 222,
+        branch: 'develop',
+      });
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query(true)
+        .reply(200, gerritRestResponse([change1, change2]), jsonResultHeader);
+      await expect(
+        client.getBranchChange('test/repo', {
+          branchName: 'renovate/dependency-1.x',
+          state: 'open',
+        }),
+      ).resolves.toEqual(change1);
+    });
+
+    it('returns matching change when targetBranch specified and match found', async () => {
+      const change1 = partial<GerritChange>({
+        _number: 111,
+        branch: 'main',
+      });
+      const change2 = partial<GerritChange>({
+        _number: 222,
+        branch: 'develop',
+      });
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query(true)
+        .reply(200, gerritRestResponse([change1, change2]), jsonResultHeader);
+      await expect(
+        client.getBranchChange('test/repo', {
+          branchName: 'renovate/dependency-1.x',
+          state: 'open',
+          targetBranch: 'develop',
+        }),
+      ).resolves.toEqual(change2);
+    });
+
+    it('returns first change when targetBranch specified but no match found', async () => {
+      const change1 = partial<GerritChange>({
+        _number: 111,
+        branch: 'main',
+      });
+      const change2 = partial<GerritChange>({
+        _number: 222,
+        branch: 'develop',
+      });
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query(true)
+        .reply(200, gerritRestResponse([change1, change2]), jsonResultHeader);
+      await expect(
+        client.getBranchChange('test/repo', {
+          branchName: 'renovate/dependency-1.x',
+          state: 'open',
+          targetBranch: 'release',
+        }),
+      ).resolves.toEqual(change1);
+    });
+  });
+
   describe('getMessages()', () => {
     it('no messages', async () => {
       httpMock
