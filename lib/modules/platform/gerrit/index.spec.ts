@@ -1,5 +1,4 @@
 import { codeBlock } from 'common-tags';
-import { DateTime } from 'luxon';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
 import { repoFingerprint } from '../util';
@@ -39,15 +38,6 @@ vi.mock('./client');
 const clientMock = vi.mocked(_client);
 
 describe('modules/platform/gerrit/index', () => {
-  const t0 = DateTime.fromISO('2025-04-14T16:33:37.000000000', {
-    zone: 'utc',
-  }) as DateTime<true>;
-
-  beforeAll(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(t0.toMillis());
-  });
-
   beforeEach(async () => {
     hostRules.find.mockReturnValue({
       username: 'user',
@@ -257,7 +247,108 @@ describe('modules/platform/gerrit/index', () => {
   });
 
   describe('createPr()', () => {
-    it('createPr() - no existing found => rejects', async () => {
+    it('createPr() - creates change by pushing to refs/for/', async () => {
+      git.pushCommit.mockResolvedValueOnce(true);
+      const change = partial<GerritChange>({
+        _number: 123456,
+        current_revision: 'some-revision',
+        revisions: {
+          'some-revision': partial<GerritRevisionInfo>({
+            commit_with_footers: 'Renovate-Branch: source',
+          }),
+        },
+      });
+      clientMock.findChanges.mockResolvedValueOnce([change]);
+      const pr = await gerrit.createPr({
+        sourceBranch: 'source',
+        targetBranch: 'target',
+        prTitle: 'title',
+        prBody: 'body',
+      });
+      expect(pr).toHaveProperty('number', 123456);
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
+        sourceRef: 'source',
+        targetRef: 'refs/for/target',
+        files: [],
+        pushOptions: ['notify=NONE'],
+      });
+      expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
+        123456,
+        'body',
+        TAG_PULL_REQUEST_BODY,
+      );
+    });
+
+    it('createPr() - with autoApprove', async () => {
+      git.pushCommit.mockResolvedValueOnce(true);
+      const change = partial<GerritChange>({
+        _number: 123456,
+        current_revision: 'some-revision',
+        revisions: {
+          'some-revision': partial<GerritRevisionInfo>({
+            commit_with_footers: 'Renovate-Branch: source',
+          }),
+        },
+      });
+      clientMock.findChanges.mockResolvedValueOnce([change]);
+      const pr = await gerrit.createPr({
+        sourceBranch: 'source',
+        targetBranch: 'target',
+        prTitle: 'title',
+        prBody: 'body',
+        platformPrOptions: {
+          autoApprove: true,
+        },
+      });
+      expect(pr).toHaveProperty('number', 123456);
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
+        sourceRef: 'source',
+        targetRef: 'refs/for/target',
+        files: [],
+        pushOptions: ['notify=NONE', 'label=Code-Review+2'],
+      });
+      expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
+        123456,
+        'body',
+        TAG_PULL_REQUEST_BODY,
+      );
+    });
+
+    it('createPr() - with labels', async () => {
+      git.pushCommit.mockResolvedValueOnce(true);
+      const change = partial<GerritChange>({
+        _number: 123456,
+        current_revision: 'some-revision',
+        revisions: {
+          'some-revision': partial<GerritRevisionInfo>({
+            commit_with_footers: 'Renovate-Branch: source',
+          }),
+        },
+      });
+      clientMock.findChanges.mockResolvedValueOnce([change]);
+      const pr = await gerrit.createPr({
+        sourceBranch: 'source',
+        targetBranch: 'target',
+        prTitle: 'title',
+        prBody: 'body',
+        labels: ['label1', 'label2'],
+      });
+      expect(pr).toHaveProperty('number', 123456);
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
+        sourceRef: 'source',
+        targetRef: 'refs/for/target',
+        files: [],
+        pushOptions: ['notify=NONE', 'hashtag=label1', 'hashtag=label2'],
+      });
+      expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
+        123456,
+        'body',
+        TAG_PULL_REQUEST_BODY,
+      );
+    });
+
+    it('createPr() - no change found after push => rejects', async () => {
+      git.pushCommit.mockResolvedValueOnce(true);
       clientMock.findChanges.mockResolvedValueOnce([]);
       await expect(
         gerrit.createPr({
@@ -267,22 +358,12 @@ describe('modules/platform/gerrit/index', () => {
           prBody: 'body',
         }),
       ).rejects.toThrow(
-        `the change should be created automatically from previous push to refs/for/source`,
+        `Could not find the Gerrit change after pushing to refs/for/target`,
       );
     });
 
-    it('createPr() - found existing but not created in the last 5 minutes => rejects', async () => {
-      const change = partial<GerritChange>({
-        _number: 123456,
-        created: t0.minus({ minutes: 6 }).toISO().replace('T', ' '),
-        current_revision: 'some-revision',
-        revisions: {
-          'some-revision': partial<GerritRevisionInfo>({
-            commit_with_footers: 'Renovate-Branch: source',
-          }),
-        },
-      });
-      clientMock.findChanges.mockResolvedValueOnce([change]);
+    it('createPr() - push fails => rejects', async () => {
+      git.pushCommit.mockResolvedValueOnce(false);
       await expect(
         gerrit.createPr({
           sourceBranch: 'source',
@@ -290,36 +371,8 @@ describe('modules/platform/gerrit/index', () => {
           prTitle: 'title',
           prBody: 'body',
         }),
-      ).rejects.toThrow(/it was not created in the last 5 minutes/);
-    });
-
-    it('createPr() - add body as message', async () => {
-      const change = partial<GerritChange>({
-        _number: 123456,
-        current_revision: 'some-revision',
-        created: t0.minus({ seconds: 30 }).toISO().replace('T', ' '),
-        revisions: {
-          'some-revision': partial<GerritRevisionInfo>({
-            commit_with_footers: 'Renovate-Branch: source',
-          }),
-        },
-        messages: [],
-      });
-      clientMock.findChanges.mockResolvedValueOnce([change]);
-      const pr = await gerrit.createPr({
-        sourceBranch: 'source',
-        targetBranch: 'target',
-        prTitle: 'title',
-        prBody: 'body',
-        platformPrOptions: {
-          autoApprove: false,
-        },
-      });
-      expect(pr).toHaveProperty('number', 123456);
-      expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
-        123456,
-        'body',
-        TAG_PULL_REQUEST_BODY,
+      ).rejects.toThrow(
+        `Failed to push commit to refs/for/target to create Gerrit change`,
       );
     });
   });

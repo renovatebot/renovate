@@ -1,5 +1,4 @@
 import { isTruthy } from '@sindresorhus/is';
-import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { parseJson } from '../../../util/common';
@@ -186,6 +185,34 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       prConfig.labels?.toString() ?? ''
     })`,
   );
+
+  logger.debug(
+    `Pushing commit to refs/for/${prConfig.targetBranch} to create Gerrit change`,
+  );
+  const pushOptions = ['notify=NONE'];
+  if (prConfig.platformPrOptions?.autoApprove) {
+    pushOptions.push('label=Code-Review+2');
+  }
+  if (prConfig.labels) {
+    for (const label of prConfig.labels) {
+      pushOptions.push(`hashtag=${label}`);
+    }
+  }
+
+  const pushResult = await git.pushCommit({
+    sourceRef: prConfig.sourceBranch,
+    targetRef: `refs/for/${prConfig.targetBranch}`,
+    files: [],
+    pushOptions,
+  });
+
+  if (!pushResult) {
+    throw new Error(
+      `Failed to push commit to refs/for/${prConfig.targetBranch} to create Gerrit change`,
+    );
+  }
+
+  // Now find the newly created change
   const change = (
     await client.findChanges(config.repository!, {
       branchName: prConfig.sourceBranch,
@@ -197,14 +224,7 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
   ).pop();
   if (change === undefined) {
     throw new Error(
-      `the change should be created automatically from previous push to refs/for/${prConfig.sourceBranch}`,
-    );
-  }
-  const created = DateTime.fromISO(change.created.replace(' ', 'T'), {});
-  const fiveMinutesAgo = DateTime.utc().minus({ minutes: 5 });
-  if (created < fiveMinutesAgo) {
-    throw new Error(
-      `the change should have been created automatically from previous push to refs/for/${prConfig.sourceBranch}, but it was not created in the last 5 minutes (${change.created})`,
+      `Could not find the Gerrit change after pushing to refs/for/${prConfig.targetBranch}`,
     );
   }
   await client.addMessage(
