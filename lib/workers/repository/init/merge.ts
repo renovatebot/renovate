@@ -18,6 +18,7 @@ import {
   CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
 } from '../../../constants/error-messages.ts';
+import { pkg } from '../../../expose.ts';
 import { logger } from '../../../logger/index.ts';
 import * as npmApi from '../../../modules/datasource/npm/index.ts';
 import { platform } from '../../../modules/platform/index.ts';
@@ -25,6 +26,7 @@ import { scm } from '../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
+import { clone } from '../../../util/clone.ts';
 import { getInheritedOrGlobal, parseJson } from '../../../util/common.ts';
 import { setUserEnv } from '../../../util/env.ts';
 import { readLocalFile, readSystemFile } from '../../../util/fs/index.ts';
@@ -283,6 +285,11 @@ export async function mergeRenovateConfig(
   // Decrypt before resolving in case we need npm authentication for any presets
   const decryptedConfig = await decryptConfig(migratedConfig, repository);
   applyNpmrc(decryptedConfig, 'decrypted');
+
+  // NOTE that this should not be used with any other configuration (`resolvedConfig`, etc) below, as they will include addditionally merged configuration
+  // Decrypted secrets are sanitised, so should be safe to log
+  await logShallowConfig(decryptedConfig, config);
+
   // Decrypt after resolving in case the preset contains npm authentication instead
   const { config: configToDecrypt } = await presets.resolveConfigPresets(
     decryptedConfig,
@@ -479,4 +486,39 @@ export function mergeStaticConfig(
 
   // renovate repo config overrides RENOVATE_STATIC_REPO_CONFIG[_FILE]
   return mergeChildConfig(staticRepoConfig, config);
+}
+
+/**
+ * Resolve everything but internal Renovate presets and log it out.
+ *
+* This allows users to understand the fully resolved configuration, including any `github>`, `local>`, etc presets, but excluding anything that's internal to Renovate (which can be verbose and/or less relevant), and provides useful output for debugging purposes.
+
+* This is also known as the "shallow" config.
+
+* Due to caching, this doesn't add any additional requests.
+ */
+async function logShallowConfig(
+  _decryptedConfig: RenovateConfig,
+  _config: RepositoryWorkerConfig,
+): Promise<void> {
+  // make sure we clone the existing config, so we don't modify the existing settings when resolving this in a shallow fashion
+  const decryptedConfig = clone(_decryptedConfig);
+  const config = clone(_config);
+
+  const { config: resolvedConfig, visitedPresets } =
+    await presets.resolveConfigPresets(
+      clone(decryptedConfig),
+      clone(config),
+      [],
+      [],
+      false,
+    );
+  logger.debug(
+    {
+      renovateVersion: pkg.version,
+      config: resolvedConfig,
+      visitedPresets,
+    },
+    'Resolved shallow config, without merging internal presets',
+  );
 }
