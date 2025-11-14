@@ -179,7 +179,7 @@
     "@renovatebot/pgp": "1.1.1",
     "@renovatebot/ruby-semver": "4.1.2",
     "@sindresorhus/is": "7.1.1",
-    "@yarnpkg/core": "4.4.4",
+    "@yarnpkg/core": "4.5.0",
     "@yarnpkg/parsers": "3.0.3",
     "ae-cvss-calculator": "1.0.9",
     "agentkeepalive": "4.6.0",
