@@ -24,6 +24,8 @@ export class RustNightlyVersionDatasource extends Datasource {
     'The release timestamp is determined from the date in the version.';
   override readonly sourceUrlSupport = 'package';
 
+  defaultTarget = 'x86_64-unknown-linux-gnu';
+
   @cache({
     namespace: `datasource-${RustNightlyVersionDatasource.id}`,
     key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
@@ -38,12 +40,23 @@ export class RustNightlyVersionDatasource extends Datasource {
       return null;
     }
 
-    const url = `${registryUrl}x86_64-unknown-linux-gnu/${packageName}.json`;
+    let pkgName = packageName;
+    let target = this.defaultTarget;
+
+    const qpPos = pkgName.indexOf('?');
+    if (qpPos !== -1) {
+      const searchParams = new URLSearchParams(pkgName.substring(qpPos + 1));
+      pkgName = pkgName.substring(0, qpPos);
+      target = searchParams.get('target') ?? this.defaultTarget;
+    }
+
+    const url = new URL(`${target}/${pkgName}.json`, registryUrl);
 
     let releases: Release[];
     try {
-      const response =
-        await this.http.getJsonUnchecked<Record<string, boolean | string>>(url);
+      const response = await this.http.getJsonUnchecked<
+        Record<string, boolean | string>
+      >(url.toString());
       const data = response.body;
 
       releases = Object.keys(data)
