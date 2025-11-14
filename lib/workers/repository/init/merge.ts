@@ -18,6 +18,7 @@ import {
   CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
 } from '../../../constants/error-messages';
+import { pkg } from '../../../expose.cjs';
 import { logger } from '../../../logger';
 import * as npmApi from '../../../modules/datasource/npm';
 import { platform } from '../../../modules/platform';
@@ -245,6 +246,21 @@ export async function mergeRenovateConfig(
     logger.debug('Found npmrc in decrypted config - setting');
     npmApi.setNpmrc(decryptedConfig.npmrc);
   }
+
+  // Provide insight into the repository config, resolving everything but internal Renovate presets
+  // This allows users to understand the fully resolved configuration, including any `github>`, `local>`, etc presets, but excluding anything that's internal to Renovate (which can be verbose and/or less relevant)
+  // This is also known as the "shallow" config
+  const { config: resolvedConfigWithoutInternalPresets, visitedPresets } =
+    await presets.resolveConfigPresets(decryptedConfig, config, [], [], false);
+  logger.trace(
+    {
+      renovateVersion: pkg.version,
+      config: resolvedConfigWithoutInternalPresets,
+      visitedPresets,
+    },
+    'Resolved shallow config, without merging internal presets',
+  );
+
   // Decrypt after resolving in case the preset contains npm authentication instead
   const { config: configToDecrypt } = await presets.resolveConfigPresets(
     decryptedConfig,
