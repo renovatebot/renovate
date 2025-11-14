@@ -200,7 +200,11 @@ export function parseKustomize(
 
   pkg.kind ??= 'Kustomization';
 
-  if (!['Kustomization', 'Component'].includes(pkg.kind)) {
+  if (
+    !['Kustomization', 'Component', 'HelmChartInflationGenerator'].includes(
+      pkg.kind,
+    )
+  ) {
     return null;
   }
 
@@ -218,6 +222,16 @@ export function extractPackageFile(
   const pkg = parseKustomize(content, packageFile);
   if (!pkg) {
     return null;
+  }
+
+  if (pkg.kind === 'HelmChartInflationGenerator') {
+    const dep = extractHelmChart(pkg as HelmChart, config.registryAliases);
+    if (dep) {
+      deps.push({
+        ...dep,
+        depType: 'HelmChart',
+      });
+    }
   }
 
   // grab the remote bases
