@@ -2,6 +2,7 @@ import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
 import { isBoolean, isNonEmptyObject, isString } from '@sindresorhus/is';
 import fs from 'fs-extra';
+import { DateTime } from 'luxon';
 import semver from 'semver';
 import type { Options, SimpleGit, TaskOptions } from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
@@ -22,7 +23,7 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
-import { incLimitedValue } from '../../workers/global/limits';
+import { incCountValue, incLimitedValue } from '../../workers/global/limits';
 import { getCache } from '../cache/repository';
 import { getEnv } from '../env';
 import { getChildEnv } from '../exec/utils';
@@ -557,6 +558,22 @@ export function getBranchCommit(branchName: string): LongCommitSha | null {
   return config.branchCommits?.[branchName] || null;
 }
 
+// Return the date of the latest commit for a branch
+export async function getBranchUpdateDate(
+  branchName: string,
+): Promise<DateTime | null> {
+  const branchSha = config.branchCommits[branchName];
+  if (!branchSha) {
+    return null;
+  }
+  try {
+    return await getCommitDate(branchSha);
+  } catch (err) {
+    logger.debug({ err, branchName }, 'Error getting branch update date');
+    return null;
+  }
+}
+
 export async function getCommitMessages(): Promise<string[]> {
   logger.debug('getCommitMessages');
   if (GlobalConfig.get('platform') !== 'local') {
@@ -591,7 +608,7 @@ export async function checkoutBranch(
     config.currentBranchSha = (
       await git.raw(['rev-parse', 'HEAD'])
     ).trim() as LongCommitSha;
-    const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
+    const latestCommitDate = await getCommitDate(config.currentBranchSha);
     if (latestCommitDate) {
       logger.debug(
         { branchName, latestCommitDate, sha: config.currentBranchSha },
@@ -1013,13 +1030,19 @@ export async function mergeBranch(branchName: string): Promise<void> {
   }
 }
 
+async function getCommitDate(ref: LongCommitSha | string): Promise<DateTime> {
+  const output = await git.show(['-s', '--format=%cI', ref]);
+  // output is in strict ISO format like "2025-05-29T01:28:16+00:00"
+  return DateTime.fromISO(output.trim());
+}
+
 export async function getBranchLastCommitTime(
   branchName: string,
 ): Promise<Date> {
   await syncGit();
   try {
-    const time = await git.show(['-s', '--format=%ai', 'origin/' + branchName]);
-    return new Date(Date.parse(time));
+    const time = await getCommitDate('origin/' + branchName);
+    return time.toJSDate();
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
     /* v8 ignore next 3 -- TODO: add test */
@@ -1285,6 +1308,7 @@ export async function pushCommit({
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
     incLimitedValue('Commits');
+    incCountValue('HourlyCommits');
     result = true;
     /* v8 ignore next 3 -- TODO: add test */
   } catch (err) {
