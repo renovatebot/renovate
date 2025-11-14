@@ -89,6 +89,31 @@ describe('modules/datasource/rust-nightly-version/index', () => {
       expect(res?.sourceUrl).toBe('https://github.com/rust-lang/rust');
     });
 
+    it('supports non-default targets', async () => {
+      httpMock
+        .scope(registryUrl)
+        .get('/aarch64-apple-darwin/rust.json')
+        .reply(200, {
+          '2025-11-14': true,
+          last_available: '2025-11-14',
+        });
+
+      const res = await getPkgReleases({
+        ...config,
+        packageName: 'rust?target=aarch64-apple-darwin',
+      });
+
+      expect(res).not.toBeNull();
+      expect(res?.releases).toHaveLength(1);
+      expect(res?.releases).toEqual([
+        {
+          version: 'nightly-2025-11-14',
+          releaseTimestamp: '2025-11-14T00:00:00.000Z',
+        },
+      ]);
+      expect(res?.sourceUrl).toBe('https://github.com/rust-lang/rust');
+    });
+
     it('returns null on 404', async () => {
       httpMock
         .scope(registryUrl)
