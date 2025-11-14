@@ -67,6 +67,28 @@ describe('modules/datasource/rust-nightly-version/index', () => {
       expect(res?.sourceUrl).toBe('https://github.com/rust-lang/rust');
     });
 
+    it('supports other package names', async () => {
+      httpMock
+        .scope(registryUrl)
+        .get('/x86_64-unknown-linux-gnu/cargo.json')
+        .reply(200, {
+          '2025-10-06': true,
+          last_available: '2025-10-06',
+        });
+
+      const res = await getPkgReleases({ ...config, packageName: 'cargo' });
+
+      expect(res).not.toBeNull();
+      expect(res?.releases).toHaveLength(1);
+      expect(res?.releases).toEqual([
+        {
+          version: 'nightly-2025-10-06',
+          releaseTimestamp: '2025-10-06T00:00:00.000Z',
+        },
+      ]);
+      expect(res?.sourceUrl).toBe('https://github.com/rust-lang/rust');
+    });
+
     it('returns null on 404', async () => {
       httpMock
         .scope(registryUrl)
@@ -103,6 +125,7 @@ describe('modules/datasource/rust-nightly-version/index', () => {
         rustNightlyVersionDatasource.getReleases(
           partial<GetReleasesConfig>({
             registryUrl,
+            packageName: 'rust',
           }),
         ),
       ).rejects.toThrow(ExternalHostError);

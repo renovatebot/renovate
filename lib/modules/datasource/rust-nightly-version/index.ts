@@ -31,13 +31,14 @@ export class RustNightlyVersionDatasource extends Datasource {
   })
   async getReleases({
     registryUrl,
+    packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
 
-    const url = `${registryUrl}x86_64-unknown-linux-gnu/rust.json`;
+    const url = `${registryUrl}x86_64-unknown-linux-gnu/${packageName}.json`;
 
     let releases: Release[];
     try {
