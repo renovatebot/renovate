@@ -2,6 +2,7 @@ import JSON5 from 'json5';
 import * as JSONC from 'jsonc-parser';
 import type { JsonValue } from 'type-fest';
 import {
+  AZURE_API_USING_HOST_TYPES,
   BITBUCKET_API_USING_HOST_TYPES,
   BITBUCKET_SERVER_API_USING_HOST_TYPES,
   FORGEJO_API_USING_HOST_TYPES,
@@ -64,6 +65,10 @@ export function detectPlatform(
 
   if (!hostType) {
     return null;
+  }
+
+  if (AZURE_API_USING_HOST_TYPES.includes(hostType)) {
+    return 'azure';
   }
 
   if (BITBUCKET_SERVER_API_USING_HOST_TYPES.includes(hostType)) {
