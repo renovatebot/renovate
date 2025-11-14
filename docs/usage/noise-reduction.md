@@ -54,7 +54,7 @@ Grouping dependencies versus single PRs:
 
 ## Scheduling Renovate
 
-For a high level overview of scheduling when Renovate bot runs, read the [key concepts, scheduling](./key-concepts/scheduling.md) docs.
+For a high level overview of scheduling when Renovate runs, read the [key concepts, scheduling](./key-concepts/scheduling.md) docs.
 
 On its own, the Renovate CLI tool runs once and then exits.
 Hence, it only runs as often as its administrator sets it to (e.g. via `cron`).

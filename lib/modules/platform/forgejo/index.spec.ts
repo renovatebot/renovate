@@ -48,7 +48,7 @@ describe('modules/platform/forgejo/index', () => {
   const mockUser: User = {
     id: 1,
     username: 'renovate',
-    full_name: 'Renovate Bot',
+    full_name: 'Renovate',
     email: 'renovate@example.com',
   };
 
@@ -286,7 +286,7 @@ describe('modules/platform/forgejo/index', () => {
 
       expect(await forgejo.initPlatform({ token: 'some-token' })).toEqual({
         endpoint: 'https://code.forgejo.org/',
-        gitAuthor: 'Renovate Bot <renovate@example.com>',
+        gitAuthor: 'Renovate <renovate@example.com>',
       });
     });
 
@@ -305,7 +305,7 @@ describe('modules/platform/forgejo/index', () => {
         }),
       ).toEqual({
         endpoint: 'https://forgejo.renovatebot.com/',
-        gitAuthor: 'Renovate Bot <renovate@example.com>',
+        gitAuthor: 'Renovate <renovate@example.com>',
       });
     });
 
@@ -324,7 +324,7 @@ describe('modules/platform/forgejo/index', () => {
         }),
       ).toEqual({
         endpoint: 'https://forgejo.renovatebot.com/',
-        gitAuthor: 'Renovate Bot <renovate@example.com>',
+        gitAuthor: 'Renovate <renovate@example.com>',
       });
     });
 

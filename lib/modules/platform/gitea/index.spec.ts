@@ -48,7 +48,7 @@ describe('modules/platform/gitea/index', () => {
   const mockUser: User = {
     id: 1,
     username: 'renovate',
-    full_name: 'Renovate Bot',
+    full_name: 'Renovate',
     email: 'renovate@example.com',
   };
 
@@ -286,7 +286,7 @@ describe('modules/platform/gitea/index', () => {
 
       expect(await gitea.initPlatform({ token: 'some-token' })).toEqual({
         endpoint: 'https://gitea.com/',
-        gitAuthor: 'Renovate Bot <renovate@example.com>',
+        gitAuthor: 'Renovate <renovate@example.com>',
       });
     });
 
@@ -305,7 +305,7 @@ describe('modules/platform/gitea/index', () => {
         }),
       ).toEqual({
         endpoint: 'https://gitea.renovatebot.com/',
-        gitAuthor: 'Renovate Bot <renovate@example.com>',
+        gitAuthor: 'Renovate <renovate@example.com>',
       });
     });
 
@@ -324,7 +324,7 @@ describe('modules/platform/gitea/index', () => {
         }),
       ).toEqual({
         endpoint: 'https://gitea.renovatebot.com/',
-        gitAuthor: 'Renovate Bot <renovate@example.com>',
+        gitAuthor: 'Renovate <renovate@example.com>',
       });
     });
 

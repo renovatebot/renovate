@@ -88,7 +88,7 @@ stringData:
   # You can set RENOVATE_AUTODISCOVER to true to run Renovate on all repos you have push access to
   RENOVATE_AUTODISCOVER: 'false'
   RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
-  RENOVATE_GIT_AUTHOR: 'Renovate Bot <bot@renovateapp.com>'
+  RENOVATE_GIT_AUTHOR: 'Renovate <bot@renovateapp.com>'
   RENOVATE_PLATFORM: 'github'
   RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
 ```
@@ -230,7 +230,7 @@ If you want to override the cache directory then set your own value for `cacheDi
 
 The following example uses the Renovate CLI tool, which you can install by running `npm i -g renovate`.
 
-If running your own Renovate bot then you will need a user account that Renovate will run as.
+If running your own Renovate then you will need a user account that Renovate will run as.
 We recommend you create and use a dedicated account for the bot, e.g. name it `renovate-bot` if on your own instance.
 Create and save a PAT for this account.
 
@@ -334,7 +334,7 @@ stringData:
   RENOVATE_GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
   RENOVATE_AUTODISCOVER: 'false'
   RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
-  RENOVATE_GIT_AUTHOR: 'Renovate Bot <bot@renovateapp.com>'
+  RENOVATE_GIT_AUTHOR: 'Renovate <bot@renovateapp.com>'
   RENOVATE_PLATFORM: 'github'
   RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
 ---

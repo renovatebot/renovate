@@ -14,10 +14,10 @@ When self-hosting Renovate you're the "administrator" of the bot, this means you
 
 - provide the infrastructure that Renovate runs on,
 - provision Renovate's global config,
-- make sure Renovate bot runs regularly,
-- make sure Renovate bot itself is updated
+- make sure Renovate runs regularly,
+- make sure Renovate itself is updated
 
-If you're self-hosting Renovate on Windows, read [Self-hosting on Windows](./installing-onboarding.md#self-hosting-on-windows) to prevent line endings from confusing Renovate bot.
+If you're self-hosting Renovate on Windows, read [Self-hosting on Windows](./installing-onboarding.md#self-hosting-on-windows) to prevent line endings from confusing Renovate.
 
 If you're running Renovate Community Edition or Renovate Enterprise Edition, refer to the documentation on the [`mend/renovate-ce-ee` GitHub repository](https://github.com/mend/renovate-ce-ee).
 
@@ -195,11 +195,11 @@ An example of a `config.js` that exports an `async` function (which is a functio
 
 Regardless of platform, you need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token.
 We recommend you use `@renovate-bot` as username if you're on a self-hosted server where you can set all usernames.
-We also recommend you configure `config.gitAuthor` with the same identity as your Renovate user, for example: `"gitAuthor": "Renovate Bot <renovate@some.domain.test>"`.
+We also recommend you configure `config.gitAuthor` with the same identity as your Renovate user, for example: `"gitAuthor": "Renovate <renovate@some.domain.test>"`.
 
 <!-- prettier-ignore -->
 !!! warning
-    We recommend you use a single, dedicated username for your Renovate bot.
+    We recommend you use a single, dedicated username for your Renovate deployment.
     Never share the Renovate username with your other bots, as this can cause flip-flopping.
 
 #### Docs

@@ -119,7 +119,7 @@ You can limit which repositories Renovate can access by using the `autodiscoverF
 
 ## autodiscoverFilter
 
-You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
+You can use this option to filter the list of repositories that the Renovate account can access through `autodiscover`.
 The pattern matches against the organization/repo path.
 
 This option supports an array of minimatch-compatible globs or RE2-compatible regex strings.
@@ -743,7 +743,7 @@ If you must expose all environment variables to package managers, you can set th
     Always consider the security implications of using `exposeAllEnv`!
     Secrets and other confidential information stored in environment variables could be leaked by a malicious script, that enumerates all environment variables.
 
-Set `exposeAllEnv` to `true` only if you have reviewed, and trust, the repositories which Renovate bot runs against.
+Set `exposeAllEnv` to `true` only if you have reviewed, and trust, the repositories which Renovate runs against.
 Alternatively, you can use the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option to handpick a set of variables you need to expose.
 
 Setting this to `true` also allows for variable substitution in `.npmrc` files.
@@ -1147,11 +1147,11 @@ Is this correct? (y/N) y
 
 GnuPG needs to construct a user ID to identify your key.
 
-Real name: Renovate Bot
+Real name: Renovate
 Email address: renovate@whitesourcesoftware.com
 Comment:
 You selected this USER-ID:
-    "Renovate Bot <renovate@whitesourcesoftware.com>"
+    "Renovate <renovate@whitesourcesoftware.com>"
 
 Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
 
@@ -1161,7 +1161,7 @@ public and secret key created and signed.
 
 pub   rsa4096 2021-09-10 [SC]
       794B820F34B34A8DF32AADB20649CEXAMPLEONLY
-uid                      Renovate Bot <renovate@whitesourcesoftware.com>
+uid                      Renovate <renovate@whitesourcesoftware.com>
 sub   rsa4096 2021-09-10 [E]
 ```
 
@@ -1177,7 +1177,7 @@ sub   rsa4096 2021-09-10 [E]
 ```bash
 ❯ gpg --edit-key renovate@whitesourcesoftware.com
 gpg> showpref
-[ultimate] (1). Renovate Bot <renovate@whitesourcesoftware.com>
+[ultimate] (1). Renovate <renovate@whitesourcesoftware.com>
      Cipher: AES256, AES192, AES, 3DES
      AEAD: OCB, EAX
      Digest: SHA512, SHA384, SHA256, SHA224, SHA1
@@ -1201,7 +1201,7 @@ gpg> save
 - Run `gpg --armor --export-secret-keys YOUR_NEW_KEY_ID > renovate-private-key.asc` to generate an armored (text-based) private key file
 - Run `gpg --armor --export YOUR_NEW_KEY_ID > renovate-public-key.asc` to generate an armored (text-based) public key file
 
-The private key should then be added to your Renovate Bot global config (either using `privateKeyPath` or exporting it to the `RENOVATE_PRIVATE_KEY` environment variable).
+The private key should then be added to your Renovate global config (either using `privateKeyPath` or exporting it to the `RENOVATE_PRIVATE_KEY` environment variable).
 The public key can be used to replace the existing key in <https://app.renovatebot.com/encrypt> for your own use.
 
 <!-- prettier-ignore -->
@@ -1497,7 +1497,7 @@ By default, Renovate processes each repository that it finds.
 You can use this optional parameter so Renovate writes the discovered repositories to a JSON file and exits.
 
 Known use cases consist, among other things, of horizontal scaling setups.
-See [Scaling Renovate Bot on self-hosted GitLab](https://github.com/renovatebot/renovate/discussions/13172).
+See [Scaling Renovate on self-hosted GitLab](https://github.com/renovatebot/renovate/discussions/13172).
 
 Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
 

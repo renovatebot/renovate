@@ -121,7 +121,7 @@ The GitHub App installation token is scoped at most to a single organization and
 
 The slug name of your app with `[bot]` appended
 
-**`gitAuthor:"Self-hosted Renovate Bot <123456+self-hosted-renovate[bot]@users.noreply.github.enterprise.com>"`** (optional, autodetected if not supplied)
+**`gitAuthor:"Self-hosted Renovate <123456+self-hosted-renovate[bot]@users.noreply.github.enterprise.com>"`** (optional, autodetected if not supplied)
 
 The [GitHub App associated email](https://github.community/t/logging-into-git-as-a-github-app/115916/2) to match commits to the bot.
 It needs to have the user id _and_ the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.

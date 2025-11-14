@@ -58,7 +58,7 @@ You can do this by running this Git command:
 git config --global core.autocrlf input
 ```
 
-This prevents the carriage return `\r\n` which may confuse Renovate bot.
+This prevents the carriage return `\r\n` which may confuse Renovate.
 You can also set the line endings in your repository by adding `* text=auto eol=lf` to your `.gitattributes` file.
 
 ## Repository onboarding
