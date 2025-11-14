@@ -30,6 +30,7 @@ export default tseslint.config(
       '**/.venv/',
       'tools/mkdocs/docs',
       'tools/mkdocs/site',
+      '.github/workflows/**/*.js',
       '.worktrees/**/*',
     ],
   },
