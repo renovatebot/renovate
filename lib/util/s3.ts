@@ -2,6 +2,7 @@
 import { S3Client } from '@aws-sdk/client-s3';
 import { isUndefined } from '@sindresorhus/is';
 import { GlobalConfig } from '../config/global';
+import { getEnv } from './env';
 import { parseUrl } from './url';
 
 let s3Instance: S3Client | undefined;
@@ -15,9 +16,20 @@ export function getS3Client(
     const forcePathStyle = isUndefined(s3PathStyle)
       ? !!GlobalConfig.get('s3PathStyle')
       : s3PathStyle;
+    const env = getEnv();
+    const accessKeyId = env.RENOVATE_S3_AWS_ACCESS_KEY_ID;
+    const secretAccessKey = env.RENOVATE_S3_AWS_SECRET_ACCESS_KEY;
+    const region = env.RENOVATE_S3_AWS_REGION;
+    const credentials =
+      accessKeyId && secretAccessKey
+        ? { accessKeyId, secretAccessKey }
+        : undefined;
     s3Instance = new S3Client({
       ...(endpoint && { endpoint }),
       ...(forcePathStyle && { forcePathStyle: true }),
+      ...(region && { region }),
+      ...(credentials && { credentials }),
+      // If not set, AWS SDK will use its default provider chain
     });
   }
   return s3Instance;
