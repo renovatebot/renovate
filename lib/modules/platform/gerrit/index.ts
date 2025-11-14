@@ -174,6 +174,12 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
       TAG_PULL_REQUEST_BODY,
     );
   }
+  if (prConfig.addLabels?.length || prConfig.removeLabels?.length) {
+    await client.setHashtags(prConfig.number, {
+      add: prConfig.addLabels ?? undefined,
+      remove: prConfig.removeLabels ?? undefined,
+    });
+  }
   if (prConfig.state && prConfig.state === 'closed') {
     await client.abandonChange(prConfig.number);
   }
@@ -490,7 +496,7 @@ export async function deleteLabel(
   number: number,
   label: string,
 ): Promise<void> {
-  await client.deleteHashtag(number, label);
+  await client.setHashtags(number, { remove: [label] });
 }
 
 export function ensureCommentRemoval(

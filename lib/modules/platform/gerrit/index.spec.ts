@@ -244,6 +244,47 @@ describe('modules/platform/gerrit/index', () => {
         TAG_PULL_REQUEST_BODY,
       );
     });
+
+    it('updatePr() - with addLabels => add hashtags', async () => {
+      const change = partial<GerritChange>({});
+      clientMock.getChange.mockResolvedValueOnce(change);
+      await gerrit.updatePr({
+        number: 123456,
+        prTitle: change.subject,
+        addLabels: ['label1', 'label2'],
+      });
+      expect(clientMock.setHashtags).toHaveBeenCalledExactlyOnceWith(123456, {
+        add: ['label1', 'label2'],
+      });
+    });
+
+    it('updatePr() - with removeLabels => remove hashtags', async () => {
+      const change = partial<GerritChange>({});
+      clientMock.getChange.mockResolvedValueOnce(change);
+      await gerrit.updatePr({
+        number: 123456,
+        prTitle: change.subject,
+        removeLabels: ['old-label'],
+      });
+      expect(clientMock.setHashtags).toHaveBeenCalledExactlyOnceWith(123456, {
+        remove: ['old-label'],
+      });
+    });
+
+    it('updatePr() - with addLabels and removeLabels => update hashtags in single call', async () => {
+      const change = partial<GerritChange>({});
+      clientMock.getChange.mockResolvedValueOnce(change);
+      await gerrit.updatePr({
+        number: 123456,
+        prTitle: change.subject,
+        addLabels: ['new-label'],
+        removeLabels: ['old-label'],
+      });
+      expect(clientMock.setHashtags).toHaveBeenCalledExactlyOnceWith(123456, {
+        add: ['new-label'],
+        remove: ['old-label'],
+      });
+    });
   });
 
   describe('createPr()', () => {
@@ -780,11 +821,10 @@ describe('modules/platform/gerrit/index', () => {
     it('deleteLabel() - deletes a label', async () => {
       const pro = gerrit.deleteLabel(123456, 'hashtag1');
       await expect(pro).resolves.toBeUndefined();
-      expect(clientMock.deleteHashtag).toHaveBeenCalledTimes(1);
-      expect(clientMock.deleteHashtag).toHaveBeenCalledExactlyOnceWith(
-        123456,
-        'hashtag1',
-      );
+      expect(clientMock.setHashtags).toHaveBeenCalledTimes(1);
+      expect(clientMock.setHashtags).toHaveBeenCalledExactlyOnceWith(123456, {
+        remove: ['hashtag1'],
+      });
     });
   });
 
