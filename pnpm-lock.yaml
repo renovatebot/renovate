@@ -108,8 +108,8 @@ importers:
         specifier: 7.1.1
         version: 7.1.1
       '@yarnpkg/core':
-        specifier: 4.4.4
-        version: 4.4.4(typanion@3.14.0)
+        specifier: 4.5.0
+        version: 4.5.0(typanion@3.14.0)
       '@yarnpkg/parsers':
         specifier: 3.0.3
         version: 3.0.3
@@ -2481,8 +2481,8 @@ packages:
   '@vitest/utils@3.2.4':
     resolution: {integrity: sha512-fB2V0JFrQSMsCo9HiSq3Ezpdv4iYaXRG1Sx8edX3MwxfyNn83mKiGzOcH+Fkxt4MHxr3y42fQi1oeAInqgX2QA==}
 
-  '@yarnpkg/core@4.4.4':
-    resolution: {integrity: sha512-0bcUFx4wzq0szvInY0PkzqjsAlM69lgzOsEbltbiyE6q/h0hRb1oOHWSBvq7rUGA+Ob5vuyhoDYWyyXY/1W4VQ==}
+  '@yarnpkg/core@4.5.0':
+    resolution: {integrity: sha512-jZnEYfP05k3KpBIWlNkPEuJ3E0QLnYTNALQOH+7x8LAQyzhnN9yuLZx8Ze80Y7mlU1Hnv5wUGtzzUFn1wyBAlQ==}
     engines: {node: '>=18.12.0'}
 
   '@yarnpkg/fslib@3.1.4':
@@ -9149,7 +9149,7 @@ snapshots:
       loupe: 3.2.1
       tinyrainbow: 2.0.0
 
-  '@yarnpkg/core@4.4.4(typanion@3.14.0)':
+  '@yarnpkg/core@4.5.0(typanion@3.14.0)':
     dependencies:
       '@arcanis/slice-ansi': 1.1.1
       '@types/semver': 7.7.1
