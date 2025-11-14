@@ -12,7 +12,7 @@ import type {
   GerritProjectInfo,
   GerritRequestDetail,
 } from './types';
-import { mapPrStateToGerritFilter } from './utils';
+import { MAX_GERRIT_COMMENT_SIZE, mapPrStateToGerritFilter } from './utils';
 
 class GerritClient {
   // memCache is disabled because GerritPrCache will provide a smarter caching
@@ -227,8 +227,22 @@ class GerritClient {
   }
 
   normalizeMessage(message: string): string {
-    //the last \n was removed from gerrit after the comment was added...
-    return message.substring(0, 0x4000).trim();
+    // Gerrit would trim it anyway
+    let msg = message.trim();
+
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(msg);
+    if (bytes.length > MAX_GERRIT_COMMENT_SIZE) {
+      const truncationNotice = '\n\n[Truncated by Renovate]';
+      const truncationNoticeBytes = encoder.encode(truncationNotice);
+      const maxContentBytes =
+        MAX_GERRIT_COMMENT_SIZE - truncationNoticeBytes.length;
+      const truncatedBytes = bytes.slice(0, maxContentBytes);
+      const decoded = new TextDecoder().decode(truncatedBytes);
+      msg = decoded + truncationNotice;
+    }
+
+    return msg;
   }
 
   private static buildSearchFilters(
