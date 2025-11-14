@@ -60,7 +60,7 @@ export class ModuleExtractor extends DependencyExtractor {
     return dependencies;
   }
 
-  private analyseTerraformModule(dep: PackageDependency): PackageDependency {
+  public analyseTerraformModule(dep: PackageDependency): PackageDependency {
     // TODO #22198
     const source = dep.managerData!.source as string;
     const githubRefMatch = githubRefMatchRegex.exec(source);
@@ -93,8 +93,11 @@ export class ModuleExtractor extends DependencyExtractor {
       if (gitTagsRefMatch.groups.subfolder) {
         logger.debug('Terraform module contains subdirectory');
       }
-      dep.depName = gitTagsRefMatch.groups.path.replace('.git', '');
-      dep.packageName = gitTagsRefMatch.groups.url.replace('.git', '');
+      dep.depName = gitTagsRefMatch.groups.path.replace(/\.git(?=$|[/?])/g, '');
+      dep.packageName = gitTagsRefMatch.groups.url.replace(
+        /\.git(?=$|[/?])/g,
+        '',
+      );
       dep.currentValue = gitTagsRefMatch.groups.tag;
       dep.datasource = GitTagsDatasource.id;
     } else if (source) {
