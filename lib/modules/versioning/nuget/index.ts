@@ -1,3 +1,4 @@
+import { isNullOrUndefined } from '@sindresorhus/is';
 import type { NewValueConfig, VersioningApi } from '../types';
 import { parseRange, parseVersion } from './parser';
 import {
@@ -44,7 +45,7 @@ class NugetVersioningApi implements VersioningApi {
     }
 
     const r = parseRange(version);
-    if (r?.type !== 'nuget-exact-range') {
+    if (isNullOrUndefined(r) || r.type !== 'nuget-exact-range') {
       return false;
     }
 

@@ -1,3 +1,4 @@
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { regEx } from '../../../util/regex';
@@ -165,7 +166,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     skipReason = 'unsupported-url';
   }
   const sha256 = extractSha256(cleanContent);
-  if (sha256?.length !== 64) {
+  if (isNullOrUndefined(sha256) || sha256.length !== 64) {
     logger.debug('Error: Invalid sha256 field');
     skipReason = 'invalid-sha256';
   }

@@ -1,3 +1,4 @@
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
@@ -56,11 +57,11 @@ export async function updateArtifacts({
   updatedDeps,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  if (updatedDeps?.length !== 1) {
+  if (isNullOrUndefined(updatedDeps) || updatedDeps.length !== 1) {
     // Each answers file (~ packageFileName) has exactly one dependency to update.
     return artifactError(
       packageFileName,
-      `Unexpected number of dependencies: ${updatedDeps.length} (should be 1)`,
+      `Unexpected number of dependencies: ${updatedDeps?.length} (should be 1)`,
     );
   }
 
