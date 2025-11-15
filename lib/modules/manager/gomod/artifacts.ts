@@ -132,6 +132,7 @@ export async function updateArtifacts({
       vendorDir &&
       (await readLocalFile(vendorModulesFileName)) !== null);
   let massagedGoMod = newGoModContent;
+  const useGoGenerate = !!config.postUpdateOptions?.includes('goGenerate');
 
   if (config.postUpdateOptions?.includes('gomodMassage')) {
     // Regex match inline replace directive, example:
@@ -330,6 +331,11 @@ export async function updateArtifacts({
       execCommands.push(`${cmd} ${args}`);
     }
 
+    if (useGoGenerate) {
+      logger.debug('go generate command included');
+      execCommands.push(`${cmd} generate ./...`);
+    }
+
     await exec(execCommands, execOptions);
 
     const status = await getRepoStatus();
@@ -377,6 +383,32 @@ export async function updateArtifacts({
             },
           });
         }
+      }
+    }
+
+    // add all files added when in go generate mode. unfortunately there is not
+    // a good way as there is with vendoring or go import path updates to detect
+    // this
+    if (useGoGenerate) {
+      logger.debug(
+        'Updating all modified files since generated files were added',
+      );
+      for (const f of status.modified.concat(status.created)) {
+        res.push({
+          file: {
+            type: 'addition',
+            path: f,
+            contents: await readLocalFile(f),
+          },
+        });
+      }
+      for (const f of coerceArray(status.deleted)) {
+        res.push({
+          file: {
+            type: 'deletion',
+            path: f,
+          },
+        });
       }
     }
 
