@@ -1,4 +1,5 @@
 import upath from 'upath';
+import { getConfigFileNames } from '../../../../config/app-strings';
 import * as _decrypt from '../../../../config/decrypt';
 import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages';
 import { getCustomEnv } from '../../../../util/env';
@@ -350,6 +351,36 @@ describe('workers/global/config/parse/index', () => {
         defaultArgv,
       );
       expect(parsedConfig.extends).toMatchObject([':pinDigests']);
+    });
+
+    it('appends files from configFileNames to config filenames list', async () => {
+      fileConfigParser.getConfig.mockResolvedValue({
+        configFileNames: ['myrenovate.json'],
+      });
+      const parsedConfig = await configParser.parseConfigs(
+        defaultEnv,
+        defaultArgv,
+      );
+      expect(parsedConfig.configFileNames).toBeUndefined();
+      expect(getConfigFileNames()[0]).toBe('myrenovate.json');
+    });
+
+    it('supports setting configFileNames through cli', async () => {
+      fileConfigParser.getConfig.mockResolvedValue({});
+      defaultArgv = defaultArgv.concat(['--config-file-names=myrenovate.json']);
+      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
+      expect(parsed.configFileNames).toBeUndefined();
+      expect(getConfigFileNames()[0]).toBe('myrenovate.json');
+    });
+
+    it('supports setting configFileNames through env', async () => {
+      fileConfigParser.getConfig.mockResolvedValue({});
+      const env: NodeJS.ProcessEnv = {
+        RENOVATE_CONFIG_FILE_NAMES: '["myrenovate.json"]',
+      };
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig.configFileNames).toBeUndefined();
+      expect(getConfigFileNames()[0]).toBe('myrenovate.json');
     });
   });
 });

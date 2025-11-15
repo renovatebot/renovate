@@ -246,8 +246,6 @@ const options: RenovateOptions[] = [
     default: null,
     globalOnly: true,
     inheritConfigSupport: true,
-    cli: false,
-    env: false,
   },
   {
     name: 'onboardingConfigFileName',
