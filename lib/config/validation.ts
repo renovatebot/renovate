@@ -1,4 +1,13 @@
-import is from '@sindresorhus/is';
+import is, {
+  isArray,
+  isEmptyString,
+  isNonEmptyArray,
+  isNonEmptyString,
+  isObject,
+  isPlainObject,
+  isString,
+  isUndefined,
+} from '@sindresorhus/is';
 import { allManagersList, getManagerList } from '../modules/manager';
 import { isCustomManager } from '../modules/manager/custom';
 import type { CustomManager } from '../modules/manager/custom/types';
@@ -204,7 +213,7 @@ export async function validateConfig(
       const unsupportedManagers = getUnsupportedEnabledManagers(
         val as string[],
       );
-      if (is.nonEmptyArray(unsupportedManagers)) {
+      if (isNonEmptyArray(unsupportedManagers)) {
         errors.push({
           topic: 'Configuration Error',
           message: `The following managers configured in enabledManagers are not supported: "${unsupportedManagers.join(
@@ -308,9 +317,9 @@ export async function validateConfig(
           const allowsNegative = optionAllowsNegativeIntegers.has(key);
           errors.push(...validateNumber(key, val, allowsNegative, currentPath));
         } else if (type === 'array' && val) {
-          if (is.array(val)) {
+          if (isArray(val)) {
             for (const [subIndex, subval] of val.entries()) {
-              if (is.object(subval)) {
+              if (isObject(subval)) {
                 const subValidation = await validateConfig(
                   configType,
                   subval as RenovateConfig,
@@ -331,7 +340,14 @@ export async function validateConfig(
             }
             if (key === 'extends') {
               for (const subval of val) {
-                if (is.string(subval)) {
+                if (isString(subval)) {
+                  if (configType !== 'global' && subval.startsWith('global:')) {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `${currentPath}: you cannot extend from "global:" presets in a repository config's "extends"`,
+                    });
+                  }
+
                   if (
                     parentName === 'packageRules' &&
                     subval.startsWith('group:')
@@ -383,7 +399,7 @@ export async function validateConfig(
             ];
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {
-                if (is.object(packageRule)) {
+                if (isObject(packageRule)) {
                   const resolvedRule = migrateConfig({
                     packageRules: [
                       await resolveConfigPresets(
@@ -437,7 +453,7 @@ export async function validateConfig(
                     'separateMultipleMinor',
                     'versioning',
                   ];
-                  if (is.nonEmptyArray(resolvedRule.matchUpdateTypes)) {
+                  if (isNonEmptyArray(resolvedRule.matchUpdateTypes)) {
                     for (const option of preLookupOptions) {
                       if (resolvedRule[option] !== undefined) {
                         const message = `${currentPath}[${subIndex}]: packageRules cannot combine both matchUpdateTypes and ${option}. Rule: ${JSON.stringify(
@@ -492,10 +508,10 @@ export async function validateConfig(
                     )}`,
                   });
                 } else if (
-                  is.nonEmptyString(customManager.customType) &&
+                  isNonEmptyString(customManager.customType) &&
                   isCustomManager(customManager.customType)
                 ) {
-                  if (is.nonEmptyArray(customManager.managerFilePatterns)) {
+                  if (isNonEmptyArray(customManager.managerFilePatterns)) {
                     switch (customManager.customType) {
                       case 'regex':
                         validateRegexManagerFields(
@@ -520,8 +536,8 @@ export async function validateConfig(
                   }
                 } else {
                   if (
-                    is.emptyString(customManager.customType) ||
-                    is.undefined(customManager.customType)
+                    isEmptyString(customManager.customType) ||
+                    isUndefined(customManager.customType)
                   ) {
                     errors.push({
                       topic: 'Configuration Error',
@@ -572,7 +588,7 @@ export async function validateConfig(
                 key === 'matchCurrentValue') &&
               // TODO: can be undefined ? #22198
               !rulesRe.test(parentPath!) && // Inside a packageRule
-              (is.string(parentPath) || !isPreset) // top level in a preset
+              (isString(parentPath) || !isPreset) // top level in a preset
             ) {
               errors.push({
                 topic: 'Configuration Error',
@@ -586,7 +602,7 @@ export async function validateConfig(
             });
           }
         } else if (type === 'string') {
-          if (!is.string(val)) {
+          if (!isString(val)) {
             errors.push({
               topic: 'Configuration Error',
               message: `Configuration option \`${currentPath}\` should be a string`,
@@ -597,7 +613,7 @@ export async function validateConfig(
           currentPath !== 'compatibility' &&
           key !== 'constraints'
         ) {
-          if (is.plainObject(val)) {
+          if (isPlainObject(val)) {
             if (key === 'registryAliases') {
               const res = validatePlainObject(val);
               if (res !== true) {
@@ -612,7 +628,7 @@ export async function validateConfig(
                   ? ((config.allowedEnv as string[]) ?? [])
                   : GlobalConfig.get('allowedEnv', []);
               for (const [envVarName, envVarValue] of Object.entries(val)) {
-                if (!is.string(envVarValue)) {
+                if (!isString(envVarValue)) {
                   errors.push({
                     topic: 'Configuration Error',
                     message: `Invalid env variable value: \`${currentPath}.${envVarName}\` must be a string.`,
@@ -640,7 +656,7 @@ export async function validateConfig(
                   });
                 }
                 if (
-                  !(is.string(statusCheckValue) || null === statusCheckValue)
+                  !(isString(statusCheckValue) || null === statusCheckValue)
                 ) {
                   errors.push({
                     topic: 'Configuration Error',
@@ -660,7 +676,7 @@ export async function validateConfig(
                 customDatasourceName,
                 customDatasourceValue,
               ] of Object.entries(val)) {
-                if (!is.plainObject(customDatasourceValue)) {
+                if (!isPlainObject(customDatasourceValue)) {
                   errors.push({
                     topic: 'Configuration Error',
                     message: `Invalid \`${currentPath}.${customDatasourceName}\` configuration: customDatasource is not an object`,
@@ -676,22 +692,20 @@ export async function validateConfig(
                       message: `Invalid \`${currentPath}.${subKey}\` configuration: key is not allowed`,
                     });
                   } else if (subKey === 'transformTemplates') {
-                    if (!is.array(subValue, is.string)) {
+                    if (!isArray(subValue, isString)) {
                       errors.push({
                         topic: 'Configuration Error',
                         message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of string`,
                       });
                     }
                   } else if (subKey === 'description') {
-                    if (
-                      !(is.string(subValue) || is.array(subValue, is.string))
-                    ) {
+                    if (!(isString(subValue) || isArray(subValue, isString))) {
                       errors.push({
                         topic: 'Configuration Error',
                         message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of strings`,
                       });
                     }
-                  } else if (!is.string(subValue)) {
+                  } else if (!isString(subValue)) {
                     errors.push({
                       topic: 'Configuration Error',
                       message: `Invalid \`${currentPath}.${subKey}\` configuration: is a string`,
@@ -724,13 +738,13 @@ export async function validateConfig(
       }
     }
 
-    if (key === 'hostRules' && is.array(val)) {
+    if (key === 'hostRules' && isArray(val)) {
       const allowedHeaders =
         configType === 'global'
           ? ((config.allowedHeaders as string[]) ?? [])
           : GlobalConfig.get('allowedHeaders', []);
       for (const rule of val as HostRule[]) {
-        if (is.nonEmptyString(rule.matchHost)) {
+        if (isNonEmptyString(rule.matchHost)) {
           if (rule.matchHost.includes('://')) {
             if (parseUrl(rule.matchHost) === null) {
               errors.push({
@@ -739,7 +753,7 @@ export async function validateConfig(
               });
             }
           }
-        } else if (is.emptyString(rule.matchHost)) {
+        } else if (isEmptyString(rule.matchHost)) {
           errors.push({
             topic: 'Configuration Error',
             message:
@@ -751,7 +765,7 @@ export async function validateConfig(
           continue;
         }
         for (const [header, value] of Object.entries(rule.headers)) {
-          if (!is.string(value)) {
+          if (!isString(value)) {
             errors.push({
               topic: 'Configuration Error',
               message: `Invalid hostRules headers value configuration: header must be a string.`,
@@ -767,7 +781,7 @@ export async function validateConfig(
       }
     }
 
-    if (key === 'matchJsonata' && is.array(val, is.string)) {
+    if (key === 'matchJsonata' && isArray(val, isString)) {
       for (const expression of val) {
         const res = getExpression(expression);
         if (res instanceof Error) {
@@ -813,7 +827,7 @@ async function validateGlobalConfig(
   }
   if (val !== null) {
     if (type === 'string') {
-      if (is.string(val)) {
+      if (isString(val)) {
         if (
           key === 'onboardingConfigFileName' &&
           !getConfigFileNames().includes(val)
@@ -867,7 +881,7 @@ async function validateGlobalConfig(
         if (
           key === 'reportType' &&
           ['s3', 'file'].includes(val) &&
-          !is.string(config.reportPath)
+          !isString(config.reportPath)
         ) {
           errors.push({
             topic: 'Configuration Error',
@@ -893,7 +907,7 @@ async function validateGlobalConfig(
         });
       }
     } else if (type === 'array') {
-      if (is.array(val)) {
+      if (isArray(val)) {
         if (isRegexOrGlobOption(key)) {
           warnings.push(
             ...regexOrGlobValidator.check({
@@ -931,7 +945,7 @@ async function validateGlobalConfig(
         });
       }
     } else if (type === 'object') {
-      if (is.plainObject(val)) {
+      if (isPlainObject(val)) {
         if (key === 'onboardingConfig') {
           const subValidation = await validateConfig('repo', val);
           for (const warning of subValidation.warnings.concat(

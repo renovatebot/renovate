@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isEmptyArray, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -32,7 +32,7 @@ export async function updateArtifacts({
   logger.debug(`mix.getArtifacts(${packageFileName})`);
   const { isLockFileMaintenance } = config;
 
-  if (is.emptyArray(updatedDeps) && !isLockFileMaintenance) {
+  if (isEmptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated mix deps');
     return null;
   }
@@ -175,7 +175,7 @@ export async function updateArtifacts({
       'deps.update',
       ...updatedDeps
         .map((dep) => dep.depName)
-        .filter(is.string)
+        .filter(isString)
         .map((dep) => quote(dep)),
     ].join(' ');
   }

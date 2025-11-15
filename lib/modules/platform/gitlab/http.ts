@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isEmptyArray } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { GitlabHttp } from '../../../util/http/gitlab';
 import type { GitLabUser, GitlabUserStatus } from './types';
@@ -12,7 +12,7 @@ export async function getUserID(username: string): Promise<number> {
     )
   ).body;
 
-  if (is.emptyArray(userInfo)) {
+  if (isEmptyArray(userInfo)) {
     throw new Error(
       `User ID for the username: ${username} could not be found.`,
     );

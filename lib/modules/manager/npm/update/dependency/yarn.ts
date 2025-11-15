@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isObject, isString } from '@sindresorhus/is';
 import type { Document } from 'yaml';
 import { CST, isCollection, isPair, isScalar, parseDocument } from 'yaml';
 import { logger } from '../../../../../logger';
@@ -14,7 +14,7 @@ export function updateYarnrcCatalogDependency({
 
   const catalogName = depType?.split('.').at(-1);
 
-  if (!is.string(catalogName)) {
+  if (!isString(catalogName)) {
     logger.error(
       'No catalogName was found; this is likely an extraction error.',
     );
@@ -49,10 +49,9 @@ export function updateYarnrcCatalogDependency({
 
   const oldVersion =
     catalogName === 'default'
-      ? parsedContents.catalogs?.list?.[depName!]
-      : is.object(parsedContents.catalogs?.list?.[catalogName]) &&
-          is.string(depName)
-        ? parsedContents.catalogs?.list?.[catalogName][depName]
+      ? parsedContents.catalog?.[depName!]
+      : isObject(parsedContents.catalogs?.[catalogName]) && isString(depName)
+        ? parsedContents.catalogs?.[catalogName][depName]
         : undefined;
 
   if (oldVersion === newValue) {
@@ -135,8 +134,8 @@ function getDepPath({
   depName: string;
 }): string[] {
   if (catalogName === 'default') {
-    return ['catalogs', 'list', depName];
+    return ['catalog', depName];
   } else {
-    return ['catalogs', 'list', catalogName, depName];
+    return ['catalogs', catalogName, depName];
   }
 }

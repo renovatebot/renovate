@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isInteger, isNumber, isUndefined } from '@sindresorhus/is';
 import { logger } from '../../logger';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 
@@ -51,7 +51,7 @@ export const counts = new Map<CountName, number>();
 export function getCount(key: CountName): number {
   const count = counts.get(key);
   // istanbul ignore if: should not happen
-  if (!is.integer(count)) {
+  if (!isInteger(count)) {
     logger.debug(`Could not compute the count of ${key}, returning zero.`);
     return 0;
   }
@@ -118,12 +118,12 @@ export function calcLimit(
     let limit = upgrade[limitName];
 
     // inherit prConcurrentLimit value incase branchConcurrentLimit is null
-    if (!is.number(limit) && limitName === 'branchConcurrentLimit') {
+    if (!isNumber(limit) && limitName === 'branchConcurrentLimit') {
       limit = upgrade.prConcurrentLimit;
     }
 
     // istanbul ignore if: should never happen as all limits get a default value
-    if (is.undefined(limit)) {
+    if (isUndefined(limit)) {
       limit = Number.MAX_SAFE_INTEGER;
     }
 
@@ -158,7 +158,7 @@ export function hasMultipleLimits(
     let limitValue = upgrade[limitName];
 
     // inherit prConcurrentLimit value incase branchConcurrentLimit is null
-    if (limitName === 'branchConcurrentLimit' && !is.number(limitValue)) {
+    if (limitName === 'branchConcurrentLimit' && !isNumber(limitValue)) {
       limitValue = upgrade.prConcurrentLimit;
     }
 
@@ -167,7 +167,7 @@ export function hasMultipleLimits(
       limitValue = 0;
     }
 
-    if (!is.undefined(limitValue) && !distinctLimits.has(limitValue)) {
+    if (!isUndefined(limitValue) && !distinctLimits.has(limitValue)) {
       distinctLimits.add(limitValue);
     }
   }

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray, isNullOrUndefined, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { mergeChildConfig, removeGlobalConfig } from '../../../config';
 import { setUserConfigFileNames } from '../../../config/app-strings';
@@ -28,8 +28,8 @@ export async function mergeInheritedConfig(
     return config;
   }
   if (
-    !is.string(config.inheritConfigRepoName) ||
-    !is.string(config.inheritConfigFileName)
+    !isString(config.inheritConfigRepoName) ||
+    !isString(config.inheritConfigFileName)
   ) {
     // Config validation should prevent this error
     logger.error(
@@ -101,7 +101,7 @@ export async function mergeInheritedConfig(
   }
 
   // set user config file name here
-  if (is.nonEmptyArray(inheritedConfig.configFileNames)) {
+  if (isNonEmptyArray(inheritedConfig.configFileNames)) {
     logger.debug(
       { configFileNames: inheritedConfig.configFileNames },
       'Updated the config filenames list',
@@ -120,7 +120,7 @@ export async function mergeInheritedConfig(
     );
   }
 
-  if (is.nullOrUndefined(filteredConfig.extends)) {
+  if (isNullOrUndefined(filteredConfig.extends)) {
     filteredConfig = applySecretsAndVariablesToConfig({
       config: filteredConfig,
       secrets: config.secrets ?? {},

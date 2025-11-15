@@ -4,6 +4,7 @@ import type { Ctx } from '../types';
 import {
   cleanupTempVars,
   qStringValue,
+  qValueMatcher,
   qVersion,
   storeInTokenMap,
   storeVarToken,
@@ -26,7 +27,7 @@ export const qPlugins = q
         maxDepth: 1,
         startsWith: '(',
         endsWith: ')',
-        search: q.begin<Ctx>().join(qStringValue).end(),
+        search: q.begin<Ctx>().join(qValueMatcher).end(),
       })
       .handler((ctx) => storeInTokenMap(ctx, 'pluginName'))
       .alt(

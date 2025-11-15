@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
@@ -23,15 +23,12 @@ export const depTypes = {
 export function parsePEP508(
   value: string | null | undefined,
 ): Pep508ParseResult | null {
-  if (is.nullOrUndefined(value)) {
+  if (isNullOrUndefined(value)) {
     return null;
   }
 
   const regExpExec = pep508Regex.exec(value);
-  if (
-    is.nullOrUndefined(regExpExec) ||
-    is.nullOrUndefined(regExpExec?.groups)
-  ) {
+  if (isNullOrUndefined(regExpExec) || isNullOrUndefined(regExpExec?.groups)) {
     logger.trace(`Pep508 could not be extracted`);
     return null;
   }
@@ -39,7 +36,7 @@ export function parsePEP508(
   const result: Pep508ParseResult = {
     packageName: regExpExec.groups.packageName,
   };
-  if (is.nonEmptyString(regExpExec.groups.currentValue)) {
+  if (isNonEmptyString(regExpExec.groups.currentValue)) {
     if (
       regExpExec.groups.currentValue.startsWith('(') &&
       regExpExec.groups.currentValue.endsWith(')')
@@ -50,10 +47,10 @@ export function parsePEP508(
     }
   }
 
-  if (is.nonEmptyString(regExpExec.groups.marker)) {
+  if (isNonEmptyString(regExpExec.groups.marker)) {
     result.marker = regExpExec.groups.marker;
   }
-  if (is.nonEmptyString(regExpExec.groups.extras)) {
+  if (isNonEmptyString(regExpExec.groups.extras)) {
     // trim to remove allowed whitespace between brackets
     result.extras = regExpExec.groups.extras.split(',').map((e) => e.trim());
   }
@@ -66,7 +63,7 @@ export function pep508ToPackageDependency(
   value: string,
 ): PackageDependency | null {
   const parsed = parsePEP508(value);
-  if (is.nullOrUndefined(parsed)) {
+  if (isNullOrUndefined(parsed)) {
     return null;
   }
 
@@ -77,7 +74,7 @@ export function pep508ToPackageDependency(
     depType,
   };
 
-  if (is.nullOrUndefined(parsed.currentValue)) {
+  if (isNullOrUndefined(parsed.currentValue)) {
     dep.skipReason = 'unspecified-version';
   } else {
     dep.currentValue = parsed.currentValue;

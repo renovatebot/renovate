@@ -95,7 +95,10 @@
     "chakra-ui": "https://github.com/chakra-ui/chakra-ui",
     "chromely": "https://github.com/chromelyapps/Chromely",
     "citation-js": "https://github.com/citation-js/citation-js",
-    "ckeditor": "https://github.com/ckeditor/ckeditor5",
+    "ckeditor": [
+      "https://github.com/ckeditor/ckeditor5",
+      "https://github.com/ckeditor/ckeditor5-premium-features"
+    ],
     "clarity": "https://github.com/vmware/clarity",
     "clearscript": [
       "https://github.com/microsoft/ClearScript",
@@ -105,6 +108,7 @@
     "contentful-rich-text": "https://github.com/contentful/rich-text",
     "cspell": "https://github.com/streetsidesoftware/cspell",
     "datadog-browser-sdk": "https://github.com/DataDog/browser-sdk",
+    "datafusion": "https://github.com/apache/datafusion",
     "datatables-net": [
       "https://github.com/DataTables/Dist-DataTables",
       "https://github.com/DataTables/Dist-DataTables-Bootstrap",
@@ -370,6 +374,7 @@
     "hickory-dns": "https://github.com/hickory-dns/hickory-dns",
     "html-eslint": "https://github.com/yeonjuan/html-eslint",
     "humanizer": "https://github.com/Humanizr/Humanizer",
+    "immich": "https://github.com/immich-app/immich",
     "infrastructure-ui": "https://github.com/instructure/instructure-ui",
     "ionic-native": "https://github.com/ionic-team/ionic-native",
     "istanbuljs": "https://github.com/istanbuljs/istanbuljs",

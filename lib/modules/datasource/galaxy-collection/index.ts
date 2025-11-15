@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
@@ -94,7 +94,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     );
 
     // filter failed versions
-    const filteredReleases = enrichedReleases.filter(is.truthy);
+    const filteredReleases = enrichedReleases.filter(isTruthy);
     // extract base information which are only provided on the release from the newest release
 
     // Find the source URL of the highest version release

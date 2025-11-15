@@ -1,6 +1,6 @@
 import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
-import is from '@sindresorhus/is';
+import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
 import semver from 'semver';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -281,7 +281,7 @@ async function fetchRepositories(): Promise<GhRestRepo[]> {
 export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
   logger.debug('Autodiscovering GitHub repositories');
   const nonEmptyRepositories = (await fetchRepositories()).filter(
-    is.nonEmptyObject,
+    isNonEmptyObject,
   );
   const nonArchivedRepositories = nonEmptyRepositories.filter(
     (repo) => !repo.archived,
@@ -545,10 +545,10 @@ export async function initRepo({
 
     if (res?.errors) {
       if (res.errors.find((err) => err.type === 'RATE_LIMITED')) {
-        logger.debug({ res }, 'Graph QL rate limit exceeded.');
+        logger.debug({ res }, 'GraphQL rate limit exceeded.');
         throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
       }
-      logger.debug({ res }, 'Unexpected Graph QL errors');
+      logger.debug({ res }, 'Unexpected GraphQL errors');
       throw new Error(PLATFORM_UNKNOWN_ERROR);
     }
 
@@ -1574,7 +1574,7 @@ export async function addLabels(
   logger.debug(`Adding labels '${labels?.join(', ')}' to #${issueNo}`);
   try {
     const repository = config.parentRepo ?? config.repository;
-    if (is.array(labels) && labels.length) {
+    if (isArray(labels) && labels.length) {
       await githubApi.postJson(`repos/${repository}/issues/${issueNo}/labels`, {
         body: labels,
       });
@@ -1966,7 +1966,7 @@ export async function mergePr({
       if (err.statusCode === 404 || err.statusCode === 405) {
         const body = err.response?.body;
         if (
-          is.nonEmptyString(body?.message) &&
+          isNonEmptyString(body?.message) &&
           regEx(/^Required status check ".+" is expected\.$/).test(body.message)
         ) {
           logger.debug(
@@ -1976,7 +1976,7 @@ export async function mergePr({
           return false;
         }
         if (
-          is.nonEmptyString(body?.message) &&
+          isNonEmptyString(body?.message) &&
           (body.message.includes('approving review') ||
             body.message.includes('code owner review'))
         ) {

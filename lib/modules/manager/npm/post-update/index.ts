@@ -1,5 +1,5 @@
 // TODO: types (#22198)
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
 import upath from 'upath';
 import { logger } from '../../../../logger';
@@ -49,7 +49,7 @@ import * as yarn from './yarn';
 
 // Strips empty values, deduplicates, and returns the directories from filenames
 const getDirs = (arr: (string | null | undefined)[]): string[] =>
-  Array.from(new Set(arr.filter(is.string)));
+  Array.from(new Set(arr.filter(isString)));
 
 export function determineLockFileDirs(
   config: PostUpdateConfig,
@@ -145,7 +145,7 @@ export async function writeExistingFiles(
     // Write out the file unless the npmrc came from the workspace
     // npmrcFilename will be set whenever the file was read from disk during extract
     if (
-      is.string(npmrc) &&
+      isString(npmrc) &&
       (npmrcFilename === packageFile.managerData.npmrcFileName ||
         !packageFile.managerData.npmrcFileName)
     ) {
@@ -336,7 +336,7 @@ export async function updateYarnBinary(
     const yarnrcYmlFilename = upath.join(lockFileDir, '.yarnrc.yml');
     yarnrcYml ??= (await getFile(yarnrcYmlFilename)) ?? undefined;
     const newYarnrcYml = await readLocalFile(yarnrcYmlFilename, 'utf8');
-    if (!is.string(yarnrcYml) || !is.string(newYarnrcYml)) {
+    if (!isString(yarnrcYml) || !isString(newYarnrcYml)) {
       return existingYarnrcYmlContent;
     }
 
@@ -344,8 +344,8 @@ export async function updateYarnBinary(
     const oldYarnPath = parseSingleYaml<YarnRcYmlFile>(yarnrcYml)?.yarnPath;
     const newYarnPath = parseSingleYaml<YarnRcYmlFile>(newYarnrcYml)?.yarnPath;
     if (
-      !is.nonEmptyStringAndNotWhitespace(oldYarnPath) ||
-      !is.nonEmptyStringAndNotWhitespace(newYarnPath)
+      !isNonEmptyStringAndNotWhitespace(oldYarnPath) ||
+      !isNonEmptyStringAndNotWhitespace(newYarnPath)
     ) {
       return existingYarnrcYmlContent;
     }

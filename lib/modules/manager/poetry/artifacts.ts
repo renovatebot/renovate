@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -119,7 +119,7 @@ function getPoetrySources(content: string, fileName: string): PoetrySource[] {
 
 async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
   const scopedMatch = find({ hostType: PypiDatasource.id, url });
-  const hostRule = is.nonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
+  const hostRule = isNonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
   if (hostRule && Object.keys(hostRule).length !== 0) {
     return hostRule;
   }
@@ -174,7 +174,7 @@ export async function updateArtifacts({
   logger.debug(`poetry.updateArtifacts(${packageFileName})`);
   const { isLockFileMaintenance } = config;
 
-  if (!is.nonEmptyArray(updatedDeps) && !isLockFileMaintenance) {
+  if (!isNonEmptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated poetry deps - returning null');
     return null;
   }
@@ -201,7 +201,7 @@ export async function updateArtifacts({
       cmd.push(
         `poetry update --lock --no-interaction ${updatedDeps
           .map((dep) => dep.depName)
-          .filter(is.string)
+          .filter(isString)
           .map((dep) => quote(dep))
           .join(' ')}`,
       );

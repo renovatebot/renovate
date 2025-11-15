@@ -167,8 +167,9 @@ export async function getPr(number: number): Promise<Pr | null> {
 
 export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prConfig.number}, ${prConfig.prTitle})`);
+  // prConfig.prBody will only be set if the body has changed
   if (prConfig.prBody) {
-    await client.addMessageIfNotAlreadyExists(
+    await client.addMessage(
       prConfig.number,
       prConfig.prBody,
       TAG_PULL_REQUEST_BODY,
@@ -206,11 +207,10 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       `the change should have been created automatically from previous push to refs/for/${prConfig.sourceBranch}, but it was not created in the last 5 minutes (${change.created})`,
     );
   }
-  await client.addMessageIfNotAlreadyExists(
+  await client.addMessage(
     change._number,
     prConfig.prBody,
     TAG_PULL_REQUEST_BODY,
-    change.messages,
   );
   return mapGerritChangeToPr(change, {
     sourceBranch: prConfig.sourceBranch,

@@ -1,4 +1,8 @@
-import is from '@sindresorhus/is';
+import {
+  isNonEmptyObject,
+  isNonEmptyString,
+  isUndefined,
+} from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
@@ -13,8 +17,8 @@ export function setOnboardingCache(
   // do not update cache if commit is null/undefined
   if (
     !(
-      is.nonEmptyString(defaultBranchSha) &&
-      is.nonEmptyString(onboardingBranchSha)
+      isNonEmptyString(defaultBranchSha) &&
+      isNonEmptyString(onboardingBranchSha)
     )
   ) {
     logger.debug('Onboarding cache not updated');
@@ -69,9 +73,9 @@ export async function isOnboardingBranchModified(
   let isModified = false;
 
   if (
-    onboardingCache &&
+    isNonEmptyObject(onboardingCache) &&
     onboardingSha === onboardingCache.onboardingBranchSha &&
-    !is.undefined(onboardingCache.isModified)
+    !isUndefined(onboardingCache.isModified)
   ) {
     return onboardingCache.isModified;
   } else {
@@ -113,10 +117,10 @@ export async function isOnboardingBranchConflicted(
   let isConflicted = false;
 
   if (
-    onboardingCache &&
+    isNonEmptyObject(onboardingCache) &&
     defaultBranchSha === onboardingCache.defaultBranchSha &&
     onboardingSha === onboardingCache.onboardingBranchSha &&
-    !is.undefined(onboardingCache.isConflicted)
+    !isUndefined(onboardingCache.isConflicted)
   ) {
     return onboardingCache.isConflicted;
   } else {

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { getConfig } from '../../../config/defaults';
 import { GlobalConfig } from '../../../config/global';
 import { addMeta } from '../../../logger';
@@ -203,7 +203,7 @@ describe('workers/repository/process/write', () => {
         ...new Set(
           branch.upgrades
             .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
-            .filter(is.string),
+            .filter(isString),
         ),
       ].sort();
       const commitFingerprint = fingerprint({
@@ -232,7 +232,7 @@ describe('workers/repository/process/write', () => {
         ...new Set(
           branch.upgrades
             .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
-            .filter(is.string),
+            .filter(isString),
         ),
       ].sort();
 
@@ -277,7 +277,7 @@ describe('workers/repository/process/write', () => {
         ...new Set(
           branch.upgrades
             .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
-            .filter(is.string),
+            .filter(isString),
         ),
       ].sort();
       const commitFingerprint = fingerprint({

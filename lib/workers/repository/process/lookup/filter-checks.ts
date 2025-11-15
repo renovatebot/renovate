@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
 import type { MinimumReleaseAgeBehaviour } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -82,7 +82,7 @@ export async function filterInternalChecks(
       // Now check for a minimumReleaseAge config
       const { minimumConfidence, minimumReleaseAge, updateType } =
         releaseConfig;
-      if (is.nonEmptyString(minimumReleaseAge)) {
+      if (isNonEmptyString(minimumReleaseAge)) {
         const minimumReleaseAgeBehaviour =
           releaseConfig.minimumReleaseAgeBehaviour;
 
@@ -103,7 +103,7 @@ export async function filterInternalChecks(
           }
         } // or if there is no timestamp, and we're running in `minimumReleaseAgeBehaviour=timestamp-required`
         else if (
-          is.nullOrUndefined(candidateRelease.releaseTimestamp) &&
+          isNullOrUndefined(candidateRelease.releaseTimestamp) &&
           minimumReleaseAgeBehaviour === 'timestamp-required'
         ) {
           // Skip it, as we require a timestamp
@@ -114,7 +114,7 @@ export async function filterInternalChecks(
           continue;
         } // if there is no timestamp, and we're running in `optional` mode, we can allow it
         else if (
-          is.nullOrUndefined(candidateRelease.releaseTimestamp) &&
+          isNullOrUndefined(candidateRelease.releaseTimestamp) &&
           minimumReleaseAgeBehaviour === 'timestamp-optional'
         ) {
           candidateVersionsWithoutReleaseTimestamp[
@@ -156,12 +156,15 @@ export async function filterInternalChecks(
             candidateVersionsWithoutReleaseTimestamp['timestamp-required'],
           check: 'minimumReleaseAge',
         },
-        `Marking ${candidateVersionsWithoutReleaseTimestamp['timestamp-required'].length} release(s) as pending, as they not have a releaseTimestamp and we're running with minimumReleaseAgeBehaviour=require-timestamp`,
+        `Marking ${candidateVersionsWithoutReleaseTimestamp['timestamp-required'].length} release(s) as pending, as they do not have a releaseTimestamp and we're running with minimumReleaseAgeBehaviour=require-timestamp`,
       );
     }
 
     if (candidateVersionsWithoutReleaseTimestamp['timestamp-optional'].length) {
-      logger.warn(
+      logger.once.warn(
+        "Some release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
+      );
+      logger.debug(
         {
           depName,
           versions:

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isFunction, isString, isUndefined } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
@@ -63,16 +63,16 @@ export function cache<T>({
     }
 
     let finalNamespace: PackageCacheNamespace | undefined;
-    if (is.string(namespace)) {
+    if (isString(namespace)) {
       finalNamespace = namespace;
-    } else if (is.function(namespace)) {
+    } else if (isFunction(namespace)) {
       finalNamespace = namespace.apply(instance, args);
     }
 
     let finalKey: string | undefined;
-    if (is.string(key)) {
+    if (isString(key)) {
       finalKey = key;
-    } else if (is.function(key)) {
+    } else if (isFunction(key)) {
       finalKey = key.apply(instance, args);
     }
 
@@ -145,7 +145,7 @@ export function cache<T>({
         newData = await callback();
       }
 
-      if (!is.undefined(newData)) {
+      if (!isUndefined(newData)) {
         const newRecord: DecoratorCachedRecord = {
           cachedAt: DateTime.local().toISO(),
           value: newData,

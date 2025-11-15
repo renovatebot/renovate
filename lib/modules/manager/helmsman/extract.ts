@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { parseSingleYaml } from '../../../util/yaml';
@@ -46,14 +46,14 @@ function createDep(
     return dep;
   }
 
-  if (!is.nonEmptyString(regexResult.groups.packageName)) {
+  if (!isNonEmptyString(regexResult.groups.packageName)) {
     dep.skipReason = 'invalid-name';
     return dep;
   }
   dep.packageName = regexResult.groups.packageName;
 
   const registryUrl = doc.helmRepos[regexResult.groups.registryRef];
-  if (!is.nonEmptyString(registryUrl)) {
+  if (!isNonEmptyString(registryUrl)) {
     dep.skipReason = 'no-repository';
     return dep;
   }
@@ -77,7 +77,7 @@ export function extractPackageFile(
 
     const deps = Object.keys(doc.apps)
       .map((key) => createDep(key, doc))
-      .filter(is.truthy); // filter null values
+      .filter(isTruthy); // filter null values
 
     if (deps.length === 0) {
       return null;

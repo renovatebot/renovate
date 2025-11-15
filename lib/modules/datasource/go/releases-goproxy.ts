@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
@@ -137,7 +137,7 @@ export class GoProxyDatasource extends Datasource {
     );
     const { body } = await this.http.getText(url);
     return filterMap(body.split(newlineRegex), (str) => {
-      if (!is.nonEmptyStringAndNotWhitespace(str)) {
+      if (!isNonEmptyStringAndNotWhitespace(str)) {
         return null;
       }
 
@@ -227,7 +227,7 @@ export class GoProxyDatasource extends Datasource {
           }
 
           return (
-            version.split(regEx(/[^\d]+/)).find(is.truthy) === major.toString()
+            version.split(regEx(/[^\d]+/)).find(isTruthy) === major.toString()
           );
         });
 

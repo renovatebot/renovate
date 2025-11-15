@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { parseSingleYaml } from '../../../util/yaml';
 import { getDep } from '../dockerfile/extract';
@@ -57,7 +57,7 @@ export function extractPackageFile(
   // use variables and if the image is not built locally
   const deps = pipelineKeys.flatMap((pipelineKey) =>
     Object.values(config[pipelineKey] ?? {})
-      .filter((step) => is.string(step?.image))
+      .filter((step) => isString(step?.image))
       .map((step) => getDep(step.image, true, extractConfig.registryAliases)),
   );
 

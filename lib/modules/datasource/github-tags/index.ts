@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isBoolean } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { queryReleases, queryTags } from '../../../util/github/graphql';
 import type { GithubReleaseItem } from '../../../util/github/graphql/types';
@@ -98,7 +98,7 @@ export class GithubTagsDatasource extends Datasource {
 
       for (const release of releases) {
         const isReleaseStable = releasesMap.get(release.version)?.isStable;
-        if (is.boolean(isReleaseStable)) {
+        if (isBoolean(isReleaseStable)) {
           release.isStable = isReleaseStable;
         }
       }

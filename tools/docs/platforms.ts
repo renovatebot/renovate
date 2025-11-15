@@ -9,7 +9,7 @@ export async function generatePlatforms(
   dist: string,
   platformIssuesMap: OpenItems,
 ): Promise<void> {
-  let platformContent = 'Supported values for `platform` are: ';
+  let platformContent = 'Supported values for `platform` are: \n\n';
   const platforms = getPlatformList();
   for (const platform of platforms) {
     let md = codeBlock`
@@ -26,10 +26,10 @@ export async function generatePlatforms(
   }
 
   platformContent += platforms
-    .map((v) => getModuleLink(v, `\`${v}\``))
-    .join(', ');
+    .map((v) => `* ${getModuleLink(v, `\`${v}\``)}\n`)
+    .join('\n');
 
-  platformContent += '.\n';
+  platformContent += '\n';
 
   let indexContent = await readFile(`docs/usage/modules/platform/index.md`);
   indexContent = replaceContent(indexContent, platformContent);

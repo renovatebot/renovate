@@ -33,7 +33,7 @@ concurrency:
 env:
   # are we on a release branch?
   DO_REALEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
-  NODE_VERSION: 22
+  NODE_VERSION: 24
   PDM_VERSION: 2.26.1 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
@@ -398,26 +398,32 @@ jobs:
         run: |
           mkdir -p ./coverage/lcov
           mkdir -p ./coverage/json
+          mkdir -p ./coverage/junit
           for shard in ${{ matrix.shards }};
           do
             mv ./coverage/shard/$shard/lcov.info ./coverage/lcov/$shard.lcov
             mv ./coverage/shard/$shard/coverage-final.json ./coverage/json/$shard.json
+            mv ./coverage/shard/$shard/junit.xml ./coverage/junit/junit-$shard.xml
           done
 
       - name: Save coverage artifacts
         if: success() && github.event.pull_request.draft != true && matrix.coverage
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: ${{ matrix.upload-artifact-name }}
           path: |
             ./coverage/lcov
             ./coverage/json
+            ./coverage/junit
 
   codecov:
     needs: [test]
     runs-on: ubuntu-latest
     timeout-minutes: 3
     if: success() && github.event_name != 'merge_group' && github.event.pull_request.draft != true
+    permissions:
+      id-token: write # required for codecov OIDC
+
     steps:
       - name: Checkout code
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -426,17 +432,27 @@ jobs:
           show-progress: false
 
       - name: Download coverage reports
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           pattern: coverage-*
           path: coverage
           merge-multiple: true
 
-      - name: Codecov
+      - name: Codecov Coverage
+        if: github.event_name != 'merge_group'
         uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          use_oidc: true
           directory: coverage/lcov
+          fail_ci_if_error: github.event_name != 'pull_request'
+          verbose: true
+
+      - name: Codecov Test
+        if: github.event_name != 'merge_group'
+        uses: codecov/test-results-action@47f89e9acb64b76debcd5ea40642d25a4adced9f # v1.1.1
+        with:
+          use_oidc: true
+          directory: coverage/junit
           fail_ci_if_error: github.event_name != 'pull_request'
           verbose: true
 
@@ -462,7 +478,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download coverage reports
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           pattern: coverage-*
           path: coverage
@@ -554,7 +570,7 @@ jobs:
         run: pnpm build
 
       - name: Upload dist
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: renovate-dist
           path: dist/
@@ -572,7 +588,7 @@ jobs:
           show-progress: false
 
       - name: Download dist
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: renovate-dist
           path: dist/
@@ -636,7 +652,7 @@ jobs:
         run: pnpm test:docs
 
       - name: Upload
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: docs
           path: tmp/docs/
@@ -664,7 +680,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download dist
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: renovate-dist
           path: dist/
@@ -710,7 +726,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@e973524a88d02428f72bfa0e369cac062acc8640 # v3.14.9
+        uses: containerbase/internal-tools@cafacb746b412fd28fc671c1fc1b8a20ea2e34e9 # v3.14.18
         with:
           command: docker-config
 

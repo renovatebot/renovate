@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isString } from '@sindresorhus/is';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class FileMatchMigration extends AbstractMigration {
@@ -6,8 +6,8 @@ export class FileMatchMigration extends AbstractMigration {
   override readonly propertyName = 'fileMatch';
 
   override run(value: unknown): void {
-    if (is.string(value) || is.array(value, is.string)) {
-      const fileMatch = is.array(value) ? value : [value];
+    if (isString(value) || isArray(value, isString)) {
+      const fileMatch = isArray(value) ? value : [value];
 
       let managerFilePatterns = this.get('managerFilePatterns') ?? [];
       managerFilePatterns = managerFilePatterns.concat(

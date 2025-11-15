@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { parseSingleYaml } from '../../../util/yaml';
@@ -44,14 +44,14 @@ export async function extractPackageFile(
   }
   const packageFileVersion = chart.version;
   let deps: PackageDependency[] = [];
-  if (!is.nonEmptyArray(chart?.dependencies)) {
+  if (!isNonEmptyArray(chart?.dependencies)) {
     logger.debug(`Chart has no dependencies in ${packageFile}`);
     return null;
   }
   const validDependencies = chart.dependencies.filter(
-    (dep) => is.nonEmptyString(dep.name) && is.nonEmptyString(dep.version),
+    (dep) => isNonEmptyString(dep.name) && isNonEmptyString(dep.version),
   );
-  if (!is.nonEmptyArray(validDependencies)) {
+  if (!isNonEmptyArray(validDependencies)) {
     logger.debug('Name and/or version missing for all dependencies');
     return null;
   }
