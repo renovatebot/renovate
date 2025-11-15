@@ -595,6 +595,35 @@ describe('modules/manager/kustomize/extract', () => {
     });
   });
 
+  it('parses HelmChartInflationGenerator', () => {
+    const res = extractPackageFile(
+      `apiVersion: builtin
+kind: HelmChartInflationGenerator
+
+metadata:
+  name: argocd-chart
+
+name: argo-cd
+repo: https://argoproj.github.io/argo-helm
+version: 6.5.1
+namespace: argocd
+releaseName: argocd`,
+      'kustomization.yaml',
+      {},
+    );
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depType: 'HelmChart',
+          depName: 'argo-cd',
+          currentValue: '6.5.1',
+          datasource: HelmDatasource.id,
+          registryUrls: ['https://argoproj.github.io/argo-helm'],
+        },
+      ],
+    });
+  });
+
   describe('extractResource', () => {
     const urls = [
       {
