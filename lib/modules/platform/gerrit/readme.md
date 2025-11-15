@@ -64,6 +64,15 @@ Also, labels in `renovate.json` will be mapped to hashtags in Gerrit. Example:
 }
 ```
 
+## Server version dependent features
+
+We use the Gerrit [Get Version REST API](https://gerrit-review.googlesource.com/Documentation/rest-api-config.html#get-version) to fetch the server version.
+You can use the experimental feature flag [`RENOVATE_X_PLATFORM_VERSION`](../../../self-hosted-experimental.md#renovate_x_platform_version) to set a specific server version.
+By setting the server version yourself, you save an API call that fetches the server version.
+
+- Use `hasfooter:Renovate-Branch` search operator instead of `message:"Renovate-Branch: "` for finding changes since `v3.6.0`
+- Use `subject:` search operator instead of `message:` for PR title search since `v3.8.0`
+
 ## Unsupported platform features/concepts
 
 - Creating issues (not a Gerrit concept)

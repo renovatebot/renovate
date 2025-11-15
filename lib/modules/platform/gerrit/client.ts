@@ -1,3 +1,4 @@
+import { gte as semverGte } from 'semver';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { GerritHttp } from '../../../util/http/gerrit';
@@ -17,6 +18,13 @@ import { mapPrStateToGerritFilter } from './utils';
 class GerritClient {
   // memCache is disabled because GerritPrCache will provide a smarter caching
   private gerritHttp = new GerritHttp({ memCache: false });
+
+  async getVersion(): Promise<string> {
+    const res = await this.gerritHttp.getJsonUnchecked<string>(
+      'a/config/server/version',
+    );
+    return res.body;
+  }
 
   async getRepos(): Promise<string[]> {
     const res = await this.gerritHttp.getJsonUnchecked<string[]>(
@@ -247,9 +255,11 @@ class GerritClient {
     }
     if (searchConfig.branchName) {
       filters.push(`footer:Renovate-Branch=${searchConfig.branchName}`);
+    } else if (semverGte(searchConfig.gerritVersion, '3.6.0')) {
+      filters.push('hasfooter:Renovate-Branch');
+    } else {
+      filters.push('message:"Renovate-Branch: "');
     }
-    // TODO: Use Gerrit 3.6+ hasfooter:Renovate-Branch when branchName is empty:
-    //   https://gerrit-review.googlesource.com/c/gerrit/+/329488
     if (searchConfig.targetBranch) {
       filters.push(`branch:${searchConfig.targetBranch}`);
     }
@@ -257,13 +267,14 @@ class GerritClient {
       filters.push(`label:Code-Review=${searchConfig.label}`);
     }
     if (searchConfig.prTitle) {
-      // Quotes in the commit message must be escaped with a backslash:
+      // Quotes in the search operators must be escaped with a backslash:
       //   https://gerrit-review.googlesource.com/Documentation/user-search.html#search-operators
-      // TODO: Use Gerrit 3.8+ subject query instead:
-      //   https://gerrit-review.googlesource.com/c/gerrit/+/354037
-      filters.push(
-        `message:${encodeURIComponent('"' + searchConfig.prTitle.replaceAll('"', '\\"') + '"')}`,
-      );
+      const escapedTitle = searchConfig.prTitle.replaceAll('"', '\\"');
+      if (semverGte(searchConfig.gerritVersion, '3.8.0')) {
+        filters.push(`subject:"${escapedTitle}"`);
+      } else {
+        filters.push(`message:"${escapedTitle}"`);
+      }
     }
     return filters;
   }
