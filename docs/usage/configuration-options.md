@@ -697,6 +697,32 @@ If you want Renovate to sign off its commits, add the [`:gitSignOff` preset](./p
 
 ## commitBodyTable
 
+## commitHourlyLimit
+
+This config option limits the maximum number of branches Renovate creates or rebases per hour.
+
+Use `commitHourlyLimit` to strictly control the rate at which Renovate triggers CI runs.
+Both branch creation and rebasing trigger CI runs, so limiting these operations helps you control your CI load.
+
+For example, with `commitHourlyLimit: 2`, in a given hour Renovate might:
+
+- Create 2 new branches (triggering 2 CI runs), then stop until the next hour, or
+- Create 1 new branch and rebase 1 existing branch (2 CI runs total), then stop
+
+This limit is enforced on a per-repository basis and per hourly period (`:00` through `:59`).
+
+This setting differs from `prHourlyLimit` in an important way:
+
+- `prHourlyLimit` only limits PR _creation_. Renovate can still rebase existing branches, which triggers additional CI runs
+- `commitHourlyLimit` limits both branch creation _and_ automatic rebasing, giving you stricter control over CI usage
+
+If you want strict control over CI load, use `commitHourlyLimit`.
+If you only want to limit the rate of _new_ PRs, use `prHourlyLimit`.
+
+<!-- prettier-ignore -->
+!!! tip
+    Manual rebases (requested via checkbox, Dependency Dashboard, or rebase label) always bypass this limit.
+
 ## commitMessage
 
 ## commitMessageAction
@@ -4744,7 +4770,7 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
 
 <!-- prettier-ignore -->
 !!! note
-    When Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `prConcurrentLimit`, `branchConcurrentLimit`, `prHourlyLimit`, or `schedule`.
+    When Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `prConcurrentLimit`, `branchConcurrentLimit`, `prHourlyLimit`, `commitHourlyLimit`, or `schedule`.
     This means that Renovate _always_ tries to create a `vulnerabilityAlerts` PR.
     In short: vulnerability alerts "skip the line".
 
