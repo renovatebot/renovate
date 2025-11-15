@@ -79,6 +79,7 @@ export interface HttpResponse<T = string> {
   body: T;
   headers: HttpHeaders;
   authorization?: boolean;
+  cached?: boolean;
 }
 
 export type Task<T> = () => Promise<T>;
