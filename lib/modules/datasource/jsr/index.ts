@@ -23,7 +23,7 @@ export class JsrDatasource extends Datasource {
   // use npm compatible registry api url due to returns
   override readonly defaultRegistryUrls = defaultRegistryUrls;
 
-  override readonly releaseTimestampSupport = false;
+  override readonly releaseTimestampSupport = true;
 
   constructor() {
     super(JsrDatasource.id);
