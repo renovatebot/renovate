@@ -255,7 +255,7 @@ export async function ensurePr(
               elapsedHours < config.prNotPendingHours))
         ) {
           logger.debug(
-            `Branch is ${elapsedHours} hours old - skipping PR creation`,
+            `Branch is ${elapsedHours} hours old - skipping PR creation as prNotPendingHours is set to ${String(config.prNotPendingHours)}`,
           );
           return {
             type: 'without-pr',
