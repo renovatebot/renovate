@@ -245,6 +245,16 @@ export async function mergeRenovateConfig(
     logger.debug('Found npmrc in decrypted config - setting');
     npmApi.setNpmrc(decryptedConfig.npmrc);
   }
+
+  // Provide insight into the repository config, resolving everything but internal Renovate presets
+  // This allows users to understand the fully resolved configuration, including any `github>`, `local>`, etc presets, but excluding anything that's internal to Renovate (which can be verbose)
+  const resolvedConfigWithoutInternalPresets =
+    await presets.resolveConfigPresets(decryptedConfig, config, [], [], false);
+  logger.trace(
+    { config: resolvedConfigWithoutInternalPresets },
+    'Resolved config, without internal presets',
+  );
+
   // Decrypt after resolving in case the preset contains npm authentication instead
   let resolvedConfig = await decryptConfig(
     await presets.resolveConfigPresets(
