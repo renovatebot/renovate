@@ -9,6 +9,7 @@ import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import * as local from './local';
+import * as scmm from './scm-manager';
 import type { Platform } from './types';
 
 const api = new Map<PlatformId, Platform>();
@@ -24,3 +25,4 @@ api.set(gitea.id, gitea);
 api.set(github.id, github);
 api.set(gitlab.id, gitlab);
 api.set(local.id, local);
+api.set(scmm.id, scmm);
