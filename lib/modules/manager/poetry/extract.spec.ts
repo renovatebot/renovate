@@ -616,4 +616,59 @@ describe('modules/manager/poetry/extract', () => {
       },
     ]);
   });
+
+  it('enriches pep621/pep735 dependencies with poetry managerData', async () => {
+    const content = codeBlock`
+        [project]
+        dependencies = ["click"]
+        [project.optional-dependencies]
+        other = ["zoom==1.0.0"]
+        [dependency-groups]
+        typing = ["mypy==1.13.0", "types-requests"]
+        [tool.poetry.dependencies]
+        click = { source = "artifactory" }
+        zoom = { source = "artifactory" }
+        [tool.poetry.group.typing.dependencies]
+        types-requests = { source = "artifactory" }
+        [tool.poetry.group.typing.dependencies.mypy]
+        source = "artifactory"
+      `;
+    const res = await extractPackageFile(content, 'pyproject.toml');
+    expect(res?.deps).toMatchObject([
+      {
+        packageName: 'click',
+        datasource: 'pypi',
+        depType: 'project.dependencies',
+        skipReason: 'unspecified-version',
+        depName: 'click',
+        managerData: { sourceName: 'artifactory' },
+      },
+      {
+        packageName: 'zoom',
+        datasource: 'pypi',
+        depType: 'project.optional-dependencies',
+        currentValue: '==1.0.0',
+        currentVersion: '1.0.0',
+        depName: 'zoom',
+        managerData: { depGroup: 'other', sourceName: 'artifactory' },
+      },
+      {
+        packageName: 'mypy',
+        datasource: 'pypi',
+        depType: 'dependency-groups',
+        currentValue: '==1.13.0',
+        currentVersion: '1.13.0',
+        depName: 'mypy',
+        managerData: { depGroup: 'typing', sourceName: 'artifactory' },
+      },
+      {
+        packageName: 'types-requests',
+        datasource: 'pypi',
+        depType: 'dependency-groups',
+        skipReason: 'unspecified-version',
+        depName: 'types-requests',
+        managerData: { depGroup: 'typing', sourceName: 'artifactory' },
+      },
+    ]);
+  });
 });

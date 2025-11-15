@@ -108,16 +108,17 @@ const PoetryPypiDependency = z.union([
   z
     .object({ version: z.string().optional(), source: z.string().optional() })
     .transform(({ version: currentValue, source }): PackageDependency => {
+      const managerData = {
+        ...(source ? { sourceName: source.toLowerCase() } : {}),
+      };
+
       if (!currentValue) {
-        return { datasource: PypiDatasource.id };
+        return { datasource: PypiDatasource.id, managerData };
       }
 
       return {
         datasource: PypiDatasource.id,
-        managerData: {
-          nestedVersion: true,
-          ...(source ? { sourceName: source.toLowerCase() } : {}),
-        },
+        managerData: { ...managerData, nestedVersion: true },
         currentValue,
       };
     })
@@ -353,19 +354,34 @@ export const PoetryPyProject = Toml.pipe(
 
       deps.push(...dependencyGroups);
 
+      const projectDepsByName = [
+        ...(projectDependencies ?? []),
+        ...(dependencyGroups ?? []),
+        ...(projectOptionalDependencies ?? []),
+      ].reduce(
+        (obj, dep) => ((obj[dep.depName!] = dep), obj),
+        {} as Record<string, PackageDependency>,
+      );
+
       const poetryDependencies = tool?.poetry?.dependencies;
-      if (poetryDependencies) {
-        deps.push(...poetryDependencies);
-      }
 
       const poetryDevDependencies = tool?.poetry?.['dev-dependencies'];
-      if (poetryDevDependencies) {
-        deps.push(...poetryDevDependencies);
-      }
 
       const poetryGroupDependencies = tool?.poetry?.group;
-      if (poetryGroupDependencies) {
-        deps.push(...poetryGroupDependencies);
+
+      for (const poetryDep of [
+        ...(poetryDependencies ?? []),
+        ...(poetryDevDependencies ?? []),
+        ...(poetryGroupDependencies ?? []),
+      ]) {
+        // When the same dep exists in project.dependencies or dependency-groups,
+        // Poetry just uses the Poetry dep for enrichment with source info.
+        if (poetryDep.depName && projectDepsByName[poetryDep.depName]) {
+          const dep = projectDepsByName[poetryDep.depName];
+          dep.managerData = { ...poetryDep.managerData, ...dep.managerData };
+        } else {
+          deps.push(poetryDep);
+        }
       }
 
       const packageFileVersion = tool?.poetry?.version;
