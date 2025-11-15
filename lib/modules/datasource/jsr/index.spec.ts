@@ -1,13 +1,17 @@
 import * as httpMock from '../../../../test/http-mock';
+import type { Timestamp } from '../../../util/timestamp';
 import { JsrDatasource } from '.';
 
 const jsrPackageMetadataResponse = {
   latest: '0.0.2',
   versions: {
     '0.0.1': {},
-    '0.0.2': {},
+    '0.0.2': { createdAt: '2025-11-15T00:00:00.000Z' },
   },
-} as { latest: string; versions: Record<string, { yanked?: boolean }> };
+} as {
+  latest: string;
+  versions: Record<string, { createdAt?: string; yanked?: boolean }>;
+};
 
 describe('modules/datasource/jsr/index', () => {
   const jsr = new JsrDatasource();
@@ -51,10 +55,12 @@ describe('modules/datasource/jsr/index', () => {
       releases: [
         {
           version: '0.0.1',
+          releaseTimestamp: '2025-09-18T00:00:00.000Z' as Timestamp,
         },
         {
           isLatest: true,
           version: '0.0.2',
+          releaseTimestamp: '2025-11-15T00:00:00.000Z' as Timestamp,
         },
       ],
     });
@@ -77,10 +83,12 @@ describe('modules/datasource/jsr/index', () => {
         {
           isDeprecated: true,
           version: '0.0.1',
+          releaseTimestamp: '2025-09-18T00:00:00.000Z' as Timestamp,
         },
         {
           isLatest: true,
           version: '0.0.2',
+          releaseTimestamp: '2025-11-15T00:00:00.000Z' as Timestamp,
         },
       ],
     });
