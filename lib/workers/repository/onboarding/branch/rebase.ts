@@ -59,6 +59,6 @@ export async function rebaseOnboardingBranch(
     ],
     message: commitMessage.toString(),
     platformCommit: config.platformCommit,
-    labels: config.labels,
+    // TODO: add prTitle for Gerrit
   });
 }
