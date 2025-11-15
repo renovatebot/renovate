@@ -57,7 +57,7 @@ steps:
 
   - bash: |
       git config --global user.email 'bot@renovateapp.com'
-      git config --global user.name 'Renovate Bot'
+      git config --global user.name 'Renovate'
       npx --userconfig .npmrc renovate
     env:
       RENOVATE_PLATFORM: azure

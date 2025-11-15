@@ -127,14 +127,14 @@ exports[`modules/platform/gitlab/index > getPr(prNo) > returns the mergeable PR 
 exports[`modules/platform/gitlab/index > initPlatform() > should accept custom endpoint 1`] = `
 {
   "endpoint": "https://gitlab.renovatebot.com/",
-  "gitAuthor": "Renovate Bot <a@b.com>",
+  "gitAuthor": "Renovate <a@b.com>",
 }
 `;
 
 exports[`modules/platform/gitlab/index > initPlatform() > should default to gitlab.com 1`] = `
 {
   "endpoint": "https://gitlab.com/api/v4/",
-  "gitAuthor": "Renovate Bot <a@b.com>",
+  "gitAuthor": "Renovate <a@b.com>",
 }
 `;
 

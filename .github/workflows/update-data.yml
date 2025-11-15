@@ -43,9 +43,9 @@ jobs:
       - name: Create pull request
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
-          author: 'Renovate Bot <renovate@whitesourcesoftware.com>'
+          author: 'Renovate <renovate@whitesourcesoftware.com>'
           branch: 'chore/update-static-data'
           commit-message: 'fix(data): automatic update of static data'
-          committer: 'Renovate Bot <renovate@whitesourcesoftware.com>'
+          committer: 'Renovate <renovate@whitesourcesoftware.com>'
           title: 'fix(data): automatic update of static data'
           assignees: viceice,secustor,jamietanna

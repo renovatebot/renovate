@@ -781,7 +781,7 @@ If enabled, all issues created by Renovate are set as confidential, even in a pu
 If enabled, Renovate raises a pull request when it needs to migrate the Renovate config file.
 Renovate only performs `configMigration` on `.json` and `.json5` files.
 
-We're adding new features to Renovate bot often.
+We're adding new features to Renovate often.
 Often you can keep using your Renovate config and use the new features right away.
 But sometimes you need to update your Renovate configuration.
 To help you with this, Renovate will create config migration pull requests, when you enable `configMigration`.
@@ -1462,7 +1462,7 @@ The Dependency Dashboard categories are only used to visually organize updates w
 ## dependencyDashboardLabels
 
 The labels only get updated when the Dependency Dashboard issue updates its content and/or title.
-It is pointless to edit the labels, as Renovate bot restores the labels on each run.
+It is pointless to edit the labels, as Renovate restores the labels on each run.
 
 ## dependencyDashboardOSVVulnerabilitySummary
 
@@ -1859,7 +1859,7 @@ Example:
 
 ## gitLabIgnoreApprovals
 
-Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
+Ignore the default project level approval(s), so that Renovate can automerge its merge requests, without needing approval(s).
 Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
 This option works only when `automerge=true` and either `automergeType=pr` or `automergeType=branch`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
@@ -2828,7 +2828,7 @@ See [Private npm module support](./getting-started/private-packages.md) for deta
 
 This option exists to provide flexibility about whether `npmrc` strings in config should override `.npmrc` files in the repo, or be merged with them.
 In some situations you need the ability to force override `.npmrc` contents in a repo (`npmrcMerge=false`) while in others you might want to simply supplement the settings already in the `.npmrc` (`npmrcMerge=true`).
-A use case for the latter is if you are a Renovate bot admin and wish to provide a default token for `npmjs.org` without removing any other `.npmrc` settings which individual repositories have configured (such as scopes/registries).
+A use case for the latter is if you are a Renovate admin and wish to provide a default token for `npmjs.org` without removing any other `.npmrc` settings which individual repositories have configured (such as scopes/registries).
 
 If `false` (default), it means that defining `config.npmrc` will result in any `.npmrc` file in the repo being overridden and its values ignored.
 If configured to `true`, it means that any `.npmrc` file in the repo will have `config.npmrc` prepended to it before running `npm`.
@@ -4080,7 +4080,7 @@ What may happen if you don't set a `prHourlyLimit`:
 
 The above may cause:
 
-- Renovate bot's PRs to overwhelm your CI systems
+- Renovate's PRs to overwhelm your CI systems
 - a lot of test runs, because branches are rebased each time you merge a PR
 
 To prevent these problems you can set `prHourlyLimit` to a value like `1` or `2`.
