@@ -4,10 +4,10 @@ By default, the `ocb` manager has no `managerFilePatterns` patterns.
 This means you must set a `managerFilePatterns` pattern for the `ocb` manager, for Renovate to update your `ocb` files.
 Here's a configuration example:
 
-```json title="If your builder files are named like foo-builder.yml or builder.yaml"
+```json title="If your builder file is named builder-config.yaml"
 {
   "ocb": {
-    "managerFilePatterns": ["/builder-config.yaml$/"]
+    "managerFilePatterns": ["/^builder-config.yaml$/"]
   }
 }
 ```
