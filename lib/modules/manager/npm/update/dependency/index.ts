@@ -3,6 +3,7 @@ import { dequal } from 'dequal';
 import { logger } from '../../../../../logger';
 import { escapeRegExp, regEx } from '../../../../../util/regex';
 import { matchAt, replaceAt } from '../../../../../util/string';
+import { updateBunCatalogDependency } from '../../../bun/update-dependency';
 import type { UpdateDependencyConfig, Upgrade } from '../../../types';
 import type {
   DependenciesMeta,
@@ -123,6 +124,9 @@ export function updateDependency({
   }
   if (upgrade.depType?.startsWith('yarn.catalog')) {
     return updateYarnrcCatalogDependency({ fileContent, upgrade });
+  }
+  if (upgrade.depType?.startsWith('bun.catalog')) {
+    return updateBunCatalogDependency({ fileContent, upgrade });
   }
 
   const { depType, managerData } = upgrade;
