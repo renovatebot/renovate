@@ -43,6 +43,40 @@ class GerritClient {
     return branchInfo.body;
   }
 
+  async getBranchChange(
+    repository: string,
+    config: Pick<
+      GerritFindPRConfig,
+      'branchName' | 'state' | 'targetBranch' | 'requestDetails'
+    >,
+  ): Promise<GerritChange | null> {
+    const changes = await this.findChanges(repository, {
+      branchName: config.branchName,
+      state: config.state,
+      singleChange: config.targetBranch ? false : true,
+      requestDetails: config.requestDetails,
+    });
+
+    if (changes.length === 0) {
+      return null;
+    }
+
+    if (changes.length === 1) {
+      return changes[0];
+    }
+
+    // If multiple changes are found, prefer the one matching the target branch
+    if (config.targetBranch) {
+      const change = changes.find((c) => c.branch === config.targetBranch);
+      if (change) {
+        return change;
+      }
+    }
+
+    // Otherwise return the first one
+    return changes[0];
+  }
+
   async findChanges(
     repository: string,
     findPRConfig: GerritFindPRConfig,
@@ -224,6 +258,21 @@ class GerritClient {
       )}/branches/${encodeURIComponent(branch)}/files/${encodeURIComponent(fileName)}/content`,
     );
     return Buffer.from(base64Content.body, 'base64').toString();
+  }
+
+  async moveChange(
+    changeNumber: number,
+    destinationBranch: string,
+  ): Promise<GerritChange> {
+    const change = await this.gerritHttp.postJson<GerritChange>(
+      `a/changes/${changeNumber}/move`,
+      {
+        body: {
+          destination_branch: destinationBranch,
+        },
+      },
+    );
+    return change.body;
   }
 
   normalizeMessage(message: string): string {
