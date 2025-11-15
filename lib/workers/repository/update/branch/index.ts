@@ -536,11 +536,6 @@ export async function processBranch(
       !dependencyDashboardCheck
     ) {
       logger.debug('rebaseWhen=never so skipping branch update check');
-      return {
-        branchExists,
-        prNo: branchPr?.number,
-        result: 'no-work',
-      };
     }
     // if the base branch has been changed by user in renovate config, rebase onto the new baseBranch
     // we have already confirmed earlier that branch isn't modified, so its safe to use targetBranch here
@@ -764,7 +759,10 @@ export async function processBranch(
     // skip if we have a non-immediate pr and there is an existing PR,
     // we want to update the PR and skip the Auto merge since status checks aren't done yet
     if (!config.artifactErrors?.length && (!commitSha || config.ignoreTests)) {
-      const mergeStatus = await tryBranchAutomerge(config);
+      const allowBehindBase =
+        config.allowBranchAutomergeBehindBase === true &&
+        (config.rebaseWhen === 'conflicted' || config.rebaseWhen === 'never');
+      const mergeStatus = await tryBranchAutomerge(config, allowBehindBase);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
         if (GlobalConfig.get('dryRun')) {
@@ -791,15 +789,21 @@ export async function processBranch(
       }
       if (
         mergeStatus === 'stale' &&
-        ['conflicted', 'never'].includes(config.rebaseWhen!) &&
+        !allowBehindBase &&
         /* v8 ignore next -- needs test */
         !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel))
       ) {
         logger.warn(
-          'Branch cannot automerge because it is behind base branch and rebaseWhen setting disallows rebasing - raising a PR instead',
+          'Branch cannot automerge because it is stale - raising a PR instead',
         );
         config.forcePr = true;
         config.branchAutomergeFailureMessage = mergeStatus;
+      }
+      if (mergeStatus === 'stale' && allowBehindBase) {
+        logger.debug(
+          'Branch is stale but allowBranchAutomergeBehindBase is enabled - rebase requested',
+        );
+        config.rebaseRequested = true;
       }
       if (
         mergeStatus === 'automerge aborted - PR exists' ||

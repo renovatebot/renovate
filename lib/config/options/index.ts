@@ -1952,6 +1952,14 @@ const options: RenovateOptions[] = [
     default: 'auto',
   },
   {
+    name: 'allowBranchAutomergeBehindBase',
+    description:
+      'Allow Renovate to automerge branches that are behind the base branch but not conflicted. Must be used with rebaseWhen set to "conflicted" or "never".',
+    type: 'boolean',
+    default: false,
+    experimental: true,
+  },
+  {
     name: 'rebaseLabel',
     description: 'Label to request a rebase from Renovate bot.',
     type: 'string',
