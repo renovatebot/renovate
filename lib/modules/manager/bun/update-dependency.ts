@@ -1,12 +1,13 @@
-import { isObject, isString } from '@sindresorhus/is';
+import { isArray, isObject, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
+import type { NpmPackage } from '../npm/extract/types';
+import { updateDependency as updateNpmDependency } from '../npm/update/dependency';
+import {
+  getNewGitValue,
+  getNewNpmAliasValue,
+} from '../npm/update/dependency/common';
 import type { UpdateDependencyConfig } from '../types';
-
-interface BunWorkspaces {
-  packages?: string[] | string;
-  catalog?: Record<string, string>;
-  catalogs?: Record<string, Record<string, string>>;
-}
+import { type BunWorkspaces, getBunCatalogsFromPackageJson } from './catalogs';
 
 export function updateBunCatalogDependency({
   fileContent,
@@ -16,55 +17,71 @@ export function updateBunCatalogDependency({
 
   const catalogName = depType?.split('.').at(-1);
 
-  if (!isString(catalogName)) {
+  if (!isString(catalogName) || !isString(depName)) {
     logger.error(
-      'No catalogName was found; this is likely an extraction error.',
+      'No catalogName or depName was found; this is likely an extraction error.',
     );
     return null;
   }
 
-  const { newValue } = upgrade;
+  let { newValue } = upgrade;
+
+  newValue = getNewGitValue(upgrade) ?? newValue;
+  newValue = getNewNpmAliasValue(newValue, upgrade) ?? newValue;
 
   logger.trace(
     `bun.updateBunCatalogDependency(): ${depType}::${catalogName}.${depName} = ${newValue}`,
   );
 
   try {
-    const parsedContents = JSON.parse(fileContent);
-    const workspaces = parsedContents.workspaces as BunWorkspaces;
+    const parsedContents: NpmPackage = JSON.parse(fileContent);
+    const bunCatalogs = getBunCatalogsFromPackageJson(parsedContents);
 
-    if (!isObject(workspaces)) {
-      logger.debug('No workspaces found in package.json');
+    if (!bunCatalogs) {
+      logger.debug('No catalogs found in package.json');
       return null;
     }
 
-    let oldVersion: string | undefined;
+    const { catalog, catalogs } = bunCatalogs;
+    const oldVersion =
+      catalogName === 'default'
+        ? catalog?.[depName]
+        : catalogs?.[catalogName]?.[depName];
+
+    if (oldVersion === newValue) {
+      logger.trace('Version is already updated');
+      return fileContent;
+    }
+
+    const workspaces = parsedContents.workspaces;
+    const isWorkspacesObject = isObject(workspaces) && !isArray(workspaces);
 
     if (catalogName === 'default') {
-      oldVersion = workspaces.catalog?.[depName!];
-      if (oldVersion === newValue) {
-        logger.trace('Version is already updated');
-        return fileContent;
+      if (isWorkspacesObject) {
+        const bunWorkspaces = workspaces as BunWorkspaces;
+        bunWorkspaces.catalog ??= {};
+        bunWorkspaces.catalog[depName] = newValue!;
+      } else {
+        const typedContents = parsedContents as NpmPackage & {
+          catalog: Record<string, string>;
+        };
+        typedContents.catalog ??= {};
+        typedContents.catalog[depName] = newValue!;
       }
-
-      if (!isObject(workspaces.catalog)) {
-        (workspaces as any).catalog = {};
-      }
-      (workspaces as any).catalog[depName!] = newValue;
     } else {
-      oldVersion = workspaces.catalogs?.[catalogName]?.[depName!];
-      if (oldVersion === newValue) {
-        logger.trace('Version is already updated');
-        return fileContent;
+      if (isWorkspacesObject) {
+        const bunWorkspaces = workspaces as BunWorkspaces;
+        bunWorkspaces.catalogs ??= {};
+        bunWorkspaces.catalogs[catalogName] ??= {};
+        bunWorkspaces.catalogs[catalogName][depName] = newValue!;
+      } else {
+        const typedContents = parsedContents as NpmPackage & {
+          catalogs: Record<string, Record<string, string>>;
+        };
+        typedContents.catalogs ??= {};
+        typedContents.catalogs[catalogName] ??= {};
+        typedContents.catalogs[catalogName][depName] = newValue!;
       }
-
-      if (!isObject(workspaces.catalogs)) {
-        (workspaces as any).catalogs = {};
-      }
-      if (!isObject((workspaces as any).catalogs[catalogName])) {
-        (workspaces as any).catalogs[catalogName] = {};
-      }
-      (workspaces as any).catalogs[catalogName][depName!] = newValue;
     }
 
     return JSON.stringify(parsedContents, null, 2);
@@ -72,4 +89,15 @@ export function updateBunCatalogDependency({
     logger.debug({ err }, 'Error updating bun catalog dependency');
     return null;
   }
+}
+
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
+  if (upgrade.depType?.startsWith('bun.catalog')) {
+    return updateBunCatalogDependency({ fileContent, upgrade });
+  }
+
+  return updateNpmDependency({ fileContent, upgrade });
 }

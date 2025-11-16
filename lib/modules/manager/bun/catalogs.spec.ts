@@ -206,5 +206,42 @@ describe('modules/manager/bun/catalogs', () => {
         },
       });
     });
+
+    it('extracts catalogs from root level when workspaces is an array', () => {
+      const packageJson = {
+        name: 'test',
+        workspaces: ['packages/*'],
+        catalog: {
+          react: '^18.0.0',
+        },
+        catalogs: {
+          testing: {
+            jest: '29.0.0',
+          },
+        },
+      };
+      const result = extractBunCatalogs(packageJson, 'package.json');
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'react',
+            currentValue: '^18.0.0',
+            datasource: 'npm',
+            depType: 'bun.catalog.default',
+            prettyDepType: 'bun.catalog.default',
+          },
+          {
+            depName: 'jest',
+            currentValue: '29.0.0',
+            datasource: 'npm',
+            depType: 'bun.catalog.testing',
+            prettyDepType: 'bun.catalog.testing',
+          },
+        ],
+        managerData: {
+          packageJsonName: 'test',
+        },
+      });
+    });
   });
 });

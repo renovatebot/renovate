@@ -4,8 +4,8 @@ import { NpmDatasource } from '../../datasource/npm';
 
 export { updateArtifacts } from './artifacts';
 export { extractAllPackageFiles } from './extract';
-export { getRangeStrategy, updateDependency } from '../npm';
-export { updateBunCatalogDependency } from './update-dependency';
+export { getRangeStrategy } from '../npm';
+export { updateDependency } from './update-dependency';
 
 export const url = 'https://bun.sh/docs/cli/install';
 export const categories: Category[] = ['js'];

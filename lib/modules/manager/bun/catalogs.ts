@@ -1,7 +1,7 @@
-import { isObject } from '@sindresorhus/is';
+import { isArray, isObject } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { extractCatalogDeps } from '../npm/extract/common/catalogs';
-import type { Catalog } from '../npm/extract/types';
+import type { Catalog, NpmPackage } from '../npm/extract/types';
 import type { NpmManagerData } from '../npm/types';
 import type { PackageFileContent } from '../types';
 
@@ -11,26 +11,60 @@ export interface BunWorkspaces {
   catalogs?: Record<string, Record<string, string>>;
 }
 
-export function extractBunCatalogs(
-  packageJson: any,
-  packageFile: string,
-): PackageFileContent<NpmManagerData> | null {
-  logger.trace(`bun.extractBunCatalogs(${packageFile})`);
+interface BunCatalogs {
+  catalog?: Record<string, string>;
+  catalogs?: Record<string, Record<string, string>>;
+}
 
-  const workspaces = packageJson?.workspaces as BunWorkspaces;
-  if (!isObject(workspaces)) {
-    return null;
+export function getBunCatalogsFromPackageJson(
+  packageJson: NpmPackage,
+): BunCatalogs | null {
+  const workspaces = packageJson?.workspaces;
+  const isWorkspacesObject = isObject(workspaces) && !isArray(workspaces);
+
+  if (isWorkspacesObject) {
+    const bunWorkspaces = workspaces as BunWorkspaces;
+    if (!bunWorkspaces.catalog && !bunWorkspaces.catalogs) {
+      return null;
+    }
+    return {
+      catalog: bunWorkspaces.catalog,
+      catalogs: bunWorkspaces.catalogs,
+    };
   }
 
-  const catalog = workspaces.catalog;
-  const catalogs = workspaces.catalogs;
+  const typedPackageJson = packageJson as NpmPackage & {
+    catalog?: Record<string, string>;
+    catalogs?: Record<string, Record<string, string>>;
+  };
+
+  const catalog = isObject(typedPackageJson.catalog)
+    ? typedPackageJson.catalog
+    : undefined;
+  const catalogs = isObject(typedPackageJson.catalogs)
+    ? typedPackageJson.catalogs
+    : undefined;
 
   if (!catalog && !catalogs) {
     return null;
   }
 
-  const bunCatalogs = bunCatalogsToArray({ catalog, catalogs });
-  const deps = extractCatalogDeps(bunCatalogs, 'bun');
+  return { catalog, catalogs };
+}
+
+export function extractBunCatalogs(
+  packageJson: NpmPackage,
+  packageFile: string,
+): PackageFileContent<NpmManagerData> | null {
+  logger.trace(`bun.extractBunCatalogs(${packageFile})`);
+
+  const bunCatalogs = getBunCatalogsFromPackageJson(packageJson);
+  if (!bunCatalogs) {
+    return null;
+  }
+
+  const catalogArray = bunCatalogsToArray(bunCatalogs);
+  const deps = extractCatalogDeps(catalogArray, 'bun');
 
   return {
     deps,
@@ -43,7 +77,7 @@ export function extractBunCatalogs(
 function bunCatalogsToArray({
   catalog: defaultCatalogDeps,
   catalogs: namedCatalogs,
-}: BunWorkspaces): Catalog[] {
+}: BunCatalogs): Catalog[] {
   const result: Catalog[] = [];
 
   if (isObject(defaultCatalogDeps)) {

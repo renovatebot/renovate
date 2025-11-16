@@ -9,7 +9,12 @@ import {
 import { extractPackageJson } from '../npm/extract/common/package-file';
 import type { NpmPackage } from '../npm/extract/types';
 import type { NpmManagerData } from '../npm/types';
-import type { ExtractConfig, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../types';
 import { type BunWorkspaces, extractBunCatalogs } from './catalogs';
 import { filesMatchingWorkspaces } from './utils';
 
@@ -17,6 +22,50 @@ function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
   return (
     fileNameWithPath === fileName || fileNameWithPath.endsWith(`/${fileName}`)
   );
+}
+
+function mergeExtractionResults(
+  regularResult: PackageFileContent<NpmManagerData> | null,
+  catalogResult: PackageFileContent<NpmManagerData> | null,
+): PackageFileContent<NpmManagerData> | null {
+  if (regularResult && catalogResult) {
+    return {
+      ...regularResult,
+      deps: [...catalogResult.deps, ...regularResult.deps],
+      managerData: {
+        ...catalogResult.managerData,
+        ...regularResult.managerData,
+      },
+    };
+  }
+  return regularResult ?? catalogResult;
+}
+
+function resolveWorkspaceCatalogRefs(
+  deps: PackageDependency[],
+  bunWorkspaces: BunWorkspaces,
+): PackageDependency[] {
+  return deps.map((dep) => {
+    const catalogRef = dep.currentValue?.startsWith('catalog:')
+      ? dep.currentValue.slice(8)
+      : null;
+    if (catalogRef === null || !dep.depName) {
+      return dep;
+    }
+    const catalogName = catalogRef || 'default';
+    const resolvedVersion =
+      catalogName === 'default'
+        ? (bunWorkspaces.catalog?.[dep.depName] ?? `catalog:${catalogName}`)
+        : (bunWorkspaces.catalogs?.[catalogName]?.[dep.depName] ??
+          `catalog:${catalogName}`);
+
+    return {
+      ...dep,
+      depType: `bun.catalog.${catalogName}`,
+      currentValue: resolvedVersion,
+      prettyDepType: `bun.catalog.${catalogName}`,
+    };
+  });
 }
 
 export async function processPackageFile(
@@ -36,60 +85,29 @@ export async function processPackageFile(
     return null;
   }
 
-  if (!bunWorkspaces && isObject(packageJson.workspaces)) {
-    const catalogResult = extractBunCatalogs(packageJson, packageFile);
-    if (catalogResult) {
-      const regularResult = extractPackageJson(packageJson, packageFile);
-      if (regularResult) {
-        return {
-          ...regularResult,
-          deps: [...catalogResult.deps, ...regularResult.deps],
-          packageFile,
-        };
-      }
-      return {
-        ...catalogResult,
-        packageFile,
-      };
-    }
-  }
-
-  const result = extractPackageJson(packageJson, packageFile);
-  if (!result) {
+  const regularResult = extractPackageJson(packageJson, packageFile);
+  const catalogResult = bunWorkspaces
+    ? null
+    : extractBunCatalogs(packageJson, packageFile);
+  const mergedResult = mergeExtractionResults(regularResult, catalogResult);
+  if (!mergedResult) {
     logger.debug({ packageFile }, 'No dependencies found');
     return null;
   }
 
-  if (bunWorkspaces) {
-    result.deps = result.deps.map((dep) => {
-      if (dep.currentValue?.startsWith('catalog:')) {
-        const catalogRef = dep.currentValue.slice(8);
-        const catalogName = catalogRef || 'default';
-        const resolvedVersion =
-          catalogName === 'default'
-            ? (bunWorkspaces.catalog?.[dep.depName!] ??
-              `catalog:${catalogName}`)
-            : (bunWorkspaces.catalogs?.[catalogName]?.[dep.depName!] ??
-              `catalog:${catalogName}`);
-
-        return {
-          ...dep,
-          depType: `bun.catalog.${catalogName}`,
-          currentValue: resolvedVersion,
-          prettyDepType: `bun.catalog.${catalogName}`,
-        };
-      }
-      return dep;
-    });
-  }
+  const deps =
+    bunWorkspaces && mergedResult.deps.length
+      ? resolveWorkspaceCatalogRefs(mergedResult.deps, bunWorkspaces)
+      : mergedResult.deps;
 
   return {
-    ...result,
+    ...mergedResult,
+    deps,
     packageFile,
   };
 }
 export async function extractAllPackageFiles(
-  _config: ExtractConfig,
+  config: ExtractConfig,
   matchedFiles: string[],
 ): Promise<PackageFile[]> {
   const packageFiles: PackageFile<NpmManagerData>[] = [];
@@ -112,8 +130,8 @@ export async function extractAllPackageFiles(
     }
 
     const workspaces = res?.managerData?.workspaces;
-    let bunWorkspaces: BunWorkspaces | undefined;
     let workspacePackages: string[] | undefined;
+    let bunWorkspaces: BunWorkspaces | undefined;
 
     if (isArray(workspaces, isString)) {
       workspacePackages = workspaces;
