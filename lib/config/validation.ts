@@ -341,6 +341,13 @@ export async function validateConfig(
             if (key === 'extends') {
               for (const subval of val) {
                 if (isString(subval)) {
+                  if (configType !== 'global' && subval.startsWith('global:')) {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `${currentPath}: you cannot extend from "global:" presets in a repository config's "extends"`,
+                    });
+                  }
+
                   if (
                     parentName === 'packageRules' &&
                     subval.startsWith('group:')

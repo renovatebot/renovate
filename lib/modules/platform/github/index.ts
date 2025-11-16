@@ -545,10 +545,10 @@ export async function initRepo({
 
     if (res?.errors) {
       if (res.errors.find((err) => err.type === 'RATE_LIMITED')) {
-        logger.debug({ res }, 'Graph QL rate limit exceeded.');
+        logger.debug({ res }, 'GraphQL rate limit exceeded.');
         throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
       }
-      logger.debug({ res }, 'Unexpected Graph QL errors');
+      logger.debug({ res }, 'Unexpected GraphQL errors');
       throw new Error(PLATFORM_UNKNOWN_ERROR);
     }
 
