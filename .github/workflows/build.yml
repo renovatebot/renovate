@@ -725,6 +725,19 @@ jobs:
           filter: blob:none # we don't need all blobs, only the full tree
           show-progress: false
 
+      # To avoid disk space issues when performing a release, we can clear up some disk space ahead of time
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+        with:
+          # we're likely already using some of the globally installed tools
+          tool-cache: false
+          # but we're definitely not using these
+          android: true
+          dotnet: true
+          haskell: true
+          # and shouldn't be using swap storage
+          swap-storage: true
+
       - name: docker-config
         uses: containerbase/internal-tools@cafacb746b412fd28fc671c1fc1b8a20ea2e34e9 # v3.14.18
         with:
