@@ -7,7 +7,7 @@ Here's a configuration example:
 ```json title="If your builder file is named builder.y(a)ml or builder-config.yaml"
 {
   "ocb": {
-    "managerFilePatterns": ["/(builder(-config)?.ya?ml$/"]
+    "managerFilePatterns": ["/builder(-config)?.ya?ml$/"]
   }
 }
 ```
