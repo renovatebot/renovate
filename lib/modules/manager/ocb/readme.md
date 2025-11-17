@@ -39,5 +39,5 @@ To allow Renovate to pin digests for these dependencies, the following `packageR
 }
 ```
 
-Using this packageRule, Renovate will use the GitHub tags on [the opentelemetry-collector repository](https://github.com/open-telemetry/opentelemetry-collector) 
+Using this packageRule, Renovate will use the GitHub tags on [the opentelemetry-collector repository](https://github.com/open-telemetry/opentelemetry-collector)
 as a datasource instead of using the `go` datasource. In this GitHub repository, it will look for the latest `confmap/v...` tag.
