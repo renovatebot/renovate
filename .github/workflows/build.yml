@@ -57,6 +57,12 @@ jobs:
       test-matrix-empty: ${{ steps.schedule-test-shards.outputs.test-matrix-empty }}
 
     steps:
+      - name: testing
+        run: |
+          df -h
+          docker system df
+          docker image ls
+    
       - name: Calculate `os-matrix-is-full` output
         id: os-matrix-is-full
         env:
