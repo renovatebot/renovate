@@ -44,5 +44,15 @@ export const presets: Record<string, Preset> = {
       internalChecksFilter: 'strict',
       prCreation: 'not-pending',
     },
+    packageRules: [
+      {
+        description:
+          'Do not require Minimum Release Age for update types that are controlled by the package manager',
+        matchUpdateTypes: ['lockFileMaintenance'],
+        prBodyNotes: [
+          "⚠️ Renovate's lock file maintenance functionality does not support validating Minimum Release Age, as the package manager performs the required changes to update package(s). Confirm whether your package manager perform its own validation for the Minimum Release Age of packages.",
+        ],
+      },
+    ],
   },
 };
