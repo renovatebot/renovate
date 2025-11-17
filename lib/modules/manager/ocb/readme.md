@@ -23,19 +23,20 @@ Supported dependencies and their respective `depType`s are:
 | processors     | `processors` |
 
 ### OpenTelemetry Collector's dual-versioning scheme and pinning digests
+
 OpenTelemetry uses a dual-versioning scheme. For example, confmap providers may be on `v1.45.0`, while the release tag is `v0.139.0`.
 To allow Renovate to pin digests for these dependencies, the following `packageRule` is needed:
 
 ```json
-    {
-      matchManagers: ["ocb"],
-      matchPackageNames: [
-        "/^go\\.opentelemetry\\.io\\/collector\\/confmap\\/provider\\/\\w+provider$/",
-      ],
-      overrideDatasource: "github-tags",
-      overridePackageName: "open-telemetry/opentelemetry-collector",
-      extractVersion: "^confmap\\/(?<version>.+)"
-    }
+{
+  matchManagers: ["ocb"],
+  matchPackageNames: [
+    "/^go\\.opentelemetry\\.io\\/collector\\/confmap\\/provider\\/\\w+provider$/",
+  ],
+  overrideDatasource: "github-tags",
+  overridePackageName: "open-telemetry/opentelemetry-collector",
+  extractVersion: "^confmap\\/(?<version>.+)"
+}
 ```
 
 Using this packageRule, Renovate will use the GitHub tags on [the opentelemetry-collector repository](https://github.com/open-telemetry/opentelemetry-collector) 
