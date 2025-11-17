@@ -210,7 +210,7 @@
     "fs-extra": "11.3.2",
     "git-url-parse": "16.1.0",
     "github-url-from-git": "1.5.0",
-    "glob": "11.0.3",
+    "glob": "11.1.0",
     "global-agent": "3.0.0",
     "good-enough-parser": "1.1.23",
     "google-auth-library": "10.4.1",
