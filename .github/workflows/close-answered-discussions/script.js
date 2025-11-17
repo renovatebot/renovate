@@ -40,8 +40,8 @@ module.exports = async ({ github, context, discussionAnsweredDays }) => {
 
     let numMutating = 0;
     let mutation = 'mutation {';
-    for (let i in resp.repository.discussions.edges) {
-      let edge = resp.repository.discussions.edges[i];
+    for (let i in repository.discussions.edges) {
+      let edge = repository.discussions.edges[i];
       if (
         isOlderThanDaysAgo(edge.node.answerChosenAt, discussionAnsweredDays)
       ) {
@@ -65,11 +65,11 @@ module.exports = async ({ github, context, discussionAnsweredDays }) => {
       );
     }
 
-    if (!resp.repository.discussions.pageInfo.hasNextPage) {
+    if (!repository.discussions.pageInfo.hasNextPage) {
       break;
     }
 
-    cursor = resp.repository.discussions.pageInfo.endCursor;
+    cursor = repository.discussions.pageInfo.endCursor;
   }
 
   return '';
