@@ -4,10 +4,10 @@ By default, the `ocb` manager has no `managerFilePatterns` patterns.
 This means you must set a `managerFilePatterns` pattern for the `ocb` manager, for Renovate to update your `ocb` files.
 Here's a configuration example:
 
-```json title="If your builder file is named builder-config.yaml"
+```json title="If your builder file is named builder.y(a)ml or builder-config.yaml"
 {
   "ocb": {
-    "managerFilePatterns": ["/^builder-config.yaml$/"]
+    "managerFilePatterns": ["/(builder.ya?ml|builder-config.yaml)$/"]
   }
 }
 ```
@@ -17,9 +17,9 @@ Supported dependencies and their respective `depType`s are:
 | Name           | depType      |
 | -------------- | ------------ |
 | base collector | `collector`  |
-| extensions     | `extensions` |
+| connectors     | `connectors` |
 | exporters      | `exports`    |
-| receivers      | `receivers`  |
+| extensions     | `extensions` |
 | processors     | `processors` |
 | providers      | `providers`  |
-| connectors     | `connectors` |
+| receivers      | `receivers`  |
