@@ -26,16 +26,16 @@ files = [
 
 [[package]]
 name = "backrefs"
-version = "6.0.1"
+version = "6.1"
 requires_python = ">=3.9"
 summary = "A wrapper around re and regex that adds additional back references."
 groups = ["default"]
 files = [
-    {file = "backrefs-6.0.1-py311-none-any.whl", hash = "sha256:6ba76d616ccb02479a3a098ad1f46d92225f280d7bdce7583bc62897f32d946c"},
-    {file = "backrefs-6.0.1-py312-none-any.whl", hash = "sha256:2f440f79f5ef5b9083fd366a09a976690044eca0ea0e59ac0508c3630e0ebc7c"},
-    {file = "backrefs-6.0.1-py313-none-any.whl", hash = "sha256:62ea7e9b286808576f35b2d28a0daa09b85ae2fc71b82a951d35729b0138e66b"},
-    {file = "backrefs-6.0.1-py314-none-any.whl", hash = "sha256:3ba0d943178d24a3721c5d915734767fa93f3bde1d317c4ef9e0f33b21b9c302"},
-    {file = "backrefs-6.0.1.tar.gz", hash = "sha256:54f8453c9ae38417a83c06d23745c634138c8da622d87a12cb3eef9ba66dd466"},
+    {file = "backrefs-6.1-py311-none-any.whl", hash = "sha256:e82bba3875ee4430f4de4b6db19429a27275d95a5f3773c57e9e18abc23fd2b7"},
+    {file = "backrefs-6.1-py312-none-any.whl", hash = "sha256:c64698c8d2269343d88947c0735cb4b78745bd3ba590e10313fbf3f78c34da5a"},
+    {file = "backrefs-6.1-py313-none-any.whl", hash = "sha256:4c9d3dc1e2e558965202c012304f33d4e0e477e1c103663fd2c3cc9bb18b0d05"},
+    {file = "backrefs-6.1-py314-none-any.whl", hash = "sha256:13eafbc9ccd5222e9c1f0bec563e6d2a6d21514962f11e7fc79872fd56cbc853"},
+    {file = "backrefs-6.1.tar.gz", hash = "sha256:3bba1749aafe1db9b915f00e0dd166cba613b6f788ffd63060ac3485dc9be231"},
 ]
 
 [[package]]
@@ -51,13 +51,13 @@ files = [
 
 [[package]]
 name = "certifi"
-version = "2025.10.5"
+version = "2025.11.12"
 requires_python = ">=3.7"
 summary = "Python package for providing Mozilla's CA Bundle."
 groups = ["default"]
 files = [
-    {file = "certifi-2025.10.5-py3-none-any.whl", hash = "sha256:0f212c2744a9bb6de0c56639a6f68afe01ecd92d91f14ae897c4fe7bbeeef0de"},
-    {file = "certifi-2025.10.5.tar.gz", hash = "sha256:47c09d31ccf2acf0be3f701ea53595ee7e0b8fa08801c6624be771df09ae7b43"},
+    {file = "certifi-2025.11.12-py3-none-any.whl", hash = "sha256:97de8790030bbd5c2d96b7ec782fc2f7820ef8dba6db909ccf95449f2d062d4b"},
+    {file = "certifi-2025.11.12.tar.gz", hash = "sha256:d8ab5478f2ecd78af242878415affce761ca6bc54a22a27e026d7c25357c3316"},
 ]
 
 [[package]]
@@ -137,7 +137,7 @@ files = [
 
 [[package]]
 name = "click"
-version = "8.3.0"
+version = "8.3.1"
 requires_python = ">=3.10"
 summary = "Composable command line interface toolkit"
 groups = ["default"]
@@ -145,8 +145,8 @@ dependencies = [
     "colorama; platform_system == \"Windows\"",
 ]
 files = [
-    {file = "click-8.3.0-py3-none-any.whl", hash = "sha256:9b9f285302c6e3064f4330c05f05b81945b2a39544279343e6e7c5f27a9baddc"},
-    {file = "click-8.3.0.tar.gz", hash = "sha256:e7b8232224eba16f4ebe410c25ced9f7875cb5f3263ffc93cc3e8da705e229c4"},
+    {file = "click-8.3.1-py3-none-any.whl", hash = "sha256:981153a64e25f12d547d3426c367a4857371575ee7ad18df2a6183ab0545b2a6"},
+    {file = "click-8.3.1.tar.gz", hash = "sha256:12ff4785d337a1bb490bb7e9c2b1ee5da3112e94a8622f26a6c77f5d2fc6842a"},
 ]
 
 [[package]]
@@ -458,7 +458,7 @@ files = [
 
 [[package]]
 name = "pymdown-extensions"
-version = "10.16.1"
+version = "10.17.1"
 requires_python = ">=3.9"
 summary = "Extension pack for Python Markdown."
 groups = ["default"]
@@ -467,8 +467,8 @@ dependencies = [
     "pyyaml",
 ]
 files = [
-    {file = "pymdown_extensions-10.16.1-py3-none-any.whl", hash = "sha256:d6ba157a6c03146a7fb122b2b9a121300056384eafeec9c9f9e584adfdb2a32d"},
-    {file = "pymdown_extensions-10.16.1.tar.gz", hash = "sha256:aace82bcccba3efc03e25d584e6a22d27a8e17caa3f4dd9f207e49b787aa9a91"},
+    {file = "pymdown_extensions-10.17.1-py3-none-any.whl", hash = "sha256:1f160209c82eecbb5d8a0d8f89a4d9bd6bdcbde9a8537761844cfc57ad5cd8a6"},
+    {file = "pymdown_extensions-10.17.1.tar.gz", hash = "sha256:60d05fe55e7fb5a1e4740fc575facad20dc6ee3a748e8d3d36ba44142e75ce03"},
 ]
 
 [[package]]
