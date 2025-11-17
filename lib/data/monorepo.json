@@ -590,6 +590,7 @@
     "slf4j": "https://github.com/qos-ch/slf4j",
     "slim-message-bus": "https://github.com/zarusz/SlimMessageBus",
     "spectre-console": "https://github.com/spectreconsole/spectre.console",
+    "spectre-console-cli": "https://github.com/spectreconsole/spectre.console.cli",
     "springfox": "https://github.com/springfox/springfox",
     "stack-exchange-redis-extensions": "https://github.com/imperugo/StackExchange.Redis.Extensions",
     "statsig-js-client": "https://github.com/statsig-io/js-client-monorepo",
