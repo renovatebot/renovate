@@ -1,12 +1,10 @@
 import {
   isEmptyStringOrWhitespace,
-  isNonEmptyArray,
   isNonEmptyObject,
   isNonEmptyString,
   isUndefined,
 } from '@sindresorhus/is';
 import fs from 'fs-extra';
-import { setUserConfigFileNames } from '../../../../config/app-strings';
 import type { AllConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { getParsedContent, migrateAndValidateConfig } from './util';
@@ -69,15 +67,6 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
       'processEnv keys were exported to env',
     );
     delete config.processEnv;
-  }
-
-  if (isNonEmptyArray(config.configFileNames)) {
-    logger.debug(
-      { configFileNames: config.configFileNames },
-      'Updated the config filenames list',
-    );
-    setUserConfigFileNames(config.configFileNames);
-    delete config.configFileNames;
   }
 
   return migrateAndValidateConfig(config, configFile);
