@@ -164,8 +164,9 @@ export function extractHelmChart(
       false,
       aliases,
     );
+    const { replaceString, ...rest } = dep;
     return {
-      ...dep,
+      ...rest,
       depName: helmChart.name,
       // https://github.com/helm/helm/issues/10312
       // https://github.com/helm/helm/issues/10678
