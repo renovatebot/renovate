@@ -448,7 +448,7 @@ jobs:
           verbose: true
 
       - name: Codecov Test
-        if: github.event_name != 'merge_group'
+        if: github.event_name != 'merge_group' && !cancelled()
         uses: codecov/test-results-action@47f89e9acb64b76debcd5ea40642d25a4adced9f # v1.1.1
         with:
           use_oidc: true
