@@ -28,6 +28,7 @@ const pr1: GitLabMergeRequest = {
   description: 'a merge request',
   sha: 'defg' as LongCommitSha,
   assignee: null,
+  assignees: [],
 };
 
 const pr2: GitLabMergeRequest = {
@@ -43,6 +44,9 @@ const pr2: GitLabMergeRequest = {
   merge_status: 'cannot_be_merged',
   description: 'a merge request',
   sha: 'defg' as LongCommitSha,
+  assignee: null,
+  assignees: [],
+  reviewers: [],
 };
 
 const pr3: GitLabMergeRequest = {
@@ -58,6 +62,9 @@ const pr3: GitLabMergeRequest = {
   merge_status: 'cannot_be_merged',
   description: 'a merge request',
   sha: 'defg' as LongCommitSha,
+  assignee: null,
+  assignees: [],
+  reviewers: [],
 };
 
 describe('modules/platform/gitlab/pr-cache', () => {
