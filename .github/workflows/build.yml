@@ -577,11 +577,21 @@ jobs:
 
   build-docker:
     needs:
+      - setup-build # we need the outputs
       - build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')
     steps:
+      - run: df -h
+
+      # Ensure docker is using /mnt/docker for data storage on x86_64 runners to avoid disk space issues
+      - name: Prepare docker
+        run: |
+          echo '{"data-root": "/mnt/docker"}' | sudo tee /etc/docker/daemon.json
+          sudo systemctl restart docker
+          docker info
+
       - name: Checkout code
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
@@ -612,6 +622,8 @@ jobs:
         run: docker run -e LOG_LEVEL=debug -e RENOVATE_TOKEN --rm renovate/renovate --dry-run=lookup ${{ github.repository }}
         env:
           RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: df -h
 
   build-docs:
     needs:
@@ -661,7 +673,9 @@ jobs:
         run: pnpm mkdocs build --no-build
 
   test-e2e:
-    needs: [build]
+    needs:
+      - setup-build
+      - build
     runs-on: 'ubuntu-latest'
     timeout-minutes: 7
 
@@ -719,6 +733,15 @@ jobs:
       packages: write
 
     steps:
+      - run: df -h
+
+      # Ensure docker is using /mnt/docker for data storage on x86_64 runners to avoid disk space issues
+      - name: Prepare docker
+        run: |
+          echo '{"data-root": "/mnt/docker"}' | sudo tee /etc/docker/daemon.json
+          sudo systemctl restart docker
+          docker info
+
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
@@ -739,6 +762,8 @@ jobs:
           haskell: true
           # and shouldn't be using swap storage
           swap-storage: true
+
+      - run: df -h
 
       - name: docker-config
         uses: containerbase/internal-tools@cafacb746b412fd28fc671c1fc1b8a20ea2e34e9 # v3.14.18
@@ -775,3 +800,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LOG_LEVEL: debug
+
+      - run: df -h
