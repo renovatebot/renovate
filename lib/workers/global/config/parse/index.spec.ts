@@ -355,7 +355,7 @@ describe('workers/global/config/parse/index', () => {
 
     it('appends files from configFileNames to config filenames list', async () => {
       fileConfigParser.getConfig.mockResolvedValue({
-        configFileNames: ['myrenovate.json'],
+        configFileNames: ['myrenovate.json', '.github/myrenovate.json'],
       });
       const parsedConfig = await configParser.parseConfigs(
         defaultEnv,
@@ -363,24 +363,30 @@ describe('workers/global/config/parse/index', () => {
       );
       expect(parsedConfig.configFileNames).toBeUndefined();
       expect(getConfigFileNames()[0]).toBe('myrenovate.json');
+      expect(getConfigFileNames()[1]).toBe('.github/myrenovate.json');
     });
 
     it('supports setting configFileNames through cli', async () => {
       fileConfigParser.getConfig.mockResolvedValue({});
-      defaultArgv = defaultArgv.concat(['--config-file-names=myrenovate.json']);
+      defaultArgv = defaultArgv.concat([
+        '--config-file-names=myrenovate.json,.github/myrenovate.json',
+      ]);
       const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
       expect(parsed.configFileNames).toBeUndefined();
       expect(getConfigFileNames()[0]).toBe('myrenovate.json');
+      expect(getConfigFileNames()[1]).toBe('.github/myrenovate.json');
     });
 
     it('supports setting configFileNames through env', async () => {
       fileConfigParser.getConfig.mockResolvedValue({});
       const env: NodeJS.ProcessEnv = {
-        RENOVATE_CONFIG_FILE_NAMES: '["myrenovate.json"]',
+        RENOVATE_CONFIG_FILE_NAMES:
+          '["myrenovate.json", ".github/myrenovate.json"]',
       };
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
       expect(parsedConfig.configFileNames).toBeUndefined();
       expect(getConfigFileNames()[0]).toBe('myrenovate.json');
+      expect(getConfigFileNames()[1]).toBe('.github/myrenovate.json');
     });
   });
 });
