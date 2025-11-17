@@ -29,13 +29,13 @@ To allow Renovate to pin digests for these dependencies, the following `packageR
 
 ```json
 {
-  matchManagers: ["ocb"],
-  matchPackageNames: [
-    "/^go\\.opentelemetry\\.io\\/collector\\/confmap\\/provider\\/\\w+provider$/",
+  "matchManagers": ["ocb"],
+  "matchPackageNames": [
+    "/^go\\.opentelemetry\\.io\\/collector\\/confmap\\/provider\\/\\w+provider$/"
   ],
-  overrideDatasource: "github-tags",
-  overridePackageName: "open-telemetry/opentelemetry-collector",
-  extractVersion: "^confmap\\/(?<version>.+)"
+  "overrideDatasource": "github-tags",
+  "overridePackageName": "open-telemetry/opentelemetry-collector",
+  "extractVersion": "^confmap\\/(?<version>.+)"
 }
 ```
 
