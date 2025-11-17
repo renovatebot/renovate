@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { LongCommitSha } from '../../../util/git/types';
+import { LooseArray } from '../../../util/schema-utils';
 
 export const LastPipelineId = z
   .object({
@@ -27,9 +28,9 @@ export const GitLabMergeRequestSchema = z.object({
   updated_at: z.string(),
   diverged_commits_count: z.number().optional(),
   merge_status: z.string().optional(),
-  assignee: GitlabUserSchema.optional().nullable(),
-  assignees: z.array(GitlabUserSchema).optional().nullable(),
-  reviewers: z.array(GitlabUserSchema).optional().nullable(),
+  assignee: GitlabUserSchema.nullish(),
+  assignees: LooseArray(GitlabUserSchema).catch([]),
+  reviewers: LooseArray(GitlabUserSchema).catch([]),
   labels: z.array(z.string()).optional(),
   sha: LongCommitShaSchema.optional(),
   head_pipeline: z
@@ -37,8 +38,7 @@ export const GitLabMergeRequestSchema = z.object({
       status: z.string(),
       sha: LongCommitShaSchema,
     })
-    .optional()
-    .nullable(),
+    .nullish(),
 });
 
 export const GitLabMergeRequestsSchema = z.array(GitLabMergeRequestSchema);
