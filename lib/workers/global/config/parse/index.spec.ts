@@ -354,6 +354,8 @@ describe('workers/global/config/parse/index', () => {
     });
 
     it('appends files from configFileNames to config filenames list', async () => {
+      // Capture the length we add our custom filenames.
+      const lengthBefore = getConfigFileNames().length;
       fileConfigParser.getConfig.mockResolvedValue({
         configFileNames: ['myrenovate.json', '.github/myrenovate.json'],
       });
@@ -364,6 +366,8 @@ describe('workers/global/config/parse/index', () => {
       expect(parsedConfig.configFileNames).toBeUndefined();
       expect(getConfigFileNames()[0]).toBe('myrenovate.json');
       expect(getConfigFileNames()[1]).toBe('.github/myrenovate.json');
+      // Ensure we added exactly two filenames.
+      expect(getConfigFileNames().length).toBe(lengthBefore + 2);
     });
 
     it('supports setting configFileNames through cli', async () => {
