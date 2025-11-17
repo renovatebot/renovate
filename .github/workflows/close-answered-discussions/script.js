@@ -15,7 +15,7 @@ module.exports = async ({ github, context, discussionAnsweredDays }) => {
 
   const query = `query ($cursor: String) {
   repository(owner: "${owner}", name: "${repo}") {
-    discussions(after: $cursor, states: OPEN, answered: true, first: 50, orderBy: {field: CREATED_AT, direction: ASC}) {
+    discussions(after: $cursor, states: OPEN, answered: true, first: 10, orderBy: {field: CREATED_AT, direction: ASC}) {
       pageInfo {
         endCursor
         hasNextPage
