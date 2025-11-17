@@ -731,6 +731,8 @@ jobs:
         with:
           # we're likely already using some of the globally installed tools
           tool-cache: false
+          # there are no images by default
+          docker-images: false
           # but we're definitely not using these
           android: true
           dotnet: true
