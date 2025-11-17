@@ -70,6 +70,9 @@ module.exports = async ({ github, context, discussionAnsweredDays }) => {
     }
 
     cursor = repository.discussions.pageInfo.endCursor;
+
+    // wait 5 seconds between each call, to reduce GitHub API rate limits
+    await new Promise((resolve) => setTimeout(resolve, 5000));
   }
 
   return '';
