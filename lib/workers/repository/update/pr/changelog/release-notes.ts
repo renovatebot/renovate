@@ -7,6 +7,7 @@ import * as packageCache from '../../../../../util/cache/package';
 import type { PackageCacheNamespace } from '../../../../../util/cache/package/types';
 import { detectPlatform } from '../../../../../util/common';
 import { linkify } from '../../../../../util/markdown';
+import { acquireLock } from '../../../../../util/mutex';
 import { newlineRegex, regEx } from '../../../../../util/regex';
 import { coerceString } from '../../../../../util/string';
 import { isHttpUrl, joinUrlParts } from '../../../../../util/url';
@@ -24,7 +25,6 @@ import type {
   ChangeLogRelease,
   ChangeLogResult,
 } from './types';
-import { acquireLock } from '../../../../../util/mutex';
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading', 'fence']);
