@@ -23,9 +23,14 @@ export interface RegexManagerConfig extends RegexManagerTemplates {
   autoReplaceStringTemplate?: string;
 }
 
+export interface PackageFileInfo {
+  packageFileExact: string;
+  packageFileDir: string;
+}
+
 export interface RecursionParameter {
   content: string;
-  packageFile: string;
+  packageFileInfo: PackageFileInfo;
   config: RegexManagerConfig;
   regexes: RegExp[];
   index: number;

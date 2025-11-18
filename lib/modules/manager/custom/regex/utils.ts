@@ -1,5 +1,4 @@
 import { URL } from 'node:url';
-import upath from 'upath';
 import { isEmptyStringOrWhitespace } from '@sindresorhus/is';
 import { migrateDatasource } from '../../../../config/migrations/custom/datasource-migration';
 import { logger } from '../../../../logger';
@@ -9,6 +8,7 @@ import type { ValidMatchFields } from '../utils';
 import { validMatchFields } from '../utils';
 import type {
   ExtractionTemplate,
+  PackageFileInfo,
   RegexManagerConfig,
   RegexManagerTemplates,
 } from './types';
@@ -43,16 +43,12 @@ function updateDependency(
 export function createDependency(
   extractionTemplate: ExtractionTemplate,
   config: RegexManagerConfig,
-  packageFile: string,
+  packageFileInfo: PackageFileInfo,
   dep?: PackageDependency,
 ): PackageDependency | null {
   const dependency = dep ?? {};
   const { groups, replaceString } = extractionTemplate;
-
-  // till this stage, packageFile is the full path
-  // so we need to extract filename and dir before passing it for template.compile
-  const packageFileExact = packageFile.split('/').pop();
-  const packageFileDir = upath.dirname(packageFile);
+  const { packageFileExact, packageFileDir } = packageFileInfo;
 
   for (const field of validMatchFields) {
     const fieldTemplate = `${field}Template` as keyof RegexManagerTemplates;
