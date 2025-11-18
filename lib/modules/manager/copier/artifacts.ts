@@ -1,4 +1,3 @@
-import { isNullOrUndefined } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
@@ -57,7 +56,7 @@ export async function updateArtifacts({
   updatedDeps,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  if (isNullOrUndefined(updatedDeps) || updatedDeps.length !== 1) {
+  if (updatedDeps?.length !== 1) {
     // Each answers file (~ packageFileName) has exactly one dependency to update.
     return artifactError(
       packageFileName,
