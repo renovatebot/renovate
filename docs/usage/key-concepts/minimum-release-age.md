@@ -183,22 +183,23 @@ Note that you will also need to [verify if the registry you're using](#which-reg
 
 The below is a non-exhaustive list of public registries which support release timestamps:
 
-| Datasource           | Registry URL                                       | Supported | Notes                                                         |
-| -------------------- | -------------------------------------------------- | --------- | ------------------------------------------------------------- |
-| `docker`             | `https://ghcr.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/39064) |
-| `rubygems`           | `https://rubygems.org`                             | ✅        |                                                               |
-| `docker`             | `https://index.docker.io`                          | ✅        |                                                               |
-| `docker`             | `https://quay.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/38572) |
-| `github-releases`    | `https://github.com`                               | ✅        |                                                               |
-| `terraform-provider` | `https://registry.terraform.io`                    | ✅        | Not always returned                                           |
-| `github-tags`        | `https://github.com`                               | ✅        |                                                               |
-| `go`                 | `https://proxy.golang.org,`                        | ✅        |                                                               |
-| `golang-version`     | `https://raw.githubusercontent.com/golang/website` | ✅        |                                                               |
-| `maven`              | `https://repo1.maven.org/maven2`                   | ✅        |                                                               |
-| `node-version`       | `https://nodejs.org/dist`                          | ✅        |                                                               |
-| `npm`                | `https://registry.npmjs.org`                       | ✅        |                                                               |
-| `pypi`               | `https://pypi.org/pypi/`                           | ✅        |                                                               |
-| `ruby-version`       | `https://www.ruby-lang.org`                        | ✅        |                                                               |
+| Datasource           | Registry URL                                       | Supported | Notes                                                            |
+| -------------------- | -------------------------------------------------- | --------- | ---------------------------------------------------------------- |
+| `docker`             | `https://ghcr.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/39064)    |
+| `rubygems`           | `https://rubygems.org`                             | ✅        |                                                                  |
+| `docker`             | `https://index.docker.io`                          | ✅        |                                                                  |
+| `docker`             | `https://quay.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/38572)    |
+| `github-releases`    | `https://github.com`                               | ✅        |                                                                  |
+| `terraform-provider` | `https://registry.terraform.io`                    | ✅        | Not always returned                                              |
+| `github-tags`        | `https://github.com`                               | ✅        |                                                                  |
+| `go`                 | `https://proxy.golang.org,`                        | ✅        |                                                                  |
+| `golang-version`     | `https://raw.githubusercontent.com/golang/website` | ✅        |                                                                  |
+| `maven`              | `https://repo1.maven.org/maven2`                   | ✅        |                                                                  |
+| `node-version`       | `https://nodejs.org/dist`                          | ✅        |                                                                  |
+| `npm`                | `https://registry.npmjs.org`                       | ✅        |                                                                  |
+| `pypi`               | `https://pypi.org/pypi/`                           | ✅        |                                                                  |
+| `ruby-version`       | `https://www.ruby-lang.org`                        | ✅        |                                                                  |
+| `jsr`                | `https://jsr.io`                                   | ✅        | For packages without explicit timestamps, defaults to 2025-09-18 |
 
 It is _likely_ that if you are using a public registry (i.e. `registry.npmjs.org`, `repo1.maven.org`, etc) the release timestamp data will be present.
 We welcome user contributions to this table.

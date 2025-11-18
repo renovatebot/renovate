@@ -1,13 +1,22 @@
 import * as httpMock from '../../../../test/http-mock';
+import type { Timestamp } from '../../../util/timestamp';
+import { MINIMUM_RELEASE_TIMESTAMP } from './schema';
 import { JsrDatasource } from '.';
 
 const jsrPackageMetadataResponse = {
   latest: '0.0.2',
   versions: {
+    // Mixed createdAt fields for testing:
+    // Actually, it's either all there or none.
+    // has no createdAt (should use fallback MINIMUM_RELEASE_TIMESTAMP)
     '0.0.1': {},
-    '0.0.2': {},
+    // has explicit createdAt (should use actual timestamp)
+    '0.0.2': { createdAt: '2025-11-15T00:00:00.000Z' },
   },
-} as { latest: string; versions: Record<string, { yanked?: boolean }> };
+} as {
+  latest: string;
+  versions: Record<string, { createdAt?: string; yanked?: boolean }>;
+};
 
 describe('modules/datasource/jsr/index', () => {
   const jsr = new JsrDatasource();
@@ -51,10 +60,12 @@ describe('modules/datasource/jsr/index', () => {
       releases: [
         {
           version: '0.0.1',
+          releaseTimestamp: MINIMUM_RELEASE_TIMESTAMP,
         },
         {
           isLatest: true,
           version: '0.0.2',
+          releaseTimestamp: '2025-11-15T00:00:00.000Z' as Timestamp,
         },
       ],
     });
@@ -77,10 +88,12 @@ describe('modules/datasource/jsr/index', () => {
         {
           isDeprecated: true,
           version: '0.0.1',
+          releaseTimestamp: MINIMUM_RELEASE_TIMESTAMP,
         },
         {
           isLatest: true,
           version: '0.0.2',
+          releaseTimestamp: '2025-11-15T00:00:00.000Z' as Timestamp,
         },
       ],
     });
