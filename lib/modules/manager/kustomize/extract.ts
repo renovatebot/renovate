@@ -164,6 +164,7 @@ export function extractHelmChart(
       false,
       aliases,
     );
+    delete dep.replaceString;
     return {
       ...dep,
       depName: helmChart.name,

@@ -247,6 +247,25 @@ describe('modules/manager/kustomize/extract', () => {
       });
       expect(pkg).toEqual(sample);
     });
+
+    it('should correctly extract an OCI chart with registryAliases', () => {
+      const sample = {
+        depName: 'redis',
+        packageName: 'registry-1.docker.io/bitnamicharts/redis',
+        currentValue: '18.12.1',
+        datasource: DockerDatasource.id,
+        pinDigests: false,
+      };
+      const pkg = extractHelmChart(
+        {
+          name: sample.depName,
+          version: sample.currentValue,
+          repo: 'oci://localhost:5000/bitnamicharts',
+        },
+        { 'localhost:5000': 'registry-1.docker.io' },
+      );
+      expect(pkg).toEqual(sample);
+    });
   });
 
   describe('image extraction', () => {
