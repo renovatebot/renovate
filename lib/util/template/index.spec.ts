@@ -216,7 +216,7 @@ describe('util/template/index', () => {
 
   it('add', () => {
     const userTemplate = '{{add 1 2}}';
-    const output = template.compile(userTemplate, undefined as never);
+    const output = template.compile(userTemplate, {});
     expect(output).toBe('3');
   });
 
