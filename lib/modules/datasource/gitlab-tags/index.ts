@@ -70,7 +70,7 @@ export class GitlabTagsDatasource extends Datasource {
   /**
    * gitlab.getDigest
    *
-   * Returs the latest commit hash of the repository.
+   * Returns the latest commit hash of the repository.
    */
   @cache({
     namespace: `datasource-${GitlabTagsDatasource.id}`,
