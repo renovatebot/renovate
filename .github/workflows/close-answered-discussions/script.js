@@ -30,11 +30,13 @@ module.exports = async ({ github, context, discussionAnsweredDays }) => {
   }
 }`;
 
+  let pageNumber = 0;
   while (true) {
     console.debug({ cursor }, 'Starting query');
     const { repository } = await github.graphql(query, { cursor });
 
     console.debug(
+      { pageNumber },
       `Found ${repository.discussions.edges.length} discussions in this page of data`,
     );
 
@@ -54,13 +56,17 @@ module.exports = async ({ github, context, discussionAnsweredDays }) => {
     mutation += '}';
 
     if (numMutating > 0) {
-      console.debug(`Attempting the following mutation:\n${mutation}`);
+      console.debug(
+        { pageNumber },
+        `Attempting the following mutation:\n${mutation}`,
+      );
 
       await github.graphql(mutation);
 
-      console.log(`Closed ${numMutating} answered Discussions`);
+      console.log({ pageNumber }, `Closed ${numMutating} answered Discussions`);
     } else {
       console.debug(
+        { pageNumber },
         `Did not find any Discussions to close in this page of data`,
       );
     }
@@ -69,6 +75,7 @@ module.exports = async ({ github, context, discussionAnsweredDays }) => {
       break;
     }
 
+    pageNumber++;
     cursor = repository.discussions.pageInfo.endCursor;
   }
 
