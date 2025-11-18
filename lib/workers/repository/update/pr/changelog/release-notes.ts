@@ -24,6 +24,7 @@ import type {
   ChangeLogRelease,
   ChangeLogResult,
 } from './types';
+import { acquireLock } from '../../../../../util/mutex';
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading', 'fence']);
@@ -70,21 +71,19 @@ export async function getReleaseList(
   return [];
 }
 
-export function getCachedReleaseList(
+export async function getCachedReleaseList(
   project: ChangeLogProject,
   release: ChangeLogRelease,
 ): Promise<ChangeLogNotes[]> {
   const { repository, apiBaseUrl } = project;
-  // TODO: types (#22198)
-  const cacheKey = `getReleaseList-${apiBaseUrl}-${repository}`;
-  const cachedResult = memCache.get<Promise<ChangeLogNotes[]>>(cacheKey);
-  // istanbul ignore if
-  if (cachedResult !== undefined) {
-    return cachedResult;
+  const lockKey = `${apiBaseUrl}:${repository}`;
+  const releaseLock = await acquireLock(lockKey, 'release-notes');
+  try {
+    const result = await getReleaseList(project, release);
+    return result;
+  } finally {
+    releaseLock();
   }
-  const promisedRes = getReleaseList(project, release);
-  memCache.set(cacheKey, promisedRes);
-  return promisedRes;
 }
 
 export function massageBody(
