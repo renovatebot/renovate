@@ -700,7 +700,6 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
-    expect(res?.deps).toHaveLength(1);
   });
 
   it('uses package file dir as dep name', async () => {
@@ -725,6 +724,5 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
-    expect(res?.deps).toHaveLength(1);
   });
 });

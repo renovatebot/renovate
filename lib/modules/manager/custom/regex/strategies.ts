@@ -59,7 +59,7 @@ export function handleCombination(
     }))
     .reduce((base, addition) => mergeExtractionTemplate(base, addition));
   return [createDependency(extraction, config, packageFile)]
-    .filter(is.truthy)
+    .filter(isTruthy)
     .filter((dep: PackageDependency) =>
       checkIsValidDependency(dep, packageFile, 'regex'),
     );
