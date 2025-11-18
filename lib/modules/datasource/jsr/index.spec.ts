@@ -1,5 +1,6 @@
 import * as httpMock from '../../../../test/http-mock';
 import type { Timestamp } from '../../../util/timestamp';
+import { MINIMUM_RELEASE_TIMESTAMP } from './schema';
 import { JsrDatasource } from '.';
 
 const jsrPackageMetadataResponse = {
@@ -55,7 +56,7 @@ describe('modules/datasource/jsr/index', () => {
       releases: [
         {
           version: '0.0.1',
-          releaseTimestamp: '2025-09-18T00:00:00.000Z' as Timestamp,
+          releaseTimestamp: MINIMUM_RELEASE_TIMESTAMP,
         },
         {
           isLatest: true,
@@ -83,7 +84,7 @@ describe('modules/datasource/jsr/index', () => {
         {
           isDeprecated: true,
           version: '0.0.1',
-          releaseTimestamp: '2025-09-18T00:00:00.000Z' as Timestamp,
+          releaseTimestamp: MINIMUM_RELEASE_TIMESTAMP,
         },
         {
           isLatest: true,
