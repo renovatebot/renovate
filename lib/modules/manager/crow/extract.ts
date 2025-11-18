@@ -37,11 +37,16 @@ export function extractPackageFile(
 
   // Image name/tags for services are only eligible for update if they don't
   // use variables and if the image is not built locally
-  const deps = pipelineKeys.flatMap((pipelineKey) =>
-    Object.values(coerceObject(config[pipelineKey]))
+  const deps = pipelineKeys.flatMap((pipelineKey) => {
+    const pipelineValue = config[pipelineKey];
+    // Handle both object and array formats
+    const steps = Array.isArray(pipelineValue)
+      ? pipelineValue
+      : Object.values(coerceObject(pipelineValue));
+    return steps
       .filter((step) => isString(step?.image))
-      .map((step) => getDep(step.image, true, extractConfig.registryAliases)),
-  );
+      .map((step) => getDep(step.image, true, extractConfig.registryAliases));
+  });
 
   logger.trace({ deps }, 'Crow Configuration image');
   return deps.length ? { deps } : null;
