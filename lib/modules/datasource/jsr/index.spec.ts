@@ -6,7 +6,11 @@ import { JsrDatasource } from '.';
 const jsrPackageMetadataResponse = {
   latest: '0.0.2',
   versions: {
+    // Mixed createdAt fields for testing:
+    // Actually, it's either all there or none.
+    // has no createdAt (should use fallback MINIMUM_RELEASE_TIMESTAMP)
     '0.0.1': {},
+    // has explicit createdAt (should use actual timestamp)
     '0.0.2': { createdAt: '2025-11-15T00:00:00.000Z' },
   },
 } as {
