@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
@@ -596,21 +597,21 @@ describe('modules/manager/kustomize/extract', () => {
   });
 
   it('parses HelmChartInflationGenerator', () => {
-    const res = extractPackageFile(
-      `apiVersion: builtin
-kind: HelmChartInflationGenerator
+    const content = codeBlock`
+      apiVersion: builtin
+      kind: HelmChartInflationGenerator
 
-metadata:
-  name: argocd-chart
+      metadata:
+        name: argocd-chart
 
-name: argo-cd
-repo: https://argoproj.github.io/argo-helm
-version: 6.5.1
-namespace: argocd
-releaseName: argocd`,
-      'kustomization.yaml',
-      {},
-    );
+      name: argo-cd
+      repo: https://argoproj.github.io/argo-helm
+      version: 6.5.1
+      namespace: argocd
+      releaseName: argocd
+      `;
+    const res = extractPackageFile(content, 'kustomization.yaml', {});
+
     expect(res).toMatchObject({
       deps: [
         {
