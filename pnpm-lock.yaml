@@ -279,8 +279,8 @@ importers:
         specifier: 5.0.1
         version: 5.0.1
       p-map:
-        specifier: 7.0.3
-        version: 7.0.3
+        specifier: 7.0.4
+        version: 7.0.4
       p-queue:
         specifier: 9.0.0
         version: 9.0.0
@@ -5177,8 +5177,8 @@ packages:
     resolution: {integrity: sha512-T8BatKGY+k5rU+Q/GTYgrEf2r4xRMevAN5mtXc2aPc4rS1j3s+vWTaO2Wag94neXuCAUAs8cxBL9EeB5EA6diw==}
     engines: {node: '>=16'}
 
-  p-map@7.0.3:
-    resolution: {integrity: sha512-VkndIv2fIB99swvQoA65bm+fsmt6UNdGeIB0oxBs+WhAhdh08QA04JXpI7rbB9r08/nkbysKoya9rtDERYOYMA==}
+  p-map@7.0.4:
+    resolution: {integrity: sha512-tkAQEw8ysMzmkhgw8k+1U/iPhWNhykKnSk4Rd5zLoPJCuJaGRPo6YposrZgaxHKzDHdDWWZvE/Sk7hsL2X/CpQ==}
     engines: {node: '>=18'}
 
   p-queue@9.0.0:
@@ -9492,7 +9492,7 @@ snapshots:
       minipass-collect: 2.0.1
       minipass-flush: 1.0.5
       minipass-pipeline: 1.2.4
-      p-map: 7.0.3
+      p-map: 7.0.4
       ssri: 12.0.0
       tar: 7.5.2
       unique-filename: 4.0.0
@@ -9508,7 +9508,7 @@ snapshots:
       minipass-collect: 2.0.1
       minipass-flush: 1.0.5
       minipass-pipeline: 1.2.4
-      p-map: 7.0.3
+      p-map: 7.0.4
       ssri: 12.0.0
       unique-filename: 4.0.0
 
@@ -12230,7 +12230,7 @@ snapshots:
 
   p-filter@4.1.0:
     dependencies:
-      p-map: 7.0.3
+      p-map: 7.0.4
 
   p-is-promise@3.0.0: {}
 
@@ -12274,7 +12274,7 @@ snapshots:
 
   p-map@6.0.0: {}
 
-  p-map@7.0.3: {}
+  p-map@7.0.4: {}
 
   p-queue@9.0.0:
     dependencies:
