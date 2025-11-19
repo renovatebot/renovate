@@ -180,41 +180,40 @@ export function getDep(
 
   // Resolve registry aliases first so that we don't need special casing later on:
   for (const [name, value] of Object.entries(registryAliases ?? {})) {
-    // Check for two possible formats:
-    // 1. Variable followed by slash: "${VAR}/image"
-    // 2. Variable including a slash: "${VAR}image"
-    if (currentFrom.startsWith(`${name}/`) || currentFrom.startsWith(name)) {
-      const depNameStartIndex = currentFrom.startsWith(`${name}/`)
-        ? name.length + 1
-        : name.length;
-      const depName = currentFrom.substring(depNameStartIndex);
-      const valueWithSlash = ensureTrailingSlash(value);
-      const dep = {
-        ...getDep(`${valueWithSlash}${depName}`, false),
-        replaceString: currentFrom,
-      };
-      // retain depName, not sure if condition is necessary
-      if (dep.depName?.startsWith(valueWithSlash)) {
-        dep.packageName = dep.depName;
-        // Keep original name and path structure in the depName
-        // Only extract depName up to the tag separator if there's actually a tag/digest
-        if (dep.currentValue || dep.currentDigest) {
-          // Split on @ first (for digest), then find the last : (for tag)
-          const [imageAndTag] = currentFrom.split('@');
-          const lastColonIndex = imageAndTag.lastIndexOf(':');
-          if (lastColonIndex > 0) {
-            dep.depName = imageAndTag.substring(0, lastColonIndex);
-          }
-        } else {
-          // No tag/digest, so the entire currentFrom is the depName
-          dep.depName = currentFrom;
-        }
-      }
-      if (specifyReplaceString) {
-        dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
-      }
-      return dep;
+    const match =
+      currentFrom.startsWith(`${name}/`) || currentFrom.startsWith(name);
+    if (!match) {
+      continue;
     }
+    const depName = currentFrom.slice(
+      currentFrom.startsWith(`${name}/`) ? name.length + 1 : name.length,
+    );
+    const valueWithSlash = ensureTrailingSlash(value);
+    const dep = {
+      ...getDep(`${valueWithSlash}${depName}`, false),
+      replaceString: currentFrom,
+    };
+    // retain depName, not sure if condition is necessary
+    if (dep.depName?.startsWith(valueWithSlash)) {
+      dep.packageName = dep.depName;
+      // Keep original name and path structure in the depName
+      // Only extract depName up to the tag separator if there's actually a tag/digest
+      if (dep.currentValue || dep.currentDigest) {
+        // Split on @ first (for digest), then find the last : (for tag)
+        const [imageAndTag] = currentFrom.split('@');
+        const lastColonIndex = imageAndTag.lastIndexOf(':');
+        if (lastColonIndex > 0) {
+          dep.depName = imageAndTag.substring(0, lastColonIndex);
+        }
+      } else {
+        // No tag/digest, so the entire currentFrom is the depName
+        dep.depName = currentFrom;
+      }
+    }
+    if (specifyReplaceString) {
+      dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
+    }
+    return dep;
   }
 
   const dep = splitImageParts(currentFrom);

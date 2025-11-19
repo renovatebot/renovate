@@ -3,7 +3,7 @@ import { getDep } from '../dockerfile/extract.ts';
 import type { PackageDependency } from '../types.ts';
 
 const depProxyRe = regEx(
-  `(?<prefix>\\$\\{?CI_DEPENDENCY_PROXY_(?:DIRECT_)?GROUP_IMAGE_PREFIX\\}?/)(?<depName>.+)`,
+  `(?<rawPrefix>\\$\\{?CI_DEPENDENCY_PROXY_(?:DIRECT_)?GROUP_IMAGE_PREFIX\\}?/)(?<depName>.+)`,
 );
 
 /**
@@ -19,7 +19,7 @@ export function getGitlabDep(
   if (match?.groups) {
     const dep = { ...getDep(match.groups.depName), replaceString: imageName };
     // TODO: types (#22198)
-    dep.autoReplaceStringTemplate = `${match.groups.prefix}${dep.autoReplaceStringTemplate}`;
+    dep.autoReplaceStringTemplate = `${match.groups.rawPrefix}${dep.autoReplaceStringTemplate}`;
     return dep;
   }
   return getDep(imageName, true, registryAliases);
