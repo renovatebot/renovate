@@ -33,7 +33,7 @@ export function extractPackageFile(
 
   // till this stage, packageFile is the full path
   // so we need to extract filename and dir before passing it for template.compile
-  const packageFileExact = packageFile.split('/').pop()!;
+  const packageFileExact = upath.basename(packageFile);
   const packageFileDir = upath.dirname(packageFile);
   const packageFileInfo: PackageFileInfo = {
     packageFileDir,
