@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../config/global';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
@@ -46,9 +46,9 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   let res = hostRules.find({ hostType, url, readOnly });
 
   if (
-    is.nonEmptyString(res.token) ||
-    is.nonEmptyString(res.username) ||
-    is.nonEmptyString(res.password)
+    isNonEmptyString(res.token) ||
+    isNonEmptyString(res.username) ||
+    isNonEmptyString(res.password)
   ) {
     // do not fallback if we already have auth infos
     return res;
@@ -60,6 +60,17 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
     GITHUB_API_USING_HOST_TYPES.includes(hostType) &&
     hostType !== 'github'
   ) {
+    res = {
+      ...hostRules.find({
+        hostType: 'github',
+        url,
+      }),
+      ...res,
+    };
+  }
+
+  // in the case that an API URL is used for GitHub.com, fallback to `github` hostType, and use the `url`'s host to find a `matchHost: api.github.com` (or `matchHost: github.com`)
+  if (url.startsWith('https://api.github.com/')) {
     res = {
       ...hostRules.find({
         hostType: 'github',
@@ -148,9 +159,9 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
   if (options.noAuth) {
     logger.trace({ url }, `Authorization disabled`);
   } else if (
-    is.nonEmptyString(options.headers?.authorization) ||
-    is.nonEmptyString(options.password) ||
-    is.nonEmptyString(options.token)
+    isNonEmptyString(options.headers?.authorization) ||
+    isNonEmptyString(options.password) ||
+    isNonEmptyString(options.token)
   ) {
     logger.once.debug(`hostRules: authentication already set for ${host}`);
     logger.trace({ url }, `Authorization already set`);
@@ -209,21 +220,21 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
     options.http2 = true;
   }
 
-  if (is.nonEmptyString(hostRule.httpsCertificateAuthority)) {
+  if (isNonEmptyString(hostRule.httpsCertificateAuthority)) {
     options.https = {
       ...(options.https ?? {}),
       certificateAuthority: hostRule.httpsCertificateAuthority,
     };
   }
 
-  if (is.nonEmptyString(hostRule.httpsPrivateKey)) {
+  if (isNonEmptyString(hostRule.httpsPrivateKey)) {
     options.https = {
       ...(options.https ?? {}),
       key: hostRule.httpsPrivateKey,
     };
   }
 
-  if (is.nonEmptyString(hostRule.httpsCertificate)) {
+  if (isNonEmptyString(hostRule.httpsCertificate)) {
     options.https = {
       ...(options.https ?? {}),
       certificate: hostRule.httpsCertificate,

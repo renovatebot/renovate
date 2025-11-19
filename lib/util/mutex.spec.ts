@@ -1,5 +1,7 @@
 import { acquireLock, getMutex } from './mutex';
 
+vi.unmock('./mutex');
+
 describe('util/mutex', () => {
   describe('getMutex', () => {
     it('returns mutex with default namespace', () => {

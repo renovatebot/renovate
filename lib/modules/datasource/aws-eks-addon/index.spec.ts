@@ -116,7 +116,7 @@ describe('modules/datasource/aws-eks-addon/index', () => {
         packageName: '{"kubernetesVersion":"1.30"}',
       });
       expect(res).toBeNull();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         {
           err: expect.anything(),

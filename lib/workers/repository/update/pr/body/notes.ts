@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { logger } from '../../../../../logger';
 import { emojify } from '../../../../../util/emoji';
 import * as template from '../../../../../util/template';
@@ -7,7 +7,7 @@ import type { BranchConfig } from '../../../../types';
 export function getPrNotes(config: BranchConfig): string {
   const notes = [];
   for (const upgrade of config.upgrades) {
-    if (is.nonEmptyArray(upgrade.prBodyNotes)) {
+    if (isNonEmptyArray(upgrade.prBodyNotes)) {
       for (const note of upgrade.prBodyNotes) {
         try {
           const res = template.compile(note, upgrade).trim();

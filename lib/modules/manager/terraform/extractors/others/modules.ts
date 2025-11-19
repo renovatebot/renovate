@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined, isPlainObject } from '@sindresorhus/is';
 import { logger } from '../../../../../logger';
 import { regEx } from '../../../../../util/regex';
 import { BitbucketTagsDatasource } from '../../../../datasource/bitbucket-tags';
@@ -32,12 +32,12 @@ export class ModuleExtractor extends DependencyExtractor {
 
   extract(hclRoot: TerraformDefinitionFile): PackageDependency[] {
     const modules = hclRoot.module;
-    if (is.nullOrUndefined(modules)) {
+    if (isNullOrUndefined(modules)) {
       return [];
     }
 
     /* v8 ignore next 4 -- needs test */
-    if (!is.plainObject(modules)) {
+    if (!isPlainObject(modules)) {
       logger.debug({ modules }, 'Terraform: unexpected `modules` value');
       return [];
     }

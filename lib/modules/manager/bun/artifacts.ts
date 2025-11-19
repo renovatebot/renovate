@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isEmptyArray } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -26,17 +26,19 @@ export async function updateArtifacts(
   logger.debug(`bun.updateArtifacts(${packageFileName})`);
   const { isLockFileMaintenance } = config;
 
-  if (is.emptyArray(updatedDeps) && !isLockFileMaintenance) {
+  if (isEmptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated bun deps - returning null');
     return null;
   }
 
-  // Find the first bun dependency in order to handle mixed manager updates
-  const lockFileName = updatedDeps.find((dep) => dep.manager === 'bun')
-    ?.lockFiles?.[0];
+  // Find the first bun dependency in order to handle mixed manager updates,
+  // eventually falling back to the first lock file from config.
+  const lockFileName =
+    updatedDeps.find((dep) => dep.manager === 'bun')?.lockFiles?.[0] ??
+    config.lockFiles?.[0];
 
   if (!lockFileName) {
-    logger.debug(`No ${lockFileName} found`);
+    logger.debug(`bun: No lock file found`);
     return null;
   }
 

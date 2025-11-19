@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNull } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { joinUrlParts } from '../../../util/url';
@@ -23,7 +23,9 @@ export class JsrDatasource extends Datasource {
   // use npm compatible registry api url due to returns
   override readonly defaultRegistryUrls = defaultRegistryUrls;
 
-  override readonly releaseTimestampSupport = false;
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `createdAt` field in the results. For packages without explicit timestamps, defaults to 2025-09-18.';
 
   constructor() {
     super(JsrDatasource.id);
@@ -45,7 +47,7 @@ export class JsrDatasource extends Datasource {
     }
 
     const validJsrPackageName = extractJsrPackageName(packageName);
-    if (is.null(validJsrPackageName)) {
+    if (isNull(validJsrPackageName)) {
       logger.debug(`Could not extract packageName: "${packageName}"`);
       return null;
     }

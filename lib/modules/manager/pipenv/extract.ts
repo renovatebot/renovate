@@ -1,6 +1,6 @@
 import { pipenv as pipenvDetect } from '@renovatebot/detect-tools';
 import { RANGE_PATTERN } from '@renovatebot/pep440';
-import is from '@sindresorhus/is';
+import { isArray, isObject, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { getParentDir, localPathExists } from '../../../util/fs';
@@ -38,7 +38,7 @@ function extractFromSection(
       let currentValue: string | undefined;
       let nestedVersion = false;
       let skipReason: SkipReason | undefined;
-      if (is.object(requirements)) {
+      if (isObject(requirements)) {
         if (requirements.git) {
           skipReason = 'git-dependency';
         } else if (requirements.file) {
@@ -97,7 +97,7 @@ function extractFromSection(
         // TODO #22198
         dep.managerData!.nestedVersion = nestedVersion;
       }
-      if (sources && is.object(requirements) && requirements.index) {
+      if (sources && isObject(requirements) && requirements.index) {
         const source = sources.find((item) => item.name === requirements.index);
         if (source) {
           dep.registryUrls = [source.url];
@@ -116,9 +116,9 @@ function isPipRequirements(
     | PipSource[],
 ): section is Record<string, PipRequirement> {
   return (
-    !is.array(section) &&
-    is.object(section) &&
-    !Object.values(section).some((dep) => !is.object(dep) && !is.string(dep))
+    !isArray(section) &&
+    isObject(section) &&
+    !Object.values(section).some((dep) => !isObject(dep) && !isString(dep))
   );
 }
 

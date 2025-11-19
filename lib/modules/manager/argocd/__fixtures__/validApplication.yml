@@ -144,3 +144,12 @@ spec:
     repoURL: https://git.example.com/foo/bar.git
     targetRevision: 3.2.1
 {{- end }}
+---
+# OCI Helm chart without explicit chart field
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  source:
+    repoURL: oci://somecontainer.registry.io/org/chart
+    targetRevision: 0.4.0
+    path: .

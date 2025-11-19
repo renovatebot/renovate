@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class IgnoreNpmrcFileMigration extends AbstractMigration {
@@ -8,7 +8,7 @@ export class IgnoreNpmrcFileMigration extends AbstractMigration {
   override run(): void {
     const npmrc = this.get('npmrc');
 
-    if (!is.string(npmrc)) {
+    if (!isString(npmrc)) {
       this.setHard('npmrc', '');
     }
   }

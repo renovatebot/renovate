@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { getEnv } from '../util/env';
 
 export function isTracingEnabled(): boolean {
@@ -14,7 +14,7 @@ export function isTraceSendingEnabled(): boolean {
 }
 
 export function massageThrowable(e: unknown): string | undefined {
-  if (is.nullOrUndefined(e)) {
+  if (isNullOrUndefined(e)) {
     return undefined;
   }
   if (e instanceof Error) {

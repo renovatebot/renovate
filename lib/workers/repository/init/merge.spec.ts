@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import type { MockInstance } from 'vitest';
 import * as decrypt from '../../../config/decrypt';
 import { getConfig } from '../../../config/defaults';
@@ -76,7 +76,7 @@ describe('workers/repository/init/merge', () => {
       scm.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       expect(await detectRepoFileConfig()).toEqual({});
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Existing config file no longer exists',
       );
@@ -551,7 +551,7 @@ describe('workers/repository/init/merge', () => {
           const [exitMock] = mockProcessExitOnce();
           let configFileName: string | undefined;
 
-          if (!is.nullOrUndefined(staticConfig)) {
+          if (!isNullOrUndefined(staticConfig)) {
             configFileName = 'static_config.json5';
             fs.readSystemFile.mockResolvedValueOnce(
               JSON.stringify(staticConfig),
@@ -600,7 +600,7 @@ describe('workers/repository/init/merge', () => {
           );
 
           expect(resolved).toStrictEqual(invalidConfig);
-          // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
           expect(logger.logger.info).toHaveBeenCalledWith(
             {
               errors: [

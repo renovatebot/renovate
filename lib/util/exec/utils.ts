@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { getCustomEnv, getUserEnv } from '../env';
 import { getChildProcessEnv } from './env';
 import type { ExecOptions } from './types';
@@ -12,7 +12,7 @@ export function getChildEnv({
 
   const inheritedKeys: string[] = [];
   for (const [key, val] of Object.entries(extraEnv ?? {})) {
-    if (is.string(val)) {
+    if (isString(val)) {
       inheritedKeys.push(key);
     }
   }
@@ -28,7 +28,7 @@ export function getChildEnv({
 
   const result: Record<string, string> = {};
   for (const [key, val] of Object.entries(combinedEnv)) {
-    if (is.string(val)) {
+    if (isString(val)) {
       result[key] = `${val}`;
     }
   }

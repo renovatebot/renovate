@@ -21,7 +21,7 @@ export const urls = [
   'https://nugettools.azurewebsites.net/',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['pin', 'bump'];
+export const supportedRangeStrategies = ['bump'];
 
 class NugetVersioningApi implements VersioningApi {
   isCompatible(version: string, _current?: string): boolean {
@@ -44,7 +44,7 @@ class NugetVersioningApi implements VersioningApi {
     }
 
     const r = parseRange(version);
-    if (!r || r.type !== 'nuget-exact-range') {
+    if (r?.type !== 'nuget-exact-range') {
       return false;
     }
 
@@ -262,6 +262,14 @@ class NugetVersioningApi implements VersioningApi {
     return null;
   }
 
+  getPinnedValue(newVersion: string): string {
+    const v = parseVersion(newVersion);
+    if (!v) {
+      return '';
+    }
+    return rangeToString({ type: 'nuget-exact-range', version: v });
+  }
+
   getNewValue({
     currentValue,
     rangeStrategy,
@@ -271,10 +279,6 @@ class NugetVersioningApi implements VersioningApi {
     const v = parseVersion(newVersion);
     if (!v) {
       return null;
-    }
-
-    if (rangeStrategy === 'pin') {
-      return rangeToString({ type: 'nuget-exact-range', version: v });
     }
 
     if (this.isVersion(currentValue)) {

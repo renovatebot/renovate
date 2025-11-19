@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import pMap from 'p-map';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
@@ -49,7 +49,7 @@ export class DenoDatasource extends Datasource {
       /^(https:\/\/deno.land\/)(?<rawPackageName>[^@\s]+)/,
     ).exec(packageName);
     const rawPackageName = extractResult?.groups?.rawPackageName;
-    if (is.nullOrUndefined(rawPackageName)) {
+    if (isNullOrUndefined(rawPackageName)) {
       logger.debug(
         `Could not extract rawPackageName from packageName: "${packageName}"`,
       );

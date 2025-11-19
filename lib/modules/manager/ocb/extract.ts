@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { parseSingleYaml } from '../../../util/yaml';
@@ -65,7 +65,7 @@ export function processModule(
   depType: string,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
-  if (is.nullOrUndefined(module)) {
+  if (isNullOrUndefined(module)) {
     return deps;
   }
 

@@ -306,6 +306,25 @@ describe('modules/datasource/pypi/index', () => {
       expect(result?.sourceUrl).toBeUndefined();
     });
 
+    it('does not mistake sponsors in project name as sponsors url', async () => {
+      const info = {
+        name: 'example',
+        home_page: 'https://example.com',
+        project_urls: {
+          random: 'https://github.com/renovatebot/example-sponsors',
+        },
+      };
+      httpMock
+        .scope(baseUrl)
+        .get('/example/json')
+        .reply(200, { ...JSON.parse(res1), info });
+      const result = await getPkgReleases({
+        datasource,
+        packageName: 'example',
+      });
+      expect(result?.sourceUrl).toBe(info.project_urls.random);
+    });
+
     it('normalizes the package name according to PEP 503', async () => {
       const expectedHttpCall = httpMock
         .scope(baseUrl)

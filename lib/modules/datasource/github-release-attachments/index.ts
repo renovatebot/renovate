@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isBoolean } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { queryReleases } from '../../../util/github/graphql';
@@ -259,7 +259,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
         gitRef: version,
         releaseTimestamp,
       };
-      if (is.boolean(isStable)) {
+      if (isBoolean(isStable)) {
         result.isStable = isStable;
       }
       return result;

@@ -34,7 +34,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
       );
       const res = await extractPnpmFilters(workSpaceFilePath);
       expect(res).toBeUndefined();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         {
           fileName: expect.any(String),
@@ -50,7 +50,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
 
       const res = await extractPnpmFilters('pnpm-workspace.yml');
       expect(res).toBeUndefined();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({
           fileName: expect.any(String),
@@ -68,7 +68,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const packageFile = 'package.json';
       const res = await findPnpmWorkspace(packageFile);
       expect(res).toBeNull();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({ packageFile }),
         'Failed to locate pnpm-workspace.yaml in a parent directory.',
@@ -82,7 +82,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const packageFile = 'package.json';
       const res = await findPnpmWorkspace(packageFile);
       expect(res).toBeNull();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({
           workspaceYamlPath: 'pnpm-workspace.yaml',

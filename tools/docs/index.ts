@@ -73,6 +73,11 @@ export async function generateDocs(
     // json-schema
     logger.info('* json-schema');
     await generateSchema(dist, version);
+    await generateSchema(dist, {
+      filename: 'renovate-global-schema.json',
+      version,
+      isGlobal: true,
+    });
 
     if (pack) {
       await tar.create({ file: `${root}/docs.tgz`, cwd: dist, gzip: true }, [

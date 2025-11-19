@@ -1,5 +1,5 @@
 import querystring from 'node:querystring';
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
@@ -86,7 +86,7 @@ export function extractImage(
     return null;
   }
   const nameToSplit = image.newName ?? image.name;
-  if (!is.string(nameToSplit)) {
+  if (!isString(nameToSplit)) {
     logger.debug({ image }, 'Invalid image name');
     return null;
   }
@@ -107,7 +107,7 @@ export function extractImage(
   }
 
   if (digest) {
-    if (!is.string(digest) || !digest.startsWith('sha256:')) {
+    if (!isString(digest) || !digest.startsWith('sha256:')) {
       return {
         depName,
         currentValue: digest,
@@ -123,7 +123,7 @@ export function extractImage(
   }
 
   if (newTag) {
-    if (!is.string(newTag) || newTag.startsWith('sha256:')) {
+    if (!isString(newTag) || newTag.startsWith('sha256:')) {
       return {
         depName,
         currentValue: newTag,
@@ -164,6 +164,7 @@ export function extractHelmChart(
       false,
       aliases,
     );
+    delete dep.replaceString;
     return {
       ...dep,
       depName: helmChart.name,
@@ -194,7 +195,7 @@ export function parseKustomize(
     return null;
   }
 
-  if (!pkg || is.string(pkg)) {
+  if (!pkg || isString(pkg)) {
     return null;
   }
 
@@ -221,7 +222,7 @@ export function extractPackageFile(
   }
 
   // grab the remote bases
-  for (const base of coerceArray(pkg.bases).filter(is.string)) {
+  for (const base of coerceArray(pkg.bases).filter(isString)) {
     const dep = extractResource(base);
     if (dep) {
       deps.push({
@@ -232,7 +233,7 @@ export function extractPackageFile(
   }
 
   // grab the remote resources
-  for (const resource of coerceArray(pkg.resources).filter(is.string)) {
+  for (const resource of coerceArray(pkg.resources).filter(isString)) {
     const dep = extractResource(resource);
     if (dep) {
       deps.push({
@@ -243,7 +244,7 @@ export function extractPackageFile(
   }
 
   // grab the remote components
-  for (const component of coerceArray(pkg.components).filter(is.string)) {
+  for (const component of coerceArray(pkg.components).filter(isString)) {
     const dep = extractResource(component);
     if (dep) {
       deps.push({

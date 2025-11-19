@@ -318,6 +318,8 @@ describe('modules/datasource/crate/index', () => {
     });
 
     it('guards against race conditions while cloning', async () => {
+      vi.unmock('../../../util/mutex');
+
       const { mockClone } = setupGitMocks(250);
       GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/othertestregistry';

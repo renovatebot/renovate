@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import type { ReleaseType } from 'semver';
 import semver from 'semver';
 import { XmlDocument } from 'xmldoc';
@@ -192,7 +192,7 @@ export function bumpPackageVersion(
 
 function isSnapshot(prerelease: readonly (string | number)[] | null): boolean {
   const lastPart = prerelease?.at(-1);
-  return is.string(lastPart) && lastPart.endsWith('SNAPSHOT');
+  return isString(lastPart) && lastPart.endsWith('SNAPSHOT');
 }
 
 function updateValue(

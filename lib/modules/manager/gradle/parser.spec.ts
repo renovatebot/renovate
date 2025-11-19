@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import {
   parseGradle,
@@ -419,7 +419,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'a = "foo"; b = "bar"; c="1.2.3"'} | ${'"${a}:${b}:${properties["c"]}"'}    | ${{ depName: 'foo:bar', currentValue: '1.2.3', sharedVariableName: 'c' }}
       `('$def | $str', ({ def, str, output }) => {
         const { deps } = parseGradle([def, str].join('\n'));
-        expect(deps).toMatchObject([output].filter(is.truthy));
+        expect(deps).toMatchObject([output].filter(isTruthy));
       });
     });
 
@@ -500,7 +500,7 @@ describe('modules/manager/gradle/parser', () => {
         ${''}              | ${'kotlin("foo", "1.2.3@@@")'}        | ${null}
       `('$def | $str', ({ def, str, output }) => {
         const { deps } = parseGradle([def, str].join('\n'));
-        expect(deps).toMatchObject([output].filter(is.truthy));
+        expect(deps).toMatchObject([output].filter(isTruthy));
       });
     });
 
@@ -530,7 +530,7 @@ describe('modules/manager/gradle/parser', () => {
         ${''}              | ${'(group = "foo", name = "bar", version = "1.2.3", changing: true)'}             | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       `('$def | $str', ({ def, str, output }) => {
         const { deps } = parseGradle([def, str].join('\n'));
-        expect(deps).toMatchObject([output].filter(is.truthy));
+        expect(deps).toMatchObject([output].filter(isTruthy));
       });
     });
 
@@ -617,12 +617,14 @@ describe('modules/manager/gradle/parser', () => {
         ${''}               | ${'id("foo.bar").version("1.2.3")'}        | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'id(["foo.bar"]) version "1.2.3"'}       | ${null}
         ${''}               | ${'id("foo", "bar") version "1.2.3"'}      | ${null}
+        ${''}               | ${'id(foo) version "1.2.3"'}               | ${null}
         ${''}               | ${'id "foo".version("1.2.3")'}             | ${null}
         ${''}               | ${'id("foo.bar") version("1.2.3")'}        | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'id("foo.bar") version "1.2.3"'}         | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'id "foo.bar" version "$baz"'}           | ${{ depName: 'foo.bar', skipReason: 'unspecified-version', currentValue: 'baz' }}
         ${'baz = "1.2.3"'}  | ${'id "foo.bar" version "$baz"'}           | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3', sharedVariableName: 'baz' }}
         ${'baz = "1.2.3"'}  | ${'id("foo.bar") version "$baz"'}          | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
+        ${'foo = "bar"'}    | ${'id(foo + ".baz") version "1.2.3"'}      | ${{ depName: 'bar.baz', packageName: 'bar.baz:bar.baz.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'id "foo.bar" version "x${ab}cd"'}       | ${{ depName: 'foo.bar', skipReason: 'unspecified-version' }}
         ${''}               | ${'id("foo.bar") version "$baz"'}          | ${{ depName: 'foo.bar', skipReason: 'unspecified-version', currentValue: 'baz' }}
         ${''}               | ${'id("foo.bar") version "x${ab}cd"'}      | ${{ depName: 'foo.bar', skipReason: 'unspecified-version' }}
@@ -637,7 +639,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'baz = "1.3.71"'} | ${'kotlin("jvm") version baz'}             | ${{ depName: 'org.jetbrains.kotlin.jvm', packageName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.3.71', sharedVariableName: 'baz' }}
       `('$def | $input', ({ def, input, output }) => {
         const { deps } = parseGradle([def, input].join('\n'));
-        expect(deps).toMatchObject([output].filter(is.truthy));
+        expect(deps).toMatchObject([output].filter(isTruthy));
       });
     });
   });
@@ -904,7 +906,7 @@ describe('modules/manager/gradle/parser', () => {
             }
           `;
           parseGradle(input);
-          // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
           expect(logger.logger.debug).toHaveBeenCalledWith(
             expect.stringContaining(
               `Skipping content descriptor with unsupported regExp pattern for ${fieldName}`,
@@ -1015,7 +1017,7 @@ describe('modules/manager/gradle/parser', () => {
     `('$def | $str', ({ def, str, output }) => {
       const input = [def, str].join('\n');
       const { deps } = parseGradle(input);
-      expect(deps).toMatchObject([output].filter(is.truthy));
+      expect(deps).toMatchObject([output].filter(isTruthy));
     });
   });
 
@@ -1030,7 +1032,7 @@ describe('modules/manager/gradle/parser', () => {
       ${'java { registerFeature(foo) { capability("foo", "bar", "1.2.3") } }'} | ${null}
     `('$input', ({ input, output }) => {
       const { deps } = parseGradle(input);
-      expect(deps).toMatchObject([output].filter(is.truthy));
+      expect(deps).toMatchObject([output].filter(isTruthy));
     });
 
     it('handles 3 independent dependencies mismatched as groupId, artifactId, version', () => {
@@ -1285,7 +1287,7 @@ describe('modules/manager/gradle/parser', () => {
         fileContents,
         3,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Max recursion depth reached in script file: foo/bar.gradle',
       );
@@ -1323,7 +1325,7 @@ describe('modules/manager/gradle/parser', () => {
       ${''}              | ${'micronaut { version = "1.2.3" }'}                             | ${{ depName: 'micronaut', packageName: GRADLE_PLUGINS.micronaut[1], currentValue: '1.2.3' }}
     `('$def | $input', ({ def, input, output }) => {
       const { deps } = parseGradle([def, input].join('\n'));
-      expect(deps).toMatchObject([output].filter(is.truthy));
+      expect(deps).toMatchObject([output].filter(isTruthy));
     });
   });
 

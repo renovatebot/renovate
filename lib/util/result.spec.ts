@@ -222,7 +222,7 @@ describe('util/result', () => {
           throw 'oops';
         });
         expect(res).toEqual(Result._uncaught('oops'));
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { err: 'oops' },
           'Result: unhandled transform error',
@@ -543,7 +543,7 @@ describe('util/result', () => {
         await expect(
           res.transform((_) => Promise.reject('oops')),
         ).resolves.toEqual(Result._uncaught('oops'));
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { err: 'oops' },
           'Result: unhandled async transform error',
@@ -557,7 +557,7 @@ describe('util/result', () => {
             throw 'bar';
           }),
         ).resolves.toEqual(Result._uncaught('bar'));
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { err: 'bar' },
           'AsyncResult: unhandled transform error',
@@ -569,7 +569,7 @@ describe('util/result', () => {
         await expect(
           res.transform(() => Promise.reject('bar')),
         ).resolves.toEqual(Result._uncaught('bar'));
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { err: 'bar' },
           'AsyncResult: unhandled async transform error',

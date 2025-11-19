@@ -4,8 +4,6 @@ import Git from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
-import { getChildEnv } from '../../../util/exec/utils';
-import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { simpleGitConfig } from '../../../util/git/config';
 import { getHttpUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
@@ -37,26 +35,11 @@ async function getUrl(
   return URL.resolve(`${remoteUrl}/`, path);
 }
 
-const headRefRe = regEx(/ref: refs\/heads\/(?<branch>\w+)\s/);
-
-async function getDefaultBranch(subModuleUrl: string): Promise<string> {
-  const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables([
-    'git-tags',
-    'git-refs',
-  ]);
-  const gitEnv = getChildEnv({ env: gitSubmoduleAuthEnvironmentVariables });
-  const val = await Git(simpleGitConfig())
-    .env(gitEnv)
-    .listRemote(['--symref', subModuleUrl, 'HEAD']);
-  return headRefRe.exec(val)?.groups?.branch ?? 'master';
-}
-
 async function getBranch(
   git: SimpleGit,
   gitModulesPath: string,
   submoduleName: string,
-  subModuleUrl: string,
-): Promise<string> {
+): Promise<string | null> {
   const branchFromConfig = (
     await Git(simpleGitConfig()).raw([
       'config',
@@ -69,7 +52,7 @@ async function getBranch(
 
   return branchFromConfig === '.'
     ? (await git.branch(['--list'])).current.trim()
-    : branchFromConfig || (await getDefaultBranch(subModuleUrl)).trim();
+    : branchFromConfig || null;
 }
 
 async function getModules(
@@ -127,18 +110,13 @@ export default async function extractPackageFile(
         .split(regEx(/\s/));
       const subModuleUrl = await getUrl(git, gitModulesPath, name);
       const httpSubModuleUrl = getHttpUrl(subModuleUrl);
-      const currentValue = await getBranch(
-        git,
-        gitModulesPath,
-        name,
-        httpSubModuleUrl,
-      );
+      const branch = await getBranch(git, gitModulesPath, name);
       deps.push({
         depName: path,
         packageName: httpSubModuleUrl,
-        currentValue,
+        currentValue: branch ?? undefined,
         currentDigest,
-        ...(semVerVersioning.api.isVersion(currentValue)
+        ...(semVerVersioning.api.isVersion(branch)
           ? { versioning: semVerVersioning.id }
           : {}),
       });

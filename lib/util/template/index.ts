@@ -1,4 +1,9 @@
-import is, { isNullOrUndefined } from '@sindresorhus/is';
+import {
+  isArray,
+  isPlainObject,
+  isPrimitive,
+  isString,
+} from '@sindresorhus/is';
 import handlebars, { type HelperOptions } from 'handlebars';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
@@ -14,10 +19,6 @@ type Options = HelperOptions & {
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
 handlebars.registerHelper('add', function (a, b) {
-  if (isNullOrUndefined(a) || isNullOrUndefined(b)) {
-    return 0;
-  }
-
   return parseInt(a, 10) + parseInt(b, 10);
 });
 
@@ -70,43 +71,64 @@ handlebars.registerHelper('containsString', (str, subStr) =>
 );
 
 handlebars.registerHelper('equals', (arg1, arg2) => arg1 === arg2);
+const helpers: Record<string, handlebars.HelperDelegate> = {
+  encodeURIComponent,
+  decodeURIComponent,
+  encodeBase64: (str: string) => Buffer.from(str ?? '').toString('base64'),
+  decodeBase64: (str: string) => Buffer.from(str ?? '', 'base64').toString(),
+  stringToPrettyJSON: (input: string): string =>
+    JSON.stringify(JSON.parse(input), null, 2),
+  toJSON: (input: unknown): string => JSON.stringify(input),
+  toArray: (...args: unknown[]): unknown[] => {
+    // Need to remove the 'options', as the last parameter
+    // https://handlebarsjs.com/api-reference/helpers.html
+    args.pop();
+    return args;
+  },
+  toObject: (...args: unknown[]): unknown => {
+    // Need to remove the 'options', as the last parameter
+    // https://handlebarsjs.com/api-reference/helpers.html
+    args.pop();
 
-handlebars.registerHelper('includes', (arg1: string[], arg2: string) => {
-  if (is.array(arg1, is.string) && is.string(arg2)) {
-    return arg1.includes(arg2);
-  }
+    if (args.length % 2 !== 0) {
+      throw new Error(`Must contain an even number of elements`);
+    }
 
-  return false;
-});
+    const keys = args.filter((_, index) => index % 2 === 0);
+    const values = args.filter((_, index) => index % 2 === 1);
 
-handlebars.registerHelper(
-  'split',
-  (str: unknown, separator: unknown): string[] => {
-    if (is.string(str) && is.string(separator)) {
+    return Object.fromEntries(keys.map((key, index) => [key, values[index]]));
+  },
+  replace: (find, replace, context) =>
+    (context ?? '').replace(regEx(find, 'g'), replace),
+  lowercase: (str: string) => str?.toLowerCase(),
+  containsString: (str, subStr) => str?.includes(subStr),
+  equals: (arg1, arg2) => arg1 === arg2,
+  includes: (arg1: string[], arg2: string) => {
+    if (isArray(arg1, isString) && isString(arg2)) {
+      return arg1.includes(arg2);
+    }
+    return false;
+  },
+  split: (str: unknown, separator: unknown): string[] => {
+    if (isString(str) && isString(separator)) {
       return str.split(separator);
     }
     return [];
   },
-);
-
-handlebars.registerHelper({
-  and(...args) {
-    // Need to remove the 'options', as last parameter
+  and: (...args: unknown[]) => {
+    // Need to remove the 'options', as the last parameter
     // https://handlebarsjs.com/api-reference/helpers.html
     args.pop();
     return args.every(Boolean);
   },
-  or(...args) {
-    // Need to remove the 'options', as last parameter
+  or: (...args: unknown[]) => {
+    // Need to remove the 'options', as the last parameter
     // https://handlebarsjs.com/api-reference/helpers.html
     args.pop();
     return args.some(Boolean);
   },
-});
-
-handlebars.registerHelper(
-  'lookupArray',
-  (obj: unknown, key: unknown, options: Options): unknown[] => {
+  lookupArray: (obj: unknown, key: unknown, options: Options): unknown[] => {
     return (
       toArray(obj)
         // skip elements like #with does
@@ -115,22 +137,29 @@ handlebars.registerHelper(
         .filter((value) => value !== undefined)
     );
   },
-);
+  distinct: (obj: unknown): unknown[] => {
+    const seen = new Set<string>();
 
-handlebars.registerHelper('distinct', (obj: unknown): unknown[] => {
-  const seen = new Set<string>();
+    return toArray(obj).filter((value) => {
+      const str = JSON.stringify(value);
 
-  return toArray(obj).filter((value) => {
-    const str = JSON.stringify(value);
+      if (seen.has(str)) {
+        return false;
+      }
 
-    if (seen.has(str)) {
-      return false;
-    }
+      seen.add(str);
+      return true;
+    });
+  },
+};
 
-    seen.add(str);
-    return true;
-  });
-});
+// Register all helpers from the single source of truth
+for (const [name, fn] of Object.entries(helpers)) {
+  handlebars.registerHelper(name, fn);
+}
+
+// Export helper names derived from the same source used to register them
+export const templateHelperNames = Object.keys(helpers) as readonly string[];
 
 export const exposedConfigOptions = [
   'additionalBranchPrefix',
@@ -292,15 +321,15 @@ class CompileInputProxyHandler implements ProxyHandler<CompileInput> {
       return value;
     }
 
-    if (is.array(value)) {
+    if (isArray(value)) {
       return value.map((element) =>
-        is.primitive(element)
+        isPrimitive(element)
           ? element
           : proxyCompileInput(element as CompileInput, this.warnVariables),
       );
     }
 
-    if (is.plainObject(value)) {
+    if (isPlainObject(value)) {
       return proxyCompileInput(value, this.warnVariables);
     }
 

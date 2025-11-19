@@ -8,9 +8,9 @@
 
 ## Context
 
-Please select one of the below:
+Please select one of the following:
 
-- [ ] This closes an existing Issue: #
+- [ ] This closes an existing Issue, Closes: # <!-- NOTE that this should NOT be a Discussion -->
 - [ ] This doesn't close an Issue, but I accept the risk that this PR may be closed if maintainers disagree with its opening or implementation
 
 ## AI assistance disclosure
@@ -23,7 +23,7 @@ Please select one option and, if yes, briefly describe how AI was used (e.g., co
 
 - [ ] No — I did not use AI for this contribution.
 - [ ] Yes — minimal assistance (e.g., IDE autocomplete, small code completions, grammar fixes).
-- [ ] Yes — substantive assistance (AI generated non‑trivial portions of code, tests, or documentation).
+- [ ] Yes — substantive assistance (AI-generated non‑trivial portions of code, tests, or documentation).
 - [ ] Yes — other (please describe):
 
 ## Documentation (please check one with an [x])
@@ -37,12 +37,12 @@ I have verified these changes via:
 
 - [ ] Code inspection only, or
 - [ ] Newly added/modified unit tests, or
-- [ ] No unit tests but ran on a real repository, or
+- [ ] No unit tests, but ran on a real repository, or
 - [ ] Both unit tests + ran on a real repository
 
 The public repository: <URL>
 
-<!-- Do you have any suggestions about this PR template? Edit it here: https://github.com/renovatebot/renovate/edit/main/.github/pull_request_template.md -->
+<!-- If you have any suggestions about this PR template, edit it here: https://github.com/renovatebot/renovate/edit/main/.github/pull_request_template.md -->
 
 <!-- Please do not force push to your PR's branch after you have created your PR, as doing so forces us to review the whole PR again. This makes it harder for us to review your work because we don't know what has changed. -->
-<!-- PRs will always be squashed by us when we merge your work. Commit as many times as you need in this branch. -->
+<!-- PRs will always be squashed by us when we merge your work. You can commit as many times as you need in this branch. -->
