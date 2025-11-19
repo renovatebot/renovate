@@ -25,6 +25,7 @@ export const packageCacheNamespaces = [
   'datasource-aws-eks-addon',
   'datasource-azure-bicep-resource',
   'datasource-azure-pipelines-tasks',
+  'datasource-azure-tags',
   'datasource-bazel',
   'datasource-bitbucket-tags',
   'datasource-bitbucket-server-tags',
