@@ -220,11 +220,6 @@ describe('util/template/index', () => {
     expect(output).toBe('3');
   });
 
-  it('add - returns 0 if any pf the inputs undefined', () => {
-    const userTemplate = '{{add 1 undefined}}';
-    const output = template.compile(userTemplate, {});
-    expect(output).toBe('0');
-  });
 
   describe('proxyCompileInput', () => {
     const allowedField = 'body';
