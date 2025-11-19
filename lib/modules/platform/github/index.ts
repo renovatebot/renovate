@@ -2112,6 +2112,22 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
           vulnerable_version_range: vulnerableVersionRange,
           first_patched_version: firstPatchedVersion,
         } = alert.security_vulnerability;
+        const knownEcosystems = new Set([
+          'maven',
+          'npm',
+          'nuget',
+          'pip',
+          'rubygems',
+          'rust',
+          'composer',
+          'go',
+        ]);
+        if (!knownEcosystems.has(ecosystem)) {
+          logger.debug(
+            { ecosystem },
+            'Unknown vulnerability ecosystem detected',
+          );
+        }
         const patch = firstPatchedVersion?.identifier;
 
         const normalizedName = normalizeNamePerEcosystem({ name, ecosystem });
