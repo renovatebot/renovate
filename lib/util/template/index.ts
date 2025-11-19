@@ -96,7 +96,7 @@ const helpers: Record<string, handlebars.HelperDelegate> = {
       return true;
     });
   },
-  add: (a, b) => parseInt(a, 10) + parseInt(b, 10),
+  add: (a, b) => parseInt(a) + parseInt(b),
 };
 
 // Register all helpers from the single source of truth
