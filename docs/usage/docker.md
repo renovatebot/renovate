@@ -301,14 +301,14 @@ Renovate will get the credentials with the [`google-auth-library`](https://www.n
 ```yaml title="Example for Workload Identity plus Renovate host rules"
 - name: authenticate to google cloud
   id: auth
-  uses: google-github-actions/auth@v2.1.12
+  uses: google-github-actions/auth@v3.0.0
   with:
     token_format: 'access_token'
     workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
     service_account: ${{ env.SERVICE_ACCOUNT }}
 
 - name: renovate
-  uses: renovatebot/github-action@v43.0.7
+  uses: renovatebot/github-action@v44.0.3
   env:
     RENOVATE_HOST_RULES: |
       [
@@ -342,6 +342,7 @@ If all your dependencies are on the Google Artifact Registry, you can base64 enc
 1. Download your JSON service account and store it on your machine. Make sure that the service account has `read` (and only `read`) permissions to your artifacts
 1. Base64 encode the service account credentials by running `cat service-account.json | base64`
 1. Add the encoded service account to your configuration file
+
    1. If you want to add it to your self-hosted configuration file:
 
       ```json
@@ -394,6 +395,7 @@ If you have dependencies on Google Container Registry (and Artifact Registry) yo
 
 1. Base64 encode the prefixed service account credentials by running `cat prefixed-service-account.json | base64`
 1. Add the prefixed and encoded service account to your configuration file
+
    1. If you want to add it to your self-hosted configuration file:
 
       ```json
@@ -477,7 +479,7 @@ Make sure to install the Google Cloud SDK into the custom image, as you need the
 For example:
 
 ```Dockerfile
-FROM renovate/renovate:41.61.1
+FROM renovate/renovate:42.11.0
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

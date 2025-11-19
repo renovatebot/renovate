@@ -1,10 +1,17 @@
 import { parsePkgAndParentSelector } from '@pnpm/parse-overrides';
-import is from '@sindresorhus/is';
+import {
+  isNonEmptyObject,
+  isNonEmptyString,
+  isNonEmptyStringAndNotWhitespace,
+  isObject,
+  isString,
+} from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../../../../../constants/error-messages';
 import { logger } from '../../../../../logger';
 import { regEx } from '../../../../../util/regex';
 import type { PackageDependency, PackageFileContent } from '../../../types';
 import type { NpmManagerData } from '../../types';
+import { loadPackageJson } from '../../utils';
 import type { NpmPackage, NpmPackageDependency } from '../types';
 import {
   extractDependency,
@@ -76,7 +83,7 @@ export function extractPackageJson(
           if (depName !== key) {
             dep.managerData = { key };
           }
-          if (depType === 'overrides' && !is.string(val)) {
+          if (depType === 'overrides' && !isString(val)) {
             // TODO: fix type #22198
             deps.push(
               ...extractOverrideDepsRec(
@@ -90,7 +97,7 @@ export function extractPackageJson(
             for (const [overridesKey, overridesVal] of Object.entries(
               val as unknown as NpmPackageDependency,
             )) {
-              if (is.string(overridesVal)) {
+              if (isString(overridesVal)) {
                 // Newer flat syntax: `parent>parent>child`
                 const packageName =
                   parsePkgAndParentSelector(overridesKey).targetPkg.name;
@@ -104,7 +111,7 @@ export function extractPackageJson(
                 // TODO: Is this expected? It's always 'overrides'.
                 dep.prettyDepType = depTypes[depName];
                 deps.push(dep);
-              } else if (is.object(overridesVal)) {
+              } else if (isObject(overridesVal)) {
                 // Older nested object syntax: `parent: { parent: { child: version } }`
                 deps.push(
                   ...extractOverrideDepsRec(
@@ -141,9 +148,22 @@ export function extractPackageJson(
     managerData: {
       packageJsonName,
       hasPackageManager:
-        is.nonEmptyStringAndNotWhitespace(packageJson.packageManager) ||
-        is.nonEmptyObject(packageJson.devEngines?.packageManager),
+        isNonEmptyStringAndNotWhitespace(packageJson.packageManager) ||
+        isNonEmptyObject(packageJson.devEngines?.packageManager),
       workspaces: packageJson.workspaces,
     },
   };
+}
+
+export async function hasPackageManager(
+  packageJsonDir: string,
+): Promise<boolean> {
+  logger.trace(`npm.hasPackageManager from package.json`);
+
+  const packageJsonResult = await loadPackageJson(packageJsonDir);
+
+  return (
+    isNonEmptyString(packageJsonResult?.packageManager?.name) &&
+    isNonEmptyString(packageJsonResult?.packageManager?.version)
+  );
 }

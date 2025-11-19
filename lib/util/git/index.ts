@@ -1,12 +1,12 @@
 import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
-import is from '@sindresorhus/is';
+import { isBoolean, isNonEmptyObject, isString } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import semver from 'semver';
 import type { Options, SimpleGit, TaskOptions } from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
 import upath from 'upath';
-import { configFileNames } from '../../config/app-strings';
+import { getConfigFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
@@ -25,8 +25,10 @@ import type { GitProtocol } from '../../types/git';
 import { incLimitedValue } from '../../workers/global/limits';
 import { getCache } from '../cache/repository';
 import { getEnv } from '../env';
+import { getChildEnv } from '../exec/utils';
 import { newlineRegex, regEx } from '../regex';
 import { matchRegexOrGlobList } from '../string-match';
+import { getGitEnvironmentVariables } from './auth';
 import { parseGitAuthor } from './author';
 import {
   getCachedBehindBaseResult,
@@ -368,6 +370,7 @@ export async function cloneSubmodules(
     return;
   }
   submodulesInitizialized = true;
+  const gitEnv = getChildEnv({ env: getGitEnvironmentVariables() });
   await syncGit();
   const submodules = await getSubmodules();
   for (const submodule of submodules) {
@@ -381,7 +384,7 @@ export async function cloneSubmodules(
     try {
       logger.debug(`Cloning git submodule at ${submodule}`);
       await gitRetry(() =>
-        git.submoduleUpdate(['--init', '--recursive', submodule]),
+        git.env(gitEnv).submoduleUpdate(['--init', '--recursive', submodule]),
       );
     } catch (err) {
       logger.warn({ err, submodule }, `Unable to initialise git submodule`);
@@ -529,7 +532,7 @@ export async function syncGit(): Promise<void> {
 }
 
 export async function getRepoStatus(path?: string): Promise<StatusResult> {
-  if (is.string(path)) {
+  if (isString(path)) {
     const localDir = GlobalConfig.get('localDir');
     const localPath = upath.resolve(localDir, path);
     if (!localPath.startsWith(upath.resolve(localDir))) {
@@ -551,7 +554,7 @@ export function branchExists(branchName: string): boolean {
 
 // Return the commit SHA for a branch
 export function getBranchCommit(branchName: string): LongCommitSha | null {
-  return config.branchCommits[branchName] || null;
+  return config.branchCommits?.[branchName] || null;
 }
 
 export async function getCommitMessages(): Promise<string[]> {
@@ -691,7 +694,7 @@ export async function getFileList(): Promise<string[]> {
   // submodules are starting with `160000 commit`
   return files
     .split(newlineRegex)
-    .filter(is.string)
+    .filter(isString)
     .filter((line) => line.startsWith('100'))
     .map((line) => line.split(regEx(/\t/)).pop()!);
 }
@@ -859,7 +862,7 @@ export async function isBranchConflicted(
     baseBranch,
     baseBranchSha,
   );
-  if (is.boolean(isConflicted)) {
+  if (isBoolean(isConflicted)) {
     logger.debug(
       `branch.isConflicted(): using cached result "${isConflicted}"`,
     );
@@ -1186,7 +1189,7 @@ export async function prepareCommit({
         try {
           /* v8 ignore next 2 -- TODO: add test */
           const addParams =
-            fileName === configFileNames[0] ? ['-f', fileName] : fileName;
+            fileName === getConfigFileNames()[0] ? ['-f', fileName] : fileName;
           await git.add(addParams);
           if (file.isExecutable) {
             await git.raw(['update-index', '--chmod=+x', fileName]);
@@ -1214,7 +1217,7 @@ export async function prepareCommit({
 
     const commitRes = await git.commit(message, [], commitOptions);
     if (
-      commitRes.summary &&
+      isNonEmptyObject(commitRes.summary) &&
       commitRes.summary.changes === 0 &&
       commitRes.summary.insertions === 0 &&
       commitRes.summary.deletions === 0

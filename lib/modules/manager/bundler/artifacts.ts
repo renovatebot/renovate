@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import {
   BUNDLER_INVALID_CREDENTIALS,
@@ -87,7 +87,7 @@ export async function updateArtifacts(
 
   const updatedDepNames: string[] = updatedDeps
     .map(({ depName }) => depName)
-    .filter(is.nonEmptyStringAndNotWhitespace);
+    .filter(isNonEmptyStringAndNotWhitespace);
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
@@ -113,7 +113,7 @@ export async function updateArtifacts(
         const deps = updatedDeps
           .filter((dep) => (dep.updateType ?? 'major') === updateType)
           .map((dep) => dep.depName)
-          .filter(is.string)
+          .filter(isString)
           .filter((dep) => dep !== 'ruby' && dep !== 'bundler');
         let additionalArgs = '';
         if (config.postUpdateOptions?.includes('bundlerConservative')) {

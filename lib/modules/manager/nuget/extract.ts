@@ -1,10 +1,11 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
+import * as semver from '../../versioning/semver';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -44,7 +45,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
     if (name === 'ContainerBaseImage') {
       const { depName, ...dep } = getDep(child.val, true);
 
-      if (is.nonEmptyStringAndNotWhitespace(depName)) {
+      if (isNonEmptyStringAndNotWhitespace(depName)) {
         results.push({ ...dep, depName, depType: 'docker' });
       }
     } else if (elemNames.has(name)) {
@@ -67,7 +68,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
         attr?.VersionOverride ??
         child.valueWithPath('VersionOverride');
 
-      if (!is.nonEmptyStringAndNotWhitespace(currentValue)) {
+      if (!isNonEmptyStringAndNotWhitespace(currentValue)) {
         dep.skipReason = 'invalid-version';
       }
 
@@ -186,6 +187,10 @@ export async function extractPackageFile(
         currentValue,
         datasource: NugetDatasource.id,
       };
+      if (isString(currentValue) && semver.isVersion(currentValue)) {
+        // This is to avoid nuget versioning pinning to [1.2.3]
+        dep.versioning = 'semver';
+      }
 
       applyRegistries(dep, registries);
 

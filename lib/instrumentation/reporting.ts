@@ -1,6 +1,6 @@
 import type { PutObjectCommandInput } from '@aws-sdk/client-s3';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
-import is from '@sindresorhus/is';
+import { isNullOrUndefined, isUndefined } from '@sindresorhus/is';
 import type { RenovateConfig } from '../config/types';
 import { getProblems, logger } from '../logger';
 import type { BranchCache } from '../util/cache/repository/types';
@@ -27,7 +27,7 @@ export function addBranchStats(
   config: RenovateConfig,
   branchesInformation: Partial<BranchCache>[],
 ): void {
-  if (is.nullOrUndefined(config.reportType)) {
+  if (isNullOrUndefined(config.reportType)) {
     return;
   }
 
@@ -39,7 +39,7 @@ export function addExtractionStats(
   config: RenovateConfig,
   extractResult: ExtractResult,
 ): void {
-  if (is.nullOrUndefined(config.reportType)) {
+  if (isNullOrUndefined(config.reportType)) {
     return;
   }
 
@@ -52,7 +52,7 @@ export function addLibYears(
   config: RenovateConfig,
   libYearsWithDepCount: LibYearsWithStatus,
 ): void {
-  if (is.nullOrUndefined(config.reportType)) {
+  if (isNullOrUndefined(config.reportType)) {
     return;
   }
 
@@ -79,7 +79,7 @@ export function finalizeReport(): void {
 
 export async function exportStats(config: RenovateConfig): Promise<void> {
   try {
-    if (is.nullOrUndefined(config.reportType)) {
+    if (isNullOrUndefined(config.reportType)) {
       return;
     }
 
@@ -97,7 +97,7 @@ export async function exportStats(config: RenovateConfig): Promise<void> {
 
     if (config.reportType === 's3') {
       const s3Url = parseS3Url(config.reportPath!);
-      if (is.nullOrUndefined(s3Url)) {
+      if (isNullOrUndefined(s3Url)) {
         logger.warn(
           { reportPath: config.reportPath },
           'Failed to parse s3 URL',
@@ -126,7 +126,7 @@ export function getReport(): Report {
 }
 
 function coerceRepo(repository: string): void {
-  if (!is.undefined(report.repositories[repository])) {
+  if (!isUndefined(report.repositories[repository])) {
     return;
   }
 

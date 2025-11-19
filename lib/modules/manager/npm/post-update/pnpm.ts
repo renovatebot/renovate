@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNumber, isNumericString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
@@ -108,10 +108,15 @@ export async function generateLockFile(
         args += ' --recursive';
       }
     }
-    if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
+    if (!GlobalConfig.get('allowScripts')) {
+      // If the admin disallows scripts, then neither scripts nor the pnpmfile should be run
       args += ' --ignore-scripts';
       args += ' --ignore-pnpmfile';
+    } else if (config.ignoreScripts) {
+      // If the admin allows scripts then always allow the pnpmfile
+      args += ' --ignore-scripts';
     }
+
     logger.trace({ args }, 'pnpm command options');
 
     const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
@@ -189,8 +194,8 @@ export async function getConstraintFromLockFile(
     // TODO: use schema (#9610)
     const pnpmLock = parseSingleYaml<PnpmLockFile>(lockfileContent);
     if (
-      !is.number(pnpmLock?.lockfileVersion) &&
-      !is.numericString(pnpmLock?.lockfileVersion)
+      !isNumber(pnpmLock?.lockfileVersion) &&
+      !isNumericString(pnpmLock?.lockfileVersion)
     ) {
       logger.trace(`Invalid pnpm lockfile version: ${lockFileName}`);
       return null;

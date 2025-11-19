@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined, isString } from '@sindresorhus/is';
 import type { PackageDependency } from '../../../types';
 import { TerraformProviderExtractor } from '../../base';
 import type {
@@ -17,14 +17,14 @@ export class RequiredProviderExtractor extends TerraformProviderExtractor {
     locks: ProviderLock[],
   ): PackageDependency[] {
     const terraformBlocks = hclRoot?.terraform;
-    if (is.nullOrUndefined(terraformBlocks)) {
+    if (isNullOrUndefined(terraformBlocks)) {
       return [];
     }
 
     const dependencies: PackageDependency[] = [];
     for (const terraformBlock of terraformBlocks) {
       const requiredProviders = terraformBlock.required_providers;
-      if (is.nullOrUndefined(requiredProviders)) {
+      if (isNullOrUndefined(requiredProviders)) {
         continue;
       }
 
@@ -33,7 +33,7 @@ export class RequiredProviderExtractor extends TerraformProviderExtractor {
       for (const [requiredProviderName, value] of entries) {
         // name = version declaration method
         let dep: PackageDependency;
-        if (is.string(value)) {
+        if (isString(value)) {
           dep = {
             currentValue: value,
             managerData: {

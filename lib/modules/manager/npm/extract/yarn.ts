@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { miscUtils, structUtils } from '@yarnpkg/core';
 import { parseSyml } from '@yarnpkg/parsers';
 import { logger } from '../../../../logger';
@@ -7,7 +7,11 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../../util/fs';
-import type { LockFile } from './types';
+import type { PackageFileContent } from '../../types';
+import type { YarnCatalogs } from '../schema';
+import type { NpmManagerData } from '../types';
+import { extractCatalogDeps } from './common/catalogs';
+import type { Catalog, LockFile } from './types';
 
 export async function getYarnLock(filePath: string): Promise<LockFile> {
   // TODO #22198
@@ -87,7 +91,7 @@ export function getZeroInstallPaths(yarnrcYml: string): string[] {
 
 export async function isZeroInstall(yarnrcYmlPath: string): Promise<boolean> {
   const yarnrcYml = await readLocalFile(yarnrcYmlPath, 'utf8');
-  if (is.string(yarnrcYml)) {
+  if (isString(yarnrcYml)) {
     const paths = getZeroInstallPaths(yarnrcYml);
     for (const p of paths) {
       if (await localPathExists(getSiblingFileName(yarnrcYmlPath, p))) {
@@ -120,4 +124,55 @@ export function getYarnVersionFromLock(lockfile: LockFile): string {
   }
 
   return '^2.0.0';
+}
+
+export async function extractYarnCatalogs(
+  catalogs: YarnCatalogs,
+  packageFile: string,
+  hasPackageManager: boolean,
+): Promise<PackageFileContent<NpmManagerData>> {
+  logger.trace(`yarn.extractYarnCatalogs(${packageFile})`);
+
+  const yarnCatalogs = yarnCatalogsToArray(catalogs);
+
+  const deps = extractCatalogDeps(yarnCatalogs, 'yarn');
+
+  let yarnLock: string | undefined;
+  const filePath = getSiblingFileName(packageFile, 'yarn.lock');
+
+  if (await localPathExists(filePath)) {
+    yarnLock = filePath;
+  }
+
+  return {
+    deps,
+    managerData: {
+      yarnLock,
+      hasPackageManager,
+    },
+  };
+}
+
+function yarnCatalogsToArray({
+  catalog: defaultCatalogDeps,
+  catalogs: namedCatalogs,
+}: YarnCatalogs): Catalog[] {
+  const result: Catalog[] = [];
+
+  if (defaultCatalogDeps !== undefined) {
+    result.push({ name: 'default', dependencies: defaultCatalogDeps });
+  }
+
+  if (!namedCatalogs) {
+    return result;
+  }
+
+  for (const [name, dependencies] of Object.entries(namedCatalogs)) {
+    result.push({
+      name,
+      dependencies,
+    });
+  }
+
+  return result;
 }

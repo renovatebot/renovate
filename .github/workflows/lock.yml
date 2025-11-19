@@ -9,6 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  discussions: write
   issues: write
   pull-requests: write
 
@@ -24,6 +25,7 @@ jobs:
         if: github.repository == 'renovatebot/renovate'
         with:
           github-token: ${{ github.token }}
+          discussion-inactive-days: 30
           issue-inactive-days: 30
           pr-inactive-days: 30
-          process-only: 'issues, prs'
+          process-only: 'issues, prs, discussions'

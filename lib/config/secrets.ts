@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isPlainObject } from '@sindresorhus/is';
 import type { InterpolatorOptions } from '../util/interpolator';
 import {
   replaceInterpolatedValuesInObject,
@@ -10,8 +10,8 @@ import type { AllConfig, RenovateConfig } from './types';
 
 const namePattern = '[A-Za-z][A-Za-z0-9_]*';
 const nameRegex = regEx(`^${namePattern}$`);
-const secretTemplateRegex = regEx(`{{ secrets\\.(${namePattern}) }}`);
-const variableTemplateRegex = regEx(`{{ variables\\.(${namePattern}) }}`);
+const secretTemplateRegex = regEx(`{{ secrets\\.(${namePattern}) }}`, 'g');
+const variableTemplateRegex = regEx(`{{ variables\\.(${namePattern}) }}`, 'g');
 
 export const options: Record<'secrets' | 'variables', InterpolatorOptions> = {
   secrets: {
@@ -33,7 +33,7 @@ function validateNestedInterpolatedValues<T extends 'secrets' | 'variables'>(
   validateInterpolatedValues(config[key], options[key]);
   if (config.repositories) {
     for (const repository of config.repositories) {
-      if (is.plainObject(repository)) {
+      if (isPlainObject(repository)) {
         validateInterpolatedValues(repository[key], options[key]);
       }
     }
@@ -66,7 +66,7 @@ export function applySecretsAndVariablesToConfig(
   const variables = applyConfig.variables ?? config.variables;
 
   // Add all secrets to be sanitized
-  if (is.plainObject(secrets)) {
+  if (isPlainObject(secrets)) {
     for (const secret of Object.values(secrets)) {
       addSecretForSanitizing(secret);
     }

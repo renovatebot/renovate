@@ -19,6 +19,7 @@ vi.mock('../../../modules/platform', () => ({
   platform: { initRepo: vi.fn() },
   getPlatformList: vi.fn(),
 }));
+vi.unmock('../../../util/mutex');
 
 const apis = vi.mocked(_apis);
 const config = vi.mocked(_config);
@@ -60,10 +61,12 @@ describe('workers/repository/init/index', () => {
         partial<RenovateConfig>(),
       );
       await initRepo({});
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { platform: undefined },
         "Configuration option 'filterUnavailableUsers' is not supported on the current platform.",
       );
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { platform: undefined },
         "Configuration option 'expandCodeOwnersGroups' is not supported on the current platform.",

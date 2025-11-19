@@ -1,5 +1,5 @@
 // TODO #22198
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -29,7 +29,7 @@ async function lookup(
 
   dep.updates = [];
 
-  if (is.string(dep.depName)) {
+  if (isString(dep.depName)) {
     dep.depName = dep.depName.trim();
   }
 
@@ -39,7 +39,7 @@ async function lookup(
     return Result.ok(dep);
   }
 
-  if (!is.nonEmptyString(dep.packageName)) {
+  if (!isNonEmptyString(dep.packageName)) {
     dep.skipReason = 'invalid-name';
     return Result.ok(dep);
   }
@@ -76,12 +76,19 @@ async function lookup(
   }
 
   return LookupStats.wrap(depConfig.datasource, async () => {
+    const { packageFile, manager } = packageFileConfig;
     return await Result.wrap(lookupUpdates(depConfig as LookupUpdateConfig))
       .onValue((dep) => {
-        logger.trace({ dep }, 'Dependency lookup success');
+        logger.trace(
+          { dep, packageFile, manager },
+          'Dependency lookup success',
+        );
       })
       .onError((err) => {
-        logger.trace({ err, depName }, 'Dependency lookup error');
+        logger.trace(
+          { err, depName, packageFile, manager },
+          'Dependency lookup error',
+        );
       })
       .catch((err): Result<UpdateResult, Error> => {
         if (
@@ -132,7 +139,10 @@ async function fetchManagerPackagerFileUpdates(
   );
 
   pFile.deps = await p.all(queue);
-  logger.trace({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
+  logger.trace(
+    { manager, packageFile },
+    'fetchManagerPackagerFileUpdates finished',
+  );
 }
 
 async function fetchManagerUpdates(

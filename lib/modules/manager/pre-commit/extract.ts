@@ -1,6 +1,10 @@
-import is from '@sindresorhus/is';
 import type { Document } from 'yaml';
 import { isMap, isScalar, isSeq } from 'yaml';
+import {
+  isEmptyObject,
+  isNonEmptyObject,
+  isPlainObject,
+} from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { detectPlatform } from '../../../util/common';
@@ -52,7 +56,7 @@ function determineDatasource(
   }
   const hostUrl = 'https://' + hostname;
   const res = find({ url: hostUrl });
-  if (is.emptyObject(res)) {
+  if (isEmptyObject(res)) {
     // 1 check, to possibly prevent 3 failures in combined query of hostType & url.
     logger.debug(
       { repository, hostUrl },
@@ -64,7 +68,7 @@ function determineDatasource(
     ['github', GithubTagsDatasource.id],
     ['gitlab', GitlabTagsDatasource.id],
   ]) {
-    if (is.nonEmptyObject(find({ hostType, url: hostUrl }))) {
+    if (isNonEmptyObject(find({ hostType, url: hostUrl }))) {
       logger.debug(
         { repository, hostUrl, hostType },
         `Provided hostname matches a ${hostType} hostrule.`,
@@ -78,6 +82,8 @@ function determineDatasource(
   );
   return { skipReason: 'unknown-registry', registryUrls: [hostname] };
 }
+
+const gitUrlRegex = regEx(/\.git$/i);
 
 function extractDependency(
   tag: string,
@@ -111,7 +117,7 @@ function extractDependency(
     const match = urlMatcher.exec(repository);
     if (match?.groups) {
       const hostname = match.groups.hostname;
-      const depName = match.groups.depName.replace(regEx(/\.git$/i), ''); // TODO 12071
+      const depName = match.groups.depName.replace(gitUrlRegex, '');
       const sourceDef = determineDatasource(repository, hostname);
       const dep: PackageDependency = {
         ...sourceDef,
@@ -250,7 +256,7 @@ export function extractPackageFile(
     );
     return null;
   }
-  if (!is.plainObject<Record<string, unknown>>(parsedContent)) {
+  if (!isPlainObject<Record<string, unknown>>(parsedContent)) {
     logger.debug(
       { packageFile },
       `Parsing of pre-commit config YAML returned invalid result`,

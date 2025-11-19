@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import type {
   ExtractConfig,
@@ -43,7 +43,7 @@ export async function extractPackageFile(
 
   const dependencies: PackageDependency[] = [];
   const hclMap = await hcl.parseHCL(content, packageFile);
-  if (is.nullOrUndefined(hclMap)) {
+  if (isNullOrUndefined(hclMap)) {
     logger.debug({ packageFile }, 'failed to parse HCL file');
     return null;
   }

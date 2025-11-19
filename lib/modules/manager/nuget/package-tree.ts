@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { Graph, hasCycle } from 'graph-data-structure';
 import upath from 'upath';
 import { logger } from '../../../logger';
@@ -59,7 +59,7 @@ export async function getDependentPackageFiles(
       .map((ig) => ig.childrenNamed('ProjectReference'))
       .flat()
       .map((pf) => pf.attr.Include)
-      .filter(is.nonEmptyString);
+      .filter(isNonEmptyString);
 
     const projectReferences = projectReferenceAttributes.map((a) =>
       upath.normalize(a),

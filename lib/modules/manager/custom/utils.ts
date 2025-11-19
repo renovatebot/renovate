@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import type { PackageDependency } from '../types';
 
@@ -26,11 +26,11 @@ export function isValidDependency({
 }: PackageDependency): boolean {
   // check if all the fields are set
   return (
-    (is.nonEmptyStringAndNotWhitespace(depName) ||
-      is.nonEmptyStringAndNotWhitespace(packageName)) &&
-    (is.nonEmptyStringAndNotWhitespace(currentDigest) ||
-      is.nonEmptyStringAndNotWhitespace(currentValue)) &&
-    is.nonEmptyStringAndNotWhitespace(datasource)
+    (isNonEmptyStringAndNotWhitespace(depName) ||
+      isNonEmptyStringAndNotWhitespace(packageName)) &&
+    (isNonEmptyStringAndNotWhitespace(currentDigest) ||
+      isNonEmptyStringAndNotWhitespace(currentValue)) &&
+    isNonEmptyStringAndNotWhitespace(datasource)
   );
 }
 

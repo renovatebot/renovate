@@ -21,6 +21,9 @@ You can store your Renovate configuration file in one of these locations:
 1. `.renovaterc.json5`
 1. `package.json` _(within a `"renovate"` section)_
 
+Or in a custom file present within the [`configFileNames`](./self-hosted-configuration.md#configfilenames).
+The bot first checks all the files in the `configFileNames` array before checking from the above file list.
+
 <!-- prettier-ignore -->
 !!! warning
     Storing the Renovate configuration in a `package.json` file is deprecated and support may be removed in the future.
@@ -368,6 +371,8 @@ Renovate also allows users to explicitly configure `baseBranchPatterns`, e.g. fo
 It's possible to add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR.
 If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch(es) instead of default.
 
+Also, check [useBaseBranchConfig](#usebasebranchconfig) if you want to configure different configuration for each base branch.
+
 The simplest approach is exact matches, e.g. `["main", "dev"]`.
 `baseBranchPatterns` also supports Regular Expressions that must begin and end with `/`, e.g.:
 
@@ -593,6 +598,14 @@ All messages are prefixed with `bumpVersions` or `bumpVersions(<name>)` to help 
   ]
 }
 ```
+
+**short versions**
+
+It's possible to bump short versions:
+
+- `1` -> `2` (major)
+- `1.1` -> `2.0` (major)
+- `1.2` -> `1.3` (minor)
 
 ### bumpType
 
@@ -1189,6 +1202,7 @@ But the second custom manager will upgrade both definitions as its first `matchS
       "datasourceTemplate": "docker"
     },
     {
+      "customType": "regex",
       "managerFilePatterns": ["/^example.json$/"],
       "matchStringsStrategy": "recursive",
       "matchStrings": [
@@ -1244,6 +1258,7 @@ Matched group values will be merged to form a single dependency.
       "datasourceTemplate": "docker"
     },
     {
+      "customType": "regex",
       "managerFilePatterns": ["/^main.yml$/"],
       "matchStringsStrategy": "combination",
       "matchStrings": [
@@ -1414,6 +1429,33 @@ If you want to approve _specific_ packages, set `dependencyDashboardApproval` to
 ## dependencyDashboardAutoclose
 
 You can configure this to `true` if you prefer Renovate to close an existing Dependency Dashboard whenever there are no outstanding PRs left.
+
+## dependencyDashboardCategory
+
+You can use this to categorize updates on the Dependency Dashboard.
+For example, to visually distinguish between production and dev updates, or to split between teams or logical parts of a monorepo.
+In practice this means it introduces an extra level of hierarchy/heading in the Dashboard's markdown.
+
+To create a category for all CI/CD updates, you can configure a package rule like this:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchCategories": ["cd", "ci"],
+      "dependencyDashboardCategory": ":hammer_and_wrench: Continuous Integration & Continuous Deployment"
+    }
+  ]
+}
+```
+
+When you configure categories, updates that do not match any of the configured categories will be grouped under the "Other" category.
+
+Some sections in the Dependency Dashboard also contain an action that applies to all updates in that section, such as to approve or rebase all updates.
+If there are categories in that section, the action will be put in an extra "All" category at the end of the section.
+This is to explicitly clarify that the action applies to all updates in the section, not to just a specific category.
+
+The Dependency Dashboard categories are only used to visually organize updates within the Dependency Dashboard issue. They do not impact grouping of updates into a single update like how e.g. `branchName` and `groupName` do.
 
 ## dependencyDashboardFooter
 
@@ -2372,16 +2414,6 @@ If you are extending from the popular `config:recommended` preset then it adds i
 Set this to `true` if running plugins causes problems.
 Applicable for Composer only for now.
 
-## ignorePrAuthor
-
-This is usually needed if someone needs to migrate bot accounts, including from the Mend Renovate App to self-hosted.
-An additional use case is for GitLab users of project or group access tokens who need to rotate them.
-
-If `ignorePrAuthor` is configured to true, it means Renovate will fetch the entire list of repository PRs instead of optimizing to fetch only those PRs which it created itself.
-You should only want to enable this if you are changing the bot account (e.g. from `@old-bot` to `@new-bot`) and want `@new-bot` to find and update any existing PRs created by `@old-bot`.
-
-Setting this field to `true` in Github or GitLab will also mean that all Issues will be fetched instead of only those by the bot itself.
-
 ## ignorePresets
 
 Use this if you are extending a complex preset but don't want to use every "sub preset" that it includes.
@@ -2686,9 +2718,14 @@ Example:
 
 ## minimumReleaseAge
 
-This feature used to be called `stabilityDays`.
+`minimumReleaseAge` is a feature that requires Renovate to wait for a specified amount of time before suggesting a dependency update.
 
-If `minimumReleaseAge` is set to a time duration _and_ the update has a release timestamp header, then Renovate will check if the set duration has passed.
+<!-- prettier-ignore -->
+!!! note
+    Minimum Release Age has [a separate documentation page](./key-concepts/minimum-release-age.md) for more in-depth documentation about the functionality.
+    This also includes documentation that was previously in this section, regarding how to specify release timestamps for custom registries.
+
+If `minimumReleaseAge` is set to a time duration _and_ the update has a release timestamp header, then Renovate will check if the set duration has passed. This behaviour can be changed using [`minimumReleaseAgeBehaviour`](#minimumreleaseagebehaviour).
 
 Note: Renovate will wait for the set duration to pass for each **separate** version.
 Renovate does not wait until the package has seen no releases for x time-duration(`minimumReleaseAge`).
@@ -2700,23 +2737,10 @@ When the time passed since the release is _less_ than the set `minimumReleaseAge
 After enough days have passed: Renovate replaces the "pending" status with a "passing" status check.
 
 The datasource that Renovate uses must have a release timestamp for the `minimumReleaseAge` config option to work.
-Some datasources may have a release timestamp, but in a format that's Renovate does not support.
+Some datasources may have a release timestamp, but in a format Renovate does not support.
 In those cases a feature request needs to be implemented.
 
-<!-- prettier-ignore -->
-!!! warning "Warning for Maven users"
-    For `minimumReleaseAge` to work, the Maven source must return reliable `last-modified` headers.
-
-    <!-- markdownlint-disable MD046 -->
-    If your custom Maven source registry is **pull-through** and does _not_ support the `last-modified` header, like GAR (Google Artifact Registry's Maven implementation) then you can extend the Maven source registry URL with `https://repo1.maven.org/maven2` as the first item. Then the `currentVersionTimestamp` via `last-modified` will be taken from Maven central for public dependencies.
-
-    ```json
-    "registryUrls": [
-      "https://repo1.maven.org/maven2",
-      "https://europe-maven.pkg.dev/org-artifacts/maven-virtual"
-    ],
-    ```
-    <!-- markdownlint-enable MD046 -->
+You can confirm if your datasource supports the release timestamp by viewing [the documentation for the given datasource](./modules/datasource/index.md).
 
 <!-- prettier-ignore -->
 !!! note
@@ -2728,7 +2752,7 @@ Examples of how you can use `minimumReleaseAge`:
 
 #### Suppress branch/PR creation for X days
 
-If you use `minimumReleaseAge=3 days` and `internalChecksFilter="strict"` then Renovate only creates branches when 3 (or more days) have passed since the version was released.
+If you use `minimumReleaseAge=3 days`, `prCreation="not-pending"` and `internalChecksFilter="strict"` then Renovate only creates branches when 3 (or more days) have passed since the version was released.
 We recommend you set `dependencyDashboard=true`, so you can see these pending PRs.
 
 #### Prevent holding broken npm packages
@@ -2749,12 +2773,24 @@ Set `minimumReleaseAge` to `3 days` for npm packages to prevent relying on a pac
 
 #### Await X time duration before Automerging
 
-If you enable `automerge` _and_ `minimumReleaseAge`, Renovate will create PRs immediately, but only automerge them when the `minimumReleaseAge` time-duration has passed.
+If you enable `automerge` _and_ `minimumReleaseAge`, Renovate Renovate will create PRs immediately, but only automerge them when the `minimumReleaseAge` time-duration has passed.
+
+It's recommended to also apply `prCreation="not-pending"` and `internalChecksFilter="strict"` to make sure that branches and PRs are only created after the `minimumReleaseAge` has passed.
 
 Renovate adds a "renovate/stability-days" pending status check to each branch/PR.
 This pending check prevents the branch going green to automerge before the time has passed.
 
 <!-- markdownlint-enable MD001 -->
+
+## minimumReleaseAgeBehaviour
+
+When `minimumReleaseAge` is set to a time duration, the `minimumReleaseAgeBehaviour` will be used to control whether the release timestamp is required.
+
+When set to `timestamp-required`, this version is not treated stable unless there is release timestamp, and that release timestamp is past the [`minimumReleaseAge`](#minimumreleaseage).
+
+When set to `timestamp-optional`, Renovate will treat a release without a releaseTimestamp as stable.
+
+This only applies when used with [`minimumReleaseAge`](#minimumreleaseage).
 
 ## minor
 
@@ -2817,6 +2853,8 @@ Renovate only queries the OSV database for dependencies that use one of these da
 - [`packagist`](./modules/datasource/packagist/index.md)
 - [`pypi`](./modules/datasource/pypi/index.md)
 - [`rubygems`](./modules/datasource/rubygems/index.md)
+
+The entire database is downloaded locally by [renovate-offline](https://github.com/renovatebot/osv-offline) and queried offline.
 
 ## packageRules
 
@@ -3592,7 +3630,7 @@ Here's an example of how you would define PR priority so that `devDependencies` 
 ### replacementName
 
 This config option only works with some managers.
-We're working to support more managers, subscribe to issue [renovatebot/renovate#14149](https://github.com/renovatebot/renovate/issues/14149) to follow our progress.
+We're working to support more managers, subscribe to issue [renovatebot/renovate#24883](https://github.com/renovatebot/renovate/discussions/24883) to follow our progress.
 
 Managers which do not support replacement:
 
@@ -3779,7 +3817,7 @@ For example, GitHub might automerge a Renovate branch even if it's behind the ba
 
 Please check platform specific docs for version requirements.
 
-To learn how to use GitHub's Merge Queue feature with Renovate, read our [Key Concepts, Automerge, GitHub Merge Queue](./key-concepts/automerge.md#github-merge-queue) docs.
+To learn how to use GitHub's Merge Queue feature with Renovate, read our [GitHub Merge Queue](./key-concepts/automerge.md#github-merge-queue) docs.
 
 ## platformCommit
 
@@ -3812,18 +3850,18 @@ Table with options:
 | `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                          |
 | `kustomizeInflateHelmCharts` | Inflate updated helm charts referenced in the kustomization.                                                                                               |
 | `npmDedupe`                  | Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.                                       |
+| `npmInstallTwice`            | Run `npm install` commands _twice_ to work around bugs where `npm` generates invalid lock files if run only once                                           |
 | `pnpmDedupe`                 | Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.                                                                                         |
 | `yarnDedupeFewer`            | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
 | `yarnDedupeHighest`          | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
 
 ## postUpgradeTasks
 
-<!-- prettier-ignore -->
-!!! note
-    Post-upgrade tasks can only be used on self-hosted Renovate instances.
-
 Post-upgrade tasks are commands that are executed by Renovate after a dependency has been updated but before the commit is created.
 The intention is to run any other command line tools that would modify existing files or generate new files when a dependency changes.
+
+Post-upgrade tasks are blocked by default for security reasons, so the admin of Renovate needs to choose whether to allow specific commands or any commands to be run - it depends on how much they trust their users in repos.
+In Mend-hosted Renovate apps, commands remain blocked by default but can be allowed on-request for any paying ("Renovate Enterprise" or Mend Appsec) customers or trusted OSS repositories - please reach out if so.
 
 Each command must match at least one of the patterns defined in `allowedCommands` (a global-only configuration option) in order to be executed.
 If the list of allowed tasks is empty then no tasks will be executed.
@@ -3890,6 +3928,20 @@ Dotfiles are included.
 
 Optional field which defaults to any non-ignored file in the repo (`**/*` glob pattern).
 Specify a custom value for this if you wish to exclude certain files which are modified by your `postUpgradeTasks` and you don't want committed.
+
+### workingDirTemplate
+
+A template describing the working directory in which the commands should be executed, relative to the repository root. If the template evaluates to a false value, then the command will be executed from the root of the repository.
+Example:
+
+```json
+{
+  "postUpgradeTasks": {
+    "commands": ["my-script.py"],
+    "workingDirTemplate": "{{{packageFileDir}}}"
+  }
+}
+```
 
 ## prBodyColumns
 
@@ -4100,7 +4152,7 @@ Behavior:
 - `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, and update nothing otherwise
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
-- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `cargo`, `composer`, `gleam`, `npm`, `yarn`, `pnpm`, `terraform` and `poetry` so far
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `cargo`, `composer`, `gleam`, `npm`, `yarn`, `pnpm`, `terraform`, `poetry` and `uv` so far
 - `in-range-only` = Update the lock file when in-range updates are available, ignore package file updates
 
 Renovate's `"auto"` strategy works like this for npm:
@@ -4179,6 +4231,7 @@ This feature works with the following managers:
 - [`ansible`](modules/manager/ansible/index.md)
 - [`bitbucket-pipelines`](modules/manager/bitbucket-pipelines/index.md)
 - [`circleci`](modules/manager/circleci/index.md)
+- [`crow`](modules/manager/crow/index.md)
 - [`docker-compose`](modules/manager/docker-compose/index.md)
 - [`dockerfile`](modules/manager/dockerfile/index.md)
 - [`droneci`](modules/manager/droneci/index.md)
@@ -4249,6 +4302,12 @@ For `npm` manager when `replacementApproach=alias` then instead of replacing `"f
 
 Similar to `ignoreUnstable`, this option controls whether to update to versions that are greater than the version tagged as `latest` in the repository.
 By default, `renovate` will update to a version greater than `latest` only if the current version is itself past latest.
+
+<!-- prettier-ignore -->
+!!! note
+    By default, respectLatest will be set to `false` for Maven results if a `latest` tag is found.
+    This is because many Maven registries don't have a reliable `latest` tag - it just means whatever was last published.
+    You need to override this to `respectLatest=true` in `packageRules` in order to use it.
 
 ## reviewers
 
@@ -4643,7 +4702,7 @@ In the below `renovate.json` extract example, Renovate will use the `docker` ver
 {
   "packageRules": [
     {
-      "matchPackageFileNames": [".gitlab-ci.yml"],
+      "matchFileNames": [".gitlab-ci.yml"],
       "versioning": "docker"
     }
   ]
@@ -4675,7 +4734,7 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
   "vulnerabilityAlerts": {
     "labels": ["security"],
     "automerge": true,
-    "assignees": ["@rarkins"]
+    "assignees": ["@renovate-tests"]
   }
 }
 ```

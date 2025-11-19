@@ -1,5 +1,5 @@
 import { setTimeout } from 'timers/promises';
-import is from '@sindresorhus/is';
+import { isArray } from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
 import {
@@ -438,7 +438,7 @@ export async function getBranchStatus(
 
   const branchStatuses = await getStatus(branchName);
   /* v8 ignore start */
-  if (!is.array(branchStatuses)) {
+  if (!isArray(branchStatuses)) {
     logger.warn(
       { branchName, branchStatuses },
       'Empty or unexpected branch statuses',
@@ -1026,7 +1026,7 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
       paginate: true,
     });
     /* v8 ignore start */
-    if (!is.array(res.body)) {
+    if (!isArray(res.body)) {
       logger.warn({ responseBody: res.body }, 'Could not retrieve issue list');
       return [];
     } /* v8 ignore stop */

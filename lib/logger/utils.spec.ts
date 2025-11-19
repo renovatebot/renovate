@@ -38,7 +38,7 @@ describe('logger/utils', () => {
     expect(() => {
       validateLogLevel(input, 'info');
     }).toThrow();
-    expect(mockExit).toHaveBeenCalledWith(1);
+    expect(mockExit).toHaveBeenCalledExactlyOnceWith(1);
   });
 
   it.each`

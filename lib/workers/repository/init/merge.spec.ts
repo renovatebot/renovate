@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import type { MockInstance } from 'vitest';
 import * as decrypt from '../../../config/decrypt';
 import { getConfig } from '../../../config/defaults';
@@ -76,6 +76,7 @@ describe('workers/repository/init/merge', () => {
       scm.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       expect(await detectRepoFileConfig()).toEqual({});
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Existing config file no longer exists',
       );
@@ -550,7 +551,7 @@ describe('workers/repository/init/merge', () => {
           const [exitMock] = mockProcessExitOnce();
           let configFileName: string | undefined;
 
-          if (!is.nullOrUndefined(staticConfig)) {
+          if (!isNullOrUndefined(staticConfig)) {
             configFileName = 'static_config.json5';
             fs.readSystemFile.mockResolvedValueOnce(
               JSON.stringify(staticConfig),
@@ -585,8 +586,7 @@ describe('workers/repository/init/merge', () => {
             resolveStaticRepoConfig({}, 'static_config.json'),
           ).rejects.toThrow(error);
 
-          expect(exitMock).toHaveBeenCalledOnce();
-          expect(exitMock).toHaveBeenCalledWith(1);
+          expect(exitMock).toHaveBeenCalledExactlyOnceWith(1);
         });
 
         it('should log static config validation errors and warnings', async () => {
@@ -600,7 +600,8 @@ describe('workers/repository/init/merge', () => {
           );
 
           expect(resolved).toStrictEqual(invalidConfig);
-          expect(logger.logger.info).toHaveBeenCalledExactlyOnceWith(
+
+          expect(logger.logger.info).toHaveBeenCalledWith(
             {
               errors: [
                 {

@@ -1,8 +1,10 @@
 import type { MaybePromise, Nullish } from '../../types';
-import type { RenovateConfig } from '../types';
+import type { RenovateConfig, RepoGlobalConfig } from '../types';
 
 // TODO: Proper typing
 export type Preset = RenovateConfig & Record<string, unknown>;
+
+export type GlobalPreset = RepoGlobalConfig & Preset;
 
 export interface PresetConfig {
   repo: string;

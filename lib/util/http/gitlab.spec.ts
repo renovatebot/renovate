@@ -53,6 +53,7 @@ describe('util/http/gitlab', () => {
       paginate: true,
     });
     expect(res.body).toHaveLength(4);
+
     expect(logger.logger.warn).toHaveBeenCalledWith(
       { err: expect.any(Error) },
       'Pagination error',

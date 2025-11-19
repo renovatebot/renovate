@@ -1,7 +1,7 @@
 import type { ChildProcess } from 'node:child_process';
 import { spawn } from 'node:child_process';
 import type { Readable } from 'node:stream';
-import is from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { getEnv } from '../env';
 import type { ExecErrorData } from './exec-error';
 import { ExecError } from './exec-error';
@@ -68,7 +68,7 @@ function registerDataListeners(
   readable: Readable | null,
   dataListeners: DataListener[] | undefined,
 ): void {
-  if (is.nullOrUndefined(readable) || is.nullOrUndefined(dataListeners)) {
+  if (isNullOrUndefined(readable) || isNullOrUndefined(dataListeners)) {
     return;
   }
 

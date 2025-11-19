@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { readLocalFile } from '../../../util/fs';
@@ -130,7 +130,7 @@ function resolveHelmRepository(
           return repo.spec.url;
         }
       })
-      .filter(is.string);
+      .filter(isString);
 
     // if registryUrls is empty, delete it from dep
     if (!dep.registryUrls?.length) {

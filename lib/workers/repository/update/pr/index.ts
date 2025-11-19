@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isNonEmptyArray, isNumber } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import {
@@ -96,7 +96,7 @@ export function updatePrDebugData(
   // When to add:
   // 1. Add it when a new PR is created, i.e., when debugData is undefined.
   // 2. Add it if an existing PR already has labels in the debug data, confirming that we can update its labels.
-  if (!debugData || is.array(debugData.labels)) {
+  if (!debugData || isArray(debugData.labels)) {
     updatedPrDebugData.labels = labels;
   }
 
@@ -105,8 +105,8 @@ export function updatePrDebugData(
 
 function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
   if (
-    is.nonEmptyArray(config.ignoreReviewers) &&
-    is.nonEmptyArray(pr.reviewers)
+    isNonEmptyArray(config.ignoreReviewers) &&
+    isNonEmptyArray(pr.reviewers)
   ) {
     const ignoreReviewers = new Set(config.ignoreReviewers);
     return (
@@ -114,7 +114,39 @@ function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
       0
     );
   }
-  return is.nonEmptyArray(pr.reviewers);
+  return isNonEmptyArray(pr.reviewers);
+}
+
+function addPullRequestNoteIfAttestationHasBeenLost(
+  upgrade: BranchUpgradeConfig,
+): void {
+  const { packageName, depName, currentVersion, newVersion } = upgrade;
+  const name = packageName ?? depName;
+
+  const currentRelease = upgrade.releases?.find(
+    (release) => release.version === currentVersion,
+  );
+  const newRelease = upgrade.releases?.find(
+    (release) => release.version === newVersion,
+  );
+
+  if (
+    currentRelease &&
+    newRelease &&
+    currentRelease.attestation === true &&
+    newRelease.attestation !== true
+  ) {
+    upgrade.prBodyNotes ??= [];
+    upgrade.prBodyNotes.push(
+      [
+        '> :exclamation: **Warning**',
+        '>',
+        `> ${name} ${currentVersion} was released with an attestation, but ${newVersion} has no attestation.`,
+        `> Verify that release ${newVersion} was published by the expected author.`,
+        '\n',
+      ].join('\n'),
+    );
+  }
 }
 
 // Ensures that PR exists with matching title/body
@@ -141,7 +173,7 @@ export async function ensurePr(
   // Check if PR already exists
   const existingPr =
     (await platform.getBranchPr(branchName, config.baseBranch)) ??
-    (await tryReuseAutoclosedPr(branchName));
+    (await tryReuseAutoclosedPr(branchName, prTitle));
   const prCache = getPrCache(branchName);
   if (existingPr) {
     logger.debug('Found existing PR');
@@ -180,13 +212,13 @@ export async function ensurePr(
       if (
         config.stabilityStatus !== 'yellow' &&
         (await getBranchStatus()) === 'yellow' &&
-        is.number(config.prNotPendingHours)
+        isNumber(config.prNotPendingHours)
       ) {
         logger.debug('Checking how long this branch has been pending');
         const lastCommitTime = await getBranchLastCommitTime(branchName);
         if (getElapsedHours(lastCommitTime) >= config.prNotPendingHours) {
           logger.debug(
-            'Branch exceeds prNotPending hours - forcing PR creation',
+            `Branch exceeds prNotPending=${config.prNotPendingHours}, hours - forcing PR creation`,
           );
           config.forcePr = true;
         }
@@ -219,11 +251,11 @@ export async function ensurePr(
         if (
           !dependencyDashboardCheck &&
           ((config.stabilityStatus && config.stabilityStatus !== 'yellow') ||
-            (is.number(config.prNotPendingHours) &&
+            (isNumber(config.prNotPendingHours) &&
               elapsedHours < config.prNotPendingHours))
         ) {
           logger.debug(
-            `Branch is ${elapsedHours} hours old - skipping PR creation`,
+            `Branch is ${elapsedHours} hours old - skipping PR creation as prNotPendingHours is set to ${config.prNotPendingHours}`,
           );
           return {
             type: 'without-pr',
@@ -290,8 +322,7 @@ export async function ensurePr(
         }
       } else if (logJSON.error === 'MissingGithubToken') {
         upgrade.prBodyNotes ??= [];
-        upgrade.prBodyNotes = [
-          ...upgrade.prBodyNotes,
+        upgrade.prBodyNotes.push(
           [
             '> :exclamation: **Important**',
             '> ',
@@ -299,9 +330,12 @@ export async function ensurePr(
             '> If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).',
             '\n',
           ].join('\n'),
-        ];
+        );
       }
     }
+
+    addPullRequestNoteIfAttestationHasBeenLost(upgrade);
+
     config.upgrades.push(upgrade);
   }
 

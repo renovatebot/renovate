@@ -8,9 +8,23 @@
 
 ## Context
 
-<!-- Describe why you're making these changes if it's not already explained in a corresponding issue. -->
-<!-- If you're closing an existing issue with this pull request, use the keyword Closes #issue_number. -->
-<!-- If you're referencing an issue with this pull request, put it in a Markdown list like this: - #issue_number. -->
+Please select one of the following:
+
+- [ ] This closes an existing Issue, Closes: #
+- [ ] This doesn't close an Issue, but I accept the risk that this PR may be closed if maintainers disagree with its opening or implementation
+
+## AI assistance disclosure
+
+<!-- We request this information to assist reviewers in identifying AI-generated errors and other issues specific to AI usage. While we typically permit the use of AI tools, we appreciate being notified when they are employed. -->
+
+Did you use AI tools to create any part of this pull request?
+
+Please select one option and, if yes, briefly describe how AI was used (e.g., code, tests, docs) and which tool(s) you used.
+
+- [ ] No — I did not use AI for this contribution.
+- [ ] Yes — minimal assistance (e.g., IDE autocomplete, small code completions, grammar fixes).
+- [ ] Yes — substantive assistance (AI-generated non‑trivial portions of code, tests, or documentation).
+- [ ] Yes — other (please describe):
 
 ## Documentation (please check one with an [x])
 
@@ -23,10 +37,12 @@ I have verified these changes via:
 
 - [ ] Code inspection only, or
 - [ ] Newly added/modified unit tests, or
-- [ ] No unit tests but ran on a real repository, or
+- [ ] No unit tests, but ran on a real repository, or
 - [ ] Both unit tests + ran on a real repository
 
-<!-- Do you have any suggestions about this PR template? Edit it here: https://github.com/renovatebot/renovate/edit/main/.github/pull_request_template.md -->
+The public repository: <URL>
+
+<!-- If you have any suggestions about this PR template, edit it here: https://github.com/renovatebot/renovate/edit/main/.github/pull_request_template.md -->
 
 <!-- Please do not force push to your PR's branch after you have created your PR, as doing so forces us to review the whole PR again. This makes it harder for us to review your work because we don't know what has changed. -->
-<!-- PRs will always be squashed by us when we merge your work. Commit as many times as you need in this branch. -->
+<!-- PRs will always be squashed by us when we merge your work. You can commit as many times as you need in this branch. -->

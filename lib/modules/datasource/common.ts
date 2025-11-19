@@ -1,4 +1,7 @@
-import is from '@sindresorhus/is';
+import {
+  isNonEmptyArray,
+  isNonEmptyStringAndNotWhitespace,
+} from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { filterMap } from '../../util/filter-map';
 import { regEx } from '../../util/regex';
@@ -44,10 +47,10 @@ export function isGetPkgReleasesConfig(
   input: unknown,
 ): input is GetPkgReleasesConfig {
   return (
-    is.nonEmptyStringAndNotWhitespace(
+    isNonEmptyStringAndNotWhitespace(
       (input as GetPkgReleasesConfig).datasource,
     ) &&
-    is.nonEmptyStringAndNotWhitespace(
+    isNonEmptyStringAndNotWhitespace(
       (input as GetPkgReleasesConfig).packageName,
     )
   );
@@ -203,7 +206,7 @@ export function applyConstraintsFiltering<
       }
 
       const constraint = releaseConstraints[name];
-      if (!is.nonEmptyArray(constraint)) {
+      if (!isNonEmptyArray(constraint)) {
         // A release with no constraints is OK
         continue;
       }

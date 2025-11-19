@@ -1,10 +1,10 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { isComment } from './common';
 
 const regex = regEx(
-  `(?<name>[-_a-zA-Z0-9]+)/(?<version>[^@#\n{*"']+)(?<userChannel>@[-_a-zA-Z0-9]+(?:/[^#\n.{*"' ]+|))?#?(?<revision>[-_a-f0-9]+[^\n{*"'])?`,
+  `(?:^|["'])(?<name>[-\\w]+)/(?<version>[^@#\n{*"']+)(?<userChannel>@[-\\w]+(?:/[^#\n.{*"' ]+|))?#?(?<revision>[-_a-f0-9]+[^\n{*"'])?`,
 );
 
 function setDepType(content: string, originalType: string): string {
@@ -31,7 +31,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   for (const section of sections) {
     let depType = setDepType(section, 'requires');
-    const rawLines = section.split('\n').filter(is.nonEmptyString);
+    const rawLines = section.split('\n').filter(isNonEmptyString);
 
     for (const rawLine of rawLines) {
       if (!isComment(rawLine)) {
