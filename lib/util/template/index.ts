@@ -18,7 +18,7 @@ handlebars.registerHelper('add', function (a, b) {
     return 0;
   }
 
-  return parseInt(a) + parseInt(b);
+  return parseInt(a, 10) + parseInt(b, 10);
 });
 
 handlebars.registerHelper('encodeBase64', (str: string) =>
@@ -135,6 +135,7 @@ handlebars.registerHelper('distinct', (obj: unknown): unknown[] => {
 export const exposedConfigOptions = [
   'additionalBranchPrefix',
   'addLabels',
+  'allowedVersions',
   'branchName',
   'branchPrefix',
   'branchTopic',
