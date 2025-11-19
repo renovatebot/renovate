@@ -220,7 +220,6 @@ describe('util/template/index', () => {
     expect(output).toBe('3');
   });
 
-
   describe('proxyCompileInput', () => {
     const allowedField = 'body';
     const allowedArrayField = 'prBodyNotes';
