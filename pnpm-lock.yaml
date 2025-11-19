@@ -382,8 +382,8 @@ importers:
         specifier: 2.3.1
         version: 2.3.1
       '@openpgp/web-stream-tools':
-        specifier: 0.2.1
-        version: 0.2.1(@types/node@22.19.1)(typescript@5.9.3)
+        specifier: 0.3.0
+        version: 0.3.0(@types/node@22.19.1)(typescript@5.9.3)
       '@semantic-release/exec':
         specifier: 7.1.0
         version: 7.1.0(semantic-release@25.0.2(typescript@5.9.3))
@@ -1366,8 +1366,8 @@ packages:
   '@open-draft/until@2.1.0':
     resolution: {integrity: sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==}
 
-  '@openpgp/web-stream-tools@0.2.1':
-    resolution: {integrity: sha512-gE6+8mVrpKOa9RurAP+TToUo/DCGLNfpnRiq/YuA5Dq/rUAVSeM6Ejrgl25qpRiOQb/qcGyM25m1l9eE4aPdfw==}
+  '@openpgp/web-stream-tools@0.3.0':
+    resolution: {integrity: sha512-WGCcIti5uAwySkdny5IJ975Vu6fS45LE9Ce3M7vylIWOZwzL4qFUFclskZ6JU7rQ1zgoze6CQ//QKFc/ML2uqw==}
     engines: {node: '>= 18.0.0'}
     peerDependencies:
       '@types/node': '>=18.0.0'
@@ -1861,6 +1861,7 @@ packages:
   '@smithy/core@3.18.4':
     resolution: {integrity: sha512-o5tMqPZILBvvROfC8vC+dSVnWJl9a0u9ax1i1+Bq8515eYjUJqqk5XjjEsDLoeL5dSqGSh6WGdVx1eJ1E/Nwhw==}
     engines: {node: '>=18.0.0'}
+    deprecated: Please upgrade your lockfile to use the latest 3.x version of @smithy/core for various fixes, see https://github.com/smithy-lang/smithy-typescript/blob/main/packages/core/CHANGELOG.md
 
   '@smithy/credential-provider-imds@4.2.5':
     resolution: {integrity: sha512-BZwotjoZWn9+36nimwm/OLIcVe+KYRwzMjfhd4QT7QxPm9WY0HiOV8t/Wlh+HVUif0SBVV7ksq8//hPaBC/okQ==}
@@ -7901,7 +7902,7 @@ snapshots:
 
   '@open-draft/until@2.1.0': {}
 
-  '@openpgp/web-stream-tools@0.2.1(@types/node@22.19.1)(typescript@5.9.3)':
+  '@openpgp/web-stream-tools@0.3.0(@types/node@22.19.1)(typescript@5.9.3)':
     optionalDependencies:
       '@types/node': 22.19.1
       typescript: 5.9.3
