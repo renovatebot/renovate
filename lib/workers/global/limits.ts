@@ -98,9 +98,10 @@ export function calcLimit(
   upgrades: BranchUpgradeConfig[],
   limitName: BranchLimitName,
 ): number {
+  const uniqueUpgrades = new Map(upgrades.map((u) => [u.depName, u]));
   logger.debug(
     {
-      limits: upgrades.map((upg) => {
+      limits: Array.from(uniqueUpgrades.values()).map((upg) => {
         return { depName: upg.depName, [limitName]: upg[limitName] };
       }),
     },
