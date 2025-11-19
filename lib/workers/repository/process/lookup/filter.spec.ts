@@ -57,7 +57,7 @@ describe('workers/repository/process/lookup/filter', () => {
       ]);
     });
 
-    it.only('should filter versions when allowedVersions templating is used', () => {
+    it('should filter versions when allowedVersions templating is used', () => {
       const releases = [
         {
           version: '1.1.0',
@@ -79,7 +79,7 @@ describe('workers/repository/process/lookup/filter', () => {
         respectLatest: false,
         allowedVersions: '<={{major}}.{{add minor 1}}.{{patch}}',
       });
-      const currentVersion = '1.0.x';
+      const currentVersion = '1.0.0';
       const latestVersion = '2.0.0';
 
       const filteredVersions = filterVersions(
