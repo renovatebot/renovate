@@ -6,7 +6,6 @@ import type { VersioningApi } from '../../../../modules/versioning';
 import * as npmVersioning from '../../../../modules/versioning/npm';
 import * as pep440 from '../../../../modules/versioning/pep440';
 import * as poetryVersioning from '../../../../modules/versioning/poetry';
-import { regEx } from '../../../../util/regex';
 import { getRegexPredicate } from '../../../../util/string-match';
 import * as template from '../../../../util/template';
 import type { FilterConfig } from './types';
@@ -78,7 +77,6 @@ export function filterVersions(
       minor: currentMinor,
       patch: currentPatch,
     };
-    warnIfFlakyTemplate(config.allowedVersions, input);
     const allowedVersions = template.compile(config.allowedVersions, input);
 
     const isAllowedPred = getRegexPredicate(allowedVersions);
@@ -172,33 +170,4 @@ export function filterVersions(
 
     return minor === currentMinor && patch === currentPatch;
   });
-}
-
-function warnIfFlakyTemplate(
-  templateStr: string,
-  values: Record<
-    'major' | 'minor' | 'patch' | 'currentVersion',
-    string | number | null
-  >,
-): void {
-  // return early if it's not a template
-  if (!regEx(/\{\{[^}]+\}\}/).test(templateStr)) {
-    return;
-  }
-
-  const allowedFields = ['currentVersion', 'major', 'minor', 'patch'];
-  for (const field of allowedFields) {
-    if (
-      templateStr.includes(field) &&
-      values[field as keyof typeof values] === null
-    ) {
-      logger.warn(
-        {
-          allowedVersions: templateStr,
-          currentVersion: values.currentVersion,
-        },
-        `allowedVersions template contains '${field}' but its value is null`,
-      );
-    }
-  }
 }
