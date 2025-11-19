@@ -115,6 +115,10 @@ It's most likely the case that `major`, `minor`, and `patch` update types will h
 
 Generally, Renovate does not provide release timestamps for `digest` updates.
 
+The `replacement` update type [does not currently](https://github.com/renovatebot/renovate/issues/39400) provide release timestamps.
+
+The `lockFileMaintenance` update type does not provide release timestamps, as the package manager performs the required changes to update package(s).
+
 You can validate which update types may have release timestamps by following something similar to how [verify if the registry you're using](#which-registries-support-release-timestamps).
 
 ### What happens to security updates?
