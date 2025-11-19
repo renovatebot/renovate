@@ -16,61 +16,6 @@ type Options = HelperOptions & {
   lookupProperty: (element: unknown, key: unknown) => unknown;
 };
 
-handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
-handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
-handlebars.registerHelper('add', function (a, b) {
-  return parseInt(a, 10) + parseInt(b, 10);
-});
-
-handlebars.registerHelper('encodeBase64', (str: string) =>
-  Buffer.from(str ?? '').toString('base64'),
-);
-
-handlebars.registerHelper('decodeBase64', (str: string) =>
-  Buffer.from(str ?? '', 'base64').toString(),
-);
-
-handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
-  JSON.stringify(JSON.parse(input), null, 2),
-);
-
-handlebars.registerHelper('toJSON', (input: unknown): string =>
-  JSON.stringify(input),
-);
-
-handlebars.registerHelper('toArray', (...args: unknown[]): unknown[] => {
-  // Need to remove the 'options', as last parameter
-  // https://handlebarsjs.com/api-reference/helpers.html
-  args.pop();
-  return args;
-});
-
-handlebars.registerHelper('toObject', (...args: unknown[]): unknown => {
-  // Need to remove the 'options', as last parameter
-  // https://handlebarsjs.com/api-reference/helpers.html
-  args.pop();
-
-  if (args.length % 2 !== 0) {
-    throw new Error(`Must contain an even number of elements`);
-  }
-
-  const keys = args.filter((_, index) => index % 2 === 0);
-  const values = args.filter((_, index) => index % 2 === 1);
-
-  return Object.fromEntries(keys.map((key, index) => [key, values[index]]));
-});
-
-handlebars.registerHelper('replace', (find, replace, context) =>
-  (context ?? '').replace(regEx(find, 'g'), replace),
-);
-
-handlebars.registerHelper('lowercase', (str: string) => str?.toLowerCase());
-
-handlebars.registerHelper('containsString', (str, subStr) =>
-  str?.includes(subStr),
-);
-
-handlebars.registerHelper('equals', (arg1, arg2) => arg1 === arg2);
 const helpers: Record<string, handlebars.HelperDelegate> = {
   encodeURIComponent,
   decodeURIComponent,
@@ -151,6 +96,7 @@ const helpers: Record<string, handlebars.HelperDelegate> = {
       return true;
     });
   },
+  add: (a, b) => parseInt(a, 10) + parseInt(b, 10),
 };
 
 // Register all helpers from the single source of truth
@@ -242,12 +188,6 @@ export const allowedFields = {
     'The minor version of the new version. e.g. "1" if the new version is "3.1.0"',
   newPatch:
     'The patch version of the new version. e.g. "0" if the new version is "3.1.0"',
-  major:
-    'The major version of the current version. e.g. "3" if the current version is "3.1.0"',
-  minor:
-    'The minor version of the current version. e.g. "1" if the current version is "3.1.0"',
-  patch:
-    'The patch version of the current version. e.g. "0" if the current version is "3.1.0"',
   newName:
     'The name of the new dependency that replaces the current deprecated dependency',
   newNameLinked:
@@ -256,6 +196,12 @@ export const allowedFields = {
     'The new value in the upgrade. Can be a range or version e.g. "^3.0.0" or "3.1.0"',
   newVersion: 'The new version in the upgrade, e.g. "3.1.0"',
   newVersionAgeInDays: 'The age of the new version in days',
+  major:
+    'The major version of the current version. e.g. "3" if the current version is "3.1.0"',
+  minor:
+    'The minor version of the current version. e.g. "1" if the current version is "3.1.0"',
+  patch:
+    'The patch version of the current version. e.g. "0" if the current version is "3.1.0"',
   packageFile: 'The filename that the dependency was found in',
   packageFileDir:
     'The directory with full path where the packageFile was found',
