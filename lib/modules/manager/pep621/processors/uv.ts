@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
@@ -308,7 +308,7 @@ async function getUvExtraIndexUrl(
       return !sources || !(packageName in sources);
     })
     .flatMap((dep) => dep.registryUrls)
-    .filter(is.string)
+    .filter(isString)
     .filter((registryUrl) => {
       // Check if the registry URL is not the default one and not already configured
       const configuredIndexUrls =

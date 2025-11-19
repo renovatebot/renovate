@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
@@ -57,7 +57,7 @@ export async function extractPackageFile(
         groupLine = lines[lineNumber];
 
         // istanbul ignore if
-        if (!is.string(groupLine)) {
+        if (!isString(groupLine)) {
           logger.debug(
             { content, packageFile, type: 'groupLine' },
             'Bundler parsing error',
@@ -214,7 +214,7 @@ export async function extractPackageFile(
           lineNumber += 1;
           sourceLine = lines[lineNumber];
           // istanbul ignore if
-          if (!is.string(sourceLine)) {
+          if (!isString(sourceLine)) {
             logger.debug(
               { content, packageFile, type: 'sourceLine' },
               'Bundler parsing error',
@@ -254,7 +254,7 @@ export async function extractPackageFile(
         lineNumber += 1;
         platformsLine = lines[lineNumber];
         // istanbul ignore if
-        if (!is.string(platformsLine)) {
+        if (!isString(platformsLine)) {
           logger.debug(
             { content, packageFile, type: 'platformsLine' },
             'Bundler parsing error',
@@ -287,7 +287,7 @@ export async function extractPackageFile(
         lineNumber += 1;
         ifLine = lines[lineNumber];
         // istanbul ignore if
-        if (!is.string(ifLine)) {
+        if (!isString(ifLine)) {
           logger.debug(
             { content, packageFile, type: 'ifLine' },
             'Bundler parsing error',

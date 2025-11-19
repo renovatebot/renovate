@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import type { MergeStrategy } from '../../../config/types';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
@@ -139,7 +139,7 @@ export function toRenovatePR(data: PR, author: string | null): Pr | null {
     cannotMergeReason: data.mergeable
       ? undefined
       : `pr.mergeable="${data.mergeable}"`,
-    hasAssignees: !!(data.assignee?.login ?? is.nonEmptyArray(data.assignees)),
+    hasAssignees: !!(data.assignee?.login ?? isNonEmptyArray(data.assignees)),
   };
 }
 

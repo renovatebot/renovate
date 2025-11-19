@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import {
   extractAllPackageFiles,
@@ -31,7 +31,7 @@ export async function getManagerPackageFiles(
     return [];
   }
   // istanbul ignore else
-  if (is.nonEmptyArray(fileList)) {
+  if (isNonEmptyArray(fileList)) {
     logger.debug(
       `Matched ${
         fileList.length

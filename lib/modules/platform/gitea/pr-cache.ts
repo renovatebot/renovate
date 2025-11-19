@@ -1,3 +1,4 @@
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -26,7 +27,10 @@ export class GiteaPrCache {
     let pullRequestCache = repoCache.platform.gitea.pullRequestsCache as
       | GiteaPrCacheData
       | undefined;
-    if (!pullRequestCache || pullRequestCache.author !== author) {
+    if (
+      isNullOrUndefined(pullRequestCache) ||
+      pullRequestCache.author !== author
+    ) {
       pullRequestCache = {
         items: {},
         updated_at: null,

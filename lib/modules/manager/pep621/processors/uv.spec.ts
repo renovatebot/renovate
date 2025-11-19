@@ -350,6 +350,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         'pyproject.toml',
       );
       expect(result).toBeEmptyArray();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { packageFile: 'pyproject.toml' },
         'No uv lock file found',
@@ -374,6 +375,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         partial(),
       );
       expect(result).toBeNull();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { packageFileName: undefined },
         'No uv lock file found',

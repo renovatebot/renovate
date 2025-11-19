@@ -1,6 +1,6 @@
 import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
-import is from '@sindresorhus/is';
+import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
 import semver from 'semver';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -281,7 +281,7 @@ async function fetchRepositories(): Promise<GhRestRepo[]> {
 export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
   logger.debug('Autodiscovering GitHub repositories');
   const nonEmptyRepositories = (await fetchRepositories()).filter(
-    is.nonEmptyObject,
+    isNonEmptyObject,
   );
   const nonArchivedRepositories = nonEmptyRepositories.filter(
     (repo) => !repo.archived,
@@ -455,7 +455,7 @@ export async function createFork(
         body: {
           organization: forkOrg ?? undefined,
           name: config.parentRepo!.replace('/', '-_-'),
-          default_branch_only: true, // no baseBranches support yet
+          default_branch_only: true, // no baseBranchPatterns support yet
         },
       })
     ).body;
@@ -545,10 +545,10 @@ export async function initRepo({
 
     if (res?.errors) {
       if (res.errors.find((err) => err.type === 'RATE_LIMITED')) {
-        logger.debug({ res }, 'Graph QL rate limit exceeded.');
+        logger.debug({ res }, 'GraphQL rate limit exceeded.');
         throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
       }
-      logger.debug({ res }, 'Unexpected Graph QL errors');
+      logger.debug({ res }, 'Unexpected GraphQL errors');
       throw new Error(PLATFORM_UNKNOWN_ERROR);
     }
 
@@ -764,11 +764,6 @@ async function checkRulesetsForForceRebase(
     );
 
     return rulesets.some((rule) => {
-      if (rule.type === 'non_fast_forward') {
-        logger.debug(`Ruleset: non_fast_forward rule found for ${branchName}`);
-        return true;
-      }
-
       if (
         rule.type === 'required_status_checks' &&
         rule.parameters?.strict_required_status_checks_policy === true
@@ -1041,6 +1036,7 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
 
 export async function tryReuseAutoclosedPr(
   autoclosedPr: Pr,
+  newTitle: string,
 ): Promise<Pr | null> {
   const { sha, number, sourceBranch: branchName } = autoclosedPr;
   try {
@@ -1055,21 +1051,28 @@ export async function tryReuseAutoclosedPr(
   }
 
   try {
-    const title = autoclosedPr.title.replace(regEx(/ - autoclosed$/), '');
     const { body: ghPr } = await githubApi.patchJson<GhRestPr>(
       `repos/${config.repository}/pulls/${number}`,
       {
         body: {
           state: 'open',
-          title,
+          title: newTitle,
         },
       },
     );
     logger.info(
-      { branchName, title, number },
+      { branchName, oldTitle: autoclosedPr.title, newTitle, number },
       'Successfully reopened autoclosed PR',
     );
+
     const result = coerceRestPr(ghPr);
+
+    const localSha = git.getBranchCommit(branchName);
+    if (localSha && localSha !== sha) {
+      await git.forcePushToRemote(branchName, 'origin');
+      result.sha = localSha;
+    }
+
     cachePr(result);
     return result;
   } catch {
@@ -1571,7 +1574,7 @@ export async function addLabels(
   logger.debug(`Adding labels '${labels?.join(', ')}' to #${issueNo}`);
   try {
     const repository = config.parentRepo ?? config.repository;
-    if (is.array(labels) && labels.length) {
+    if (isArray(labels) && labels.length) {
       await githubApi.postJson(`repos/${repository}/issues/${issueNo}/labels`, {
         body: labels,
       });
@@ -1963,7 +1966,7 @@ export async function mergePr({
       if (err.statusCode === 404 || err.statusCode === 405) {
         const body = err.response?.body;
         if (
-          is.nonEmptyString(body?.message) &&
+          isNonEmptyString(body?.message) &&
           regEx(/^Required status check ".+" is expected\.$/).test(body.message)
         ) {
           logger.debug(
@@ -1973,7 +1976,7 @@ export async function mergePr({
           return false;
         }
         if (
-          is.nonEmptyString(body?.message) &&
+          isNonEmptyString(body?.message) &&
           (body.message.includes('approving review') ||
             body.message.includes('code owner review'))
         ) {

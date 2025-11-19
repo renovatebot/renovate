@@ -104,4 +104,4 @@ Additionally, the preset `config:recommended` is added to `onboardingConfig`.
 A limited set of approved `postUpgradeTasks` commands are allowed in the app.
 The commands are not documented, as they may change over time.
 
-You can find the allowed `postUpgradeTasks` commands in Renovate's log output.
+You can find the allowed `postUpgradeTasks` commands in Renovate's log output, when searching for a log line which references [`allowedCommands`](../self-hosted-configuration.md#allowedcommands).

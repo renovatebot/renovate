@@ -36,4 +36,23 @@ export const presets: Record<string, Preset> = {
     },
     osvVulnerabilityAlerts: true,
   },
+  minimumReleaseAgeNpm: {
+    description:
+      'Wait until the npm package is three days old before raising the update. This a) introduces a short delay to allow for malware researchers and scanners to (possibly) detect any malicious behaviour in packages, and b) prevents the maintainer and/or NPM from unpublishing a package you already upgraded to, breaking builds.',
+    npm: {
+      minimumReleaseAge: '3 days',
+      internalChecksFilter: 'strict',
+      prCreation: 'not-pending',
+    },
+    packageRules: [
+      {
+        description:
+          'Do not require Minimum Release Age for update types that are controlled by the package manager',
+        matchUpdateTypes: ['lockFileMaintenance'],
+        prBodyNotes: [
+          "⚠️ Renovate's lock file maintenance functionality does not support validating Minimum Release Age, as the package manager performs the required changes to update package(s). Confirm whether your package manager perform its own validation for the Minimum Release Age of packages.",
+        ],
+      },
+    ],
+  },
 };

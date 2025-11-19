@@ -7,84 +7,210 @@ import { fs } from '~test/util';
 vi.mock('../../../util/fs');
 
 describe('modules/manager/nix/extract', () => {
-  const flake1Lock = codeBlock`{
-    "nodes": {
-      "root": {}
-    },
-    "root": "root",
-    "version": 7
-  }`;
-
   it('returns null when no nixpkgs input exists', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "root": {}
+      },
+      "root": "root",
+      "version": 7
+    }`;
     const flakeNix = codeBlock`{
       inputs = {};
     }`;
-    fs.readLocalFile.mockResolvedValueOnce(flake1Lock);
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
     expect(await extractPackageFile(flakeNix, 'flake.nix')).toBeNull();
   });
 
-  it('match nixpkgs input', async () => {
-    const flakeNix = codeBlock`{
-      inputs = {
-        nixpkgs.url = "github:nixos/nixpkgs/nixos-21.11";
-      };
+  it('does not include nixpkgs input with no explicit ref', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "root": {}
+      },
+      "root": "root",
+      "version": 7
     }`;
-    fs.readLocalFile.mockResolvedValueOnce(flake1Lock);
-    expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
-      deps: [
-        {
-          depName: 'nixpkgs',
-          currentValue: 'nixos-21.11',
-          datasource: GitRefsDatasource.id,
-          packageName: 'https://github.com/NixOS/nixpkgs',
-          versioning: nixpkgsVersioning,
-        },
-      ],
-    });
-  });
-
-  it('match nixpkgs input case insensitive', async () => {
-    const flakeNix = codeBlock`{
-      inputs = {
-        nixpkgs.url = "github:NixOS/nixpkgs/nixos-21.11";
-      };
-    }`;
-    fs.readLocalFile.mockResolvedValueOnce(flake1Lock);
-    expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
-      deps: [
-        {
-          depName: 'nixpkgs',
-          currentValue: 'nixos-21.11',
-          datasource: GitRefsDatasource.id,
-          packageName: 'https://github.com/NixOS/nixpkgs',
-          versioning: nixpkgsVersioning,
-        },
-      ],
-    });
-  });
-
-  it('includes nixpkgs input with no explicit ref', async () => {
     const flakeNix = codeBlock`{
       inputs = {
         nixpkgs.url = "github:NixOS/nixpkgs";
       };
     }`;
-    fs.readLocalFile.mockResolvedValueOnce(flake1Lock);
-    expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
-      deps: [
-        {
-          currentValue: undefined,
-          datasource: 'git-refs',
-          depName: 'nixpkgs',
-          packageName: 'https://github.com/NixOS/nixpkgs',
-          versioning: 'nixpkgs',
-        },
-      ],
-    });
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile(flakeNix, 'flake.nix')).toBeNull();
+  });
+
+  it('includes nixpkgs input with only ref', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "root": {}
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    const flakeNix = codeBlock`{
+      inputs = {
+        nixpkgs-lib.url = "https://github.com/NixOS/nixpkgs/archive/072a6db25e947df2f31aab9eccd0ab75d5b2da11.tar.gz";
+      };
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile(flakeNix, 'flake.nix')).toBeNull();
   });
 
   it('returns null when no inputs', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(flake1Lock);
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "root": {}
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
+  it('returns null when inputs are missing locked', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "nixpkgs": {
+          "original": {
+            "owner": "NixOS",
+            "ref": "nixos-unstable",
+            "repo": "nixpkgs",
+            "type": "github"
+          }
+        },
+        "root": {
+          "inputs": {
+            "nixpkgs": "nixpkgs"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
+  it('returns null when inputs are missing original', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "nixpkgs": {
+          "locked": {
+            "lastModified": 1720031269,
+            "narHash": "sha256-rwz8NJZV+387rnWpTYcXaRNvzUSnnF9aHONoJIYmiUQ=",
+            "owner": "NixOS",
+            "repo": "nixpkgs",
+            "rev": "9f4128e00b0ae8ec65918efeba59db998750ead6",
+            "type": "github"
+          }
+        },
+        "root": {
+          "inputs": {
+            "nixpkgs": "nixpkgs"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
+  it('returns null when original inputs are from local path', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "nixpkgs": {
+          "locked": {
+            "lastModified": 1720031269,
+            "narHash": "sha256-rwz8NJZV+387rnWpTYcXaRNvzUSnnF9aHONoJIYmiUQ=",
+            "owner": "NixOS",
+            "repo": "nixpkgs",
+            "rev": "9f4128e00b0ae8ec65918efeba59db998750ead6",
+            "type": "github"
+          },
+          "original": {
+            "owner": "NixOS",
+            "ref": "nixos-unstable",
+            "repo": "nixpkgs",
+            "type": "path"
+          }
+        },
+        "root": {
+          "inputs": {
+            "nixpkgs": "nixpkgs"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
+  it('returns null when locked inputs are indirect', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "nixpkgs": {
+          "locked": {
+            "lastModified": 1720031269,
+            "narHash": "sha256-rwz8NJZV+387rnWpTYcXaRNvzUSnnF9aHONoJIYmiUQ=",
+            "owner": "NixOS",
+            "repo": "nixpkgs",
+            "rev": "9f4128e00b0ae8ec65918efeba59db998750ead6",
+            "type": "indirect"
+          },
+          "original": {
+            "owner": "NixOS",
+            "ref": "nixos-unstable",
+            "repo": "nixpkgs",
+            "type": "github"
+          }
+        },
+        "root": {
+          "inputs": {
+            "nixpkgs": "nixpkgs"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
+  it('returns null when locked inputs are from local path', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "nixpkgs": {
+          "locked": {
+            "lastModified": 1720031269,
+            "narHash": "sha256-rwz8NJZV+387rnWpTYcXaRNvzUSnnF9aHONoJIYmiUQ=",
+            "owner": "NixOS",
+            "repo": "nixpkgs",
+            "rev": "9f4128e00b0ae8ec65918efeba59db998750ead6",
+            "type": "path"
+          },
+          "original": {
+            "owner": "NixOS",
+            "ref": "nixos-unstable",
+            "repo": "nixpkgs",
+            "type": "github"
+          }
+        },
+        "root": {
+          "inputs": {
+            "nixpkgs": "nixpkgs"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
   });
 
@@ -120,11 +246,12 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile('', 'flake.nix')).toEqual({
       deps: [
         {
-          depName: 'nixpkgs',
-          currentDigest: '9f4128e00b0ae8ec65918efeba59db998750ead6',
           currentValue: 'nixos-unstable',
+          depName: 'nixpkgs',
           datasource: GitRefsDatasource.id,
           packageName: 'https://github.com/NixOS/nixpkgs',
+          versioning: nixpkgsVersioning,
+          lockedVersion: '9f4128e00b0ae8ec65918efeba59db998750ead6',
         },
       ],
     });
@@ -161,10 +288,10 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
       deps: [
         {
-          currentDigest: '612ee628421ba2c1abca4c99684862f76cb3b089',
           datasource: 'git-refs',
           depName: 'nixpkgs',
           packageName: 'https://github.com/NixOS/nixpkgs',
+          lockedVersion: '612ee628421ba2c1abca4c99684862f76cb3b089',
         },
       ],
     });
@@ -219,10 +346,10 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
       deps: [
         {
-          currentDigest: 'a0f54334df36770b335c051e540ba40afcbf8378',
           datasource: 'git-refs',
           depName: 'patchelf',
           packageName: 'https://github.com/NixOS/patchelf.git',
+          lockedVersion: 'a0f54334df36770b335c051e540ba40afcbf8378',
         },
       ],
     });
@@ -260,10 +387,10 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
       deps: [
         {
-          currentDigest: '88f0d9ae98942bf49cba302c42b2a0f6e05f9b58',
           datasource: 'git-refs',
           depName: 'ijq',
           packageName: 'https://git.sr.ht/~gpanders/ijq',
+          lockedVersion: '88f0d9ae98942bf49cba302c42b2a0f6e05f9b58',
         },
       ],
     });
@@ -301,10 +428,10 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
       deps: [
         {
-          currentDigest: '65ae9c147349829d3df0222151f53f79821c5134',
           datasource: 'git-refs',
           depName: 'home-manager',
           packageName: 'https://gitlab.com/rycee/home-manager',
+          lockedVersion: '65ae9c147349829d3df0222151f53f79821c5134',
         },
       ],
     });
@@ -355,10 +482,10 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
       deps: [
         {
-          currentDigest: '5633bcff0c6162b9e4b5f1264264611e950c8ec7',
           datasource: 'git-refs',
           depName: 'nixpkgs',
           packageName: 'https://github.com/NixOS/nixpkgs',
+          lockedVersion: '5633bcff0c6162b9e4b5f1264264611e950c8ec7',
         },
       ],
     });
@@ -509,11 +636,11 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
       deps: [
         {
-          currentDigest: '6bf2706348447df6f8b86b1c3e54f87b0afda84f',
           datasource: 'git-refs',
           depName: 'nixpkgs-extra-pkgs',
           packageName:
             'https://github.corp.example.com/my-org/nixpkgs-extra-pkgs',
+          lockedVersion: '6bf2706348447df6f8b86b1c3e54f87b0afda84f',
         },
       ],
     });
@@ -611,10 +738,10 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
       deps: [
         {
-          currentDigest: 'c7e39452affcc0f89e023091524e38b3aaf109e9',
           datasource: 'git-refs',
           depName: 'data-mesher',
           packageName: 'https://git.clan.lol/clan/data-mesher',
+          lockedVersion: 'c7e39452affcc0f89e023091524e38b3aaf109e9',
         },
       ],
     });
@@ -651,13 +778,571 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
       deps: [
         {
-          currentDigest: '24b560624f154c9e962d146217b2a964faaf2055',
           datasource: 'git-refs',
           depName: 'subgroup-project',
           packageName: 'https://gitlab.com/group/sub-group/subgroup-project',
+          lockedVersion: '24b560624f154c9e962d146217b2a964faaf2055',
         },
       ],
     });
+  });
+
+  it('includes flake with only tarball type', async () => {
+    const flakeLock = codeBlock`{
+    "nodes": {
+      "nixpkgs-lib": {
+        "locked": {
+          "lastModified": 1738452942,
+          "narHash": "sha256-vJzFZGaCpnmo7I6i416HaBLpC+hvcURh/BQwROcGIp8=",
+          "type": "tarball",
+          "url": "https://github.com/NixOS/nixpkgs/archive/072a6db25e947df2f31aab9eccd0ab75d5b2da11.tar.gz"
+        },
+        "original": {
+          "type": "tarball",
+          "url": "https://github.com/NixOS/nixpkgs/archive/072a6db25e947df2f31aab9eccd0ab75d5b2da11.tar.gz"
+        }
+      },
+      "root": {
+        "inputs": {
+          "nixpkgs-lib": "nixpkgs-lib"
+        }
+      }
+    },
+    "root": "root",
+    "version": 7
+  }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
+  it('includes flake with nixpkgs-lib as tarball type', async () => {
+    const flakeLock = codeBlock`{
+    "nodes": {
+      "flake-parts": {
+        "inputs": {
+          "nixpkgs-lib": "nixpkgs-lib"
+        },
+        "locked": {
+          "lastModified": 1733312601,
+          "narHash": "sha256-4pDvzqnegAfRkPwO3wmwBhVi/Sye1mzps0zHWYnP88c=",
+          "owner": "hercules-ci",
+          "repo": "flake-parts",
+          "rev": "205b12d8b7cd4802fbcb8e8ef6a0f1408781a4f9",
+          "type": "github"
+        },
+        "original": {
+          "owner": "hercules-ci",
+          "repo": "flake-parts",
+          "type": "github"
+        }
+      },
+      "nixpkgs": {
+        "locked": {
+          "lastModified": 1734649271,
+          "narHash": "sha256-4EVBRhOjMDuGtMaofAIqzJbg4Ql7Ai0PSeuVZTHjyKQ=",
+          "owner": "nixos",
+          "repo": "nixpkgs",
+          "rev": "d70bd19e0a38ad4790d3913bf08fcbfc9eeca507",
+          "type": "github"
+        },
+        "original": {
+          "owner": "nixos",
+          "ref": "nixos-unstable",
+          "repo": "nixpkgs",
+          "type": "github"
+        }
+      },
+      "nixpkgs-lib": {
+        "locked": {
+          "lastModified": 1733096140,
+          "narHash": "sha256-1qRH7uAUsyQI7R1Uwl4T+XvdNv778H0Nb5njNrqvylY=",
+          "type": "tarball",
+          "url": "https://github.com/NixOS/nixpkgs/archive/5487e69da40cbd611ab2cadee0b4637225f7cfae.tar.gz"
+        },
+        "original": {
+          "type": "tarball",
+          "url": "https://github.com/NixOS/nixpkgs/archive/5487e69da40cbd611ab2cadee0b4637225f7cfae.tar.gz"
+        }
+      },
+      "root": {
+        "inputs": {
+          "flake-parts": "flake-parts",
+          "nixpkgs": "nixpkgs"
+        }
+      }
+    },
+    "root": "root",
+    "version": 7
+  }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          datasource: 'git-refs',
+          depName: 'flake-parts',
+          packageName: 'https://github.com/hercules-ci/flake-parts',
+          lockedVersion: '205b12d8b7cd4802fbcb8e8ef6a0f1408781a4f9',
+        },
+        {
+          currentValue: 'nixos-unstable',
+          datasource: 'git-refs',
+          depName: 'nixpkgs',
+          packageName: 'https://github.com/NixOS/nixpkgs',
+          lockedVersion: 'd70bd19e0a38ad4790d3913bf08fcbfc9eeca507',
+        },
+      ],
+    });
+  });
+
+  it('includes flake with nixpkgs channel as tarball type', async () => {
+    const flakeLock = codeBlock`{
+    "nodes": {
+      "nixpkgs": {
+        "locked": {
+          "lastModified": 1756904031,
+          "narHash": "sha256-V29Bu1nR6Ayt+uUhf/6L43DSxb66BQ+8E2wH1GHa5IA=",
+          "rev": "0e6684e6c5755325f801bda1751a8a4038145d7d",
+          "type": "tarball",
+          "url": "https://releases.nixos.org/nixos/25.05/nixos-25.05.809350.0e6684e6c575/nixexprs.tar.xz"
+        },
+        "original": {
+          "type": "tarball",
+          "url": "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz"
+        }
+      },
+      "root": {
+        "inputs": {
+          "nixpkgs": "nixpkgs"
+        }
+      }
+    },
+    "root": "root",
+    "version": 7
+  }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          currentValue: 'nixpkgs-unstable',
+          datasource: 'git-refs',
+          depName: 'nixpkgs',
+          packageName: 'https://github.com/NixOS/nixpkgs',
+          lockedVersion: '0e6684e6c5755325f801bda1751a8a4038145d7d',
+          versioning: 'nixpkgs',
+        },
+      ],
+    });
+  });
+
+  it('finds currentDigest correctly when input sha is pinned', async () => {
+    const flakeNix = codeBlock`{
+      inputs = {
+        disko.url = "github:nix-community/disko/76c0a6dba345490508f36c1aa3c7ba5b6b460989";
+      };
+    }`;
+    const flakeLock = codeBlock`{
+    "nodes": {
+      "disko": {
+        "locked": {
+          "lastModified": 1744145203,
+          "narHash": "sha256-I2oILRiJ6G+BOSjY+0dGrTPe080L3pbKpc+gCV3Nmyk=",
+          "owner": "nix-community",
+          "repo": "disko",
+          "rev": "76c0a6dba345490508f36c1aa3c7ba5b6b460989",
+          "type": "github"
+        },
+        "original": {
+          "owner": "nix-community",
+          "repo": "disko",
+          "rev": "76c0a6dba345490508f36c1aa3c7ba5b6b460989",
+          "type": "github"
+        }
+      },
+      "root": {
+        "inputs": {
+          "disko": "disko"
+        }
+      }
+    },
+    "root": "root",
+    "version": 7
+  }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          currentDigest: '76c0a6dba345490508f36c1aa3c7ba5b6b460989',
+          datasource: 'git-refs',
+          depName: 'disko',
+          packageName: 'https://github.com/nix-community/disko',
+        },
+      ],
+    });
+  });
+
+  it('does not duplicate nixpkgs dependency', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "nixpkgs": {
+          "locked": {
+            "lastModified": 1756904031,
+            "narHash": "sha256-V29Bu1nR6Ayt+uUhf/6L43DSxb66BQ+8E2wH1GHa5IA=",
+            "rev": "0e6684e6c5755325f801bda1751a8a4038145d7d",
+            "type": "tarball",
+            "url": "https://releases.nixos.org/nixos/25.05/nixos-25.05.809350.0e6684e6c575/nixexprs.tar.xz"
+          },
+          "original": {
+            "type": "tarball",
+            "url": "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz"
+          }
+        },
+        "root": {
+          "inputs": {
+            "nixpkgs": "nixpkgs"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    const flakeNix = codeBlock`{
+      inputs = {
+        nixpkgs.url = "github:nixos/nixpkgs/nixos-21.11";
+      };
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
+      deps: [
+        {
+          currentValue: 'nixpkgs-unstable',
+          datasource: 'git-refs',
+          depName: 'nixpkgs',
+          packageName: 'https://github.com/NixOS/nixpkgs',
+          lockedVersion: '0e6684e6c5755325f801bda1751a8a4038145d7d',
+          versioning: 'nixpkgs',
+        },
+      ],
+    });
+  });
+
+  it('returns null when flake.lock file cannot be read', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
+  it('returns null when flake.nix file cannot be read', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "root": {}
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
+  it('returns null when flake.lock has invalid JSON', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('{ invalid json');
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
+  it('returns deps when no root inputs but deps exist', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "root": {}
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+
+    const result = await extractPackageFile('', 'flake.nix');
+    expect(result).toBeNull();
+  });
+
+  it('handles currentDigest replacement when config provided', async () => {
+    const flakeNix = codeBlock`{
+      inputs = {
+        disko.url = "github:nix-community/disko/newdigest123";
+      };
+    }`;
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "disko": {
+          "locked": {
+            "lastModified": 1744145203,
+            "narHash": "sha256-I2oILRiJ6G+BOSjY+0dGrTPe080L3pbKpc+gCV3Nmyk=",
+            "owner": "nix-community",
+            "repo": "disko",
+            "rev": "76c0a6dba345490508f36c1aa3c7ba5b6b460989",
+            "type": "github"
+          },
+          "original": {
+            "owner": "nix-community",
+            "repo": "disko",
+            "rev": "olddigest123",
+            "type": "github"
+          }
+        },
+        "root": {
+          "inputs": {
+            "disko": "disko"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    const config = {
+      currentDigest: 'olddigest123',
+      newDigest: 'newdigest123',
+    };
+
+    const result = await extractPackageFile(flakeNix, 'flake.nix', config);
+    expect(result?.deps[0]).toMatchObject({
+      currentDigest: 'newdigest123',
+      depName: 'disko',
+      packageName: 'https://github.com/nix-community/disko',
+    });
+  });
+
+  it('includes nixpkgs with ref when original has rev', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "nixpkgs": {
+          "locked": {
+            "lastModified": 1720031269,
+            "narHash": "sha256-rwz8NJZV+387rnWpTYcXaRNvzUSnnF9aHONoJIYmiUQ=",
+            "owner": "NixOS",
+            "repo": "nixpkgs",
+            "rev": "9f4128e00b0ae8ec65918efeba59db998750ead6",
+            "type": "github"
+          },
+          "original": {
+            "owner": "NixOS",
+            "ref": "nixos-unstable",
+            "repo": "nixpkgs",
+            "rev": "specific-commit-hash",
+            "type": "github"
+          }
+        },
+        "root": {
+          "inputs": {
+            "nixpkgs": "nixpkgs"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          currentValue: 'nixos-unstable',
+          currentDigest: 'specific-commit-hash',
+          depName: 'nixpkgs',
+          packageName: 'https://github.com/NixOS/nixpkgs',
+        },
+      ],
+    });
+  });
+
+  it('includes github flake with ref when original has rev', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "flake-utils": {
+          "locked": {
+            "lastModified": 1726560853,
+            "narHash": "sha256-X6rJYSESBVr3hBoH0WbKE5KvhPU5bloyZ2L4K60/fPQ=",
+            "owner": "numtide",
+            "repo": "flake-utils",
+            "rev": "c1dfcf08411b08f6b8615f7d8971a2bfa81d5e8a",
+            "type": "github"
+          },
+          "original": {
+            "owner": "numtide",
+            "repo": "flake-utils",
+            "ref": "main",
+            "rev": "specific-commit-hash",
+            "type": "github"
+          }
+        },
+        "root": {
+          "inputs": {
+            "flake-utils": "flake-utils"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          currentValue: 'main',
+          currentDigest: 'specific-commit-hash',
+          depName: 'flake-utils',
+          packageName: 'https://github.com/numtide/flake-utils',
+        },
+      ],
+    });
+  });
+
+  it('includes gitlab flake with custom host', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "custom-project": {
+          "locked": {
+            "lastModified": 1728650932,
+            "narHash": "sha256-mGKzqdsRyLnGNl6WjEr7+sghGgBtYHhJQ4mjpgRTCsU=",
+            "owner": "group",
+            "repo": "project",
+            "rev": "65ae9c147349829d3df0222151f53f79821c5134",
+            "type": "gitlab",
+            "host": "gitlab.example.com"
+          },
+          "original": {
+            "owner": "group",
+            "repo": "project",
+            "type": "gitlab",
+            "host": "gitlab.example.com"
+          }
+        },
+        "root": {
+          "inputs": {
+            "custom-project": "custom-project"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          datasource: 'git-refs',
+          depName: 'custom-project',
+          packageName: 'https://gitlab.example.com/group/project',
+          lockedVersion: '65ae9c147349829d3df0222151f53f79821c5134',
+        },
+      ],
+    });
+  });
+
+  it('includes sourcehut flake with custom host', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "custom-project": {
+          "locked": {
+            "lastModified": 1723569650,
+            "narHash": "sha256-Ho/sAhEUeSug52JALgjrKVUPCBe8+PovbJj/lniKxp8=",
+            "owner": "~user",
+            "repo": "project",
+            "rev": "88f0d9ae98942bf49cba302c42b2a0f6e05f9b58",
+            "type": "sourcehut",
+            "host": "git.custom.org"
+          },
+          "original": {
+            "owner": "~user",
+            "repo": "project",
+            "type": "sourcehut",
+            "host": "git.custom.org"
+          }
+        },
+        "root": {
+          "inputs": {
+            "custom-project": "custom-project"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          datasource: 'git-refs',
+          depName: 'custom-project',
+          packageName: 'https://git.custom.org/~user/project',
+          lockedVersion: '88f0d9ae98942bf49cba302c42b2a0f6e05f9b58',
+        },
+      ],
+    });
+  });
+
+  it('includes tarball flake with ref when original has rev', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "data-mesher": {
+          "locked": {
+            "lastModified": 1727355895,
+            "narHash": "sha256-grZIaLgk5GgoDuTt49RTCLBh458H4YJdIAU4B3onXRw=",
+            "rev": "c7e39452affcc0f89e023091524e38b3aaf109e9",
+            "type": "tarball",
+            "url": "https://git.clan.lol/api/v1/repos/clan/data-mesher/archive/c7e39452affcc0f89e023091524e38b3aaf109e9.tar.gz"
+          },
+          "original": {
+            "type": "tarball",
+            "url": "https://git.clan.lol/clan/data-mesher/archive/main.tar.gz",
+            "ref": "main",
+            "rev": "specific-commit-hash"
+          }
+        },
+        "root": {
+          "inputs": {
+            "data-mesher": "data-mesher"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          currentValue: 'main',
+          currentDigest: 'specific-commit-hash',
+          datasource: 'git-refs',
+          depName: 'data-mesher',
+          packageName: 'https://git.clan.lol/clan/data-mesher',
+        },
+      ],
+    });
+  });
+
+  it('handles unknown flake lock type', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "unknown-flake": {
+          "locked": {
+            "lastModified": 1727355895,
+            "narHash": "sha256-grZIaLgk5GgoDuTt49RTCLBh458H4YJdIAU4B3onXRw=",
+            "rev": "c7e39452affcc0f89e023091524e38b3aaf109e9",
+            "type": "unknown-type"
+          },
+          "original": {
+            "type": "unknown-type"
+          }
+        },
+        "root": {
+          "inputs": {
+            "unknown-flake": "unknown-flake"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
   });
 
   it('ignores unsupported file type and still extracts other inputs', async () => {

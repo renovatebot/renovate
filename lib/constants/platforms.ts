@@ -13,7 +13,7 @@ export const PLATFORM_HOST_TYPES = [
 
 export type PlatformId = (typeof PLATFORM_HOST_TYPES)[number];
 
-export const AZURE_API_USING_HOST_TYPES = ['azure', 'azure-changelog'];
+export const AZURE_API_USING_HOST_TYPES = ['azure', 'azure-tags', 'azure-changelog'];
 
 export const GITEA_API_USING_HOST_TYPES = [
   'gitea',
@@ -38,6 +38,7 @@ export const GITHUB_API_USING_HOST_TYPES = [
   'hermit',
   'github-changelog',
   'conan',
+  // DEPRECATED: do not add additional datasource-specific entries here, if they use `api.github.com` to look up new versions
 ];
 
 export const GITLAB_API_USING_HOST_TYPES = [

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import type { Nullish } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -19,7 +19,7 @@ export async function fetchJSONFile(
   tag?: string,
 ): Promise<Nullish<Preset>> {
   let ref = '';
-  if (is.nonEmptyString(tag)) {
+  if (isNonEmptyString(tag)) {
     ref = `?ref=${tag}`;
   }
   const url = `${endpoint}repos/${repo}/contents/${fileName}${ref}`;

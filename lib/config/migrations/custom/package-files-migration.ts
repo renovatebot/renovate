@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isNonEmptyObject, isString } from '@sindresorhus/is';
 import type { PackageRule } from '../../types';
 import { AbstractMigration } from '../base/abstract-migration';
 
@@ -8,13 +8,13 @@ export class PackageFilesMigration extends AbstractMigration {
 
   override run(value: unknown): void {
     const packageRules: PackageRule[] = this.get('packageRules') ?? [];
-    if (is.array(value)) {
+    if (isArray(value)) {
       const fileList: string[] = [];
       for (const packageFile of value) {
         if (
-          is.nonEmptyObject(packageFile) &&
+          isNonEmptyObject(packageFile) &&
           'packageFile' in packageFile &&
-          is.string(packageFile.packageFile)
+          isString(packageFile.packageFile)
         ) {
           fileList.push(packageFile.packageFile);
           packageFile.paths = [packageFile.packageFile];
@@ -25,9 +25,9 @@ export class PackageFilesMigration extends AbstractMigration {
               ...packageFile,
             });
           }
-        } else if (is.array(packageFile, is.string)) {
+        } else if (isArray(packageFile, isString)) {
           fileList.push(...packageFile);
-        } else if (is.string(packageFile)) {
+        } else if (isString(packageFile)) {
           fileList.push(packageFile);
         }
       }

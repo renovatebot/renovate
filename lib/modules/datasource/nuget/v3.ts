@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import extract from 'extract-zip';
 import semver from 'semver';
 import upath from 'upath';
@@ -179,7 +179,11 @@ export class NugetV3Api {
         if (releaseTimestamp) {
           release.releaseTimestamp = releaseTimestamp;
         }
-        if (versioning.isValid(version) && versioning.isStable(version)) {
+        if (
+          versioning.isValid(version) &&
+          versioning.isStable(version) &&
+          listed
+        ) {
           latestStable = removeBuildMeta(version);
           homepage = projectUrl ? massageUrl(projectUrl) : homepage;
           nupkgUrl = massageUrl(packageContent);
@@ -218,7 +222,7 @@ export class NugetV3Api {
         registryUrl,
         'PackageBaseAddress',
       );
-      if (is.nonEmptyString(packageBaseAddress)) {
+      if (isNonEmptyString(packageBaseAddress)) {
         const nuspecUrl = `${ensureTrailingSlash(
           packageBaseAddress,
         )}${pkgName.toLowerCase()}/${

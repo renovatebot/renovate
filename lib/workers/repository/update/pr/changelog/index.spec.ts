@@ -281,11 +281,12 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('will call getInRangeReleases when releases is undefined', async () => {
-      await getChangeLogJSON({
+      const param = {
         ...upgrade,
         releases: undefined,
-      });
-      expect(getInRangeReleasesMock).toHaveBeenCalledOnce();
+      };
+      await getChangeLogJSON(param);
+      expect(getInRangeReleasesMock).toHaveBeenCalledExactlyOnceWith(param);
     });
 
     it('supports github enterprise and github.com changelog', async () => {

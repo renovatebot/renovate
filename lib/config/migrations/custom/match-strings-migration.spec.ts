@@ -1,8 +1,8 @@
 import { MatchStringsMigration } from './match-strings-migration';
 
 describe('config/migrations/custom/match-strings-migration', () => {
-  it('should migrate properly', () => {
-    expect(MatchStringsMigration).toMigrate(
+  it('should migrate properly', async () => {
+    await expect(MatchStringsMigration).toMigrate(
       {
         matchStrings: [
           undefined,

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -41,7 +41,7 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`pip_requirements.updateArtifacts(${packageFileName})`);
-  if (!is.nonEmptyArray(updatedDeps)) {
+  if (!isNonEmptyArray(updatedDeps)) {
     logger.debug('No updated pip_requirements deps - returning null');
     return null;
   }

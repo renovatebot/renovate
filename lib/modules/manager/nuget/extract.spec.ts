@@ -51,6 +51,7 @@ describe('modules/manager/nuget/extract', () => {
           config,
         ),
       ).toBeNull();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'NuGet: Skipping versions.props as it is not XML',
       );

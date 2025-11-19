@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isPlainObject } from '@sindresorhus/is';
 import { z } from 'zod';
 import { LooseArray } from '../../../util/schema-utils';
 import { MaybeTimestamp } from '../../../util/timestamp';
@@ -52,7 +52,7 @@ export const HexRelease = z
           release.releaseTimestamp = releaseTimestamp;
         }
 
-        if (is.plainObject(hexResponse.retirements?.[version])) {
+        if (isPlainObject(hexResponse.retirements?.[version])) {
           release.isDeprecated = true;
         }
 

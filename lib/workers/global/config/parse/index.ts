@@ -1,4 +1,5 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray, isNonEmptyObject } from '@sindresorhus/is';
+import { setUserConfigFileNames } from '../../../../config/app-strings';
 import { setPrivateKeys } from '../../../../config/decrypt';
 import * as defaultsParser from '../../../../config/defaults';
 import { resolveConfigPresets } from '../../../../config/presets';
@@ -51,8 +52,8 @@ export async function parseConfigs(
   let config: AllConfig = mergeChildConfig(fileConfig, additionalFileConfig);
   // merge extends from file config and additional file config
   if (
-    is.nonEmptyArray(fileConfig.extends) &&
-    is.nonEmptyArray(additionalFileConfig.extends)
+    isNonEmptyArray(fileConfig.extends) &&
+    isNonEmptyArray(additionalFileConfig.extends)
   ) {
     config.extends = [...fileConfig.extends, ...(config.extends ?? [])];
   }
@@ -63,7 +64,7 @@ export async function parseConfigs(
 
   let resolvedGlobalExtends: AllConfig | undefined;
 
-  if (is.nonEmptyArray(config?.globalExtends)) {
+  if (isNonEmptyArray(config?.globalExtends)) {
     // resolve global presets immediately
     resolvedGlobalExtends = await resolveGlobalExtends(
       config.globalExtends,
@@ -164,10 +165,7 @@ export async function parseConfigs(
 
   // do not add these secrets to repoSecrets and,
   //  do not delete the secrets/variables object after applying on global config as it needs to be re-used for repo config
-  if (
-    is.nonEmptyObject(config.secrets) ||
-    is.nonEmptyObject(config.variables)
-  ) {
+  if (isNonEmptyObject(config.secrets) || isNonEmptyObject(config.variables)) {
     config = applySecretsAndVariablesToConfig({
       config,
       secrets: config.secrets,
@@ -181,8 +179,17 @@ export async function parseConfigs(
     }
   }
 
-  if (is.nonEmptyObject(config.customEnvVariables)) {
+  if (isNonEmptyObject(config.customEnvVariables)) {
     setCustomEnv(config.customEnvVariables);
+  }
+
+  if (isNonEmptyArray(config.configFileNames)) {
+    logger.debug(
+      { configFileNames: config.configFileNames },
+      'Updated the config filenames list',
+    );
+    setUserConfigFileNames(config.configFileNames);
+    delete config.configFileNames;
   }
 
   return config;

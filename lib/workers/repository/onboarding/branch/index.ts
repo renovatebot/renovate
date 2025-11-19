@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyObject, isNullOrUndefined } from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
@@ -149,7 +149,7 @@ function handleOnboardingManualRebase(onboardingPr: Pr): void {
   if (!['github', 'gitlab', 'gitea'].includes(pl)) {
     logger.trace(`Platform '${pl}' does not support extended markdown`);
     OnboardingState.prUpdateRequested = true;
-  } else if (is.nullOrUndefined(rebaseRequested)) {
+  } else if (isNullOrUndefined(rebaseRequested)) {
     logger.debug('No rebase checkbox was found in the onboarding PR');
     OnboardingState.prUpdateRequested = true;
   } else if (rebaseRequested) {
@@ -174,7 +174,7 @@ function isOnboardingCacheValid(
   const cache = getCache();
   const onboardingBranchCache = cache?.onboardingBranchCache;
   return !!(
-    onboardingBranchCache &&
+    isNonEmptyObject(onboardingBranchCache) &&
     onboardingBranchCache.defaultBranchSha === getBranchCommit(defaultBranch) &&
     onboardingBranchCache.onboardingBranchSha ===
       getBranchCommit(onboardingBranch) &&
