@@ -1,4 +1,5 @@
 import URL from 'node:url';
+import { supportedEcosystems } from '../../../constants/supported-ecosystems';
 import { setTimeout } from 'timers/promises';
 import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
 import semver from 'semver';
@@ -2112,6 +2113,13 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
           vulnerable_version_range: vulnerableVersionRange,
           first_patched_version: firstPatchedVersion,
         } = alert.security_vulnerability;
+        if (!supportedEcosystems.has(ecosystem)) {
+          logger.debug(
+            { ecosystem },
+            'Unknown vulnerability ecosystem detected',
+          );
+          continue;
+        }
         const patch = firstPatchedVersion?.identifier;
 
         const normalizedName = normalizeNamePerEcosystem({ name, ecosystem });
