@@ -1,10 +1,10 @@
-import type { Document } from 'yaml';
-import { isMap, isScalar, isSeq } from 'yaml';
 import {
   isEmptyObject,
   isNonEmptyObject,
   isPlainObject,
 } from '@sindresorhus/is';
+import type { Document } from 'yaml';
+import { isMap, isScalar, isSeq } from 'yaml';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { detectPlatform } from '../../../util/common';
