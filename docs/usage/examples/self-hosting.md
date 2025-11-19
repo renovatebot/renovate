@@ -1,5 +1,12 @@
 # Self-Hosting Examples
 
+<!-- prettier-ignore -->
+!!! warning
+    Most Open Source packages are hosted on github.com, including a number of tools that Renovate may pull at run-time.
+    GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for `github.com` or the bot will get rate limited quickly.
+    &nbsp;
+    Read [Running Renovate, GitHub.com token for changelogs](../getting-started/running.md#githubcom-token-for-changelogs-and-tools) to learn more.
+
 ## Installing Renovate OSS CLI
 
 ### npmjs
