@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import is, { isNullOrUndefined } from '@sindresorhus/is';
 import handlebars, { type HelperOptions } from 'handlebars';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
@@ -14,6 +14,10 @@ type Options = HelperOptions & {
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
 handlebars.registerHelper('add', function (a, b) {
+  if (isNullOrUndefined(a) || isNullOrUndefined(b)) {
+    return 0;
+  }
+
   return parseInt(a) + parseInt(b);
 });
 
