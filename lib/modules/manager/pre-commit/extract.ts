@@ -167,13 +167,13 @@ function findDependencies(
   const repoComments: Record<number, string | undefined> = {};
   if (doc?.contents && isMap(doc.contents)) {
     const reposPair = doc.contents.items.find(
-      (pair: any) => pair.key && pair.key.value === 'repos',
+      (pair: any) => pair.key?.value === 'repos',
     );
     if (reposPair?.value && isSeq(reposPair.value)) {
       for (const [idx, repoItem] of reposPair.value.items.entries()) {
         if (repoItem && isMap(repoItem)) {
           const revPair = repoItem.items.find(
-            (pair: any) => pair.key && pair.key.value === 'rev',
+            (pair: any) => pair.key?.value === 'rev',
           );
           if (
             revPair?.value &&
