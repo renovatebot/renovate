@@ -20,7 +20,7 @@ Sign in with your GitHub account.
 Once you're logged in, you can see the logs for the Renovate jobs on your repository.
 You should have access to any repository which you have write access to and which has Renovate installed.
 
-Renovate only provides the 10 most recent logs for each repository.
+The Mend Renovate App provides logs for the most recent 2 weeks of logs, for each repository.
 
 After selecting a recent job, you can select the debug level that you care about.
 For a full overview, select the `DEBUG` log level.
