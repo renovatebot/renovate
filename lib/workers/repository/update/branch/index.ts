@@ -751,7 +751,16 @@ export async function processBranch(
       commitSha &&
       config.prCreation !== 'immediate'
     ) {
-      logger.debug(`Branch status pending, current sha: ${commitSha}`);
+      logger.debug(
+        {
+          branchPr,
+          numArtifactErrors: config.artifactErrors?.length,
+          userRebaseRequested,
+          commitSha,
+          prCreation: config.prCreation,
+        },
+        `Branch status pending, current sha: ${commitSha}`,
+      );
       return {
         branchExists: true,
         updatesVerified,
