@@ -381,13 +381,14 @@ export async function getReleaseNotesMd(
     if (changelogParsed.length >= 2) {
       for (const section of changelogParsed) {
         try {
-          const [heading] = section.split(newlineRegex);
           // replace brackets and parenthesis with space
-          const deParenthesizedHeading = heading.replace(
+          const deParenthesizedSection = section.replace(
             regEx(/[[\]()]/g),
             ' ',
           );
-          const title = deParenthesizedHeading
+          const [heading] = deParenthesizedSection.split(newlineRegex);
+          const [parenthesizedHeading] = section.split(newlineRegex);
+          const title = heading
             .replace(regEx(/^\s*#*\s*/), '')
             .split(' ')
             .filter(Boolean);
@@ -401,7 +402,7 @@ export async function getReleaseNotesMd(
           const mdHeadingLink =
             project.type === 'azure'
               ? encodeURIComponent(
-                  heading
+                  parenthesizedHeading
                     .replace(regEx(/^\s*#*\s*/), '')
                     .toLowerCase()
                     .replace(regEx(/\s+/), '-'),
