@@ -13,7 +13,11 @@ export const PLATFORM_HOST_TYPES = [
 
 export type PlatformId = (typeof PLATFORM_HOST_TYPES)[number];
 
-export const AZURE_API_USING_HOST_TYPES = ['azure', 'azure-tags', 'azure-changelog'];
+export const AZURE_API_USING_HOST_TYPES = [
+  'azure',
+  'azure-tags',
+  'azure-changelog',
+];
 
 export const GITEA_API_USING_HOST_TYPES = [
   'gitea',
