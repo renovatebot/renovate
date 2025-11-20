@@ -92,7 +92,11 @@ export function getResourceDetectorsFromEnv(
   ]);
   const resourceDetectorsFromEnv = env.OTEL_NODE_RESOURCE_DETECTORS?.split(
     ',',
-  ) ?? ['all'];
+  ) ?? [
+    env.RENOVATE_USE_CLOUD_METADATA_SERVICES?.toLocaleLowerCase() === 'false'
+      ? 'env'
+      : 'all',
+  ];
 
   if (resourceDetectorsFromEnv.includes('all')) {
     return [...resourceDetectors.values()].flat();
