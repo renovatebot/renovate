@@ -2424,8 +2424,6 @@ You should only want to enable this if you are changing the bot account (e.g. fr
 
 Setting this field to `true` in Github or GitLab will also mean that all Issues will be fetched instead of only those by the bot itself.
 
-
-
 ## ignorePresets
 
 Use this if you are extending a complex preset but don't want to use every "sub preset" that it includes.

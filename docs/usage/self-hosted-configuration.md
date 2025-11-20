@@ -879,7 +879,6 @@ Value of `0` means no caching.
 !!! warning
     When you set `httpCacheTtlDays` to `0`, Renovate will remove the cached HTTP data.
 
-
 ## includeMirrors
 
 By default, Renovate does not autodiscover repositories that are mirrors.
