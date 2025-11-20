@@ -30,6 +30,7 @@ import {
 import { gcpDetector } from '@opentelemetry/resource-detector-gcp';
 import { gitHubDetector } from '@opentelemetry/resource-detector-github';
 import {
+  type ResourceDetector,
   detectResources,
   envDetector,
   resourceFromAttributes,
@@ -57,6 +58,55 @@ import {
 let instrumentations: Instrumentation[] = [];
 
 init();
+
+export function getResourceDetectorsFromEnv(
+  env: Record<string, string | undefined>,
+): ResourceDetector[] {
+  const RESOURCE_DETECTOR_AWS = 'aws';
+  const RESOURCE_DETECTOR_GCP = 'gcp';
+  const RESOURCE_DETECTOR_AZURE = 'azure';
+  const RESOURCE_DETECTOR_ENVIRONMENT = 'env';
+  const RESOURCE_DETECTOR_GITHUB = 'github';
+
+  const resourceDetectors = new Map<
+    string,
+    ResourceDetector | ResourceDetector[]
+  >([
+    [RESOURCE_DETECTOR_ENVIRONMENT, envDetector],
+    [RESOURCE_DETECTOR_GCP, gcpDetector],
+    [
+      RESOURCE_DETECTOR_AZURE,
+      [azureAppServiceDetector, azureFunctionsDetector, azureVmDetector],
+    ],
+    [
+      RESOURCE_DETECTOR_AWS,
+      [
+        awsBeanstalkDetector,
+        awsEc2Detector,
+        awsEcsDetector,
+        awsEksDetector,
+        awsLambdaDetector,
+      ],
+    ],
+    [RESOURCE_DETECTOR_GITHUB, gitHubDetector],
+  ]);
+  const resourceDetectorsFromEnv = env.OTEL_NODE_RESOURCE_DETECTORS?.split(
+    ',',
+  ) ?? ['all'];
+
+  if (resourceDetectorsFromEnv.includes('all')) {
+    return [...resourceDetectors.values()].flat();
+  }
+
+  if (resourceDetectorsFromEnv.includes('none')) {
+    return [];
+  }
+
+  return resourceDetectorsFromEnv.flatMap((detector) => {
+    const resourceDetector = resourceDetectors.get(detector);
+    return resourceDetector ?? [];
+  });
+}
 
 export function init(): void {
   if (!isTracingEnabled()) {
@@ -86,19 +136,7 @@ export function init(): void {
   });
 
   const detectedResource = detectResources({
-    detectors: [
-      awsBeanstalkDetector,
-      awsEc2Detector,
-      awsEcsDetector,
-      awsEksDetector,
-      awsLambdaDetector,
-      azureAppServiceDetector,
-      azureFunctionsDetector,
-      azureVmDetector,
-      gcpDetector,
-      gitHubDetector,
-      envDetector,
-    ],
+    detectors: getResourceDetectorsFromEnv(env),
   });
 
   const traceProvider = new NodeTracerProvider({
