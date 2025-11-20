@@ -8,6 +8,9 @@
     "no-emphasis-as-header": false,
     "no-inline-html": false,
     "single-h1": false,
+    "table-column-style": {
+      "style": "aligned",
+    },
   },
 
   // Define glob expressions to use (only valid at root)
