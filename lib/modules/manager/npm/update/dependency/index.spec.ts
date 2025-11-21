@@ -6,7 +6,6 @@ import { Fixtures } from '~test/fixtures';
 const readFixture = (x: string): string => Fixtures.get(x, '../..');
 
 const input01Content = readFixture('inputs/01.json');
-const input01YamlContent = readFixture('inputs/01.yaml');
 const input01GlobContent = readFixture('inputs/01-glob.json');
 const input01PMContent = readFixture('inputs/01-package-manager.json');
 
@@ -27,13 +26,18 @@ describe('modules/manager/npm/update/dependency/index', () => {
     });
 
     it('replaces a dependency of a yaml value', () => {
+      const fileContent = codeBlock`
+        name: renovate-repro
+        dependencies:
+          cheerio: "=0.22.0"
+        `;
       const upgrade = {
         depType: 'dependencies',
         depName: 'cheerio',
         newValue: '0.22.1',
       };
       const testContent = npmUpdater.updateDependency({
-        fileContent: input01YamlContent,
+        fileContent,
         upgrade,
         packageFile: 'outputs/011.yml',
       });
@@ -81,13 +85,18 @@ describe('modules/manager/npm/update/dependency/index', () => {
     });
 
     it('replaces a dependency of a yaml value when the source do not have quotes', () => {
+      const fileContent = codeBlock`
+        name: renovate-repro
+        dependencies:
+          bower: ~1.6.0
+        `;
       const upgrade = {
         depType: 'dependencies',
         depName: 'bower',
         newValue: '~2.0.0',
       };
       const testContent = npmUpdater.updateDependency({
-        fileContent: input01YamlContent,
+        fileContent,
         upgrade,
         packageFile: 'outputs/012.yaml',
       });

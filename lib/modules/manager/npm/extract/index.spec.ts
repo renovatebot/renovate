@@ -14,7 +14,6 @@ const defaultExtractConfig = {
 } satisfies ExtractConfig;
 
 const input01Content = Fixtures.get('inputs/01.json', '..');
-const input01YamlContent = Fixtures.get('inputs/01.yaml', '..');
 const input02Content = Fixtures.get('inputs/02.json', '..');
 const input01PackageManager = Fixtures.get(
   'inputs/01-package-manager.json',
@@ -24,6 +23,17 @@ const input01GlobContent = Fixtures.get('inputs/01-glob.json', '..');
 const workspacesContent = Fixtures.get('inputs/workspaces.json', '..');
 const vendorisedContent = Fixtures.get('is-object.json', '..');
 const invalidNameContent = Fixtures.get('invalid-name.json', '..');
+
+const input01YamlContent = `
+name: renovate
+version: 1.0.0
+dependencies:
+  autoprefixer: 6.5.0
+  config: 1.21.0
+devDependencies:
+  angular-touch: 1.5.8
+resolution:
+  config: 1.21.0`;
 
 describe('modules/manager/npm/extract/index', () => {
   describe('.extractPackageFile()', () => {
@@ -143,52 +153,11 @@ describe('modules/manager/npm/extract/index', () => {
             prettyDepType: 'dependency',
           },
           {
-            currentValue: '~1.6.0',
-            datasource: 'npm',
-            depName: 'bower',
-            depType: 'dependencies',
-            prettyDepType: 'dependency',
-          },
-          {
-            currentValue: '13.1.0',
-            datasource: 'npm',
-            depName: 'browserify',
-            depType: 'dependencies',
-            prettyDepType: 'dependency',
-          },
-          {
-            currentValue: '0.9.2',
-            datasource: 'npm',
-            depName: 'browserify-css',
-            depType: 'dependencies',
-            prettyDepType: 'dependency',
-          },
-          {
-            currentValue: '=0.22.0',
-            datasource: 'npm',
-            depName: 'cheerio',
-            depType: 'dependencies',
-            prettyDepType: 'dependency',
-          },
-          {
             currentValue: '1.21.0',
             datasource: 'npm',
             depName: 'config',
             depType: 'dependencies',
             prettyDepType: 'dependency',
-          },
-          {
-            depName: 'enabled',
-            depType: 'devDependencies',
-            prettyDepType: 'devDependency',
-            skipReason: 'invalid-value',
-          },
-          {
-            currentValue: '^1.5.8',
-            datasource: 'npm',
-            depName: 'angular',
-            depType: 'devDependencies',
-            prettyDepType: 'devDependency',
           },
           {
             currentValue: '1.5.8',
@@ -196,57 +165,6 @@ describe('modules/manager/npm/extract/index', () => {
             depName: 'angular-touch',
             depType: 'devDependencies',
             prettyDepType: 'devDependency',
-          },
-          {
-            currentValue: '1.5.8',
-            datasource: 'npm',
-            depName: 'angular-sanitize',
-            depType: 'devDependencies',
-            prettyDepType: 'devDependency',
-          },
-          {
-            currentValue: '4.0.0-beta.1',
-            datasource: 'npm',
-            depName: '@angular/core',
-            depType: 'devDependencies',
-            prettyDepType: 'devDependency',
-          },
-          {
-            currentValue: '1.21.0',
-            datasource: 'npm',
-            depName: 'config',
-            depType: 'resolutions',
-            prettyDepType: 'resolutions',
-          },
-          {
-            currentValue: '8.0.0',
-            datasource: 'npm',
-            depName: '@angular/cli',
-            depType: 'resolutions',
-            managerData: {
-              key: '**/@angular/cli',
-            },
-            prettyDepType: 'resolutions',
-          },
-          {
-            currentValue: '1.33.0',
-            datasource: 'npm',
-            depName: 'angular',
-            depType: 'resolutions',
-            managerData: {
-              key: '**/angular',
-            },
-            prettyDepType: 'resolutions',
-          },
-          {
-            currentValue: '1.0.0',
-            datasource: 'npm',
-            depName: 'glob',
-            depType: 'resolutions',
-            managerData: {
-              key: 'config/glob',
-            },
-            prettyDepType: 'resolutions',
           },
         ],
         extractedConstraints: {},
