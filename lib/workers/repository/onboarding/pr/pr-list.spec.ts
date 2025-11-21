@@ -136,7 +136,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
 
 
 
-        🚸 Branch creation will be limited to maximum 1 per hour, so it doesn't swamp any CI resources or overwhelm the project. See docs for \`prHourlyLimit\` for details.
+        🚸 Branch creation will be limited to maximum 1 per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`prHourlyLimit\`](https://docs.renovatebot.com/configuration-options/#prhourlylimit) for details.
 
         "
       `);
