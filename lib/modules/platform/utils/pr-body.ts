@@ -10,7 +10,7 @@ export function smartTruncate(input: string, len: number): string {
   if (input.length < len) {
     return input;
   }
-  logger.warn(
+  logger.debug(
     `Truncating PR body due to platform limitation of ${len} characters`,
   );
 

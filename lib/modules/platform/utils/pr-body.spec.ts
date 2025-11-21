@@ -10,7 +10,7 @@ describe('modules/platform/utils/pr-body', () => {
       const body = smartTruncate(prBody, 1000);
       expect(body).toMatchSnapshot();
       expect(body.length < prBody.length).toBe(true);
-      expect(logger.logger.warn).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         'Truncating PR body due to platform limitation of 1000 characters',
       );
     });
@@ -19,7 +19,7 @@ describe('modules/platform/utils/pr-body', () => {
       const body = smartTruncate(prBody, 300);
       expect(body).toMatchSnapshot();
       expect(body).toHaveLength(300);
-      expect(logger.logger.warn).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         'Truncating PR body due to platform limitation of 300 characters',
       );
     });
@@ -27,7 +27,7 @@ describe('modules/platform/utils/pr-body', () => {
     it('truncates to 10', () => {
       const body = smartTruncate('Lorem ipsum dolor sit amet', 10);
       expect(body).toBe('> **Note:*');
-      expect(logger.logger.warn).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         'Truncating PR body due to platform limitation of 10 characters',
       );
     });
