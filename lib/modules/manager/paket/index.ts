@@ -57,7 +57,7 @@ export async function extractPackageFile(
         );
 
         const version = lockVersion?.version;
-        const name = lockVersion?.packageName ?? p.name;
+        const name = lockVersion?.packageName;
         return {
           depType: 'dependencies',
           depName: name,
