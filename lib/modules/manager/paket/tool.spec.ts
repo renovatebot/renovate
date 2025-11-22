@@ -2,7 +2,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { UpdatePackage } from './tool';
-import { getAllPackages, updateAllPackages, updatePackage } from './tool';
+import { updateAllPackages, updatePackage } from './tool';
 import type { ExecResult } from '~test/exec-util';
 import { exec } from '~test/exec-util';
 
@@ -155,30 +155,6 @@ describe('modules/manager/paket/tool', () => {
       await updateAllPackages(packageFilePath, 'GroupA');
 
       expect(execSnapshots).toEqual(['paket update --group GroupA ']);
-    });
-  });
-
-  describe('getAllPackages()', () => {
-    it('return all dependencies', async () => {
-      const execSnapshots = mockExecAll({
-        stderr: '',
-        stdout:
-          'GroupA FAKE - 5.16\n' +
-          'Main dotnet-fable - 2.0.11\n' +
-          'Main FSharp.Core - 9.0.300\n' +
-          'Main xunit - 2.9.3\n',
-      });
-      GlobalConfig.set(adminConfig);
-
-      const result = await getAllPackages(packageFilePath);
-
-      expect(result).toEqual([
-        { group: 'GroupA', name: 'FAKE', version: '5.16' },
-        { group: 'Main', name: 'dotnet-fable', version: '2.0.11' },
-        { group: 'Main', name: 'FSharp.Core', version: '9.0.300' },
-        { group: 'Main', name: 'xunit', version: '2.9.3' },
-      ]);
-      expect(execSnapshots).toEqual(['paket show-installed-packages --silent']);
     });
   });
 });
