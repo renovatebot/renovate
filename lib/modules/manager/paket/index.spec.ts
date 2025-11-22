@@ -29,14 +29,34 @@ describe('modules/manager/paket/index', () => {
 
   describe('extractPackageFile()', () => {
     const config: ExtractConfig = {};
-    const packageFileContent = 'Fake package content';
+    const packageFileContent = `
+source https://api.nuget.org/v3/index.json
+
+nuget Fsharp.Core
+nuget xunit
+
+group GroupA
+  source https://api.nuget.org/v3/index.json
+  nuget Fake
+  nuget xunit
+`;
+    const lockFileName = '/app/test/paket.lock';
+    const lockFileContent = `
+NUGET
+  remote: https://api.nuget.org/v3/index.json
+    FSharp.Core (9.0.300)
+    xunit (2.9.3)
+GROUP GroupA
+NUGET
+  remote: https://api.nuget.org/v3/index.json
+    FAKE (5.16)
+    xunit (2.9.2)
+`;
 
     it('return all packages', async () => {
-      const spy = vi.spyOn(tool, 'getAllPackages');
-      spy.mockResolvedValue([
-        { name: 'FSharp.Core', version: '1.2.3', group: 'Main' },
-        { name: 'XUnit', version: '2.5.0', group: 'Main' },
-      ]);
+      git.getFiles.mockResolvedValueOnce({
+        [lockFileName]: lockFileContent,
+      });
 
       const result = await extractPackageFile(
         packageFileContent,
@@ -50,22 +70,40 @@ describe('modules/manager/paket/index', () => {
             depType: 'dependencies',
             depName: 'FSharp.Core',
             packageName: 'FSharp.Core',
-            currentVersion: '1.2.3',
+            currentVersion: '9.0.300',
             datasource: NugetDatasource.id,
             rangeStrategy: 'update-lockfile',
-            lockedVersion: '1.2.3',
+            lockedVersion: '9.0.300',
           },
           {
             depType: 'dependencies',
-            depName: 'XUnit',
-            packageName: 'XUnit',
-            currentVersion: '2.5.0',
+            depName: 'xunit',
+            packageName: 'xunit',
+            currentVersion: '2.9.3',
             datasource: NugetDatasource.id,
             rangeStrategy: 'update-lockfile',
-            lockedVersion: '2.5.0',
+            lockedVersion: '2.9.3',
+          },
+          {
+            depType: 'dependencies',
+            depName: 'FAKE',
+            packageName: 'FAKE',
+            currentVersion: '5.16',
+            datasource: NugetDatasource.id,
+            rangeStrategy: 'update-lockfile',
+            lockedVersion: '5.16',
+          },
+          {
+            depType: 'dependencies',
+            depName: 'xunit',
+            packageName: 'xunit',
+            currentVersion: '2.9.2',
+            datasource: NugetDatasource.id,
+            rangeStrategy: 'update-lockfile',
+            lockedVersion: '2.9.2',
           },
         ],
-        lockFiles: ['/app/test/paket.lock'],
+        lockFiles: [lockFileName],
       });
     });
   });
