@@ -180,6 +180,13 @@ function findDependencies(precommitFile: PreCommitConfig): PackageDependency[] {
               packageDependencies.push(dep);
             }
           });
+        } else if (hook.language === 'golang') {
+          // hook.additional_dependencies?.map((req) => {
+          //   const dep = parseLine(req);
+          //   if (dep) {
+          //     packageDependencies.push(dep);
+          //   }
+          // });
         }
       });
     }
