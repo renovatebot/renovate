@@ -1,0 +1,38 @@
+# Test fixture for APK datasource
+# This represents an Alpine Linux package repository structure
+
+# Example repository URLs that would be used:
+# - https://dl-cdn.alpinelinux.org/alpine/v3.19/main
+# - https://dl-cdn.alpinelinux.org/alpine/v3.19/community
+# - https://packages.wolfi.dev/os
+
+# Example package entries that would be found in APKINDEX.tar.gz:
+# P:nginx
+# V:1.24.0-r0
+# T:nginx web server
+# U:https://nginx.org/
+# S:1234567
+# I:1234567890
+# o:nginx
+# A:x86_64
+# L:BSD-2-Clause
+# D:openssl
+# p:nginx
+# c:
+# r:
+
+# Example packages that would be extracted:
+packages:
+  - name: nginx
+    version: 1.24.0-r0
+    description: nginx web server
+    url: https://nginx.org/
+    size: 1234567
+    buildDate: 1234567890
+    origin: nginx
+    arch: x86_64
+    license: BSD-2-Clause
+    depends: [openssl]
+    provides: [nginx]
+    conflicts: []
+    replaces: []
