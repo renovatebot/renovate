@@ -110,6 +110,18 @@ NUGET
         lockFiles: [lockFileName],
       });
     });
+
+    it('throw error if not found lock file', async () => {
+      git.getFiles.mockResolvedValueOnce({});
+
+      const result = extractPackageFile(
+        packageFileContent,
+        packageFileName,
+        config,
+      );
+
+      await expect(result).rejects.toThrowError();
+    });
   });
 
   describe('updateArtifacts()', () => {
