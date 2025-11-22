@@ -1,4 +1,5 @@
-import { Dependency, parse } from './lock-file';
+import type { Dependency } from './lock-file';
+import { parse } from './lock-file';
 
 describe('modules/manager/paket/parsers/lock-file', () => {
   describe('parse()', () => {
