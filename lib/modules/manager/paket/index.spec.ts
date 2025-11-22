@@ -16,7 +16,7 @@ import { fs, git } from '~test/util';
 describe('modules/manager/paket/index', () => {
   const packageFileName = '/app/test/paket.dependencies';
 
-  beforeEach(() => {
+  function initializeMock() {
     vi.mock('../../../util/fs');
     fs.getSiblingFileName.mockImplementation(
       (fileName: string, siblingName: string) => {
@@ -25,9 +25,13 @@ describe('modules/manager/paket/index', () => {
         return '/app/test/paket.lock';
       },
     );
-  });
+  }
 
   describe('extractPackageFile()', () => {
+    beforeEach(() => {
+      initializeMock();
+    });
+
     const config: ExtractConfig = {};
     const packageFileContent = `
 source https://api.nuget.org/v3/index.json
@@ -109,6 +113,10 @@ NUGET
   });
 
   describe('updateArtifacts()', () => {
+    beforeEach(() => {
+      initializeMock();
+    });
+
     const updateArtifact: UpdateArtifact = {
       config: {},
       packageFileName,
@@ -162,6 +170,10 @@ NUGET
   });
 
   describe('updateLockedDependency()', () => {
+    beforeEach(() => {
+      initializeMock();
+    });
+
     const lockFileName = '/app/test/paket.lock';
     const config: UpdateLockedConfig = {
       packageFile: packageFileName,
