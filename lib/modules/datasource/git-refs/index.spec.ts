@@ -182,7 +182,7 @@ describe('modules/datasource/git-refs/index', () => {
       });
     });
 
-    it('returns nil if remote call throws exception', async () => {
+    it('returns null if remote call throws exception', async () => {
       gitMock.listRemote.mockRejectedValue(new Error());
 
       const digest = await new GitRefsDatasource().getDigest({
