@@ -1,7 +1,6 @@
 import { quote } from 'shlex';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import { newlineRegex } from '../../../util/regex';
 
 export interface UpdatePackage {
   filePath: string;
@@ -32,28 +31,4 @@ export async function updateAllPackages(
   group?: string,
 ): Promise<void> {
   await updatePackage({ filePath, group });
-}
-
-export async function getAllPackages(
-  filePath: string,
-): Promise<{ name: string; version: string; group: string }[]> {
-  const execOptions: ExecOptions = {
-    cwdFile: filePath,
-  };
-  const result = await exec(
-    `paket show-installed-packages --silent`,
-    execOptions,
-  );
-  return result.stdout
-    .split(newlineRegex)
-    .map((line) => line.split(' - '))
-    .filter((line) => line.length === 2)
-    .map((line) => {
-      const [group, name] = line[0].trim().split(' ');
-      return {
-        group,
-        name,
-        version: line[1].trim(),
-      };
-    });
 }
