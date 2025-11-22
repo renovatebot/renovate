@@ -12,7 +12,9 @@ import type {
   UpdateLockedConfig,
   UpdateLockedResult,
 } from '../types';
-import { getAllPackages, updateAllPackages, updatePackage } from './tool';
+import { parse as parseDependenciesFile } from './parsers/dependencies-file';
+import { parse as parseLockFile } from './parsers/lock-file';
+import { updateAllPackages, updatePackage } from './tool';
 
 export const displayName = 'Paket';
 export const url = 'https://fsprojects.github.io/Paket/';
@@ -25,28 +27,50 @@ export const defaultConfig = {
 
 export const supportedDatasources = [NugetDatasource.id];
 
+interface PaketPackage {
+  paketGroupName: string;
+}
 export async function extractPackageFile(
-  _content: string,
+  content: string,
   packageFile: string,
   _config: ExtractConfig,
-): Promise<PackageFileContent> {
+): Promise<PackageFileContent<PaketPackage>> {
   logger.debug(`paket.extractPackageFile(${packageFile})`);
 
-  const allPackages = await getAllPackages(packageFile);
-
-  const deps: PackageDependency[] = allPackages.map((p) => {
-    return {
-      depType: 'dependencies',
-      depName: p.name,
-      packageName: p.name,
-      currentVersion: p.version,
-      datasource: NugetDatasource.id,
-      rangeStrategy: 'update-lockfile',
-      lockedVersion: p.version,
-    };
-  });
-
   const lockFileName = getSiblingFileName(packageFile, 'paket.lock');
+  const lockFileContentMap = await getFiles([lockFileName]);
+  const lockFileContent = lockFileContentMap[lockFileName];
+  if (!lockFileContent) {
+    throw new Error(`Impossible to find paket lock file: ${lockFileName}`);
+  }
+
+  const parsedPackageFile = parseDependenciesFile(content);
+  const parsedLockFile = parseLockFile(lockFileContent);
+
+  const deps: PackageDependency[] = parsedPackageFile.groups.flatMap(
+    (group) => {
+      return group.nugetPackages.map((p) => {
+        const lockVersion = parsedLockFile.find(
+          (d) =>
+            d.groupName === group.groupName &&
+            d.packageName.toUpperCase() === p.name.toUpperCase(),
+        );
+
+        const version = lockVersion?.version;
+        const name = lockVersion?.packageName ?? p.name;
+        return {
+          depType: 'dependencies',
+          depName: name,
+          packageName: name,
+          currentVersion: version,
+          datasource: NugetDatasource.id,
+          rangeStrategy: 'update-lockfile',
+          lockedVersion: version,
+        };
+      });
+    },
+  );
+
   return {
     deps,
     lockFiles: [lockFileName],
@@ -90,9 +114,7 @@ export async function updateArtifacts(
 export async function updateLockedDependency(
   config: UpdateLockedConfig,
 ): Promise<UpdateLockedResult> {
-  logger.debug(
-    `paket.updateLockedDependency(${config.lockFile}, ${JSON.stringify(config)})`,
-  );
+  logger.debug(`paket.updateLockedDependency(${config.lockFile}})`);
 
   const existingLockFileContentMap = await getFiles([config.lockFile]);
 
