@@ -224,6 +224,13 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
         config.branchCommits[ref.replace('refs/heads/', '')] =
           sha as LongCommitSha;
       });
+
+    if (config.virtualBranches?.length) {
+      for (const branch of config.virtualBranches) {
+        config.branchCommits[branch.name] = branch.sha;
+      }
+    }
+
     logger.trace({ branchCommits: config.branchCommits }, 'branch commits');
     /* v8 ignore next 11 -- TODO: add test */
   } catch (err) {
@@ -239,8 +246,8 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
   }
 }
 
-export async function fetchRevSpec(revSpec: string): Promise<void> {
-  await gitRetry(() => git.fetch(['origin', revSpec]));
+export async function fetchRevSpec(...revSpec: string[]): Promise<void> {
+  await gitRetry(() => git.fetch(['origin', ...revSpec]));
 }
 
 export async function initRepo(args: StorageConfig): Promise<void> {
@@ -525,6 +532,14 @@ export async function syncGit(): Promise<void> {
     await fetchBranchCommits(false);
   }
 
+  if (config.virtualBranches?.length) {
+    const refspecs = config.virtualBranches.map(
+      (branch) => `${branch.ref}:refs/remotes/origin/${branch.name}`,
+    );
+    await fetchRevSpec(...refspecs);
+    logger.debug(`Fetched ${config.virtualBranches.length} virtual branches`);
+  }
+
   config.currentBranchSha = (
     await git.revparse('HEAD')
   ).trim() as LongCommitSha;
@@ -643,6 +658,41 @@ export async function checkoutBranchFromRemote(
     }
     throw err;
   }
+}
+
+/**
+ * Delete a virtual branch that was initialized from a non-standard ref.
+ * Used by platforms like Gerrit where changes are represented as refs instead of regular branches.
+ *
+ * @param branchName Virtual branch name to delete
+ */
+export async function deleteVirtualBranch(branchName: string): Promise<void> {
+  await syncGit();
+  // Delete local branch if it exists
+  try {
+    await deleteLocalBranch(branchName);
+    logger.debug(`Deleted local branch: ${branchName}`);
+  } catch (err) {
+    const errChecked = checkForPlatformFailure(err);
+    /* v8 ignore next 3 -- TODO: add test */
+    if (errChecked) {
+      throw errChecked;
+    }
+    logger.debug(
+      { err, branchName },
+      `No local branch to delete with name: ${branchName}`,
+    );
+  }
+
+  // Delete remote-tracking ref that was created from refspec
+  // Note: git update-ref -d succeeds even if ref doesn't exist
+  await git.raw(['update-ref', '-d', `refs/remotes/origin/${branchName}`]);
+  logger.debug(
+    `Deleted remote-tracking ref: refs/remotes/origin/${branchName}`,
+  );
+
+  // Clean up branch commit tracking
+  delete config.branchCommits[branchName];
 }
 
 export async function resetHardFromRemote(
