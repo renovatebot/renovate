@@ -81,7 +81,7 @@ describe('workers/global/config/parse/additional-config-file', () => {
         "platform": "github",
         "token":"abcdef",
         "onboarding": false,
-        "gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"
+        "gitAuthor": "Renovate <renovate@whitesourcesoftware.com>"
         "onboardingConfig": {
           "extends": ["config:recommended"],
         },

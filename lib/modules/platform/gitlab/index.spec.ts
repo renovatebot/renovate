@@ -58,7 +58,7 @@ describe('modules/platform/gitlab/index', () => {
       .get('/api/v4/user')
       .reply(200, {
         email: 'a@b.com',
-        name: 'Renovate Bot',
+        name: 'Renovate',
       })
       .get('/api/v4/version')
       .reply(200, {
@@ -89,7 +89,7 @@ describe('modules/platform/gitlab/index', () => {
     it('should default to gitlab.com', async () => {
       httpMock.scope(gitlabApiHost).get('/api/v4/user').reply(200, {
         email: 'a@b.com',
-        name: 'Renovate Bot',
+        name: 'Renovate',
       });
       httpMock.scope(gitlabApiHost).get('/api/v4/version').reply(200, {
         version: '13.3.6-ee',
@@ -109,7 +109,7 @@ describe('modules/platform/gitlab/index', () => {
         .get('/user')
         .reply(200, {
           email: 'a@b.com',
-          name: 'Renovate Bot',
+          name: 'Renovate',
         })
         .get('/version')
         .reply(200, {
@@ -461,7 +461,7 @@ describe('modules/platform/gitlab/index', () => {
         .get('/api/v4/user')
         .reply(200, {
           email: 'a@b.com',
-          name: 'Renovate Bot',
+          name: 'Renovate',
         })
         .get('/api/v4/version')
         .reply(200, {
@@ -2053,7 +2053,7 @@ describe('modules/platform/gitlab/index', () => {
       .get('/api/v4/user')
       .reply(200, {
         email: 'a@b.com',
-        name: 'Renovate Bot',
+        name: 'Renovate',
       })
       .get('/api/v4/version')
       .reply(200, {

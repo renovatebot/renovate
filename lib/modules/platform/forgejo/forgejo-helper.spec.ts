@@ -65,7 +65,7 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
   const otherMockUser: User & Required<Pick<User, 'full_name'>> = {
     ...mockUser,
     username: 'renovate',
-    full_name: 'Renovate Bot',
+    full_name: 'Renovate',
     email: 'renovate@example.com',
   };
 

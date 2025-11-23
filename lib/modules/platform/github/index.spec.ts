@@ -399,7 +399,7 @@ describe('modules/platform/github/index', () => {
       await github.initPlatform({
         endpoint: githubApiHost,
         username: 'renovate-bot',
-        gitAuthor: 'Renovate Bot',
+        gitAuthor: 'Renovate',
         token: 'x-access-token:123test',
       });
       httpMock
@@ -427,7 +427,7 @@ describe('modules/platform/github/index', () => {
         endpoint: githubApiHost,
         username: 'self-hosted-renovate[bot]',
         gitAuthor:
-          'Self-hosted Renovate Bot <123456+self-hosted-renovate[bot]@users.noreply.github.com>',
+          'Self-hosted Renovate <123456+self-hosted-renovate[bot]@users.noreply.github.com>',
         token: 'ghs_123test',
       });
       httpMock

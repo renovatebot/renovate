@@ -98,7 +98,7 @@ The basic idea is that you create a new `packageRules` entry and describe what k
 }
 ```
 
-You may even configure Renovate bot to ask for approval for _all_ updates.
+You may even configure Renovate to ask for approval for _all_ updates.
 The `dependencyDashboardApproval` config option is outside of a `packageRules` array, and so applies to all updates:
 
 ```json
