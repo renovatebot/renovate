@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { parseJson } from '../../../util/common';
+import { getEnv } from '../../../util/env';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import { regEx } from '../../../util/regex';
@@ -44,7 +45,10 @@ export const id = 'gerrit';
 
 const defaults: {
   endpoint?: string;
-} = {};
+  version: string;
+} = {
+  version: '0.0.0',
+};
 
 let config: {
   repository?: string;
@@ -60,7 +64,7 @@ export function writeToConfig(newConfig: typeof config): void {
   config = { ...config, ...newConfig };
 }
 
-export function initPlatform({
+export async function initPlatform({
   endpoint,
   username,
   password,
@@ -77,10 +81,32 @@ export function initPlatform({
   config.gerritUsername = username;
   defaults.endpoint = ensureTrailingSlash(endpoint);
   setBaseUrl(defaults.endpoint);
+
+  let gerritVersion: string;
+  try {
+    const env = getEnv();
+    /* v8 ignore start: experimental feature */
+    if (env.RENOVATE_X_PLATFORM_VERSION) {
+      gerritVersion = env.RENOVATE_X_PLATFORM_VERSION;
+    } /* v8 ignore stop */ else {
+      gerritVersion = await client.getVersion();
+    }
+    logger.debug('Gerrit version is: ' + gerritVersion);
+    // Example: 3.13.0-rc3-148-gb478dbbb57
+    [gerritVersion] = gerritVersion.split('-');
+    defaults.version = gerritVersion;
+  } catch (err) {
+    logger.debug(
+      { err },
+      'Error authenticating with Gerrit. Check your credentials',
+    );
+    throw new Error('Init: Authentication failure');
+  }
+
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
   };
-  return Promise.resolve(platformConfig);
+  return platformConfig;
 }
 
 /**
@@ -112,7 +138,7 @@ export async function initRepo({
   };
   const baseUrl = defaults.endpoint!;
   const url = getGerritRepoUrl(repository, baseUrl);
-  configureScm(repository, config.gerritUsername!);
+  configureScm(repository, config.gerritUsername!, defaults.version);
   await git.initRepo({ url });
 
   //abandon "open" and "rejected" changes at startup
@@ -120,6 +146,7 @@ export async function initRepo({
     branchName: '',
     state: 'open',
     label: '-2',
+    gerritVersion: defaults.version,
   });
   for (const change of rejectedChanges) {
     await client.abandonChange(
@@ -144,6 +171,7 @@ export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
       ...findPRConfig,
       singleChange: true,
       requestDetails: REQUEST_DETAILS_FOR_PRS,
+      gerritVersion: defaults.version,
     })
   ).pop();
   return change
@@ -193,6 +221,7 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       state: 'open',
       singleChange: true,
       requestDetails: REQUEST_DETAILS_FOR_PRS,
+      gerritVersion: defaults.version,
     })
   ).pop();
   if (change === undefined) {
@@ -229,6 +258,7 @@ export async function getBranchPr(
       targetBranch,
       singleChange: true,
       requestDetails: REQUEST_DETAILS_FOR_PRS,
+      gerritVersion: defaults.version,
     })
   ).pop();
   return change
@@ -242,6 +272,7 @@ export async function getPrList(): Promise<Pr[]> {
   const changes = await client.findChanges(config.repository!, {
     branchName: '',
     requestDetails: REQUEST_DETAILS_FOR_PRS,
+    gerritVersion: defaults.version,
   });
   return changes.map((change) => mapGerritChangeToPr(change)).filter(isTruthy);
 }
@@ -279,6 +310,7 @@ export async function getBranchStatus(
       branchName,
       singleChange: true,
       requestDetails: ['LABELS', 'SUBMITTABLE', 'CHECK'],
+      gerritVersion: defaults.version,
     })
   ).pop();
   if (change) {
@@ -317,6 +349,7 @@ export async function getBranchStatusCheck(
         state: 'open',
         singleChange: true,
         requestDetails: ['LABELS'],
+        gerritVersion: defaults.version,
       })
     ).pop();
     if (change) {
@@ -353,6 +386,7 @@ export async function setBranchStatus(
         state: 'open',
         singleChange: true,
         requestDetails: ['LABELS'],
+        gerritVersion: defaults.version,
       })
     ).pop();
 
