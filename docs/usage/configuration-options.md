@@ -2981,6 +2981,21 @@ For example, if you want to upgrade to Angular v1.5 but _not_ to `angular` v1.6 
 
 Renovate calculates the valid syntax for this at runtime, because it depends on the dynamic versioning scheme.
 
+You can also use the template fields: `currentVersion`, `major`, `minor` and `patch` with `allowedVersions`.
+
+For example, if you want to upgrade to Angular to only the next major, you could set `allowedVersions` like this:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["angular"],
+      "allowedVersions": "<={{add major 1}}"
+    }
+  ]
+}
+```
+
 <!-- prettier-ignore -->
 !!! warning
     `allowedVersions` and `matchUpdateTypes` cannot be used in the same package rule.
