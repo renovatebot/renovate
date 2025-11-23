@@ -250,3 +250,57 @@ To this:
   ref: 2-4-1
   file: 'ci-include-docker-lint-base.yml'
 ```
+
+#### Handling scenarios where dependency name must be extracted from the file path
+
+Some repositories structure dependencies so that the dependency name is embedded in the file path itself.
+Two common patterns are:
+
+```bash
+packages/
+  <package-name>/
+
+# or
+
+packages/
+  <package-name-1>/
+    version.txt
+  <package-name-2>/
+    version.txt
+```
+
+In these situations, the regex manager may need to derive the dependency name from either the filename or the directory containing that file.
+
+Renovate exposes two template fields that help with this:
+
+1. `packageFile`: Filename of the matched file
+1. `packageFileDir`: Directory path where the file exists (relative to repo root)
+
+For example, if you package file exists at `home/packages/package.json`, then:
+
+`packageFile` will be `package.json`
+`packageFileDir` will be `home/packages`
+
+These values can be referenced inside `depNameTemplate` or `packageNameTemplate`
+
+If your dependency folder looks like:
+
+```bash
+packages/my-lib/version.txt
+```
+
+You can configure the regex manager like:
+
+```json
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["packages/.*/version\\.txt$"],
+      "matchStrings": ["(?<currentValue>.+)"],
+      "depNameTemplate": "{{lookup (split packageFileDir '/') 1 }}",
+      "datasourceTemplate": "github-tags"
+    }
+  ]
+}
+```
