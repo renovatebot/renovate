@@ -79,6 +79,7 @@ export interface RenovateSharedConfig {
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
+  prBodyHeadingDefinitions?: Record<string, string>;
   prCreation?: 'immediate' | 'not-pending' | 'status-success' | 'approval';
   prPriority?: number;
   productLinks?: Record<string, string>;
