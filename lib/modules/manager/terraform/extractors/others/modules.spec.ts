@@ -1,3 +1,4 @@
+import type { PackageDependency } from '../../../types';
 import {
   ModuleExtractor,
   azureDevOpsSshRefMatchRegex,
@@ -6,6 +7,15 @@ import {
   githubRefMatchRegex,
   hostnameMatchRegex,
 } from './modules';
+
+function makeDep(source: string | undefined): PackageDependency {
+  return {
+    depName: 'foo',
+    depType: 'module',
+    currentValue: '0.0.0',
+    managerData: { source },
+  };
+}
 
 describe('modules/manager/terraform/extractors/others/modules', () => {
   const extractor = new ModuleExtractor();
@@ -338,5 +348,20 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
         hostname: 'example.com',
       });
     });
+  });
+
+  test('Gitlab Dedicated URL', () => {
+    const dep = extractor.analyseTerraformModule(
+      makeDep(
+        'git::https://example.gitlab-dedicated.com/group/subgroup/repo.git?ref=v2.0.0',
+      ),
+    );
+    expect(dep.depName).toBe(
+      'example.gitlab-dedicated.com/group/subgroup/repo',
+    );
+    expect(dep.packageName).toBe(
+      'https://example.gitlab-dedicated.com/group/subgroup/repo',
+    );
+    expect(dep.currentValue).toBe('v2.0.0');
   });
 });
