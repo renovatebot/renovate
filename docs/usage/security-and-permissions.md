@@ -88,7 +88,7 @@ Keep reading to learn more.
 Since the update process runs with the _same_ user privileges as the Renovate process, it inherently has access to the same information and resources.
 This includes sensitive data that may be stored within the environment where Renovate is hosted.
 
-###### Execution of code
+###### Execution of code (insider attack)
 
 In certain scenarios, code from the monitored repository is executed as part of the update process.
 This is particularly true during, for example:
@@ -100,6 +100,40 @@ These scripts can contain arbitrary code.
 This may pose a significant security risk if the repository's integrity is compromised, or if the repository maintainers have malicious intentions.
 
 Because such insider attack is an inherent and unavoidable risk, the Renovate project will not issue CVEs for such attacks or weaknesses other than in exceptional circumstances.
+
+###### Execution of code (outsider attack)
+
+Separately, there are also opportunities for malicious external code to execute, as part of Renovate's update process.
+
+Below are _some_ of the options, but note that this is **not exhaustive**.
+
+**??**, but not limited to:
+
+- performing [lock file maintenance](./configuration-options.md#lockfilemaintenance)
+- `npm install` **??** - as part of
+- [performing Gradle Verification Metadata](./modules/manager/gradle.md#dependency-verification) (via `./gradlew ...`)
+  - as the Gradle buildscript is evaluated at this time, which means that **??**
+- executing any `postUpgradeTasks` in a way that may use an updated dependency
+  - i.e. `make docs` where that calls your **??**, and that has **??** updated
+
+- `gomodUpdateImportPaths`
+
+Note that for a number of these, this is related to (arguably) insecure defaults in package managers.
+
+For these purposes, it is is important to know that **??**.
+
+Separately to internally developed code being executed as part of Renovate's update process, there are also opportunities for malicious **??**
+
+In particular, this is **??** where an external dependency can be **??**.
+
+In the case a **??**, then we can **??**.
+
+This is particularly true during, for example:
+
+- `postUpgradeTasks`, where scripts specified by the repository are run
+- when a wrapper within the repository is called, like `gradlew`
+
+However, this is also true because
 
 ##### Centralized logging and sensitive information management
 
@@ -131,6 +165,8 @@ This reduces the impact of any malicious code execution.
 
 Regularly review the actions taken by `postUpgradeTasks` to make sure they do not execute unnecessary or risky operations.
 Consider implementing a review process for changes to these tasks within repositories.
+
+Where possible, restrict the commands executed to an allowlist you control, and **??**
 
 ###### Use security tools
 

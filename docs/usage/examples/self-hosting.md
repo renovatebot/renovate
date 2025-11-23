@@ -1,5 +1,9 @@
 # Self-Hosting Examples
 
+<!-- prettier-ignore -->
+!!! warning
+    All self-hosted Renovate instances must operate under a trust relationship with the developers of the monitored repositories. Because of this, there are [security implications](./security-and-permissions.md#security-awareness-for-self-hosted-renovate-instances) when running a self-hosted Renovate instance, which you must consider carefully.
+
 ## Installing Renovate OSS CLI
 
 ### npmjs
