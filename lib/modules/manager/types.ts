@@ -238,6 +238,7 @@ export interface UpdateArtifact<T = Record<string, unknown>> {
 export interface UpdateDependencyConfig<T = Record<string, any>> {
   fileContent: string;
   upgrade: Upgrade<T>;
+  packageFile?: string;
 }
 
 export interface BumpPackageVersionResult {

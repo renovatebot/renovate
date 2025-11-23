@@ -263,6 +263,7 @@ export async function getUpdatedPackageFiles(
       let newContent = await updateDependency({
         fileContent: packageFileContent!,
         upgrade,
+        packageFile,
       });
       newContent = await applyManagerBumpPackageVersion(newContent, upgrade);
       if (!newContent) {
