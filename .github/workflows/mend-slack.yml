@@ -35,6 +35,6 @@ jobs:
           method: chat.postMessage
           payload: |
             channel: 'C05NLTMGCJC'
-            text: '<${{ github.event.discussion.html_url }}|${{ github.event.discussion.title }}> (${{ github.event.discussion.created_at }}), ${{ steps.timeago.outputs.ago }})'
+            text: '<${{ github.event.discussion.html_url }}|${{ github.event.discussion.title }}> (${{ github.event.discussion.created_at }}, ${{ steps.timeago.outputs.ago }})'
           errors: true
           token: ${{ secrets.SLACK_BOT_TOKEN }}
