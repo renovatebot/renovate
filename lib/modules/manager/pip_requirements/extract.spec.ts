@@ -10,7 +10,6 @@ const requirements5 = Fixtures.get('requirements5.txt');
 const requirements6 = Fixtures.get('requirements6.txt');
 const requirements7 = Fixtures.get('requirements7.txt');
 const requirements8 = Fixtures.get('requirements8.txt');
-const requirements9 = Fixtures.get('requirements9.in');
 const requirementsWithEnvMarkers = Fixtures.get('requirements-env-markers.txt');
 const requirementsGitPackages = Fixtures.get('requirements-git-packages.txt');
 
@@ -183,7 +182,7 @@ some-package==0.3.1`;
     });
 
     it('should handle package with extras and no version specifiers', () => {
-      const res = extractPackageFile(requirements9);
+      const res = extractPackageFile('Django[argon2]');
       expect(res).toMatchObject({
         deps: [
           {
