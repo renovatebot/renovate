@@ -203,3 +203,12 @@ export function mapMergeStrategy(
       return GitPullRequestMergeStrategy.NoFastForward;
   }
 }
+
+export function getWorkItemTitle(rawTitle: string, repository: string): string {
+  const repoName = repository.split('/').pop();
+  const isDependencyDashboard = rawTitle.includes('Dependency Dashboard');
+  if (isDependencyDashboard && !rawTitle.includes(`[${repoName}]`)) {
+    return `[${repoName}] ${rawTitle}`;
+  }
+  return rawTitle;
+}
