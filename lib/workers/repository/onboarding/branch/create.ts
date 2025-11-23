@@ -52,6 +52,6 @@ export async function createOnboardingBranch(
     message: commitMessage,
     platformCommit: config.platformCommit,
     force: true,
-    labels: config.labels,
+    // TODO: add prTitle for Gerrit
   });
 }
