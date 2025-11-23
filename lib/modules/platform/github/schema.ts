@@ -12,6 +12,7 @@ const Package = z.object({
     z.literal('rust'),
     z.literal('composer'),
     z.literal('go'),
+    z.literal('actions'),
   ]),
   name: z.string(),
 });
