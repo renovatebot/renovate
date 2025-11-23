@@ -38,7 +38,6 @@ export class GlobalConfig {
     's3Endpoint',
     's3PathStyle',
     'cachePrivatePackages',
-    'ignorePrAuthor',
   ];
 
   private static config: RepoGlobalConfig = {};
