@@ -366,5 +366,3 @@ exports[`modules/manager/pip_requirements/extract > extractPackageFile() > shoul
   ],
 }
 `;
-
-exports[`modules/manager/pip_requirements/extract > extractPackageFile() > should handle package with extras and no version specifiers 1`] = `null`;

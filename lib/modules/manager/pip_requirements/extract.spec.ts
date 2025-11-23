@@ -184,8 +184,16 @@ some-package==0.3.1`;
 
     it('should handle package with extras and no version specifiers', () => {
       const res = extractPackageFile(requirements9);
-      expect(res).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(1);
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: undefined,
+            datasource: 'pypi',
+            depName: 'Django',
+            packageName: 'django',
+          },
+        ],
+      });
     });
 
     it('should handle dependency and ignore env markers', () => {
