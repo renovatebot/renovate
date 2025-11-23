@@ -122,6 +122,50 @@ NUGET
 
       await expect(result).rejects.toThrowError();
     });
+
+    it('return package name of dependencies file if unknown in lock file', async () => {
+      git.getFiles.mockResolvedValueOnce({
+        [lockFileName]: `
+NUGET
+  remote: https://api.nuget.org/v3/index.json
+    FSharp.Core (9.0.300)
+`,
+      });
+      const packageFileContent = `
+source https://api.nuget.org/v3/index.json
+
+nuget Fsharp.Core
+nuget xunit
+`;
+
+      const result = await extractPackageFile(
+        packageFileContent,
+        packageFileName,
+        config,
+      );
+
+      expect(result).toEqual({
+        deps: [
+          {
+            depType: 'dependencies',
+            depName: 'FSharp.Core',
+            packageName: 'FSharp.Core',
+            currentVersion: '9.0.300',
+            datasource: NugetDatasource.id,
+            rangeStrategy: 'update-lockfile',
+            lockedVersion: '9.0.300',
+          },
+          {
+            depType: 'dependencies',
+            depName: 'xunit',
+            packageName: 'xunit',
+            datasource: NugetDatasource.id,
+            rangeStrategy: 'update-lockfile',
+          },
+        ],
+        lockFiles: [lockFileName],
+      });
+    });
   });
 
   describe('updateArtifacts()', () => {
