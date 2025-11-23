@@ -34,24 +34,23 @@ The following configuration options can be used to enable and tune the functiona
 
 <!-- prettier-ignore -->
 !!! warning
-    Renovate 42 changes the behaviour detailed below.
+    Renovate 42 changed the behaviour detailed below.
     In Renovate 42, the absence of a release timestamp will be treated as if the release is not yet past the timestamp, which provides a safer default.
-    Prior to Renovate 42, you can opt into this behaviour using [`minimumReleaseAgeBehaviour=timestamp-required`](../configuration-options.md#minimumreleaseagebehaviour) (added in 41.150.0)
+    Prior to Renovate 42, we would treat the dependency without a release timestamp **as if it has passed** the `minimumReleaseAge`, and will **immediately suggest that dependency update**.
+    If using Renovate prior you can opt into the more secure behaviour (which is default in Renovate 42) by using [`minimumReleaseAgeBehaviour=timestamp-required`](../configuration-options.md#minimumreleaseagebehaviour) (added in 41.150.0)
 
 Consider that:
 
 <!-- markdownlint-disable MD007 -->
 <!-- prettier-ignore -->
 - we have set `minimumReleaseAge` to apply to a given dependency
-- that dependency has 3 updates available
-    - 2 of which have a release timestamp that has not yet passed
+- that dependency has 4 updates available
+    - 1 of which has a release timestamp that has passed
+    - 2 of which have a release timestamp that has _not_ yet passed
     - 1 of which does not have a release timestamp
 
-The current behaviour in Renovate is that we will treat the dependency without a release timestamp **as if it has passed** the `minimumReleaseAge`, and will **immediately suggest that dependency update**.
-
-<!-- prettier-ignore -->
-!!! warning
-    This is counter-intuitive behaviour, which is why Renovate 42 changes this behaviour to be more predictable.
+Renovate will create a PR for the 1 dependency update that has passed the release timestamp, and the others will be marked as "Pending Status Checks" on the Dependency Dashboard.
+As time goes on, if the 2 updates with a release timestamp are now passed the minimum release age, Renovate will add them to the PR (or create a new one).
 
 ### What happens when an update is not yet passing the minimum release age checks?
 
