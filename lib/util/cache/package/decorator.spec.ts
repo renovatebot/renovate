@@ -334,7 +334,7 @@ describe('util/cache/package/decorator', () => {
       it('handles concurrent calls through mutex', async () => {
         class Class {
           @cache({ namespace: '_test-namespace', key: 'concurrent-key' })
-          public async fn(): Promise<string> {
+          public fn(): Promise<string> {
             return getValue();
           }
         }
@@ -360,7 +360,7 @@ describe('util/cache/package/decorator', () => {
             key: 'race-key',
             cacheable: () => false,
           })
-          public async fn(): Promise<string> {
+          public fn(): Promise<string> {
             return getValue();
           }
         }
@@ -392,7 +392,7 @@ describe('util/cache/package/decorator', () => {
             key: 'backend-key',
             ttlMinutes: 30,
           })
-          public async fn(): Promise<string> {
+          public fn(): Promise<string> {
             return getValue();
           }
         }
@@ -488,7 +488,7 @@ describe('util/cache/package/decorator', () => {
             key: 'no-cache-key',
             ttlMinutes: 30,
           })
-          public async fn(): Promise<string> {
+          public fn(): Promise<string> {
             return getValue();
           }
         }
