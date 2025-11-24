@@ -2,9 +2,6 @@ import fs from 'fs-extra';
 import type { PushResult } from 'simple-git';
 import Git from 'simple-git';
 import tmp from 'tmp-promise';
-import { logger } from '~test/util';
-import * as git from '.';
-import { setNoVerify } from '.';
 import { GlobalConfig } from '../../config/global';
 import {
   CONFIG_VALIDATION,
@@ -18,6 +15,9 @@ import * as _behindBaseCache from './behind-base-branch-cache';
 import * as _conflictsCache from './conflicts-cache';
 import * as _modifiedCache from './modified-cache';
 import type { FileChange } from './types';
+import { logger } from '~test/util';
+import * as git from '.';
+import { setNoVerify } from '.';
 
 vi.mock('./conflicts-cache');
 vi.mock('./behind-base-branch-cache');
