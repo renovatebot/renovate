@@ -13,7 +13,5 @@ export abstract class PackageCacheBase {
     hardTtlMinutes: number,
   ): Promise<void>;
 
-  async destroy(): Promise<void> {
-    // no-op by default
-  }
+  abstract destroy(): Promise<void>;
 }
