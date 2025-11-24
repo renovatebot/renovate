@@ -170,6 +170,10 @@ To opt out a dependency from minimum release age checks, create a package rule w
 }
 ```
 
+<!-- prettier-ignore -->
+!!! note
+    As of Renovate 42.19.5, using `minimumReleaseAge=0 days` is treated the same as `minimumReleaseAge=null`.
+
 ### Which datasources support release timestamps?
 
 <!-- prettier-ignore -->
