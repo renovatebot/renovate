@@ -406,14 +406,18 @@ export async function processBranch(
       config.stabilityStatus = 'green';
       // Default to 'success' but set 'pending' if any update is pending
       for (const upgrade of config.upgrades) {
-        if (isNonEmptyString(upgrade.minimumReleaseAge)) {
+        const minimumReleaseAgeMs = isNonEmptyString(upgrade.minimumReleaseAge)
+          ? coerceNumber(toMs(upgrade.minimumReleaseAge), 0)
+          : 0;
+
+        if (minimumReleaseAgeMs) {
           const minimumReleaseAgeBehaviour: MinimumReleaseAgeBehaviour =
             upgrade.minimumReleaseAgeBehaviour ?? 'timestamp-required';
 
           // regardless of the value of `minimumReleaseAgeBehaviour`, if there is a timestamp, we will process it according to `minimumReleaseAge`
           if (upgrade.releaseTimestamp) {
             const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
-            if (timeElapsed < coerceNumber(toMs(upgrade.minimumReleaseAge))) {
+            if (timeElapsed < minimumReleaseAgeMs) {
               logger.debug(
                 {
                   depName: upgrade.depName,
