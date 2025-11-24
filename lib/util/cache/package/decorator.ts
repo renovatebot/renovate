@@ -73,7 +73,7 @@ export function cache<T>({
       return data.value;
     }
 
-    return await getMutex(combinedKey, 'package-cache').runExclusive(
+    return await getMutex(combinedKey, 'package-cache-decorator').runExclusive(
       async () => {
         if (packageCache.memory.has(combinedKey)) {
           const data = packageCache.memory.get(
@@ -117,6 +117,8 @@ export function cache<T>({
         // we cache only `getReleases` and `getDigest` results for an extended period.
         //
         // For other method names being decorated, the "soft" just equals the "hard" ttl.
+        // We only extend the cache for `getReleases` and `getDigest` because their results
+        // are considered final, whereas other cached methods are considered to work with intermediate values.
         if (methodName !== 'getReleases' && methodName !== 'getDigest') {
           hardTtlMinutes = softTtlMinutes;
         }
@@ -149,11 +151,18 @@ export function cache<T>({
           throw err;
         }
 
+        // We cache `null` values but skip caching `undefined`.
+        // An `undefined` result is treated as a potential transient failure
+        // that should be retried on the next run.
+        // The in-memory cache will still hold the `undefined` result for the duration
+        // of the current run to avoid repeated calls within the same process.
+        const value = { cachedAt: DateTime.local().toISO(), value: newValue };
+        packageCache.memory.set(combinedKey, value);
         if (!isUndefined(newValue)) {
           await packageCache.setWithRawTtl(
             finalNamespace,
             cacheKey,
-            { cachedAt: DateTime.local().toISO(), value: newValue },
+            value,
             hardTtlMinutes,
           );
         }

@@ -117,7 +117,7 @@ describe('util/cache/package/decorator', () => {
     );
   });
 
-  it('does not cache undefined', async () => {
+  it('cache undefined in memory only', async () => {
     class Class {
       @cache({ namespace: '_test-namespace', key: 'key' })
       public async fn(): Promise<string | undefined> {
@@ -131,7 +131,7 @@ describe('util/cache/package/decorator', () => {
     expect(await obj.fn()).toBeUndefined();
     expect(await obj.fn()).toBeUndefined();
 
-    expect(getValue).toHaveBeenCalledTimes(3);
+    expect(getValue).toHaveBeenCalledTimes(1);
     expect(setCache).not.toHaveBeenCalled();
   });
 
