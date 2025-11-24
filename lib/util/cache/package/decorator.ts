@@ -141,7 +141,7 @@ export function cache<T>({
         try {
           newValue = await callback();
         } catch (err) {
-          if (fallbackValue !== undefined) {
+          if (!isUndefined(fallbackValue)) {
             logger.debug(
               { err },
               'Package cache decorator: callback error, returning old data',
