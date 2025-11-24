@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -82,7 +82,7 @@ export async function extractAllDependencies(
 
   // If enabledManagers is non-empty, check that each of them has at least one extraction.
   // If not, log a warning to indicate possible misconfiguration.
-  if (is.nonEmptyArray(config.enabledManagers)) {
+  if (isNonEmptyArray(config.enabledManagers)) {
     for (const enabledManager of config.enabledManagers) {
       if (
         !(enabledManager.replace('custom.', '') in extractResult.packageFiles)

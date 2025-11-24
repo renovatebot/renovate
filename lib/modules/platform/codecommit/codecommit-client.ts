@@ -47,7 +47,7 @@ import {
   UpdatePullRequestTitleCommand,
 } from '@aws-sdk/client-codecommit';
 import type { RepositoryMetadata } from '@aws-sdk/client-codecommit/dist-types/models/models_0';
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import * as aws4 from 'aws4';
 import { REPOSITORY_UNINITIATED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -302,7 +302,7 @@ export function getCodeCommitUrl(
   const dateTime = signer.getDateTime();
 
   /* v8 ignore start */
-  if (!is.string(dateTime)) {
+  if (!isString(dateTime)) {
     throw new Error(REPOSITORY_UNINITIATED);
   } /* v8 ignore stop */
 

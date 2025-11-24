@@ -469,6 +469,7 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
         mockPR.head!.label,
       );
       expect(res).toBeNull();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           err: expect.any(Object),

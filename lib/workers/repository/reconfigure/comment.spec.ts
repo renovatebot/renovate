@@ -67,6 +67,7 @@ describe('workers/repository/reconfigure/comment', () => {
           reconfigurePr,
         ),
       ).toBeTrue();
+
       expect(logger.logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would check branch renovate/reconfigure',
       );

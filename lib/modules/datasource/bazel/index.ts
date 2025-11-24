@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { isValidLocalPath, readLocalFile } from '../../../util/fs';
@@ -65,7 +65,7 @@ export class BazelDatasource extends Datasource {
         .sort(BzlmodVersion.defaultCompare)
         .map((bv) => {
           const release: Release = { version: bv.original };
-          if (is.truthy(metadata.yanked_versions?.[bv.original])) {
+          if (isTruthy(metadata.yanked_versions?.[bv.original])) {
             release.isDeprecated = true;
           }
           return release;

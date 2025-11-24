@@ -14,7 +14,11 @@ import { generateSchema } from './schema';
 import { generateTemplates } from './templates';
 import { generateVersioning } from './versioning';
 
-export async function generateDocs(root = 'tmp', pack = true): Promise<void> {
+export async function generateDocs(
+  root = 'tmp',
+  pack = true,
+  version = undefined,
+): Promise<void> {
   try {
     const dist = `${root}/docs`;
     logger.info(`generating docs to '${dist}'`);
@@ -68,7 +72,12 @@ export async function generateDocs(root = 'tmp', pack = true): Promise<void> {
 
     // json-schema
     logger.info('* json-schema');
-    await generateSchema(dist);
+    await generateSchema(dist, version);
+    await generateSchema(dist, {
+      filename: 'renovate-global-schema.json',
+      version,
+      isGlobal: true,
+    });
 
     if (pack) {
       await tar.create({ file: `${root}/docs.tgz`, cwd: dist, gzip: true }, [

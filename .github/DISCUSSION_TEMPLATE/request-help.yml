@@ -7,10 +7,27 @@ body:
         - 'A Mend.io-hosted app'
         - 'Self-hosted Renovate'
 
+  - type: dropdown
+    id: self-hosted-platform
+    attributes:
+      label: Which platform you running Renovate on?
+      options:
+        - 'GitHub.com'
+        - 'GitHub Enterprise Server'
+        - 'GitLab (.com or self-hosted)'
+        - 'Gitea'
+        - 'Forgejo'
+        - 'Other (please specify)'
+    validations:
+      required: false
+
   - type: input
     id: self-hosted-version
     attributes:
-      label: If you're self-hosting Renovate, tell us which platform (GitHub, GitLab, etc) and which version of Renovate.
+      label: Which version of Renovate are you using?
+      description: |
+        Please do not say 'latest' version (as Renovate ships many updates daily), but instead note the exact version.
+        You can find it by checking the `INFO: Repository started` log line.
     validations:
       required: false
 

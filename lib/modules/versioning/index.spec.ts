@@ -90,6 +90,7 @@ describe('modules/versioning/index', () => {
       'subset',
       'intersects',
       'isSame',
+      'getPinnedValue',
     ];
     const npmApi = Object.keys(allVersioning.get(semverVersioning.id))
       .filter((val) => !optionalFunctions.includes(val))

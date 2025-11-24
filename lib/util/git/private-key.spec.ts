@@ -69,13 +69,16 @@ describe('util/git/private-key', () => {
       setPrivateKey('some-key', undefined);
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey(repoDir)).resolves.not.toThrow();
+
       expect(exec.exec).toHaveBeenCalledWith(
         `git config user.signingkey ${publicKey}`,
         { cwd: repoDir },
       );
+
       expect(exec.exec).toHaveBeenCalledWith('git config commit.gpgsign true', {
         cwd: repoDir,
       });
+
       expect(exec.exec).toHaveBeenCalledWith('git config gpg.format openpgp', {
         cwd: repoDir,
       });
@@ -142,6 +145,7 @@ some-private-key with-passphrase
       expect(exec.exec).toHaveBeenCalledWith(
         `ssh-keygen -p -f ${privateKeyFile} -P "${passphrase}" -N ""`,
       );
+
       expect(exec.exec).toHaveBeenCalledWith(
         `git config user.signingkey ${privateKeyFile}`,
         { cwd: repoDir },
@@ -189,6 +193,7 @@ some-private-key
       setPrivateKey(privateKey, undefined);
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey(repoDir)).resolves.not.toThrow();
+
       expect(exec.exec).toHaveBeenCalledWith(
         `git config user.signingkey ${privateKeyFile}`,
         { cwd: repoDir },
@@ -199,9 +204,11 @@ some-private-key
         privateKey,
       );
       expect((await fs.readFile(publicKeyFile)).toString()).toEqual(publicKey);
+
       expect(exec.exec).toHaveBeenCalledWith('git config commit.gpgsign true', {
         cwd: repoDir,
       });
+
       expect(exec.exec).toHaveBeenCalledWith('git config gpg.format ssh', {
         cwd: repoDir,
       });
@@ -271,9 +278,11 @@ some-private-key
         `git config user.signingkey ${publicKey}`,
         { cwd: repoDir },
       );
+
       expect(exec.exec).toHaveBeenCalledWith('git config commit.gpgsign true', {
         cwd: repoDir,
       });
+
       expect(exec.exec).toHaveBeenCalledWith('git config gpg.format openpgp', {
         cwd: repoDir,
       });
@@ -308,9 +317,11 @@ some-private-key
         `git config user.signingkey ${publicKey}`,
         { cwd: repoDir },
       );
+
       expect(exec.exec).toHaveBeenCalledWith('git config commit.gpgsign true', {
         cwd: repoDir,
       });
+
       expect(exec.exec).toHaveBeenCalledWith('git config gpg.format openpgp', {
         cwd: repoDir,
       });
@@ -396,6 +407,7 @@ some-private-key
         `git config user.signingkey ${publicKey}`,
         { cwd: repoDir },
       );
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Passphrase is not yet supported for GPG keys, it will be ignored',
       );
@@ -428,6 +440,7 @@ some-private-key
         `git config user.signingkey ${privateKeyFile}`,
         { cwd: repoDir },
       );
+
       expect(exec.exec).toHaveBeenCalledWith('git config gpg.format ssh', {
         cwd: repoDir,
       });
@@ -446,6 +459,7 @@ some-private-key
         base64Key,
         'global',
       );
+
       expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith(
         originalKey,
         'global',
@@ -463,10 +477,12 @@ some-private-key
         base64Key,
         'global',
       );
+
       expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith(
         originalKey,
         'global',
       );
+
       expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith(
         passphrase,
         'global',

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { parseYaml } from '../../../util/yaml';
@@ -88,11 +88,11 @@ function extractApis(
   }
 
   return doc
-    .filter(is.truthy)
+    .filter(isTruthy)
     .filter(
       (m) =>
-        is.nonEmptyStringAndNotWhitespace(m.kind) &&
-        is.nonEmptyStringAndNotWhitespace(m.apiVersion),
+        isNonEmptyStringAndNotWhitespace(m.kind) &&
+        isNonEmptyStringAndNotWhitespace(m.apiVersion),
     )
     .filter((m) => supportedApis.has(m.kind))
     .map((configuration) => ({

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined, isString } from '@sindresorhus/is';
 import type { RenovateConfig } from '../../types';
 import type { Migration } from '../types';
 
@@ -30,8 +30,8 @@ export abstract class AbstractMigration implements Migration {
     value: RenovateConfig[Key],
   ): void {
     if (
-      is.nullOrUndefined(this.originalConfig[key]) &&
-      is.nullOrUndefined(this.migratedConfig[key])
+      isNullOrUndefined(this.originalConfig[key]) &&
+      isNullOrUndefined(this.migratedConfig[key])
     ) {
       this.migratedConfig[key] = value;
     }
@@ -45,7 +45,7 @@ export abstract class AbstractMigration implements Migration {
   }
 
   protected rewrite(value: unknown): void {
-    if (!is.string(this.propertyName)) {
+    if (!isString(this.propertyName)) {
       throw new Error();
     }
 
@@ -53,7 +53,7 @@ export abstract class AbstractMigration implements Migration {
   }
 
   protected delete(property = this.propertyName): void {
-    if (!is.string(property)) {
+    if (!isString(property)) {
       throw new Error();
     }
 

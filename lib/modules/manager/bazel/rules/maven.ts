@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { z } from 'zod';
 import { MavenDatasource } from '../../../datasource/maven';
 import { id as versioning } from '../../../versioning/gradle';
@@ -31,7 +31,7 @@ export const MavenTarget = z
       .transform((xs) => {
         const result: ArtifactSpec[] = [];
         for (const x of xs) {
-          if (is.string(x)) {
+          if (isString(x)) {
             const [group, artifact, version] = x.split(':');
             if (group && artifact && version) {
               result.push({ group, artifact, version });

@@ -45,6 +45,34 @@ describe('modules/manager/pip-compile/common', () => {
       expect(logger.warn).toHaveBeenCalledTimes(0);
     });
 
+    it.each([
+      '-v',
+      '--all-extras',
+      '--generate-hashes',
+      '--output-file=reqs.txt',
+      '--extra-index-url=https://pypi.org/simple',
+      // uv-specific options
+      `--no-strip-extras`,
+      '--universal',
+      '--constraints=constraints.txt',
+      '--python-version=3.13',
+      '--no-emit-package=cffi',
+      '--prerelease=if-necessary',
+      '--format=pylock.toml',
+      '--resolution=lowest',
+      '--fork-strategy=fewest',
+      '--exclude-newer=2025-11-01',
+      '--exclude-newer-package="tqdm=2022-04-04T00:00:00Z"',
+    ])('returns object on correct uv options', (argument: string) => {
+      expect(
+        extractHeaderCommand(
+          getCommandInHeader(`uv pip compile ${argument} reqs.in`),
+          'reqs.txt',
+        ),
+      ).toBeObject();
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+    });
+
     it.each(['--resolver', '--output-file reqs.txt', '--extra = jupyter'])(
       'errors on malformed options with argument',
       (argument: string) => {

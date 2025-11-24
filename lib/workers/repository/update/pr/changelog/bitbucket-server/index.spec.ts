@@ -219,6 +219,7 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
         changelogFile: 'packages/components/src/CHANGELOG.md',
         changelogMd: changelogMd + '\n#\n##',
       });
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Multiple candidates for changelog file, using packages/components/src/CHANGELOG.md`,
       );

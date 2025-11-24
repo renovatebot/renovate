@@ -1,5 +1,5 @@
 import { URL } from 'node:url';
-import is from '@sindresorhus/is';
+import { isEmptyStringOrWhitespace } from '@sindresorhus/is';
 import { migrateDatasource } from '../../../../config/migrations/custom/datasource-migration';
 import { logger } from '../../../../logger';
 import * as template from '../../../../util/template';
@@ -31,7 +31,7 @@ function updateDependency(
       dependency.datasource = migrateDatasource(value);
       break;
     case 'indentation':
-      dependency.indentation = is.emptyStringOrWhitespace(value) ? value : '';
+      dependency.indentation = isEmptyStringOrWhitespace(value) ? value : '';
       break;
     default:
       dependency[field] = value;

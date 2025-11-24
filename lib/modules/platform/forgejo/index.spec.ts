@@ -625,7 +625,7 @@ describe('modules/platform/forgejo/index', () => {
       };
       await forgejo.initRepo(repoCfg);
 
-      expect(git.initRepo).toHaveBeenCalledWith(
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ url: mockRepo.clone_url }),
       );
     });
@@ -643,7 +643,7 @@ describe('modules/platform/forgejo/index', () => {
       };
       await forgejo.initRepo(repoCfg);
 
-      expect(git.initRepo).toHaveBeenCalledWith(
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ url: mockRepo.clone_url }),
       );
     });
@@ -661,7 +661,7 @@ describe('modules/platform/forgejo/index', () => {
       };
       await forgejo.initRepo(repoCfg);
 
-      expect(git.initRepo).toHaveBeenCalledWith(
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ url: mockRepo.ssh_url }),
       );
     });
@@ -696,7 +696,7 @@ describe('modules/platform/forgejo/index', () => {
       };
       await forgejo.initRepo(repoCfg);
 
-      expect(git.initRepo).toHaveBeenCalledWith(
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           url: `https://code.forgejo.org/${mockRepo.full_name}.git`,
         }),
@@ -744,7 +744,7 @@ describe('modules/platform/forgejo/index', () => {
 
       const url = new URL(`${mockRepo.clone_url}`);
       url.username = token;
-      expect(git.initRepo).toHaveBeenCalledWith(
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           url: `https://${token}@code.forgejo.org/${mockRepo.full_name}.git`,
         }),
@@ -772,7 +772,7 @@ describe('modules/platform/forgejo/index', () => {
 
       const url = new URL(`${mockRepo.clone_url}`);
       url.username = token;
-      expect(git.initRepo).toHaveBeenCalledWith(
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ url: url.toString() }),
       );
     });
@@ -1808,6 +1808,7 @@ describe('modules/platform/forgejo/index', () => {
         number: 42,
         title: 'pr-title',
       });
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42 }),
         'Forgejo-native automerge: fail',
@@ -1835,6 +1836,7 @@ describe('modules/platform/forgejo/index', () => {
         number: 42,
         title: 'pr-title',
       });
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42 }),
         'Forgejo-native automerge: not supported on this version of Forgejo. Use 10.0.0 or newer.',
@@ -2096,6 +2098,7 @@ describe('modules/platform/forgejo/index', () => {
           labels: ['some-label', 'unavailable-label'],
         }),
       ).toResolve();
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Some labels could not be looked up. Renovate may halt label updates assuming changes by others.',
       );
@@ -2731,6 +2734,7 @@ describe('modules/platform/forgejo/index', () => {
       });
 
       expect(res).toBe(false);
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { err: expect.any(Error), issue: 1, subject: 'some-topic' },
         'Error ensuring comment',
@@ -2894,6 +2898,7 @@ describe('modules/platform/forgejo/index', () => {
       await initFakeRepo(scope);
       ///
       await expect(forgejo.addReviewers(1, ['me', 'you'])).toResolve();
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { err: expect.any(Error), number: 1, reviewers: ['me', 'you'] },
         'Failed to assign reviewer',

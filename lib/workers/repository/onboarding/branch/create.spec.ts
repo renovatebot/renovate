@@ -20,7 +20,7 @@ describe('workers/repository/onboarding/branch/create', () => {
   describe('createOnboardingBranch', () => {
     it('applies the default commit message', async () => {
       await createOnboardingBranch(config);
-      expect(scm.commitAndPush).toHaveBeenCalledWith({
+      expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
         branchName: 'renovate/configure',
         files: [
           {
@@ -44,7 +44,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
       await createOnboardingBranch(config);
 
-      expect(scm.commitAndPush).toHaveBeenCalledWith({
+      expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
         branchName: 'renovate/configure',
         files: [
           {
@@ -66,7 +66,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           ...config,
           commitBody: 'some commit body',
         });
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -93,7 +93,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           commitBody: 'Signed Off: {{{gitAuthor}}}',
           gitAuthor: '<Bot bot@botland.com>',
         });
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -119,7 +119,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -148,7 +148,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -174,7 +174,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -203,7 +203,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -230,7 +230,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -255,7 +255,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -281,7 +281,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -307,7 +307,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/configure',
           files: [{ type: 'addition', path, contents: '{"foo":"bar"}' }],
           message,

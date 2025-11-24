@@ -82,7 +82,7 @@ describe('workers/repository/update/branch/automerge', () => {
       const res = await tryBranchAutomerge(config);
 
       expect(res).toBe('automerged');
-      expect(scm.checkoutBranch).toHaveBeenCalledWith('test-branch');
+      expect(scm.checkoutBranch).toHaveBeenCalledExactlyOnceWith('test-branch');
     });
 
     it('returns true if automerge succeeds (dry-run)', async () => {

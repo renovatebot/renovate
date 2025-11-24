@@ -1,5 +1,5 @@
 // TODO #22198
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -29,7 +29,7 @@ async function lookup(
 
   dep.updates = [];
 
-  if (is.string(dep.depName)) {
+  if (isString(dep.depName)) {
     dep.depName = dep.depName.trim();
   }
 
@@ -39,7 +39,7 @@ async function lookup(
     return Result.ok(dep);
   }
 
-  if (!is.nonEmptyString(dep.packageName)) {
+  if (!isNonEmptyString(dep.packageName)) {
     dep.skipReason = 'invalid-name';
     return Result.ok(dep);
   }

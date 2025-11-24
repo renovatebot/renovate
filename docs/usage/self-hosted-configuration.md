@@ -15,6 +15,8 @@ The config options below _must_ be configured in the bot/admin config, so in eit
 !!! note
      Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
 
+For information about how to configure Renovate with a `config.js` see the [Using `config.js` documentation](./getting-started/running.md#using-configjs).
+
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
 <!-- prettier-ignore -->
@@ -372,6 +374,7 @@ Other valid cache namespaces are as follows:
 - `changelog-github-release`
 - `changelog-gitlab-notes@v2`
 - `changelog-gitlab-release`
+- `datasource-azure-tags`
 - `datasource-artifactory`
 - `datasource-aws-machine-image`
 - `datasource-aws-rds`
@@ -429,6 +432,7 @@ Other valid cache namespaces are as follows:
 - `datasource-jsr`
 - `datasource-maven:cache-provider`
 - `datasource-maven:postprocess-reject`
+- `datasource-nextcloud`
 - `datasource-node-version`
 - `datasource-npm:cache-provider`
 - `datasource-nuget-v3`
@@ -465,6 +469,28 @@ It has been designed with the intention of being run on one repository, in a one
 It is highly unlikely that you should ever need to add this to your permanent global config.
 
 Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/checked` will rebase the `renovate/chalk-4.x` branch in the `renovate-reproductions/checked` repository.`
+
+## configFileNames
+
+A list of filenames where repository config can be stored.
+
+This list doesn't replace the existing list of default config filenames used internally, instead these filenames are prepended to the list.
+
+Example:
+
+```json
+{
+  "configFileNames": ["myrenovate.json"]
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+    If you want renovate to use a custom filename for the onboarding branch you also need to change the [`onboardingConfigFileName`](#onboardingconfigfilename).
+
+## configValidationError
+
+If enabled, config validation errors will be reported as errors instead of warnings, and Renovate will exit with a non-zero exit code.
 
 ## containerbaseDir
 
@@ -1009,6 +1035,10 @@ If `commitMessagePrefix` or `semanticCommits` values are set then they will be p
 If set to one of the valid [config file names](./configuration-options.md), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
 Falls back to `renovate.json` if the name provided is not valid.
 
+<!-- prettier-ignore -->
+!!! note
+    If you want renovate to use a custom filename for the onboarding branch you need add allow that filename using the [`configFileNames`](#configfilenames) option.
+
 ## onboardingNoDeps
 
 The default `auto` setting is converted to `disabled` if `autodiscoverRepositories` is `true`, or converted to `enabled` if false.
@@ -1413,7 +1443,7 @@ You can control if Renovate should try to access these services with the `useClo
 ## userAgent
 
 If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
-Otherwise, it will default to `RenovateBot/${renovateVersion} (https://github.com/renovatebot/renovate)`.
+Otherwise, it will default to `Renovate/${renovateVersion} (https://github.com/renovatebot/renovate)`.
 
 ## username
 

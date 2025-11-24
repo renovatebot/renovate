@@ -1,4 +1,9 @@
-import is from '@sindresorhus/is';
+import {
+  isArray,
+  isNonEmptyObject,
+  isNullOrUndefined,
+  isPlainObject,
+} from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import {
   PLATFORM_BAD_CREDENTIALS,
@@ -70,7 +75,7 @@ function handleGotError(
   const path = url.toString();
   let message = err.message || '';
   const body = err.response?.body;
-  if (is.plainObject(body) && 'message' in body) {
+  if (isPlainObject(body) && 'message' in body) {
     message = String(body.message);
   }
   if (
@@ -386,22 +391,22 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
           },
         );
         const pages = await p.all(queue);
-        if (httpOptions.paginationField && is.plainObject(result.body)) {
+        if (httpOptions.paginationField && isPlainObject(result.body)) {
           const paginatedResult = result.body[httpOptions.paginationField];
-          if (is.array<T>(paginatedResult)) {
+          if (isArray<T>(paginatedResult)) {
             for (const nextPage of pages) {
-              if (is.plainObject(nextPage.body)) {
+              if (isPlainObject(nextPage.body)) {
                 const nextPageResults =
                   nextPage.body[httpOptions.paginationField];
-                if (is.array<T>(nextPageResults)) {
+                if (isArray<T>(nextPageResults)) {
                   paginatedResult.push(...nextPageResults);
                 }
               }
             }
           }
-        } else if (is.array<T>(result.body)) {
+        } else if (isArray<T>(result.body)) {
           for (const nextPage of pages) {
-            if (is.array<T>(nextPage.body)) {
+            if (isArray<T>(nextPage.body)) {
               result.body.push(...nextPage.body);
             }
           }
@@ -479,8 +484,8 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       });
       const repositoryData = res?.data?.repository;
       if (
-        is.nonEmptyObject(repositoryData) &&
-        !is.nullOrUndefined(repositoryData[fieldName])
+        isNonEmptyObject(repositoryData) &&
+        !isNullOrUndefined(repositoryData[fieldName])
       ) {
         optimalCount = count;
 

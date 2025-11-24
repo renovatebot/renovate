@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined, isString, isTruthy } from '@sindresorhus/is';
 import slugify from 'slugify';
 import { mergeChildConfig } from '../../config';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
@@ -15,11 +15,11 @@ async function matchesRule(
     const isMatch = await matcher.matches(inputConfig, packageRule);
 
     // no rules are defined
-    if (is.nullOrUndefined(isMatch)) {
+    if (isNullOrUndefined(isMatch)) {
       continue;
     }
 
-    if (!is.truthy(isMatch)) {
+    if (!isTruthy(isMatch)) {
       return false;
     }
   }
@@ -59,7 +59,7 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
         delete config.skipStage;
       }
       if (
-        is.string(toApply.overrideDatasource) &&
+        isString(toApply.overrideDatasource) &&
         toApply.overrideDatasource !== config.datasource
       ) {
         logger.debug(
@@ -68,7 +68,7 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
         config.datasource = toApply.overrideDatasource;
       }
       if (
-        is.string(toApply.overrideDepName) &&
+        isString(toApply.overrideDepName) &&
         toApply.overrideDepName !== config.depName
       ) {
         logger.debug(
@@ -77,7 +77,7 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
         config.depName = compile(toApply.overrideDepName, config);
       }
       if (
-        is.string(toApply.overridePackageName) &&
+        isString(toApply.overridePackageName) &&
         toApply.overridePackageName !== config.packageName
       ) {
         logger.debug(

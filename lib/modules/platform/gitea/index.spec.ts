@@ -626,7 +626,7 @@ describe('modules/platform/gitea/index', () => {
       };
       await gitea.initRepo(repoCfg);
 
-      expect(git.initRepo).toHaveBeenCalledWith(
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ url: mockRepo.clone_url }),
       );
     });
@@ -644,7 +644,7 @@ describe('modules/platform/gitea/index', () => {
       };
       await gitea.initRepo(repoCfg);
 
-      expect(git.initRepo).toHaveBeenCalledWith(
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ url: mockRepo.clone_url }),
       );
     });
@@ -662,7 +662,7 @@ describe('modules/platform/gitea/index', () => {
       };
       await gitea.initRepo(repoCfg);
 
-      expect(git.initRepo).toHaveBeenCalledWith(
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ url: mockRepo.ssh_url }),
       );
     });
@@ -697,7 +697,7 @@ describe('modules/platform/gitea/index', () => {
       };
       await gitea.initRepo(repoCfg);
 
-      expect(git.initRepo).toHaveBeenCalledWith(
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           url: `https://gitea.com/${mockRepo.full_name}.git`,
         }),
@@ -745,7 +745,7 @@ describe('modules/platform/gitea/index', () => {
 
       const url = new URL(`${mockRepo.clone_url}`);
       url.username = token;
-      expect(git.initRepo).toHaveBeenCalledWith(
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           url: `https://${token}@gitea.com/${mockRepo.full_name}.git`,
         }),
@@ -773,7 +773,7 @@ describe('modules/platform/gitea/index', () => {
 
       const url = new URL(`${mockRepo.clone_url}`);
       url.username = token;
-      expect(git.initRepo).toHaveBeenCalledWith(
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ url: url.toString() }),
       );
     });
@@ -1809,6 +1809,7 @@ describe('modules/platform/gitea/index', () => {
         number: 42,
         title: 'pr-title',
       });
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42 }),
         'Gitea-native automerge: fail',
@@ -1836,6 +1837,7 @@ describe('modules/platform/gitea/index', () => {
         number: 42,
         title: 'pr-title',
       });
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42 }),
         'Gitea-native automerge: not supported on this version of Gitea. Use 1.24.0 or newer.',
@@ -2097,6 +2099,7 @@ describe('modules/platform/gitea/index', () => {
           labels: ['some-label', 'unavailable-label'],
         }),
       ).toResolve();
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Some labels could not be looked up. Renovate may halt label updates assuming changes by others.',
       );
@@ -2732,6 +2735,7 @@ describe('modules/platform/gitea/index', () => {
       });
 
       expect(res).toBe(false);
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { err: expect.any(Error), issue: 1, subject: 'some-topic' },
         'Error ensuring comment',
@@ -2900,6 +2904,7 @@ describe('modules/platform/gitea/index', () => {
       await initFakeRepo(scope);
       ///
       await expect(gitea.addReviewers(1, ['me', 'you'])).toResolve();
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { err: expect.any(Error), number: 1, reviewers: ['me', 'you'] },
         'Failed to assign reviewer',

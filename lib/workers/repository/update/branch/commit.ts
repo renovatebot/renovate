@@ -1,5 +1,5 @@
 // TODO #22198
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import { CONFIG_SECRETS_EXPOSED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
@@ -16,7 +16,7 @@ export function commitFilesToBranch(
     config.updatedArtifacts!,
   );
   // istanbul ignore if
-  if (is.nonEmptyArray(config.excludeCommitPaths)) {
+  if (isNonEmptyArray(config.excludeCommitPaths)) {
     updatedFiles = updatedFiles.filter(({ path: filePath }) => {
       const matchesExcludePaths = config.excludeCommitPaths!.some(
         (excludedPath) =>
@@ -29,7 +29,7 @@ export function commitFilesToBranch(
       return true;
     });
   }
-  if (!is.nonEmptyArray(updatedFiles)) {
+  if (!isNonEmptyArray(updatedFiles)) {
     logger.debug(`No files to commit`);
     return Promise.resolve(null);
   }

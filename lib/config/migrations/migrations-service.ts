@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isRegExp } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import type { RenovateConfig } from '../types';
 import { RemovePropertyMigration } from './base/remove-property-migration';
@@ -241,7 +241,7 @@ export class MigrationsService {
     key: string,
   ): Migration | undefined {
     return migrations.find((migration) => {
-      if (is.regExp(migration.propertyName)) {
+      if (isRegExp(migration.propertyName)) {
         return migration.propertyName.test(key);
       }
 
