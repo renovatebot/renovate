@@ -81,7 +81,18 @@ export function cache<T>({
         hardTtlMinutes,
       } = resolveTtlValues(finalNamespace, ttlMinutes);
 
-      // Hard TTL (stale fallback) is enabled only for specific methods
+      // The separation between "soft" and "hard" TTL allows us to treat
+      // data as obsolete according to the "soft" TTL while physically storing it
+      // according to the "hard" TTL.
+      //
+      // This helps us return obsolete data in case of upstream server errors,
+      // which is more useful than throwing exceptions ourselves.
+      //
+      // However, since the default hard TTL is one week, it could create
+      // unnecessary pressure on storage volume. Therefore,
+      // we cache only `getReleases` and `getDigest` results for an extended period.
+      //
+      // For other method names being decorated, the "soft" just equals the "hard" ttl.
       if (methodName !== 'getReleases' && methodName !== 'getDigest') {
         hardTtlMinutes = softTtlMinutes;
       }
