@@ -21,6 +21,7 @@ describe('util/cache/package/impl/factory', () => {
     it('returns instance when no cache configured', async () => {
       const cache = await PackageCache.create({});
       expect(cache).toBeInstanceOf(PackageCache);
+      expect(cache.getType()).toBeUndefined();
     });
 
     it('creates redis cache', async () => {
@@ -31,6 +32,7 @@ describe('util/cache/package/impl/factory', () => {
         redisPrefix: 'prefix',
       });
       expect(cache).toBeInstanceOf(PackageCache);
+      expect(cache.getType()).toBe('redis');
       expect(PackageCacheRedis.create).toHaveBeenCalledWith(
         'redis://localhost',
         'prefix',
@@ -45,6 +47,7 @@ describe('util/cache/package/impl/factory', () => {
       vi.mocked(PackageCacheSqlite.create).mockResolvedValue(backend);
       const cache = await PackageCache.create({ cacheDir: '/tmp' });
       expect(cache).toBeInstanceOf(PackageCache);
+      expect(cache.getType()).toBe('sqlite');
       expect(PackageCacheSqlite.create).toHaveBeenCalledWith('/tmp');
     });
 
@@ -53,6 +56,7 @@ describe('util/cache/package/impl/factory', () => {
       vi.mocked(PackageCacheFile.create).mockReturnValue(backend);
       const cache = await PackageCache.create({ cacheDir: '/tmp' });
       expect(cache).toBeInstanceOf(PackageCache);
+      expect(cache.getType()).toBe('file');
       expect(PackageCacheFile.create).toHaveBeenCalledWith('/tmp');
     });
   });

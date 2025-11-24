@@ -110,6 +110,30 @@ describe('util/cache/package/impl/index', () => {
       expect(await cache.get('_test-namespace', 'missing')).toBeUndefined();
       expect(backend.get).not.toHaveBeenCalled();
     });
+
+    it('cleans up memory cache', async () => {
+      const backend = {
+        get: vi.fn().mockResolvedValue('value'),
+        set: vi.fn(),
+        destroy: vi.fn(),
+      } as any;
+      const cache = new PackageCache(backend);
+
+      // Populate memory cache
+      await cache.get('_test-namespace', 'key');
+      expect(backend.get).toHaveBeenCalledTimes(1);
+
+      // Verify hit
+      await cache.get('_test-namespace', 'key');
+      expect(backend.get).toHaveBeenCalledTimes(1);
+
+      // Cleanup
+      cache.cleanup();
+
+      // Verify miss in memory
+      await cache.get('_test-namespace', 'key');
+      expect(backend.get).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('No backend', () => {

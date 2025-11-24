@@ -164,6 +164,27 @@ describe('util/cache/package/decorator', () => {
     );
   });
 
+  it('skips cache if namespace or key is empty', async () => {
+    class Class {
+      @cache({ namespace: (() => '') as any, key: 'key' })
+      public fn1(): Promise<string> {
+        return getValue();
+      }
+
+      @cache({ namespace: '_test-namespace', key: () => '' })
+      public fn2(): Promise<string> {
+        return getValue();
+      }
+    }
+    const obj = new Class();
+
+    expect(await obj.fn1()).toBe('111');
+    expect(await obj.fn2()).toBe('222');
+
+    expect(getValue).toHaveBeenCalledTimes(2);
+    expect(setCache).not.toHaveBeenCalled();
+  });
+
   it('wraps class methods', async () => {
     class Class {
       public fn(): Promise<string> {
