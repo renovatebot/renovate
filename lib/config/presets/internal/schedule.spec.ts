@@ -1,9 +1,9 @@
 import { isScheduledNow } from '../../../workers/repository/update/branch/schedule';
-import type { RenovateConfig } from '../../types';
+import type { BranchConfig } from '../../../workers/types';
 import { presets } from './schedule';
 
 describe('config/presets/internal/schedule', () => {
-  let config: RenovateConfig;
+  let config: BranchConfig;
 
   beforeAll(() => {
     vi.useFakeTimers();
@@ -12,7 +12,12 @@ describe('config/presets/internal/schedule', () => {
   beforeEach(() => {
     vi.setSystemTime(new Date('2017-06-30T10:50:00.000')); // Locally 2017-06-30 10:50am
 
-    config = {};
+    config = {
+      baseBranch: 'main',
+      upgrades: [],
+      branchName: 'update-branch',
+      manager: '',
+    };
   });
 
   describe('daily', () => {
@@ -161,7 +166,7 @@ describe('config/presets/internal/schedule', () => {
     `('$datetime', ({ datetime, expected }) => {
       config.schedule = presets.weekends.schedule;
       vi.setSystemTime(new Date(datetime));
-      expect(isScheduledNow(config)).toBe(expected);
+      expect(isScheduledNow(config as BranchConfig)).toBe(expected);
     });
   });
 
