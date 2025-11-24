@@ -378,6 +378,9 @@ importers:
       '@eslint/js':
         specifier: 9.39.1
         version: 9.39.1
+      '@hyrious/esbuild-dev':
+        specifier: 0.10.13
+        version: 0.10.13(esbuild@0.27.0)
       '@hyrious/marshal':
         specifier: 0.3.3
         version: 0.3.3
@@ -594,9 +597,6 @@ importers:
       tmp-promise:
         specifier: 3.0.3
         version: 3.0.3
-      tsx:
-        specifier: 4.20.6
-        version: 4.20.6
       type-fest:
         specifier: 5.2.0
         version: 5.2.0
@@ -1181,6 +1181,13 @@ packages:
   '@humanwhocodes/retry@0.4.3':
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
+
+  '@hyrious/esbuild-dev@0.10.13':
+    resolution: {integrity: sha512-YVrNGrYWp3QnR5g5xxw/0NcYqHu4FRVKiaVTwRXcBxI+y78xmEqKTPH8wIR2lSeG+1WUtDV7zUV+okPVRVBvYg==}
+    engines: {node: ^14.18 || >=16}
+    hasBin: true
+    peerDependencies:
+      esbuild: 0.27.0
 
   '@hyrious/marshal@0.3.3':
     resolution: {integrity: sha512-Sprz5CmX+V5MEbgOfXB0iqJS2i703RsV2cXSKC3++Y+4EeUvZPJlv0tgvoBRNT7mvb6aUu7UeOzfiowXlAOmew==}
@@ -7735,6 +7742,10 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
+  '@hyrious/esbuild-dev@0.10.13(esbuild@0.27.0)':
+    dependencies:
+      esbuild: 0.27.0
+
   '@hyrious/marshal@0.3.3': {}
 
   '@isaacs/balanced-match@4.0.1': {}
@@ -13454,6 +13465,7 @@ snapshots:
       get-tsconfig: 4.13.0
     optionalDependencies:
       fsevents: 2.3.3
+    optional: true
 
   tunnel-agent@0.6.0:
     dependencies:
