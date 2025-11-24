@@ -1,10 +1,12 @@
 import { GlobalConfig } from './global';
 import * as configMigration from './migration';
+import { MigrationsService } from './migrations';
 import type {
   MigratedConfig,
   RenovateConfig,
   RenovateSharedConfig,
 } from './types';
+import { logger } from '~test/util';
 interface TestRenovateConfig extends RenovateConfig {
   node?: RenovateSharedConfig;
 }
@@ -801,5 +803,17 @@ describe('config/migration', () => {
     expect(res.migratedConfig).toEqual({
       baseBranchPatterns: ['main', 'dev'],
     });
+  });
+
+  it('logs errors', () => {
+    vi.spyOn(MigrationsService, 'run').mockImplementation(() => {
+      throw new Error('test error');
+    });
+    const config = { baseBranches: ['main', 'dev'] };
+    expect(() => configMigration.migrateConfig(config)).toThrow('test error');
+    expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
+      { config, err: expect.any(Error) },
+      'migrateConfig() error',
+    );
   });
 });

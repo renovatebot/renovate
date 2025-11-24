@@ -147,10 +147,10 @@ export async function getRepos(config: AutodiscoverConfig): Promise<string[]> {
     }
 
     return repos.map(({ owner, name }) => `${owner}/${name}`);
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.error({ err }, `bitbucket getRepos error`);
     throw err;
-  } /* v8 ignore stop */
+  }
 }
 
 export async function getRawFile(
@@ -240,13 +240,13 @@ export async function initRepo({
     };
 
     logger.debug(`${repository} owner = ${config.owner}`);
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
     logger.debug({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
-  } /* v8 ignore stop */
+  }
 
   const { hostname } = URL.parse(defaults.endpoint);
 
@@ -286,7 +286,7 @@ export async function initRepo({
   return repoConfig;
 }
 
-/* v8 ignore start */
+/* v8 ignore next */
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === 'all') {
     return true;
@@ -295,7 +295,7 @@ function matchesState(state: string, desiredState: string): boolean {
     return state !== desiredState.substring(1);
   }
   return state === desiredState;
-} /* v8 ignore stop */
+}
 
 export async function getPrList(): Promise<Pr[]> {
   logger.trace('getPrList()');
@@ -383,10 +383,10 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     )
   ).body;
 
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (!pr) {
     return null;
-  } /* v8 ignore stop */
+  }
 
   const res: Pr = {
     ...utils.prInfo(pr),
@@ -418,10 +418,10 @@ async function getBranchCommit(
       )
     ).body;
     return branch.target.hash;
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.debug({ err }, `getBranchCommit('${branchName}') failed'`);
     return undefined;
-  } /* v8 ignore stop */
+  }
 }
 
 // Returns the Pull Request for a branch. Null if not exists.
@@ -440,12 +440,12 @@ async function getStatus(
 ): Promise<BitbucketStatus[]> {
   const sha = await getBranchCommit(branchName);
   const opts: BitbucketHttpOptions = { paginate: true };
-  /* v8 ignore start: temporary code */
+  /* v8 ignore next: temporary code */
   if (memCache) {
     opts.cacheProvider = aggressiveRepoCacheProvider;
   } else {
     opts.memCache = false;
-  } /* v8 ignore stop */
+  }
   return (
     await bitbucketHttp.getJsonUnchecked<PagedResult<BitbucketStatus>>(
       `/2.0/repositories/${config.repository}/commit/${sha!}/statuses`,
@@ -564,22 +564,22 @@ async function findOpenIssues(title: string): Promise<BbIssue[]> {
           `/2.0/repositories/${config.repository}/issues?q=${filter}`,
           { cacheProvider: aggressiveRepoCacheProvider },
         )
-      ).body.values /* v8 ignore start */ || [] /* v8 ignore stop */
+      ).body.values /* v8 ignore next */ || []
     );
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.warn({ err }, 'Error finding issues');
     return [];
-  } /* v8 ignore stop */
+  }
 }
 
 export async function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
 
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (!config.has_issues) {
     logger.debug('Issues are disabled - cannot findIssue');
     return null;
-  } /* v8 ignore stop */
+  }
   const issues = await findOpenIssues(title);
   if (!issues.length) {
     return null;
@@ -628,12 +628,12 @@ export async function ensureIssue({
   body,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue()`);
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (!config.has_issues) {
     logger.debug('Issues are disabled - cannot ensureIssue');
     logger.debug(`Failed to ensure Issue with title:${title}`);
     return null;
-  } /* v8 ignore stop */
+  }
   try {
     let issues = await findOpenIssues(title);
     const description = massageMarkdown(sanitize(body));
@@ -682,17 +682,17 @@ export async function ensureIssue({
       );
       return 'created';
     }
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     if (err.message.startsWith('Repository has no issue tracker.')) {
       logger.debug(`Issues are disabled, so could not create issue: ${title}`);
     } else {
       logger.warn({ err }, 'Could not ensure issue');
     }
-  } /* v8 ignore stop */
+  }
   return null;
 }
 
-/* v8 ignore start */
+/* v8 ignore next */
 export async function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
 
@@ -715,14 +715,14 @@ export async function getIssueList(): Promise<Issue[]> {
     logger.warn({ err }, 'Error finding issues');
     return [];
   }
-} /* v8 ignore stop */
+}
 
 export async function ensureIssueClosing(title: string): Promise<void> {
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (!config.has_issues) {
     logger.debug('Issues are disabled - cannot ensureIssueClosing');
     return;
-  } /* v8 ignore stop */
+  }
   const issues = await findOpenIssues(title);
   for (const issue of issues) {
     await closeIssue(issue.id);
@@ -769,10 +769,10 @@ export async function addReviewers(
   );
 }
 
-/* v8 ignore start */
+/* v8 ignore next */
 export function deleteLabel(): never {
   throw new Error('deleteLabel not implemented');
-} /* v8 ignore stop */
+}
 
 export function ensureComment({
   number,
@@ -962,7 +962,7 @@ export async function createPr({
       await autoResolvePrTasks(pr);
     }
     return pr;
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     // Try sanitizing reviewers
     const sanitizedReviewers = await sanitizeReviewers(reviewers, err);
 
@@ -993,7 +993,7 @@ export async function createPr({
       }
       return pr;
     }
-  } /* v8 ignore stop */
+  }
 }
 
 async function autoResolvePrTasks(pr: Pr): Promise<void> {
@@ -1134,10 +1134,10 @@ export async function mergePr({
       },
     );
     logger.debug('Automerging succeeded');
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.debug({ err }, `PR merge error`);
     logger.info({ pr: prNo }, 'PR automerge failed');
     return false;
-  } /* v8 ignore stop */
+  }
   return true;
 }
