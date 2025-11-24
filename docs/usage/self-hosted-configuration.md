@@ -376,6 +376,7 @@ Other valid cache namespaces are as follows:
 - `changelog-gitlab-release`
 - `datasource-azure-tags`
 - `datasource-artifactory`
+- `datasource-apk`
 - `datasource-aws-machine-image`
 - `datasource-aws-rds`
 - `datasource-aws-eks-addon`
