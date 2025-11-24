@@ -1213,6 +1213,58 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(1);
     });
 
+    it('does not error on use of `global:` presets in `globalExtends`', async () => {
+      const config = {
+        globalExtends: ['global:safeEnv'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+        true,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('does not error on use of `global:` presets in global `extends`', async () => {
+      const config = {
+        extends: ['global:safeEnv'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+        true,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('errors on use of `global:` presets in inherit `extends`', async () => {
+      const config = {
+        extends: ['global:safeEnv'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'inherit',
+        config,
+        true,
+      );
+      expect(errors).toHaveLength(1);
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('errors on use of `global:` presets in repo `extends`', async () => {
+      const config = {
+        extends: ['global:safeEnv'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(errors).toHaveLength(1);
+      expect(warnings).toHaveLength(0);
+    });
+
     // adding this test explicitly because we used to validate the customEnvVariables inside repo config previously
     it('warns if customEnvVariables are found in repo config', async () => {
       const config = {
@@ -1602,6 +1654,21 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+    });
+
+    it('validates env against the allowedEnv regex', async () => {
+      const config = {
+        env: {
+          SOME_VAR: 'SOME_VALUE',
+        },
+        allowedEnv: ['/^SOME.*/'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
     });
 
     it('validates options with different type but defaultValue=null', async () => {

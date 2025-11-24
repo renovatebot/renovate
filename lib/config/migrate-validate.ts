@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../logger';
 import * as configMassage from './massage';
@@ -34,10 +34,10 @@ export async function migrateAndValidate(
       errors: ValidationMessage[];
     } = await configValidation.validateConfig('repo', massagedConfig);
     /* v8 ignore start -- hard to test */
-    if (is.nonEmptyArray(warnings)) {
+    if (isNonEmptyArray(warnings)) {
       logger.warn({ warnings }, 'Found renovate config warnings');
     }
-    if (is.nonEmptyArray(errors)) {
+    if (isNonEmptyArray(errors)) {
       logger.info({ errors }, 'Found renovate config errors');
     }
     massagedConfig.errors = (config.errors ?? []).concat(errors);

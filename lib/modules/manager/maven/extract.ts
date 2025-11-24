@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isNonEmptyArray } from '@sindresorhus/is';
 import upath from 'upath';
 import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
@@ -51,7 +51,7 @@ function parsePom(raw: string, packageFile: string): XmlDocument | null {
     return project;
   }
   if (
-    is.nonEmptyArray(children) &&
+    isNonEmptyArray(children) &&
     children.some((c: any) => c.name === 'modelVersion' && c.val === '4.0.0')
   ) {
     return project;
@@ -74,7 +74,7 @@ function parseExtensions(raw: string, packageFile: string): XmlDocument | null {
   if (!supportedExtensionsNamespaces.includes(attr.xmlns)) {
     return null;
   }
-  if (!is.nonEmptyArray(children)) {
+  if (!isNonEmptyArray(children)) {
     return null;
   }
   return extensions;
@@ -428,7 +428,7 @@ export function extractPackage(
       }
     }
     result.deps.forEach((dep) => {
-      if (is.array(dep.registryUrls)) {
+      if (isArray(dep.registryUrls)) {
         repoUrls.forEach((url) => dep.registryUrls!.push(url));
       }
     });

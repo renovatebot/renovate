@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
@@ -178,7 +178,7 @@ export async function extract(
     }
 
     // Clean up cached branch extracts
-    const baseBranches = is.nonEmptyArray(config.baseBranches)
+    const baseBranches = isNonEmptyArray(config.baseBranches)
       ? config.baseBranches
       : [baseBranch];
     Object.keys(cache.scan).forEach((branchName) => {

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import type { Document } from 'yaml';
 import { CST, isCollection, isPair, isScalar, parseDocument } from 'yaml';
 import { logger } from '../../../../../logger';
@@ -15,7 +15,7 @@ export function updatePnpmCatalogDependency({
   const catalogName = depType?.split('.').at(-1);
 
   /* v8 ignore start -- needs test */
-  if (!is.string(catalogName)) {
+  if (!isString(catalogName)) {
     logger.error(
       'No catalogName was found; this is likely an extraction error.',
     );

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isUndefined } from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { matchRegexOrGlobList } from '../string-match';
 import { Matcher } from './base';
@@ -8,10 +8,10 @@ export class DatasourcesMatcher extends Matcher {
     { datasource }: PackageRuleInputConfig,
     { matchDatasources }: PackageRule,
   ): boolean | null {
-    if (is.undefined(matchDatasources)) {
+    if (isUndefined(matchDatasources)) {
       return null;
     }
-    if (is.undefined(datasource)) {
+    if (isUndefined(datasource)) {
       return false;
     }
     return matchRegexOrGlobList(datasource, matchDatasources);

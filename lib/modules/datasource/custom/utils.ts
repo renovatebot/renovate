@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
 import type { CustomDatasourceConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as template from '../../../util/template';
@@ -14,7 +14,7 @@ export function massageCustomDatasourceConfig(
   }: GetReleasesConfig,
 ): Required<CustomDatasourceConfig> | null {
   const customDatasource = customDatasources?.[customDatasourceName];
-  if (is.nullOrUndefined(customDatasource)) {
+  if (isNullOrUndefined(customDatasource)) {
     logger.debug(
       `No custom datasource config provided while ${packageName} has been requested`,
     );
@@ -24,7 +24,7 @@ export function massageCustomDatasourceConfig(
 
   const registryUrlTemplate =
     defaultRegistryUrl ?? customDatasource.defaultRegistryUrlTemplate;
-  if (is.nullOrUndefined(registryUrlTemplate)) {
+  if (isNullOrUndefined(registryUrlTemplate)) {
     logger.debug(
       'No registry url provided by extraction nor datasource configuration',
     );
@@ -56,7 +56,7 @@ export function getCustomConfig(
     '',
   );
 
-  if (!is.nonEmptyString(customDatasourceName)) {
+  if (!isNonEmptyString(customDatasourceName)) {
     logger.debug(
       `No datasource has been supplied while looking up ${getReleasesConfig.packageName}`,
     );

@@ -1,5 +1,5 @@
 import { setTimeout } from 'timers/promises';
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import type {
   GitItem,
   GitPullRequest,
@@ -316,7 +316,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   azurePr.labels = labels
     .filter((label) => label.active)
     .map((label) => label.name)
-    .filter(is.string);
+    .filter(isString);
   return azurePr;
 }
 

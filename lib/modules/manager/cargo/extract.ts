@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isObject, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { getEnv } from '../../../util/env';
@@ -246,10 +246,10 @@ export async function extractPackageFile(
   const packageSection = cargoManifest.package;
   let version: string | undefined = undefined;
   if (packageSection) {
-    if (is.string(packageSection.version)) {
+    if (isString(packageSection.version)) {
       version = packageSection.version;
     } else if (
-      is.object(packageSection.version) &&
+      isObject(packageSection.version) &&
       cargoManifest.workspace?.package?.version
     ) {
       // TODO: Support reading from parent workspace manifest?

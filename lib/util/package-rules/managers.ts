@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isUndefined } from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { isCustomManager } from '../../modules/manager/custom';
 import { matchRegexOrGlobList } from '../string-match';
@@ -9,10 +9,10 @@ export class ManagersMatcher extends Matcher {
     { manager }: PackageRuleInputConfig,
     { matchManagers }: PackageRule,
   ): boolean | null {
-    if (is.undefined(matchManagers)) {
+    if (isUndefined(matchManagers)) {
       return null;
     }
-    if (is.undefined(manager) || !manager) {
+    if (isUndefined(manager) || !manager) {
       return false;
     }
     if (isCustomManager(manager)) {

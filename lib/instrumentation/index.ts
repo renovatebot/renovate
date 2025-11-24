@@ -14,6 +14,7 @@ import type { Instrumentation } from '@opentelemetry/instrumentation';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { BunyanInstrumentation } from '@opentelemetry/instrumentation-bunyan';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
+import { RedisInstrumentation } from '@opentelemetry/instrumentation-redis';
 import {
   awsBeanstalkDetector,
   awsEc2Detector,
@@ -127,6 +128,7 @@ export function init(): void {
       /* v8 ignore stop */
     }),
     new BunyanInstrumentation(),
+    new RedisInstrumentation(),
   ];
   registerInstrumentations({
     instrumentations,

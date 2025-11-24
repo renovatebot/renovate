@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isEmptyArray, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -24,7 +24,7 @@ export async function updateArtifacts({
   logger.debug(`pub.updateArtifacts(${packageFileName})`);
   const { isLockFileMaintenance } = config;
 
-  if (is.emptyArray(updatedDeps) && !isLockFileMaintenance) {
+  if (isEmptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated pub deps - returning null');
     return null;
   }
@@ -105,7 +105,7 @@ function getExecCommand(
   if (isLockFileMaintenance) {
     return `${toolName} pub upgrade`;
   } else {
-    const depNames = updatedDeps.map((dep) => dep.depName).filter(is.string);
+    const depNames = updatedDeps.map((dep) => dep.depName).filter(isString);
     if (depNames.length === 1 && SDK_NAMES.includes(depNames[0])) {
       return `${toolName} ${PUB_GET_COMMAND}`;
     }

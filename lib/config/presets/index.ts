@@ -1,4 +1,9 @@
-import is from '@sindresorhus/is';
+import {
+  isArray,
+  isNullOrUndefined,
+  isObject,
+  isString,
+} from '@sindresorhus/is';
 import {
   CONFIG_VALIDATION,
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -75,7 +80,7 @@ export function replaceArgs(
   obj: string | string[] | Record<string, any> | Record<string, any>[],
   argMapping: Record<string, any>,
 ): any {
-  if (is.string(obj)) {
+  if (isString(obj)) {
     let returnStr = obj;
     for (const [arg, argVal] of Object.entries(argMapping)) {
       const re = regEx(`{{${arg}}}`, 'g', false);
@@ -83,14 +88,14 @@ export function replaceArgs(
     }
     return returnStr;
   }
-  if (is.array(obj)) {
+  if (isArray(obj)) {
     const returnArray = [];
     for (const item of obj) {
       returnArray.push(replaceArgs(item, argMapping));
     }
     return returnArray;
   }
-  if (is.object(obj)) {
+  if (isObject(obj)) {
     const returnObj: Record<string, any> = {};
     for (const [key, val] of Object.entries(obj)) {
       returnObj[key] = replaceArgs(val, argMapping);
@@ -129,7 +134,7 @@ export async function getPreset(
     presetConfig = memCache.get(cacheKey);
   }
 
-  if (is.nullOrUndefined(presetConfig)) {
+  if (isNullOrUndefined(presetConfig)) {
     presetConfig = await presetSources[presetSource].getPreset({
       repo,
       presetPath,
@@ -225,11 +230,11 @@ export async function resolveConfigPresets(
   logger.trace({ config }, `Post-merge resolve config`);
   for (const [key, val] of Object.entries(config)) {
     const ignoredKeys = ['content', 'onboardingConfig'];
-    if (is.array(val)) {
+    if (isArray(val)) {
       // Resolve nested objects inside arrays
       config[key] = [];
       for (const element of val) {
-        if (is.object(element)) {
+        if (isObject(element)) {
           (config[key] as RenovateConfig[]).push(
             await resolveConfigPresets(
               element as RenovateConfig,
@@ -242,7 +247,7 @@ export async function resolveConfigPresets(
           (config[key] as unknown[]).push(element);
         }
       }
-    } else if (is.object(val) && !ignoredKeys.includes(key)) {
+    } else if (isObject(val) && !ignoredKeys.includes(key)) {
       // Resolve nested objects
       logger.trace(`Resolving object "${key}"`);
       config[key] = await resolveConfigPresets(

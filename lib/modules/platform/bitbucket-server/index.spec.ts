@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { mockDeep } from 'vitest-mock-extended';
 import {
   REPOSITORY_CHANGED,
@@ -63,7 +63,7 @@ function repoMock(
             name: 'ssh',
           }
         : null,
-    ].filter(is.truthy);
+    ].filter(isTruthy);
   }
 
   return {

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -67,7 +67,7 @@ export class DartVersionDatasource extends Datasource {
   ): Release[] {
     return prefixes
       .map((prefix) => this.getVersionFromPrefix(prefix))
-      .filter(is.string)
+      .filter(isString)
       .filter((version) => {
         if (
           version === 'latest' ||

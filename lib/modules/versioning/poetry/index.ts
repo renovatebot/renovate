@@ -24,7 +24,6 @@ export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
   'widen',
-  'pin',
   'replace',
 ];
 
@@ -165,9 +164,6 @@ function getNewValue({
   currentVersion,
   newVersion,
 }: NewValueConfig): string {
-  if (rangeStrategy === 'pin') {
-    return newVersion;
-  }
   if (rangeStrategy === 'replace') {
     const npmCurrentValue = poetry2npm(currentValue);
     try {

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
 
 import { getRangeStrategy } from '../../../../modules/manager';
 import type { LookupUpdate } from '../../../../modules/manager/types';
@@ -29,10 +29,10 @@ export function isReplacementRulesConfigured(
   config: LookupUpdateConfig,
 ): boolean {
   return (
-    is.nonEmptyString(config.replacementName) ||
-    is.nonEmptyString(config.replacementNameTemplate) ||
-    is.nonEmptyString(config.replacementVersion) ||
-    is.nonEmptyString(config.replacementVersionTemplate)
+    isNonEmptyString(config.replacementName) ||
+    isNonEmptyString(config.replacementNameTemplate) ||
+    isNonEmptyString(config.replacementVersion) ||
+    isNonEmptyString(config.replacementVersionTemplate)
   );
 }
 
@@ -69,10 +69,10 @@ export function determineNewReplacementValue(
 }
 
 function getNewVersion(config: LookupUpdateConfig): string | null {
-  if (!is.nullOrUndefined(config.replacementVersion)) {
+  if (!isNullOrUndefined(config.replacementVersion)) {
     return config.replacementVersion;
   }
-  if (!is.nullOrUndefined(config.replacementVersionTemplate)) {
+  if (!isNullOrUndefined(config.replacementVersionTemplate)) {
     return template.compile(config.replacementVersionTemplate, config, true);
   }
   return null;

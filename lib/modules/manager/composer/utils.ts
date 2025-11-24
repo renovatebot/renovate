@@ -1,5 +1,5 @@
 // TODO: types (#22198)
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
@@ -23,7 +23,7 @@ export function getComposerArguments(
   if (config.composerIgnorePlatformReqs) {
     if (config.composerIgnorePlatformReqs.length === 0) {
       if (
-        is.string(toolConstraint.constraint) &&
+        isString(toolConstraint.constraint) &&
         api.intersects!(toolConstraint.constraint, '^2.2')
       ) {
         args += " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*'";
@@ -56,7 +56,7 @@ export function getComposerUpdateArguments(
   let args = getComposerArguments(config, toolConstraint);
 
   if (
-    is.string(toolConstraint.constraint) &&
+    isString(toolConstraint.constraint) &&
     api.intersects!(toolConstraint.constraint, '>=2.7')
   ) {
     args += ' --minimal-changes';

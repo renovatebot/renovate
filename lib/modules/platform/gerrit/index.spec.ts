@@ -7,7 +7,6 @@ import { client as _client } from './client';
 import type {
   GerritAccountInfo,
   GerritChange,
-  GerritChangeMessageInfo,
   GerritLabelInfo,
   GerritLabelTypeInfo,
   GerritProjectInfo,
@@ -241,42 +240,15 @@ describe('modules/platform/gerrit/index', () => {
       expect(clientMock.abandonChange).toHaveBeenCalledExactlyOnceWith(123456);
     });
 
-    it('updatePr() - existing prBody found in change.messages => nothing todo...', async () => {
-      const change = partial<GerritChange>({
-        current_revision: 'some-revision',
-        revisions: {
-          'some-revision': partial<GerritRevisionInfo>({
-            commit_with_footers: 'some message',
-          }),
-        },
-      });
-      clientMock.getChange.mockResolvedValueOnce(change);
-      clientMock.getMessages.mockResolvedValueOnce([
-        partial<GerritChangeMessageInfo>({
-          tag: TAG_PULL_REQUEST_BODY,
-          message: 'Last PR-Body',
-        }),
-      ]);
-      await gerrit.updatePr({
-        number: 123456,
-        prTitle: 'title',
-        prBody: 'Last PR-Body',
-      });
-      expect(clientMock.addMessage).not.toHaveBeenCalled();
-    });
-
-    it('updatePr() - new prBody found in change.messages => add as message', async () => {
+    it('updatePr() - body set => add as message', async () => {
       const change = partial<GerritChange>({});
       clientMock.getChange.mockResolvedValueOnce(change);
-      clientMock.getMessages.mockResolvedValueOnce([]);
       await gerrit.updatePr({
         number: 123456,
         prTitle: change.subject,
         prBody: 'NEW PR-Body',
       });
-      expect(
-        clientMock.addMessageIfNotAlreadyExists,
-      ).toHaveBeenCalledExactlyOnceWith(
+      expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
         123456,
         'NEW PR-Body',
         TAG_PULL_REQUEST_BODY,
@@ -321,7 +293,7 @@ describe('modules/platform/gerrit/index', () => {
       ).rejects.toThrow(/it was not created in the last 5 minutes/);
     });
 
-    it('createPr() - update body', async () => {
+    it('createPr() - add body as message', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
         current_revision: 'some-revision',
@@ -344,13 +316,10 @@ describe('modules/platform/gerrit/index', () => {
         },
       });
       expect(pr).toHaveProperty('number', 123456);
-      expect(
-        clientMock.addMessageIfNotAlreadyExists,
-      ).toHaveBeenCalledExactlyOnceWith(
+      expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
         123456,
         'body',
         TAG_PULL_REQUEST_BODY,
-        [],
       );
     });
   });

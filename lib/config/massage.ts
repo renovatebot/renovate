@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isNonEmptyArray, isObject, isString } from '@sindresorhus/is';
 import { clone } from '../util/clone';
 import { getOptions } from './options';
 import type { PackageRule, RenovateConfig, UpdateType } from './types';
@@ -19,12 +19,12 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
   }
   const massagedConfig = clone(config);
   for (const [key, val] of Object.entries(config)) {
-    if (allowedStrings.includes(key) && is.string(val)) {
+    if (allowedStrings.includes(key) && isString(val)) {
       massagedConfig[key] = [val];
-    } else if (is.array(val)) {
+    } else if (isArray(val)) {
       massagedConfig[key] = [];
       val.forEach((item) => {
-        if (is.object(item)) {
+        if (isObject(item)) {
           (massagedConfig[key] as RenovateConfig[]).push(
             massageConfig(item as RenovateConfig),
           );
@@ -32,11 +32,11 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
           (massagedConfig[key] as unknown[]).push(item);
         }
       });
-    } else if (is.object(val) && key !== 'encrypted') {
+    } else if (isObject(val) && key !== 'encrypted') {
       massagedConfig[key] = massageConfig(val as RenovateConfig);
     }
   }
-  if (is.nonEmptyArray(massagedConfig.packageRules)) {
+  if (isNonEmptyArray(massagedConfig.packageRules)) {
     let newRules: PackageRule[] = [];
     const updateTypes: UpdateType[] = [
       'major',

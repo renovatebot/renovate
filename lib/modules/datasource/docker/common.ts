@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { parse } from 'auth-header';
 import {
   HOST_DISABLED,
@@ -78,7 +78,7 @@ export async function getAuthHeaders(
     }
     if (
       apiCheckResponse.statusCode !== 401 ||
-      !is.nonEmptyString(apiCheckResponse.headers['www-authenticate'])
+      !isNonEmptyString(apiCheckResponse.headers['www-authenticate'])
     ) {
       logger.warn(
         { apiCheckUrl, res: apiCheckResponse },
@@ -159,7 +159,7 @@ export async function getAuthHeaders(
     // * www-authenticate: Bearer realm="https://auth.docker.io/token",service="registry.docker.io"
     if (
       authenticateHeader.scheme.toUpperCase() !== 'BEARER' ||
-      !is.string(authenticateHeader.params.realm) ||
+      !isString(authenticateHeader.params.realm) ||
       parseUrl(authenticateHeader.params.realm) === null
     ) {
       logger.once.debug(`hostRules: testing direct auth for ${registryHost}`);
@@ -174,7 +174,7 @@ export async function getAuthHeaders(
 
     // repo isn't known to server yet, so causing wrong scope `repository:user/image:pull`
     if (
-      is.string(authenticateHeader.params.scope) &&
+      isString(authenticateHeader.params.scope) &&
       !apiCheckUrl.endsWith('/v2/')
     ) {
       authUrl.searchParams.append('scope', authenticateHeader.params.scope);
@@ -185,7 +185,7 @@ export async function getAuthHeaders(
       );
     }
 
-    if (is.string(authenticateHeader.params.service)) {
+    if (isString(authenticateHeader.params.service)) {
       authUrl.searchParams.append('service', authenticateHeader.params.service);
     }
 

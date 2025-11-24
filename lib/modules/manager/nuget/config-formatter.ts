@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
@@ -29,7 +29,7 @@ export function createNuGetConfigXml(registries: Registry[]): string {
       url: registry.url,
     });
 
-    if (is.nonEmptyString(password) || is.nonEmptyString(username)) {
+    if (isNonEmptyString(password) || isNonEmptyString(username)) {
       credentials.push({
         name: registryName,
         password,
@@ -121,10 +121,7 @@ function escapeName(name: string): string {
   let escapedName = '';
   for (const char of name) {
     if (char.match(charactersToEscape)) {
-      escapedName += `__x${char
-        .codePointAt(0)!
-        .toString(16)
-        .padStart(4, '0')}__`;
+      escapedName += `_x${char.codePointAt(0)!.toString(16).padStart(4, '0')}_`;
     } else {
       escapedName += char;
     }

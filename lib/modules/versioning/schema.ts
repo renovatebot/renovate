@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isFunction } from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../logger';
 import versionings from './api';
@@ -18,7 +18,7 @@ export const Versioning = z
       return defaultVersioning.api;
     }
 
-    if (is.function(versioning)) {
+    if (isFunction(versioning)) {
       const versioningConfig = versioningRest.length
         ? versioningRest.join(':')
         : undefined;

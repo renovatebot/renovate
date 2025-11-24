@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { lang, query as q } from 'good-enough-parser';
 import { quote } from 'shlex';
 import upath from 'upath';
@@ -215,7 +215,7 @@ export async function updateArtifacts({
           addIfUpdated(status, fileProjectPath),
         ),
       )
-    ).filter(is.truthy);
+    ).filter(isTruthy);
     if (lockFiles) {
       updateArtifactsResult.push(...lockFiles);
     }

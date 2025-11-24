@@ -1331,7 +1331,7 @@ None detected
     it('forwards configured labels to the ensure issue call', async () => {
       const branches: BranchConfig[] = [];
       config.dependencyDashboard = true;
-      config.dependencyDashboardLabels = ['RenovateBot', 'Maintenance'];
+      config.dependencyDashboardLabels = ['Renovate', 'Maintenance'];
       await dependencyDashboard.ensureDependencyDashboard(
         config,
         branches,
@@ -1340,7 +1340,7 @@ None detected
       );
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].labels).toStrictEqual([
-        'RenovateBot',
+        'Renovate',
         'Maintenance',
       ]);
 

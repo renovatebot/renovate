@@ -1,6 +1,6 @@
 import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
-import is from '@sindresorhus/is';
+import { isBoolean, isNonEmptyObject, isString } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import semver from 'semver';
 import type { Options, SimpleGit, TaskOptions } from 'simple-git';
@@ -532,7 +532,7 @@ export async function syncGit(): Promise<void> {
 }
 
 export async function getRepoStatus(path?: string): Promise<StatusResult> {
-  if (is.string(path)) {
+  if (isString(path)) {
     const localDir = GlobalConfig.get('localDir');
     const localPath = upath.resolve(localDir, path);
     if (!localPath.startsWith(upath.resolve(localDir))) {
@@ -694,7 +694,7 @@ export async function getFileList(): Promise<string[]> {
   // submodules are starting with `160000 commit`
   return files
     .split(newlineRegex)
-    .filter(is.string)
+    .filter(isString)
     .filter((line) => line.startsWith('100'))
     .map((line) => line.split(regEx(/\t/)).pop()!);
 }
@@ -862,7 +862,7 @@ export async function isBranchConflicted(
     baseBranch,
     baseBranchSha,
   );
-  if (is.boolean(isConflicted)) {
+  if (isBoolean(isConflicted)) {
     logger.debug(
       `branch.isConflicted(): using cached result "${isConflicted}"`,
     );
@@ -1217,7 +1217,7 @@ export async function prepareCommit({
 
     const commitRes = await git.commit(message, [], commitOptions);
     if (
-      commitRes.summary &&
+      isNonEmptyObject(commitRes.summary) &&
       commitRes.summary.changes === 0 &&
       commitRes.summary.insertions === 0 &&
       commitRes.summary.deletions === 0

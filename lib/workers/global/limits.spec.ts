@@ -9,7 +9,7 @@ import {
   setCount,
   setMaxLimit,
 } from './limits';
-import { partial } from '~test/util';
+import { logger, partial } from '~test/util';
 
 describe('workers/global/limits', () => {
   beforeEach(() => {
@@ -157,6 +157,34 @@ describe('workers/global/limits', () => {
       expect(calcLimit(upgrades, 'prHourlyLimit')).toBe(1);
       expect(calcLimit(upgrades, 'branchConcurrentLimit')).toBe(1);
       expect(calcLimit(upgrades, 'prConcurrentLimit')).toBe(1);
+    });
+
+    it('de-duplicates upgrades by depName from debug log', () => {
+      const upgrades = partial<BranchUpgradeConfig>([
+        {
+          depName: 'depA',
+          prHourlyLimit: 10,
+        },
+        {
+          depName: 'depA',
+          prHourlyLimit: 10,
+        },
+        {
+          depName: 'depB',
+          prHourlyLimit: 1,
+        },
+      ]);
+
+      expect(calcLimit(upgrades, 'prHourlyLimit')).toBe(1);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          limits: [
+            { depName: 'depA', prHourlyLimit: 10 },
+            { depName: 'depB', prHourlyLimit: 1 },
+          ],
+        },
+        'prHourlyLimit of the upgrades present in this branch',
+      );
     });
   });
 

@@ -1,4 +1,8 @@
-import is from '@sindresorhus/is';
+import {
+  isNonEmptyString,
+  isNonEmptyStringAndNotWhitespace,
+  isString,
+} from '@sindresorhus/is';
 import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
 import semver from 'semver';
@@ -36,7 +40,7 @@ export async function getRepositoryConfig(
 ): Promise<RenovateConfig> {
   const repoConfig = configParser.mergeChildConfig(
     globalConfig,
-    is.string(repository) ? { repository } : repository,
+    isString(repository) ? { repository } : repository,
   );
   const repoParts = repoConfig.repository.split('/');
   repoParts.pop();
@@ -110,10 +114,10 @@ export async function start(): Promise<number> {
   let config: AllConfig;
   const env = getEnv();
   try {
-    if (is.nonEmptyStringAndNotWhitespace(env.AWS_SECRET_ACCESS_KEY)) {
+    if (isNonEmptyStringAndNotWhitespace(env.AWS_SECRET_ACCESS_KEY)) {
       addSecretForSanitizing(env.AWS_SECRET_ACCESS_KEY, 'global');
     }
-    if (is.nonEmptyStringAndNotWhitespace(env.AWS_SESSION_TOKEN)) {
+    if (isNonEmptyStringAndNotWhitespace(env.AWS_SESSION_TOKEN)) {
       addSecretForSanitizing(env.AWS_SESSION_TOKEN, 'global');
     }
 
@@ -152,7 +156,7 @@ export async function start(): Promise<number> {
       autodiscoverRepositories(config),
     );
 
-    if (is.nonEmptyString(config.writeDiscoveredRepos)) {
+    if (isNonEmptyString(config.writeDiscoveredRepos)) {
       const content = JSON.stringify(config.repositories);
       await fs.writeFile(config.writeDiscoveredRepos, content);
       logger.info(

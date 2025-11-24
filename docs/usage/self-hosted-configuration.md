@@ -374,6 +374,7 @@ Other valid cache namespaces are as follows:
 - `changelog-github-release`
 - `changelog-gitlab-notes@v2`
 - `changelog-gitlab-release`
+- `datasource-azure-tags`
 - `datasource-artifactory`
 - `datasource-aws-machine-image`
 - `datasource-aws-rds`
@@ -431,6 +432,7 @@ Other valid cache namespaces are as follows:
 - `datasource-jsr`
 - `datasource-maven:cache-provider`
 - `datasource-maven:postprocess-reject`
+- `datasource-nextcloud`
 - `datasource-node-version`
 - `datasource-npm:cache-provider`
 - `datasource-nuget-v3`
@@ -485,6 +487,10 @@ Example:
 <!-- prettier-ignore -->
 !!! note
     If you want renovate to use a custom filename for the onboarding branch you also need to change the [`onboardingConfigFileName`](#onboardingconfigfilename).
+
+## configValidationError
+
+If enabled, config validation errors will be reported as errors instead of warnings, and Renovate will exit with a non-zero exit code.
 
 ## containerbaseDir
 
@@ -1437,7 +1443,7 @@ You can control if Renovate should try to access these services with the `useClo
 ## userAgent
 
 If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
-Otherwise, it will default to `RenovateBot/${renovateVersion} (https://github.com/renovatebot/renovate)`.
+Otherwise, it will default to `Renovate/${renovateVersion} (https://github.com/renovatebot/renovate)`.
 
 ## username
 
