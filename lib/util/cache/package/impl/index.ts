@@ -50,16 +50,14 @@ export class PackageCache extends PackageCacheBase {
     key: string,
   ): Promise<T | undefined> {
     const combinedKey = getCombinedKey(namespace, key);
-    const cachedValue = this.memory.get(combinedKey);
-    if (cachedValue !== undefined) {
-      return cachedValue as T;
+    if (this.memory.has(combinedKey)) {
+      return this.memory.get(combinedKey) as T;
     }
 
     return await getMutex(combinedKey, 'package-cache').runExclusive(
       async () => {
-        const cachedValue = this.memory.get(combinedKey);
-        if (cachedValue !== undefined) {
-          return cachedValue as T;
+        if (this.memory.has(combinedKey)) {
+          return this.memory.get(combinedKey) as T;
         }
 
         const backend = this.backend;
@@ -71,9 +69,7 @@ export class PackageCache extends PackageCacheBase {
           backend.get<T>(namespace, key),
         );
 
-        if (value !== undefined) {
-          this.memory.set(combinedKey, value);
-        }
+        this.memory.set(combinedKey, value);
 
         return value;
       },

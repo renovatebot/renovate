@@ -92,6 +92,24 @@ describe('util/cache/package/impl/index', () => {
       expect(results).toEqual(['backend-value', 'backend-value']);
       expect(backend.get).toHaveBeenCalledTimes(1);
     });
+
+    it('caches undefined (negative caching)', async () => {
+      const backend = {
+        get: vi.fn().mockResolvedValue(undefined),
+        set: vi.fn(),
+        destroy: vi.fn(),
+      } as any;
+      const cache = new PackageCache(backend);
+
+      // First get - miss in memory, miss in backend
+      expect(await cache.get('_test-namespace', 'missing')).toBeUndefined();
+      expect(backend.get).toHaveBeenCalledTimes(1);
+
+      // Second get - hit in memory (negative cache)
+      backend.get.mockClear();
+      expect(await cache.get('_test-namespace', 'missing')).toBeUndefined();
+      expect(backend.get).not.toHaveBeenCalled();
+    });
   });
 
   describe('No backend', () => {
