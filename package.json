@@ -317,7 +317,7 @@
     "@types/tar": "6.1.13",
     "@types/tmp": "0.2.6",
     "@types/validate-npm-package-name": "4.0.2",
-    "@vitest/coverage-v8": "3.2.4",
+    "@vitest/coverage-v8": "4.0.10",
     "@vitest/eslint-plugin": "1.4.3",
     "ajv": "8.17.1",
     "ajv-formats": "3.0.1",
@@ -355,7 +355,7 @@
     "unified": "11.0.5",
     "vite": "7.2.2",
     "vite-tsconfig-paths": "5.1.4",
-    "vitest": "3.2.4",
+    "vitest": "4.0.10",
     "vitest-mock-extended": "3.1.0"
   },
   "packageManager": "pnpm@10.22.0",
