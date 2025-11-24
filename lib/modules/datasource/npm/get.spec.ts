@@ -1,15 +1,11 @@
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as _packageCache from '../../../util/cache/package';
 import * as hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
 import type { HttpResponse } from '../../../util/http/types';
 import { getDependency } from './get';
 import { resolveRegistryUrl, setNpmrc } from './npmrc';
 import * as httpMock from '~test/http-mock';
-
-vi.mock('../../../util/cache/package');
-
-const packageCache = vi.mocked(_packageCache);
+import { packageCache } from '~test/util';
 
 function getPath(s = ''): string {
   const [x] = s.split('\n');

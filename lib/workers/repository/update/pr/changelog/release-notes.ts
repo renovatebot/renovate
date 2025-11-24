@@ -3,7 +3,7 @@ import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
 import { logger } from '../../../../../logger';
 import * as memCache from '../../../../../util/cache/memory';
-import * as packageCache from '../../../../../util/cache/package';
+import { packageCache } from '../../../../../util/cache/package';
 import type { PackageCacheNamespace } from '../../../../../util/cache/package/types';
 import { detectPlatform } from '../../../../../util/common';
 import { linkify } from '../../../../../util/markdown';

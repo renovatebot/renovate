@@ -1,7 +1,7 @@
 import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
-import * as packageCache from '../../../util/cache/package';
+import { packageCache } from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
 import { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';

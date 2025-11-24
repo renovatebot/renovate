@@ -5,7 +5,6 @@ import {
   HOST_DISABLED,
 } from '../../constants/error-messages';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as _packageCache from '../../util/cache/package';
 import { loadModules } from '../../util/modules';
 import datasources from './api';
 import { getDefaultVersioning } from './common';
@@ -23,7 +22,7 @@ import {
   getPkgReleases,
   supportsDigests,
 } from '.';
-import { logger } from '~test/util';
+import { logger, packageCache } from '~test/util';
 
 const datasource = 'dummy';
 const packageName = 'package';
@@ -130,9 +129,6 @@ vi.mock('./metadata-manual', () => ({
     },
   },
 }));
-
-vi.mock('../../util/cache/package');
-const packageCache = vi.mocked(_packageCache);
 
 describe('modules/datasource/index', () => {
   afterEach(() => {

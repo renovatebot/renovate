@@ -3,7 +3,7 @@ import { supportedDatasources as presetSupportedDatasources } from '../../config
 import type { AllConfig, UpdateType } from '../../config/types';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as packageCache from '../cache/package';
+import { packageCache } from '../cache/package';
 import * as hostRules from '../host-rules';
 import { Http } from '../http';
 import { memCacheProvider } from '../http/cache/memory-http-cache-provider';
@@ -152,7 +152,10 @@ async function queryApi(
     newVersion,
   );
   const cacheKey = `${token}:${url}`;
-  const cachedResult = await packageCache.get(hostType, cacheKey);
+  const cachedResult = await packageCache.get<MergeConfidence>(
+    hostType,
+    cacheKey,
+  );
 
   // istanbul ignore if
   if (cachedResult) {

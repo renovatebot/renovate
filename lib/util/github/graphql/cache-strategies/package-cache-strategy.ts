@@ -1,4 +1,4 @@
-import * as packageCache from '../../../cache/package';
+import { packageCache } from '../../../cache/package';
 import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
 import { AbstractGithubGraphqlCacheStrategy } from './abstract-cache-strategy';
 

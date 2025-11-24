@@ -5,6 +5,7 @@ import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { getPkgReleases } from '..';
 import { GlobalConfig } from '../../../config/global';
+import { packageCache } from '../../../util/cache/package';
 import { hashStream, toSha256 } from '../../../util/hash';
 import type { GetPkgReleasesConfig } from '../types';
 import { cacheSubDir } from './common';
@@ -21,6 +22,9 @@ import { fs } from '~test/util';
 
 const debBaseUrl = 'http://deb.debian.org';
 
+vi.unmock('../../../util/mutex');
+vi.unmock('../../../util/cache/package');
+
 describe('modules/datasource/deb/index', () => {
   const fixturePackagesArchivePath = Fixtures.getPath(`Packages.gz`);
   const fixturePackagesArchivePath2 = Fixtures.getPath(`Packages2.gz`);
@@ -35,6 +39,7 @@ describe('modules/datasource/deb/index', () => {
   let extractedPackageFile: string;
 
   beforeEach(async () => {
+    packageCache.cleanup();
     debDatasource = new DebDatasource();
     cacheDir = await dir({ unsafeCleanup: true });
     GlobalConfig.set({ cacheDir: cacheDir.path });
@@ -277,7 +282,6 @@ describe('modules/datasource/deb/index', () => {
     });
 
     it('should not lead to a race condition on parallel lookups', async () => {
-      vi.unmock('../../../util/mutex');
       const packages = [
         'album',
         'album-data',
@@ -289,18 +293,14 @@ describe('modules/datasource/deb/index', () => {
         'amoeba-data',
       ];
 
-      for (let i = 0; i < packages.length; i++) {
-        // first call doesn't include a http head call, since the file doesn't exists locally yet
-        // the package index is downloaded every time since the http head call returns 200
-        mockHttpCalls(
-          'stable',
-          'non-free',
-          'amd64',
-          !!i,
-          fixturePackagesArchivePath,
-          fixturePackagesArchiveHash,
-        );
-      }
+      mockHttpCalls(
+        'stable',
+        'non-free',
+        'amd64',
+        false,
+        fixturePackagesArchivePath,
+        fixturePackagesArchiveHash,
+      );
 
       const results = await Promise.all(
         packages.map((packageName) => getPkgReleases({ ...cfg, packageName })),

@@ -1,7 +1,7 @@
 import { isString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
-import * as packageCache from '../../cache/package';
+import { packageCache } from '../../cache/package';
 import { resolveTtlValues } from '../../cache/package/ttl';
 import type { PackageCacheNamespace } from '../../cache/package/types';
 import { regEx } from '../../regex';

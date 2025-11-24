@@ -3,10 +3,11 @@ import zlib, { constants } from 'node:zlib';
 import type { Database, Statement } from 'better-sqlite3';
 import { exists } from 'fs-extra';
 import upath from 'upath';
-import { sqlite } from '../../../expose.cjs';
-import { logger } from '../../../logger';
-import { ensureDir } from '../../fs';
-import type { PackageCacheNamespace } from './types';
+import { sqlite } from '../../../../expose.cjs';
+import { logger } from '../../../../logger';
+import { ensureDir } from '../../../fs';
+import type { PackageCacheNamespace } from '../types';
+import { PackageCacheBase } from './base';
 
 const brotliCompress = promisify(zlib.brotliCompress);
 const brotliDecompress = promisify(zlib.brotliDecompress);
@@ -27,35 +28,18 @@ async function decompress<T>(input: Buffer): Promise<T> {
   return JSON.parse(jsonStr) as T;
 }
 
-export class SqlitePackageCache {
-  private readonly upsertStatement: Statement<unknown[]>;
-  private readonly getStatement: Statement<unknown[]>;
-  private readonly deleteExpiredRows: Statement<unknown[]>;
-  private readonly countStatement: Statement<unknown[]>;
+export class PackageCacheSqlite extends PackageCacheBase {
+  private upsertStatement: Statement<unknown[]>;
+  private getStatement: Statement<unknown[]>;
+  private deleteExpiredRows: Statement<unknown[]>;
+  private countStatement: Statement<unknown[]>;
 
-  static async init(cacheDir: string): Promise<SqlitePackageCache> {
-    // simply let it throw if it fails, so no test coverage needed
-    const Sqlite = sqlite();
-    const sqliteDir = upath.join(cacheDir, 'renovate/renovate-cache-sqlite');
-    await ensureDir(sqliteDir);
-    const sqliteFile = upath.join(sqliteDir, 'db.sqlite');
+  private constructor(private readonly client: Database) {
+    super();
+    this.client.pragma('journal_mode = WAL');
+    this.client.pragma("encoding = 'UTF-8'");
 
-    if (await exists(sqliteFile)) {
-      logger.debug(`Using SQLite package cache: ${sqliteFile}`);
-    } else {
-      logger.debug(`Creating SQLite package cache: ${sqliteFile}`);
-    }
-
-    const client = new Sqlite(sqliteFile);
-    const res = new SqlitePackageCache(client);
-    return res;
-  }
-
-  private constructor(private client: Database) {
-    client.pragma('journal_mode = WAL');
-    client.pragma("encoding = 'UTF-8'");
-
-    client
+    this.client
       .prepare(
         `
           CREATE TABLE IF NOT EXISTS package_cache (
@@ -68,16 +52,16 @@ export class SqlitePackageCache {
         `,
       )
       .run();
-    client
+    this.client
       .prepare('CREATE INDEX IF NOT EXISTS expiry ON package_cache (expiry)')
       .run();
-    client
+    this.client
       .prepare(
         'CREATE INDEX IF NOT EXISTS namespace_key ON package_cache (namespace, key)',
       )
       .run();
 
-    this.upsertStatement = client.prepare(`
+    this.upsertStatement = this.client.prepare(`
       INSERT INTO package_cache (namespace, key, data, expiry)
       VALUES (@namespace, @key, @data, unixepoch() + @ttlSeconds)
       ON CONFLICT (namespace, key) DO UPDATE SET
@@ -85,7 +69,7 @@ export class SqlitePackageCache {
         expiry = unixepoch() + @ttlSeconds
     `);
 
-    this.getStatement = client
+    this.getStatement = this.client
       .prepare(
         `
           SELECT data FROM package_cache
@@ -95,26 +79,41 @@ export class SqlitePackageCache {
       )
       .pluck(true);
 
-    this.deleteExpiredRows = client.prepare(`
+    this.deleteExpiredRows = this.client.prepare(`
       DELETE FROM package_cache
       WHERE expiry <= unixepoch()
     `);
 
-    this.countStatement = client
+    this.countStatement = this.client
       .prepare('SELECT COUNT(*) FROM package_cache')
       .pluck(true);
   }
 
-  async set(
+  static async create(cacheDir: string): Promise<PackageCacheSqlite> {
+    const Sqlite = sqlite();
+    const sqliteDir = upath.join(cacheDir, 'renovate/renovate-cache-sqlite');
+    await ensureDir(sqliteDir);
+    const sqliteFile = upath.join(sqliteDir, 'db.sqlite');
+
+    if (await exists(sqliteFile)) {
+      logger.debug(`Using SQLite package cache: ${sqliteFile}`);
+    } else {
+      logger.debug(`Creating SQLite package cache: ${sqliteFile}`);
+    }
+
+    const client = new Sqlite(sqliteFile);
+    return new PackageCacheSqlite(client);
+  }
+
+  async set<T = unknown>(
     namespace: PackageCacheNamespace,
     key: string,
-    value: unknown,
-    hardTtlMinutes = 5,
+    value: T,
+    hardTtlMinutes: number,
   ): Promise<void> {
     const data = await compress(value);
     const ttlSeconds = hardTtlMinutes * 60;
     this.upsertStatement.run({ namespace, key, data, ttlSeconds });
-    return Promise.resolve();
   }
 
   async get<T = unknown>(
@@ -132,7 +131,7 @@ export class SqlitePackageCache {
     return await decompress<T>(data);
   }
 
-  private cleanupExpired(): void {
+  override destroy(): Promise<void> {
     const start = Date.now();
     const totalCount = this.countStatement.get() as number;
     const { changes: deletedCount } = this.deleteExpiredRows.run();
@@ -141,10 +140,6 @@ export class SqlitePackageCache {
     logger.debug(
       `SQLite package cache: deleted ${deletedCount} of ${totalCount} entries in ${durationMs}ms`,
     );
-  }
-
-  cleanup(): Promise<void> {
-    this.cleanupExpired();
     this.client.close();
     return Promise.resolve();
   }

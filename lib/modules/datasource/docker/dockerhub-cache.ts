@@ -1,6 +1,6 @@
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
-import * as packageCache from '../../../util/cache/package';
+import { packageCache } from '../../../util/cache/package';
 import type { DockerHubTag } from './schema';
 
 export interface DockerHubCacheData {

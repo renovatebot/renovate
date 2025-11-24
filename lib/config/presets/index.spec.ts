@@ -1,8 +1,7 @@
-import { mockDeep } from 'vitest-mock-extended';
 import { PLATFORM_RATE_LIMIT_EXCEEDED } from '../../constants/error-messages';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
-import * as _packageCache from '../../util/cache/package';
+import { packageCache } from '../../util/cache/package';
 import { setCustomEnv } from '../../util/env';
 import { GlobalConfig } from '../global';
 import type { RenovateConfig } from '../types';
@@ -22,12 +21,13 @@ import { logger } from '~test/util';
 vi.mock('./npm');
 vi.mock('./github');
 vi.mock('./local');
-vi.mock('../../util/cache/package', () => mockDeep());
+
+vi.unmock('../../util/cache/package');
+vi.unmock('../../util/mutex');
 
 const npm = vi.mocked(_npm);
 const local = vi.mocked(_local);
 const gitHub = vi.mocked(_github);
-const packageCache = vi.mocked(_packageCache);
 
 const presetIkatyang = Fixtures.getJson('renovate-config-ikatyang.json');
 
@@ -39,22 +39,7 @@ describe('config/presets/index', () => {
       config = {};
       GlobalConfig.reset();
       memCache.init();
-      packageCache.get.mockImplementation(
-        <T>(namespace: string, key: string): Promise<T> =>
-          Promise.resolve(memCache.get(`${namespace}-${key}`)),
-      );
-
-      packageCache.set.mockImplementation(
-        (
-          namespace: string,
-          key: string,
-          value: unknown,
-          minutes: number,
-        ): Promise<void> => {
-          memCache.set(`${namespace}-${key}`, value);
-          return Promise.resolve();
-        },
-      );
+      packageCache.cleanup();
 
       npm.getPreset.mockImplementation(({ repo, presetName }) => {
         if (repo === 'renovate-config-ikatyang') {
@@ -407,6 +392,8 @@ describe('config/presets/index', () => {
     });
 
     it('default packageCache TTL should be 15 minutes', async () => {
+      const packageCacheSet = vi.spyOn(packageCache, 'set');
+
       GlobalConfig.set({
         presetCachePersistence: true,
       });
@@ -444,10 +431,12 @@ describe('config/presets/index', () => {
         ],
       });
 
-      expect(packageCache.set.mock.calls[0][3]).toBe(15);
+      expect(packageCacheSet.mock.calls[0][3]).toBe(15);
     });
 
     it('use packageCache when presetCachePersistence is set', async () => {
+      const packageCacheSet = vi.spyOn(packageCache, 'set');
+
       GlobalConfig.set({
         presetCachePersistence: true,
       });
@@ -485,7 +474,7 @@ describe('config/presets/index', () => {
         ],
       });
 
-      expect(packageCache.set.mock.calls[0][3]).toBe(15);
+      expect(packageCacheSet.mock.calls[0][3]).toBe(15);
     });
 
     it('throws', async () => {

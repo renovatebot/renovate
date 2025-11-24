@@ -8,7 +8,7 @@ import { logger } from '../../../../../logger';
 import { getPkgReleases } from '../../../../../modules/datasource';
 import type { Release } from '../../../../../modules/datasource/types';
 import * as allVersioning from '../../../../../modules/versioning';
-import * as packageCache from '../../../../../util/cache/package';
+import { packageCache } from '../../../../../util/cache/package';
 import type { PackageCacheNamespace } from '../../../../../util/cache/package/types';
 import { memoize } from '../../../../../util/memoize';
 import { regEx } from '../../../../../util/regex';
@@ -139,15 +139,15 @@ export abstract class ChangeLogSource {
       if (!inRange(next.version)) {
         continue;
       }
-      let release = await packageCache.get(
+      let release = await packageCache.get<ChangeLogRelease>(
         this.cacheNamespace,
         this.getCacheKey(sourceUrl, packageName, prev.version, next.version),
       );
       if (!release) {
         release = {
           version: next.version,
-          date: next.releaseTimestamp,
-          gitRef: next.gitRef,
+          date: next.releaseTimestamp!,
+          gitRef: next.gitRef!,
           // put empty changes so that existing templates won't break
           changes: [],
           compare: {},

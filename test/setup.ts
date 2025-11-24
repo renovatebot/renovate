@@ -36,3 +36,5 @@ vi.mock('../lib/util/mutex', () => ({
   initMutexes: () => vi.fn(),
   acquireLock: () => vi.fn().mockImplementation(() => () => undefined),
 }));
+
+vi.mock('../lib/util/cache/package', () => mockDeep());

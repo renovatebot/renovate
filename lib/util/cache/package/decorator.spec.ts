@@ -1,21 +1,19 @@
 import { GlobalConfig } from '../../../config/global';
-import * as memCache from '../memory';
 import { cache } from './decorator';
-import * as file from './file';
-import * as packageCache from '.';
+import { packageCache } from '.';
 
-vi.mock('./file');
+vi.unmock('.');
+vi.unmock('../../mutex');
 
 describe('util/cache/package/decorator', () => {
-  const setCache = file.set;
+  const setCache = vi.spyOn(packageCache, 'setWithRawTtl');
   const getValue = vi.fn();
   let count = 1;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.useRealTimers();
     GlobalConfig.reset();
-    memCache.init();
-    await packageCache.init({ cacheDir: 'some-dir' });
+    packageCache.cleanup();
     count = 1;
     getValue.mockImplementation(() => {
       const res = String(100 * count + 10 * count + count);

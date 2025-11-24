@@ -1,6 +1,6 @@
 import type { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
-import * as packageCache from '../../../util/cache/package';
+import { packageCache } from '../../../util/cache/package';
 import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash } from '../../../util/url';
 import mavenVersion from '../../versioning/maven';

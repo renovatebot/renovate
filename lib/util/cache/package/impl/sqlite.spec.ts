@@ -1,23 +1,23 @@
 import { withDir } from 'tmp-promise';
-import { GlobalConfig } from '../../../config/global';
-import { SqlitePackageCache } from './sqlite';
+import { GlobalConfig } from '../../../../config/global';
+import { PackageCacheSqlite } from './sqlite';
 
 function withSqlite<T>(
-  fn: (sqlite: SqlitePackageCache) => Promise<T>,
+  fn: (sqlite: PackageCacheSqlite) => Promise<T>,
 ): Promise<T> {
   return withDir(
     async ({ path }) => {
       GlobalConfig.set({ cacheDir: path });
-      const sqlite = await SqlitePackageCache.init(path);
+      const sqlite = await PackageCacheSqlite.create(path);
       const res = await fn(sqlite);
-      await sqlite.cleanup();
+      await sqlite.destroy();
       return res;
     },
     { unsafeCleanup: true },
   );
 }
 
-describe('util/cache/package/sqlite', () => {
+describe('util/cache/package/impl/sqlite', () => {
   it('should get undefined', async () => {
     const res = await withSqlite((sqlite) =>
       sqlite.get('_test-namespace', 'bar'),
@@ -27,9 +27,9 @@ describe('util/cache/package/sqlite', () => {
 
   it('should set and get', async () => {
     const res = await withSqlite(async (sqlite) => {
-      await sqlite.set('_test-namespace', 'bar', { foo: 'foo' });
-      await sqlite.set('_test-namespace', 'bar', { bar: 'bar' });
-      await sqlite.set('_test-namespace', 'bar', { baz: 'baz' });
+      await sqlite.set('_test-namespace', 'bar', { foo: 'foo' }, 5);
+      await sqlite.set('_test-namespace', 'bar', { bar: 'bar' }, 5);
+      await sqlite.set('_test-namespace', 'bar', { baz: 'baz' }, 5);
       return sqlite.get('_test-namespace', 'bar');
     });
     expect(res).toEqual({ baz: 'baz' });
@@ -40,13 +40,13 @@ describe('util/cache/package/sqlite', () => {
       async ({ path }) => {
         GlobalConfig.set({ cacheDir: path });
 
-        const client1 = await SqlitePackageCache.init(path);
-        await client1.set('_test-namespace', 'bar', 'baz');
-        await client1.cleanup();
+        const client1 = await PackageCacheSqlite.create(path);
+        await client1.set('_test-namespace', 'bar', 'baz', 5);
+        await client1.destroy();
 
-        const client2 = await SqlitePackageCache.init(path);
+        const client2 = await PackageCacheSqlite.create(path);
         const res = await client2.get('_test-namespace', 'bar');
-        await client2.cleanup();
+        await client2.destroy();
         return res;
       },
       { unsafeCleanup: true },

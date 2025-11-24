@@ -2,7 +2,7 @@ import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as memCache from '../../cache/memory';
-import * as packageCache from '../../cache/package';
+import { packageCache } from '../../cache/package';
 import type { PackageCacheNamespace } from '../../cache/package/types';
 import type {
   GithubGraphqlResponse,
