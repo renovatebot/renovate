@@ -1,4 +1,4 @@
-export type { CombinedKey, PackageCacheNamespace } from './namespaces';
+export type { PackageCacheNamespace } from './namespaces';
 
 export interface DecoratorCachedRecord {
   value: unknown;

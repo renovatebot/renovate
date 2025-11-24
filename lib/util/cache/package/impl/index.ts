@@ -2,7 +2,6 @@ import type { AllConfig } from '../../../../config/types';
 import { getEnv } from '../../../env';
 import { getMutex } from '../../../mutex';
 import { PackageCacheStats } from '../../../stats';
-import { getCombinedKey } from '../key';
 import { getTtlOverride } from '../ttl';
 import type { PackageCacheNamespace } from '../types';
 import { PackageCacheBase } from './base';
@@ -49,7 +48,7 @@ export class PackageCache extends PackageCacheBase {
     namespace: PackageCacheNamespace,
     key: string,
   ): Promise<T | undefined> {
-    const combinedKey = getCombinedKey(namespace, key);
+    const combinedKey = `${namespace}:${key}`;
     if (this.memory.has(combinedKey)) {
       return this.memory.get(combinedKey) as T;
     }
@@ -92,7 +91,7 @@ export class PackageCache extends PackageCacheBase {
     value: T,
     hardTtlMinutes: number,
   ): Promise<void> {
-    const combinedKey = getCombinedKey(namespace, key);
+    const combinedKey = `${namespace}:${key}`;
     await getMutex(combinedKey, 'package-cache').runExclusive(async () => {
       const backend = this.backend;
       if (backend) {
