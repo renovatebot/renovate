@@ -5,6 +5,12 @@ Central caching mechanism for Renovate datasources and lookups. Implements a two
 1.  **L1:** In-memory `Map` (per-process).
 2.  **L2:** Persistent storage (File, Redis, or SQLite).
 
+## TTL Handling Scope
+
+Soft/Hard TTL logic is not isolated to the `@cache` decorator.
+The HTTP cache layer in `PackageHttpCacheProvider` also resolves and applies soft/hard TTL independently (Cache-Control headers, etc.).
+In core caching, only TTL overrides are applied; use `setWithRawTtl` to bypass this logic.
+
 ## Flow Architecture
 
 The `@cache` decorator orchestrates the retrieval flow.
@@ -135,7 +141,6 @@ sequenceDiagram
     participant C as Caller
     participant D as @cache Decorator
     participant M as Memory (L1)
-    participant B as Backend (L2)
     participant U as Upstream
     participant X as Mutex
 
@@ -147,13 +152,12 @@ sequenceDiagram
     D->>M: Check key again
     M-->>D: Still miss
 
-    Note over D: cacheable() = false<br/>cachePrivatePackages = false
+    Note over D: Check cacheable()<br/>cacheable() = false<br/>cachePrivatePackages = false
 
-    D->>U: Fetch from upstream
+    D->>U: Fetch from upstream (skip backend)
     U-->>D: Return value
 
     D->>M: Store in L1 only
-    Note over B: No L2 storage
     X->>D: Release lock
     D-->>C: Return value
 ```
