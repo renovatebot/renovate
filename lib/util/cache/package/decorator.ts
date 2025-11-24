@@ -4,7 +4,7 @@ import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import type { Decorator } from '../../decorator';
 import { decorate } from '../../decorator';
-import { acquireLock } from '../../mutex';
+import { getMutex } from '../../mutex';
 import { resolveTtlValues } from './ttl';
 import type { DecoratorCachedRecord, PackageCacheNamespace } from './types';
 import { packageCache } from '.';
@@ -33,7 +33,11 @@ interface CacheParameters {
 
   /**
    * A function that returns true if a result is cacheable
-   * Used to prevent caching of private, sensitive, results
+   * Used to prevent caching of private, sensitive, results.
+   *
+   * NOTE:
+   *   This means persistence between runs.
+   *   During a single run, the data still could be cached.
    */
   cacheable?: BooleanFunction;
 
@@ -50,13 +54,6 @@ export function cache<T>({
   ttlMinutes = 30,
 }: CacheParameters): Decorator<T> {
   return decorate(async ({ args, instance, callback, methodName }) => {
-    if (
-      !GlobalConfig.get('cachePrivatePackages', false) &&
-      !cacheable.apply(instance, args)
-    ) {
-      return callback();
-    }
-
     const finalNamespace = isString(namespace)
       ? namespace
       : namespace.apply(instance, args);
@@ -67,9 +64,35 @@ export function cache<T>({
     }
 
     const cacheKey = `cache-decorator:${finalKey}`;
-    const releaseLock = await acquireLock(cacheKey, finalNamespace);
+    const combinedKey = `${finalNamespace}:${cacheKey}`;
 
-    try {
+    if (packageCache.memory.has(combinedKey)) {
+      const data = packageCache.memory.get(
+        combinedKey,
+      ) as DecoratorCachedRecord;
+      return data.value;
+    }
+
+    return await getMutex(cacheKey, finalNamespace).runExclusive(async () => {
+      if (packageCache.memory.has(combinedKey)) {
+        const data = packageCache.memory.get(
+          combinedKey,
+        ) as DecoratorCachedRecord;
+        return data.value;
+      }
+
+      if (
+        !GlobalConfig.get('cachePrivatePackages', false) &&
+        !cacheable.apply(instance, args)
+      ) {
+        const value = await callback();
+        packageCache.memory.set(combinedKey, {
+          cachedAt: DateTime.local().toISO(),
+          value,
+        });
+        return value;
+      }
+
       const cachedRecord = await packageCache.get<DecoratorCachedRecord>(
         finalNamespace,
         cacheKey,
@@ -135,8 +158,6 @@ export function cache<T>({
       }
 
       return newValue;
-    } finally {
-      releaseLock();
-    }
+    });
   });
 }

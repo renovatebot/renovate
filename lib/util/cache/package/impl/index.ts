@@ -35,7 +35,7 @@ export class PackageCache extends PackageCacheBase {
   }
 
   // In-memory layer is meant to live during a single Renovate run
-  private readonly memory = new Map<string, unknown>();
+  readonly memory = new Map<string, unknown>();
 
   constructor(
     private readonly backend?: PackageCacheBase,
