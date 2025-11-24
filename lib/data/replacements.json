@@ -19,6 +19,7 @@
       "replacements:framer-motion-to-motion",
       "replacements:hapi-to-scoped",
       "replacements:google-github-action-release-please-to-googleapis",
+      "replacements:grafana-oss-to-grafana",
       "replacements:jade-to-pug",
       "replacements:joi-to-scoped",
       "replacements:joi-to-unscoped",
@@ -701,6 +702,16 @@
         "matchDatasources": ["github-tags"],
         "matchPackageNames": ["google-github-actions/release-please-action"],
         "replacementName": "googleapis/release-please-action"
+      }
+    ]
+  },
+  "grafana-oss-to-grafana": {
+    "description": "Starting with Grafana release `12.4.0`, the `grafana/grafana-oss` Docker Hub repository will no longer be updated. Instead, we encourage you to use the `grafana/grafana` Docker Hub repository. These two repositories have the same Grafana OSS docker images.",
+    "packageRules": [
+      {
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["grafana/grafana-oss"],
+        "replacementName": "grafana/grafana"
       }
     ]
   },
