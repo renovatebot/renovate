@@ -1,7 +1,6 @@
 import type { MergeStrategy } from '../../config/types';
 import * as git from '../../util/git';
 import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
-import { constructPipCompileCmd } from '../manager/pip-compile/artifacts';
 import type { PlatformScm } from './types';
 
 export class DefaultGitScm implements PlatformScm {
