@@ -15,9 +15,9 @@ import * as _behindBaseCache from './behind-base-branch-cache';
 import * as _conflictsCache from './conflicts-cache';
 import * as _modifiedCache from './modified-cache';
 import type { FileChange } from './types';
-import { logger } from '~test/util';
 import * as git from '.';
 import { setNoVerify } from '.';
+import { logger } from '~test/util';
 
 vi.mock('./conflicts-cache');
 vi.mock('./behind-base-branch-cache');

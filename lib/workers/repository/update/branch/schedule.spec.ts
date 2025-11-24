@@ -1,5 +1,5 @@
 import cronstrue from 'cronstrue';
-import { BranchConfig } from '../../../types';
+import type { BranchConfig } from '../../../types';
 import * as schedule from './schedule';
 
 describe('workers/repository/update/branch/schedule', () => {

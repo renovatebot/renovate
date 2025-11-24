@@ -2,7 +2,7 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { scm } from '../../../../modules/platform/scm';
-import { BranchConfig } from '../../../types';
+import type { BranchConfig } from '../../../types';
 import { isScheduledNow } from './schedule';
 import { resolveBranchStatus } from './status-checks';
 
@@ -27,14 +27,14 @@ export async function tryBranchAutomerge(
     return 'off schedule';
   }
   const existingPr = await platform.getBranchPr(
-    config.branchName!,
+    config.branchName,
     config.baseBranch,
   );
   if (existingPr) {
     return 'automerge aborted - PR exists';
   }
   const branchStatus = await resolveBranchStatus(
-    config.branchName!,
+    config.branchName,
     !!config.internalChecksAsSuccess,
     config.ignoreTests,
   );
@@ -43,9 +43,9 @@ export async function tryBranchAutomerge(
     try {
       if (GlobalConfig.get('dryRun')) {
         // TODO: types (#22198)
-        logger.info(`DRY-RUN: Would automerge branch ${config.branchName!}`);
+        logger.info(`DRY-RUN: Would automerge branch ${config.branchName}`);
       } else {
-        await scm.checkoutBranch(config.baseBranch!);
+        await scm.checkoutBranch(config.baseBranch);
         const automergeStrategy = config.automergeStrategy ?? 'auto';
         await scm.mergeAndPush(
           config.branchName,

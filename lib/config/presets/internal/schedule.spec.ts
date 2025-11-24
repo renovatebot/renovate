@@ -166,7 +166,7 @@ describe('config/presets/internal/schedule', () => {
     `('$datetime', ({ datetime, expected }) => {
       config.schedule = presets.weekends.schedule;
       vi.setSystemTime(new Date(datetime));
-      expect(isScheduledNow(config as BranchConfig)).toBe(expected);
+      expect(isScheduledNow(config)).toBe(expected);
     });
   });
 

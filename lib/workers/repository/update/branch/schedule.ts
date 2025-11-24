@@ -5,7 +5,7 @@ import cronstrue from 'cronstrue';
 import { DateTime } from 'luxon';
 import { fixShortHours } from '../../../../config/migration';
 import { logger } from '../../../../logger';
-import { BranchConfig } from '../../../types';
+import type { BranchConfig } from '../../../types';
 
 const scheduleMappings: Record<string, string> = {
   'every month': 'before 5am on the first day of the month',
