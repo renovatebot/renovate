@@ -33,8 +33,11 @@ declare global {
 }
 
 vi.mock('../lib/util/mutex', () => ({
-  initMutexes: () => vi.fn(),
-  acquireLock: () => vi.fn().mockImplementation(() => () => undefined),
+  initMutexes: vi.fn(),
+  acquireLock: vi.fn(() => () => undefined),
+  getMutex: vi.fn(() => ({
+    runExclusive: (f: () => void) => f(),
+  })),
 }));
 
 vi.mock('../lib/util/cache/package', () => mockDeep());
