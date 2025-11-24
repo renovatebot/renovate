@@ -2,8 +2,8 @@
 
 Central caching mechanism for Renovate datasources and lookups. Implements a two-layer architecture:
 
-1.  **L1:** In-memory `Map` (per-process).
-2.  **L2:** Persistent storage (File, Redis, or SQLite).
+1. **L1:** In-memory `Map` (per-process).
+2. **L2:** Persistent storage (File, Redis, or SQLite).
 
 ## TTL Handling Scope
 
@@ -304,8 +304,8 @@ The `cacheable` parameter **only controls persistence (L2)**.
 
 Renovate uses a dual-TTL system to handle upstream instability.
 
-1.  **Soft TTL (`ttlMinutes`):** Period where data is considered "fresh". Returned immediately without network calls.
-2.  **Hard TTL:** Period where data is physically retained on disk. Used for fallback if upstream fails.
+1. **Soft TTL (`ttlMinutes`):** Period where data is considered "fresh". Returned immediately without network calls.
+2. **Hard TTL:** Period where data is physically retained on disk. Used for fallback if upstream fails.
 
 **Important:** The Stale-While-Revalidate (Hard TTL) logic is **only active** for methods named:
 
@@ -342,6 +342,6 @@ Users can override Soft TTLs via `config.js`. The resolution uses **Longest Matc
 
 Backend is selected at startup based on environment and config:
 
-1.  **Redis:** if `redisUrl` is configured.
-2.  **SQLite:** if `RENOVATE_X_SQLITE_PACKAGE_CACHE=true`.
-3.  **File:** Default. Uses `cacache` with `gzip`.
+1. **Redis:** if `redisUrl` is configured.
+2. **SQLite:** if `RENOVATE_X_SQLITE_PACKAGE_CACHE=true`.
+3. **File:** Default. Uses `cacache` with `gzip`.
