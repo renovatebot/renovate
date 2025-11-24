@@ -39,7 +39,7 @@ describe('modules/datasource/deb/index', () => {
   let extractedPackageFile: string;
 
   beforeEach(async () => {
-    packageCache.cleanup();
+    packageCache.reset();
     debDatasource = new DebDatasource();
     cacheDir = await dir({ unsafeCleanup: true });
     GlobalConfig.set({ cacheDir: cacheDir.path });

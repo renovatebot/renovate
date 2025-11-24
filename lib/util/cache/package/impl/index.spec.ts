@@ -128,7 +128,7 @@ describe('util/cache/package/impl/index', () => {
       expect(backend.get).toHaveBeenCalledTimes(1);
 
       // Cleanup
-      cache.cleanup();
+      cache.reset();
 
       // Verify miss in memory
       await cache.get('_test-namespace', 'key');

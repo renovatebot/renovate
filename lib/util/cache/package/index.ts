@@ -10,10 +10,10 @@ export async function init(config: AllConfig): Promise<void> {
 } /* v8 ignore stop */
 
 /* v8 ignore start -- almost nothing to test */
-export async function cleanup(): Promise<void> {
+export async function destroy(): Promise<void> {
   try {
     await packageCache.destroy();
   } catch (err) {
-    logger.warn({ err }, 'Package cache cleanup failed');
+    logger.warn({ err }, 'Package cache destroy failed');
   }
 } /* v8 ignore stop */

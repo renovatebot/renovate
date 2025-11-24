@@ -39,7 +39,7 @@ describe('config/presets/index', () => {
       config = {};
       GlobalConfig.reset();
       memCache.init();
-      packageCache.cleanup();
+      packageCache.reset();
 
       npm.getPreset.mockImplementation(({ repo, presetName }) => {
         if (repo === 'renovate-config-ikatyang') {

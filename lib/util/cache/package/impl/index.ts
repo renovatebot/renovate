@@ -108,7 +108,7 @@ export class PackageCache extends PackageCacheBase {
     return this.cacheType;
   }
 
-  cleanup(): void {
+  reset(): void {
     this.memory.clear();
   }
 

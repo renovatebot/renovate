@@ -13,7 +13,7 @@ describe('util/cache/package/decorator', () => {
   beforeEach(() => {
     vi.useRealTimers();
     GlobalConfig.reset();
-    packageCache.cleanup();
+    packageCache.reset();
     count = 1;
     getValue.mockImplementation(() => {
       const res = String(100 * count + 10 * count + count);

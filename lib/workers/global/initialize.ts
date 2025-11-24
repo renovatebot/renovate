@@ -7,7 +7,7 @@ import { logger } from '../../logger';
 import { resetGlobalLogLevelRemaps } from '../../logger/remap';
 import { initPlatform } from '../../modules/platform';
 import {
-  cleanup as cleanupPackageCache,
+  destroy as cleanupPackageCache,
   init as initPackageCache,
 } from '../../util/cache/package';
 import { setEmojiConfig } from '../../util/emoji';
