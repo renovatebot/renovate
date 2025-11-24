@@ -73,91 +73,93 @@ export function cache<T>({
       return data.value;
     }
 
-    return await getMutex(cacheKey, finalNamespace).runExclusive(async () => {
-      if (packageCache.memory.has(combinedKey)) {
-        const data = packageCache.memory.get(
-          combinedKey,
-        ) as DecoratorCachedRecord;
-        return data.value;
-      }
-
-      if (
-        !GlobalConfig.get('cachePrivatePackages', false) &&
-        !cacheable.apply(instance, args)
-      ) {
-        const value = await callback();
-        packageCache.memory.set(combinedKey, {
-          cachedAt: DateTime.local().toISO(),
-          value,
-        });
-        return value;
-      }
-
-      const cachedRecord = await packageCache.get<DecoratorCachedRecord>(
-        finalNamespace,
-        cacheKey,
-      );
-
-      let {
-        // eslint-disable-next-line prefer-const
-        softTtlMinutes,
-        hardTtlMinutes,
-      } = resolveTtlValues(finalNamespace, ttlMinutes);
-
-      // The separation between "soft" and "hard" TTL allows us to treat
-      // data as obsolete according to the "soft" TTL while physically storing it
-      // according to the "hard" TTL.
-      //
-      // This helps us return obsolete data in case of upstream server errors,
-      // which is more useful than throwing exceptions ourselves.
-      //
-      // However, since the default hard TTL is one week, it could create
-      // unnecessary pressure on storage volume. Therefore,
-      // we cache only `getReleases` and `getDigest` results for an extended period.
-      //
-      // For other method names being decorated, the "soft" just equals the "hard" ttl.
-      if (methodName !== 'getReleases' && methodName !== 'getDigest') {
-        hardTtlMinutes = softTtlMinutes;
-      }
-
-      let fallbackValue: unknown;
-      if (cachedRecord) {
-        const now = DateTime.local();
-        const cachedAt = DateTime.fromISO(cachedRecord.cachedAt);
-
-        if (now < cachedAt.plus({ minutes: softTtlMinutes })) {
-          return cachedRecord.value;
+    return await getMutex(combinedKey, 'package-cache').runExclusive(
+      async () => {
+        if (packageCache.memory.has(combinedKey)) {
+          const data = packageCache.memory.get(
+            combinedKey,
+          ) as DecoratorCachedRecord;
+          return data.value;
         }
 
-        if (now < cachedAt.plus({ minutes: hardTtlMinutes })) {
-          fallbackValue = cachedRecord.value;
+        if (
+          !GlobalConfig.get('cachePrivatePackages', false) &&
+          !cacheable.apply(instance, args)
+        ) {
+          const value = await callback();
+          packageCache.memory.set(combinedKey, {
+            cachedAt: DateTime.local().toISO(),
+            value,
+          });
+          return value;
         }
-      }
 
-      let newValue: unknown;
-      try {
-        newValue = await callback();
-      } catch (err) {
-        if (fallbackValue !== undefined) {
-          logger.debug(
-            { err },
-            'Package cache decorator: callback error, returning old data',
-          );
-          return fallbackValue;
-        }
-        throw err;
-      }
-
-      if (!isUndefined(newValue)) {
-        await packageCache.setWithRawTtl(
+        const cachedRecord = await packageCache.get<DecoratorCachedRecord>(
           finalNamespace,
           cacheKey,
-          { cachedAt: DateTime.local().toISO(), value: newValue },
-          hardTtlMinutes,
         );
-      }
 
-      return newValue;
-    });
+        let {
+          // eslint-disable-next-line prefer-const
+          softTtlMinutes,
+          hardTtlMinutes,
+        } = resolveTtlValues(finalNamespace, ttlMinutes);
+
+        // The separation between "soft" and "hard" TTL allows us to treat
+        // data as obsolete according to the "soft" TTL while physically storing it
+        // according to the "hard" TTL.
+        //
+        // This helps us return obsolete data in case of upstream server errors,
+        // which is more useful than throwing exceptions ourselves.
+        //
+        // However, since the default hard TTL is one week, it could create
+        // unnecessary pressure on storage volume. Therefore,
+        // we cache only `getReleases` and `getDigest` results for an extended period.
+        //
+        // For other method names being decorated, the "soft" just equals the "hard" ttl.
+        if (methodName !== 'getReleases' && methodName !== 'getDigest') {
+          hardTtlMinutes = softTtlMinutes;
+        }
+
+        let fallbackValue: unknown;
+        if (cachedRecord) {
+          const now = DateTime.local();
+          const cachedAt = DateTime.fromISO(cachedRecord.cachedAt);
+
+          if (now < cachedAt.plus({ minutes: softTtlMinutes })) {
+            return cachedRecord.value;
+          }
+
+          if (now < cachedAt.plus({ minutes: hardTtlMinutes })) {
+            fallbackValue = cachedRecord.value;
+          }
+        }
+
+        let newValue: unknown;
+        try {
+          newValue = await callback();
+        } catch (err) {
+          if (fallbackValue !== undefined) {
+            logger.debug(
+              { err },
+              'Package cache decorator: callback error, returning old data',
+            );
+            return fallbackValue;
+          }
+          throw err;
+        }
+
+        if (!isUndefined(newValue)) {
+          await packageCache.setWithRawTtl(
+            finalNamespace,
+            cacheKey,
+            { cachedAt: DateTime.local().toISO(), value: newValue },
+            hardTtlMinutes,
+          );
+        }
+
+        return newValue;
+      },
+    );
   });
 }
