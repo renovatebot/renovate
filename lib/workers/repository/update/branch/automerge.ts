@@ -1,8 +1,8 @@
 import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { scm } from '../../../../modules/platform/scm';
+import { BranchConfig } from '../../../types';
 import { isScheduledNow } from './schedule';
 import { resolveBranchStatus } from './status-checks';
 
@@ -17,7 +17,7 @@ export type AutomergeResult =
   | 'not ready';
 
 export async function tryBranchAutomerge(
-  config: RenovateConfig,
+  config: BranchConfig,
 ): Promise<AutomergeResult> {
   logger.debug('Checking if we can automerge branch');
   if (!(config.automerge && config.automergeType === 'branch')) {
@@ -46,9 +46,11 @@ export async function tryBranchAutomerge(
         logger.info(`DRY-RUN: Would automerge branch ${config.branchName!}`);
       } else {
         await scm.checkoutBranch(config.baseBranch!);
+        const automergeStrategy = config.automergeStrategy ?? 'auto';
         await scm.mergeAndPush(
-          config.branchName!,
-          config.automergeStrategy ?? 'auto',
+          config.branchName,
+          automergeStrategy,
+          automergeStrategy === 'squash' ? config.commitMessage : undefined,
         );
       }
       logger.info({ branch: config.branchName }, 'Branch automerged');

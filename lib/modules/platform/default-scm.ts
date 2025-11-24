@@ -1,6 +1,7 @@
 import type { MergeStrategy } from '../../config/types';
 import * as git from '../../util/git';
 import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
+import { constructPipCompileCmd } from '../manager/pip-compile/artifacts';
 import type { PlatformScm } from './types';
 
 export class DefaultGitScm implements PlatformScm {
@@ -45,8 +46,9 @@ export class DefaultGitScm implements PlatformScm {
   mergeAndPush(
     branchName: string,
     mergeStrategy: MergeStrategy,
+    commitMessage?: string,
   ): Promise<void> {
-    return git.mergeBranch(branchName, mergeStrategy);
+    return git.mergeBranch(branchName, mergeStrategy, commitMessage);
   }
 
   mergeToLocal(branchName: string): Promise<void> {

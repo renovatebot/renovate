@@ -4,8 +4,8 @@ import { Cron, CronPattern } from 'croner';
 import cronstrue from 'cronstrue';
 import { DateTime } from 'luxon';
 import { fixShortHours } from '../../../../config/migration';
-import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
+import { BranchConfig } from '../../../types';
 
 const scheduleMappings: Record<string, string> = {
   'every month': 'before 5am on the first day of the month',
@@ -128,7 +128,7 @@ export function cronMatches(
 }
 
 export function isScheduledNow(
-  config: RenovateConfig,
+  config: BranchConfig,
   scheduleKey: 'schedule' | 'automergeSchedule' = 'schedule',
 ): boolean {
   let configSchedule = config[scheduleKey];

@@ -980,6 +980,7 @@ export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
 export async function mergeBranch(
   branchName: string,
   mergeStrategy: MergeStrategy,
+  commitMessage?: string,
 ): Promise<void> {
   let status: StatusResult | undefined;
   try {
@@ -1010,7 +1011,12 @@ export async function mergeBranch(
       logger.debug(
         `Performing merge commit because mergeStrategy=${mergeStrategy}`,
       );
-      await gitRetry(() => git.merge(['--no-ff', '--no-edit', branchName]));
+      let commandOptions = ['--no-ff', '--no-edit'];
+      if (commitMessage) {
+        commandOptions = commandOptions.concat(['-m', commitMessage]);
+      }
+      commandOptions.push(branchName);
+      await gitRetry(() => git.merge(commandOptions));
     } else if (mergeStrategy === 'squash') {
       logger.debug(
         `Performing squash then merge because mergeStrategy=${mergeStrategy}`,
@@ -1018,7 +1024,12 @@ export async function mergeBranch(
       // Create a squash commit
       await gitRetry(() => git.merge(['--squash', branchName]));
       // Commit the squash commit
-      await gitRetry(() => git.raw(['commit', '--no-edit']));
+      if (commitMessage) {
+        await gitRetry(() => git.commit(commitMessage));
+      } else {
+        // Uses the default commit message for the squash commit from git
+        await gitRetry(() => git.raw(['commit', '--no-edit']));
+      }
     }
     await gitRetry(() => git.push('origin', config.currentBranch));
     incLimitedValue('Commits');

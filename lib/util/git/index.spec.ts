@@ -2,6 +2,9 @@ import fs from 'fs-extra';
 import type { PushResult } from 'simple-git';
 import Git from 'simple-git';
 import tmp from 'tmp-promise';
+import { logger } from '~test/util';
+import * as git from '.';
+import { setNoVerify } from '.';
 import { GlobalConfig } from '../../config/global';
 import {
   CONFIG_VALIDATION,
@@ -15,9 +18,6 @@ import * as _behindBaseCache from './behind-base-branch-cache';
 import * as _conflictsCache from './conflicts-cache';
 import * as _modifiedCache from './modified-cache';
 import type { FileChange } from './types';
-import * as git from '.';
-import { setNoVerify } from '.';
-import { logger } from '~test/util';
 
 vi.mock('./conflicts-cache');
 vi.mock('./behind-base-branch-cache');
@@ -505,6 +505,30 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
   });
 
+  describe('mergeBranch(branchName, merge-commit, commitMessage)', () => {
+    it('should perform a branch merge with a merge commit and a custom commit message', async () => {
+      await git.mergeBranch(
+        'renovate/future_branch',
+        'merge-commit',
+        'custom commit message',
+      );
+      const merged = await Git(origin.path).branch([
+        '--verbose',
+        '--merged',
+        defaultBranch,
+      ]);
+      expect(merged.all).toContain('renovate/future_branch');
+      const commits = await Git(origin.path).log();
+      expect(commits.latest?.message).toStartWith('custom commit message');
+    });
+
+    it('should throw if branch merge throws', async () => {
+      await expect(
+        git.mergeBranch('not_found', 'merge-commit', 'custom commit message'),
+      ).rejects.toThrow();
+    });
+  });
+
   describe('mergeBranch(branchName, squash)', () => {
     it('should perform a branch merge with squash', async () => {
       await git.mergeBranch('renovate/future_branch', 'squash');
@@ -525,6 +549,35 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     it('should throw if branch merge throws', async () => {
       await expect(git.mergeBranch('not_found', 'squash')).rejects.toThrow();
+    });
+  });
+
+  describe('mergeBranch(branchName, squash, commitMessage)', () => {
+    it('should perform a branch merge with squash and a custom commit message', async () => {
+      await git.mergeBranch(
+        'renovate/future_branch',
+        'squash',
+        'custom commit message',
+      );
+      const unmerged = await Git(origin.path).branch([
+        '--verbose',
+        '--no-merged',
+        defaultBranch,
+      ]);
+      expect(unmerged.all).toContain('renovate/future_branch');
+      const commits = await Git(origin.path).log();
+      // Check for default squash commit message
+      expect(commits.latest?.message).toStartWith('custom commit message');
+      // Show that the commit contains the files future_file and future_file2
+      const files = await Git(origin.path).show(['--name-only', 'HEAD']);
+      expect(files).toContain('future_file');
+      expect(files).toContain('future_file2');
+    });
+
+    it('should throw if branch merge throws', async () => {
+      await expect(
+        git.mergeBranch('not_found', 'squash', 'custom commit message'),
+      ).rejects.toThrow();
     });
   });
 
