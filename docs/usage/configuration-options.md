@@ -4000,7 +4000,8 @@ You can configure this object to either:
 
 ## prBodyHeadingDefinitions
 
-You can configure this object to modify the table headers present in the pr body.
+You can configure this object to modify the table headers present in the PR body.
+This can include Markdown or any other syntax that the platform supports.
 
 ```json title="Modifying the default value for the Package and Age table headers"
 {
