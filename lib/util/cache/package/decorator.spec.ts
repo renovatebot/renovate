@@ -1,19 +1,25 @@
 import { DateTime } from 'luxon';
+import { type DirectoryResult, dir } from 'tmp-promise';
+import type { MockInstance } from 'vitest';
 import { GlobalConfig } from '../../../config/global';
 import { cache } from './decorator';
-import { packageCache } from '.';
+import { init, packageCache } from '.';
 
 vi.unmock('.');
 vi.unmock('../../mutex');
 
 describe('util/cache/package/decorator', () => {
-  const setCache = vi.spyOn(packageCache, 'setWithRawTtl');
   const getValue = vi.fn();
   let count = 1;
+  let tmpDir: DirectoryResult;
+  let setCache: MockInstance<typeof packageCache.setWithRawTtl>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.useRealTimers();
     GlobalConfig.reset();
+    tmpDir = await dir({ unsafeCleanup: true });
+    await init({ cacheDir: tmpDir.path } as any);
+    setCache = vi.spyOn(packageCache, 'setWithRawTtl');
     packageCache.reset();
     count = 1;
     getValue.mockImplementation(() => {
@@ -21,6 +27,11 @@ describe('util/cache/package/decorator', () => {
       count += 1;
       return Promise.resolve(res);
     });
+  });
+
+  afterEach(async () => {
+    setCache.mockRestore();
+    await tmpDir.cleanup();
   });
 
   it('caches string value and returns same result on repeated calls', async () => {
