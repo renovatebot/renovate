@@ -424,7 +424,7 @@ describe('util/cache/package/decorator', () => {
 
   describe('Backend cache scenarios', () => {
     it('returns cached value from backend when within soft TTL', async () => {
-      const getCache = vi.spyOn(packageCache, 'get');
+      const getCache = vi.spyOn(packageCache, 'getUnsynced');
       const mockCachedRecord = {
         cachedAt: DateTime.local().toISO(),
         value: 'cached-value',
@@ -454,7 +454,7 @@ describe('util/cache/package/decorator', () => {
 
     it('fetches fresh value when soft TTL expired but within hard TTL', async () => {
       vi.useFakeTimers();
-      const getCache = vi.spyOn(packageCache, 'get');
+      const getCache = vi.spyOn(packageCache, 'getUnsynced');
       const mockCachedRecord = {
         cachedAt: DateTime.local().minus({ minutes: 31 }).toISO(),
         value: 'old-cached-value',
@@ -486,7 +486,7 @@ describe('util/cache/package/decorator', () => {
 
     it('returns fallback value when callback fails and value within hard TTL', async () => {
       vi.useFakeTimers();
-      const getCache = vi.spyOn(packageCache, 'get');
+      const getCache = vi.spyOn(packageCache, 'getUnsynced');
       const mockCachedRecord = {
         cachedAt: DateTime.local().minus({ minutes: 31 }).toISO(),
         value: 'fallback-value',
@@ -518,7 +518,7 @@ describe('util/cache/package/decorator', () => {
     });
 
     it('throws error when callback fails and no fallback value exists', async () => {
-      const getCache = vi.spyOn(packageCache, 'get');
+      const getCache = vi.spyOn(packageCache, 'getUnsynced');
 
       getCache.mockResolvedValueOnce(undefined);
       getValue.mockRejectedValueOnce(new Error('upstream error with no cache'));

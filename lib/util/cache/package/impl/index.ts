@@ -53,26 +53,34 @@ export class PackageCache extends PackageCacheBase {
       return this.memory.get(combinedKey) as T;
     }
 
-    return await getMutex(combinedKey, 'package-cache').runExclusive(
-      async () => {
-        if (this.memory.has(combinedKey)) {
-          return this.memory.get(combinedKey) as T;
-        }
+    return await getMutex(combinedKey, 'package-cache').runExclusive(() => {
+      if (this.memory.has(combinedKey)) {
+        return this.memory.get(combinedKey) as T;
+      }
 
-        const backend = this.backend;
-        if (!backend) {
-          return undefined;
-        }
+      return this.getUnsynced<T>(namespace, key);
+    });
+  }
 
-        const value = await PackageCacheStats.wrapGet(() =>
-          backend.get<T>(namespace, key),
-        );
+  /**
+   * NOTE: This MUST NOT be used outside of cache implementation, use `get()` instead
+   */
+  async getUnsynced<T = unknown>(
+    namespace: PackageCacheNamespace,
+    key: string,
+  ): Promise<T | undefined> {
+    const backend = this.backend;
+    if (!backend) {
+      return undefined;
+    }
 
-        this.memory.set(combinedKey, value);
-
-        return value;
-      },
+    const value = await PackageCacheStats.wrapGet(() =>
+      backend.get<T>(namespace, key),
     );
+
+    this.memory.set(`${namespace}:${key}`, value);
+
+    return value;
   }
 
   async set<T = unknown>(

@@ -94,10 +94,11 @@ export function cache<T>({
           return value;
         }
 
-        const cachedRecord = await packageCache.get<DecoratorCachedRecord>(
-          finalNamespace,
-          cacheKey,
-        );
+        const cachedRecord =
+          await packageCache.getUnsynced<DecoratorCachedRecord>(
+            finalNamespace,
+            cacheKey,
+          );
 
         let {
           // eslint-disable-next-line prefer-const
