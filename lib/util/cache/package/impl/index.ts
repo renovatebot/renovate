@@ -106,14 +106,15 @@ export class PackageCache extends PackageCacheBase {
     hardTtlMinutes: number,
   ): Promise<void> {
     const combinedKey = `${namespace}:${key}`;
+
+    this.memory.set(combinedKey, value);
+
     const backend = this.backend;
     if (backend) {
       await PackageCacheStats.wrapSet(() =>
         backend.set(namespace, key, value, hardTtlMinutes),
       );
     }
-
-    this.memory.set(combinedKey, value);
   }
 
   getType(): CacheType | undefined {
