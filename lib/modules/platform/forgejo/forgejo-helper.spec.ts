@@ -15,7 +15,6 @@ import {
   getCurrentUser,
   getIssue,
   getOrgLabels,
-  getOrgTeams,
   getPR,
   getPRByBranch,
   getRepo,
@@ -663,22 +662,6 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
       await expect(
         unassignLabel(mockRepo.full_name, mockIssue.number, mockLabel.id),
       ).toResolve();
-    });
-  });
-
-  describe('getOrgTeams', () => {
-    it('should call /api/v1/orgs/[org]/teams endpoint', async () => {
-      const teams = [
-        { id: 1, name: 'team-one' },
-        { id: 2, name: 'team-two' },
-      ];
-      httpMock
-        .scope(baseUrl)
-        .get(`/orgs/${mockRepo.owner.username}/teams`)
-        .reply(200, teams);
-
-      const res = await getOrgTeams(mockRepo.owner.username);
-      expect(res).toEqual(teams);
     });
   });
 

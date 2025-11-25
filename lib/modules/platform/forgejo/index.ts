@@ -44,7 +44,6 @@ import { smartTruncate } from '../utils/pr-body';
 import * as helper from './forgejo-helper';
 import { forgejoHttp } from './forgejo-helper';
 import { ForgejoPrCache } from './pr-cache';
-import type { OrgTeam, OrgTeamList } from './schema';
 import type {
   CombinedCommitStatus,
   Comment,
@@ -71,7 +70,6 @@ interface ForgejoRepoConfig {
 
   issueList: Promise<Issue[]> | null;
   labelList: Promise<Label[]> | null;
-  teamList: Promise<OrgTeamList> | null;
   defaultBranch: string;
   cloneSubmodules: boolean;
   cloneSubmodulesFilter: string[] | undefined;
@@ -175,24 +173,6 @@ async function lookupLabelByName(name: string): Promise<number | null> {
   logger.debug(`lookupLabelByName(${name})`);
   const labelList = await getLabelList();
   return labelList.find((l) => l.name === name)?.id ?? null;
-}
-
-function getTeamList(): Promise<OrgTeam[]> {
-  config.teamList ??= config.isOrgRepo
-    ? helper
-        .getOrgTeams(config.orgName)
-        .then((teams) => {
-          logger.debug(`Retrieved ${teams.length} org teams`);
-          return teams;
-        })
-        .catch((err) => {
-          // Will fail if owner of repo is not org
-          logger.debug({ err }, `Unable to fetch organization teams`);
-          return [];
-        })
-    : Promise.resolve([]);
-
-  return config.teamList;
 }
 
 interface FetchRepositoriesArgs {
@@ -385,7 +365,6 @@ const platform: Platform = {
     // Reset cached resources
     config.issueList = null;
     config.labelList = null;
-    config.teamList = null;
     config.hasIssuesEnabled = !repo.external_tracker && repo.has_issues;
     config.orgName = repo.owner.username;
 
@@ -1084,9 +1063,14 @@ const platform: Platform = {
   async addReviewers(number: number, reviewers: string[]): Promise<void> {
     logger.debug(`Adding reviewers '${reviewers?.join(', ')}' to #${number}`);
     try {
-      const teams = new Set((await getTeamList()).map((t) => t.name));
-      const teamReviewers = new Set(reviewers.filter((r) => teams.has(r)));
-      const userReviewers = new Set(reviewers.filter((r) => !teams.has(r)));
+      const teamReviewers = new Set(
+        reviewers
+          .filter((r) => r.startsWith('team:'))
+          .map((r) => r.substring(5)),
+      );
+      const userReviewers = new Set(
+        reviewers.filter((r) => !r.startsWith('team:')),
+      );
 
       await helper.requestPrReviewers(config.repository, number, {
         reviewers: [...userReviewers],

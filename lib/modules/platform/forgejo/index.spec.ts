@@ -2952,8 +2952,6 @@ describe('modules/platform/forgejo/index', () => {
     it('should assign user and team reviewers', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
-        .get('/orgs/some/teams')
-        .reply(200, [{ id: 5, name: 'team' }])
         .post('/repos/some/repo/pulls/1/requested_reviewers', {
           reviewers: ['me', 'you'],
           team_reviewers: ['team'],
@@ -2962,7 +2960,9 @@ describe('modules/platform/forgejo/index', () => {
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
-      await expect(forgejo.addReviewers(1, ['me', 'you', 'team'])).toResolve();
+      await expect(
+        forgejo.addReviewers(1, ['me', 'you', 'team:team']),
+      ).toResolve();
 
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
@@ -2985,8 +2985,6 @@ describe('modules/platform/forgejo/index', () => {
     it('catches errors', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
-        .get('/orgs/some/teams')
-        .reply(503)
         .post('/repos/some/repo/pulls/1/requested_reviewers', {
           reviewers: ['me', 'you'],
         })

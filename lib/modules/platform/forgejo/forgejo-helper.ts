@@ -6,7 +6,6 @@ import type { ForgejoHttpOptions } from '../../../util/http/forgejo';
 import { ForgejoHttp } from '../../../util/http/forgejo';
 import { fromBase64 } from '../../../util/string';
 import { getQueryString } from '../../../util/url';
-import { OrgTeamList } from './schema';
 import type {
   Branch,
   CombinedCommitStatus,
@@ -341,16 +340,6 @@ export async function getOrgLabels(
 ): Promise<Label[]> {
   const url = `${API_PATH}/orgs/${orgName}/labels`;
   const res = await forgejoHttp.getJsonUnchecked<Label[]>(url, options);
-
-  return res.body;
-}
-
-export async function getOrgTeams(
-  orgName: string,
-  options?: ForgejoHttpOptions,
-): Promise<OrgTeamList> {
-  const url = `${API_PATH}/orgs/${orgName}/teams`;
-  const res = await forgejoHttp.getJson(url, options ?? {}, OrgTeamList);
 
   return res.body;
 }
