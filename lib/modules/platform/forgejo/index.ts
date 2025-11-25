@@ -74,6 +74,8 @@ interface ForgejoRepoConfig {
   cloneSubmodules: boolean;
   cloneSubmodulesFilter: string[] | undefined;
   hasIssuesEnabled: boolean;
+  isOrgRepo: boolean;
+  orgName: string;
 }
 
 export const id = 'forgejo';
@@ -143,19 +145,21 @@ function getLabelList(): Promise<Label[]> {
         return labels;
       });
 
-    const orgLabels = helper
-      .getOrgLabels(config.repository.split('/')[0], {
-        memCache: false,
-      })
-      .then((labels) => {
-        logger.debug(`Retrieved ${labels.length} org labels`);
-        return labels;
-      })
-      .catch((err) => {
-        // Will fail if owner of repo is not org or Forgejo version < 1.12
-        logger.debug(`Unable to fetch organization labels`);
-        return [] as Label[];
-      });
+    const orgLabels = config.isOrgRepo
+      ? helper
+          .getOrgLabels(config.orgName, {
+            memCache: false,
+          })
+          .then((labels) => {
+            logger.debug(`Retrieved ${labels.length} org labels`);
+            return labels;
+          })
+          .catch((err) => {
+            // Will fail if owner of repo is not org
+            logger.debug({ err }, `Unable to fetch organization labels`);
+            return [] as Label[];
+          })
+      : Promise.resolve([]);
 
     config.labelList = Promise.all([repoLabels, orgLabels]).then((labels) =>
       ([] as Label[]).concat(...labels),
@@ -226,7 +230,7 @@ const platform: Platform = {
       botUserID = user.id;
       botUserName = user.username;
       const env = getEnv();
-      /* v8 ignore next: experimental feature */
+      /* v8 ignore if: experimental feature */
       if (semver.valid(env.RENOVATE_X_PLATFORM_VERSION)) {
         defaults.version = env.RENOVATE_X_PLATFORM_VERSION!;
       } else {
@@ -339,6 +343,13 @@ const platform: Platform = {
       throw new Error(REPOSITORY_BLOCKED);
     }
 
+    try {
+      config.isOrgRepo = await helper.isOrg(repo.owner.username);
+    } catch (err) {
+      logger.debug({ err }, 'Forgejo initRepo() error');
+      throw err;
+    }
+
     // Determine author email and branches
     config.defaultBranch = repo.default_branch;
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
@@ -355,6 +366,7 @@ const platform: Platform = {
     config.issueList = null;
     config.labelList = null;
     config.hasIssuesEnabled = !repo.external_tracker && repo.has_issues;
+    config.orgName = repo.owner.username;
 
     return {
       defaultBranch: config.defaultBranch,
@@ -784,7 +796,7 @@ const platform: Platform = {
         number,
         body,
       };
-    } catch (err) /* v8 ignore next */ {
+    } catch (err) {
       logger.debug({ err, number }, 'Error getting issue');
       return null;
     }
@@ -1051,10 +1063,20 @@ const platform: Platform = {
   async addReviewers(number: number, reviewers: string[]): Promise<void> {
     logger.debug(`Adding reviewers '${reviewers?.join(', ')}' to #${number}`);
     try {
-      const teamReviewers = new Set(reviewers.filter((r) => r.includes('/')));
+      const teamReviewers = new Set(
+        reviewers
+          .filter((r) => r.startsWith('team:'))
+          .map((r) => r.substring(5)),
+      );
+      const userReviewers = new Set(
+        reviewers.filter((r) => !r.startsWith('team:')),
+      );
+
       await helper.requestPrReviewers(config.repository, number, {
-        reviewers: reviewers.filter((r) => !teamReviewers.has(r)),
-        ...(teamReviewers.size && { team_reviewers: [...teamReviewers] }),
+        reviewers: [...userReviewers],
+        ...(teamReviewers.size && {
+          team_reviewers: [...teamReviewers],
+        }),
       });
     } catch (err) {
       logger.warn({ err, number, reviewers }, 'Failed to assign reviewer');
