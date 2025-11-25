@@ -96,10 +96,10 @@ export async function downloadHttpProtocol(
       return result;
     })
     .catch((err): MavenFetchResult => {
-      /* v8 ignore start: never happens, needs for type narrowing */
+      /* v8 ignore next: never happens, needs for type narrowing */
       if (!(err instanceof HttpError)) {
         return Result.err({ type: 'unknown', err });
-      } /* v8 ignore stop */
+      }
 
       const failedUrl = url;
       if (err.message === HOST_DISABLED) {

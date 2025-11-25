@@ -127,7 +127,7 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
   // see https://stackoverflow.com/a/62352647/3005034
   try {
     let res = await git.raw(['rev-parse', '--abbrev-ref', 'origin/HEAD']);
-    /* v8 ignore start -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
     if (!res) {
       logger.debug('Could not determine default branch using git rev-parse');
       const headPrefix = 'HEAD branch: ';
@@ -137,9 +137,9 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
         .find((line) => line.startsWith(headPrefix))!
         .replace(headPrefix, '');
     }
-    /* v8 ignore stop */
+
     return res.replace('origin/', '').trim();
-    /* v8 ignore start -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
   } catch (err) {
     logger.debug({ err }, 'Error getting default branch');
     const errChecked = checkForPlatformFailure(err);
@@ -159,7 +159,6 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
     }
     throw err;
   }
-  /* v8 ignore stop */
 }
 
 let config: LocalConfig = {} as any;
@@ -429,7 +428,7 @@ export async function syncGit(): Promise<void> {
       const durationMs = Math.round(Date.now() - fetchStart);
       logger.info({ durationMs }, 'git fetch completed');
       clone = false;
-      /* v8 ignore next 6 -- TODO: add test */
+      /* v8 ignore next -- TODO: add test */
     } catch (err) {
       if (err.message === REPOSITORY_EMPTY) {
         throw err;
@@ -479,7 +478,7 @@ export async function syncGit(): Promise<void> {
     config.currentBranchSha = (
       await git.raw(['rev-parse', 'HEAD'])
     ).trim() as LongCommitSha;
-    /* v8 ignore next 6 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
   } catch (err) {
     if (err.message?.includes('fatal: not a git repository')) {
       throw new Error(REPOSITORY_CHANGED);
@@ -491,7 +490,7 @@ export async function syncGit(): Promise<void> {
   try {
     const latestCommit = (await git.log({ n: 1 })).latest;
     logger.debug({ latestCommit }, 'latest repository commit');
-    /* v8 ignore next 10 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
@@ -885,7 +884,7 @@ export async function isBranchConflicted(
     await git.merge(['--no-commit', '--no-ff', `origin/${branch}`]);
   } catch (err) {
     result = true;
-    /* v8 ignore next 6 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
     if (!err?.git?.conflicts?.length) {
       logger.debug(
         { baseBranch, branch, err },
@@ -898,7 +897,7 @@ export async function isBranchConflicted(
       if (origBranch !== baseBranch) {
         await git.checkout(origBranch);
       }
-      /* v8 ignore next 6 -- TODO: add test */
+      /* v8 ignore next -- TODO: add test */
     } catch (err) {
       logger.debug(
         { baseBranch, branch, err },
@@ -1330,7 +1329,7 @@ export async function commitFiles(
       }
     }
     return null;
-    /* v8 ignore next 6 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
   } catch (err) {
     if (err.message.includes('[rejected] (stale info)')) {
       throw new Error(REPOSITORY_CHANGED);
@@ -1559,8 +1558,8 @@ export async function getRemotes(): Promise<string[]> {
     const remotes = await git.getRemotes();
     logger.debug(`Found remotes: ${remotes.map((r) => r.name).join(', ')}`);
     return remotes.map((remote) => remote.name);
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.error({ err }, 'Error getting remotes');
     throw err;
-  } /* v8 ignore stop */
+  }
 }

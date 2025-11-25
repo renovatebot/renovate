@@ -138,10 +138,10 @@ export async function initPlatform({
       botUserName = user.name;
     }
     const env = getEnv();
-    /* v8 ignore start: experimental feature */
+    /* v8 ignore next: experimental feature */
     if (env.RENOVATE_X_PLATFORM_VERSION) {
       gitlabVersion = env.RENOVATE_X_PLATFORM_VERSION;
-    } /* v8 ignore stop */ else {
+    } else {
       const version = (
         await gitlabApi.getJsonUnchecked<{ version: string }>('version', {
           token,
@@ -307,11 +307,11 @@ export async function initRepo({
       throw new Error(REPOSITORY_EMPTY);
     }
     config.defaultBranch = res.body.default_branch;
-    /* v8 ignore start */
+    /* v8 ignore next */
     if (!config.defaultBranch) {
       logger.warn({ resBody: res.body }, 'Error fetching GitLab project');
       throw new Error(TEMPORARY_ERROR);
-    } /* v8 ignore stop */
+    }
     config.mergeMethod = res.body.merge_method || 'merge';
     config.mergeTrainsEnabled = res.body.merge_trains_enabled ?? false;
     if (res.body.squash_option) {
@@ -326,7 +326,7 @@ export async function initRepo({
       ...config,
       url,
     });
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (err.message.includes('HEAD is not a symbolic ref')) {
       throw new Error(REPOSITORY_EMPTY);
@@ -345,7 +345,7 @@ export async function initRepo({
     }
     logger.debug({ err }, 'Unknown GitLab initRepo error');
     throw err;
-  } /* v8 ignore stop */
+  }
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: !!res.body.forked_from_project,
@@ -403,13 +403,13 @@ async function getStatus(
 
     return (await gitlabApi.getJsonUnchecked<GitlabBranchStatus[]>(url, opts))
       .body;
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.debug({ err }, 'Error getting commit status');
     if (err.response?.statusCode === 404) {
       throw new Error(REPOSITORY_CHANGED);
     }
     throw err;
-  } /* v8 ignore stop */
+  }
 }
 
 const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
@@ -437,14 +437,14 @@ export async function getBranchStatus(
   }
 
   const branchStatuses = await getStatus(branchName);
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (!isArray(branchStatuses)) {
     logger.warn(
       { branchName, branchStatuses },
       'Empty or unexpected branch statuses',
     );
     return 'yellow';
-  } /* v8 ignore stop */
+  }
   logger.debug(`Got res with ${branchStatuses.length} results`);
 
   const mr = await getBranchPr(branchName);
@@ -651,9 +651,9 @@ async function tryPrAutomerge(
         await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
       }
     }
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.debug({ err }, 'Automerge on PR creation failed');
-  } /* v8 ignore stop */
+  }
 }
 
 async function approveMr(mrNumber: number): Promise<void> {
@@ -807,7 +807,7 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
       },
     );
     return true;
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     if (err.statusCode === 401) {
       logger.debug('No permissions to merge PR');
       return false;
@@ -819,7 +819,7 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
     logger.debug({ err }, 'merge PR error');
     logger.debug('PR merge failed');
     return false;
-  } /* v8 ignore stop */
+  }
 }
 
 export function massageMarkdown(input: string): string {
@@ -845,11 +845,10 @@ export function maxBodyLength(): number {
   }
 }
 
-/* v8 ignore start: no need to test */
+/* v8 ignore next: no need to test */
 export function labelCharLimit(): number {
   return 255;
 }
-/* v8 ignore stop */
 
 // Branch
 
@@ -992,7 +991,7 @@ export async function setBranchStatus({
 
     // update status cache
     await getStatus(branchName, false);
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     if (
       err.body?.message?.startsWith(
         'Cannot transition status via :enqueue from :pending',
@@ -1004,7 +1003,7 @@ export async function setBranchStatus({
       logger.debug({ err });
       logger.warn('Failed to set branch status');
     }
-  } /* v8 ignore stop */
+  }
 }
 
 // Issue
@@ -1025,11 +1024,11 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
       memCache: false,
       paginate: true,
     });
-    /* v8 ignore start */
+    /* v8 ignore next */
     if (!isArray(res.body)) {
       logger.warn({ responseBody: res.body }, 'Could not retrieve issue list');
       return [];
-    } /* v8 ignore stop */
+    }
     config.issueList = res.body.map((i) => ({
       iid: i.iid,
       title: i.title,
@@ -1045,12 +1044,12 @@ export async function getIssue(
 ): Promise<Issue | null> {
   try {
     const opts: GitlabHttpOptions = {};
-    /* v8 ignore start: temporary code */
+    /* v8 ignore next: temporary code */
     if (useCache) {
       opts.cacheProvider = memCacheProvider;
     } else {
       opts.memCache = false;
-    } /* v8 ignore stop */
+    }
     const issueBody = (
       await gitlabApi.getJsonUnchecked<{ description: string }>(
         `projects/${config.repository}/issues/${number}`,
@@ -1061,10 +1060,10 @@ export async function getIssue(
       number,
       body: issueBody,
     };
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.debug({ err, number }, 'Error getting issue');
     return null;
-  } /* v8 ignore stop */
+  }
 }
 
 export async function findIssue(title: string): Promise<Issue | null> {
@@ -1076,10 +1075,10 @@ export async function findIssue(title: string): Promise<Issue | null> {
       return null;
     }
     return await getIssue(issue.iid);
-  } catch /* v8 ignore start */ {
+  } catch /* v8 ignore next */ {
     logger.warn('Error finding issue');
     return null;
-  } /* v8 ignore stop */
+  }
 }
 
 export async function ensureIssue({
@@ -1130,13 +1129,13 @@ export async function ensureIssue({
       delete config.issueList;
       return 'created';
     }
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     if (err.message.startsWith('Issues are disabled for this repo')) {
       logger.debug(`Could not create issue: ${(err as Error).message}`);
     } else {
       logger.warn({ err }, 'Could not ensure issue');
     }
-  } /* v8 ignore stop */
+  }
   return null;
 }
 
@@ -1262,9 +1261,9 @@ export async function deleteLabel(
         body: { labels },
       },
     );
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.warn({ err, issueNo, label }, 'Failed to delete label');
-  } /* v8 ignore stop */
+  }
 }
 
 async function getComments(issueNo: number): Promise<GitlabComment[]> {
