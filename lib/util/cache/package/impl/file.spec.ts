@@ -22,39 +22,41 @@ describe('util/cache/package/impl/file', () => {
     await tmpDir.cleanup();
   });
 
-  describe('get / set', () => {
-    it('sets and gets', async () => {
-      await packageCache.set('_test-namespace', 'key', 1234, 5);
-      expect(await packageCache.get('_test-namespace', 'key')).toBe(1234);
-    });
+  it('sets and gets', async () => {
+    await packageCache.set('_test-namespace', 'key', 1234, 5);
+    const res = await packageCache.get('_test-namespace', 'key');
+    expect(res).toBe(1234);
   });
 
   describe('get', () => {
-    it('gets undefined on cache miss', async () => {
-      expect(
-        await packageCache.get('_test-namespace', 'missing-key'),
-      ).toBeUndefined();
+    it('returns undefined on cache miss', async () => {
+      const res = await packageCache.get('_test-namespace', 'missing-key');
+      expect(res).toBeUndefined();
     });
 
-    it('expires', async () => {
+    it('expires cached entries', async () => {
       await packageCache.set('_test-namespace', 'key', 1234, -5);
-      expect(await packageCache.get('_test-namespace', 'key')).toBeUndefined();
+      const res = await packageCache.get('_test-namespace', 'key');
+      expect(res).toBeUndefined();
+
       await expect(
         cacache.get(cacheFileName, '_test-namespace-key'),
       ).rejects.toThrow('No cache entry');
     });
 
-    it('handles invalid cached value (empty)', async () => {
+    it('returns undefined for null cached value', async () => {
       await cacache.put(cacheFileName, '_test-namespace-key', 'null');
-      expect(await packageCache.get('_test-namespace', 'key')).toBeUndefined();
+      const res = await packageCache.get('_test-namespace', 'key');
+      expect(res).toBeUndefined();
     });
 
-    it('handles invalid JSON in cache', async () => {
+    it('returns undefined for invalid JSON', async () => {
       await cacache.put(cacheFileName, '_test-namespace-key', 'invalid-json');
-      expect(await packageCache.get('_test-namespace', 'key')).toBeUndefined();
+      const res = await packageCache.get('_test-namespace', 'key');
+      expect(res).toBeUndefined();
     });
 
-    it('handles corrupted compressed value', async () => {
+    it('returns undefined for corrupted compressed value', async () => {
       await cacache.put(
         cacheFileName,
         '_test-namespace-key',
@@ -64,10 +66,11 @@ describe('util/cache/package/impl/file', () => {
           expiry: DateTime.local().plus({ minutes: 5 }),
         }),
       );
-      expect(await packageCache.get('_test-namespace', 'key')).toBeUndefined();
+      const res = await packageCache.get('_test-namespace', 'key');
+      expect(res).toBeUndefined();
     });
 
-    it('handles non-compressed value', async () => {
+    it('retrieves non-compressed value', async () => {
       await cacache.put(
         cacheFileName,
         '_test-namespace-key',
@@ -77,12 +80,13 @@ describe('util/cache/package/impl/file', () => {
           expiry: DateTime.local().plus({ minutes: 5 }),
         }),
       );
-      expect(await packageCache.get('_test-namespace', 'key')).toBe(1234);
+      const res = await packageCache.get('_test-namespace', 'key');
+      expect(res).toBe(1234);
     });
   });
 
   describe('destroy', () => {
-    it('cleans up', async () => {
+    it('removes expired and invalid entries', async () => {
       await packageCache.set('_test-namespace', 'valid', 1234, 5);
       await packageCache.set('_test-namespace', 'expired', 1234, -5);
       await cacache.put(cacheFileName, 'invalid', 'not json');
@@ -95,17 +99,20 @@ describe('util/cache/package/impl/file', () => {
 
       const entries = await cacache.ls(cacheFileName);
       expect(Object.keys(entries)).toEqual(['_test-namespace-valid']);
+
       await expect(
         cacache.get.byDigest(cacheFileName, expiredDigest),
       ).rejects.toThrow('ENOENT');
     });
 
-    it('handles cleanup errors', async () => {
+    it('continues on cleanup errors', async () => {
       await packageCache.set('_test-namespace', 'valid', 1234, 5);
       const cacacheGet = vi
         .spyOn(cacache, 'get')
         .mockRejectedValue(new Error('error'));
+
       await packageCache.destroy();
+
       expect(cacacheGet).toHaveBeenCalled();
     });
   });

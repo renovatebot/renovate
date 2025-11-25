@@ -85,6 +85,9 @@ export class PackageCache extends PackageCacheBase {
     await this.setWithRawTtl(namespace, key, value, rawTtl);
   }
 
+  /**
+   * NOTE: This MUST NOT be used outside of cache implementation, use `set()` instead
+   */
   async setWithRawTtl<T = unknown>(
     namespace: PackageCacheNamespace,
     key: string,

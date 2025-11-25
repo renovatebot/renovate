@@ -18,14 +18,14 @@ function withSqlite<T>(
 }
 
 describe('util/cache/package/impl/sqlite', () => {
-  it('should get undefined', async () => {
+  it('returns undefined on cache miss', async () => {
     const res = await withSqlite((sqlite) =>
       sqlite.get('_test-namespace', 'bar'),
     );
     expect(res).toBeUndefined();
   });
 
-  it('should set and get', async () => {
+  it('overwrites and returns latest value', async () => {
     const res = await withSqlite(async (sqlite) => {
       await sqlite.set('_test-namespace', 'bar', { foo: 'foo' }, 5);
       await sqlite.set('_test-namespace', 'bar', { bar: 'bar' }, 5);
@@ -35,7 +35,7 @@ describe('util/cache/package/impl/sqlite', () => {
     expect(res).toEqual({ baz: 'baz' });
   });
 
-  it('reopens', async () => {
+  it('retrieves value from persistent storage after reopening', async () => {
     const res = await withDir(
       async ({ path }) => {
         GlobalConfig.set({ cacheDir: path });
@@ -45,9 +45,9 @@ describe('util/cache/package/impl/sqlite', () => {
         await client1.destroy();
 
         const client2 = await PackageCacheSqlite.create(path);
-        const res = await client2.get('_test-namespace', 'bar');
+        const data = await client2.get('_test-namespace', 'bar');
         await client2.destroy();
-        return res;
+        return data;
       },
       { unsafeCleanup: true },
     );

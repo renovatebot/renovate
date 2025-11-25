@@ -233,9 +233,12 @@ sequenceDiagram
     D-->>C: Throw error
 ```
 
-### Scenario 8: Special Values (undefined)
+### Scenario 8: Special Values (`undefined` vs `null`)
 
-Undefined values are cached in memory (L1) but never persisted to backend (L2). This prevents repeated upstream calls within a single run while treating undefined as a potential transient failure that should not survive between runs.
+- **`undefined`**: Cached in Memory (L1) but **never persisted** to Backend (L2). Treated as a transient failure that should be retried on the next run.
+- **`null`**: Cached in both L1 and L2 (if `cacheable` returns true). Treated as a valid result (e.g., "package not found").
+
+The diagram below illustrates the `undefined` flow:
 
 ```mermaid
 sequenceDiagram
@@ -279,13 +282,16 @@ class MyDatasource {
     namespace: 'datasource-my-source', // or function(arg) => string
     key: 'some-key', // or function(arg) => string
     ttlMinutes: 15, // Soft TTL
-    cacheable: (result) => result !== null, // Optional
+    // Optional. Default: () => true. Controls L2 persistence. L1 (Memory) always caches.
+    cacheable: (result) => result !== null,
   })
   async getTags(pkgName: string): Promise<string[]> {
     // Expensive upstream call
   }
 }
 ```
+
+**Note:** The decorator prefixes L2 cache keys with `cache-decorator:`. Actual L2 key example: `datasource-my-source:cache-decorator:some-key`
 
 ### Persistence vs. Memory (`cacheable`)
 
@@ -312,7 +318,7 @@ Renovate uses a dual-TTL system to handle upstream instability.
 - `getReleases`
 - `getDigest`
 
-For all other methods, `HardTTL = SoftTTL`.
+For all other methods, `Hard TTL = Soft TTL`.
 
 ### TTL Resolution Logic
 
@@ -327,6 +333,8 @@ graph TD
     E -- No --> G[Hard TTL = Soft TTL]
 ```
 
+See also: [cacheHardTtlMinutes](https://docs.renovatebot.com/self-hosted-configuration/#cachehardttlminutes)
+
 ## Configuration Overrides (`cacheTtlOverride`)
 
 Users can override Soft TTLs via `config.js`. The resolution uses **Longest Matching Pattern**.
@@ -340,8 +348,8 @@ Users can override Soft TTLs via `config.js`. The resolution uses **Longest Matc
 
 ## Backends
 
-Backend is selected at startup based on environment and config:
+Backend is selected at startup based on environment and config (checked in order):
 
-1. **Redis:** if `redisUrl` is configured.
-2. **SQLite:** if `RENOVATE_X_SQLITE_PACKAGE_CACHE=true`.
-3. **File:** Default. Uses `cacache` with `gzip`.
+1. **Redis:** Enabled if `redisUrl` is configured ([docs](https://docs.renovatebot.com/self-hosted-configuration/#redisurl), env: `RENOVATE_REDIS_URL`, CLI: `--redis-url`).
+2. **SQLite:** Enabled if `RENOVATE_X_SQLITE_PACKAGE_CACHE=true` and `cacheDir` is available.
+3. **File:** Default fallback. Uses `cacache` with `gzip` in `cacheDir` ([docs](https://docs.renovatebot.com/self-hosted-configuration/#cachedir), env: `RENOVATE_CACHE_DIR`, CLI: `--cache-dir`).

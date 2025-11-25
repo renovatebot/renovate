@@ -23,7 +23,7 @@ describe('util/cache/package/decorator', () => {
     });
   });
 
-  it('should cache string', async () => {
+  it('caches string value and returns same result on repeated calls', async () => {
     class Class {
       @cache({ namespace: '_test-namespace', key: 'some-key' })
       public fn(): Promise<string> {
@@ -32,10 +32,13 @@ describe('util/cache/package/decorator', () => {
     }
     const obj = new Class();
 
-    expect(await obj.fn()).toBe('111');
-    expect(await obj.fn()).toBe('111');
-    expect(await obj.fn()).toBe('111');
+    const res1 = await obj.fn();
+    const res2 = await obj.fn();
+    const res3 = await obj.fn();
 
+    expect(res1).toBe('111');
+    expect(res2).toBe('111');
+    expect(res3).toBe('111');
     expect(getValue).toHaveBeenCalledTimes(1);
     expect(setCache).toHaveBeenCalledExactlyOnceWith(
       '_test-namespace',
@@ -45,7 +48,7 @@ describe('util/cache/package/decorator', () => {
     );
   });
 
-  it('disables cache if cacheability check is false', async () => {
+  it('disables persistence when cacheability check returns false', async () => {
     class Class {
       @cache({
         namespace: '_test-namespace',
@@ -58,15 +61,18 @@ describe('util/cache/package/decorator', () => {
     }
     const obj = new Class();
 
-    expect(await obj.fn()).toBe('111');
-    expect(await obj.fn()).toBe('111'); // Memory cache still works
-    expect(await obj.fn()).toBe('111'); // Memory cache still works
+    const res1 = await obj.fn();
+    const res2 = await obj.fn();
+    const res3 = await obj.fn();
 
-    expect(getValue).toHaveBeenCalledTimes(1); // Only called once due to memory cache
-    expect(setCache).not.toHaveBeenCalled(); // Not persisted to backend
+    expect(res1).toBe('111');
+    expect(res2).toBe('111');
+    expect(res3).toBe('111');
+    expect(getValue).toHaveBeenCalledTimes(1);
+    expect(setCache).not.toHaveBeenCalled();
   });
 
-  it('forces cache if cachePrivatePackages=true', async () => {
+  it('forces persistence when cachePrivatePackages is enabled', async () => {
     GlobalConfig.set({ cachePrivatePackages: true });
 
     class Class {
@@ -81,10 +87,13 @@ describe('util/cache/package/decorator', () => {
     }
     const obj = new Class();
 
-    expect(await obj.fn()).toBe('111');
-    expect(await obj.fn()).toBe('111');
-    expect(await obj.fn()).toBe('111');
+    const res1 = await obj.fn();
+    const res2 = await obj.fn();
+    const res3 = await obj.fn();
 
+    expect(res1).toBe('111');
+    expect(res2).toBe('111');
+    expect(res3).toBe('111');
     expect(getValue).toHaveBeenCalledTimes(1);
     expect(setCache).toHaveBeenCalledExactlyOnceWith(
       '_test-namespace',
@@ -94,7 +103,7 @@ describe('util/cache/package/decorator', () => {
     );
   });
 
-  it('caches null values', async () => {
+  it('persists and returns null values', async () => {
     class Class {
       @cache({ namespace: '_test-namespace', key: 'key' })
       public async fn(val: string | null): Promise<string | null> {
@@ -104,10 +113,13 @@ describe('util/cache/package/decorator', () => {
     }
     const obj = new Class();
 
-    expect(await obj.fn(null)).toBeNull();
-    expect(await obj.fn(null)).toBeNull();
-    expect(await obj.fn(null)).toBeNull();
+    const res1 = await obj.fn(null);
+    const res2 = await obj.fn(null);
+    const res3 = await obj.fn(null);
 
+    expect(res1).toBeNull();
+    expect(res2).toBeNull();
+    expect(res3).toBeNull();
     expect(getValue).toHaveBeenCalledTimes(1);
     expect(setCache).toHaveBeenCalledExactlyOnceWith(
       '_test-namespace',
@@ -117,7 +129,7 @@ describe('util/cache/package/decorator', () => {
     );
   });
 
-  it('cache undefined in memory only', async () => {
+  it('caches undefined values in memory only, skips persistence', async () => {
     class Class {
       @cache({ namespace: '_test-namespace', key: 'key' })
       public async fn(): Promise<string | undefined> {
@@ -127,15 +139,18 @@ describe('util/cache/package/decorator', () => {
     }
     const obj = new Class();
 
-    expect(await obj.fn()).toBeUndefined();
-    expect(await obj.fn()).toBeUndefined();
-    expect(await obj.fn()).toBeUndefined();
+    const res1 = await obj.fn();
+    const res2 = await obj.fn();
+    const res3 = await obj.fn();
 
+    expect(res1).toBeUndefined();
+    expect(res2).toBeUndefined();
+    expect(res3).toBeUndefined();
     expect(getValue).toHaveBeenCalledTimes(1);
     expect(setCache).not.toHaveBeenCalled();
   });
 
-  it('computes cache namespace and key from arguments', async () => {
+  it('computes namespace and key from function arguments', async () => {
     interface Arg {
       foo: 'namespace';
       bar: 'key';
@@ -153,9 +168,11 @@ describe('util/cache/package/decorator', () => {
     const obj = new Class();
     const arg: Arg = { foo: 'namespace', bar: 'key' };
 
-    expect(await obj.fn('_test', arg)).toBe('111');
-    expect(await obj.fn('_test', arg)).toBe('111');
+    const res1 = await obj.fn('_test', arg);
+    const res2 = await obj.fn('_test', arg);
 
+    expect(res1).toBe('111');
+    expect(res2).toBe('111');
     expect(getValue).toHaveBeenCalledTimes(1);
     expect(setCache).toHaveBeenCalledExactlyOnceWith(
       '_test-namespace',
@@ -165,7 +182,7 @@ describe('util/cache/package/decorator', () => {
     );
   });
 
-  it('skips cache if namespace or key is empty', async () => {
+  it('skips caching when namespace or key is empty', async () => {
     class Class {
       @cache({ namespace: (() => '') as any, key: 'key' })
       public fn1(): Promise<string> {
@@ -179,14 +196,16 @@ describe('util/cache/package/decorator', () => {
     }
     const obj = new Class();
 
-    expect(await obj.fn1()).toBe('111');
-    expect(await obj.fn2()).toBe('222');
+    const res1 = await obj.fn1();
+    const res2 = await obj.fn2();
 
+    expect(res1).toBe('111');
+    expect(res2).toBe('222');
     expect(getValue).toHaveBeenCalledTimes(2);
     expect(setCache).not.toHaveBeenCalled();
   });
 
-  it('wraps class methods', async () => {
+  it('wraps and caches class methods', async () => {
     class Class {
       public fn(): Promise<string> {
         return getValue();
@@ -195,10 +214,13 @@ describe('util/cache/package/decorator', () => {
     const decorator = cache({ namespace: '_test-namespace', key: 'key' });
     const fn = decorator(Class.prototype, 'fn', undefined as never);
 
-    expect(await fn.value?.()).toBe('111');
-    expect(await fn.value?.()).toBe('111');
-    expect(await fn.value?.()).toBe('111');
+    const res1 = await fn.value?.();
+    const res2 = await fn.value?.();
+    const res3 = await fn.value?.();
 
+    expect(res1).toBe('111');
+    expect(res2).toBe('111');
+    expect(res3).toBe('111');
     expect(getValue).toHaveBeenCalledTimes(1);
     expect(setCache).toHaveBeenCalledExactlyOnceWith(
       '_test-namespace',
@@ -215,8 +237,6 @@ describe('util/cache/package/decorator', () => {
         key: 'key',
         ttlMinutes: 1,
       })
-
-      // Hard TTL is enabled only for `getReleases` and `getDigest` methods
       public getReleases(): Promise<string> {
         return getValue();
       }
@@ -227,14 +247,16 @@ describe('util/cache/package/decorator', () => {
       GlobalConfig.set({ cacheHardTtlMinutes: 2 });
     });
 
-    it('updates cached result', async () => {
+    it('updates cached result after soft TTL expires', async () => {
       const obj = new Class();
 
-      expect(await obj.getReleases()).toBe('111');
+      const res1 = await obj.getReleases();
+      expect(res1).toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
 
       vi.advanceTimersByTime(60 * 1000 - 1);
-      expect(await obj.getReleases()).toBe('111');
+      const res2 = await obj.getReleases();
+      expect(res2).toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenLastCalledWith(
         '_test-namespace',
@@ -244,8 +266,9 @@ describe('util/cache/package/decorator', () => {
       );
 
       vi.advanceTimersByTime(1);
-      packageCache.reset(); // Clear memory cache to simulate TTL expiry
-      expect(await obj.getReleases()).toBe('222');
+      packageCache.reset();
+      const res3 = await obj.getReleases();
+      expect(res3).toBe('222');
       expect(getValue).toHaveBeenCalledTimes(2);
       expect(setCache).toHaveBeenLastCalledWith(
         '_test-namespace',
@@ -255,14 +278,15 @@ describe('util/cache/package/decorator', () => {
       );
     });
 
-    it('overrides soft ttl and updates result', async () => {
+    it('respects hard TTL override and fetches new value', async () => {
       GlobalConfig.set({
         cacheTtlOverride: { '_test-namespace': 2 },
         cacheHardTtlMinutes: 3,
       });
       const obj = new Class();
 
-      expect(await obj.getReleases()).toBe('111');
+      const res1 = await obj.getReleases();
+      expect(res1).toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenLastCalledWith(
         '_test-namespace',
@@ -271,14 +295,16 @@ describe('util/cache/package/decorator', () => {
         3,
       );
 
-      vi.advanceTimersByTime(120 * 1000 - 1); // namespace default ttl is 1min
-      expect(await obj.getReleases()).toBe('111');
+      vi.advanceTimersByTime(120 * 1000 - 1);
+      const res2 = await obj.getReleases();
+      expect(res2).toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenCalledTimes(1);
 
       vi.advanceTimersByTime(1);
-      packageCache.reset(); // Clear memory cache to simulate TTL expiry
-      expect(await obj.getReleases()).toBe('222');
+      packageCache.reset();
+      const res3 = await obj.getReleases();
+      expect(res3).toBe('222');
       expect(getValue).toHaveBeenCalledTimes(2);
       expect(setCache).toHaveBeenLastCalledWith(
         '_test-namespace',
@@ -288,10 +314,11 @@ describe('util/cache/package/decorator', () => {
       );
     });
 
-    it('returns obsolete result on error', async () => {
+    it('returns obsolete cached value from memory on callback error', async () => {
       const obj = new Class();
 
-      expect(await obj.getReleases()).toBe('111');
+      const res1 = await obj.getReleases();
+      expect(res1).toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenLastCalledWith(
         '_test-namespace',
@@ -300,18 +327,19 @@ describe('util/cache/package/decorator', () => {
         2,
       );
 
-      // With memory cache, the value is always returned regardless of TTL
       vi.advanceTimersByTime(60 * 1000);
       getValue.mockRejectedValueOnce(new Error('test'));
-      expect(await obj.getReleases()).toBe('111'); // Memory cache returns value
-      expect(getValue).toHaveBeenCalledTimes(1); // getValue not called due to memory cache
+      const res2 = await obj.getReleases();
+      expect(res2).toBe('111');
+      expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenCalledTimes(1);
     });
 
-    it('drops obsolete value after hard TTL is out', async () => {
+    it('discards obsolete value after hard TTL expires', async () => {
       const obj = new Class();
 
-      expect(await obj.getReleases()).toBe('111');
+      const res1 = await obj.getReleases();
+      expect(res1).toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenLastCalledWith(
         '_test-namespace',
@@ -320,18 +348,19 @@ describe('util/cache/package/decorator', () => {
         2,
       );
 
-      // With memory cache, the value is always returned regardless of TTL
       vi.advanceTimersByTime(2 * 60 * 1000 - 1);
       getValue.mockRejectedValueOnce(new Error('test'));
-      expect(await obj.getReleases()).toBe('111'); // Memory cache returns value
+      const res2 = await obj.getReleases();
+      expect(res2).toBe('111');
 
       vi.advanceTimersByTime(1);
       getValue.mockRejectedValueOnce(new Error('test'));
-      expect(await obj.getReleases()).toBe('111'); // Memory cache still returns value
+      const res3 = await obj.getReleases();
+      expect(res3).toBe('111');
     });
 
     describe('Concurrent access', () => {
-      it('handles concurrent calls through mutex', async () => {
+      it('deduplicates concurrent calls through mutex', async () => {
         class Class {
           @cache({ namespace: '_test-namespace', key: 'concurrent-key' })
           public fn(): Promise<string> {
@@ -340,20 +369,19 @@ describe('util/cache/package/decorator', () => {
         }
         const obj = new Class();
 
-        // Simulate concurrent calls
-        const [result1, result2, result3] = await Promise.all([
+        const [res1, res2, res3] = await Promise.all([
           obj.fn(),
           obj.fn(),
           obj.fn(),
         ]);
 
-        expect(result1).toBe('111');
-        expect(result2).toBe('111');
-        expect(result3).toBe('111');
-        expect(getValue).toHaveBeenCalledTimes(1); // Only one call should reach getValue
+        expect(res1).toBe('111');
+        expect(res2).toBe('111');
+        expect(res3).toBe('111');
+        expect(getValue).toHaveBeenCalledTimes(1);
       });
 
-      it('handles race condition with non-cacheable items', async () => {
+      it('deduplicates concurrent calls for non-cacheable items using memory cache', async () => {
         class Class {
           @cache({
             namespace: '_test-namespace',
@@ -366,24 +394,22 @@ describe('util/cache/package/decorator', () => {
         }
         const obj = new Class();
 
-        // Simulate concurrent calls for non-cacheable items
-        const [result1, result2] = await Promise.all([obj.fn(), obj.fn()]);
+        const [res1, res2] = await Promise.all([obj.fn(), obj.fn()]);
 
-        expect(result1).toBe('111');
-        expect(result2).toBe('111'); // Should get same value from memory cache
+        expect(res1).toBe('111');
+        expect(res2).toBe('111');
         expect(getValue).toHaveBeenCalledTimes(1);
       });
     });
 
     describe('Backend cache scenarios', () => {
-      it('returns cached value when within soft TTL', async () => {
+      it('returns cached value from backend when within soft TTL', async () => {
         const getCache = vi.spyOn(packageCache, 'get');
         const mockCachedRecord = {
           cachedAt: DateTime.local().toISO(),
           value: 'cached-value',
         };
 
-        // Mock the backend to return a cached value
         getCache.mockResolvedValueOnce(mockCachedRecord);
 
         class Class {
@@ -397,16 +423,16 @@ describe('util/cache/package/decorator', () => {
           }
         }
         const obj = new Class();
-        packageCache.reset(); // Clear memory to force backend lookup
+        packageCache.reset();
 
-        const result = await obj.fn();
-        expect(result).toBe('cached-value');
-        expect(getValue).not.toHaveBeenCalled(); // Should use cached value
+        const res = await obj.fn();
+        expect(res).toBe('cached-value');
+        expect(getValue).not.toHaveBeenCalled();
 
         getCache.mockRestore();
       });
 
-      it('fetches new value when soft TTL expired but within hard TTL', async () => {
+      it('fetches fresh value when soft TTL expired but within hard TTL', async () => {
         vi.useFakeTimers();
         const getCache = vi.spyOn(packageCache, 'get');
         const mockCachedRecord = {
@@ -414,7 +440,6 @@ describe('util/cache/package/decorator', () => {
           value: 'old-cached-value',
         };
 
-        // Mock the backend to return an expired cached value
         getCache.mockResolvedValueOnce(mockCachedRecord);
 
         class Class {
@@ -428,18 +453,18 @@ describe('util/cache/package/decorator', () => {
           }
         }
         const obj = new Class();
-        packageCache.reset(); // Clear memory to force backend lookup
+        packageCache.reset();
         GlobalConfig.set({ cacheHardTtlMinutes: 60 });
 
-        const result = await obj.getReleases();
-        expect(result).toBe('111'); // Should fetch new value
+        const res = await obj.getReleases();
+        expect(res).toBe('111');
         expect(getValue).toHaveBeenCalledTimes(1);
 
         getCache.mockRestore();
         vi.useRealTimers();
       });
 
-      it('returns fallback value when callback fails and value is within hard TTL', async () => {
+      it('returns fallback value when callback fails and value within hard TTL', async () => {
         vi.useFakeTimers();
         const getCache = vi.spyOn(packageCache, 'get');
         const mockCachedRecord = {
@@ -447,7 +472,6 @@ describe('util/cache/package/decorator', () => {
           value: 'fallback-value',
         };
 
-        // Mock the backend to return an expired cached value
         getCache.mockResolvedValueOnce(mockCachedRecord);
         getValue.mockRejectedValueOnce(new Error('upstream error'));
 
@@ -462,11 +486,11 @@ describe('util/cache/package/decorator', () => {
           }
         }
         const obj = new Class();
-        packageCache.reset(); // Clear memory to force backend lookup
+        packageCache.reset();
         GlobalConfig.set({ cacheHardTtlMinutes: 60 });
 
-        const result = await obj.getReleases();
-        expect(result).toBe('fallback-value'); // Should return fallback
+        const res = await obj.getReleases();
+        expect(res).toBe('fallback-value');
         expect(getValue).toHaveBeenCalledTimes(1);
 
         getCache.mockRestore();
@@ -476,7 +500,6 @@ describe('util/cache/package/decorator', () => {
       it('throws error when callback fails and no fallback value exists', async () => {
         const getCache = vi.spyOn(packageCache, 'get');
 
-        // Mock the backend to return undefined (no cached value)
         getCache.mockResolvedValueOnce(undefined);
         getValue.mockRejectedValueOnce(
           new Error('upstream error with no cache'),
@@ -493,7 +516,7 @@ describe('util/cache/package/decorator', () => {
           }
         }
         const obj = new Class();
-        packageCache.reset(); // Clear memory to force backend lookup
+        packageCache.reset();
 
         await expect(obj.fn()).rejects.toThrow('upstream error with no cache');
         expect(getValue).toHaveBeenCalledTimes(1);
