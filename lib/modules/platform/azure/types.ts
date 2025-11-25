@@ -1,3 +1,4 @@
+import type { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import type { Pr } from '../types';
 
 export interface AzurePr extends Pr {
@@ -11,3 +12,15 @@ export const AzurePrVote = {
   ApprovedWithSuggestions: 5,
   Approved: 10,
 } as const;
+
+export interface Config {
+  repoForceRebase: boolean;
+  mergeMethods: Record<string, GitPullRequestMergeStrategy>;
+  owner: string;
+  repoId: string;
+  project: string;
+  prList: AzurePr[];
+  fileList: null;
+  repository: string;
+  defaultBranch: string;
+}
