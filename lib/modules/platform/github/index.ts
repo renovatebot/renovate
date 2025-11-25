@@ -271,10 +271,10 @@ async function fetchRepositories(): Promise<GhRestRepo[]> {
       );
       return res.body;
     }
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.error({ err }, `GitHub getRepos error`);
     throw err;
-  } /* v8 ignore stop */
+  }
 }
 
 // Get all repositories that the user has access to
@@ -491,13 +491,13 @@ export async function initRepo({
     cloneSubmodulesFilter,
     ignorePrAuthor,
   } as any;
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
     logger.debug(`Overriding default GitHub endpoint with ${endpoint}`);
     platformConfig.endpoint = endpoint;
     githubHttp.setBaseUrl(endpoint);
-  } /* v8 ignore stop */
+  }
   const opts = hostRules.find({
     hostType: 'github',
     url: platformConfig.endpoint,
@@ -553,19 +553,19 @@ export async function initRepo({
     }
 
     repo = res?.data?.repository;
-    /* v8 ignore start */
+    /* v8 ignore next */
     if (!repo) {
       logger.debug({ res }, 'No repository returned');
       throw new Error(REPOSITORY_NOT_FOUND);
-    } /* v8 ignore stop */
-    /* v8 ignore start */
+    }
+    /* v8 ignore next */
     if (!repo.defaultBranchRef?.name) {
       logger.debug(
         { res },
         'No default branch returned - treating repo as empty',
       );
       throw new Error(REPOSITORY_EMPTY);
-    } /* v8 ignore stop */
+    }
     if (
       repo.nameWithOwner &&
       repo.nameWithOwner.toUpperCase() !== repository.toUpperCase()
@@ -605,7 +605,7 @@ export async function initRepo({
       .catch([])
       .parse(res?.data?.repository?.issues?.nodes);
     GithubIssueCache.addIssuesToReconcile(recentIssues);
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (
       err.message === REPOSITORY_ARCHIVED ||
@@ -637,7 +637,7 @@ export async function initRepo({
     }
     logger.debug({ err }, 'Unknown GitHub initRepo error');
     throw err;
-  } /* v8 ignore stop */
+  }
   // This shouldn't be necessary, but occasional strange errors happened until it was added
   config.prList = null;
 
@@ -680,7 +680,7 @@ export async function initRepo({
             token: forkToken,
           });
           logger.debug('Created new default branch in fork');
-        } catch (err) /* v8 ignore start */ {
+        } catch (err) /* v8 ignore next */ {
           if (err.response?.body?.message === 'Reference already exists') {
             logger.debug(
               `Branch ${config.defaultBranch} already exists in the fork`,
@@ -691,7 +691,7 @@ export async function initRepo({
               'Could not create parent defaultBranch in fork',
             );
           }
-        } /* v8 ignore stop */
+        }
         logger.debug(
           `Setting ${config.defaultBranch} as default branch for ${config.repository}`,
         );
@@ -704,9 +704,9 @@ export async function initRepo({
             token: forkToken,
           });
           logger.debug('Successfully changed default branch for fork');
-        } catch (err) /* v8 ignore start */ {
+        } catch (err) /* v8 ignore next */ {
           logger.warn({ err }, 'Could not set default branch');
-        } /* v8 ignore stop */
+        }
       }
     } else if (forkCreation) {
       logger.debug('Forked repo is not found - attempting to create it');
@@ -722,13 +722,13 @@ export async function initRepo({
   if (forkToken) {
     logger.debug('Using forkToken for git init');
     parsedEndpoint.auth = coerceToNull(config.forkToken);
-  } /* v8 ignore start */ else {
+  } /* v8 ignore next */ else {
     const tokenType = opts.token?.startsWith('x-access-token:')
       ? 'app'
       : 'personal access';
     logger.debug(`Using ${tokenType} token for git init`);
     parsedEndpoint.auth = opts.token ?? null;
-  } /* v8 ignore stop */
+  }
   // TODO: null checks (#22198)
   parsedEndpoint.host = parsedEndpoint.host!.replace(
     'api.github.com',
@@ -1106,7 +1106,7 @@ export async function getBranchStatus(
   let commitStatus: CombinedBranchStatus;
   try {
     commitStatus = await getStatus(branchName);
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     if (err.statusCode === 404) {
       logger.debug(
         'Received 404 when checking branch status, assuming that branch has been deleted',
@@ -1115,7 +1115,7 @@ export async function getBranchStatus(
     }
     logger.debug('Unknown error when checking branch status');
     throw err;
-  } /* v8 ignore stop */
+  }
   logger.debug(
     { state: commitStatus.state, statuses: commitStatus.statuses },
     'branch status check result',
@@ -1158,10 +1158,10 @@ export async function getBranchStatus(
         conclusion: run.conclusion,
       }));
       logger.debug({ checkRuns }, 'check runs result');
-    } /* v8 ignore start */ else {
+    } /* v8 ignore next */ else {
       logger.debug({ result: checkRunsRaw }, 'No check runs found');
-    } /* v8 ignore stop */
-  } catch (err) /* v8 ignore start */ {
+    }
+  } catch (err) /* v8 ignore next */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -1173,7 +1173,7 @@ export async function getBranchStatus(
     } else {
       logger.warn({ err }, 'Error retrieving check runs');
     }
-  } /* v8 ignore stop */
+  }
   if (checkRuns.length === 0) {
     if (commitStatus.state === 'success') {
       return 'green';
@@ -1235,13 +1235,13 @@ export async function getBranchStatusCheck(
       }
     }
     return null;
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     if (err.statusCode === 404) {
       logger.debug('Commit not found when checking statuses');
       throw new Error(REPOSITORY_CHANGED);
     }
     throw err;
-  } /* v8 ignore stop */
+  }
 }
 
 export async function setBranchStatus({
@@ -1251,11 +1251,11 @@ export async function setBranchStatus({
   state,
   url: targetUrl,
 }: BranchStatusConfig): Promise<void> {
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (config.parentRepo) {
     logger.debug('Cannot set branch status when in forking mode');
     return;
-  } /* v8 ignore stop */
+  }
   const existingStatus = await getBranchStatusCheck(branchName, context);
   if (existingStatus === state) {
     return;
@@ -1283,10 +1283,10 @@ export async function setBranchStatus({
     // update status cache
     await getStatus(branchName, false);
     await getStatusCheck(branchName, false);
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.debug({ err, url }, 'Caught error setting branch status - aborting');
     throw new Error(REPOSITORY_CHANGED);
-  } /* v8 ignore stop */
+  }
 }
 
 // Issue
@@ -1310,10 +1310,10 @@ async function getIssues(): Promise<Issue[]> {
 }
 
 export async function getIssueList(): Promise<Issue[]> {
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (config.hasIssuesEnabled === false) {
     return [];
-  } /* v8 ignore stop */
+  }
   let issueList = GithubIssueCache.getIssues();
   if (!issueList) {
     logger.debug('Retrieving issueList');
@@ -1380,13 +1380,13 @@ export async function ensureIssue({
   shouldReOpen = true,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue(${title})`);
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (config.hasIssuesEnabled === false) {
     logger.info(
       'Cannot ensure issue because issues are disabled in this repository',
     );
     return null;
-  } /* v8 ignore stop */
+  }
   const body = sanitize(rawBody);
   try {
     const issueList = await getIssueList();
@@ -1464,22 +1464,22 @@ export async function ensureIssue({
     // reset issueList so that it will be fetched again as-needed
     GithubIssueCache.updateIssue(createdIssue);
     return 'created';
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     if (err.body?.message?.startsWith('Issues are disabled for this repo')) {
       logger.debug(`Issues are disabled, so could not create issue: ${title}`);
     } else {
       logger.warn({ err }, 'Could not ensure issue');
     }
-  } /* v8 ignore stop */
+  }
   return null;
 }
 
 export async function ensureIssueClosing(title: string): Promise<void> {
   logger.trace(`ensureIssueClosing(${title})`);
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (config.hasIssuesEnabled === false) {
     return;
-  } /* v8 ignore stop */
+  }
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
@@ -1562,9 +1562,9 @@ export async function addReviewers(
         },
       },
     );
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.warn({ err }, 'Failed to assign reviewer');
-  } /* v8 ignore stop */
+  }
 }
 
 export async function addLabels(
@@ -1579,12 +1579,12 @@ export async function addLabels(
         body: labels,
       });
     }
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.warn(
       { err, issueNo, labels },
       'Error while adding labels. Skipping',
     );
-  } /* v8 ignore stop */
+  }
 }
 
 export async function deleteLabel(
@@ -1597,9 +1597,9 @@ export async function deleteLabel(
     await githubApi.deleteJson(
       `repos/${repository}/issues/${issueNo}/labels/${label}`,
     );
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.warn({ err, issueNo, label }, 'Failed to delete label');
-  } /* v8 ignore stop */
+  }
 }
 
 async function addComment(issueNo: number, body: string): Promise<void> {
@@ -1650,13 +1650,13 @@ async function getComments(issueNo: number): Promise<Comment[]> {
     );
     logger.debug(`Found ${comments.length} comments`);
     return comments;
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     if (err.statusCode === 404) {
       logger.debug('404 response when retrieving comments');
       throw new ExternalHostError(err, 'github');
     }
     throw err;
-  } /* v8 ignore stop */
+  }
 }
 
 export async function ensureComment({
@@ -1705,7 +1705,7 @@ export async function ensureComment({
       logger.debug('Comment is already update-to-date');
     }
     return true;
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -1715,7 +1715,7 @@ export async function ensureComment({
       logger.warn({ err }, 'Error ensuring comment');
     }
     return false;
-  } /* v8 ignore stop */
+  }
 }
 
 export async function ensureCommentRemoval(
@@ -1745,9 +1745,9 @@ export async function ensureCommentRemoval(
       logger.debug(`Removing comment from issueNo: ${issueNo}`);
       await deleteComment(commentId);
     }
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.warn({ err }, 'Error deleting comment');
-  } /* v8 ignore stop */
+  }
 }
 
 // Pull Request
@@ -1801,9 +1801,9 @@ async function tryPrAutomerge(
     }
 
     logger.debug(`GitHub-native automerge: success...PrNo: ${prNumber}`);
-  } catch (err) /* v8 ignore start: missing test #22198 */ {
+  } catch (err) /* v8 ignore next: missing test #22198 */ {
     logger.warn({ prNumber, err }, 'GitHub-native automerge: REST API error');
-  } /* v8 ignore stop */
+  }
 }
 
 // Creates PR and returns PR number
@@ -1832,13 +1832,13 @@ export async function createPr({
       draft: draftPR,
     },
   };
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (config.forkToken) {
     options.token = config.forkToken;
     options.body.maintainer_can_modify =
       !config.forkOrg &&
       platformPrOptions?.forkModeDisallowMaintainerEdits !== true;
-  } /* v8 ignore stop */
+  }
   logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
   const ghPr = (
     await githubApi.postJson<GhRestPr>(
@@ -1886,10 +1886,10 @@ export async function updatePr({
   const options: any = {
     body: patchBody,
   };
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (config.forkToken) {
     options.token = config.forkToken;
-  } /* v8 ignore stop */
+  }
 
   // Update PR labels
   try {
@@ -1910,12 +1910,12 @@ export async function updatePr({
     const result = coerceRestPr(ghPr);
     cachePr(result);
     logger.debug(`PR updated...prNo: ${prNo}`);
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
     logger.warn({ err }, 'Error updating PR');
-  } /* v8 ignore stop */
+  }
 }
 
 export async function reattemptPlatformAutomerge({
@@ -1929,9 +1929,9 @@ export async function reattemptPlatformAutomerge({
     await tryPrAutomerge(number, node_id, platformPrOptions);
 
     logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.warn({ err }, 'Error re-attempting PR platform automerge');
-  } /* v8 ignore stop */
+  }
 }
 
 export async function mergePr({
@@ -1946,10 +1946,10 @@ export async function mergePr({
   const options: GithubHttpOptions = {
     body: {},
   };
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (config.forkToken) {
     options.token = config.forkToken;
-  } /* v8 ignore stop */
+  }
   let automerged = false;
   let automergeResult: HttpResponse<unknown>;
   const mergeStrategy = mapMergeStartegy(strategy) ?? config.mergeMethod;
@@ -1962,7 +1962,7 @@ export async function mergePr({
       logger.debug({ options, url }, `mergePr`);
       automergeResult = await githubApi.putJson(url, options);
       automerged = true;
-    } catch (err) /* v8 ignore start */ {
+    } catch (err) /* v8 ignore next */ {
       if (err.statusCode === 404 || err.statusCode === 405) {
         const body = err.response?.body;
         if (
@@ -1997,7 +1997,7 @@ export async function mergePr({
         );
         return false;
       }
-    } /* v8 ignore stop */
+    }
   }
   if (!automerged) {
     // We need to guess the merge method and try squash -> merge -> rebase
@@ -2066,11 +2066,11 @@ export function maxBodyLength(): number {
 }
 
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (config.hasVulnerabilityAlertsEnabled === false) {
     logger.debug('No vulnerability alerts enabled for repo');
     return [];
-  } /* v8 ignore stop */
+  }
   let vulnerabilityAlerts: VulnerabilityAlert[] | undefined;
   try {
     vulnerabilityAlerts = (
@@ -2084,7 +2084,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
         GithubVulnerabilityAlert,
       )
     ).body;
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.debug({ err }, 'Error retrieving vulnerability alerts');
     logger.warn(
       {
@@ -2092,7 +2092,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       },
       'Cannot access vulnerability alerts. Please ensure permissions have been granted.',
     );
-  } /* v8 ignore stop */
+  }
   try {
     if (vulnerabilityAlerts?.length) {
       const shortAlerts: AggregatedVulnerabilities = {};
@@ -2126,9 +2126,9 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     } else {
       logger.debug('No vulnerability alerts found');
     }
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.error({ err }, 'Error processing vulnerabity alerts');
-  } /* v8 ignore stop */
+  }
   return vulnerabilityAlerts ?? [];
 }
 

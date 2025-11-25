@@ -1,6 +1,7 @@
 import { getConfig } from './defaults';
 import { migrateAndValidate } from './migrate-validate';
-import type { RenovateConfig } from '~test/util';
+import * as configMigration from './migration';
+import { type RenovateConfig, logger } from '~test/util';
 
 let config: RenovateConfig;
 
@@ -43,6 +44,25 @@ describe('config/migrate-validate', () => {
       );
       expect(res.warnings).toBeUndefined();
       expect(res).toMatchSnapshot();
+    });
+
+    it('logs errors', async () => {
+      vi.spyOn(configMigration, 'migrateConfig').mockImplementation(() => {
+        throw new Error('test error');
+      });
+      await expect(
+        migrateAndValidate(config, { invalid: 'config' } as any),
+      ).rejects.toThrow('test error');
+      expect(logger.logger.debug).toHaveBeenCalledTimes(2);
+      expect(logger.logger.debug).toHaveBeenNthCalledWith(
+        1,
+        'migrateAndValidate()',
+      );
+      expect(logger.logger.debug).toHaveBeenNthCalledWith(
+        2,
+        { config: { invalid: 'config' } },
+        'migrateAndValidate error',
+      );
     });
   });
 });

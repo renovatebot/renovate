@@ -71,14 +71,13 @@ async function rebaseCheck(
     logger.debug(
       `Manual rebase requested via PR labels for #${branchPr.number}`,
     );
-    /* v8 ignore start -- needs test */
+    /* v8 ignore next -- needs test */
     if (GlobalConfig.get('dryRun')) {
       logger.info(
         `DRY-RUN: Would delete label ${config.rebaseLabel!} from #${
           branchPr.number
         }`,
       );
-      /* v8 ignore stop -- needs test */
     } else {
       await platform.deleteLabel(branchPr.number, config.rebaseLabel!);
     }
@@ -98,10 +97,10 @@ async function rebaseCheck(
 async function deleteBranchSilently(branchName: string): Promise<void> {
   try {
     await scm.deleteBranch(branchName);
-    /* v8 ignore start -- needs test */
   } catch (err) {
+    /* v8 ignore next -- needs test */
     logger.debug({ branchName, err }, 'Branch auto-remove failed');
-  } /* v8 ignore stop -- needs test */
+  }
 }
 
 function userChangedTargetBranch(pr: Pr): boolean {
@@ -817,12 +816,13 @@ export async function processBranch(
         config.branchAutomergeFailureMessage = mergeStatus;
       }
     }
-    /* v8 ignore start -- needs test */
   } catch (err) {
+    /* v8 ignore if -- needs test */
     if (err.statusCode === 404) {
       logger.debug({ err }, 'Received a 404 error - aborting run');
       throw new Error(REPOSITORY_CHANGED);
     }
+    /* v8 ignore if -- needs test */
     if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
       logger.debug('Passing rate-limit-exceeded error up');
       throw err;
@@ -831,10 +831,12 @@ export async function processBranch(
       logger.debug('Passing repository-changed error up');
       throw err;
     }
+    /* v8 ignore if -- needs test */
     if (err.message?.startsWith('remote: Invalid username or password')) {
       logger.debug('Throwing bad credentials');
       throw new Error(PLATFORM_BAD_CREDENTIALS);
     }
+    /* v8 ignore if -- needs test */
     if (
       err.message?.startsWith(
         'ssh_exchange_identification: Connection closed by remote host',
@@ -843,10 +845,12 @@ export async function processBranch(
       logger.debug('Throwing bad credentials');
       throw new Error(PLATFORM_BAD_CREDENTIALS);
     }
+    /* v8 ignore if -- needs test */
     if (err.message === PLATFORM_BAD_CREDENTIALS) {
       logger.debug('Passing bad-credentials error up');
       throw err;
     }
+    /* v8 ignore if -- needs test */
     if (err.message === PLATFORM_INTEGRATION_UNAUTHORIZED) {
       logger.debug('Passing integration-unauthorized error up');
       throw err;
@@ -855,17 +859,21 @@ export async function processBranch(
       logger.debug('Passing lockfile-error up');
       throw err;
     }
+    /* v8 ignore if -- needs test */
     if (err.message?.includes('space left on device')) {
       throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     }
+    /* v8 ignore if -- needs test */
     if (err.message === SYSTEM_INSUFFICIENT_DISK_SPACE) {
       logger.debug('Passing disk-space error up');
       throw err;
     }
+    /* v8 ignore if -- needs test */
     if (err.message.startsWith('Resource not accessible by integration')) {
       logger.debug('Passing 403 error up');
       throw err;
     }
+    /* v8 ignore next -- needs test */
     if (err.message === WORKER_FILE_UPDATE_FAILED) {
       logger.warn('Error updating branch: update failure');
     } else if (err.message.startsWith('bundler-')) {
@@ -901,7 +909,7 @@ export async function processBranch(
       result: 'error',
       commitSha,
     };
-  } /* v8 ignore stop -- needs test */
+  }
   try {
     logger.debug('Ensuring PR');
     logger.debug(
@@ -1048,8 +1056,8 @@ export async function processBranch(
         }
       }
     }
-    /* v8 ignore start -- needs test */
   } catch (err) {
+    /* v8 ignore if -- needs test */
     if (
       err instanceof ExternalHostError ||
       [PLATFORM_RATE_LIMIT_EXCEEDED, REPOSITORY_CHANGED].includes(err.message)
@@ -1059,7 +1067,7 @@ export async function processBranch(
     }
     // Otherwise don't throw here - we don't want to stop the other renovations
     logger.error({ err }, `Error ensuring PR`);
-  } /* v8 ignore stop -- needs test */
+  }
   if (!branchExists) {
     return {
       branchExists: true,

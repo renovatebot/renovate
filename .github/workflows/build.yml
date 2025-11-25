@@ -493,10 +493,10 @@ jobs:
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --branches 94.60 \
-            --functions 99.02 \
-            --lines 97.49 \
-            --statements 97.50
+            --branches 99.0 \
+            --functions 99.79 \
+            --lines 99.02 \
+            --statements 99.03
 
   # Catch-all required check for test matrix and coverage
   test-success:
