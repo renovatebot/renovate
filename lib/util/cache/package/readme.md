@@ -317,7 +317,7 @@ class MyDatasource {
 
 The `cacheable` parameter **only controls persistence (L2)**.
 
-- If `cacheable` returns `false`, the result is still stored in **L1 Memory** for the duration of the process.
+- If `cacheable` returns `false`, the result is still stored in **L1 Memory**.
 - Private packages are treated as non-cacheable by default unless forced by config.
 
 | `cacheable()` Result | `cachePrivatePackages` Config | L1 (Memory) | L2 (Disk/Redis) |
