@@ -88,7 +88,6 @@ export default defineConfig(() =>
         mockReset: true,
         coverage: {
           provider: 'v8',
-          ignoreEmptyLines: true,
           skipFull: !ci,
           reporter: ci
             ? ['text-summary', 'lcovonly', 'json']

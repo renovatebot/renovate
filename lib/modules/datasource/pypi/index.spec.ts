@@ -205,9 +205,12 @@ describe('modules/datasource/pypi/index', () => {
         ],
       };
       googleAuth.mockImplementationOnce(
-        vi.fn().mockImplementationOnce(() => ({
-          getAccessToken: vi.fn().mockResolvedValue('some-token'),
-        })),
+        // TODO: fix typing
+        vi.fn<any>(
+          class {
+            getAccessToken = vi.fn().mockResolvedValue('some-token');
+          },
+        ),
       );
       const res = await getPkgReleases({
         ...config,
@@ -229,9 +232,12 @@ describe('modules/datasource/pypi/index', () => {
         ],
       };
       googleAuth.mockImplementation(
-        vi.fn().mockImplementation(() => ({
-          getAccessToken: vi.fn().mockResolvedValue(undefined),
-        })),
+        // TODO: fix typing
+        vi.fn<any>(
+          class {
+            getAccessToken = vi.fn();
+          },
+        ),
       );
       const res = await getPkgReleases({
         ...config,
@@ -798,9 +804,12 @@ describe('modules/datasource/pypi/index', () => {
       ],
     };
     googleAuth.mockImplementationOnce(
-      vi.fn().mockImplementationOnce(() => ({
-        getAccessToken: vi.fn().mockResolvedValue('some-token'),
-      })),
+      // TODO: fix typing
+      vi.fn<any>(
+        class {
+          getAccessToken = vi.fn().mockResolvedValue('some-token');
+        },
+      ),
     );
     expect(
       await getPkgReleases({

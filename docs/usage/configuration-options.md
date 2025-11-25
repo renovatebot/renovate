@@ -2746,6 +2746,10 @@ You can confirm if your datasource supports the release timestamp by viewing [th
 !!! note
     Configuring this option will add a `renovate/stability-days` option to the status checks.
 
+<!-- prettier-ignore -->
+!!! note
+    As of Renovate 42.19.5, using `minimumReleaseAge=0 days` is treated the same as `minimumReleaseAge=null`.
+
 Examples of how you can use `minimumReleaseAge`:
 
 <!-- markdownlint-disable MD001 -->
