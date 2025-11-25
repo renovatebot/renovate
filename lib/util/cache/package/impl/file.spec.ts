@@ -91,9 +91,11 @@ describe('util/cache/package/impl/file', () => {
       await packageCache.set('_test-namespace', 'expired', 1234, -5);
       await cacache.put(cacheFileName, 'invalid', 'not json');
 
-      const expiredDigest = (
-        await cacache.get(cacheFileName, '_test-namespace-expired')
-      ).integrity;
+      const cacheObject = await cacache.get(
+        cacheFileName,
+        '_test-namespace-expired',
+      );
+      const expiredDigest = cacheObject.integrity;
 
       await packageCache.destroy();
 
