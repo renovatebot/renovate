@@ -21,121 +21,134 @@ describe('util/cache/package/impl/index', () => {
       await tmpDir.cleanup();
     });
 
-    it('returns undefined on cache miss', async () => {
-      const result = await cache.get('_test-namespace', 'missing-key');
-      expect(result).toBeUndefined();
+    describe('Basic operations', () => {
+      it('returns undefined on cache miss', async () => {
+        const result = await cache.get('_test-namespace', 'missing-key');
+        expect(result).toBeUndefined();
+      });
+
+      it('stores and retrieves values from cache', async () => {
+        await cache.set('_test-namespace', 'some-key', { foo: 'bar' }, 10);
+
+        const result = await cache.get('_test-namespace', 'some-key');
+        expect(result).toEqual({ foo: 'bar' });
+      });
     });
 
-    it('stores and retrieves values from cache', async () => {
-      await cache.set('_test-namespace', 'some-key', { foo: 'bar' }, 10);
+    describe('Persistence', () => {
+      it('persists cache to file system across instances', async () => {
+        await cache.set('_test-namespace', 'some-key', 'some-value', 10);
 
-      const result = await cache.get('_test-namespace', 'some-key');
-      expect(result).toEqual({ foo: 'bar' });
+        const backend = PackageCacheFile.create(cacheDir);
+        const newCache = new PackageCache(backend);
+
+        const result = await newCache.get('_test-namespace', 'some-key');
+        expect(result).toBe('some-value');
+      });
     });
 
-    it('persists cache to file system across instances', async () => {
-      await cache.set('_test-namespace', 'some-key', 'some-value', 10);
+    describe('TTL handling', () => {
+      it('applies raw TTL when using setWithRawTtl', async () => {
+        await cache.setWithRawTtl(
+          '_test-namespace',
+          'ttl-key',
+          'ttl-value',
+          10,
+        );
 
-      // Create new cache instance to verify persistence
-      const backend = PackageCacheFile.create(cacheDir);
-      const newCache = new PackageCache(backend);
-
-      const result = await newCache.get('_test-namespace', 'some-key');
-      expect(result).toBe('some-value');
+        const result = await cache.get('_test-namespace', 'ttl-key');
+        expect(result).toBe('ttl-value');
+      });
     });
 
-    it('applies raw TTL when using setWithRawTtl', async () => {
-      await cache.setWithRawTtl('_test-namespace', 'ttl-key', 'ttl-value', 10);
-
-      const result = await cache.get('_test-namespace', 'ttl-key');
-      expect(result).toBe('ttl-value');
-    });
-
-    it('cleans up backend resources on destroy', async () => {
-      await expect(cache.destroy()).resolves.not.toThrow();
-    });
-  });
-
-  describe('Mocked backend', () => {
-    it('bypasses backend on L1 memory cache hit', async () => {
-      const backend = {
-        get: vi.fn(),
-        set: vi.fn(),
-        destroy: vi.fn(),
-      } as any;
-      const cache = new PackageCache(backend);
-
-      await cache.get('_test-namespace', 'key');
-      expect(backend.get).toHaveBeenCalledTimes(1);
-
-      await cache.set('_test-namespace', 'key', 'val', 1);
-
-      // Verify L1 hit avoids backend call
-      backend.get.mockClear();
-      const result = await cache.get('_test-namespace', 'key');
-      expect(result).toBe('val');
-      expect(backend.get).not.toHaveBeenCalled();
-    });
-
-    it('deduplicates concurrent requests via mutex', async () => {
-      const backend = {
-        get: vi.fn().mockResolvedValue('backend-value'),
-        set: vi.fn(),
-        destroy: vi.fn(),
-      } as any;
-      const cache = new PackageCache(backend);
-
-      // Concurrent requests for same key - mutex ensures single backend call
-      const results = await Promise.all([
-        cache.get('_test-namespace', 'concurrent'),
-        cache.get('_test-namespace', 'concurrent'),
-      ]);
-
-      expect(results).toEqual(['backend-value', 'backend-value']);
-      expect(backend.get).toHaveBeenCalledTimes(1);
-    });
-
-    it('implements negative caching for undefined values in L1', async () => {
-      const backend = {
-        get: vi.fn().mockResolvedValue(undefined),
-        set: vi.fn(),
-        destroy: vi.fn(),
-      } as any;
-      const cache = new PackageCache(backend);
-
-      const firstResult = await cache.get('_test-namespace', 'missing');
-      expect(firstResult).toBeUndefined();
-      expect(backend.get).toHaveBeenCalledTimes(1);
-
-      // Verify undefined is cached in memory (negative cache prevents retry)
-      backend.get.mockClear();
-      const secondResult = await cache.get('_test-namespace', 'missing');
-      expect(secondResult).toBeUndefined();
-      expect(backend.get).not.toHaveBeenCalled();
-    });
-
-    it('evicts L1 memory cache on reset', async () => {
-      const backend = {
-        get: vi.fn().mockResolvedValue('value'),
-        set: vi.fn(),
-        destroy: vi.fn(),
-      } as any;
-      const cache = new PackageCache(backend);
-
-      await cache.get('_test-namespace', 'key');
-      expect(backend.get).toHaveBeenCalledTimes(1);
-
-      await cache.get('_test-namespace', 'key');
-      expect(backend.get).toHaveBeenCalledTimes(1);
-
-      cache.reset();
-
-      await cache.get('_test-namespace', 'key');
-      expect(backend.get).toHaveBeenCalledTimes(2);
+    describe('Resource cleanup', () => {
+      it('cleans up backend resources on destroy', async () => {
+        await expect(cache.destroy()).resolves.not.toThrow();
+      });
     });
   });
 
-  describe('No backend', () => {
+  describe('Memory caching with mocked backend', () => {
+    describe('L1 memory cache', () => {
+      it('bypasses backend on L1 memory cache hit', async () => {
+        const backend = {
+          get: vi.fn(),
+          set: vi.fn(),
+          destroy: vi.fn(),
+        } as any;
+        const cache = new PackageCache(backend);
+
+        await cache.get('_test-namespace', 'key');
+        expect(backend.get).toHaveBeenCalledTimes(1);
+
+        await cache.set('_test-namespace', 'key', 'val', 1);
+
+        backend.get.mockClear();
+        const result = await cache.get('_test-namespace', 'key');
+        expect(result).toBe('val');
+        expect(backend.get).not.toHaveBeenCalled();
+      });
+
+      it('implements negative caching for undefined values in L1', async () => {
+        const backend = {
+          get: vi.fn().mockResolvedValue(undefined),
+          set: vi.fn(),
+          destroy: vi.fn(),
+        } as any;
+        const cache = new PackageCache(backend);
+
+        const firstResult = await cache.get('_test-namespace', 'missing');
+        expect(firstResult).toBeUndefined();
+        expect(backend.get).toHaveBeenCalledTimes(1);
+
+        backend.get.mockClear();
+        const secondResult = await cache.get('_test-namespace', 'missing');
+        expect(secondResult).toBeUndefined();
+        expect(backend.get).not.toHaveBeenCalled();
+      });
+
+      it('evicts L1 memory cache on reset', async () => {
+        const backend = {
+          get: vi.fn().mockResolvedValue('value'),
+          set: vi.fn(),
+          destroy: vi.fn(),
+        } as any;
+        const cache = new PackageCache(backend);
+
+        await cache.get('_test-namespace', 'key');
+        expect(backend.get).toHaveBeenCalledTimes(1);
+
+        await cache.get('_test-namespace', 'key');
+        expect(backend.get).toHaveBeenCalledTimes(1);
+
+        cache.reset();
+
+        await cache.get('_test-namespace', 'key');
+        expect(backend.get).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    describe('Concurrency control', () => {
+      it('deduplicates concurrent requests via mutex', async () => {
+        const backend = {
+          get: vi.fn().mockResolvedValue('backend-value'),
+          set: vi.fn(),
+          destroy: vi.fn(),
+        } as any;
+        const cache = new PackageCache(backend);
+
+        const results = await Promise.all([
+          cache.get('_test-namespace', 'concurrent'),
+          cache.get('_test-namespace', 'concurrent'),
+        ]);
+
+        expect(results).toEqual(['backend-value', 'backend-value']);
+        expect(backend.get).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  describe('Memory-only cache (no backend)', () => {
     it('stores and retrieves from L1 memory only', async () => {
       const noBackendCache = new PackageCache();
       await noBackendCache.set('_test-namespace', 'key', 'value', 10);

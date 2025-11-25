@@ -19,7 +19,7 @@ describe('util/cache/package/impl/redis', () => {
     });
   });
 
-  describe('redis cache backend', () => {
+  describe('PackageCacheRedis', () => {
     const clientMock = {
       connect: vi.fn(),
       get: vi.fn(),
@@ -39,156 +39,172 @@ describe('util/cache/package/impl/redis', () => {
         await expect(PackageCacheRedis.create('')).rejects.toThrow();
       });
 
-      it('initializes client and connects', async () => {
-        await PackageCacheRedis.create('redis://host');
+      describe('Single client initialization', () => {
+        it('initializes client and connects', async () => {
+          await PackageCacheRedis.create('redis://host');
 
-        expect(createClient).toHaveBeenCalledWith({
-          pingInterval: 30000,
-          socket: { reconnectStrategy: expect.any(Function) },
-          url: 'redis://host',
-        });
-        expect(clientMock.connect).toHaveBeenCalled();
+          expect(createClient).toHaveBeenCalledWith({
+            pingInterval: 30000,
+            socket: { reconnectStrategy: expect.any(Function) },
+            url: 'redis://host',
+          });
+          expect(clientMock.connect).toHaveBeenCalled();
 
-        const { reconnectStrategy } = vi.mocked(createClient).mock.calls[0][0]!
-          .socket as any;
-        expect(reconnectStrategy(1)).toBe(100);
-        expect(reconnectStrategy(100)).toBe(3000);
-      });
-
-      it('initializes cluster client', async () => {
-        await PackageCacheRedis.create('redis+cluster://host');
-
-        expect(createCluster).toHaveBeenCalledWith({
-          rootNodes: [
-            {
-              pingInterval: 30000,
-              socket: { reconnectStrategy: expect.any(Function) },
-              url: 'redis://host',
-            },
-          ],
+          const { reconnectStrategy } = vi.mocked(createClient).mock
+            .calls[0][0]!.socket as any;
+          expect(reconnectStrategy(1)).toBe(100);
+          expect(reconnectStrategy(100)).toBe(3000);
         });
       });
 
-      it('initializes cluster client with username and password', async () => {
-        await PackageCacheRedis.create('redis+cluster://user:pass@host');
+      describe('Cluster initialization', () => {
+        it('initializes cluster client', async () => {
+          await PackageCacheRedis.create('redis+cluster://host');
 
-        expect(createCluster).toHaveBeenCalledWith({
-          defaults: {
-            password: 'pass',
-            username: 'user',
-          },
-          rootNodes: [
-            {
-              pingInterval: 30000,
-              socket: { reconnectStrategy: expect.any(Function) },
-              url: 'redis://user:pass@host',
-            },
-          ],
+          expect(createCluster).toHaveBeenCalledWith({
+            rootNodes: [
+              {
+                pingInterval: 30000,
+                socket: { reconnectStrategy: expect.any(Function) },
+                url: 'redis://host',
+              },
+            ],
+          });
         });
-      });
 
-      it('initializes cluster client with password only', async () => {
-        await PackageCacheRedis.create('redis+cluster://:pass@host');
+        it('initializes cluster client with username and password', async () => {
+          await PackageCacheRedis.create('redis+cluster://user:pass@host');
 
-        expect(createCluster).toHaveBeenCalledWith({
-          defaults: {
-            password: 'pass',
-          },
-          rootNodes: [
-            {
-              pingInterval: 30000,
-              socket: { reconnectStrategy: expect.any(Function) },
-              url: 'redis://:pass@host',
+          expect(createCluster).toHaveBeenCalledWith({
+            defaults: {
+              password: 'pass',
+              username: 'user',
             },
-          ],
+            rootNodes: [
+              {
+                pingInterval: 30000,
+                socket: { reconnectStrategy: expect.any(Function) },
+                url: 'redis://user:pass@host',
+              },
+            ],
+          });
+        });
+
+        it('initializes cluster client with password only', async () => {
+          await PackageCacheRedis.create('redis+cluster://:pass@host');
+
+          expect(createCluster).toHaveBeenCalledWith({
+            defaults: {
+              password: 'pass',
+            },
+            rootNodes: [
+              {
+                pingInterval: 30000,
+                socket: { reconnectStrategy: expect.any(Function) },
+                url: 'redis://:pass@host',
+              },
+            ],
+          });
         });
       });
     });
 
     describe('get', () => {
-      it('returns compressed cached value', async () => {
-        const cache = await PackageCacheRedis.create('redis://host', 'p:');
-        const value = { foo: 'bar' };
-        const compressed = await compressToBase64(JSON.stringify(value));
+      describe('Value retrieval', () => {
+        it('returns compressed cached value', async () => {
+          const cache = await PackageCacheRedis.create('redis://host', 'p:');
+          const value = { foo: 'bar' };
+          const compressed = await compressToBase64(JSON.stringify(value));
 
-        clientMock.get.mockResolvedValue(
-          JSON.stringify({
-            compress: true,
-            value: compressed,
-            expiry: DateTime.local().plus({ minutes: 5 }),
-          }),
-        );
+          clientMock.get.mockResolvedValue(
+            JSON.stringify({
+              compress: true,
+              value: compressed,
+              expiry: DateTime.local().plus({ minutes: 5 }),
+            }),
+          );
 
-        const res = await cache.get('_test-namespace', 'key');
-        expect(res).toEqual(value);
+          const res = await cache.get('_test-namespace', 'key');
+          expect(res).toEqual(value);
+        });
+
+        it('returns uncompressed value', async () => {
+          const cache = await PackageCacheRedis.create('redis://host', 'p:');
+          const value = { foo: 'bar' };
+
+          clientMock.get.mockResolvedValue(
+            JSON.stringify({
+              compress: false,
+              value,
+              expiry: DateTime.local().plus({ minutes: 5 }),
+            }),
+          );
+
+          const res = await cache.get('_test-namespace', 'key');
+          expect(res).toEqual(value);
+        });
       });
 
-      it('returns uncompressed value', async () => {
-        const cache = await PackageCacheRedis.create('redis://host', 'p:');
-        const value = { foo: 'bar' };
+      describe('TTL handling', () => {
+        it('removes expired cached entry', async () => {
+          const cache = await PackageCacheRedis.create('redis://host', 'p:');
 
-        clientMock.get.mockResolvedValue(
-          JSON.stringify({
-            compress: false,
-            value,
-            expiry: DateTime.local().plus({ minutes: 5 }),
-          }),
-        );
+          clientMock.get.mockResolvedValue(
+            JSON.stringify({
+              expiry: DateTime.local().minus({ minutes: 1 }),
+            }),
+          );
 
-        const res = await cache.get('_test-namespace', 'key');
-        expect(res).toEqual(value);
+          const res = await cache.get('_test-namespace', 'key');
+          expect(res).toBeUndefined();
+          expect(clientMock.del).toHaveBeenCalledWith('p:_test-namespace-key');
+        });
       });
 
-      it('removes expired cached entry', async () => {
-        const cache = await PackageCacheRedis.create('redis://host', 'p:');
+      describe('Error handling', () => {
+        it('returns undefined on get error', async () => {
+          const cache = await PackageCacheRedis.create('redis://host');
+          clientMock.get.mockRejectedValue(new Error('foo'));
 
-        clientMock.get.mockResolvedValue(
-          JSON.stringify({
-            expiry: DateTime.local().minus({ minutes: 1 }),
-          }),
-        );
-
-        const res = await cache.get('_test-namespace', 'key');
-        expect(res).toBeUndefined();
-        expect(clientMock.del).toHaveBeenCalledWith('p:_test-namespace-key');
-      });
-
-      it('returns undefined on get error', async () => {
-        const cache = await PackageCacheRedis.create('redis://host');
-        clientMock.get.mockRejectedValue(new Error('foo'));
-
-        const res = await cache.get('_test-namespace', 'key');
-        expect(res).toBeUndefined();
+          const res = await cache.get('_test-namespace', 'key');
+          expect(res).toBeUndefined();
+        });
       });
     });
 
     describe('set', () => {
-      it('compresses and sets cached value', async () => {
-        const cache = await PackageCacheRedis.create('redis://host', 'p:');
-        await cache.set('_test-namespace', 'key', { foo: 'bar' }, 10);
+      describe('Value storage', () => {
+        it('compresses and sets cached value', async () => {
+          const cache = await PackageCacheRedis.create('redis://host', 'p:');
+          await cache.set('_test-namespace', 'key', { foo: 'bar' }, 10);
 
-        expect(clientMock.set).toHaveBeenCalledWith(
-          'p:_test-namespace-key',
-          expect.stringContaining('"compress":true'),
-          { EX: 600 },
-        );
+          expect(clientMock.set).toHaveBeenCalledWith(
+            'p:_test-namespace-key',
+            expect.stringContaining('"compress":true'),
+            { EX: 600 },
+          );
+        });
       });
 
-      it('deletes entry with negative TTL', async () => {
-        const cache = await PackageCacheRedis.create('redis://host', 'p:');
-        await cache.set('_test-namespace', 'key', { foo: 'bar' }, -1);
+      describe('TTL handling', () => {
+        it('deletes entry with negative TTL', async () => {
+          const cache = await PackageCacheRedis.create('redis://host', 'p:');
+          await cache.set('_test-namespace', 'key', { foo: 'bar' }, -1);
 
-        expect(clientMock.del).toHaveBeenCalledWith('p:_test-namespace-key');
-        expect(clientMock.set).not.toHaveBeenCalled();
+          expect(clientMock.del).toHaveBeenCalledWith('p:_test-namespace-key');
+          expect(clientMock.set).not.toHaveBeenCalled();
+        });
       });
 
-      it('silently handles set error', async () => {
-        const cache = await PackageCacheRedis.create('redis://host');
-        clientMock.set.mockRejectedValue(new Error('foo'));
+      describe('Error handling', () => {
+        it('silently handles set error', async () => {
+          const cache = await PackageCacheRedis.create('redis://host');
+          clientMock.set.mockRejectedValue(new Error('foo'));
 
-        await expect(
-          cache.set('_test-namespace', 'key', 'val', 5),
-        ).resolves.not.toThrow();
+          await expect(
+            cache.set('_test-namespace', 'key', 'val', 5),
+          ).resolves.not.toThrow();
+        });
       });
     });
 

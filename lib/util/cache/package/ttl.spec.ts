@@ -8,7 +8,7 @@ describe('util/cache/package/ttl', () => {
   });
 
   describe('getTtlOverride', () => {
-    describe('basic functionality', () => {
+    describe('No configuration', () => {
       it('returns undefined when no cacheTtlOverride config exists', () => {
         GlobalConfig.set({});
         const res = getTtlOverride('datasource-npm' as never);
@@ -20,7 +20,9 @@ describe('util/cache/package/ttl', () => {
         const res = getTtlOverride('datasource-npm' as never);
         expect(res).toBeUndefined();
       });
+    });
 
+    describe('Exact match', () => {
       it('returns exact match when namespace exists in config', () => {
         GlobalConfig.set({
           cacheTtlOverride: {
@@ -57,8 +59,8 @@ describe('util/cache/package/ttl', () => {
       });
     });
 
-    describe('pattern matching', () => {
-      it('matches glob patterns', () => {
+    describe('Glob patterns', () => {
+      it('matches simple glob patterns', () => {
         GlobalConfig.set({
           cacheTtlOverride: {
             'datasource-*': 90,
@@ -94,6 +96,41 @@ describe('util/cache/package/ttl', () => {
         expect(resAny).toBe(45);
       });
 
+      it('matches complex glob patterns with braces', () => {
+        GlobalConfig.set({
+          cacheTtlOverride: {
+            'datasource-{npm,docker}': 150,
+          },
+        });
+
+        const resNpm = getTtlOverride('datasource-npm' as never);
+        const resDocker = getTtlOverride('datasource-docker' as never);
+        const resMaven = getTtlOverride('datasource-maven' as never);
+
+        expect(resNpm).toBe(150);
+        expect(resDocker).toBe(150);
+        expect(resMaven).toBeUndefined();
+      });
+
+      it('handles special characters in namespace patterns', () => {
+        GlobalConfig.set({
+          cacheTtlOverride: {
+            'datasource-npm:*': 120,
+            'changelog-*@v2': 60,
+          },
+        });
+
+        const resColon = getTtlOverride(
+          'datasource-npm:cache-provider' as never,
+        );
+        const resAt = getTtlOverride('changelog-github-notes@v2' as never);
+
+        expect(resColon).toBe(120);
+        expect(resAt).toBe(60);
+      });
+    });
+
+    describe('Regex patterns', () => {
       it('matches regex patterns', () => {
         GlobalConfig.set({
           cacheTtlOverride: {
@@ -110,22 +147,6 @@ describe('util/cache/package/ttl', () => {
         expect(resNpm).toBe(75);
         expect(resDocker).toBe(75);
         expect(resChangelog).toBeUndefined();
-      });
-
-      it('matches complex glob patterns with braces', () => {
-        GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-{npm,docker}': 150,
-          },
-        });
-
-        const resNpm = getTtlOverride('datasource-npm' as never);
-        const resDocker = getTtlOverride('datasource-docker' as never);
-        const resMaven = getTtlOverride('datasource-maven' as never);
-
-        expect(resNpm).toBe(150);
-        expect(resDocker).toBe(150);
-        expect(resMaven).toBeUndefined();
       });
 
       it('matches patterns with regex escape sequences', () => {
@@ -145,7 +166,7 @@ describe('util/cache/package/ttl', () => {
       });
     });
 
-    describe('priority and multiple patterns', () => {
+    describe('Priority and multiple patterns', () => {
       it('prioritizes exact match over glob patterns', () => {
         GlobalConfig.set({
           cacheTtlOverride: {
@@ -221,9 +242,22 @@ describe('util/cache/package/ttl', () => {
 
         expect(res).toBeUndefined();
       });
+
+      it('applies patterns consistently regardless of case in config order', () => {
+        GlobalConfig.set({
+          cacheTtlOverride: {
+            'Datasource-*': 120,
+            'datasource-*': 90,
+          },
+        });
+
+        const res = getTtlOverride('datasource-docker' as never);
+
+        expect(res).toBe(120);
+      });
     });
 
-    describe('edge cases', () => {
+    describe('Edge cases', () => {
       it('handles empty string pattern', () => {
         GlobalConfig.set({
           cacheTtlOverride: {
@@ -295,41 +329,11 @@ describe('util/cache/package/ttl', () => {
         expect(resNpm).toBeUndefined();
         expect(resDocker).toBe(90);
       });
-
-      it('handles special characters in namespace patterns', () => {
-        GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-npm:*': 120,
-            'changelog-*@v2': 60,
-          },
-        });
-
-        const resColon = getTtlOverride(
-          'datasource-npm:cache-provider' as never,
-        );
-        const resAt = getTtlOverride('changelog-github-notes@v2' as never);
-
-        expect(resColon).toBe(120);
-        expect(resAt).toBe(60);
-      });
-
-      it('applies patterns consistently regardless of case in config order', () => {
-        GlobalConfig.set({
-          cacheTtlOverride: {
-            'Datasource-*': 120,
-            'datasource-*': 90,
-          },
-        });
-
-        const res = getTtlOverride('datasource-docker' as never);
-
-        expect(res).toBe(120);
-      });
     });
   });
 
   describe('resolveTtlValues', () => {
-    describe('basic functionality', () => {
+    describe('Default values', () => {
       it('returns default values when no overrides set', () => {
         GlobalConfig.set({});
 
@@ -340,7 +344,9 @@ describe('util/cache/package/ttl', () => {
           hardTtlMinutes: 10080,
         });
       });
+    });
 
+    describe('Override application', () => {
       it('uses override for softTtlMinutes when available', () => {
         GlobalConfig.set({
           cacheTtlOverride: {
@@ -369,22 +375,6 @@ describe('util/cache/package/ttl', () => {
         });
       });
 
-      it('uses maximum of softTtlMinutes and cacheHardTtlMinutes for hardTtlMinutes', () => {
-        GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-npm': 20160,
-          },
-          cacheHardTtlMinutes: 1440,
-        });
-
-        const res = resolveTtlValues('datasource-npm' as never, 60);
-
-        expect(res).toEqual({
-          softTtlMinutes: 20160,
-          hardTtlMinutes: 20160,
-        });
-      });
-
       it('resolves TTL with glob pattern overrides', () => {
         GlobalConfig.set({
           cacheTtlOverride: {
@@ -398,55 +388,6 @@ describe('util/cache/package/ttl', () => {
         expect(res).toEqual({
           softTtlMinutes: 180,
           hardTtlMinutes: 2880,
-        });
-      });
-    });
-
-    describe('edge cases and special scenarios', () => {
-      it('handles zero as valid override value', () => {
-        GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-npm': 0,
-          },
-          cacheHardTtlMinutes: 1440,
-        });
-
-        const res = resolveTtlValues('datasource-npm' as never, 60);
-
-        expect(res).toEqual({
-          softTtlMinutes: 0,
-          hardTtlMinutes: 1440,
-        });
-      });
-
-      it('handles negative cacheHardTtlMinutes config', () => {
-        GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-npm': 120,
-          },
-          cacheHardTtlMinutes: -1,
-        });
-
-        const res = resolveTtlValues('datasource-npm' as never, 60);
-
-        expect(res).toEqual({
-          softTtlMinutes: 120,
-          hardTtlMinutes: 120,
-        });
-      });
-
-      it('uses fallback when override is not a number', () => {
-        GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-npm': 'invalid',
-          },
-        });
-
-        const res = resolveTtlValues('datasource-npm' as never, 60);
-
-        expect(res).toEqual({
-          softTtlMinutes: 60,
-          hardTtlMinutes: 10080,
         });
       });
 
@@ -465,6 +406,73 @@ describe('util/cache/package/ttl', () => {
         expect(res).toEqual({
           softTtlMinutes: 200,
           hardTtlMinutes: 5760,
+        });
+      });
+    });
+
+    describe('Hard TTL calculation', () => {
+      it('uses maximum of softTtlMinutes and cacheHardTtlMinutes for hardTtlMinutes', () => {
+        GlobalConfig.set({
+          cacheTtlOverride: {
+            'datasource-npm': 20160,
+          },
+          cacheHardTtlMinutes: 1440,
+        });
+
+        const res = resolveTtlValues('datasource-npm' as never, 60);
+
+        expect(res).toEqual({
+          softTtlMinutes: 20160,
+          hardTtlMinutes: 20160,
+        });
+      });
+
+      it('handles negative cacheHardTtlMinutes config', () => {
+        GlobalConfig.set({
+          cacheTtlOverride: {
+            'datasource-npm': 120,
+          },
+          cacheHardTtlMinutes: -1,
+        });
+
+        const res = resolveTtlValues('datasource-npm' as never, 60);
+
+        expect(res).toEqual({
+          softTtlMinutes: 120,
+          hardTtlMinutes: 120,
+        });
+      });
+    });
+
+    describe('Edge cases and special scenarios', () => {
+      it('handles zero as valid override value', () => {
+        GlobalConfig.set({
+          cacheTtlOverride: {
+            'datasource-npm': 0,
+          },
+          cacheHardTtlMinutes: 1440,
+        });
+
+        const res = resolveTtlValues('datasource-npm' as never, 60);
+
+        expect(res).toEqual({
+          softTtlMinutes: 0,
+          hardTtlMinutes: 1440,
+        });
+      });
+
+      it('uses fallback when override is not a number', () => {
+        GlobalConfig.set({
+          cacheTtlOverride: {
+            'datasource-npm': 'invalid',
+          },
+        });
+
+        const res = resolveTtlValues('datasource-npm' as never, 60);
+
+        expect(res).toEqual({
+          softTtlMinutes: 60,
+          hardTtlMinutes: 10080,
         });
       });
     });

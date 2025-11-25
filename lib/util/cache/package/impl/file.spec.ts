@@ -22,13 +22,15 @@ describe('util/cache/package/impl/file', () => {
     await tmpDir.cleanup();
   });
 
-  it('sets and gets', async () => {
-    await packageCache.set('_test-namespace', 'key', 1234, 5);
-    const res = await packageCache.get('_test-namespace', 'key');
-    expect(res).toBe(1234);
+  describe('Basic operations', () => {
+    it('sets and gets', async () => {
+      await packageCache.set('_test-namespace', 'key', 1234, 5);
+      const res = await packageCache.get('_test-namespace', 'key');
+      expect(res).toBe(1234);
+    });
   });
 
-  describe('get', () => {
+  describe('Get operations', () => {
     it('returns undefined on cache miss', async () => {
       const res = await packageCache.get('_test-namespace', 'missing-key');
       expect(res).toBeUndefined();
@@ -85,7 +87,7 @@ describe('util/cache/package/impl/file', () => {
     });
   });
 
-  describe('destroy', () => {
+  describe('Cleanup operations', () => {
     it('removes expired and invalid entries', async () => {
       await packageCache.set('_test-namespace', 'valid', 1234, 5);
       await packageCache.set('_test-namespace', 'expired', 1234, -5);
