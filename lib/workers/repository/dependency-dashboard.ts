@@ -318,7 +318,7 @@ export async function ensureDependencyDashboard(
     return;
   }
   // legacy/migrated issue
-  const reuseTitle = 'Update Dependencies (Renovate Bot)';
+  const reuseTitle = 'Update Dependencies (Renovate)';
   const branches = allBranches.filter(
     (branch) =>
       branch.result !== 'automerged' &&

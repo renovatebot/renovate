@@ -29,7 +29,7 @@ Renovate can manage the Node.js version in the following files:
 When `binarySource=docker` or `binarySource=install`, such as in the Mend Renovate App, Renovate will choose and install an `npm` version dynamically.
 
 To control which version or constraint is installed, you should use the `engines.npm` property in your `package.json` file.
-Renovate bot will then use that version constraint for npm when it creates a pull request.
+Renovate will then use that version constraint for npm when it creates a pull request.
 
 For example, if you want to use at least npm `8.1.0` and also allow newer versions of npm in the `8.x` range, you would put this in your `package.json` file:
 

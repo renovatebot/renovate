@@ -290,7 +290,7 @@ async function cleanLocalBranches(): Promise<void> {
 
 export function setGitAuthor(gitAuthor: string | undefined): void {
   const gitAuthorParsed = parseGitAuthor(
-    gitAuthor ?? 'Renovate Bot <renovate@whitesourcesoftware.com>',
+    gitAuthor ?? 'Renovate <renovate@whitesourcesoftware.com>',
   );
   if (!gitAuthorParsed) {
     const error = new Error(CONFIG_VALIDATION);

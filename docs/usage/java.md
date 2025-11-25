@@ -116,7 +116,7 @@ The manager for Gradle makes use of the `maven` datasource.
 Renovate can be configured to access more repositories and access repositories authenticated.
 
 This example shows how you can use a `config.js` file to configure Renovate for use with Artifactory.
-We're using environment variables to pass the Artifactory username and password to Renovate bot.
+We're using environment variables to pass the Artifactory username and password to Renovate.
 
 ```js title="config.js"
 module.exports = {

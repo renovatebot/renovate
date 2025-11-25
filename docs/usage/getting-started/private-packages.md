@@ -628,7 +628,7 @@ The Mend Renovate App does not run using GitHub Actions, but such secrets would 
 
 ## Admin/Bot config vs User/Repository config for Self-hosted users
 
-"Admin/Bot config" refers to the config which the Renovate Bot administrator provides at bot startup, e.g. using environment variables, CLI parameters, or the `config.js` configuration file.
+"Admin/Bot config" refers to the config which the Renovate administrator provides at bot startup, e.g. using environment variables, CLI parameters, or the `config.js` configuration file.
 User/Repository config refers to the in-repository config file which defaults to `renovate.json` but has a large number of alternative filenames supported.
 
 If there is a need to supply custom rules for certain repository, it can still be done using the `config.js` file and the `repositories` array.
