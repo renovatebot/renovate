@@ -73,7 +73,7 @@ export function cache<T>({
       return data.value;
     }
 
-    return await getMutex(combinedKey, 'package-cache-decorator').runExclusive(
+    return await getMutex(combinedKey, 'package-cache').runExclusive(
       async () => {
         if (packageCache.memory.has(combinedKey)) {
           const data = packageCache.memory.get(

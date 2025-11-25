@@ -82,7 +82,10 @@ export class PackageCache extends PackageCacheBase {
     hardTtlMinutes: number,
   ): Promise<void> {
     const rawTtl = getTtlOverride(namespace) ?? hardTtlMinutes;
-    await this.setWithRawTtl(namespace, key, value, rawTtl);
+    const combinedKey = `${namespace}:${key}`;
+    await getMutex(combinedKey, 'package-cache').runExclusive(async () => {
+      await this.setWithRawTtl(namespace, key, value, rawTtl);
+    });
   }
 
   /**
@@ -95,16 +98,14 @@ export class PackageCache extends PackageCacheBase {
     hardTtlMinutes: number,
   ): Promise<void> {
     const combinedKey = `${namespace}:${key}`;
-    await getMutex(combinedKey, 'package-cache').runExclusive(async () => {
-      const backend = this.backend;
-      if (backend) {
-        await PackageCacheStats.wrapSet(() =>
-          backend.set(namespace, key, value, hardTtlMinutes),
-        );
-      }
+    const backend = this.backend;
+    if (backend) {
+      await PackageCacheStats.wrapSet(() =>
+        backend.set(namespace, key, value, hardTtlMinutes),
+      );
+    }
 
-      this.memory.set(combinedKey, value);
-    });
+    this.memory.set(combinedKey, value);
   }
 
   getType(): CacheType | undefined {

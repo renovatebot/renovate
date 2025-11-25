@@ -4,6 +4,7 @@ import { GlobalConfig } from '../../../config/global';
 import { packageCache } from '../../cache/package';
 import { resolveTtlValues } from '../../cache/package/ttl';
 import type { PackageCacheNamespace } from '../../cache/package/types';
+import { getMutex } from '../../mutex';
 import { regEx } from '../../regex';
 import { HttpCacheStats } from '../../stats';
 import type { HttpResponse } from '../types';
@@ -53,12 +54,16 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   }
 
   async persist(method: string, url: string, data: HttpCache): Promise<void> {
-    await packageCache.setWithRawTtl(
-      this.namespace,
-      this.cacheKey(method, url),
-      data,
-      this.hardTtlMinutes,
-    );
+    const cacheKey = this.cacheKey(method, url);
+    const combinedKey = `${this.namespace}:${cacheKey}`;
+    await getMutex(combinedKey, 'package-cache').runExclusive(async () => {
+      await packageCache.setWithRawTtl(
+        this.namespace,
+        cacheKey,
+        data,
+        this.hardTtlMinutes,
+      );
+    });
   }
 
   override async bypassServer<T>(
