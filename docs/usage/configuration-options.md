@@ -4016,6 +4016,10 @@ You can configure this object to modify the table headers present in the pr body
 !!! tip
     Columns must also be included in the `prBodyColumns` array in order to be used, so that's why it's included above in the example.
 
+<!-- prettier-ignore -->
+!!! note
+    Templating is not supported for this option.
+
 ## prBodyNotes
 
 Use this field to add custom content inside PR bodies, including conditionally.
