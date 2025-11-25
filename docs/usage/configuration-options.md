@@ -4006,7 +4006,7 @@ You can configure this object to modify the table headers present in the pr body
 {
   "prBodyHeadingDefinitions": {
     "Package": "📦 Package",
-    "Age": "https://docs.renovatebot.com/merge-confidence"
+    "Age": "[Age](https://docs.renovatebot.com/merge-confidence)"
   },
   "prBodyColumn": ["Package", "Age"]
 }
