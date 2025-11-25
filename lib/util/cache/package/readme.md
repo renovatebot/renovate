@@ -23,7 +23,7 @@ The fastest path - data is already in memory.
 sequenceDiagram
     participant C as Caller
     participant D as Decorated method <br/>(via @cache)
-    participant L1 as Memory
+    participant L1 as Memory <br/>(L1)
 
     C->>D: Call decorated method
     D->>L1: Check key
@@ -40,8 +40,8 @@ sequenceDiagram
     participant C as Caller
     participant D as Decorated method <br/>(via @cache)
     participant X as Mutex
-    participant L1 as Memory
-    participant L2 as Backend
+    participant L1 as Memory <br/>(L1)
+    participant L2 as Backend <br/>(L2)
 
     C->>D: Call decorated method
     D->>L1: Check key
@@ -71,8 +71,8 @@ sequenceDiagram
     participant C as Caller
     participant D as Decorated method <br/>(via @cache)
     participant X as Mutex
-    participant L1 as Memory
-    participant L2 as Backend
+    participant L1 as Memory <br/>(L1)
+    participant L2 as Backend <br/>(L2)
     participant U as Original method <br/>(callback)
 
     C->>D: Call getReleases/getDigest
@@ -111,8 +111,8 @@ sequenceDiagram
     participant C as Caller
     participant D as Decorated method <br/>(via @cache)
     participant X as Mutex
-    participant L1 as Memory
-    participant L2 as Backend
+    participant L1 as Memory <br/>(L1)
+    participant L2 as Backend <br/>(L2)
     participant U as Original method <br/>(callback)
 
     C->>D: Call decorated method
@@ -147,7 +147,7 @@ sequenceDiagram
     participant C as Caller
     participant D as Decorated method <br/>(via @cache)
     participant X as Mutex
-    participant L1 as Memory
+    participant L1 as Memory <br/>(L1)
     participant U as Original method <br/>(callback)
 
     C->>D: Call decorated method
@@ -181,7 +181,7 @@ sequenceDiagram
     participant C2 as Caller 2
     participant D as Decorated method <br/>(via @cache)
     participant X as Mutex
-    participant L1 as Memory
+    participant L1 as Memory <br/>(L1)
     participant U as Upstream
 
     C1->>D: Call method
@@ -224,8 +224,8 @@ sequenceDiagram
     participant C as Caller
     participant D as Decorated method <br/>(via @cache)
     participant X as Mutex
-    participant L1 as Memory
-    participant L2 as Backend
+    participant L1 as Memory <br/>(L1)
+    participant L2 as Backend <br/>(L2)
     participant U as Original method <br/>(callback)
 
     C->>D: Call decorated method
@@ -262,7 +262,7 @@ sequenceDiagram
     participant C as Caller
     participant D as Decorated method <br/>(via @cache)
     participant X as Mutex
-    participant L1 as Memory
+    participant L1 as Memory <br/>(L1)
     participant U as Original method <br/>(callback)
 
     C->>D: Call decorated method
