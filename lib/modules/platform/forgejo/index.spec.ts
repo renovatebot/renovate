@@ -59,6 +59,9 @@ describe('modules/platform/forgejo/index', () => {
     ssh_url: 'git@forgejo.renovatebot.com/some/repo.git',
     default_branch: 'master',
     full_name: 'some/repo',
+    owner: partial<User>({
+      username: 'some',
+    }),
   });
 
   type MockPr = PR & Required<Pick<PR, 'head' | 'base'>>;
@@ -255,10 +258,15 @@ describe('modules/platform/forgejo/index', () => {
     scope: httpMock.Scope,
     repo?: Partial<Repo>,
     config?: Partial<RepoParams>,
+    orgCode = 200,
   ): Promise<void> {
     const repoResult = { ...mockRepo, ...repo };
     const repository = repoResult.full_name;
-    scope.get(`/repos/${repository}`).reply(200, repoResult);
+    scope
+      .get(`/repos/${repository}`)
+      .reply(200, repoResult)
+      .get(`/orgs/${repoResult.owner.username}`)
+      .reply(orgCode, {});
     await forgejo.initRepo({ repository, ignorePrAuthor: true, ...config });
   }
 
@@ -468,6 +476,19 @@ describe('modules/platform/forgejo/index', () => {
       await expect(forgejo.initRepo(initRepoCfg)).rejects.toThrow('getRepo()');
     });
 
+    it('should propagate org API errors', async () => {
+      const scope = httpMock
+        .scope('https://code.forgejo.org/api/v1')
+        .get(`/orgs/some`)
+        .replyWithError(httpMock.error('isOrg()'))
+        .get(`/repos/${initRepoCfg.repository}`)
+        .reply(200, {
+          ...mockRepo,
+        });
+      await initFakePlatform(scope);
+      await expect(forgejo.initRepo(initRepoCfg)).rejects.toThrow('isOrg()');
+    });
+
     it('should abort when repo is archived', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
@@ -559,6 +580,8 @@ describe('modules/platform/forgejo/index', () => {
     it('should select default merge method when it is allowed', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
+        .get(`/orgs/some`)
+        .reply(200, {})
         .get(`/repos/${initRepoCfg.repository}`)
         .reply(200, {
           ...mockRepo,
@@ -580,6 +603,8 @@ describe('modules/platform/forgejo/index', () => {
     it('should fall back to merge method as per ordered list when default not allowed', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
+        .get(`/orgs/some`)
+        .reply(200, {})
         .get(`/repos/${initRepoCfg.repository}`)
         .reply(200, {
           ...mockRepo,
@@ -616,6 +641,8 @@ describe('modules/platform/forgejo/index', () => {
     it('should use clone_url of repo if gitUrl is not specified', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
+        .get(`/orgs/some`)
+        .reply(200, {})
         .get(`/repos/${initRepoCfg.repository}`)
         .reply(200, mockRepo);
       await initFakePlatform(scope);
@@ -633,6 +660,8 @@ describe('modules/platform/forgejo/index', () => {
     it('should use clone_url of repo if gitUrl has value default', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
+        .get(`/orgs/some`)
+        .reply(200, {})
         .get(`/repos/${initRepoCfg.repository}`)
         .reply(200, mockRepo);
       await initFakePlatform(scope);
@@ -651,6 +680,8 @@ describe('modules/platform/forgejo/index', () => {
     it('should use ssh_url of repo if gitUrl has value ssh', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
+        .get(`/orgs/some`)
+        .reply(200, {})
         .get(`/repos/${initRepoCfg.repository}`)
         .reply(200, mockRepo);
       await initFakePlatform(scope);
@@ -669,6 +700,8 @@ describe('modules/platform/forgejo/index', () => {
     it('should abort when gitUrl has value ssh but ssh_url is empty', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
+        .get(`/orgs/some`)
+        .reply(200, {})
         .get(`/repos/${initRepoCfg.repository}`)
         .reply(200, { ...mockRepo, ssh_url: undefined });
       await initFakePlatform(scope);
@@ -686,6 +719,8 @@ describe('modules/platform/forgejo/index', () => {
     it('should use generated url of repo if gitUrl has value endpoint', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
+        .get(`/orgs/some`)
+        .reply(200, {})
         .get(`/repos/${initRepoCfg.repository}`)
         .reply(200, mockRepo);
       await initFakePlatform(scope);
@@ -706,6 +741,8 @@ describe('modules/platform/forgejo/index', () => {
     it('should abort when clone_url is empty', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
+        .get(`/orgs/some`)
+        .reply(200, {})
         .get(`/repos/${initRepoCfg.repository}`)
         .reply(200, {
           ...mockRepo,
@@ -725,6 +762,8 @@ describe('modules/platform/forgejo/index', () => {
     it('should use given access token if gitUrl has value endpoint', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
+        .get(`/orgs/some`)
+        .reply(200, {})
         .get(`/repos/${initRepoCfg.repository}`)
         .reply(200, mockRepo);
       await initFakePlatform(scope);
@@ -754,6 +793,8 @@ describe('modules/platform/forgejo/index', () => {
     it('should use given access token if gitUrl is not specified', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
+        .get(`/orgs/some`)
+        .reply(200, {})
         .get(`/repos/${initRepoCfg.repository}`)
         .reply(200, mockRepo);
       await initFakePlatform(scope);
@@ -780,6 +821,8 @@ describe('modules/platform/forgejo/index', () => {
     it('should abort when clone_url is not valid', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
+        .get(`/orgs/some`)
+        .reply(200, {})
         .get(`/repos/${initRepoCfg.repository}`)
         .reply(200, {
           ...mockRepo,
@@ -1595,7 +1638,7 @@ describe('modules/platform/forgejo/index', () => {
       });
     });
 
-    it('should resolve and apply optional labels to pull request', async () => {
+    it('should resolve and apply optional repo and org labels to pull request', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .post('/repos/some/repo/pulls')
@@ -1606,6 +1649,30 @@ describe('modules/platform/forgejo/index', () => {
         .reply(200, mockOrgLabels);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
+
+      const res = await forgejo.createPr({
+        sourceBranch: mockNewPR.head.label,
+        targetBranch: 'master',
+        prTitle: mockNewPR.title,
+        prBody: mockNewPR.body,
+        labels: [...mockRepoLabels, ...mockOrgLabels].map(({ name }) => name),
+      });
+
+      expect(res).toMatchObject({
+        number: 42,
+        title: 'pr-title',
+      });
+    });
+
+    it('should resolve and apply optional repo labels to pull request', async () => {
+      const scope = httpMock
+        .scope('https://code.forgejo.org/api/v1')
+        .post('/repos/some/repo/pulls')
+        .reply(200, mockNewPR)
+        .get('/repos/some/repo/labels')
+        .reply(200, mockRepoLabels);
+      await initFakePlatform(scope);
+      await initFakeRepo(scope, undefined, undefined, 404);
 
       const res = await forgejo.createPr({
         sourceBranch: mockNewPR.head.label,
@@ -2178,6 +2245,19 @@ describe('modules/platform/forgejo/index', () => {
       const scope = httpMock.scope('https://code.forgejo.org/api/v1');
       await initFakePlatform(scope);
       await initFakeRepo(scope, { has_issues: false });
+
+      const res = await forgejo.getIssue!(1);
+
+      expect(res).toBeNull();
+    });
+
+    it('should return null on error', async () => {
+      const scope = httpMock
+        .scope('https://code.forgejo.org/api/v1')
+        .get('/repos/some/repo/issues/1')
+        .reply(404);
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
 
       const res = await forgejo.getIssue!(1);
 
@@ -2869,20 +2949,35 @@ describe('modules/platform/forgejo/index', () => {
   });
 
   describe('addReviewers', () => {
-    it('should assign reviewers', async () => {
+    it('should assign user and team reviewers', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
+        .get('/orgs/some/teams')
+        .reply(200, [{ id: 5, name: 'team' }])
         .post('/repos/some/repo/pulls/1/requested_reviewers', {
           reviewers: ['me', 'you'],
-          team_reviewers: ['org/team'],
+          team_reviewers: ['team'],
         })
         .reply(200);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
-      await expect(
-        forgejo.addReviewers(1, ['me', 'you', 'org/team']),
-      ).toResolve();
+      await expect(forgejo.addReviewers(1, ['me', 'you', 'team'])).toResolve();
+
+      expect(logger.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('should assign user reviewers', async () => {
+      const scope = httpMock
+        .scope('https://code.forgejo.org/api/v1')
+        .post('/repos/some/repo/pulls/1/requested_reviewers', {
+          reviewers: ['me', 'you'],
+        })
+        .reply(200);
+      await initFakePlatform(scope);
+      await initFakeRepo(scope, undefined, undefined, 404);
+
+      await expect(forgejo.addReviewers(1, ['me', 'you'])).toResolve();
 
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
@@ -2890,13 +2985,14 @@ describe('modules/platform/forgejo/index', () => {
     it('catches errors', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
+        .get('/orgs/some/teams')
+        .reply(503)
         .post('/repos/some/repo/pulls/1/requested_reviewers', {
           reviewers: ['me', 'you'],
         })
         .replyWithError('unknown');
       await initFakePlatform(scope);
       await initFakeRepo(scope);
-      ///
       await expect(forgejo.addReviewers(1, ['me', 'you'])).toResolve();
 
       expect(logger.logger.warn).toHaveBeenCalledWith(

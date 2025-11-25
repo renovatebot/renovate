@@ -15,12 +15,14 @@ import {
   getCurrentUser,
   getIssue,
   getOrgLabels,
+  getOrgTeams,
   getPR,
   getPRByBranch,
   getRepo,
   getRepoContents,
   getRepoLabels,
   getVersion,
+  isOrg,
   mergePR,
   orgListRepos,
   requestPrReviewers,
@@ -212,6 +214,24 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
       const res = await getVersion();
 
       expect(res).toEqual(version);
+    });
+  });
+
+  describe('isOrg', () => {
+    it('should call /api/v1/orgs/[org] endpoint', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(`/orgs/${mockRepo.owner.username}`)
+        .reply(200, {})
+        .get(`/orgs/user`)
+        .reply(404)
+        .get(`/orgs/error`)
+        .reply(503);
+      expect(await isOrg(mockRepo.owner.username)).toEqual(true);
+      // uses cached result
+      expect(await isOrg(mockRepo.owner.username)).toEqual(true);
+      expect(await isOrg('user')).toEqual(false);
+      await expect(isOrg('error')).rejects.toThrow();
     });
   });
 
@@ -643,6 +663,22 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
       await expect(
         unassignLabel(mockRepo.full_name, mockIssue.number, mockLabel.id),
       ).toResolve();
+    });
+  });
+
+  describe('getOrgTeams', () => {
+    it('should call /api/v1/orgs/[org]/teams endpoint', async () => {
+      const teams = [
+        { id: 1, name: 'team-one' },
+        { id: 2, name: 'team-two' },
+      ];
+      httpMock
+        .scope(baseUrl)
+        .get(`/orgs/${mockRepo.owner.username}/teams`)
+        .reply(200, teams);
+
+      const res = await getOrgTeams(mockRepo.owner.username);
+      expect(res).toEqual(teams);
     });
   });
 
