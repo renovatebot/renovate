@@ -15,225 +15,242 @@ In core caching, only TTL overrides are applied; use `setWithRawTtl` to bypass t
 
 The `@cache` decorator orchestrates the retrieval flow.
 
-### Scenario 1: L1 Memory Cache Hit
+### Scenario 1: L1 hit (memory)
 
 The fastest path - data is already in memory.
 
 ```mermaid
 sequenceDiagram
     participant C as Caller
-    participant D as @cache Decorator
-    participant M as Memory (L1)
+    participant D as Decorated method <br/>(via @cache)
+    participant L1 as Memory
 
     C->>D: Call decorated method
-    D->>M: Check key
-    M-->>D: Cache hit
-    D-->>C: Return cached value
+    D->>L1: Check key
+    L1->>D: L1 hit
+    D->>C: Return cached value
 ```
 
-### Scenario 2: L2 Cache Hit (Fresh)
+### Scenario 2: L2 hit (fresh in storage)
 
 Data is not in memory but exists in backend storage and is still fresh (within Soft TTL).
 
 ```mermaid
 sequenceDiagram
     participant C as Caller
-    participant D as @cache Decorator
-    participant M as Memory (L1)
-    participant B as Backend (L2)
+    participant D as Decorated method <br/>(via @cache)
     participant X as Mutex
+    participant L1 as Memory
+    participant L2 as Backend
 
     C->>D: Call decorated method
-    D->>M: Check key
-    M-->>D: Miss
+    D->>L1: Check key
+    L1->>D: L1 miss
 
-    D->>X: Acquire lock (namespace:key)
-    Note over D,X: Prevents duplicate fetches
+    D-->>X: Request lock (based on namespace + key)
+    rect rgba(150, 100, 200, 0.15)
+        X-->>D: Receive lock
+        D->>L1: Check key again
+        L1->>D: Still L1 miss
 
-    D->>M: Check key again
-    M-->>D: Still miss
-
-    D->>B: Get cached record
-    B-->>D: Return value (within Soft TTL)
-    D->>M: Store in L1
-    X->>D: Release lock
-    D-->>C: Return value
+        D->>L2: Get cached record
+        L2->>D: L2 hit
+        D->>L1: Store in L1
+        D-->>X: Release lock
+    end
+    D->>C: Return value
 ```
 
-### Scenario 3: L2 Cache Hit (Stale) - Only for getReleases/getDigest
+### Scenario 3: L2 hit (stale in storage)
 
-Data has expired Soft TTL but is within Hard TTL. Attempts to refresh but falls back if upstream fails.
+**NOTE:** This is only works for `getReleases`/`getDigest` methods.
+Data has expired Soft TTL but is within Hard TTL. Attempts to refresh but falls back if callback fails.
 
 ```mermaid
 sequenceDiagram
     participant C as Caller
-    participant D as @cache Decorator
-    participant M as Memory (L1)
-    participant B as Backend (L2)
-    participant U as Upstream
+    participant D as Decorated method <br/>(via @cache)
     participant X as Mutex
+    participant L1 as Memory
+    participant L2 as Backend
+    participant U as Original method <br/>(callback)
 
     C->>D: Call getReleases/getDigest
-    D->>M: Check key
-    M-->>D: Miss
+    D->>L1: Check key
+    L1->>D: L1 miss
 
-    D->>X: Acquire lock
-    D->>M: Check key again
-    M-->>D: Still miss
+    D-->>X: Request lock
+    rect rgba(150, 100, 200, 0.15)
+        X-->>D: Receive lock
+        D->>L1: Check key again
+        L1->>D: Still L1 miss
 
-    D->>B: Get cached record
-    B-->>D: Return stale value<br/>(Soft TTL expired, Hard TTL valid)
+        D->>L2: Get cached record
+        L2->>D: L2 hit
 
-    D->>U: Try to fetch fresh data
-    alt Upstream Success
-        U-->>D: New value
-        D->>B: Update cache with new TTL
-        D->>M: Store in L1
-        D-->>C: Return new value
-    else Upstream Error
-        U-->>D: Error
-        Note over D: Fallback to stale
-        D->>M: Store stale in L1
-        D-->>C: Return stale value
+        D->>U: Try to fetch fresh data
+        alt Upstream Success
+            U->>D: New value
+            D->>L2: Update cache with new TTL
+            D->>L1: Store in L1
+        else Upstream Error
+            U->>D: Error
+            Note over D: Fallback to <br/>stale value
+        end
+        D-->>X: Release lock
     end
-    X->>D: Release lock
+    D->>C: Return value
 ```
 
-### Scenario 4: L2 Cache Miss
+### Scenario 4: L2 miss
 
 No cached data exists or Hard TTL has expired.
 
 ```mermaid
 sequenceDiagram
     participant C as Caller
-    participant D as @cache Decorator
-    participant M as Memory (L1)
-    participant B as Backend (L2)
-    participant U as Upstream
+    participant D as Decorated method <br/>(via @cache)
     participant X as Mutex
+    participant L1 as Memory
+    participant L2 as Backend
+    participant U as Original method <br/>(callback)
 
     C->>D: Call decorated method
-    D->>M: Check key
-    M-->>D: Miss
+    D->>L1: Check key
+    L1->>D: L1 miss
 
-    D->>X: Acquire lock
-    D->>M: Check key again
-    M-->>D: Still miss
+    D-->>X: Request lock
+    rect rgba(150, 100, 200, 0.15)
+        X-->>D: Receive lock
+        D->>L1: Check key again
+        L1->>D: Still L1 miss
 
-    D->>B: Get cached record
-    B-->>D: Miss or expired
+        D->>L2: Get cached record
+        L2->>D: L2 miss
 
-    D->>U: Fetch from upstream
-    U-->>D: Return value
+        D->>U: Fetch from upstream
+        U->>D: Return value
 
-    D->>B: Store with Hard TTL
-    D->>M: Store in L1
-    X->>D: Release lock
-    D-->>C: Return value
+        D->>L2: Store with Hard TTL
+        D->>L1: Store in L1
+        D-->>X: Release lock
+    end
+    D->>C: Return value
 ```
 
-### Scenario 5: Non-Cacheable Items
+### Scenario 5: Private packages
 
-When `cacheable()` returns false, only memory caching is used (unless `cachePrivatePackages` is true).
+When `cacheable()` returns false, only memory caching is used (which is reset after Renovate run). Setting `cachePrivatePackages` forces persistence of private packages (available to self-hosted users).
 
 ```mermaid
 sequenceDiagram
     participant C as Caller
-    participant D as @cache Decorator
-    participant M as Memory (L1)
-    participant U as Upstream
+    participant D as Decorated method <br/>(via @cache)
     participant X as Mutex
+    participant L1 as Memory
+    participant U as Original method <br/>(callback)
 
     C->>D: Call decorated method
-    D->>M: Check key
-    M-->>D: Miss
+    D->>L1: Check key
+    L1->>D: L1 miss
 
-    D->>X: Acquire lock
-    D->>M: Check key again
-    M-->>D: Still miss
+    D-->>X: Request lock
+    rect rgba(150, 100, 200, 0.15)
+        X-->>D: Receive lock
+        D->>L1: Check key again
+        L1->>D: Still L1 miss
 
-    Note over D: Check cacheable()<br/>cacheable() = false<br/>cachePrivatePackages = false
+        Note over D: Check cacheable()<br/>cacheable() = false<br/>cachePrivatePackages = false
 
-    D->>U: Fetch from upstream (skip backend)
-    U-->>D: Return value
+        D->>U: Fetch from upstream (skip backend)
+        U->>D: Return value
 
-    D->>M: Store in L1 only
-    X->>D: Release lock
-    D-->>C: Return value
+        D->>L1: Store in L1 only
+        D-->>X: Release lock
+    end
+    D->>C: Return value
 ```
 
 ### Scenario 6: Concurrent Access (Race Protection)
 
-Multiple concurrent calls for the same key - mutex ensures only one upstream fetch.
+Multiple concurrent calls for the same key - mutex ensures only one fetch. In this context, upstream is represented by both L2 and the original method (calling the actual external service).
 
 ```mermaid
 sequenceDiagram
     participant C1 as Caller 1
     participant C2 as Caller 2
-    participant D as @cache Decorator
-    participant M as Memory (L1)
+    participant D as Decorated method <br/>(via @cache)
     participant X as Mutex
+    participant L1 as Memory
     participant U as Upstream
 
     C1->>D: Call method
     C2->>D: Call method (concurrent)
 
-    D->>M: Check key (C1)
-    D->>M: Check key (C2)
-    M-->>D: Miss (both)
+    D->>L1: Check key (C1)
+    D->>L1: Check key (C2)
+    L1->>D: L1 miss (both)
 
-    D->>X: C1 acquires lock
-    D->>X: C2 waits for lock
+    D-->>X: C1 requests lock
+    D-->>X: C2 requests lock
+    Note over C2: C2 waits
 
-    Note over C1,X: C1 has lock
-    D->>M: C1 checks again
-    M-->>D: Still miss
-    D->>U: C1 fetches from upstream
-    U-->>D: Return value
-    D->>M: C1 stores in L1
-    X->>D: C1 releases lock
-    D-->>C1: Return value
+    rect rgba(150, 100, 200, 0.15)
+        X-->>D: C1 receives lock
+        D->>L1: C1 checks again
+        L1->>D: Still L1 miss
+        D->>U: C1 fetches from upstream
+        U->>D: Return value
+        D->>L1: C1 stores in L1
+        D-->>X: C1 releases lock
+    end
+    D->>C1: Return value
 
-    Note over C2,X: C2 gets lock
-    D->>M: C2 checks again
-    M-->>D: Hit! (C1 stored it)
-    X->>D: C2 releases lock
-    D-->>C2: Return cached value
+    rect rgba(150, 100, 200, 0.15)
+        X-->>D: C2 receives lock
+        D->>L1: C2 checks again
+        L1->>D: L1 hit
+        D-->>X: C2 releases lock
+    end
+    D->>C2: Return cached value
 ```
 
-### Scenario 7: Upstream Error (No Fallback)
+### Scenario 7: Decorated method throws
 
-When upstream fails and no cached data exists to fall back on.
+When callback fails and no cached data exists to fall back on.
 
 ```mermaid
 sequenceDiagram
     participant C as Caller
-    participant D as @cache Decorator
-    participant M as Memory (L1)
-    participant B as Backend (L2)
-    participant U as Upstream
+    participant D as Decorated method <br/>(via @cache)
     participant X as Mutex
+    participant L1 as Memory
+    participant L2 as Backend
+    participant U as Original method <br/>(callback)
 
     C->>D: Call decorated method
-    D->>M: Check key
-    M-->>D: Miss
+    D->>L1: Check key
+    L1->>D: L1 miss
 
-    D->>X: Acquire lock
-    D->>M: Check key again
-    M-->>D: Still miss
+    D-->>X: Request lock
+    rect rgba(150, 100, 200, 0.15)
+        X-->>D: Receive lock
+        D->>L1: Check key again
+        L1->>D: Still L1 miss
 
-    D->>B: Get cached record
-    B-->>D: No cached data
+        D->>L2: Get cached record
+        L2->>D: L2 miss
 
-    D->>U: Fetch from upstream
-    U-->>D: Error!
+        D->>U: Fetch from upstream
+        U->>D: Error
 
-    Note over D: No fallback available
-    X->>D: Release lock
-    D-->>C: Throw error
+        Note over D: No fallback available
+        D-->>X: Release lock
+    end
+    D->>C: Throw error
 ```
 
-### Scenario 8: Special Values (`undefined` vs `null`)
+### Scenario 8: Decorated method returns special values (`undefined` or `null`)
 
 - **`undefined`**: Cached in Memory (L1) but **never persisted** to Backend (L2). Treated as a transient failure that should be retried on the next run.
 - **`null`**: Cached in both L1 and L2 (if `cacheable` returns true). Treated as a valid result (e.g., "package not found").
@@ -243,31 +260,34 @@ The diagram below illustrates the `undefined` flow:
 ```mermaid
 sequenceDiagram
     participant C as Caller
-    participant D as @cache Decorator
-    participant M as Memory (L1)
-    participant U as Upstream
+    participant D as Decorated method <br/>(via @cache)
     participant X as Mutex
+    participant L1 as Memory
+    participant U as Original method <br/>(callback)
 
     C->>D: Call decorated method
-    D->>M: Check key
-    M-->>D: Miss
+    D->>L1: Check key
+    L1->>D: Miss
 
-    D->>X: Acquire lock
-    D->>M: Check key again
-    M-->>D: Still miss
+    D-->>X: Request lock
+    rect rgba(150, 100, 200, 0.15)
+        X-->>D: Receive lock
+        D->>L1: Check key again
+        L1->>D: Still miss
 
-    D->>U: Execute callback
-    U-->>D: Return undefined
+        D->>U: Execute callback
+        U->>D: Return undefined
 
-    D->>M: Store in L1 only
-    Note over D: undefined not persisted to L2
-    X->>D: Release lock
-    D-->>C: Return undefined
+        D->>L1: Store in L1 only
+        Note over D: undefined not persisted to L2
+        D-->>X: Release lock
+    end
+    D->>C: Return undefined
 
     C->>D: Call again
-    D->>M: Check key
-    M-->>D: Hit in memory
-    D-->>C: Return undefined (no upstream call)
+    D->>L1: Check key
+    L1->>D: L1 hit
+    D->>C: Return undefined (no upstream call)
 ```
 
 ## Usage
@@ -286,7 +306,7 @@ class MyDatasource {
     cacheable: (result) => result !== null,
   })
   async getTags(pkgName: string): Promise<string[]> {
-    // Expensive upstream call
+    // Expensive call to external source
   }
 }
 ```
@@ -308,10 +328,10 @@ The `cacheable` parameter **only controls persistence (L2)**.
 
 ## TTL Strategy (Soft vs. Hard)
 
-Renovate uses a dual-TTL system to handle upstream instability.
+Renovate uses a dual-TTL system to handle external source instability.
 
 1. **Soft TTL (`ttlMinutes`):** Period where data is considered "fresh". Returned immediately without network calls.
-2. **Hard TTL:** Period where data is physically retained on disk. Used for fallback if upstream fails.
+2. **Hard TTL:** Period where data is physically retained on disk. Used for fallback if callback fails.
 
 **Important:** The Stale-While-Revalidate (Hard TTL) logic is **only active** for methods named:
 
@@ -350,6 +370,6 @@ Users can override Soft TTLs via `config.js`. The resolution uses **Longest Matc
 
 Backend is selected at startup based on environment and config (checked in order):
 
-1. **Redis:** Enabled if `redisUrl` is configured ([docs](https://docs.renovatebot.com/self-hosted-configuration/#redisurl), env: `RENOVATE_REDIS_URL`, CLI: `--redis-url`).
+1. **Redis:** Enabled if `redisUrl` is configured (via env or CLI, see [docs](https://docs.renovatebot.com/self-hosted-configuration/#redisurl)).
 2. **SQLite:** Enabled if `RENOVATE_X_SQLITE_PACKAGE_CACHE=true` and `cacheDir` is available.
-3. **File:** Default fallback. Uses `cacache` with `gzip` in `cacheDir` ([docs](https://docs.renovatebot.com/self-hosted-configuration/#cachedir), env: `RENOVATE_CACHE_DIR`, CLI: `--cache-dir`).
+3. **File:** Default fallback. Uses `cacache` with `gzip` in `cacheDir` (via env or CLI, see [docs](https://docs.renovatebot.com/self-hosted-configuration/#cachedir)).
