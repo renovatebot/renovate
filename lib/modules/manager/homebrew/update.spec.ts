@@ -26,13 +26,19 @@ describe('modules/manager/homebrew/update', () => {
       .scope(baseUrl)
       .get('/aide/aide/releases/download/v0.17.7/aide-0.17.7.tar.gz')
       .reply(200, Readable.from(['foo']));
+
     const newContent = await updateDependency({
       fileContent: aide,
       upgrade,
     });
-    expect(newContent).not.toBeNull();
+
     expect(newContent).not.toBe(aide);
-    expect(newContent).toMatchSnapshot();
+    expect(newContent).toContain(
+      'https://github.com/aide/aide/releases/download/v0.17.7/aide-0.17.7.tar.gz',
+    );
+    expect(newContent).toContain(
+      '2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae',
+    );
   });
 
   it('updates "archive" github dependency', async () => {
@@ -54,16 +60,29 @@ describe('modules/manager/homebrew/update', () => {
         '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
       )
       .reply(200, Readable.from(['foo']));
+
     const newContent = await updateDependency({
       fileContent: ibazel,
       upgrade,
     });
-    expect(newContent).not.toBeNull();
+
     expect(newContent).not.toBe(ibazel);
-    expect(newContent).toMatchSnapshot();
+    expect(newContent).toContain(
+      'https://github.com/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
+    );
+    expect(newContent).toContain(
+      '2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae',
+    );
   });
 
   it('updates "archive" github dependency from old url format', async () => {
+    const oldArchiveFormat = `class Ibazel < Formula
+  desc 'IBazel is a tool for building Bazel targets when source files change.'
+  homepage 'https://github.com/bazelbuild/bazel-watcher'
+  url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
+  sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+end`;
+
     const upgrade = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
@@ -82,13 +101,19 @@ describe('modules/manager/homebrew/update', () => {
         '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
       )
       .reply(200, Readable.from(['foo']));
+
     const newContent = await updateDependency({
-      fileContent: ibazel,
+      fileContent: oldArchiveFormat,
       upgrade,
     });
-    expect(newContent).not.toBeNull();
-    expect(newContent).not.toBe(ibazel);
-    expect(newContent).toMatchSnapshot();
+
+    expect(newContent).not.toBe(oldArchiveFormat);
+    expect(newContent).toContain(
+      'https://github.com/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
+    );
+    expect(newContent).toContain(
+      '2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae',
+    );
   });
 
   it('returns unchanged content if fromStream promise rejects', async () => {
@@ -112,16 +137,16 @@ describe('modules/manager/homebrew/update', () => {
       .replyWithError('')
       .get('/bazelbuild/bazel-watcher/archive/refs/tags/v0.9.3.tar.gz')
       .replyWithError('');
+
     const newContent = await updateDependency({
       fileContent: ibazel,
       upgrade,
     });
-    expect(newContent).not.toBeNull();
+
     expect(newContent).toBe(ibazel);
   });
 
   it('returns unchanged content if url field in upgrade object is invalid', async () => {
-    const content = ibazel;
     const upgrade = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
@@ -134,16 +159,16 @@ describe('modules/manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
+
     const newContent = await updateDependency({
-      fileContent: content,
+      fileContent: ibazel,
       upgrade,
     });
-    expect(newContent).not.toBeNull();
-    expect(newContent).toBe(content);
+
+    expect(newContent).toBe(ibazel);
   });
 
   it('returns unchanged content if repoName in upgrade object is invalid', async () => {
-    const content = ibazel;
     const upgrade = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
@@ -164,16 +189,16 @@ describe('modules/manager/homebrew/update', () => {
       .replyWithError('')
       .get('/bazelbuild/invalid/repo/name/archive/refs/tags/v0.9.3.tar.gz')
       .reply(200, Readable.from(['foo']));
+
     const newContent = await updateDependency({
-      fileContent: content,
+      fileContent: ibazel,
       upgrade,
     });
-    expect(newContent).not.toBeNull();
-    expect(newContent).toBe(content);
+
+    expect(newContent).toBe(ibazel);
   });
 
   it('returns unchanged content if repoName in upgrade object is wrong', async () => {
-    const content = ibazel;
     const upgrade = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
@@ -196,23 +221,23 @@ describe('modules/manager/homebrew/update', () => {
         '/bazelbuild/wrong-version/archive/refs/tags/v10.2.3.tar.gz/archive/refs/tags/v0.9.3.tar.gz',
       )
       .reply(200, Readable.from(['foo']));
+
     const newContent = await updateDependency({
-      fileContent: content,
+      fileContent: ibazel,
       upgrade,
     });
-    expect(newContent).not.toBeNull();
-    expect(newContent).toBe(content);
+
+    expect(newContent).toBe(ibazel);
   });
 
   it('returns unchanged content if url field in Formula file is invalid', async () => {
-    const content = `
-          class Ibazel < Formula
-          desc 'IBazel is a tool for building Bazel targets when source files change.'
-          homepage 'https://github.com/bazelbuild/bazel-watcher'
-          url ???https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
-          sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-          end
-      `;
+    const invalidUrlFormula = `class Ibazel < Formula
+  desc 'IBazel is a tool for building Bazel targets when source files change.'
+  homepage 'https://github.com/bazelbuild/bazel-watcher'
+  url ???https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+  sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+end`;
+
     const upgrade = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
@@ -231,22 +256,22 @@ describe('modules/manager/homebrew/update', () => {
         '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
       )
       .reply(200, Readable.from(['foo']));
+
     const newContent = await updateDependency({
-      fileContent: content,
+      fileContent: invalidUrlFormula,
       upgrade,
     });
-    expect(newContent).not.toBeNull();
-    expect(newContent).toBe(content);
+
+    expect(newContent).toBe(invalidUrlFormula);
   });
 
   it('returns unchanged content if url field in Formula file is missing', async () => {
-    const content = `
-          class Ibazel < Formula
-          desc 'IBazel is a tool for building Bazel targets when source files change.'
-          homepage 'https://github.com/bazelbuild/bazel-watcher'
-          sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-          end
-      `;
+    const missingUrlFormula = `class Ibazel < Formula
+  desc 'IBazel is a tool for building Bazel targets when source files change.'
+  homepage 'https://github.com/bazelbuild/bazel-watcher'
+  sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+end`;
+
     const upgrade = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
@@ -265,23 +290,23 @@ describe('modules/manager/homebrew/update', () => {
         '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
       )
       .reply(200, Readable.from(['foo']));
+
     const newContent = await updateDependency({
-      fileContent: content,
+      fileContent: missingUrlFormula,
       upgrade,
     });
-    expect(newContent).not.toBeNull();
-    expect(newContent).toBe(content);
+
+    expect(newContent).toBe(missingUrlFormula);
   });
 
   it('returns unchanged content if sha256 field in Formula file is invalid', async () => {
-    const content = `
-          class Ibazel < Formula
-          desc 'IBazel is a tool for building Bazel targets when source files change.'
-          homepage 'https://github.com/bazelbuild/bazel-watcher'
-          url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
-          sha256 ???26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-          end
-      `;
+    const invalidSha256Formula = `class Ibazel < Formula
+  desc 'IBazel is a tool for building Bazel targets when source files change.'
+  homepage 'https://github.com/bazelbuild/bazel-watcher'
+  url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+  sha256 ???26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+end`;
+
     const upgrade = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
@@ -300,22 +325,22 @@ describe('modules/manager/homebrew/update', () => {
         '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
       )
       .reply(200, Readable.from(['foo']));
+
     const newContent = await updateDependency({
-      fileContent: content,
+      fileContent: invalidSha256Formula,
       upgrade,
     });
-    expect(newContent).not.toBeNull();
-    expect(newContent).toBe(content);
+
+    expect(newContent).toBe(invalidSha256Formula);
   });
 
   it('returns unchanged content if sha256 field in Formula file is missing', async () => {
-    const content = `
-          class Ibazel < Formula
-          desc 'IBazel is a tool for building Bazel targets when source files change.'
-          homepage 'https://github.com/bazelbuild/bazel-watcher'
-          url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
-          end
-      `;
+    const missingSha256Formula = `class Ibazel < Formula
+  desc 'IBazel is a tool for building Bazel targets when source files change.'
+  homepage 'https://github.com/bazelbuild/bazel-watcher'
+  url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+end`;
+
     const upgrade = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
@@ -334,12 +359,13 @@ describe('modules/manager/homebrew/update', () => {
         '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
       )
       .reply(200, Readable.from(['foo']));
+
     const newContent = await updateDependency({
-      fileContent: content,
+      fileContent: missingSha256Formula,
       upgrade,
     });
-    expect(newContent).not.toBeNull();
-    expect(newContent).toBe(content);
+
+    expect(newContent).toBe(missingSha256Formula);
   });
 
   it('returns unchanged content if both got requests fail', async () => {
@@ -361,12 +387,12 @@ describe('modules/manager/homebrew/update', () => {
       .replyWithError('')
       .get('/aide/aide/archive/refs/tags/v0.17.7.tar.gz')
       .replyWithError('');
+
     const newContent = await updateDependency({
       fileContent: aide,
       upgrade,
     });
-    expect(newContent).not.toBeNull();
+
     expect(newContent).toBe(aide);
-    expect(newContent).toMatchSnapshot();
   });
 });
