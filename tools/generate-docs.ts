@@ -11,6 +11,7 @@ process.on('unhandledRejection', (err) => {
 const program = new Command('pnpm build:docs')
   .description('Generate docs')
   .option('--mkdocs', 'generate docs for mkdocs')
+  .option('--version <version>', 'the current version of the Renovate CLI')
   .action(async (opts) => {
     if (opts.mkdocs) {
       logger.info('Generating for mkdocs');
