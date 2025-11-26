@@ -178,6 +178,7 @@ export interface RepoGlobalConfig {
   cachePrivatePackages?: boolean;
   configFileNames?: string[];
   ignorePrAuthor?: boolean;
+  allowedUnsafeExecutions?: AllowedUnsafeExecution[];
 }
 
 export interface LegacyAdminConfig {
@@ -409,6 +410,10 @@ export type MergeStrategy =
   | 'rebase'
   | 'rebase-merge'
   | 'squash';
+
+// ref: https://github.com/renovatebot/renovate/issues/39458
+// This list should be added to as any new unsafe execution commands should be permitted
+export type AllowedUnsafeExecution = 'goGenerate' | 'gradlewExecution';
 
 // TODO: Proper typings
 export interface PackageRule

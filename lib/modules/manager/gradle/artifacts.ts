@@ -1,6 +1,7 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
+import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -242,8 +243,17 @@ export async function updateArtifacts({
     }
 
     await writeLocalFile(packageFileName, newPackageFileContent);
-    await exec(cmds, { ...execOptions, ignoreStdout: true });
 
+    if (
+      !GlobalConfig.get('allowedUnsafeExecutions')?.includes('gradlewExecution')
+    ) {
+      logger.info(
+        'Skipping gradlew update commands as gradlewExecution is not set in allowedUnsafeExecutions',
+      );
+      return null;
+    }
+
+    await exec(cmds, { ...execOptions, ignoreStdout: true });
     const res = await getUpdatedLockfiles(oldLockFileContentMap);
     logger.debug('Returning updated Gradle dependency lockfiles');
 
