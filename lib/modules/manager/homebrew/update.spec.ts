@@ -1,4 +1,5 @@
 import { Readable } from 'node:stream';
+import { codeBlock } from 'common-tags';
 import { updateDependency } from '.';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
@@ -76,7 +77,7 @@ describe('modules/manager/homebrew/update', () => {
   });
 
   it('updates "archive" github dependency from old url format', async () => {
-    const oldArchiveFormat = `class Ibazel < Formula
+    const oldArchiveFormat = codeBlock`class Ibazel < Formula
   desc 'IBazel is a tool for building Bazel targets when source files change.'
   homepage 'https://github.com/bazelbuild/bazel-watcher'
   url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
@@ -231,7 +232,7 @@ end`;
   });
 
   it('returns unchanged content if url field in Formula file is invalid', async () => {
-    const invalidUrlFormula = `class Ibazel < Formula
+    const invalidUrlFormula = codeBlock`class Ibazel < Formula
   desc 'IBazel is a tool for building Bazel targets when source files change.'
   homepage 'https://github.com/bazelbuild/bazel-watcher'
   url ???https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
@@ -266,7 +267,7 @@ end`;
   });
 
   it('returns unchanged content if url field in Formula file is missing', async () => {
-    const missingUrlFormula = `class Ibazel < Formula
+    const missingUrlFormula = codeBlock`class Ibazel < Formula
   desc 'IBazel is a tool for building Bazel targets when source files change.'
   homepage 'https://github.com/bazelbuild/bazel-watcher'
   sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
@@ -300,7 +301,7 @@ end`;
   });
 
   it('returns unchanged content if sha256 field in Formula file is invalid', async () => {
-    const invalidSha256Formula = `class Ibazel < Formula
+    const invalidSha256Formula = codeBlock`class Ibazel < Formula
   desc 'IBazel is a tool for building Bazel targets when source files change.'
   homepage 'https://github.com/bazelbuild/bazel-watcher'
   url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
@@ -335,7 +336,7 @@ end`;
   });
 
   it('returns unchanged content if sha256 field in Formula file is missing', async () => {
-    const missingSha256Formula = `class Ibazel < Formula
+    const missingSha256Formula = codeBlock`class Ibazel < Formula
   desc 'IBazel is a tool for building Bazel targets when source files change.'
   homepage 'https://github.com/bazelbuild/bazel-watcher'
   url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
