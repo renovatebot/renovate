@@ -244,15 +244,6 @@ export async function updateArtifacts({
 
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    if (
-      !GlobalConfig.get('allowedUnsafeExecutions')?.includes('gradlewExecution')
-    ) {
-      logger.info(
-        'Skipping gradlew update commands as gradlewExecution is not set in allowedUnsafeExecutions',
-      );
-      return null;
-    }
-
     await exec(cmds, { ...execOptions, ignoreStdout: true });
     const res = await getUpdatedLockfiles(oldLockFileContentMap);
     logger.debug('Returning updated Gradle dependency lockfiles');
