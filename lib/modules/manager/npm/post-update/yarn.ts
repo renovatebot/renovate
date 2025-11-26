@@ -77,10 +77,10 @@ export async function checkYarnrc(
         );
       }
     }
-    /* v8 ignore start -- needs test */
+    /* v8 ignore next -- needs test */
   } catch {
     // not found
-  } /* v8 ignore stop -- needs test */
+  }
   return { offlineMirror, yarnPath };
 }
 
@@ -291,13 +291,13 @@ export async function generateLockFile(
       // https://github.com/yarnpkg/berry/blob/20612e82d26ead5928cc27bf482bb8d62dde87d3/packages/yarnpkg-core/sources/Project.ts#L284.
       try {
         await writeLocalFile(lockFileName, '');
-        /* v8 ignore start -- needs test */
+        /* v8 ignore next -- needs test */
       } catch (err) {
         logger.debug(
           { err, lockFileName },
           'Error clearing `yarn.lock` for lock file maintenance',
         );
-      } /* v8 ignore stop -- needs test */
+      }
     }
 
     // Run the commands
@@ -305,7 +305,7 @@ export async function generateLockFile(
 
     // Read the result
     lockFile = await readLocalFile(lockFileName, 'utf8');
-    /* v8 ignore start -- needs test */
+    /* v8 ignore next -- needs test */
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
@@ -332,7 +332,7 @@ export async function generateLockFile(
       throw new ExternalHostError(err, NpmDatasource.id);
     }
     return { error: true, stderr: err.stderr, stdout: err.stdout };
-  } /* v8 ignore stop -- needs test */
+  }
   return { lockFile };
 }
 

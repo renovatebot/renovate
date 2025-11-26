@@ -276,7 +276,7 @@
 
 
     ```ts
-    /* v8 ignore next -- typescript strict null check */
+    /* v8 ignore if -- typescript strict null check */
     if (!url) {
       return null;
     }
