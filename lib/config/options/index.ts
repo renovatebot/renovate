@@ -2845,6 +2845,14 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'prBodyHeadingDefinitions',
+    description: 'Table header definitions to use in PR tables.',
+    type: 'object',
+    freeChoice: true,
+    mergeable: true,
+    default: {},
+  },
+  {
     name: 'prBodyColumns',
     description: 'List of columns to use in PR bodies.',
     type: 'array',
