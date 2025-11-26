@@ -66,7 +66,10 @@ async function lookup(
   }
 
   if (depConfig.enabled === false) {
-    logger.debug(`Dependency: ${depName!}, is disabled`);
+    logger.debug(
+      { packageFile: depConfig.packageFile },
+      `Dependency: ${depName!}, is disabled`,
+    );
     dep.skipReason = 'disabled';
     return Result.ok(dep);
   }
