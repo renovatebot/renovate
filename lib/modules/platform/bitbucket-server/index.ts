@@ -90,12 +90,12 @@ const defaults: {
   version: '0.0.0',
 };
 
-/* v8 ignore start */
+/* v8 ignore next */
 function updatePrVersion(pr: number, version: number): number {
   const res = Math.max(config.prVersions.get(pr) ?? 0, version);
   config.prVersions.set(pr, res);
   return res;
-} /* v8 ignore stop */
+}
 
 export async function initPlatform({
   endpoint,
@@ -205,10 +205,10 @@ export async function getRepos(): Promise<string[]> {
     const result = repos.map((repo) => `${repo.project.key}/${repo.slug}`);
     logger.debug({ result }, 'result of getRepos()');
     return result;
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.error({ err }, `bitbucket getRepos error`);
     throw err;
-  } /* v8 ignore stop */
+  }
 }
 
 export async function getRawFile(
@@ -308,7 +308,7 @@ export async function initRepo({
     };
 
     return repoConfig;
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
@@ -318,7 +318,7 @@ export async function initRepo({
 
     logger.debug({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
-  } /* v8 ignore stop */
+  }
 }
 
 export async function getBranchForceRebase(
@@ -374,7 +374,7 @@ export async function getPr(
 }
 
 // TODO: coverage (#9624)
-/* v8 ignore start */
+/* v8 ignore next */
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === 'all') {
     return true;
@@ -383,10 +383,10 @@ function matchesState(state: string, desiredState: string): boolean {
     return state !== desiredState.substring(1);
   }
   return state === desiredState;
-} /* v8 ignore stop */
+}
 
 // TODO: coverage (#9624)
-/* v8 ignore start */
+/* v8 ignore next */
 function isRelevantPr(
   branchName: string,
   prTitle: string | null | undefined,
@@ -396,7 +396,7 @@ function isRelevantPr(
     p.sourceBranch === branchName &&
     (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
     matchesState(p.state, state);
-} /* v8 ignore stop */
+}
 
 // TODO: coverage (#9624)
 export async function getPrList(): Promise<Pr[]> {
@@ -411,7 +411,7 @@ export async function getPrList(): Promise<Pr[]> {
 }
 
 // TODO: coverage (#9624)
-/* v8 ignore start */
+/* v8 ignore next */
 export async function findPr({
   branchName,
   prTitle,
@@ -455,7 +455,7 @@ export async function findPr({
     logger.debug(`Renovate did not find a PR for branch #${branchName}`);
   }
   return pr ?? null;
-} /* v8 ignore stop */
+}
 
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<BbsPr | null> {
@@ -467,13 +467,13 @@ export async function getBranchPr(branchName: string): Promise<BbsPr | null> {
   return existingPr ? getPr(existingPr.number) : null;
 }
 
-/* v8 ignore start */
+/* v8 ignore next */
 export async function refreshPr(number: number): Promise<void> {
   // wait for pr change propagation
   await setTimeout(1000);
   // refresh cache
   await getPr(number, true);
-} /* v8 ignore stop */
+}
 
 async function getStatus(
   branchName: string,
@@ -481,11 +481,10 @@ async function getStatus(
 ): Promise<utils.BitbucketCommitStatus> {
   const branchCommit = git.getBranchCommit(branchName);
 
-  /* v8 ignore start: temporary code */
+  /* v8 ignore next: temporary code */
   const opts: HttpOptions = memCache
     ? { cacheProvider: memCacheProvider }
     : { memCache: false };
-  /* v8 ignore stop */
 
   return (
     await bitbucketServerHttp.getJsonUnchecked<utils.BitbucketCommitStatus>(
@@ -534,13 +533,12 @@ async function getStatusCheck(
   const branchCommit = git.getBranchCommit(branchName);
 
   const opts: BitbucketServerHttpOptions = { paginate: true };
-  /* v8 ignore start: temporary code */
+  /* v8 ignore next: temporary code */
   if (memCache) {
     opts.cacheProvider = memCacheProvider;
   } else {
     opts.memCache = false;
   }
-  /* v8 ignore stop */
 
   return (
     await bitbucketServerHttp.getJsonUnchecked<utils.BitbucketStatus[]>(
@@ -632,7 +630,7 @@ export async function setBranchStatus({
 
 // Issue
 
-/* v8 ignore start */
+/* v8 ignore next */
 export function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
   // This is used by Renovate when creating its own issues,
@@ -641,9 +639,9 @@ export function findIssue(title: string): Promise<Issue | null> {
   //
   // Bitbucket Server does not have issues
   return Promise.resolve(null);
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
+/* v8 ignore next */
 export function ensureIssue({
   title,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
@@ -654,9 +652,9 @@ export function ensureIssue({
   //
   // Bitbucket Server does not have issues
   return Promise.resolve(null);
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
+/* v8 ignore next */
 export function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
   // This is used by Renovate when creating its own issues,
@@ -665,9 +663,9 @@ export function getIssueList(): Promise<Issue[]> {
   //
   // Bitbucket Server does not have issues
   return Promise.resolve([]);
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
+/* v8 ignore next */
 export function ensureIssueClosing(title: string): Promise<void> {
   logger.debug(`ensureIssueClosing(${title})`);
   // This is used by Renovate when creating its own issues,
@@ -676,7 +674,7 @@ export function ensureIssueClosing(title: string): Promise<void> {
   //
   // Bitbucket Server does not have issues
   return Promise.resolve();
-} /* v8 ignore stop */
+}
 
 export function addAssignees(iid: number, assignees: string[]): Promise<void> {
   logger.debug(`addAssignees(${iid}, [${assignees.join(', ')}])`);
@@ -956,10 +954,10 @@ export async function ensureComment({
       logger.debug('Comment is already update-to-date');
     }
     return true;
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.warn({ err }, 'Error ensuring comment');
     return false;
-  } /* v8 ignore stop */
+  }
 }
 
 export async function ensureCommentRemoval(
@@ -988,9 +986,9 @@ export async function ensureCommentRemoval(
     if (commentId) {
       await deleteComment(prNo, commentId);
     }
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.warn({ err }, 'Error ensuring comment removal');
-  } /* v8 ignore stop */
+  }
 }
 
 // Pull Request
@@ -1050,7 +1048,7 @@ export async function createPr({
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests`,
       { body },
     );
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     if (
       err.body?.errors?.[0]?.exceptionName ===
       'com.atlassian.bitbucket.pull.EmptyPullRequestException'
@@ -1062,7 +1060,7 @@ export async function createPr({
       throw new Error(REPOSITORY_CHANGED);
     }
     throw err;
-  } /* v8 ignore stop */
+  }
 
   const pr: BbsPr = {
     ...utils.prInfo(prInfoRes.body),

@@ -206,7 +206,6 @@ export function migrateConfig(
       };
     }
     return { isMigrated, migratedConfig };
-    /* v8 ignore next 4 -- TODO: add test */
   } catch (err) {
     logger.debug({ config, err }, 'migrateConfig() error');
     throw err;

@@ -42,7 +42,6 @@ export const presets: Record<string, Preset> = {
     npm: {
       minimumReleaseAge: '3 days',
       internalChecksFilter: 'strict',
-      prCreation: 'not-pending',
     },
     packageRules: [
       {

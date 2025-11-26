@@ -198,6 +198,7 @@ export async function postUpgradeCommandsExecutor(
         (ua) => ua.type === 'deletion',
       );
       for (const previouslyDeletedFile of previouslyDeletedFiles) {
+        /* v8 ignore if -- TODO: needs test */
         if (!changedFiles.includes(previouslyDeletedFile.path)) {
           logger.debug(
             { file: previouslyDeletedFile.path },
