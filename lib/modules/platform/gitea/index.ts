@@ -226,10 +226,10 @@ const platform: Platform = {
       botUserID = user.id;
       botUserName = user.username;
       const env = getEnv();
-      /* v8 ignore start: experimental feature */
+      /* v8 ignore next: experimental feature */
       if (semver.valid(env.RENOVATE_X_PLATFORM_VERSION)) {
         defaults.version = env.RENOVATE_X_PLATFORM_VERSION!;
-      } /* v8 ignore stop */ else {
+      } else {
         defaults.version = await helper.getVersion({ token });
       }
       if (defaults.version?.includes('gitea-')) {
@@ -792,10 +792,10 @@ const platform: Platform = {
         number,
         body,
       };
-    } catch (err) /* v8 ignore start */ {
+    } catch (err) /* v8 ignore next */ {
       logger.debug({ err, number }, 'Error getting issue');
       return null;
-    } /* v8 ignore stop */
+    }
   },
 
   async findIssue(title: string): Promise<Issue | null> {

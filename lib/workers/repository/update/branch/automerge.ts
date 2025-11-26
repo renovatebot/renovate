@@ -50,11 +50,13 @@ export async function tryBranchAutomerge(
       }
       logger.info({ branch: config.branchName }, 'Branch automerged');
       return 'automerged'; // Branch no longer exists
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) {
+      /* v8 ignore if -- TODO: needs test */
       if (err.message === 'not ready') {
         logger.debug('Branch is not ready for automerge');
         return 'not ready';
       }
+      /* v8 ignore if -- TODO: needs test */
       if (
         err.message.includes('refusing to merge unrelated histories') ||
         err.message.includes('Not possible to fast-forward') ||
@@ -66,6 +68,7 @@ export async function tryBranchAutomerge(
         logger.info('Branch is not up to date - cannot automerge');
         return 'stale';
       }
+      /* v8 ignore if -- TODO: needs test */
       if (err.message.includes('Protected branch')) {
         if (err.message.includes('status check')) {
           logger.debug(
