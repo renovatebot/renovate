@@ -23,6 +23,7 @@ export interface StorageConfig {
   upstreamUrl?: string | undefined;
   extraCloneOpts?: GitOptions;
   cloneSubmodules?: boolean;
+  cloneSubmodulesRecursive?: boolean;
   cloneSubmodulesFilter?: string[];
   fullClone?: boolean;
 }
