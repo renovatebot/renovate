@@ -657,6 +657,7 @@ export async function ensureIssue({
           `/2.0/repositories/${config.repository}/issues/${issue.id}`,
           {
             body: {
+              kind: 'task',
               content: {
                 raw: readOnlyIssueBody(description),
                 markup: 'markdown',
@@ -673,6 +674,7 @@ export async function ensureIssue({
         {
           body: {
             title,
+            kind: 'task',
             content: {
               raw: readOnlyIssueBody(description),
               markup: 'markdown',
