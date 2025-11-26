@@ -19,7 +19,6 @@ import {
 import type { Mocked, MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
-import { AZURE_POLICY_TYPES } from '../../../constants';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_NOT_FOUND,
@@ -1939,7 +1938,7 @@ describe('modules/platform/azure/index', () => {
                 isEnabled: true,
                 isBlocking: true,
                 type: {
-                  id: AZURE_POLICY_TYPES.MinimumNumberOfReviewers,
+                  id: 'some-policy-id',
                 },
               },
               status: PolicyEvaluationStatus.Rejected,
@@ -1950,7 +1949,7 @@ describe('modules/platform/azure/index', () => {
                 isEnabled: true,
                 isBlocking: true,
                 type: {
-                  id: AZURE_POLICY_TYPES.WorkItemLinking,
+                  id: 'another-policy-id',
                 },
               },
               status: PolicyEvaluationStatus.Rejected,
@@ -1968,10 +1967,7 @@ describe('modules/platform/azure/index', () => {
         id: pullRequestIdMock,
         strategy: 'auto',
         platformOptions: {
-          azureBypassPolicyTypes: [
-            'MinimumNumberOfReviewers',
-            '40e92b44-2fe1-4dd6-b3d8-74a9c21d0c6e',
-          ],
+          azureBypassPolicyTypes: ['some-policy-id', 'another-policy-id'],
         },
       });
 
@@ -1993,7 +1989,7 @@ describe('modules/platform/azure/index', () => {
       expect(res).toBeTrue();
     });
 
-    it('should not bypass policies if enabled but some policies did not pass', async () => {
+    it('should not bypass policies if not all non approved policies are bypassed', async () => {
       await initRepo({ repository: 'some/repo' });
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
@@ -2021,7 +2017,18 @@ describe('modules/platform/azure/index', () => {
                 isEnabled: true,
                 isBlocking: true,
                 type: {
-                  id: AZURE_POLICY_TYPES.Build,
+                  id: 'some-policy-id',
+                },
+              },
+              status: PolicyEvaluationStatus.Rejected,
+            },
+            {
+              configuration: {
+                settings: undefined,
+                isEnabled: true,
+                isBlocking: true,
+                type: {
+                  id: 'another-policy-id',
                 },
               },
               status: PolicyEvaluationStatus.Queued,
@@ -2039,7 +2046,7 @@ describe('modules/platform/azure/index', () => {
         id: pullRequestIdMock,
         strategy: 'auto',
         platformOptions: {
-          azureBypassPolicyTypes: [AZURE_POLICY_TYPES.RequiredReviewers],
+          azureBypassPolicyTypes: ['another-policy-id'],
         },
       });
 

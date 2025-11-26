@@ -1,5 +1,4 @@
 import type { MergeStrategy } from '../../config/types';
-import type { AzurePolicyType } from '../../constants';
 import type { BranchStatus, HostRule, VulnerabilityAlert } from '../../types';
 import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
 
@@ -107,7 +106,7 @@ export interface PlatformPrOptions {
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
-  azureBypassPolicyTypes?: AzurePolicyType[];
+  azureBypassPolicyTypes?: string[];
   azureBypassPolicyReason?: string;
 }
 export interface CreatePRConfig {

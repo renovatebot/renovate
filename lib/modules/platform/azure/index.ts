@@ -14,7 +14,6 @@ import {
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { PolicyEvaluationStatus } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
-import { AZURE_POLICY_TYPES } from '../../../constants';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -801,14 +800,9 @@ export async function mergePr({
 
   let bypassPolicy: boolean | undefined;
 
-  const bypassPolicyTypeUuids =
-    platformOptions?.azureBypassPolicyTypes?.map(
-      (policyType) =>
-        AZURE_POLICY_TYPES[policyType as keyof typeof AZURE_POLICY_TYPES] ??
-        policyType,
-    ) ?? [];
-
-  const bypassPolicyTypes = new Set<string>(bypassPolicyTypeUuids);
+  const bypassPolicyTypes = new Set<string>(
+    platformOptions?.azureBypassPolicyTypes ?? [],
+  );
 
   if (bypassPolicyTypes.size > 0) {
     const artifactId = `vstfs:///CodeReview/CodeReviewId/${config.project}/${pullRequestId}`;

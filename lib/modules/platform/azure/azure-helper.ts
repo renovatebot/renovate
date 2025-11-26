@@ -4,7 +4,6 @@ import type {
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import { AZURE_POLICY_TYPES } from '../../../constants';
 import { logger } from '../../../logger';
 import { streamToString } from '../../../util/streams';
 import { getNewBranchName } from '../util';
@@ -14,6 +13,8 @@ import {
   getBranchNameWithoutRefsPrefix,
   getBranchNameWithoutRefsheadsPrefix,
 } from './util';
+
+const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
 
 export async function getRefs(
   repoId: string,
@@ -151,11 +152,7 @@ export async function getMergeMethod(
   const policyConfigurations = (
     await (
       await azureApi.policyApi()
-    ).getPolicyConfigurations(
-      project,
-      undefined,
-      AZURE_POLICY_TYPES.RequireAMergeStrategy,
-    )
+    ).getPolicyConfigurations(project, undefined, mergePolicyGuid)
   )
     .filter((p) => p.settings.scope.some(isRelevantScope))
     .map((p) => p.settings)[0];
