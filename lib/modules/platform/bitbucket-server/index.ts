@@ -123,26 +123,23 @@ export async function initPlatform({
     endpoint: defaults.endpoint,
   };
   try {
-    let bitbucketServerVersion: string;
     const env = getEnv();
-    /* v8 ignore start: experimental feature */
-    if (env.RENOVATE_X_PLATFORM_VERSION) {
-      bitbucketServerVersion = env.RENOVATE_X_PLATFORM_VERSION;
-    } /* v8 ignore stop */ else {
-      const { body, headers } = await bitbucketServerHttp.getJsonUnchecked<{
-        version: string;
-      }>(`./rest/api/1.0/application-properties`, { ...(token && { token }) });
+    let bitbucketServerVersion = env.RENOVATE_X_PLATFORM_VERSION;
+    /* v8 ignore start */
+    const { body, headers } = await bitbucketServerHttp.getJsonUnchecked<{
+      version: string;
+    }>(`./rest/api/1.0/application-properties`, { ...(token && { token }) });
 
-      bitbucketServerVersion = body.version;
-      if (headers['x-ausername'] && !username) {
-        logger.debug(
-          { 'x-username': headers['x-ausername'] },
-          'Platform: No username configured using headers["x-ausername"]',
-        );
-        config.username = headers['x-ausername'];
-      }
-      logger.debug('Bitbucket Server version is: ' + bitbucketServerVersion);
+    bitbucketServerVersion ??= body.version;
+    if (headers['x-ausername'] && !username) {
+      logger.debug(
+        { 'x-username': headers['x-ausername'] },
+        'Platform: No username configured using headers["x-ausername"]',
+      );
+      config.username = headers['x-ausername'];
     }
+    logger.debug('Bitbucket Server version is: ' + bitbucketServerVersion);
+    /* v8 ignore stop */
 
     if (semver.valid(bitbucketServerVersion)) {
       defaults.version = bitbucketServerVersion;
