@@ -3083,6 +3083,8 @@ const options: RenovateOptions[] = [
     subType: 'string',
     allowedValues: ['gradlewExecution'],
     default: [],
+    stage: 'global',
+    globalOnly: true,
   },
   {
     name: 'gitNoVerify',
