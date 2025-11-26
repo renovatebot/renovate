@@ -70,6 +70,7 @@ export interface HttpOptions {
 
 export interface HttpHeaders extends IncomingHttpHeaders {
   link?: string | undefined;
+  'x-ausername'?: string; // bitbucket-server
 }
 
 export type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';

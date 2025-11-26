@@ -129,12 +129,18 @@ export async function initPlatform({
     if (env.RENOVATE_X_PLATFORM_VERSION) {
       bitbucketServerVersion = env.RENOVATE_X_PLATFORM_VERSION;
     } /* v8 ignore stop */ else {
-      const { version } = (
-        await bitbucketServerHttp.getJsonUnchecked<{ version: string }>(
-          `./rest/api/1.0/application-properties`,
-        )
-      ).body;
-      bitbucketServerVersion = version;
+      const { body, headers } = await bitbucketServerHttp.getJsonUnchecked<{
+        version: string;
+      }>(`./rest/api/1.0/application-properties`, { ...(token && { token }) });
+
+      bitbucketServerVersion = body.version;
+      if (headers['x-ausername'] && !username) {
+        logger.debug(
+          { 'x-username': headers['x-ausername'] },
+          'Platform: No username configured using headers["x-ausername"]',
+        );
+        config.username = headers['x-ausername'];
+      }
       logger.debug('Bitbucket Server version is: ' + bitbucketServerVersion);
     }
 
@@ -258,7 +264,7 @@ export async function initRepo({
     repositorySlug,
     repository,
     prVersions: new Map<number, number>(),
-    username: opts.username,
+    username: opts.username ?? config.username,
     ignorePrAuthor,
   } as any;
 
