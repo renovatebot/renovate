@@ -32,6 +32,7 @@ export class GlobalConfig {
     'gitTimeout',
     'httpCacheTtlDays',
     'ignorePrAuthor',
+    'includeMirrors',
     'localDir',
     'migratePresets',
     'platform',

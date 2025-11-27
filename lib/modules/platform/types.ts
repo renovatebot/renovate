@@ -48,7 +48,6 @@ export interface RepoParams {
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
   bbUseDevelopmentBranch?: boolean;
-  includeMirrors?: boolean;
 }
 
 export interface PrDebugData {
