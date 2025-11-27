@@ -15,10 +15,10 @@ const program = new Command('pnpm build:docs')
   .action(async (opts) => {
     if (opts.mkdocs) {
       logger.info('Generating for mkdocs');
-      await generateDocs('tools/mkdocs', false);
+      await generateDocs('tools/mkdocs', false, opts.version);
     } else {
       logger.info('Generating docs for testing');
-      await generateDocs();
+      await generateDocs(undefined, undefined, opts.version);
     }
     logger.info('Generation completed');
   });
