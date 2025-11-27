@@ -13,7 +13,6 @@ import { logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
 import { coerceArray } from '../../../util/array';
 import { parseJson } from '../../../util/common';
-import { getEnv } from '../../../util/env';
 import * as git from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -53,6 +52,10 @@ interface Config {
 
 export const id = 'codecommit';
 
+const platformConfig = {
+  endpoint: 'https://git-codecommit.us-east-1.amazonaws.com',
+};
+
 let config: Config = {} as any;
 
 export async function initPlatform({
@@ -63,7 +66,7 @@ export async function initPlatform({
 }: PlatformParams): Promise<PlatformResult> {
   const accessKeyId = username;
   const secretAccessKey = password;
-  const env = getEnv();
+  const env = process.env;
   let region: string | undefined;
 
   if (accessKeyId) {
@@ -92,17 +95,18 @@ export async function initPlatform({
   // To check if we have permission to codecommit, throws exception if failed.
   await client.listRepositories();
 
-  const platformConfig: PlatformResult = {
-    endpoint:
-      endpoint ??
-      `https://git-codecommit.${env.AWS_REGION ?? 'us-east-1'}.amazonaws.com/`,
+  platformConfig.endpoint =
+    endpoint ??
+    `https://git-codecommit.${env.AWS_REGION ?? 'us-east-1'}.amazonaws.com/`;
+
+  const platformResult: PlatformResult = {
+    endpoint: platformConfig.endpoint,
   };
-  return Promise.resolve(platformConfig);
+  return platformResult;
 }
 
 export async function initRepo({
   repository,
-  endpoint,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
 
@@ -143,7 +147,10 @@ export async function initRepo({
   logger.debug(`${repository} default branch = ${defaultBranch}`);
 
   return {
-    repoFingerprint: repoFingerprint(metadata.repositoryId, endpoint),
+    repoFingerprint: repoFingerprint(
+      metadata.repositoryId,
+      platformConfig.endpoint,
+    ),
     defaultBranch,
     isFork: false,
   };

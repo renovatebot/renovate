@@ -3,6 +3,7 @@ import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import ignore from 'ignore';
 import semver from 'semver';
 import type { PartialDeep } from 'type-fest';
+import { GlobalConfig } from '../../../config/global';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
@@ -244,7 +245,6 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   cloneSubmodulesFilter,
-  ignorePrAuthor,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${JSON.stringify({ repository }, null, 2)}")`);
@@ -260,8 +260,8 @@ export async function initRepo({
     repositorySlug,
     repository,
     prVersions: new Map<number, number>(),
-    username: opts.username ?? config.username,
-    ignorePrAuthor,
+    username: opts.username,
+    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor', false),
   } as any;
 
   try {
