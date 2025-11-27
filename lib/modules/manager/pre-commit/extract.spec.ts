@@ -128,7 +128,6 @@ describe('modules/manager/pre-commit/extract', () => {
             datasource: GoDatasource.id,
             depName: 'github.com/wasilibs/go-shellcheck/cmd/shellcheck',
             depType: 'pre-commit-golang',
-            packageName: 'github.com/wasilibs/go-shellcheck/cmd/shellcheck',
           },
           { depName: 'rhysd/actionlint', currentValue: 'v1.7.7' },
         ],

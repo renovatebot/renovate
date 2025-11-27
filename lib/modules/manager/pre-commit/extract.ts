@@ -191,7 +191,6 @@ function findDependencies(precommitFile: PreCommitConfig): PackageDependency[] {
               packageDependencies.push({
                 ...dep,
                 depType,
-                packageName: dep.depName,
               });
             }
           });

@@ -114,7 +114,6 @@ exports[`modules/manager/pre-commit/extract > extractPackageFile() > extracts fr
       "datasource": "go",
       "depName": "github.com/wasilibs/go-shellcheck/cmd/shellcheck",
       "depType": "pre-commit-golang",
-      "packageName": "github.com/wasilibs/go-shellcheck/cmd/shellcheck",
     },
     {
       "currentValue": "v1.7.7",
