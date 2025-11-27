@@ -11,7 +11,9 @@ export const supportsRanges = false;
 const validPattern = regEx(/^((\d|[1-9]\d*)(\.(\d|[1-9]\d*)){0,2})(.+)?$/);
 const versionPattern = regEx(/^((\d|[1-9]\d*)(\.(\d|[1-9]\d*)){2})(.+)?$/);
 const stablePattern = regEx(/^((\d|[1-9]\d*)(\.(\d|[1-9]\d*)){2})(\+.+)?$/);
+const prereleasePattern = regEx(/^[-+.]?(a|alpha|b|beta|rc|c)?(\d+)?(.*)$/);
 const rangeOperatorPattern = regEx(/^[~>^]/);
+
 const preReleaseOrder: Record<string, number> = {
   a: 1,
   alpha: 1,
@@ -46,7 +48,7 @@ class DevboxVersioningApi extends GenericVersioningApi {
   } {
     // Match patterns like: -alpha1, a1, rc3, +8, -beta.3, .5
     // This regex always matches due to all-optional groups and trailing (.*)
-    const match = /^[-+.]?(a|alpha|b|beta|rc|c)?(\d+)?(.*)$/.exec(suffix)!;
+    const match = prereleasePattern.exec(suffix)!;
     const type = match[1] || '';
     const num = match[2] ? parseInt(match[2]) : 0;
     const rest = match[3] || '';
@@ -132,6 +134,10 @@ class DevboxVersioningApi extends GenericVersioningApi {
     }
     // Reject versions with empty suffixes (e.g., '1.2.3-', '1.2.3.')
     if (regEx(/[-+.]$/).test(version)) {
+      return false;
+    }
+    // Reject versions with leading zeros
+    if (this._hasLeadingZero(version)) {
       return false;
     }
     const matches = versionPattern.exec(version);
