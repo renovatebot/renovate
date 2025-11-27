@@ -46,7 +46,7 @@ export class SbtPluginDatasource extends Datasource {
     const indexContent = await downloadHttpContent(this.http, pkgUrl);
     if (indexContent) {
       let artifactSubdirs = extractPageLinks(indexContent, (href) => {
-        const path = href.split('/').at(-1);
+        const path = href.split('/').at(-1)!;
         if (
           path.startsWith(`${artifact}_native`) ||
           path.startsWith(`${artifact}_sjs`)
@@ -85,7 +85,7 @@ export class SbtPluginDatasource extends Datasource {
         const content = await downloadHttpContent(this.http, pkgUrl);
         if (content) {
           const subdirReleases = extractPageLinks(content, (href) => {
-            const path = href.split('/').at(-1);
+            const path = href.split('/').at(-1)!;
             if (path.startsWith('.')) {
               return null;
             }
