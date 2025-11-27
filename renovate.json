@@ -91,6 +91,12 @@
       "description": "Mark major version bumps with the breaking label",
       "matchUpdateTypes": ["major"],
       "addLabels": ["breaking"]
+    },
+    {
+      "description": "Multiple major updates for got",
+      "matchDatasources": ["npm"],
+      "matchDepNames": ["got"],
+      "separateMultipleMajor": true
     }
   ],
   "customManagers": [
