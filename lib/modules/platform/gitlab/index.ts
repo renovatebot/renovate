@@ -2,6 +2,7 @@ import { setTimeout } from 'timers/promises';
 import { isArray } from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
+import { GlobalConfig } from '../../../config/global';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -262,7 +263,6 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   cloneSubmodulesFilter,
-  ignorePrAuthor,
   gitUrl,
   endpoint,
   includeMirrors,
@@ -271,7 +271,7 @@ export async function initRepo({
   config.repository = urlEscape(repository);
   config.cloneSubmodules = cloneSubmodules;
   config.cloneSubmodulesFilter = cloneSubmodulesFilter;
-  config.ignorePrAuthor = ignorePrAuthor;
+  config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
 
   let res: HttpResponse<RepoResponse>;
   try {
