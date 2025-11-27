@@ -17,6 +17,13 @@ export type RenovateConfigStage =
   | 'branch'
   | 'pr';
 
+export type RenovateSplit =
+  | 'init'
+  | 'onboarding'
+  | 'extract'
+  | 'lookup'
+  | 'update';
+
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export type RepositoryCacheType = 'local' | string;
