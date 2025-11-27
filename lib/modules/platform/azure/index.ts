@@ -13,6 +13,7 @@ import {
   GitVersionType,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type { PolicyConfigurationRef } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
 import { PolicyEvaluationStatus } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
 import {
   REPOSITORY_ARCHIVED,
@@ -798,7 +799,7 @@ export async function mergePr({
       ? await getMergeStrategy(pr.targetRefName!)
       : mapMergeStrategy(strategy);
 
-  let bypassPolicy: boolean | undefined;
+  const bypassedPolicies: PolicyConfigurationRef[] = [];
 
   const bypassPolicyTypes = new Set<string>(
     platformOptions?.azureBypassPolicyTypes ?? [],
@@ -812,16 +813,31 @@ export async function mergePr({
     );
 
     // only use bypass if all required policies are in approved state
-    bypassPolicy = policyEvaluations
-      .filter(
-        (policy) =>
-          policy.configuration?.isEnabled &&
-          policy.configuration.isBlocking &&
-          !bypassPolicyTypes.has(policy.configuration.type?.id ?? ''),
-      )
-      .every((policy) => policy.status === PolicyEvaluationStatus.Approved);
+    for (const policyEvaluation of policyEvaluations) {
+      if (
+        policyEvaluation.status === PolicyEvaluationStatus.Approved ||
+        policyEvaluation.status === PolicyEvaluationStatus.NotApplicable ||
+        policyEvaluation.configuration?.isEnabled !== true ||
+        policyEvaluation.configuration?.isBlocking !== true ||
+        !policyEvaluation.configuration?.type?.id
+      ) {
+        // policy does not require bypassing
+        continue;
+      }
+
+      if (bypassPolicyTypes.has(policyEvaluation.configuration.type.id)) {
+        bypassedPolicies.push(policyEvaluation.configuration);
+      } else {
+        logger.debug(
+          { policy: policyEvaluation },
+          'Policy prevents PR from auto-merge.',
+        );
+        return false;
+      }
+    }
   }
 
+  const bypassPolicy = bypassedPolicies.length > 0;
   const bypassReason = bypassPolicy
     ? (platformOptions?.azureBypassPolicyReason ?? 'Auto-merge by Renovate')
     : undefined;
@@ -839,6 +855,9 @@ export async function mergePr({
   };
 
   logger.trace(
+    {
+      bypassedPolicies,
+    },
     `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
       PullRequestStatus[PullRequestStatus.Completed]
     }) with lastMergeSourceCommit ${
