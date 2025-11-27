@@ -4,5 +4,5 @@ import type { RangeConfig } from '../types';
 export function getRangeStrategy({
   rangeStrategy,
 }: RangeConfig): RangeStrategy {
-  return rangeStrategy === 'auto' ? 'pin' : rangeStrategy;
+  return rangeStrategy === 'auto' ? 'pin' : rangeStrategy!;
 }

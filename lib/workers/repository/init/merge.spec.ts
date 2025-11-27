@@ -391,6 +391,7 @@ describe('workers/repository/init/merge', () => {
         await mergeRenovateConfig({
           ...config,
           requireConfig: 'ignored',
+          // @ts-expect-error -- TODO: do we still need this?
           configFileParsed: undefined,
           warnings: undefined,
           secrets: undefined,
@@ -637,7 +638,6 @@ describe('workers/repository/init/merge', () => {
           repoFileConfig: {},
           staticConfig: {},
           wantConfig: {
-            renovateJsonPresent: true,
             warnings: [],
           },
         },
@@ -656,7 +656,6 @@ describe('workers/repository/init/merge', () => {
                 matchPackageNames: ['socket.io**'],
               },
             ],
-            renovateJsonPresent: true,
             warnings: [],
           },
         },
@@ -673,7 +672,6 @@ describe('workers/repository/init/merge', () => {
                 matchPackageNames: ['socket.io**'],
               },
             ],
-            renovateJsonPresent: true,
             warnings: [],
           },
         },
@@ -715,7 +713,6 @@ describe('workers/repository/init/merge', () => {
                 matchConfidence: ['high', 'very high'],
               },
             ],
-            renovateJsonPresent: true,
             warnings: [],
           },
         },
@@ -755,7 +752,6 @@ describe('workers/repository/init/merge', () => {
                 matchPackageNames: ['anything**'],
               },
             ],
-            renovateJsonPresent: true,
             warnings: [],
           },
         },

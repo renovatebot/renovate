@@ -301,7 +301,6 @@ export async function mergeRenovateConfig(
   }
   returnConfig = mergeChildConfig(returnConfig, resolvedConfig);
   returnConfig = await presets.resolveConfigPresets(returnConfig, config);
-  returnConfig.renovateJsonPresent = true;
   // istanbul ignore if
   if (returnConfig.ignorePaths?.length) {
     logger.debug(
