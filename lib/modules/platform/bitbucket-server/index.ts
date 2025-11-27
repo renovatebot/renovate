@@ -1,4 +1,5 @@
 import { setTimeout } from 'timers/promises';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import ignore from 'ignore';
 import semver from 'semver';
 import type { PartialDeep } from 'type-fest';
@@ -125,13 +126,12 @@ export async function initPlatform({
   try {
     const env = getEnv();
     let bitbucketServerVersion = env.RENOVATE_X_PLATFORM_VERSION;
-    /* v8 ignore start */
     const { body, headers } = await bitbucketServerHttp.getJsonUnchecked<{
       version: string;
     }>(`./rest/api/1.0/application-properties`, { ...(token && { token }) });
 
     bitbucketServerVersion ??= body.version;
-    if (headers['x-ausername'] && !username) {
+    if (isNonEmptyStringAndNotWhitespace(headers['x-ausername']) && !username) {
       logger.debug(
         { 'x-username': headers['x-ausername'] },
         'Platform: No username configured using headers["x-ausername"]',
@@ -139,7 +139,6 @@ export async function initPlatform({
       config.username = headers['x-ausername'];
     }
     logger.debug('Bitbucket Server version is: ' + bitbucketServerVersion);
-    /* v8 ignore stop */
 
     if (semver.valid(bitbucketServerVersion)) {
       defaults.version = bitbucketServerVersion;
