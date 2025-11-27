@@ -142,6 +142,7 @@ export interface RepoCacheData {
   platform?: {
     forgejo?: {
       pullRequestsCache?: unknown;
+      orgs?: Record<string, boolean>;
     };
     gitea?: {
       pullRequestsCache?: unknown;

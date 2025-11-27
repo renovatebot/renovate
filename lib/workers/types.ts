@@ -144,6 +144,7 @@ export interface BranchConfig
   isConflicted?: boolean;
   commitFingerprint?: string;
   cacheFingerprintMatch?: CacheFingerprintMatchResult;
+  prNotPendingHours?: number;
 }
 
 export interface BranchMetadata {
