@@ -549,11 +549,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
@@ -591,11 +593,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
@@ -645,11 +649,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
@@ -682,11 +688,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
@@ -719,11 +727,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
