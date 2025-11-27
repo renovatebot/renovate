@@ -474,7 +474,6 @@ export async function createFork(
 
 // Initialize GitHub by getting base branch and SHA
 export async function initRepo({
-  endpoint,
   repository,
   forkCreation,
   forkOrg,
@@ -491,13 +490,6 @@ export async function initRepo({
     cloneSubmodulesFilter,
     ignorePrAuthor: GlobalConfig.get('ignorePrAuthor', false),
   } as any;
-  /* v8 ignore next */
-  if (endpoint) {
-    // Necessary for Renovate Pro - do not remove
-    logger.debug(`Overriding default GitHub endpoint with ${endpoint}`);
-    platformConfig.endpoint = endpoint;
-    githubHttp.setBaseUrl(endpoint);
-  }
   const opts = hostRules.find({
     hostType: 'github',
     url: platformConfig.endpoint,

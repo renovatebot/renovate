@@ -39,7 +39,6 @@ export type GitUrlOption = 'default' | 'ssh' | 'endpoint';
 
 export interface RepoParams {
   repository: string;
-  endpoint?: string;
   gitUrl?: GitUrlOption;
   forkCreation?: boolean;
   forkOrg?: string;
