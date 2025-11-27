@@ -374,6 +374,12 @@ export interface RenovateConfig
   registryUrls?: string[] | null;
   registryAliases?: Record<string, string>;
 
+  /**
+   * What is this used for?
+   * @deprecated
+   */
+  renovateJsonPresent?: boolean;
+
   repoIsOnboarded?: boolean;
   repoIsActivated?: boolean;
 
