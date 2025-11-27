@@ -846,6 +846,10 @@ If you need to _override_ constraints that Renovate detects from the repository,
 
 <!-- prettier-ignore -->
 !!! note
+    When using [`binarySource=global`](./self-hosted-configuration.md#binarysource), the `constraints` options do not take effect.
+
+<!-- prettier-ignore -->
+!!! note
     Make sure not to mix this up with the term `compatibility`, which Renovate uses in the context of version releases, e.g. if a Docker image is `node:12.16.0-alpine` then the `-alpine` suffix represents `compatibility`.
 
 ## constraintsFiltering
