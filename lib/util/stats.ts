@@ -496,7 +496,7 @@ type ObsoleteCacheStats = Record<
   }
 >;
 
-/* v8 ignore start: temporary code */
+/* v8 ignore next: temporary code */
 export class ObsoleteCacheHitLogger {
   static getData(): ObsoleteCacheStats {
     return memCache.get<ObsoleteCacheStats>('obsolete-cache-stats') ?? {};

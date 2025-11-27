@@ -32,8 +32,8 @@ It builds `latest` based on the `main` branch and all SemVer tags are published 
 ```sh title="Example of valid tags"
 docker run --rm renovate/renovate
 docker run --rm renovate/renovate:42
-docker run --rm renovate/renovate:42.11
-docker run --rm renovate/renovate:42.11.0
+docker run --rm renovate/renovate:42.19
+docker run --rm renovate/renovate:42.19.3
 ```
 
 <!-- prettier-ignore -->
@@ -69,7 +69,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:42.11.0
+              image: renovate/renovate:42.19.3
               args:
                 - user/repo
               # Environment Variables
@@ -128,7 +128,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:42.11.0
+            - image: renovate/renovate:42.19.3
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -374,7 +374,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:42.11.0
+              image: renovate/renovate:42.19.3
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true
@@ -467,4 +467,4 @@ This configuration ensures that both `example.org` and `www.example.org` are acc
 
 If a tool that Renovate runs (such as git) still has proxy-related issues, note that different tools interpret NO_PROXY formats differently. See [GitLab’s detailed explanation](https://about.gitlab.com/blog/we-need-to-talk-no-proxy/#no_proxy-format) for guidance on tool-specific behavior.
 
-To to debug the proxy configuration behavior you can set the environment variable `ROARR_LOG=true` to enable log printing to stdout.
+To debug the proxy configuration behavior you can set the environment variable `ROARR_LOG=true` to enable log printing to stdout.

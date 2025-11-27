@@ -198,7 +198,7 @@ export function updateDependency({
         );
       }
     }
-    /* v8 ignore start -- needs test */
+    /* v8 ignore next -- needs test */
     if (!newFileContent) {
       logger.debug(
         { fileContent, parsedContents, depType, depName, newValue },
@@ -206,7 +206,7 @@ export function updateDependency({
       );
       return fileContent;
     }
-    /* v8 ignore stop -- needs test */
+
     if (parsedContents?.resolutions) {
       let depKey: string | undefined;
       if (parsedContents.resolutions[depName]) {
@@ -215,7 +215,7 @@ export function updateDependency({
         depKey = `**/${depName}`;
       }
       if (depKey) {
-        /* v8 ignore start -- needs test */
+        /* v8 ignore next -- needs test */
         if (parsedContents.resolutions[depKey] !== oldVersion) {
           logger.debug(
             {
@@ -226,7 +226,7 @@ export function updateDependency({
             },
             'Upgraded dependency exists in yarn resolutions but is different version',
           );
-        } /* v8 ignore stop -- needs test */
+        }
         newFileContent = replaceAsString(
           parsedContents,
           newFileContent,
