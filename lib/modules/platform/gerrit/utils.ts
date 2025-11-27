@@ -16,6 +16,12 @@ import type {
 
 export const TAG_PULL_REQUEST_BODY = 'pull-request';
 
+/**
+ * Max comment size in Gerrit (16kiB by default)
+ * https://gerrit-review.googlesource.com/Documentation/config-gerrit.html#change:~:text=change.commentSizeLimit
+ */
+export const MAX_GERRIT_COMMENT_SIZE = 16 * 1024;
+
 export const REQUEST_DETAILS_FOR_PRS: GerritRequestDetail[] = [
   'MESSAGES', // to get the pr body
   'LABELS', // to get the reviewers
@@ -132,7 +138,8 @@ export function findPullRequestBody(change: GerritChange): string | undefined {
     .reverse()
     .find((msg) => msg.tag === TAG_PULL_REQUEST_BODY);
   if (msg) {
-    return msg.message.replace(/^Patch Set \d+:\n\n/, ''); //TODO: check how to get rid of the auto-added prefix?
+    // Gerrit adds a "Patch Set X:" prefix to comments
+    return msg.message.replace(/^Patch Set \d+:\n\n/, '');
   }
   return undefined;
 }
