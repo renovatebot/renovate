@@ -8,12 +8,14 @@ const ibazel = Fixtures.get('ibazel.rb');
 describe('modules/manager/homebrew/extract', () => {
   describe('extractPackageFile()', () => {
     it('skips sourceforge dependency 1', () => {
-      const content = codeBlock`class Aalib < Formula
-  desc "Portable ASCII art graphics library"
-  homepage "https://aa-project.sourceforge.io/aalib/"
-  url "https://downloads.sourceforge.net/aa-project/aalib-1.4rc5.tar.gz"
-  sha256 "fbddda9230cf6ee2a4f5706b4b11e2190ae45f5eda1f0409dc4f99b35e0a70ee"
-end`;
+      const content = codeBlock`
+        class Aalib < Formula
+        desc "Portable ASCII art graphics library"
+        homepage "https://aa-project.sourceforge.io/aalib/"
+        url "https://downloads.sourceforge.net/aa-project/aalib-1.4rc5.tar.gz"
+        sha256 "fbddda9230cf6ee2a4f5706b4b11e2190ae45f5eda1f0409dc4f99b35e0a70ee"
+        end
+      `;
 
       const res = extractPackageFile(content);
 
@@ -37,12 +39,14 @@ end`;
     });
 
     it('skips sourceforge dependency 2', () => {
-      const content = codeBlock`class Aap < Formula
-  desc "Make-like tool to download, build, and install software"
-  homepage "http://www.a-a-p.org"
-  url "https://downloads.sourceforge.net/project/a-a-p/aap-1.094.zip"
-  sha256 "3f53b2fc277756042449416150acc477f29de93692944f8a77e8cef285a1efd8"
-end`;
+      const content = codeBlock`
+        class Aap < Formula
+        desc "Make-like tool to download, build, and install software"
+        homepage "http://www.a-a-p.org"
+        url "https://downloads.sourceforge.net/project/a-a-p/aap-1.094.zip"
+        sha256 "3f53b2fc277756042449416150acc477f29de93692944f8a77e8cef285a1efd8"
+        end
+      `;
 
       const res = extractPackageFile(content);
 
@@ -66,13 +70,15 @@ end`;
     });
 
     it('skips github dependency with wrong format', () => {
-      const content = codeBlock`class Acmetool < Formula
-  desc "Automatic certificate acquisition tool for ACME (Let's Encrypt)"
-  homepage "https://github.com/hlandau/acme"
-  url "https://github.com/hlandau/acme.git",
-      :tag      => "v0.0.67",
-      :revision => "221ea15246f0bbcf254b350bee272d43a1820285"
-end`;
+      const content = codeBlock`
+        class Acmetool < Formula
+        desc "Automatic certificate acquisition tool for ACME (Let's Encrypt)"
+        homepage "https://github.com/hlandau/acme"
+        url "https://github.com/hlandau/acme.git",
+          :tag      => "v0.0.67",
+          :revision => "221ea15246f0bbcf254b350bee272d43a1820285"
+        end
+      `;
 
       const res = extractPackageFile(content);
 
@@ -137,12 +143,14 @@ end`;
     });
 
     it('handles old "archive" github url format', () => {
-      const content = codeBlock`class Ibazel < Formula
-  desc 'IBazel is a tool for building Bazel targets when source files change.'
-  homepage 'https://github.com/bazelbuild/bazel-watcher'
-  url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
-  sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-end`;
+      const content = codeBlock`
+        class Ibazel < Formula
+        desc 'IBazel is a tool for building Bazel targets when source files change.'
+        homepage 'https://github.com/bazelbuild/bazel-watcher'
+        url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
+        sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+        end
+      `;
 
       const res = extractPackageFile(content);
 
@@ -165,12 +173,14 @@ end`;
     });
 
     it('handles no space before class header', () => {
-      const content = codeBlock`class Ibazel < Formula
-  desc 'IBazel is a tool for building Bazel targets when source files change.'
-  homepage 'https://github.com/bazelbuild/bazel-watcher'
-  url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
-  sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-end`;
+      const content = codeBlock`
+        class Ibazel < Formula
+        desc 'IBazel is a tool for building Bazel targets when source files change.'
+        homepage 'https://github.com/bazelbuild/bazel-watcher'
+        url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+        sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+        end
+      `;
 
       const res = extractPackageFile(content);
 
@@ -193,12 +203,14 @@ end`;
     });
 
     it('returns null for invalid class header 1', () => {
-      const content = codeBlock`class Ibazel !?# Formula
-  desc 'IBazel is a tool for building Bazel targets when source files change.'
-  homepage 'https://github.com/bazelbuild/bazel-watcher'
-  url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
-  sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-end`;
+      const content = codeBlock`
+        class Ibazel !?# Formula
+        desc 'IBazel is a tool for building Bazel targets when source files change.'
+        homepage 'https://github.com/bazelbuild/bazel-watcher'
+        url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+        sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+        end
+      `;
 
       const res = extractPackageFile(content);
 
@@ -206,12 +218,14 @@ end`;
     });
 
     it('returns null for invalid class header 2', () => {
-      const content = codeBlock`class Ibazel < NotFormula
-  desc 'IBazel is a tool for building Bazel targets when source files change.'
-  homepage 'https://github.com/bazelbuild/bazel-watcher'
-  url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
-  sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-end`;
+      const content = codeBlock`
+        class Ibazel < NotFormula
+        desc 'IBazel is a tool for building Bazel targets when source files change.'
+        homepage 'https://github.com/bazelbuild/bazel-watcher'
+        url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+        sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+        end
+      `;
 
       const res = extractPackageFile(content);
 
@@ -219,12 +233,14 @@ end`;
     });
 
     it('skips if there is no url field', () => {
-      const content = codeBlock`class Ibazel < Formula
-  desc 'IBazel is a tool for building Bazel targets when source files change.'
-  homepage 'https://github.com/bazelbuild/bazel-watcher'
-  not_url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
-  sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-end`;
+      const content = codeBlock`
+        class Ibazel < Formula
+        desc 'IBazel is a tool for building Bazel targets when source files change.'
+        homepage 'https://github.com/bazelbuild/bazel-watcher'
+        not_url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+        sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+        end
+      `;
 
       const res = extractPackageFile(content);
 
@@ -248,12 +264,14 @@ end`;
     });
 
     it('skips if invalid url protocol', () => {
-      const content = codeBlock`class Ibazel < Formula
-  desc 'IBazel is a tool for building Bazel targets when source files change.'
-  homepage 'https://github.com/bazelbuild/bazel-watcher'
-  url ??https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
-  sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-end`;
+      const content = codeBlock`
+        class Ibazel < Formula
+        desc 'IBazel is a tool for building Bazel targets when source files change.'
+        homepage 'https://github.com/bazelbuild/bazel-watcher'
+        url ??https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+        sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+        end
+      `;
 
       const res = extractPackageFile(content);
 
@@ -277,12 +295,14 @@ end`;
     });
 
     it('skips if invalid url', () => {
-      const content = codeBlock`class Ibazel < Formula
-  desc 'IBazel is a tool for building Bazel targets when source files change.'
-  homepage 'https://github.com/bazelbuild/bazel-watcher'
-  url "invalid_url"
-  sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-end`;
+      const content = codeBlock`
+        class Ibazel < Formula
+        desc 'IBazel is a tool for building Bazel targets when source files change.'
+        homepage 'https://github.com/bazelbuild/bazel-watcher'
+        url "invalid_url"
+        sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+        end
+      `;
 
       const res = extractPackageFile(content);
 
@@ -306,12 +326,14 @@ end`;
     });
 
     it('skips if there is no sha256 field', () => {
-      const content = codeBlock`class Ibazel < Formula
-  desc 'IBazel is a tool for building Bazel targets when source files change.'
-  homepage 'https://github.com/bazelbuild/bazel-watcher'
-  url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
-  not_sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-end`;
+      const content = codeBlock`
+        class Ibazel < Formula
+        desc 'IBazel is a tool for building Bazel targets when source files change.'
+        homepage 'https://github.com/bazelbuild/bazel-watcher'
+        url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+        not_sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+        end
+      `;
 
       const res = extractPackageFile(content);
 
@@ -334,12 +356,14 @@ end`;
     });
 
     it('skips if sha256 field is invalid', () => {
-      const content = codeBlock`class Ibazel < Formula
-  desc 'IBazel is a tool for building Bazel targets when source files change.'
-  homepage 'https://github.com/bazelbuild/bazel-watcher'
-  url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
-  sha256 '26f5125218fad2741d3caf937b0229'
-end`;
+      const content = codeBlock`
+        class Ibazel < Formula
+        desc 'IBazel is a tool for building Bazel targets when source files change.'
+        homepage 'https://github.com/bazelbuild/bazel-watcher'
+        url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+        sha256 '26f5125218fad2741d3caf937b0229'
+        end
+      `;
 
       const res = extractPackageFile(content);
 
