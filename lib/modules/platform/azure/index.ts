@@ -4,6 +4,7 @@ import type {
   GitItem,
   GitPullRequest,
   GitPullRequestCommentThread,
+  GitPullRequestCompletionOptions,
   GitStatus,
   GitVersionDescriptor,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
@@ -799,7 +800,8 @@ export async function mergePr({
       ? await getMergeStrategy(pr.targetRefName!)
       : mapMergeStrategy(strategy);
 
-  const bypassedPolicies: PolicyConfigurationRef[] = [];
+  const bypassPolicies: PolicyConfigurationRef[] = [];
+  let bypassCompletionOptions: GitPullRequestCompletionOptions = {};
 
   const bypassPolicyTypes = new Set<string>(
     platformOptions?.azureBypassPolicyTypes ?? [],
@@ -826,7 +828,13 @@ export async function mergePr({
       }
 
       if (bypassPolicyTypes.has(policyEvaluation.configuration.type.id)) {
-        bypassedPolicies.push(policyEvaluation.configuration);
+        bypassPolicies.push(policyEvaluation.configuration);
+        bypassCompletionOptions = {
+          bypassPolicy: true,
+          bypassReason:
+            platformOptions?.azureBypassPolicyReason ??
+            'Auto-merge by Renovate',
+        };
       } else {
         logger.debug(
           { policy: policyEvaluation },
@@ -837,11 +845,6 @@ export async function mergePr({
     }
   }
 
-  const bypassPolicy = bypassedPolicies.length > 0;
-  const bypassReason = bypassPolicy
-    ? (platformOptions?.azureBypassPolicyReason ?? 'Auto-merge by Renovate')
-    : undefined;
-
   const objToUpdate: GitPullRequest = {
     status: PullRequestStatus.Completed,
     lastMergeSourceCommit: pr.lastMergeSourceCommit,
@@ -849,14 +852,13 @@ export async function mergePr({
       mergeStrategy,
       deleteSourceBranch: true,
       mergeCommitMessage: pr.title,
-      bypassPolicy,
-      bypassReason,
+      ...bypassCompletionOptions,
     },
   };
 
   logger.trace(
     {
-      bypassedPolicies,
+      bypassPolicies,
     },
     `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
       PullRequestStatus[PullRequestStatus.Completed]
@@ -865,7 +867,7 @@ export async function mergePr({
       pr.lastMergeSourceCommit?.commitId
     } using mergeStrategy ${mergeStrategy} (${
       GitPullRequestMergeStrategy[mergeStrategy]
-    })${bypassPolicy ? ' and bypassPolicies' : ''}`,
+    })${bypassCompletionOptions.bypassPolicy ? ' and bypassPolicies' : ''}`,
   );
 
   try {
