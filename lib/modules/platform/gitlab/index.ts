@@ -264,7 +264,6 @@ export async function initRepo({
   cloneSubmodules,
   cloneSubmodulesFilter,
   gitUrl,
-  endpoint,
   includeMirrors,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
