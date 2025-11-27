@@ -2853,7 +2853,13 @@ const options: RenovateOptions[] = [
     type: 'object',
     freeChoice: true,
     mergeable: true,
-    default: {},
+    default: {
+      Age: '[Age](https://docs.renovatebot.com/merge-confidence/)',
+      Adoption: '[Adoption](https://docs.renovatebot.com/merge-confidence/)',
+      Passing: '[Passing](https://docs.renovatebot.com/merge-confidence/)',
+      Confidence:
+        '[Confidence](https://docs.renovatebot.com/merge-confidence/)',
+    },
   },
   {
     name: 'prBodyColumns',
