@@ -1659,7 +1659,7 @@ describe('modules/platform/gitlab/index', () => {
         expect(scope.isDone()).toBeTrue();
       });
 
-      it('should fail to get user IDs', async () => {
+      it('should not fail if some reviewers are unknown', async () => {
         const scope = httpMock
           .scope(gitlabApiHost)
           .get(
@@ -1671,7 +1671,11 @@ describe('modules/platform/gitlab/index', () => {
           .get('/api/v4/users?username=someotheruser')
           .reply(404)
           .get('/api/v4/groups/someotheruser/members')
-          .reply(404);
+          .reply(404)
+          .put('/api/v4/projects/undefined/merge_requests/42', {
+            reviewer_ids: [1, 2, 10],
+          })
+          .reply(200);
 
         await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
         expect(scope.isDone()).toBeTrue();
