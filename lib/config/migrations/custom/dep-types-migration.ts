@@ -1,8 +1,10 @@
 import { isArray, isNonEmptyObject, isObject } from '@sindresorhus/is';
-import type { PackageRule, PackageRuleInputConfig } from '../../types';
+import type { PackageRule } from '../../types';
 import { AbstractMigration } from '../base/abstract-migration';
 
-interface DepTypesRule extends PackageRule, PackageRuleInputConfig {}
+interface DepTypesRule extends PackageRule {
+  depType?: string;
+}
 
 export class DepTypesMigration extends AbstractMigration {
   override readonly deprecated = true;

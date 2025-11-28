@@ -12,7 +12,6 @@ import { partial } from '~test/util';
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
   branchName: '',
-  endpoint: 'https://gitea.com/api/v1/',
   packageName: 'renovate',
   versioning: semverVersioning.id,
   currentVersion: '5.2.0',
@@ -338,7 +337,6 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://gitea-enterprise.example.com/meno/dropzone/',
-          endpoint: 'https://gitea-enterprise.example.com/',
         }),
       ).toMatchObject({
         hasReleaseNotes: false,
@@ -373,9 +371,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          platform: 'gitea',
           sourceUrl: 'https://git.test.com/meno/dropzone/',
-          endpoint: 'https://git.test.com/api/v1/',
         }),
       ).toMatchObject({
         hasReleaseNotes: false,
