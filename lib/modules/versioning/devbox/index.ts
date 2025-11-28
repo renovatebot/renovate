@@ -8,9 +8,13 @@ export const displayName = 'devbox';
 export const urls = [];
 export const supportsRanges = false;
 
-const validPattern = regEx(/^((\d|[1-9]\d*)(\.(\d|[1-9]\d*)){0,2})(.+)?$/);
-const versionPattern = regEx(/^((\d|[1-9]\d*)(\.(\d|[1-9]\d*)){2})(.+)?$/);
-const stablePattern = regEx(/^((\d|[1-9]\d*)(\.(\d|[1-9]\d*)){2})(\+.+)?$/);
+const validPattern = regEx(/^((?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*)){0,2})(.+)?$/);
+const versionPattern = regEx(
+  /^((?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*)){1,2})(.+)?$/,
+);
+const stablePattern = regEx(
+  /^((?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*)){1,2})(\+.+)?$/,
+);
 const prereleasePattern = regEx(/^[-+.]?(a|alpha|b|beta|rc|c)?(\d+)?(.*)$/);
 const rangeOperatorPattern = regEx(/^[~>^]/);
 
@@ -36,7 +40,7 @@ class DevboxVersioningApi extends GenericVersioningApi {
 
   private _getSuffix(version: string): string {
     const matches = validPattern.exec(version);
-    return matches?.[5] ?? '';
+    return matches?.[2] ?? '';
   }
 
   private _parsePreRelease(suffix: string): {
@@ -98,10 +102,13 @@ class DevboxVersioningApi extends GenericVersioningApi {
 
   private _hasLeadingZero(version: string): boolean {
     // Check for leading zeros in any numeric part
-    // Extract just the numeric version part before any suffix
-    const numericPart = version.split(/[-+]/)[0];
+    // Split on common delimiters to get numeric version parts
+    // This handles versions like "1.2.3a1", "1.2.3-foo", "1.2.3+8"
+    const numericPart = version.split(/[^\d.]/)[0]; // Take everything before first non-digit/non-dot
     const parts = numericPart.split('.');
     for (const part of parts) {
+      // Check if part has leading zero: length > 1 and starts with '0'
+      // "0" is valid, "01", "001" are not
       if (part.length > 1 && part.startsWith('0')) {
         return true;
       }
@@ -153,7 +160,15 @@ class DevboxVersioningApi extends GenericVersioningApi {
     if (range === 'latest') {
       return this.isVersion(version);
     }
-    return this.isVersion(version) && this.equals(version, range);
+    if (!this.isVersion(version)) {
+      return false;
+    }
+    // Only 3-part versions can match ranges, unless version exactly equals range
+    const parsed = this._parse(version);
+    if (parsed && parsed.release.length < 3 && version !== range) {
+      return false;
+    }
+    return this.equals(version, range);
   }
 
   protected override _compare(version: string, other: string): number {
@@ -174,6 +189,7 @@ class DevboxVersioningApi extends GenericVersioningApi {
     if (!(parsed1 && parsed2)) {
       return 1;
     }
+
     // support variable length compare
     const length = Math.max(parsed1.release.length, parsed2.release.length);
     for (let i = 0; i < length; i += 1) {

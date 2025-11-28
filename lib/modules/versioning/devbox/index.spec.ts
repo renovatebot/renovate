@@ -5,9 +5,9 @@ describe('modules/versioning/devbox/index', () => {
     version           | expected
     ${'1'}            | ${false}
     ${'01'}           | ${false}
-    ${'1.01'}         | ${false}
     ${'1.1.01'}       | ${false}
-    ${'1.1'}          | ${false}
+    ${'1.1'}          | ${true}
+    ${'1.01'}         | ${false}
     ${'1.3.0'}        | ${true}
     ${'2.1.20'}       | ${true}
     ${'v1.4'}         | ${false}
@@ -32,6 +32,8 @@ describe('modules/versioning/devbox/index', () => {
     ${'1.2.3+8'}      | ${true}
     ${'1.2.3a1'}      | ${true}
     ${'1.2.3rc3'}     | ${true}
+    ${'3.13.0a1'}     | ${true}
+    ${'1.23rc1'}      | ${true}
   `('isVersion("$version") === $expected', ({ version, expected }) => {
     expect(!!devbox.isVersion(version)).toBe(expected);
   });
@@ -68,6 +70,8 @@ describe('modules/versioning/devbox/index', () => {
     ${'1.2.3-'}       | ${false}
     ${'1.2.3.'}       | ${false}
     ${'1.2.3+'}       | ${false}
+    ${'3.13.0a1'}     | ${true}
+    ${'1.23rc1'}      | ${true}
   `('isValid("$version") === $isValid', ({ version, isValid }) => {
     expect(!!devbox.isValid(version)).toBe(isValid);
   });
@@ -187,4 +191,52 @@ describe('modules/versioning/devbox/index', () => {
       expect(devbox.isGreaterThan(version, other)).toBe(expected);
     },
   );
+
+  it.each`
+    version            | major   | minor   | patch
+    ${'foo'}           | ${null} | ${null} | ${null}
+    ${'v1.2.3'}        | ${null} | ${null} | ${null}
+    ${'V1.2.3'}        | ${null} | ${null} | ${null}
+    ${'~1.2.3'}        | ${null} | ${null} | ${null}
+    ${'>1.2.3'}        | ${null} | ${null} | ${null}
+    ${'^1.2.3'}        | ${null} | ${null} | ${null}
+    ${''}              | ${null} | ${null} | ${null}
+    ${'*'}             | ${null} | ${null} | ${null}
+    ${'x'}             | ${null} | ${null} | ${null}
+    ${'X'}             | ${null} | ${null} | ${null}
+    ${'latest'}        | ${null} | ${null} | ${null}
+    ${'1'}             | ${1}    | ${null} | ${null}
+    ${'42'}            | ${42}   | ${null} | ${null}
+    ${'1.2'}           | ${1}    | ${2}    | ${null}
+    ${'1.2.3'}         | ${1}    | ${2}    | ${3}
+    ${'0.0.0'}         | ${0}    | ${0}    | ${0}
+    ${'10.20.30'}      | ${10}   | ${20}   | ${30}
+    ${'1.2.3.4'}       | ${1}    | ${2}    | ${3}
+    ${'1.2.3-foo'}     | ${1}    | ${2}    | ${3}
+    ${'1.2.3+8'}       | ${1}    | ${2}    | ${3}
+    ${'1.2.3a1'}       | ${1}    | ${2}    | ${3}
+    ${'1.2.3rc3'}      | ${1}    | ${2}    | ${3}
+    ${'1.2.0a1'}       | ${1}    | ${2}    | ${0}
+    ${'3.5.0-beta.3'}  | ${3}    | ${5}    | ${0}
+    ${'4.2.21.Final'}  | ${4}    | ${2}    | ${21}
+    ${'1.2.3foo'}      | ${1}    | ${2}    | ${3}
+    ${'100.200.300'}   | ${100}  | ${200}  | ${300}
+    ${'1.2.3.4.5'}     | ${1}    | ${2}    | ${3}
+    ${'2024.12.1'}     | ${2024} | ${12}   | ${1}
+    ${'1.0.0-alpha.1'} | ${1}    | ${0}    | ${0}
+    ${'1.23rc1'}       | ${1}    | ${23}   | ${null}
+  `(
+    'getMajor, getMinor, getPatch for "$version"',
+    ({ version, major, minor, patch }) => {
+      expect(devbox.getMajor(version)).toBe(major);
+      expect(devbox.getMinor(version)).toBe(minor);
+      expect(devbox.getPatch(version)).toBe(patch);
+    },
+  );
+
+  it('validates that isValid rejects leading zeros', () => {
+    expect(devbox.isValid('01')).toBe(false);
+    expect(devbox.isValid('1.01')).toBe(false);
+    expect(devbox.isValid('1.1.01')).toBe(false);
+  });
 });
