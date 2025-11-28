@@ -30,6 +30,7 @@ describe('config/migrate-validate', () => {
     });
 
     it('handles invalid', async () => {
+      // @ts-expect-error -- invalid option
       const input: RenovateConfig = { foo: 'none' };
       const res = await migrateAndValidate(config, input);
       expect(res).toMatchSnapshot();
