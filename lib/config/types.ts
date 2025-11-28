@@ -300,9 +300,9 @@ export interface RenovateInternalConfig {
   isFork?: boolean;
   isVulnerabilityAlert?: boolean;
 
-  /** ??? */
+  /** What is this used for? */
   remediations?: unknown;
-  /** ??? */
+  /** What is this used for? */
   vulnerabilityAlertsOnly?: boolean;
 }
 
