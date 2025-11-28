@@ -1,5 +1,6 @@
 import { logger } from '../logger';
 import * as memCache from './cache/memory';
+import type { GitOperationType } from './git/types';
 import { parseUrl } from './url';
 
 type LookupStatsData = Record<string, number[]>;
@@ -573,5 +574,33 @@ export class AbandonedPackageStats {
     if (Object.keys(report).length > 0) {
       logger.debug(report, 'Abandoned package statistics');
     }
+  }
+}
+
+type GitOperationStatsData = Record<GitOperationType, number[]>;
+
+export class GitOperationStats {
+  static write(operationType: GitOperationType, duration: number): void {
+    const data =
+      memCache.get<GitOperationStatsData>('git-operations-stats') ?? {};
+    data[operationType] ??= [];
+    data[operationType].push(duration);
+    memCache.set('git-operations-stats', data);
+  }
+
+  static getReport(): Record<string, TimingStatsReport> {
+    const report: Record<string, TimingStatsReport> = {};
+    const data = memCache.get<LookupStatsData>('git-operations-stats') ?? {};
+    for (const [operationType, durations] of Object.entries(data)) {
+      report[operationType] = makeTimingReport(durations);
+      report[operationType].totalMs = Math.ceil(report[operationType].totalMs);
+    }
+
+    return report;
+  }
+
+  static report(): void {
+    const report = GitOperationStats.getReport();
+    logger.debug(report, 'Git operations statistics');
   }
 }
