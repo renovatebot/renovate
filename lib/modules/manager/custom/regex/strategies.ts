@@ -15,11 +15,10 @@ import {
 } from './utils';
 
 export function handleAny(
-  content: string,
-  packageFile: string,
   config: RegexManagerConfig,
   packageFileInfo: PackageFileInfo,
 ): PackageDependency[] {
+  const { content, packageFile } = packageFileInfo;
   return config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
     .flatMap((regex) => regexMatchAll(regex, content)) // match all regex to content, get all matches, reduce to single array
@@ -42,11 +41,10 @@ export function handleAny(
 }
 
 export function handleCombination(
-  content: string,
-  packageFile: string,
   config: RegexManagerConfig,
   packageFileInfo: PackageFileInfo,
 ): PackageDependency[] {
+  const { content, packageFile } = packageFileInfo;
   const matches = config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
     .flatMap((regex) => regexMatchAll(regex, content)); // match all regex to content, get all matches, reduce to single array
@@ -72,11 +70,10 @@ export function handleCombination(
 }
 
 export function handleRecursive(
-  content: string,
-  packageFile: string,
   config: RegexManagerConfig,
   packageFileInfo: PackageFileInfo,
 ): PackageDependency[] {
+  const { content, packageFile } = packageFileInfo;
   const regexes = config.matchStrings.map((matchString) =>
     regEx(matchString, 'g'),
   );

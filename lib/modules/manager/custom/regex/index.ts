@@ -33,38 +33,25 @@ export function extractPackageFile(
 
   // till this stage, packageFile is the full path
   // so we need to extract filename and dir before passing it for template.compile
-  const packageFileExact = upath.basename(packageFile);
+  const packageFileName = upath.basename(packageFile);
   const packageFileDir = upath.dirname(packageFile);
   const packageFileInfo: PackageFileInfo = {
     packageFileDir,
-    packageFileExact,
+    packageFileName,
+    content,
+    packageFile,
   };
 
   switch (config.matchStringsStrategy) {
     default:
     case 'any':
-      deps = handleAny(
-        content,
-        packageFile,
-        config as RegexManagerConfig,
-        packageFileInfo,
-      );
+      deps = handleAny(config as RegexManagerConfig, packageFileInfo);
       break;
     case 'combination':
-      deps = handleCombination(
-        content,
-        packageFile,
-        config as RegexManagerConfig,
-        packageFileInfo,
-      );
+      deps = handleCombination(config as RegexManagerConfig, packageFileInfo);
       break;
     case 'recursive':
-      deps = handleRecursive(
-        content,
-        packageFile,
-        config as RegexManagerConfig,
-        packageFileInfo,
-      );
+      deps = handleRecursive(config as RegexManagerConfig, packageFileInfo);
       break;
   }
 

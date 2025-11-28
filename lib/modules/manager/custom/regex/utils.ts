@@ -48,7 +48,7 @@ export function createDependency(
 ): PackageDependency | null {
   const dependency = dep ?? {};
   const { groups, replaceString } = extractionTemplate;
-  const { packageFileExact, packageFileDir } = packageFileInfo;
+  const { packageFileName, packageFileDir } = packageFileInfo;
 
   for (const field of validMatchFields) {
     const fieldTemplate = `${field}Template` as keyof RegexManagerTemplates;
@@ -57,7 +57,7 @@ export function createDependency(
       try {
         const compiled = template.compile(
           tmpl,
-          { ...groups, packageFile: packageFileExact, packageFileDir },
+          { ...groups, packageFile: packageFileName, packageFileDir },
           false,
         );
         updateDependency(dependency, field, compiled);
