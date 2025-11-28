@@ -19,6 +19,8 @@ import {
   TEMPORARY_ERROR,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages';
+import { instrument } from '../../instrumentation';
+import { instrumentStandalone } from '../../instrumentation/decorator';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
@@ -395,140 +397,155 @@ export function isCloned(): boolean {
   return gitInitialized;
 }
 
-export async function syncGit(): Promise<void> {
-  if (gitInitialized) {
-    /* v8 ignore next 3 -- TODO: add test */
-    if (getEnv().RENOVATE_X_CLEAR_HOOKS) {
-      await git.raw(['config', 'core.hooksPath', '/dev/null']);
+export const syncGit = instrumentStandalone(
+  { name: 'syncGit' },
+  async function (): Promise<void> {
+    if (gitInitialized) {
+      /* v8 ignore next 3 -- TODO: add test */
+      if (getEnv().RENOVATE_X_CLEAR_HOOKS) {
+        await git.raw(['config', 'core.hooksPath', '/dev/null']);
+      }
+      return;
     }
-    return;
-  }
-  /* v8 ignore next 3 -- failsafe TODO: add test */
-  if (GlobalConfig.get('platform') === 'local') {
-    throw new Error('Cannot sync git when platform=local');
-  }
-  gitInitialized = true;
-  const localDir = GlobalConfig.get('localDir')!;
-  logger.debug(`syncGit(): Initializing git repository into ${localDir}`);
-  const gitHead = upath.join(localDir, '.git/HEAD');
-  let clone = true;
+    /* v8 ignore next 3 -- failsafe TODO: add test */
+    if (GlobalConfig.get('platform') === 'local') {
+      throw new Error('Cannot sync git when platform=local');
+    }
+    gitInitialized = true;
+    const localDir = GlobalConfig.get('localDir')!;
+    logger.debug(`syncGit(): Initializing git repository into ${localDir}`);
+    const gitHead = upath.join(localDir, '.git/HEAD');
+    let clone = true;
 
-  if (await fs.pathExists(gitHead)) {
-    logger.debug(
-      `syncGit(): Found existing git repository, attempting git fetch`,
-    );
+    if (await fs.pathExists(gitHead)) {
+      await instrument('fetch', async () => {
+        logger.debug(
+          `syncGit(): Found existing git repository, attempting git fetch`,
+        );
+        try {
+          await git.raw(['remote', 'set-url', 'origin', config.url]);
+          const fetchStart = Date.now();
+          await gitRetry(() => git.fetch(['--prune', 'origin']));
+          config.currentBranch =
+            config.currentBranch || (await getDefaultBranch(git));
+          await resetToBranch(config.currentBranch);
+          await cleanLocalBranches();
+          const durationMs = Math.round(Date.now() - fetchStart);
+          logger.info({ durationMs }, 'git fetch completed');
+          clone = false;
+          /* v8 ignore next -- TODO: add test */
+        } catch (err) {
+          if (err.message === REPOSITORY_EMPTY) {
+            throw err;
+          }
+          logger.info({ err }, 'git fetch error, falling back to git clone');
+        }
+      });
+    }
+    if (clone) {
+      await instrument('clone', async () => {
+        const cloneStart = Date.now();
+        try {
+          const opts: string[] = [];
+          if (config.defaultBranch) {
+            opts.push('-b', config.defaultBranch);
+          }
+          if (config.fullClone) {
+            logger.debug('Performing full clone');
+          } else {
+            logger.debug('Performing blobless clone');
+            opts.push('--filter=blob:none');
+          }
+          if (config.extraCloneOpts) {
+            Object.entries(config.extraCloneOpts).forEach((e) =>
+              // TODO: types (#22198)
+              opts.push(e[0], `${e[1]!}`),
+            );
+          }
+          const emptyDirAndClone = async (): Promise<void> => {
+            await instrument(`fs.emptyDir(${localDir})`, () =>
+              fs.emptyDir(localDir),
+            );
+            await git.clone(config.url, '.', opts);
+          };
+          await gitRetry(() =>
+            instrument('emptyDirAndClone', emptyDirAndClone),
+          );
+          /* v8 ignore next 10 -- TODO: add test */
+        } catch (err) {
+          logger.debug({ err }, 'git clone error');
+          if (err.message?.includes('No space left on device')) {
+            throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
+          }
+          if (err.message === REPOSITORY_EMPTY) {
+            throw err;
+          }
+          throw new ExternalHostError(err, 'git');
+        }
+        const durationMs = Math.round(Date.now() - cloneStart);
+        logger.debug({ durationMs }, 'git clone completed');
+      });
+    }
     try {
-      await git.raw(['remote', 'set-url', 'origin', config.url]);
-      const fetchStart = Date.now();
-      await gitRetry(() => git.fetch(['--prune', 'origin']));
-      config.currentBranch =
-        config.currentBranch || (await getDefaultBranch(git));
-      await resetToBranch(config.currentBranch);
-      await cleanLocalBranches();
-      const durationMs = Math.round(Date.now() - fetchStart);
-      logger.info({ durationMs }, 'git fetch completed');
-      clone = false;
+      config.currentBranchSha = (
+        await git.raw(['rev-parse', 'HEAD'])
+      ).trim() as LongCommitSha;
       /* v8 ignore next -- TODO: add test */
     } catch (err) {
-      if (err.message === REPOSITORY_EMPTY) {
-        throw err;
+      if (err.message?.includes('fatal: not a git repository')) {
+        throw new Error(REPOSITORY_CHANGED);
       }
-      logger.info({ err }, 'git fetch error, falling back to git clone');
+      throw err;
     }
-  }
-  if (clone) {
-    const cloneStart = Date.now();
-    try {
-      const opts: string[] = [];
-      if (config.defaultBranch) {
-        opts.push('-b', config.defaultBranch);
-      }
-      if (config.fullClone) {
-        logger.debug('Performing full clone');
-      } else {
-        logger.debug('Performing blobless clone');
-        opts.push('--filter=blob:none');
-      }
-      if (config.extraCloneOpts) {
-        Object.entries(config.extraCloneOpts).forEach((e) =>
-          // TODO: types (#22198)
-          opts.push(e[0], `${e[1]!}`),
-        );
-      }
-      const emptyDirAndClone = async (): Promise<void> => {
-        await fs.emptyDir(localDir);
-        await git.clone(config.url, '.', opts);
-      };
-      await gitRetry(() => emptyDirAndClone());
-      /* v8 ignore next 10 -- TODO: add test */
-    } catch (err) {
-      logger.debug({ err }, 'git clone error');
-      if (err.message?.includes('No space left on device')) {
-        throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
-      }
-      if (err.message === REPOSITORY_EMPTY) {
-        throw err;
-      }
-      throw new ExternalHostError(err, 'git');
-    }
-    const durationMs = Math.round(Date.now() - cloneStart);
-    logger.debug({ durationMs }, 'git clone completed');
-  }
-  try {
-    config.currentBranchSha = (
-      await git.raw(['rev-parse', 'HEAD'])
-    ).trim() as LongCommitSha;
-    /* v8 ignore next -- TODO: add test */
-  } catch (err) {
-    if (err.message?.includes('fatal: not a git repository')) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
-    throw err;
-  }
-  // This will only happen now if set in global config
-  await cloneSubmodules(!!config.cloneSubmodules, config.cloneSubmodulesFilter);
-  try {
-    const latestCommit = (await git.log({ n: 1 })).latest;
-    logger.debug({ latestCommit }, 'latest repository commit');
-    /* v8 ignore next -- TODO: add test */
-  } catch (err) {
-    const errChecked = checkForPlatformFailure(err);
-    if (errChecked) {
-      throw errChecked;
-    }
-    if (err.message.includes('does not have any commits yet')) {
-      throw new Error(REPOSITORY_EMPTY);
-    }
-    logger.warn({ err }, 'Cannot retrieve latest commit');
-  }
-  config.currentBranch =
-    config.currentBranch ??
-    config.defaultBranch ??
-    (await getDefaultBranch(git));
-  /* v8 ignore next -- TODO: add test */
-  delete getCache()?.semanticCommits;
-
-  // If upstreamUrl is set then the bot is running in fork mode
-  // The "upstream" remote is the original repository which was forked from
-  if (config.upstreamUrl) {
-    logger.debug(
-      `Bringing default branch up-to-date with ${RENOVATE_FORK_UPSTREAM}, to get latest config`,
+    // This will only happen now if set in global config
+    await instrument('cloneSubmodules', () =>
+      cloneSubmodules(!!config.cloneSubmodules, config.cloneSubmodulesFilter),
     );
-    // Add remote if it does not exist
-    const remotes = await git.getRemotes(true);
-    if (!remotes.some((remote) => remote.name === RENOVATE_FORK_UPSTREAM)) {
-      logger.debug(`Adding remote ${RENOVATE_FORK_UPSTREAM}`);
-      await git.addRemote(RENOVATE_FORK_UPSTREAM, config.upstreamUrl);
+    try {
+      const latestCommit = (await git.log({ n: 1 })).latest;
+      logger.debug({ latestCommit }, 'latest repository commit');
+      /* v8 ignore next -- TODO: add test */
+    } catch (err) {
+      const errChecked = checkForPlatformFailure(err);
+      if (errChecked) {
+        throw errChecked;
+      }
+      if (err.message.includes('does not have any commits yet')) {
+        throw new Error(REPOSITORY_EMPTY);
+      }
+      logger.warn({ err }, 'Cannot retrieve latest commit');
     }
-    await syncForkWithUpstream(config.currentBranch);
-    await fetchBranchCommits(false);
-  }
+    config.currentBranch =
+      config.currentBranch ??
+      config.defaultBranch ??
+      (await getDefaultBranch(git));
+    /* v8 ignore next -- TODO: add test */
+    delete getCache()?.semanticCommits;
 
-  config.currentBranchSha = (
-    await git.revparse('HEAD')
-  ).trim() as LongCommitSha;
-  logger.debug(`Current branch SHA: ${config.currentBranchSha}`);
-}
+    // If upstreamUrl is set then the bot is running in fork mode
+    // The "upstream" remote is the original repository which was forked from
+    if (config.upstreamUrl) {
+      await instrument('sync with upstreamUrl', async () => {
+        logger.debug(
+          `Bringing default branch up-to-date with ${RENOVATE_FORK_UPSTREAM}, to get latest config`,
+        );
+        // Add remote if it does not exist
+        const remotes = await git.getRemotes(true);
+        if (!remotes.some((remote) => remote.name === RENOVATE_FORK_UPSTREAM)) {
+          logger.debug(`Adding remote ${RENOVATE_FORK_UPSTREAM}`);
+          await git.addRemote(RENOVATE_FORK_UPSTREAM, config.upstreamUrl!);
+        }
+        await syncForkWithUpstream(config.currentBranch);
+        await fetchBranchCommits(false);
+      });
+    }
+
+    config.currentBranchSha = (
+      await git.revparse('HEAD')
+    ).trim() as LongCommitSha;
+    logger.debug(`Current branch SHA: ${config.currentBranchSha}`);
+  },
+);
 
 export async function getRepoStatus(path?: string): Promise<StatusResult> {
   if (isString(path)) {
