@@ -23,6 +23,7 @@ import { addSplit, getSplits, splitInit } from '../../util/split';
 import {
   AbandonedPackageStats,
   DatasourceCacheStats,
+  GitOperationStats,
   HttpCacheStats,
   HttpStats,
   LookupStats,
@@ -207,6 +208,7 @@ export async function renovateRepository(
   LookupStats.report();
   ObsoleteCacheHitLogger.report();
   AbandonedPackageStats.report();
+  GitOperationStats.report();
   const cloned = isCloned();
   /* v8 ignore next 11 -- coverage not required of these `undefined` checks, as we're happy receiving an `undefined` in the logs */
   logger.info(

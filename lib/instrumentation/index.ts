@@ -41,6 +41,7 @@ import {
 } from '@opentelemetry/semantic-conventions';
 import { pkg } from '../expose.cjs';
 import { getEnv } from '../util/env';
+import { GitOperationSpanProcessor } from '../util/git/span-processor';
 import type { RenovateSpanOptions } from './types';
 import {
   isTraceDebuggingEnabled,
@@ -69,6 +70,8 @@ export function init(): void {
     const exporter = new OTLPTraceExporter();
     spanProcessors.push(new BatchSpanProcessor(exporter));
   }
+
+  spanProcessors.push(new GitOperationSpanProcessor());
 
   const env = getEnv();
   const baseResource = resourceFromAttributes({
