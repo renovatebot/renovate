@@ -2986,7 +2986,7 @@ You can also use the following template fields with `allowedVersions`:
 - `currentVersion`
 - `major`
 - `minor`
-- `patch` 
+- `patch`
 
 For example, if you want to upgrade to Angular to only the next major, you could set `allowedVersions` like this:
 
