@@ -2,6 +2,10 @@
 
 <!-- prettier-ignore -->
 !!! warning
+    All self-hosted Renovate instances must operate under a trust relationship with the developers of the monitored repositories. Because of this, there are [security implications](../security-and-permissions.md#security-awareness-for-self-hosted-renovate-instances) when running a self-hosted Renovate instance, which you must consider carefully.
+
+<!-- prettier-ignore -->
+!!! warning
     Most Open Source packages are hosted on github.com, including a number of tools that Renovate may pull at run-time.
     GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for `github.com` or the bot will get rate limited quickly.
     &nbsp;
