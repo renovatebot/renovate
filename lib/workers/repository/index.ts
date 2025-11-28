@@ -10,6 +10,7 @@ import {
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
 import { addExtractionStats } from '../../instrumentation/reporting';
+import { ATTR_RENOVATE_SPLIT } from '../../instrumentation/types';
 import { logger, setMeta } from '../../logger';
 import { resetRepositoryLogLevelRemaps } from '../../logger/remap';
 import { removeDanglingContainers } from '../../util/exec/docker';
@@ -95,6 +96,11 @@ export async function renovateRepository(
 
       return { config, localDir, errorRes };
     },
+    {
+      attributes: {
+        [ATTR_RENOVATE_SPLIT]: 'init',
+      },
+    },
   );
 
   try {
@@ -107,9 +113,9 @@ export async function renovateRepository(
       config.repoIsOnboarded! ||
       !OnboardingState.onboardingCacheValid ||
       OnboardingState.prUpdateRequested;
-    const extractResult = await instrument('extract', () =>
-      performExtract ? extractDependencies(config) : emptyExtract(config),
-    );
+    const extractResult = performExtract
+      ? await extractDependencies(config)
+      : emptyExtract(config);
     addExtractionStats(config, extractResult);
 
     const { branches, branchList, packageFiles } = extractResult;
@@ -122,12 +128,24 @@ export async function renovateRepository(
       GlobalConfig.get('dryRun') !== 'lookup' &&
       GlobalConfig.get('dryRun') !== 'extract'
     ) {
-      await instrument('onboarding', () =>
-        ensureOnboardingPr(config, packageFiles, branches),
+      await instrument(
+        'onboarding',
+        () => ensureOnboardingPr(config, packageFiles, branches),
+        {
+          attributes: {
+            [ATTR_RENOVATE_SPLIT]: 'onboarding',
+          },
+        },
       );
       addSplit('onboarding');
-      const res = await instrument('update', () =>
-        updateRepo(config, branches),
+      const res = await instrument(
+        'update',
+        () => updateRepo(config, branches),
+        {
+          attributes: {
+            [ATTR_RENOVATE_SPLIT]: 'update',
+          },
+        },
       );
       setMeta({ repository: config.repository });
       addSplit('update');
@@ -208,11 +226,23 @@ export async function renovateRepository(
 
 // istanbul ignore next: renovateRepository is ignored
 function emptyExtract(config: RenovateConfig): ExtractResult {
-  return {
-    branches: [],
-    branchList: [config.onboardingBranch!], // to prevent auto closing
-    packageFiles: {},
-  };
+  return instrument(
+    'extract',
+    () => {
+      addSplit('extract');
+      addSplit('lookup');
+      return {
+        branches: [],
+        branchList: [config.onboardingBranch!], // to prevent auto closing
+        packageFiles: {},
+      };
+    },
+    {
+      attributes: {
+        [ATTR_RENOVATE_SPLIT]: 'extract',
+      },
+    },
+  );
 }
 
 export function printRepositoryProblems(repository: string | undefined): void {

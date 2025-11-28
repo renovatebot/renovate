@@ -1,11 +1,5 @@
 import { ClientRequest } from 'node:http';
-import type {
-  Context,
-  Span,
-  SpanOptions,
-  Tracer,
-  TracerProvider,
-} from '@opentelemetry/api';
+import type { Context, Span, Tracer, TracerProvider } from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
 import { ProxyTracerProvider, SpanStatusCode } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
@@ -47,6 +41,7 @@ import {
 } from '@opentelemetry/semantic-conventions';
 import { pkg } from '../expose.cjs';
 import { getEnv } from '../util/env';
+import type { RenovateSpanOptions } from './types';
 import {
   isTraceDebuggingEnabled,
   isTraceSendingEnabled,
@@ -170,12 +165,18 @@ export function instrument<F extends () => ReturnType<F>>(
 export function instrument<F extends () => ReturnType<F>>(
   name: string,
   fn: F,
-  options: SpanOptions,
+  options: RenovateSpanOptions,
 ): ReturnType<F>;
 export function instrument<F extends () => ReturnType<F>>(
   name: string,
   fn: F,
-  options: SpanOptions = {},
+  options: RenovateSpanOptions,
+  context: Context,
+): ReturnType<F>;
+export function instrument<F extends () => ReturnType<F>>(
+  name: string,
+  fn: F,
+  options: RenovateSpanOptions = {},
   context: Context = api.context.active(),
 ): ReturnType<F> {
   return getTracer().startActiveSpan(name, options, context, (span: Span) => {

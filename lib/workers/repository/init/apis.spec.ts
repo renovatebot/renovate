@@ -15,7 +15,6 @@ describe('workers/repository/init/apis', () => {
       config = { ...getConfig() };
       config.errors = [];
       config.warnings = [];
-      config.token = 'some-token';
       delete config.optimizeForDisabled;
       delete config.forkProcessing;
     });
