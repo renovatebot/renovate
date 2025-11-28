@@ -184,15 +184,33 @@ export async function resolveConfigPresets(
   baseConfig?: RenovateConfig,
   _ignorePresets?: string[],
   existingPresets: string[] = [],
+  /**
+   * Resolve the given repo **??**, without any /internal/ Renovate **??**, and then log it out
+   */
+  resolveInternalPresets = true,
 ): Promise<AllConfig> {
   let ignorePresets = clone(_ignorePresets);
   if (!ignorePresets || ignorePresets.length === 0) {
     ignorePresets = inputConfig.ignorePresets ?? [];
   }
   logger.trace(
-    { config: inputConfig, existingPresets },
+    { config: inputConfig, existingPresets, resolveInternalPresets },
     'resolveConfigPresets',
   );
+
+  const internalPresets: string[] = [];
+
+  for (const k in internal.groups) {
+    const v = internal.groups[k];
+    for (const kk in v) {
+      if (k === 'default') {
+        internalPresets.push(`:${kk}`);
+        internalPresets.push(`default:${kk}`);
+      } else {
+        internalPresets.push(`${k}:${kk}`);
+      }
+    }
+  }
   let config: AllConfig = {};
   // First, merge all the preset configs from left to right
   if (inputConfig.extends?.length) {
@@ -214,11 +232,22 @@ export async function resolveConfigPresets(
           baseConfig ?? inputConfig,
           ignorePresets,
           existingPresets.concat([preset]),
+          resolveInternalPresets,
         );
         if (inputConfig?.ignoreDeps?.length === 0) {
           delete presetConfig.description;
         }
-        config = mergeChildConfig(config, presetConfig);
+        if (resolveInternalPresets) {
+          config = mergeChildConfig(config, presetConfig);
+        } else if (
+          !resolveInternalPresets &&
+          internalPresets.includes(preset)
+        ) {
+          logger.trace(
+            { ignoredPreset: preset, resolveInternalPresets },
+            'Not merging preset',
+          );
+        }
       }
     }
   }
@@ -241,6 +270,7 @@ export async function resolveConfigPresets(
               baseConfig,
               ignorePresets,
               existingPresets,
+              resolveInternalPresets,
             ),
           );
         } else {
@@ -255,11 +285,12 @@ export async function resolveConfigPresets(
         baseConfig,
         ignorePresets,
         existingPresets,
+        resolveInternalPresets,
       );
     }
   }
   logger.trace({ config: inputConfig }, 'Input config');
-  logger.trace({ config }, 'Resolved config');
+  logger.trace({ config, resolveInternalPresets }, 'Resolved config');
   return config;
 }
 
