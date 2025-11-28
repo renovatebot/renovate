@@ -113,16 +113,9 @@ export async function renovateRepository(
       config.repoIsOnboarded! ||
       !OnboardingState.onboardingCacheValid ||
       OnboardingState.prUpdateRequested;
-    const extractResult = await instrument(
-      'extract',
-      () =>
-        performExtract ? extractDependencies(config) : emptyExtract(config),
-      {
-        attributes: {
-          [ATTR_RENOVATE_SPLIT]: 'extract',
-        },
-      },
-    );
+    const extractResult = performExtract
+      ? await extractDependencies(config)
+      : emptyExtract(config);
     addExtractionStats(config, extractResult);
 
     const { branches, branchList, packageFiles } = extractResult;
@@ -233,11 +226,23 @@ export async function renovateRepository(
 
 // istanbul ignore next: renovateRepository is ignored
 function emptyExtract(config: RenovateConfig): ExtractResult {
-  return {
-    branches: [],
-    branchList: [config.onboardingBranch!], // to prevent auto closing
-    packageFiles: {},
-  };
+  return instrument(
+    'extract',
+    () => {
+      addSplit('extract');
+      addSplit('lookup');
+      return {
+        branches: [],
+        branchList: [config.onboardingBranch!], // to prevent auto closing
+        packageFiles: {},
+      };
+    },
+    {
+      attributes: {
+        [ATTR_RENOVATE_SPLIT]: 'extract',
+      },
+    },
+  );
 }
 
 export function printRepositoryProblems(repository: string | undefined): void {
