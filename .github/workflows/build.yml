@@ -357,6 +357,7 @@ jobs:
       id-token: write # required for codecov OIDC
 
     strategy:
+      fail-fast: false
       matrix:
         include: ${{ fromJSON(needs.setup.outputs.test-shard-matrix) }}
 
