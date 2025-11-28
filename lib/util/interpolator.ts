@@ -99,7 +99,7 @@ export function replaceInterpolatedValuesInObject(
     delete config[name];
   }
   for (const [key, value] of Object.entries(config)) {
-    if (isPlainObject(value)) {
+    if (isPlainObject(value) && key !== 'onboardingConfig') {
       config[key] = replaceInterpolatedValuesInObject(
         value,
         input,
