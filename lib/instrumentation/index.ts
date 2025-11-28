@@ -175,6 +175,12 @@ export function instrument<F extends () => ReturnType<F>>(
 export function instrument<F extends () => ReturnType<F>>(
   name: string,
   fn: F,
+  options: SpanOptions,
+  context: Context,
+): ReturnType<F>;
+export function instrument<F extends () => ReturnType<F>>(
+  name: string,
+  fn: F,
   options: SpanOptions = {},
   context: Context = api.context.active(),
 ): ReturnType<F> {
