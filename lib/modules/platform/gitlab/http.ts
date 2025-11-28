@@ -31,16 +31,8 @@ async function getMembers(group: string): Promise<GitLabUser[]> {
 }
 
 export async function getMemberUserIDs(group: string): Promise<number[]> {
-  try {
-    const members = await getMembers(group);
-    return members.map((u) => u.id);
-  } catch (err) {
-    logger.warn(
-      { group, errorMessage: err.message },
-      'Unable to fetch user IDs for members of the group',
-    );
-    return [];
-  }
+  const members = await getMembers(group);
+  return members.map((u) => u.id);
 }
 
 export async function getMemberUsernames(group: string): Promise<string[]> {
