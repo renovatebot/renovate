@@ -2981,7 +2981,12 @@ For example, if you want to upgrade to Angular v1.5 but _not_ to `angular` v1.6 
 
 Renovate calculates the valid syntax for this at runtime, because it depends on the dynamic versioning scheme.
 
-You can also use the template fields: `currentVersion`, `major`, `minor` and `patch` with `allowedVersions`.
+You can also use the following template fields with `allowedVersions`:
+
+- `currentVersion`
+- `major`
+- `minor`
+- `patch` 
 
 For example, if you want to upgrade to Angular to only the next major, you could set `allowedVersions` like this:
 
