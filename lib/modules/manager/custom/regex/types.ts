@@ -26,7 +26,7 @@ export interface RegexManagerConfig extends RegexManagerTemplates {
 export interface PackageFileInfo {
   /**full package file path ie. dir/folder/package.json */
   packageFile: string;
-  /**fexact package file name ie. package.json */
+  /** exacted package file name ie. package.json */
   packageFileName: string;
   content: string;
   packageFileDir: string;
