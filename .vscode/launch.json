@@ -10,7 +10,8 @@
         "LOG_LEVEL": "debug"
       },
       "console": "integratedTerminal",
-      "runtimeExecutable": "tsx",
+      "runtimeExecutable": "esbuild-dev",
+      "runtimeArgs": ["--cjs"],
       "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"]
     },
     {
@@ -23,7 +24,8 @@
       },
       "preLaunchTask": "npm: clean-cache",
       "console": "integratedTerminal",
-      "runtimeExecutable": "tsx",
+      "runtimeExecutable": "esbuild-dev",
+      "runtimeArgs": ["--cjs"],
       "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"]
     },
     {
