@@ -42,6 +42,7 @@ describe('modules/platform/gerrit/index', () => {
   const t0 = DateTime.fromISO('2025-04-14T16:33:37.000000000', {
     zone: 'utc',
   }) as DateTime<true>;
+  const gerritVersion = '3.0.0'; // default version
 
   beforeAll(() => {
     vi.useFakeTimers();
@@ -57,6 +58,7 @@ describe('modules/platform/gerrit/index', () => {
       repository: 'test/repo',
       labels: {},
     });
+    clientMock.getVersion.mockResolvedValue('3.0.0');
     await gerrit.initPlatform({
       endpoint: gerritEndpointUrl,
       username: 'user',
@@ -65,14 +67,16 @@ describe('modules/platform/gerrit/index', () => {
   });
 
   describe('initPlatform()', () => {
-    it('should throw if no endpoint', () => {
+    it('should throw if no endpoint', async () => {
       expect.assertions(1);
-      expect(() => gerrit.initPlatform({})).toThrow();
+      await expect(() => gerrit.initPlatform({})).rejects.toThrow();
     });
 
-    it('should throw if no username/password', () => {
+    it('should throw if no username/password', async () => {
       expect.assertions(1);
-      expect(() => gerrit.initPlatform({ endpoint: 'endpoint' })).toThrow();
+      await expect(() =>
+        gerrit.initPlatform({ endpoint: 'endpoint' }),
+      ).rejects.toThrow();
     });
 
     it('should init', async () => {
@@ -83,6 +87,17 @@ describe('modules/platform/gerrit/index', () => {
           password: '123',
         }),
       ).toEqual({ endpoint: 'https://dev.gerrit.com/renovate/' });
+    });
+
+    it('should throw if auth fails', async () => {
+      clientMock.getVersion.mockRejectedValue(new Error('Auth failed'));
+      await expect(
+        gerrit.initPlatform({
+          endpoint: gerritEndpointUrl,
+          username: 'abc',
+          password: '123',
+        }),
+      ).rejects.toThrow('Init: Authentication failure');
     });
   });
 
@@ -142,7 +157,7 @@ describe('modules/platform/gerrit/index', () => {
 
       expect(clientMock.findChanges.mock.calls[0]).toEqual([
         'test/repo',
-        { branchName: '', label: '-2', state: 'open' },
+        { branchName: '', label: '-2', state: 'open', gerritVersion },
       ]);
       expect(clientMock.abandonChange.mock.calls).toEqual([
         [
@@ -175,6 +190,7 @@ describe('modules/platform/gerrit/index', () => {
           targetBranch: 'master',
           singleChange: true,
           requestDetails: REQUEST_DETAILS_FOR_PRS,
+          gerritVersion,
         },
       );
     });
@@ -337,6 +353,7 @@ describe('modules/platform/gerrit/index', () => {
           state: 'open',
           singleChange: true,
           requestDetails: REQUEST_DETAILS_FOR_PRS,
+          gerritVersion,
         },
       );
     });
@@ -363,6 +380,7 @@ describe('modules/platform/gerrit/index', () => {
           singleChange: true,
           targetBranch: 'master',
           requestDetails: REQUEST_DETAILS_FOR_PRS,
+          gerritVersion,
         },
       ]);
     });
@@ -389,6 +407,7 @@ describe('modules/platform/gerrit/index', () => {
           singleChange: true,
           targetBranch: undefined,
           requestDetails: REQUEST_DETAILS_FOR_PRS,
+          gerritVersion,
         },
       ]);
     });
@@ -403,6 +422,7 @@ describe('modules/platform/gerrit/index', () => {
         {
           branchName: '',
           requestDetails: REQUEST_DETAILS_FOR_PRS,
+          gerritVersion,
         },
       );
     });
