@@ -11,6 +11,7 @@ import { regEx } from '../../../util/regex';
 import { parseSingleYaml } from '../../../util/yaml';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
+import { parseLine } from '../gomod/line-parser';
 import { extractDependency as npmExtractDependency } from '../npm/extract/common/dependency';
 import { pep508ToPackageDependency } from '../pep621/utils';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -178,6 +179,19 @@ function findDependencies(precommitFile: PreCommitConfig): PackageDependency[] {
             const dep = pep508ToPackageDependency('pre-commit-python', req);
             if (dep) {
               packageDependencies.push(dep);
+            }
+          });
+        } else if (hook.language === 'golang') {
+          hook.additional_dependencies?.map((req) => {
+            // Convert dependency into a gomod require line to use the gomod line parser
+            const requireLine = `require ${req.replace('@', ' ')}`;
+            const dep = parseLine(requireLine);
+            if (dep) {
+              const depType = 'pre-commit-golang';
+              packageDependencies.push({
+                ...dep,
+                depType,
+              });
             }
           });
         }
