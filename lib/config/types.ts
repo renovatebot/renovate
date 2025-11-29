@@ -413,7 +413,7 @@ export type MergeStrategy =
 
 // ref: https://github.com/renovatebot/renovate/issues/39458
 // This list should be added to as any new unsafe execution commands should be permitted
-export type AllowedUnsafeExecution = 'gradlewExecution';
+export type AllowedUnsafeExecution = undefined;
 
 // TODO: Proper typings
 export interface PackageRule

@@ -242,8 +242,8 @@ export async function updateArtifacts({
     }
 
     await writeLocalFile(packageFileName, newPackageFileContent);
-
     await exec(cmds, { ...execOptions, ignoreStdout: true });
+
     const res = await getUpdatedLockfiles(oldLockFileContentMap);
     logger.debug('Returning updated Gradle dependency lockfiles');
 

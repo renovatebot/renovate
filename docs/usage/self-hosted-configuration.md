@@ -114,16 +114,10 @@ module.exports = {
 
 ## allowedUnsafeExecutions
 
-This should be configured to a list of commands which are allowed to be run automatically as part
-of a dependency upgrade. Some `updateArtifact` methods will implicitly call a command in the repository
-in order to finalize a dependency upgrade. Examples include running `gradlew`. As there is a security risk of running these commands automatically when a dependency upgrades, self hosted implementations
-need to explicitly declare which commands are permitted for their installation.
-
-Currently supported options include:
-
-| Option           | Description                                       |
-| ---------------- | ------------------------------------------------- |
-| gradlewExecution | Allows `gradlew` to run after an artifact upgrade |
+This should be configured to a list of commands which are allowed to be run automatically as part of a dependency upgrade.
+Some `updateArtifact` methods will implicitly call a command in the repository in order to finalize a dependency upgrade.
+Examples include running `gradlew`.
+As there is a security risk of running these commands automatically when a dependency upgrades, self hosted implementations need to explicitly declare which commands are permitted for their installation.
 
 ## autodiscover
 
