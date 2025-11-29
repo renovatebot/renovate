@@ -15,6 +15,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { getCache } from '../cache/repository';
 import { getEnv } from '../env';
+import * as hostRules from '../host-rules';
 import { maskToken } from '../mask';
 import * as p from '../promises';
 import { range } from '../range';
@@ -116,6 +117,30 @@ function handleGotError(
   }
   if (err.statusCode === 403 && message.includes('rate limit exceeded')) {
     logger.debug({ err }, 'GitHub failure: rate limit');
+
+    const parsed = parseUrl(baseUrl);
+
+    const rule = hostRules.find({ url: baseUrl });
+    if (rule.token || rule.password) {
+      logger.once.warn(
+        'Rate limit exceeded for api.github.com, even though we are authenticated',
+      );
+    } else {
+      if (parsed?.hostname === 'api.github.com') {
+        logger.once.warn(
+          {
+            documentationUrl:
+              'https://docs.renovatebot.com/getting-started/running/#githubcom-token-for-changelogs-and-tools',
+          },
+          `Rate limit exceeded for ${parsed.host}, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN`,
+        );
+      } else {
+        logger.once.warn(
+          `Rate limit exceeded for ${parsed!.host}, as no hostRules set for this host`,
+        );
+      }
+    }
+
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (

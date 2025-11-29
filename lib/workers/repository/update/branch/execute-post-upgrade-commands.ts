@@ -319,7 +319,6 @@ export default async function executePostUpgradeCommands(
         config.postUpgradeTasks!.executionMode === 'branch'
           ? config.postUpgradeTasks
           : undefined,
-      fileFilters: config.fileFilters,
     },
   ];
 

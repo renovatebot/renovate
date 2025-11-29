@@ -353,7 +353,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: ${{ matrix.runner-timeout-minutes }}
 
+    permissions:
+      id-token: write # required for codecov OIDC
+
     strategy:
+      fail-fast: false
       matrix:
         include: ${{ fromJSON(needs.setup.outputs.test-shard-matrix) }}
 
@@ -393,17 +397,26 @@ jobs:
               --coverage ${{ matrix.coverage }}
           done
 
+      - name: Codecov Test
+        if: github.event_name != 'merge_group' && !cancelled()
+        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
+        with:
+          use_oidc: true
+          report_type: test_results
+          directory: ./coverage/shard
+          # TODO: compute proper flags per job
+          # flags: ${{ matrix.name }}
+          verbose: true
+
       - name: Move coverage files
         if: success() && github.event.pull_request.draft != true && matrix.coverage
         run: |
           mkdir -p ./coverage/lcov
           mkdir -p ./coverage/json
-          mkdir -p ./coverage/junit
           for shard in ${{ matrix.shards }};
           do
             mv ./coverage/shard/$shard/lcov.info ./coverage/lcov/$shard.lcov
             mv ./coverage/shard/$shard/coverage-final.json ./coverage/json/$shard.json
-            mv ./coverage/shard/$shard/junit.xml ./coverage/junit/junit-$shard.xml
           done
 
       - name: Save coverage artifacts
@@ -414,7 +427,6 @@ jobs:
           path: |
             ./coverage/lcov
             ./coverage/json
-            ./coverage/junit
 
   codecov:
     needs: [test]
@@ -444,15 +456,6 @@ jobs:
         with:
           use_oidc: true
           directory: coverage/lcov
-          fail_ci_if_error: github.event_name != 'pull_request'
-          verbose: true
-
-      - name: Codecov Test
-        if: github.event_name != 'merge_group' && !cancelled()
-        uses: codecov/test-results-action@47f89e9acb64b76debcd5ea40642d25a4adced9f # v1.1.1
-        with:
-          use_oidc: true
-          directory: coverage/junit
           fail_ci_if_error: github.event_name != 'pull_request'
           verbose: true
 
@@ -766,7 +769,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@3159f3f297e9f0ccd5b18ce5c723e0d86a665f64 # v3.14.21
+        uses: containerbase/internal-tools@655d8c2eeed7b80011d094bfb650e66967c5f7ae # v3.14.22
         with:
           command: docker-config
 

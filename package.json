@@ -144,7 +144,7 @@
   },
   "volta": {
     "node": "24.11.1",
-    "pnpm": "10.22.0"
+    "pnpm": "10.23.0"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.922.0",
@@ -244,7 +244,7 @@
     "prettier": "3.6.2",
     "protobufjs": "7.5.4",
     "punycode": "2.3.1",
-    "redis": "5.9.0",
+    "redis": "5.10.0",
     "remark": "15.0.1",
     "remark-gfm": "4.0.1",
     "remark-github": "12.0.0",
@@ -268,7 +268,7 @@
     "zod": "3.25.76"
   },
   "optionalDependencies": {
-    "better-sqlite3": "12.4.1",
+    "better-sqlite3": "12.4.5",
     "openpgp": "6.2.2",
     "re2": "1.22.3"
   },
@@ -318,7 +318,7 @@
     "@types/tar": "6.1.13",
     "@types/tmp": "0.2.6",
     "@types/validate-npm-package-name": "4.0.2",
-    "@vitest/coverage-v8": "4.0.10",
+    "@vitest/coverage-v8": "4.0.12",
     "@vitest/eslint-plugin": "1.4.3",
     "ajv": "8.17.1",
     "ajv-formats": "3.0.1",
@@ -339,13 +339,13 @@
     "graphql": "16.12.0",
     "husky": "9.1.7",
     "jest-extended": "7.0.0",
-    "lint-staged": "16.2.6",
+    "lint-staged": "16.2.7",
     "markdownlint-cli2": "0.18.1",
     "memfs": "4.51.0",
     "nock": "14.0.10",
     "npm-run-all2": "8.0.4",
     "nyc": "17.1.0",
-    "rimraf": "6.1.0",
+    "rimraf": "6.1.2",
     "semantic-release": "25.0.2",
     "tar": "7.5.2",
     "tmp-promise": "3.0.3",
@@ -356,10 +356,10 @@
     "unified": "11.0.5",
     "vite": "npm:rolldown-vite@7.2.7",
     "vite-tsconfig-paths": "5.1.4",
-    "vitest": "4.0.10",
+    "vitest": "4.0.12",
     "vitest-mock-extended": "3.1.0"
   },
-  "packageManager": "pnpm@10.22.0",
+  "packageManager": "pnpm@10.23.0",
   "files": [
     "dist",
     "renovate-schema.json"

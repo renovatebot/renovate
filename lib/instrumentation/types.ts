@@ -1,7 +1,16 @@
-import type { Attributes, SpanKind } from '@opentelemetry/api';
+import type { Attributes, SpanKind, SpanOptions } from '@opentelemetry/api';
+import type { RenovateSplit } from '../config/types';
 import type { BunyanRecord } from '../logger/types';
 import type { PackageFile } from '../modules/manager/types';
 import type { BranchCache } from '../util/cache/repository/types';
+
+export type RenovateSpanOptions = {
+  attributes?: RenovateSpanAttributes;
+} & SpanOptions;
+
+export type RenovateSpanAttributes = {
+  [ATTR_RENOVATE_SPLIT]?: RenovateSplit;
+} & Attributes;
 
 /**
  * The instrumentation decorator parameters.
@@ -54,3 +63,5 @@ export interface DependencyStatus {
   outdated: number;
   total: number;
 }
+
+export const ATTR_RENOVATE_SPLIT = 'renovate.split';
