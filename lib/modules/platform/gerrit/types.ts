@@ -1,3 +1,4 @@
+import type { LongCommitSha } from '../../../util/git/types';
 import type { FindPRConfig } from '../types';
 
 export interface GerritFindPRConfig extends FindPRConfig {
@@ -82,7 +83,7 @@ export interface GerritChange {
   /** Requires o=MESSAGES. */
   messages?: GerritChangeMessageInfo[];
   /** Requires o=CURRENT_REVISION. */
-  current_revision?: string;
+  current_revision?: LongCommitSha;
   /**
    * All patch sets of this change as a map that maps the commit ID of the patch set to a RevisionInfo entity.
    * Requires o=CURRENT_REVISION.
