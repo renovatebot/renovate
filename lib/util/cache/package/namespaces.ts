@@ -108,6 +108,3 @@ export const packageCacheNamespaces = [
 export type PackageCacheNamespace =
   | (typeof packageCacheNamespaces)[number]
   | `datasource-releases-${string}`;
-
-export type CombinedKey =
-  `datasource-mem:pkg-fetch:${PackageCacheNamespace}:${string}`;

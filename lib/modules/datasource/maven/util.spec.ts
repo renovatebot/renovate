@@ -1,8 +1,6 @@
 import type Request from 'got/dist/source/core';
-import { vi } from 'vitest';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as packageCache from '../../../util/cache/package';
 import { Http, HttpError } from '../../../util/http';
 import { MAVEN_REPO } from './common';
 import type { MavenFetchError } from './types';
@@ -11,7 +9,7 @@ import {
   downloadMavenXml,
   downloadS3Protocol,
 } from './util';
-import { logger, partial } from '~test/util';
+import { logger, packageCache, partial } from '~test/util';
 
 const http = new Http('test');
 
@@ -127,14 +125,8 @@ describe('modules/datasource/maven/util', () => {
     });
 
     describe('429 logging', () => {
-      const getCacheTypeSpy = vi.spyOn(packageCache, 'getCacheType');
-
-      afterAll(() => {
-        getCacheTypeSpy.mockRestore();
-      });
-
       it('throws ExternalHostError for 429 status with redis cache', async () => {
-        getCacheTypeSpy.mockReturnValue('redis');
+        packageCache.getType.mockReturnValue('redis');
         const http = partial<Http>({
           getText: () =>
             Promise.reject(
@@ -150,12 +142,12 @@ describe('modules/datasource/maven/util', () => {
 
         expect(logger.logger.once.warn).toHaveBeenCalledWith(
           { failedUrl: MAVEN_REPO + '/some/path' },
-          'Maven Central rate limiting detected despite Redis caching.',
+          "Maven Central rate limiting detected despite 'redis' caching being enabled.",
         );
       });
 
       it('throws ExternalHostError for 429 status without redis cache', async () => {
-        getCacheTypeSpy.mockReturnValue('file');
+        packageCache.getType.mockReturnValue('file');
         const http = partial<Http>({
           getText: () =>
             Promise.reject(
@@ -171,7 +163,28 @@ describe('modules/datasource/maven/util', () => {
 
         expect(logger.logger.once.warn).toHaveBeenCalledWith(
           { failedUrl: MAVEN_REPO + '/some/path' },
-          'Maven Central rate limiting detected. Persistent caching required.',
+          "Maven Central rate limiting detected despite 'file' caching being enabled.",
+        );
+      });
+
+      it('throws ExternalHostError for 429 status with no cache', async () => {
+        packageCache.getType.mockReturnValue(undefined);
+        const http = partial<Http>({
+          getText: () =>
+            Promise.reject(
+              httpError({
+                code: 'ECONNRESET',
+                response: { statusCode: 429 } as never,
+              }),
+            ),
+        });
+        await expect(
+          downloadHttpProtocol(http, MAVEN_REPO + '/some/path'),
+        ).rejects.toThrow(ExternalHostError);
+
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          { failedUrl: MAVEN_REPO + '/some/path' },
+          'Maven Central rate limiting detected. Persistent caching is required.',
         );
       });
 

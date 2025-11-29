@@ -5,7 +5,7 @@ import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as packageCache from '../../../util/cache/package';
+import { packageCache } from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
 import { getEnv } from '../../../util/env';
 import * as fs from '../../../util/fs';

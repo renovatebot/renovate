@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import * as npmApi from '../../../modules/datasource/npm';
 import * as memCache from '../../../util/cache/memory';
+import { packageCache } from '../../../util/cache/package';
 import * as repositoryCache from '../../../util/cache/repository';
 import { initRepoCache } from '../../../util/cache/repository/init';
 import { privateCacheDir } from '../../../util/fs';
@@ -8,6 +9,7 @@ import type { WorkerPlatformConfig } from './apis';
 
 export async function resetCaches(): Promise<void> {
   memCache.reset();
+  packageCache.reset();
   repositoryCache.resetCache();
   await fs.remove(privateCacheDir());
 }

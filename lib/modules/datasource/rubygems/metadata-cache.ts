@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import * as packageCache from '../../../util/cache/package';
+import { packageCache } from '../../../util/cache/package';
 import { toSha256 } from '../../../util/hash';
 import type { Http } from '../../../util/http';
 import type { AsyncResult } from '../../../util/result';
