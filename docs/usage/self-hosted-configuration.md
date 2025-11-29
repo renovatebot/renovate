@@ -221,6 +221,36 @@ For example:
 }
 ```
 
+## azureBypassPolicyReason
+
+By default the reason for bypassing policies is set to "Auto-merge by Renovate".
+
+Define a custom reason when policies are being bypassed to perform auto-merge.
+
+## azureBypassPolicyTypes
+
+Add a list of policy UUIDs which might be failing but should not block auto-merge.
+
+> For this to work the account that executes renovate must be allowed the `Bypass policies when completing pull requests` permission on the respective repository.
+
+You can get the list of all available policy UUIDs by using the [Azure DevOps REST API](https://learn.microsoft.com/en-us/rest/api/azure/devops/policy/types/list).
+
+```http request
+GET https://dev.azure.com/{organization}/{project}/_apis/policy/types?api-version=7.1
+```
+
+For Example:
+
+```json5
+{
+  azureBypassPolicyTypes: [
+    'fd2167ab-b0be-447a-8ec8-39368250530e', // RequiredReviewers
+    'fa4e907d-c16b-4a4c-9dfa-4906e5d171dd', // MinimumNumberOfReviewers
+    '40e92b44-2fe1-4dd6-b3d8-74a9c21d0c6e', // WorkItemLinking
+  ],
+}
+```
+
 ## baseDir
 
 By default Renovate uses a temporary directory like `/tmp/renovate` to store its data.

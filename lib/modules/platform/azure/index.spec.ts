@@ -1,6 +1,7 @@
 import { Readable } from 'node:stream';
 import { isString } from '@sindresorhus/is';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
+import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
 import type {
   GitPullRequest,
   GitVersionDescriptor,
@@ -11,6 +12,10 @@ import {
   GitVersionType,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import {
+  type PolicyEvaluationRecord,
+  PolicyEvaluationStatus,
+} from 'azure-devops-node-api/interfaces/PolicyInterfaces';
 import type { Mocked, MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
@@ -1929,6 +1934,254 @@ describe('modules/platform/azure/index', () => {
       );
       expect(logger.warn).toHaveBeenCalled();
       expect(res).toBeTrue();
+    });
+
+    it('should bypass policies with provided reason if non approved policies are bypassed', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const pullRequestIdMock = 12345;
+      const branchNameMock = 'test';
+      const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
+
+      const updatePullRequestMock = vi.fn().mockResolvedValueOnce({});
+
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequestById: vi.fn().mockResolvedValue({
+            lastMergeSourceCommit: lastMergeSourceCommitMock,
+            targetRefName: 'refs/heads/ding',
+            title: 'title',
+          }),
+          updatePullRequest: updatePullRequestMock,
+        }),
+      );
+
+      azureApi.policyApi.mockResolvedValueOnce(
+        partial<IPolicyApi>({
+          getPolicyEvaluations: vi.fn().mockResolvedValue([
+            {
+              configuration: {
+                settings: undefined,
+                isEnabled: true,
+                isBlocking: true,
+                type: {
+                  id: 'some-policy-id',
+                },
+              },
+              status: PolicyEvaluationStatus.Rejected,
+            },
+            {
+              configuration: {
+                settings: undefined,
+                isEnabled: true,
+                isBlocking: true,
+                type: {
+                  id: 'another-policy-id',
+                },
+              },
+              status: PolicyEvaluationStatus.Queued,
+            },
+          ] satisfies PolicyEvaluationRecord[]),
+        }),
+      );
+
+      azureHelper.getMergeMethod = vi
+        .fn()
+        .mockResolvedValueOnce(GitPullRequestMergeStrategy.Squash);
+
+      const res = await azure.mergePr({
+        branchName: branchNameMock,
+        id: pullRequestIdMock,
+        strategy: 'auto',
+        platformOptions: {
+          azureBypassPolicyTypes: ['some-policy-id', 'another-policy-id'],
+        },
+      });
+
+      expect(updatePullRequestMock).toHaveBeenCalledWith(
+        {
+          status: PullRequestStatus.Completed,
+          lastMergeSourceCommit: lastMergeSourceCommitMock,
+          completionOptions: {
+            mergeStrategy: GitPullRequestMergeStrategy.Squash,
+            deleteSourceBranch: true,
+            mergeCommitMessage: 'title',
+            bypassPolicy: true,
+            bypassReason: 'Auto-merge by Renovate',
+          },
+        },
+        '1',
+        pullRequestIdMock,
+      );
+      expect(res).toBeTrue();
+    });
+
+    it('should complete pr but not bypass policies if all policies are approved, not applicable, disabled or not blocking', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const pullRequestIdMock = 12345;
+      const branchNameMock = 'test';
+      const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
+
+      const updatePullRequestMock = vi.fn().mockResolvedValue({});
+
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequestById: vi.fn().mockResolvedValue({
+            lastMergeSourceCommit: lastMergeSourceCommitMock,
+            targetRefName: 'refs/heads/ding',
+            title: 'title',
+          }),
+          updatePullRequest: updatePullRequestMock,
+        }),
+      );
+
+      azureApi.policyApi.mockResolvedValueOnce(
+        partial<IPolicyApi>({
+          getPolicyEvaluations: vi.fn().mockResolvedValue([
+            {
+              configuration: {
+                settings: undefined,
+                isEnabled: true,
+                isBlocking: true,
+                type: {
+                  id: 'approved-policy-id',
+                },
+              },
+              status: PolicyEvaluationStatus.Approved,
+            },
+            {
+              configuration: {
+                settings: undefined,
+                isEnabled: true,
+                isBlocking: true,
+                type: {
+                  id: 'not-applicable-policy-id',
+                },
+              },
+              status: PolicyEvaluationStatus.NotApplicable,
+            },
+            {
+              configuration: {
+                settings: undefined,
+                isEnabled: false,
+                isBlocking: true,
+                type: {
+                  id: 'disabled-policy-id',
+                },
+              },
+              status: PolicyEvaluationStatus.Rejected,
+            },
+            {
+              configuration: {
+                settings: undefined,
+                isEnabled: true,
+                isBlocking: false,
+                type: {
+                  id: 'non-blocking-policy-id',
+                },
+              },
+              status: PolicyEvaluationStatus.Rejected,
+            },
+          ] satisfies PolicyEvaluationRecord[]),
+        }),
+      );
+
+      azureHelper.getMergeMethod = vi
+        .fn()
+        .mockResolvedValueOnce(GitPullRequestMergeStrategy.Squash);
+
+      const res = await azure.mergePr({
+        branchName: branchNameMock,
+        id: pullRequestIdMock,
+        strategy: 'auto',
+        platformOptions: {
+          azureBypassPolicyTypes: [
+            'approved-policy-id',
+            'not-applicable-policy-id',
+            'disabled-policy-id',
+            'non-blocking-policy-id',
+          ],
+        },
+      });
+
+      expect(updatePullRequestMock).toHaveBeenCalledWith(
+        {
+          status: PullRequestStatus.Completed,
+          lastMergeSourceCommit: lastMergeSourceCommitMock,
+          completionOptions: {
+            mergeStrategy: GitPullRequestMergeStrategy.Squash,
+            deleteSourceBranch: true,
+            mergeCommitMessage: 'title',
+          },
+        },
+        '1',
+        pullRequestIdMock,
+      );
+      expect(res).toBeTrue();
+    });
+
+    it('should not complete pr should not bypass policies if not all non approved policies are bypassed', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const pullRequestIdMock = 12345;
+      const branchNameMock = 'test';
+      const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
+
+      const updatePullRequestMock = vi.fn().mockResolvedValue({});
+
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequestById: vi.fn().mockResolvedValue({
+            lastMergeSourceCommit: lastMergeSourceCommitMock,
+            targetRefName: 'refs/heads/ding',
+            title: 'title',
+          }),
+          updatePullRequest: updatePullRequestMock,
+        }),
+      );
+
+      azureApi.policyApi.mockResolvedValueOnce(
+        partial<IPolicyApi>({
+          getPolicyEvaluations: vi.fn().mockResolvedValue([
+            {
+              configuration: {
+                settings: undefined,
+                isEnabled: true,
+                isBlocking: true,
+                type: {
+                  id: 'some-policy-id',
+                },
+              },
+              status: PolicyEvaluationStatus.Rejected,
+            },
+            {
+              configuration: {
+                settings: undefined,
+                isEnabled: true,
+                isBlocking: true,
+                type: {
+                  id: 'another-policy-id',
+                },
+              },
+              status: PolicyEvaluationStatus.Queued,
+            },
+          ] satisfies PolicyEvaluationRecord[]),
+        }),
+      );
+
+      azureHelper.getMergeMethod = vi
+        .fn()
+        .mockResolvedValueOnce(GitPullRequestMergeStrategy.Squash);
+
+      const res = await azure.mergePr({
+        branchName: branchNameMock,
+        id: pullRequestIdMock,
+        strategy: 'auto',
+        platformOptions: {
+          azureBypassPolicyTypes: ['another-policy-id'],
+        },
+      });
+
+      expect(updatePullRequestMock).not.toHaveBeenCalled();
+      expect(res).toBeFalse();
     });
   });
 

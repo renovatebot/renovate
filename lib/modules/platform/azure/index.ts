@@ -4,6 +4,7 @@ import type {
   GitItem,
   GitPullRequest,
   GitPullRequestCommentThread,
+  GitPullRequestCompletionOptions,
   GitStatus,
   GitVersionDescriptor,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
@@ -13,6 +14,8 @@ import {
   GitVersionType,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type { PolicyConfigurationRef } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
+import { PolicyEvaluationStatus } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -784,9 +787,11 @@ export async function mergePr({
   branchName,
   id: pullRequestId,
   strategy,
+  platformOptions,
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${pullRequestId}, ${branchName!})`);
   const azureApiGit = await azureApi.gitApi();
+  const azurePolicyApi = await azureApi.policyApi();
 
   let pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
 
@@ -794,6 +799,52 @@ export async function mergePr({
     strategy === 'auto'
       ? await getMergeStrategy(pr.targetRefName!)
       : mapMergeStrategy(strategy);
+
+  const bypassPolicies: PolicyConfigurationRef[] = [];
+  let bypassCompletionOptions: GitPullRequestCompletionOptions = {};
+
+  const bypassPolicyTypes = new Set<string>(
+    platformOptions?.azureBypassPolicyTypes ?? [],
+  );
+
+  if (bypassPolicyTypes.size > 0) {
+    const artifactId = `vstfs:///CodeReview/CodeReviewId/${config.project}/${pullRequestId}`;
+    const policyEvaluations = await azurePolicyApi.getPolicyEvaluations(
+      config.project,
+      artifactId,
+    );
+
+    // only use bypass if all required policies are in approved state
+    for (const policyEvaluation of policyEvaluations) {
+      if (
+        policyEvaluation.status === PolicyEvaluationStatus.Approved ||
+        policyEvaluation.status === PolicyEvaluationStatus.NotApplicable ||
+        policyEvaluation.configuration?.isEnabled !== true ||
+        policyEvaluation.configuration?.isBlocking !== true ||
+        !policyEvaluation.configuration?.type?.id
+      ) {
+        // policy does not require bypassing
+        continue;
+      }
+
+      if (bypassPolicyTypes.has(policyEvaluation.configuration.type.id)) {
+        bypassPolicies.push(policyEvaluation.configuration);
+        bypassCompletionOptions = {
+          bypassPolicy: true,
+          bypassReason:
+            platformOptions?.azureBypassPolicyReason ??
+            'Auto-merge by Renovate',
+        };
+      } else {
+        logger.debug(
+          { policy: policyEvaluation },
+          'Policy prevents PR from auto-merge.',
+        );
+        return false;
+      }
+    }
+  }
+
   const objToUpdate: GitPullRequest = {
     status: PullRequestStatus.Completed,
     lastMergeSourceCommit: pr.lastMergeSourceCommit,
@@ -801,10 +852,14 @@ export async function mergePr({
       mergeStrategy,
       deleteSourceBranch: true,
       mergeCommitMessage: pr.title,
+      ...bypassCompletionOptions,
     },
   };
 
   logger.trace(
+    {
+      bypassPolicies,
+    },
     `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
       PullRequestStatus[PullRequestStatus.Completed]
     }) with lastMergeSourceCommit ${
@@ -812,7 +867,7 @@ export async function mergePr({
       pr.lastMergeSourceCommit?.commitId
     } using mergeStrategy ${mergeStrategy} (${
       GitPullRequestMergeStrategy[mergeStrategy]
-    })`,
+    })${bypassCompletionOptions.bypassPolicy ? ' and bypassPolicies' : ''}`,
   );
 
   try {
