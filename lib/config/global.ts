@@ -61,7 +61,7 @@ export class GlobalConfig {
       : GlobalConfig.config;
   }
 
-  static set(config: RenovateConfig | RepoGlobalConfig): RenovateConfig {
+  static set(config: RenovateConfig & RepoGlobalConfig): RenovateConfig {
     GlobalConfig.reset();
 
     const result = { ...config };

@@ -32,6 +32,7 @@ import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
 import { supportedDatasources } from './presets/internal/merge-confidence';
 import type {
+  AllConfig,
   AllowedParents,
   RenovateConfig,
   RenovateOptions,
@@ -156,7 +157,7 @@ function initOptions(): void {
 
 export async function validateConfig(
   configType: 'global' | 'inherit' | 'repo',
-  config: RenovateConfig,
+  config: AllConfig,
   isPreset?: boolean,
   parentPath?: string,
 ): Promise<ValidationResult> {
@@ -452,7 +453,7 @@ export async function validateConfig(
                     'separateMultipleMajor',
                     'separateMultipleMinor',
                     'versioning',
-                  ];
+                  ] as const;
                   if (isNonEmptyArray(resolvedRule.matchUpdateTypes)) {
                     for (const option of preLookupOptions) {
                       if (resolvedRule[option] !== undefined) {
@@ -625,7 +626,7 @@ export async function validateConfig(
             } else if (key === 'env') {
               const allowedEnvVars =
                 configType === 'global'
-                  ? ((config.allowedEnv as string[]) ?? [])
+                  ? (config.allowedEnv ?? [])
                   : GlobalConfig.get('allowedEnv', []);
               for (const [envVarName, envVarValue] of Object.entries(val)) {
                 if (!isString(envVarValue)) {
@@ -741,7 +742,7 @@ export async function validateConfig(
     if (key === 'hostRules' && isArray(val)) {
       const allowedHeaders =
         configType === 'global'
-          ? ((config.allowedHeaders as string[]) ?? [])
+          ? (config.allowedHeaders ?? [])
           : GlobalConfig.get('allowedHeaders', []);
       for (const rule of val as HostRule[]) {
         if (isNonEmptyString(rule.matchHost)) {
