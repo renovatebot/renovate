@@ -3081,7 +3081,6 @@ const options: RenovateOptions[] = [
         which run automatically, and are not explicitly added in \`postUpgradeTasks\``,
     type: 'array',
     subType: 'string',
-    allowedValues: [],
     default: [],
     stage: 'global',
     globalOnly: true,
