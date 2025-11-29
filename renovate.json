@@ -97,6 +97,13 @@
       "matchDatasources": ["npm"],
       "matchDepNames": ["got"],
       "separateMultipleMajor": true
+    },
+    {
+      "matchPackageNames": [
+        "markdownlint-cli2",
+        "davidanson/markdownlint-cli2-action"
+      ],
+      "groupName": "markdownlint-cli2"
     }
   ],
   "customManagers": [
