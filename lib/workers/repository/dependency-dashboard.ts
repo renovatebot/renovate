@@ -624,6 +624,7 @@ export async function ensureDependencyDashboard(
       body: platform.massageMarkdown(issueBody, config.rebaseLabel),
       labels: config.dependencyDashboardLabels,
       confidential: config.confidential,
+      isPinned: true,
     });
   }
 }
