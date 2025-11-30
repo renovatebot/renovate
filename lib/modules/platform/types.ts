@@ -165,6 +165,7 @@ export interface EnsureIssueConfig {
   once?: boolean;
   shouldReOpen?: boolean;
   confidential?: boolean;
+  isPinned?: boolean;
 }
 export interface StatusCheckConfig {
   context: string;
