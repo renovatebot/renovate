@@ -28,6 +28,7 @@ query($owner: String!, $name: String!, $user: String) {
       first: 5
     ) {
       nodes {
+        id
         number
         state
         title
@@ -59,6 +60,7 @@ query(
         hasNextPage
       }
       nodes {
+        id
         number
         state
         title
@@ -123,6 +125,38 @@ mutation EnablePullRequestAutoMerge(
     }
   ) {
     pullRequest {
+      number
+    }
+  }
+}
+`;
+
+export const pinIssueMutation = `
+mutation PinIssue(
+  $issueId: ID!,
+) {
+  pinIssue(
+    input: {
+      issueId: $issueId,
+    }
+  ) {
+    issue {
+      number
+    }
+  }
+}
+`;
+
+export const unpinIssueMutation = `
+mutation UnpinIssue(
+  $issueId: ID!,
+) {
+  unpinIssue(
+    input: {
+      issueId: $issueId,
+    }
+  ) {
+    issue {
       number
     }
   }
