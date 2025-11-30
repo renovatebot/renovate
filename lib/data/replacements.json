@@ -706,11 +706,12 @@
     ]
   },
   "grafana-oss-to-grafana": {
-    "description": "Starting with Grafana release `12.4.0`, the `grafana/grafana-oss` Docker Hub repository will no longer be updated. Instead, we encourage you to use the `grafana/grafana` Docker Hub repository. These two repositories have the same Grafana OSS docker images.",
+    "description": "`grafana/grafana-oss`` was replaced by `grafana/grafana` with the same images",
     "packageRules": [
       {
         "matchDatasources": ["docker"],
-        "matchPackageNames": ["grafana/grafana-oss"],
+        "matchPackageNames": ["/^(?:docker\\.io/)?grafana/grafana-oss$/"],
+        "matchCurrentVersion": ">=12.1.1",
         "replacementName": "grafana/grafana"
       }
     ]
