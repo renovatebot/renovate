@@ -3076,6 +3076,12 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'cloneSubmodulesRecursive',
+    description: 'Set to `false` to disable recursive cloning of submodules.',
+    type: 'boolean',
+    default: true,
+  },
+  {
     name: 'cloneSubmodulesFilter',
     description:
       'List of submodules names or patterns to clone when cloneSubmodules=true.',

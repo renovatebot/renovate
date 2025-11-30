@@ -193,6 +193,7 @@ export async function getJsonFile(
 export async function initRepo({
   repository,
   cloneSubmodules,
+  cloneSubmodulesRecursive,
   cloneSubmodulesFilter,
   bbUseDevelopmentBranch,
 }: RepoParams): Promise<RepoResult> {
@@ -276,6 +277,7 @@ export async function initRepo({
     ...config,
     url,
     cloneSubmodules,
+    cloneSubmodulesRecursive,
     cloneSubmodulesFilter,
   });
   const repoConfig: RepoResult = {

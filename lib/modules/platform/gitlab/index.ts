@@ -85,6 +85,7 @@ let config: {
   mergeTrainsEnabled: boolean;
   defaultBranch: string;
   cloneSubmodules: boolean | undefined;
+  cloneSubmodulesRecursive: boolean | undefined;
   cloneSubmodulesFilter: string[] | undefined;
   ignorePrAuthor: boolean | undefined;
   squash: boolean;
@@ -262,12 +263,14 @@ export async function getJsonFile(
 export async function initRepo({
   repository,
   cloneSubmodules,
+  cloneSubmodulesRecursive,
   cloneSubmodulesFilter,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
   config.cloneSubmodules = cloneSubmodules;
+  config.cloneSubmodulesRecursive = cloneSubmodulesRecursive;
   config.cloneSubmodulesFilter = cloneSubmodulesFilter;
   config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
 

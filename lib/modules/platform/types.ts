@@ -46,6 +46,7 @@ export interface RepoParams {
   forkProcessing?: 'enabled' | 'disabled';
   renovateUsername?: string;
   cloneSubmodules?: boolean;
+  cloneSubmodulesRecursive?: boolean;
   cloneSubmodulesFilter?: string[];
   bbUseDevelopmentBranch?: boolean;
 }
