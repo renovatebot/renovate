@@ -160,7 +160,7 @@ describe('modules/manager/nuget/config-formatter', () => {
 
       const registryCredentialsWithSpecialName =
         packageSourceCredentials?.childNamed(
-          'my__x0020__very__x003f____x0020__weird__x0021__-regi__x0024__try_name',
+          'my_x0020_very_x003f__x0020_weird_x0021_-regi_x0024_try_name',
         );
 
       expect(

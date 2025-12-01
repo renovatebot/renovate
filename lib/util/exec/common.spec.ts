@@ -354,7 +354,10 @@ describe('util/exec/common', () => {
         signal: exitSignal,
         message: `Command failed: ${cmd}\nInterrupted by ${exitSignal}`,
       });
-      expect(process.kill).toHaveBeenCalledWith(-stub.pid!, exitSignal);
+      expect(process.kill).toHaveBeenCalledExactlyOnceWith(
+        -stub.pid!,
+        exitSignal,
+      );
     });
 
     it('handles process.kill call on non existent gpid', async () => {

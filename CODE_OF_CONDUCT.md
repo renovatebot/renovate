@@ -98,7 +98,7 @@ If you keep breaking the rules or challenge our guidelines openly, you will be b
 For example: if you keep spamming the maintainers with `@mentions` or challenge our rules openly, you will be blocked.
 
 We generally do not argue about these decisions, but we are willing to reverse a block if you show that you understand and respect the rules, or if there was a misunderstanding.
-To reverse a block, or to clear up a misunderstanding, write a _short_ email to Renovate's lead maintainer Rhys Arkins.
+To reverse a block, or to clear up a misunderstanding, write a _short_ email to <renovate@mend.io> and wait 1-2 working days.
 
 Simply put: we block and unblock swiftly, what matters is how you follow the rules going forward.
 
@@ -134,7 +134,7 @@ We only do this to keep the project sustainable.
 
 People working for big companies might push too hard in Open Source projects.
 It’s often hard for them to understand that our maintainers cannot spend much time to solve their issues quickly.
-Frequent requests for updates like "@rarkins how can we move this forward?" are _not_ helpful.
+Frequent requests for updates like "@maintainers how can we move this forward?" are _not_ helpful.
 
 Please remember, unless you are a Mend.io customer, this project does not owe you the level of response or support you might expect.
 Mend.io customers should use their designated support channels for urgent needs.

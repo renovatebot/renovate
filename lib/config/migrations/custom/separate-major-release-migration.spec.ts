@@ -1,8 +1,8 @@
 import { SeparateMajorReleasesMigration } from './separate-major-release-migration';
 
 describe('config/migrations/custom/separate-major-release-migration', () => {
-  it('should migrate', () => {
-    expect(SeparateMajorReleasesMigration).toMigrate(
+  it('should migrate', async () => {
+    await expect(SeparateMajorReleasesMigration).toMigrate(
       {
         separateMajorReleases: true,
       },

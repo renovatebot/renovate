@@ -130,7 +130,11 @@ export default async function handleError(
   }
   if (err.message === CONFIG_VALIDATION) {
     delete config.branchList;
-    logger.info({ error: err }, 'Repository has invalid config');
+    if (config.configValidationError) {
+      logger.error({ error: err }, 'Repository has invalid config');
+    } else {
+      logger.warn({ error: err }, 'Repository has invalid config');
+    }
     await raiseConfigWarningIssue(config, err);
     return err.message;
   }

@@ -1,5 +1,16 @@
 # Self-Hosting Examples
 
+<!-- prettier-ignore -->
+!!! warning
+    All self-hosted Renovate instances must operate under a trust relationship with the developers of the monitored repositories. Because of this, there are [security implications](../security-and-permissions.md#security-awareness-for-self-hosted-renovate-instances) when running a self-hosted Renovate instance, which you must consider carefully.
+
+<!-- prettier-ignore -->
+!!! warning
+    Most Open Source packages are hosted on github.com, including a number of tools that Renovate may pull at run-time.
+    GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for `github.com` or the bot will get rate limited quickly.
+    &nbsp;
+    Read [Running Renovate, GitHub.com token for changelogs](../getting-started/running.md#githubcom-token-for-changelogs-and-tools) to learn more.
+
 ## Installing Renovate OSS CLI
 
 ### npmjs
@@ -24,9 +35,9 @@ It builds `latest` based on the `main` branch and all SemVer tags are published 
 
 ```sh title="Example of valid tags"
 docker run --rm renovate/renovate
-docker run --rm renovate/renovate:41
-docker run --rm renovate/renovate:41.82
-docker run --rm renovate/renovate:41.82.10
+docker run --rm renovate/renovate:42
+docker run --rm renovate/renovate:42.27
+docker run --rm renovate/renovate:42.27.0
 ```
 
 <!-- prettier-ignore -->
@@ -62,7 +73,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:41.82.10
+              image: renovate/renovate:42.27.0
               args:
                 - user/repo
               # Environment Variables
@@ -121,7 +132,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:41.82.10
+            - image: renovate/renovate:42.27.0
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -367,7 +378,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:41.82.10
+              image: renovate/renovate:42.27.0
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true
@@ -441,3 +452,23 @@ USER 12021
 # OpenSSL
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 ```
+
+## Proxy Environment Variable Configuration
+
+If your environment uses an HTTP proxy configured via environment variables (`HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`, and their lowercase variants), Renovate inherits these settings and prefers the lowercase variant.
+
+In some cases, you may need to adjust the `NO_PROXY` variable if Renovate encounters network or TLS errors when accessing internal or excluded domains.
+
+Renovate uses the [global-agent](https://github.com/gajus/global-agent) library to manage proxy connections.
+
+To exclude a domain and all its subdomains, you must use a wildcard — for example:
+
+```
+NO_PROXY=*.example.org
+```
+
+This configuration ensures that both `example.org` and `www.example.org` are accessed directly, bypassing the proxy for Renovate.
+
+If a tool that Renovate runs (such as git) still has proxy-related issues, note that different tools interpret NO_PROXY formats differently. See [GitLab’s detailed explanation](https://about.gitlab.com/blog/we-need-to-talk-no-proxy/#no_proxy-format) for guidance on tool-specific behavior.
+
+To debug the proxy configuration behavior you can set the environment variable `ROARR_LOG=true` to enable log printing to stdout.

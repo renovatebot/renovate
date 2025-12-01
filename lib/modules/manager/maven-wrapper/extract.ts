@@ -20,18 +20,26 @@ const WRAPPER_VERSION_REGEX = regEx(
   '^(?:wrapperVersion\\s*=\\s*)(?<replaceString>(?<version>\\d+\\.\\d+(?:\\.\\d+)?))',
 );
 
+const WRAPPER_VERSION_MVNW_REGEX = regEx(
+  '^(#|@REM) Apache Maven Wrapper startup batch script, version (?<replaceString>(?<version>\\d+\\.\\d+(?:\\.\\d+)?))',
+);
+
 function extractVersions(fileContent: string): MavenVersionExtract {
   const lines = coerceArray(fileContent?.split(newlineRegex));
   const maven = extractLineInfo(lines, DISTRIBUTION_URL_REGEX) ?? undefined;
   const wrapper =
-    extractLineInfo(lines, WRAPPER_URL_REGEX, WRAPPER_VERSION_REGEX) ??
-    undefined;
+    extractLineInfo(
+      lines,
+      WRAPPER_URL_REGEX,
+      WRAPPER_VERSION_REGEX,
+      WRAPPER_VERSION_MVNW_REGEX,
+    ) ?? undefined;
   return { maven, wrapper };
 }
 
 function extractLineInfo(lines: string[], ...regexs: RegExp[]): Version | null {
-  for (const line of lines) {
-    for (const regex of regexs) {
+  for (const regex of regexs) {
+    for (const line of lines) {
       if (line.match(regex)) {
         const match = regex.exec(line);
         if (match?.groups) {

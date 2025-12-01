@@ -42,6 +42,7 @@ describe('workers/repository/update/branch/artifacts', () => {
           artifactError: null,
         }),
       });
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
       );
@@ -55,6 +56,7 @@ describe('workers/repository/update/branch/artifacts', () => {
           artifactError: '',
         }),
       });
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
       );
@@ -66,6 +68,7 @@ describe('workers/repository/update/branch/artifacts', () => {
         ...config,
         statusCheckNames: undefined,
       });
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
       );

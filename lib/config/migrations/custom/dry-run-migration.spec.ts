@@ -1,8 +1,8 @@
 import { DryRunMigration } from './dry-run-migration';
 
 describe('config/migrations/custom/dry-run-migration', () => {
-  it('should migrate dryRun=true to dryRun=full', () => {
-    expect(DryRunMigration).toMigrate(
+  it('should migrate dryRun=true to dryRun=full', async () => {
+    await expect(DryRunMigration).toMigrate(
       {
         dryRun: true,
       },
@@ -12,8 +12,8 @@ describe('config/migrations/custom/dry-run-migration', () => {
     );
   });
 
-  it('should migrate dryRun=false to dryRun=null', () => {
-    expect(DryRunMigration).toMigrate(
+  it('should migrate dryRun=false to dryRun=null', async () => {
+    await expect(DryRunMigration).toMigrate(
       {
         dryRun: false,
       },

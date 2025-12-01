@@ -154,6 +154,8 @@ You put `schedule:nonOfficeHours` in the `extends` array of your `renovate.json`
 
 If you browse the "default" presets, you will see some that have parameters, e.g.:
 
+<!-- schema-validation-disable-next-block -->
+
 ```json
 {
   "labels": {
@@ -171,7 +173,7 @@ Here is how you would use these in your Renovate config:
 
 ```json
 {
-  "extends": [":labels(dependencies,devops)", ":assignee(rarkins)"]
+  "extends": [":labels(dependencies,devops)", ":assignee(renovate-tests)"]
 }
 ```
 
@@ -195,7 +197,7 @@ To host your preset config on GitHub:
 
   ```json
   {
-    "extends": ["github>rarkins/renovate-config"]
+    "extends": ["github>renovate-tests/renovate-config"]
   }
   ```
 
@@ -210,7 +212,7 @@ To host your preset config on GitLab:
 
 - Create a new repository on GitLab. Normally you'd call it `renovate-config` but it can be named anything
 - Add a `default.json` to this new repo containing the preset config. No other files are necessary
-- In other repos, reference it in an extends array like `"gitlab>owner/name"`, e.g. `"gitlab>rarkins/renovate-config"`
+- In other repos, reference it in an extends array like `"gitlab>owner/name"`, e.g. `"gitlab>renovate-tests/renovate-config"`
 
 ## Gitea-hosted Presets
 
@@ -218,7 +220,7 @@ To host your preset config on Gitea:
 
 - Create a new repository on Gitea. Normally you'd call it `renovate-config` but you can use any name you want
 - Add a `default.json` to this new repository containing the preset config. No other files are necessary
-- In other repositories, reference it in an extends array like `"gitea>owner/name"`, e.g. `"gitea>rarkins/renovate-config"`
+- In other repositories, reference it in an extends array like `"gitea>owner/name"`, e.g. `"gitea>renovate-tests/renovate-config"`
 
 ## Forgejo-hosted Presets
 
@@ -226,7 +228,7 @@ To host your preset config on Forgejo:
 
 - Create a new repository on Forgejo. Normally you'd call it `renovate-config` but you can use any name you want
 - Add a `default.json` to this new repository containing the preset config. No other files are necessary
-- In other repositories, reference it in an extends array like `"forgejo>owner/name"`, e.g. `"forgejo>rarkins/renovate-config"`
+- In other repositories, reference it in an extends array like `"forgejo>owner/name"`, e.g. `"forgejo>renovate-tests/renovate-config"`
 
 ## Local presets
 

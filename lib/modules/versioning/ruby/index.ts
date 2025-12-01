@@ -12,21 +12,20 @@ import { regEx } from '../../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
 import { isSingleOperator, isValidOperator } from './operator';
 import { ltr, parse as parseRange } from './range';
-import { bump, pin, replace, widen } from './strategies';
+import { bump, replace, widen } from './strategies';
 import { parse as parseVersion } from './version';
 
 export const id = 'ruby';
 export const displayName = 'Ruby';
 export const urls = [
   'https://guides.rubygems.org/patterns/',
-  'https://bundler.io/v1.5/gemfile.html',
+  'https://bundler.io/guides/gemfile.html',
   'https://www.devalot.com/articles/2012/04/gem-versions.html',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
   'widen',
-  'pin',
   'replace',
 ];
 
@@ -95,6 +94,10 @@ function minSatisfyingVersion(
   return minSatisfying(versions.map(vtrim), vtrim(range));
 }
 
+const getPinnedValue = (value: string): string => {
+  return vtrim(value);
+};
+
 const getNewValue = ({
   currentValue,
   rangeStrategy,
@@ -122,9 +125,6 @@ const getNewValue = ({
             newVersion,
           });
         }
-        break;
-      case 'pin':
-        newValue = pin({ to: vtrim(newVersion) });
         break;
       case 'bump':
         newValue = bump({ range: vtrim(currentValue), to: vtrim(newVersion) });
@@ -184,6 +184,7 @@ export const api: VersioningApi = {
   matches,
   getSatisfyingVersion,
   minSatisfyingVersion,
+  getPinnedValue,
   getNewValue,
   sortVersions,
 };

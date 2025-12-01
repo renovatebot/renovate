@@ -51,7 +51,7 @@ const dockerAdminConfig = {
   ...adminConfig,
   binarySource: 'docker',
   dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
-};
+} satisfies RepoGlobalConfig;
 
 const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
@@ -1158,7 +1158,13 @@ describe('modules/manager/pipenv/artifacts', () => {
       FOO: '1',
     };
     addExtraEnvVariable(extraEnv, 'FOO', '2');
-    expect(logger.warn).toHaveBeenCalledOnce();
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      {
+        envVar: 'FOO',
+      },
+      'Possible misconfiguration, environment variable already set to a different value',
+    );
   });
 
   it('updates extraEnv if variable names differ from default', async () => {

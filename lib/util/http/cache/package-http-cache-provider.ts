@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
 import * as packageCache from '../../cache/package';
@@ -34,31 +34,39 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   }: PackageHttpCacheProviderOptions) {
     super();
     this.namespace = namespace;
-    const ttl = resolveTtlValues(this.namespace, softTtlMinutes);
-    this.softTtlMinutes = ttl.softTtlMinutes;
-    this.hardTtlMinutes = ttl.hardTtlMinutes;
+    const ttlValues = resolveTtlValues(this.namespace, softTtlMinutes);
+    this.softTtlMinutes = ttlValues.softTtlMinutes;
+    this.hardTtlMinutes = ttlValues.hardTtlMinutes;
     this.checkCacheControlHeader = checkCacheControlHeader;
     this.checkAuthorizationHeader = checkAuthorizationHeader;
   }
 
-  async load(url: string): Promise<unknown> {
-    return await packageCache.get(this.namespace, url);
+  private cacheKey(method: string, url: string): string {
+    if (method !== 'get') {
+      return `${method}:${url}`;
+    }
+    return url;
   }
 
-  async persist(url: string, data: HttpCache): Promise<void> {
+  async load(method: string, url: string): Promise<unknown> {
+    return await packageCache.get(this.namespace, this.cacheKey(method, url));
+  }
+
+  async persist(method: string, url: string, data: HttpCache): Promise<void> {
     await packageCache.setWithRawTtl(
       this.namespace,
-      url,
+      this.cacheKey(method, url),
       data,
       this.hardTtlMinutes,
     );
   }
 
   override async bypassServer<T>(
+    method: string,
     url: string,
     ignoreSoftTtl = false,
   ): Promise<HttpResponse<T> | null> {
-    const cached = await this.get(url);
+    const cached = await this.get(method, url);
     if (!cached) {
       return null;
     }
@@ -90,7 +98,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
 
     if (
       this.checkCacheControlHeader &&
-      is.string(resp.headers['cache-control'])
+      isString(resp.headers['cache-control'])
     ) {
       const isPublic = resp.headers['cache-control']
         .toLocaleLowerCase()
@@ -110,6 +118,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   }
 
   override async wrapServerResponse<T>(
+    method: string,
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
@@ -117,6 +126,6 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
       return resp;
     }
 
-    return await super.wrapServerResponse(url, resp);
+    return await super.wrapServerResponse(method, url, resp);
   }
 }

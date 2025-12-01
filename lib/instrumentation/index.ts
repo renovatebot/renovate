@@ -1,11 +1,5 @@
 import { ClientRequest } from 'node:http';
-import type {
-  Context,
-  Span,
-  SpanOptions,
-  Tracer,
-  TracerProvider,
-} from '@opentelemetry/api';
+import type { Context, Span, Tracer, TracerProvider } from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
 import { ProxyTracerProvider, SpanStatusCode } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
@@ -14,6 +8,7 @@ import type { Instrumentation } from '@opentelemetry/instrumentation';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { BunyanInstrumentation } from '@opentelemetry/instrumentation-bunyan';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
+import { RedisInstrumentation } from '@opentelemetry/instrumentation-redis';
 import {
   awsBeanstalkDetector,
   awsEc2Detector,
@@ -46,6 +41,7 @@ import {
 } from '@opentelemetry/semantic-conventions';
 import { pkg } from '../expose.cjs';
 import { getEnv } from '../util/env';
+import type { RenovateSpanOptions } from './types';
 import {
   isTraceDebuggingEnabled,
   isTraceSendingEnabled,
@@ -112,9 +108,10 @@ export function init(): void {
 
   instrumentations = [
     new HttpInstrumentation({
-      /* v8 ignore start -- not easily testable */
+      /* v8 ignore next -- not easily testable */
       applyCustomAttributesOnSpan: (span, request, response) => {
         // ignore 404 errors when the branch protection of Github could not be found. This is expected if no rules are configured
+        /* v8 ignore next -- not easily testable */
         if (
           request instanceof ClientRequest &&
           request.host === `api.github.com` &&
@@ -124,17 +121,17 @@ export function init(): void {
           span.setStatus({ code: SpanStatusCode.OK });
         }
       },
-      /* v8 ignore stop */
     }),
     new BunyanInstrumentation(),
+    new RedisInstrumentation(),
   ];
   registerInstrumentations({
     instrumentations,
   });
 }
 
-/* v8 ignore start -- not easily testable */
 // https://github.com/open-telemetry/opentelemetry-js-api/issues/34
+/* v8 ignore next -- not easily testable */
 export async function shutdown(): Promise<void> {
   const traceProvider = getTracerProvider();
   if (traceProvider instanceof NodeTracerProvider) {
@@ -146,7 +143,6 @@ export async function shutdown(): Promise<void> {
     }
   }
 }
-/* v8 ignore stop */
 
 export function disableInstrumentations(): void {
   for (const instrumentation of instrumentations) {
@@ -169,12 +165,18 @@ export function instrument<F extends () => ReturnType<F>>(
 export function instrument<F extends () => ReturnType<F>>(
   name: string,
   fn: F,
-  options: SpanOptions,
+  options: RenovateSpanOptions,
 ): ReturnType<F>;
 export function instrument<F extends () => ReturnType<F>>(
   name: string,
   fn: F,
-  options: SpanOptions = {},
+  options: RenovateSpanOptions,
+  context: Context,
+): ReturnType<F>;
+export function instrument<F extends () => ReturnType<F>>(
+  name: string,
+  fn: F,
+  options: RenovateSpanOptions = {},
   context: Context = api.context.active(),
 ): ReturnType<F> {
   return getTracer().startActiveSpan(name, options, context, (span: Span) => {

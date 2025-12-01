@@ -70,7 +70,7 @@ describe('workers/repository/extract/supersedes', () => {
       expect(extractResults).toEqual([
         {
           manager: 'bun',
-          packageFiles: [{ packageFile: 'package.json', deps: [] }],
+          packageFiles: [],
         },
         {
           manager: 'npm',

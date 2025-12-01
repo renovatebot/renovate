@@ -200,6 +200,19 @@ const staticGroups = {
       },
     ],
   },
+  gradle: {
+    description:
+      "Group anything that looks like Gradle together so that it's updated together.",
+    packageRules: [
+      {
+        commitMessageTopic: 'Gradle',
+        matchDatasources: ['docker', 'gradle-version'],
+        matchPackageNames: [
+          '/(?:^|/)gradle$/', // gradle or ends with "/gradle"
+        ],
+      },
+    ],
+  },
   hibernateCommons: {
     description: 'Group Java Hibernate Commons packages.',
     packageRules: [
@@ -376,6 +389,18 @@ const staticGroups = {
       },
     ],
   },
+  markdownlintCli2: {
+    description: 'Group markdownlint-cli2 packages',
+    packageRules: [
+      {
+        groupName: 'markdownlint-cli2',
+        matchPackageNames: [
+          'markdownlint-cli2',
+          'davidanson/markdownlint-cli2-action',
+        ],
+      },
+    ],
+  },
   micrometer: {
     description:
       "Group Micrometer packages together, e.g. 'io.micrometer:micrometer-core'.",
@@ -513,6 +538,7 @@ const staticGroups = {
       'group:githubArtifactActions',
       'group:glimmer',
       'group:goOpenapi',
+      'group:gradle',
       'group:hibernateCore',
       'group:hibernateValidator',
       'group:hibernateOgm',

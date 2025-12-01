@@ -1,8 +1,8 @@
 import { RenovateForkMigration } from './renovate-fork-migration';
 
 describe('config/migrations/custom/renovate-fork-migration', () => {
-  it('should migrate true', () => {
-    expect(RenovateForkMigration).toMigrate(
+  it('should migrate true', async () => {
+    await expect(RenovateForkMigration).toMigrate(
       {
         renovateFork: true,
       },
@@ -12,8 +12,8 @@ describe('config/migrations/custom/renovate-fork-migration', () => {
     );
   });
 
-  it('should migrate false', () => {
-    expect(RenovateForkMigration).toMigrate(
+  it('should migrate false', async () => {
+    await expect(RenovateForkMigration).toMigrate(
       {
         renovateFork: false,
       },
@@ -23,8 +23,8 @@ describe('config/migrations/custom/renovate-fork-migration', () => {
     );
   });
 
-  it('should not migrate non boolean value', () => {
-    expect(RenovateForkMigration).toMigrate(
+  it('should not migrate non boolean value', async () => {
+    await expect(RenovateForkMigration).toMigrate(
       {
         renovateFork: 'test',
       },

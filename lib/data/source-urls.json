@@ -30,6 +30,7 @@
     "mcr.microsoft.com/dotnet/sdk": "https://github.com/dotnet/sdk",
     "node": "https://github.com/nodejs/node",
     "registry": "https://github.com/distribution/distribution",
+    "timberio/vector": "https://github.com/vectordotdev/vector",
     "traefik": "https://github.com/containous/traefik",
     "kudobuilder/kuttl": "https://github.com/kudobuilder/kuttl",
     "prom/blackbox-exporter": "https://github.com/prometheus/blackbox_exporter",

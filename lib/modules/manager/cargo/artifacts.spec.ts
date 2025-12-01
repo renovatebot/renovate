@@ -5,6 +5,7 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import { ExecError } from '../../../util/exec/exec-error';
 import * as _hostRules from '../../../util/host-rules';
+import { CrateDatasource } from '../../datasource/crate';
 import type { UpdateArtifactsConfig } from '../types';
 import * as cargo from '.';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
@@ -44,6 +45,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -78,6 +80,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -101,6 +104,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -127,6 +131,7 @@ describe('modules/manager/cargo/artifacts', () => {
         packageName: 'dep1',
         lockedVersion: '1.0.0',
         newVersion: '1.0.1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -144,20 +149,20 @@ describe('modules/manager/cargo/artifacts', () => {
         cmd:
           'cargo update --config net.git-fetch-with-cli=true' +
           ' --manifest-path Cargo.toml' +
-          ' --workspace',
+          ' --package dep1@1.0.0 --precise 1.0.1',
       },
       {
         cmd:
           'cargo update --config net.git-fetch-with-cli=true' +
           ' --manifest-path Cargo.toml' +
-          ' --package dep1@1.0.0 --precise 1.0.1',
+          ' --workspace',
       },
     ]);
   });
 
   it('returns an artifact error when cargo update fails', async () => {
     const cmd =
-      'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace';
+      'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --package dep1@1.0.0 --precise 1.0.1';
     const execError = new ExecError('Exec error', {
       cmd,
       stdout: '',
@@ -176,6 +181,7 @@ describe('modules/manager/cargo/artifacts', () => {
         packageName: 'dep1',
         lockedVersion: '1.0.0',
         newVersion: '1.0.1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -230,9 +236,12 @@ describe('modules/manager/cargo/artifacts', () => {
       ' --manifest-path Cargo.toml' +
       ' --package dep2@1.0.0 --precise 1.0.2';
 
-    const execSnapshotsIter1 = mockExecSequence([
-      // Iter 1: workspaceCmd
-      { stdout: '', stderr: '' },
+    const packageDep3Cmd =
+      'cargo update --config net.git-fetch-with-cli=true' +
+      ' --manifest-path Cargo.toml' +
+      ' --package dep3@1.0.0 --precise 1.0.3';
+
+    const execSnapshots = mockExecSequence([
       // Iter 1: packageDep1Cmd (updates dep1 and dep2)
       { stdout: '', stderr: '' },
       // Iter 1: packageDep2Cmd (fails to update dep2 - updated by previous command)
@@ -242,6 +251,10 @@ describe('modules/manager/cargo/artifacts', () => {
         stderr: '... error: package ID specification ...',
         options: { encoding: 'utf8' },
       }),
+      // Iter 2: packageDep3Cmd (updates dep3)
+      { stdout: '', stderr: '' },
+      // Iter 2: workspaceCmd
+      { stdout: '', stderr: '' },
     ]);
 
     const lockfileAfterIter1 = `
@@ -265,18 +278,6 @@ describe('modules/manager/cargo/artifacts', () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce(lockfileAfterIter1);
 
-    const packageDep3Cmd =
-      'cargo update --config net.git-fetch-with-cli=true' +
-      ' --manifest-path Cargo.toml' +
-      ' --package dep3@1.0.0 --precise 1.0.3';
-
-    const execSnapshotsIter2 = mockExecSequence([
-      // Iter 2: workspaceCmd
-      { stdout: '', stderr: '' },
-      // Iter 2: packageDep3Cmd (updates dep3)
-      { stdout: '', stderr: '' },
-    ]);
-
     // run updateArtifacts
 
     const updatedDeps = [
@@ -285,18 +286,21 @@ describe('modules/manager/cargo/artifacts', () => {
         packageName: 'dep1',
         lockedVersion: '1.0.0',
         newVersion: '1.0.1',
+        datasource: CrateDatasource.id,
       },
       {
         depName: 'dep2',
         packageName: 'dep2',
         lockedVersion: '1.0.0',
         newVersion: '1.0.2',
+        datasource: CrateDatasource.id,
       },
       {
         depName: 'dep3',
         packageName: 'dep3',
         lockedVersion: '1.0.0',
         newVersion: '1.0.3',
+        datasource: CrateDatasource.id,
       },
     ];
 
@@ -311,15 +315,14 @@ describe('modules/manager/cargo/artifacts', () => {
       { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
     ]);
 
-    expect(execSnapshotsIter1).toMatchObject([
-      { cmd: workspaceCmd },
+    expect(execSnapshots.slice(0, 2)).toMatchObject([
       { cmd: packageDep1Cmd },
       { cmd: packageDep2Cmd },
     ]);
 
-    expect(execSnapshotsIter2).toMatchObject([
-      { cmd: workspaceCmd },
+    expect(execSnapshots.slice(2, 4)).toMatchObject([
       { cmd: packageDep3Cmd },
+      { cmd: workspaceCmd },
     ]);
   });
 
@@ -354,6 +357,7 @@ describe('modules/manager/cargo/artifacts', () => {
       {
         depName: 'renamedDep1',
         packageName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -383,6 +387,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -427,6 +432,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -492,6 +498,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -597,6 +604,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -673,6 +681,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -732,6 +741,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -790,6 +800,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -841,6 +852,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(

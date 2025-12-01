@@ -242,9 +242,17 @@ export const presets: Record<string, Preset> = {
       enabled: true,
     },
   },
+  enableVulnerabilityAlertsWithAdditionalLabel: {
+    description:
+      'Raise PR when vulnerability alerts are detected with label `{{arg0}}`, in addition to any existing list of PR labels.',
+    vulnerabilityAlerts: {
+      addLabels: ['{{arg0}}'],
+      enabled: true,
+    },
+  },
   enableVulnerabilityAlertsWithLabel: {
     description:
-      'Raise PR when vulnerability alerts are detected with label `{{arg0}}`.',
+      'Raise PR when vulnerability alerts are detected with label `{{arg0}}`, replacing any existing list of PR labels.',
     vulnerabilityAlerts: {
       enabled: true,
       labels: ['{{arg0}}'],
@@ -582,6 +590,10 @@ export const presets: Record<string, Preset> = {
         matchDepTypes: ['dependencies', 'extras'],
         matchManagers: ['poetry'],
         semanticCommitType: 'fix',
+      },
+      {
+        matchJsonata: ['isLockfileUpdate = true'],
+        semanticCommitType: 'chore',
       },
     ],
   },

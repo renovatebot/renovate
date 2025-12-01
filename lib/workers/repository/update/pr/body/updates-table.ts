@@ -39,6 +39,10 @@ function getNonEmptyColumns(
   return res;
 }
 
+function getHeaderLabel(header: string, config: BranchConfig): string {
+  return config.prBodyHeadingDefinitions?.[header] ?? header;
+}
+
 export function getPrUpdatesTable(config: BranchConfig): string {
   if (config.prBodyColumns === undefined) {
     logger.warn('getPrUpdatesTable - prBodyColumns is undefined');
@@ -86,7 +90,9 @@ export function getPrUpdatesTable(config: BranchConfig): string {
   const tableValues = Object.values(tableKeyValuePairs);
   const tableColumns = getNonEmptyColumns(config.prBodyColumns, tableValues);
   let res = '\n\nThis PR contains the following updates:\n\n';
-  res += '| ' + tableColumns.join(' | ') + ' |\n';
+  const headerCells = tableColumns.map((col) => getHeaderLabel(col, config));
+
+  res += '| ' + headerCells.join(' | ') + ' |\n';
   res += '|' + tableColumns.map(() => '---|').join('') + '\n';
   const rows = [];
   for (const row of tableValues) {

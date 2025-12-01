@@ -1,4 +1,5 @@
 import type {
+  MigratableConfig,
   Migration,
   MigrationConstructor,
 } from '../lib/config/migrations/types';
@@ -9,10 +10,10 @@ declare global {
   namespace jest {
     interface Matchers<R> {
       toMigrate(
-        originalConfig: RenovateConfig,
-        expectedConfig: RenovateConfig,
+        originalConfig: MigratableConfig | Record<string, unknown>,
+        expectedConfig: MigratableConfig | Record<string, unknown>,
         isMigrated?: boolean,
-      ): R;
+      ): Promise<R>;
     }
   }
 }

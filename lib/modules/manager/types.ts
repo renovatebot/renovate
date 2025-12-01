@@ -28,6 +28,8 @@ export interface ExtractConfig extends CustomExtractConfig {
   npmrcMerge?: boolean;
   skipInstalls?: boolean | null;
   repository?: string;
+  currentDigest?: string;
+  newDigest?: string;
 }
 
 export interface UpdateArtifactsConfig {
@@ -53,7 +55,7 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   depName?: string;
   depType?: string;
   manager?: string;
-  rangeStrategy: RangeStrategy;
+  rangeStrategy?: RangeStrategy;
 }
 
 export interface PackageFileContent<T = Record<string, any>>
@@ -89,17 +91,25 @@ export interface LookupUpdate {
   isRange?: boolean;
   isRollback?: boolean;
   isReplacement?: boolean;
+  isSingleVersion?: boolean;
+  isVulnerabilityAlert?: boolean;
   newDigest?: string;
   newMajor?: number;
   newMinor?: number;
   newPatch?: number;
   newName?: string;
+  newNameSanitized?: string;
   newValue?: string;
   semanticCommitType?: string;
   pendingChecks?: boolean;
   pendingVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
+  /**
+   *  where this is set?
+   * @deprecated Never set?
+   */
+  updateTypes?: UpdateType[];
   isBreaking?: boolean;
   mergeConfidenceLevel?: MergeConfidence | undefined;
   userStrings?: Record<string, string>;
@@ -109,6 +119,8 @@ export interface LookupUpdate {
   newVersionAgeInDays?: number;
   registryUrl?: string;
   libYears?: number;
+
+  version?: string;
 }
 
 /**

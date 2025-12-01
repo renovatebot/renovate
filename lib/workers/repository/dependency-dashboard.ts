@@ -1,4 +1,10 @@
-import is from '@sindresorhus/is';
+import {
+  isNonEmptyArray,
+  isNonEmptyObject,
+  isNonEmptyString,
+  isNullOrUndefined,
+  isTruthy,
+} from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
@@ -202,6 +208,35 @@ function getListItem(branch: BranchConfig, type: string): string {
   return item + ' (' + uniquePackages.join(', ') + ')\n';
 }
 
+function splitBranchesByCategory(filteredBranches: BranchConfig[]): {
+  categories: Record<string, BranchConfig[]>;
+  uncategorized: BranchConfig[];
+  hasCategorized: boolean;
+  hasUncategorized: boolean;
+} {
+  const categories: Record<string, BranchConfig[]> = {};
+  const uncategorized: BranchConfig[] = [];
+  let hasCategorized = false;
+  let hasUncategorized = false;
+  for (const branch of filteredBranches) {
+    if (branch.dependencyDashboardCategory) {
+      categories[branch.dependencyDashboardCategory] ??= [];
+      categories[branch.dependencyDashboardCategory].push(branch);
+      hasCategorized = true;
+      continue;
+    }
+    uncategorized.push(branch);
+    hasUncategorized = true;
+  }
+  return { categories, uncategorized, hasCategorized, hasUncategorized };
+}
+
+function getBranchList(branches: BranchConfig[], listItemType: string): string {
+  return branches
+    .map((branch: BranchConfig): string => getListItem(branch, listItemType))
+    .join('');
+}
+
 function getBranchesListMd(
   branches: BranchConfig[],
   predicate: (
@@ -214,21 +249,41 @@ function getBranchesListMd(
   listItemType = 'approvePr',
   bulkComment?: string,
   bulkMessage?: string,
-  bulkIcon?: string,
+  bulkIcon?: '🔐',
 ): string {
   const filteredBranches = branches.filter(predicate);
   if (filteredBranches.length === 0) {
     return '';
   }
   let result = `## ${title}\n\n${description}\n\n`;
-  result += `${filteredBranches
-    .map((branch: BranchConfig): string => getListItem(branch, listItemType))
-    .join('')}`;
-  if (bulkComment && bulkMessage && filteredBranches.length > 1) {
-    result += getCheckbox(bulkComment);
-    result += `${bulkIcon ? bulkIcon + ' ' : ''}**${bulkMessage}**${bulkIcon ? ' ' + bulkIcon : ''}\n`;
+  const { categories, uncategorized, hasCategorized, hasUncategorized } =
+    splitBranchesByCategory(filteredBranches);
+  if (hasCategorized) {
+    for (const [category, branches] of Object.entries(categories).sort(
+      ([keyA], [keyB]) =>
+        keyA.localeCompare(keyB, undefined, { numeric: true }),
+    )) {
+      result = result.trimEnd() + '\n\n';
+      result += `### ${category}\n\n`;
+      result += getBranchList(branches, listItemType);
+    }
+    if (hasUncategorized) {
+      result = result.trimEnd() + '\n\n';
+      result += `### Others`;
+    }
   }
-  return result + '\n';
+  result = result.trimEnd() + '\n\n';
+  result += getBranchList(uncategorized, listItemType);
+
+  if (bulkComment && bulkMessage && filteredBranches.length > 1) {
+    if (hasCategorized) {
+      result = result.trimEnd() + '\n\n';
+      result += '### All\n\n';
+    }
+    result += getCheckbox(bulkComment);
+    result += `${bulkIcon ? bulkIcon + ' ' : ''}**${bulkMessage}**${bulkIcon ? ' ' + bulkIcon : ''}`;
+  }
+  return result.trimEnd() + '\n\n';
 }
 
 function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
@@ -304,7 +359,7 @@ export async function ensureDependencyDashboard(
   let hasDeprecations = false;
   const deprecatedPackages: Record<string, Record<string, boolean>> = {};
   logger.debug('Checking packageFiles for deprecated packages');
-  if (is.nonEmptyObject(packageFiles)) {
+  if (isNonEmptyObject(packageFiles)) {
     for (const [manager, fileNames] of Object.entries(packageFiles)) {
       for (const fileName of fileNames) {
         for (const dep of fileName.deps) {
@@ -322,7 +377,7 @@ export async function ensureDependencyDashboard(
     }
   }
 
-  const hasBranches = is.nonEmptyArray(branches);
+  const hasBranches = isNonEmptyArray(branches);
   if (config.dependencyDashboardAutoclose && !hasBranches && !hasDeprecations) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
@@ -646,7 +701,7 @@ export async function getDashboardMarkdownVulnerabilities(
   let result = '';
 
   if (
-    is.nullOrUndefined(config.dependencyDashboardOSVVulnerabilitySummary) ||
+    isNullOrUndefined(config.dependencyDashboardOSVVulnerabilitySummary) ||
     config.dependencyDashboardOSVVulnerabilitySummary === 'none'
   ) {
     return result;
@@ -667,13 +722,13 @@ export async function getDashboardMarkdownVulnerabilities(
   }
 
   const unresolvedVulnerabilities = vulnerabilities.filter((value) =>
-    is.nullOrUndefined(value.fixedVersion),
+    isNullOrUndefined(value.fixedVersion),
   );
   const resolvedVulnerabilitiesLength =
     vulnerabilities.length - unresolvedVulnerabilities.length;
 
   result += `\`${resolvedVulnerabilitiesLength}\`/\`${vulnerabilities.length}\``;
-  if (is.truthy(config.osvVulnerabilityAlerts)) {
+  if (isTruthy(config.osvVulnerabilityAlerts)) {
     result += ' CVEs have Renovate fixes.\n';
   } else {
     result +=
@@ -696,14 +751,14 @@ export async function getDashboardMarkdownVulnerabilities(
   > = {};
   for (const vulnerability of renderedVulnerabilities) {
     const { manager, packageFile } = vulnerability.packageFileConfig;
-    if (is.nullOrUndefined(managerRecords[manager!])) {
+    if (isNullOrUndefined(managerRecords[manager!])) {
       managerRecords[manager!] = {};
     }
-    if (is.nullOrUndefined(managerRecords[manager!][packageFile])) {
+    if (isNullOrUndefined(managerRecords[manager!][packageFile])) {
       managerRecords[manager!][packageFile] = {};
     }
     if (
-      is.nullOrUndefined(
+      isNullOrUndefined(
         managerRecords[manager!][packageFile][vulnerability.packageName],
       )
     ) {
@@ -724,7 +779,7 @@ export async function getDashboardMarkdownVulnerabilities(
         result += `<details><summary>${packageName}</summary>\n<blockquote>\n\n`;
         for (const vul of cves) {
           const id = vul.vulnerability.id;
-          const suffix = is.nonEmptyString(vul.fixedVersion)
+          const suffix = isNonEmptyString(vul.fixedVersion)
             ? ` (fixed in ${vul.fixedVersion})`
             : '';
           result += `- [${id}](https://osv.dev/vulnerability/${id})${suffix}\n`;

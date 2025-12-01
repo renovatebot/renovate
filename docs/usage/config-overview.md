@@ -178,8 +178,17 @@ But default settings through Inherited config are useful if:
 #### How it's found
 
 If `inheritConfig` is `true` in Global config then Renovate will look for Inherited config before processing each repository.
+
 The repository and file name which Renovate looks for can be configured using the other `inheritConfig*` settings documented in Global config.
-Default values are `{{parentOrg}}/renovate-config` for repository name and `org-inherited-config.json` for file name.
+Default values are `{{parentOrg}}/renovate-config` for repository name (`inheritConfigRepoName`) and `org-inherited-config.json` for file name (`inheritConfigFileName`).
+
+Note: For Azure DevOps, `{{parentOrg}}` is the Project the repo belongs to, and for Bitbucket, the `{{parentOrg}}` is the Workspace of the repo, as shown in the table below.
+
+| Repo         | Inherited config file location                                  |
+| ------------ | --------------------------------------------------------------- |
+| GitHub       | {parentOrg} / renovate-config / org-inherited-config.json       |
+| Bitbucket    | {parentWorkspace} / renovate-config / org-inherited-config.json |
+| Azure DevOps | {parentProject} / renovate-config / org-inherited-config.json   |
 
 If found, Inherited config will be merged on top (i.e. override) Global config.
 Avoid putting any global-only setting in a Inherited config, as doing so will result in an error.

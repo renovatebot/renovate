@@ -9,35 +9,37 @@ export class GlobalConfig {
     'allowedHeaders',
     'allowPlugins',
     'allowScripts',
+    'autodiscoverRepoSort',
+    'autodiscoverRepoOrder',
     'binarySource',
     'cacheDir',
     'cacheHardTtlMinutes',
+    'cachePrivatePackages',
     'cacheTtlOverride',
     'containerbaseDir',
     'customEnvVariables',
     'dockerChildPrefix',
     'dockerCliOptions',
+    'dockerMaxPages',
     'dockerSidecarImage',
     'dockerUser',
     'dryRun',
     'encryptedWarning',
+    'endpoint',
     'exposeAllEnv',
     'executionTimeout',
     'githubTokenWarn',
+    'gitTimeout',
+    'httpCacheTtlDays',
+    'ignorePrAuthor',
+    'includeMirrors',
     'localDir',
     'migratePresets',
-    'presetCachePersistence',
-    'gitTimeout',
     'platform',
-    'endpoint',
-    'httpCacheTtlDays',
-    'autodiscoverRepoSort',
-    'autodiscoverRepoOrder',
-    'userAgent',
-    'dockerMaxPages',
+    'presetCachePersistence',
     's3Endpoint',
     's3PathStyle',
-    'cachePrivatePackages',
+    'userAgent',
   ];
 
   private static config: RepoGlobalConfig = {};
@@ -59,7 +61,7 @@ export class GlobalConfig {
       : GlobalConfig.config;
   }
 
-  static set(config: RenovateConfig | RepoGlobalConfig): RenovateConfig {
+  static set(config: RenovateConfig & RepoGlobalConfig): RenovateConfig {
     GlobalConfig.reset();
 
     const result = { ...config };

@@ -66,7 +66,7 @@ describe('modules/manager/cargo/extract', () => {
     it('extracts multiple dependencies simple', async () => {
       const res = await extractPackageFile(cargo1toml, 'Cargo.toml', config);
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(15);
+      expect(res?.deps).toHaveLength(19);
     });
 
     it('extracts multiple dependencies advanced', async () => {
@@ -555,6 +555,24 @@ replace-with = "mcorbin"
 
       const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
       expect(res?.deps).toMatchObject([{ lockedVersion: '2.0.1' }]);
+    });
+
+    it('does not extract locked versions for git dependencies', async () => {
+      const cargolock = Fixtures.get('lockfile-update/Cargo.3.lock');
+      mockReadLocalFile({ 'Cargo.lock': cargolock });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+
+      const cargotoml = codeBlock`
+        [package]
+        name = "test"
+        version = "0.1.0"
+        edition = "2021"
+        [dependencies]
+        git_dep = { git = "https://github.com/foo/bar" }
+        `;
+
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+      expect(res?.deps[0].lockedVersion).toBeUndefined();
     });
 
     it('extracts locked versions for renamed packages', async () => {

@@ -75,7 +75,7 @@ Renovate works on these platforms:
 
 ## Who Uses Renovate?
 
-Renovate is used by:
+A non-exhaustive list of companies and projects using Renovate can be seen below:
 
 ![Logos of companies and projects that use Renovate](./assets/images/matrix.png){ loading=lazy }
 

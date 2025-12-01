@@ -1,8 +1,8 @@
 import { UpdateLockFilesMigration } from './update-lock-files-migration';
 
 describe('config/migrations/custom/update-lock-files-migration', () => {
-  it('should replace false value', () => {
-    expect(UpdateLockFilesMigration).toMigrate(
+  it('should replace false value', async () => {
+    await expect(UpdateLockFilesMigration).toMigrate(
       {
         updateLockFiles: false,
       },
@@ -12,8 +12,8 @@ describe('config/migrations/custom/update-lock-files-migration', () => {
     );
   });
 
-  it('should not replace true value', () => {
-    expect(UpdateLockFilesMigration).toMigrate(
+  it('should not replace true value', async () => {
+    await expect(UpdateLockFilesMigration).toMigrate(
       {
         updateLockFiles: true,
       },
@@ -21,8 +21,8 @@ describe('config/migrations/custom/update-lock-files-migration', () => {
     );
   });
 
-  it('should not replace skipArtifactsUpdate', () => {
-    expect(UpdateLockFilesMigration).toMigrate(
+  it('should not replace skipArtifactsUpdate', async () => {
+    await expect(UpdateLockFilesMigration).toMigrate(
       {
         updateLockFiles: false,
         skipArtifactsUpdate: false,

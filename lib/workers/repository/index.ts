@@ -10,6 +10,7 @@ import {
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
 import { addExtractionStats } from '../../instrumentation/reporting';
+import { ATTR_RENOVATE_SPLIT } from '../../instrumentation/types';
 import { logger, setMeta } from '../../logger';
 import { resetRepositoryLogLevelRemaps } from '../../logger/remap';
 import { removeDanglingContainers } from '../../util/exec/docker';
@@ -49,32 +50,71 @@ export async function renovateRepository(
   canRetry = true,
 ): Promise<ProcessResult | undefined> {
   splitInit();
-  let config = GlobalConfig.set(
-    applySecretsAndVariablesToConfig({
-      config: repoConfig,
-      deleteVariables: false,
-      deleteSecrets: false,
-    }),
-  );
-  await removeDanglingContainers();
-  setMeta({ repository: config.repository });
-  logger.info({ renovateVersion: pkg.version }, 'Repository started');
-  logger.trace({ config });
+
   let repoResult: ProcessResult | undefined;
-  queue.clear();
-  throttle.clear();
-  const localDir = GlobalConfig.get('localDir')!;
+  const { config, localDir, errorRes } = await instrument(
+    'init',
+    async (): Promise<{
+      config: RenovateConfig;
+      localDir: string;
+      errorRes?: string;
+    }> => {
+      let errorRes: string | undefined;
+      let config = GlobalConfig.set(
+        applySecretsAndVariablesToConfig({
+          config: repoConfig,
+          deleteVariables: false,
+          deleteSecrets: false,
+        }),
+      );
+      await removeDanglingContainers();
+      setMeta({ repository: config.repository });
+      logger.info({ renovateVersion: pkg.version }, 'Repository started');
+      logger.trace({ config });
+      queue.clear();
+      throttle.clear();
+      const localDir = GlobalConfig.get('localDir')!;
+
+      try {
+        await fs.ensureDir(localDir);
+        logger.debug('Using localDir: ' + localDir);
+        config = await initRepo(config);
+        addSplit('init');
+      } catch (err) /* istanbul ignore next */ {
+        setMeta({ repository: config.repository });
+        errorRes = await handleError(config, err);
+        const pruneWhenErrors = [
+          REPOSITORY_DISABLED_BY_CONFIG,
+          REPOSITORY_FORKED,
+          REPOSITORY_NO_CONFIG,
+        ];
+        if (pruneWhenErrors.includes(errorRes)) {
+          await pruneStaleBranches(config, []);
+        }
+        repoResult = processResult(config, errorRes);
+      }
+
+      return { config, localDir, errorRes };
+    },
+    {
+      attributes: {
+        [ATTR_RENOVATE_SPLIT]: 'init',
+      },
+    },
+  );
+
   try {
-    await fs.ensureDir(localDir);
-    logger.debug('Using localDir: ' + localDir);
-    config = await initRepo(config);
-    addSplit('init');
+    // only continue if init stage was successful
+    if (errorRes) {
+      throw new Error(errorRes);
+    }
+
     const performExtract =
       config.repoIsOnboarded! ||
       !OnboardingState.onboardingCacheValid ||
       OnboardingState.prUpdateRequested;
     const extractResult = performExtract
-      ? await instrument('extract', () => extractDependencies(config))
+      ? await extractDependencies(config)
       : emptyExtract(config);
     addExtractionStats(config, extractResult);
 
@@ -88,12 +128,24 @@ export async function renovateRepository(
       GlobalConfig.get('dryRun') !== 'lookup' &&
       GlobalConfig.get('dryRun') !== 'extract'
     ) {
-      await instrument('onboarding', () =>
-        ensureOnboardingPr(config, packageFiles, branches),
+      await instrument(
+        'onboarding',
+        () => ensureOnboardingPr(config, packageFiles, branches),
+        {
+          attributes: {
+            [ATTR_RENOVATE_SPLIT]: 'onboarding',
+          },
+        },
       );
       addSplit('onboarding');
-      const res = await instrument('update', () =>
-        updateRepo(config, branches),
+      const res = await instrument(
+        'update',
+        () => updateRepo(config, branches),
+        {
+          attributes: {
+            [ATTR_RENOVATE_SPLIT]: 'update',
+          },
+        },
       );
       setMeta({ repository: config.repository });
       addSplit('update');
@@ -156,18 +208,41 @@ export async function renovateRepository(
   ObsoleteCacheHitLogger.report();
   AbandonedPackageStats.report();
   const cloned = isCloned();
-  logger.info({ cloned, durationMs: splits.total }, 'Repository finished');
+  /* v8 ignore next 11 -- coverage not required of these `undefined` checks, as we're happy receiving an `undefined` in the logs */
+  logger.info(
+    {
+      cloned,
+      durationMs: splits.total,
+      result: repoResult?.res,
+      status: repoResult?.status,
+      enabled: repoResult?.enabled,
+      onboarded: repoResult?.onboarded,
+    },
+    'Repository finished',
+  );
   resetRepositoryLogLevelRemaps();
   return repoResult;
 }
 
 // istanbul ignore next: renovateRepository is ignored
 function emptyExtract(config: RenovateConfig): ExtractResult {
-  return {
-    branches: [],
-    branchList: [config.onboardingBranch!], // to prevent auto closing
-    packageFiles: {},
-  };
+  return instrument(
+    'extract',
+    () => {
+      addSplit('extract');
+      addSplit('lookup');
+      return {
+        branches: [],
+        branchList: [config.onboardingBranch!], // to prevent auto closing
+        packageFiles: {},
+      };
+    },
+    {
+      attributes: {
+        [ATTR_RENOVATE_SPLIT]: 'extract',
+      },
+    },
+  );
 }
 
 export function printRepositoryProblems(repository: string | undefined): void {

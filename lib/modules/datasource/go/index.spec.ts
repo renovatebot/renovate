@@ -9,6 +9,7 @@ const hostRules = vi.mocked(_hostRules);
 
 const getReleasesDirectMock = vi.fn();
 
+const getDigestForgejoMock = vi.fn();
 const getDigestGiteaMock = vi.fn();
 const getDigestGithubMock = vi.fn();
 const getDigestGitlabMock = vi.fn();
@@ -16,29 +17,36 @@ const getDigestGitMock = vi.fn();
 const getDigestBitbucketMock = vi.fn();
 vi.mock('./releases-direct', () => {
   return {
-    GoDirectDatasource: vi.fn().mockImplementation(() => {
-      return {
-        git: { getDigest: (...args: any[]) => getDigestGitMock(...args) },
-        gitea: { getDigest: (...args: any[]) => getDigestGiteaMock(...args) },
-        github: { getDigest: (...args: any[]) => getDigestGithubMock(...args) },
-        gitlab: { getDigest: (...args: any[]) => getDigestGitlabMock(...args) },
-        bitbucket: {
+    GoDirectDatasource: vi.fn(
+      class {
+        forgejo = {
+          getDigest: (...args: any[]) => getDigestForgejoMock(...args),
+        };
+        git = { getDigest: (...args: any[]) => getDigestGitMock(...args) };
+        gitea = { getDigest: (...args: any[]) => getDigestGiteaMock(...args) };
+        github = {
+          getDigest: (...args: any[]) => getDigestGithubMock(...args),
+        };
+        gitlab = {
+          getDigest: (...args: any[]) => getDigestGitlabMock(...args),
+        };
+        bitbucket = {
           getDigest: (...args: any[]) => getDigestBitbucketMock(...args),
-        },
-        getReleases: (...args: any[]) => getReleasesDirectMock(...args),
-      };
-    }),
+        };
+        getReleases = (...args: any[]) => getReleasesDirectMock(...args);
+      },
+    ),
   };
 });
 
 const getReleasesProxyMock = vi.fn();
 vi.mock('./releases-goproxy', () => {
   return {
-    GoProxyDatasource: vi.fn().mockImplementation(() => {
-      return {
-        getReleases: () => getReleasesProxyMock(),
-      };
-    }),
+    GoProxyDatasource: vi.fn(
+      class {
+        getReleases = () => getReleasesProxyMock();
+      },
+    ),
   };
 });
 
@@ -151,7 +159,7 @@ describe('modules/datasource/go/index', () => {
         'v1.2.3',
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
-      expect(getDigestGithubMock).toHaveBeenCalledWith(
+      expect(getDigestGithubMock).toHaveBeenCalledExactlyOnceWith(
         {
           datasource: 'github-tags',
           packageName: 'golang/text',
@@ -172,7 +180,7 @@ describe('modules/datasource/go/index', () => {
         'v0.0.0',
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
-      expect(getDigestGithubMock).toHaveBeenCalledWith(
+      expect(getDigestGithubMock).toHaveBeenCalledExactlyOnceWith(
         {
           datasource: 'github-tags',
           packageName: 'golang/text',
@@ -187,6 +195,17 @@ describe('modules/datasource/go/index', () => {
       const res = await datasource.getDigest(
         {
           packageName: 'bitbucket.org/golang/text',
+        },
+        undefined,
+      );
+      expect(res).toBe('123');
+    });
+
+    it('support forgejo digest', async () => {
+      getDigestForgejoMock.mockResolvedValueOnce('123');
+      const res = await datasource.getDigest(
+        {
+          packageName: 'code.forgejo.org/go-chi/cache',
         },
         undefined,
       );

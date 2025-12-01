@@ -22,7 +22,6 @@ export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
   'widen',
-  'pin',
   'replace',
 ];
 
@@ -64,6 +63,10 @@ function isSingleVersion(input: string): boolean {
   return isValidVersion(input.replace(/^==/, '').trimStart());
 }
 
+function getPinnedValue(newVersion: string): string {
+  return `==${newVersion}`;
+}
+
 function getNewValue({
   currentValue,
   rangeStrategy,
@@ -71,10 +74,6 @@ function getNewValue({
   newVersion,
   isReplacement,
 }: NewValueConfig): string | null {
-  if (rangeStrategy === 'pin') {
-    return '==' + newVersion;
-  }
-
   if (currentValue === '*') {
     if (rangeStrategy === 'bump') {
       return '>=' + newVersion;
@@ -215,7 +214,7 @@ export const api = {
 
   minSatisfyingVersion,
   getNewValue,
-
+  getPinnedValue,
   matches,
   sortVersions,
 } satisfies VersioningApi;

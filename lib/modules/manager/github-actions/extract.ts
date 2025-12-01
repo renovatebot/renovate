@@ -175,10 +175,12 @@ function extractRunner(runner: string): PackageDependency | null {
   return dependency;
 }
 
+// For official https://github.com/actions
 const versionedActions: Record<string, string> = {
   go: npmVersioning.id,
   node: nodeVersioning.id,
   python: npmVersioning.id,
+
   // Not covered yet because they use different datasources/packageNames:
   // - dotnet
   // - java

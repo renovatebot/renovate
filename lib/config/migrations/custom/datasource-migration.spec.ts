@@ -1,8 +1,8 @@
 import { DatasourceMigration } from './datasource-migration';
 
 describe('config/migrations/custom/datasource-migration', () => {
-  it('should migrate adoptium-java', () => {
-    expect(DatasourceMigration).toMigrate(
+  it('should migrate adoptium-java', async () => {
+    await expect(DatasourceMigration).toMigrate(
       {
         datasource: 'adoptium-java',
       },
@@ -12,8 +12,8 @@ describe('config/migrations/custom/datasource-migration', () => {
     );
   });
 
-  it('should migrate donet', () => {
-    expect(DatasourceMigration).toMigrate(
+  it('should migrate donet', async () => {
+    await expect(DatasourceMigration).toMigrate(
       {
         datasource: 'dotnet',
       },
@@ -23,8 +23,8 @@ describe('config/migrations/custom/datasource-migration', () => {
     );
   });
 
-  it('should migrate node', () => {
-    expect(DatasourceMigration).toMigrate(
+  it('should migrate node', async () => {
+    await expect(DatasourceMigration).toMigrate(
       {
         datasource: 'node',
       },

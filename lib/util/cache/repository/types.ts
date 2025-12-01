@@ -128,6 +128,7 @@ export interface BranchCache {
 export interface RepoCacheData {
   configFileName?: string;
   httpCache?: Record<string, unknown>;
+  httpCacheHead?: Record<string, unknown>;
   semanticCommits?: 'enabled' | 'disabled';
   branches?: BranchCache[];
   init?: RepoInitConfig;
@@ -136,6 +137,7 @@ export interface RepoCacheData {
   platform?: {
     forgejo?: {
       pullRequestsCache?: unknown;
+      orgs?: Record<string, boolean>;
     };
     gitea?: {
       pullRequestsCache?: unknown;

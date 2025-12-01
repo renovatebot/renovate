@@ -1,13 +1,13 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined, isString } from '@sindresorhus/is';
 import type { Repository } from './types';
 
 export function isOCIRegistry(
   repository: Repository | string | null | undefined,
 ): boolean {
-  if (is.nullOrUndefined(repository)) {
+  if (isNullOrUndefined(repository)) {
     return false;
   }
-  const repo = is.string(repository) ? repository : repository.repository;
+  const repo = isString(repository) ? repository : repository.repository;
   return repo.startsWith('oci://');
 }
 

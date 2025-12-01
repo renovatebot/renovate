@@ -31,6 +31,14 @@ export class RpmDatasource extends Datasource {
   override readonly customRegistrySupport = true;
 
   /**
+   * Users can specify multiple repositories and the datasource will aggregate the releases
+   * @example
+   * Every Fedora release has "release" and "updates" repositories.
+   * To get the latest package version, these repositories should be aggregated.
+   */
+  override readonly registryStrategy = 'merge';
+
+  /**
    * Fetches the release information for a given package from the registry URL.
    *
    * @param registryUrl - the registryUrl should be the folder which contains repodata.xml and its corresponding file list <sha256>-primary.xml.gz, e.g.: https://packages.microsoft.com/azurelinux/3.0/prod/cloud-native/x86_64/repodata/

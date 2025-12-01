@@ -1,5 +1,6 @@
-import is from '@sindresorhus/is';
+import { isNumber, isString } from '@sindresorhus/is';
 import semver from 'semver';
+import { GlobalConfig } from '../../../config/global';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -47,7 +48,6 @@ import { GiteaPrCache } from './pr-cache';
 import type {
   CombinedCommitStatus,
   Comment,
-  IssueState,
   Label,
   PRMergeMethod,
   PRUpdateParams,
@@ -57,6 +57,7 @@ import {
   DRAFT_PREFIX,
   getMergeMethod,
   getRepoUrl,
+  isAllowed,
   smartLinks,
   toRenovatePR,
   trimTrailingApiPath,
@@ -226,10 +227,10 @@ const platform: Platform = {
       botUserID = user.id;
       botUserName = user.username;
       const env = getEnv();
-      /* v8 ignore start: experimental feature */
+      /* v8 ignore next: experimental feature */
       if (semver.valid(env.RENOVATE_X_PLATFORM_VERSION)) {
         defaults.version = env.RENOVATE_X_PLATFORM_VERSION!;
-      } /* v8 ignore stop */ else {
+      } else {
         defaults.version = await helper.getVersion({ token });
       }
       if (defaults.version?.includes('gitea-')) {
@@ -280,7 +281,6 @@ const platform: Platform = {
     cloneSubmodules,
     cloneSubmodulesFilter,
     gitUrl,
-    ignorePrAuthor,
   }: RepoParams): Promise<RepoResult> {
     let repo: Repo;
 
@@ -288,7 +288,7 @@ const platform: Platform = {
     config.repository = repository;
     config.cloneSubmodules = !!cloneSubmodules;
     config.cloneSubmodulesFilter = cloneSubmodulesFilter;
-    config.ignorePrAuthor = !!ignorePrAuthor;
+    config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor', false);
 
     // Try to fetch information about repository
     try {
@@ -323,28 +323,22 @@ const platform: Platform = {
       throw new Error(REPOSITORY_BLOCKED);
     }
 
-    if (repo.allow_rebase && repo.default_merge_style === 'rebase') {
-      config.mergeMethod = 'rebase';
-    } else if (
-      repo.allow_rebase_explicit &&
-      repo.default_merge_style === 'rebase-merge'
-    ) {
-      config.mergeMethod = 'rebase-merge';
-    } else if (
-      repo.allow_squash_merge &&
-      repo.default_merge_style === 'squash'
-    ) {
-      config.mergeMethod = 'squash';
-    } else if (
-      repo.allow_merge_commits &&
-      repo.default_merge_style === 'merge'
-    ) {
-      config.mergeMethod = 'merge';
-    } else if (
-      repo.allow_fast_forward_only_merge &&
-      repo.default_merge_style === 'fast-forward-only'
-    ) {
-      config.mergeMethod = 'fast-forward-only';
+    // similar to gitea behaviour- if default merge style is allowed, use this;
+    // else fall back to predefined order. Order chosen to minimize commits - see
+    // https://github.com/renovatebot/renovate/pull/37768 for discussion.
+    const preferredOrder: PRMergeMethod[] = [
+      repo.default_merge_style,
+      'fast-forward-only',
+      'squash',
+      'merge',
+      'rebase',
+      'rebase-merge',
+    ];
+
+    const mergeStyle = preferredOrder.find((style) => isAllowed(style, repo));
+
+    if (mergeStyle) {
+      config.mergeMethod = mergeStyle;
     } else {
       logger.debug(
         'Repository has no allowed merge methods - aborting renovation',
@@ -553,7 +547,7 @@ const platform: Platform = {
     targetBranch,
   }: FindPRConfig): Promise<Pr | null> {
     logger.debug(`findPr(${branchName}, ${title!}, ${state})`);
-    if (includeOtherAuthors && is.string(targetBranch)) {
+    if (includeOtherAuthors && isString(targetBranch)) {
       // do not use pr cache as it only fetches prs created by the bot account
       const pr = await helper.getPRByBranch(
         config.repository,
@@ -608,7 +602,7 @@ const platform: Platform = {
         head,
         title,
         body,
-        labels: labels.filter(is.number),
+        labels: labels.filter(isNumber),
       });
 
       if (platformPrOptions?.usePlatformAutomerge) {
@@ -733,7 +727,7 @@ const platform: Platform = {
      */
     if (Array.isArray(labels)) {
       prUpdateParams.labels = (await map(labels, lookupLabelByName)).filter(
-        is.number,
+        isNumber,
       );
       if (labels.length !== prUpdateParams.labels.length) {
         logger.warn(
@@ -798,10 +792,10 @@ const platform: Platform = {
         number,
         body,
       };
-    } catch (err) /* v8 ignore start */ {
+    } catch (err) /* v8 ignore next */ {
       logger.debug({ err, number }, 'Error getting issue');
       return null;
-    } /* v8 ignore stop */
+    }
   },
 
   async findIssue(title: string): Promise<Issue | null> {
@@ -845,7 +839,7 @@ const platform: Platform = {
 
       const labels = Array.isArray(labelNames)
         ? (await Promise.all(labelNames.map(lookupLabelByName))).filter(
-            is.number,
+            isNumber,
           )
         : undefined;
 
@@ -890,41 +884,42 @@ const platform: Platform = {
           return null;
         }
 
-        // Update issue body and re-open if enabled
-        // TODO: types (#22198)
-        logger.debug(`Updating Issue #${activeIssue.number!}`);
-        const existingIssue = await helper.updateIssue(
-          config.repository,
-          // TODO #22198
-          activeIssue.number!,
-          {
-            body,
-            title,
-            state: shouldReOpen ? 'open' : (activeIssue.state as IssueState),
-          },
-        );
-
-        // Test whether the issues need to be updated
-        const existingLabelIds = (existingIssue.labels ?? []).map(
-          (label) => label.id,
-        );
-        if (
-          labels &&
-          (labels.length !== existingLabelIds.length ||
-            labels.filter((labelId) => !existingLabelIds.includes(labelId))
-              .length !== 0)
-        ) {
-          await helper.updateIssueLabels(
+        if (shouldReOpen || activeIssue.state === 'open') {
+          // Update issue body and re-open
+          logger.debug(`Updating Issue #${activeIssue.number}`);
+          const existingIssue = await helper.updateIssue(
             config.repository,
             // TODO #22198
             activeIssue.number!,
             {
-              labels,
+              body,
+              title,
+              state: 'open',
             },
           );
-        }
 
-        return 'updated';
+          // Test whether the issues need to be updated
+          const existingLabelIds = (existingIssue.labels ?? []).map(
+            (label) => label.id,
+          );
+          if (
+            labels &&
+            (labels.length !== existingLabelIds.length ||
+              labels.filter((labelId) => !existingLabelIds.includes(labelId))
+                .length !== 0)
+          ) {
+            await helper.updateIssueLabels(
+              config.repository,
+              // TODO #22198
+              activeIssue.number!,
+              {
+                labels,
+              },
+            );
+          }
+
+          return 'updated';
+        }
       }
 
       // Create new issue and reset cache

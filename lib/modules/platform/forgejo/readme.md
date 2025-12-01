@@ -16,14 +16,14 @@ You must set `platform=forgejo` in your Renovate config file.
 
 The PAT should have these permissions:
 
-| Scope          | Permission       | Valid for Forgejo versions     | Notes                         |
-| -------------- | ---------------- | ------------------------------ | ----------------------------- |
-| `repo`         | `Read and Write` | all                            |                               |
-| `user`         | `Read`           | all                            |                               |
-| `issue`        | `Read and Write` | `>= 1.20.0`                    |                               |
-| `organization` | `Read`           | `>= 1.20.0`                    | Required to read group labels |
-| `email`        | `Read`           | `<= 1.19.3`                    |                               |
-| `misc`         | `Read`           | Only for `1.20.0` and `1.20.1` |                               |
+| Scope          | Permission       | Valid for Forgejo versions     | Notes                                 |
+| -------------- | ---------------- | ------------------------------ | ------------------------------------- |
+| `repo`         | `Read and Write` | all                            |                                       |
+| `user`         | `Read`           | all                            |                                       |
+| `issue`        | `Read and Write` | `>= 1.20.0`                    |                                       |
+| `organization` | `Read`           | `>= 1.20.0`                    | Required to read org labels and teams |
+| `email`        | `Read`           | `<= 1.19.3`                    |                                       |
+| `misc`         | `Read`           | Only for `1.20.0` and `1.20.1` |                                       |
 
 If you use Forgejo packages, add the `read:packages` scope.
 
@@ -47,3 +47,10 @@ Repositories are ignored when one of the following conditions is met:
 You can change the default server-side sort method and order for autodiscover API.
 Set those via [`autodiscoverRepoSort`](../../../self-hosted-configuration.md#autodiscoverreposort) and [`autodiscoverRepoOrder`](../../../self-hosted-configuration.md#autodiscoverrepoorder).
 Read the [Forgejo swagger docs](https://code.forgejo.org/api/swagger#/repository/repoSearch) for more details.
+
+## Merge style
+
+Renovate uses the repository's default merge style if allowed; if the default
+merge style is not an allowed merge style, renovate falls back to an allowed
+merge style as per an order chosen to minimize commits. If no merge style is
+allowed, the repository is blocked.

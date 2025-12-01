@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import type { Category } from '../../../../constants';
 import { logger } from '../../../../logger';
 import { parseJson } from '../../../../util/common';
@@ -43,7 +43,7 @@ export async function extractPackageFile(
     return null;
   }
 
-  if (is.nullOrUndefined(json)) {
+  if (isNullOrUndefined(json)) {
     return null;
   }
 

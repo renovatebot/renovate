@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isUndefined } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -28,7 +28,7 @@ export async function checkConfigMigrationBranch(
 
   if (!config.configMigration) {
     if (
-      is.undefined(configMigrationCheckboxState) ||
+      isUndefined(configMigrationCheckboxState) ||
       configMigrationCheckboxState === 'no-checkbox' ||
       configMigrationCheckboxState === 'unchecked'
     ) {
