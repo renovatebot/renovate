@@ -59,6 +59,10 @@ export class CrateDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `repository` field in the results.';
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `version.created_at` field from the response.';
+
   @cache({
     namespace: `datasource-${CrateDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>

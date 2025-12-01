@@ -94,8 +94,8 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
   return config;
 }
 
-function removeMatchers(
-  packageRule: PackageRule & PackageRuleInputConfig,
+function removeMatchers<T extends Record<string, unknown>>(
+  packageRule: T,
 ): Record<string, unknown> {
   for (const key of Object.keys(packageRule)) {
     if (key.startsWith('match') || key.startsWith('exclude')) {

@@ -167,6 +167,7 @@ describe('workers/repository/updates/flatten', () => {
           },
         ],
       };
+      // @ts-expect-error -- TODO: fix types
       const res = await flattenUpdates(config, packageFiles);
       expect(res).toHaveLength(15);
       expect(

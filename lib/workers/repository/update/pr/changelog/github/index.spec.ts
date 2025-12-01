@@ -15,7 +15,6 @@ const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
   branchName: '',
   packageName: 'renovate',
-  endpoint: 'https://api.github.com/',
   versioning: semverVersioning.id,
   currentVersion: '1.0.0',
   newVersion: '3.0.0',
@@ -261,7 +260,6 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          endpoint: 'https://github-enterprise.example.com/',
         }),
       ).toMatchSnapshot({
         hasReleaseNotes: true,
@@ -295,7 +293,6 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
-          endpoint: 'https://github-enterprise.example.com/',
         }),
       ).toMatchSnapshot({
         hasReleaseNotes: true,
@@ -337,7 +334,6 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
         manager: 'some-manager',
         branchName: '',
         packageName: 'correctPrefix/target',
-        endpoint: 'https://api.github.com/',
         versioning: 'npm',
         currentVersion: '1.0.0',
         newVersion: '1.0.2',

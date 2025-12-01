@@ -1,7 +1,7 @@
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { decryptConfig, setPrivateKeys } from '../decrypt';
 import { GlobalConfig } from '../global';
-import type { RenovateConfig } from '../types';
+import type { AllConfig } from '../types';
 import { tryDecryptBcPgp } from './bcpgp';
 import { Fixtures } from '~test/fixtures';
 import { logger } from '~test/util';
@@ -28,7 +28,7 @@ const repository = 'abc/def';
 
 describe('config/decrypt/bcpgp', () => {
   describe('decryptConfig()', () => {
-    let config: RenovateConfig;
+    let config: AllConfig;
 
     beforeEach(() => {
       config = {};

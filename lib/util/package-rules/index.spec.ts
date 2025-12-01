@@ -20,10 +20,12 @@ describe('util/package-rules/index', () => {
     packageRules: [
       {
         matchPackageNames: ['a', 'b', 'xyz/**', '!xyz/foo**'],
+        // @ts-expect-error -- testing
         x: 2,
       },
       {
         matchPackageNames: ['/a/', '/b/', '!aa', '!/d/'],
+        // @ts-expect-error -- testing
         y: 2,
       },
       {
@@ -216,6 +218,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchPackageNames: ['!foo'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -237,6 +240,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchPackageNames: ['neutrino', '/^@neutrino\\//'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -259,6 +263,7 @@ describe('util/package-rules/index', () => {
         {
           matchDepTypes: ['dependencies', 'peerDependencies'],
           matchPackageNames: ['a'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -277,6 +282,7 @@ describe('util/package-rules/index', () => {
         {
           matchDepTypes: ['test'],
           matchPackageNames: ['a'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -295,6 +301,7 @@ describe('util/package-rules/index', () => {
         {
           matchDepTypes: ['test'],
           matchPackageNames: ['a'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -312,6 +319,7 @@ describe('util/package-rules/index', () => {
         {
           matchManagers: ['npm', 'meteor'],
           matchPackageNames: ['node'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -331,6 +339,7 @@ describe('util/package-rules/index', () => {
         {
           matchManagers: ['dockerfile', 'npm'],
           matchPackageNames: ['node'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -352,6 +361,7 @@ describe('util/package-rules/index', () => {
         {
           matchCategories: ['node'],
           matchPackageNames: ['node'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -372,6 +382,7 @@ describe('util/package-rules/index', () => {
         {
           matchCategories: ['docker'],
           matchPackageNames: ['node'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -391,6 +402,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchCategories: ['docker'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -409,10 +421,12 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchDatasources: [OrbDatasource.id, DockerDatasource.id],
+          // @ts-expect-error -- testing
           x: 1,
         },
         {
           matchDatasources: [DockerDatasource.id],
+          // @ts-expect-error -- testing
           y: 1,
         },
       ],
@@ -432,6 +446,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchBaseBranches: ['master', 'staging'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -450,6 +465,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchDatasources: [OrbDatasource.id],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -467,6 +483,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchBaseBranches: ['master'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -484,6 +501,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchBaseBranches: ['/^release\\/.*/'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -502,6 +520,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchBaseBranches: ['/^release\\/.*/'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -520,10 +539,12 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchUpdateTypes: ['minor', 'patch'],
+          // @ts-expect-error -- testing
           x: 1,
         },
         {
           matchUpdateTypes: ['minor'],
+          // @ts-expect-error -- testing
           y: 1,
         },
       ],
@@ -546,6 +567,7 @@ describe('util/package-rules/index', () => {
             'https://github.com/foo/bar**',
             'https://github.com/renovatebot/**',
           ],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -568,6 +590,7 @@ describe('util/package-rules/index', () => {
             'https://github.com/foo/bar**',
             'https://github.com/renovatebot/**',
           ],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -590,6 +613,7 @@ describe('util/package-rules/index', () => {
             'https://github.com/foo/bar**',
             'https://github.com/renovatebot/**',
           ],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -611,6 +635,7 @@ describe('util/package-rules/index', () => {
             'https://github.com/foo/bar',
             'https://github.com/renovatebot/presets',
           ],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -633,6 +658,7 @@ describe('util/package-rules/index', () => {
             'https://github.com/foo/bar',
             'https://github.com/facebook/react',
           ],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -663,6 +689,7 @@ describe('util/package-rules/index', () => {
         packageRules: [
           {
             matchConfidence: ['high'],
+            // @ts-expect-error -- testing
             x: 1,
           },
         ],
@@ -681,6 +708,7 @@ describe('util/package-rules/index', () => {
         packageRules: [
           {
             matchConfidence: ['high'],
+            // @ts-expect-error -- testing
             x: 1,
           },
         ],
@@ -699,6 +727,7 @@ describe('util/package-rules/index', () => {
         packageRules: [
           {
             matchConfidence: ['high'],
+            // @ts-expect-error -- testing
             x: 1,
           },
         ],
@@ -718,6 +747,7 @@ describe('util/package-rules/index', () => {
           {
             matchUpdateTypes: ['major'],
             matchConfidence: ['high'],
+            // @ts-expect-error -- testing
             x: 1,
           },
         ],
@@ -744,6 +774,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchDepTypes: ['dependencies', 'peerDependencies'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -762,6 +793,7 @@ describe('util/package-rules/index', () => {
         {
           matchDepTypes: ['dependencies', 'peerDependencies'],
           matchPackageNames: ['a'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -781,6 +813,7 @@ describe('util/package-rules/index', () => {
         {
           matchPackageNames: ['test'],
           matchCurrentVersion: '<= 2.0.0',
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -819,6 +852,7 @@ describe('util/package-rules/index', () => {
         {
           matchPackageNames: ['test'],
           matchCurrentVersion: '>= 2.0.0',
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -840,6 +874,7 @@ describe('util/package-rules/index', () => {
         {
           matchPackageNames: ['test'],
           matchCurrentVersion: '2.1.0',
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -869,6 +904,7 @@ describe('util/package-rules/index', () => {
         {
           matchPackageNames: ['test'],
           matchCurrentVersion: '4.6.0',
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -890,6 +926,7 @@ describe('util/package-rules/index', () => {
         {
           matchPackageNames: ['test'],
           matchCurrentVersion: '/^4/',
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -920,6 +957,7 @@ describe('util/package-rules/index', () => {
         {
           matchPackageNames: ['test'],
           matchCurrentVersion: '!/^4/',
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -950,6 +988,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchFileNames: ['package.json'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -974,6 +1013,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchFileNames: ['yarn.lock'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -988,6 +1028,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchFileNames: ['examples/**', 'lib/'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -1047,6 +1088,7 @@ describe('util/package-rules/index', () => {
             'https://github.com/foo/bar**',
             'https://github.com/Renovatebot/**',
           ],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -1069,6 +1111,7 @@ describe('util/package-rules/index', () => {
             'https://github.com/foo/bar',
             'https://github.com/Renovatebot/renovate',
           ],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -1089,6 +1132,7 @@ describe('util/package-rules/index', () => {
         {
           matchPackageNames: ['abc'],
           matchCategories: ['js'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -1106,6 +1150,7 @@ describe('util/package-rules/index', () => {
         {
           matchPackageNames: ['abc'],
           matchBaseBranches: ['dev'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -1123,6 +1168,7 @@ describe('util/package-rules/index', () => {
         {
           matchPackageNames: ['abc'],
           matchManagers: ['npm'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -1139,6 +1185,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchDepNames: ['test1'],
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],
@@ -1162,6 +1209,7 @@ describe('util/package-rules/index', () => {
     const config: TestConfig = {
       packageRules: [
         {
+          // @ts-expect-error -- testing
           x: 1,
         },
       ],

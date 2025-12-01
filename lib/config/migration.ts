@@ -44,31 +44,38 @@ export function migrateConfig(
 
     for (const [key, val] of Object.entries(newConfig)) {
       if (isString(val) && val.includes('{{baseDir}}')) {
+        // @ts-expect-error -- TODO: fix me
         migratedConfig[key] = val.replace(
           regEx(/{{baseDir}}/g),
           '{{packageFileDir}}',
         );
       } else if (isString(val) && val.includes('{{lookupName}}')) {
+        // @ts-expect-error -- TODO: fix me
         migratedConfig[key] = val.replace(
           regEx(/{{lookupName}}/g),
           '{{packageName}}',
         );
       } else if (isString(val) && val.includes('{{depNameShort}}')) {
+        // @ts-expect-error -- TODO: fix me
         migratedConfig[key] = val.replace(
           regEx(/{{depNameShort}}/g),
           '{{depName}}',
         );
       } else if (isString(val) && val.startsWith('{{semanticPrefix}}')) {
+        // @ts-expect-error -- TODO: fix me
         migratedConfig[key] = val.replace(
           '{{semanticPrefix}}',
           '{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}',
         );
       } else if (optionTypes[key] === 'object' && isBoolean(val)) {
+        // @ts-expect-error -- TODO: fix me
         migratedConfig[key] = { enabled: val };
       } else if (optionTypes[key] === 'boolean') {
         if (val === 'true') {
+          // @ts-expect-error -- TODO: fix me
           migratedConfig[key] = true;
         } else if (val === 'false') {
+          // @ts-expect-error -- TODO: fix me
           migratedConfig[key] = false;
         }
       } else if (
@@ -76,10 +83,13 @@ export function migrateConfig(
         isArray(val) &&
         val.length === 1
       ) {
+        // @ts-expect-error -- TODO: fix me
         migratedConfig[key] = String(val[0]);
       } else if (isArray(val)) {
+        // @ts-expect-error -- TODO: fix me
         if (isArray(migratedConfig?.[key])) {
           const newArray = [];
+          // @ts-expect-error -- TODO: fix me
           for (const item of migratedConfig[key]) {
             if (isObject(item) && !isArray(item)) {
               const arrMigrate = migrateConfig(item as RenovateConfig);
@@ -88,14 +98,17 @@ export function migrateConfig(
               newArray.push(item);
             }
           }
+          // @ts-expect-error -- TODO: fix me
           migratedConfig[key] = newArray;
         }
       } else if (isObject(val)) {
         const subMigrate = migrateConfig(
+          // @ts-expect-error -- TODO: fix me
           migratedConfig[key] as RenovateConfig,
           key,
         );
         if (subMigrate.isMigrated) {
+          // @ts-expect-error -- TODO: fix me
           migratedConfig[key] = subMigrate.migratedConfig;
         }
       }
@@ -108,8 +121,10 @@ export function migrateConfig(
         newVersionMinor: 'newMinor',
         toVersion: 'newVersion',
       };
+      // @ts-expect-error -- TODO: fix me
       if (isString(migratedConfig[key])) {
         for (const [from, to] of Object.entries(migratedTemplates)) {
+          // @ts-expect-error -- TODO: fix me
           migratedConfig[key] = (migratedConfig[key] as string).replace(
             regEx(from, 'g'),
             to,
@@ -130,14 +145,17 @@ export function migrateConfig(
       'rust',
     ];
     for (const language of languages) {
+      // @ts-expect-error -- TODO: fix me
       if (isNonEmptyObject(migratedConfig[language])) {
         migratedConfig.packageRules ??= [];
+        // @ts-expect-error -- TODO: fix me
         const currentContent = migratedConfig[language] as any;
         const packageRule = {
           matchCategories: [language],
           ...currentContent,
         };
         migratedConfig.packageRules.unshift(packageRule);
+        // @ts-expect-error -- TODO: fix me
         delete migratedConfig[language];
       }
     }
@@ -146,15 +164,18 @@ export function migrateConfig(
       const existingRules = migratedConfig.packageRules;
       migratedConfig.packageRules = [];
       for (const packageRule of existingRules) {
+        // @ts-expect-error -- TODO: fix me
         if (isArray(packageRule.packageRules)) {
           logger.debug('Flattening nested packageRules');
           // merge each subrule and add to the parent list
+          // @ts-expect-error -- TODO: fix me
           for (const subrule of packageRule.packageRules) {
             // TODO: fix types #22198
             const combinedRule = mergeChildConfig(
               packageRule,
               subrule as PackageRule,
             );
+            // @ts-expect-error -- TODO: fix me
             delete combinedRule.packageRules;
             migratedConfig.packageRules.push(combinedRule);
           }
@@ -164,9 +185,12 @@ export function migrateConfig(
       }
     }
     if (
+      // @ts-expect-error -- TODO: fix me
       isNonEmptyObject(migratedConfig['pip-compile']) &&
+      // @ts-expect-error -- TODO: fix me
       isNonEmptyArray(migratedConfig['pip-compile'].managerFilePatterns)
     ) {
+      // @ts-expect-error -- TODO: fix me
       migratedConfig['pip-compile'].managerFilePatterns = migratedConfig[
         'pip-compile'
       ].managerFilePatterns.map((filePattern) => {
@@ -180,22 +204,31 @@ export function migrateConfig(
         return pattern.replace(/\.in\$\/$/, '.txt$/');
       });
     }
+    // @ts-expect-error -- TODO: fix me
     if (isNonEmptyArray(migratedConfig.matchManagers)) {
+      // @ts-expect-error -- TODO: fix me
       if (migratedConfig.matchManagers.includes('gradle-lite')) {
+        // @ts-expect-error -- TODO: fix me
         if (!migratedConfig.matchManagers.includes('gradle')) {
+          // @ts-expect-error -- TODO: fix me
           migratedConfig.matchManagers.push('gradle');
         }
+        // @ts-expect-error -- TODO: fix me
         migratedConfig.matchManagers = migratedConfig.matchManagers.filter(
+          // @ts-expect-error -- TODO: fix me
           (manager) => manager !== 'gradle-lite',
         );
       }
     }
+    // @ts-expect-error -- TODO: fix me
     if (isNonEmptyObject(migratedConfig['gradle-lite'])) {
       migratedConfig.gradle = mergeChildConfig(
         migratedConfig.gradle ?? {},
+        // @ts-expect-error -- TODO: fix me
         migratedConfig['gradle-lite'],
       );
     }
+    // @ts-expect-error -- TODO: fix me
     delete migratedConfig['gradle-lite'];
     const isMigrated = !dequal(config, migratedConfig);
     if (isMigrated) {
