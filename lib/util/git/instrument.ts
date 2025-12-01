@@ -21,14 +21,17 @@ import {
   ATTR_VCS_GIT_OPERATION_TYPE,
   ATTR_VCS_GIT_SUBCOMMAND,
 } from '../../instrumentation/types';
-import type { GitOperationType } from './types';
+import { GitOperationType } from './types';
 
 function isGitOperationType(
   subcommand: string,
 ): subcommand is GitOperationType {
-  return knownGitOperationTypesBySubcommand.includes(
-    subcommand as GitOperationType,
-  );
+  // `GitOperationType`s that should not have a matching subcommand
+  if (subcommand === 'plumbing' || subcommand === 'other') {
+    return false;
+  }
+
+  return GitOperationType.includes(subcommand as GitOperationType);
 }
 
 function gitOperationTypeForSubcommand(subcommand: string): GitOperationType {
@@ -43,21 +46,6 @@ function gitOperationTypeForSubcommand(subcommand: string): GitOperationType {
 
   return subcommand;
 }
-
-/** single-command prefixes that correspond to an operation type */
-const knownGitOperationTypesBySubcommand: GitOperationType[] = [
-  'branch',
-  'checkout',
-  'clean',
-  'clone',
-  'commit',
-  'fetch',
-  'merge',
-  'pull',
-  'push',
-  'reset',
-  'submodule',
-];
 
 /** helper method for instrumentation of Git operations */
 export function prepareInstrumentation(
