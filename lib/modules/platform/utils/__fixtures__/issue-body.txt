@@ -1,13 +1,3 @@
-## Rate-Limited
-
-The following updates are currently rate-limited. To force their creation now, click on a checkbox below.
-
- - [ ] <!-- unlimit-branch=renovate/ansi-regex-6.x -->Update dependency ansi-regex to v6
- - [ ] <!-- unlimit-branch=renovate/commander-10.x -->Update dependency commander to v10
- - [ ] <!-- unlimit-branch=renovate/graceful-fs-4.x -->Update dependency graceful-fs to v4
- - [ ] <!-- create-all-rate-limited-prs -->🔐 **Create all rate-limited PRs at once** 🔐
-
-
 ## Awaiting Schedule
 
 The following updates are awaiting their schedule. To get an update now, click on a checkbox below.
@@ -17,6 +7,20 @@ The following updates are awaiting their schedule. To get an update now, click o
  - [ ] <!-- unschedule-branch=branchName3 -->[pr6](../pull/6)
  - [ ] <!-- create-all-awaiting-schedule-prs -->🔐 **Create all awaiting schedule PRs at once** 🔐
 
+## Rate-Limited
+
+The following updates are currently rate-limited. To force their creation now, click on a checkbox below.
+
+ - [ ] <!-- unlimit-branch=renovate/ansi-regex-6.x -->Update dependency ansi-regex to v6
+ - [ ] <!-- unlimit-branch=renovate/commander-10.x -->Update dependency commander to v10
+ - [ ] <!-- unlimit-branch=renovate/graceful-fs-4.x -->Update dependency graceful-fs to v4
+ - [ ] <!-- create-all-rate-limited-prs -->🔐 **Create all rate-limited PRs at once** 🔐
+
+## Edited/Blocked
+
+The following updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox below.
+
+- [ ] <!-- rebase-branch=renovate/docker-renovate-renovate-16.x -->[Update renovate/renovate Docker tag to v16.13.8](../pull/2)
 
 ## Open
 
@@ -27,13 +31,7 @@ The following updates have all been created. To force a retry/rebase of any, cli
  - [ ] <!-- rebase-branch=branchName3 -->[pr3](../pull/3)
  - [ ] <!-- rebase-all-open-prs -->**Click on this checkbox to rebase all open PRs at once**
 
-## Edited/Blocked
-
-The following updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox below.
-
-- [ ] <!-- rebase-branch=renovate/docker-renovate-renovate-16.x -->[Update renovate/renovate Docker tag to v16.13.8](../pull/2)
-
-## Closed/Ignored
+## Ignored or Blocked
 
 The following updates are blocked by an existing closed PR. To recreate the PR, click on a checkbox below.
 
