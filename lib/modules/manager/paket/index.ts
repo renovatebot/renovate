@@ -61,7 +61,6 @@ export async function extractPackageFile(
         return {
           depType: 'dependencies',
           depName: name,
-          packageName: name,
           currentVersion: version,
           datasource: NugetDatasource.id,
           rangeStrategy: 'update-lockfile',

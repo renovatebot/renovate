@@ -73,7 +73,6 @@ NUGET
           {
             depType: 'dependencies',
             depName: 'FSharp.Core',
-            packageName: 'FSharp.Core',
             currentVersion: '9.0.300',
             datasource: NugetDatasource.id,
             rangeStrategy: 'update-lockfile',
@@ -82,7 +81,6 @@ NUGET
           {
             depType: 'dependencies',
             depName: 'xunit',
-            packageName: 'xunit',
             currentVersion: '2.9.3',
             datasource: NugetDatasource.id,
             rangeStrategy: 'update-lockfile',
@@ -91,7 +89,6 @@ NUGET
           {
             depType: 'dependencies',
             depName: 'FAKE',
-            packageName: 'FAKE',
             currentVersion: '5.16',
             datasource: NugetDatasource.id,
             rangeStrategy: 'update-lockfile',
@@ -100,7 +97,6 @@ NUGET
           {
             depType: 'dependencies',
             depName: 'xunit',
-            packageName: 'xunit',
             currentVersion: '2.9.2',
             datasource: NugetDatasource.id,
             rangeStrategy: 'update-lockfile',
@@ -149,7 +145,6 @@ nuget xunit
           {
             depType: 'dependencies',
             depName: 'FSharp.Core',
-            packageName: 'FSharp.Core',
             currentVersion: '9.0.300',
             datasource: NugetDatasource.id,
             rangeStrategy: 'update-lockfile',
@@ -158,7 +153,6 @@ nuget xunit
           {
             depType: 'dependencies',
             depName: 'xunit',
-            packageName: 'xunit',
             datasource: NugetDatasource.id,
             rangeStrategy: 'update-lockfile',
           },
