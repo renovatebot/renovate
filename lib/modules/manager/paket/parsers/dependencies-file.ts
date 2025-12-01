@@ -1,4 +1,5 @@
 import { isNonEmptyString } from '@sindresorhus/is';
+import { newlineRegex } from '../../../../util/regex';
 
 interface DependenciesFile {
   groups: DependenciesGroup[];
@@ -46,7 +47,7 @@ export function parse(content: string): DependenciesFile {
     currentGroup: { groupName: 'Main', nugetPackages: [] },
   };
 
-  for (const item of content.split('\n')) {
+  for (const item of content.split(newlineRegex)) {
     result = analyzeLine(result, item);
   }
 
