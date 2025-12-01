@@ -257,8 +257,6 @@ export class InstrumentedSimpleGit {
       async () => {
         if (verbose === true) {
           return await instrument('other', () => this.git.getRemotes(true));
-        } else if (verbose === false) {
-          return await instrument('other', () => this.git.getRemotes(false));
         } else {
           return await instrument('other', () => this.git.getRemotes());
         }
