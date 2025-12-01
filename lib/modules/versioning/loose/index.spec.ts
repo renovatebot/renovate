@@ -6,6 +6,7 @@ describe('modules/versioning/loose/index', () => {
     ${'1.1'}     | ${true}
     ${'1.3.RC2'} | ${true}
     ${'2.1-rc2'} | ${true}
+    ${'1.2.3+4'} | ${true}
   `('isVersion("$version") === $expected', ({ version, expected }) => {
     expect(!!loose.isVersion(version)).toBe(expected);
   });
@@ -24,6 +25,7 @@ describe('modules/versioning/loose/index', () => {
     ${'0.8a'}                                      | ${true}
     ${'3.1.0.GA'}                                  | ${true}
     ${'3.0.0-beta.3'}                              | ${true}
+    ${'3.0.0+8'}                                   | ${true}
     ${'foo'}                                       | ${false}
     ${'1.2.3.4.5.6.7'}                             | ${false}
     ${'0a1b2c3'}                                   | ${false}
@@ -59,6 +61,7 @@ describe('modules/versioning/loose/index', () => {
     ${'1.9'}                        | ${'1.9.1'}                      | ${false}
     ${'2.4'}                        | ${'2.4.beta'}                   | ${true}
     ${'2.4.0'}                      | ${'2.4.beta'}                   | ${true}
+    ${'2.4.0+2'}                    | ${'2.4.0+1'}                    | ${true}
     ${'2.4.beta'}                   | ${'2.4'}                        | ${false}
     ${'2.4.beta'}                   | ${'2.4.0'}                      | ${false}
     ${'2024-07-21T11-33-05.abc123'} | ${'2023-06-21T11-33-05.abc123'} | ${true}
