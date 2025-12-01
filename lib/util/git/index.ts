@@ -3,7 +3,7 @@ import { setTimeout } from 'timers/promises';
 import { isBoolean, isNonEmptyObject, isString } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import semver from 'semver';
-import type { Options, SimpleGit, TaskOptions } from 'simple-git';
+import type { Options, TaskOptions } from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
 import upath from 'upath';
 import { getConfigFileNames } from '../../config/app-strings';
@@ -46,6 +46,8 @@ import {
   checkForPlatformFailure,
   handleCommitError,
 } from './error';
+import type { InstrumentedSimpleGit } from './instrument';
+import { instrumentGit } from './instrument';
 import {
   getCachedModifiedResult,
   setCachedModifiedResult,
@@ -124,7 +126,7 @@ async function isDirectory(dir: string): Promise<boolean> {
   }
 }
 
-async function getDefaultBranch(git: SimpleGit): Promise<string> {
+async function getDefaultBranch(git: InstrumentedSimpleGit): Promise<string> {
   logger.debug('getDefaultBranch()');
   // see https://stackoverflow.com/a/62352647/3005034
   try {
@@ -166,7 +168,7 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
 let config: LocalConfig = {} as any;
 
 // TODO: can be undefined
-let git: SimpleGit;
+let git: InstrumentedSimpleGit;
 let gitInitialized: boolean;
 let submodulesInitizialized: boolean;
 
@@ -176,7 +178,7 @@ export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
 export async function validateGitVersion(): Promise<boolean> {
   let version: string | undefined;
-  const globalGit = simpleGit();
+  const globalGit = instrumentGit(simpleGit());
   try {
     const { major, minor, patch, installed } = await globalGit.version();
     /* v8 ignore next 4 -- TODO: add test */
@@ -250,11 +252,13 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.additionalBranches = [];
   config.branchIsModified = {};
   // TODO: safe to pass all env variables? use `getChildEnv` instead?
-  git = simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env({
-    ...getEnv(),
-    LANG: 'C.UTF-8',
-    LC_ALL: 'C.UTF-8',
-  });
+  git = instrumentGit(
+    simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env({
+      ...getEnv(),
+      LANG: 'C.UTF-8',
+      LC_ALL: 'C.UTF-8',
+    }),
+  );
   gitInitialized = false;
   submodulesInitizialized = false;
   await fetchBranchCommits();
