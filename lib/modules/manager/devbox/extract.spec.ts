@@ -83,7 +83,6 @@ describe('modules/manager/devbox/extract', () => {
             depName: 'yarn',
             currentValue: '1.22.10',
             datasource: 'devbox',
-            versioning: 'devbox',
           },
         ],
       });
@@ -113,7 +112,6 @@ describe('modules/manager/devbox/extract', () => {
             depName: 'yarn',
             currentValue: '1.22.10',
             datasource: 'devbox',
-            versioning: 'devbox',
           },
         ],
       });
@@ -147,7 +145,6 @@ describe('modules/manager/devbox/extract', () => {
             depName: 'yarn',
             currentValue: '1.22.10',
             datasource: 'devbox',
-            versioning: 'devbox',
           },
         ],
       });
@@ -178,14 +175,12 @@ describe('modules/manager/devbox/extract', () => {
             depName: 'yarn',
             currentValue: '1.22.10',
             datasource: 'devbox',
-            versioning: 'devbox',
           },
           {
             currentValue: 'invalid',
             datasource: 'devbox',
             depName: 'invalid',
             skipReason: 'invalid-version',
-            versioning: 'devbox',
           },
         ],
       });
@@ -218,14 +213,12 @@ describe('modules/manager/devbox/extract', () => {
             depName: 'yarn',
             currentValue: '1.22.10',
             datasource: 'devbox',
-            versioning: 'devbox',
           },
           {
             currentValue: 'invalid',
             datasource: 'devbox',
             depName: 'invalid',
             skipReason: 'invalid-version',
-            versioning: 'devbox',
           },
         ],
       });
@@ -252,14 +245,12 @@ describe('modules/manager/devbox/extract', () => {
             depName: 'yarn',
             currentValue: '1.22.10',
             datasource: 'devbox',
-            versioning: 'devbox',
           },
           {
             currentValue: 'invalid',
             datasource: 'devbox',
             depName: 'invalid',
             skipReason: 'invalid-version',
-            versioning: 'devbox',
           },
           {
             datasource: 'devbox',

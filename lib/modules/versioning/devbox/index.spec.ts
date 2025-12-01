@@ -6,6 +6,7 @@ describe('modules/versioning/devbox/index', () => {
     ${'1'}            | ${false}
     ${'01'}           | ${false}
     ${'1.01'}         | ${false}
+    ${'1.1'}          | ${false}
     ${'1.3.0'}        | ${true}
     ${'2.1.20'}       | ${true}
     ${'v1.4'}         | ${false}

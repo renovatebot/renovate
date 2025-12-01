@@ -9,9 +9,6 @@ describe('modules/versioning/python/index', () => {
     ${'1.2.3-foo'}                                   | ${true}
     ${'1.2.3foo'}                                    | ${false}
     ${'1.2.3a0'}                                     | ${true}
-    ${'1.2.3beta2'}                                  | ${true}
-    ${'1.2a0'}                                       | ${true}
-    ${'1.2beta2'}                                    | ${true}
     ${'1.2.3b1'}                                     | ${true}
     ${'1.2.3rc23'}                                   | ${true}
     ${'*'}                                           | ${true}

@@ -2,6 +2,7 @@ import * as looseVersioning from '../../versioning/loose';
 import * as nodeVersioning from '../../versioning/node';
 import * as pythonVersioning from '../../versioning/python';
 import * as rubyVersioning from '../../versioning/ruby';
+import * as semver from '../../versioning/semver';
 import type { VersioningApi } from '../../versioning/types';
 
 export type ToolVersioning = Record<string, { api: VersioningApi; id: string }>;
@@ -21,8 +22,8 @@ export const devboxToolVersioning: ToolVersioning = {
   },
   // Using loose versioning due to versions like 1.2.3+2
   jdk: {
-    api: looseVersioning.api,
-    id: looseVersioning.id,
+    api: semver.api,
+    id: semver.id,
   },
   // Using loose versioning due to versions like 1.2
   postgresql: {

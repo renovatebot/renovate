@@ -7,7 +7,7 @@ import {
   withDebugMessage,
 } from '../../../util/schema-utils';
 import { DevboxDatasource } from '../../datasource/devbox';
-import * as devboxVersioning from '../../versioning/devbox';
+import { api } from '../../versioning/devbox';
 import type { PackageDependency } from '../types';
 import { devboxToolVersioning } from './tool-versioning';
 
@@ -31,12 +31,12 @@ const DevboxEntry = z
 
     dep.currentValue = currentValue;
 
-    let versioning = devboxToolVersioning[depName];
-    versioning ??= devboxVersioning;
+    const versioning = devboxToolVersioning[depName];
+    if (versioning) {
+      dep.versioning = versioning.id;
+    }
 
-    dep.versioning = versioning.id;
-
-    if (!versioning.api.isValid(currentValue)) {
+    if (!(versioning?.api ?? api).isValid(currentValue)) {
       logger.debug(
         { depName },
         'Devbox: skipping invalid devbox dependency in devbox JSON file.',
