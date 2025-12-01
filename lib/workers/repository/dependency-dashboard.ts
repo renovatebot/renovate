@@ -29,7 +29,6 @@ interface DependencyDashboard {
   dependencyDashboardAllPending: boolean;
   dependencyDashboardAllRateLimited: boolean;
   dependencyDashboardAllAwaitingSchedule: boolean;
-  dependencyDashboardAllPendingStatus: boolean;
 }
 
 const rateLimitedRe = regEx(
@@ -38,10 +37,6 @@ const rateLimitedRe = regEx(
 );
 const pendingApprovalRe = regEx(
   ` - \\[ \\] ${getMarkdownComment('approve-branch=([^\\s]+)')}`,
-  'g',
-);
-const pendingStatusRe = regEx(
-  ` - \\[ \\] ${getMarkdownComment('approvePr-branch=([^\\s]+)')}`,
   'g',
 );
 const awaitingScheduleRe = regEx(
@@ -58,7 +53,6 @@ const markedBranchesRe = regEx(
 
 const approveAllPendingPrs = 'approve-all-pending-prs';
 const createAllRateLimitedPrs = 'create-all-rate-limited-prs';
-const createAllPendingStatusPrs = 'create-all-pending-status-prs';
 const createAllAwaitingSchedulePrs = 'create-all-awaiting-schedule-prs';
 const createConfigMigrationPr = 'create-config-migration-pr';
 const configMigrationPrInfo = 'config-migration-pr-info';
@@ -86,10 +80,6 @@ function checkOpenAllRateLimitedPR(issueBody: string): boolean {
 
 function checkOpenAllAwaitingSchedulePR(issueBody: string): boolean {
   return isBoxChecked(issueBody, createAllAwaitingSchedulePrs);
-}
-
-function checkOpenAllPendingStatusPR(issueBody: string): boolean {
-  return isBoxChecked(issueBody, createAllPendingStatusPrs);
 }
 
 function checkApproveAllPendingPR(issueBody: string): boolean {
@@ -130,11 +120,6 @@ function selectAllRelevantBranches(issueBody: string): string[] {
       checkedBranches.push(match[0]);
     }
   }
-  if (checkOpenAllPendingStatusPR(issueBody)) {
-    for (const match of issueBody.matchAll(pendingStatusRe)) {
-      checkedBranches.push(match[0]);
-    }
-  }
   if (checkApproveAllPendingPR(issueBody)) {
     for (const match of issueBody.matchAll(pendingApprovalRe)) {
       checkedBranches.push(match[0]);
@@ -172,8 +157,6 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
   const dependencyDashboardRebaseAllOpen = checkRebaseAll(issueBody);
   const dependencyDashboardAllAwaitingSchedule =
     checkOpenAllAwaitingSchedulePR(issueBody);
-  const dependencyDashboardAllPendingStatus =
-    checkOpenAllPendingStatusPR(issueBody);
   const dependencyDashboardAllPending = checkApproveAllPendingPR(issueBody);
   const dependencyDashboardAllRateLimited =
     checkOpenAllRateLimitedPR(issueBody);
@@ -183,7 +166,6 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
     dependencyDashboardChecks,
     dependencyDashboardRebaseAllOpen,
     dependencyDashboardAllAwaitingSchedule,
-    dependencyDashboardAllPendingStatus,
     dependencyDashboardAllPending,
     dependencyDashboardAllRateLimited,
   };
@@ -196,7 +178,6 @@ export async function readDashboardBody(
     dependencyDashboardChecks: {},
     dependencyDashboardRebaseAllOpen: false,
     dependencyDashboardAllAwaitingSchedule: false,
-    dependencyDashboardAllPendingStatus: false,
     dependencyDashboardAllPending: false,
     dependencyDashboardAllRateLimited: false,
   };
@@ -543,10 +524,6 @@ export async function ensureDependencyDashboard(
     (branch) => branch.result === 'pending',
     'Pending Status Checks',
     'The following updates await pending status checks. To force their creation now, click on a checkbox below.',
-    'approvePr',
-    createAllPendingStatusPrs,
-    'Create all pending status check PRs at once',
-    '🔐',
   );
   issueBody += getBranchesListMd(
     branches,
