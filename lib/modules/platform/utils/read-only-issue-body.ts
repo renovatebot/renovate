@@ -5,7 +5,7 @@ export function readOnlyIssueBody(body: string): string {
     .replace(regEx(/ To.*?, click on a checkbox below\./g), '')
     .replace(regEx(/\[ ] <!-- \w*-branch.*-->/g), '')
     .replace(regEx(/- \[ ] <!-- rebase-all-open-prs -->.*/g), '')
-    .replace(regEx(/ - \[ ] <!-- create-all-rate-limited-prs -->.*/g), '');
+    .replace(regEx(/- \[ ] <!-- create-all-[\w-]*-prs -->.*/g), '');
 }
 
 export default readOnlyIssueBody;
