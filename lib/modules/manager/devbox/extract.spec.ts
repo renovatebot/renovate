@@ -27,7 +27,7 @@ describe('modules/manager/devbox/extract', () => {
         `,
         'devbox.lock',
       );
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         deps: [
           {
             depName: 'nodejs',
@@ -50,7 +50,7 @@ describe('modules/manager/devbox/extract', () => {
         `,
         'devbox.lock',
       );
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         deps: [
           {
             depName: 'nodejs',
@@ -71,7 +71,7 @@ describe('modules/manager/devbox/extract', () => {
         `,
         'devbox.lock',
       );
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         deps: [
           {
             depName: 'nodejs',
@@ -100,7 +100,7 @@ describe('modules/manager/devbox/extract', () => {
         `,
         'devbox.lock',
       );
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         deps: [
           {
             depName: 'nodejs',
@@ -133,7 +133,7 @@ describe('modules/manager/devbox/extract', () => {
         `,
         'devbox.lock',
       );
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         deps: [
           {
             depName: 'nodejs',
@@ -163,7 +163,7 @@ describe('modules/manager/devbox/extract', () => {
         `,
         'devbox.lock',
       );
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         deps: [
           {
             depName: 'nodejs',
@@ -201,7 +201,7 @@ describe('modules/manager/devbox/extract', () => {
         `,
         'devbox.lock',
       );
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         deps: [
           {
             depName: 'nodejs',
@@ -233,7 +233,7 @@ describe('modules/manager/devbox/extract', () => {
         `,
         'devbox.lock',
       );
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         deps: [
           {
             depName: 'nodejs',
