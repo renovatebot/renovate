@@ -1,3 +1,5 @@
+import { isNonEmptyString } from '@sindresorhus/is';
+
 interface DependenciesFile {
   groups: DependenciesGroup[];
 }
@@ -17,7 +19,7 @@ interface ReduceState {
 export function parse(content: string): DependenciesFile {
   const result: ReduceState = content.split('\n').reduce(
     (state: ReduceState, line: string) => {
-      const lineParts = line.split(/\s+/).filter((p) => p !== '');
+      const lineParts = line.split(/\s+/).filter(isNonEmptyString);
       if (lineParts.length < 2) {
         return state;
       }
