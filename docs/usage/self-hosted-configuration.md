@@ -214,6 +214,13 @@ The order method for autodiscover server side repository search.
 
 The sort method for autodiscover server side repository search.
 
+Platform supported sort options:
+
+| Platform       | Supported sort options                      |
+| -------------- | ------------------------------------------- |
+| GitLab         | `created_at`, `updated_at`, `id`            |
+| Forgejo, Gitea | `alpha`, `created`, `updated`, `size`, `id` |
+
 > If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
 
 ## autodiscoverTopics
