@@ -1,6 +1,7 @@
 import { ProxyTracerProvider } from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
+import type { Response, SimpleGit } from 'simple-git';
 import {
   disableInstrumentations,
   getTracerProvider,
@@ -147,6 +148,32 @@ describe('instrumentation/index', () => {
           throw error;
         }),
       ).rejects.toThrow(error);
+    });
+
+    describe('should return result for async fn with intersection type of Promise', async () => {
+      const simpleGitMock = {
+        status: vi.fn(),
+      } as Partial<SimpleGit>;
+
+      const value = 'testResult';
+
+      it('when promise is first type', async () => {
+        const promise = Promise.resolve(value);
+        // this copies `simpleGitMock` properties onto `promise`
+        const prom = Object.assign(promise, simpleGitMock) as Response<string>;
+
+        const result = await instrument('test', () => prom);
+        expect(result).toStrictEqual(value);
+      });
+
+      it('when promise is second type', async () => {
+        const promise = Promise.resolve(value);
+        // this copies `promise` properties onto `simpleGitMock`
+        const prom = Object.assign(simpleGitMock, promise) as Response<string>;
+
+        const result = await instrument('test', () => prom);
+        expect(result).toStrictEqual(value);
+      });
     });
   });
 });
