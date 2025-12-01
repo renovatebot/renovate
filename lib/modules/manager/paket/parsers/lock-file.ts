@@ -1,3 +1,5 @@
+import { newlineRegex } from '../../../../util/regex';
+
 export type SourceType = 'nuget';
 export interface Dependency {
   source: SourceType;
@@ -14,7 +16,7 @@ interface Line {
 
 function extractLines(content: string): Line[] {
   return content
-    .split('\n')
+    .split(newlineRegex)
     .map((line) => ({
       text: line.trim(),
       indent: /^( *)/.exec(line)![1].length,
