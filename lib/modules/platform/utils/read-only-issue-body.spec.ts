@@ -6,8 +6,6 @@ const issueBody = Fixtures.get('issue-body.txt');
 describe('modules/platform/utils/read-only-issue-body', () => {
   describe('.readOnlyIssueBody', () => {
     it('removes all checkbox formatting', () => {
-      console.log(readOnlyIssueBody(issueBody));
-
       expect(readOnlyIssueBody(issueBody)).toEqual(
         expect.not.stringContaining('[ ] <!--'),
       );
