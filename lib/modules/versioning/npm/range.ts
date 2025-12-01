@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import semver from 'semver';
 import semverUtils from 'semver-utils';
 import { logger } from '../../../logger';
@@ -152,7 +152,7 @@ export function getNewValue({
       return semverUtils
         .parseRange(currentValue)
         .map((x) => x.semver)
-        .filter(is.string)
+        .filter(isString)
         .map((subRange) => {
           const bumpedSubRange = getNewValue({
             currentValue: subRange,

@@ -5,6 +5,8 @@ import { migrateAndValidate } from '../../../config/migrate-validate';
 import { resolveConfigPresets } from '../../../config/presets';
 import type { RenovateConfig } from '../../../config/types';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
+import { instrument } from '../../../instrumentation';
+import { ATTR_RENOVATE_SPLIT } from '../../../instrumentation/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
 import { platform } from '../../../modules/platform';
@@ -156,45 +158,93 @@ export async function extractDependencies(
     );
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
-    for (const baseBranch of config.baseBranches) {
-      addMeta({ baseBranch });
+    await instrument(
+      'extract',
+      async () => {
+        for (const baseBranch of config.baseBranches!) {
+          addMeta({ baseBranch });
 
-      if (scm.syncForkWithUpstream) {
-        await scm.syncForkWithUpstream(baseBranch);
-      }
-      if (await scm.branchExists(baseBranch)) {
-        const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
-        extracted[baseBranch] = await extract(baseBranchConfig, overwriteCache);
-      } else {
-        logger.warn({ baseBranch }, 'Base branch does not exist - skipping');
-      }
-    }
-    addSplit('extract');
-    for (const baseBranch of config.baseBranches) {
-      if (await scm.branchExists(baseBranch)) {
-        addMeta({ baseBranch });
-        const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
-        const packageFiles = extracted[baseBranch];
-        const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
-        res.branches = res.branches.concat(baseBranchRes?.branches);
-        res.branchList = res.branchList.concat(baseBranchRes?.branchList);
-        if (!res.packageFiles || !Object.keys(res.packageFiles).length) {
-          // Use the first branch
-          res.packageFiles = baseBranchRes?.packageFiles;
+          if (scm.syncForkWithUpstream) {
+            await scm.syncForkWithUpstream(baseBranch);
+          }
+          if (await scm.branchExists(baseBranch)) {
+            const baseBranchConfig = await getBaseBranchConfig(
+              baseBranch,
+              config,
+            );
+            extracted[baseBranch] = await extract(
+              baseBranchConfig,
+              overwriteCache,
+            );
+          } else {
+            logger.warn(
+              { baseBranch },
+              'Base branch does not exist - skipping',
+            );
+          }
         }
-      }
-    }
+      },
+      {
+        attributes: {
+          [ATTR_RENOVATE_SPLIT]: 'extract',
+        },
+      },
+    );
+    addSplit('extract');
+    await instrument(
+      'lookup',
+      async () => {
+        for (const baseBranch of config.baseBranches!) {
+          if (await scm.branchExists(baseBranch)) {
+            addMeta({ baseBranch });
+            const baseBranchConfig = await getBaseBranchConfig(
+              baseBranch,
+              config,
+            );
+            const packageFiles = extracted[baseBranch];
+            const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
+            res.branches = res.branches.concat(baseBranchRes?.branches);
+            res.branchList = res.branchList.concat(baseBranchRes?.branchList);
+            if (!res.packageFiles || !Object.keys(res.packageFiles).length) {
+              // Use the first branch
+              res.packageFiles = baseBranchRes?.packageFiles;
+            }
+          }
+        }
+      },
+      {
+        attributes: {
+          [ATTR_RENOVATE_SPLIT]: 'lookup',
+        },
+      },
+    );
     removeMeta(['baseBranch']);
   } else {
     logger.debug('No baseBranches');
-    const packageFiles = await extract(config, overwriteCache);
+    const packageFiles = await instrument(
+      'extract',
+      async () => await extract(config, overwriteCache),
+      {
+        attributes: {
+          [ATTR_RENOVATE_SPLIT]: 'extract',
+        },
+      },
+    );
     addSplit('extract');
     if (GlobalConfig.get('dryRun') === 'extract') {
       res.packageFiles = packageFiles;
       logger.info({ packageFiles }, 'Extracted dependencies');
       return res;
     }
-    res = await lookup(config, packageFiles);
+    res = await instrument(
+      'lookup',
+      async () => await lookup(config, packageFiles),
+      {
+        attributes: {
+          [ATTR_RENOVATE_SPLIT]: 'lookup',
+        },
+      },
+    );
   }
   addSplit('lookup');
   return res;

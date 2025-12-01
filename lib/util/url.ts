@@ -1,4 +1,9 @@
-import is from '@sindresorhus/is';
+import {
+  isArray,
+  isNonEmptyString,
+  isString,
+  isUrlInstance,
+} from '@sindresorhus/is';
 // eslint-disable-next-line no-restricted-imports
 import _parseLinkHeader from 'parse-link-header';
 import urlJoin from 'url-join';
@@ -65,14 +70,14 @@ export function replaceUrlPath(baseUrl: string | URL, path: string): string {
     return path;
   }
 
-  const { origin } = is.string(baseUrl) ? new URL(baseUrl) : baseUrl;
+  const { origin } = isString(baseUrl) ? new URL(baseUrl) : baseUrl;
   return urlJoin(origin, path);
 }
 
 export function getQueryString(params: Record<string, any>): string {
   const usp = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
-    if (is.array<object>(v)) {
+    if (isArray<object>(v)) {
       for (const item of v) {
         // TODO: fix me?
         // eslint-disable-next-line @typescript-eslint/no-base-to-string
@@ -86,7 +91,7 @@ export function getQueryString(params: Record<string, any>): string {
 }
 
 export function isHttpUrl(url: unknown): boolean {
-  if (!is.nonEmptyString(url) && !is.urlInstance(url)) {
+  if (!isNonEmptyString(url) && !isUrlInstance(url)) {
     return false;
   }
   const protocol = parseUrl(url)?.protocol;
@@ -123,7 +128,7 @@ export type LinkHeaderLinks = _parseLinkHeader.Links;
 export function parseLinkHeader(
   linkHeader: string | null | undefined,
 ): LinkHeaderLinks | null {
-  if (!is.nonEmptyString(linkHeader)) {
+  if (!isNonEmptyString(linkHeader)) {
     return null;
   }
   if (linkHeader.length > 2000) {

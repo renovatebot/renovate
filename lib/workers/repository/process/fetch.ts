@@ -1,7 +1,8 @@
 // TODO #22198
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
+import { instrument } from '../../../instrumentation';
 import { logger } from '../../../logger';
 import { getDefaultConfig } from '../../../modules/datasource';
 import { getDefaultVersioning } from '../../../modules/datasource/common';
@@ -29,7 +30,7 @@ async function lookup(
 
   dep.updates = [];
 
-  if (is.string(dep.depName)) {
+  if (isString(dep.depName)) {
     dep.depName = dep.depName.trim();
   }
 
@@ -39,7 +40,7 @@ async function lookup(
     return Result.ok(dep);
   }
 
-  if (!is.nonEmptyString(dep.packageName)) {
+  if (!isNonEmptyString(dep.packageName)) {
     dep.skipReason = 'invalid-name';
     return Result.ok(dep);
   }
@@ -169,7 +170,9 @@ export async function fetchUpdates(
 ): Promise<void> {
   const managers = Object.keys(packageFiles);
   const allManagerJobs = managers.map((manager) =>
-    fetchManagerUpdates(config, packageFiles, manager),
+    instrument(manager, () =>
+      fetchManagerUpdates(config, packageFiles, manager),
+    ),
   );
   await Promise.all(allManagerJobs);
   PackageFiles.add(config.baseBranch!, { ...packageFiles });

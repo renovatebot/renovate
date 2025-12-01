@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString, isTruthy } from '@sindresorhus/is';
 import { z } from 'zod';
 import { escapeRegExp, regEx } from '../../../../util/regex';
 import { parseUrl } from '../../../../util/url';
@@ -44,7 +44,7 @@ function stripArchiveSuffix(value: string): string {
 }
 
 function isHash(value: unknown): value is string {
-  return is.string(value) && regEx(/[0-9a-z]{40}/i).test(value);
+  return isString(value) && regEx(/[0-9a-z]{40}/i).test(value);
 }
 
 export function parseGithubPath(
@@ -136,7 +136,7 @@ export const HttpTarget = z
   })
   .refine(({ url, urls }) => !!url || !!urls)
   .transform(({ rule, name, url, urls = [] }): PackageDependency[] => {
-    const parsedUrl = [url, ...urls].map(parseArchiveUrl).find(is.truthy);
+    const parsedUrl = [url, ...urls].map(parseArchiveUrl).find(isTruthy);
     if (!parsedUrl) {
       return [];
     }

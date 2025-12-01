@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -861,7 +861,7 @@ export class DockerDatasource extends Datasource {
       // TODO: types (#22198)
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`,
     );
-    const newTag = is.nonEmptyString(newValue) ? newValue : 'latest';
+    const newTag = isNonEmptyString(newValue) ? newValue : 'latest';
     let digest: string | null = null;
     try {
       let architecture: string | null | undefined = null;
@@ -893,7 +893,7 @@ export class DockerDatasource extends Datasource {
       }
 
       if (
-        is.string(architecture) ||
+        isString(architecture) ||
         (manifestResponse &&
           !hasKey('docker-content-digest', manifestResponse.headers))
       ) {
@@ -1145,16 +1145,16 @@ export class DockerDatasource extends Datasource {
       latestTag,
     );
     if (labels) {
-      if (is.nonEmptyString(labels[gitRefLabel])) {
+      if (isNonEmptyString(labels[gitRefLabel])) {
         ret.gitRef = labels[gitRefLabel];
       }
       for (const label of sourceLabels) {
-        if (is.nonEmptyString(labels[label])) {
+        if (isNonEmptyString(labels[label])) {
           ret.sourceUrl = labels[label];
           break;
         }
       }
-      if (is.nonEmptyString(labels[imageUrlLabel])) {
+      if (isNonEmptyString(labels[imageUrlLabel])) {
         ret.homepage = labels[imageUrlLabel];
       }
     }

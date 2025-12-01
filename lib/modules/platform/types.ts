@@ -39,7 +39,6 @@ export type GitUrlOption = 'default' | 'ssh' | 'endpoint';
 
 export interface RepoParams {
   repository: string;
-  endpoint?: string;
   gitUrl?: GitUrlOption;
   forkCreation?: boolean;
   forkOrg?: string;
@@ -48,9 +47,7 @@ export interface RepoParams {
   renovateUsername?: string;
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
-  ignorePrAuthor?: boolean;
   bbUseDevelopmentBranch?: boolean;
-  includeMirrors?: boolean;
 }
 
 export interface PrDebugData {

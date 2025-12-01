@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray } from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
@@ -143,7 +143,8 @@ export async function getConfig(
     if (option.type === 'array' && option.subType === 'object') {
       try {
         const parsed = JSON5.parse(envVal);
-        if (is.array(parsed)) {
+        if (isArray(parsed)) {
+          // @ts-expect-error -- type can't be narrowed
           config[option.name] = parsed;
         } else {
           logger.debug(
@@ -159,6 +160,7 @@ export async function getConfig(
       }
     } else {
       const coerce = coersions[option.type];
+      // @ts-expect-error -- type can't be narrowed
       config[option.name] = coerce(envVal);
       if (option.name === 'dryRun') {
         if ((config[option.name] as string) === 'true') {

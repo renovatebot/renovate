@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import * as manager from '../../modules/manager';
 import * as platform from '../../modules/platform';
 import { getOptions } from '.';
@@ -52,7 +52,7 @@ describe('config/options/index', () => {
   describe('every option with allowedValues and a default must have the default in allowedValues', () => {
     const opts = getOptions();
     for (const option of opts) {
-      if (option.allowedValues && !is.nullOrUndefined(option.default)) {
+      if (option.allowedValues && !isNullOrUndefined(option.default)) {
         it(`${option.name}: \`${option.default}\` is in ${JSON.stringify(option.allowedValues)}`, () => {
           expect(option.allowedValues).toBeDefined();
 

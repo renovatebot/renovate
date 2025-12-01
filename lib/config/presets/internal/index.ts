@@ -9,7 +9,6 @@ import * as groupPreset from './group';
 import * as helpersPreset from './helpers';
 import * as mergeConfidence from './merge-confidence';
 import * as monorepoPreset from './monorepos';
-import * as npm from './npm';
 import * as packagesPreset from './packages';
 import * as previewPreset from './preview';
 import * as replacements from './replacements';
@@ -30,7 +29,6 @@ export const groups: Record<string, Record<string, Preset>> = {
   helpers: helpersPreset.presets,
   mergeConfidence: mergeConfidence.presets,
   monorepo: monorepoPreset.presets,
-  npm: npm.presets,
   packages: packagesPreset.presets,
   preview: previewPreset.presets,
   replacements: replacements.presets,

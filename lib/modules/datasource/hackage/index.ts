@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { joinUrlParts } from '../../../util/url';
 import * as pvpVersioning from '../../versioning/pvp';
 import { Datasource } from '../datasource';
@@ -18,7 +18,7 @@ export class HackageDatasource extends Datasource {
 
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { registryUrl, packageName } = config;
-    if (!is.nonEmptyString(registryUrl)) {
+    if (!isNonEmptyString(registryUrl)) {
       return null;
     }
     const massagedPackageName = encodeURIComponent(packageName);

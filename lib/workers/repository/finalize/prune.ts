@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
@@ -126,7 +126,7 @@ function calculateBaseBranchRegex(config: RenovateConfig): RegExp | null {
 
   // calculate possible branch prefixes and escape for regex
   const branchPrefixes = [config.branchPrefix, config.branchPrefixOld]
-    .filter(is.nonEmptyStringAndNotWhitespace)
+    .filter(isNonEmptyStringAndNotWhitespace)
     .filter(uniqueStrings)
     .map(escapeRegExp);
 

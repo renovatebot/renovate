@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray, isNonEmptyString, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { GithubHttp } from '../../../util/http/github';
 import { getPrBodyStruct } from '../pr-body';
@@ -17,7 +17,7 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
     sourceBranch: pr.head?.ref,
     title: pr.title,
     state:
-      pr.state === 'closed' && is.string(pr.merged_at) ? 'merged' : pr.state,
+      pr.state === 'closed' && isString(pr.merged_at) ? 'merged' : pr.state,
     bodyStruct,
     updated_at: pr.updated_at,
     node_id: pr.node_id,
@@ -35,14 +35,14 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
     result.labels = pr.labels.map(({ name }) => name);
   }
 
-  if (!!pr.assignee || is.nonEmptyArray(pr.assignees)) {
+  if (!!pr.assignee || isNonEmptyArray(pr.assignees)) {
     result.hasAssignees = true;
   }
 
   if (pr.requested_reviewers) {
     result.reviewers = pr.requested_reviewers
       .map(({ login }) => login)
-      .filter(is.nonEmptyString);
+      .filter(isNonEmptyString);
   }
 
   if (pr.created_at) {

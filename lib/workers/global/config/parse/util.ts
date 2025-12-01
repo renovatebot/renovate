@@ -1,5 +1,5 @@
 import { pathToFileURL } from 'url';
-import is from '@sindresorhus/is';
+import { isFunction } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import upath from 'upath';
 import { massageConfig } from '../../../../config/massage';
@@ -69,7 +69,7 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
       /* v8 ignore next -- not testable */
       let config = tmpConfig.default ?? tmpConfig;
       // Allow the config to be a function
-      if (is.function(config)) {
+      if (isFunction(config)) {
         config = config();
       }
       return config;

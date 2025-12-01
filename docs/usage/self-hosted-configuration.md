@@ -112,6 +112,14 @@ module.exports = {
 };
 ```
 
+## allowedUnsafeExecutions
+
+This should be configured to a list of commands which are allowed to be run automatically as part of a dependency upgrade.
+
+This is a separate class of commands that could be executed compared to [`allowedCommands`](#allowedcommands), or package managers that are controlled with [`allowScripts=true`](#allowscripts) and [`ignoreScripts=false`](./configuration-options.md#ignorescripts), where seemingly "safe" commands can result in code execution.
+As there is a security risk of running these commands automatically when a dependency upgrades, self hosted implementations need to explicitly declare which commands are permitted for their installation.
+For more details of where this may be found, see ["Trusting Repository Developers"](./security-and-permissions.md#trusting-repository-developers).
+
 ## autodiscover
 
 When you enable `autodiscover`, by default, Renovate runs on _every_ repository that the bot account can access.
@@ -374,6 +382,7 @@ Other valid cache namespaces are as follows:
 - `changelog-github-release`
 - `changelog-gitlab-notes@v2`
 - `changelog-gitlab-release`
+- `datasource-azure-tags`
 - `datasource-artifactory`
 - `datasource-aws-machine-image`
 - `datasource-aws-rds`
@@ -431,6 +440,7 @@ Other valid cache namespaces are as follows:
 - `datasource-jsr`
 - `datasource-maven:cache-provider`
 - `datasource-maven:postprocess-reject`
+- `datasource-nextcloud`
 - `datasource-node-version`
 - `datasource-npm:cache-provider`
 - `datasource-nuget-v3`
@@ -485,6 +495,10 @@ Example:
 <!-- prettier-ignore -->
 !!! note
     If you want renovate to use a custom filename for the onboarding branch you also need to change the [`onboardingConfigFileName`](#onboardingconfigfilename).
+
+## configValidationError
+
+If enabled, config validation errors will be reported as errors instead of warnings, and Renovate will exit with a non-zero exit code.
 
 ## containerbaseDir
 

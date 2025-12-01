@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { compressToBase64, decompressFromBase64 } from '../../../compress';
@@ -51,14 +51,14 @@ export abstract class RepoCacheBase implements RepoCache {
   async load(): Promise<void> {
     try {
       const oldCache = await this.read();
-      if (!is.string(oldCache)) {
+      if (!isString(oldCache)) {
         logger.debug(
           `RepoCacheBase.load() - expecting data of type 'string' received '${typeof oldCache}' instead - skipping`,
         );
         return;
       }
 
-      if (!is.nonEmptyString(oldCache)) {
+      if (!isNonEmptyString(oldCache)) {
         logger.debug('RepoCacheBase.load() - cache file is empty - skipping');
         return;
       }

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { massageConfig } from '../../../config/massage';
 import type { RenovateConfig } from '../../../config/types';
 import { validateConfig } from '../../../config/validation';
@@ -30,7 +30,7 @@ export async function validateReconfigureBranch(
     );
 
     // if old status check is present skip validation
-    if (is.nonEmptyString(validationStatus)) {
+    if (isNonEmptyString(validationStatus)) {
       logger.debug(
         'Skipping validation check because status check already exists.',
       );

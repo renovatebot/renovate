@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
@@ -99,7 +99,7 @@ function getUpdateImportPathCmds(
 }
 
 function useModcacherw(goVersion: string | undefined): boolean {
-  if (!is.string(goVersion)) {
+  if (!isString(goVersion)) {
     return true;
   }
 

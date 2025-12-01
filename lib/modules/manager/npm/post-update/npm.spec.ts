@@ -467,6 +467,31 @@ describe('modules/manager/npm/post-update/npm', () => {
     ]);
   });
 
+  it('does not install npm if no constraints specified', async () => {
+    GlobalConfig.set({
+      localDir: '',
+      cacheDir: '/tmp',
+      binarySource: 'install',
+    });
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { constraints: {} },
+      [{ isLockFileMaintenance: true }],
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0' },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
+  });
+
   describe('installs workspace only packages separately', () => {
     const updates = [
       {
