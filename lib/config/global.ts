@@ -6,6 +6,7 @@ export class GlobalConfig {
     'allowedCommands',
     'allowedEnv',
     'allowCustomCrateRegistries',
+    'allowedUnsafeExecutions',
     'allowedHeaders',
     'allowPlugins',
     'allowScripts',

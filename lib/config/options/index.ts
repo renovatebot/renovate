@@ -3099,6 +3099,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     subType: 'string',
     default: [],
+    allowedValues: ['goGenerate'],
     stage: 'global',
     globalOnly: true,
   },

@@ -645,6 +645,10 @@ describe('modules/manager/gomod/artifacts', () => {
   });
 
   it('supports go generate when configured', async () => {
+    GlobalConfig.set({
+      ...adminConfig,
+      allowedUnsafeExecutions: ['goGenerate'],
+    });
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendor');
     const gomodFile = upath.join('go.mod');
 
@@ -659,10 +663,9 @@ describe('modules/manager/gomod/artifacts', () => {
         deleted: ['internal/generated/deleted.go'],
       }),
     );
+    fs.readLocalFile.mockResolvedValueOnce('New go.mod');
     fs.readLocalFile.mockResolvedValueOnce('Foo go');
-    fs.readLocalFile.mockResolvedValueOnce('New go.mod');
     fs.readLocalFile.mockResolvedValueOnce('Bar go');
-    fs.readLocalFile.mockResolvedValueOnce('New go.mod');
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
       updatedDeps: [],
@@ -675,15 +678,21 @@ describe('modules/manager/gomod/artifacts', () => {
     expect(res).toEqual([
       {
         file: {
-          contents: 'Foo go',
-          path: 'internal/generated/foo.go',
+          path: 'internal/generated/deleted.go',
+          type: 'deletion',
+        },
+      },
+      {
+        file: {
+          path: 'go.mod',
+          contents: 'New go.mod',
           type: 'addition',
         },
       },
       {
         file: {
-          contents: 'New go.mod',
-          path: 'go.mod',
+          contents: 'Foo go',
+          path: 'internal/generated/foo.go',
           type: 'addition',
         },
       },
@@ -694,12 +703,52 @@ describe('modules/manager/gomod/artifacts', () => {
           type: 'addition',
         },
       },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
       {
-        file: {
-          path: 'internal/generated/deleted.go',
-          type: 'deletion',
-        },
+        cmd: 'go get -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
       },
+      {
+        cmd: 'go mod vendor',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go generate ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
+  it('only allows go generate usage when permitted globally', async () => {
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendor');
+    const gomodFile = upath.join('go.mod');
+
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce('modules.txt content'); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['internal/generated/foo.go', gomodFile],
+        created: ['internal/generated/bar.go'],
+        not_added: ['internal/pkg/file.go'],
+        deleted: ['internal/generated/deleted.go'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New go.mod');
+    fs.readLocalFile.mockResolvedValueOnce('Foo go');
+    fs.readLocalFile.mockResolvedValueOnce('Bar go');
+    const res = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [],
+      newPackageFileContent: gomod1,
+      config: {
+        ...config,
+        postUpdateOptions: ['goGenerate'],
+      },
+    });
+    expect(res).toEqual([
       {
         file: {
           path: 'internal/generated/deleted.go',
@@ -722,10 +771,6 @@ describe('modules/manager/gomod/artifacts', () => {
       },
       {
         cmd: 'go mod vendor',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go generate ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
