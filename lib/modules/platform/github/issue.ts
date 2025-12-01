@@ -18,7 +18,7 @@ interface TransformedIssue {
   title: string;
   body: string;
   lastModified: string;
-  node_id: string | undefined;
+  node_id?: string;
 }
 
 const GithubGraphqlIssue = GithubIssueBase.extend({
