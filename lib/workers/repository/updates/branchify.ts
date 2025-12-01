@@ -2,6 +2,7 @@
 import type { Merge } from 'type-fest';
 import type { RenovateConfig, ValidationMessage } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
+import type { PackageFile } from '../../../modules/manager/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { flattenUpdates } from './flatten';
 import { generateBranchConfig } from './generate';
@@ -15,7 +16,7 @@ export type BranchifiedConfig = Merge<
 >;
 export async function branchifyUpgrades(
   config: RenovateConfig,
-  packageFiles: Record<string, any[]>,
+  packageFiles: Record<string, PackageFile[]>,
 ): Promise<BranchifiedConfig> {
   logger.debug('branchifyUpgrades');
   const updates = await flattenUpdates(config, packageFiles);

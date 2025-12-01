@@ -30,9 +30,7 @@ describe('workers/repository/config-migration/pr/index', () => {
   let config: RenovateConfig;
 
   beforeEach(() => {
-    GlobalConfig.set({
-      dryRun: null,
-    });
+    GlobalConfig.reset();
 
     config = {
       ...getConfig(),

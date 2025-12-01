@@ -2423,7 +2423,6 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo hardcoded-string$'],
-        trustLevel: 'high',
         localDir: '/localDir',
       });
 
@@ -2538,7 +2537,6 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo hardcoded-string$'],
-        trustLevel: 'high',
         localDir: '/localDir',
         cacheDir,
       });
@@ -2644,7 +2642,6 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo hardcoded-string$'],
-        trustLevel: 'high',
         localDir: '/localDir',
         cacheDir,
       });

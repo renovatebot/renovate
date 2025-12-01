@@ -1,5 +1,6 @@
 import { isNumber, isString } from '@sindresorhus/is';
 import semver from 'semver';
+import { GlobalConfig } from '../../../config/global';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -280,7 +281,6 @@ const platform: Platform = {
     cloneSubmodules,
     cloneSubmodulesFilter,
     gitUrl,
-    ignorePrAuthor,
   }: RepoParams): Promise<RepoResult> {
     let repo: Repo;
 
@@ -288,7 +288,7 @@ const platform: Platform = {
     config.repository = repository;
     config.cloneSubmodules = !!cloneSubmodules;
     config.cloneSubmodulesFilter = cloneSubmodulesFilter;
-    config.ignorePrAuthor = !!ignorePrAuthor;
+    config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor', false);
 
     // Try to fetch information about repository
     try {

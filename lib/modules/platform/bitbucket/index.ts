@@ -1,5 +1,6 @@
 import URL from 'node:url';
 import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
+import { GlobalConfig } from '../../../config/global';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
@@ -193,7 +194,6 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   cloneSubmodulesFilter,
-  ignorePrAuthor,
   bbUseDevelopmentBranch,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
@@ -203,7 +203,7 @@ export async function initRepo({
   });
   config = {
     repository,
-    ignorePrAuthor,
+    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor', false),
   } as Config;
   let info: RepoInfo;
   let mainBranch: string;
@@ -545,6 +545,7 @@ export async function setBranchStatus({
 interface BbIssue {
   id: number;
   title: string;
+  kind: string;
   content?: { raw: string };
 }
 
@@ -637,6 +638,7 @@ export async function ensureIssue({
   try {
     let issues = await findOpenIssues(title);
     const description = massageMarkdown(sanitize(body));
+    const issueKind = 'task';
 
     if (!issues.length && reuseTitle) {
       issues = await findOpenIssues(reuseTitle);
@@ -650,14 +652,15 @@ export async function ensureIssue({
 
       if (
         issue.title !== title ||
-        String(issue.content?.raw).trim() !== description.trim()
+        String(issue.content?.raw).trim() !== description.trim() ||
+        issue.kind !== issueKind
       ) {
         logger.debug('Issue updated');
         await bitbucketHttp.putJson(
           `/2.0/repositories/${config.repository}/issues/${issue.id}`,
           {
             body: {
-              kind: 'task',
+              kind: issueKind,
               content: {
                 raw: readOnlyIssueBody(description),
                 markup: 'markdown',
@@ -674,7 +677,7 @@ export async function ensureIssue({
         {
           body: {
             title,
-            kind: 'task',
+            kind: issueKind,
             content: {
               raw: readOnlyIssueBody(description),
               markup: 'markdown',
