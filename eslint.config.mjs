@@ -7,6 +7,7 @@ import * as importX from 'eslint-plugin-import-x';
 import eslintPluginPromise from 'eslint-plugin-promise';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
+import sortedArrayByName from './eslint-rules/sorted-array-by-name.js';
 
 const jsFiles = { files: ['**/*.{js,cjs,mjs,mts,ts}'] };
 
@@ -74,7 +75,15 @@ export default tseslint.config(
   eslintConfigPrettier,
   {
     ...jsFiles,
+    plugins: {
+      local: {
+        rules: {
+          'sorted-array-by-name': sortedArrayByName,
+        },
+      },
+    },
     rules: {
+      'local/sorted-array-by-name': 'error',
       'import-x/default': 2,
       'import-x/named': 2,
       'import-x/namespace': 2,
