@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isFalsy } from '@sindresorhus/is';
 import { readLocalFile } from '../../../util/fs';
 import { parseYaml } from '../../../util/yaml';
 import { GlasskubePackagesDatasource } from '../../datasource/glasskube-packages';
@@ -74,7 +74,7 @@ function findRepository(
     if (name === repository.metadata.name) {
       return repository;
     }
-    if (is.falsy(name) && isDefaultRepository(repository)) {
+    if (isFalsy(name) && isDefaultRepository(repository)) {
       return repository;
     }
   }

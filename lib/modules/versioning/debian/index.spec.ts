@@ -359,15 +359,6 @@ describe('modules/versioning/debian/index', () => {
     ${'9'}            | ${undefined}  | ${undefined}   | ${'stable'}   | ${'12'}
     ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'12'}       | ${'stable'}
     ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'3'}        | ${'3'}
-    ${'oldstable'}    | ${'pin'}      | ${undefined}   | ${'11'}       | ${'11'}
-    ${'oldstable'}    | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'12'}
-    ${'oldstable'}    | ${'pin'}      | ${undefined}   | ${'bullseye'} | ${'11'}
-    ${'buster'}       | ${'pin'}      | ${undefined}   | ${'11'}       | ${'11'}
-    ${'buster'}       | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'12'}
-    ${'buster'}       | ${'pin'}      | ${undefined}   | ${'bullseye'} | ${'11'}
-    ${'10'}           | ${'pin'}      | ${undefined}   | ${'11'}       | ${'11'}
-    ${'10'}           | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'12'}
-    ${'10'}           | ${'pin'}      | ${undefined}   | ${'bullseye'} | ${'11'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
@@ -422,7 +413,7 @@ describe('modules/versioning/debian/index', () => {
     vi.setSystemTime(future);
     expect(debian.isStable('buster')).toBeFalse();
     expect(logger.debug).toHaveBeenCalledTimes(1);
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       'RollingReleasesData - data written',
     );

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
@@ -61,9 +61,9 @@ function processDepForAutoReplace(
   for (const lineNumberRange of lineNumberRanges) {
     for (const lineNumber of lineNumberRange) {
       if (
-        (is.string(dep.currentValue) &&
+        (isString(dep.currentValue) &&
           lines[lineNumber].includes(dep.currentValue)) ||
-        (is.string(dep.currentDigest) &&
+        (isString(dep.currentDigest) &&
           lines[lineNumber].includes(dep.currentDigest))
       ) {
         lineNumberRangesToReplace.push(lineNumberRange);
@@ -169,8 +169,8 @@ export function getDep(
   registryAliases?: Record<string, string>,
 ): PackageDependency {
   if (
-    !is.string(currentFrom) ||
-    !is.nonEmptyStringAndNotWhitespace(currentFrom)
+    !isString(currentFrom) ||
+    !isNonEmptyStringAndNotWhitespace(currentFrom)
   ) {
     return {
       skipReason: 'invalid-value',

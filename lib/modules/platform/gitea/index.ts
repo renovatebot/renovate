@@ -1,5 +1,6 @@
-import is from '@sindresorhus/is';
+import { isNumber, isString } from '@sindresorhus/is';
 import semver from 'semver';
+import { GlobalConfig } from '../../../config/global';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -226,10 +227,10 @@ const platform: Platform = {
       botUserID = user.id;
       botUserName = user.username;
       const env = getEnv();
-      /* v8 ignore start: experimental feature */
+      /* v8 ignore next: experimental feature */
       if (semver.valid(env.RENOVATE_X_PLATFORM_VERSION)) {
         defaults.version = env.RENOVATE_X_PLATFORM_VERSION!;
-      } /* v8 ignore stop */ else {
+      } else {
         defaults.version = await helper.getVersion({ token });
       }
       if (defaults.version?.includes('gitea-')) {
@@ -280,7 +281,6 @@ const platform: Platform = {
     cloneSubmodules,
     cloneSubmodulesFilter,
     gitUrl,
-    ignorePrAuthor,
   }: RepoParams): Promise<RepoResult> {
     let repo: Repo;
 
@@ -288,7 +288,7 @@ const platform: Platform = {
     config.repository = repository;
     config.cloneSubmodules = !!cloneSubmodules;
     config.cloneSubmodulesFilter = cloneSubmodulesFilter;
-    config.ignorePrAuthor = !!ignorePrAuthor;
+    config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor', false);
 
     // Try to fetch information about repository
     try {
@@ -547,7 +547,7 @@ const platform: Platform = {
     targetBranch,
   }: FindPRConfig): Promise<Pr | null> {
     logger.debug(`findPr(${branchName}, ${title!}, ${state})`);
-    if (includeOtherAuthors && is.string(targetBranch)) {
+    if (includeOtherAuthors && isString(targetBranch)) {
       // do not use pr cache as it only fetches prs created by the bot account
       const pr = await helper.getPRByBranch(
         config.repository,
@@ -602,7 +602,7 @@ const platform: Platform = {
         head,
         title,
         body,
-        labels: labels.filter(is.number),
+        labels: labels.filter(isNumber),
       });
 
       if (platformPrOptions?.usePlatformAutomerge) {
@@ -727,7 +727,7 @@ const platform: Platform = {
      */
     if (Array.isArray(labels)) {
       prUpdateParams.labels = (await map(labels, lookupLabelByName)).filter(
-        is.number,
+        isNumber,
       );
       if (labels.length !== prUpdateParams.labels.length) {
         logger.warn(
@@ -792,10 +792,10 @@ const platform: Platform = {
         number,
         body,
       };
-    } catch (err) /* v8 ignore start */ {
+    } catch (err) /* v8 ignore next */ {
       logger.debug({ err, number }, 'Error getting issue');
       return null;
-    } /* v8 ignore stop */
+    }
   },
 
   async findIssue(title: string): Promise<Issue | null> {
@@ -839,7 +839,7 @@ const platform: Platform = {
 
       const labels = Array.isArray(labelNames)
         ? (await Promise.all(labelNames.map(lookupLabelByName))).filter(
-            is.number,
+            isNumber,
           )
         : undefined;
 

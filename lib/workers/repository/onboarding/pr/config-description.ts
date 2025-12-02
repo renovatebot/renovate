@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isString } from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
@@ -23,9 +23,7 @@ export function getScheduleDesc(config: RenovateConfig): string[] {
 function getDescriptionArray(config: RenovateConfig): string[] {
   logger.debug('getDescriptionArray()');
   logger.trace({ config });
-  const desc = is.array(config.description, is.string)
-    ? config.description
-    : [];
+  const desc = isArray(config.description, isString) ? config.description : [];
   return desc.concat(getScheduleDesc(config));
 }
 

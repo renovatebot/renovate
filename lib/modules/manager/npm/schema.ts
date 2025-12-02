@@ -7,23 +7,24 @@ export const PnpmCatalogs = z.object({
 });
 
 export const YarnCatalogs = z.object({
-  options: z.optional(z.union([z.string(), z.array(z.string())])),
-  list: z.record(z.union([z.string(), z.record(z.string())])),
+  catalog: z.optional(z.record(z.string())),
+  catalogs: z.optional(z.record(z.record(z.string()))).catch(undefined),
 });
 export type YarnCatalogs = z.infer<typeof YarnCatalogs>;
 
 export const YarnConfig = Yaml.pipe(
-  z.object({
-    npmRegistryServer: z.string().optional(),
-    npmScopes: z
-      .record(
-        z.object({
-          npmRegistryServer: z.string().optional(),
-        }),
-      )
-      .optional(),
-    catalogs: YarnCatalogs.optional().catch(undefined),
-  }),
+  z
+    .object({
+      npmRegistryServer: z.string().optional(),
+      npmScopes: z
+        .record(
+          z.object({
+            npmRegistryServer: z.string().optional(),
+          }),
+        )
+        .optional(),
+    })
+    .and(YarnCatalogs),
 );
 export type YarnConfig = z.infer<typeof YarnConfig>;
 

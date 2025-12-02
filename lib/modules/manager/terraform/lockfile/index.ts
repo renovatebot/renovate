@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import * as p from '../../../../util/promises';
 import { escapeRegExp, regEx } from '../../../../util/regex';
@@ -64,7 +64,7 @@ async function updateAllLocks(
     { concurrency: 4 },
   );
 
-  return updates.filter(is.truthy);
+  return updates.filter(isTruthy);
 }
 
 export function getNewConstraint(

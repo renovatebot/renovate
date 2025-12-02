@@ -67,7 +67,7 @@ describe('workers/repository/reconfigure/comment', () => {
           reconfigurePr,
         ),
       ).toBeTrue();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would check branch renovate/reconfigure',
       );
@@ -113,7 +113,6 @@ Based on the default config's presets, Renovate will:
     });
 
     it('adds schedule', () => {
-      config.packageFiles = [];
       config.schedule = ['before 5am'];
       const res = getConfigDesc(config);
       expect(res).toEqual(`

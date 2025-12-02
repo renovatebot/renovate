@@ -39,7 +39,6 @@ describe('workers/repository/finalize/repository-statistics', () => {
     it('Calls runRenovateRepoStats', () => {
       runRenovateRepoStats(config, result);
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         {
           stats: {
@@ -70,7 +69,6 @@ describe('workers/repository/finalize/repository-statistics', () => {
 
       runBranchSummary(config);
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         {
           cacheModified: true,
@@ -132,7 +130,6 @@ describe('workers/repository/finalize/repository-statistics', () => {
 
       runBranchSummary(config);
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.debug).toHaveBeenCalledWith(
         {
           baseBranches: [
@@ -161,6 +158,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
       const defaultBranch = 'main';
       const config: RenovateConfig = {
         defaultBranch,
+        // @ts-expect-error -- TODO: should we remove this test?
         branchSummaryExtended: true,
       };
       const branchCache = partial<BranchCache>({

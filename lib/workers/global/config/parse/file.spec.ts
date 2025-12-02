@@ -112,7 +112,7 @@ describe('workers/global/config/parse/file', () => {
 
       // TODO this should be called exactly once, but is called twice
       // expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(processExitSpy).toHaveBeenCalledWith(1);
     });
 
@@ -131,7 +131,6 @@ describe('workers/global/config/parse/file', () => {
 
       await file.getConfig({ RENOVATE_CONFIG_FILE: tmpConfigFile });
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.fatal).toHaveBeenCalledWith(
         `Error parsing config file due to unresolved variable(s): CI_API_V4_URL is not defined`,
       );
@@ -147,7 +146,7 @@ describe('workers/global/config/parse/file', () => {
       fs.writeFileSync(configFile, `{"token": "abc"}`, { encoding: 'utf8' });
       await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
       expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.fatal).toHaveBeenCalledWith('Unsupported file type');
       fs.unlinkSync(configFile);
     });
@@ -262,7 +261,7 @@ describe('workers/global/config/parse/file', () => {
 
       expect(fsRemoveSpy).toHaveBeenCalledTimes(1);
       expect(fsRemoveSpy).toHaveBeenCalledExactlyOnceWith(configFile);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.trace).toHaveBeenCalledWith(
         expect.anything(),
         'config file successfully deleted',
@@ -285,7 +284,7 @@ describe('workers/global/config/parse/file', () => {
 
       expect(fsRemoveSpy).toHaveBeenCalledTimes(1);
       expect(fsRemoveSpy).toHaveBeenCalledExactlyOnceWith(configFile);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.warn).toHaveBeenCalledWith(
         expect.anything(),
         'error deleting config file',

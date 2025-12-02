@@ -1,5 +1,5 @@
 import url from 'node:url';
-import is from '@sindresorhus/is';
+import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { getEnv } from '../../../util/env';
@@ -37,7 +37,7 @@ export function prInfo(mr: GitLabMergeRequest): GitlabPr {
     }),
     ...(mr.head_pipeline?.sha && { headPipelineSha: mr.head_pipeline?.sha }),
 
-    ...(is.nonEmptyArray(mr.reviewers) && {
+    ...(isNonEmptyArray(mr.reviewers) && {
       reviewers: mr.reviewers?.map(({ username }) => username),
     }),
 
@@ -77,7 +77,7 @@ export function getRepoUrl(
 
   if (
     gitUrl === 'endpoint' ||
-    is.nonEmptyString(env.GITLAB_IGNORE_REPO_URL) ||
+    isNonEmptyString(env.GITLAB_IGNORE_REPO_URL) ||
     res.body.http_url_to_repo === null
   ) {
     if (res.body.http_url_to_repo === null) {

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -40,12 +40,12 @@ export function resetPrefetchedImages(): void {
 }
 
 function expandVolumeOption(x: VolumeOption): VolumesPair | null {
-  if (is.nonEmptyString(x)) {
+  if (isNonEmptyString(x)) {
     return [x, x];
   }
   if (Array.isArray(x) && x.length === 2) {
     const [from, to] = x;
-    if (is.nonEmptyString(from) && is.nonEmptyString(to)) {
+    if (isNonEmptyString(from) && isNonEmptyString(to)) {
       return [from, to];
     }
   }
@@ -69,7 +69,7 @@ function prepareVolumes(volumes: VolumeOption[]): string[] {
 
 function prepareCommands(commands: Opt<string>[]): string[] {
   return commands.filter<string>((command): command is string =>
-    is.string(command),
+    isString(command),
   );
 }
 
@@ -255,7 +255,7 @@ export async function generateDockerCommand(
   if (envVars) {
     result.push(
       ...uniq(envVars)
-        .filter(is.string)
+        .filter(isString)
         .map((e) => `-e ${e}`),
     );
   }

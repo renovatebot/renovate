@@ -21,6 +21,7 @@ import {
   getRepoContents,
   getRepoLabels,
   getVersion,
+  isOrg,
   mergePR,
   orgListRepos,
   requestPrReviewers,
@@ -212,6 +213,24 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
       const res = await getVersion();
 
       expect(res).toEqual(version);
+    });
+  });
+
+  describe('isOrg', () => {
+    it('should call /api/v1/orgs/[org] endpoint', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(`/orgs/${mockRepo.owner.username}`)
+        .reply(200, {})
+        .get(`/orgs/user`)
+        .reply(404)
+        .get(`/orgs/error`)
+        .reply(503);
+      expect(await isOrg(mockRepo.owner.username)).toEqual(true);
+      // uses cached result
+      expect(await isOrg(mockRepo.owner.username)).toEqual(true);
+      expect(await isOrg('user')).toEqual(false);
+      await expect(isOrg('error')).rejects.toThrow();
     });
   });
 
@@ -469,7 +488,7 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
         mockPR.head!.label,
       );
       expect(res).toBeNull();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           err: expect.any(Object),

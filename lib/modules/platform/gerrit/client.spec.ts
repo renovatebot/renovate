@@ -156,26 +156,174 @@ describe('modules/platform/gerrit/client', () => {
       },
     );
 
-    it('sets query.n when limit is provided', async () => {
+    it('sets query.n as 1 if a single change is requested', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
-        .query((query) => query.n === '5' && !('no-limit' in query))
+        .query((query) => query.n === '1')
         .reply(200, gerritRestResponse([{ _number: 1 }]), jsonResultHeader);
       await expect(
-        client.findChanges('repo', { branchName: 'dependency-xyz', limit: 5 }),
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+          singleChange: true,
+          pageLimit: 5, // should be ignored
+        }),
       ).resolves.toEqual([{ _number: 1 }]);
     });
 
-    it('sets query["no-limit"] when limit is not provided', async () => {
+    it('sets query.n as 50 if pageLimit is not provided', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
-        .query((query) => query['no-limit'] === 'true')
-        .reply(200, gerritRestResponse([{ _number: 2 }]), jsonResultHeader);
+        .query((query) => query.n === '50')
+        .reply(200, gerritRestResponse([{ _number: 1 }]), jsonResultHeader);
       await expect(
-        client.findChanges('repo', { branchName: 'dependency-xyz' }),
-      ).resolves.toEqual([{ _number: 2 }]);
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+        }),
+      ).resolves.toEqual([{ _number: 1 }]);
+    });
+
+    it('sets query.n with pageLimit if provided', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.n === '5')
+        .reply(200, gerritRestResponse([{ _number: 1 }]), jsonResultHeader);
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+          pageLimit: 5,
+        }),
+      ).resolves.toEqual([{ _number: 1 }]);
+    });
+
+    it('sets query.S with startOffset if provided', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.S === '5')
+        .reply(200, gerritRestResponse([{ _number: 1 }]), jsonResultHeader);
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+          startOffset: 5,
+        }),
+      ).resolves.toEqual([{ _number: 1 }]);
+    });
+
+    it('sets query.S as 0 if startOffset is not provided', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.S === '0')
+        .reply(200, gerritRestResponse([{ _number: 1 }]), jsonResultHeader);
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+        }),
+      ).resolves.toEqual([{ _number: 1 }]);
+    });
+
+    it('handles pagination automatically', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '0')
+        .reply(
+          200,
+          gerritRestResponse([
+            { _number: 1 },
+            { _number: 2, _more_changes: true },
+          ]),
+          jsonResultHeader,
+        )
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '2')
+        .reply(
+          200,
+          gerritRestResponse([
+            { _number: 3 },
+            { _number: 4, _more_changes: true },
+          ]),
+          jsonResultHeader,
+        )
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '4')
+        .reply(
+          200,
+          gerritRestResponse([{ _number: 5 }, { _number: 6 }]),
+          jsonResultHeader,
+        );
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+          pageLimit: 2, // to keep the test short
+        }),
+      ).resolves.toEqual([
+        { _number: 1 },
+        { _number: 2 },
+        { _number: 3 },
+        { _number: 4 },
+        { _number: 5 },
+        { _number: 6 },
+      ]);
+    });
+
+    it('handles pagination with startOffset', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '2')
+        .reply(
+          200,
+          gerritRestResponse([
+            { _number: 3 },
+            { _number: 4, _more_changes: true },
+          ]),
+          jsonResultHeader,
+        )
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '4')
+        .reply(
+          200,
+          gerritRestResponse([{ _number: 5 }, { _number: 6 }]),
+          jsonResultHeader,
+        );
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+          pageLimit: 2,
+          startOffset: 2,
+        }),
+      ).resolves.toEqual([
+        { _number: 3 },
+        { _number: 4 },
+        { _number: 5 },
+        { _number: 6 },
+      ]);
+    });
+
+    it('allows disabling automatic pagination', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '0')
+        .reply(
+          200,
+          gerritRestResponse([
+            { _number: 1 },
+            { _number: 2, _more_changes: true },
+          ]),
+          jsonResultHeader,
+        );
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+          noPagination: true,
+          pageLimit: 2,
+        }),
+      ).resolves.toEqual([{ _number: 1 }, { _number: 2 }]);
     });
 
     it('sets query.o when requestDetails is provided', async () => {
@@ -205,10 +353,7 @@ describe('modules/platform/gerrit/client', () => {
         .get('/a/changes/123456?o=CURRENT_REVISION&o=COMMIT_FOOTERS')
         .reply(200, gerritRestResponse(change), jsonResultHeader);
       await expect(
-        client.getChange(123456, undefined, [
-          'CURRENT_REVISION',
-          'COMMIT_FOOTERS',
-        ]),
+        client.getChange(123456, ['CURRENT_REVISION', 'COMMIT_FOOTERS']),
       ).resolves.toEqual(change);
     });
   });

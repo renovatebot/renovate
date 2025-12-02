@@ -82,7 +82,7 @@ describe('modules/manager/npm/extract/yarn', () => {
   describe('.extractYarnCatalogs()', () => {
     it('handles empty catalog entries', async () => {
       expect(
-        await extractYarnCatalogs(undefined, 'package.json', false),
+        await extractYarnCatalogs({}, 'package.json', false),
       ).toMatchObject({
         deps: [],
       });
@@ -94,8 +94,10 @@ describe('modules/manager/npm/extract/yarn', () => {
       expect(
         await extractYarnCatalogs(
           {
-            list: {
+            catalog: {
               react: '18.3.0',
+            },
+            catalogs: {
               react17: {
                 react: '17.0.2',
               },
@@ -134,7 +136,7 @@ describe('modules/manager/npm/extract/yarn', () => {
       expect(
         await extractYarnCatalogs(
           {
-            list: {
+            catalog: {
               react: '18.3.1',
             },
           },

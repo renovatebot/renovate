@@ -17,6 +17,7 @@ export interface FilteredBranchUpgradeConfig {
   gitRef?: boolean;
   hasReleaseNotes?: boolean;
   prBodyDefinitions?: Record<string, string>;
+  prBodyHeadingDefinitions?: Record<string, string>;
   prBodyNotes?: string[];
   repoName?: string;
 }

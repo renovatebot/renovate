@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNumber } from '@sindresorhus/is';
 import detectIndent from 'detect-indent';
 import JSON5 from 'json5';
 import type { BuiltInParserName, Options } from 'prettier';
@@ -85,7 +85,7 @@ export async function applyPrettierFormatting(
 
       // https://github.com/prettier/prettier/blob/bab892242a1f9d8fcae50514b9304bf03f2e25ab/src/config/editorconfig/editorconfig-to-prettier.js#L47
       if (editorconf.maxLineLength) {
-        options.printWidth = is.number(editorconf.maxLineLength)
+        options.printWidth = isNumber(editorconf.maxLineLength)
           ? editorconf.maxLineLength
           : Number.POSITIVE_INFINITY;
       }

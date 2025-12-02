@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString, isTruthy } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -15,11 +15,11 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   const registryUrls: string[] = [...fileContent.matchAll(repositoryRegex)]
     .map((match) => match.groups?.repositoryName)
-    .filter(is.string);
+    .filter(isString);
 
   const matches = [...fileContent.matchAll(dependsOnRegex)]
     .map((m) => m.groups)
-    .filter(is.truthy);
+    .filter(isTruthy);
   const deps: PackageDependency[] = [];
   for (const match of matches) {
     const dep: PackageDependency = {

@@ -5,7 +5,7 @@ import { addMeta } from '../../../logger';
 import { getCache } from '../../../util/cache/repository';
 import * as _extractUpdate from './extract-update';
 import { lookup } from './extract-update';
-import { extractDependencies, updateRepo } from '.';
+import { extractDependencies, getBaseBranchConfig, updateRepo } from '.';
 import { git, logger, platform, scm } from '~test/util';
 import type { RenovateConfig } from '~test/util';
 
@@ -76,7 +76,6 @@ describe('workers/repository/process/index', () => {
         packageFiles: undefined,
       });
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(platform.getJsonFile).toHaveBeenCalledWith(
         'renovate.json',
         undefined,
@@ -157,7 +156,6 @@ describe('workers/repository/process/index', () => {
         packageFiles: undefined,
       });
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           baseBranches: [
@@ -170,7 +168,7 @@ describe('workers/repository/process/index', () => {
         },
         'baseBranches',
       );
-      /* eslint-disable vitest/prefer-called-exactly-once-with */
+
       expect(addMeta).toHaveBeenCalledWith({
         baseBranch: 'RELEASE/v0',
       });
@@ -184,7 +182,6 @@ describe('workers/repository/process/index', () => {
       expect(addMeta).toHaveBeenCalledWith({
         baseBranch: 'some-other',
       });
-      /* eslint-enable vitest/prefer-called-exactly-once-with */
     });
 
     it('maps $default to defaultBranch', async () => {
@@ -204,6 +201,48 @@ describe('workers/repository/process/index', () => {
       expect(addMeta).toHaveBeenCalledTimes(2);
       expect(addMeta).toHaveBeenNthCalledWith(1, { baseBranch: 'master' });
       expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'master' });
+    });
+  });
+
+  describe('getBaseBranchConfig', () => {
+    it('adds base branch name to branchPrefix if multiple base branches expected - more than one base branch configured', async () => {
+      const res = await getBaseBranchConfig('main', {
+        ...config,
+        baseBranchPatterns: ['main', 'maint/v7'],
+      });
+      expect(res.baseBranch).toBe('main');
+      expect(res.hasBaseBranches).toBeTrue();
+      expect(res.branchPrefix).toBe('renovate/main-');
+    });
+
+    it('adds base branch name to branchPrefix if multiple base branches expected - base branch regex configured', async () => {
+      const res = await getBaseBranchConfig('main', {
+        ...config,
+        baseBranchPatterns: ['/main/'],
+      });
+      expect(res.baseBranch).toBe('main');
+      expect(res.hasBaseBranches).toBeTrue();
+      expect(res.branchPrefix).toBe('renovate/main-');
+    });
+
+    it('does not add base branch name to branchPrefix if multiple base branches are not expected - only one base branch configured', async () => {
+      const res = await getBaseBranchConfig('main', {
+        ...config,
+        baseBranchPatterns: ['main'],
+      });
+      expect(res.baseBranch).toBe('main');
+      expect(res.hasBaseBranches).toBeUndefined();
+      expect(res.branchPrefix).toBe('renovate/');
+    });
+
+    it('does not add base branch name to branchPrefix if multiple base branches are not expected - baseBranchPatterns undefined', async () => {
+      const res = await getBaseBranchConfig('main', {
+        ...config,
+        baseBranchPatterns: undefined,
+      });
+      expect(res.baseBranch).toBe('main');
+      expect(res.hasBaseBranches).toBeUndefined();
+      expect(res.branchPrefix).toBe('renovate/');
     });
   });
 });

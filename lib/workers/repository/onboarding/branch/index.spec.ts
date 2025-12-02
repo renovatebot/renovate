@@ -1,5 +1,5 @@
 import { mock } from 'vitest-mock-extended';
-import { configFileNames } from '../../../../config/app-strings';
+import { getConfigFileNames } from '../../../../config/app-strings';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import {
@@ -145,7 +145,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       delete expectConfig.ignorePresets;
       expect(
         configModule.getOnboardingConfigContents,
-      ).toHaveBeenCalledExactlyOnceWith(expectConfig, configFileNames[0]);
+      ).toHaveBeenCalledExactlyOnceWith(expectConfig, getConfigFileNames()[0]);
       const file = scm.commitAndPush.mock.calls[0][0].files[0] as FileAddition;
       const contents = file.contents?.toString();
       expect(contents).toBeJsonString();
@@ -205,15 +205,15 @@ describe('workers/repository/onboarding/branch/index', () => {
       cache.getCache.mockReturnValue({ configFileName: '.renovaterc' });
       platform.getJsonFile.mockResolvedValueOnce({});
       const res = await checkOnboardingBranch(config);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Checking cached config file name',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Existing config file confirmed',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         {
           fileName: '.renovaterc',
@@ -229,15 +229,15 @@ describe('workers/repository/onboarding/branch/index', () => {
       platform.getJsonFile.mockResolvedValueOnce({ renovate: {} });
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const res = await checkOnboardingBranch(config);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Checking cached config file name',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Existing config file confirmed',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         {
           fileName: 'package.json',
@@ -303,7 +303,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       expect(logger.debug).not.toHaveBeenCalledExactlyOnceWith(
         'Skip processing since the onboarding branch is up to date and default branch has not changed',
       ); // onboarding cache no longer valid
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.info).toHaveBeenCalledWith(
         {
           branch: config.onboardingBranch,
@@ -440,7 +440,6 @@ describe('workers/repository/onboarding/branch/index', () => {
 
         await checkOnboardingBranch(config);
 
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.trace).toHaveBeenCalledWith(
           `Platform '${pl}' does not support extended markdown`,
         );
@@ -457,7 +456,6 @@ describe('workers/repository/onboarding/branch/index', () => {
 
         await checkOnboardingBranch(config);
 
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.debug).toHaveBeenCalledWith(
           `No rebase checkbox was found in the onboarding PR`,
         );
@@ -474,7 +472,6 @@ describe('workers/repository/onboarding/branch/index', () => {
 
         await checkOnboardingBranch(config);
 
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.debug).toHaveBeenCalledWith(
           `Manual onboarding PR update requested`,
         );
