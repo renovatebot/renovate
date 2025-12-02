@@ -187,6 +187,24 @@ Add `"docker:enableMajor"` to your `extends` array.
 
 Add `"default:pinDigestsDisabled"` to your `extends` array.
 
+Note: This preset only sets the global default for the [digest pinning flag](./configuration-options.md#pindigests) to `false`.
+If you have configured package rules that set `pinDigests` to `true`, those will still apply.
+This is also the case if you use the [`docker:pinDigests` preset](./presets-docker.md#dockerpindigests), which adds a package rule that sets `pinDigests` to `true` for all packages from the docker datasource.
+
+If you want to disable the digest pinning introduced by the `docker:pinDigests` preset,
+you can override it with a package rule like this:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "pinDigests": false
+    }
+  ]
+}
+```
+
 ### Automerge digest updates
 
 Add `"default:automergeDigest"` to your `extends` array.
