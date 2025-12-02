@@ -13,9 +13,13 @@ describe('modules/platform/utils/read-only-issue-body', () => {
 
     it('removes all checkbox-related instructions', () => {
       expect(readOnlyIssueBody(issueBody)).toEqual(
-        expect.not.stringMatching(
-          /click (?:(?:on |)a|their|this) checkbox|check the box below/gi,
-        ),
+        expect.not.stringMatching(/click on a checkbox below/gi),
+      );
+    });
+
+    it('removes all approval-all-pending-prs', () => {
+      expect(readOnlyIssueBody(issueBody)).toEqual(
+        expect.not.stringMatching('Create all pending approval PRs at once'),
       );
     });
 
@@ -23,6 +27,13 @@ describe('modules/platform/utils/read-only-issue-body', () => {
       const s = readOnlyIssueBody(issueBody);
       expect(s).toEqual(
         expect.not.stringMatching('Create all rate-limited PRs at once'),
+      );
+    });
+
+    it('removes create-config-migration-pr', () => {
+      const s = readOnlyIssueBody(issueBody);
+      expect(s).toEqual(
+        expect.not.stringMatching('create an automated Config Migration PR'),
       );
     });
   });
