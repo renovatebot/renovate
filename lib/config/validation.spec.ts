@@ -2374,5 +2374,116 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(2);
       expect(errors).toHaveLength(1);
     });
+
+    it('errors if no bumpVersions filePattern is provided', async () => {
+      const config: Partial<RenovateConfig> = {
+        bumpVersions: [
+          {
+            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+            bumpType: 'patch',
+            filePatterns: [],
+          },
+        ],
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            bumpVersions: [
+              {
+                matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+                bumpType: 'patch',
+                filePatterns: [],
+              },
+            ],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'bumpVersions[0]: invalid bumpVersions configuration: filePatterns must not be empty',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'packageRules[0].bumpVersions: invalid bumpVersions configuration: filePatterns must not be empty',
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
+
+    it('errors if no matchStrings are provided for bumpVersion', async () => {
+      const config: RenovateConfig = {
+        bumpVersions: [
+          {
+            filePatterns: ['foo'],
+            matchStrings: [],
+          },
+        ],
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            bumpVersions: [
+              {
+                filePatterns: ['bar'],
+                matchStrings: [],
+              },
+            ],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'bumpVersions[0]: invalid bumpVersions configuration: matchStrings must not be empty',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'packageRules[0].bumpVersions[0]: invalid bumpVersions configuration: matchStrings must not be empty',
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
+
+    it('allows bumpVersion', async () => {
+      const config: RenovateConfig = {
+        bumpVersions: [
+          // @ts-expect-error -- invalid config
+          {
+            filePatterns: ['foo'],
+          },
+        ],
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            bumpVersions: [
+              // @ts-expect-error -- invalid config
+              {
+                filePatterns: ['bar'],
+              },
+            ],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
+    });
   });
 });
