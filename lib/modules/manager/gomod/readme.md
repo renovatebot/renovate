@@ -37,7 +37,7 @@ You might be interested in the following `postUpdateOptions`:
 1. `gomodTidyE` - if you'd like Renovate to run `go mod tidy -e` after every update before raising the PR
 1. `gomodUpdateImportPaths` - if you'd like Renovate to update your source import paths on major updates before raising the PR
 1. `gomodMassage` - to enable massaging of all `replace` statements prior to running `go` so that they will be ignored
-1. `goGenerate` - to run `go generate ./...` after vendoring. Will only run if the `allowedUnsafeExecutions` global option includes `goGenerate`. This will not install any additional tools required to run `go generate`, you can use [tools](https://tip.golang.org/doc/go1.24#tools) as one option. Refer to the [configuration documentation for more information](../../../docs/usage/self-hosted-configuration.md#allowedunsafeexecutions).
+1. `goGenerate` - to run `go generate ./...` after vendoring. Will only run if the `allowedUnsafeExecutions` global option includes `goGenerate`. This will not install any additional tools required to run `go generate`, you can use [tools](https://tip.golang.org/doc/go1.24#tools) as one option. Refer to the [configuration documentation for more information](../../../self-hosted-configuration.md#allowedunsafeexecutions).
 
 When Renovate is running using `binarySource=docker` (such as in the Mend Renovate App) then it will pick the latest compatible version of Go to run, i.e. the latest `1.x` release.
 Even if the `go.mod` has a version like `go 1.22`, Renovate will treat it as a `^1.22` constraint and not `=1.22`.
