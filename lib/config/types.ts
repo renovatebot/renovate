@@ -47,6 +47,16 @@ export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
 export type BinarySource = 'docker' | 'global' | 'install' | 'hermit';
 
 // TODO: Proper typings
+/**
+ * Any configuration that could be used either top-level in a repository config (or Global, Inherited or Shareable Preset configuration), or:
+ *
+ * - in a datasource-specific configuration
+ * - in a manager-specific configuration
+ * - in a Package Rule
+ *
+ * @see RenovateConfig for the superset of all configuration allowed in a given repository
+ *
+ */
 export interface RenovateSharedConfig {
   $schema?: string;
   abandonmentThreshold?: Nullish<string>;
@@ -185,8 +195,13 @@ export interface GlobalOnlyConfigLegacy {
   deleteAdditionalConfigFile?: boolean;
 }
 
-// Config options used within the repository worker, but not user configurable
-// The below should contain config options where globalOnly=true
+/**
+ * Any global-only configuration set by self-hosted administrators.
+ *
+ * Used within the repository worker.
+ *
+ * Should only contain config options where globalOnly=true.
+ */
 export interface RepoGlobalConfig {
   allowedCommands?: string[];
   allowCustomCrateRegistries?: boolean;
@@ -318,6 +333,11 @@ export interface RenovateInternalConfig {
 }
 
 // TODO: Proper typings
+/**
+ * Configuration that could be used either top-level in a repository config (or Global, Inherited or Shareable Preset configuration).
+ *
+ * This is a superset of any configuration that a Renovate user (not self-hosted administrator) can set.
+ */
 export interface RenovateConfig
   extends LegacyAdminConfig,
     RenovateSharedConfig,
@@ -447,6 +467,10 @@ export interface CustomDatasourceConfig {
   transformTemplates?: string[];
 }
 
+/**
+ * The superset of all configuration that a self-hosted administrator can set, alongside all repository-level configuration.
+ *
+ */
 export interface AllConfig
   extends RenovateConfig,
     GlobalOnlyConfigLegacy,
