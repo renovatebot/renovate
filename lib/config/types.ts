@@ -231,6 +231,8 @@ export interface RepoGlobalConfig {
 
 /**
  * Those options are global only but still passed into the repository worker config.
+ *
+ * @deprecated https://github.com/renovatebot/renovate/issues/39693
  */
 export interface LegacyAdminConfig {
   baseDir?: string;
