@@ -75,15 +75,7 @@ export default tseslint.config(
   eslintConfigPrettier,
   {
     ...jsFiles,
-    plugins: {
-      local: {
-        rules: {
-          'sorted-array-by-name': sortedArrayByName,
-        },
-      },
-    },
     rules: {
-      'local/sorted-array-by-name': 'error',
       'import-x/default': 2,
       'import-x/named': 2,
       'import-x/namespace': 2,
@@ -338,6 +330,19 @@ export default tseslint.config(
 
     rules: {
       '@typescript-eslint/no-floating-promises': 0,
+    },
+  },
+  {
+    files: ['lib/config/options/index.ts'],
+    plugins: {
+      local: {
+        rules: {
+          'sorted-array-by-name': sortedArrayByName,
+        },
+      },
+    },
+    rules: {
+      'local/sorted-array-by-name': 'error',
     },
   },
 );
