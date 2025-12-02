@@ -150,7 +150,8 @@ export interface RenovateSharedConfig {
 
 // Config options used only within the global worker
 // The below should contain config options where stage=global
-export interface GlobalOnlyConfig {
+/** @deprecated use `RepoGlobalConfig` instead **/
+export interface GlobalOnlyConfigLegacy {
   autodiscover?: boolean;
   autodiscoverFilter?: string[] | string;
   autodiscoverNamespaces?: string[];
@@ -446,7 +447,7 @@ export interface CustomDatasourceConfig {
 
 export interface AllConfig
   extends RenovateConfig,
-    GlobalOnlyConfig,
+    GlobalOnlyConfigLegacy,
     RepoGlobalConfig {
   password?: string;
   token?: string;
