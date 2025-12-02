@@ -73,6 +73,7 @@ export interface RenovateSharedConfig {
   branchPrefix?: string;
   branchPrefixOld?: string;
   bumpVersions?: BumpVersionConfig[];
+  changelogUrl?: string;
   commitBody?: string;
   commitBodyTable?: boolean;
   commitMessage?: string;
@@ -83,7 +84,6 @@ export interface RenovateSharedConfig {
   commitMessageTopic?: string;
   confidential?: boolean;
   configValidationError?: boolean;
-  changelogUrl?: string;
   dependencyDashboardApproval?: boolean;
   draftPR?: boolean;
   enabled?: boolean;
@@ -91,7 +91,6 @@ export interface RenovateSharedConfig {
   encrypted?: Record<string, string>;
   extends?: string[];
   extractVersion?: string;
-  managerFilePatterns?: string[];
   followTag?: string;
   force?: RenovateConfig;
   gitIgnoredAuthors?: string[];
@@ -109,12 +108,12 @@ export interface RenovateSharedConfig {
   keepUpdatedLabel?: string;
   labels?: string[];
   manager?: string;
+  managerFilePatterns?: string[];
   milestone?: number;
   minimumReleaseAge?: Nullish<string>;
+  npmToken?: string;
   npmrc?: string;
   npmrcMerge?: boolean;
-  npmToken?: string;
-
   pinDigests?: boolean;
   platformAutomerge?: boolean;
   platformCommit?: PlatformCommitOptions;
@@ -154,8 +153,8 @@ export interface RenovateSharedConfig {
   timezone?: string;
   unicodeEmoji?: boolean;
   updateNotScheduled?: boolean;
-  versioning?: string;
   versionCompatibility?: string;
+  versioning?: string;
 }
 
 // Config options used only within the global worker
@@ -170,6 +169,8 @@ export interface GlobalOnlyConfigLegacy {
   baseDir?: string;
   cacheDir?: string;
   containerbaseDir?: string;
+  deleteAdditionalConfigFile?: boolean;
+  deleteConfigFile?: boolean;
   detectHostRulesFromEnv?: boolean;
   dockerCliOptions?: string;
   endpoint?: string;
@@ -181,18 +182,16 @@ export interface GlobalOnlyConfigLegacy {
   mergeConfidenceDatasources?: string[];
   mergeConfidenceEndpoint?: string;
   platform?: PlatformId;
-  processEnv?: Record<string, string>;
   prCommitsPerRunLimit?: number;
   privateKey?: string;
   privateKeyOld?: string;
   privateKeyPath?: string;
   privateKeyPathOld?: string;
+  processEnv?: Record<string, string>;
   redisPrefix?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
   useCloudMetadataServices?: boolean;
-  deleteConfigFile?: boolean;
-  deleteAdditionalConfigFile?: boolean;
 }
 
 /**
@@ -203,20 +202,26 @@ export interface GlobalOnlyConfigLegacy {
  * Should only contain config options where globalOnly=true.
  */
 export interface RepoGlobalConfig {
-  allowedCommands?: string[];
   allowCustomCrateRegistries?: boolean;
   allowPlugins?: boolean;
   allowScripts?: boolean;
+  allowedCommands?: string[];
   allowedEnv?: string[];
   allowedHeaders?: string[];
+  allowedUnsafeExecutions?: AllowedUnsafeExecution[];
+  autodiscoverRepoOrder?: SortMethod;
+  autodiscoverRepoSort?: RepoSortMethod;
   binarySource?: BinarySource;
   cacheDir?: string;
   cacheHardTtlMinutes?: number;
+  cachePrivatePackages?: boolean;
   cacheTtlOverride?: Record<string, number>;
+  configFileNames?: string[];
   containerbaseDir?: string;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerCliOptions?: string;
+  dockerMaxPages?: number;
   dockerSidecarImage?: string;
   dockerUser?: string;
   dryRun?: DryRunConfig;
@@ -226,22 +231,16 @@ export interface RepoGlobalConfig {
   exposeAllEnv?: boolean;
   gitTimeout?: number;
   githubTokenWarn?: boolean;
+  httpCacheTtlDays?: number;
+  ignorePrAuthor?: boolean;
   includeMirrors?: boolean;
   localDir?: string;
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
   presetCachePersistence?: boolean;
-  httpCacheTtlDays?: number;
-  autodiscoverRepoSort?: RepoSortMethod;
-  autodiscoverRepoOrder?: SortMethod;
-  userAgent?: string;
-  dockerMaxPages?: number;
   s3Endpoint?: string;
   s3PathStyle?: boolean;
-  cachePrivatePackages?: boolean;
-  configFileNames?: string[];
-  ignorePrAuthor?: boolean;
-  allowedUnsafeExecutions?: AllowedUnsafeExecution[];
+  userAgent?: string;
 }
 
 /**
