@@ -603,6 +603,7 @@ async function closeIssue(issueNumber: number): Promise<void> {
 
 export function massageMarkdown(input: string): string {
   // Remove any HTML we use
+  // Bitbucket doesn't currently support collapsible syntax; https://jira.atlassian.com/browse/BCLOUD-20231
   return smartTruncate(input, maxBodyLength())
     .replace(
       'you tick the rebase/retry checkbox',
