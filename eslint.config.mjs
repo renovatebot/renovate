@@ -7,6 +7,7 @@ import * as importX from 'eslint-plugin-import-x';
 import eslintPluginPromise from 'eslint-plugin-promise';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
+import sortedArrayByName from './eslint-rules/sorted-array-by-name.js';
 
 const jsFiles = { files: ['**/*.{js,cjs,mjs,mts,ts}'] };
 
@@ -331,6 +332,19 @@ export default tseslint.config(
 
     rules: {
       '@typescript-eslint/no-floating-promises': 0,
+    },
+  },
+  {
+    files: ['lib/config/options/index.ts'],
+    plugins: {
+      local: {
+        rules: {
+          'sorted-array-by-name': sortedArrayByName,
+        },
+      },
+    },
+    rules: {
+      'local/sorted-array-by-name': 'error',
     },
   },
 );
