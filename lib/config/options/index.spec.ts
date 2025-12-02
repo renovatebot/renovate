@@ -66,4 +66,26 @@ describe('config/options/index', () => {
       }
     }
   });
+
+  describe('every globalOnly option should have stage=global', () => {
+    const opts = getOptions();
+    for (const option of opts) {
+      if (option.globalOnly) {
+        it(`globalOnly option ${option.name} has stage=global`, () => {
+          expect(option.stage).toEqual('global');
+        });
+      }
+    }
+  });
+
+  describe('every stage=global option should have globalOnly', () => {
+    const opts = getOptions();
+    for (const option of opts) {
+      if (option.stage && option.stage === 'global') {
+        it(`stage=global option ${option.name} is globalOnly`, () => {
+          expect(option.globalOnly).toBeTrue();
+        });
+      }
+    }
+  });
 });
