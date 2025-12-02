@@ -35,7 +35,7 @@ export async function getMemberUserIDs(group: string): Promise<number[]> {
     const members = await getMembers(group);
     return members.map((u) => u.id);
   } catch (err) {
-    logger.warn(
+    logger.once.warn(
       { group, errorMessage: err.message },
       'Unable to fetch user IDs for members of the group',
     );
