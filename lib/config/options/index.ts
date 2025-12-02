@@ -3100,6 +3100,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: [],
     stage: 'repository',
+    globalOnly: true,
   },
   {
     name: 'gitNoVerify',
