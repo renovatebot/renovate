@@ -5,7 +5,7 @@ import * as helmVersioning from '../../versioning/helm';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { HelmRepositoryData } from './schema';
-import { HelmRepositorySchema } from './schema';
+import { HelmRepository } from './schema';
 
 export class HelmDatasource extends Datasource {
   static readonly id = 'helm';
@@ -38,7 +38,7 @@ export class HelmDatasource extends Datasource {
       .getYamlSafe(
         'index.yaml',
         { baseUrl: ensureTrailingSlash(helmRepository) },
-        HelmRepositorySchema,
+        HelmRepository,
       )
       .unwrap();
 

@@ -1,7 +1,10 @@
-import type { RenovateConfig } from '../types';
+import type { MaybePromise, Nullish } from '../../types';
+import type { RenovateConfig, RepoGlobalConfig } from '../types';
 
 // TODO: Proper typing
 export type Preset = RenovateConfig & Record<string, unknown>;
+
+export type GlobalPreset = RepoGlobalConfig & Preset;
 
 export interface PresetConfig {
   repo: string;
@@ -11,9 +14,7 @@ export interface PresetConfig {
 }
 
 export interface PresetApi {
-  getPreset(
-    config: PresetConfig,
-  ): Promise<Preset | null | undefined> | Preset | null | undefined;
+  getPreset(config: PresetConfig): MaybePromise<Nullish<Preset>>;
 }
 
 export interface ParsedPreset {
@@ -23,6 +24,7 @@ export interface ParsedPreset {
   presetName: string;
   tag?: string | undefined;
   params?: string[] | undefined;
+  rawParams?: string | undefined;
 }
 
 export type PresetFetcher = (
@@ -30,7 +32,7 @@ export type PresetFetcher = (
   fileName: string,
   endpoint: string,
   tag?: string,
-) => Promise<Preset | null | undefined>;
+) => Promise<Nullish<Preset>>;
 
 export interface FetchPresetConfig {
   repo: string;

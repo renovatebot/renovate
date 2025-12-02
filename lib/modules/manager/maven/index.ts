@@ -1,6 +1,6 @@
 import type { Category } from '../../../constants';
+import { DockerDatasource } from '../../datasource/docker';
 import { MavenDatasource } from '../../datasource/maven';
-import * as mavenVersioning from '../../versioning/maven';
 
 export { extractAllPackageFiles } from './extract';
 export { bumpPackageVersion, updateDependency } from './update';
@@ -14,7 +14,6 @@ export const defaultConfig = {
     '/^(((\\.mvn)|(\\.m2))/)?settings\\.xml$/',
     '/(^|/)\\.mvn/extensions\\.xml$/',
   ],
-  versioning: mavenVersioning.id,
 };
 
-export const supportedDatasources = [MavenDatasource.id];
+export const supportedDatasources = [MavenDatasource.id, DockerDatasource.id];

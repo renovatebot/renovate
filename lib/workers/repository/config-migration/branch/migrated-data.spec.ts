@@ -110,6 +110,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       vi.mocked(detectRepoFileConfig).mockRejectedValueOnce(err);
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toBeNull();
+
       expect(logger.debug).toHaveBeenCalledWith(
         { err },
         'MigratedDataFactory.getAsync() Error initializing renovate MigratedData',
@@ -172,6 +173,17 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       await expect(
         MigratedDataFactory.applyPrettierFormatting(migratedData),
       ).resolves.toEqual(formatted);
+    });
+
+    it('formats without prettier if in .renovaterc', async () => {
+      vi.mocked(scm.getFileList).mockResolvedValue(['.prettierrc']);
+      await MigratedDataFactory.getAsync();
+      await expect(
+        MigratedDataFactory.applyPrettierFormatting({
+          ...migratedData,
+          filename: '.renovaterc',
+        }),
+      ).resolves.toEqual(migratedData.content);
     });
 
     it('formats when finds prettier config inside the package.json file', async () => {

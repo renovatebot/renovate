@@ -1,11 +1,10 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { z } from 'zod';
 
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { Result } from '../../../util/result';
-import { Toml } from '../../../util/schema-utils';
 import {
   ensureTrailingSlash,
   isHttpUrl,
@@ -13,16 +12,14 @@ import {
 } from '../../../util/url';
 import type { RegistryStrategy } from '../../datasource';
 import { defaultRegistryUrl as defaultCondaRegistryApi } from '../../datasource/conda/common';
-import { PyProjectSchema } from '../pep621/schema';
 import type { PackageFileContent } from '../types';
 import {
   type Channels,
   type PixiConfig,
+  PixiFile,
   type PixiPackageDependency,
-  PixiToml,
+  PixiPyProject,
 } from './schema';
-
-const PyProjectToml = Toml.pipe(PyProjectSchema);
 
 export function getUserPixiConfig(
   content: string,
@@ -32,7 +29,7 @@ export function getUserPixiConfig(
     packageFile === 'pyproject.toml' ||
     packageFile.endsWith('/pyproject.toml')
   ) {
-    const { val, err } = Result.parse(content, PyProjectToml).unwrap();
+    const { val, err } = Result.parse(content, PixiPyProject).unwrap();
     if (err) {
       logger.debug({ packageFile, err }, `error parsing ${packageFile}`);
       return null;
@@ -42,7 +39,7 @@ export function getUserPixiConfig(
   }
 
   if (packageFile === 'pixi.toml' || packageFile.endsWith('/pixi.toml')) {
-    const { val, err } = Result.parse(content, PixiToml).unwrap();
+    const { val, err } = Result.parse(content, PixiFile).unwrap();
     if (err) {
       logger.debug({ packageFile, err }, `error parsing ${packageFile}`);
       return null;
@@ -53,7 +50,7 @@ export function getUserPixiConfig(
 
   const { val, err } = Result.parse(
     content,
-    z.union([PixiToml, PyProjectToml.transform((p) => p.tool?.pixi)]),
+    z.union([PixiFile, PixiPyProject.transform((p) => p.tool?.pixi)]),
   ).unwrap();
 
   if (err) {
@@ -162,7 +159,7 @@ function channelToRegistryUrl(channel: string): string {
 function orderChannels(channels: Channels = []): string[] {
   return channels
     .map((channel, index) => {
-      if (is.string(channel)) {
+      if (isString(channel)) {
         return { channel, priority: 0, index };
       }
 

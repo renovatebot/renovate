@@ -1,5 +1,5 @@
 // TODO: types (#22198)
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
@@ -54,10 +54,7 @@ async function getNpmConstraintFromPackageLock(
     logger.debug(`Using npm constraint <9 for lockfileVersion=2`);
     return `<9`;
   }
-  logger.debug(
-    `Using npm constraint >=9 for lockfileVersion=${lockfileVersion}`,
-  );
-  return `>=9`;
+  return null;
 }
 
 export async function generateLockFile(
@@ -87,7 +84,7 @@ export async function generateLockFile(
     const supportsPreferDedupeFlag =
       !npmToolConstraint.constraint ||
       semver.intersects('>=7.0.0', npmToolConstraint.constraint);
-    const commands: string[] = [];
+    let commands: string[] = [];
     let cmdOptions = '';
     if (
       (postUpdateOptions?.includes('npmDedupe') === true &&
@@ -119,11 +116,13 @@ export async function generateLockFile(
       extraEnv,
       toolConstraints: [
         await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPkgJson),
-        npmToolConstraint,
+        ...(isNonEmptyString(npmToolConstraint.constraint)
+          ? [npmToolConstraint]
+          : []),
       ],
       docker: {},
     };
-    // istanbul ignore if
+    /* v8 ignore next 4 -- needs test */
     if (GlobalConfig.get('exposeAllEnv')) {
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
@@ -187,11 +186,26 @@ export async function generateLockFile(
       );
       try {
         await deleteLocalFile(lockFileName);
-      } catch (err) /* istanbul ignore next */ {
+        /* v8 ignore next -- needs test */
+      } catch (err) {
         logger.debug(
           { err, lockFileName },
           'Error removing `package-lock.json` for lock file maintenance',
         );
+      }
+    }
+
+    if (postUpdateOptions?.includes('npmInstallTwice')) {
+      logger.debug('Running npm install twice');
+      // Run the install command twice to ensure the lock file is up to date
+      // iterate through commands and if any command starts with `npm install`, add it again
+      const existingCommands = [...commands];
+      commands = [];
+      for (const command of existingCommands) {
+        commands.push(command);
+        if (command.startsWith('npm install')) {
+          commands.push(command);
+        }
       }
     }
 
@@ -240,7 +254,8 @@ export async function generateLockFile(
         lockFile = composeLockFile(lockFileParsed, detectedIndent);
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next -- needs test */
+  } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
@@ -282,7 +297,7 @@ export function divideWorkspaceAndRootDeps(
     );
     if (
       upgrade.managerData.workspacesPackages?.length &&
-      is.string(upgrade.packageFile)
+      isString(upgrade.packageFile)
     ) {
       const workspacePatterns = upgrade.managerData.workspacesPackages; // glob pattern or directory name/path
       const packageFileDir = trimSlashes(
@@ -296,7 +311,7 @@ export function divideWorkspaceAndRootDeps(
           : packageFileDir,
       );
 
-      if (is.nonEmptyString(workspaceDir)) {
+      if (isNonEmptyString(workspaceDir)) {
         let workspaceName: string | undefined;
         // compare workspaceDir to workspace patterns
         // stop when the first match is found and

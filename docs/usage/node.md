@@ -33,6 +33,8 @@ Renovate bot will then use that version constraint for npm when it creates a pul
 
 For example, if you want to use at least npm `8.1.0` and also allow newer versions of npm in the `8.x` range, you would put this in your `package.json` file:
 
+<!-- schema-validation-disable-next-block -->
+
 ```json title="package.json"
 {
   "engines": {

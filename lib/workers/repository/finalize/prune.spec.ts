@@ -11,10 +11,6 @@ beforeEach(() => {
     repoIsOnboarded: true,
     branchPrefix: `renovate/`,
     pruneStaleBranches: true,
-    ignoredAuthors: [],
-    platform: 'github',
-    errors: [],
-    warnings: [],
   });
 });
 
@@ -82,6 +78,7 @@ describe('workers/repository/finalize/prune', () => {
 
     it('deletes with base branches', async () => {
       config.branchList = ['renovate/main-a'];
+      config.baseBranchPatterns = ['/main.*/'];
       config.baseBranches = ['main', 'maint/v7'];
       git.getBranchList.mockReturnValueOnce(
         config.branchList.concat([
@@ -95,17 +92,21 @@ describe('workers/repository/finalize/prune', () => {
       scm.isBranchModified.mockResolvedValueOnce(true);
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getBranchList).toHaveBeenCalledTimes(1);
-      expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
-      expect(scm.deleteBranch).toHaveBeenCalledWith('renovate/maint/v7-a');
+      expect(scm.deleteBranch).toHaveBeenCalledExactlyOnceWith(
+        'renovate/maint/v7-a',
+      );
       expect(scm.isBranchModified).toHaveBeenCalledTimes(3);
+
       expect(scm.isBranchModified).toHaveBeenCalledWith(
         'renovate/main-b',
         'main',
       );
+
       expect(scm.isBranchModified).toHaveBeenCalledWith(
         'renovate/maint/v7-a',
         'maint/v7',
       );
+
       expect(scm.isBranchModified).toHaveBeenCalledWith(
         'renovate/maint/v7-b',
         'maint/v7',

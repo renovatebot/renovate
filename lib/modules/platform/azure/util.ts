@@ -131,7 +131,7 @@ export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
   }
   addSecretForSanitizing(authValue, 'global');
   return {
-    '-c': `http.extraheader=AUTHORIZATION: ${authType} ${authValue}`,
+    '-c': `http.extraHeader=AUTHORIZATION: ${authType} ${authValue}`,
   };
 }
 
@@ -195,6 +195,8 @@ export function mapMergeStrategy(
       return GitPullRequestMergeStrategy.Rebase;
     case 'merge-commit':
       return GitPullRequestMergeStrategy.NoFastForward;
+    case 'rebase-merge':
+      return GitPullRequestMergeStrategy.RebaseMerge;
     case 'squash':
       return GitPullRequestMergeStrategy.Squash;
     default:

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isDate, isUndefined } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
 import { logger } from '../../../../../logger';
@@ -13,6 +13,7 @@ import { isHttpUrl, joinUrlParts } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import * as bitbucket from './bitbucket';
 import * as bitbucketServer from './bitbucket-server';
+import * as forgejo from './forgejo';
 import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
@@ -25,7 +26,7 @@ import type {
 } from './types';
 
 const markdown = new MarkdownIt('zero');
-markdown.enable(['heading', 'lheading']);
+markdown.enable(['heading', 'lheading', 'fence']);
 
 const repositoriesToSkipMdFetching = ['facebook/react-native'];
 
@@ -37,12 +38,6 @@ export async function getReleaseList(
   const { apiBaseUrl, repository, type } = project;
   try {
     switch (type) {
-      case 'gitea':
-        return await gitea.getReleaseList(project, release);
-      case 'gitlab':
-        return await gitlab.getReleaseList(project, release);
-      case 'github':
-        return await github.getReleaseList(project, release);
       case 'bitbucket':
         return bitbucket.getReleaseList(project, release);
       case 'bitbucket-server':
@@ -50,6 +45,14 @@ export async function getReleaseList(
           'Unsupported Bitbucket Server feature. Skipping release fetching.',
         );
         return [];
+      case 'forgejo':
+        return await forgejo.getReleaseList(project, release);
+      case 'gitea':
+        return await gitea.getReleaseList(project, release);
+      case 'github':
+        return await github.getReleaseList(project, release);
+      case 'gitlab':
+        return await gitlab.getReleaseList(project, release);
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return [];
@@ -108,9 +111,16 @@ export function massageBody(
   );
   // Reduce headings size
   body = body
-    .replace(regEx(/\n\s*####? /g), '\n##### ')
-    .replace(regEx(/\n\s*## /g), '\n#### ')
-    .replace(regEx(/\n\s*# /g), '\n### ');
+    .split(regEx(/(```[\s\S]*?```)/g))
+    .map((part) =>
+      part.startsWith('```') // do not modify # inside of codeblocks
+        ? part
+        : part
+            .replace(regEx(/\n\s*####? /g), '\n##### ')
+            .replace(regEx(/\n\s*## /g), '\n#### ')
+            .replace(regEx(/\n\s*# /g), '\n### '),
+    )
+    .join('');
   // Trim whitespace
   return body.trim();
 }
@@ -154,7 +164,7 @@ export async function getReleaseNotes(
     version,
     releases,
   );
-  if (is.undefined(matchedRelease)) {
+  if (isUndefined(matchedRelease)) {
     // no exact match of a release then check other cases
     matchedRelease = releases.find(
       (r) =>
@@ -164,7 +174,7 @@ export async function getReleaseNotes(
         r.tag === `v${gitRef}`,
     );
   }
-  if (is.undefined(matchedRelease) && config.extractVersion) {
+  if (isUndefined(matchedRelease) && config.extractVersion) {
     const extractVersionRegEx = regEx(config.extractVersion);
     matchedRelease = releases.find((r) => {
       const extractedVersion = extractVersionRegEx.exec(r.tag!)?.groups
@@ -262,14 +272,26 @@ export async function getReleaseNotesMdFileInner(
   const sourceDirectory = project.sourceDirectory!;
   try {
     switch (type) {
-      case 'gitea':
-        return await gitea.getReleaseNotesMd(
+      case 'bitbucket':
+        return await bitbucket.getReleaseNotesMd(
           repository,
           apiBaseUrl,
           sourceDirectory,
         );
-      case 'gitlab':
-        return await gitlab.getReleaseNotesMd(
+      case 'bitbucket-server':
+        return await bitbucketServer.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory,
+        );
+      case 'forgejo':
+        return await forgejo.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory,
+        );
+      case 'gitea':
+        return await gitea.getReleaseNotesMd(
           repository,
           apiBaseUrl,
           sourceDirectory,
@@ -280,14 +302,8 @@ export async function getReleaseNotesMdFileInner(
           apiBaseUrl,
           sourceDirectory,
         );
-      case 'bitbucket':
-        return await bitbucket.getReleaseNotesMd(
-          repository,
-          apiBaseUrl,
-          sourceDirectory,
-        );
-      case 'bitbucket-server':
-        return await bitbucketServer.getReleaseNotesMd(
+      case 'gitlab':
+        return await gitlab.getReleaseNotesMd(
           repository,
           apiBaseUrl,
           sourceDirectory,
@@ -334,7 +350,7 @@ export async function getReleaseNotesMd(
   project: ChangeLogProject,
   release: ChangeLogRelease,
 ): Promise<ChangeLogNotes | null> {
-  const { baseUrl, repository } = project;
+  const { baseUrl, repository, packageName } = project;
   const version = release.version;
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
 
@@ -366,33 +382,45 @@ export async function getReleaseNotesMd(
             .replace(regEx(/^\s*#*\s*/), '')
             .split(' ')
             .filter(Boolean);
-          let body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
+          const body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
+          const notesSourceUrl = getNotesSourceUrl(
+            baseUrl,
+            repository,
+            project,
+            changelogFile,
+          );
+          const mdHeadingLink = title
+            .filter((word) => !isHttpUrl(word))
+            .join('-')
+            .replace(regEx(/[^A-Za-z0-9-]/g), '');
+          const url = `${notesSourceUrl}#${mdHeadingLink}`;
+          // Look for version in title
           for (const word of title) {
             if (word.includes(version) && !isHttpUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
-              const notesSourceUrl = getNotesSourceUrl(
-                baseUrl,
-                repository,
-                project,
-                changelogFile,
-              );
-              const mdHeadingLink = title
-                .filter((word) => !isHttpUrl(word))
-                .join('-')
-                .replace(regEx(/[^A-Za-z0-9-]/g), '');
-              const url = `${notesSourceUrl}#${mdHeadingLink}`;
-              body = massageBody(body, baseUrl);
-              if (body?.length) {
-                try {
-                  body = await linkify(body, {
-                    repository: `${baseUrl}${repository}`,
-                  });
-                } catch (err) /* istanbul ignore next */ {
-                  logger.warn({ body, err }, 'linkify error');
-                }
-              }
               return {
-                body,
+                body: await linkifyBody(project, body),
+                url,
+                notesSourceUrl,
+              };
+            }
+          }
+          // Look for version in body - useful for monorepos. First check for heading with "(yyyy-mm-dd)"
+          const releasesRegex = regEx(/([0-9]{4}-[0-9]{2}-[0-9]{2})/);
+          if (packageName && heading.search(releasesRegex) !== -1) {
+            // Now check if any line contains both the package name and the version
+            const bodyLines = body.split('\n');
+            if (
+              bodyLines.some(
+                (line) =>
+                  line.includes(packageName) &&
+                  line.includes(version) &&
+                  !isHttpUrl(line),
+              )
+            ) {
+              logger.trace({ body }, 'Found release notes for v' + version);
+              return {
+                body: await linkifyBody(project, body),
                 url,
                 notesSourceUrl,
               };
@@ -420,7 +448,7 @@ export async function getReleaseNotesMd(
  * cache for days.
  */
 export function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
-  const dt = is.date(releaseDate)
+  const dt = isDate(releaseDate)
     ? DateTime.fromJSDate(releaseDate)
     : DateTime.fromISO(releaseDate!);
 
@@ -523,4 +551,21 @@ function getNotesSourceUrl(
     'HEAD',
     changelogFile,
   );
+}
+
+async function linkifyBody(
+  { baseUrl, repository }: ChangeLogProject,
+  bodyStr: string,
+): Promise<string> {
+  const body = massageBody(bodyStr, baseUrl);
+  if (body?.length) {
+    try {
+      return await linkify(body, {
+        repository: `${baseUrl}${repository}`,
+      });
+    } catch (err) /* istanbul ignore next */ {
+      logger.warn({ body, err }, 'linkify error');
+    }
+  }
+  return body;
 }

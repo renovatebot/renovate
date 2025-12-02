@@ -14,10 +14,12 @@ vi.mock('../init/apis');
 vi.mock('../init/config');
 vi.mock('../init/merge');
 vi.mock('../../../config/secrets');
+vi.mock('../../../config/variables');
 vi.mock('../../../modules/platform', () => ({
   platform: { initRepo: vi.fn() },
   getPlatformList: vi.fn(),
 }));
+vi.unmock('../../../util/mutex');
 
 const apis = vi.mocked(_apis);
 const config = vi.mocked(_config);
@@ -40,7 +42,7 @@ describe('workers/repository/init/index', () => {
       onboarding.checkOnboardingBranch.mockResolvedValueOnce({});
       config.getRepoConfig.mockResolvedValueOnce({ mode: 'silent' });
       merge.mergeRenovateConfig.mockResolvedValueOnce({});
-      secrets.applySecretsToConfig.mockReturnValueOnce(
+      secrets.applySecretsAndVariablesToConfig.mockReturnValueOnce(
         partial<RenovateConfig>(),
       );
       const renovateConfig = await initRepo({});
@@ -55,14 +57,16 @@ describe('workers/repository/init/index', () => {
         expandCodeOwnersGroups: true,
       });
       merge.mergeRenovateConfig.mockResolvedValueOnce({});
-      secrets.applySecretsToConfig.mockReturnValueOnce(
+      secrets.applySecretsAndVariablesToConfig.mockReturnValueOnce(
         partial<RenovateConfig>(),
       );
       await initRepo({});
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { platform: undefined },
         "Configuration option 'filterUnavailableUsers' is not supported on the current platform.",
       );
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { platform: undefined },
         "Configuration option 'expandCodeOwnersGroups' is not supported on the current platform.",

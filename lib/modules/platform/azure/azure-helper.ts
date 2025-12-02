@@ -8,7 +8,7 @@ import { logger } from '../../../logger';
 import { streamToString } from '../../../util/streams';
 import { getNewBranchName } from '../util';
 import * as azureApi from './azure-got-wrapper';
-import { WrappedExceptionSchema } from './schema';
+import { WrappedException } from './schema';
 import {
   getBranchNameWithoutRefsPrefix,
   getBranchNameWithoutRefsheadsPrefix,
@@ -84,7 +84,7 @@ export async function getFile(
   if (item?.readable) {
     const fileContent = await streamToString(item);
     try {
-      const result = WrappedExceptionSchema.safeParse(fileContent);
+      const result = WrappedException.safeParse(fileContent);
       if (result.success) {
         if (result.data.typeKey === 'GitItemNotFoundException') {
           logger.warn({ filePath }, 'Unable to find file');
@@ -95,9 +95,9 @@ export async function getFile(
           return null;
         }
       }
-    } catch /* v8 ignore start */ {
+    } catch /* v8 ignore next */ {
       // it 's not a JSON, so I send the content directly with the line under
-    } /* v8 ignore stop */
+    }
 
     return fileContent;
   }

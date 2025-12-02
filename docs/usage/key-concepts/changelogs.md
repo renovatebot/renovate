@@ -49,7 +49,7 @@ Fetching changelogs from github.com requires a GitHub token because GitHub block
 
 This means that if you run Renovate on self-hosted GitHub Enterprise Server, or any non-GitHub platform which Renovate supports, then you need to configure a github.com Personal Access Token in Renovate in order to fetch changelogs.
 
-Read [Running Renovate, GitHub.com token for changelogs](../getting-started/running.md#githubcom-token-for-changelogs) to learn more.
+Read [Running Renovate, GitHub.com token for changelogs](../getting-started/running.md#githubcom-token-for-changelogs-and-tools) to learn more.
 
 ## Troubleshooting missing changelogs
 
@@ -67,6 +67,9 @@ Follow these steps to find out why Renovate does not find a changelog:
    - Check if the token Renovate uses has access rights to the repository you need it to access
 1. Renovate cannot detect the file names or release name convention within the repository
    - In this case an enhancement to Renovate might be needed to better detect the releases/formats, assuming the package/repository has a reasonable convention to follow
+1. Renovate cannot detect the release version in the changelog file
+   - Ensure the changelog header for the section contains the version being released, or in the case of a monorepo where this may not be the case, ensure the body has a line that contains both the package name and the version.
+   - Otherwise an enhancement to Renovate might be needed to better detect the versions, assuming the package/repository has a reasonable convention to follow
 
 If none of this helps, search the Renovate issues and discussions to see if this is a known problem.
 
@@ -104,6 +107,6 @@ Read [`maven` datasource, making your changelogs fetchable](../modules/datasourc
 
 Read the [Docker datasource](../modules/datasource/docker/index.md) docs.
 
-### Nuget package maintainers
+### NuGet package maintainers
 
 See [Renovate issue #14128 about using NuGet's changelogs](https://github.com/renovatebot/renovate/issues/14128).

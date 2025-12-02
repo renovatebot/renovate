@@ -3,6 +3,8 @@ Extracts dependencies from `composer.json` files, and keeps the associated `comp
 If you use [VCS repositories](https://getcomposer.org/doc/05-repositories.md#vcs) then Renovate needs a hint via the `name` property, which must match the relevant package.
 For example, the package `acme/foo` would need an entry in [repositories](https://getcomposer.org/doc/04-schema.md#repositories) similar to the following:
 
+<!-- schema-validation-disable-next-block -->
+
 ```json
 {
   "name": "acme/foo",
@@ -10,3 +12,6 @@ For example, the package `acme/foo` would need an entry in [repositories](https:
   "url": "http://vcs-of-acme.org/acme/foo.git"
 }
 ```
+
+By default, Renovate will invoke `composer update` with the `--with-dependencies` flag.
+Add `composerWithAll` to your `postUpdateOptions` array to use the `--with-all-dependencies` flag instead.

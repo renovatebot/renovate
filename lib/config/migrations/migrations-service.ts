@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isRegExp } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import type { RenovateConfig } from '../types';
 import { RemovePropertyMigration } from './base/remove-property-migration';
@@ -56,9 +56,14 @@ import { StabilityDaysMigration } from './custom/stability-days-migration';
 import { SuppressNotificationsMigration } from './custom/suppress-notifications-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
 import { UnpublishSafeMigration } from './custom/unpublish-safe-migration';
+import { UpdateLockFilesMigration } from './custom/update-lock-files-migration';
 import { UpgradeInRangeMigration } from './custom/upgrade-in-range-migration';
 import { VersionStrategyMigration } from './custom/version-strategy-migration';
-import type { Migration, MigrationConstructor } from './types';
+import type {
+  MigratableConfig,
+  Migration,
+  MigrationConstructor,
+} from './types';
 
 export class MigrationsService {
   static readonly removedProperties: ReadonlySet<string> = new Set([
@@ -106,6 +111,7 @@ export class MigrationsService {
     ['masterIssueTitle', 'dependencyDashboardTitle'],
     ['masterIssueLabels', 'dependencyDashboardLabels'],
     ['regexManagers', 'customManagers'],
+    ['baseBranches', 'baseBranchPatterns'],
   ]);
 
   static readonly customMigrations: readonly MigrationConstructor[] = [
@@ -164,16 +170,21 @@ export class MigrationsService {
     CustomManagersMigration,
     PlatformCommitMigration,
     FileMatchMigration,
+    UpdateLockFilesMigration,
   ];
 
   static run(
-    originalConfig: RenovateConfig,
+    originalConfig: MigratableConfig,
     parentKey?: string,
   ): RenovateConfig {
     const migratedConfig: RenovateConfig = {};
     const migrations = this.getMigrations(originalConfig, migratedConfig);
 
-    for (const [key, value] of Object.entries(originalConfig)) {
+    for (const [key, value] of Object.entries(originalConfig) as [
+      keyof RenovateConfig,
+      unknown,
+    ][]) {
+      // @ts-expect-error -- can't be narrowed
       migratedConfig[key] ??= value;
       const migration = MigrationsService.getMigration(migrations, key);
 
@@ -190,14 +201,14 @@ export class MigrationsService {
   }
 
   static isMigrated(
-    originalConfig: RenovateConfig,
+    originalConfig: MigratableConfig,
     migratedConfig: RenovateConfig,
   ): boolean {
     return !dequal(originalConfig, migratedConfig);
   }
 
   public static getMigrations(
-    originalConfig: RenovateConfig,
+    originalConfig: MigratableConfig,
     migratedConfig: RenovateConfig,
   ): readonly Migration[] {
     const migrations: Migration[] = [];
@@ -238,7 +249,7 @@ export class MigrationsService {
     key: string,
   ): Migration | undefined {
     return migrations.find((migration) => {
-      if (is.regExp(migration.propertyName)) {
+      if (isRegExp(migration.propertyName)) {
         return migration.propertyName.test(key);
       }
 

@@ -1,4 +1,4 @@
-import { configFileNames } from './app-strings';
+import { getConfigFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
@@ -18,19 +18,38 @@ describe('config/validation', () => {
       expect(warnings).toMatchSnapshot();
     });
 
+    it('allow enabled field in vulnerabilityAlerts', async () => {
+      const config = {
+        vulnerabilityAlerts: {
+          enabled: false,
+        },
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(0);
+    });
+
     it('catches global options in repo config', async () => {
       const config = {
         binarySource: 'something',
         username: 'user',
+        ignorePrAuthor: true,
       };
       const { warnings } = await configValidation.validateConfig(
         'repo',
+        // @ts-expect-error -- invalid config
         config,
       );
-      expect(warnings).toHaveLength(2);
+      expect(warnings).toHaveLength(3);
       expect(warnings).toMatchObject([
         {
           message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+        },
+        {
+          message: `The "ignorePrAuthor" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
         {
           message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
@@ -45,6 +64,7 @@ describe('config/validation', () => {
       };
       const { warnings } = await configValidation.validateConfig(
         'inherit',
+        // @ts-expect-error -- invalid config
         config,
       );
       expect(warnings).toHaveLength(2);
@@ -92,6 +112,7 @@ describe('config/validation', () => {
       };
       const { warnings } = await configValidation.validateConfig(
         'repo',
+        // @ts-expect-error -- TODO: What is `platformConfig` type?
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -101,6 +122,7 @@ describe('config/validation', () => {
       const config = {
         platformConfig: 'invalid',
       };
+      // @ts-expect-error -- TODO: What is `platformConfig` type?
       const { errors } = await configValidation.validateConfig('repo', config);
       expect(errors).toHaveLength(1);
     });
@@ -228,7 +250,7 @@ describe('config/validation', () => {
 
     it('validates matchBaseBranches', async () => {
       const config = {
-        baseBranches: ['foo'],
+        baseBranchPatterns: ['foo'],
         packageRules: [
           {
             matchBaseBranches: ['foo'],
@@ -244,7 +266,7 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
     });
 
-    it('catches invalid matchBaseBranches when baseBranches is not defined', async () => {
+    it('catches invalid matchBaseBranches when baseBranchPatterns is not defined', async () => {
       const config = {
         packageRules: [
           {
@@ -372,15 +394,15 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('catches invalid baseBranches regex', async () => {
+    it('catches invalid baseBranchPatterns regex', async () => {
       const config = {
-        baseBranches: ['/***$}{]][/', '/branch/i'],
+        baseBranchPatterns: ['/***$}{]][/', '/branch/i'],
       };
       const { errors } = await configValidation.validateConfig('repo', config);
       expect(errors).toEqual([
         {
           topic: 'Configuration Error',
-          message: 'Invalid regExp for baseBranches: `/***$}{]][/`',
+          message: 'Invalid regExp for baseBranchPatterns: `/***$}{]][/`',
         },
       ]);
     });
@@ -401,6 +423,7 @@ describe('config/validation', () => {
           },
         ],
         lockFileMaintenance: {
+          // @ts-expect-error -- testing
           bar: 2,
         },
         major: null,
@@ -412,24 +435,6 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(4);
       expect(errors).toMatchSnapshot();
-    });
-
-    it('included unsupported manager', async () => {
-      const config = {
-        packageRules: [
-          {
-            matchManagers: ['foo'],
-            enabled: true,
-          },
-        ],
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        config,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(1);
-      expect(errors[0].message).toContain('ansible');
     });
 
     it('included managers of the wrong type', async () => {
@@ -446,7 +451,7 @@ describe('config/validation', () => {
         config as any,
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
+      expect(errors).toHaveLength(1);
       expect(errors).toMatchSnapshot();
     });
 
@@ -491,6 +496,7 @@ describe('config/validation', () => {
 
     it('errors for all types', async () => {
       const config: RenovateConfig = {
+        // @ts-expect-error - only allowed in package rules
         allowedVersions: 'foo',
         enabled: 1 as any,
         enabledManagers: ['npm'],
@@ -545,6 +551,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
+        // @ts-expect-error -- TODO: managers, datasources and versionings are not defined on RenovateConfig
         config,
       );
       expect(warnings).toHaveLength(4);
@@ -583,6 +590,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
+        // @ts-expect-error -- TODO: managers, datasources and versionings are not defined on RenovateConfig
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -1076,6 +1084,7 @@ describe('config/validation', () => {
     it('errors if managerFilePatterns has wrong parent', async () => {
       const config: RenovateConfig = {
         managerFilePatterns: ['foo'],
+        // @ts-expect-error: -- TODO: managers, datasources and versionings are not defined on RenovateConfig
         npm: {
           managerFilePatterns: ['package\\.json'],
           minor: {
@@ -1096,10 +1105,23 @@ describe('config/validation', () => {
         'repo',
         config,
       );
-      expect(errors).toHaveLength(1);
-      expect(warnings).toHaveLength(1);
-      expect(errors).toMatchSnapshot();
-      expect(warnings).toMatchSnapshot();
+
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(2);
+      expect(warnings).toEqual([
+        {
+          topic: 'managerFilePatterns',
+          message: expect.toStartWith(
+            `"managerFilePatterns" can't be used in ".". Allowed objects: `,
+          ),
+        },
+        {
+          topic: 'npm.minor.managerFilePatterns',
+          message: expect.toStartWith(
+            `"managerFilePatterns" can't be used in "minor". Allowed objects: `,
+          ),
+        },
+      ]);
     });
 
     it('errors if manager objects are nested', async () => {
@@ -1128,6 +1150,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
+        // @ts-expect-error: contains invalid values
         config,
       );
       expect(errors).toHaveLength(0);
@@ -1200,12 +1223,64 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(1);
     });
 
+    it('does not error on use of `global:` presets in `globalExtends`', async () => {
+      const config = {
+        globalExtends: ['global:safeEnv'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+        true,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('does not error on use of `global:` presets in global `extends`', async () => {
+      const config = {
+        extends: ['global:safeEnv'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+        true,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('errors on use of `global:` presets in inherit `extends`', async () => {
+      const config = {
+        extends: ['global:safeEnv'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'inherit',
+        config,
+        true,
+      );
+      expect(errors).toHaveLength(1);
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('errors on use of `global:` presets in repo `extends`', async () => {
+      const config = {
+        extends: ['global:safeEnv'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(errors).toHaveLength(1);
+      expect(warnings).toHaveLength(0);
+    });
+
     // adding this test explicitly because we used to validate the customEnvVariables inside repo config previously
     it('warns if customEnvVariables are found in repo config', async () => {
       const config = {
         customEnvVariables: {
           example1: 'abc',
-          example2: 123,
+          example2: '123',
         },
       };
       const { warnings } = await configValidation.validateConfig(
@@ -1499,6 +1574,7 @@ describe('config/validation', () => {
       };
       const { errors } = await configValidation.validateConfig(
         'global',
+        // @ts-expect-error: contains invalid values
         config,
       );
       expect(errors).toMatchObject([
@@ -1589,6 +1665,21 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+    });
+
+    it('validates env against the allowedEnv regex', async () => {
+      const config = {
+        env: {
+          SOME_VAR: 'SOME_VALUE',
+        },
+        allowedEnv: ['/^SOME.*/'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
     });
 
     it('validates options with different type but defaultValue=null', async () => {
@@ -1738,7 +1829,7 @@ describe('config/validation', () => {
         );
         expect(warnings).toEqual([
           {
-            message: `Invalid value \`invalid\` for \`onboardingConfigFileName\`. The allowed values are ${configFileNames.join(', ')}.`,
+            message: `Invalid value \`invalid\` for \`onboardingConfigFileName\`. The allowed values are ${getConfigFileNames().join(', ')}.`,
             topic: 'Configuration Error',
           },
         ]);
@@ -1756,15 +1847,17 @@ describe('config/validation', () => {
           'global',
           config,
         );
+        expect.assertions(1);
         expect(warnings).toEqual([
-          {
-            message:
-              '"managerFilePatterns" may not be defined at the top level of a config and must instead be within a manager block',
-            topic: 'Config error',
-          },
           {
             topic: 'Configuration Error',
             message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+          },
+          {
+            topic: 'managerFilePatterns',
+            message: expect.toStartWith(
+              `"managerFilePatterns" can't be used in ".". Allowed objects: `,
+            ),
           },
         ]);
       });
@@ -1786,9 +1879,10 @@ describe('config/validation', () => {
         );
         expect(warnings).toEqual([
           {
-            message:
-              '"managerFilePatterns" may not be defined at the top level of a config and must instead be within a manager block',
-            topic: 'Config error',
+            topic: 'managerFilePatterns',
+            message: expect.toStartWith(
+              `"managerFilePatterns" can't be used in ".". Allowed objects: `,
+            ),
           },
         ]);
       });
@@ -1799,6 +1893,7 @@ describe('config/validation', () => {
         };
         const { warnings } = await configValidation.validateConfig(
           'global',
+          // @ts-expect-error: contains invalid values
           config,
         );
         expect(warnings).toEqual([
@@ -1818,6 +1913,7 @@ describe('config/validation', () => {
       };
       const { warnings } = await configValidation.validateConfig(
         'global',
+        // @ts-expect-error: contains invalid values
         config,
       );
       expect(warnings).toMatchObject([
@@ -1837,6 +1933,7 @@ describe('config/validation', () => {
       };
       const { warnings } = await configValidation.validateConfig(
         'global',
+        // @ts-expect-error: contains invalid values
         config,
       );
       expect(warnings).toMatchObject([
@@ -1936,6 +2033,7 @@ describe('config/validation', () => {
       };
       const { warnings } = await configValidation.validateConfig(
         'global',
+        // @ts-expect-error -- testing
         config,
       );
       expect(warnings).toMatchObject([
@@ -2073,6 +2171,7 @@ describe('config/validation', () => {
     });
 
     it('errors if no bumpVersion filePattern is provided', async () => {
+      // @ts-expect-error -- TODO: fix test
       const config = partial<RenovateConfig>({
         bumpVersion: {
           matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
@@ -2098,6 +2197,7 @@ describe('config/validation', () => {
     });
 
     it('errors if no matchStrings are provided for bumpVersion', async () => {
+      // @ts-expect-error -- TODO: fix test
       const config = partial<RenovateConfig>({
         bumpVersion: {
           filePatterns: ['foo'],
@@ -2120,7 +2220,8 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(2);
     });
 
-    it('allow bumpVersion ', async () => {
+    it('allow bumpVersion', async () => {
+      // @ts-expect-error -- TODO: fix test
       const config = partial<RenovateConfig>({
         bumpVersion: {
           filePatterns: ['foo'],

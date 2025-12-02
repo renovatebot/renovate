@@ -67,14 +67,14 @@ function mockGenericPackage(opts: MockOpts = {}) {
       const [major, minor, patch] = latest
         .replace('-SNAPSHOT', '')
         .split('.')
-        .map((x) => parseInt(x, 10))
+        .map((x) => parseInt(x))
         .map((x) => (x < 10 ? `0${x}` : `${x}`));
       scope
         .get(
           `/${packagePath}/${latest}/${artifact}-${latest.replace(
             '-SNAPSHOT',
             '',
-          )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`,
+          )}-20200101.${major}${minor}${patch}-${parseInt(patch)}.pom`,
         )
         .reply(200, pom);
     } else {
@@ -162,6 +162,7 @@ describe('modules/datasource/maven/index', () => {
       packageScope: 'org.example',
       registryUrl: 'https://repo.maven.apache.org/maven2',
       releases: [{ version: '1.0.3-SNAPSHOT' }],
+      respectLatest: false,
       tags: {
         latest: '1.0.3-SNAPSHOT',
         release: '1.0.3-SNAPSHOT',
@@ -197,6 +198,7 @@ describe('modules/datasource/maven/index', () => {
       packageScope: 'org.example',
       registryUrl: 'https://repo.maven.apache.org/maven2',
       releases: [{ version: '1.0.3-SNAPSHOT' }],
+      respectLatest: false,
       tags: {
         latest: '1.0.3-SNAPSHOT',
         release: '1.0.3-SNAPSHOT',
@@ -454,9 +456,12 @@ describe('modules/datasource/maven/index', () => {
       .reply(200, Fixtures.get('pom.xml'));
 
     googleAuth.mockImplementation(
-      vi.fn().mockImplementation(() => ({
-        getAccessToken: vi.fn().mockResolvedValue('some-token'),
-      })),
+      // TODO: fix typing
+      vi.fn<any>(
+        class {
+          getAccessToken = vi.fn().mockResolvedValue('some-token');
+        },
+      ),
     );
 
     const res = await get('org.example:package', baseUrlAR);
@@ -479,6 +484,7 @@ describe('modules/datasource/maven/index', () => {
         { version: '1.0.5-SNAPSHOT' },
         { version: '2.0.0' },
       ],
+      respectLatest: false,
       tags: {
         latest: '2.0.0',
         release: '2.0.0',
@@ -503,9 +509,12 @@ describe('modules/datasource/maven/index', () => {
       .reply(200, Fixtures.get('pom.xml'));
 
     googleAuth.mockImplementation(
-      vi.fn().mockImplementation(() => ({
-        getAccessToken: vi.fn().mockResolvedValue(undefined),
-      })),
+      // TODO: fix typing
+      vi.fn<any>(
+        class GoogleAuth {
+          getAccessToken = vi.fn();
+        },
+      ),
     );
 
     const res = await get('org.example:package', baseUrlAR);
@@ -528,6 +537,7 @@ describe('modules/datasource/maven/index', () => {
         { version: '1.0.5-SNAPSHOT' },
         { version: '2.0.0' },
       ],
+      respectLatest: false,
       tags: {
         latest: '2.0.0',
         release: '2.0.0',

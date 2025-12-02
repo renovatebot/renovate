@@ -6,8 +6,6 @@ exports[`modules/platform/bitbucket-server/index > endpoint with no path > addRe
 
 exports[`modules/platform/bitbucket-server/index > endpoint with no path > addReviewers > throws 1`] = `[HTTPError: Response code 405 (Method Not Allowed)]`;
 
-exports[`modules/platform/bitbucket-server/index > endpoint with no path > addReviewers > throws on invalid reviewers 1`] = `[HTTPError: Response code 409 (Conflict)]`;
-
 exports[`modules/platform/bitbucket-server/index > endpoint with no path > deleteLAbel() > does not throw 1`] = `undefined`;
 
 exports[`modules/platform/bitbucket-server/index > endpoint with no path > findPr() > has pr 1`] = `
@@ -210,8 +208,6 @@ exports[`modules/platform/bitbucket-server/index > endpoint with path > addAssig
 exports[`modules/platform/bitbucket-server/index > endpoint with path > addReviewers > does not throw 1`] = `undefined`;
 
 exports[`modules/platform/bitbucket-server/index > endpoint with path > addReviewers > throws 1`] = `[HTTPError: Response code 405 (Method Not Allowed)]`;
-
-exports[`modules/platform/bitbucket-server/index > endpoint with path > addReviewers > throws on invalid reviewers 1`] = `[HTTPError: Response code 409 (Conflict)]`;
 
 exports[`modules/platform/bitbucket-server/index > endpoint with path > deleteLAbel() > does not throw 1`] = `undefined`;
 

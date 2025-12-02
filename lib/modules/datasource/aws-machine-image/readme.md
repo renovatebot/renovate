@@ -93,46 +93,63 @@ Or as JSON:
 }
 ```
 
+**Note about `currentImageName`:**
+
+The optional `currentImageName` comment is automatically updated by Renovate to track the actual AMI name corresponding to the AMI ID.
+This provides human-readable context about which image version is being used.
+When Renovate finds a newer AMI, it will update both the AMI ID and the `currentImageName` comment.
+
 This would match every file, and would recognize the following lines:
 
 ```yaml
 # With AMI name mentioned in the comments
 # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]
-# currentImageName=unknown
+# currentImageName=amazon-eks-node-1.21-v20240703
 my_ami1: ami-02ce3d9008cab69cb
+
 # Only AMI, no name mentioned
 # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]}]
-# currentImageName=unknown
+# currentImageName=amazon-eks-node-1.20-v20240615
 my_ami2: ami-0083e9407e275acf2
 
 # Using custom aws profile and region
 # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]},{"profile":"test","region":"eu-central-1"}]
-# currentImageName=unknown
+# currentImageName=amazon-eks-node-1.20-v20240615
 ami = "ami-0083e9407e275acf2"
+
+# Without currentImageName comment (also works!)
+# amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.19-*"]}]
+my_ami3: ami-0a1b2c3d4e5f6g7h8
 ```
 
 ```typescript
 const myConfigObject = {
   // With AMI name mentioned in the comments
   // amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]
-  // currentImageName=unknown
+  // currentImageName=amazon-eks-node-1.21-v20240703
   my_ami1: 'ami-02ce3d9008cab69cb',
 };
 
 /**
- * Only AMI, no AMI name mentioned
+ * AMI with name tracked in comment
  * amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]}]
- * currentImageName=unknown
+ * currentImageName=amazon-eks-node-1.20-v20240615
  */
 const my_ami2 = 'ami-0083e9407e275acf2';
+
+/**
+ * Without currentImageName comment
+ * amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.19-*"]}]
+ */
+const my_ami3 = 'ami-0a1b2c3d4e5f6g7h8';
 ```
 
 ```hcl
 resource "aws_instance" "web" {
 
-    # Only AMI, no name mentioned
+    # AMI with name tracked in comment
     # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]}]
-    # currentImageName=unknown
+    # currentImageName=amazon-eks-node-1.20-v20240615
     ami = "ami-0083e9407e275acf2"
 
     count = 2
@@ -141,5 +158,13 @@ resource "aws_instance" "web" {
     connection {
         user = "root"
     }
+}
+
+resource "aws_instance" "app" {
+    # Without currentImageName comment
+    # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.19-*"]}]
+    ami = "ami-0a1b2c3d4e5f6g7h8"
+
+    count = 1
 }
 ```

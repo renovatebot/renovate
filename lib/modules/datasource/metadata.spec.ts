@@ -5,6 +5,7 @@ import { MavenDatasource } from './maven';
 import {
   addMetaData,
   massageGithubUrl,
+  massageGitlabUrl,
   massageUrl,
   shouldDeleteHomepage,
 } from './metadata';
@@ -451,6 +452,12 @@ describe('modules/datasource/metadata', () => {
     expect(massageGithubUrl('git://example.com/foo/bar')).toMatch(
       'https://example.com/foo/bar',
     );
+  });
+
+  it('Should massage gitlab git url to valid https url', () => {
+    expect(
+      massageGitlabUrl('git://example.gitlab-dedicated.com/foo/bar'),
+    ).toMatch('https://example.gitlab-dedicated.com/foo/bar');
   });
 
   it('Should remove homepage when homepage and sourceUrl are same', () => {

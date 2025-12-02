@@ -1,7 +1,7 @@
-import is from '@sindresorhus/is';
+import { isArray, isNullOrUndefined } from '@sindresorhus/is';
 
 export function coerceArray<T>(input: T[] | null | undefined): T[] {
-  if (is.array(input)) {
+  if (isArray(input)) {
     return input;
   }
   return [];
@@ -13,7 +13,7 @@ export function coerceArray<T>(input: T[] | null | undefined): T[] {
 export function isNotNullOrUndefined<T>(
   value: T | undefined | null,
 ): value is T {
-  return !is.nullOrUndefined(value);
+  return !isNullOrUndefined(value);
 }
 
 /**
@@ -22,7 +22,7 @@ export function isNotNullOrUndefined<T>(
  * @returns array of values
  */
 export function toArray<T>(value: T | T[]): T[] {
-  return is.array(value) ? value : [value];
+  return isArray(value) ? value : [value];
 }
 
 export function deduplicateArray<T>(array: T[]): T[] {

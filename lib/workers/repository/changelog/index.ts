@@ -9,7 +9,38 @@ export async function embedChangelog(
   if (upgrade.logJSON !== undefined) {
     return;
   }
-  upgrade.logJSON = await getChangeLogJSON(upgrade);
+
+  if (upgrade.changelogContent === undefined) {
+    upgrade.logJSON = await getChangeLogJSON(upgrade);
+  } else {
+    upgrade.logJSON = {
+      hasReleaseNotes: true,
+      project: {
+        packageName: upgrade.packageName,
+        depName: upgrade.depName,
+        type: undefined!,
+        apiBaseUrl: undefined!,
+        baseUrl: undefined!,
+        repository: upgrade.repository!,
+        sourceUrl: upgrade.sourceUrl!,
+        sourceDirectory: upgrade.sourceDirectory,
+      },
+      versions: [
+        {
+          changes: undefined!,
+          compare: undefined!,
+          date: undefined!,
+          releaseNotes: {
+            body: upgrade.changelogContent,
+            notesSourceUrl: undefined!,
+            url: upgrade.changelogUrl!,
+          },
+          gitRef: undefined!,
+          version: upgrade.newVersion!,
+        },
+      ],
+    };
+  }
 }
 
 export async function embedChangelogs(

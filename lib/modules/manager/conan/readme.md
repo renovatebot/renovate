@@ -1,8 +1,3 @@
-<!-- prettier-ignore -->
-!!! warning
-    The Conan package manager is disabled by default due to slowness in the Conan API.
-    We recommend you only enable it for low volume experimental purposes until [issue #14170](https://github.com/renovatebot/renovate/issues/14170) is resolved.
-
 Renovate can upgrade dependencies in `conanfile.txt` or `conanfile.py` files and also updates `conan.lock` files too if found.
 
 How it works:
@@ -21,7 +16,3 @@ How it works:
 1. Renovate resolves the dependency's version using the Conan v2 API
 1. If Renovate finds an update, Renovate will update `conanfile.txt` or `conanfile.py`
 1. Renovate also updates `conan.lock` file if exists
-
-Enabling Conan updating
-
-Renovate updates Conan packages by default.

@@ -1,4 +1,13 @@
-import is from '@sindresorhus/is';
+import {
+  ATTR_VCS_OWNER_NAME,
+  ATTR_VCS_PROVIDER_NAME,
+  ATTR_VCS_REPOSITORY_NAME,
+} from '@opentelemetry/semantic-conventions/incubating';
+import {
+  isNonEmptyString,
+  isNonEmptyStringAndNotWhitespace,
+  isString,
+} from '@sindresorhus/is';
 import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
 import semver from 'semver';
@@ -6,7 +15,7 @@ import upath from 'upath';
 import * as configParser from '../../config';
 import { GlobalConfig } from '../../config/global';
 import { resolveConfigPresets } from '../../config/presets';
-import { validateConfigSecrets } from '../../config/secrets';
+import { validateConfigSecretsAndVariables } from '../../config/secrets';
 import type {
   AllConfig,
   RenovateConfig,
@@ -36,7 +45,7 @@ export async function getRepositoryConfig(
 ): Promise<RenovateConfig> {
   const repoConfig = configParser.mergeChildConfig(
     globalConfig,
-    is.string(repository) ? { repository } : repository,
+    isString(repository) ? { repository } : repository,
   );
   const repoParts = repoConfig.repository.split('/');
   repoParts.pop();
@@ -110,10 +119,10 @@ export async function start(): Promise<number> {
   let config: AllConfig;
   const env = getEnv();
   try {
-    if (is.nonEmptyStringAndNotWhitespace(env.AWS_SECRET_ACCESS_KEY)) {
+    if (isNonEmptyStringAndNotWhitespace(env.AWS_SECRET_ACCESS_KEY)) {
       addSecretForSanitizing(env.AWS_SECRET_ACCESS_KEY, 'global');
     }
-    if (is.nonEmptyStringAndNotWhitespace(env.AWS_SESSION_TOKEN)) {
+    if (isNonEmptyStringAndNotWhitespace(env.AWS_SESSION_TOKEN)) {
       addSecretForSanitizing(env.AWS_SESSION_TOKEN, 'global');
     }
 
@@ -143,8 +152,8 @@ export async function start(): Promise<number> {
 
       checkEnv();
 
-      // validate secrets. Will throw and abort if invalid
-      validateConfigSecrets(config);
+      // validate secrets and variables. Will throw and abort if invalid
+      validateConfigSecretsAndVariables(config);
     });
 
     // autodiscover repositories (needs to come after platform initialization)
@@ -152,7 +161,7 @@ export async function start(): Promise<number> {
       autodiscoverRepositories(config),
     );
 
-    if (is.nonEmptyString(config.writeDiscoveredRepos)) {
+    if (isNonEmptyString(config.writeDiscoveredRepos)) {
       const content = JSON.stringify(config.repositories);
       await fs.writeFile(config.writeDiscoveredRepos, content);
       logger.info(
@@ -166,6 +175,11 @@ export async function start(): Promise<number> {
       if (haveReachedLimits()) {
         break;
       }
+
+      const { owner, repo } = repositoryToOwnerAndRepo(
+        typeof repository === 'string' ? repository : repository.repository,
+      );
+
       await instrument(
         'repository',
         async () => {
@@ -186,6 +200,10 @@ export async function start(): Promise<number> {
         },
         {
           attributes: {
+            [ATTR_VCS_PROVIDER_NAME]: config.platform,
+            [ATTR_VCS_OWNER_NAME]: owner,
+            [ATTR_VCS_REPOSITORY_NAME]: repo,
+            /** @deprecated TODO remove */
             repository:
               typeof repository === 'string'
                 ? repository
@@ -228,4 +246,14 @@ export async function start(): Promise<number> {
     return 1;
   }
   return 0;
+}
+
+function repositoryToOwnerAndRepo(fullName: string): {
+  owner: string;
+  repo: string;
+} {
+  const parts = fullName.split('/');
+  const repo = parts.pop() ?? '';
+  const owner = parts.join('/');
+  return { owner, repo };
 }

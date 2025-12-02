@@ -1,12 +1,11 @@
 import { logger } from '../../../logger';
-import type { PubspecLockSchema, PubspecSchema } from './schema';
-import { PubspecLockYaml, PubspecYaml } from './schema';
+import { Pubspec, PubspecLock } from './schema';
 
 export function parsePubspec(
   fileName: string,
   fileContent: string,
-): PubspecSchema | null {
-  const res = PubspecYaml.safeParse(fileContent);
+): Pubspec | null {
+  const res = Pubspec.safeParse(fileContent);
   if (res.success) {
     return res.data;
   } else {
@@ -18,8 +17,8 @@ export function parsePubspec(
 export function parsePubspecLock(
   fileName: string,
   fileContent: string,
-): PubspecLockSchema | null {
-  const res = PubspecLockYaml.safeParse(fileContent);
+): PubspecLock | null {
+  const res = PubspecLock.safeParse(fileContent);
   if (res.success) {
     return res.data;
   } else {

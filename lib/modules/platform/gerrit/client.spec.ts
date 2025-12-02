@@ -108,7 +108,7 @@ describe('modules/platform/gerrit/client', () => {
         { branchName: 'dependency-xyz', targetBranch: 'otherTarget' },
       ],
       [
-        'status:closed',
+        'status:abandoned',
         {
           branchName: 'dependency-xyz',
           state: 'closed' as FindPRConfig['state'],
@@ -122,7 +122,7 @@ describe('modules/platform/gerrit/client', () => {
         },
       ],
       [
-        'message:"fix(deps): update dependency react-router-dom to ~> v6.21.2"',
+        'message:"fix(deps): update dependency react-router-dom to ~> \\"v6.21.2\\""',
         {
           branchName: 'dependency-xyz',
           prTitle:
@@ -130,7 +130,7 @@ describe('modules/platform/gerrit/client', () => {
         },
       ],
       [
-        'message:"fix(deps): update dependency react-router-dom to ~> v6.21.2"',
+        'message:"fix(deps): \\"update dependency react-router-dom to ~> \\"v6.21.2\\"\\""',
         {
           branchName: 'dependency-xyz',
           prTitle:
@@ -155,6 +155,194 @@ describe('modules/platform/gerrit/client', () => {
         ]);
       },
     );
+
+    it('sets query.n as 1 if a single change is requested', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.n === '1')
+        .reply(200, gerritRestResponse([{ _number: 1 }]), jsonResultHeader);
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+          singleChange: true,
+          pageLimit: 5, // should be ignored
+        }),
+      ).resolves.toEqual([{ _number: 1 }]);
+    });
+
+    it('sets query.n as 50 if pageLimit is not provided', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.n === '50')
+        .reply(200, gerritRestResponse([{ _number: 1 }]), jsonResultHeader);
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+        }),
+      ).resolves.toEqual([{ _number: 1 }]);
+    });
+
+    it('sets query.n with pageLimit if provided', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.n === '5')
+        .reply(200, gerritRestResponse([{ _number: 1 }]), jsonResultHeader);
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+          pageLimit: 5,
+        }),
+      ).resolves.toEqual([{ _number: 1 }]);
+    });
+
+    it('sets query.S with startOffset if provided', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.S === '5')
+        .reply(200, gerritRestResponse([{ _number: 1 }]), jsonResultHeader);
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+          startOffset: 5,
+        }),
+      ).resolves.toEqual([{ _number: 1 }]);
+    });
+
+    it('sets query.S as 0 if startOffset is not provided', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.S === '0')
+        .reply(200, gerritRestResponse([{ _number: 1 }]), jsonResultHeader);
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+        }),
+      ).resolves.toEqual([{ _number: 1 }]);
+    });
+
+    it('handles pagination automatically', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '0')
+        .reply(
+          200,
+          gerritRestResponse([
+            { _number: 1 },
+            { _number: 2, _more_changes: true },
+          ]),
+          jsonResultHeader,
+        )
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '2')
+        .reply(
+          200,
+          gerritRestResponse([
+            { _number: 3 },
+            { _number: 4, _more_changes: true },
+          ]),
+          jsonResultHeader,
+        )
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '4')
+        .reply(
+          200,
+          gerritRestResponse([{ _number: 5 }, { _number: 6 }]),
+          jsonResultHeader,
+        );
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+          pageLimit: 2, // to keep the test short
+        }),
+      ).resolves.toEqual([
+        { _number: 1 },
+        { _number: 2 },
+        { _number: 3 },
+        { _number: 4 },
+        { _number: 5 },
+        { _number: 6 },
+      ]);
+    });
+
+    it('handles pagination with startOffset', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '2')
+        .reply(
+          200,
+          gerritRestResponse([
+            { _number: 3 },
+            { _number: 4, _more_changes: true },
+          ]),
+          jsonResultHeader,
+        )
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '4')
+        .reply(
+          200,
+          gerritRestResponse([{ _number: 5 }, { _number: 6 }]),
+          jsonResultHeader,
+        );
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+          pageLimit: 2,
+          startOffset: 2,
+        }),
+      ).resolves.toEqual([
+        { _number: 3 },
+        { _number: 4 },
+        { _number: 5 },
+        { _number: 6 },
+      ]);
+    });
+
+    it('allows disabling automatic pagination', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '0')
+        .reply(
+          200,
+          gerritRestResponse([
+            { _number: 1 },
+            { _number: 2, _more_changes: true },
+          ]),
+          jsonResultHeader,
+        );
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+          noPagination: true,
+          pageLimit: 2,
+        }),
+      ).resolves.toEqual([{ _number: 1 }, { _number: 2 }]);
+    });
+
+    it('sets query.o when requestDetails is provided', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query(
+          (query) =>
+            Array.isArray(query.o) &&
+            query.o.toString() === ['LABELS', 'MESSAGES'].toString(),
+        )
+        .reply(200, gerritRestResponse([{ _number: 3 }]), jsonResultHeader);
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+          requestDetails: ['LABELS', 'MESSAGES'],
+        }),
+      ).resolves.toEqual([{ _number: 3 }]);
+    });
   });
 
   describe('getChange()', () => {
@@ -162,11 +350,11 @@ describe('modules/platform/gerrit/client', () => {
       const change = partial<GerritChange>({});
       httpMock
         .scope(gerritEndpointUrl)
-        .get(
-          '/a/changes/123456?o=SUBMITTABLE&o=CHECK&o=MESSAGES&o=DETAILED_ACCOUNTS&o=LABELS&o=CURRENT_ACTIONS&o=CURRENT_REVISION&o=CURRENT_COMMIT',
-        )
+        .get('/a/changes/123456?o=CURRENT_REVISION&o=COMMIT_FOOTERS')
         .reply(200, gerritRestResponse(change), jsonResultHeader);
-      await expect(client.getChange(123456)).resolves.toEqual(change);
+      await expect(
+        client.getChange(123456, ['CURRENT_REVISION', 'COMMIT_FOOTERS']),
+      ).resolves.toEqual(change);
     });
   });
 
@@ -370,6 +558,18 @@ describe('modules/platform/gerrit/client', () => {
       await expect(
         client.setLabel(123456, 'Renovate-Merge-Confidence', +1),
       ).toResolve();
+    });
+  });
+
+  describe('deleteHashtag()', () => {
+    it('deleteHashtag', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .post('/a/changes/123456/hashtags', {
+          remove: ['hashtag1'],
+        })
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
+      await expect(client.deleteHashtag(123456, 'hashtag1')).toResolve();
     });
   });
 

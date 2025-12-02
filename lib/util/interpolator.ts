@@ -1,8 +1,9 @@
-import is from '@sindresorhus/is';
+import { isArray, isPlainObject, isString } from '@sindresorhus/is';
 import type { RenovateConfig } from '../config/types';
 import {
   CONFIG_SECRETS_INVALID,
   CONFIG_VALIDATION,
+  CONFIG_VARIABLES_INVALID,
 } from '../constants/error-messages';
 import { logger } from '../logger';
 import { capitalize } from './string';
@@ -24,12 +25,12 @@ export function validateInterpolatedValues(
   const { name, nameRegex } = options;
 
   const validationErrors: string[] = [];
-  if (is.plainObject(input)) {
+  if (isPlainObject(input)) {
     for (const [key, value] of Object.entries(input)) {
       if (!nameRegex.test(key)) {
         validationErrors.push(`Invalid ${name} name "${key}"`);
       }
-      if (!is.string(value)) {
+      if (!isString(value)) {
         validationErrors.push(
           `${capitalize(name)} values must be strings. Found type ${typeof value} for ${name} ${key}`,
         );
@@ -43,7 +44,9 @@ export function validateInterpolatedValues(
 
   if (validationErrors.length) {
     logger.error({ validationErrors }, `Invalid ${name}s configured`);
-    throw new Error(CONFIG_SECRETS_INVALID);
+    throw new Error(
+      name === 'secrets' ? CONFIG_SECRETS_INVALID : CONFIG_VARIABLES_INVALID,
+    );
   }
 }
 
@@ -54,6 +57,9 @@ function replaceInterpolatedValuesInString(
   options: InterpolatorOptions,
 ): string {
   const { name, templateRegex } = options;
+  // Reset regex lastIndex for global regexes to ensure consistent behavior
+  templateRegex.lastIndex = 0;
+
   // do nothing if no interpolator template found
   if (!templateRegex.test(value)) {
     return value;
@@ -85,7 +91,7 @@ export function replaceInterpolatedValuesInObject(
   config_: RenovateConfig,
   input: Record<string, string>,
   options: InterpolatorOptions,
-  deleteValues: boolean,
+  deleteValues = true,
 ): RenovateConfig {
   const config = { ...config_ };
   const { name } = options;
@@ -93,7 +99,8 @@ export function replaceInterpolatedValuesInObject(
     delete config[name];
   }
   for (const [key, value] of Object.entries(config)) {
-    if (is.plainObject(value)) {
+    if (isPlainObject(value)) {
+      // @ts-expect-error -- type can't be narrowed
       config[key] = replaceInterpolatedValuesInObject(
         value,
         input,
@@ -101,7 +108,8 @@ export function replaceInterpolatedValuesInObject(
         deleteValues,
       );
     }
-    if (is.string(value)) {
+    if (isString(value)) {
+      // @ts-expect-error -- type can't be narrowed
       config[key] = replaceInterpolatedValuesInString(
         key,
         value,
@@ -109,16 +117,16 @@ export function replaceInterpolatedValuesInObject(
         options,
       );
     }
-    if (is.array(value)) {
+    if (isArray(value)) {
       for (const [arrayIndex, arrayItem] of value.entries()) {
-        if (is.plainObject(arrayItem)) {
+        if (isPlainObject(arrayItem)) {
           value[arrayIndex] = replaceInterpolatedValuesInObject(
             arrayItem,
             input,
             options,
             deleteValues,
           );
-        } else if (is.string(arrayItem)) {
+        } else if (isString(arrayItem)) {
           value[arrayIndex] = replaceInterpolatedValuesInString(
             key,
             arrayItem,

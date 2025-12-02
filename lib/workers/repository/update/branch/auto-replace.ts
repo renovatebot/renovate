@@ -1,5 +1,5 @@
 // TODO #22198
-import is from '@sindresorhus/is';
+import { isNumber, isString, isUndefined } from '@sindresorhus/is';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { extractPackageFile } from '../../../../modules/manager';
@@ -43,14 +43,15 @@ export async function confirmIfDepUpdated(
       return false;
     }
     // istanbul ignore if
-    if (is.number(depIndex) && depIndex >= newExtract.deps.length) {
+    if (isNumber(depIndex) && depIndex >= newExtract.deps.length) {
       logger.debug(
         `Extracted ${packageFile!} after autoreplace has fewer deps than expected.`,
       );
       return false;
     }
     newUpgrade = newExtract.deps[depIndex!];
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
+    /* istanbul ignore next */
     logger.debug({ manager, packageFile, err }, 'Failed to parse newContent');
   }
 
@@ -225,9 +226,9 @@ export async function doAutoReplace(
     return await checkExistingBranch(upgrade, existingContent);
   }
   const replaceWithoutReplaceString =
-    is.string(newName) &&
+    isString(newName) &&
     newName !== depName &&
-    (is.undefined(upgrade.replaceString) ||
+    (isUndefined(upgrade.replaceString) ||
       !upgrade.replaceString?.includes(depName!));
   const replaceString = upgrade.replaceString ?? currentValue ?? currentDigest;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
@@ -318,6 +319,7 @@ export async function doAutoReplace(
     let newContent = existingContent;
     let nameReplaced = !newName;
     let valueReplaced = !newValue;
+    let digestReplaced = !newDigest;
     let startIndex = searchIndex;
     // Iterate through the rest of the file
     for (; searchIndex < newContent.length; searchIndex += 1) {
@@ -339,8 +341,9 @@ export async function doAutoReplace(
             searchIndex = startIndex - 1;
             await writeLocalFile(upgrade.packageFile!, existingContent);
             newContent = existingContent;
-            nameReplaced = false;
-            valueReplaced = false;
+            nameReplaced = !newName;
+            valueReplaced = !newValue;
+            digestReplaced = !newDigest;
             continue;
           }
           // replace with newName
@@ -366,8 +369,9 @@ export async function doAutoReplace(
             searchIndex = startIndex - 1;
             await writeLocalFile(upgrade.packageFile!, existingContent);
             newContent = existingContent;
-            nameReplaced = false;
-            valueReplaced = false;
+            nameReplaced = !newName;
+            valueReplaced = !newValue;
+            digestReplaced = !newDigest;
             continue;
           }
           // Now test if the result matches
@@ -380,8 +384,41 @@ export async function doAutoReplace(
           await writeLocalFile(upgrade.packageFile!, newContent);
           valueReplaced = true;
           searchIndex += newValue.length - 1;
+        } else if (
+          newDigest &&
+          matchAt(newContent, searchIndex, currentDigest!)
+        ) {
+          logger.debug(
+            { packageFile, currentDigest },
+            `Found currentDigest at index ${searchIndex}`,
+          );
+          if (digestReplaced) {
+            startIndex = firstIndexOf(
+              existingContent,
+              depName!,
+              currentValue!,
+              startIndex + 1,
+            );
+            searchIndex = startIndex - 1;
+            await writeLocalFile(upgrade.packageFile!, existingContent);
+            newContent = existingContent;
+            nameReplaced = !newName;
+            valueReplaced = !newValue;
+            digestReplaced = !newDigest;
+            continue;
+          }
+          // Now test if the result matches
+          newContent = replaceAt(
+            newContent,
+            searchIndex,
+            currentDigest!,
+            newDigest,
+          );
+          await writeLocalFile(upgrade.packageFile!, newContent);
+          digestReplaced = true;
+          searchIndex += newDigest.length - 1;
         }
-        if (nameReplaced && valueReplaced) {
+        if (nameReplaced && valueReplaced && digestReplaced) {
           if (await confirmIfDepUpdated(upgrade, newContent)) {
             return newContent;
           }
@@ -394,8 +431,9 @@ export async function doAutoReplace(
           searchIndex = startIndex - 1;
           await writeLocalFile(upgrade.packageFile!, existingContent);
           newContent = existingContent;
-          nameReplaced = false;
-          valueReplaced = false;
+          nameReplaced = !newName;
+          valueReplaced = !newValue;
+          digestReplaced = !newDigest;
         }
       } else if (matchAt(newContent, searchIndex, replaceString!)) {
         logger.debug(
@@ -417,7 +455,8 @@ export async function doAutoReplace(
         newContent = existingContent;
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
+    /* istanbul ignore next */
     logger.debug({ packageFile, depName, err }, 'doAutoReplace error');
   }
   // istanbul ignore next

@@ -2,7 +2,7 @@ This issue lists Renovate updates and detected dependencies. Read the [Dependenc
 
 ## Open
 
-These updates have all been created already. Click a checkbox below to force a retry/rebase of any.
+The following updates have all been created. To force a retry/rebase of any, click on a checkbox below.
 
  - [ ] <!-- rebase-branch=branchName1 -->[pr1](../pull/1)
  - [ ] <!-- rebase-branch=branchName2 -->[pr2](../pull/2) (`dep2`, `dep3`)

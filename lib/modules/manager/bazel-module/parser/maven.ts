@@ -3,9 +3,9 @@ import { MavenDatasource } from '../../../datasource/maven';
 import { id as versioning } from '../../../versioning/gradle';
 import type { PackageDependency } from '../../types';
 import {
-  ExtensionTagFragmentSchema,
-  StringArrayFragmentSchema,
-  StringFragmentSchema,
+  ExtensionTagFragment,
+  StringArrayFragment,
+  StringFragment,
 } from './fragments';
 
 const artifactTag = 'artifact';
@@ -27,13 +27,13 @@ const ArtifactSpec = z.object({
 });
 type ArtifactSpec = z.infer<typeof ArtifactSpec>;
 
-const MavenArtifactTarget = ExtensionTagFragmentSchema.extend({
+const MavenArtifactTarget = ExtensionTagFragment.extend({
   extension: z.literal(mavenExtensionPrefix),
   tag: z.literal(artifactTag),
   children: z.object({
-    artifact: StringFragmentSchema,
-    group: StringFragmentSchema,
-    version: StringFragmentSchema,
+    artifact: StringFragment,
+    group: StringFragment,
+    version: StringFragment,
   }),
 }).transform(
   ({ children: { artifact, group, version } }): PackageDependency[] => [
@@ -47,11 +47,11 @@ const MavenArtifactTarget = ExtensionTagFragmentSchema.extend({
   ],
 );
 
-const MavenInstallTarget = ExtensionTagFragmentSchema.extend({
+const MavenInstallTarget = ExtensionTagFragment.extend({
   extension: z.literal(mavenExtensionPrefix),
   tag: z.literal(installTag),
   children: z.object({
-    artifacts: StringArrayFragmentSchema.transform((artifacts) => {
+    artifacts: StringArrayFragment.transform((artifacts) => {
       const result: ArtifactSpec[] = [];
       for (const { value } of artifacts.items) {
         const [group, artifact, version] = value.split(':');
@@ -62,7 +62,7 @@ const MavenInstallTarget = ExtensionTagFragmentSchema.extend({
 
       return result;
     }),
-    repositories: StringArrayFragmentSchema,
+    repositories: StringArrayFragment,
   }),
 }).transform(({ children: { artifacts, repositories } }): PackageDependency[] =>
   artifacts.map(({ group, artifact, version: currentValue }) => ({

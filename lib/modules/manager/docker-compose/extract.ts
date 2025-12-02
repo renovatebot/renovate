@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { parseSingleYaml } from '../../../util/yaml';
@@ -56,13 +56,15 @@ export function extractPackageFile(
     // become optional and can no longer be used to differentiate
     // between v1 and v2.
     const services = config.services ?? config;
+    const extensions = config.extensions ?? {};
 
     // Image name/tags for services are only eligible for update if they don't
     // use variables and if the image is not built locally
     const deps = Object.values(
       services || /* istanbul ignore next: can never happen */ {},
     )
-      .filter((service) => is.string(service?.image) && !service?.build)
+      .concat(Object.values(extensions))
+      .filter((service) => isString(service?.image) && !service?.build)
       .map((service) => {
         const dep = getDep(service.image, true, extractConfig.registryAliases);
         const lineNumber = lineMapper.pluckLineNumber(service.image);
@@ -72,7 +74,7 @@ export function extractPackageFile(
         }
         return dep;
       })
-      .filter(is.truthy);
+      .filter(isTruthy);
 
     logger.trace({ deps }, 'Docker Compose image');
     return { deps };

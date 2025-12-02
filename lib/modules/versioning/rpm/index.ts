@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNumericString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import type { GenericVersion } from '../generic';
 import { GenericVersioningApi } from '../generic';
@@ -61,7 +61,7 @@ class RpmVersioningApi extends GenericVersioningApi {
     if (epochIndex !== -1) {
       const epochStr = remainingVersion.slice(0, epochIndex);
       if (epochPattern.test(epochStr)) {
-        epoch = parseInt(epochStr, 10);
+        epoch = parseInt(epochStr);
       } else {
         return null;
       }
@@ -111,7 +111,7 @@ class RpmVersioningApi extends GenericVersioningApi {
     }
 
     const release = [...remainingVersion.matchAll(regEx(/\d+/g))].map((m) =>
-      parseInt(m[0], 10),
+      parseInt(m[0]),
     );
 
     return {
@@ -177,9 +177,9 @@ class RpmVersioningApi extends GenericVersioningApi {
         }
       }
 
-      if (is.numericString(matchv1?.[0])) {
+      if (isNumericString(matchv1?.[0])) {
         // numbers are greater than letters
-        if (!is.numericString(matchv2?.[0])) {
+        if (!isNumericString(matchv2?.[0])) {
           return 1;
         }
 
@@ -193,7 +193,7 @@ class RpmVersioningApi extends GenericVersioningApi {
         }
 
         return Math.sign(result);
-      } else if (is.numericString(matchv2?.[0])) {
+      } else if (isNumericString(matchv2?.[0])) {
         return -1;
       }
 

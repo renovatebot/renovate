@@ -1,9 +1,12 @@
 // TODO #22198
 import { mergeChildConfig } from '../../../config';
 import { GlobalConfig } from '../../../config/global';
+import { migrateAndValidate } from '../../../config/migrate-validate';
 import { resolveConfigPresets } from '../../../config/presets';
 import type { RenovateConfig } from '../../../config/types';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
+import { instrument } from '../../../instrumentation';
+import { ATTR_RENOVATE_SPLIT } from '../../../instrumentation/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
 import { platform } from '../../../modules/platform';
@@ -19,7 +22,7 @@ import type { ExtractResult } from './extract-update';
 import { extract, lookup, update } from './extract-update';
 import type { WriteUpdateResult } from './write';
 
-async function getBaseBranchConfig(
+export async function getBaseBranchConfig(
   baseBranch: string,
   config: RenovateConfig,
 ): Promise<RenovateConfig> {
@@ -61,6 +64,17 @@ async function getBaseBranchConfig(
       throw error;
     }
 
+    baseBranchConfig = await migrateAndValidate(config, baseBranchConfig);
+    if (baseBranchConfig.errors?.length) {
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationSource = configFileName;
+      error.validationError = `The renovate configuration file of branch ${baseBranch} contains some invalid settings`;
+      error.validationMessage = baseBranchConfig.errors
+        .map((e) => e.message)
+        .join(', ');
+      throw error;
+    }
+
     baseBranchConfig = await resolveConfigPresets(baseBranchConfig, config);
     baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
 
@@ -73,10 +87,11 @@ async function getBaseBranchConfig(
     }
 
     // baseBranches value should be based off the default branch
+    baseBranchConfig.baseBranchPatterns = config.baseBranchPatterns;
     baseBranchConfig.baseBranches = config.baseBranches;
   }
 
-  if (config.baseBranches!.length > 1) {
+  if (isMultiBaseBranch(config)) {
     baseBranchConfig.branchPrefix += `${baseBranch}-`;
     baseBranchConfig.hasBaseBranches = true;
   }
@@ -88,28 +103,39 @@ async function getBaseBranchConfig(
 
 function unfoldBaseBranches(
   defaultBranch: string,
-  baseBranches: string[],
+  baseBranchPatterns: string[],
 ): string[] {
   const unfoldedList: string[] = [];
 
   const allBranches = getBranchList();
-  for (const baseBranch of baseBranches) {
-    const isAllowedPred = getRegexPredicate(baseBranch);
+  for (const baseBranchPattern of baseBranchPatterns) {
+    const isAllowedPred = getRegexPredicate(baseBranchPattern);
     if (isAllowedPred) {
       const matchingBranches = allBranches.filter(isAllowedPred);
       logger.debug(
-        `baseBranches regex "${baseBranch}" matches [${matchingBranches.join()}]`,
+        `baseBranchePatterns regex "${baseBranchPattern}" matches [${matchingBranches.join()}]`,
       );
       unfoldedList.push(...matchingBranches);
-    } else if (baseBranch === '$default') {
-      logger.debug(`baseBranches "$default" matches "${defaultBranch}"`);
+    } else if (baseBranchPattern === '$default') {
+      logger.debug(`baseBranchPatterns "$default" matches "${defaultBranch}"`);
       unfoldedList.push(defaultBranch);
     } else {
-      unfoldedList.push(baseBranch);
+      unfoldedList.push(baseBranchPattern);
     }
   }
 
   return [...new Set(unfoldedList)];
+}
+
+function isMultiBaseBranch(config: RenovateConfig): boolean {
+  if (!config.baseBranchPatterns?.length) {
+    return false;
+  }
+
+  return (
+    config.baseBranchPatterns.length > 1 ||
+    config.baseBranchPatterns[0].startsWith('/')
+  );
 }
 
 export async function extractDependencies(
@@ -122,52 +148,103 @@ export async function extractDependencies(
     branchList: [],
     packageFiles: {},
   };
-  if (GlobalConfig.get('platform') !== 'local' && config.baseBranches?.length) {
+  if (
+    GlobalConfig.get('platform') !== 'local' &&
+    config.baseBranchPatterns?.length
+  ) {
     config.baseBranches = unfoldBaseBranches(
       config.defaultBranch!,
-      config.baseBranches,
+      config.baseBranchPatterns,
     );
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
-    for (const baseBranch of config.baseBranches) {
-      addMeta({ baseBranch });
+    await instrument(
+      'extract',
+      async () => {
+        for (const baseBranch of config.baseBranches!) {
+          addMeta({ baseBranch });
 
-      if (scm.syncForkWithUpstream) {
-        await scm.syncForkWithUpstream(baseBranch);
-      }
-      if (await scm.branchExists(baseBranch)) {
-        const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
-        extracted[baseBranch] = await extract(baseBranchConfig, overwriteCache);
-      } else {
-        logger.warn({ baseBranch }, 'Base branch does not exist - skipping');
-      }
-    }
-    addSplit('extract');
-    for (const baseBranch of config.baseBranches) {
-      if (await scm.branchExists(baseBranch)) {
-        addMeta({ baseBranch });
-        const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
-        const packageFiles = extracted[baseBranch];
-        const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
-        res.branches = res.branches.concat(baseBranchRes?.branches);
-        res.branchList = res.branchList.concat(baseBranchRes?.branchList);
-        if (!res.packageFiles || !Object.keys(res.packageFiles).length) {
-          // Use the first branch
-          res.packageFiles = baseBranchRes?.packageFiles;
+          if (scm.syncForkWithUpstream) {
+            await scm.syncForkWithUpstream(baseBranch);
+          }
+          if (await scm.branchExists(baseBranch)) {
+            const baseBranchConfig = await getBaseBranchConfig(
+              baseBranch,
+              config,
+            );
+            extracted[baseBranch] = await extract(
+              baseBranchConfig,
+              overwriteCache,
+            );
+          } else {
+            logger.warn(
+              { baseBranch },
+              'Base branch does not exist - skipping',
+            );
+          }
         }
-      }
-    }
+      },
+      {
+        attributes: {
+          [ATTR_RENOVATE_SPLIT]: 'extract',
+        },
+      },
+    );
+    addSplit('extract');
+    await instrument(
+      'lookup',
+      async () => {
+        for (const baseBranch of config.baseBranches!) {
+          if (await scm.branchExists(baseBranch)) {
+            addMeta({ baseBranch });
+            const baseBranchConfig = await getBaseBranchConfig(
+              baseBranch,
+              config,
+            );
+            const packageFiles = extracted[baseBranch];
+            const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
+            res.branches = res.branches.concat(baseBranchRes?.branches);
+            res.branchList = res.branchList.concat(baseBranchRes?.branchList);
+            if (!res.packageFiles || !Object.keys(res.packageFiles).length) {
+              // Use the first branch
+              res.packageFiles = baseBranchRes?.packageFiles;
+            }
+          }
+        }
+      },
+      {
+        attributes: {
+          [ATTR_RENOVATE_SPLIT]: 'lookup',
+        },
+      },
+    );
     removeMeta(['baseBranch']);
   } else {
     logger.debug('No baseBranches');
-    const packageFiles = await extract(config, overwriteCache);
+    const packageFiles = await instrument(
+      'extract',
+      async () => await extract(config, overwriteCache),
+      {
+        attributes: {
+          [ATTR_RENOVATE_SPLIT]: 'extract',
+        },
+      },
+    );
     addSplit('extract');
     if (GlobalConfig.get('dryRun') === 'extract') {
       res.packageFiles = packageFiles;
       logger.info({ packageFiles }, 'Extracted dependencies');
       return res;
     }
-    res = await lookup(config, packageFiles);
+    res = await instrument(
+      'lookup',
+      async () => await lookup(config, packageFiles),
+      {
+        attributes: {
+          [ATTR_RENOVATE_SPLIT]: 'lookup',
+        },
+      },
+    );
   }
   addSplit('lookup');
   return res;

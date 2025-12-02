@@ -1,6 +1,7 @@
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import { HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
@@ -9,6 +10,7 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { GalaxyV3, GalaxyV3DetailedVersion, GalaxyV3Versions } from './schema';
 
+const ansibleProtocolRegex = regEx(/^\S+\/api\/ansible\/.+/);
 const repositoryRegex = regEx(
   /^\S+\/api\/galaxy\/content\/(?<repository>[^/]+)/,
 );
@@ -45,29 +47,17 @@ export class GalaxyCollectionDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const [namespace, projectName] = packageName.split('.');
-
-    const repository =
-      repositoryRegex.exec(registryUrl!)?.groups?.repository ?? 'published';
-
-    const baseUrl = ensureTrailingSlash(
-      joinUrlParts(
-        registryUrl!,
-        'v3/plugin/ansible/content',
-        repository,
-        'collections/index',
-        namespace,
-        projectName,
-      ),
-    );
+    const baseUrl = this.constructBaseUrl(registryUrl!, packageName);
 
     const { val: baseProject, err: baseErr } = await this.http
       .getJsonSafe(baseUrl, GalaxyV3)
       .onError((err) => {
-        logger.warn(
-          { url: baseUrl, datasource: this.id, packageName, err },
-          'Error fetching from url',
-        );
+        if (!(err instanceof HttpError && err.response?.statusCode === 404)) {
+          logger.warn(
+            { url: baseUrl, datasource: this.id, packageName, err },
+            'Error fetching from url',
+          );
+        }
       })
       .unwrap();
     if (baseErr) {
@@ -104,7 +94,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     );
 
     // filter failed versions
-    const filteredReleases = enrichedReleases.filter(is.truthy);
+    const filteredReleases = enrichedReleases.filter(isTruthy);
     // extract base information which are only provided on the release from the newest release
 
     // Find the source URL of the highest version release
@@ -116,6 +106,28 @@ export class GalaxyCollectionDatasource extends Datasource {
       releases: filteredReleases,
       sourceUrl: sourceUrlOfHighestRelease,
     };
+  }
+
+  constructBaseUrl(registryUrl: string, packageName: string): string {
+    const [namespace, projectName] = packageName.split('.');
+    if (ansibleProtocolRegex.test(registryUrl)) {
+      return ensureTrailingSlash(
+        joinUrlParts(registryUrl, 'api/v3/collections', namespace, projectName),
+      );
+    } else {
+      const repository =
+        repositoryRegex.exec(registryUrl)?.groups?.repository ?? 'published';
+      return ensureTrailingSlash(
+        joinUrlParts(
+          registryUrl,
+          'v3/plugin/ansible/content',
+          repository,
+          'collections/index',
+          namespace,
+          projectName,
+        ),
+      );
+    }
   }
 
   @cache({

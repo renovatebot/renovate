@@ -6,6 +6,14 @@ export interface NpmrcRules {
   packageRules: PackageRule[];
 }
 
+export interface NpmAttestations {
+  url?: string;
+}
+
+export interface NpmDistribution {
+  attestations?: NpmAttestations;
+}
+
 export interface NpmResponseVersion {
   repository?: {
     url: string;
@@ -17,6 +25,7 @@ export interface NpmResponseVersion {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   engines?: Record<string, string>;
+  dist?: NpmDistribution;
 }
 
 export interface NpmResponse {

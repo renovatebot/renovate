@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isEmptyObject, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { z } from 'zod';
 import {
@@ -101,7 +101,7 @@ function getAuthJson(): string | null {
     }
   }
 
-  return is.emptyObject(authJson) ? null : JSON.stringify(authJson);
+  return isEmptyObject(authJson) ? null : JSON.stringify(authJson);
 }
 
 export async function updateArtifacts({
@@ -186,10 +186,13 @@ export async function updateArtifacts({
                 ? quote(`${dep.depName}:${dep.newVersion}`)
                 : quote(dep.depName!),
             )
-            .filter(is.string)
+            .filter(isString)
             .map((dep) => quote(dep))
             .join(' ')
-        ).trim() + ' --with-dependencies';
+        ).trim() +
+        (config.postUpdateOptions?.includes('composerWithAll')
+          ? ' --with-all-dependencies'
+          : ' --with-dependencies');
     }
     args += getComposerUpdateArguments(config, composerToolConstraint);
     logger.trace({ cmd, args }, 'composer command');

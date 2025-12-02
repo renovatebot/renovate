@@ -43,3 +43,8 @@ name = "unicode-ident"
 version = "1.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "301abaae475aa91687eb82514b328ab47a211a533026cb25fc3e519b86adfc3c"
+
+[[package]]
+name = "git_dep"
+version = "0.1.0"
+source = "git+https://git@github.com/foo/bar.git?tag=0.1.0#c16f71cd6376d56ddeee6856f1e294fe4d2a0bae"

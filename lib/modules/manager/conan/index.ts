@@ -13,7 +13,6 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)conanfile\\.(txt|py)$/'],
   datasource: ConanDatasource.id,
   versioning: conan.id,
-  enabled: false, // See https://github.com/renovatebot/renovate/issues/14170
 };
 
 export const supportedDatasources = [ConanDatasource.id];

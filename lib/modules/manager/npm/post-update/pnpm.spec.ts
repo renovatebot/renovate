@@ -14,6 +14,23 @@ vi.mock('./node-version');
 delete process.env.NPM_CONFIG_CACHE;
 process.env.CONTAINERBASE = 'true';
 
+function mockPnpmFiles(workspaceFileContent?: string) {
+  fs.getSiblingFileName.mockReturnValue('some-folder/pnpm-workspace.yaml');
+  fs.readLocalFile.mockImplementation((fileName: string): Promise<string> => {
+    if (fileName === 'some-folder/pnpm-lock.yaml') {
+      return Promise.resolve('package-lock-contents');
+    }
+    if (
+      fileName === 'some-folder/pnpm-workspace.yaml' &&
+      workspaceFileContent
+    ) {
+      return Promise.resolve(workspaceFileContent);
+    }
+    return Promise.resolve('unexpected file name');
+  });
+  fs.localPathExists.mockResolvedValueOnce(workspaceFileContent !== undefined); // pnpm-workspace.yaml
+}
+
 describe('modules/manager/npm/post-update/pnpm', () => {
   let config: PostUpdateConfig;
   const upgrades: Upgrade[] = [{}];
@@ -100,10 +117,15 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     ]);
   });
 
-  it('performs lock file updates for workspace with --recursive', async () => {
+  it('performs lock file updates for workspace with packages', async () => {
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValue('package-lock-contents');
-    fs.localPathExists.mockResolvedValueOnce(true); // pnpm-workspace.yaml
+    mockPnpmFiles(
+      codeBlock`
+        packages:
+          - pkg-a
+      `,
+    );
+
     const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
       { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: true },
       {
@@ -112,11 +134,126 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         isLockfileUpdate: true,
       },
     ]);
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'pnpm update --no-save some-dep@1.0.1 some-other-dep@1.1.0 --lockfile-only --recursive --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
+  });
+
+  it('performs lock file updates for workspace with packages using pnpm 10.x', async () => {
+    const execSnapshots = mockExecAll();
+    mockPnpmFiles(
+      codeBlock`
+        packages:
+          - pkg-a
+          - pkg-b
+      `,
+    );
+    const res = await pnpmHelper.generateLockFile(
+      'some-folder',
+      {},
+      { ...config, constraints: { pnpm: '10.x' } },
+      [
+        {
+          packageName: 'some-dep',
+          newVersion: '1.0.1',
+          isLockfileUpdate: true,
+        },
+        {
+          packageName: 'some-other-dep',
+          newVersion: '1.1.0',
+          isLockfileUpdate: true,
+        },
+      ],
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm update --no-save some-dep@1.0.1 some-other-dep@1.1.0 --lockfile-only --recursive --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
+  });
+
+  it('performs lock file updates for non workspace using pnpm 10.x', async () => {
+    const execSnapshots = mockExecAll();
+    mockPnpmFiles(); // no workspace file
+    const res = await pnpmHelper.generateLockFile(
+      'some-folder',
+      {},
+      { ...config, constraints: { pnpm: '10.x' } },
+      [
+        {
+          packageName: 'some-dep',
+          newVersion: '1.0.1',
+          isLockfileUpdate: true,
+        },
+        {
+          packageName: 'some-other-dep',
+          newVersion: '1.1.0',
+          isLockfileUpdate: true,
+        },
+      ],
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm update --no-save some-dep@1.0.1 some-other-dep@1.1.0 --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
+  });
+
+  it('performs lock file updates for workspace with empty package list', async () => {
+    const execSnapshots = mockExecAll();
+    mockPnpmFiles(codeBlock`packages: []`);
+    const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
+      {
+        packageName: 'some-dep',
+        newVersion: '1.0.1',
+        isLockfileUpdate: true,
+      },
+      {
+        packageName: 'some-other-dep',
+        newVersion: '1.1.0',
+        isLockfileUpdate: true,
+      },
+    ]);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm update --no-save some-dep@1.0.1 some-other-dep@1.1.0 --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
+  });
+
+  it('performs lock file updates for workspace with config but no package list', async () => {
+    const execSnapshots = mockExecAll();
+    mockPnpmFiles(codeBlock`
+      overrides:
+        "foo@1.0.0>bar": "-"
+`);
+    const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
+      {
+        packageName: 'some-dep',
+        newVersion: '1.0.1',
+        isLockfileUpdate: true,
+      },
+      {
+        packageName: 'some-other-dep',
+        newVersion: '1.1.0',
+        isLockfileUpdate: true,
+      },
+    ]);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm update --no-save some-dep@1.0.1 some-other-dep@1.1.0 --lockfile-only --ignore-scripts --ignore-pnpmfile',
       },
     ]);
   });
@@ -179,7 +316,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
       },
       {
-        cmd: 'pnpm dedupe --config.ignore-scripts=true',
+        cmd: 'pnpm dedupe --ignore-scripts',
       },
     ]);
   });
@@ -414,6 +551,32 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       { cmd: 'install-tool pnpm 6.0.0' },
       {
         cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
+  });
+
+  it('allows pnpmfile even if ignoring scripts', async () => {
+    GlobalConfig.set({
+      localDir: '',
+      cacheDir: '/tmp',
+      binarySource: 'install',
+      allowScripts: true,
+    });
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const res = await pnpmHelper.generateLockFile(
+      'some-dir',
+      {},
+      { ...config, constraints: { pnpm: '6.0.0' }, ignoreScripts: true },
+      upgrades,
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0' },
+      { cmd: 'install-tool pnpm 6.0.0' },
+      {
+        cmd: 'pnpm install --lockfile-only --ignore-scripts',
       },
     ]);
   });

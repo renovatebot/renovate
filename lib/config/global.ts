@@ -2,42 +2,45 @@ import type { RenovateConfig, RepoGlobalConfig } from './types';
 
 export class GlobalConfig {
   // TODO: once global config work is complete, add a test to make sure this list includes all options with globalOnly=true (#9603)
-  private static readonly OPTIONS: (keyof RepoGlobalConfig)[] = [
-    'allowedCommands',
-    'allowedEnv',
+  static OPTIONS: readonly (keyof RepoGlobalConfig)[] = [
     'allowCustomCrateRegistries',
-    'allowedHeaders',
     'allowPlugins',
     'allowScripts',
+    'allowedCommands',
+    'allowedEnv',
+    'allowedHeaders',
+    'allowedUnsafeExecutions',
+    'autodiscoverRepoOrder',
+    'autodiscoverRepoSort',
     'binarySource',
     'cacheDir',
     'cacheHardTtlMinutes',
+    'cachePrivatePackages',
     'cacheTtlOverride',
     'containerbaseDir',
     'customEnvVariables',
     'dockerChildPrefix',
     'dockerCliOptions',
+    'dockerMaxPages',
     'dockerSidecarImage',
     'dockerUser',
     'dryRun',
     'encryptedWarning',
-    'exposeAllEnv',
+    'endpoint',
     'executionTimeout',
+    'exposeAllEnv',
+    'gitTimeout',
     'githubTokenWarn',
+    'httpCacheTtlDays',
+    'ignorePrAuthor',
+    'includeMirrors',
     'localDir',
     'migratePresets',
-    'presetCachePersistence',
-    'gitTimeout',
     'platform',
-    'endpoint',
-    'httpCacheTtlDays',
-    'autodiscoverRepoSort',
-    'autodiscoverRepoOrder',
-    'userAgent',
-    'dockerMaxPages',
+    'presetCachePersistence',
     's3Endpoint',
     's3PathStyle',
-    'cachePrivatePackages',
+    'userAgent',
   ];
 
   private static config: RepoGlobalConfig = {};
@@ -59,7 +62,7 @@ export class GlobalConfig {
       : GlobalConfig.config;
   }
 
-  static set(config: RenovateConfig | RepoGlobalConfig): RenovateConfig {
+  static set(config: RenovateConfig & RepoGlobalConfig): RenovateConfig {
     GlobalConfig.reset();
 
     const result = { ...config };

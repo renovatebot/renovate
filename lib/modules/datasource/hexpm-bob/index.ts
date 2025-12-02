@@ -1,8 +1,9 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
+import { regEx } from '../../../util/regex';
 import { asTimestamp } from '../../../util/timestamp';
 import { id as semverId } from '../../versioning/semver';
 import { Datasource } from '../datasource';
@@ -63,7 +64,7 @@ export class HexpmBobDatasource extends Datasource {
       result.releases = body
         .split('\n')
         .map((line) => line.trim())
-        .filter(is.nonEmptyString)
+        .filter(isNonEmptyString)
         .map((line) => {
           const [version, gitRef, buildDate] = line.split(' ');
 
@@ -109,7 +110,7 @@ export class HexpmBobDatasource extends Datasource {
   private static isStable(version: string, packageType: PackageType): boolean {
     switch (packageType) {
       case 'elixir':
-        return /^v\d+\.\d+\.\d+($|-otp)/.test(version);
+        return regEx(/^v\d+\.\d+\.\d+($|-otp)/).test(version);
       case 'erlang':
         return version.startsWith('OTP-');
     }

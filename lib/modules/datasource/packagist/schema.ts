@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isUndefined } from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger';
 import { LooseArray, LooseRecord } from '../../../util/schema-utils';
@@ -25,12 +25,12 @@ export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
         continue;
       }
 
-      if (!is.undefined(val)) {
+      if (!isUndefined(val)) {
         prevVals[key] = val;
         continue;
       }
 
-      if (!is.undefined(prevVals[key])) {
+      if (!isUndefined(prevVals[key])) {
         x[key] = prevVals[key];
         continue;
       }
@@ -42,7 +42,7 @@ export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
 export type MinifiedArray = z.infer<typeof MinifiedArray>;
 
 export const ComposerRelease = z.object({
-  version: z.string(),
+  version: z.union([z.string(), z.number().transform((v) => v.toString())]),
   homepage: z.string().nullable().catch(null),
   source: z.object({ url: z.string() }).nullable().catch(null),
   time: MaybeTimestamp,

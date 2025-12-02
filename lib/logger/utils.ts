@@ -1,9 +1,23 @@
 import { Stream } from 'node:stream';
-import is from '@sindresorhus/is';
+import {
+  isArray,
+  isBuffer,
+  isDate,
+  isEmptyObject,
+  isError,
+  isFunction,
+  isNonEmptyObject,
+  isNonEmptyStringAndNotWhitespace,
+  isObject,
+  isPlainObject,
+  isString,
+  isUndefined,
+} from '@sindresorhus/is';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { RequestError as HttpError } from 'got';
 import { ZodError } from 'zod';
+import { ExecError } from '../util/exec/exec-error';
 import { regEx } from '../util/regex';
 import { redactedFields, sanitize } from '../util/sanitize';
 import type { BunyanRecord, BunyanStream } from './types';
@@ -57,12 +71,12 @@ type ZodShortenedIssue =
     };
 
 export function prepareZodIssues(input: unknown): ZodShortenedIssue {
-  if (!is.plainObject(input)) {
+  if (!isPlainObject(input)) {
     return null;
   }
 
   let err: null | string | string[] = null;
-  if (is.array(input._errors, is.string)) {
+  if (isArray(input._errors, isString)) {
     if (input._errors.length === 1) {
       err = input._errors[0];
     } else if (input._errors.length > 1) {
@@ -73,7 +87,7 @@ export function prepareZodIssues(input: unknown): ZodShortenedIssue {
   }
   delete input._errors;
 
-  if (is.emptyObject(input)) {
+  if (isEmptyObject(input)) {
     return err;
   }
 
@@ -128,6 +142,16 @@ export default function prepareError(err: Error): Record<string, unknown> {
     response.stack = err.stack;
   }
 
+  if (err instanceof AggregateError) {
+    response.errors = err.errors.map((error) => prepareError(error));
+  }
+
+  // handle rawExec error
+  if (err instanceof ExecError && isNonEmptyObject(err.options?.env)) {
+    const env = Object.keys(err.options.env);
+    response.options = { ...err.options, env };
+  }
+
   // handle got error
   if (err instanceof HttpError) {
     const options: Record<string, unknown> = {
@@ -163,35 +187,35 @@ export default function prepareError(err: Error): Record<string, unknown> {
 type NestedValue = unknown[] | object;
 
 function isNested(value: unknown): value is NestedValue {
-  return is.array(value) || is.object(value);
+  return isArray(value) || isObject(value);
 }
 
 export function sanitizeValue(
   value: unknown,
   seen = new WeakMap<NestedValue, unknown>(),
 ): any {
-  if (is.string(value)) {
+  if (isString(value)) {
     return sanitize(sanitizeUrls(value));
   }
 
-  if (is.date(value)) {
+  if (isDate(value)) {
     return value;
   }
 
-  if (is.function(value)) {
+  if (isFunction(value)) {
     return '[function]';
   }
 
-  if (is.buffer(value)) {
+  if (isBuffer(value)) {
     return '[content]';
   }
 
-  if (is.error(value)) {
+  if (isError(value)) {
     const err = prepareError(value);
     return sanitizeValue(err, seen);
   }
 
-  if (is.array(value)) {
+  if (isArray(value)) {
     const length = value.length;
     const arrayResult = Array(length);
     seen.set(value, arrayResult);
@@ -205,7 +229,7 @@ export function sanitizeValue(
     return arrayResult;
   }
 
-  if (is.object(value)) {
+  if (isObject(value)) {
     const objectResult: Record<string, any> = {};
     seen.set(value, objectResult);
     for (const [key, val] of Object.entries<any>(value)) {
@@ -214,7 +238,7 @@ export function sanitizeValue(
         curValue = val;
       } else if (redactedFields.includes(key)) {
         // Do not mask/sanitize secrets templates
-        if (is.string(val) && regEx(/^{{\s*secrets\..*}}$/).test(val)) {
+        if (isString(val) && regEx(/^{{\s*secrets\..*}}$/).test(val)) {
           curValue = val;
         } else {
           curValue = '***********';
@@ -230,7 +254,8 @@ export function sanitizeValue(
         curValue = seen.has(val) ? seen.get(val) : sanitizeValue(val, seen);
       }
 
-      objectResult[key] = curValue;
+      const sanitizedKey = sanitizeValue(key, seen);
+      objectResult[sanitizedKey] = curValue;
     }
 
     return objectResult;
@@ -255,7 +280,10 @@ export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
       const result =
         streamConfig.type === 'raw'
           ? raw
-          : JSON.stringify(raw, bunyan.safeCycles()).replace(/\n?$/, '\n'); // TODO #12874
+          : JSON.stringify(raw, bunyan.safeCycles()).replace(
+              regEx(/\n?$/),
+              '\n',
+            );
       stream.write(result, enc, cb);
     };
 
@@ -298,8 +326,8 @@ export function validateLogLevel(
   ];
 
   if (
-    is.undefined(logLevelToCheck) ||
-    (is.string(logLevelToCheck) &&
+    isUndefined(logLevelToCheck) ||
+    (isString(logLevelToCheck) &&
       allowedValues.includes(logLevelToCheck as bunyan.LogLevelString))
   ) {
     // log level is in the allowed values or its undefined
@@ -335,18 +363,18 @@ export function sanitizeUrls(text: string): string {
 export function getEnv(key: string): string | undefined {
   return [process.env[`RENOVATE_${key}`], process.env[key]]
     .map((v) => v?.toLowerCase().trim())
-    .find(is.nonEmptyStringAndNotWhitespace);
+    .find(isNonEmptyStringAndNotWhitespace);
 }
 
 export function getMessage(
   p1: string | Record<string, any>,
   p2?: string,
 ): string | undefined {
-  return is.string(p1) ? p1 : p2;
+  return isString(p1) ? p1 : p2;
 }
 
 export function toMeta(
   p1: string | Record<string, any>,
 ): Record<string, unknown> {
-  return is.object(p1) ? p1 : {};
+  return isObject(p1) ? p1 : {};
 }

@@ -5,7 +5,7 @@ import * as hostRules from '../../../util/host-rules';
 import type { HttpOptions } from '../../../util/http/types';
 import { id as versioning } from '../../versioning/loose';
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import {
   AzurePipelinesFallbackTasks,
   AzurePipelinesJSON,
@@ -67,13 +67,17 @@ export class AzurePipelinesTasksDatasource extends Datasource {
         })
         .sort(AzurePipelinesTasksDatasource.compareSemanticVersions('version'))
         .forEach((task) => {
-          result.releases.push({
+          const release: Release = {
             version: `${task.version!.major}.${task.version!.minor}.${task.version!.patch}`,
+            changelogContent: task.releaseNotes,
             isDeprecated: task.deprecated,
-            changelogUrl: task.serverOwned
-              ? BUILT_IN_TASKS_CHANGELOG_URL
-              : undefined,
-          });
+          };
+
+          if (task.serverOwned) {
+            release.changelogUrl = BUILT_IN_TASKS_CHANGELOG_URL;
+          }
+
+          result.releases.push(release);
         });
 
       return result;

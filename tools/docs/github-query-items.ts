@@ -29,7 +29,7 @@ export interface Items {
   features: ItemsEntity[];
 }
 
-const GhOutputSchema = z.array(
+const GhOutput = z.array(
   z.object({
     url: z.string(),
     title: z.string(),
@@ -47,7 +47,7 @@ async function getIssuesByIssueType(
 ): Promise<ItemsEntity[]> {
   const command = `gh issue list --json "title,number,url,labels" --search "type:${issueType}" --limit 1000`;
   const execRes = await exec(command);
-  const res = GhOutputSchema.safeParse(JSON.parse(execRes.stdout));
+  const res = GhOutput.safeParse(JSON.parse(execRes.stdout));
   if (res.error) {
     throw res.error;
   }

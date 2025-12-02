@@ -2,7 +2,7 @@ import type { SimpleGit } from 'simple-git';
 import { simpleGit } from 'simple-git';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
-import { join } from 'upath';
+import upath from 'upath';
 import { mock } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -37,7 +37,7 @@ describe('modules/manager/git-submodules/update', () => {
       upgrade = { depName: 'renovate' };
 
       tmpDir = await dir({ unsafeCleanup: true });
-      adminConfig = { localDir: join(tmpDir.path) };
+      adminConfig = { localDir: upath.join(tmpDir.path) };
       GlobalConfig.set(adminConfig);
     });
 
@@ -81,7 +81,7 @@ describe('modules/manager/git-submodules/update', () => {
         upgrade,
       });
       expect(update).toBe('');
-      expect(gitMock.env).toHaveBeenCalledWith({
+      const variables = {
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.https://ssh:abc123@github.com/.insteadOf',
         GIT_CONFIG_KEY_1: 'url.https://git:abc123@github.com/.insteadOf',
@@ -89,7 +89,10 @@ describe('modules/manager/git-submodules/update', () => {
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
-      });
+      };
+      expect(gitMock.env).toHaveBeenCalledTimes(2);
+      expect(gitMock.env).toHaveBeenNthCalledWith(1, variables);
+      expect(gitMock.env).toHaveBeenNthCalledWith(2, variables);
     });
 
     it('update gitmodule branch value if value changed', async () => {
@@ -112,7 +115,7 @@ describe('modules/manager/git-submodules/update', () => {
         upgrade,
       });
       expect(update).toBe(updatedGitModules);
-      expect(gitMock.subModule).toHaveBeenCalledWith([
+      expect(gitMock.subModule).toHaveBeenCalledExactlyOnceWith([
         'set-branch',
         '--branch',
         'v0.0.2',
@@ -158,7 +161,7 @@ describe('modules/manager/git-submodules/update', () => {
         upgrade,
       });
       expect(update).toBe('');
-      expect(gitMock.env).toHaveBeenCalledWith({
+      const variables = {
         GIT_CONFIG_COUNT: '6',
         GIT_CONFIG_KEY_0:
           'url.https://git-refs-user:git-refs-password@gitrefs.com/.insteadOf',
@@ -178,7 +181,10 @@ describe('modules/manager/git-submodules/update', () => {
         GIT_CONFIG_VALUE_3: 'ssh://git@gittags.com/',
         GIT_CONFIG_VALUE_4: 'git@gittags.com:',
         GIT_CONFIG_VALUE_5: 'https://gittags.com/',
-      });
+      };
+      expect(gitMock.env).toHaveBeenCalledTimes(2);
+      expect(gitMock.env).toHaveBeenNthCalledWith(1, variables);
+      expect(gitMock.env).toHaveBeenNthCalledWith(2, variables);
     });
   });
 });

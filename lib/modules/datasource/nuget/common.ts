@@ -44,7 +44,7 @@ export function parseRegistryUrl(registryUrl: string): ParsedRegistryUrl {
   if (protocolVersionMatch) {
     const { protocol } = protocolVersionMatch;
     parsedUrl.hash = '';
-    protocolVersion = Number.parseInt(protocol, 10);
+    protocolVersion = Number.parseInt(protocol);
   } else if (parsedUrl.pathname.endsWith('.json')) {
     protocolVersion = 3;
   }

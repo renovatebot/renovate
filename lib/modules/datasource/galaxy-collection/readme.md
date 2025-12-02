@@ -6,7 +6,7 @@ Set your own registries by:
 - setting a `source` in your `requirements.yaml` file, _or_
 - writing a `packageRule` to set a new `registryURLs`
 
-Then you can use Renovate with a private automation hub.
+Then you can use Renovate with a private automation hub or an ansible repository on artifactory.
 
 ```yaml title="Example config for requirements.yaml"
 ---
@@ -24,7 +24,8 @@ collections:
       "registryUrls": [
         "https://hub.mydomain.com/api/galaxy/content/community/",
         "https://hub.mydomain.com/api/galaxy/content/certified/",
-        "https://hub.mydomain.com/api/galaxy/content/myprivaterepo/"
+        "https://hub.mydomain.com/api/galaxy/content/myprivaterepo/",
+        "https://mydomain.com/artifactory/api/ansible/myrepository/"
       ]
     }
   ]

@@ -364,7 +364,7 @@ describe('modules/datasource/npm/get', () => {
             "authorization": "Bearer XXX",
             "connection": "close",
             "host": "test.org",
-            "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+            "user-agent": "Renovate/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
           },
           "method": "GET",
           "status": 200,
@@ -512,7 +512,7 @@ describe('modules/datasource/npm/get', () => {
             "authorization": "Bearer XXX",
             "connection": "close",
             "host": "test.org",
-            "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+            "user-agent": "Renovate/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
           },
           "method": "GET",
           "status": 200,
@@ -554,7 +554,7 @@ describe('modules/datasource/npm/get', () => {
             "authorization": "Bearer XXX",
             "connection": "close",
             "host": "test.org",
-            "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+            "user-agent": "Renovate/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
           },
           "method": "GET",
           "status": 200,
@@ -596,7 +596,15 @@ describe('modules/datasource/npm/get', () => {
 
       expect(dep).toEqual({
         registryUrl: 'https://example.com',
-        releases: [{ version: '1.0.0' }],
+        releases: [
+          {
+            attestation: false,
+            dependencies: undefined,
+            devDependencies: undefined,
+            gitRef: undefined,
+            version: '1.0.0',
+          },
+        ],
         sourceDirectory: 'packages/foo',
         sourceUrl:
           'https://github.com/octocat/Hello-World/tree/master/packages/test',
@@ -622,7 +630,15 @@ describe('modules/datasource/npm/get', () => {
 
       expect(dep).toEqual({
         registryUrl: 'https://example.com',
-        releases: [{ version: '1.0.0' }],
+        releases: [
+          {
+            attestation: false,
+            dependencies: undefined,
+            devDependencies: undefined,
+            gitRef: undefined,
+            version: '1.0.0',
+          },
+        ],
         sourceDirectory: 'packages/foo',
         sourceUrl:
           'https://github.com/octocat/Hello-World/tree/master/packages/test',
@@ -648,7 +664,15 @@ describe('modules/datasource/npm/get', () => {
 
       expect(dep).toEqual({
         registryUrl: 'https://example.com',
-        releases: [{ version: '1.0.0' }],
+        releases: [
+          {
+            attestation: false,
+            dependencies: undefined,
+            devDependencies: undefined,
+            gitRef: undefined,
+            version: '1.0.0',
+          },
+        ],
         sourceDirectory: 'packages/foo',
         sourceUrl:
           'https://github.com/octocat/Hello-World/tree/master/packages/test',

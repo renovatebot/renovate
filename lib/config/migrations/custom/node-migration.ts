@@ -5,11 +5,11 @@ export class NodeMigration extends AbstractMigration {
   override readonly propertyName = 'node';
 
   override run(value: unknown): void {
-    const node = this.get('node') as RenovateConfig;
+    const node = this.get('node')!;
     if ((value as RenovateConfig).enabled === true) {
       // validated non-null
       delete node.enabled;
-      const travis = (this.get('travis') ?? {}) as RenovateConfig;
+      const travis = this.get('travis') ?? {};
       travis.enabled = true;
       if (Object.keys(node).length) {
         this.rewrite(node);

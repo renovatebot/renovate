@@ -13,7 +13,6 @@ import { logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
 import { coerceArray } from '../../../util/array';
 import { parseJson } from '../../../util/common';
-import { getEnv } from '../../../util/env';
 import * as git from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -53,7 +52,11 @@ interface Config {
 
 export const id = 'codecommit';
 
-export const config: Config = {};
+const platformConfig = {
+  endpoint: 'https://git-codecommit.us-east-1.amazonaws.com',
+};
+
+let config: Config = {} as any;
 
 export async function initPlatform({
   endpoint,
@@ -63,7 +66,7 @@ export async function initPlatform({
 }: PlatformParams): Promise<PlatformResult> {
   const accessKeyId = username;
   const secretAccessKey = password;
-  const env = getEnv();
+  const env = process.env;
   let region: string | undefined;
 
   if (accessKeyId) {
@@ -92,21 +95,22 @@ export async function initPlatform({
   // To check if we have permission to codecommit, throws exception if failed.
   await client.listRepositories();
 
-  const platformConfig: PlatformResult = {
-    endpoint:
-      endpoint ??
-      `https://git-codecommit.${env.AWS_REGION ?? 'us-east-1'}.amazonaws.com/`,
+  platformConfig.endpoint =
+    endpoint ??
+    `https://git-codecommit.${env.AWS_REGION ?? 'us-east-1'}.amazonaws.com/`;
+
+  const platformResult: PlatformResult = {
+    endpoint: platformConfig.endpoint,
   };
-  return Promise.resolve(platformConfig);
+  return platformResult;
 }
 
 export async function initRepo({
   repository,
-  endpoint,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
 
-  config.repository = repository;
+  config = { repository } as Config;
 
   let repo;
   try {
@@ -143,7 +147,10 @@ export async function initRepo({
   logger.debug(`${repository} default branch = ${defaultBranch}`);
 
   return {
-    repoFingerprint: repoFingerprint(metadata.repositoryId, endpoint),
+    repoFingerprint: repoFingerprint(
+      metadata.repositoryId,
+      platformConfig.endpoint,
+    ),
     defaultBranch,
     isFork: false,
   };
@@ -438,7 +445,7 @@ export async function updatePr({
 }
 
 // Auto-Merge not supported currently.
-/* v8 ignore start */
+/* v8 ignore next */
 export async function mergePr({
   branchName,
   id: prNo,
@@ -448,17 +455,17 @@ export async function mergePr({
   await client.getPr(`${prNo}`);
   return Promise.resolve(false);
   //
-  // /* v8 ignore start */
+  // /* v8 ignore next */
   // if (!prOut) {
   //   return false;
-  // } /* v8 ignore stop */
+  // }
   // const pReq = prOut.pullRequest;
   // const targets = pReq?.pullRequestTargets;
   //
-  // /* v8 ignore start */
+  // /* v8 ignore next */
   // if (!targets) {
   //   return false;
-  // } /* v8 ignore stop */
+  // }
   //
   // if (strategy === 'rebase') {
   //   logger.warn('CodeCommit does not support a "rebase" strategy.');
@@ -513,7 +520,7 @@ export async function mergePr({
   //   logger.debug({ err }, 'Failed to set the PR as Closed.');
   //   return false;
   // }
-} /* v8 ignore stop */
+}
 
 export async function addReviewers(
   prNo: number,
@@ -533,54 +540,54 @@ export async function addReviewers(
   }
 }
 
-/* v8 ignore start */
+/* v8 ignore next */
 export function addAssignees(iid: number, assignees: string[]): Promise<void> {
   // CodeCommit does not support adding reviewers
   return Promise.resolve();
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
+/* v8 ignore next */
 export function findIssue(title: string): Promise<Issue | null> {
   // CodeCommit does not have issues
   return Promise.resolve(null);
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
+/* v8 ignore next */
 export function ensureIssue({
   title,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   // CodeCommit does not have issues
   return Promise.resolve(null);
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
+/* v8 ignore next */
 export function getIssueList(): Promise<Issue[]> {
   // CodeCommit does not have issues
   return Promise.resolve([]);
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
+/* v8 ignore next */
 export function ensureIssueClosing(title: string): Promise<void> {
   // CodeCommit does not have issues
   return Promise.resolve();
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
+/* v8 ignore next */
 export function deleteLabel(prNumber: number, label: string): Promise<void> {
   return Promise.resolve();
-} /* v8 ignore stop */
+}
 
 // Returns the combined status for a branch.
-/* v8 ignore start */
+/* v8 ignore next */
 export function getBranchStatus(branchName: string): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   logger.debug(
     'returning branch status yellow, because getBranchStatus isnt supported on aws yet',
   );
   return Promise.resolve('yellow');
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
+/* v8 ignore next */
 export function getBranchStatusCheck(
   branchName: string,
   context: string,
@@ -590,9 +597,9 @@ export function getBranchStatusCheck(
     'returning null, because getBranchStatusCheck is not supported on aws yet',
   );
   return Promise.resolve(null);
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
+/* v8 ignore next */
 export function setBranchStatus({
   branchName,
   context,
@@ -601,7 +608,7 @@ export function setBranchStatus({
   url: targetUrl,
 }: BranchStatusConfig): Promise<void> {
   return Promise.resolve();
-} /* v8 ignore stop */
+}
 
 export async function ensureComment({
   number,

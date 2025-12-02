@@ -3,6 +3,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
 import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
+import { ForgejoTagsDatasource } from '../forgejo-tags';
 import { GitTagsDatasource } from '../git-tags';
 import { GiteaTagsDatasource } from '../gitea-tags';
 import { GithubTagsDatasource } from '../github-tags';
@@ -60,6 +61,7 @@ function filterByPrefix(packageName: string, releases: Release[]): Release[] {
 export class GoDirectDatasource extends Datasource {
   static readonly id = 'go-direct';
 
+  readonly forgejo = new ForgejoTagsDatasource();
   git: GitTagsDatasource;
   readonly gitea = new GiteaTagsDatasource();
   github: GithubTagsDatasource;
@@ -106,6 +108,10 @@ export class GoDirectDatasource extends Datasource {
     }
 
     switch (source.datasource) {
+      case ForgejoTagsDatasource.id: {
+        res = await this.forgejo.getReleases(source);
+        break;
+      }
       case GitTagsDatasource.id: {
         res = await this.git.getReleases(source);
         break;
@@ -137,7 +143,7 @@ export class GoDirectDatasource extends Datasource {
       return null;
     }
 
-    const sourceUrl = getSourceUrl(source) ?? null;
+    const sourceUrl = res.sourceUrl ?? getSourceUrl(source) ?? null;
 
     return {
       ...res,

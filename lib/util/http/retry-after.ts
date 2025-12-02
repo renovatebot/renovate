@@ -56,10 +56,9 @@ export async function wrapWithRetry<T>(
         `Retry-After: will retry ${url} after ${delaySeconds} seconds`,
       );
 
-      const delay = Promise.all([
-        hostDelays.get(key),
-        setTimeout(1000 * delaySeconds),
-      ]);
+      let hostDelay = hostDelays.get(key);
+      hostDelay ??= Promise.resolve();
+      const delay = Promise.all([hostDelay, setTimeout(1000 * delaySeconds)]);
       hostDelays.set(key, delay);
       retries += 1;
     }
@@ -102,7 +101,7 @@ export function getRetryAfter(err: unknown): number | null {
     return seconds;
   }
 
-  const seconds = parseInt(retryAfter, 10);
+  const seconds = parseInt(retryAfter);
   if (!Number.isNaN(seconds) && seconds >= 0) {
     return seconds;
   }

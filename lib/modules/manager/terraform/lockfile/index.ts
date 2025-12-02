@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import * as p from '../../../../util/promises';
 import { escapeRegExp, regEx } from '../../../../util/regex';
@@ -64,7 +64,7 @@ async function updateAllLocks(
     { concurrency: 4 },
   );
 
-  return updates.filter(is.truthy);
+  return updates.filter(isTruthy);
 }
 
 export function getNewConstraint(
@@ -171,7 +171,7 @@ export async function updateArtifacts({
         const updateLock = locks.find(
           (value) => value.packageName === packageName,
         );
-        // istanbul ignore if: needs test
+        /* v8 ignore next 4 -- needs test */
         if (!updateLock) {
           logger.debug(`Skipping. No lock found for "${packageName}"`);
           continue;
@@ -204,7 +204,7 @@ export async function updateArtifacts({
               registryUrl,
               updateLock.packageName,
               newVersion!,
-            )) ?? /* istanbul ignore next: needs test */ [],
+            )) ?? /* v8 ignore next: needs test */ [],
           ...updateLock,
         };
         updates.push(update);
@@ -222,7 +222,6 @@ export async function updateArtifacts({
     const res = writeLockUpdates(updates, lockFilePath, lockFileContent);
     return [res];
   } catch (err) {
-    /* istanbul ignore next */
     return [
       {
         artifactError: {

@@ -2,7 +2,7 @@ import { promisify } from 'node:util';
 import zlib, { constants } from 'node:zlib';
 import type { Database, Statement } from 'better-sqlite3';
 import { exists } from 'fs-extra';
-import * as upath from 'upath';
+import upath from 'upath';
 import { sqlite } from '../../../expose.cjs';
 import { logger } from '../../../logger';
 import { ensureDir } from '../../fs';
@@ -109,10 +109,10 @@ export class SqlitePackageCache {
     namespace: PackageCacheNamespace,
     key: string,
     value: unknown,
-    ttlMinutes = 5,
+    hardTtlMinutes = 5,
   ): Promise<void> {
     const data = await compress(value);
-    const ttlSeconds = ttlMinutes * 60;
+    const ttlSeconds = hardTtlMinutes * 60;
     this.upsertStatement.run({ namespace, key, data, ttlSeconds });
     return Promise.resolve();
   }

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import * as hostRules from '../../../../util/host-rules';
 import { regEx } from '../../../../util/regex';
@@ -48,7 +48,7 @@ export function processHostRules(): HostRulesResult {
 
     const matchedHost = hostRule.matchHost;
     // Should never be necessary as if we have a resolvedHost, there has to be a matchHost
-    // istanbul ignore next
+    /* v8 ignore next 4 */
     if (!matchedHost) {
       logger.debug('Skipping host rule without matchHost');
       continue;
@@ -84,7 +84,7 @@ export function processHostRules(): HostRulesResult {
       continue;
     }
 
-    if (is.string(hostRule.username) && is.string(hostRule.password)) {
+    if (isString(hostRule.username) && isString(hostRule.password)) {
       logger.debug(
         `Adding npmrc entry for ${cleanedUri} with username/password`,
       );

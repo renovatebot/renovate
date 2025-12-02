@@ -42,7 +42,7 @@ const DevboxEntry = z
     return dep;
   });
 
-export const DevboxSchema = Jsonc.pipe(
+export const Devbox = Jsonc.pipe(
   z.object({
     packages: z
       .union([

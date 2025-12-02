@@ -82,6 +82,7 @@ gohugo extended_0.104.3
 golang 1.23.3
 golangci-lint 1.52.2
 gomplate 3.11.7
+gotestsum 1.12.3
 hadolint 2.12.0
 haskell 9.4.2
 helm 3.10.1
@@ -99,11 +100,13 @@ kubebuilder 3.10.0
 kubectl 1.26.3
 kubetail 1.6.19
 kustomize 4.5.7
+localstack 4.5.0
 lua 5.4.4
 markdownlint-cli2 0.13.0
 maven 3.9.6
 mimirtool 2.11.0
 minikube 1.33.1
+mockery 3.5.1
 nim 1.6.8
 nodejs 18.12.0
 ocaml 4.14.0
@@ -407,6 +410,13 @@ dummy 1.2.3
             extractVersion: '^v(?<version>.+)',
           },
           {
+            currentValue: '1.12.3',
+            datasource: 'github-releases',
+            packageName: 'gotestyourself/gotestsum',
+            depName: 'gotestsum',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '2.12.0',
             datasource: 'github-tags',
             packageName: 'hadolint/hadolint',
@@ -523,6 +533,13 @@ dummy 1.2.3
             extractVersion: '^kustomize/v(?<version>\\S+)',
           },
           {
+            currentValue: '4.5.0',
+            datasource: 'github-tags',
+            packageName: 'localstack/localstack',
+            depName: 'localstack',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '5.4.4',
             datasource: 'github-releases',
             packageName: 'lua/lua',
@@ -554,6 +571,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'kubernetes/minikube',
             depName: 'minikube',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '3.5.1',
+            datasource: 'github-releases',
+            packageName: 'vektra/mockery',
+            depName: 'mockery',
             extractVersion: '^v(?<version>\\S+)',
           },
           {

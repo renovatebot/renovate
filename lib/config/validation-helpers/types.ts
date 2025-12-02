@@ -13,5 +13,6 @@ export interface CheckMatcherArgs {
 export interface CheckBaseBranchesArgs {
   resolvedRule: PackageRule;
   currentPath: string;
-  baseBranches?: string[];
+  /** user configurable base branch patterns*/
+  baseBranchPatterns?: string[];
 }

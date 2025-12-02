@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isPlainObject } from '@sindresorhus/is';
 import { HttpBase, type InternalJsonUnsafeOptions } from './http';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types';
 
@@ -12,11 +12,11 @@ export interface GiteaHttpOptions extends HttpOptions {
 }
 
 function getPaginationContainer<T = unknown>(body: unknown): T[] | null {
-  if (is.array(body) && body.length) {
+  if (isArray(body) && body.length) {
     return body as T[];
   }
 
-  if (is.plainObject(body) && is.array(body?.data) && body.data.length) {
+  if (isPlainObject(body) && isArray(body?.data) && body.data.length) {
     return body.data as T[];
   }
 
@@ -48,8 +48,8 @@ export class GiteaHttp extends HttpBase<GiteaHttpOptions> {
       opts.httpOptions.memCache = false;
 
       delete opts.httpOptions.paginate;
-      const total = parseInt(res.headers['x-total-count'] as string, 10);
-      let nextPage = parseInt(resolvedUrl.searchParams.get('page') ?? '1', 10);
+      const total = parseInt(res.headers['x-total-count'] as string);
+      let nextPage = parseInt(resolvedUrl.searchParams.get('page') ?? '1');
 
       while (total && pc.length < total) {
         nextPage += 1;

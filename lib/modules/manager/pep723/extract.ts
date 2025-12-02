@@ -1,7 +1,7 @@
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { PackageFileContent } from '../types';
-import { Pep723Schema } from './schema';
+import { Pep723 } from './schema';
 
 // Adapted regex from the Python reference implementation: https://packaging.python.org/en/latest/specifications/inline-script-metadata/#reference-implementation
 const regex = regEx(
@@ -26,7 +26,7 @@ export function extractPackageFile(
     .map((line) => line.substring(line.startsWith('# ') ? 2 : 1))
     .join('\n');
 
-  const { data: res, error } = Pep723Schema.safeParse(parsedToml);
+  const { data: res, error } = Pep723.safeParse(parsedToml);
 
   if (error) {
     logger.debug(

@@ -155,34 +155,12 @@ exports[`config/validation > validateConfig(config) > errors if manager objects 
 ]
 `;
 
-exports[`config/validation > validateConfig(config) > errors if managerFilePatterns has wrong parent 1`] = `
-[
-  {
-    "message": ""managerFilePatterns" may not be defined at the top level of a config and must instead be within a manager block",
-    "topic": "Config error",
-  },
-]
-`;
-
-exports[`config/validation > validateConfig(config) > errors if managerFilePatterns has wrong parent 2`] = `
-[
-  {
-    "message": ""managerFilePatterns" must be configured in a manager block and not here: npm.minor",
-    "topic": "Config warning",
-  },
-]
-`;
-
 exports[`config/validation > validateConfig(config) > ignore packageRule nesting validation for presets 1`] = `[]`;
 
 exports[`config/validation > validateConfig(config) > included managers of the wrong type 1`] = `
 [
   {
     "message": "Configuration option \`packageRules[0].matchManagers\` should be a list (Array)",
-    "topic": "Configuration Error",
-  },
-  {
-    "message": "packageRules: Managers should be type of List. You have included string.",
     "topic": "Configuration Error",
   },
 ]
@@ -251,7 +229,7 @@ exports[`config/validation > validateConfig(config) > validates regEx for each m
 exports[`config/validation > validateConfig(config) > warns if hostType has the wrong parent 1`] = `
 [
   {
-    "message": "hostType should only be configured within one of "hostRules" objects. Was found in .",
+    "message": ""hostType" can't be used in ".". Allowed objects: hostRules.",
     "topic": "hostType",
   },
 ]

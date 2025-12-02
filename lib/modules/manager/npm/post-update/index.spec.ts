@@ -200,7 +200,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       expect(fs.deleteLocalFile).not.toHaveBeenCalled();
-      expect(git.getFile).toHaveBeenCalledOnce();
+      expect(git.getFile).toHaveBeenCalledExactlyOnceWith('package-lock.json');
     });
 
     it('writes .npmrc files', async () => {
@@ -217,8 +217,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ],
       });
 
-      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
-      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+      expect(fs.writeLocalFile).toHaveBeenCalledExactlyOnceWith(
         'packages/core/.npmrc',
         '#dummy\n',
       );
@@ -241,8 +240,7 @@ describe('modules/manager/npm/post-update/index', () => {
         },
       );
 
-      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
-      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+      expect(fs.writeLocalFile).toHaveBeenCalledExactlyOnceWith(
         'packages/core/.npmrc',
         '#dummy\n',
       );
@@ -258,7 +256,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       expect(fs.deleteLocalFile).not.toHaveBeenCalled();
-      expect(git.getFile).toHaveBeenCalledOnce();
+      expect(git.getFile).toHaveBeenCalledExactlyOnceWith('package-lock.json');
     });
 
     it('has no npm files', async () => {
@@ -390,10 +388,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
     it('works', async () => {
       expect(
-        await getAdditionalFiles(
-          { ...updateConfig, updateLockFiles: true },
-          additionalFiles,
-        ),
+        await getAdditionalFiles({ ...updateConfig }, additionalFiles),
       ).toStrictEqual({
         artifactErrors: [],
         updatedArtifacts: [],
@@ -410,7 +405,7 @@ describe('modules/manager/npm/post-update/index', () => {
       });
       expect(
         await getAdditionalFiles(
-          { ...updateConfig, updateLockFiles: true, reuseExistingBranch: true },
+          { ...updateConfig, reuseExistingBranch: true },
           additionalFiles,
         ),
       ).toStrictEqual({
@@ -425,6 +420,7 @@ describe('modules/manager/npm/post-update/index', () => {
       });
 
       expect(fs.readLocalFile).toHaveBeenCalledWith('.npmrc', 'utf8');
+
       expect(fs.writeLocalFile).toHaveBeenCalledWith('.npmrc', '# dummy');
       expect(fs.deleteLocalFile.mock.calls).toMatchObject([
         ['randomFolder/.npmrc'],
@@ -451,7 +447,6 @@ describe('modules/manager/npm/post-update/index', () => {
           await getAdditionalFiles(
             {
               ...updateConfig,
-              updateLockFiles: true,
               reuseExistingBranch: true,
             },
             additionalFiles,
@@ -480,7 +475,6 @@ describe('modules/manager/npm/post-update/index', () => {
           await getAdditionalFiles(
             {
               ...updateConfig,
-              updateLockFiles: true,
               reuseExistingBranch: false,
               baseBranch: 'base',
             },
@@ -494,7 +488,7 @@ describe('modules/manager/npm/post-update/index', () => {
       spyYarn.mockResolvedValueOnce({ error: false, lockFile: '{}' });
       expect(
         await getAdditionalFiles(
-          { ...updateConfig, updateLockFiles: true, reuseExistingBranch: true },
+          { ...updateConfig, reuseExistingBranch: true },
           additionalFiles,
         ),
       ).toStrictEqual({
@@ -519,7 +513,6 @@ describe('modules/manager/npm/post-update/index', () => {
         await getAdditionalFiles(
           {
             ...updateConfig,
-            updateLockFiles: true,
             reuseExistingBranch: true,
             upgrades: [
               {
@@ -559,6 +552,37 @@ describe('modules/manager/npm/post-update/index', () => {
       });
     });
 
+    it('skip lock file updating', async () => {
+      expect(
+        await getAdditionalFiles(
+          {
+            ...updateConfig,
+            skipArtifactsUpdate: true,
+            reuseExistingBranch: true,
+            upgrades: [
+              {
+                depName: 'postcss',
+                isRemediation: true,
+                managerData: {
+                  npmLock: 'package-lock.json',
+                },
+                rangeStrategy: 'widen',
+              },
+            ],
+          },
+          additionalFiles,
+        ),
+      ).toStrictEqual({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      expect(spyNpm).not.toHaveBeenCalled();
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Skipping lock file generation',
+      );
+    });
+
     it('reuse existing up-to-date', async () => {
       expect(
         await getAdditionalFiles(
@@ -566,7 +590,6 @@ describe('modules/manager/npm/post-update/index', () => {
             ...baseConfig,
             reuseExistingBranch: true,
             upgrades: [{ isLockfileUpdate: true }],
-            updateLockFiles: true,
           },
           additionalFiles,
         ),
@@ -586,7 +609,6 @@ describe('modules/manager/npm/post-update/index', () => {
             upgrades: [{ isLockfileUpdate: false }],
             reuseExistingBranch: true,
             isLockFileMaintenance: true,
-            updateLockFiles: true,
           },
           additionalFiles,
         ),
@@ -599,10 +621,7 @@ describe('modules/manager/npm/post-update/index', () => {
     it('fails for npm', async () => {
       spyNpm.mockResolvedValueOnce({ error: true, stderr: 'some-error' });
       expect(
-        await getAdditionalFiles(
-          { ...updateConfig, updateLockFiles: true },
-          additionalFiles,
-        ),
+        await getAdditionalFiles({ ...updateConfig }, additionalFiles),
       ).toStrictEqual({
         artifactErrors: [
           { lockFile: 'package-lock.json', stderr: 'some-error' },
@@ -615,7 +634,7 @@ describe('modules/manager/npm/post-update/index', () => {
       spyYarn.mockResolvedValueOnce({ error: true, stdout: 'some-error' });
       expect(
         await getAdditionalFiles(
-          { ...updateConfig, updateLockFiles: true, reuseExistingBranch: true },
+          { ...updateConfig, reuseExistingBranch: true },
           additionalFiles,
         ),
       ).toStrictEqual({
@@ -630,7 +649,6 @@ describe('modules/manager/npm/post-update/index', () => {
         await getAdditionalFiles(
           {
             ...updateConfig,
-            updateLockFiles: true,
             upgrades: [
               {
                 isRemediation: true,
@@ -684,11 +702,11 @@ describe('modules/manager/npm/post-update/index', () => {
         await getAdditionalFiles(
           {
             ...updateConfig,
-            updateLockFiles: true,
             reuseExistingBranch: true,
           },
           additionalFiles,
         );
+
         expect(fs.writeLocalFile).toHaveBeenCalledWith(
           '.yarnrc.yml',
           'npmRegistries:\n' +
@@ -721,7 +739,6 @@ describe('modules/manager/npm/post-update/index', () => {
           getAdditionalFiles(
             {
               ...updateConfig,
-              updateLockFiles: true,
               reuseExistingBranch: true,
             },
             additionalFiles,

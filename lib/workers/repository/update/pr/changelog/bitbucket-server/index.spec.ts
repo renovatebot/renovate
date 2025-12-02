@@ -15,7 +15,6 @@ const apiBaseUrl = 'https://bitbucket.some.domain.org/rest/api/1.0/';
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
   branchName: '',
-  endpoint: apiBaseUrl,
   packageName: 'renovate',
   versioning: semverVersioning.id,
   currentVersion: '5.2.0',
@@ -219,6 +218,7 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
         changelogFile: 'packages/components/src/CHANGELOG.md',
         changelogMd: changelogMd + '\n#\n##',
       });
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Multiple candidates for changelog file, using packages/components/src/CHANGELOG.md`,
       );
@@ -245,6 +245,25 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
   });
 
   describe('source', () => {
+    describe('getBaseUrl', () => {
+      it.each`
+        sourceUrl                                                                     | expected
+        ${'https://bitbucket.some-host.org/projects/some-org/repos/some-repo'}        | ${'https://bitbucket.some-host.org/'}
+        ${'https://some-host.org/bitbucket/projects/some-org/repos/some-repo/browse'} | ${'https://some-host.org/bitbucket/'}
+        ${'https://some-host.org:7990/extra/path/projects/some-org/repos/some-repo/'} | ${'https://some-host.org:7990/extra/path/'}
+        ${'git+https://some-host.org:7990/scm/some-org/some-repo.git'}                | ${'https://some-host.org:7990/'}
+        ${'https://tools.domain.com/bitbucket/projects/mygroup/repos/my-library'}     | ${'https://tools.domain.com/bitbucket/'}
+        ${'some-random-value'}                                                        | ${''}
+      `('$sourceUrl', ({ sourceUrl, expected }) => {
+        expect(
+          changelogSource.getBaseUrl({
+            ...upgrade,
+            sourceUrl,
+          }),
+        ).toBe(expected);
+      });
+    });
+
     it('getAPIBaseUrl', () => {
       expect(changelogSource.getAPIBaseUrl(upgrade)).toBe(apiBaseUrl);
     });
@@ -267,6 +286,7 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
         ${'ssh://git@some-host.org:7999/some-org/some-repo.git'}                                   | ${'some-org/some-repo'}
         ${'https://some-host.org:7990/scm/some-org/some-repo.git'}                                 | ${'some-org/some-repo'}
         ${'https://some-host:7990/projects/some-org/repos/some-repo/raw/src/CHANGELOG.md?at=HEAD'} | ${'some-org/some-repo'}
+        ${'https://tools.domain.com/bitbucket/projects/mygroup/repos/my-library'}                  | ${'mygroup/my-library'}
         ${'some-random-value'}                                                                     | ${''}
       `('$input', ({ input, expected }) => {
         expect(

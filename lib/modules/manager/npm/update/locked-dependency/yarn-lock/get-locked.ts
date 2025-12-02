@@ -29,7 +29,7 @@ export function getYarn1LockedDependencies(
   try {
     for (const [depNameConstraint, entry] of Object.entries(yarnLock)) {
       const parsed = parseEntry(depNameConstraint);
-      // istanbul ignore if
+      /* v8 ignore next 3 -- needs test */
       if (!parsed) {
         continue;
       }
@@ -37,8 +37,8 @@ export function getYarn1LockedDependencies(
       if (entryName === depName && entry?.version === currentVersion) {
         res.push({ entry, depNameConstraint, depName, constraint });
       }
-    }
-  } catch (err) /* istanbul ignore next */ {
+    } /* v8 ignore next -- needs test */
+  } catch (err) {
     logger.warn({ err }, 'getLockedDependencies() error');
   }
   return res;
@@ -58,7 +58,7 @@ export function getYarn2LockedDependencies(
       for (const subConstraint of fullConstraint.split(', ')) {
         const depNameConstraint = subConstraint;
         const parsed = parseEntry(depNameConstraint);
-        // istanbul ignore if
+        /* v8 ignore next 3 -- needs test */
         if (!parsed) {
           continue;
         }
@@ -68,8 +68,8 @@ export function getYarn2LockedDependencies(
           res.push({ entry, depNameConstraint, depName, constraint });
         }
       }
-    }
-  } catch (err) /* istanbul ignore next */ {
+    } /* v8 ignore next -- needs test */
+  } catch (err) {
     logger.warn({ err }, 'getLockedDependencies() error');
   }
   return res;

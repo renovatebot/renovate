@@ -1,181 +1,133 @@
 import {
   CONFIG_SECRETS_INVALID,
   CONFIG_VALIDATION,
+  CONFIG_VARIABLES_INVALID,
 } from '../constants/error-messages';
 import { getConfig } from './defaults';
-import { applySecretsToConfig, validateConfigSecrets } from './secrets';
+import {
+  applySecretsAndVariablesToConfig,
+  validateConfigSecretsAndVariables,
+} from './secrets';
 
 describe('config/secrets', () => {
-  describe('validateConfigSecrets(config)', () => {
+  describe('validateConfigSecretsAndVariables(config)', () => {
     it('works with default config', () => {
-      expect(() => validateConfigSecrets(getConfig())).not.toThrow();
-    });
-
-    it('returns if no secrets', () => {
-      expect(validateConfigSecrets({})).toBeUndefined();
-    });
-
-    it('throws if secrets is not an object', () => {
-      expect(() => validateConfigSecrets({ secrets: 'hello' } as any)).toThrow(
-        CONFIG_SECRETS_INVALID,
-      );
-    });
-
-    it('throws for invalid secret names', () => {
       expect(() =>
-        validateConfigSecrets({ secrets: { '123': 'abc' } }),
-      ).toThrow(CONFIG_SECRETS_INVALID);
+        validateConfigSecretsAndVariables(getConfig()),
+      ).not.toThrow();
     });
 
-    it('throws for non-string secret', () => {
-      expect(() =>
-        validateConfigSecrets({ secrets: { abc: 123 } } as any),
-      ).toThrow(CONFIG_SECRETS_INVALID);
+    it('returns if no secrets/variables', () => {
+      expect(validateConfigSecretsAndVariables({})).toBeUndefined();
     });
 
-    it('throws for secrets inside repositories', () => {
+    it('throws for invalid secret name', () => {
       expect(() =>
-        validateConfigSecrets({
-          repositories: [
-            { repository: 'abc/def', secrets: { abc: 123 } },
-          ] as any,
+        validateConfigSecretsAndVariables({
+          secrets: { '123': 'abc' },
         }),
       ).toThrow(CONFIG_SECRETS_INVALID);
     });
+
+    it('throws for invalid variable name', () => {
+      expect(() =>
+        validateConfigSecretsAndVariables({
+          variables: { '123': 'abc' },
+        }),
+      ).toThrow(CONFIG_VARIABLES_INVALID);
+    });
+
+    it('throws for secrets in repositories', () => {
+      expect(() =>
+        validateConfigSecretsAndVariables({
+          repositories: [{ repository: 'x/y', secrets: { abc: 123 } }],
+        } as any),
+      ).toThrow(CONFIG_SECRETS_INVALID);
+    });
+
+    it('throws for variables in repositories', () => {
+      expect(() =>
+        validateConfigSecretsAndVariables({
+          repositories: [{ repository: 'x/y', variables: { abc: 123 } }],
+        } as any),
+      ).toThrow(CONFIG_VARIABLES_INVALID);
+    });
   });
 
-  describe('applySecretsToConfig(config)', () => {
-    it('works with default config', () => {
-      expect(() => applySecretsToConfig(getConfig())).not.toThrow();
-    });
-
-    it('throws if disallowed field is used', () => {
+  describe('applySecretsAndVariablesToConfig(config)', () => {
+    it('replaces both secrets and variables', () => {
       const config = {
-        prTitle: '{{ secrets.ARTIFACTORY_TOKEN }}',
-        secrets: {
-          ARTIFACTORY_TOKEN: '123test==',
-        },
-      };
-      expect(() => applySecretsToConfig(config)).toThrow(CONFIG_VALIDATION);
-    });
-
-    it('throws if an unknown secret is used', () => {
-      const config = {
-        npmToken: '{{ secrets.ARTIFACTORY_TOKEN }}',
-      };
-      expect(() => applySecretsToConfig(config)).toThrow(CONFIG_VALIDATION);
-    });
-
-    it('replaces secrets in the top level', () => {
-      const config = {
-        secrets: { ARTIFACTORY_TOKEN: '123test==' },
-        npmToken: '{{ secrets.ARTIFACTORY_TOKEN }}',
-      };
-      const res = applySecretsToConfig(config);
-      expect(res).toStrictEqual({
-        npmToken: '123test==',
-      });
-      expect(Object.keys(res)).not.toContain('secrets');
-    });
-
-    it('replaces secrets in a subobject', () => {
-      const config = {
-        secrets: { ARTIFACTORY_TOKEN: '123test==' },
-        npm: { npmToken: '{{ secrets.ARTIFACTORY_TOKEN }}' },
-      };
-      const res = applySecretsToConfig(config);
-      expect(res).toStrictEqual({
-        npm: {
-          npmToken: '123test==',
-        },
-      });
-      expect(Object.keys(res)).not.toContain('secrets');
-    });
-
-    it('replaces secrets in a array of objects', () => {
-      const config = {
-        secrets: { ARTIFACTORY_TOKEN: '123test==' },
+        secrets: { TOKEN: 'secret123' },
+        variables: { MANAGER: 'npm' },
         hostRules: [
-          { hostType: 'npm', token: '{{ secrets.ARTIFACTORY_TOKEN }}' },
+          {
+            hostType: '{{ variables.MANAGER }}',
+            token: '{{ secrets.TOKEN }}',
+          },
         ],
       };
-      const res = applySecretsToConfig(config);
-      expect(res).toStrictEqual({
-        hostRules: [{ hostType: 'npm', token: '123test==' }],
+      const result = applySecretsAndVariablesToConfig({ config });
+      expect(result).toEqual({
+        hostRules: [{ hostType: 'npm', token: 'secret123' }],
       });
-      expect(Object.keys(res)).not.toContain('secrets');
     });
 
-    it('replaces secrets in a array of strings', () => {
+    it('replaces all secrets and variables', () => {
       const config = {
-        secrets: { SECRET_MANAGER: 'npm' },
-        allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
+        secrets: { FOO: 'foo', BAR: 'bar', BAZ: 'baz' },
+        variables: { FOO: 'foo', BAR: 'bar', BAZ: 'baz' },
+        customEnvVariables: {
+          SECRETS: '{{ secrets.FOO }} {{ secrets.BAR }} {{ secrets.BAZ }}',
+          VARIABLES:
+            '{{ variables.FOO }} {{ variables.BAR }} {{ variables.BAZ }}',
+        },
       };
-      const res = applySecretsToConfig(config);
-      expect(res).toStrictEqual({
-        allowedManagers: ['npm'],
+      const result = applySecretsAndVariablesToConfig({ config });
+      expect(result).toEqual({
+        customEnvVariables: {
+          SECRETS: 'foo bar baz',
+          VARIABLES: 'foo bar baz',
+        },
       });
-      expect(Object.keys(res)).not.toContain('secrets');
     });
 
-    it('replaces secrets in a array of objects without deleting them', () => {
+    it('preserves secrets and variables if delete flags are false', () => {
       const config = {
-        secrets: { ARTIFACTORY_TOKEN: '123test==' },
+        secrets: { TOKEN: 'secret123' },
+        variables: { MANAGER: 'npm' },
         hostRules: [
-          { hostType: 'npm', token: '{{ secrets.ARTIFACTORY_TOKEN }}' },
+          {
+            hostType: '{{ variables.MANAGER }}',
+            token: '{{ secrets.TOKEN }}',
+          },
         ],
       };
-      const res = applySecretsToConfig(config, config.secrets, false);
-      expect(res).toStrictEqual({
-        secrets: { ARTIFACTORY_TOKEN: '123test==' },
-        hostRules: [{ hostType: 'npm', token: '123test==' }],
+      const result = applySecretsAndVariablesToConfig({
+        config,
+        deleteSecrets: false,
+        deleteVariables: false,
       });
-      expect(Object.keys(res)).toContain('secrets');
+      expect(result).toEqual({
+        secrets: { TOKEN: 'secret123' },
+        variables: { MANAGER: 'npm' },
+        hostRules: [{ hostType: 'npm', token: 'secret123' }],
+      });
     });
 
-    it('replaces secrets in a array of strings without deleting them', () => {
+    it('throws if secret is missing', () => {
       const config = {
-        secrets: { SECRET_MANAGER: 'npm' },
-        allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
+        hostRules: [{ token: '{{ secrets.MISSING_SECRET }}' }],
       };
-      const res = applySecretsToConfig(config, config.secrets, false);
-      expect(res).toStrictEqual({
-        secrets: { SECRET_MANAGER: 'npm' },
-        allowedManagers: ['npm'],
-      });
-      expect(Object.keys(res)).toContain('secrets');
-    });
-
-    it('{} as secrets will result in an error', () => {
-      const config = {
-        secrets: { SECRET_MANAGER: 'npm' },
-        allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
-      };
-      expect(() => applySecretsToConfig(config, {}, false)).toThrow(
+      expect(() => applySecretsAndVariablesToConfig({ config })).toThrow(
         CONFIG_VALIDATION,
       );
     });
 
-    it('undefined as secrets will result replace the secret', () => {
+    it('throws if variable is missing', () => {
       const config = {
-        secrets: { SECRET_MANAGER: 'npm' },
-        allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
+        hostRules: [{ hostType: '{{ variables.MISSING_VAR }}' }],
       };
-      const res = applySecretsToConfig(config, undefined, false);
-      expect(res).toStrictEqual({
-        secrets: { SECRET_MANAGER: 'npm' },
-        allowedManagers: ['npm'],
-      });
-      expect(Object.keys(res)).toContain('secrets');
-    });
-
-    it('null as secrets will result in an error', () => {
-      const config = {
-        secrets: { SECRET_MANAGER: 'npm' },
-        allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
-      };
-      // TODO fix me? #22198
-      expect(() => applySecretsToConfig(config, null as never, false)).toThrow(
+      expect(() => applySecretsAndVariablesToConfig({ config })).toThrow(
         CONFIG_VALIDATION,
       );
     });

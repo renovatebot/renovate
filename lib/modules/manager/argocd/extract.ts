@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyObject, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
@@ -16,7 +16,7 @@ import type {
 } from '../types';
 import {
   type ApplicationDefinition,
-  ApplicationDefinitionSchema,
+  ApplicationDefinitions,
   type ApplicationSource,
   type ApplicationSpec,
 } from './schema';
@@ -37,7 +37,7 @@ export function extractPackageFile(
     return null;
   }
 
-  const definitions = ApplicationDefinitionSchema.catch(
+  const definitions = ApplicationDefinitions.catch(
     withDebugMessage([], `${packageFile} does not match schema`),
   ).parse(content);
 
@@ -72,6 +72,19 @@ function processSource(source: ApplicationSource): PackageDependency[] {
     ];
   }
 
+  // Handle OCI Helm chart without explicit chart field
+  if (isOCIRegistry(source.repoURL)) {
+    const registryURL = trimTrailingSlash(removeOCIPrefix(source.repoURL));
+
+    return [
+      {
+        depName: registryURL,
+        currentValue: source.targetRevision,
+        datasource: DockerDatasource.id,
+      },
+    ];
+  }
+
   const dependencies: PackageDependency[] = [
     {
       depName: source.repoURL,
@@ -83,7 +96,7 @@ function processSource(source: ApplicationSource): PackageDependency[] {
   // Git repo is pointing to a Kustomize resources
   if (source.kustomize?.images) {
     dependencies.push(
-      ...source.kustomize.images.map(processKustomizeImage).filter(is.truthy),
+      ...source.kustomize.images.map(processKustomizeImage).filter(isTruthy),
     );
   }
 
@@ -100,7 +113,7 @@ function processAppSpec(
 
   const deps: PackageDependency[] = [];
 
-  if (is.nonEmptyObject(spec.source)) {
+  if (isNonEmptyObject(spec.source)) {
     deps.push(...processSource(spec.source));
   }
 

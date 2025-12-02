@@ -5,6 +5,7 @@ import type {
 } from '../../../config/types';
 import type { PackageFile } from '../../../modules/manager/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
+import type { ExtractResult } from '../../../workers/repository/process/extract-update';
 import type { PrBlockedBy } from '../../../workers/types';
 
 export interface BaseBranchCache {
@@ -46,6 +47,7 @@ export interface OnboardingBranchCache {
 export interface ReconfigureBranchCache {
   reconfigureBranchSha: string;
   isConfigValid: boolean;
+  extractResult?: ExtractResult;
 }
 
 export interface PrCache {
@@ -126,12 +128,17 @@ export interface BranchCache {
 export interface RepoCacheData {
   configFileName?: string;
   httpCache?: Record<string, unknown>;
+  httpCacheHead?: Record<string, unknown>;
   semanticCommits?: 'enabled' | 'disabled';
   branches?: BranchCache[];
   init?: RepoInitConfig;
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
   platform?: {
+    forgejo?: {
+      pullRequestsCache?: unknown;
+      orgs?: Record<string, boolean>;
+    };
     gitea?: {
       pullRequestsCache?: unknown;
     };
@@ -144,6 +151,9 @@ export interface RepoCacheData {
       issuesCache?: Record<number, unknown>;
     };
     bitbucket?: {
+      pullRequestsCache?: unknown;
+    };
+    gitlab?: {
       pullRequestsCache?: unknown;
     };
     bitbucketServer?: {

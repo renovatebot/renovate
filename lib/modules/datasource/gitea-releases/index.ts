@@ -3,9 +3,9 @@ import type { PackageCacheNamespace } from '../../../util/cache/package/types';
 import { GiteaHttp } from '../../../util/http/gitea';
 import { Datasource } from '../datasource';
 import { GiteaTagsDatasource } from '../gitea-tags';
-import { CommitsSchema, TagSchema } from '../gitea-tags/schema';
+import { Commits, Tag } from '../gitea-tags/schema';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { ReleasesSchema } from './schema';
+import { Releases } from './schema';
 
 export class GiteaReleasesDatasource extends Datasource {
   static readonly id = 'gitea-releases';
@@ -46,7 +46,7 @@ export class GiteaReleasesDatasource extends Datasource {
         {
           paginate: true,
         },
-        ReleasesSchema,
+        Releases,
       )
     ).body;
 
@@ -79,7 +79,7 @@ export class GiteaReleasesDatasource extends Datasource {
       registryUrl,
     )}repos/${repo}/tags/${tag}`;
 
-    const { body } = await this.http.getJson(url, TagSchema);
+    const { body } = await this.http.getJson(url, Tag);
 
     return body.commit.sha;
   }
@@ -102,7 +102,7 @@ export class GiteaReleasesDatasource extends Datasource {
     const url = `${GiteaTagsDatasource.getApiUrl(
       registryUrl,
     )}repos/${repo}/commits?stat=false&verification=false&files=false&page=1&limit=1`;
-    const { body } = await this.http.getJson(url, CommitsSchema);
+    const { body } = await this.http.getJson(url, Commits);
 
     if (body.length === 0) {
       return null;

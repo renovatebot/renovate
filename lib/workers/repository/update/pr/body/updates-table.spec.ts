@@ -253,4 +253,131 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         '\n',
     );
   });
+
+  it('handles replacements with new names', () => {
+    const upgrade = partial<BranchUpgradeConfig>({
+      manager: 'some-manager',
+      branchName: 'some-branch',
+      prBodyDefinitions: {
+        Package:
+          '{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} → {{{newNameLinked}}}{{/unless}}{{/if}}',
+        Type: '{{{depType}}}',
+        Update: '{{{updateType}}}',
+        'Current value': '{{{currentValue}}}',
+        'New value': '{{{newValue}}}',
+        Change:
+          "[{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if depName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
+      },
+      updateType: 'replacement',
+      depNameLinked: '[mocha](https://mochajs.org/)',
+      depType: 'devDependencies',
+      depName: 'mocha',
+      currentValue: '6.2.3',
+      newValue: '6.2.4',
+      currentVersion: '6.2.3',
+      newVersion: '6.2.4',
+      displayFrom: '6.2.3',
+      displayTo: '6.2.4',
+      newName: 'mochaNew',
+      newNameLinked: '[mochaNew](https://mochajs.org/)',
+    });
+
+    const configObj: BranchConfig = {
+      manager: 'some-manager',
+      branchName: 'some-branch',
+      baseBranch: 'base',
+      upgrades: [upgrade],
+      prBodyColumns: ['Package', 'Type', 'Update', 'Change', 'Pending'],
+      prBodyDefinitions: {
+        Package:
+          '{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} → {{{newNameLinked}}}{{/unless}}{{/if}}',
+        Type: '{{{depType}}}',
+        Update: '{{{updateType}}}',
+        'Current value': '{{{currentValue}}}',
+        'New value': '{{{newValue}}}',
+        Change: 'All locks refreshed',
+        Pending: '{{{displayPending}}}',
+        References: '{{{references}}}',
+        'Package file': '{{{packageFile}}}',
+      },
+    };
+    const result = getPrUpdatesTable(configObj);
+    expect(result).toMatch(
+      '\n' +
+        '\n' +
+        'This PR contains the following updates:\n' +
+        '\n' +
+        '| Package | Type | Update | Change |\n' +
+        '|---|---|---|---|\n' +
+        '| [mocha](https://mochajs.org/) → [mochaNew](https://mochajs.org/) | devDependencies | replacement | [`6.2.3` -> `6.2.4`](https://renovatebot.com/diffs/npm/mocha/6.2.3/6.2.4) |\n' +
+        '\n' +
+        '\n',
+    );
+  });
+
+  it('customizes table headers as per prBodyHeadingDefinitions', () => {
+    const upgrade1 = partial<BranchUpgradeConfig>({
+      manager: 'some-manager',
+      branchName: 'some-branch',
+      prBodyDefinitions: {
+        Package: '{{{depNameLinked}}}',
+        Type: '{{{depType}}}',
+        Update: '{{{updateType}}}',
+        'Current value': '{{{currentValue}}}',
+        'New value': '{{{newValue}}}',
+        Change: 'All locks refreshed',
+        Pending: '{{{displayPending}}}',
+        References: '{{{references}}}',
+        'Package file': '{{{packageFile}}}',
+        Age: "{{#if newVersion}}[![age](https://developer.mend.io/api/mc/badges/age/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/){{/if}}",
+      },
+      updateType: 'pin',
+      depNameLinked: '[koa](https://github.com/koajs/koa)',
+      depName: 'koa',
+      packageName: 'koa',
+      depType: 'dependencies',
+      currentValue: '^1.7.0',
+      newValue: '1.7.0',
+      currentVersion: '1.7.0',
+      newVersion: '1.7.0',
+      displayFrom: '^1.7.0',
+      displayTo: '1.7.0',
+      datasource: 'npm',
+    });
+
+    const configObj: BranchConfig = {
+      manager: 'some-manager',
+      branchName: 'some-branch',
+      baseBranch: 'base',
+      upgrades: [upgrade1],
+      prBodyColumns: ['Package', 'Type', 'Update', 'Change', 'Pending', 'Age'],
+      prBodyDefinitions: {
+        Package: '{{{depNameLinked}}}',
+        Type: '{{{depType}}}',
+        Update: '{{{updateType}}}',
+        'Current value': '{{{currentValue}}}',
+        'New value': '{{{newValue}}}',
+        Change: 'All locks refreshed',
+        Pending: '{{{displayPending}}}',
+        References: '{{{references}}}',
+        'Package file': '{{{packageFile}}}',
+        Age: "{{#if newVersion}}[![age](https://developer.mend.io/api/mc/badges/age/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/){{/if}}",
+      },
+      prBodyHeadingDefinitions: {
+        Age: '[Age](https://docs.renovatebot.com/merge-confidence)',
+      },
+    };
+    const result = getPrUpdatesTable(configObj);
+    expect(result).toMatch(
+      '\n' +
+        '\n' +
+        'This PR contains the following updates:\n' +
+        '\n' +
+        '| Package | Type | Update | Change | [Age](https://docs.renovatebot.com/merge-confidence) |\n' +
+        '|---|---|---|---|---|\n' +
+        '| [koa](https://github.com/koajs/koa) | dependencies | pin | All locks refreshed | [![age](https://developer.mend.io/api/mc/badges/age/npm/koa/1.7.0?slim=true)](https://docs.renovatebot.com/merge-confidence/) |\n' +
+        '\n' +
+        '\n',
+    );
+  });
 });

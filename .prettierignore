@@ -37,3 +37,6 @@ pnpm-lock.yaml
 # mkdocs generated files
 /tools/mkdocs/docs
 /tools/mkdocs/site
+
+# Git worktrees
+/.worktrees

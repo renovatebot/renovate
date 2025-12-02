@@ -218,11 +218,14 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.packageFile = '.gitlab-ci.yml';
       upgrade.autoReplaceStringTemplate =
         "'{{{depName}}}'\nref: {{{newValue}}}";
+      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStringsStrategy = 'combination';
 
       // If the new "name" is not added to the matchStrings, the regex matcher fails to extract from `newContent` as
       // there's nothing defined in there anymore that it can match
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         '[\'"]?(?<depName>pipeline-fragments\\/docker-lint)[\'"]?\\s*ref:\\s[\'"]?(?<currentValue>[\\d-]*)[\'"]?',
         '[\'"]?(?<depName>pipeline-solutions\\/gitlab\\/fragments\\/docker-lint)[\'"]?\\s*ref:\\s[\'"]?(?<currentValue>[\\d-]*)[\'"]?',
@@ -250,9 +253,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.replaceString =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
       upgrade.packageFile = 'k8s/base/defaults.yaml';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*\\\'?\\"?(?<depName>[^:]+):(?<currentValue>[^\\s\\\'\\"]+)\\\'?\\"?\\s*',
       ];
+      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = doAutoReplace(upgrade, yml, reuseExistingBranch);
       await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
@@ -315,9 +320,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.replaceString =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
       upgrade.packageFile = 'k8s/base/defaults.yaml';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*\\\'?\\"?(?<depName>[^:]+):(?<currentValue>[^\\s\\\'\\"]+)\\\'?\\"?\\s*',
       ];
+      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe(yml);
@@ -757,6 +764,33 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
+    it('updates with helm value image/repository replacement with digest', async () => {
+      const yml = codeBlock`
+        parser:
+          image:
+              repository: docker.io/securecodebox/parser-nmap
+              tag: 3.14.3@q1w2e3r4t5z6u7i8o9p0
+      `;
+      upgrade.manager = 'helm-values';
+      upgrade.depName = 'docker.io/securecodebox/parser-nmap';
+      upgrade.replaceString = '3.14.3';
+      upgrade.currentValue = '3.14.3';
+      upgrade.currentDigest = 'q1w2e3r4t5z6u7i8o9p0';
+      upgrade.depIndex = 0;
+      upgrade.updateType = 'replacement';
+      upgrade.newName = 'iteratec/juice-balancer';
+      upgrade.newValue = 'v5.1.0';
+      upgrade.newDigest = 'p0o9i8u7z6t5r4e3w2q1';
+      upgrade.packageFile = 'values.yml';
+      const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
+      expect(res).toBe(
+        yml
+          .replace(upgrade.depName, upgrade.newName)
+          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentDigest, upgrade.newDigest),
+      );
+    });
+
     it('updates with helm value image/repository wrong version', async () => {
       const yml = codeBlock`
         parser:
@@ -1153,6 +1187,32 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
+    it('updates with multiple same digest replacement without replaceString', async () => {
+      const dockerfile = codeBlock`
+        FROM notUbuntu:18.04@q1w2e3r4t5z6u7i8o9p0
+        FROM alsoNotUbuntu:18.05@q1w2e3r4t5z6u7i8o9p0
+        FROM ubuntu:18.04@q1w2e3r4t5z6u7i8o9p0
+      `;
+      upgrade.manager = 'dockerfile';
+      upgrade.depName = 'ubuntu';
+      upgrade.currentValue = '18.04';
+      upgrade.currentDigest = 'q1w2e3r4t5z6u7i8o9p0';
+      upgrade.depIndex = 2;
+      upgrade.updateType = 'replacement';
+      upgrade.newName = 'alpine';
+      upgrade.newValue = '3.16';
+      upgrade.newDigest = 'p0o9i8u7z6t5r4e3w2q1';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        codeBlock`
+          FROM notUbuntu:18.04@q1w2e3r4t5z6u7i8o9p0
+          FROM alsoNotUbuntu:18.05@q1w2e3r4t5z6u7i8o9p0
+          FROM alpine:3.16@p0o9i8u7z6t5r4e3w2q1
+        `,
+      );
+    });
+
     it('docker: updates with pinDigest enabled but no currentDigest value', async () => {
       const dockerfile = codeBlock`
         FROM ubuntu:18.04
@@ -1260,9 +1320,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newName = 'some.other.url.com/some-new-repo';
       upgrade.newValue = '3.16';
       upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*?\\\'?\\"?(?<depName>[^:\\\'\\"]+):(?<currentValue>[^@\\\'\\"]+)@?(?<currentDigest>[^\\s\\\'\\"]+)?\\"?\\\'?\\s*',
       ];
+      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe('image: "some.other.url.com/some-new-repo:3.16"');
@@ -1284,9 +1346,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newName = 'some.other.url.com/some-new-repo';
       upgrade.newValue = '3.16';
       upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*[\\\'\\"]?(?<depName>[^:]+):(?<currentValue>[^@]+)?@?(?<currentDigest>[^\\s\\\'\\"]+)?[\\\'\\"]?\\s*',
       ];
+      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe(
@@ -1479,6 +1543,57 @@ describe('workers/repository/update/branch/auto-replace', () => {
               runs-on: ubuntu-latest
               steps:
                 - uses: some-other-action/checkout@2485f4 # tag=v2.0.0
+        `,
+      );
+    });
+
+    it('updates only digest', async () => {
+      const githubAction = codeBlock`
+        """Rules/toolchains for angular with Bazel."""
+    module(
+        name = "angular-cli",
+    )
+
+    bazel_dep(name = "rules_angular")
+    git_override(
+        module_name = "rules_angular",
+        commit = "17eac47ea99057f7473a7d93292e76327c894ed9",
+        remote = "https://github.com/devversion/rules_angular.git",
+    )
+      `;
+      upgrade.manager = 'bazel-module';
+      upgrade.updateType = 'digest';
+      upgrade.pinDigests = false;
+      upgrade.autoReplaceStringTemplate = undefined;
+      upgrade.depName = 'rules_angular';
+      upgrade.currentValue = undefined;
+      upgrade.currentDigestShort = '17eac47';
+      upgrade.currentDigest = '17eac47ea99057f7473a7d93292e76327c894ed9';
+      upgrade.depIndex = 1;
+      upgrade.replaceString = undefined;
+      upgrade.newName = undefined;
+      upgrade.newValue = undefined;
+      upgrade.newDigest = '84f4bf185682d841c7e7b369f498e68c742229cc';
+      upgrade.packageFile = 'MODULE.bazel';
+      upgrade.autoReplaceGlobalMatch = true;
+      const res = await doAutoReplace(
+        upgrade,
+        githubAction,
+        reuseExistingBranch,
+      );
+      expect(res).toBe(
+        codeBlock`
+          """Rules/toolchains for angular with Bazel."""
+    module(
+        name = "angular-cli",
+    )
+
+    bazel_dep(name = "rules_angular")
+    git_override(
+        module_name = "rules_angular",
+        commit = "84f4bf185682d841c7e7b369f498e68c742229cc",
+        remote = "https://github.com/devversion/rules_angular.git",
+    )
         `,
       );
     });

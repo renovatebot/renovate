@@ -1,4 +1,4 @@
-import type { RenovateConfig } from '../../../config/types';
+import type { AllConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import * as repositoryCache from '../../../util/cache/repository';
@@ -15,10 +15,11 @@ import {
 export async function finalizeRepo(
   config: RenovateConfig,
   branchList: string[],
+  repoConfig: AllConfig,
 ): Promise<void> {
-  await checkReconfigureBranch(config);
-  await repositoryCache.saveCache();
+  await checkReconfigureBranch(config, repoConfig);
   await pruneStaleBranches(config, branchList);
+  await repositoryCache.saveCache();
   await ensureIssuesClosing();
   await clearRenovateRefs();
   PackageFiles.clear();

@@ -1,5 +1,6 @@
 import { TimeoutError } from 'got';
 import { z } from 'zod';
+import { ExecError } from '../util/exec/exec-error';
 import prepareError, {
   prepareZodIssues,
   sanitizeValue,
@@ -37,7 +38,7 @@ describe('logger/utils', () => {
     expect(() => {
       validateLogLevel(input, 'info');
     }).toThrow();
-    expect(mockExit).toHaveBeenCalledWith(1);
+    expect(mockExit).toHaveBeenCalledExactlyOnceWith(1);
   });
 
   it.each`
@@ -232,6 +233,36 @@ describe('logger/utils', () => {
       expect(prepareError(err)).toMatchObject({
         message: 'timeout',
         name: 'TimeoutError',
+      });
+    });
+
+    it('handles rawExec error', () => {
+      const execError = new ExecError('exec-error', {
+        cmd: '',
+        stdout: '',
+        stderr: '',
+        options: { encoding: 'utf8', env: { key: 'val' } },
+      });
+
+      expect(prepareError(execError)).toMatchObject({
+        options: { encoding: 'utf8', env: ['key'] },
+      });
+    });
+
+    it('handles AggregateError', () => {
+      const err = new Error('err');
+      err.stack = 'err stack';
+      const aggregateErr = new AggregateError([err], 'aggregate');
+      aggregateErr.stack = 'aggregate stack';
+      expect(prepareError(aggregateErr)).toMatchObject({
+        message: 'aggregate',
+        stack: 'aggregate stack',
+        errors: [
+          {
+            message: 'err',
+            stack: 'err stack',
+          },
+        ],
       });
     });
   });

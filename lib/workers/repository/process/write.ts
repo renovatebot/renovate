@@ -1,5 +1,11 @@
-import is from '@sindresorhus/is';
+import {
+  ATTR_VCS_REF_BASE_TYPE,
+  ATTR_VCS_REF_HEAD_NAME,
+  ATTR_VCS_REF_TYPE,
+} from '@opentelemetry/semantic-conventions/incubating';
+import { isString } from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types';
+import { instrument } from '../../../instrumentation';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
 import { scm } from '../../../modules/platform/scm';
@@ -8,7 +14,11 @@ import type { BranchCache } from '../../../util/cache/repository/types';
 import { fingerprint } from '../../../util/fingerprint';
 import { setBranchNewCommit } from '../../../util/git/set-branch-commit';
 import { incCountValue, setCount } from '../../global/limits';
-import type { BranchConfig, UpgradeFingerprintConfig } from '../../types';
+import type {
+  BranchConfig,
+  CacheFingerprintMatchResult,
+  UpgradeFingerprintConfig,
+} from '../../types';
 import { processBranch } from '../update/branch';
 import { upgradeFingerprintFields } from './fingerprint-fields';
 import {
@@ -33,22 +43,22 @@ export function generateCommitFingerprintConfig(
   return res;
 }
 
-export function canSkipBranchUpdateCheck(
+export function compareCacheFingerprint(
   branchState: BranchCache,
   commitFingerprint: string,
-): boolean {
+): CacheFingerprintMatchResult {
   if (!branchState.commitFingerprint) {
     logger.trace('branch.isUpToDate(): no fingerprint');
-    return false;
+    return 'no-fingerprint';
   }
 
   if (commitFingerprint !== branchState.commitFingerprint) {
     logger.debug('branch.isUpToDate(): needs recalculation');
-    return false;
+    return 'no-match';
   }
 
   logger.debug('branch.isUpToDate(): using cached result "true"');
-  return true;
+  return 'matched';
 }
 
 export async function syncBranchState(
@@ -137,50 +147,66 @@ export async function writeUpdates(
 
   for (const branch of branches) {
     const { baseBranch, branchName } = branch;
-    const meta: Record<string, string> = { branch: branchName };
-    if (config.baseBranches?.length && baseBranch) {
-      meta.baseBranch = baseBranch;
-    }
-    addMeta(meta);
-    const branchExisted = await scm.branchExists(branchName);
-    const branchState = await syncBranchState(branchName, baseBranch);
+    const res = await instrument(
+      branchName,
+      async () => {
+        const meta: Record<string, string> = { branch: branchName };
+        if (config.baseBranchPatterns?.length && baseBranch) {
+          meta.baseBranch = baseBranch;
+        }
+        addMeta(meta);
+        const branchExisted = await scm.branchExists(branchName);
+        const branchState = await syncBranchState(branchName, baseBranch);
 
-    const managers = [
-      ...new Set(
-        branch.upgrades
-          .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
-          .filter(is.string),
-      ),
-    ].sort();
-    const commitFingerprint = fingerprint({
-      commitFingerprintConfig: generateCommitFingerprintConfig(branch),
-      managers,
-    });
-    branch.skipBranchUpdate = canSkipBranchUpdateCheck(
-      branchState,
-      commitFingerprint,
+        const managers = [
+          ...new Set(
+            branch.upgrades
+              .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
+              .filter(isString),
+          ),
+        ].sort();
+        const commitFingerprint = fingerprint({
+          commitFingerprintConfig: generateCommitFingerprintConfig(branch),
+          managers,
+        });
+        branch.cacheFingerprintMatch = compareCacheFingerprint(
+          branchState,
+          commitFingerprint,
+        );
+
+        const res = await processBranch(branch);
+        branch.prBlockedBy = res?.prBlockedBy;
+        branch.prNo = res?.prNo;
+        branch.result = res?.result;
+        branch.commitFingerprint = res?.updatesVerified
+          ? commitFingerprint
+          : branchState.commitFingerprint;
+
+        if (res?.commitSha) {
+          setBranchNewCommit(branchName, baseBranch, res.commitSha);
+        }
+        if (
+          branch.result === 'automerged' &&
+          branch.automergeType !== 'pr-comment'
+        ) {
+          // Stop processing other branches because base branch has been changed
+          return 'automerged';
+        }
+        if (!branchExisted && (await scm.branchExists(branch.branchName))) {
+          incCountValue('Branches');
+        }
+      },
+      {
+        attributes: {
+          [ATTR_VCS_REF_TYPE]: 'branch',
+          [ATTR_VCS_REF_BASE_TYPE]: 'branch',
+          [ATTR_VCS_REF_HEAD_NAME]: branchName,
+        },
+      },
     );
 
-    const res = await processBranch(branch);
-    branch.prBlockedBy = res?.prBlockedBy;
-    branch.prNo = res?.prNo;
-    branch.result = res?.result;
-    branch.commitFingerprint = res?.updatesVerified
-      ? commitFingerprint
-      : branchState.commitFingerprint;
-
-    if (res?.commitSha) {
-      setBranchNewCommit(branchName, baseBranch, res.commitSha);
-    }
-    if (
-      branch.result === 'automerged' &&
-      branch.automergeType !== 'pr-comment'
-    ) {
-      // Stop processing other branches because base branch has been changed
-      return 'automerged';
-    }
-    if (!branchExisted && (await scm.branchExists(branch.branchName))) {
-      incCountValue('Branches');
+    if (res !== undefined) {
+      return res;
     }
   }
   removeMeta(['branch', 'baseBranch']);

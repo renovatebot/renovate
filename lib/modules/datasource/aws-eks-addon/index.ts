@@ -1,6 +1,6 @@
 import { DescribeAddonVersionsCommand, EKSClient } from '@aws-sdk/client-eks';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { cache } from '../../../util/cache/package/decorator';
@@ -50,7 +50,7 @@ export class AwsEKSAddonDataSource extends Datasource {
         .flatMap((addon) => {
           return addon.addonVersions;
         })
-        .filter(is.truthy)
+        .filter(isTruthy)
         .map((versionInfo) => ({
           version: versionInfo.addonVersion ?? '',
           default:

@@ -8,7 +8,7 @@ function ensureNumber(input: string): number | null {
     return null;
   }
 
-  return Number.parseInt(input, 10);
+  return Number.parseInt(input);
 }
 
 function comparePrereleases(x: string, y: string): number {

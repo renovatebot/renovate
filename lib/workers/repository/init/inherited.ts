@@ -1,10 +1,11 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray, isNullOrUndefined, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { mergeChildConfig, removeGlobalConfig } from '../../../config';
+import { setUserConfigFileNames } from '../../../config/app-strings';
 import { decryptConfig } from '../../../config/decrypt';
 import { parseFileConfig } from '../../../config/parse';
 import { resolveConfigPresets } from '../../../config/presets';
-import { applySecretsToConfig } from '../../../config/secrets';
+import { applySecretsAndVariablesToConfig } from '../../../config/secrets';
 import type { RenovateConfig } from '../../../config/types';
 import { validateConfig } from '../../../config/validation';
 import {
@@ -27,8 +28,8 @@ export async function mergeInheritedConfig(
     return config;
   }
   if (
-    !is.string(config.inheritConfigRepoName) ||
-    !is.string(config.inheritConfigFileName)
+    !isString(config.inheritConfigRepoName) ||
+    !isString(config.inheritConfigFileName)
   ) {
     // Config validation should prevent this error
     logger.error(
@@ -99,6 +100,16 @@ export async function mergeInheritedConfig(
     );
   }
 
+  // set user config file name here
+  if (isNonEmptyArray(inheritedConfig.configFileNames)) {
+    logger.debug(
+      { configFileNames: inheritedConfig.configFileNames },
+      'Updated the config filenames list',
+    );
+    setUserConfigFileNames(inheritedConfig.configFileNames);
+    delete config.configFileNames;
+  }
+
   let decryptedConfig = await decryptConfig(inheritedConfig, config.repository);
 
   let filteredConfig = removeGlobalConfig(decryptedConfig, true);
@@ -109,8 +120,12 @@ export async function mergeInheritedConfig(
     );
   }
 
-  if (is.nullOrUndefined(filteredConfig.extends)) {
-    filteredConfig = applySecretsToConfig(filteredConfig, config.secrets ?? {});
+  if (isNullOrUndefined(filteredConfig.extends)) {
+    filteredConfig = applySecretsAndVariablesToConfig({
+      config: filteredConfig,
+      secrets: config.secrets ?? {},
+      variables: config.variables ?? {},
+    });
     setInheritedHostRules(filteredConfig);
     return mergeChildConfig(config, filteredConfig);
   }
@@ -150,7 +165,11 @@ export async function mergeInheritedConfig(
     );
   }
 
-  filteredConfig = applySecretsToConfig(filteredConfig, config.secrets ?? {});
+  filteredConfig = applySecretsAndVariablesToConfig({
+    config: filteredConfig,
+    secrets: config.secrets ?? {},
+    variables: config.variables ?? {},
+  });
   setInheritedHostRules(filteredConfig);
   return mergeChildConfig(config, filteredConfig);
 }

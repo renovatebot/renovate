@@ -40,14 +40,14 @@ export class HermitVersioning extends RegExpVersioningApi {
       compatibility,
     } = groups;
     const release = [
-      Number.parseInt(major, 10),
-      typeof minor === 'undefined' ? 0 : Number.parseInt(minor, 10),
-      typeof patch === 'undefined' ? 0 : Number.parseInt(patch, 10),
-      typeof supplement === 'undefined' ? 0 : Number.parseInt(supplement, 10),
+      Number.parseInt(major),
+      typeof minor === 'undefined' ? 0 : Number.parseInt(minor),
+      typeof patch === 'undefined' ? 0 : Number.parseInt(patch),
+      typeof supplement === 'undefined' ? 0 : Number.parseInt(supplement),
     ];
 
     if (build) {
-      release.push(Number.parseInt(build, 10));
+      release.push(Number.parseInt(build));
     }
 
     return {
@@ -82,20 +82,20 @@ export class HermitVersioning extends RegExpVersioningApi {
     const release = [];
 
     if (major) {
-      release.push(Number.parseInt(major, 10));
+      release.push(Number.parseInt(major));
     }
 
     if (minor) {
-      release.push(Number.parseInt(minor, 10));
+      release.push(Number.parseInt(minor));
     }
     if (patch) {
-      release.push(Number.parseInt(patch, 10));
+      release.push(Number.parseInt(patch));
     }
     if (supplement) {
-      release.push(Number.parseInt(supplement, 10));
+      release.push(Number.parseInt(supplement));
     }
     if (build) {
-      release.push(Number.parseInt(build, 10));
+      release.push(Number.parseInt(build));
     }
 
     return {

@@ -27,9 +27,11 @@ function massageUpdateMetadata(config: BranchConfig): void {
     } = upgrade;
     // TODO: types (#22198)
     let depNameLinked = upgrade.depName!;
+    let newNameLinked = upgrade.newName!;
     const primaryLink = homepage ?? sourceUrl ?? dependencyUrl;
     if (primaryLink) {
       depNameLinked = `[${depNameLinked}](${primaryLink})`;
+      newNameLinked = `[${newNameLinked}](${primaryLink})`;
     }
 
     let sourceRootPath = 'tree/HEAD';
@@ -58,6 +60,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
       depNameLinked += ` (${otherLinks.join(', ')})`;
     }
     upgrade.depNameLinked = depNameLinked;
+    upgrade.newNameLinked = newNameLinked;
     const references: string[] = [];
     if (homepage) {
       references.push(`[homepage](${homepage})`);
@@ -95,6 +98,7 @@ interface PrBodyConfig {
 
 const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
 
+// TODO: `branchConfig` and `config`are the same object
 export function getPrBody(
   branchConfig: BranchConfig,
   prBodyConfig: PrBodyConfig,
@@ -129,7 +133,7 @@ export function getPrBody(
     prBody = prBody.replace(regEx(/\n\n\n+/g), '\n\n');
     const prDebugData64 = toBase64(JSON.stringify(prBodyConfig.debugData));
     prBody += `\n<!--renovate-debug:${prDebugData64}-->\n`;
-    prBody = platform.massageMarkdown(prBody);
+    prBody = platform.massageMarkdown(prBody, config.rebaseLabel);
 
     if (prBodyConfig?.rebasingNotice) {
       prBody = prBody.replace(

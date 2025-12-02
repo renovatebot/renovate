@@ -39,7 +39,6 @@ export type GitUrlOption = 'default' | 'ssh' | 'endpoint';
 
 export interface RepoParams {
   repository: string;
-  endpoint?: string;
   gitUrl?: GitUrlOption;
   forkCreation?: boolean;
   forkOrg?: string;
@@ -48,9 +47,7 @@ export interface RepoParams {
   renovateUsername?: string;
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
-  ignorePrAuthor?: boolean;
   bbUseDevelopmentBranch?: boolean;
-  includeMirrors?: boolean;
 }
 
 export interface PrDebugData {
@@ -221,6 +218,13 @@ export interface AutodiscoverConfig {
   projects?: string[];
 }
 
+export interface FileOwnerRule {
+  usernames: string[];
+  pattern: string;
+  score: number;
+  match: (path: string) => boolean;
+}
+
 export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
@@ -242,7 +246,14 @@ export interface Platform {
   ensureIssue(
     issueConfig: EnsureIssueConfig,
   ): Promise<EnsureIssueResult | null>;
-  massageMarkdown(prBody: string): string;
+  massageMarkdown(
+    prBody: string,
+    /**
+     * Useful for suggesting the use of rebase label when there is no better
+     * way, e.g. for Gerrit.
+     */
+    rebaseLabel?: string,
+  ): string;
   updatePr(prConfig: UpdatePrConfig): Promise<void>;
   mergePr(config: MergePRConfig): Promise<boolean>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;
@@ -275,11 +286,12 @@ export interface Platform {
     internalChecksAsSuccess: boolean,
   ): Promise<BranchStatus>;
   getBranchPr(branchName: string, targetBranch?: string): Promise<Pr | null>;
-  tryReuseAutoclosedPr?(pr: Pr): Promise<Pr | null>;
+  tryReuseAutoclosedPr?(pr: Pr, newTitle: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<LongCommitSha | null>;
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
+  extractRulesFromCodeOwnersLines?(cleanedLines: string[]): FileOwnerRule[];
 
   maxBodyLength(): number;
   labelCharLimit?(): number;

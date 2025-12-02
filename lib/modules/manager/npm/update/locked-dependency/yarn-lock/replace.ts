@@ -17,7 +17,7 @@ export function replaceConstraintVersion(
   const matchString = `(${escaped}(("|",|,)[^\n:]*)?:\n)(.*\n)*?(\\s+dependencies|\n[@a-z])`;
   // yarn will fill in the details later
   const matchResult = regEx(matchString).exec(lockFileContent);
-  // istanbul ignore if
+  /* v8 ignore next -- needs test */
   if (!matchResult) {
     logger.debug(
       { depName, constraint, newVersion },

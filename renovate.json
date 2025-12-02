@@ -1,14 +1,15 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>renovatebot/.github"],
-  "assignees": ["rarkins", "viceice"],
+  "assignees": ["viceice", "secustor", "jamietanna"],
+  "reviewers": ["@renovatebot/maintainers"],
   "semanticCommitScope": "deps",
   "automergeType": "pr",
   "prCreation": "immediate",
   "ignorePresets": [":ignoreModulesAndTests"],
   "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "test/**"],
   "rebaseWhen": "conflicted",
-  "baseBranches": ["$default", "next"],
+  "baseBranchPatterns": ["$default", "next"],
   "dockerfile": {
     "semanticCommitType": "build"
   },
@@ -64,7 +65,7 @@
     },
     {
       "description": "set branch prefix for node major updates to split from minor updates",
-      "matchPackageNames": ["node"],
+      "matchPackageNames": ["node", "containerbase/node-prebuild"],
       "matchUpdateTypes": ["major"],
       "additionalBranchPrefix": "major"
     },
@@ -79,12 +80,29 @@
       "matchPackageNames": ["*"],
       "matchBaseBranches": ["next"],
       "dependencyDashboardApproval": true
+    },
+    {
+      "description": "require approval on next branch lockfile maintenance",
+      "matchBaseBranches": ["next"],
+      "matchUpdateTypes": ["lockFileMaintenance"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Mark major version bumps with the breaking label",
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["breaking"]
+    },
+    {
+      "description": "Multiple major updates for got",
+      "matchDatasources": ["npm"],
+      "matchDepNames": ["got"],
+      "separateMultipleMajor": true
     }
   ],
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["config/options/index.ts"],
+      "managerFilePatterns": ["lib/config/options/index.ts"],
       "matchStrings": [
         "default: '(?<depName>ghcr.io/containerbase/sidecar):(?<currentValue>.*)'"
       ],
