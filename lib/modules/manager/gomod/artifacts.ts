@@ -341,7 +341,7 @@ export async function updateArtifacts({
         logger.debug('go generate command included');
         execCommands.push(`${cmd} generate ./...`);
       } else {
-        logger.info(
+        logger.once.warn(
           `go generate command requested as a post update action, but goGenerate is not permitted in the allowedUnsafeExecutions`,
         );
       }
@@ -455,10 +455,10 @@ export async function updateArtifacts({
       alreadyAdded.add(goModFileName);
     }
 
-    // add all files added when in go generate mode. unfortunately there is not
-    // a good way as there is with vendoring or go import path updates to detect
-    // this. Do this at the very very end to ensure we only capture files which
-    // would have been explicitly modified, added, or deleted from a go generate invocation
+    // add all files added when in `go generate` mode.
+    // unfortunately there is not a good way as there is with vendoring or go import path updates to detect this.
+    // Do this at the very very end to ensure we only capture files which would have been explicitly
+    // modified, added, or deleted from a `go generate` invocation
     if (useGoGenerate && goGenerateAllowed) {
       logger.debug(
         'Updating all modified files since generated files were added',

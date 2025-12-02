@@ -3100,7 +3100,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: [],
     allowedValues: ['goGenerate'],
-    stage: 'global',
+    stage: 'repository',
     globalOnly: true,
   },
   {

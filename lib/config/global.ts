@@ -2,16 +2,17 @@ import type { RenovateConfig, RepoGlobalConfig } from './types';
 
 export class GlobalConfig {
   // TODO: once global config work is complete, add a test to make sure this list includes all options with globalOnly=true (#9603)
-  private static readonly OPTIONS: (keyof RepoGlobalConfig)[] = [
-    'allowedCommands',
-    'allowedEnv',
+  static OPTIONS: readonly (keyof RepoGlobalConfig)[] = [
     'allowCustomCrateRegistries',
-    'allowedUnsafeExecutions',
     'allowedHeaders',
     'allowPlugins',
     'allowScripts',
-    'autodiscoverRepoSort',
+    'allowedCommands',
+    'allowedEnv',
+    'allowedHeaders',
+    'allowedUnsafeExecutions',
     'autodiscoverRepoOrder',
+    'autodiscoverRepoSort',
     'binarySource',
     'cacheDir',
     'cacheHardTtlMinutes',
@@ -27,10 +28,10 @@ export class GlobalConfig {
     'dryRun',
     'encryptedWarning',
     'endpoint',
-    'exposeAllEnv',
     'executionTimeout',
-    'githubTokenWarn',
+    'exposeAllEnv',
     'gitTimeout',
+    'githubTokenWarn',
     'httpCacheTtlDays',
     'ignorePrAuthor',
     'includeMirrors',

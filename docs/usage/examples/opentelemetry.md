@@ -22,7 +22,7 @@ services:
 
   # Prometheus for storing metrics
   prometheus:
-    image: prom/prometheus:v3.7.3
+    image: prom/prometheus:v3.8.0
     ports:
       - '9090:9090' # Web UI
       - '4318' # OTLP HTTP
@@ -36,7 +36,7 @@ services:
   otel-collector:
     # Using the Contrib version to access the spanmetrics connector.
     # If you don't need the spanmetrics connector, you can use the standard version
-    image: otel/opentelemetry-collector-contrib:0.140.1
+    image: otel/opentelemetry-collector-contrib:0.141.0
     volumes:
       - ./otel-collector-config.yml:/etc/otelcol-contrib/config.yaml
     ports:
