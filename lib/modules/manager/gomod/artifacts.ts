@@ -485,7 +485,6 @@ export async function updateArtifacts({
         }
       }
     }
-
     return res;
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {

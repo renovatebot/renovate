@@ -4,7 +4,6 @@ export class GlobalConfig {
   // TODO: once global config work is complete, add a test to make sure this list includes all options with globalOnly=true (#9603)
   static OPTIONS: readonly (keyof RepoGlobalConfig)[] = [
     'allowCustomCrateRegistries',
-    'allowedHeaders',
     'allowPlugins',
     'allowScripts',
     'allowedCommands',
