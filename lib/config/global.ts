@@ -9,6 +9,7 @@ export class GlobalConfig {
     'allowedCommands',
     'allowedEnv',
     'allowedHeaders',
+    'allowedUnsafeExecutions',
     'autodiscoverRepoOrder',
     'autodiscoverRepoSort',
     'binarySource',
