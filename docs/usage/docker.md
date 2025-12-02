@@ -191,17 +191,13 @@ Note: This preset only sets the global default for the [digest pinning flag](./c
 If you have configured package rules that set `pinDigests` to `true`, those will still apply.
 This is also the case if you use the [`docker:pinDigests` preset](./presets-docker.md#dockerpindigests), which adds a package rule that sets `pinDigests` to `true` for all packages from the docker datasource.
 
-If you want to disable the digest pinning introduced by the `docker:pinDigests` preset,
-you can override it with a package rule like this:
+If you want to disable the `docker:pinDigests` preset (e.g. if you want to use `config:best-practices` but not have digest pinning enabled),
+ignore the preset like this:
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchDatasources": ["docker"],
-      "pinDigests": false
-    }
-  ]
+  "extends": ["config:best-practices"],
+  "ignorePresets": ["docker:pinDigests"]
 }
 ```
 
