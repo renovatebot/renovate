@@ -139,7 +139,6 @@ If set to a valid path pointing to a file containing a _valid_ Renovate configur
 !!! warning
 If the file is missing or contains invalid configuration, the scan will be aborted.
 
-<!-- prettier-ignore -->
 !!! note
 You probably **shouldn’t use this** unless you have a very specific reason to override the repository’s normal configuration resolution process.
 
