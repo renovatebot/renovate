@@ -51,12 +51,12 @@ export function findDepConstraints(
             constraint,
           });
         }
-      } /* v8 ignore start -- needs test */ else {
+      } /* v8 ignore next -- needs test */ else {
         logger.warn(
           { parentDepName, depName, currentVersion, constraint },
           'Parent constraint is invalid',
         );
-      } /* v8 ignore stop -- needs test */
+      }
     }
   }
   if (dependencies) {

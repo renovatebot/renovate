@@ -1,4 +1,9 @@
 import {
+  ATTR_VCS_OWNER_NAME,
+  ATTR_VCS_PROVIDER_NAME,
+  ATTR_VCS_REPOSITORY_NAME,
+} from '@opentelemetry/semantic-conventions/incubating';
+import {
   isNonEmptyString,
   isNonEmptyStringAndNotWhitespace,
   isString,
@@ -170,6 +175,11 @@ export async function start(): Promise<number> {
       if (haveReachedLimits()) {
         break;
       }
+
+      const { owner, repo } = repositoryToOwnerAndRepo(
+        typeof repository === 'string' ? repository : repository.repository,
+      );
+
       await instrument(
         'repository',
         async () => {
@@ -190,6 +200,10 @@ export async function start(): Promise<number> {
         },
         {
           attributes: {
+            [ATTR_VCS_PROVIDER_NAME]: config.platform,
+            [ATTR_VCS_OWNER_NAME]: owner,
+            [ATTR_VCS_REPOSITORY_NAME]: repo,
+            /** @deprecated TODO remove */
             repository:
               typeof repository === 'string'
                 ? repository
@@ -232,4 +246,14 @@ export async function start(): Promise<number> {
     return 1;
   }
   return 0;
+}
+
+function repositoryToOwnerAndRepo(fullName: string): {
+  owner: string;
+  repo: string;
+} {
+  const parts = fullName.split('/');
+  const repo = parts.pop() ?? '';
+  const owner = parts.join('/');
+  return { owner, repo };
 }

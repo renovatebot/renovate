@@ -79,6 +79,7 @@ describe('workers/global/index', () => {
   it('handles config warnings and errors', async () => {
     parseConfigs.mockResolvedValueOnce({
       repositories: [],
+      // @ts-expect-error -- testing
       maintainYarnLock: true,
       foo: 1,
     });

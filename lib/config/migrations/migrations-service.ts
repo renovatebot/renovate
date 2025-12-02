@@ -59,7 +59,11 @@ import { UnpublishSafeMigration } from './custom/unpublish-safe-migration';
 import { UpdateLockFilesMigration } from './custom/update-lock-files-migration';
 import { UpgradeInRangeMigration } from './custom/upgrade-in-range-migration';
 import { VersionStrategyMigration } from './custom/version-strategy-migration';
-import type { Migration, MigrationConstructor } from './types';
+import type {
+  MigratableConfig,
+  Migration,
+  MigrationConstructor,
+} from './types';
 
 export class MigrationsService {
   static readonly removedProperties: ReadonlySet<string> = new Set([
@@ -170,13 +174,17 @@ export class MigrationsService {
   ];
 
   static run(
-    originalConfig: RenovateConfig,
+    originalConfig: MigratableConfig,
     parentKey?: string,
   ): RenovateConfig {
     const migratedConfig: RenovateConfig = {};
     const migrations = this.getMigrations(originalConfig, migratedConfig);
 
-    for (const [key, value] of Object.entries(originalConfig)) {
+    for (const [key, value] of Object.entries(originalConfig) as [
+      keyof RenovateConfig,
+      unknown,
+    ][]) {
+      // @ts-expect-error -- can't be narrowed
       migratedConfig[key] ??= value;
       const migration = MigrationsService.getMigration(migrations, key);
 
@@ -193,14 +201,14 @@ export class MigrationsService {
   }
 
   static isMigrated(
-    originalConfig: RenovateConfig,
+    originalConfig: MigratableConfig,
     migratedConfig: RenovateConfig,
   ): boolean {
     return !dequal(originalConfig, migratedConfig);
   }
 
   public static getMigrations(
-    originalConfig: RenovateConfig,
+    originalConfig: MigratableConfig,
     migratedConfig: RenovateConfig,
   ): readonly Migration[] {
     const migrations: Migration[] = [];
