@@ -389,18 +389,6 @@ const staticGroups = {
       },
     ],
   },
-  markdownlintCli2: {
-    description: 'Group markdownlint-cli2 packages',
-    packageRules: [
-      {
-        groupName: 'markdownlint-cli2',
-        matchPackageNames: [
-          'markdownlint-cli2',
-          'davidanson/markdownlint-cli2-action',
-        ],
-      },
-    ],
-  },
   micrometer: {
     description:
       "Group Micrometer packages together, e.g. 'io.micrometer:micrometer-core'.",
