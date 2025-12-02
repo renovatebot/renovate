@@ -1,5 +1,6 @@
 import {
   isArray,
+  isNumber,
   isPlainObject,
   isPrimitive,
   isString,
@@ -96,7 +97,13 @@ const helpers: Record<string, handlebars.HelperDelegate> = {
       return true;
     });
   },
-  add: (a, b) => parseInt(a) + parseInt(b),
+  add: (a, b) => {
+    if (isNumber(a) && isNumber(b)) {
+      return a + b;
+    }
+
+    throw new Error('add: inputs are not valid');
+  },
 };
 
 // Register all helpers from the single source of truth
