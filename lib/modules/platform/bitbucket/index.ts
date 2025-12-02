@@ -194,7 +194,6 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   cloneSubmodulesFilter,
-  ignorePrAuthor,
   bbMendAppDashboardStatus,
   bbUseDevelopmentBranch,
 }: RepoParams): Promise<RepoResult> {
