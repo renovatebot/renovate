@@ -73,6 +73,7 @@ export interface RenovateSharedConfig {
   branchPrefix?: string;
   branchPrefixOld?: string;
   bumpVersions?: BumpVersionConfig[];
+  changelogUrl?: string;
   commitBody?: string;
   commitBodyTable?: boolean;
   commitMessage?: string;
@@ -83,7 +84,6 @@ export interface RenovateSharedConfig {
   commitMessageTopic?: string;
   confidential?: boolean;
   configValidationError?: boolean;
-  changelogUrl?: string;
   dependencyDashboardApproval?: boolean;
   draftPR?: boolean;
   enabled?: boolean;
@@ -91,7 +91,6 @@ export interface RenovateSharedConfig {
   encrypted?: Record<string, string>;
   extends?: string[];
   extractVersion?: string;
-  managerFilePatterns?: string[];
   followTag?: string;
   force?: RenovateConfig;
   gitIgnoredAuthors?: string[];
@@ -109,12 +108,12 @@ export interface RenovateSharedConfig {
   keepUpdatedLabel?: string;
   labels?: string[];
   manager?: string;
+  managerFilePatterns?: string[];
   milestone?: number;
   minimumReleaseAge?: Nullish<string>;
+  npmToken?: string;
   npmrc?: string;
   npmrcMerge?: boolean;
-  npmToken?: string;
-
   pinDigests?: boolean;
   platformAutomerge?: boolean;
   platformCommit?: PlatformCommitOptions;
@@ -155,8 +154,8 @@ export interface RenovateSharedConfig {
   timezone?: string;
   unicodeEmoji?: boolean;
   updateNotScheduled?: boolean;
-  versioning?: string;
   versionCompatibility?: string;
+  versioning?: string;
 }
 
 /**
@@ -186,6 +185,8 @@ export interface GlobalOnlyConfigLegacy {
   baseDir?: string;
   cacheDir?: string;
   containerbaseDir?: string;
+  deleteAdditionalConfigFile?: boolean;
+  deleteConfigFile?: boolean;
   detectHostRulesFromEnv?: boolean;
   dockerCliOptions?: string;
   endpoint?: string;
@@ -197,18 +198,16 @@ export interface GlobalOnlyConfigLegacy {
   mergeConfidenceDatasources?: string[];
   mergeConfidenceEndpoint?: string;
   platform?: PlatformId;
-  processEnv?: Record<string, string>;
   prCommitsPerRunLimit?: number;
   privateKey?: string;
   privateKeyOld?: string;
   privateKeyPath?: string;
   privateKeyPathOld?: string;
+  processEnv?: Record<string, string>;
   redisPrefix?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
   useCloudMetadataServices?: boolean;
-  deleteConfigFile?: boolean;
-  deleteAdditionalConfigFile?: boolean;
 }
 
 /**
@@ -219,21 +218,27 @@ export interface GlobalOnlyConfigLegacy {
  * Should only contain config options where globalOnly=true.
  */
 export interface RepoGlobalConfig extends GlobalInheritableConfig {
-  allowedCommands?: string[];
   allowCustomCrateRegistries?: boolean;
   allowPlugins?: boolean;
   allowScripts?: boolean;
   allowShellExecutorForPostUpgradeCommands?: boolean;
+  allowedCommands?: string[];
   allowedEnv?: string[];
   allowedHeaders?: string[];
+  allowedUnsafeExecutions?: AllowedUnsafeExecution[];
+  autodiscoverRepoOrder?: SortMethod;
+  autodiscoverRepoSort?: RepoSortMethod;
   binarySource?: BinarySource;
   cacheDir?: string;
   cacheHardTtlMinutes?: number;
+  cachePrivatePackages?: boolean;
   cacheTtlOverride?: Record<string, number>;
+  configFileNames?: string[];
   containerbaseDir?: string;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerCliOptions?: string;
+  dockerMaxPages?: number;
   dockerSidecarImage?: string;
   dockerUser?: string;
   dryRun?: DryRunConfig;
@@ -243,26 +248,20 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   exposeAllEnv?: boolean;
   gitTimeout?: number;
   githubTokenWarn?: boolean;
+  httpCacheTtlDays?: number;
+  ignorePrAuthor?: boolean;
   includeMirrors?: boolean;
   localDir?: string;
   migratePresets?: Record<string, string>;
+  onboardingAutoCloseAge?: number;
   platform?: PlatformId;
   prCacheSyncMaxPages?: number;
   presetCachePersistence?: boolean;
-  httpCacheTtlDays?: number;
-  autodiscoverRepoSort?: RepoSortMethod;
-  autodiscoverRepoOrder?: SortMethod;
-  userAgent?: string;
-  dockerMaxPages?: number;
+  repositoryCacheForceLocal?: boolean;
   s3Endpoint?: string;
   s3PathStyle?: boolean;
-  cachePrivatePackages?: boolean;
-  repositoryCacheForceLocal?: boolean;
-  configFileNames?: string[];
-  ignorePrAuthor?: boolean;
-  allowedUnsafeExecutions?: AllowedUnsafeExecution[];
-  onboardingAutoCloseAge?: number;
   toolSettings?: ToolSettingsOptions;
+  userAgent?: string;
 }
 
 /**
@@ -273,27 +272,19 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
 export interface LegacyAdminConfig {
   baseDir?: string;
   localDir?: string;
-
   logContext?: string;
-
   onboarding?: boolean;
   onboardingBranch?: string;
   onboardingCommitMessage?: string;
-  onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
-  onboardingRebaseCheckbox?: boolean;
   onboardingConfig?: RenovateConfig;
   onboardingConfigFileName?: string;
-
+  onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
+  onboardingRebaseCheckbox?: boolean;
   optimizeForDisabled?: boolean;
-
   persistRepoData?: boolean;
-
   prCommitsPerRunLimit?: number;
-
   requireConfig?: RequiredConfig;
-
   useCloudMetadataServices?: boolean;
-
   writeDiscoveredRepos?: string;
 }
 
@@ -365,113 +356,95 @@ export interface RenovateConfig
     AssigneesAndReviewersConfig,
     ConfigMigration,
     RenovateInternalConfig {
-  s3Endpoint?: string;
-  s3PathStyle?: boolean;
-  reportPath?: string;
-  reportType?: 'logging' | 'file' | 's3' | null;
-  depName?: string;
+  additionalBranchPrefix?: string;
   /** user configurable base branch patterns*/
-  baseBranchPatterns?: string[];
-  useBaseBranchConfig?: UseBaseBranchConfigType;
   baseBranch?: string;
-  defaultBranch?: string;
+  baseBranchPatterns?: string[];
+  branchConcurrentLimit?: number | null;
   branchList?: string[];
+  branchTopic?: string;
+  checkedBranches?: string[];
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
+  commitHourlyLimit?: number;
+  configFileNames?: string[];
+  configWarningReuseIssue?: boolean;
+  constraints?: Record<string, string>;
+  constraintsFiltering?: ConstraintsFilter;
+  customDatasources?: Record<string, CustomDatasourceConfig>;
+  customManagers?: CustomManager[];
+  customizeDashboard?: Record<string, string>;
+  defaultBranch?: string;
+  defaultRegistryUrls?: string[];
+  depName?: string;
+  dependencyDashboard?: boolean;
+  dependencyDashboardAutoclose?: boolean;
+  dependencyDashboardChecks?: Record<string, string>;
+  dependencyDashboardFooter?: string;
+  dependencyDashboardHeader?: string;
+  dependencyDashboardIssue?: number;
+  dependencyDashboardLabels?: string[];
+  dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
+  dependencyDashboardReportAbandonment?: boolean;
+  dependencyDashboardTitle?: string;
   description?: string | string[];
   detectGlobalManagerConfig?: boolean;
+  /**
+   * User configured environment variables that Renovate uses when executing package manager commands
+   */
+  env?: UserEnv;
   errors?: ValidationMessage[];
+  fetchChangeLogs?: FetchChangeLogsOptions;
+  fileList?: string[];
   forkModeDisallowMaintainerEdits?: boolean;
   forkProcessing?: 'auto' | 'enabled' | 'disabled';
   forkToken?: string;
-
   gitAuthor?: string;
-
   hostRules?: HostRule[];
-
+  ignorePresets?: string[];
   inheritConfig?: boolean;
   inheritConfigFileName?: string;
   inheritConfigRepoName?: string;
   inheritConfigStrict?: boolean;
-
-  ignorePresets?: string[];
-
-  fileList?: string[];
-  configWarningReuseIssue?: boolean;
-  dependencyDashboard?: boolean;
-  dependencyDashboardAutoclose?: boolean;
-  dependencyDashboardChecks?: Record<string, string>;
-  dependencyDashboardIssue?: number;
-  dependencyDashboardTitle?: string;
-  dependencyDashboardHeader?: string;
-  dependencyDashboardFooter?: string;
-  dependencyDashboardLabels?: string[];
-  dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
-  dependencyDashboardReportAbandonment?: boolean;
+  logLevelRemap?: LogLevelRemap[];
+  minimumGroupSize?: number;
+  minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
   mode?: 'silent' | 'full';
+  osvVulnerabilityAlerts?: boolean;
   packageFile?: string;
   packageRules?: PackageRule[];
-  postUpdateOptions?: string[];
-  branchConcurrentLimit?: number | null;
   parentOrg?: string;
+  postUpdateOptions?: string[];
   prConcurrentLimit?: number;
-  commitHourlyLimit?: number;
   prHourlyLimit?: number;
-
   printConfig?: boolean;
-
   pruneStaleBranches?: boolean;
-
-  defaultRegistryUrls?: string[];
-  registryUrls?: string[] | null;
   registryAliases?: Record<string, string>;
-
+  registryUrls?: string[] | null;
   /**
    * What is this used for?
    * @deprecated
    */
   renovateJsonPresent?: boolean;
-
-  repoIsOnboarded?: boolean;
   repoIsActivated?: boolean;
-
+  repoIsOnboarded?: boolean;
+  reportPath?: string;
+  reportType?: 'logging' | 'file' | 's3' | null;
+  s3Endpoint?: string;
+  s3PathStyle?: boolean;
+  secrets?: Record<string, string>;
+  sharedVariableName?: string;
+  skipInstalls?: boolean | null;
+  statusCheckNames?: Record<StatusCheckKey, string | null>;
+  toolSettings?: ToolSettingsOptions;
   topLevelOrg?: string;
   updateInternalDeps?: boolean;
   updateType?: UpdateType;
-
-  warnings?: ValidationMessage[];
-  vulnerabilityAlerts?: RenovateSharedConfig;
-  osvVulnerabilityAlerts?: boolean;
-  vulnerabilitySeverity?: string;
-  customManagers?: CustomManager[];
-  customDatasources?: Record<string, CustomDatasourceConfig>;
-
-  fetchChangeLogs?: FetchChangeLogsOptions;
-  secrets?: Record<string, string>;
+  useBaseBranchConfig?: UseBaseBranchConfigType;
   variables?: Record<string, string>;
-
-  constraints?: Record<string, string>;
-  skipInstalls?: boolean | null;
-
-  constraintsFiltering?: ConstraintsFilter;
-
-  checkedBranches?: string[];
-  customizeDashboard?: Record<string, string>;
-
-  statusCheckNames?: Record<StatusCheckKey, string | null>;
-  /**
-   * User configured environment variables that Renovate uses when executing package manager commands
-   */
-  env?: UserEnv;
-  logLevelRemap?: LogLevelRemap[];
-
-  branchTopic?: string;
-  additionalBranchPrefix?: string;
-  sharedVariableName?: string;
-  minimumGroupSize?: number;
-  configFileNames?: string[];
-  minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
-  toolSettings?: ToolSettingsOptions;
+  vulnerabilityAlerts?: RenovateSharedConfig;
+  vulnerabilitySeverity?: string;
+  warnings?: ValidationMessage[];
 }
 
 const CustomDatasourceFormats = [
@@ -571,23 +544,23 @@ export interface PackageRule
   matchDepNames?: string[];
   matchDepTypes?: string[];
   matchFileNames?: string[];
+  matchJsonata?: string[];
   matchManagers?: string[];
   matchNewValue?: string;
   matchPackageNames?: string[];
   matchRepositories?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
-  matchJsonata?: string[];
   overrideDatasource?: string;
   overrideDepName?: string;
   overridePackageName?: string;
   registryUrls?: string[] | null;
   replacementName?: string;
   replacementVersion?: string;
-  sourceUrl?: string;
   sourceDirectory?: string;
-  vulnerabilitySeverity?: string;
+  sourceUrl?: string;
   vulnerabilityFixVersion?: string;
+  vulnerabilitySeverity?: string;
 }
 
 export interface ValidationMessage {
