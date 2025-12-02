@@ -1,3 +1,7 @@
+## Config Migration Needed
+
+ - [ ] <!-- create-config-migration-pr --> Select this checkbox to let Renovate create an automated Config Migration PR.
+
 ## Pending Approval
 
 The following branches are pending approval. To create them, click on a checkbox below.
@@ -35,7 +39,3 @@ The following updates have all been created. To force a retry/rebase of any, cli
 The following updates are blocked by an existing closed PR. To recreate the PR, click on a checkbox below.
 
  - [ ] <!-- recreate-branch=renovate/docker-renovate-renovate-16.10.8 -->[Update renovate/renovate:16.10.8 Docker digest to 6f9a209](../pull/1)
-
-## Config Migration Needed
-
- - [ ] <!-- create-config-migration-pr --> Select this checkbox to let Renovate create an automated Config Migration PR.
