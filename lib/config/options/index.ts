@@ -3099,7 +3099,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     subType: 'string',
     default: [],
-    stage: 'global',
+    stage: 'repository',
     globalOnly: true,
   },
   {
