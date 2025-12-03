@@ -418,9 +418,12 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        vi.fn().mockImplementationOnce(() => ({
-          getAccessToken: vi.fn().mockResolvedValue('some-token'),
-        })),
+        // TODO: fix typing
+        vi.fn<any>(
+          class {
+            getAccessToken = vi.fn().mockResolvedValue('some-token');
+          },
+        ),
       );
 
       hostRules.find.mockReturnValue({});
@@ -450,9 +453,12 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        vi.fn().mockImplementationOnce(() => ({
-          getAccessToken: vi.fn().mockResolvedValue('some-token'),
-        })),
+        // TODO: fix typing
+        vi.fn<any>(
+          class GoogleAuth {
+            getAccessToken = vi.fn().mockResolvedValue('some-token');
+          },
+        ),
       );
 
       hostRules.find.mockReturnValue({});
@@ -483,9 +489,12 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        vi.fn().mockImplementationOnce(() => ({
-          getAccessToken: vi.fn().mockResolvedValue('some-token'),
-        })),
+        // TODO: fix typing
+        vi.fn<any>(
+          class GoogleAuth {
+            getAccessToken = vi.fn().mockResolvedValue('some-token');
+          },
+        ),
       );
 
       const res = await getDigest(
@@ -514,9 +523,12 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        vi.fn().mockImplementationOnce(() => ({
-          getAccessToken: vi.fn().mockResolvedValue('some-token'),
-        })),
+        // TODO: fix typing
+        vi.fn<any>(
+          class GoogleAuth {
+            getAccessToken = vi.fn().mockResolvedValue('some-token');
+          },
+        ),
       );
 
       const res = await getDigest(
@@ -580,9 +592,12 @@ describe('modules/datasource/docker/index', () => {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
       googleAuth.GoogleAuth.mockImplementationOnce(
-        vi.fn().mockImplementationOnce(() => ({
-          getAccessToken: vi.fn().mockResolvedValue(undefined),
-        })),
+        // TODO: fix typing
+        vi.fn<any>(
+          class GoogleAuth {
+            getAccessToken = vi.fn();
+          },
+        ),
       );
       const res = await getDigest(
         {
@@ -601,9 +616,12 @@ describe('modules/datasource/docker/index', () => {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
       googleAuth.GoogleAuth.mockImplementationOnce(
-        vi.fn().mockImplementationOnce(() => ({
-          getAccessToken: vi.fn().mockRejectedValue('some-error'),
-        })),
+        // TODO: fix typing
+        vi.fn<any>(
+          class GoogleAuth {
+            getAccessToken = vi.fn().mockRejectedValue('some-error');
+          },
+        ),
       );
       const res = await getDigest(
         {

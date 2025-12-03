@@ -51,7 +51,7 @@ const dockerAdminConfig = {
   ...adminConfig,
   binarySource: 'docker',
   dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
-};
+} satisfies RepoGlobalConfig;
 
 const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };

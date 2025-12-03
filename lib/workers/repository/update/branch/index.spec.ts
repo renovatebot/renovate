@@ -272,6 +272,21 @@ describe('workers/repository/update/branch/index', () => {
         await branchWorker.processBranch(config);
         expect(reuse.shouldReuseExistingBranch).toHaveBeenCalled();
       });
+
+      it('does not skip branch if minimumReleaseAgeBehaviour=timestamp-required and minimumReleaseAge=0 days', async () => {
+        schedule.isScheduledNow.mockReturnValueOnce(true);
+        config.prCreation = 'not-pending';
+        config.upgrades = partial<BranchUpgradeConfig>([
+          {
+            releaseTimestamp: undefined,
+            minimumReleaseAge: '0 days',
+            minimumReleaseAgeBehaviour: 'timestamp-required',
+          },
+        ]);
+        scm.isBranchModified.mockResolvedValueOnce(false);
+        await branchWorker.processBranch(config);
+        expect(reuse.shouldReuseExistingBranch).toHaveBeenCalled();
+      });
     });
 
     it('skips branch if minimumConfidence not met', async () => {
@@ -2408,7 +2423,6 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo hardcoded-string$'],
-        trustLevel: 'high',
         localDir: '/localDir',
       });
 
@@ -2523,7 +2537,6 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo hardcoded-string$'],
-        trustLevel: 'high',
         localDir: '/localDir',
         cacheDir,
       });
@@ -2629,7 +2642,6 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo hardcoded-string$'],
-        trustLevel: 'high',
         localDir: '/localDir',
         cacheDir,
       });

@@ -2,6 +2,7 @@
 import _timers from 'timers/promises';
 import { mockDeep } from 'vitest-mock-extended';
 import type { RepoParams } from '..';
+import { GlobalConfig } from '../../../config/global';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ARCHIVED,
@@ -31,6 +32,7 @@ const gitlabApiHost = 'https://gitlab.com';
 
 describe('modules/platform/gitlab/index', () => {
   beforeEach(() => {
+    GlobalConfig.reset();
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(
@@ -341,10 +343,10 @@ describe('modules/platform/gitlab/index', () => {
           default_branch: 'master',
           mirror: true,
         });
+      GlobalConfig.set({ includeMirrors: true });
       expect(
         await gitlab.initRepo({
           repository: 'some/repo',
-          includeMirrors: true,
         }),
       ).toEqual({
         defaultBranch: 'master',
@@ -556,6 +558,7 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -594,6 +597,7 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -632,6 +636,7 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -691,6 +696,7 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -773,6 +779,7 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -818,6 +825,7 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -867,6 +875,7 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -1869,6 +1878,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'branch a pr',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -1892,6 +1902,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'branch a pr',
             state: 'merged',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -1916,6 +1927,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'branch a pr',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -1941,6 +1953,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'branch a pr',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -1965,6 +1978,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'Draft: branch a pr',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -1989,6 +2003,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'WIP: branch a pr',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -2013,6 +2028,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'branch a pr',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -3390,10 +3406,10 @@ describe('modules/platform/gitlab/index', () => {
           {
             iid: 1,
             source_branch: 'branch-a',
+            target_branch: 'branch-new',
             title: 'branch a pr',
             description: 'a merge request',
             state: 'opened',
-            target_branch: 'branch-b',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -3406,6 +3422,7 @@ describe('modules/platform/gitlab/index', () => {
           description: 'body',
           state: 'opened',
           target_branch: 'branch-new',
+          created_at: '2025-05-19T12:00:00.000Z',
         });
       await expect(
         gitlab.updatePr({
@@ -3444,6 +3461,7 @@ describe('modules/platform/gitlab/index', () => {
           title: 'title',
           description: 'body',
           state: 'opened',
+          created_at: '2025-05-19T12:00:00.000Z',
         })
         .post('/api/v4/projects/undefined/merge_requests/1/approve')
         .reply(200);
@@ -3486,6 +3504,7 @@ describe('modules/platform/gitlab/index', () => {
           title: 'title',
           description: 'a merge requbody',
           state: 'closed',
+          created_at: '2025-05-19T12:00:00.000Z',
         });
       await expect(
         gitlab.updatePr({
@@ -3524,6 +3543,7 @@ describe('modules/platform/gitlab/index', () => {
           title: 'title',
           description: 'body',
           state: 'opened',
+          created_at: '2025-05-19T12:00:00.000Z',
         });
       await expect(
         gitlab.updatePr({
@@ -3590,7 +3610,7 @@ describe('modules/platform/gitlab/index', () => {
 
   ## Open
 
-These updates have all been created already. Click a checkbox below to force a retry/rebase of any.
+These updates have all been created already. To force a retry/rebase of any, click on a checkbox below.
 
  - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](../pull/2433) (\`gh-got\`, \`gl-got\`, \`got\`)
 `;

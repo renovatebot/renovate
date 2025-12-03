@@ -112,6 +112,14 @@ module.exports = {
 };
 ```
 
+## allowedUnsafeExecutions
+
+This should be configured to a list of commands which are allowed to be run automatically as part of a dependency upgrade.
+
+This is a separate class of commands that could be executed compared to [`allowedCommands`](#allowedcommands), or package managers that are controlled with [`allowScripts=true`](#allowscripts) and [`ignoreScripts=false`](./configuration-options.md#ignorescripts), where seemingly "safe" commands can result in code execution.
+As there is a security risk of running these commands automatically when a dependency upgrades, self hosted implementations need to explicitly declare which commands are permitted for their installation.
+For more details of where this may be found, see ["Trusting Repository Developers"](./security-and-permissions.md#trusting-repository-developers).
+
 ## autodiscover
 
 When you enable `autodiscover`, by default, Renovate runs on _every_ repository that the bot account can access.
