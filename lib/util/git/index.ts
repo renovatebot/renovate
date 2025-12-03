@@ -591,6 +591,8 @@ export async function getRepoStatus(path?: string): Promise<StatusResult> {
 }
 
 export function branchExists(branchName: string): boolean {
+  // TODO
+
   return !!config.branchCommits[branchName];
 }
 
