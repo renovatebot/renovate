@@ -3592,7 +3592,7 @@ describe('modules/platform/gitlab/index', () => {
 
   ## Open
 
-These updates have all been created already. Click a checkbox below to force a retry/rebase of any.
+These updates have all been created already. To force a retry/rebase of any, click on a checkbox below.
 
  - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](../pull/2433) (\`gh-got\`, \`gl-got\`, \`got\`)
 `;
