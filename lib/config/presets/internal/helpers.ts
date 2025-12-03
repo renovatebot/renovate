@@ -27,7 +27,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         changelogUrl: '{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}',
-        matchSourceUrls: ['https://github.com/**/*'],
+        matchSourceUrls: ['https://github.com/**'],
         matchUpdateTypes: ['digest'],
       },
     ],
