@@ -134,7 +134,7 @@ export async function initPlatform({
     bitbucketServerVersion ??= body.version;
     if (isNonEmptyStringAndNotWhitespace(headers['x-ausername']) && !username) {
       logger.debug(
-        { 'x-username': headers['x-ausername'] },
+        { 'x-ausername': headers['x-ausername'] },
         'Platform: No username configured using headers["x-ausername"]',
       );
       config.username = headers['x-ausername'];
