@@ -1660,7 +1660,7 @@ describe('modules/platform/bitbucket/index', () => {
   });
 
   describe('massageMarkdown()', () => {
-    it('returns diff files', () => {
+    it('removes html tags', () => {
       const prBody =
         '<details><summary>foo</summary>\n<blockquote>\n\n<details><summary>text</summary>' +
         '\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->' +
@@ -1669,7 +1669,20 @@ describe('modules/platform/bitbucket/index', () => {
       expect(bitbucket.massageMarkdown(prBody)).toMatchSnapshot();
     });
 
-    it('updates dependencies section to block nested list', () => {
+    it('updates abandoned dependencies heading and place note inside', () => {
+      const prBody =
+        '> ℹ **Note**\n>\n' +
+        'These dependencies have not received updates for an extended period and may be unmaintained:\n' +
+        '<details><summary>View abandoned dependencies (6)</summary>';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '## Abandoned dependencies  (6)\n' +
+          '> ℹ **Note**\n>\n' +
+          'These dependencies have not received updates for an extended period and may be unmaintained:\n',
+      );
+    });
+
+    it('updates detected dependencies section to block quote with nested list', () => {
       const prBody =
         '## Detected dependencies\n\n' +
         '<details><summary>dockerfile</summary>\n<blockquote>\n\n' +
@@ -1683,8 +1696,8 @@ describe('modules/platform/bitbucket/index', () => {
       expect(bitbucket.massageMarkdown(prBody)).toEqual(
         '## Detected dependencies\n\n' +
           '**dockerfile**\n\n' +
-          '> - `app1/Dockerfile`\n>     - `node:24`\n>     - `temurin:27`\n>\n\n' +
-          '> - `app2/Dockerfile`\n>     - `node:20`\n>     - `python:3:14`\n>\n\n' +
+          '> - `app1/Dockerfile`\n>     - `node:24`\n>     - `temurin:27`\n\n' +
+          '> - `app2/Dockerfile`\n>     - `node:20`\n>     - `python:3:14`\n\n' +
           '\n\n**npm**\n\n' +
           '> - `package.json`\n>     - `@biomejs/biome:2.0.0`\n\n',
       );

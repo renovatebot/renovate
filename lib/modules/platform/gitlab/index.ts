@@ -59,9 +59,9 @@ import {
 } from './http';
 import { getMR, updateMR } from './merge-request';
 import { GitlabPrCache } from './pr-cache';
+import type { GitLabMergeRequest } from './schema';
 import { LastPipelineId } from './schema';
 import type {
-  GitLabMergeRequest,
   GitlabComment,
   GitlabIssue,
   GitlabPr,

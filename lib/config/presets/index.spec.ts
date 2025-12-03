@@ -579,6 +579,7 @@ describe('config/presets/index', () => {
           'mergeConfidence:age-confidence-badges',
           'replacements:all',
           'workarounds:all',
+          'helpers:githubDigestChangelogs',
         ],
       });
     });

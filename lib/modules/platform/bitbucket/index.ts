@@ -603,6 +603,8 @@ async function closeIssue(issueNumber: number): Promise<void> {
 
 export function massageMarkdown(input: string): string {
   // Remove any HTML we use
+  // Bitbucket doesn't currently support collapsible syntax; https://jira.atlassian.com/browse/BCLOUD-20231
+  // See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
   return (
     smartTruncate(input, maxBodyLength())
       .replace(
@@ -613,25 +615,29 @@ export function massageMarkdown(input: string): string {
         'checking the rebase/retry box above',
         'renaming the PR to start with "rebase!"',
       )
+      .replace(
+        regEx(/<summary>View abandoned dependencies(.*)<\/summary>/),
+        '## Abandoned dependencies $1',
+      )
+      .replace(regEx(/(>[\s\S]+?)(## Abandoned dependencies.*)/), '$2\n$1')
+      .replace(regEx(/<\/?summary>/g), '**')
+      .replace(regEx(/<\/?details>/g), '')
+      .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
+      .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
+      .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
       // Massage html <blockquote> sections
       .replace(
         regEx(/<blockquote>([\s\S]*?)<\/blockquote>/g),
         (_match, inner: string) => {
           const massagedBlockQuote = inner
-            .replace(/^\s*$/gm, '') // Remove empty lines
-            .replace(/^(.+)$/gm, '>$1') // Then prefix the rest
+            .replace(regEx(/^\s*$/gm), '') // Remove empty lines
+            .replace(regEx(/^(.+)$/gm), '>$1') // Then prefix the rest
             .replace(regEx(/ - /g), '     - ') // level two unordered list
-            .replace(regEx(/<summary>(.*)<\/summary>/g), ' - `$1`'); // level one unordered list
+            .replace(regEx(/\*\*(.*)\*\*/g), ' - `$1`'); // level one unordered list
 
           return massagedBlockQuote;
         },
       )
-      .replace(regEx(/<\/?summary>/g), '**')
-      .replace(regEx(/<\/?details>/g), '')
-      .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-
-      .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
-      .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
   );
 }
 
