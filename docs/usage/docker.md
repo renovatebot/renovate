@@ -187,6 +187,7 @@ Add `"docker:enableMajor"` to your `extends` array.
 
 Add `"default:pinDigestsDisabled"` to your `extends` array.
 
+<!-- markdownlint-disable MD046 -->
 <!-- prettier-ignore -->
 !!! note
     This preset only sets the global default for the [digest pinning flag] (./configuration-options.md#pindigests) to `false`.
@@ -202,6 +203,8 @@ Add `"default:pinDigestsDisabled"` to your `extends` array.
       "ignorePresets": ["docker:pinDigests"]
     }
     ```
+
+<!-- markdownlint-enable MD046 -->
 
 ### Automerge digest updates
 
