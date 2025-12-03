@@ -390,6 +390,28 @@ describe('modules/platform/bitbucket-server/index', () => {
           });
         });
 
+        it('should collect username from headers if token with no username', async () => {
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/application-properties`)
+            .reply(200, { version: '8.0.0' }, { 'x-ausername': 'user_name' });
+
+          expect(
+            await bitbucket.initPlatform({
+              endpoint: url.href,
+              token: '123',
+            }),
+          ).toEqual({
+            endpoint: ensureTrailingSlash(url.href),
+          });
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            {
+              'x-ausername': 'user_name',
+            },
+            'Platform: No username configured using headers["x-ausername"]',
+          );
+        });
+
         it('should use fallback gitAuthor if user info has empty email address', async () => {
           httpMock
             .scope(urlHost)
