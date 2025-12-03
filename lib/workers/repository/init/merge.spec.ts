@@ -391,6 +391,7 @@ describe('workers/repository/init/merge', () => {
         await mergeRenovateConfig({
           ...config,
           requireConfig: 'ignored',
+          // @ts-expect-error -- TODO: do we still need this?
           configFileParsed: undefined,
           warnings: undefined,
           secrets: undefined,

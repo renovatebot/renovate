@@ -68,11 +68,10 @@ export class BitbucketHttp extends HttpBase<BitbucketHttpOptions> {
 
       // Override other page-related attributes
       resultBody.pagelen = resultBody.values.length;
-      /* v8 ignore start -- hard to test all branches */
+      /* v8 ignore next -- hard to test all branches */
       resultBody.size =
         page <= MAX_PAGES ? resultBody.values.length : undefined;
       resultBody.next = page <= MAX_PAGES ? nextURL : undefined;
-      /* v8 ignore stop */
     }
 
     return result as HttpResponse<T>;

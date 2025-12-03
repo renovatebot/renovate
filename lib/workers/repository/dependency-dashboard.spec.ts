@@ -39,13 +39,12 @@ type PrUpgrade = BranchUpgradeConfig;
 const massageMdSpy = platform.massageMarkdown;
 const getIssueSpy = platform.getIssue;
 
-let config: RenovateConfig;
+let config: BranchConfig;
 
 beforeEach(() => {
   massageMdSpy.mockImplementation(massageMarkdown);
   platform.maxBodyLength.mockReturnValue(60000); // Github Limit
-  config = getConfig();
-  config.platform = 'github';
+  config = getConfig() as BranchConfig;
   config.errors = [];
   config.warnings = [];
 });
