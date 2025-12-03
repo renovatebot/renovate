@@ -226,10 +226,14 @@ export function handleLongFormDep(ctx: Ctx): Ctx {
 
 export function handlePlugin(ctx: Ctx): Ctx {
   const methodName = loadFromTokenMap(ctx, 'methodName')[0];
-  const pluginName = loadFromTokenMap(ctx, 'pluginName')[0];
+  const pluginNameTokens = loadFromTokenMap(ctx, 'pluginName');
   const pluginVersion = loadFromTokenMap(ctx, 'version');
 
-  const plugin = pluginName.value;
+  const plugin = interpolateString(pluginNameTokens, ctx);
+  if (!plugin) {
+    return ctx;
+  }
+
   const depName =
     methodName.value === 'kotlin' ? `org.jetbrains.kotlin.${plugin}` : plugin;
   const packageName = `${depName}:${depName}.gradle.plugin`;

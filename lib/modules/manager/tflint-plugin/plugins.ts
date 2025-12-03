@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
@@ -27,7 +27,7 @@ export function extractTFLintPlugin(
     const line = lines[lineNumber];
 
     // istanbul ignore else
-    if (is.string(line)) {
+    if (isString(line)) {
       // `{` will be counted with +1 and `}` with -1.
       // Therefore if we reach braceCounter == 0 then we found the end of the tflint configuration block.
       const openBrackets = (line.match(regEx(/\{/g)) ?? []).length;

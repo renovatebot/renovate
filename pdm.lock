@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:4ddb0a6a81d10ff83e75463cf154c2a2e6bc37279017608f7a167a6ed75dacd7"
+content_hash = "sha256:165a31b404735b32815b271d32c51f8fcdfeb66647738d0ed74d5a24bb910308"
 
 [[metadata.targets]]
 requires_python = ">=3.11"
@@ -26,16 +26,16 @@ files = [
 
 [[package]]
 name = "backrefs"
-version = "5.9"
+version = "6.1"
 requires_python = ">=3.9"
 summary = "A wrapper around re and regex that adds additional back references."
 groups = ["default"]
 files = [
-    {file = "backrefs-5.9-py311-none-any.whl", hash = "sha256:6907635edebbe9b2dc3de3a2befff44d74f30a4562adbb8b36f21252ea19c5cf"},
-    {file = "backrefs-5.9-py312-none-any.whl", hash = "sha256:7fdf9771f63e6028d7fee7e0c497c81abda597ea45d6b8f89e8ad76994f5befa"},
-    {file = "backrefs-5.9-py313-none-any.whl", hash = "sha256:cc37b19fa219e93ff825ed1fed8879e47b4d89aa7a1884860e2db64ccd7c676b"},
-    {file = "backrefs-5.9-py314-none-any.whl", hash = "sha256:df5e169836cc8acb5e440ebae9aad4bf9d15e226d3bad049cf3f6a5c20cc8dc9"},
-    {file = "backrefs-5.9.tar.gz", hash = "sha256:808548cb708d66b82ee231f962cb36faaf4f2baab032f2fbb783e9c2fdddaa59"},
+    {file = "backrefs-6.1-py311-none-any.whl", hash = "sha256:e82bba3875ee4430f4de4b6db19429a27275d95a5f3773c57e9e18abc23fd2b7"},
+    {file = "backrefs-6.1-py312-none-any.whl", hash = "sha256:c64698c8d2269343d88947c0735cb4b78745bd3ba590e10313fbf3f78c34da5a"},
+    {file = "backrefs-6.1-py313-none-any.whl", hash = "sha256:4c9d3dc1e2e558965202c012304f33d4e0e477e1c103663fd2c3cc9bb18b0d05"},
+    {file = "backrefs-6.1-py314-none-any.whl", hash = "sha256:13eafbc9ccd5222e9c1f0bec563e6d2a6d21514962f11e7fc79872fd56cbc853"},
+    {file = "backrefs-6.1.tar.gz", hash = "sha256:3bba1749aafe1db9b915f00e0dd166cba613b6f788ffd63060ac3485dc9be231"},
 ]
 
 [[package]]
@@ -51,13 +51,13 @@ files = [
 
 [[package]]
 name = "certifi"
-version = "2025.10.5"
+version = "2025.11.12"
 requires_python = ">=3.7"
 summary = "Python package for providing Mozilla's CA Bundle."
 groups = ["default"]
 files = [
-    {file = "certifi-2025.10.5-py3-none-any.whl", hash = "sha256:0f212c2744a9bb6de0c56639a6f68afe01ecd92d91f14ae897c4fe7bbeeef0de"},
-    {file = "certifi-2025.10.5.tar.gz", hash = "sha256:47c09d31ccf2acf0be3f701ea53595ee7e0b8fa08801c6624be771df09ae7b43"},
+    {file = "certifi-2025.11.12-py3-none-any.whl", hash = "sha256:97de8790030bbd5c2d96b7ec782fc2f7820ef8dba6db909ccf95449f2d062d4b"},
+    {file = "certifi-2025.11.12.tar.gz", hash = "sha256:d8ab5478f2ecd78af242878415affce761ca6bc54a22a27e026d7c25357c3316"},
 ]
 
 [[package]]
@@ -137,7 +137,7 @@ files = [
 
 [[package]]
 name = "click"
-version = "8.3.0"
+version = "8.3.1"
 requires_python = ">=3.10"
 summary = "Composable command line interface toolkit"
 groups = ["default"]
@@ -145,8 +145,8 @@ dependencies = [
     "colorama; platform_system == \"Windows\"",
 ]
 files = [
-    {file = "click-8.3.0-py3-none-any.whl", hash = "sha256:9b9f285302c6e3064f4330c05f05b81945b2a39544279343e6e7c5f27a9baddc"},
-    {file = "click-8.3.0.tar.gz", hash = "sha256:e7b8232224eba16f4ebe410c25ced9f7875cb5f3263ffc93cc3e8da705e229c4"},
+    {file = "click-8.3.1-py3-none-any.whl", hash = "sha256:981153a64e25f12d547d3426c367a4857371575ee7ad18df2a6183ab0545b2a6"},
+    {file = "click-8.3.1.tar.gz", hash = "sha256:12ff4785d337a1bb490bb7e9c2b1ee5da3112e94a8622f26a6c77f5d2fc6842a"},
 ]
 
 [[package]]
@@ -200,16 +200,13 @@ files = [
 
 [[package]]
 name = "markdown"
-version = "3.9"
-requires_python = ">=3.9"
+version = "3.10"
+requires_python = ">=3.10"
 summary = "Python implementation of John Gruber's Markdown."
 groups = ["default"]
-dependencies = [
-    "importlib-metadata>=4.4; python_version < \"3.10\"",
-]
 files = [
-    {file = "markdown-3.9-py3-none-any.whl", hash = "sha256:9f4d91ed810864ea88a6f32c07ba8bee1346c0cc1f6b1f9f6c822f2a9667d280"},
-    {file = "markdown-3.9.tar.gz", hash = "sha256:d2900fe1782bd33bdbbd56859defef70c2e78fc46668f8eb9df3128138f2cb6a"},
+    {file = "markdown-3.10-py3-none-any.whl", hash = "sha256:b5b99d6951e2e4948d939255596523444c0e677c669700b1d17aa4a8a464cb7c"},
+    {file = "markdown-3.10.tar.gz", hash = "sha256:37062d4f2aa4b2b6b32aefb80faa300f82cc790cb949a35b8caede34f2b68c0e"},
 ]
 
 [[package]]
@@ -361,26 +358,26 @@ files = [
 
 [[package]]
 name = "mkdocs-material"
-version = "9.6.22"
+version = "9.7.0"
 requires_python = ">=3.8"
 summary = "Documentation that simply works"
 groups = ["default"]
 dependencies = [
-    "babel~=2.10",
-    "backrefs~=5.7.post1",
-    "colorama~=0.4",
-    "jinja2~=3.1",
-    "markdown~=3.2",
-    "mkdocs-material-extensions~=1.3",
-    "mkdocs~=1.6",
-    "paginate~=0.5",
-    "pygments~=2.16",
-    "pymdown-extensions~=10.2",
-    "requests~=2.26",
+    "babel>=2.10",
+    "backrefs>=5.7.post1",
+    "colorama>=0.4",
+    "jinja2>=3.1",
+    "markdown>=3.2",
+    "mkdocs-material-extensions>=1.3",
+    "mkdocs>=1.6",
+    "paginate>=0.5",
+    "pygments>=2.16",
+    "pymdown-extensions>=10.2",
+    "requests>=2.26",
 ]
 files = [
-    {file = "mkdocs_material-9.6.22-py3-none-any.whl", hash = "sha256:14ac5f72d38898b2f98ac75a5531aaca9366eaa427b0f49fc2ecf04d99b7ad84"},
-    {file = "mkdocs_material-9.6.22.tar.gz", hash = "sha256:87c158b0642e1ada6da0cbd798a3389b0bc5516b90e5ece4a0fb939f00bacd1c"},
+    {file = "mkdocs_material-9.7.0-py3-none-any.whl", hash = "sha256:da2866ea53601125ff5baa8aa06404c6e07af3c5ce3d5de95e3b52b80b442887"},
+    {file = "mkdocs_material-9.7.0.tar.gz", hash = "sha256:602b359844e906ee402b7ed9640340cf8a474420d02d8891451733b6b02314ec"},
 ]
 
 [[package]]
@@ -461,7 +458,7 @@ files = [
 
 [[package]]
 name = "pymdown-extensions"
-version = "10.16.1"
+version = "10.17.1"
 requires_python = ">=3.9"
 summary = "Extension pack for Python Markdown."
 groups = ["default"]
@@ -470,8 +467,8 @@ dependencies = [
     "pyyaml",
 ]
 files = [
-    {file = "pymdown_extensions-10.16.1-py3-none-any.whl", hash = "sha256:d6ba157a6c03146a7fb122b2b9a121300056384eafeec9c9f9e584adfdb2a32d"},
-    {file = "pymdown_extensions-10.16.1.tar.gz", hash = "sha256:aace82bcccba3efc03e25d584e6a22d27a8e17caa3f4dd9f207e49b787aa9a91"},
+    {file = "pymdown_extensions-10.17.1-py3-none-any.whl", hash = "sha256:1f160209c82eecbb5d8a0d8f89a4d9bd6bdcbde9a8537761844cfc57ad5cd8a6"},
+    {file = "pymdown_extensions-10.17.1.tar.gz", hash = "sha256:60d05fe55e7fb5a1e4740fc575facad20dc6ee3a748e8d3d36ba44142e75ce03"},
 ]
 
 [[package]]

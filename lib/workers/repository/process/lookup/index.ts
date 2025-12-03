@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isString, isUndefined } from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
 import type { ValidationMessage } from '../../../../config/types';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
@@ -91,7 +91,7 @@ export async function lookupUpdates(
       },
       'lookupUpdates',
     );
-    if (config.currentValue && !is.string(config.currentValue)) {
+    if (config.currentValue && !isString(config.currentValue)) {
       // If currentValue is not a string, then it's invalid
       if (config.currentValue) {
         logger.debug(
@@ -110,8 +110,8 @@ export async function lookupUpdates(
     }
     let compareValue = config.currentValue;
     if (
-      is.string(config.currentValue) &&
-      is.string(config.versionCompatibility)
+      isString(config.currentValue) &&
+      isString(config.versionCompatibility)
     ) {
       const versionCompatbilityRegEx = regEx(config.versionCompatibility);
       const regexMatch = versionCompatbilityRegEx.exec(config.currentValue);
@@ -140,10 +140,10 @@ export async function lookupUpdates(
     }
 
     const isValid =
-      is.string(compareValue) && versioningApi.isValid(compareValue);
+      isString(compareValue) && versioningApi.isValid(compareValue);
 
     const unconstrainedValue =
-      !!config.lockedVersion && is.undefined(config.currentValue);
+      !!config.lockedVersion && isUndefined(config.currentValue);
 
     if (isValid || unconstrainedValue) {
       if (
@@ -343,13 +343,13 @@ export async function lookupUpdates(
         versioningApi,
       );
 
-      if (is.nonEmptyString(currentVersionTimestamp)) {
+      if (isNonEmptyString(currentVersionTimestamp)) {
         res.currentVersionTimestamp = currentVersionTimestamp;
         res.currentVersionAgeInDays = getElapsedDays(currentVersionTimestamp);
 
         if (
           config.packageRules?.some((rule) =>
-            is.nonEmptyString(rule.matchCurrentAge),
+            isNonEmptyString(rule.matchCurrentAge),
           )
         ) {
           // Reapply package rules to check matches for matchCurrentAge
@@ -366,16 +366,12 @@ export async function lookupUpdates(
         rangeStrategy === 'pin' &&
         !versioningApi.isSingleVersion(compareValue)
       ) {
+        const newValue =
+          versioningApi.getPinnedValue?.(currentVersion) ?? currentVersion;
         res.updates.push({
           updateType: 'pin',
           isPin: true,
-          // TODO: newValue can be null! (#22198)
-          newValue: versioningApi.getNewValue({
-            currentValue: compareValue,
-            rangeStrategy,
-            currentVersion,
-            newVersion: currentVersion,
-          })!,
+          newValue,
           newVersion: currentVersion,
           newMajor: versioningApi.getMajor(currentVersion)!,
         });
@@ -474,7 +470,7 @@ export async function lookupUpdates(
           release.version,
           versioningApi,
         );
-        if (is.string(bucket)) {
+        if (isString(bucket)) {
           if (buckets[bucket]) {
             buckets[bucket].push(release);
           } else {
@@ -548,7 +544,7 @@ export async function lookupUpdates(
           res.isSingleVersion = true;
         }
         res.isSingleVersion ??=
-          is.string(update.newValue) &&
+          isString(update.newValue) &&
           versioningApi.isSingleVersion(update.newValue);
         // istanbul ignore if
         if (
@@ -614,13 +610,13 @@ export async function lookupUpdates(
 
     // massage versionCompatibility
     if (
-      is.string(config.currentValue) &&
-      is.string(compareValue) &&
-      is.string(config.versionCompatibility)
+      isString(config.currentValue) &&
+      isString(compareValue) &&
+      isString(config.versionCompatibility)
     ) {
       for (const update of res.updates) {
         logger.debug({ update });
-        if (is.string(config.currentValue) && is.string(update.newValue)) {
+        if (isString(config.currentValue) && isString(update.newValue)) {
           update.newValue = config.currentValue.replace(
             compareValue,
             update.newValue,
@@ -739,8 +735,7 @@ export async function lookupUpdates(
       .filter((update) => update.newDigest !== null)
       .filter(
         (update) =>
-          (is.string(update.newName) &&
-            update.newName !== config.packageName) ||
+          (isString(update.newName) && update.newName !== config.packageName) ||
           update.isReplacement === true ||
           update.newValue !== config.currentValue ||
           update.isLockfileUpdate === true ||

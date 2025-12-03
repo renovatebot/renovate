@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isEmptyObject, isString } from '@sindresorhus/is';
 import type { PackageDependency } from '../../../types';
 import type { NpmManagerData } from '../../types';
 import { extractDependency } from './dependency';
@@ -15,11 +15,11 @@ export function extractOverrideDepsRec(
   child: NpmManagerData,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
-  if (!child || is.emptyObject(child)) {
+  if (!child || isEmptyObject(child)) {
     return deps;
   }
   for (const [overrideName, versionValue] of Object.entries(child)) {
-    if (is.string(versionValue)) {
+    if (isString(versionValue)) {
       // special handling for "." override dependency name
       // "." means the constraint is applied to the parent dep
       const currDepName =

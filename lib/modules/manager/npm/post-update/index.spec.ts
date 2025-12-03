@@ -419,9 +419,8 @@ describe('modules/manager/npm/post-update/index', () => {
         ],
       });
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(fs.readLocalFile).toHaveBeenCalledWith('.npmrc', 'utf8');
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(fs.writeLocalFile).toHaveBeenCalledWith('.npmrc', '# dummy');
       expect(fs.deleteLocalFile.mock.calls).toMatchObject([
         ['randomFolder/.npmrc'],
@@ -578,7 +577,7 @@ describe('modules/manager/npm/post-update/index', () => {
         updatedArtifacts: [],
       });
       expect(spyNpm).not.toHaveBeenCalled();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Skipping lock file generation',
       );
@@ -707,7 +706,7 @@ describe('modules/manager/npm/post-update/index', () => {
           },
           additionalFiles,
         );
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(fs.writeLocalFile).toHaveBeenCalledWith(
           '.yarnrc.yml',
           'npmRegistries:\n' +
@@ -746,7 +745,6 @@ describe('modules/manager/npm/post-update/index', () => {
           ),
         ).rejects.toThrow();
 
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
         expect(logger.logger.warn).toHaveBeenCalledWith(
           expect.anything(),
           'Error appending .yarnrc.yml content',

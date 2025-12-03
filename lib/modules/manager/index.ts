@@ -100,7 +100,7 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
     return 'update-lockfile';
   }
 
-  return config.rangeStrategy;
+  return config.rangeStrategy!;
 }
 
 export function isKnownManager(mgr: string): boolean {

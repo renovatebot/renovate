@@ -15,7 +15,7 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
     return 'widen';
   }
   if (rangeStrategy !== 'auto') {
-    return rangeStrategy;
+    return rangeStrategy!;
   }
   if (
     isComplexRange ||

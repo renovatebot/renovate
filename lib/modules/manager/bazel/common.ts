@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNumber, isString } from '@sindresorhus/is';
 import { parse } from './parser';
 import type { Fragment, FragmentPath, FragmentUpdater } from './types';
 
@@ -18,11 +18,11 @@ export function findCodeFragment(
       break;
     }
 
-    if (fragment.type === 'array' && is.number(key)) {
+    if (fragment.type === 'array' && isNumber(key)) {
       fragment = fragment.children[key];
     }
 
-    if (fragment.type === 'record' && is.string(key)) {
+    if (fragment.type === 'record' && isString(key)) {
       fragment = fragment.children[key];
     }
   }
@@ -38,7 +38,7 @@ export function patchCodeAtFragment(
   const { value, offset } = fragment;
   const left = input.slice(0, offset);
   const right = input.slice(offset + value.length);
-  return is.string(updater)
+  return isString(updater)
     ? `${left}${updater}${right}`
     : `${left}${updater(value)}${right}`;
 }

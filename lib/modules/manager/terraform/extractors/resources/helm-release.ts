@@ -1,4 +1,8 @@
-import is from '@sindresorhus/is';
+import {
+  isNonEmptyString,
+  isNullOrUndefined,
+  isPlainObject,
+} from '@sindresorhus/is';
 import { logger } from '../../../../../logger';
 import { joinUrlParts } from '../../../../../util/url';
 import { HelmDatasource } from '../../../../datasource/helm';
@@ -23,12 +27,12 @@ export class HelmReleaseExtractor extends DependencyExtractor {
     const dependencies = [];
 
     const helmReleases = hclMap?.resource?.helm_release;
-    if (is.nullOrUndefined(helmReleases)) {
+    if (isNullOrUndefined(helmReleases)) {
       return [];
     }
 
     /* v8 ignore next 7 -- needs test */
-    if (!is.plainObject(helmReleases)) {
+    if (!isPlainObject(helmReleases)) {
       logger.debug(
         { helmReleases },
         'Terraform: unexpected `helmReleases` value',
@@ -46,7 +50,7 @@ export class HelmReleaseExtractor extends DependencyExtractor {
 
       dependencies.push(dep);
 
-      if (!is.nonEmptyString(helmRelease.chart)) {
+      if (!isNonEmptyString(helmRelease.chart)) {
         dep.skipReason = 'invalid-name';
       } else if (isOCIRegistry(helmRelease.chart)) {
         // For oci charts, we remove the oci:// and use the docker datasource
@@ -54,7 +58,7 @@ export class HelmReleaseExtractor extends DependencyExtractor {
         this.processOCI(dep.depName, config, dep);
       } else if (checkIfStringIsPath(helmRelease.chart)) {
         dep.skipReason = 'local-chart';
-      } else if (is.nonEmptyString(helmRelease.repository)) {
+      } else if (isNonEmptyString(helmRelease.repository)) {
         if (isOCIRegistry(helmRelease.repository)) {
           // For oci charts, we remove the oci:// and use the docker datasource
           this.processOCI(

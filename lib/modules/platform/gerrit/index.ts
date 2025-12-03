@@ -153,16 +153,9 @@ export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
     : null;
 }
 
-export async function getPr(
-  number: number,
-  refreshCache?: boolean,
-): Promise<Pr | null> {
+export async function getPr(number: number): Promise<Pr | null> {
   try {
-    const change = await client.getChange(
-      number,
-      refreshCache,
-      REQUEST_DETAILS_FOR_PRS,
-    );
+    const change = await client.getChange(number, REQUEST_DETAILS_FOR_PRS);
     return mapGerritChangeToPr(change);
   } catch (err) {
     if (err.statusCode === 404) {
@@ -174,8 +167,9 @@ export async function getPr(
 
 export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prConfig.number}, ${prConfig.prTitle})`);
+  // prConfig.prBody will only be set if the body has changed
   if (prConfig.prBody) {
-    await client.addMessageIfNotAlreadyExists(
+    await client.addMessage(
       prConfig.number,
       prConfig.prBody,
       TAG_PULL_REQUEST_BODY,
@@ -198,7 +192,6 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       targetBranch: prConfig.targetBranch,
       state: 'open',
       singleChange: true,
-      refreshCache: true,
       requestDetails: REQUEST_DETAILS_FOR_PRS,
     })
   ).pop();
@@ -214,11 +207,10 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       `the change should have been created automatically from previous push to refs/for/${prConfig.sourceBranch}, but it was not created in the last 5 minutes (${change.created})`,
     );
   }
-  await client.addMessageIfNotAlreadyExists(
+  await client.addMessage(
     change._number,
     prConfig.prBody,
     TAG_PULL_REQUEST_BODY,
-    change.messages,
   );
   return mapGerritChangeToPr(change, {
     sourceBranch: prConfig.sourceBranch,
@@ -244,11 +236,6 @@ export async function getBranchPr(
         sourceBranch: branchName,
       })
     : null;
-}
-
-export async function refreshPr(number: number): Promise<void> {
-  // refresh cache
-  await getPr(number, true);
 }
 
 export async function getPrList(): Promise<Pr[]> {
@@ -291,7 +278,6 @@ export async function getBranchStatus(
       state: 'open',
       branchName,
       singleChange: true,
-      refreshCache: true,
       requestDetails: ['LABELS', 'SUBMITTABLE', 'CHECK'],
     })
   ).pop();
@@ -330,7 +316,6 @@ export async function getBranchStatusCheck(
         branchName,
         state: 'open',
         singleChange: true,
-        refreshCache: true,
         requestDetails: ['LABELS'],
       })
     ).pop();

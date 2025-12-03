@@ -93,7 +93,7 @@ describe('modules/datasource/maven/s3', () => {
         const res = await get('org.example:package', baseUrlS3);
 
         expect(res).toBeNull();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.debug).toHaveBeenCalledWith(
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
@@ -113,7 +113,7 @@ describe('modules/datasource/maven/s3', () => {
         const res = await get('org.example:package', baseUrlS3);
 
         expect(res).toBeNull();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.debug).toHaveBeenCalledWith(
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
@@ -133,7 +133,7 @@ describe('modules/datasource/maven/s3', () => {
         const res = await get('org.example:package', baseUrlS3);
 
         expect(res).toBeNull();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.trace).toHaveBeenCalledWith(
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
@@ -153,7 +153,7 @@ describe('modules/datasource/maven/s3', () => {
         const res = await get('org.example:package', baseUrlS3);
 
         expect(res).toBeNull();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.trace).toHaveBeenCalledWith(
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
@@ -186,7 +186,7 @@ describe('modules/datasource/maven/s3', () => {
         const res = await get('org.example:package', baseUrlS3);
 
         expect(res).toBeNull();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.debug).toHaveBeenCalledWith(
           {
             err: expect.objectContaining({ message: 'Unknown error' }),

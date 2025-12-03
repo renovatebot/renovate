@@ -1,5 +1,5 @@
 // TODO #22198
-import is from '@sindresorhus/is';
+import { isNumber, isString, isUndefined } from '@sindresorhus/is';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { extractPackageFile } from '../../../../modules/manager';
@@ -43,14 +43,15 @@ export async function confirmIfDepUpdated(
       return false;
     }
     // istanbul ignore if
-    if (is.number(depIndex) && depIndex >= newExtract.deps.length) {
+    if (isNumber(depIndex) && depIndex >= newExtract.deps.length) {
       logger.debug(
         `Extracted ${packageFile!} after autoreplace has fewer deps than expected.`,
       );
       return false;
     }
     newUpgrade = newExtract.deps[depIndex!];
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
+    /* istanbul ignore next */
     logger.debug({ manager, packageFile, err }, 'Failed to parse newContent');
   }
 
@@ -225,9 +226,9 @@ export async function doAutoReplace(
     return await checkExistingBranch(upgrade, existingContent);
   }
   const replaceWithoutReplaceString =
-    is.string(newName) &&
+    isString(newName) &&
     newName !== depName &&
-    (is.undefined(upgrade.replaceString) ||
+    (isUndefined(upgrade.replaceString) ||
       !upgrade.replaceString?.includes(depName!));
   const replaceString = upgrade.replaceString ?? currentValue ?? currentDigest;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
@@ -454,7 +455,8 @@ export async function doAutoReplace(
         newContent = existingContent;
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
+    /* istanbul ignore next */
     logger.debug({ packageFile, depName, err }, 'doAutoReplace error');
   }
   // istanbul ignore next
