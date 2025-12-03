@@ -1,48 +1,50 @@
-import { isArray, isNonEmptyArray, isNumber } from '@sindresorhus/is';
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
+import type {
+  BranchConfig,
+  BranchUpgradeConfig,
+  PrBlockedBy,
+} from '../../../types';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../../../constants/error-messages';
-import { pkg } from '../../../../expose.cjs';
-import { logger } from '../../../../logger';
 import type {
   PlatformPrOptions,
   Pr,
   PrDebugData,
   UpdatePrConfig,
 } from '../../../../modules/platform';
-import { platform } from '../../../../modules/platform';
-import { ensureComment } from '../../../../modules/platform/comment';
-import {
-  getPrBodyStruct,
-  hashBody,
-} from '../../../../modules/platform/pr-body';
-import { scm } from '../../../../modules/platform/scm';
-import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import { getElapsedHours } from '../../../../util/date';
-import { stripEmojis } from '../../../../util/emoji';
-import { fingerprint } from '../../../../util/fingerprint';
-import { getBranchLastCommitTime } from '../../../../util/git';
-import { memoize } from '../../../../util/memoize';
-import { incCountValue, isLimitReached } from '../../../global/limits';
-import type {
-  BranchConfig,
-  BranchUpgradeConfig,
-  PrBlockedBy,
-} from '../../../types';
-import { embedChangelogs } from '../../changelog';
-import { resolveBranchStatus } from '../branch/status-checks';
-import { getPrBody } from './body';
-import { getChangedLabels, prepareLabels, shouldUpdateLabels } from './labels';
-import { addParticipants } from './participants';
-import { getPrCache, setPrCache } from './pr-cache';
 import {
   generatePrBodyFingerprintConfig,
   validatePrCache,
 } from './pr-fingerprint';
+import { getChangedLabels, prepareLabels, shouldUpdateLabels } from './labels';
+import {
+  getPrBodyStruct,
+  hashBody,
+} from '../../../../modules/platform/pr-body';
+import { getPrCache, setPrCache } from './pr-cache';
+import { incCountValue, isLimitReached } from '../../../global/limits';
+import { isArray, isNonEmptyArray, isNumber } from '@sindresorhus/is';
+
+import { ExternalHostError } from '../../../../types/errors/external-host-error';
+import { GlobalConfig } from '../../../../config/global';
+import type { RenovateConfig } from '../../../../config/types';
+import { Vulnerabilities } from '../../process/vulnerabilities';
+import { addParticipants } from './participants';
+import { embedChangelogs } from '../../changelog';
+import { ensureComment } from '../../../../modules/platform/comment';
+import { fingerprint } from '../../../../util/fingerprint';
+import { getBranchLastCommitTime } from '../../../../util/git';
+import { getElapsedHours } from '../../../../util/date';
+import { getPrBody } from './body';
+import { logger } from '../../../../logger';
+import { memoize } from '../../../../util/memoize';
+import { pkg } from '../../../../expose.cjs';
+import { platform } from '../../../../modules/platform';
+import { resolveBranchStatus } from '../branch/status-checks';
+import { scm } from '../../../../modules/platform/scm';
+import { stripEmojis } from '../../../../util/emoji';
 import { tryReuseAutoclosedPr } from './pr-reuse';
 
 export function getPlatformPrOptions(
@@ -340,6 +342,36 @@ export async function ensurePr(
   }
 
   config.hasReleaseNotes = config.upgrades.some((upg) => upg.hasReleaseNotes);
+
+  // Optionally append OSV vulnerability summary for each target version
+  if (config.prVulnerabilitySummary) {
+    try {
+      const vuln = await Vulnerabilities.create();
+      for (const upgrade of config.upgrades) {
+        const datasource = upgrade.datasource;
+        const pkgName = upgrade.packageName ?? upgrade.depName;
+        const targetVersion = upgrade.newVersion ?? upgrade.newValue;
+        const versioning = upgrade.versioning;
+        if (datasource && pkgName && targetVersion) {
+          const res = await vuln.evaluateTargetVersionForDatasource(
+            datasource,
+            pkgName,
+            targetVersion,
+            versioning,
+          );
+          if (res?.notes?.length) {
+            upgrade.prBodyNotes ??= [];
+            upgrade.prBodyNotes.push(
+              `### Vulnerabilities affecting target version`,
+            );
+            upgrade.prBodyNotes.push(...res.notes);
+          }
+        }
+      }
+    } catch (err) {
+      logger.debug({ err }, 'Unable to append OSV vulnerability summary');
+    }
+  }
 
   const releaseNotesSources: string[] = [];
   for (const upgrade of config.upgrades) {

@@ -1,34 +1,36 @@
+import * as p from '../../../util/promises';
+
+import type {
+  DependencyVulnerabilities,
+  SeverityDetails,
+  Vulnerability,
+} from './types';
 // TODO #22198
 import type { Ecosystem, Osv } from '@renovatebot/osv-offline';
-import { OsvOffline } from '@renovatebot/osv-offline';
+import type {
+  PackageDependency,
+  PackageFile,
+} from '../../../modules/manager/types';
+import type { PackageRule, RenovateConfig } from '../../../config/types';
+import { getManagerConfig, mergeChildConfig } from '../../../config';
 import {
   isEmptyArray,
   isNonEmptyString,
   isNullOrUndefined,
   isTruthy,
 } from '@sindresorhus/is';
+
 import type { CvssVector } from 'ae-cvss-calculator';
-import { fromVector } from 'ae-cvss-calculator';
-import { z } from 'zod';
-import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type { PackageRule, RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { getDefaultVersioning } from '../../../modules/datasource/common';
-import type {
-  PackageDependency,
-  PackageFile,
-} from '../../../modules/manager/types';
+import { OsvOffline } from '@renovatebot/osv-offline';
 import type { VersioningApi } from '../../../modules/versioning';
+import { fromVector } from 'ae-cvss-calculator';
+import { getDefaultVersioning } from '../../../modules/datasource/common';
 import { get as getVersioning } from '../../../modules/versioning';
-import { sanitizeMarkdown } from '../../../util/markdown';
-import * as p from '../../../util/promises';
+import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { sanitizeMarkdown } from '../../../util/markdown';
 import { titleCase } from '../../../util/string';
-import type {
-  DependencyVulnerabilities,
-  SeverityDetails,
-  Vulnerability,
-} from './types';
+import { z } from 'zod';
 
 export class Vulnerabilities {
   private osvOffline: OsvOffline | undefined;
@@ -100,6 +102,85 @@ export class Vulnerabilities {
       packageFiles,
     );
     return groups.flatMap((group) => group.vulnerabilities);
+  }
+
+  /**
+   * Evaluate OSV vulnerabilities for a specific datasource/package target version.
+   * Returns PR body notes for any vulnerabilities that still affect the target version.
+   */
+  async evaluateTargetVersionForDatasource(
+    datasource: string,
+    rawPackageName: string,
+    targetVersion: string,
+    versioningOverride?: string,
+  ): Promise<{ notes: string[] } | null> {
+    const ecosystem = Vulnerabilities.datasourceEcosystemMap[datasource];
+    if (!ecosystem) {
+      logger.trace(`Cannot map datasource ${datasource} to OSV ecosystem`);
+      return null;
+    }
+
+    let packageName = rawPackageName;
+    if (ecosystem === 'PyPI') {
+      // https://peps.python.org/pep-0503/#normalized-names
+      packageName = packageName.toLowerCase().replace(regEx(/[_.-]+/g), '-');
+    }
+
+    try {
+      const osvVulnerabilities = await this.osvOffline?.getVulnerabilities(
+        ecosystem,
+        packageName,
+      );
+      if (
+        isNullOrUndefined(osvVulnerabilities) ||
+        isEmptyArray(osvVulnerabilities)
+      ) {
+        logger.trace(
+          `No vulnerabilities found in OSV database for ${packageName}`,
+        );
+        return null;
+      }
+
+      const versioning = versioningOverride ?? getDefaultVersioning(datasource);
+      const versioningApi = getVersioning(versioning);
+      if (!versioningApi.isVersion(targetVersion)) {
+        logger.debug(
+          `Skipping target vulnerability evaluation for ${packageName} due to unsupported version ${targetVersion}`,
+        );
+        return null;
+      }
+
+      const notes: string[] = [];
+      for (const osvVulnerability of osvVulnerabilities) {
+        if (osvVulnerability.withdrawn) {
+          continue;
+        }
+        for (const affected of osvVulnerability.affected ?? []) {
+          const isVulnerable = this.isPackageVulnerable(
+            ecosystem,
+            packageName,
+            targetVersion,
+            affected,
+            versioningApi,
+          );
+          if (!isVulnerable) {
+            continue;
+          }
+          notes.push(...this.generatePrBodyNotes(osvVulnerability, affected));
+        }
+      }
+
+      if (notes.length === 0) {
+        return null;
+      }
+      return { notes };
+    } catch (err) {
+      logger.warn(
+        { err, packageName },
+        'Error evaluating target version vulnerability information for package',
+      );
+      return null;
+    }
   }
 
   private async fetchDependencyVulnerabilities(

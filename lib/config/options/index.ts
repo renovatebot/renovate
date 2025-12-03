@@ -2079,6 +2079,13 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'prVulnerabilitySummary',
+    description:
+      'If enabled, Renovate will query OSV for the target version of each upgrade and append a vulnerability summary to the PR body.',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'overrideDatasource',
     description: 'Override the datasource value.',
     type: 'string',

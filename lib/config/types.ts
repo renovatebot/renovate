@@ -1,8 +1,3 @@
-import type { Category, PlatformId } from '../constants';
-import type { LogLevelRemap } from '../logger/types';
-import type { ManagerName } from '../manager-list.generated';
-import type { CustomManager } from '../modules/manager/custom/types';
-import type { RepoSortMethod, SortMethod } from '../modules/platform/types';
 import type {
   AutoMergeType,
   HostRule,
@@ -10,9 +5,15 @@ import type {
   RangeStrategy,
   SkipReason,
 } from '../types';
-import type { StageName } from '../types/skip-reason';
+import type { Category, PlatformId } from '../constants';
+import type { RepoSortMethod, SortMethod } from '../modules/platform/types';
+
+import type { CustomManager } from '../modules/manager/custom/types';
 import type { GitNoVerifyOption } from '../util/git/types';
+import type { LogLevelRemap } from '../logger/types';
+import type { ManagerName } from '../manager-list.generated';
 import type { MergeConfidence } from '../util/merge-confidence/types';
+import type { StageName } from '../types/skip-reason';
 import type { Timestamp } from '../util/timestamp';
 
 export type RenovateConfigStage =
@@ -130,6 +131,7 @@ export interface RenovateSharedConfig {
   prTitle?: string;
   productLinks?: Record<string, string>;
   pruneBranchAfterAutomerge?: boolean;
+  prVulnerabilitySummary?: boolean;
   rangeStrategy?: RangeStrategy;
   rebaseLabel?: string;
   rebaseWhen?: string;
