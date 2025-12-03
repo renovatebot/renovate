@@ -1,4 +1,4 @@
-import { DEBUG, ERROR, FATAL, INFO, TRACE, WARN } from 'bunyan';
+import { ERROR, WARN } from 'bunyan';
 import { codeBlock } from 'common-tags';
 import type { MockedObject } from 'vitest';
 import { vi } from 'vitest';
