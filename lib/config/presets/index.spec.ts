@@ -580,6 +580,8 @@ describe('config/presets/index', () => {
           'replacements:all',
           'workarounds:all',
           'helpers:githubDigestChangelogs',
+          'helpers:goXPackagesChangelogLink',
+          'helpers:goXPackagesNameLink',
         ],
       });
     });
