@@ -1,0 +1,124 @@
+{
+  "hooks": {
+    "SubagentStop": [
+      {
+        "matcher": "init-explorer",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-init-explorer.sh",
+            "timeout": 30000
+          }
+        ]
+      },
+      {
+        "matcher": "coder",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-coder-standards-check.sh",
+            "timeout": 120000
+          }
+        ]
+      },
+      {
+        "matcher": "coding-standards-checker",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-standards-testing.sh",
+            "timeout": 120000
+          }
+        ]
+      },
+      {
+        "matcher": "bdd-agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-bdd-agent.sh",
+            "timeout": 120000
+          }
+        ]
+      },
+      {
+        "matcher": "gherkin-to-test",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-gherkin-to-test.sh",
+            "timeout": 120000
+          }
+        ]
+      },
+      {
+        "matcher": "tester",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-tester-infrastructure.sh",
+            "timeout": 120000
+          }
+        ]
+      },
+      {
+        "matcher": "backend-tester",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-tester-infrastructure.sh",
+            "timeout": 120000
+          }
+        ]
+      },
+      {
+        "matcher": "frontend-tester",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-tester-infrastructure.sh",
+            "timeout": 120000
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "strict-coder",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/pre-write-governance.py"
+          }
+        ]
+      },
+      {
+        "matcher": "debugger",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/crash-guardrail.py"
+          }
+        ]
+      },
+      {
+        "matcher": "forensic",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/crash-guardrail.py"
+          }
+        ]
+      },
+      {
+        "matcher": "analyst",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/crash-guardrail.py"
+          }
+        ]
+      }
+    ]
+  }
+}
