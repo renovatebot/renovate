@@ -17,7 +17,7 @@ export function extractRepoProblems(
   );
 }
 
-function emojiFromLevel(level: number): string {
+export function emojiFromLevel(level: number): string {
   switch (level) {
     case TRACE:
       return '🔬';
