@@ -71,7 +71,7 @@ const staticGroups = {
           '!api-platform/postman-collection-generator',
           '!api-platform/schema-generator',
         ],
-        "sourceUrl": "https://github.com/api-platform/core",
+        sourceUrl: 'https://github.com/api-platform/core',
       },
     ],
   },
