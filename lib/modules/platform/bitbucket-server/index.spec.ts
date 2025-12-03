@@ -334,23 +334,6 @@ describe('modules/platform/bitbucket-server/index', () => {
           );
         });
 
-        it('should skip api call to fetch version when platform version is set in environment', async () => {
-          process.env.RENOVATE_X_PLATFORM_VERSION = '8.0.0';
-          httpMock
-            .scope('https://stash.renovatebot.com')
-            .get(`/rest/api/1.0/users/${username}`)
-            .reply(200, userInfo);
-
-          await expect(
-            bitbucket.initPlatform({
-              endpoint: 'https://stash.renovatebot.com',
-              username: 'abc',
-              password: '123',
-            }),
-          ).toResolve();
-          delete process.env.RENOVATE_X_PLATFORM_VERSION;
-        });
-
         it('should skip users api call when gitAuthor is configured', async () => {
           httpMock
             .scope(urlHost)
@@ -405,6 +388,28 @@ describe('modules/platform/bitbucket-server/index', () => {
             endpoint: ensureTrailingSlash(url.href),
             gitAuthor: `${userInfo.displayName} <${userInfo.emailAddress}>`,
           });
+        });
+
+        it('should collect username from headers if token with no username', async () => {
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/application-properties`)
+            .reply(200, { version: '8.0.0' }, { 'x-ausername': 'user_name' });
+
+          expect(
+            await bitbucket.initPlatform({
+              endpoint: url.href,
+              token: '123',
+            }),
+          ).toEqual({
+            endpoint: ensureTrailingSlash(url.href),
+          });
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            {
+              'x-ausername': 'user_name',
+            },
+            'Platform: No username configured using headers["x-ausername"]',
+          );
         });
 
         it('should use fallback gitAuthor if user info has empty email address', async () => {
