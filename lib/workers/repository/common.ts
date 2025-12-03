@@ -1,4 +1,3 @@
-import type { LogLevelString } from 'bunyan';
 import { DEBUG, ERROR, FATAL, INFO, TRACE, WARN, nameFromLevel } from 'bunyan';
 import { getProblems } from '../../logger';
 
