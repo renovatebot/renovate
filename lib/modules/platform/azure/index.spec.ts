@@ -1989,7 +1989,7 @@ describe('modules/platform/azure/index', () => {
       expect(res).toBeTrue();
     });
 
-    it('should complete pr but not bypass policies if all policies are approved, not applicable, disabled or not blocking', async () => {
+    it('should complete the PR without bypassing policies when all policies are satisfied', async () => {
       await initRepo({ repository: 'some/repo' });
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
@@ -2093,7 +2093,7 @@ describe('modules/platform/azure/index', () => {
       expect(res).toBeTrue();
     });
 
-    it('should not complete pr should not bypass policies if not all non approved policies are bypassed', async () => {
+    it('should not complete the PR when some unmet policies are not allowed to be bypassed', async () => {
       await initRepo({ repository: 'some/repo' });
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';

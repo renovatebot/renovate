@@ -831,9 +831,7 @@ export async function mergePr({
         bypassPolicies.push(policyEvaluation.configuration);
         bypassCompletionOptions = {
           bypassPolicy: true,
-          bypassReason:
-            platformOptions?.azureBypassPolicyReason ??
-            'Auto-merge by Renovate',
+          bypassReason: platformOptions?.azureBypassPolicyReason,
         };
       } else {
         logger.debug(
@@ -867,7 +865,7 @@ export async function mergePr({
       pr.lastMergeSourceCommit?.commitId
     } using mergeStrategy ${mergeStrategy} (${
       GitPullRequestMergeStrategy[mergeStrategy]
-    })${bypassCompletionOptions.bypassPolicy ? ' and bypassPolicies' : ''}`,
+    }) and bypassed ${bypassPolicies.length} policies.`,
   );
 
   try {

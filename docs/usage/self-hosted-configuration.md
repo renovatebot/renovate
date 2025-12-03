@@ -221,15 +221,17 @@ For example:
 
 ## azureBypassPolicyReason
 
-By default the reason for bypassing policies is set to "Auto-merge by Renovate".
-
 Define a custom reason when policies are being bypassed to perform auto-merge.
+
+By default, the reason for bypassing policies is set to "Auto-merge by Renovate".
 
 ## azureBypassPolicyTypes
 
 Add a list of policy UUIDs which might be failing but should not block auto-merge.
 
-> For this to work the account that executes renovate must be allowed the `Bypass policies when completing pull requests` permission on the respective repository.
+<!-- prettier-ignore -->
+!!! note
+    For this to work the account that executes renovate must be allowed the `Bypass policies when completing pull requests` permission on the respective repository.
 
 You can get the list of all available policy UUIDs by using the [Azure DevOps REST API](https://learn.microsoft.com/en-us/rest/api/azure/devops/policy/types/list).
 
