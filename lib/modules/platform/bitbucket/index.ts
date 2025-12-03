@@ -612,6 +612,11 @@ export function massageMarkdown(input: string): string {
       'checking the rebase/retry box above',
       'renaming the PR to start with "rebase!"',
     )
+    .replace(
+      regEx(/<summary>View abandoned dependencies(.*)<\/summary>/),
+      '## Abandoned dependencies $1',
+    )
+    .replace(regEx(/(>[\s\S]+?)(## Abandoned dependencies.*)/), '$2\n$1')
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?(details|blockquote)>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
