@@ -769,7 +769,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@1cc46a6d80ac51be43fdca42aa2a3ea944bf3771 # v3.14.25
+        uses: containerbase/internal-tools@f84621abbc75c66d17dff3782dbed0438430aec6 # v3.14.26
         with:
           command: docker-config
 
