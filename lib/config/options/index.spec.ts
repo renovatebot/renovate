@@ -1,6 +1,7 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import * as manager from '../../modules/manager';
 import * as platform from '../../modules/platform';
+import type { RenovateOptions } from '../types';
 import { getOptions } from '.';
 
 vi.unmock('../../modules/platform');
@@ -65,5 +66,20 @@ describe('config/options/index', () => {
         });
       }
     }
+  });
+
+  it('are in alphabetical order, based on `name`', () => {
+    const keys = function (opts: RenovateOptions[]): string[] {
+      return opts.map((opt) => opt.name);
+    };
+
+    const opts = getOptions();
+
+    const sortedOpts = [...opts].sort((a, b) => a.name.localeCompare(b.name));
+
+    expect(
+      keys(opts),
+      'Configuration options should be in alphabetical order based on the `name` key',
+    ).toStrictEqual(keys(sortedOpts));
   });
 });
