@@ -525,6 +525,10 @@ Renovate tried to run on this repository, but found these problems.
  - ❌ ERROR: i am a duplicated problem
  - ❌ ERROR: i am a non-duplicated problem
  - ⚠️ WARN: i am a non-duplicated problem
+ - 🔬 TRACE: i am a trace level error
+ - 🔍 DEBUG: i am a debug level error
+ - ℹ️ INFO: i am a info level error
+ - 💀 FATAL: i am a fatal level error
 
 ## Pending Status Checks
 

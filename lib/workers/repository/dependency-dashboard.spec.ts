@@ -1,4 +1,4 @@
-import { ERROR, WARN } from 'bunyan';
+import { DEBUG, ERROR, FATAL, INFO, TRACE, WARN } from 'bunyan';
 import { codeBlock } from 'common-tags';
 import type { MockedObject } from 'vitest';
 import { vi } from 'vitest';
@@ -1056,6 +1056,22 @@ None detected
           level: WARN,
           msg: 'i am an artifact error',
           artifactErrors: {},
+        },
+        {
+          level: TRACE,
+          msg: 'i am a trace level error',
+        },
+        {
+          level: DEBUG,
+          msg: 'i am a debug level error',
+        },
+        {
+          level: INFO,
+          msg: 'i am a info level error',
+        },
+        {
+          level: FATAL,
+          msg: 'i am a fatal level error',
         },
       ]);
       config.dependencyDashboard = true;

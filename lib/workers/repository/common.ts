@@ -1,5 +1,5 @@
 import type { LogLevelString } from 'bunyan';
-import { nameFromLevel } from 'bunyan';
+import { DEBUG, ERROR, FATAL, INFO, TRACE, WARN, nameFromLevel } from 'bunyan';
 import { getProblems } from '../../logger';
 
 export function extractRepoProblems(
@@ -11,29 +11,26 @@ export function extractRepoProblems(
         (problem) =>
           problem.repository === repository && !problem.artifactErrors,
       )
-      .map((problem) => {
-        const levelName = nameFromLevel[problem.level];
-
-        return `${emojiFromLevel(levelName as LogLevelString)} ${levelName.toUpperCase()}: ${problem.msg}`;
-      }),
+      .map(
+        (problem) =>
+          `${emojiFromLevel(problem.level)} ${nameFromLevel[problem.level].toUpperCase()}: ${problem.msg}`,
+      ),
   );
 }
 
-function emojiFromLevel(levelName: LogLevelString): string {
-  const level = levelName.toLowerCase();
-
+function emojiFromLevel(level: number): string {
   switch (level) {
-    case 'trace':
+    case TRACE:
       return '🔬';
-    case 'debug':
+    case DEBUG:
       return '🔍';
-    case 'info':
+    case INFO:
       return 'ℹ️';
-    case 'warn':
+    case WARN:
       return '⚠️';
-    case 'error':
+    case ERROR:
       return '❌';
-    case 'fatal':
+    case FATAL:
       return '💀';
     default:
       return '';
