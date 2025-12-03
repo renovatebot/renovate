@@ -115,6 +115,7 @@ describe('util/interpolator', () => {
     it('does not resolve secrets in onboaringConfig', () => {
       const res = replaceInterpolatedValuesInObject(
         {
+          // @ts-expect-error as we are using secrets to pass the value
           mode: '{{ secrets.SECRET_MODE }}',
           secrets: { SECRET_MODE: 'silent', ARTIFACTORY_API_TOKEN: 'token' },
           onboardingConfig: {
