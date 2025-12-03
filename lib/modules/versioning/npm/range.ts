@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import semver from 'semver';
 import semverUtils from 'semver-utils';
 import { logger } from '../../../logger';
@@ -68,13 +68,10 @@ export function getNewValue({
   currentVersion,
   newVersion,
 }: NewValueConfig): string | null {
-  if (
-    !['pin', 'update-lockfile'].includes(rangeStrategy) &&
-    isSemVerXRange(currentValue)
-  ) {
+  if (rangeStrategy !== 'update-lockfile' && isSemVerXRange(currentValue)) {
     return null;
   }
-  if (rangeStrategy === 'pin' || isVersion(currentValue)) {
+  if (isVersion(currentValue)) {
     return newVersion;
   }
   if (rangeStrategy === 'update-lockfile') {
@@ -155,7 +152,7 @@ export function getNewValue({
       return semverUtils
         .parseRange(currentValue)
         .map((x) => x.semver)
-        .filter(is.string)
+        .filter(isString)
         .map((subRange) => {
           const bumpedSubRange = getNewValue({
             currentValue: subRange,

@@ -6,6 +6,8 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
+
+import { PackageJson } from './schema';
 import type { LockFile, ParseLockFileResult } from './types';
 
 export function parseLockFile(lockFile: string): ParseLockFileResult {
@@ -30,10 +32,10 @@ export async function getNpmrcContent(dir: string): Promise<string | null> {
   let originalNpmrcContent: string | null = null;
   try {
     originalNpmrcContent = await readLocalFile(npmrcFilePath, 'utf8');
-    /* v8 ignore start -- needs test */
   } catch {
+    /* v8 ignore next -- needs test */
     originalNpmrcContent = null;
-  } /* v8 ignore stop -- needs test */
+  }
   if (originalNpmrcContent) {
     logger.debug(`npmrc file ${npmrcFilePath} found in repository`);
   }
@@ -55,10 +57,10 @@ export async function updateNpmrcContent(
       logger.debug(`Writing updated .npmrc file to ${npmrcFilePath}`);
       await writeLocalFile(npmrcFilePath, `${newContent}\n`);
     }
-    /* v8 ignore start -- needs test */
   } catch {
+    /* v8 ignore next -- needs test */
     logger.warn('Unable to write custom npmrc file');
-  } /* v8 ignore stop -- needs test */
+  }
 }
 
 export async function resetNpmrcContent(
@@ -69,16 +71,28 @@ export async function resetNpmrcContent(
   if (originalContent) {
     try {
       await writeLocalFile(npmrcFilePath, originalContent);
-      /* v8 ignore start -- needs test */
+      /* v8 ignore next -- needs test */
     } catch {
       logger.warn('Unable to reset npmrc to original contents');
-    } /* v8 ignore stop -- needs test */
+    }
   } else {
     try {
       await deleteLocalFile(npmrcFilePath);
-      /* v8 ignore start -- needs test */
     } catch {
+      /* v8 ignore next -- needs test */
       logger.warn('Unable to delete custom npmrc');
-    } /* v8 ignore stop -- needs test */
+    }
   }
+}
+
+export async function loadPackageJson(parentDir: string): Promise<PackageJson> {
+  const json = await readLocalFile(
+    upath.join(parentDir, 'package.json'),
+    'utf8',
+  );
+  const res = PackageJson.safeParse(json);
+  if (res.success) {
+    return res.data;
+  }
+  return {};
 }

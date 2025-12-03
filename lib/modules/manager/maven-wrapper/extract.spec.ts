@@ -65,6 +65,23 @@ describe('modules/manager/maven-wrapper/extract', () => {
       ]);
     });
 
+    it('extracts wrapper information from wrapperUrl in precedence to wrapperVersion', () => {
+      const res = extractPackageFile(
+        'wrapperVersion=3.1.0\nwrapperUrl=https://internal.artifactory.acme.org/artifactory/maven-bol/org/apache/maven/wrapper/maven-wrapper/3.1.2/maven-wrapper-3.1.2.jar',
+      );
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '3.1.2',
+          replaceString:
+            'https://internal.artifactory.acme.org/artifactory/maven-bol/org/apache/maven/wrapper/maven-wrapper/3.1.2/maven-wrapper-3.1.2.jar',
+          datasource: 'maven',
+          depName: 'maven-wrapper',
+          packageName: 'org.apache.maven.wrapper:maven-wrapper',
+          versioning: 'maven',
+        },
+      ]);
+    });
+
     it('extracts maven warapper version from mvnw file', () => {
       const res = extractPackageFile(`# ${mvnwWrapperString}`);
       expect(res?.deps).toEqual([

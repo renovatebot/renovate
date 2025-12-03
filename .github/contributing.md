@@ -57,7 +57,7 @@ Failure to disclose this is first and foremost rude to the human operators on th
 
 Please be respectful to maintainers and disclose AI assistance.
 
-_The above AI Assitance Notice is largely copy/pasted from the Ghostty project with thanks to `@mitchellh`_.
+_The above AI Assistance Notice is largely copy/pasted from the Ghostty project with thanks to `@mitchellh`_.
 
 ### Tests
 

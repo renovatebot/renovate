@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import ignore from 'ignore';
 import { logger } from '../../../../logger';
 import type { FileOwnerRule, Pr } from '../../../../modules/platform';
@@ -77,7 +77,7 @@ function parseCodeOwnersContent(codeOwnersFile: string): string[] {
       .map((line) => line.split('#')[0])
       // Remove empty lines
       .map((line) => line.trim())
-      .filter(is.nonEmptyString)
+      .filter(isNonEmptyString)
   );
 }
 

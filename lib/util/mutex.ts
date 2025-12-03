@@ -1,7 +1,11 @@
 import { Mutex, type MutexInterface, withTimeout } from 'async-mutex';
 
 const DEFAULT_NAMESPACE = 'default';
-const mutexes: Record<string, Record<string, MutexInterface>> = {};
+let mutexes: Record<string, Record<string, MutexInterface>> = {};
+
+export function initMutexes(): void {
+  mutexes = {};
+}
 
 export function getMutex(
   key: string,

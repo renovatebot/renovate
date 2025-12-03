@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { hashStream } from '../../../util/hash';
@@ -108,7 +108,7 @@ async function getHashFromUrl(url: string): Promise<string | null> {
 async function getHashFromUrls(urls: string[]): Promise<string | null> {
   const hashes = (
     await pMap(urls, (url) => getHashFromUrl(massageUrl(url)))
-  ).filter(is.truthy);
+  ).filter(isTruthy);
   if (!hashes.length) {
     logger.debug({ urls }, 'Could not calculate hash for URLs');
     return null;
@@ -136,10 +136,10 @@ export async function updateArtifacts(
 
     if (upgrade.depType === 'http_file' || upgrade.depType === 'http_archive') {
       const rule = findCodeFragment(newContents, [idx]);
-      /* v8 ignore start -- used only for type narrowing */
+      /* v8 ignore next -- used only for type narrowing */
       if (rule?.type !== 'record') {
         continue;
-      } /* v8 ignore stop */
+      }
 
       const urlFragments = getUrlFragments(rule);
       if (!urlFragments?.length) {

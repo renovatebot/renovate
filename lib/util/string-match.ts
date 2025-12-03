@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { minimatch } from './minimatch';
 import { regEx } from './regex';
 
@@ -75,7 +75,7 @@ const configValEnd = regEx(/\/i?$/);
 
 export function isRegexMatch(input: unknown): input is string {
   return (
-    is.string(input) && configValStart.test(input) && configValEnd.test(input)
+    isString(input) && configValStart.test(input) && configValEnd.test(input)
   );
 }
 

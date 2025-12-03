@@ -58,9 +58,9 @@ export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
     return !!flags[`${method}:${url}`];
   }
 
-  private markSynced(method: string, url: string): void {
+  markSynced(method: string, url: string, value = true): void {
     const flags = this.getSyncFlags();
-    flags[`${method}:${url}`] = true;
+    flags[`${method}:${url}`] = value;
   }
 
   override wrapServerResponse<T>(

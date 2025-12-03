@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isEmptyArray, isTruthy } from '@sindresorhus/is';
 import jsonata from 'jsonata';
 import { migrateDatasource } from '../../../../config/migrations/custom/datasource-migration';
 import { logger } from '../../../../logger';
@@ -25,7 +25,7 @@ export async function handleMatching(
 
     // allows empty dep object cause templates can be used to configure the required fields
     // if some issues arise then the isValidDependency call will catch them later on
-    if (!queryResult || is.emptyArray(queryResult)) {
+    if (!queryResult || isEmptyArray(queryResult)) {
       logger.debug(
         {
           jsonataQuery: query,
@@ -50,7 +50,7 @@ export async function handleMatching(
 
   return results
     .map((dep) => createDependency(dep, config))
-    .filter(is.truthy)
+    .filter(isTruthy)
     .filter((dep) =>
       checkIsValidDependency(dep, packageFile, 'custom.jsonata'),
     );

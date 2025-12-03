@@ -167,7 +167,7 @@ function getNewValue({
   newVersion,
 }: NewValueConfig): string | null {
   const cleanRange = cleanVersion(currentValue);
-  if (isVersion(currentValue) || rangeStrategy === 'pin') {
+  if (isVersion(currentValue)) {
     return newVersion;
   }
   const options = getOptions(currentValue);

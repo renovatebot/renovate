@@ -13,6 +13,7 @@ export const presets: Record<string, Preset> = {
       ':configMigration',
       ':pinDevDependencies',
       'abandonments:recommended',
+      'security:minimumReleaseAgeNpm',
     ],
   },
   'js-app': {
@@ -35,6 +36,7 @@ export const presets: Record<string, Preset> = {
       'mergeConfidence:age-confidence-badges',
       'replacements:all',
       'workarounds:all',
+      'helpers:githubDigestChangelogs',
     ],
   },
   semverAllMonthly: {

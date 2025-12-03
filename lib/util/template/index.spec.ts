@@ -115,7 +115,7 @@ describe('util/template/index', () => {
   it('string to pretty JSON', () => {
     const userTemplate =
       '{{{ stringToPrettyJSON \'{"some":{"fancy":"json"}}\'}}}';
-    const output = template.compile(userTemplate, undefined as never);
+    const output = template.compile(userTemplate, {});
     expect(output).toMatchSnapshot();
   });
 
@@ -173,7 +173,7 @@ describe('util/template/index', () => {
 
   it('lowercase', () => {
     const userTemplate = "{{{ lowercase 'FOO'}}}";
-    const output = template.compile(userTemplate, undefined as never);
+    const output = template.compile(userTemplate, {});
     expect(output).toBe('foo');
   });
 
@@ -280,7 +280,7 @@ describe('util/template/index', () => {
     it('encodes values', () => {
       const output = template.compile(
         '{{{encodeURIComponent "@fsouza/prettierd"}}}',
-        undefined as never,
+        {},
       );
       expect(output).toBe('%40fsouza%2Fprettierd');
     });
@@ -288,7 +288,7 @@ describe('util/template/index', () => {
     it('decodes values', () => {
       const output = template.compile(
         '{{{decodeURIComponent "%40fsouza/prettierd"}}}',
-        undefined as never,
+        {},
       );
       expect(output).toBe('@fsouza/prettierd');
     });
@@ -298,7 +298,7 @@ describe('util/template/index', () => {
     it('encodes values', () => {
       const output = template.compile(
         '{{{encodeBase64 "@fsouza/prettierd"}}}',
-        undefined as never,
+        {},
       );
       expect(output).toBe('QGZzb3V6YS9wcmV0dGllcmQ=');
     });
@@ -322,7 +322,7 @@ describe('util/template/index', () => {
     it('decode values', () => {
       const output = template.compile(
         '{{{decodeBase64 "QGZzb3V6YS9wcmV0dGllcmQ="}}}',
-        undefined as never,
+        {},
       );
       expect(output).toBe('@fsouza/prettierd');
     });

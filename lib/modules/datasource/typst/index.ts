@@ -13,7 +13,7 @@ import { SourceUrl, Versions } from './schema';
 export class TypstDatasource extends Datasource {
   static readonly id = 'typst';
 
-  override readonly defaultRegistryUrls = ['https://github.com'];
+  override readonly defaultRegistryUrls = ['https://api.github.com'];
 
   override defaultVersioning = semver;
 
@@ -21,9 +21,7 @@ export class TypstDatasource extends Datasource {
 
   constructor() {
     super(TypstDatasource.id);
-    this.githubHttp = new GithubHttp(TypstDatasource.id, {
-      baseUrl: 'https://api.github.com',
-    });
+    this.githubHttp = new GithubHttp(TypstDatasource.id);
   }
 
   @cache({
@@ -33,6 +31,7 @@ export class TypstDatasource extends Datasource {
   })
   override async getReleases({
     packageName,
+    registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const [namespace, pkg] = packageName.split('/');
     if (namespace !== 'preview') {
@@ -51,7 +50,10 @@ export class TypstDatasource extends Datasource {
 
     const { body: versions } = await this.githubHttp.getJson(
       versionsUrl,
-      { cacheProvider },
+      {
+        cacheProvider,
+        baseUrl: registryUrl,
+      },
       Versions,
     );
 
@@ -68,7 +70,10 @@ export class TypstDatasource extends Datasource {
     const manifestUrl = `/repos/typst/packages/contents/packages/preview/${pkg}/${latestRelease}/typst.toml`;
     const { body: sourceUrl } = await this.githubHttp.getJson(
       manifestUrl,
-      { cacheProvider },
+      {
+        cacheProvider,
+        baseUrl: registryUrl,
+      },
       SourceUrl,
     );
 

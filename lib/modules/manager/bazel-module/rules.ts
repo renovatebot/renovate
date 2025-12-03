@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import parseGithubUrl from 'github-url-from-git';
 import { z } from 'zod';
 import { logger } from '../../../logger';
@@ -98,7 +98,7 @@ const GitOverrideToPackageDep = RuleFragment.extend({
       currentDigest: commit.value,
     };
     const ghPackageName = githubPackageName(remote.value);
-    if (is.nonEmptyString(ghPackageName)) {
+    if (isNonEmptyString(ghPackageName)) {
       override.datasource = GithubTagsDatasource.id;
       override.packageName = ghPackageName;
     } else {
@@ -262,7 +262,7 @@ export const GitRepositoryToPackageDep = RuleFragment.extend({
     }
 
     const ghPackageName = githubPackageName(remote.value);
-    if (is.nonEmptyString(ghPackageName)) {
+    if (isNonEmptyString(ghPackageName)) {
       gitRepo.datasource = GithubTagsDatasource.id;
       gitRepo.packageName = ghPackageName;
     } else {

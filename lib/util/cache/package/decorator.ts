@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isFunction, isString, isUndefined } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
@@ -63,16 +63,16 @@ export function cache<T>({
     }
 
     let finalNamespace: PackageCacheNamespace | undefined;
-    if (is.string(namespace)) {
+    if (isString(namespace)) {
       finalNamespace = namespace;
-    } else if (is.function(namespace)) {
+    } else if (isFunction(namespace)) {
       finalNamespace = namespace.apply(instance, args);
     }
 
     let finalKey: string | undefined;
-    if (is.string(key)) {
+    if (isString(key)) {
       finalKey = key;
-    } else if (is.function(key)) {
+    } else if (isFunction(key)) {
       finalKey = key.apply(instance, args);
     }
 
@@ -92,25 +92,39 @@ export function cache<T>({
         finalKey,
       );
 
-      const ttlValues = resolveTtlValues(finalNamespace, ttlMinutes);
-      const softTtl = ttlValues.softTtlMinutes;
-      const hardTtl =
-        methodName === 'getReleases' || methodName === 'getDigest'
-          ? ttlValues.hardTtlMinutes
-          : // Skip two-tier TTL for any intermediate data fetching
-            softTtl;
+      // eslint-disable-next-line prefer-const
+      let { softTtlMinutes, hardTtlMinutes } = resolveTtlValues(
+        finalNamespace,
+        ttlMinutes,
+      );
+
+      // The separation between "soft" and "hard" TTL allows us to treat
+      // data as obsolete according to the "soft" TTL while physically storing it
+      // according to the "hard" TTL.
+      //
+      // This helps us return obsolete data in case of upstream server errors,
+      // which is more useful than throwing exceptions ourselves.
+      //
+      // However, since the default hard TTL is one week, it could create
+      // unnecessary pressure on storage volume. Therefore,
+      // we cache only `getReleases` and `getDigest` results for an extended period.
+      //
+      // For other method names being decorated, the "soft" just equals the "hard" ttl.
+      if (methodName !== 'getReleases' && methodName !== 'getDigest') {
+        hardTtlMinutes = softTtlMinutes;
+      }
 
       let oldData: unknown;
       if (oldRecord) {
         const now = DateTime.local();
         const cachedAt = DateTime.fromISO(oldRecord.cachedAt);
 
-        const softDeadline = cachedAt.plus({ minutes: softTtl });
+        const softDeadline = cachedAt.plus({ minutes: softTtlMinutes });
         if (now < softDeadline) {
           return oldRecord.value;
         }
 
-        const hardDeadline = cachedAt.plus({ minutes: hardTtl });
+        const hardDeadline = cachedAt.plus({ minutes: hardTtlMinutes });
         if (now < hardDeadline) {
           oldData = oldRecord.value;
         }
@@ -131,7 +145,7 @@ export function cache<T>({
         newData = await callback();
       }
 
-      if (!is.undefined(newData)) {
+      if (!isUndefined(newData)) {
         const newRecord: DecoratorCachedRecord = {
           cachedAt: DateTime.local().toISO(),
           value: newData,
@@ -140,7 +154,7 @@ export function cache<T>({
           finalNamespace,
           finalKey,
           newRecord,
-          hardTtl,
+          hardTtlMinutes,
         );
       }
 

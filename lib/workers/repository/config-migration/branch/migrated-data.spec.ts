@@ -110,6 +110,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       vi.mocked(detectRepoFileConfig).mockRejectedValueOnce(err);
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toBeNull();
+
       expect(logger.debug).toHaveBeenCalledWith(
         { err },
         'MigratedDataFactory.getAsync() Error initializing renovate MigratedData',

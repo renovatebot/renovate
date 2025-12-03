@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { findLocalSiblingOrParent, readLocalFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { get as getVersioning } from '../../../versioning';
@@ -228,7 +228,7 @@ export function writeLockUpdates(
 }
 
 export function massageNewValue(value: string | undefined): string | undefined {
-  if (is.nullOrUndefined(value)) {
+  if (isNullOrUndefined(value)) {
     return value;
   }
 

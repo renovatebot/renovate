@@ -40,7 +40,7 @@ export async function checkReconfigureBranch(
 
   // this is something the user initiates, skip if no branch exists
   if (!branchExists) {
-    logger.debug('No reconfigure branch found');
+    logger.debug({ reconfigureBranch }, 'No reconfigure branch found');
     deleteReconfigureBranchCache(); // in order to remove cache when the branch has been deleted
     return;
   }

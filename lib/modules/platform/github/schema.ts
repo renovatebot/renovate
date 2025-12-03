@@ -45,14 +45,13 @@ export const GithubVulnerabilityAlert = LooseArray(
     }),
   }),
   {
-    /* v8 ignore start */
+    /* v8 ignore next */
     onError: ({ error }) => {
       logger.debug(
         { error },
         'Vulnerability Alert: Failed to parse some alerts',
       );
     },
-    /* v8 ignore stop */
   },
 );
 export type GithubVulnerabilityAlert = z.infer<typeof GithubVulnerabilityAlert>;
@@ -102,3 +101,22 @@ export const GithubBranchProtection = z.object({
     .optional(),
 });
 export type GithubBranchProtection = z.infer<typeof GithubBranchProtection>;
+
+const GithubRulesetRule = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('non_fast_forward'),
+  }),
+  z.object({
+    type: z.literal('required_status_checks'),
+    parameters: z.object({
+      strict_required_status_checks_policy: z.boolean().optional(),
+    }),
+  }),
+  // prevents deletion
+  z.object({
+    type: z.literal('deletion'),
+  }),
+]);
+
+export const GithubBranchRulesets = LooseArray(GithubRulesetRule);
+export type GithubBranchRulesets = z.infer<typeof GithubBranchRulesets>;

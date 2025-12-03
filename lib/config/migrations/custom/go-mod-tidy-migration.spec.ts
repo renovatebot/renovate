@@ -1,8 +1,8 @@
 import { GoModTidyMigration } from './go-mod-tidy-migration';
 
 describe('config/migrations/custom/go-mod-tidy-migration', () => {
-  it('should add postUpdateOptions option when true', () => {
-    expect(GoModTidyMigration).toMigrate(
+  it('should add postUpdateOptions option when true', async () => {
+    await expect(GoModTidyMigration).toMigrate(
       {
         gomodTidy: true,
         postUpdateOptions: ['test'],
@@ -13,8 +13,8 @@ describe('config/migrations/custom/go-mod-tidy-migration', () => {
     );
   });
 
-  it('should handle case when postUpdateOptions is not defined', () => {
-    expect(GoModTidyMigration).toMigrate(
+  it('should handle case when postUpdateOptions is not defined', async () => {
+    await expect(GoModTidyMigration).toMigrate(
       {
         gomodTidy: true,
       },
@@ -24,8 +24,8 @@ describe('config/migrations/custom/go-mod-tidy-migration', () => {
     );
   });
 
-  it('should only remove when false', () => {
-    expect(GoModTidyMigration).toMigrate(
+  it('should only remove when false', async () => {
+    await expect(GoModTidyMigration).toMigrate(
       {
         gomodTidy: false,
       },

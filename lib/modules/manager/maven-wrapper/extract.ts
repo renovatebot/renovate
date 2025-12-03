@@ -38,8 +38,8 @@ function extractVersions(fileContent: string): MavenVersionExtract {
 }
 
 function extractLineInfo(lines: string[], ...regexs: RegExp[]): Version | null {
-  for (const line of lines) {
-    for (const regex of regexs) {
+  for (const regex of regexs) {
+    for (const line of lines) {
       if (line.match(regex)) {
         const match = regex.exec(line);
         if (match?.groups) {

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -25,7 +25,7 @@ export async function ensureReconfigurePrComment(
 ): Promise<boolean> {
   logger.debug('ensureReconfigurePrComment()');
   logger.trace({ config });
-  let prCommentTemplate = `This is an reconfigure PR comment to help you understand and re-configure your renovate bot settings. If this Reconfigure PR were to be merged, we'd expect to see the following outcome:\n\n`;
+  let prCommentTemplate = `This is a reconfigure PR comment to help you understand and re-configure your renovate bot settings. If this Reconfigure PR were to be merged, we'd expect to see the following outcome:\n\n`;
 
   // TODO #22198
   prCommentTemplate += `
@@ -86,9 +86,7 @@ export async function ensureReconfigurePrComment(
 function getDescriptionArray(config: RenovateConfig): string[] {
   logger.debug('getDescriptionArray()');
   logger.trace({ config });
-  const desc = is.array(config.description, is.string)
-    ? config.description
-    : [];
+  const desc = isArray(config.description, isString) ? config.description : [];
   return desc.concat(getScheduleDesc(config));
 }
 

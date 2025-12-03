@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { detectPlatform } from '../../../util/common';
@@ -80,7 +80,7 @@ export class BitriseDatasource extends Datasource {
       GithubContentResponse,
     );
 
-    if (!is.array(packageRaw)) {
+    if (!isArray(packageRaw)) {
       logger.warn(
         { data: packageRaw, url: packageUrl },
         'Got unexpected response for Bitrise package location',

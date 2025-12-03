@@ -120,10 +120,12 @@ function genTable(obj: [string, string][], type: string, def: any): string {
       ) {
         el[1] = `<code>${el[1]}</code>`;
       }
-      // objects and arrays should be printed in JSON notation
       if (
-        (type === 'object' || type === 'array') &&
-        (el[0] === 'default' || el[0] === 'additionalProperties')
+        // objects and arrays should be printed in JSON notation
+        ((type === 'object' || type === 'array') &&
+          (el[0] === 'default' || el[0] === 'additionalProperties')) ||
+        // enum values for `allowedValues` should be printed in JSON notation
+        el[0] === 'allowedValues'
       ) {
         // only show array and object defaults if they are not null and are not empty
         if (Object.keys(el[1] ?? []).length === 0) {
@@ -135,8 +137,8 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     }
   });
 
-  if (type === 'list') {
-    data.push(['default', '`[]`']);
+  if (type === 'array') {
+    data.push(['default', '<code>[]</code>']);
   }
   if (type === 'string' && def === undefined) {
     data.push(['default', '<code>null</code>']);
@@ -151,7 +153,7 @@ function genTable(obj: [string, string][], type: string, def: any): string {
 }
 
 function stringifyArrays(el: Record<string, any>): void {
-  const ignoredKeys = ['default', 'experimentalIssues'];
+  const ignoredKeys = ['allowedValues', 'default', 'experimentalIssues'];
 
   for (const [key, value] of Object.entries(el)) {
     if (!ignoredKeys.includes(key) && Array.isArray(value)) {

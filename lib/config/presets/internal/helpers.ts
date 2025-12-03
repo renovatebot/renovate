@@ -21,6 +21,17 @@ export const presets: Record<string, Preset> = {
     description: 'Keep `typescript` version in sync with the `rc` tag.',
     extends: [':followTag(typescript, rc)'],
   },
+  githubDigestChangelogs: {
+    description:
+      'Ensure that every dependency pinned by digest and sourced from GitHub.com contains a link to the commit-to-commit diff',
+    packageRules: [
+      {
+        changelogUrl: '{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}',
+        matchSourceUrls: ['https://github.com/**'],
+        matchUpdateTypes: ['digest'],
+      },
+    ],
+  },
   pinGitHubActionDigests: {
     description: 'Pin `github-action` digests.',
     packageRules: [

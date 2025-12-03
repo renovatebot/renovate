@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -56,10 +56,10 @@ ${
     }).\n\n`,
   );
 
-  if (is.string(config.prHeader)) {
+  if (isString(config.prHeader)) {
     prBody = `${template.compile(config.prHeader, config)}\n\n${prBody}`;
   }
-  if (is.string(config.prFooter)) {
+  if (isString(config.prFooter)) {
     prBody = `${prBody}\n---\n\n${template.compile(config.prFooter, config)}\n`;
   }
   logger.trace({ prBody }, 'prBody');

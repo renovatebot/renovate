@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { isSkipComment } from '../../../util/ignore';
 import { newlineRegex, regEx } from '../../../util/regex';
@@ -19,7 +19,7 @@ function getDependency(plugin: JenkinsPlugin): PackageDependency {
 
   if (plugin.source?.version) {
     dep.currentValue = plugin.source.version.toString();
-    if (!is.string(plugin.source.version)) {
+    if (!isString(plugin.source.version)) {
       dep.skipReason = 'invalid-version';
       logger.warn(
         { dep },
@@ -59,7 +59,7 @@ function extractYaml(
   try {
     // TODO: use schema (#9610)
     const doc = parseSingleYaml<JenkinsPlugins>(content);
-    if (is.nonEmptyArray(doc?.plugins)) {
+    if (isNonEmptyArray(doc?.plugins)) {
       for (const plugin of doc.plugins) {
         if (plugin.artifactId) {
           const dep = getDependency(plugin);

@@ -1,32 +1,16 @@
-import is from '@sindresorhus/is';
+import { isArray } from '@sindresorhus/is';
 import semver from 'semver';
-import upath from 'upath';
 import { logger } from '../../../../logger';
-import { readLocalFile } from '../../../../util/fs';
 import { Lazy } from '../../../../util/lazy';
-import { PackageJson } from '../schema';
+import type { PackageJson } from '../schema';
+import { loadPackageJson } from '../utils';
 
 export function lazyLoadPackageJson(
   lockFileDir: string,
 ): Lazy<Promise<PackageJson>> {
   return new Lazy(() => loadPackageJson(lockFileDir));
 }
-
 export type LazyPackageJson = ReturnType<typeof lazyLoadPackageJson>;
-
-export async function loadPackageJson(
-  lockFileDir: string,
-): Promise<PackageJson> {
-  const json = await readLocalFile(
-    upath.join(lockFileDir, 'package.json'),
-    'utf8',
-  );
-  const res = PackageJson.safeParse(json);
-  if (res.success) {
-    return res.data;
-  }
-  return {};
-}
 
 export function getPackageManagerVersion(
   name: string,
@@ -39,7 +23,7 @@ export function getPackageManagerVersion(
     return version;
   }
   if (pkg.devEngines?.packageManager) {
-    const packageManagers = is.array(pkg.devEngines.packageManager)
+    const packageManagers = isArray(pkg.devEngines.packageManager)
       ? pkg.devEngines.packageManager
       : [pkg.devEngines.packageManager];
     const packageMgr = packageManagers.find((pm) => pm.name === name);

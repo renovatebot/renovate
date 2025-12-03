@@ -66,6 +66,7 @@ describe('util/git/modified-cache', () => {
     it('returns without updating when cache not populated', () => {
       setCachedModifiedResult('foo', false);
       expect(repoCache).toEqual({});
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'setCachedModifiedResult(): Branch cache not present',
       );
@@ -74,6 +75,7 @@ describe('util/git/modified-cache', () => {
     it('returns without updating when branch not found', () => {
       setCachedModifiedResult('foo', false);
       expect(repoCache).toEqual({});
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'setCachedModifiedResult(): Branch cache not present',
       );

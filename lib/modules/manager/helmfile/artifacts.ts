@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isFalsy } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -39,7 +39,7 @@ export async function updateArtifacts({
   const lockFileName = getSiblingFileName(packageFileName, 'helmfile.lock');
   const existingLockFileContent = await getFile(lockFileName);
 
-  if (is.falsy(existingLockFileContent)) {
+  if (isFalsy(existingLockFileContent)) {
     logger.debug('No helmfile.lock found');
     return null;
   }

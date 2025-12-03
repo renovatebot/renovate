@@ -1,8 +1,8 @@
 import { FileMatchMigration } from './file-match-migration';
 
 describe('config/migrations/custom/file-match-migration', () => {
-  it('migrates fileMatch of type string', () => {
-    expect(FileMatchMigration).toMigrate(
+  it('migrates fileMatch of type string', async () => {
+    await expect(FileMatchMigration).toMigrate(
       {
         fileMatch: 'filename',
       },
@@ -12,8 +12,8 @@ describe('config/migrations/custom/file-match-migration', () => {
     );
   });
 
-  it('migrates fileMatch of type array', () => {
-    expect(FileMatchMigration).toMigrate(
+  it('migrates fileMatch of type array', async () => {
+    await expect(FileMatchMigration).toMigrate(
       {
         fileMatch: ['filename1', 'filename2'],
       },
@@ -23,20 +23,20 @@ describe('config/migrations/custom/file-match-migration', () => {
     );
   });
 
-  it('concats fileMatch to managerFilePatterns', () => {
-    expect(FileMatchMigration).toMigrate(
+  it('concats fileMatch to managerFilePatterns', async () => {
+    await expect(FileMatchMigration).toMigrate(
       {
         fileMatch: ['filename1', 'filename2'],
         managerFilePatterns: ['filename3'],
       },
       {
-        managerFilePatterns: ['/filename1/', '/filename2/', 'filename3'],
+        managerFilePatterns: ['filename3', '/filename1/', '/filename2/'],
       },
     );
   });
 
-  it('does nothing if fileMatch not defined', () => {
-    expect(FileMatchMigration).toMigrate(
+  it('does nothing if fileMatch not defined', async () => {
+    await expect(FileMatchMigration).toMigrate(
       {
         managerFilePatterns: ['filename3'],
       },

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isUndefined } from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { matchRegexOrGlobList } from '../string-match';
 import { Matcher } from './base';
@@ -9,7 +9,7 @@ export class PackageNameMatcher extends Matcher {
     packageRule: PackageRule,
   ): boolean | null {
     const { matchPackageNames } = packageRule;
-    if (is.undefined(matchPackageNames)) {
+    if (isUndefined(matchPackageNames)) {
       return null;
     }
     if (!packageName) {

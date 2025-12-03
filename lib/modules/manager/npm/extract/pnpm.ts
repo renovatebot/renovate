@@ -1,4 +1,10 @@
-import is from '@sindresorhus/is';
+import {
+  isNonEmptyObject,
+  isNumber,
+  isObject,
+  isPlainObject,
+  isString,
+} from '@sindresorhus/is';
 import { findPackages } from 'find-packages';
 import upath from 'upath';
 import type { z } from 'zod';
@@ -20,7 +26,7 @@ import { extractCatalogDeps } from './common/catalogs';
 import type { Catalog, LockFile } from './types';
 
 function isPnpmLockfile(obj: any): obj is PnpmLockFile {
-  return is.plainObject(obj) && 'lockfileVersion' in obj;
+  return isPlainObject(obj) && 'lockfileVersion' in obj;
 }
 
 export async function extractPnpmFilters(
@@ -33,7 +39,7 @@ export async function extractPnpmFilters(
     );
     if (
       !Array.isArray(contents.packages) ||
-      !contents.packages.every((item) => is.string(item))
+      !contents.packages.every((item) => isString(item))
     ) {
       logger.trace(
         { fileName },
@@ -159,7 +165,7 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
     logger.trace({ lockParsed }, 'pnpm lockfile parsed');
 
     // field lockfileVersion is type string in lockfileVersion = 6 and type number in < 6
-    const lockfileVersion: number = is.number(lockParsed.lockfileVersion)
+    const lockfileVersion: number = isNumber(lockParsed.lockfileVersion)
       ? lockParsed.lockfileVersion
       : parseFloat(lockParsed.lockfileVersion);
 
@@ -182,7 +188,7 @@ function getLockedCatalogVersions(
 ): Record<string, Record<string, string>> {
   const lockedVersions: Record<string, Record<string, string>> = {};
 
-  if (is.nonEmptyObject(lockParsed.catalogs)) {
+  if (isNonEmptyObject(lockParsed.catalogs)) {
     for (const [catalog, dependencies] of Object.entries(lockParsed.catalogs)) {
       const versions: Record<string, string> = {};
 
@@ -206,7 +212,7 @@ function getLockedVersions(
   > = {};
 
   // monorepo
-  if (is.nonEmptyObject(lockParsed.importers)) {
+  if (isNonEmptyObject(lockParsed.importers)) {
     for (const [importer, imports] of Object.entries(lockParsed.importers)) {
       lockedVersions[importer] = getLockedDependencyVersions(imports);
     }
@@ -235,7 +241,7 @@ function getLockedDependencyVersions(
       obj[depType] ?? {},
     )) {
       let version: string;
-      if (is.object(versionCarrier)) {
+      if (isObject(versionCarrier)) {
         version = versionCarrier.version;
       } else {
         version = versionCarrier;
