@@ -69,7 +69,7 @@ describe('config/options/index', () => {
 
   describe('every option with a siblingProperties has a `property` that matches a known option', () => {
     const opts = getOptions();
-    const optionNames = opts.map((o) => o.name);
+    const optionNames = new Set(opts.map((o) => o.name));
 
     for (const option of opts) {
       if (option.requiredIf) {
