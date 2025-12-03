@@ -47,9 +47,11 @@ export function checkForPlatformFailure(err: Error): Error | null {
           { err },
           'Converting gitCloneMode=shallow git error to CONFIG_VALIDATION error',
         );
+        // TODO is this right???
         const res = new Error(CONFIG_VALIDATION);
         res.validationError = `Running in gitCloneMode=shallow with gitShallowCloneDepth=${GlobalConfig.get('gitShallowCloneDepth')}, but target branch was too many commits behind`;
         res.validationMessage = `\`${err.message.replaceAll('`', "'")}\``;
+        // TODO is this right???
         return res;
       }
     }
