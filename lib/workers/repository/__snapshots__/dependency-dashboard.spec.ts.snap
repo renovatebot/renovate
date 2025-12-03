@@ -520,11 +520,11 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 
 Renovate tried to run on this repository, but found these problems.
 
- - ERROR: everything is broken
- - WARN: just a bit
- - ERROR: i am a duplicated problem
- - ERROR: i am a non-duplicated problem
- - WARN: i am a non-duplicated problem
+ - ❌ ERROR: everything is broken
+ - ⚠️ WARN: just a bit
+ - ❌ ERROR: i am a duplicated problem
+ - ❌ ERROR: i am a non-duplicated problem
+ - ⚠️ WARN: i am a non-duplicated problem
 
 ## Pending Status Checks
 
@@ -546,7 +546,7 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 
 platform is github
 
- - ERROR: i am a non-duplicated problem
+ - ❌ ERROR: i am a non-duplicated problem
 
 ## Pending Status Checks
 
