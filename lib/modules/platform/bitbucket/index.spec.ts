@@ -1676,7 +1676,7 @@ describe('modules/platform/bitbucket/index', () => {
         '<details><summary>View abandoned dependencies (6)</summary>';
 
       expect(bitbucket.massageMarkdown(prBody)).toEqual(
-        '## Abandoned dependencies  (6)\n' +
+        '## Abandoned Dependencies  (6)\n' +
           '> ℹ **Note**\n>\n' +
           'These dependencies have not received updates for an extended period and may be unmaintained:\n',
       );
