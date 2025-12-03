@@ -1668,6 +1668,27 @@ describe('modules/platform/bitbucket/index', () => {
 
       expect(bitbucket.massageMarkdown(prBody)).toMatchSnapshot();
     });
+
+    it('updates dependencies section to block nested list', () => {
+      const prBody =
+        '## Detected dependencies\n\n' +
+        '<details><summary>dockerfile</summary>\n<blockquote>\n\n' +
+        '<details><summary>app1/Dockerfile</summary>\n - `node:24`\n - `temurin:27`\n</details>\n\n' +
+        '<details><summary>app2/Dockerfile</summary>\n - `node:20`\n - `python:3:14`\n</details>\n\n' +
+        '</blockquote>\n</details>\n\n' +
+        '<details><summary>npm</summary>\n<blockquote>\n\n' +
+        '<details><summary>package.json</summary>\n - `@biomejs/biome:2.0.0`</details>\n\n' +
+        '</blockquote>\n</details>';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '## Detected dependencies\n\n' +
+          '**dockerfile**\n\n' +
+          '> - `app1/Dockerfile`\n>     - `node:24`\n>     - `temurin:27`\n>\n\n' +
+          '> - `app2/Dockerfile`\n>     - `node:20`\n>     - `python:3:14`\n>\n\n' +
+          '\n\n**npm**\n\n' +
+          '> - `package.json`\n>     - `@biomejs/biome:2.0.0`\n\n',
+      );
+    });
   });
 
   describe('updatePr()', () => {

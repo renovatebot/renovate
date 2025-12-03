@@ -603,20 +603,36 @@ async function closeIssue(issueNumber: number): Promise<void> {
 
 export function massageMarkdown(input: string): string {
   // Remove any HTML we use
-  return smartTruncate(input, maxBodyLength())
-    .replace(
-      'you tick the rebase/retry checkbox',
-      'by renaming this PR to start with "rebase!"',
-    )
-    .replace(
-      'checking the rebase/retry box above',
-      'renaming the PR to start with "rebase!"',
-    )
-    .replace(regEx(/<\/?summary>/g), '**')
-    .replace(regEx(/<\/?(details|blockquote)>/g), '')
-    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-    .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
-    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
+  return (
+    smartTruncate(input, maxBodyLength())
+      .replace(
+        'you tick the rebase/retry checkbox',
+        'by renaming this PR to start with "rebase!"',
+      )
+      .replace(
+        'checking the rebase/retry box above',
+        'renaming the PR to start with "rebase!"',
+      )
+      // Massage html <blockquote> sections
+      .replace(
+        regEx(/<blockquote>([\s\S]*?)<\/blockquote>/g),
+        (_match, inner: string) => {
+          const massagedBlockQuote = inner
+            .replace(/^\s*$/gm, '') // Remove empty lines
+            .replace(/^(.+)$/gm, '>$1') // Then prefix the rest
+            .replace(regEx(/ - /g), '     - ') // level two unordered list
+            .replace(regEx(/<summary>(.*)<\/summary>/g), ' - `$1`'); // level one unordered list
+
+          return massagedBlockQuote;
+        },
+      )
+      .replace(regEx(/<\/?summary>/g), '**')
+      .replace(regEx(/<\/?details>/g), '')
+      .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
+
+      .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
+      .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
+  );
 }
 
 export function maxBodyLength(): number {

@@ -137,11 +137,13 @@ exports[`modules/platform/bitbucket/index > getPrList() > filters PR list by aut
 exports[`modules/platform/bitbucket/index > massageMarkdown() > returns diff files 1`] = `
 "**foo**
 
+> - \`text\`
+>---
 
-**text**
+>     - [ ] <!-- rebase-check --> rebase
+>
 
-
-
+>
 
 "
 `;
