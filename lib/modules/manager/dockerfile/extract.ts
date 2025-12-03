@@ -352,7 +352,7 @@ export function extractPackageFile(
         for (const [fullVariable, argName] of Object.entries(variables)) {
           const resolvedArgValue = args[argName];
           if (resolvedArgValue || resolvedArgValue === '') {
-            fromImage = fromImage.replace(fullVariable, resolvedArgValue);
+            fromImage = fromImage.replaceAll(fullVariable, resolvedArgValue);
             lineNumberRanges.push(argsLines[argName]);
           }
         }
