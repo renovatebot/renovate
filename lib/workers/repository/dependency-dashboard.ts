@@ -729,10 +729,10 @@ export async function getDashboardMarkdownVulnerabilities(
 
   result += `\`${resolvedVulnerabilitiesLength}\`/\`${vulnerabilities.length}\``;
   if (isTruthy(config.osvVulnerabilityAlerts)) {
-    result += ' CVEs have Renovate fixes.\n';
+    result += ' CVEs have Renovate fixes.\n\n';
   } else {
     result +=
-      ' CVEs have possible Renovate fixes.\nSee [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n';
+      ' CVEs have possible Renovate fixes.\nSee [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n\n';
   }
 
   let renderedVulnerabilities: Vulnerability[];

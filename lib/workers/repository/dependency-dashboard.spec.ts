@@ -1800,6 +1800,7 @@ None detected
       expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
 
 \`1\`/\`2\` CVEs have Renovate fixes.
+
 <details><summary>npm</summary>
 <blockquote>
 
@@ -1867,6 +1868,7 @@ None detected
 
 \`1\`/\`2\` CVEs have possible Renovate fixes.
 See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.
+
 <details><summary>npm</summary>
 <blockquote>
 
