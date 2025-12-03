@@ -33,7 +33,6 @@ export class GlobalConfig {
     'gitShallowCloneDepth',
     'gitTimeout',
     'githubTokenWarn',
-    'githubTokenWarn',
     'httpCacheTtlDays',
     'ignorePrAuthor',
     'includeMirrors',
