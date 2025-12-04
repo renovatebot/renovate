@@ -290,7 +290,7 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
   let newIssueBody = issueBody;
   const repoProblems = extractRepoProblems(config.repository);
   if (repoProblems.size) {
-    newIssueBody += '## Repository problems\n\n';
+    newIssueBody += '## Repository Problems\n\n';
     const repoProblemsHeader =
       config.customizeDashboard?.repoProblemsHeader ??
       'Renovate tried to run on this repository, but found these problems.';
