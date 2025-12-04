@@ -1342,7 +1342,13 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
-    .replace(regEx(/<!--.*?-->/gs), '');
+    .replace(regEx(/<!--.*?-->/gs), '')
+    .replace(
+      regEx(
+        /(!\[.+?\]\(https:\/\/developer\.mend\.io\/api\/mc\/badges\/.+?\))/g,
+      ),
+      '$1{height=20}',
+    );
 }
 
 export function maxBodyLength(): number {

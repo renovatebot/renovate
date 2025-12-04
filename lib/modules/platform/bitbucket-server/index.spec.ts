@@ -2289,6 +2289,13 @@ Followed by some information.
 <!-- followed by some more comments -->`);
           expect(prBody).toMatchSnapshot();
         });
+
+        it('resizes mend.io merge confidence badges', () => {
+          const badgeUrl =
+            'https://developer.mend.io/api/mc/badges/age/npm/yargs/18.0.0?slim=true';
+          const prBody = bitbucket.massageMarkdown(`| ![age](${badgeUrl}) |`);
+          expect(prBody).toBe(`| ![age](${badgeUrl}){height=20} |`);
+        });
       });
 
       describe('getBranchStatus()', () => {
