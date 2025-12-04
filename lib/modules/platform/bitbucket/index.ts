@@ -605,7 +605,8 @@ export function massageMarkdown(input: string): string {
   // Remove any HTML we use
   // Bitbucket doesn't currently support collapsible syntax; https://jira.atlassian.com/browse/BCLOUD-20231
   // See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
-  return smartTruncate(input, maxBodyLength())
+
+  const after = smartTruncate(input, maxBodyLength())
     .replace(
       'you tick the rebase/retry checkbox',
       'by renaming this PR to start with "rebase!"',
@@ -619,11 +620,72 @@ export function massageMarkdown(input: string): string {
       '## Abandoned dependencies $1',
     )
     .replace(regEx(/(>[\s\S]+?)(## Abandoned dependencies.*)/), '$2\n$1')
-    .replace(regEx(/<\/?summary>/g), '**')
-    .replace(regEx(/<\/?(details|blockquote)>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
+
+  return massageDetectedDepsAndVulns(after);
+}
+
+function massageDetectedDepsAndVulns(body: string): string {
+  const DETAILS_OPEN_TAG = '<details>';
+  const DETAILS_CLOSE_TAG = '</details>';
+
+  const parts = body
+    .split(DETAILS_OPEN_TAG)
+    .map((text) => ({ raw: text, depth: 0, transformed: text }));
+
+  let depth = 0;
+
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+
+    // Depth for the content *before* potentially encountering an opening tag
+    part.depth = depth;
+
+    // If this is not the last part, an opening <details> follows → go deeper
+    if (i < parts.length - 1) {
+      depth += 1;
+    }
+
+    // Reduce depth based on any closing tags in this block
+    const closes = part.raw.split(DETAILS_CLOSE_TAG).length - 1;
+    depth = Math.max(0, depth - closes);
+  }
+
+  let newBody = '';
+  for (const part of parts) {
+    const d = part.depth;
+    // Only add list bullets for real nested content
+    if (d >= 2) {
+      newBody += `${'\t'.repeat(d - 2)} - `;
+    }
+
+    let t = part.raw;
+
+    if (d === 1) {
+      // Top-level heading
+      t = t.replace(regEx(/<\/?summary>/g), '**');
+    } else if (d === 2) {
+      // Second level: keep summary as plain text (no backticks)
+      t = t
+        .replace(regEx(/<\/?summary>/g), '`')
+        // indent the inner bullet items properly
+        .replace(regEx(/\n - (`.*`)/g), `\n${'\t'.repeat(d - 1)} - $1`);
+    } else if (d === 3) {
+      // Third level: plain text label + indented items
+      t = t
+        .replace(regEx(/<\/?summary>/g), '`')
+        .replace(regEx(/<blockquote>\n\n/g), `${'\t'.repeat(d - 1)} `);
+    }
+
+    part.transformed = t
+      .replace(regEx(/<\/?(details|summary|blockquote)>/g), '')
+      .replace(regEx(/(\n{3,})+/g), '\n\n');
+    newBody += part.transformed;
+  }
+
+  return newBody;
 }
 
 export function maxBodyLength(): number {
