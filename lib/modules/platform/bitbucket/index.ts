@@ -606,8 +606,6 @@ export function massageMarkdown(input: string): string {
   // Bitbucket doesn't currently support collapsible syntax; https://jira.atlassian.com/browse/BCLOUD-20231
   // See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
 
-  console.log('ADAM BEFORE', JSON.stringify(input));
-
   const after = smartTruncate(input, maxBodyLength())
     .replace(
       'you tick the rebase/retry checkbox',
@@ -622,23 +620,17 @@ export function massageMarkdown(input: string): string {
       '## Abandoned dependencies $1',
     )
     .replace(regEx(/(>[\s\S]+?)(## Abandoned dependencies.*)/), '$2\n$1')
-    // .replace(regEx(/<\/?summary>/g), '**')
-    // .replace(regEx(/<\/?blockquote>/g), '')
-    // Blockquote html replacements for Detected Dependencies and Vulnerabilities list
-    .replace(/^[\s\S]*$/m, (full) => massageDetectedDepsAndVulns(full))
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 
-  console.log('ADAM AFTER', JSON.stringify(after));
-
-  return after;
+  return massageDetectedDepsAndVulns(after);
 }
 
 function massageDetectedDepsAndVulns(body: string): string {
   const DETAILS_OPEN_TAG = '<details>';
   const DETAILS_CLOSE_TAG = '</details>';
-  // unified structure holding both text and depth
+
   const parts = body
     .split(DETAILS_OPEN_TAG)
     .map((text) => ({ raw: text, depth: 0, transformed: text }));
@@ -663,29 +655,33 @@ function massageDetectedDepsAndVulns(body: string): string {
 
   let newBody = '';
   for (const part of parts) {
-    if (part.depth > 1) {
-      newBody += `${'\t'.repeat(part.depth - 1)} - `;
+    const d = part.depth;
+    // Only add list bullets for real nested content
+    if (d >= 2) {
+      newBody += `${'\t'.repeat(d - 2)} - `;
     }
 
     let t = part.raw;
 
-    if (part.depth === 1) {
+    if (d === 1) {
+      // Top-level heading
       t = t.replace(regEx(/<\/?summary>/g), '**');
-    } else if (part.depth === 2) {
+    } else if (d === 2) {
+      // Second level: keep summary as plain text (no backticks)
       t = t
         .replace(regEx(/<\/?summary>/g), '`')
-        .replace(regEx(/\n - (`.*`)/g), `\n${'\t'.repeat(part.depth)} - $1`);
-    } else if (part.depth === 3) {
+        // indent the inner bullet items properly
+        .replace(regEx(/\n - (`.*`)/g), `\n${'\t'.repeat(d - 1)} - $1`);
+    } else if (d === 3) {
+      // Third level: plain text label + indented items
       t = t
         .replace(regEx(/<\/?summary>/g), '`')
-        .replace(regEx(/<blockquote>\n\n/g), `\n${'\t'.repeat(part.depth)} `);
+        .replace(regEx(/<blockquote>\n\n/g), `${'\t'.repeat(d - 1)} `);
     }
 
-    part.transformed = t.replace(
-      regEx(/<\/?(details|summary|blockquote)>/g),
-      '',
-    );
-    // .replace(regEx(/(\n{2,})+/g), '\n');
+    part.transformed = t
+      .replace(regEx(/<\/?(details|summary|blockquote)>/g), '')
+      .replace(regEx(/(\n{3,})+/g), '\n\n');
     newBody += part.transformed;
   }
 

@@ -1696,14 +1696,14 @@ describe('modules/platform/bitbucket/index', () => {
         '</details>\n\n</blockquote>\n</details>\n\n</blockquote>\n</details>\n\n';
 
       expect(bitbucket.massageMarkdown(prBody)).toEqual(
-        '## Vulnerabilities\n' +
+        '## Vulnerabilities\n\n' +
           '`2`/`2` CVEs have Renovate fixes.\n' +
-          '**maven**\n' +
-          '\t - `pom.xml`\n' +
-          '\t\t - `org.eclipse.jetty.http2:http2-common`\n' +
-          '\t\t\t - [GHSA-mmxm-8w33-wc4h](https://osv.dev/vulnerability/GHSA-mmxm-8w33-wc4h) (fixed in [11.0.26,))\n' +
-          '\t\t - `org.apache.commons:commons-lang3`\n' +
-          '\t\t\t - [GHSA-j288-q9x7-2f5v](https://osv.dev/vulnerability/GHSA-j288-q9x7-2f5v) (fixed in [3.18.0,))\n',
+          '**maven**\n\n' +
+          ' - `pom.xml`\n\n' +
+          '\t - `org.eclipse.jetty.http2:http2-common`\n' +
+          '\t\t - [GHSA-mmxm-8w33-wc4h](https://osv.dev/vulnerability/GHSA-mmxm-8w33-wc4h) (fixed in [11.0.26,))\n\n' +
+          '\t - `org.apache.commons:commons-lang3`\n' +
+          '\t\t - [GHSA-j288-q9x7-2f5v](https://osv.dev/vulnerability/GHSA-j288-q9x7-2f5v) (fixed in [3.18.0,))\n\n',
       );
     });
 
@@ -1719,12 +1719,12 @@ describe('modules/platform/bitbucket/index', () => {
         '</blockquote>\n</details>';
 
       expect(bitbucket.massageMarkdown(prBody)).toEqual(
-        '## Detected dependencies\n' +
-          '**dockerfile**\n' +
-          '\t - `app1/Dockerfile`\n\t\t - `node:24`\n\t\t - `temurin:27`\n' +
-          '\t - `app2/Dockerfile`\n\t\t - `node:20`\n\t\t - `python:3:14`\n' +
-          '**npm**\n' +
-          '\t - `package.json`\n\t\t - `@biomejs/biome:2.0.0`\n',
+        '## Detected dependencies\n\n' +
+          '**dockerfile**\n\n' +
+          ' - `app1/Dockerfile`\n\t - `node:24`\n\t - `temurin:27`\n\n' +
+          ' - `app2/Dockerfile`\n\t - `node:20`\n\t - `python:3:14`\n\n' +
+          '**npm**\n\n' +
+          ' - `package.json`\n\t - `@biomejs/biome:2.0.0`\n\n',
       );
     });
   });
