@@ -834,9 +834,9 @@ export async function mergePr({
           bypassReason: platformOptions?.azureBypassPolicyReason,
         };
       } else {
-        logger.debug(
+        logger.warn(
           { policy: policyEvaluation },
-          'Policy prevents PR from auto-merge.',
+          'At least one policy prevents the PR from being auto-merged.',
         );
         return false;
       }
@@ -865,7 +865,7 @@ export async function mergePr({
       pr.lastMergeSourceCommit?.commitId
     } using mergeStrategy ${mergeStrategy} (${
       GitPullRequestMergeStrategy[mergeStrategy]
-    }) and bypassed ${bypassPolicies.length} policies.`,
+    }) and bypassing ${bypassPolicies.length} policies.`,
   );
 
   try {
