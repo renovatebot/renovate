@@ -229,6 +229,16 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'onboardingAutoCloseAge',
+    description:
+      'Maximum duration after which Renovate will stop trying to onboard the repository.',
+    type: 'integer',
+    default: 360,
+    globalOnly: true,
+    inheritConfigSupport: true,
+    cli: false,
+  },
+  {
     name: 'onboardingCommitMessage',
     description:
       'Change this value to override the default onboarding commit message.',

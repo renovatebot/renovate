@@ -7,6 +7,7 @@ import { platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
+import { getElapsedDays } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
 import { getFile } from '../../../../util/git';
 import { toSha256 } from '../../../../util/hash';
@@ -50,6 +51,31 @@ export async function ensureOnboardingPr(
     config.defaultBranch,
   );
   if (existingPr) {
+    // check if the existing pr crosses the onboarding autoclose age
+    const ageOfOnboardingPr = getElapsedDays(existingPr.createdAt);
+    if (ageOfOnboardingPr > GlobalConfig.get('onboardingAutoCloseAge')!) {
+      // close the pr
+      await platform.updatePr({
+        number: existingPr.number,
+        state: 'closed',
+        prTitle: existingPr.title,
+      });
+      // ensure comment
+      await ensureComment({
+        number: existingPr.number,
+        topic: `Renovate is disabled`,
+        content: `Renovate is disabled because the onboarding pr has been unmerged for more than ${GlobalConfig.get('onboardingAutoCloseAge')} days. To enable Renovate, you can either (a) change this PR's title to get a new onboarding PR, and merge the new onboarding PR, or (b) create a Renovate config file, and commit that file to your base branch.`,
+      });
+
+      logger.debug(
+        {
+          ageOfOnboardingPr,
+          onboardingAutoCloseAge: GlobalConfig.get('onboardingAutoCloseAge'),
+        },
+        `Renovate is being disabled for this repository as the onboarding pr has been umerged for more than ${GlobalConfig.get('onboardingAutoCloseAge')} days`,
+      );
+      return;
+    }
     // skip pr-update if branch is conflicted
     if (
       await isOnboardingBranchConflicted(

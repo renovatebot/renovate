@@ -71,7 +71,7 @@ export interface Pr {
   bodyStruct?: PrBodyStruct;
   sourceBranch: string;
   cannotMergeReason?: string; // for reflecting platform policies which may prevent merging
-  createdAt?: string;
+  createdAt: string;
   closedAt?: string;
   hasAssignees?: boolean;
   labels?: string[];
