@@ -37,8 +37,6 @@ export const presets: Record<string, Preset> = {
       'replacements:all',
       'workarounds:all',
       'helpers:githubDigestChangelogs',
-      'helpers:goXPackagesChangelogLink',
-      'helpers:goXPackagesNameLink',
     ],
   },
   semverAllMonthly: {
