@@ -2,7 +2,7 @@ name: 'Mend Slack Notifier'
 
 on:
   discussion:
-    types: [labeled]
+    types: [created, labeled]
 
 permissions:
   discussions: read
