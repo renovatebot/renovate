@@ -14,8 +14,6 @@ on:
 permissions:
   contents: read # the config file
   pull-requests: write # for labeling pull requests (on: pull_request_target or on: pull_request)
-  statuses: write # to generate status
-  checks: write # to generate status
 
 jobs:
   pr-labeler:
