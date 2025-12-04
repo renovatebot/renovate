@@ -431,9 +431,9 @@ export async function ensureDependencyDashboard(
     for (const manager of Object.keys(deprecatedPackages).sort()) {
       const deps = deprecatedPackages[manager];
       for (const depName of Object.keys(deps).sort()) {
-        const doesDepHaveReplacement = deps[depName];
+        const hasReplacement = deps[depName];
         issueBody += `| ${manager} | \`${depName}\` | ${
-          doesDepHaveReplacement
+          hasReplacement
             ? '![Available](https://img.shields.io/badge/available-green?style=flat-square)'
             : '![Unavailable](https://img.shields.io/badge/unavailable-orange?style=flat-square)'
         } |\n`;
