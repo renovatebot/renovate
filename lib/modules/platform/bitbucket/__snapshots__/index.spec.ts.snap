@@ -136,8 +136,9 @@ exports[`modules/platform/bitbucket/index > getPrList() > filters PR list by aut
 
 exports[`modules/platform/bitbucket/index > massageMarkdown() > removes html tags 1`] = `
 "**foo**
-
-> - \`text\`
+	 - \`text\`
+---
+ - [ ] <!-- rebase-check --> rebase
 
 "
 `;

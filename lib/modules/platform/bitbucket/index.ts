@@ -605,40 +605,91 @@ export function massageMarkdown(input: string): string {
   // Remove any HTML we use
   // Bitbucket doesn't currently support collapsible syntax; https://jira.atlassian.com/browse/BCLOUD-20231
   // See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
-  return (
-    smartTruncate(input, maxBodyLength())
-      .replace(
-        'you tick the rebase/retry checkbox',
-        'by renaming this PR to start with "rebase!"',
-      )
-      .replace(
-        'checking the rebase/retry box above',
-        'renaming the PR to start with "rebase!"',
-      )
-      .replace(
-        regEx(/<summary>View abandoned dependencies(.*)<\/summary>/),
-        '## Abandoned dependencies $1',
-      )
-      .replace(regEx(/(>[\s\S]+?)(## Abandoned dependencies.*)/), '$2\n$1')
-      .replace(regEx(/<\/?summary>/g), '**')
-      .replace(regEx(/<\/?details>/g), '')
-      .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-      .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
-      .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
-      // Massage html <blockquote> sections
-      .replace(
-        regEx(/<blockquote>([\s\S]*?)<\/blockquote>/g),
-        (_match, inner: string) => {
-          const massagedBlockQuote = inner
-            .replace(regEx(/^\s*$/gm), '') // Remove empty lines
-            .replace(regEx(/^(.+)$/gm), '>$1') // Then prefix the rest
-            .replace(regEx(/ - /g), '     - ') // level two unordered list
-            .replace(regEx(/\*\*(.*)\*\*/g), ' - `$1`'); // level one unordered list
 
-          return massagedBlockQuote;
-        },
-      )
-  );
+  console.log('ADAM BEFORE', JSON.stringify(input));
+
+  const after = smartTruncate(input, maxBodyLength())
+    .replace(
+      'you tick the rebase/retry checkbox',
+      'by renaming this PR to start with "rebase!"',
+    )
+    .replace(
+      'checking the rebase/retry box above',
+      'renaming the PR to start with "rebase!"',
+    )
+    .replace(
+      regEx(/<summary>View abandoned dependencies(.*)<\/summary>/),
+      '## Abandoned dependencies $1',
+    )
+    .replace(regEx(/(>[\s\S]+?)(## Abandoned dependencies.*)/), '$2\n$1')
+    // .replace(regEx(/<\/?summary>/g), '**')
+    // .replace(regEx(/<\/?blockquote>/g), '')
+    // Blockquote html replacements for Detected Dependencies and Vulnerabilities list
+    .replace(/^[\s\S]*$/m, (full) => massageDetectedDepsAndVulns(full))
+    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
+    .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
+    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
+
+  console.log('ADAM AFTER', JSON.stringify(after));
+
+  return after;
+}
+
+function massageDetectedDepsAndVulns(body: string): string {
+  const DETAILS_OPEN_TAG = '<details>';
+  const DETAILS_CLOSE_TAG = '</details>';
+  // unified structure holding both text and depth
+  const parts = body
+    .split(DETAILS_OPEN_TAG)
+    .map((text) => ({ raw: text, depth: 0, transformed: text }));
+
+  let depth = 0;
+
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+
+    // Depth for the content *before* potentially encountering an opening tag
+    part.depth = depth;
+
+    // If this is not the last part, an opening <details> follows → go deeper
+    if (i < parts.length - 1) {
+      depth += 1;
+    }
+
+    // Reduce depth based on any closing tags in this block
+    const closes = part.raw.split(DETAILS_CLOSE_TAG).length - 1;
+    depth = Math.max(0, depth - closes);
+  }
+
+  let newBody = '';
+  for (const part of parts) {
+    if (part.depth > 1) {
+      newBody += `${'\t'.repeat(part.depth - 1)} - `;
+    }
+
+    let t = part.raw;
+
+    if (part.depth === 1) {
+      t = t.replace(regEx(/<\/?summary>/g), '**');
+    } else if (part.depth === 2) {
+      t = t
+        .replace(regEx(/<\/?summary>/g), '`')
+        .replace(regEx(/\n - (`.*`)/g), `\n${'\t'.repeat(part.depth)} - $1`);
+    } else if (part.depth === 3) {
+      t = t
+        .replace(regEx(/<\/?summary>/g), '`')
+        .replace(regEx(/<blockquote>\n\n/g), `\n${'\t'.repeat(part.depth)} `);
+    }
+
+    part.transformed = t.replace(
+      regEx(/<\/?(details|summary|blockquote)>/g),
+      '',
+    );
+    // .replace(regEx(/(\n{2,})+/g), '\n');
+    newBody += part.transformed;
+  }
+
+  return newBody;
 }
 
 export function maxBodyLength(): number {
