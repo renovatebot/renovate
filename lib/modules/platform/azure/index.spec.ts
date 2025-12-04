@@ -1968,6 +1968,7 @@ describe('modules/platform/azure/index', () => {
         strategy: 'auto',
         platformOptions: {
           azureBypassPolicyTypes: ['some-policy-id', 'another-policy-id'],
+          azureBypassPolicyReason: 'reason',
         },
       });
 
@@ -1980,7 +1981,7 @@ describe('modules/platform/azure/index', () => {
             deleteSourceBranch: true,
             mergeCommitMessage: 'title',
             bypassPolicy: true,
-            bypassReason: 'Auto-merge by Renovate',
+            bypassReason: 'reason',
           },
         },
         '1',
