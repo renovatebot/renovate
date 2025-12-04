@@ -66,4 +66,28 @@ describe('config/options/index', () => {
       }
     }
   });
+
+  describe('every option with a siblingProperties has a `property` that matches a known option', () => {
+    const opts = getOptions();
+    const optionNames = new Set(opts.map((o) => o.name));
+
+    for (const option of opts) {
+      if (option.requiredIf) {
+        for (const req of option.requiredIf) {
+          for (const prop of req.siblingProperties) {
+            it(`${option.name}'s reference to ${prop.property} is valid`, () => {
+              expect(optionNames).toContain(prop.property);
+            });
+
+            const foundOption = opts.filter((o) => o.name === prop.property);
+            if (foundOption?.length && foundOption[0].allowedValues) {
+              it(`${option.name}'s value for ${prop.property} is valid, according to allowedValues`, () => {
+                expect(foundOption[0].allowedValues).toContain(prop.value);
+              });
+            }
+          }
+        }
+      }
+    }
+  });
 });
