@@ -1,5 +1,6 @@
 import { DEBUG, ERROR, FATAL, INFO, TRACE, WARN, nameFromLevel } from 'bunyan';
 import { getProblems } from '../../logger';
+import { emojify } from '../../util/emoji';
 
 export function extractRepoProblems(
   repository: string | undefined,
@@ -10,28 +11,24 @@ export function extractRepoProblems(
         (problem) =>
           problem.repository === repository && !problem.artifactErrors,
       )
-      .map(
-        (problem) =>
-          `${emojiFromLevel(problem.level)} ${nameFromLevel[problem.level].toUpperCase()}: ${problem.msg}`,
-      ),
+      .map((problem) => `${formatProblemLevel(problem.level)}: ${problem.msg}`),
   );
 }
 
-export function emojiFromLevel(level: number): string {
-  switch (level) {
-    case TRACE:
-      return '🔬';
-    case DEBUG:
-      return '🔍';
-    case INFO:
-      return 'ℹ️';
-    case WARN:
-      return '⚠️';
-    case ERROR:
-      return '❌';
-    case FATAL:
-      return '💀';
-    default:
-      return '';
-  }
+type EmojiLogLevelMapping = Record<number, string>;
+
+const logLevelEmojis: EmojiLogLevelMapping = {
+  [TRACE]: ':microscope:',
+  [DEBUG]: ':mag:',
+  [INFO]: ':information_source:',
+  [WARN]: ':warning:',
+  [ERROR]: ':x:',
+  [FATAL]: ':skull:',
+};
+
+export function formatProblemLevel(level: number): string {
+  const name = nameFromLevel[level].toUpperCase();
+  const unicode = logLevelEmojis[level];
+
+  return unicode ? `${emojify(unicode)} ${name}` : name;
 }

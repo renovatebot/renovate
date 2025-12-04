@@ -1,19 +1,30 @@
 import { DEBUG, ERROR, FATAL, INFO, TRACE, WARN } from 'bunyan';
-import { emojiFromLevel } from './common';
+import { formatProblemLevel } from './common';
 
 describe('workers/repository/common', () => {
-  describe('emojiFromLevel()', () => {
-    it('handles valid levels', () => {
-      expect(emojiFromLevel(TRACE)).toEqual('🔬');
-      expect(emojiFromLevel(DEBUG)).toEqual('🔍');
-      expect(emojiFromLevel(INFO)).toEqual('ℹ️');
-      expect(emojiFromLevel(WARN)).toEqual('⚠️');
-      expect(emojiFromLevel(ERROR)).toEqual('❌');
-      expect(emojiFromLevel(FATAL)).toEqual('💀');
+  describe('formatProblemLevel()', () => {
+    it('handles trace level', () => {
+      expect(formatProblemLevel(TRACE)).toEqual('🔬 TRACE');
     });
 
-    it('handles unknown level', () => {
-      expect(emojiFromLevel(-1)).toEqual('');
+    it('handles debug level', () => {
+      expect(formatProblemLevel(DEBUG)).toEqual('🔍 DEBUG');
+    });
+
+    it('handles info level', () => {
+      expect(formatProblemLevel(INFO)).toEqual('ℹ️ INFO');
+    });
+
+    it('handles warn level', () => {
+      expect(formatProblemLevel(WARN)).toEqual('⚠️ WARN');
+    });
+
+    it('handles error level', () => {
+      expect(formatProblemLevel(ERROR)).toEqual('❌ ERROR');
+    });
+
+    it('handles fatal level', () => {
+      expect(formatProblemLevel(FATAL)).toEqual('💀 FATAL');
     });
   });
 });
