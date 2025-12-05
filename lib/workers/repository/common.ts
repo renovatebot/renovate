@@ -30,5 +30,5 @@ export function formatProblemLevel(level: number): string {
   const name = nameFromLevel[level].toUpperCase();
   const emojiName = logLevelEmojis[level];
 
-  return emojiName ? `${emojify(emojiName)} ${name}` : name;
+  return `${emojify(emojiName)} ${name}`;
 }
