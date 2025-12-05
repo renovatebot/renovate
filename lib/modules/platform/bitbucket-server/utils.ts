@@ -84,10 +84,15 @@ function generateUrlFromEndpoint(
   repository: string,
 ): string {
   const url = new URL(defaultEndpoint);
+  const authString =
+    opts.username && opts.password
+      ? `${opts.username}:${opts.password}`
+      : (opts.username ?? '');
+
   const generatedUrl = git.getUrl({
     protocol: url.protocol as GitProtocol,
     // TODO: types (#22198)
-    auth: `${opts.username}:${opts.password}`,
+    auth: authString,
     host: `${url.host}${url.pathname}${
       /* v8 ignore next */
       url.pathname.endsWith('/') ? '' : '/'
@@ -118,26 +123,40 @@ export function getRepoGitUrl(
   info: BbsRestRepo,
   opts: HostRule,
 ): string {
-  if (gitUrl === 'ssh') {
-    const sshUrl = info.links.clone?.find(({ name }) => name === 'ssh');
-    if (sshUrl === undefined) {
-      throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
+  switch (gitUrl) {
+    case 'endpoint': {
+      const generatedUrl = generateUrlFromEndpoint(
+        defaultEndpoint,
+        opts,
+        repository,
+      );
+      logger.debug(`Using endpoint URL: ${generatedUrl}`);
+      return generatedUrl;
     }
-    logger.debug(`Using ssh URL: ${sshUrl.href}`);
-    return sshUrl.href;
+    case 'ssh': {
+      const sshUrl = info.links.clone?.find(({ name }) => name === 'ssh');
+      if (sshUrl === undefined) {
+        throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
+      }
+      logger.debug(`Using ssh URL: ${sshUrl.href}`);
+      return sshUrl.href;
+    }
+    case undefined:
+    case 'default': {
+      let cloneUrl = info.links.clone?.find(({ name }) => name === 'http');
+      if (cloneUrl) {
+        // Inject auth into the API provided URL
+        return injectAuth(cloneUrl.href, opts);
+      }
+      // Http access might be disabled, try to find ssh url in this case
+      cloneUrl = info.links.clone?.find(({ name }) => name === 'ssh');
+      if (cloneUrl) {
+        return cloneUrl.href;
+      }
+      // SSH urls can be used directly
+      return generateUrlFromEndpoint(defaultEndpoint, opts, repository);
+    }
   }
-  let cloneUrl = info.links.clone?.find(({ name }) => name === 'http');
-  if (cloneUrl) {
-    // Inject auth into the API provided URL
-    return injectAuth(cloneUrl.href, opts);
-  }
-  // Http access might be disabled, try to find ssh url in this case
-  cloneUrl = info.links.clone?.find(({ name }) => name === 'ssh');
-  if (gitUrl === 'endpoint' || !cloneUrl) {
-    return generateUrlFromEndpoint(defaultEndpoint, opts, repository);
-  }
-  // SSH urls can be used directly
-  return cloneUrl.href;
 }
 
 export function getExtraCloneOpts(opts: HostRule): GitOptions {
