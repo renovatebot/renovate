@@ -28,7 +28,7 @@ const logLevelEmojis: EmojiLogLevelMapping = {
 
 export function formatProblemLevel(level: number): string {
   const name = nameFromLevel[level].toUpperCase();
-  const unicode = logLevelEmojis[level];
+  const emojiName = logLevelEmojis[level];
 
-  return unicode ? `${emojify(unicode)} ${name}` : name;
+  return unicode ? `${emojify(emojiName)} ${name}` : name;
 }
