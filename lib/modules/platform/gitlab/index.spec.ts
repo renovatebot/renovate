@@ -1689,7 +1689,7 @@ describe('modules/platform/gitlab/index', () => {
         expect(scope.isDone()).toBeTrue();
       });
 
-      it('should fail to get user IDs', async () => {
+      it('should not fail if some reviewers are unknown', async () => {
         const scope = httpMock
           .scope(gitlabApiHost)
           .get(
@@ -1701,10 +1701,37 @@ describe('modules/platform/gitlab/index', () => {
           .get('/api/v4/users?username=someotheruser')
           .reply(404)
           .get('/api/v4/groups/someotheruser/members')
+          .reply(404)
+          .put('/api/v4/projects/undefined/merge_requests/42', {
+            reviewer_ids: [1, 2, 10],
+          })
+          .reply(200);
+
+        await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
+        expect(scope.isDone()).toBeTrue();
+      });
+
+      it('should warn and return early if new reviewers IDs could be fetched', async () => {
+        const scope = httpMock
+          .scope(gitlabApiHost)
+          .get(
+            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1',
+          )
+          .reply(200, { reviewers: existingReviewers })
+          .get('/api/v4/users?username=someuser')
+          .reply(404)
+          .get('/api/v4/groups/someuser/members')
+          .reply(404)
+          .get('/api/v4/users?username=someotheruser')
+          .reply(404)
+          .get('/api/v4/groups/someotheruser/members')
           .reply(404);
 
         await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
         expect(scope.isDone()).toBeTrue();
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          'Failed to get IDs of the new reviewers',
+        );
       });
 
       it('should add gitlab group members as reviewers to MR', async () => {
