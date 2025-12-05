@@ -2,6 +2,7 @@ import type { ChildProcess } from 'node:child_process';
 import { spawn } from 'node:child_process';
 import type { Readable } from 'node:stream';
 import { isNullOrUndefined } from '@sindresorhus/is';
+import { instrument } from '../../instrumentation';
 import { getEnv } from '../env';
 import type { ExecErrorData } from './exec-error';
 import { ExecError } from './exec-error';
@@ -169,4 +170,5 @@ function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
 export const rawExec: (
   cmd: string,
   opts: RawExecOptions,
-) => Promise<ExecResult> = exec;
+) => Promise<ExecResult> = (cmd: string, opts: RawExecOptions) =>
+  instrument(`rawExec: ${cmd}`, () => exec(cmd, opts));
