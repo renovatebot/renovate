@@ -90,6 +90,9 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
         );
         config.packageName = compile(toApply.overridePackageName, config);
       }
+      if (isString(toApply.sourceUrl)) {
+        toApply.sourceUrl = compile(toApply.sourceUrl, config);
+      }
       delete toApply.overrideDatasource;
       delete toApply.overrideDepName;
       delete toApply.overridePackageName;
