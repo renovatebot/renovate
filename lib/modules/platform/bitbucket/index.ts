@@ -689,8 +689,6 @@ function massageCollapsibleSectionsIntoLists(body: string): string {
 
     part.transformed = t;
 
-    console.log(JSON.stringify(t));
-
     newBody += part.transformed;
   }
 
