@@ -46,7 +46,11 @@ async function getIssuesByIssueType(
   issueType: 'Bug' | 'Feature',
 ): Promise<ItemsEntity[]> {
   const command = `gh issue list --json "title,number,url,labels" --search "type:${issueType}" --limit 1000`;
-  const execRes = await exec(command);
+  const execRes = await exec(command, {
+    extraEnv: {
+      GITHUB_TOKEN: process.env.GITHUB_TOKEN,
+    },
+  });
   const res = GhOutput.safeParse(JSON.parse(execRes.stdout));
   if (res.error) {
     throw res.error;
