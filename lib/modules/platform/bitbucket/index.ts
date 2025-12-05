@@ -616,9 +616,9 @@ export function massageMarkdown(input: string): string {
     )
     .replace(
       regEx(
-        /(> ℹ \*\*Note\*\*[\s\S]*?unmaintained:\n)[\s\S]*?(View abandoned dependencies(.*)<\/summary>)/m,
+        /(> ℹ \*\*Note\*\*[\s\S]*?unmaintained:\n)[\s\S]*?(View abandoned dependencies.*<\/summary>)/m,
       ),
-      '## Abandoned Dependencies$3\n$1',
+      '## Abandoned Dependencies\n$1',
     )
     .replace(regEx(/(>[\s\S]+?)(## Abandoned dependencies.*)/), '$2\n$1')
     .replace(regEx(/<\/?summary>/g), '**')
