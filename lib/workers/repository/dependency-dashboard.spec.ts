@@ -826,7 +826,7 @@ The following branches have not met their minimum group size. To create them, cl
 
  - [ ] <!-- approveGroup-branch=groupBranch1 -->undefined
 
-## Detected dependencies
+## Detected Dependencies
 
 None detected
 `,
@@ -1308,7 +1308,7 @@ None detected
 
 This repository currently has no open or pending branches.
 
-## Detected dependencies
+## Detected Dependencies
 
 None detected
 
@@ -1451,7 +1451,7 @@ None detected
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            'These dependencies are deprecated',
+            'These dependencies are either deprecated or have replacements available',
           );
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
             '| npm | `cookie-parser` | ![Unavailable]',
@@ -1650,7 +1650,7 @@ None detected
       describe('PackageFiles.getDashboardMarkdown()', () => {
         const note =
           '> ℹ **Note**\n> \n> Detected dependencies section has been truncated\n\n';
-        const title = `## Detected dependencies\n\n`;
+        const title = `## Detected Dependencies\n\n`;
 
         beforeEach(() => {
           PackageFiles.clear();

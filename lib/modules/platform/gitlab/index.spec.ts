@@ -258,6 +258,27 @@ describe('modules/platform/gitlab/index', () => {
       });
       expect(repos).toEqual(['a/b', 'a/c']);
     });
+
+    it('should include order and sort query parameters', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false&order_by=updated_at&sort=desc',
+        )
+        .reply(200, [
+          {
+            path_with_namespace: 'a/b',
+          },
+          {
+            path_with_namespace: 'a/c',
+          },
+        ]);
+      const repos = await gitlab.getRepos({
+        order: 'desc',
+        sort: 'updated_at',
+      });
+      expect(repos).toEqual(['a/b', 'a/c']);
+    });
   });
 
   async function initRepo(
