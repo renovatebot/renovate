@@ -1672,13 +1672,20 @@ describe('modules/platform/bitbucket/index', () => {
     it('updates abandoned dependencies heading and place note inside', () => {
       const prBody =
         '> ℹ **Note**\n>\n' +
-        'These dependencies have not received updates for an extended period and may be unmaintained:\n' +
-        '<details><summary>View abandoned dependencies (6)</summary>';
+        'These dependencies have not received updates for an extended period and may be unmaintained:\n\n' +
+        '<details>\n<summary>View abandoned dependencies (6)</summary>\n\n' +
+        '| Datasource | Name | Last Updated |\n' +
+        '|------------|------|-------------|\n' +
+        '| npm | node | unknown |\n' +
+        '\n<details>\n\n';
 
       expect(bitbucket.massageMarkdown(prBody)).toEqual(
         '## Abandoned dependencies  (6)\n' +
           '> ℹ **Note**\n>\n' +
-          'These dependencies have not received updates for an extended period and may be unmaintained:\n',
+          'These dependencies have not received updates for an extended period and may be unmaintained:\n\n\n\n\n' +
+          '| Datasource | Name | Last Updated |\n' +
+          '|------------|------|-------------|\n' +
+          '| npm | node | unknown |\n\n\n\n',
       );
     });
 
@@ -1698,12 +1705,12 @@ describe('modules/platform/bitbucket/index', () => {
       expect(bitbucket.massageMarkdown(prBody)).toEqual(
         '## Vulnerabilities\n\n' +
           '`2`/`2` CVEs have Renovate fixes.\n' +
-          '**maven**\n\n' +
-          ' - `pom.xml`\n\n' +
-          '\t - `org.eclipse.jetty.http2:http2-common`\n' +
-          '\t\t - [GHSA-mmxm-8w33-wc4h](https://osv.dev/vulnerability/GHSA-mmxm-8w33-wc4h) (fixed in [11.0.26,))\n\n' +
-          '\t - `org.apache.commons:commons-lang3`\n' +
-          '\t\t - [GHSA-j288-q9x7-2f5v](https://osv.dev/vulnerability/GHSA-j288-q9x7-2f5v) (fixed in [3.18.0,))\n\n',
+          ' - **maven**\n\n\n' +
+          '\t - `pom.xml`\n\n\n' +
+          '\t\t - `org.eclipse.jetty.http2:http2-common`\n\n\n' +
+          '\t\t\t- [GHSA-mmxm-8w33-wc4h](https://osv.dev/vulnerability/GHSA-mmxm-8w33-wc4h) (fixed in [11.0.26,))\n\n\n\n' +
+          '\t\t - `org.apache.commons:commons-lang3`\n\n\n' +
+          '\t\t\t- [GHSA-j288-q9x7-2f5v](https://osv.dev/vulnerability/GHSA-j288-q9x7-2f5v) (fixed in [3.18.0,))\n\n\n\n\n\n\n\n\n\n',
       );
     });
 
@@ -1720,11 +1727,16 @@ describe('modules/platform/bitbucket/index', () => {
 
       expect(bitbucket.massageMarkdown(prBody)).toEqual(
         '## Detected dependencies\n\n' +
-          '**dockerfile**\n\n' +
-          ' - `app1/Dockerfile`\n\t - `node:24`\n\t - `temurin:27`\n\n' +
-          ' - `app2/Dockerfile`\n\t - `node:20`\n\t - `python:3:14`\n\n' +
-          '**npm**\n\n' +
-          ' - `package.json`\n\t - `@biomejs/biome:2.0.0`\n\n',
+          ' - **dockerfile**\n\n\n' +
+          '\t - `app1/Dockerfile`\n' +
+          '\t\t - `node:24`\n' +
+          '\t\t - `temurin:27`\n\n\n' +
+          '\t - `app2/Dockerfile`\n' +
+          '\t\t - `node:20`\n' +
+          '\t\t - `python:3:14`\n\n\n\n\n\n' +
+          ' - **npm**\n\n\n' +
+          '\t - `package.json`\n' +
+          '\t\t - `@biomejs/biome:2.0.0`\n\n\n',
       );
     });
   });

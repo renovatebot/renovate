@@ -603,7 +603,6 @@ async function closeIssue(issueNumber: number): Promise<void> {
 
 export function massageMarkdown(input: string): string {
   // Remove any HTML we use
-  // Bitbucket doesn't currently support collapsible syntax; https://jira.atlassian.com/browse/BCLOUD-20231
   // See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
 
   const after = smartTruncate(input, maxBodyLength())
@@ -624,68 +623,82 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 
-  return massageDetectedDepsAndVulns(after);
+  return massageCollapsibleSectionsIntoLists(after);
 }
 
-function massageDetectedDepsAndVulns(body: string): string {
-  const DETAILS_OPEN_TAG = '<details>';
-  const DETAILS_CLOSE_TAG = '</details>';
-
-  const parts = body
-    .split(DETAILS_OPEN_TAG)
+/**
+ * Massage collapsible html sections into nested unordered lists
+ *
+ * Bitbucket doesn't currently support collapsible syntax; https://jira.atlassian.com/browse/BCLOUD-20231
+ */
+function massageCollapsibleSectionsIntoLists(body: string): string {
+  const detailsParts = body
+    .split('<details>')
     .map((text) => ({ raw: text, depth: 0, transformed: text }));
 
   let depth = 0;
 
-  for (let i = 0; i < parts.length; i++) {
-    const part = parts[i];
+  // Calculate the nesting depth of <details> tags
+  for (let i = 0; i < detailsParts.length; i++) {
+    const part = detailsParts[i];
 
-    // Depth for the content *before* potentially encountering an opening tag
+    const isTableContent = part.raw.startsWith(
+      '\n\n\n| Datasource | Name | Last Updated |\n',
+    );
+
+    // No need to convert <details> which contain tables into markdown lists
+    if (isTableContent) {
+      part.depth = 0;
+      depth = 0;
+      continue;
+    }
+
     part.depth = depth;
 
-    // If this is not the last part, an opening <details> follows → go deeper
-    if (i < parts.length - 1) {
+    const countClosingDetailsTags = part.raw.split('</details>').length - 1;
+    const isLastDetailsPart = i === detailsParts.length - 1;
+    const hasContent = part.raw.length > 0;
+
+    if (hasContent && !isLastDetailsPart) {
       depth += 1;
     }
 
-    // Reduce depth based on any closing tags in this block
-    const closes = part.raw.split(DETAILS_CLOSE_TAG).length - 1;
-    depth = Math.max(0, depth - closes);
+    depth = Math.max(0, depth - countClosingDetailsTags);
   }
 
   let newBody = '';
-  for (const part of parts) {
-    const d = part.depth;
-    // Only add list bullets for real nested content
-    if (d >= 2) {
-      newBody += `${'\t'.repeat(d - 2)} - `;
-    }
 
+  // Reassemble parts while replacing collapsible html elements with markdown list
+  for (const part of detailsParts) {
     let t = part.raw;
+    const d = part.depth;
 
-    if (d === 1) {
-      // Top-level heading
-      t = t.replace(regEx(/<\/?summary>/g), '**');
-    } else if (d === 2) {
-      // Second level: keep summary as plain text (no backticks)
-      t = t
-        .replace(regEx(/<\/?summary>/g), '`')
-        // indent the inner bullet items properly
-        .replace(regEx(/\n - (`.*`)/g), `\n${'\t'.repeat(d - 1)} - $1`);
-    } else if (d === 3) {
-      // Third level: plain text label + indented items
-      t = t
-        .replace(regEx(/<\/?summary>/g), '`')
-        .replace(regEx(/<blockquote>\n\n/g), `${'\t'.repeat(d - 1)} `);
+    if (d === 0) {
+      newBody += t;
+      continue;
     }
 
-    part.transformed = t
-      .replace(regEx(/<\/?(details|summary|blockquote)>/g), '')
-      .replace(regEx(/(\n{3,})+/g), '\n\n');
+    newBody += `${tabs(d - 1)} - `;
+
+    t = t
+      .replace(regEx(/<\/?summary>/g), d === 1 ? '**' : '`')
+      .replace(regEx(/( - `)/g), `${tabs(d)}$1`) // package names
+      .replace(regEx(/(- \[)/g), `${tabs(d)}$1`) // vuln names
+      .replace(regEx(/^[ \t]*-\s*$(\r?\n)?/gm), '$1') // strip dash only lines
+      .replace(regEx(/<\/?(summary|details|blockquote)>/g), '');
+
+    part.transformed = t;
+
+    console.log(JSON.stringify(t));
+
     newBody += part.transformed;
   }
 
   return newBody;
+}
+
+function tabs(count: number): string {
+  return '\t'.repeat(count);
 }
 
 export function maxBodyLength(): number {
