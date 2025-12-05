@@ -1,6 +1,7 @@
 import cacache from 'cacache';
 import { DateTime } from 'luxon';
 import upath from 'upath';
+import { instrument } from '../../../instrumentation';
 import { logger } from '../../../logger';
 import { compressToBase64, decompressFromBase64 } from '../../compress';
 import type { PackageCacheNamespace } from './types';
@@ -75,42 +76,47 @@ export function init(cacheDir: string): string {
 }
 
 export async function cleanup(): Promise<void> {
-  logger.debug('Checking file package cache for expired items');
-  let totalCount = 0;
-  let deletedCount = 0;
-  const startTime = Date.now();
-  let errorCount = 0;
-  for await (const item of cacache.ls.stream(cacheFileName)) {
-    try {
-      totalCount += 1;
-      const cachedItem = item as unknown as cacache.CacheObject;
-      const res = await cacache.get(cacheFileName, cachedItem.key);
-      let cachedValue: any;
-      try {
-        cachedValue = JSON.parse(res.data.toString());
-      } catch {
-        logger.debug('Error parsing cached value - deleting');
+  await instrument(
+    'Checking file package cache for expired items',
+    async () => {
+      logger.debug('Checking file package cache for expired items');
+      let totalCount = 0;
+      let deletedCount = 0;
+      const startTime = Date.now();
+      let errorCount = 0;
+      for await (const item of cacache.ls.stream(cacheFileName)) {
+        const cachedItem = item as unknown as cacache.CacheObject;
+        try {
+          totalCount += 1;
+          const res = await cacache.get(cacheFileName, cachedItem.key);
+          let cachedValue: any;
+          try {
+            cachedValue = JSON.parse(res.data.toString());
+          } catch {
+            logger.debug('Error parsing cached value - deleting');
+          }
+          if (
+            !cachedValue ||
+            (cachedValue?.expiry &&
+              DateTime.local() > DateTime.fromISO(cachedValue.expiry))
+          ) {
+            await cacache.rm.entry(cacheFileName, cachedItem.key);
+            await cacache.rm.content(cacheFileName, cachedItem.integrity);
+            deletedCount += 1;
+          }
+        } catch (err) /* istanbul ignore next */ {
+          logger.trace({ err }, 'Error cleaning up cache entry');
+          errorCount += 1;
+        }
       }
-      if (
-        !cachedValue ||
-        (cachedValue?.expiry &&
-          DateTime.local() > DateTime.fromISO(cachedValue.expiry))
-      ) {
-        await cacache.rm.entry(cacheFileName, cachedItem.key);
-        await cacache.rm.content(cacheFileName, cachedItem.integrity);
-        deletedCount += 1;
+      // istanbul ignore if: cannot reproduce error
+      if (errorCount > 0) {
+        logger.debug(`Error count cleaning up cache: ${errorCount}`);
       }
-    } catch (err) /* istanbul ignore next */ {
-      logger.trace({ err }, 'Error cleaning up cache entry');
-      errorCount += 1;
-    }
-  }
-  // istanbul ignore if: cannot reproduce error
-  if (errorCount > 0) {
-    logger.debug(`Error count cleaning up cache: ${errorCount}`);
-  }
-  const durationMs = Math.round(Date.now() - startTime);
-  logger.debug(
-    `Deleted ${deletedCount} of ${totalCount} file cached entries in ${durationMs}ms`,
+      const durationMs = Math.round(Date.now() - startTime);
+      logger.debug(
+        `Deleted ${deletedCount} of ${totalCount} file cached entries in ${durationMs}ms`,
+      );
+    },
   );
 }
