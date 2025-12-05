@@ -7,12 +7,14 @@ import {
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
+import { parseJsonWithFallback } from '../../../../util/common';
 import {
   findLocalSiblingOrParent,
   getSiblingFileName,
   readLocalFile,
 } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
+import { parseSingleYaml } from '../../../../util/yaml';
 import { NpmDatasource } from '../../../datasource/npm';
 
 import type {
@@ -38,6 +40,26 @@ function hasMultipleLockFiles(lockFiles: NpmLockFiles): boolean {
   return Object.values(lockFiles).filter(isString).length > 1;
 }
 
+function parsePackageContent(
+  packageFile: string,
+  content: string,
+): NpmPackage | null {
+  if (/\.ya?ml$/.test(packageFile)) {
+    try {
+      return parseSingleYaml(content);
+    } catch {
+      logger.debug({ packageFile }, `Invalid YAML`);
+      return null;
+    }
+  }
+  try {
+    return parseJsonWithFallback(content, packageFile) as NpmPackage;
+  } catch {
+    logger.debug({ packageFile }, `Invalid JSON`);
+    return null;
+  }
+}
+
 export async function extractPackageFile(
   content: string,
   packageFile: string,
@@ -45,11 +67,8 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent<NpmManagerData> | null> {
   logger.trace(`npm.extractPackageFile(${packageFile})`);
   logger.trace({ content });
-  let packageJson: NpmPackage;
-  try {
-    packageJson = JSON.parse(content);
-  } catch {
-    logger.debug({ packageFile }, `Invalid JSON`);
+  const packageJson = parsePackageContent(packageFile, content);
+  if (packageJson === null) {
     return null;
   }
 
@@ -260,7 +279,7 @@ export async function extractAllPackageFiles(
           });
         }
       } else {
-        if (packageFile.endsWith('json')) {
+        if (packageFile.startsWith('package.')) {
           logger.trace({ packageFile }, `Extracting as a package.json file`);
 
           const deps = await extractPackageFile(content, packageFile, config);
