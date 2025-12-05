@@ -143,7 +143,23 @@ async function bumpVersion(
       let newVersion: string | null = null;
       try {
         const bumpType = compile(rawBumpType, branchConfig);
-        newVersion = inc(version, bumpType as ReleaseType);
+        const parts = regEx('^(?<major>\\d+)(?:\\.(?<minor>\\d+))?$').exec(
+          version,
+        );
+        if (parts?.groups) {
+          const { major, minor } = parts.groups;
+          if (bumpType === 'major') {
+            newVersion = `${parseInt(major) + 1}${minor ? `.0` : ''}`;
+          } else if (bumpType === 'minor') {
+            newVersion = `${major}.${parseInt(minor) + 1}`;
+          } else {
+            throw new Error(
+              `Unsupported bump type for {major}.{minor} version: ${bumpType}`,
+            );
+          }
+        } else {
+          newVersion = inc(version, bumpType as ReleaseType);
+        }
       } catch (e) {
         addArtifactError(
           branchConfig,

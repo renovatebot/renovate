@@ -134,6 +134,28 @@ describe('modules/manager/copier/artifacts', () => {
       expect(execSnapshots).toEqual([]);
     });
 
+    it('reports an error updated deps is undefined', async () => {
+      const execSnapshots = mockExecAll();
+
+      const result = await updateArtifacts({
+        packageFileName: '.copier-answers.yml',
+        updatedDeps: null as never,
+        newPackageFileContent: '',
+        config,
+      });
+
+      expect(result).toEqual([
+        {
+          artifactError: {
+            lockFile: '.copier-answers.yml',
+            stderr:
+              'Unexpected number of dependencies: undefined (should be 1)',
+          },
+        },
+      ]);
+      expect(execSnapshots).toEqual([]);
+    });
+
     it('invokes copier update with the correct options by default', async () => {
       const execSnapshots = mockExecAll();
 
@@ -443,7 +465,7 @@ describe('modules/manager/copier/artifacts', () => {
         newPackageFileContent: '',
         config,
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         {
           depName: 'https://github.com/foo/bar',

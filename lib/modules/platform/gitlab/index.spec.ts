@@ -2,6 +2,7 @@
 import _timers from 'timers/promises';
 import { mockDeep } from 'vitest-mock-extended';
 import type { RepoParams } from '..';
+import { GlobalConfig } from '../../../config/global';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ARCHIVED,
@@ -31,6 +32,7 @@ const gitlabApiHost = 'https://gitlab.com';
 
 describe('modules/platform/gitlab/index', () => {
   beforeEach(() => {
+    GlobalConfig.reset();
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(
@@ -256,6 +258,27 @@ describe('modules/platform/gitlab/index', () => {
       });
       expect(repos).toEqual(['a/b', 'a/c']);
     });
+
+    it('should include order and sort query parameters', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false&order_by=updated_at&sort=desc',
+        )
+        .reply(200, [
+          {
+            path_with_namespace: 'a/b',
+          },
+          {
+            path_with_namespace: 'a/c',
+          },
+        ]);
+      const repos = await gitlab.getRepos({
+        order: 'desc',
+        sort: 'updated_at',
+      });
+      expect(repos).toEqual(['a/b', 'a/c']);
+    });
   });
 
   async function initRepo(
@@ -341,10 +364,10 @@ describe('modules/platform/gitlab/index', () => {
           default_branch: 'master',
           mirror: true,
         });
+      GlobalConfig.set({ includeMirrors: true });
       expect(
         await gitlab.initRepo({
           repository: 'some/repo',
-          includeMirrors: true,
         }),
       ).toEqual({
         defaultBranch: 'master',
@@ -556,6 +579,7 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -594,6 +618,7 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -632,6 +657,7 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -691,6 +717,7 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -773,6 +800,7 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -818,6 +846,7 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -867,6 +896,7 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'some-branch',
             target_branch: 'master',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -1096,7 +1126,7 @@ describe('modules/platform/gitlab/index', () => {
         state: 'green',
         url: 'some-url',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Failed to get the branch commit SHA',
       );
@@ -1128,7 +1158,7 @@ describe('modules/platform/gitlab/index', () => {
         state: 'green',
         url: 'some-url',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Failed to retrieve commit pipeline',
       );
@@ -1257,15 +1287,15 @@ describe('modules/platform/gitlab/index', () => {
 
       expect(timers.setTimeout.mock.calls).toHaveLength(retry + 1);
       expect(timers.setTimeout.mock.calls[0][0]).toBe(delay);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Pipeline not yet created. Retrying 1`,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Pipeline not yet created. Retrying 2`,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Pipeline not yet created after 3 attempts`,
       );
@@ -1604,14 +1634,14 @@ describe('modules/platform/gitlab/index', () => {
       await expect(
         gitlab.addAssignees(42, ['someuser', 'someotheruser']),
       ).toResolve();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         {
           assignee: 'someuser',
         },
         'Failed to add assignee - could not get ID',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           assignee: 'someuser',
@@ -1629,7 +1659,7 @@ describe('modules/platform/gitlab/index', () => {
       it('should not be supported in too low version', async () => {
         await initFakePlatform('13.8.0');
         await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { version: '13.8.0' },
           'Adding reviewers is only available in GitLab 13.9 and onwards',
@@ -1869,6 +1899,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'branch a pr',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -1892,6 +1923,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'branch a pr',
             state: 'merged',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -1916,6 +1948,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'branch a pr',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -1941,6 +1974,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'branch a pr',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -1965,6 +1999,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'Draft: branch a pr',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -1989,6 +2024,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'WIP: branch a pr',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -2013,6 +2049,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'branch a pr',
             state: 'opened',
+            description: 'a merge request',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -2287,15 +2324,15 @@ describe('modules/platform/gitlab/index', () => {
         sourceBranch: 'some-branch',
         title: 'some title',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 1',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 2',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 3',
       );
@@ -2350,15 +2387,15 @@ describe('modules/platform/gitlab/index', () => {
         sourceBranch: 'some-branch',
         title: 'some title',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 1',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 2',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 3',
       );
@@ -2412,24 +2449,24 @@ describe('modules/platform/gitlab/index', () => {
         sourceBranch: 'some-branch',
         title: 'some title',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 1',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 2',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 3',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.any(Object),
         'Automerge on PR creation failed. Retrying 1',
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.any(Object),
         'Automerge on PR creation failed. Retrying 2',
@@ -3390,10 +3427,10 @@ describe('modules/platform/gitlab/index', () => {
           {
             iid: 1,
             source_branch: 'branch-a',
+            target_branch: 'branch-new',
             title: 'branch a pr',
             description: 'a merge request',
             state: 'opened',
-            target_branch: 'branch-b',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -3406,6 +3443,7 @@ describe('modules/platform/gitlab/index', () => {
           description: 'body',
           state: 'opened',
           target_branch: 'branch-new',
+          created_at: '2025-05-19T12:00:00.000Z',
         });
       await expect(
         gitlab.updatePr({
@@ -3444,6 +3482,7 @@ describe('modules/platform/gitlab/index', () => {
           title: 'title',
           description: 'body',
           state: 'opened',
+          created_at: '2025-05-19T12:00:00.000Z',
         })
         .post('/api/v4/projects/undefined/merge_requests/1/approve')
         .reply(200);
@@ -3486,6 +3525,7 @@ describe('modules/platform/gitlab/index', () => {
           title: 'title',
           description: 'a merge requbody',
           state: 'closed',
+          created_at: '2025-05-19T12:00:00.000Z',
         });
       await expect(
         gitlab.updatePr({
@@ -3524,6 +3564,7 @@ describe('modules/platform/gitlab/index', () => {
           title: 'title',
           description: 'body',
           state: 'opened',
+          created_at: '2025-05-19T12:00:00.000Z',
         });
       await expect(
         gitlab.updatePr({
@@ -3590,7 +3631,7 @@ describe('modules/platform/gitlab/index', () => {
 
   ## Open
 
-These updates have all been created already. Click a checkbox below to force a retry/rebase of any.
+These updates have all been created already. To force a retry/rebase of any, click on a checkbox below.
 
  - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](../pull/2433) (\`gh-got\`, \`gl-got\`, \`got\`)
 `;
@@ -3851,7 +3892,7 @@ These updates have all been created already. Click a checkbox below to force a r
         '@group',
       ]);
       expect(expandedGroupMembers).toEqual(['group']);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.any(Object),
         'Unable to fetch group',

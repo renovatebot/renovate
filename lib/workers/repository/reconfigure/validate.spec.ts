@@ -39,7 +39,7 @@ describe('workers/repository/reconfigure/validate', () => {
       configFileName,
       null,
     );
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       { errors: expect.any(String) },
       'Validation Errors',
@@ -59,7 +59,7 @@ describe('workers/repository/reconfigure/validate', () => {
       configFileName,
       mock<Pr>({ number: 1 }),
     );
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       { errors: expect.any(String) },
       'Validation Errors',
@@ -95,7 +95,7 @@ describe('workers/repository/reconfigure/validate', () => {
       configFileName,
       null,
     );
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       'Status check is null or an empty string, skipping status check addition.',
     );
@@ -114,7 +114,7 @@ describe('workers/repository/reconfigure/validate', () => {
       configFileName,
       null,
     );
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       'Status check is null or an empty string, skipping status check addition.',
     );
@@ -129,7 +129,7 @@ describe('workers/repository/reconfigure/validate', () => {
       configFileName,
       null,
     );
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       'Skipping validation check because status check already exists.',
     );

@@ -65,7 +65,7 @@
     },
     {
       "description": "set branch prefix for node major updates to split from minor updates",
-      "matchPackageNames": ["node"],
+      "matchPackageNames": ["node", "containerbase/node-prebuild"],
       "matchUpdateTypes": ["major"],
       "additionalBranchPrefix": "major"
     },
@@ -86,6 +86,17 @@
       "matchBaseBranches": ["next"],
       "matchUpdateTypes": ["lockFileMaintenance"],
       "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Mark major version bumps with the breaking label",
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["breaking"]
+    },
+    {
+      "description": "Multiple major updates for got",
+      "matchDatasources": ["npm"],
+      "matchDepNames": ["got"],
+      "separateMultipleMajor": true
     }
   ],
   "customManagers": [

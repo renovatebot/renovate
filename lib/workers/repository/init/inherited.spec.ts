@@ -83,7 +83,7 @@ describe('workers/repository/init/inherited', () => {
   it('should warn if validateConfig returns warnings', async () => {
     platform.getRawFile.mockResolvedValue('{"binarySource": "docker"}');
     const res = await mergeInheritedConfig(config);
-    expect(res.binarySource).toBeUndefined();
+    expect(res).not.toContainKey('binarySource');
     expect(logger.warn).toHaveBeenCalled();
   });
 
@@ -190,7 +190,7 @@ describe('workers/repository/init/inherited', () => {
     expect(res.labels).toEqual(['test']);
     expect(res.onboarding).toBeFalse();
     expect(logger.warn).not.toHaveBeenCalled();
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       'Resolving presets found in inherited config',
     );
@@ -220,8 +220,8 @@ describe('workers/repository/init/inherited', () => {
       automerge: true,
     });
     const res = await mergeInheritedConfig(config);
-    expect(res.binarySource).toBeUndefined();
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+    expect(res).not.toContainKey('binarySource');
+
     expect(logger.warn).toHaveBeenCalledWith(
       {
         warnings: [
@@ -260,7 +260,7 @@ describe('workers/repository/init/inherited', () => {
     await expect(mergeInheritedConfig(config)).rejects.toThrow(
       CONFIG_VALIDATION,
     );
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.warn).toHaveBeenCalledWith(
       {
         errors: [
@@ -290,7 +290,7 @@ describe('workers/repository/init/inherited', () => {
     const res = await mergeInheritedConfig(config);
     expect(res.labels).toEqual(['test']);
     expect(logger.warn).not.toHaveBeenCalled();
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       {
         inheritedConfig: {

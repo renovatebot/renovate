@@ -36,7 +36,7 @@ describe('modules/manager/conan/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.trace).toHaveBeenCalledWith(
       'No conan.lock dependencies to update',
     );
@@ -57,7 +57,7 @@ describe('modules/manager/conan/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.trace).toHaveBeenCalledWith('No conan.lock found');
   });
 
@@ -78,7 +78,7 @@ describe('modules/manager/conan/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       'conan.lock read operation failed',
     );
@@ -109,7 +109,7 @@ describe('modules/manager/conan/artifacts', () => {
       }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject(expectedInSnapshot);
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.debug).toHaveBeenCalledWith(
       'New conan.lock read operation failed',
     );
@@ -141,7 +141,7 @@ describe('modules/manager/conan/artifacts', () => {
       }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject(expectedInSnapshot);
-    // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
     expect(logger.trace).toHaveBeenCalledWith('conan.lock is unchanged');
   });
 

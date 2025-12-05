@@ -1,4 +1,6 @@
 import type { EnsureIssueConfig, RepoParams } from '..';
+import { GlobalConfig } from '../../../config/global';
+import type { RepoGlobalConfig } from '../../../config/types';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -231,6 +233,7 @@ describe('modules/platform/gitea/index', () => {
   ];
 
   beforeEach(() => {
+    GlobalConfig.reset();
     gitea.resetPlatform();
     memCache.init();
     repoCache.resetCache();
@@ -254,12 +257,13 @@ describe('modules/platform/gitea/index', () => {
   async function initFakeRepo(
     scope: httpMock.Scope,
     repo?: Partial<Repo>,
-    config?: Partial<RepoParams>,
+    config?: RepoGlobalConfig,
   ): Promise<void> {
     const repoResult = { ...mockRepo, ...repo };
     const repository = repoResult.full_name;
     scope.get(`/repos/${repository}`).reply(200, repoResult);
-    await gitea.initRepo({ repository, ignorePrAuthor: true, ...config });
+    GlobalConfig.set({ ignorePrAuthor: true, ...config });
+    await gitea.initRepo({ repository });
   }
 
   describe('initPlatform()', () => {
@@ -905,7 +909,6 @@ describe('modules/platform/gitea/index', () => {
         }),
       ).toResolve();
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         {
           err: expect.any(Error),
@@ -1810,7 +1813,7 @@ describe('modules/platform/gitea/index', () => {
         number: 42,
         title: 'pr-title',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42 }),
         'Gitea-native automerge: fail',
@@ -1838,7 +1841,7 @@ describe('modules/platform/gitea/index', () => {
         number: 42,
         title: 'pr-title',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42 }),
         'Gitea-native automerge: not supported on this version of Gitea. Use 1.24.0 or newer.',
@@ -2100,7 +2103,7 @@ describe('modules/platform/gitea/index', () => {
           labels: ['some-label', 'unavailable-label'],
         }),
       ).toResolve();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Some labels could not be looked up. Renovate may halt label updates assuming changes by others.',
       );
@@ -2560,7 +2563,6 @@ describe('modules/platform/gitea/index', () => {
         once: false,
       });
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { err: expect.any(Error) },
         'Could not ensure issue',
@@ -2636,7 +2638,6 @@ describe('modules/platform/gitea/index', () => {
 
       await expect(gitea.deleteLabel(42, 'missing')).toResolve();
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { issue: 42, labelName: 'missing' },
         'Failed to lookup label for deletion',
@@ -2738,7 +2739,7 @@ describe('modules/platform/gitea/index', () => {
       });
 
       expect(res).toBe(false);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { err: expect.any(Error), issue: 1, subject: 'some-topic' },
         'Error ensuring comment',
@@ -2801,7 +2802,6 @@ describe('modules/platform/gitea/index', () => {
         topic: 'some-topic',
       });
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         {
           config: { number: 1, topic: 'some-topic', type: 'by-topic' },
@@ -2908,7 +2908,7 @@ describe('modules/platform/gitea/index', () => {
       await initFakeRepo(scope);
       ///
       await expect(gitea.addReviewers(1, ['me', 'you'])).toResolve();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { err: expect.any(Error), number: 1, reviewers: ['me', 'you'] },
         'Failed to assign reviewer',

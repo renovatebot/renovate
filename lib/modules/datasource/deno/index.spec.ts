@@ -63,7 +63,6 @@ describe('modules/datasource/deno/index', () => {
         },
       });
 
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
       expect(logger.logger.warn).toHaveBeenCalledWith(
         expect.objectContaining({
           err: expect.any(ZodError),

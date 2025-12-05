@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -218,7 +218,7 @@ export async function updateArtifacts({
       } else {
         const updatedDepNames = updatedDeps
           .map(({ depName, packageName }) => packageName ?? depName)
-          .filter(is.nonEmptyStringAndNotWhitespace);
+          .filter(isNonEmptyStringAndNotWhitespace);
 
         lockfileCmd += ` --update-locks ${updatedDepNames
           .map(quote)

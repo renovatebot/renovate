@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { mockDeep } from 'vitest-mock-extended';
 import {
   REPOSITORY_CHANGED,
@@ -63,7 +63,7 @@ function repoMock(
             name: 'ssh',
           }
         : null,
-    ].filter(is.truthy);
+    ].filter(isTruthy);
   }
 
   return {
@@ -202,7 +202,6 @@ describe('modules/platform/bitbucket-server/index', () => {
             displayId: 'master',
           });
         await bitbucket.initRepo({
-          endpoint: 'https://stash.renovatebot.com/vcs/',
           repository: 'SOME/repo',
           ...config,
         });
@@ -302,7 +301,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             username: 'abc',
             password: '123',
           });
-          // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
           expect(logger.logger.debug).toHaveBeenCalledWith(
             expect.any(Object),
             'Error authenticating with Bitbucket. Check that your token includes "api" permissions',
@@ -328,28 +327,11 @@ describe('modules/platform/bitbucket-server/index', () => {
           ).toEqual({
             endpoint: ensureTrailingSlash(url.href),
           });
-          // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
           expect(logger.logger.debug).toHaveBeenCalledWith(
             expect.any(Object),
             'Failed to get user info, fallback gitAuthor will be used',
           );
-        });
-
-        it('should skip api call to fetch version when platform version is set in environment', async () => {
-          process.env.RENOVATE_X_PLATFORM_VERSION = '8.0.0';
-          httpMock
-            .scope('https://stash.renovatebot.com')
-            .get(`/rest/api/1.0/users/${username}`)
-            .reply(200, userInfo);
-
-          await expect(
-            bitbucket.initPlatform({
-              endpoint: 'https://stash.renovatebot.com',
-              username: 'abc',
-              password: '123',
-            }),
-          ).toResolve();
-          delete process.env.RENOVATE_X_PLATFORM_VERSION;
         });
 
         it('should skip users api call when gitAuthor is configured', async () => {
@@ -408,6 +390,28 @@ describe('modules/platform/bitbucket-server/index', () => {
           });
         });
 
+        it('should collect username from headers if token with no username', async () => {
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/application-properties`)
+            .reply(200, { version: '8.0.0' }, { 'x-ausername': 'user_name' });
+
+          expect(
+            await bitbucket.initPlatform({
+              endpoint: url.href,
+              token: '123',
+            }),
+          ).toEqual({
+            endpoint: ensureTrailingSlash(url.href),
+          });
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            {
+              'x-ausername': 'user_name',
+            },
+            'Platform: No username configured using headers["x-ausername"]',
+          );
+        });
+
         it('should use fallback gitAuthor if user info has empty email address', async () => {
           httpMock
             .scope(urlHost)
@@ -430,7 +434,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           ).toEqual({
             endpoint: ensureTrailingSlash(url.href),
           });
-          // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
           expect(logger.logger.debug).toHaveBeenCalledWith(
             {
               err: new Error('No email address configured for username abc'),
@@ -493,7 +497,6 @@ describe('modules/platform/bitbucket-server/index', () => {
             });
           expect(
             await bitbucket.initRepo({
-              endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
             }),
           ).toMatchSnapshot();
@@ -513,7 +516,6 @@ describe('modules/platform/bitbucket-server/index', () => {
             });
           expect(
             await bitbucket.initRepo({
-              endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
             }),
           ).toEqual({
@@ -539,7 +541,6 @@ describe('modules/platform/bitbucket-server/index', () => {
               displayId: 'master',
             });
           const res = await bitbucket.initRepo({
-            endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
             gitUrl: 'ssh',
           });
@@ -571,7 +572,6 @@ describe('modules/platform/bitbucket-server/index', () => {
             });
           git.getUrl.mockReturnValueOnce(link);
           const res = await bitbucket.initRepo({
-            endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
             gitUrl: 'endpoint',
           });
@@ -603,7 +603,6 @@ describe('modules/platform/bitbucket-server/index', () => {
               displayId: 'master',
             });
           const res = await bitbucket.initRepo({
-            endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
             gitUrl: 'default',
           });
@@ -638,7 +637,6 @@ describe('modules/platform/bitbucket-server/index', () => {
               displayId: 'master',
             });
           const res = await bitbucket.initRepo({
-            endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
           });
           expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
@@ -663,7 +661,6 @@ describe('modules/platform/bitbucket-server/index', () => {
               displayId: 'master',
             });
           const res = await bitbucket.initRepo({
-            endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
           });
           expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
@@ -695,7 +692,6 @@ describe('modules/platform/bitbucket-server/index', () => {
             });
           git.getUrl.mockReturnValueOnce(link);
           const res = await bitbucket.initRepo({
-            endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
           });
           expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
@@ -718,7 +714,6 @@ describe('modules/platform/bitbucket-server/index', () => {
             .reply(204);
           await expect(
             bitbucket.initRepo({
-              endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
             }),
           ).rejects.toThrow(REPOSITORY_EMPTY);

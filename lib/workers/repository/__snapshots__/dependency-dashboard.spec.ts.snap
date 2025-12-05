@@ -61,7 +61,7 @@ The following updates await pending status checks before automerging. To abort t
 
  - [ ] <!-- approvePr-branch=branchName9 -->pr9
 
-## Detected dependencies
+## Detected Dependencies
 
 None detected
 
@@ -84,7 +84,7 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 
 This repository currently has no open or pending branches.
 
-## Detected dependencies
+## Detected Dependencies
 
 <details><summary>Branch dev</summary>
 <blockquote>
@@ -160,7 +160,7 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 
 This repository currently has no open or pending branches.
 
-## Detected dependencies
+## Detected Dependencies
 
 <details><summary>Branch dev</summary>
 <blockquote>
@@ -268,7 +268,7 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 
 This repository currently has no open or pending branches.
 
-## Detected dependencies
+## Detected Dependencies
 
 <details><summary>Branch dev</summary>
 <blockquote>
@@ -335,7 +335,7 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 
 This repository currently has no open or pending branches.
 
-## Detected dependencies
+## Detected Dependencies
 
 <details><summary>Branch dev</summary>
 <blockquote>
@@ -402,7 +402,7 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 
 This repository currently has no open or pending branches.
 
-## Detected dependencies
+## Detected Dependencies
 
 <details><summary>dockerfile</summary>
 <blockquote>
@@ -455,7 +455,7 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 
 This repository currently has no open or pending branches.
 
-## Detected dependencies
+## Detected Dependencies
 
 None detected
 
@@ -467,7 +467,7 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 
 This repository currently has no open or pending branches.
 
-## Detected dependencies
+## Detected Dependencies
 
 None detected
 
@@ -479,7 +479,7 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 
 This repository currently has no open or pending branches.
 
-## Detected dependencies
+## Detected Dependencies
 
 <details><summary>dockerfile</summary>
 <blockquote>
@@ -516,7 +516,7 @@ This repository currently has no open or pending branches.
 exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() > contains logged problems 1`] = `
 "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
-## Repository problems
+## Repository Problems
 
 Renovate tried to run on this repository, but found these problems.
 
@@ -532,7 +532,7 @@ The following updates await pending status checks. To force their creation now, 
 
  - [ ] <!-- approvePr-branch=branchName1 -->pr1
 
-## Detected dependencies
+## Detected Dependencies
 
 None detected
 
@@ -542,7 +542,7 @@ None detected
 exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() > contains logged problems with custom header 1`] = `
 "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
-## Repository problems
+## Repository Problems
 
 platform is github
 
@@ -554,7 +554,7 @@ The following updates await pending status checks. To force their creation now, 
 
  - [ ] <!-- approvePr-branch=branchName1 -->pr1
 
-## Detected dependencies
+## Detected Dependencies
 
 None detected
 
@@ -566,7 +566,7 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 
 This repository currently has no open or pending branches.
 
-## Detected dependencies
+## Detected Dependencies
 
 None detected
 
@@ -580,7 +580,7 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 
 This repository currently has no open or pending branches.
 
-## Detected dependencies
+## Detected Dependencies
 
 None detected
 
@@ -606,7 +606,7 @@ The following updates are awaiting their schedule. To get an update now, click o
 
  - [x] <!-- unschedule-branch=branchName3 -->pr3
 
-## Detected dependencies
+## Detected Dependencies
 
 None detected
 

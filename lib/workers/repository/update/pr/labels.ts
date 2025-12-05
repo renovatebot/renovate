@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -22,9 +22,9 @@ export function prepareLabels(config: RenovateConfig): string[] {
   const labels = config.labels ?? [];
   const addLabels = config.addLabels ?? [];
   return [...new Set([...labels, ...addLabels])]
-    .filter(is.nonEmptyStringAndNotWhitespace)
+    .filter(isNonEmptyStringAndNotWhitespace)
     .map((label) => template.compile(label, config))
-    .filter(is.nonEmptyStringAndNotWhitespace)
+    .filter(isNonEmptyStringAndNotWhitespace)
     .map((label) => trimLabel(label, labelCharLimit))
     .sort();
 }
@@ -78,7 +78,7 @@ export function shouldUpdateLabels(
   // If the 'labelsInDebugData' field is undefined
   // it means the PR was created before the update-labels logic was merged, and labels should not be updated.
   //  Reference: https://github.com/renovatebot/renovate/pull/25340
-  if (!is.array(prInitialLabels)) {
+  if (!isArray(prInitialLabels)) {
     return false;
   }
 

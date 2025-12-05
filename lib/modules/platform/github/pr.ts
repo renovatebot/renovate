@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isEmptyArray } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
@@ -57,7 +57,7 @@ export async function getPrCache(
   username?: string,
 ): Promise<Record<number, GhPr>> {
   const prApiCache = getPrApiCache();
-  const isInitial = is.emptyArray(prApiCache.getItems());
+  const isInitial = isEmptyArray(prApiCache.getItems());
 
   try {
     let requestsTotal = 0;
@@ -129,10 +129,10 @@ export async function getPrCache(
       },
       `PR cache: getPrList success`,
     );
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.debug({ err }, 'PR cache: getPrList err');
     throw new ExternalHostError(err, 'github');
-  } /* v8 ignore stop */
+  }
 
   return prApiCache.getItems();
 }

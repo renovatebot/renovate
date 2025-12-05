@@ -180,7 +180,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.warn).toHaveBeenCalledWith(
         'Updating multiple npm lock files is deprecated and support will be removed in future versions.',
       );
@@ -834,7 +834,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig,
       );
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Invalid npm package alias for dependency: "g":"npm:@foo/@bar/@1.2.3"',
       );
@@ -1279,14 +1279,8 @@ describe('modules/manager/npm/extract/index', () => {
       const yarnrc = codeBlock`
         nodeLinker: node-modules
 
-        plugins:
-          - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-            path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-            spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-        catalogs:
-          list:
-            is-positive: 1.0.0
+        catalog:
+          is-positive: 1.0.0
       `;
       fs.readLocalFile.mockResolvedValueOnce(yarnrc);
 
@@ -1319,14 +1313,8 @@ describe('modules/manager/npm/extract/index', () => {
       const yarnrc = codeBlock`
         nodeLinker: node-modules
 
-        plugins:
-          - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-            path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-            spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-        catalogs:
-          list:
-            is-positive: 1.0.0
+        catalog:
+          is-positive: 1.0.0
       `;
 
       fs.readLocalFile.mockResolvedValueOnce(yarnrc);
@@ -1357,14 +1345,8 @@ describe('modules/manager/npm/extract/index', () => {
       const yarnrc = codeBlock`
         nodeLinker: node-modules
 
-        plugins:
-          - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-            path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-            spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-        catalogs:
-          list:
-            is-positive: 1.0.0
+        catalog:
+          is-positive: 1.0.0
       `;
 
       fs.readLocalFile.mockResolvedValueOnce(yarnrc);

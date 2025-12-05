@@ -1,4 +1,10 @@
-import is from '@sindresorhus/is';
+import {
+  isNonEmptyArray,
+  isNonEmptyObject,
+  isNonEmptyString,
+  isNullOrUndefined,
+  isTruthy,
+} from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
@@ -284,7 +290,7 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
   let newIssueBody = issueBody;
   const repoProblems = extractRepoProblems(config.repository);
   if (repoProblems.size) {
-    newIssueBody += '## Repository problems\n\n';
+    newIssueBody += '## Repository Problems\n\n';
     const repoProblemsHeader =
       config.customizeDashboard?.repoProblemsHeader ??
       'Renovate tried to run on this repository, but found these problems.';
@@ -349,11 +355,11 @@ export async function ensureDependencyDashboard(
   }
   logger.debug('Ensuring Dependency Dashboard');
 
-  // Check packageFiles for any deprecations
-  let hasDeprecations = false;
+  // Check packageFiles for any deprecations or replacements
+  let hasDeprecationsOrReplacements = false;
   const deprecatedPackages: Record<string, Record<string, boolean>> = {};
-  logger.debug('Checking packageFiles for deprecated packages');
-  if (is.nonEmptyObject(packageFiles)) {
+  logger.debug('Checking packageFiles for deprecated or replacement packages');
+  if (isNonEmptyObject(packageFiles)) {
     for (const [manager, fileNames] of Object.entries(packageFiles)) {
       for (const fileName of fileNames) {
         for (const dep of fileName.deps) {
@@ -362,7 +368,7 @@ export async function ensureDependencyDashboard(
             (updates) => updates.updateType === 'replacement',
           );
           if (name && (dep.deprecationMessage ?? hasReplacement)) {
-            hasDeprecations = true;
+            hasDeprecationsOrReplacements = true;
             deprecatedPackages[manager] ??= {};
             deprecatedPackages[manager][name] ??= hasReplacement;
           }
@@ -371,8 +377,12 @@ export async function ensureDependencyDashboard(
     }
   }
 
-  const hasBranches = is.nonEmptyArray(branches);
-  if (config.dependencyDashboardAutoclose && !hasBranches && !hasDeprecations) {
+  const hasBranches = isNonEmptyArray(branches);
+  if (
+    config.dependencyDashboardAutoclose &&
+    !hasBranches &&
+    !hasDeprecationsOrReplacements
+  ) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
         { title: config.dependencyDashboardTitle },
@@ -411,9 +421,11 @@ export async function ensureDependencyDashboard(
 
   issueBody = appendRepoProblems(config, issueBody);
 
-  if (hasDeprecations) {
-    issueBody += '> ⚠ **Warning**\n> \n';
-    issueBody += 'These dependencies are deprecated:\n\n';
+  if (hasDeprecationsOrReplacements) {
+    issueBody += '## Deprecations / Replacements\n';
+    issueBody += '> ⚠️ **Warning**\n> \n';
+    issueBody +=
+      'These dependencies are either deprecated or have replacements available:\n\n';
     issueBody += '| Datasource | Name | Replacement PR? |\n';
     issueBody += '|------------|------|--------------|\n';
     for (const manager of Object.keys(deprecatedPackages).sort()) {
@@ -695,7 +707,7 @@ export async function getDashboardMarkdownVulnerabilities(
   let result = '';
 
   if (
-    is.nullOrUndefined(config.dependencyDashboardOSVVulnerabilitySummary) ||
+    isNullOrUndefined(config.dependencyDashboardOSVVulnerabilitySummary) ||
     config.dependencyDashboardOSVVulnerabilitySummary === 'none'
   ) {
     return result;
@@ -716,17 +728,17 @@ export async function getDashboardMarkdownVulnerabilities(
   }
 
   const unresolvedVulnerabilities = vulnerabilities.filter((value) =>
-    is.nullOrUndefined(value.fixedVersion),
+    isNullOrUndefined(value.fixedVersion),
   );
   const resolvedVulnerabilitiesLength =
     vulnerabilities.length - unresolvedVulnerabilities.length;
 
   result += `\`${resolvedVulnerabilitiesLength}\`/\`${vulnerabilities.length}\``;
-  if (is.truthy(config.osvVulnerabilityAlerts)) {
-    result += ' CVEs have Renovate fixes.\n';
+  if (isTruthy(config.osvVulnerabilityAlerts)) {
+    result += ' CVEs have Renovate fixes.\n\n';
   } else {
     result +=
-      ' CVEs have possible Renovate fixes.\nSee [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n';
+      ' CVEs have possible Renovate fixes.\nSee [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n\n';
   }
 
   let renderedVulnerabilities: Vulnerability[];
@@ -745,14 +757,14 @@ export async function getDashboardMarkdownVulnerabilities(
   > = {};
   for (const vulnerability of renderedVulnerabilities) {
     const { manager, packageFile } = vulnerability.packageFileConfig;
-    if (is.nullOrUndefined(managerRecords[manager!])) {
+    if (isNullOrUndefined(managerRecords[manager!])) {
       managerRecords[manager!] = {};
     }
-    if (is.nullOrUndefined(managerRecords[manager!][packageFile])) {
+    if (isNullOrUndefined(managerRecords[manager!][packageFile])) {
       managerRecords[manager!][packageFile] = {};
     }
     if (
-      is.nullOrUndefined(
+      isNullOrUndefined(
         managerRecords[manager!][packageFile][vulnerability.packageName],
       )
     ) {
@@ -773,7 +785,7 @@ export async function getDashboardMarkdownVulnerabilities(
         result += `<details><summary>${packageName}</summary>\n<blockquote>\n\n`;
         for (const vul of cves) {
           const id = vul.vulnerability.id;
-          const suffix = is.nonEmptyString(vul.fixedVersion)
+          const suffix = isNonEmptyString(vul.fixedVersion)
             ? ` (fixed in ${vul.fixedVersion})`
             : '';
           result += `- [${id}](https://osv.dev/vulnerability/${id})${suffix}\n`;

@@ -64,6 +64,10 @@ describe('util/common', () => {
 
     it('uses host rules', () => {
       hostRules.add({
+        hostType: 'azure',
+        matchHost: 'az.example.com',
+      });
+      hostRules.add({
         hostType: 'bitbucket',
         matchHost: 'bb.example.com',
       });
@@ -87,7 +91,9 @@ describe('util/common', () => {
         hostType: 'unknown',
         matchHost: 'f.example.com',
       });
-
+      expect(detectPlatform('https://az.example.com/chalk/chalk')).toBe(
+        'azure',
+      );
       expect(detectPlatform('https://bb.example.com/chalk/chalk')).toBe(
         'bitbucket',
       );
@@ -149,7 +155,7 @@ describe('util/common', () => {
         city: 'San Francisco',
         isMarried: false,
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { context: 'renovate.json' },
         'File contents are invalid JSONC but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.',

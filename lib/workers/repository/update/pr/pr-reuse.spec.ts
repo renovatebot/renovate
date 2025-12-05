@@ -75,7 +75,7 @@ describe('workers/repository/update/pr/pr-reuse', () => {
   });
 
   it('returns null for dry-runs', async () => {
-    GlobalConfig.set({ dryRun: true });
+    GlobalConfig.set({ dryRun: 'full' });
 
     platform.findPr.mockResolvedValueOnce({
       number: 123,

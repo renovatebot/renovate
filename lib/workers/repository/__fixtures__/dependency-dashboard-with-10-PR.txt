@@ -42,7 +42,7 @@ The following updates are pending. To force the creation of a PR, click on a che
 
  - [ ] <!-- other-branch=branchName10 -->pr10
 
-## Detected dependencies
+## Detected Dependencies
 
 None detected
 
