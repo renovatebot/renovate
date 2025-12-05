@@ -1736,6 +1736,16 @@ const options: RenovateOptions[] = [
     advancedUse: true,
   },
   {
+    name: 'maxMajorIncrement',
+    description:
+      'Limit the maximum major version increment allowed. Set to 0 to disable.',
+    stage: 'package',
+    type: 'integer',
+    default: 500,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'respectLatest',
     description: 'Ignore versions newer than npm "latest" version.',
     stage: 'package',

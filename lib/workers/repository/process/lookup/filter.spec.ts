@@ -145,5 +145,119 @@ describe('workers/repository/process/lookup/filter', () => {
         { version: '2.0.0' },
       ]);
     });
+
+    it('filters versions with major increment greater than maxMajorIncrement', () => {
+      const releases = [
+        { version: '19.2.0' },
+        { version: '20.0.0' },
+        { version: '21.0.0' },
+        { version: '2023.3.3' },
+        { version: '2024.1.1' },
+      ] satisfies Release[];
+
+      const config = partial<FilterConfig>({
+        maxMajorIncrement: 50,
+      });
+      const currentVersion = '19.2.0';
+      const latestVersion = '2024.1.1';
+
+      const filteredVersions = filterVersions(
+        config,
+        currentVersion,
+        latestVersion,
+        releases,
+        versioning,
+      );
+
+      expect(filteredVersions).toEqual([
+        { version: '20.0.0' },
+        { version: '21.0.0' },
+      ]);
+    });
+
+    it('allows all versions when maxMajorIncrement is 0', () => {
+      const releases = [
+        { version: '19.2.0' },
+        { version: '20.0.0' },
+        { version: '2023.3.3' },
+      ] satisfies Release[];
+
+      const config = partial<FilterConfig>({
+        maxMajorIncrement: 0,
+      });
+      const currentVersion = '19.2.0';
+      const latestVersion = '2023.3.3';
+
+      const filteredVersions = filterVersions(
+        config,
+        currentVersion,
+        latestVersion,
+        releases,
+        versioning,
+      );
+
+      expect(filteredVersions).toEqual([
+        { version: '20.0.0' },
+        { version: '2023.3.3' },
+      ]);
+    });
+
+    it('filters with maxMajorIncrement set to 1', () => {
+      const releases = [
+        { version: '1.0.1' },
+        { version: '1.2.0' },
+        { version: '2.0.0' },
+        { version: '3.0.0' },
+      ] satisfies Release[];
+
+      const config = partial<FilterConfig>({
+        maxMajorIncrement: 1,
+      });
+      const currentVersion = '1.0.0';
+      const latestVersion = '3.0.0';
+
+      const filteredVersions = filterVersions(
+        config,
+        currentVersion,
+        latestVersion,
+        releases,
+        versioning,
+      );
+
+      expect(filteredVersions).toEqual([
+        { version: '1.0.1' },
+        { version: '1.2.0' },
+        { version: '2.0.0' },
+      ]);
+    });
+
+    it('handles maxMajorIncrement with 0.x versions', () => {
+      const releases = [
+        { version: '0.1.0' },
+        { version: '0.2.0' },
+        { version: '1.0.0' },
+        { version: '2.0.0' },
+      ] satisfies Release[];
+
+      const config = partial<FilterConfig>({
+        maxMajorIncrement: 1,
+      });
+      const currentVersion = '0.0.1';
+      const latestVersion = '2.0.0';
+
+      const filteredVersions = filterVersions(
+        config,
+        currentVersion,
+        latestVersion,
+        releases,
+        versioning,
+      );
+
+      expect(filteredVersions).toEqual([
+        { version: '0.1.0' },
+        { version: '0.2.0' },
+        { version: '1.0.0' },
+      ]);
+    });
   });
 });
