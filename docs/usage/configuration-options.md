@@ -311,7 +311,7 @@ To configure this option refer to [`schedule`](#schedule) as the syntax is the s
 The automerge strategy defaults to `auto`, so Renovate decides how to merge pull requests as best it can.
 If possible, Renovate follows the merge strategy set on the platform itself for the repository.
 
-If you've set `automerge=true` and `automergeType=pr` for any of your dependencies, then you may choose what automerge strategy Renovate uses by setting the `automergeStrategy` config option.
+If you've set `automerge=true` and `automergeType` to either `pr` or `branch` for any of your dependencies, then you may choose what automerge strategy Renovate uses by setting the `automergeStrategy` config option.
 If you're happy with the default behavior, you don't need to do anything.
 
 You may choose from these values:
