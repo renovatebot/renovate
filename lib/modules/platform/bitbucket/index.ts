@@ -632,67 +632,47 @@ export function massageMarkdown(input: string): string {
  * Bitbucket doesn't currently support collapsible syntax; https://jira.atlassian.com/browse/BCLOUD-20231
  */
 function massageCollapsibleSectionsIntoLists(body: string): string {
-  const detailsParts = body
-    .split('<details>')
-    .map((text) => ({ raw: text, depth: 0, transformed: text }));
-
   let depth = 0;
-  // Calculate the nesting depth of <details> tags
-  for (let i = 0; i < detailsParts.length; i++) {
-    const part = detailsParts[i];
-    const partWithoutSpecialChars = part.raw.replace(regEx(/[\n\r\t ]+/g), '');
-
-    const isFirstDetailsPart = i === 0;
-    const isLastDetailsPart = i === detailsParts.length - 1;
-    const isTableContent = part.raw.startsWith(
+  // Parse detail parts to calculate correct list depth
+  const detailsParts = body.split('<details>').map((raw, i, arr) => {
+    const hasContent = raw.replace(/[\n\r\t ]+/g, '').length > 0;
+    const isTableContent = raw.startsWith(
       '\n\n\n| Datasource | Name | Last Updated |\n',
     );
-    const hasContent = partWithoutSpecialChars.length > 0;
+    const isFirst = i === 0;
+    const isLast = i === arr.length - 1;
 
-    // Only update depth if not first item or contents is markdown tables
-    if (!isFirstDetailsPart && !isTableContent && hasContent) {
-      part.depth = depth;
+    let partDepth = 0;
+
+    if (!isFirst && !isTableContent && hasContent) {
+      partDepth = depth;
     }
 
-    // Increment nested depth
-    if (hasContent && !isLastDetailsPart) {
+    if (hasContent && !isLast) {
       depth += 1;
     }
 
-    // Calculate amount of closing sections
-    const countClosingDetailsTags = part.raw.split('</details>').length - 1;
-    depth = Math.max(0, depth - countClosingDetailsTags);
-  }
+    depth = Math.max(0, depth - (raw.split('</details>').length - 1));
 
-  let newBody = '';
+    return { raw, partDepth };
+  });
 
   // Reassemble parts while replacing collapsible html elements with markdown list
-  for (const part of detailsParts) {
-    let t = part.raw;
-    const d = part.depth;
+  return detailsParts
+    .map(({ raw, partDepth }) => {
+      if (partDepth === 0) {
+        return raw;
+      }
 
-    if (d === 0) {
-      newBody += t;
-      continue;
-    }
+      const t = raw
+        .replace(/<\/?summary>/g, partDepth === 1 ? '**' : '`')
+        .replace(/( - `)/g, '\t'.repeat(partDepth) + ' - `')
+        .replace(/(- \[)/g, '\t'.repeat(partDepth) + '- [');
 
-    newBody += `${tabs(d - 1)} - `;
-
-    t = t
-      .replace(regEx(/<\/?summary>/g), d === 1 ? '**' : '`')
-      .replace(regEx(/( - `)/g), `${tabs(d)}$1`) // package names
-      .replace(regEx(/(- \[)/g), `${tabs(d)}$1`); // vuln names
-
-    part.transformed = t;
-
-    newBody += part.transformed;
-  }
-
-  return newBody.replace(regEx(/<\/?(summary|details|blockquote)>/g), '');
-}
-
-function tabs(count: number): string {
-  return '\t'.repeat(count);
+      return `${'\t'.repeat(partDepth - 1)} - ${t}`;
+    })
+    .join('')
+    .replace(/<\/?(summary|details|blockquote)>/g, '');
 }
 
 export function maxBodyLength(): number {
