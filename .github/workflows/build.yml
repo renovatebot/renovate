@@ -666,7 +666,7 @@ jobs:
           # TODO: work out why we can't use `GITHUB_TOKEN` as we're using it in the docs repo
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SKIP_GITHUB_ISSUES: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && 'true' || '' }}
+          SKIP_GITHUB_ISSUES: ''
 
       - name: Test docs
         run: pnpm test:docs
