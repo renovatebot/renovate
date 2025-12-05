@@ -22,9 +22,8 @@ import {
 // eg. 8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589
 const versionWithHashRegString = '^(?<version>.*)\\+(?<hash>.*)';
 
-// Execute 'corepack use' command for npm manager updates
-// This step is necessary because Corepack recommends attaching a hash after the version
-// The hash is generated only after running 'corepack use' and cannot be fetched from the npm registry
+// Instead of running 'corepack use' we directly compute the SRI hash from the npm registry
+// This step is necessary because 'corepack use' will fail due to prepare scripts
 export async function updateArtifacts({
   packageFileName,
   config,
@@ -51,13 +50,12 @@ export async function updateArtifacts({
   // write old updates before executing corepack update so that they are not removed from package file
   await writeLocalFile(packageFileName, existingPackageFileContent);
 
-  // Asumming that corepack only needs to modify the package.json file in the root folder
+  // Asumming that only the root package.json needs to modification
   // As it should not be regular practice to have different package managers in different workspaces
   const pkgFileDir = upath.dirname(packageFileName);
   const { additionalNpmrcContent } = processHostRules();
   const npmrcContent = await getNpmrcContent(pkgFileDir);
   const lazyPkgJson = lazyLoadPackageJson(pkgFileDir);
-  const cmd = `corepack use ${depName}@${newVersion}`;
 
   const nodeConstraints = await getNodeToolConstraint(
     config,
@@ -71,7 +69,7 @@ export async function updateArtifacts({
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     extraEnv: {
-      // To make sure pnpm store location is consistent between "corepack use"
+      // To make sure pnpm store location is consistent between adding the integrity
       // here and the pnpm commands in ./post-update/pnpm.ts. Check
       // ./post-update/pnpm.ts for more details.
       npm_config_cache_dir: pnpmConfigCacheDir,
@@ -79,38 +77,64 @@ export async function updateArtifacts({
       pnpm_config_cache_dir: pnpmConfigCacheDir,
       pnpm_config_store_dir: pnpmConfigStoreDir,
     },
-    toolConstraints: [
-      nodeConstraints,
-      {
-        toolName: 'corepack',
-        constraint: config.constraints?.corepack,
-      },
-    ],
+    toolConstraints: [nodeConstraints],
     docker: {},
   };
 
   await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
   try {
-    await exec(cmd, execOptions);
-    await resetNpmrcContent(pkgFileDir, npmrcContent);
-    const newPackageFileContent = await readLocalFile(packageFileName, 'utf8');
-    if (
-      !newPackageFileContent ||
-      existingPackageFileContent === newPackageFileContent
-    ) {
+    const integrity = (
+      await exec(
+        `npm view ${depName}@${newVersion} dist.integrity`,
+        execOptions,
+      )
+    ).stdout.trim();
+
+    if (!integrity || !/^sha\d+-/.test(integrity)) {
+      throw new Error(
+        `No integrity found for ${depName}@${newVersion}: "${integrity}"`,
+      );
+    }
+
+    const [algo, b64] = integrity.split('-', 2);
+    const hex = Buffer.from(b64, 'base64').toString('hex');
+
+    const expectedLen = algo === 'sha512' ? 128 : algo === 'sha256' ? 64 : null;
+    if (expectedLen && hex.length !== expectedLen) {
+      throw new Error(
+        `Unexpected ${algo} hex length (${hex.length}) for ${depName}@${newVersion}`,
+      );
+    }
+
+    const newPackageManagerValue = `${depName}@${newVersion}+${algo}.${hex}`;
+
+    const fileText = await readLocalFile(packageFileName, 'utf8');
+    const pkg = JSON.parse(fileText!);
+    const prev = pkg.packageManager;
+
+    if (prev === newPackageManagerValue) {
+      await resetNpmrcContent(pkgFileDir, npmrcContent);
       return null;
     }
+
+    pkg.packageManager = newPackageManagerValue;
+
+    const updatedText = JSON.stringify(pkg, null, 2) + '\n';
+    await writeLocalFile(packageFileName, updatedText);
+
+    await resetNpmrcContent(pkgFileDir, npmrcContent);
     logger.debug('Returning updated package.json');
+
     return [
       {
         file: {
           type: 'addition',
           path: packageFileName,
-          contents: newPackageFileContent,
+          contents: updatedText,
         },
       },
     ];
-  } catch (err) {
+  } catch (err: any) {
     logger.warn({ err }, 'Error updating package.json');
     await resetNpmrcContent(pkgFileDir, npmrcContent);
     return [

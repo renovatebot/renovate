@@ -5,7 +5,7 @@ import * as docker from '../../../util/exec/docker';
 import type { UpdateArtifactsConfig, Upgrade } from '../types';
 import * as rules from './post-update/rules';
 import { updateArtifacts } from '.';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
+import { envMock, mockExecSequence } from '~test/exec-util';
 import { env, fs } from '~test/util';
 
 vi.mock('../../../util/exec/env');
@@ -36,6 +36,13 @@ const validDepUpdate = {
 
 describe('modules/manager/npm/artifacts', () => {
   const spyProcessHostRules = vi.spyOn(rules, 'processHostRules');
+
+  const integrityB64 =
+    'd7iem+d6Kwatj0A6Gcrl4il29hAj+YrTI9XDAZSVjrwC7gpq5dE+5FT2E05OjK8poF8LGg4dKxe8prah8RWfhg==';
+  const integrityStr = `sha512-${integrityB64}`;
+  const expectedHex =
+    '77b89e9be77a2b06ad8f403a19cae5e22976f61023f98ad323d5c30194958ebc02ee0a6ae5d13ee454f6134e4e8caf29a05f0b1a0e1d2b17bca6b6a1f1159f86';
+  const expectedPmValue = `pnpm@8.15.6+sha512.${expectedHex}`;
 
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue({
@@ -85,67 +92,92 @@ describe('modules/manager/npm/artifacts', () => {
   });
 
   it('returns null if unchanged', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('some content');
-    const execSnapshots = mockExecAll();
+    fs.readLocalFile
+      .mockResolvedValueOnce('# dummy') // for npmrc
+      .mockResolvedValueOnce('{}') // for node constraints
+      .mockResolvedValue(JSON.stringify({ packageManager: expectedPmValue })); // existing package.json
+
+    const execSnapshots = mockExecSequence([
+      { stdout: integrityStr, stderr: '' },
+    ]);
 
     const res = await updateArtifacts({
       packageFileName: 'package.json',
       updatedDeps: [validDepUpdate],
-      newPackageFileContent: 'some content',
+      newPackageFileContent: 'pre-update content',
       config: { ...config },
     });
 
     expect(res).toBeNull();
-    expect(execSnapshots).toMatchObject([{ cmd: 'corepack use pnpm@8.15.6' }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'npm view pnpm@8.15.6 dist.integrity' },
+    ]);
   });
 
   it('returns updated package.json', async () => {
     fs.readLocalFile
-      .mockResolvedValueOnce('# dummy') // for npmrc
-      .mockResolvedValueOnce('{}') // for node constraints
-      .mockResolvedValue('some new content'); // for updated package.json
-    const execSnapshots = mockExecAll();
+      .mockResolvedValueOnce('# dummy') // npmrc
+      .mockResolvedValueOnce('{}') // node constraints
+      .mockResolvedValue(JSON.stringify({ packageManager: 'pnpm@8.15.5' })); // existing package.json
+
+    const execSnapshots = mockExecSequence([
+      { stdout: integrityStr, stderr: '' },
+    ]);
 
     const res = await updateArtifacts({
       packageFileName: 'package.json',
       updatedDeps: [validDepUpdate],
-      newPackageFileContent: 'some content',
+      newPackageFileContent: 'pre-update content',
       config: { ...config },
     });
+
+    const expectedText =
+      JSON.stringify({ packageManager: expectedPmValue }, null, 2) + '\n';
 
     expect(res).toEqual([
       {
         file: {
-          contents: 'some new content',
+          contents: expectedText,
           path: 'package.json',
           type: 'addition',
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: 'corepack use pnpm@8.15.6' }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'npm view pnpm@8.15.6 dist.integrity' },
+    ]);
   });
 
   it('supports docker mode', async () => {
     GlobalConfig.set(dockerAdminConfig);
-    const execSnapshots = mockExecAll();
+
     fs.readLocalFile
-      .mockResolvedValueOnce('# dummy') // for npmrc
-      .mockResolvedValueOnce('some new content');
+      .mockResolvedValueOnce('# dummy') // npmrc
+      .mockResolvedValue(JSON.stringify({ packageManager: 'pnpm@8.15.5' })); // existing package.json
+
+    const execSnapshots = mockExecSequence([
+      { stdout: '', stderr: '' }, // docker pull
+      { stdout: '', stderr: '' }, // docker ps
+      { stdout: integrityStr, stderr: '' }, // npm view pnpm@8.15.6 dist.integrity
+    ]);
 
     const res = await updateArtifacts({
       packageFileName: 'package.json',
       updatedDeps: [validDepUpdate],
-      newPackageFileContent: 'some content',
+      newPackageFileContent: 'pre-update content',
       config: {
         ...config,
-        constraints: { node: '20.1.0', corepack: '0.29.3' },
+        constraints: { node: '20.1.0' },
       },
     });
+
+    const expectedText =
+      JSON.stringify({ packageManager: expectedPmValue }, null, 2) + '\n';
 
     expect(res).toEqual([
       {
         file: {
-          contents: 'some new content',
+          contents: expectedText,
           path: 'package.json',
           type: 'addition',
         },
@@ -166,9 +198,7 @@ describe('modules/manager/npm/artifacts', () => {
           'bash -l -c "' +
           'install-tool node 20.1.0 ' +
           '&& ' +
-          'install-tool corepack 0.29.3 ' +
-          '&& ' +
-          'corepack use pnpm@8.15.6' +
+          'npm view pnpm@8.15.6 dist.integrity' +
           '"',
       },
     ]);
@@ -176,25 +206,33 @@ describe('modules/manager/npm/artifacts', () => {
 
   it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    const execSnapshots = mockExecAll();
+
     fs.readLocalFile
-      .mockResolvedValueOnce('# dummy') // for npmrc
-      .mockResolvedValueOnce('some new content');
+      .mockResolvedValueOnce('# dummy') // npmrc
+      .mockResolvedValue(JSON.stringify({ packageManager: 'pnpm@8.15.5' })); // existing package.json
+
+    const execSnapshots = mockExecSequence([
+      { stdout: '', stderr: '' }, // install-tool node
+      { stdout: integrityStr, stderr: '' }, // npm view pnpm@8.15.6 dist.integrity
+    ]);
 
     const res = await updateArtifacts({
       packageFileName: 'package.json',
       updatedDeps: [validDepUpdate],
-      newPackageFileContent: 'some content',
+      newPackageFileContent: 'pre-update content',
       config: {
         ...config,
-        constraints: { node: '20.1.0', corepack: '0.29.3' },
+        constraints: { node: '20.1.0' },
       },
     });
+
+    const expectedText =
+      JSON.stringify({ packageManager: expectedPmValue }, null, 2) + '\n';
 
     expect(res).toEqual([
       {
         file: {
-          contents: 'some new content',
+          contents: expectedText,
           path: 'package.json',
           type: 'addition',
         },
@@ -206,10 +244,8 @@ describe('modules/manager/npm/artifacts', () => {
         cmd: 'install-tool node 20.1.0',
         options: { cwd: '/tmp/github/some/repo' },
       },
-      { cmd: 'install-tool corepack 0.29.3' },
-
       {
-        cmd: 'corepack use pnpm@8.15.6',
+        cmd: 'npm view pnpm@8.15.6 dist.integrity',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -221,10 +257,10 @@ describe('modules/manager/npm/artifacts', () => {
     const res = await updateArtifacts({
       packageFileName: 'package.json',
       updatedDeps: [validDepUpdate],
-      newPackageFileContent: 'some content',
+      newPackageFileContent: 'pre-update content',
       config: {
         ...config,
-        constraints: { node: '20.1.0', corepack: '0.29.3' },
+        constraints: { node: '20.1.0' },
       },
     });
 
@@ -233,6 +269,8 @@ describe('modules/manager/npm/artifacts', () => {
         artifactError: { fileName: 'package.json', stderr: 'exec error' },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: 'corepack use pnpm@8.15.6' }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'npm view pnpm@8.15.6 dist.integrity' },
+    ]);
   });
 });
