@@ -10,6 +10,15 @@ The following branches are pending approval. To create them, click on a checkbox
  - [ ] <!-- approve-branch=branchName2 -->pr2
  - [ ] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐
 
+## Awaiting Schedule
+
+The following updates are awaiting their schedule. To get an update now, click on a checkbox below.
+
+ - [ ] <!-- unschedule-branch=branchName4 -->[pr4](../pull/4)
+ - [ ] <!-- unschedule-branch=branchName5 -->[pr5](../pull/5) (`dep5a`, `dep5b`)
+ - [ ] <!-- unschedule-branch=branchName3 -->[pr6](../pull/6)
+ - [ ] <!-- create-all-awaiting-schedule-prs -->🔐 **Create all awaiting schedule PRs at once** 🔐
+
 ## Rate-Limited
 
 The following updates are currently rate-limited. To force their creation now, click on a checkbox below.

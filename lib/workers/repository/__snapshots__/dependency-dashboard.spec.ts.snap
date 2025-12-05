@@ -35,6 +35,10 @@ The following updates are awaiting their schedule. To get an update now, click o
 
  - [ ] <!-- unschedule-branch=branchName3 -->pr3
 
+### All
+
+ - [ ] <!-- create-all-awaiting-schedule-prs -->🔐 **Create all awaiting schedule PRs at once** 🔐
+
 ## Rate-Limited
 
 The following updates are currently rate-limited. To force their creation now, click on a checkbox below.
