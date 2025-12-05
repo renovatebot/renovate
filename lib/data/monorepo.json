@@ -550,6 +550,7 @@
     "react-admin": "https://github.com/marmelab/react-admin",
     "react-apollo": "https://github.com/apollographql/react-apollo",
     "react-dnd": "https://github.com/react-dnd/react-dnd",
+    "react-email": "https://github.com/resend/react-email",
     "react-navigation": "https://github.com/react-navigation/react-navigation",
     "react-page": "https://github.com/react-page/react-page",
     "react-rails": "https://github.com/reactjs/react-rails",
