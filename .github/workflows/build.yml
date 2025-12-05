@@ -634,9 +634,6 @@ jobs:
       - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    permissions:
-      contents: read
-      issues: read
 
     steps:
       - name: Checkout code
@@ -663,8 +660,6 @@ jobs:
       - name: Build
         run: pnpm build:docs
         env:
-          # TODO: work out why we can't use `GITHUB_TOKEN` as we're using it in the docs repo
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SKIP_GITHUB_ISSUES: ''
 
