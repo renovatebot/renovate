@@ -19,8 +19,10 @@ For example:
 
 ```console
 $ npx --yes --package renovate -- renovate-config-validator
- INFO: Validating renovate.json
- INFO: Config validated successfully
+```
+```console
+INFO: Validating renovate.json
+INFO: Config validated successfully
 ```
 
 If you want to run `renovate-config-validator` while using a custom filename for your renovate config file, you will need to pass the filename as cli argument.
