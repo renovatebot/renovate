@@ -214,6 +214,17 @@ describe('util/template/index', () => {
     expect(output).toBe('ghc/dep');
   });
 
+  it('add', () => {
+    const userTemplate = '{{add 1 2}}';
+    const output = template.compile(userTemplate, {});
+    expect(output).toBe('3');
+  });
+
+  it('add - throws if inputs are invalid', () => {
+    const userTemplate = '{{add undefined null}}';
+    expect(() => template.compile(userTemplate, {})).toThrow();
+  });
+
   describe('proxyCompileInput', () => {
     const allowedField = 'body';
     const allowedArrayField = 'prBodyNotes';
