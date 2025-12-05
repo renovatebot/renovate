@@ -1,6 +1,6 @@
 This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
-## Ignored or Blocked
+## PR Closed (Blocked)
 
 The following updates are blocked by an existing closed PR. To recreate the PR, click on a checkbox below.
 
