@@ -28,7 +28,7 @@ export async function generateVersioning(
   let versioningContent = '\nSupported values for `versioning` are:\n\n';
   for (const versioning of versioningList) {
     const definition = (await import(
-      `../../lib/modules/versioning/${versioning}`
+      `../../lib/modules/versioning/${versioning}/index.ts`
     )) as Versioning;
     const { id, displayName, urls, supportsRanges, supportedRangeStrategies } =
       definition;
