@@ -174,17 +174,14 @@ function getExtraEnvOptions(deps: PackageDependency[]): ExtraEnv {
   const customMavenWrapperUrl = getCustomMavenWrapperRepoUrl(deps);
   if (customMavenWrapperUrl) {
     extraEnv.MVNW_REPOURL = customMavenWrapperUrl;
-  }
 
-  // Set credentials for Maven wrapper repository
-  const registryUrls = getRegistryUrls(deps);
-  for (const registryUrl of registryUrls) {
+    // Set credentials for Maven wrapper repository
     const { username, password } = findHostRules({
       hostType: MavenDatasource.id,
-      url: registryUrl,
+      url: customMavenWrapperUrl,
     });
 
-    if (username || password) {
+    if (username && password) {
       if (username) {
         extraEnv.MVNW_USERNAME = username;
       }
@@ -192,43 +189,18 @@ function getExtraEnvOptions(deps: PackageDependency[]): ExtraEnv {
         extraEnv.MVNW_PASSWORD = password;
       }
       logger.debug(
-        { registryUrl },
+        { customMavenWrapperUrl },
         'Using MVNW_USERNAME and MVNW_PASSWORD for private repository',
       );
-      // Use the first registry with credentials
-      break;
+    } else if (username || password) {
+      logger.warn(
+        { customMavenWrapperUrl },
+        'Only found username OR password for private repository.',
+      );
     }
   }
 
   return extraEnv;
-}
-
-function getRegistryUrls(deps: PackageDependency[]): string[] {
-  const registryUrls: string[] = [];
-
-  // Add custom Maven wrapper repository URL first (highest priority)
-  const customUrl = getCustomMavenWrapperRepoUrl(deps);
-  if (customUrl) {
-    registryUrls.push(customUrl);
-  }
-
-  // Get registryUrls from dependencies
-  for (const dep of deps) {
-    if (dep.registryUrls) {
-      for (const url of dep.registryUrls) {
-        if (!registryUrls.includes(url)) {
-          registryUrls.push(url);
-        }
-      }
-    }
-  }
-
-  // Add default Maven Central if no other registries are configured
-  if (registryUrls.length === 0) {
-    registryUrls.push(DEFAULT_MAVEN_REPO_URL);
-  }
-
-  return registryUrls;
 }
 
 function getCustomMavenWrapperRepoUrl(

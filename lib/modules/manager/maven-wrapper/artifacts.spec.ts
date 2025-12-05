@@ -498,7 +498,8 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         updatedDeps: [
           {
             depName: 'maven-wrapper',
-            registryUrls: ['https://private-registry.example.com/maven2'],
+            replaceString:
+              'https://private-registry.example.com/maven2/org/apache/maven/wrapper/maven-wrapper/3.0.0/maven-wrapper-3.0.0.jar',
           },
         ],
         config: {
@@ -515,6 +516,10 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       expect(execSnapshots[0].options!.env).toHaveProperty(
         'MVNW_PASSWORD',
         'test-password',
+      );
+      expect(execSnapshots[0].options!.env).toHaveProperty(
+        'MVNW_REPOURL',
+        'https://private-registry.example.com/maven2',
       );
 
       // Verify command is still just wrapper:wrapper
@@ -535,7 +540,8 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         updatedDeps: [
           {
             depName: 'maven-wrapper',
-            registryUrls: ['https://public-registry.example.com/maven2'],
+            replaceString:
+              'https://public-registry.example.com/maven2/org/apache/maven/wrapper/maven-wrapper/3.0.0/maven-wrapper-3.0.0.jar',
           },
         ],
         config: {
@@ -594,57 +600,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       clearHostRules();
     });
 
-    it('should use first registry with credentials when multiple are configured', async () => {
-      clearHostRules();
-      addHostRules({
-        hostType: 'maven',
-        matchHost: 'private1.example.com',
-        username: 'user1',
-        password: 'pass1',
-      });
-      addHostRules({
-        hostType: 'maven',
-        matchHost: 'private2.example.com',
-        username: 'user2',
-        password: 'pass2',
-      });
-
-      const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
-      mockMavenFileChangedInGit();
-
-      await updateArtifacts({
-        packageFileName: 'maven-wrapper',
-        newPackageFileContent: '',
-        updatedDeps: [
-          {
-            depName: 'maven-wrapper',
-            registryUrls: [
-              'https://private1.example.com/maven2',
-              'https://public.example.com/maven2',
-              'https://private2.example.com/maven2',
-            ],
-          },
-        ],
-        config: {
-          currentValue: '3.0.0',
-          newValue: '3.3.1',
-        },
-      });
-
-      // Verify only the first set of credentials is used
-      expect(execSnapshots[0].options!.env).toHaveProperty(
-        'MVNW_USERNAME',
-        'user1',
-      );
-      expect(execSnapshots[0].options!.env).toHaveProperty(
-        'MVNW_PASSWORD',
-        'pass1',
-      );
-
-      clearHostRules();
-    });
-
-    it('should set only MVNW_USERNAME when only username is configured', async () => {
+    it('should not set credentials when only username is configured', async () => {
       clearHostRules();
       addHostRules({
         hostType: 'maven',
@@ -661,7 +617,8 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         updatedDeps: [
           {
             depName: 'maven-wrapper',
-            registryUrls: ['https://private-registry.example.com/maven2'],
+            replaceString:
+              'https://private-registry.example.com/maven2/org/apache/maven/wrapper/maven-wrapper/3.0.0/maven-wrapper-3.0.0.jar',
           },
         ],
         config: {
@@ -670,17 +627,14 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       });
 
-      // Verify only username is set
-      expect(execSnapshots[0].options!.env).toHaveProperty(
-        'MVNW_USERNAME',
-        'test-user',
-      );
+      // Verify credentials are not set when only username is present
+      expect(execSnapshots[0].options!.env).not.toHaveProperty('MVNW_USERNAME');
       expect(execSnapshots[0].options!.env).not.toHaveProperty('MVNW_PASSWORD');
 
       clearHostRules();
     });
 
-    it('should set only MVNW_PASSWORD when only password is configured', async () => {
+    it('should not set credentials when only password is configured', async () => {
       clearHostRules();
       addHostRules({
         hostType: 'maven',
@@ -697,7 +651,8 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         updatedDeps: [
           {
             depName: 'maven-wrapper',
-            registryUrls: ['https://private-registry.example.com/maven2'],
+            replaceString:
+              'https://private-registry.example.com/maven2/org/apache/maven/wrapper/maven-wrapper/3.0.0/maven-wrapper-3.0.0.jar',
           },
         ],
         config: {
@@ -706,11 +661,8 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       });
 
-      // Verify only password is set
-      expect(execSnapshots[0].options!.env).toHaveProperty(
-        'MVNW_PASSWORD',
-        'test-password',
-      );
+      // Verify credentials are not set when only password is present
+      expect(execSnapshots[0].options!.env).not.toHaveProperty('MVNW_PASSWORD');
       expect(execSnapshots[0].options!.env).not.toHaveProperty('MVNW_USERNAME');
 
       clearHostRules();
