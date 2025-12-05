@@ -618,7 +618,7 @@ export function massageMarkdown(input: string): string {
       regEx(/<summary>View abandoned dependencies(.*)<\/summary>/),
       '## Abandoned dependencies $1',
     )
-    .replace(regEx(/(>[\s\S]+?)(## Abandoned dependencies.*)/), '$2\n$1')
+    .replace(regEx(/(>[\s\S]+?)(## Abandoned dependencies.*)/), '$2\n$1') // Move note under heading
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
@@ -637,32 +637,30 @@ function massageCollapsibleSectionsIntoLists(body: string): string {
     .map((text) => ({ raw: text, depth: 0, transformed: text }));
 
   let depth = 0;
-
   // Calculate the nesting depth of <details> tags
   for (let i = 0; i < detailsParts.length; i++) {
     const part = detailsParts[i];
+    const partWithoutSpecialChars = part.raw.replace(regEx(/[\n\r\t ]+/g), '');
 
+    const isFirstDetailsPart = i === 0;
+    const isLastDetailsPart = i === detailsParts.length - 1;
     const isTableContent = part.raw.startsWith(
       '\n\n\n| Datasource | Name | Last Updated |\n',
     );
+    const hasContent = partWithoutSpecialChars.length > 0;
 
-    // No need to convert <details> which contain tables into markdown lists
-    if (isTableContent) {
-      part.depth = 0;
-      depth = 0;
-      continue;
+    // Only update depth if not first item or contents is markdown tables
+    if (!isFirstDetailsPart && !isTableContent && hasContent) {
+      part.depth = depth;
     }
 
-    part.depth = depth;
-
-    const countClosingDetailsTags = part.raw.split('</details>').length - 1;
-    const isLastDetailsPart = i === detailsParts.length - 1;
-    const hasContent = part.raw.length > 0;
-
+    // Increment nested depth
     if (hasContent && !isLastDetailsPart) {
       depth += 1;
     }
 
+    // Calculate amount of closing sections
+    const countClosingDetailsTags = part.raw.split('</details>').length - 1;
     depth = Math.max(0, depth - countClosingDetailsTags);
   }
 
@@ -683,16 +681,14 @@ function massageCollapsibleSectionsIntoLists(body: string): string {
     t = t
       .replace(regEx(/<\/?summary>/g), d === 1 ? '**' : '`')
       .replace(regEx(/( - `)/g), `${tabs(d)}$1`) // package names
-      .replace(regEx(/(- \[)/g), `${tabs(d)}$1`) // vuln names
-      .replace(regEx(/^[ \t]*-\s*$(\r?\n)?/gm), '$1') // strip dash only lines
-      .replace(regEx(/<\/?(summary|details|blockquote)>/g), '');
+      .replace(regEx(/(- \[)/g), `${tabs(d)}$1`); // vuln names
 
     part.transformed = t;
 
     newBody += part.transformed;
   }
 
-  return newBody;
+  return newBody.replace(regEx(/<\/?(summary|details|blockquote)>/g), '');
 }
 
 function tabs(count: number): string {

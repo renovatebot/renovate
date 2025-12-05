@@ -135,8 +135,8 @@ exports[`modules/platform/bitbucket/index > getPrList() > filters PR list by aut
 `;
 
 exports[`modules/platform/bitbucket/index > massageMarkdown() > removes html tags 1`] = `
-"<summary>foo</summary>
-<blockquote>
+"foo
+
 
  - **text**
 
