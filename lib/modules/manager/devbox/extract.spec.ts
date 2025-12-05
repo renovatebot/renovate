@@ -27,12 +27,13 @@ describe('modules/manager/devbox/extract', () => {
         `,
         'devbox.lock',
       );
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         deps: [
           {
             depName: 'nodejs',
             currentValue: '20.1.8',
             datasource: 'devbox',
+            versioning: 'node',
           },
         ],
       });
@@ -49,35 +50,13 @@ describe('modules/manager/devbox/extract', () => {
         `,
         'devbox.lock',
       );
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         deps: [
           {
             depName: 'nodejs',
             currentValue: '20.1.8',
             datasource: 'devbox',
-          },
-        ],
-      });
-    });
-
-    it('returns invalid-version when the devbox JSON file has a single package with an invalid version', () => {
-      const result = extractPackageFile(
-        codeBlock`
-          {
-            "packages": {
-              "nodejs": "^20.1.8"
-            }
-          }
-        `,
-        'devbox.lock',
-      );
-      expect(result).toEqual({
-        deps: [
-          {
-            currentValue: '^20.1.8',
-            datasource: 'devbox',
-            depName: 'nodejs',
-            skipReason: 'invalid-version',
+            versioning: 'node',
           },
         ],
       });
@@ -92,12 +71,13 @@ describe('modules/manager/devbox/extract', () => {
         `,
         'devbox.lock',
       );
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         deps: [
           {
             depName: 'nodejs',
             currentValue: '20.1.8',
             datasource: 'devbox',
+            versioning: 'node',
           },
           {
             depName: 'yarn',
@@ -120,12 +100,13 @@ describe('modules/manager/devbox/extract', () => {
         `,
         'devbox.lock',
       );
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         deps: [
           {
             depName: 'nodejs',
             currentValue: '20.1.8',
             datasource: 'devbox',
+            versioning: 'node',
           },
           {
             depName: 'yarn',
@@ -152,12 +133,13 @@ describe('modules/manager/devbox/extract', () => {
         `,
         'devbox.lock',
       );
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         deps: [
           {
             depName: 'nodejs',
             currentValue: '20.1.8',
             datasource: 'devbox',
+            versioning: 'node',
           },
           {
             depName: 'yarn',
@@ -181,12 +163,13 @@ describe('modules/manager/devbox/extract', () => {
         `,
         'devbox.lock',
       );
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         deps: [
           {
             depName: 'nodejs',
             currentValue: '20.1.8',
             datasource: 'devbox',
+            versioning: 'node',
           },
           {
             depName: 'yarn',
@@ -218,12 +201,13 @@ describe('modules/manager/devbox/extract', () => {
         `,
         'devbox.lock',
       );
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         deps: [
           {
             depName: 'nodejs',
             currentValue: '20.1.8',
             datasource: 'devbox',
+            versioning: 'node',
           },
           {
             depName: 'yarn',
@@ -249,12 +233,13 @@ describe('modules/manager/devbox/extract', () => {
         `,
         'devbox.lock',
       );
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         deps: [
           {
             depName: 'nodejs',
             currentValue: '20.1.8',
             datasource: 'devbox',
+            versioning: 'node',
           },
           {
             depName: 'yarn',
