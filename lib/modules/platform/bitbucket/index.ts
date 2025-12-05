@@ -652,7 +652,8 @@ function massageCollapsibleSectionsIntoLists(body: string): string {
       depth += 1;
     }
 
-    depth = Math.max(0, depth - (raw.split('</details>').length - 1));
+    const countClosingDetailsTags = raw.split('</details>').length - 1;
+    depth = Math.max(0, depth - countClosingDetailsTags);
 
     return { raw, partDepth };
   });
