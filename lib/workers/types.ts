@@ -223,6 +223,7 @@ export interface WorkerExtractConfig extends ExtractConfig {
   includePaths?: string[];
   ignorePaths?: string[];
   enabled?: boolean;
+  postUpdateOptions?: string[];
 }
 
 export interface DepWarnings {
