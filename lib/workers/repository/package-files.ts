@@ -105,11 +105,12 @@ export class PackageFiles {
       }
 
       for (const manager of managers) {
-        deps += `<details><summary>${manager}</summary>\n<blockquote>\n\n`;
-        for (const packageFile of Array.from(packageFiles[manager]).sort(
+        const managerPackageFiles = Array.from(packageFiles[manager]).sort(
           (a, b) => a.packageFile.localeCompare(b.packageFile),
-        )) {
-          deps += `<details><summary>${packageFile.packageFile}</summary>\n\n`;
+        );
+        deps += `<details><summary>${manager} (${managerPackageFiles.length})</summary>\n<blockquote>\n\n`;
+        for (const packageFile of managerPackageFiles) {
+          deps += `<details><summary>${packageFile.packageFile} (${packageFile.deps.length})</summary>\n\n`;
           for (const dep of packageFile.deps) {
             const ver = dep.currentValue;
             const digest = dep.currentDigest;
