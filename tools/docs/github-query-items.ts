@@ -78,20 +78,20 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
   }
 
   if (process.env.CI) {
-    if (
-      process.env.GITHUB_REF === 'main' &&
-      process.env.GITHUB_REPOSITORY !== 'renovatebot/renovatebot.github.io' &&
-      process.env.GITHUB_REPOSITORY !== 'renovatebot/renovate'
-    ) {
-      logger.warn(
-        {
-          repository: process.env.GITHUB_REPOSITORY,
-          ref: process.env.GITHUB_REF,
-        },
-        "Skipping collection of open GitHub Issues, as we're running CI on a non-HEAD branch of Renovate or its docs site",
-      );
-      return result;
-    }
+    // if (
+    //   process.env.GITHUB_REF === 'main' &&
+    //   process.env.GITHUB_REPOSITORY !== 'renovatebot/renovatebot.github.io' &&
+    //   process.env.GITHUB_REPOSITORY !== 'renovatebot/renovate'
+    // ) {
+    //   logger.warn(
+    //     {
+    //       repository: process.env.GITHUB_REPOSITORY,
+    //       ref: process.env.GITHUB_REF,
+    //     },
+    //     "Skipping collection of open GitHub Issues, as we're running CI on a non-HEAD branch of Renovate or its docs site",
+    //   );
+    //   return result;
+    // }
   }
 
   try {
