@@ -275,38 +275,38 @@ jobs:
   #         path: .cache/prettier
   #         key: prettier-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
 
-  lint-docs:
-    needs:
-      - setup-build
-    runs-on: ubuntu-latest
-    timeout-minutes: 7
-
-    steps: []
-      # - name: Checkout code
-      #   uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-      #   with:
-      #     show-progress: false
-      #
-      # - name: Setup Node.js
-      #   uses: ./.github/actions/setup-node
-      #   with:
-      #     node-version: ${{ needs.setup-build.outputs.node-version }}
-      #     os: ${{ runner.os }}
-      #
-      # - name: Lint markdown
-      #   run: pnpm markdown-lint
-      #
-      # - name: Generate JSON schema
-      #   run: pnpm create-json-schema
-      #
-      # - name: Lint fenced code blocks
-      #   run: pnpm doc-fence-check
-      #
-      # - name: Lint documentation
-      #   run: pnpm lint-documentation
-      #
-      # - name: Markdown lint
-      #   run: pnpm markdown-lint
+  # lint-docs:
+  #   needs:
+  #     - setup-build
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 7
+  #
+  #   steps: []
+  # - name: Checkout code
+  #   uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+  #   with:
+  #     show-progress: false
+  #
+  # - name: Setup Node.js
+  #   uses: ./.github/actions/setup-node
+  #   with:
+  #     node-version: ${{ needs.setup-build.outputs.node-version }}
+  #     os: ${{ runner.os }}
+  #
+  # - name: Lint markdown
+  #   run: pnpm markdown-lint
+  #
+  # - name: Generate JSON schema
+  #   run: pnpm create-json-schema
+  #
+  # - name: Lint fenced code blocks
+  #   run: pnpm doc-fence-check
+  #
+  # - name: Lint documentation
+  #   run: pnpm lint-documentation
+  #
+  # - name: Markdown lint
+  #   run: pnpm markdown-lint
 
   # lint-other:
   #   needs:
@@ -630,7 +630,7 @@ jobs:
 
   build-docs:
     needs:
-      - lint-docs
+      # - lint-docs
       - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -722,7 +722,7 @@ jobs:
       - build-docker
       - lint-eslint
       - lint-prettier
-      - lint-docs
+      # - lint-docs
       - lint-other
       - test-e2e
       - test-success
