@@ -19,7 +19,9 @@ import {
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
+import { getRemoteUrlWithToken } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
+import { isHttpUrl } from '../../../util/url';
 import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,
@@ -192,11 +194,15 @@ export async function updateArtifacts({
 
     const cmd = 'go';
     const env = getEnv();
+    // add auth of 'go-proxy' urls to URLs in GOPROXY
+    const goproxy = getGoProxyWithAuth(env.GOPROXY);
+
     const execOptions: ExecOptions = {
       cwdFile: goModFileName,
       extraEnv: {
         GOPATH: await ensureCacheDir('go'),
-        GOPROXY: env.GOPROXY,
+        // only set extraEnv GOPROXY if it doesn't have injected credentials
+        ...(goproxy === env.GOPROXY ? { GOPROXY: env.GOPROXY } : {}),
         GOPRIVATE: env.GOPRIVATE,
         GONOPROXY: env.GONOPROXY,
         GONOSUMDB: env.GONOSUMDB,
@@ -206,6 +212,10 @@ export async function updateArtifacts({
         GOFLAGS: useModcacherw(goConstraints) ? '-modcacherw' : null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(['go']),
+      },
+      env: {
+        // set GOPROXY only with injected credentials
+        ...(goproxy === env.GOPROXY ? {} : { GOPROXY: goproxy }),
       },
       docker: {},
       toolConstraints: [
@@ -482,4 +492,19 @@ function getGoConstraints(content: string): string | undefined {
     return undefined;
   }
   return `^${match.groups.gover}`;
+}
+
+function getGoProxyWithAuth(goproxy: string | undefined): string | undefined {
+  if (!isString(goproxy)) {
+    return goproxy;
+  }
+
+  const goproxyUrls = goproxy.split(',');
+  const authGoproxyUrls = goproxyUrls.map((url) => {
+    if (!isHttpUrl(url)) {
+      return url;
+    }
+    return getRemoteUrlWithToken(url, 'go-proxy');
+  });
+  return authGoproxyUrls.join(',');
 }
