@@ -99,6 +99,7 @@ export interface RenovateSharedConfig {
   groupName?: string;
   groupSlug?: string;
   hashedBranchLength?: number;
+  hostRules?: HostRule[];
   ignoreDeps?: string[];
   ignorePaths?: string[];
   ignoreTests?: boolean;

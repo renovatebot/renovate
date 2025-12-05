@@ -112,6 +112,46 @@ describe('util/interpolator', () => {
       });
     });
 
+    it('does not resolve secrets in onboaringConfig', () => {
+      const res = replaceInterpolatedValuesInObject(
+        {
+          // @ts-expect-error as we are using secrets to pass the value
+          mode: '{{ secrets.SECRET_MODE }}',
+          secrets: { SECRET_MODE: 'silent', ARTIFACTORY_API_TOKEN: 'token' },
+          onboardingConfig: {
+            hostRules: [
+              {
+                hostType: 'maven',
+                matchHost:
+                  'http://artifactory-artifactory-nginx.artifactory.svc.cluster.local',
+                username: process.env.ARTIFACTORY_API_USER, // this can be displayed public, not a secret
+                password: '{{ secrets.ARTIFACTORY_API_TOKEN }}',
+              },
+            ],
+          },
+        },
+        { SECRET_MODE: 'silent', ARTIFACTORY_API_TOKEN: 'token' },
+        options.secrets,
+        false,
+      );
+
+      expect(res).toEqual({
+        mode: 'silent',
+        secrets: { SECRET_MODE: 'silent', ARTIFACTORY_API_TOKEN: 'token' },
+        onboardingConfig: {
+          hostRules: [
+            {
+              hostType: 'maven',
+              matchHost:
+                'http://artifactory-artifactory-nginx.artifactory.svc.cluster.local',
+              username: process.env.ARTIFACTORY_API_USER, // this can be displayed public, not a secret
+              password: '{{ secrets.ARTIFACTORY_API_TOKEN }}',
+            },
+          ],
+        },
+      });
+    });
+
     it('throws error if secrets are used in disallowed options', () => {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'config';
