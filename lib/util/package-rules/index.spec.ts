@@ -1282,4 +1282,39 @@ describe('util/package-rules/index', () => {
     expect(res.depName).toBe('node');
     expect(res.packageName).toBe('docker.io/library/node');
   });
+
+  it('compiles sourceUrl template in package rules', async () => {
+    const config: TestConfig = {
+      datasource: 'terraform-provider',
+      depName: 'aws',
+      packageName: 'hashicorp/aws',
+      packageRules: [
+        {
+          matchDatasources: ['terraform-provider'],
+          sourceUrl:
+            'https://github.com/{{replace "/" "/terraform-provider-" packageName}}',
+        },
+      ],
+    };
+    const res = await applyPackageRules(config);
+    expect(res.sourceUrl).toBe(
+      'https://github.com/hashicorp/terraform-provider-aws',
+    );
+  });
+
+  it('compiles sourceUrl template with variables', async () => {
+    const config: TestConfig = {
+      datasource: 'terraform-provider',
+      depName: 'aws',
+      packageName: 'hashicorp/aws',
+      packageRules: [
+        {
+          matchDatasources: ['terraform-provider'],
+          sourceUrl: 'https://github.com/{{packageName}}',
+        },
+      ],
+    };
+    const res = await applyPackageRules(config);
+    expect(res.sourceUrl).toBe('https://github.com/hashicorp/aws');
+  });
 });

@@ -3771,6 +3771,8 @@ Use this field to set the directory in which the package is present at the sourc
 Use this field to set the source URL for a package, including overriding an existing one.
 Source URLs are necessary to link to the source of the package and in order to look up changelogs.
 
+The `sourceUrl` field supports template compilation, allowing you to dynamically construct URLs based on package information.
+
 ```json title="Setting the source URL for the dummy package"
 {
   "packageRules": [
@@ -3781,6 +3783,20 @@ Source URLs are necessary to link to the source of the package and in order to l
   ]
 }
 ```
+
+```json title="Using templates to construct source URLs for OpenTofu providers"
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["terraform-provider"],
+      "registryUrls": ["https://registry.opentofu.org"],
+      "sourceUrl": "https://github.com/{{replace '/' '/terraform-provider-' packageName}}"
+    }
+  ]
+}
+```
+
+In the example above, a package name like `hashicorp/aws` will be transformed to `https://github.com/hashicorp/terraform-provider-aws`.
 
 ## patch
 
