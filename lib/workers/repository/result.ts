@@ -1,27 +1,21 @@
 import type { RenovateConfig } from '../../config/types';
 
+import type {
+  ConfigErrors,
+  EXTERNAL_HOST_ERROR,
+  MANAGER_LOCKFILE_ERROR,
+  PlatformErrors,
+  SystemErrors,
+  TemporaryErrors,
+  UNKNOWN_ERROR,
+} from '../../constants/error-messages';
 import {
   CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,
   MISSING_API_CREDENTIALS,
-  REPOSITORY_ACCESS_FORBIDDEN,
-  REPOSITORY_ARCHIVED,
-  REPOSITORY_BLOCKED,
-  REPOSITORY_CANNOT_FORK,
-  REPOSITORY_CLOSED_ONBOARDING,
-  REPOSITORY_DISABLED,
-  REPOSITORY_DISABLED_BY_CONFIG,
-  REPOSITORY_EMPTY,
-  REPOSITORY_FORKED,
-  REPOSITORY_FORK_MISSING,
-  REPOSITORY_FORK_MODE_FORKED,
-  REPOSITORY_MIRRORED,
-  REPOSITORY_NOT_FOUND,
-  REPOSITORY_NO_CONFIG,
-  REPOSITORY_NO_PACKAGE_FILES,
-  REPOSITORY_RENAMED,
-  REPOSITORY_UNINITIATED,
+  RepositoryErrors,
 } from '../../constants/error-messages';
+
 import { logger } from '../../logger';
 
 export type ProcessStatus =
@@ -32,35 +26,34 @@ export type ProcessStatus =
   | 'unknown';
 
 export interface ProcessResult {
-  res: string;
+  res: RepositoryResult;
   status: ProcessStatus;
   enabled: boolean | undefined;
   onboarded: boolean | undefined;
 }
 
+/** a strong type for any repository result status that Renovate may report */
+export type RepositoryResult =
+  /** repository was processed successfully */
+  | 'done'
+  /** Renovate performed branch-based automerge on one branch during its run */
+  | 'automerged'
+  // common set of errors
+  | (typeof SystemErrors)[number]
+  | (typeof RepositoryErrors)[number]
+  | (typeof TemporaryErrors)[number]
+  | (typeof ConfigErrors)[number]
+  | (typeof PlatformErrors)[number]
+  // other errors
+  | typeof EXTERNAL_HOST_ERROR
+  | typeof MISSING_API_CREDENTIALS
+  | typeof MANAGER_LOCKFILE_ERROR
+  | typeof UNKNOWN_ERROR;
+
 export function processResult(
   config: RenovateConfig,
-  res: string,
+  res: RepositoryResult,
 ): ProcessResult {
-  const disabledStatuses = [
-    REPOSITORY_ACCESS_FORBIDDEN,
-    REPOSITORY_ARCHIVED,
-    REPOSITORY_BLOCKED,
-    REPOSITORY_CANNOT_FORK,
-    REPOSITORY_CLOSED_ONBOARDING,
-    REPOSITORY_DISABLED,
-    REPOSITORY_DISABLED_BY_CONFIG,
-    REPOSITORY_EMPTY,
-    REPOSITORY_FORK_MISSING,
-    REPOSITORY_FORK_MODE_FORKED,
-    REPOSITORY_FORKED,
-    REPOSITORY_MIRRORED,
-    REPOSITORY_NOT_FOUND,
-    REPOSITORY_NO_CONFIG,
-    REPOSITORY_NO_PACKAGE_FILES,
-    REPOSITORY_RENAMED,
-    REPOSITORY_UNINITIATED,
-  ];
   const enabledStatuses = [
     CONFIG_SECRETS_EXPOSED,
     CONFIG_VALIDATION,
@@ -70,7 +63,7 @@ export function processResult(
   let enabled: boolean | undefined;
   let onboarded: boolean | undefined;
   // istanbul ignore next
-  if (disabledStatuses.includes(res)) {
+  if (RepositoryErrors.includes(res as (typeof RepositoryErrors)[number])) {
     status = 'disabled';
     enabled = false;
   } else if (config.repoIsActivated) {

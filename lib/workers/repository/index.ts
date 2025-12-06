@@ -42,7 +42,7 @@ import { OnboardingState } from './onboarding/common';
 import { ensureOnboardingPr } from './onboarding/pr';
 import { extractDependencies, updateRepo } from './process';
 import type { ExtractResult } from './process/extract-update';
-import type { ProcessResult } from './result';
+import type { ProcessResult, RepositoryResult } from './result';
 import { processResult } from './result';
 
 // istanbul ignore next
@@ -60,7 +60,7 @@ export async function renovateRepository(
       localDir: string;
       errorRes?: string;
     }> => {
-      let errorRes: string | undefined;
+      let errorRes: RepositoryResult | undefined;
       let config = GlobalConfig.set(
         applySecretsAndVariablesToConfig({
           config: repoConfig,
