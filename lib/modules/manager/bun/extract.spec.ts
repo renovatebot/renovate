@@ -215,4 +215,136 @@ describe('modules/manager/bun/extract', () => {
       ]);
     });
   });
+
+  describe('bunfig.toml registry support', () => {
+    it('applies default registry from bunfig.toml', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'test',
+          version: '0.0.1',
+          dependencies: { lodash: '1.0.0' },
+        }),
+      );
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce(
+        'bunfig.toml',
+      );
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(`
+[install]
+registry = "https://registry.example.com"
+`);
+
+      const packageFiles = await extractAllPackageFiles({}, ['bun.lock']);
+
+      expect(packageFiles[0].deps[0].registryUrls).toEqual([
+        'https://registry.example.com',
+      ]);
+    });
+
+    it('applies scoped registry from bunfig.toml', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'test',
+          version: '0.0.1',
+          dependencies: {
+            lodash: '1.0.0',
+            '@myorg/utils': '2.0.0',
+          },
+        }),
+      );
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce(
+        'bunfig.toml',
+      );
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(`
+[install]
+registry = "https://registry.example.com"
+
+[install.scopes]
+myorg = "https://registry.myorg.com"
+`);
+
+      const packageFiles = await extractAllPackageFiles({}, ['bun.lock']);
+
+      const lodashDep = packageFiles[0].deps.find(
+        (d) => d.depName === 'lodash',
+      );
+      const myorgDep = packageFiles[0].deps.find(
+        (d) => d.depName === '@myorg/utils',
+      );
+
+      expect(lodashDep?.registryUrls).toEqual(['https://registry.example.com']);
+      expect(myorgDep?.registryUrls).toEqual(['https://registry.myorg.com']);
+    });
+
+    it('handles missing bunfig.toml gracefully', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'test',
+          version: '0.0.1',
+          dependencies: { lodash: '1.0.0' },
+        }),
+      );
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce(null);
+
+      const packageFiles = await extractAllPackageFiles({}, ['bun.lock']);
+
+      expect(packageFiles[0].deps[0].registryUrls).toBeUndefined();
+    });
+
+    it('applies bunfig.toml registry to workspace packages', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.readLocalFile)
+        // Root package.json with workspaces
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'root',
+            version: '1.0.0',
+            workspaces: ['packages/*'],
+            dependencies: { lodash: '1.0.0' },
+          }),
+        );
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce(
+        'bunfig.toml',
+      );
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(`
+[install]
+registry = "https://registry.example.com"
+`);
+      vi.mocked(fs.getParentDir).mockReturnValueOnce('');
+      // Workspace package.json
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'pkg1',
+          version: '1.0.0',
+          dependencies: { axios: '2.0.0' },
+        }),
+      );
+
+      const matchedFiles = [
+        'bun.lock',
+        'package.json',
+        'packages/pkg1/package.json',
+      ];
+
+      const packageFiles = await extractAllPackageFiles({}, matchedFiles);
+
+      // Root package should have registry applied
+      const rootPkg = packageFiles.find(
+        (p) => p.packageFile === 'package.json',
+      );
+      expect(rootPkg?.deps[0].registryUrls).toEqual([
+        'https://registry.example.com',
+      ]);
+
+      // Workspace package should also have registry applied
+      const workspacePkg = packageFiles.find(
+        (p) => p.packageFile === 'packages/pkg1/package.json',
+      );
+      expect(workspacePkg?.deps[0].registryUrls).toEqual([
+        'https://registry.example.com',
+      ]);
+    });
+  });
 });
