@@ -103,8 +103,9 @@ export interface PlatformPrOptions {
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
+  azureBypassPolicyTypes?: string[];
+  azureBypassPolicyReason?: string;
 }
-
 export interface CreatePRConfig {
   sourceBranch: string;
   targetBranch: string;
@@ -177,6 +178,7 @@ export interface MergePRConfig {
   branchName?: string;
   id: number;
   strategy?: MergeStrategy;
+  platformOptions?: PlatformPrOptions;
 }
 export interface EnsureCommentConfig {
   number: number;
