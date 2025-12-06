@@ -766,6 +766,12 @@ Set to `null` (not recommended) to fully omit `--ignore-platform-reqs/--ignore-p
 This requires the Renovate image to be fully compatible with your Composer platform requirements in order for the Composer invocation to succeed, otherwise Renovate will fail to create the updated lock file.
 The Composer output should inform you about the reasons the update failed.
 
+## composerMinimalChanges
+
+If set to `true`, it is the equivalent of passing the `--minimal-changes` option to `update`, `require` or `remove` Composer commands.
+
+With this flag Composer will only perform absolutely necessary changes to dependencies. If packages cannot be kept at their currently locked version they are updated. For partial updates the allow-listed packages are always updated fully.
+
 ## confidential
 
 If enabled, all issues created by Renovate are set as confidential, even in a public repository.

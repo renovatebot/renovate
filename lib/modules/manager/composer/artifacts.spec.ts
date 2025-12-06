@@ -23,6 +23,7 @@ const datasource = vi.mocked(_datasource);
 
 const config: UpdateArtifactsConfig = {
   composerIgnorePlatformReqs: [],
+  composerMinimalChanges: false,
   ignoreScripts: false,
 };
 

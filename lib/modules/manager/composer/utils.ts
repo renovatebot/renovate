@@ -37,6 +37,14 @@ export function getComposerArguments(
     }
   }
 
+  if (
+    config.composerMinimalChanges &&
+    isString(toolConstraint.constraint) &&
+    api.intersects!(toolConstraint.constraint, '>=2.7')
+  ) {
+    args += ' --minimal-changes';
+  }
+
   args += ' --no-ansi --no-interaction';
   if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
     args += ' --no-scripts --no-autoloader';
@@ -44,22 +52,6 @@ export function getComposerArguments(
 
   if (!GlobalConfig.get('allowPlugins') || config.ignorePlugins) {
     args += ' --no-plugins';
-  }
-
-  return args;
-}
-
-export function getComposerUpdateArguments(
-  config: UpdateArtifactsConfig,
-  toolConstraint: ToolConstraint,
-): string {
-  let args = getComposerArguments(config, toolConstraint);
-
-  if (
-    isString(toolConstraint.constraint) &&
-    api.intersects!(toolConstraint.constraint, '>=2.7')
-  ) {
-    args += ' --minimal-changes';
   }
 
   return args;
