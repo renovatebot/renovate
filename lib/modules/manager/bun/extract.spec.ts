@@ -293,6 +293,26 @@ myorg = "https://registry.myorg.com"
       expect(packageFiles[0].deps[0].registryUrls).toBeUndefined();
     });
 
+    it('handles empty bunfig.toml file gracefully', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'test',
+          version: '0.0.1',
+          dependencies: { lodash: '1.0.0' },
+        }),
+      );
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce(
+        'bunfig.toml',
+      );
+      // bunfig.toml exists but is empty/null
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(null);
+
+      const packageFiles = await extractAllPackageFiles({}, ['bun.lock']);
+
+      expect(packageFiles[0].deps[0].registryUrls).toBeUndefined();
+    });
+
     it('applies bunfig.toml registry to workspace packages', async () => {
       vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
       vi.mocked(fs.readLocalFile)
@@ -345,6 +365,29 @@ registry = "https://registry.example.com"
       expect(workspacePkg?.deps[0].registryUrls).toEqual([
         'https://registry.example.com',
       ]);
+    });
+
+    it('handles invalid bunfig.toml schema gracefully', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'test',
+          version: '0.0.1',
+          dependencies: { lodash: '1.0.0' },
+        }),
+      );
+      vi.mocked(fs.findLocalSiblingOrParent).mockResolvedValueOnce(
+        'bunfig.toml',
+      );
+      // Valid TOML but invalid schema (registry should be string or object with url)
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(`
+[install]
+registry = 123
+`);
+
+      const packageFiles = await extractAllPackageFiles({}, ['bun.lock']);
+
+      expect(packageFiles[0].deps[0].registryUrls).toBeUndefined();
     });
   });
 });

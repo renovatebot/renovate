@@ -10,6 +10,15 @@ describe('modules/manager/bun/bunfig', () => {
       expect(parseBunfigToml('')).toEqual({});
     });
 
+    it('returns null for valid TOML with invalid schema', () => {
+      // Valid TOML but registry is not a string or valid object
+      const toml = `
+[install]
+registry = 123
+`;
+      expect(parseBunfigToml(toml)).toBeNull();
+    });
+
     it('parses simple string registry', () => {
       const toml = `
 [install]
