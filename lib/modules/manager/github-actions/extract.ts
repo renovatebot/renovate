@@ -20,7 +20,7 @@ import { CommunityActions } from './community';
 import type { Steps } from './schema';
 import { Workflow } from './schema';
 
-const dockerActionRe = regEx(/^\s+uses\s*: ['"]?docker:\/\/([^'"]+)\s*$/);
+const dockerActionRe = regEx(/^\s+uses\s*: ['"]?docker:\/\/([^'"\s]+)/);
 const actionRe = regEx(
   /^\s+-?\s+?uses\s*: (?<replaceString>['"]?(?<depName>(?<registryUrl>https:\/\/[.\w-]+\/)?(?<packageName>[\w-]+\/[.\w-]+))(?<path>\/.*)?@(?<currentValue>[^\s'"]+)['"]?(?:(?<commentWhiteSpaces>\s+)#\s*(((?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+\/[.\w-]+)?)@?(?<tag>([\w-]*[-/])?v?\d+(?:\.\d+(?:\.\d+)?)?)|(?:ratchet:exclude)))?)/,
 );

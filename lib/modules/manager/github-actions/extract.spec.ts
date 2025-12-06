@@ -188,6 +188,13 @@ describe('modules/manager/github-actions/extract', () => {
           versioning: 'docker',
         },
         {
+          currentValue: '1.37.0-glibc',
+          datasource: 'docker',
+          depName: 'busybox',
+          depType: 'docker',
+          replaceString: 'busybox:1.37.0-glibc',
+        },
+        {
           currentValue: 'latest',
           datasource: 'github-runners',
           depName: 'ubuntu',
