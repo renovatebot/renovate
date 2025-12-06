@@ -101,6 +101,7 @@ export interface PlatformPrOptions {
   bbUseDefaultReviewers?: boolean;
   bbAutoResolvePrTasks?: boolean;
   gitLabIgnoreApprovals?: boolean;
+  gitLabNotesMerge?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
 }
