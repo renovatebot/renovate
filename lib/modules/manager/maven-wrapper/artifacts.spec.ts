@@ -5,6 +5,10 @@ import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import { resetPrefetchedImages } from '../../../util/exec/docker';
+import {
+  add as addHostRules,
+  clear as clearHostRules,
+} from '../../../util/host-rules';
 import { getPkgReleases } from '../../datasource';
 import { updateArtifacts } from '.';
 import { envMock, mockExecAll } from '~test/exec-util';
@@ -473,5 +477,195 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
 
     expect(execSnapshots[0].options!.env).not.toHaveProperty('MVNW_REPOURL');
     expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
+  });
+
+  describe('private package support', () => {
+    it('should set MVNW_USERNAME and MVNW_PASSWORD when hostRules are configured', async () => {
+      clearHostRules();
+      addHostRules({
+        hostType: 'maven',
+        matchHost: 'private-registry.example.com',
+        username: 'test-user',
+        password: 'test-password',
+      });
+
+      const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+      mockMavenFileChangedInGit();
+
+      await updateArtifacts({
+        packageFileName: 'maven-wrapper',
+        newPackageFileContent: '',
+        updatedDeps: [
+          {
+            depName: 'maven-wrapper',
+            replaceString:
+              'https://private-registry.example.com/maven2/org/apache/maven/wrapper/maven-wrapper/3.0.0/maven-wrapper-3.0.0.jar',
+          },
+        ],
+        config: {
+          currentValue: '3.0.0',
+          newValue: '3.3.1',
+        },
+      });
+
+      // Verify environment variables are set
+      expect(execSnapshots[0].options!.env).toHaveProperty(
+        'MVNW_USERNAME',
+        'test-user',
+      );
+      expect(execSnapshots[0].options!.env).toHaveProperty(
+        'MVNW_PASSWORD',
+        'test-password',
+      );
+      expect(execSnapshots[0].options!.env).toHaveProperty(
+        'MVNW_REPOURL',
+        'https://private-registry.example.com/maven2',
+      );
+
+      // Verify command is still just wrapper:wrapper
+      expect(execSnapshots[0].cmd).toBe('./mvnw wrapper:wrapper');
+
+      clearHostRules();
+    });
+
+    it('should not set MVNW_USERNAME and MVNW_PASSWORD when no credentials are configured', async () => {
+      clearHostRules();
+
+      const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+      mockMavenFileChangedInGit();
+
+      await updateArtifacts({
+        packageFileName: 'maven-wrapper',
+        newPackageFileContent: '',
+        updatedDeps: [
+          {
+            depName: 'maven-wrapper',
+            replaceString:
+              'https://public-registry.example.com/maven2/org/apache/maven/wrapper/maven-wrapper/3.0.0/maven-wrapper-3.0.0.jar',
+          },
+        ],
+        config: {
+          currentValue: '3.0.0',
+          newValue: '3.3.1',
+        },
+      });
+
+      // Verify environment variables are not set
+      expect(execSnapshots[0].options!.env).not.toHaveProperty('MVNW_USERNAME');
+      expect(execSnapshots[0].options!.env).not.toHaveProperty('MVNW_PASSWORD');
+
+      // Verify command is just wrapper:wrapper
+      expect(execSnapshots[0].cmd).toBe('./mvnw wrapper:wrapper');
+    });
+
+    it('should set credentials with custom repository URL', async () => {
+      clearHostRules();
+      addHostRules({
+        hostType: 'maven',
+        matchHost: 'internal.local',
+        username: 'internal-user',
+        password: 'internal-password',
+      });
+
+      const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+      mockMavenFileChangedInGit();
+
+      await updateArtifacts({
+        packageFileName: 'maven-wrapper',
+        newPackageFileContent: '',
+        updatedDeps: [
+          {
+            depName: 'maven-wrapper',
+            replaceString:
+              'https://internal.local/maven-public/org/apache/maven/wrapper/maven-wrapper/3.0.0/maven-wrapper-3.0.0.jar',
+          },
+        ],
+        config: { currentValue: '3.0.0', newValue: '3.3.1' },
+      });
+
+      // Verify both credentials and MVNW_REPOURL are set
+      expect(execSnapshots[0].options!.env).toHaveProperty(
+        'MVNW_USERNAME',
+        'internal-user',
+      );
+      expect(execSnapshots[0].options!.env).toHaveProperty(
+        'MVNW_PASSWORD',
+        'internal-password',
+      );
+      expect(execSnapshots[0].options!.env).toHaveProperty(
+        'MVNW_REPOURL',
+        'https://internal.local/maven-public',
+      );
+
+      clearHostRules();
+    });
+
+    it('should not set credentials when only username is configured', async () => {
+      clearHostRules();
+      addHostRules({
+        hostType: 'maven',
+        matchHost: 'private-registry.example.com',
+        username: 'test-user',
+      });
+
+      const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+      mockMavenFileChangedInGit();
+
+      await updateArtifacts({
+        packageFileName: 'maven-wrapper',
+        newPackageFileContent: '',
+        updatedDeps: [
+          {
+            depName: 'maven-wrapper',
+            replaceString:
+              'https://private-registry.example.com/maven2/org/apache/maven/wrapper/maven-wrapper/3.0.0/maven-wrapper-3.0.0.jar',
+          },
+        ],
+        config: {
+          currentValue: '3.0.0',
+          newValue: '3.3.1',
+        },
+      });
+
+      // Verify credentials are not set when only username is present
+      expect(execSnapshots[0].options!.env).not.toHaveProperty('MVNW_USERNAME');
+      expect(execSnapshots[0].options!.env).not.toHaveProperty('MVNW_PASSWORD');
+
+      clearHostRules();
+    });
+
+    it('should not set credentials when only password is configured', async () => {
+      clearHostRules();
+      addHostRules({
+        hostType: 'maven',
+        matchHost: 'private-registry.example.com',
+        password: 'test-password',
+      });
+
+      const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+      mockMavenFileChangedInGit();
+
+      await updateArtifacts({
+        packageFileName: 'maven-wrapper',
+        newPackageFileContent: '',
+        updatedDeps: [
+          {
+            depName: 'maven-wrapper',
+            replaceString:
+              'https://private-registry.example.com/maven2/org/apache/maven/wrapper/maven-wrapper/3.0.0/maven-wrapper-3.0.0.jar',
+          },
+        ],
+        config: {
+          currentValue: '3.0.0',
+          newValue: '3.3.1',
+        },
+      });
+
+      // Verify credentials are not set when only password is present
+      expect(execSnapshots[0].options!.env).not.toHaveProperty('MVNW_PASSWORD');
+      expect(execSnapshots[0].options!.env).not.toHaveProperty('MVNW_USERNAME');
+
+      clearHostRules();
+    });
   });
 });
