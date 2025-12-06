@@ -2601,6 +2601,7 @@ Supported lock files:
 | `poetry`          | `poetry.lock`                                      |
 | `pub`             | `pubspec.lock`                                     |
 | `terraform`       | `.terraform.lock.hcl`                              |
+| `uv`              | `uv.lock`                                          |
 
 Support for new lock files may be added via feature request.
 
