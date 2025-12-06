@@ -193,6 +193,7 @@ export async function updateArtifacts({
           ? ' --with-all-dependencies'
           : ' --with-dependencies');
     }
+    args += getComposerArguments(config, composerToolConstraint);
     logger.trace({ cmd, args }, 'composer command');
     commands.push(`${cmd} ${args}`);
 
