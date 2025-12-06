@@ -70,6 +70,7 @@ export interface HttpOptions {
 
 export interface HttpHeaders extends IncomingHttpHeaders {
   link?: string | undefined;
+  'x-ms-continuationtoken'?: string | undefined;
 }
 
 export type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
