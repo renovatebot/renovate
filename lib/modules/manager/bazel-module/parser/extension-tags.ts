@@ -3,6 +3,7 @@ import { regEx } from '../../../../util/regex';
 import { kvParams } from './common';
 import type { Ctx } from './context';
 
+import { imgExtensionPrefix, imgExtensionTags } from './img';
 import { mavenExtensionPrefix, mavenExtensionTags } from './maven';
 import { ociExtensionPrefix, ociExtensionTags } from './oci';
 
@@ -20,10 +21,14 @@ import { ociExtensionPrefix, ociExtensionTags } from './oci';
 // by assuming the extension names start with well-known prefixes.
 
 const supportedExtensionRegex = regEx(
-  `^(${ociExtensionPrefix}|${mavenExtensionPrefix}).*$`,
+  `^(${ociExtensionPrefix}|${mavenExtensionPrefix}|${imgExtensionPrefix}).*$`,
 );
 
-const supportedExtensionTags = [...mavenExtensionTags, ...ociExtensionTags];
+const supportedExtensionTags = [
+  ...mavenExtensionTags,
+  ...ociExtensionTags,
+  ...imgExtensionTags,
+];
 
 const supportedExtensionTagsRegex = regEx(
   `^(${supportedExtensionTags.join('|')})$`,
