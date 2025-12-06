@@ -2,6 +2,7 @@ import type { RenovateConfig } from '../../../config/types';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
+  REPOSITORY_NO_CONFIG,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { RepoParams, RepoResult } from '../../../modules/platform';
@@ -28,6 +29,19 @@ async function validateOptimizeForDisabled(
     const renovateConfig = await getJsonFile(getDefaultConfigFileName(config));
     if (renovateConfig?.enabled === false) {
       throw new Error(REPOSITORY_DISABLED_BY_CONFIG);
+    }
+    // If config file is missing, onboarding is disabled, and config is required,
+    // skip the repo early without cloning
+    if (
+      !renovateConfig &&
+      config.onboarding === false &&
+      config.requireConfig !== 'optional' &&
+      config.requireConfig !== 'ignored'
+    ) {
+      logger.debug(
+        'Repository has no config and onboarding is disabled - skipping',
+      );
+      throw new Error(REPOSITORY_NO_CONFIG);
     }
     /*
      * The following is to support a use case within Mend customers where:
