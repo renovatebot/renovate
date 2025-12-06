@@ -2,6 +2,7 @@ import { getConfig } from '../../../config/defaults';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_FORKED,
+  REPOSITORY_NO_CONFIG,
 } from '../../../constants/error-messages';
 import { initApis } from './apis';
 import { platform } from '~test/util';
@@ -219,6 +220,86 @@ describe('workers/repository/init/apis', () => {
           extends: [':disableRenovate'],
         }),
       ).rejects.toThrow(REPOSITORY_DISABLED);
+    });
+
+    it('skips without cloning when config is missing and onboarding is disabled', async () => {
+      platform.initRepo.mockResolvedValueOnce({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: '123',
+      });
+      platform.getJsonFile.mockResolvedValueOnce(null);
+      await expect(
+        initApis({
+          ...config,
+          optimizeForDisabled: true,
+          onboarding: false,
+        }),
+      ).rejects.toThrow(REPOSITORY_NO_CONFIG);
+    });
+
+    it('skips without cloning when config is missing, onboarding is disabled, and requireConfig is required', async () => {
+      platform.initRepo.mockResolvedValueOnce({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: '123',
+      });
+      platform.getJsonFile.mockResolvedValueOnce(null);
+      await expect(
+        initApis({
+          ...config,
+          optimizeForDisabled: true,
+          onboarding: false,
+          requireConfig: 'required',
+        }),
+      ).rejects.toThrow(REPOSITORY_NO_CONFIG);
+    });
+
+    it('continues when config is missing, onboarding is disabled, but requireConfig is optional', async () => {
+      platform.initRepo.mockResolvedValueOnce({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: '123',
+      });
+      platform.getJsonFile.mockResolvedValueOnce(null);
+      const workerPlatformConfig = await initApis({
+        ...config,
+        optimizeForDisabled: true,
+        onboarding: false,
+        requireConfig: 'optional',
+      });
+      expect(workerPlatformConfig).toBeTruthy();
+    });
+
+    it('continues when config is missing, onboarding is disabled, but requireConfig is ignored', async () => {
+      platform.initRepo.mockResolvedValueOnce({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: '123',
+      });
+      platform.getJsonFile.mockResolvedValueOnce(null);
+      const workerPlatformConfig = await initApis({
+        ...config,
+        optimizeForDisabled: true,
+        onboarding: false,
+        requireConfig: 'ignored',
+      });
+      expect(workerPlatformConfig).toBeTruthy();
+    });
+
+    it('continues when config exists even with onboarding disabled', async () => {
+      platform.initRepo.mockResolvedValueOnce({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: '123',
+      });
+      platform.getJsonFile.mockResolvedValueOnce({ extends: ['config:base'] });
+      const workerPlatformConfig = await initApis({
+        ...config,
+        optimizeForDisabled: true,
+        onboarding: false,
+      });
+      expect(workerPlatformConfig).toBeTruthy();
     });
   });
 });

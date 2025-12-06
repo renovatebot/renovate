@@ -1095,6 +1095,10 @@ In that case, Renovate searches the repository config file for any of these conf
 If Renovate finds any of the above configurations, it continues initializing the repository.
 If not, then Renovate skips the repository without cloning it.
 
+A third use case is when `onboarding` is set to `false` and `requireConfig` is not `"optional"` or `"ignored"`.
+In this scenario, if the config file is missing, Renovate will skip the repository without cloning it.
+This is useful for large organizations with many repositories where only some have Renovate enabled.
+
 ## password
 
 ## persistRepoData
