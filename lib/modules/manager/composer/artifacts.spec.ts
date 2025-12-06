@@ -993,7 +993,6 @@ describe('modules/manager/composer/artifacts', () => {
         config: {
           ...config,
           composerIgnorePlatformReqs: undefined,
-          composerMinimalChanges: false,
         },
       }),
     ).toEqual([
@@ -1029,7 +1028,6 @@ describe('modules/manager/composer/artifacts', () => {
         config: {
           ...config,
           composerIgnorePlatformReqs: ['ext-posix', 'ext-sodium'],
-          composerMinimalChanges: true,
         },
       }),
     ).toEqual([
@@ -1043,7 +1041,7 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'composer update --with-dependencies --ignore-platform-req ext-posix --ignore-platform-req ext-sodium --minimal-changes --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        cmd: 'composer update --with-dependencies --ignore-platform-req ext-posix --ignore-platform-req ext-sodium --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
