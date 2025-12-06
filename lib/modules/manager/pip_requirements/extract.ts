@@ -24,7 +24,7 @@ const specifierPartPattern = `\\s*${rangePattern.replace(
   '?:',
 )}`;
 const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
-export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
+export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})?`;
 
 export function extractPackageFile(
   content: string,
