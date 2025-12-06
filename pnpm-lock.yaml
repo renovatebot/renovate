@@ -630,8 +630,8 @@ importers:
         version: 3.1.0(typescript@5.9.3)(vitest@4.0.14(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(esbuild@0.27.0)(tsx@4.20.6)(yaml@2.8.1))
     optionalDependencies:
       better-sqlite3:
-        specifier: 12.4.6
-        version: 12.4.6
+        specifier: 12.5.0
+        version: 12.5.0
       openpgp:
         specifier: 6.2.2
         version: 6.2.2
@@ -2753,8 +2753,8 @@ packages:
   before-after-hook@4.0.0:
     resolution: {integrity: sha512-q6tR3RPqIB1pMiTRMFcZwuG5T8vwp+vUvEG0vuI6B+Rikh5BfPp2fQ82c925FOs+b0lcFQ8CFrL+KbilfZFhOQ==}
 
-  better-sqlite3@12.4.6:
-    resolution: {integrity: sha512-gaYt9yqTbQ1iOxLpJA8FPR5PiaHP+jlg8I5EX0Rs2KFwNzhBsF40KzMZS5FwelY7RG0wzaucWdqSAJM3uNCPCg==}
+  better-sqlite3@12.5.0:
+    resolution: {integrity: sha512-WwCZ/5Diz7rsF29o27o0Gcc1Du+l7Zsv7SYtVPG0X3G/uUI1LqdxrQI7c9Hs2FWpqXXERjW9hp6g3/tH7DlVKg==}
     engines: {node: 20.x || 22.x || 23.x || 24.x || 25.x}
 
   bignumber.js@9.3.1:
@@ -9617,7 +9617,7 @@ snapshots:
 
   before-after-hook@4.0.0: {}
 
-  better-sqlite3@12.4.6:
+  better-sqlite3@12.5.0:
     dependencies:
       bindings: 1.5.0
       prebuild-install: 7.1.3
