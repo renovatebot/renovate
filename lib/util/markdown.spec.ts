@@ -31,14 +31,20 @@ describe('util/markdown', () => {
     ` + '\n';
 
     it('works', async () => {
-      const res = await linkify(before, { repository: 'some/repo' });
+      const res = await linkify('https://github.com/', 'some/repo', before);
+      expect(res).toEqual(after);
+    });
+
+    it('works with base url without trailing slash', async () => {
+      const res = await linkify('https://github.com', 'some/repo', before);
       expect(res).toEqual(after);
     });
 
     it('works with gitlab', async () => {
       const res = await linkify(
+        'https://company.gitlab.local',
+        'some/repo',
         `(https://company.gitlab.local/shared/scanner/-/merge_requests/1177)`,
-        { repository: 'some/repo' },
       );
       expect(res.toString()).toEqual(
         `(<https://company.gitlab.local/shared/scanner/-/merge_requests/1177>)\n`,
