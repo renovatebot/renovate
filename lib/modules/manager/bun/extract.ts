@@ -5,17 +5,43 @@ import {
   getSiblingFileName,
   readLocalFile,
 } from '../../../util/fs';
+import { NpmDatasource } from '../../datasource/npm';
 
 import { extractPackageJson } from '../npm/extract/common/package-file';
 import type { NpmPackage } from '../npm/extract/types';
 import type { NpmManagerData } from '../npm/types';
 import type { ExtractConfig, PackageFile } from '../types';
+import {
+  type BunfigConfig,
+  loadBunfigToml,
+  resolveRegistryUrl,
+} from './bunfig';
 import { filesMatchingWorkspaces } from './utils';
 
 function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
   return (
     fileNameWithPath === fileName || fileNameWithPath.endsWith(`/${fileName}`)
   );
+}
+
+/**
+ * Applies registry URLs from bunfig.toml to dependencies.
+ */
+function applyRegistryUrls(
+  packageFile: PackageFile,
+  bunfigConfig: BunfigConfig,
+): void {
+  for (const dep of packageFile.deps) {
+    if (dep.depName && dep.datasource === NpmDatasource.id) {
+      const registryUrl = resolveRegistryUrl(
+        dep.packageName ?? dep.depName,
+        bunfigConfig,
+      );
+      if (registryUrl) {
+        dep.registryUrls = [registryUrl];
+      }
+    }
+  }
 }
 
 export async function processPackageFile(
@@ -65,6 +91,15 @@ export async function extractAllPackageFiles(
     if (res) {
       packageFiles.push({ ...res, lockFiles: [lockFile] });
     }
+
+    // Load bunfig.toml for registry configuration
+    const bunfigConfig = await loadBunfigToml(packageFile);
+
+    // Apply registry URLs from bunfig.toml if present
+    if (bunfigConfig && res) {
+      applyRegistryUrls(res, bunfigConfig);
+    }
+
     // Check if package.json contains workspaces
     const workspaces = res?.managerData?.workspaces;
 
@@ -84,6 +119,10 @@ export async function extractAllPackageFiles(
       for (const workspaceFile of workspacePackageFiles) {
         const res = await processPackageFile(workspaceFile);
         if (res) {
+          // Apply registry URLs from root bunfig.toml to workspace packages
+          if (bunfigConfig) {
+            applyRegistryUrls(res, bunfigConfig);
+          }
           packageFiles.push({ ...res, lockFiles: [lockFile] });
         }
       }
