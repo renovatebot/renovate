@@ -136,10 +136,10 @@ export async function updateArtifacts(
 
     if (upgrade.depType === 'http_file' || upgrade.depType === 'http_archive') {
       const rule = findCodeFragment(newContents, [idx]);
-      /* v8 ignore start -- used only for type narrowing */
+      /* v8 ignore next -- used only for type narrowing */
       if (rule?.type !== 'record') {
         continue;
-      } /* v8 ignore stop */
+      }
 
       const urlFragments = getUrlFragments(rule);
       if (!urlFragments?.length) {

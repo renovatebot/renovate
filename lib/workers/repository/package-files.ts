@@ -34,7 +34,7 @@ export class PackageFiles {
   static getDashboardMarkdown(maxLength: number, setHeader = true): string {
     const note =
       '> ℹ **Note**\n> \n> Detected dependencies section has been truncated\n\n';
-    const title = `## Detected dependencies\n\n`;
+    const title = `## Detected Dependencies\n\n`;
 
     // exclude header length from the available space
     const maxHeaderLen = setHeader ? (title + note).length : 0;

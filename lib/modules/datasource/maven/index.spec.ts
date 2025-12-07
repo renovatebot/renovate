@@ -456,9 +456,12 @@ describe('modules/datasource/maven/index', () => {
       .reply(200, Fixtures.get('pom.xml'));
 
     googleAuth.mockImplementation(
-      vi.fn().mockImplementation(() => ({
-        getAccessToken: vi.fn().mockResolvedValue('some-token'),
-      })),
+      // TODO: fix typing
+      vi.fn<any>(
+        class {
+          getAccessToken = vi.fn().mockResolvedValue('some-token');
+        },
+      ),
     );
 
     const res = await get('org.example:package', baseUrlAR);
@@ -506,9 +509,12 @@ describe('modules/datasource/maven/index', () => {
       .reply(200, Fixtures.get('pom.xml'));
 
     googleAuth.mockImplementation(
-      vi.fn().mockImplementation(() => ({
-        getAccessToken: vi.fn().mockResolvedValue(undefined),
-      })),
+      // TODO: fix typing
+      vi.fn<any>(
+        class GoogleAuth {
+          getAccessToken = vi.fn();
+        },
+      ),
     );
 
     const res = await get('org.example:package', baseUrlAR);
