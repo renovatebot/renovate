@@ -342,7 +342,7 @@
     "lint-staged": "16.2.7",
     "markdownlint-cli2": "0.19.1",
     "markdownlint-cli2-formatter-template": "0.0.4",
-    "memfs": "4.51.0",
+    "memfs": "4.51.1",
     "nock": "14.0.10",
     "npm-run-all2": "8.0.4",
     "nyc": "17.1.0",
