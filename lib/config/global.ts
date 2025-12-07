@@ -12,6 +12,8 @@ export class GlobalConfig {
     'allowedUnsafeExecutions',
     'autodiscoverRepoOrder',
     'autodiscoverRepoSort',
+    'bbMendAppDashboardStatus',
+    'bbUseDevelopmentBranch',
     'binarySource',
     'cacheDir',
     'cacheHardTtlMinutes',
@@ -41,8 +43,6 @@ export class GlobalConfig {
     's3Endpoint',
     's3PathStyle',
     'userAgent',
-    'bbMendAppDashboardStatus',
-    'bbUseDevelopmentBranch',
   ];
 
   private static config: RepoGlobalConfig = {};
