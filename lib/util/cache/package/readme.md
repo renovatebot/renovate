@@ -322,9 +322,9 @@ The `cacheable` parameter **only controls persistence (L2)**.
 
 | `cacheable()` Result | `cachePrivatePackages` Config | L1 (Memory) | L2 (Disk/Redis) |
 | :------------------- | :---------------------------- | :---------- | :-------------- |
-| `true`               | `false`                       | ✅          | ✅              |
-| `false`              | `false`                       | ✅          | ❌              |
-| `false`              | `true`                        | ✅          | ✅              |
+| `true`               | `false`                       | Yes         | Yes             |
+| `false`              | `false`                       | Yes         | No              |
+| `false`              | `true`                        | Yes         | Yes             |
 
 ## TTL Strategy (Soft vs. Hard)
 
