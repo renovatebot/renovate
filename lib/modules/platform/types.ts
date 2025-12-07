@@ -47,8 +47,6 @@ export interface RepoParams {
   renovateUsername?: string;
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
-  bbMendAppDashboardStatus?: boolean;
-  bbUseDevelopmentBranch?: boolean;
 }
 
 export interface PrDebugData {

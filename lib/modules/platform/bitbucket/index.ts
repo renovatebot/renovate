@@ -194,8 +194,6 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   cloneSubmodulesFilter,
-  bbMendAppDashboardStatus,
-  bbUseDevelopmentBranch,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
@@ -217,6 +215,7 @@ export async function initRepo({
 
     mainBranch = info.mainbranch;
 
+    const bbUseDevelopmentBranch = GlobalConfig.get('bbUseDevelopmentBranch');
     if (bbUseDevelopmentBranch) {
       // Fetch Bitbucket development branch
       const developmentBranch = (
@@ -232,6 +231,9 @@ export async function initRepo({
 
     config.defaultBranch = mainBranch;
 
+    const bbMendAppDashboardStatus = GlobalConfig.get(
+      'bbMendAppDashboardStatus',
+    );
     if (bbMendAppDashboardStatus) {
       const statusName = 'Mend.io Dashboard';
 

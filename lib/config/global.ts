@@ -41,6 +41,8 @@ export class GlobalConfig {
     's3Endpoint',
     's3PathStyle',
     'userAgent',
+    'bbMendAppDashboardStatus',
+    'bbUseDevelopmentBranch',
   ];
 
   private static config: RepoGlobalConfig = {};

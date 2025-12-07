@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../config/global';
 import * as memCache from '../../../util/cache/memory';
 import { setBaseUrl } from '../../../util/http/bitbucket';
 import type { PlatformResult, RepoParams } from '../types';
@@ -34,6 +35,7 @@ describe('modules/platform/bitbucket/index', () => {
 
     setBaseUrl(baseUrl);
     memCache.init();
+    GlobalConfig.reset();
   });
 
   async function initRepoMock(
@@ -262,6 +264,8 @@ describe('modules/platform/bitbucket/index', () => {
 
   describe('bbMendAppDashboardStatus', () => {
     it('not enabled: should skip setting branch status for main branch', async () => {
+      GlobalConfig.set({ bbMendAppDashboardStatus: false });
+
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -274,7 +278,6 @@ describe('modules/platform/bitbucket/index', () => {
       expect(
         await bitbucket.initRepo({
           repository: 'some/repo',
-          bbMendAppDashboardStatus: false,
         }),
       ).toMatchObject({
         defaultBranch: 'main',
@@ -284,6 +287,8 @@ describe('modules/platform/bitbucket/index', () => {
     });
 
     it('enabled: should set main branch status if does not exist', async () => {
+      GlobalConfig.set({ bbMendAppDashboardStatus: true });
+
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -322,7 +327,6 @@ describe('modules/platform/bitbucket/index', () => {
       expect(
         await bitbucket.initRepo({
           repository: 'some/repo',
-          bbMendAppDashboardStatus: true,
         }),
       ).toMatchObject({
         defaultBranch: 'main',
@@ -336,6 +340,8 @@ describe('modules/platform/bitbucket/index', () => {
     });
 
     it('enabled: should skip creating main branch status if already exist', async () => {
+      GlobalConfig.set({ bbMendAppDashboardStatus: true });
+
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -366,7 +372,6 @@ describe('modules/platform/bitbucket/index', () => {
       expect(
         await bitbucket.initRepo({
           repository: 'some/repo',
-          bbMendAppDashboardStatus: true,
         }),
       ).toMatchObject({
         defaultBranch: 'main',
@@ -376,6 +381,8 @@ describe('modules/platform/bitbucket/index', () => {
     });
 
     it('enabled: should create status with correct URL format', async () => {
+      GlobalConfig.set({ bbMendAppDashboardStatus: true });
+
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/test/project')
@@ -411,7 +418,6 @@ describe('modules/platform/bitbucket/index', () => {
 
       const result = await bitbucket.initRepo({
         repository: 'test/project',
-        bbMendAppDashboardStatus: true,
       });
 
       expect(result).toMatchObject({
@@ -426,6 +432,8 @@ describe('modules/platform/bitbucket/index', () => {
     });
 
     it('enabled: should not create status when getBranchStatusCheck returns existing status', async () => {
+      GlobalConfig.set({ bbMendAppDashboardStatus: true });
+
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -455,7 +463,6 @@ describe('modules/platform/bitbucket/index', () => {
 
       const result = await bitbucket.initRepo({
         repository: 'some/repo',
-        bbMendAppDashboardStatus: true,
       });
 
       expect(result).toMatchObject({
@@ -473,6 +480,7 @@ describe('modules/platform/bitbucket/index', () => {
 
   describe('bbUseDevelopmentBranch', () => {
     it('not enabled: defaults to using main branch', async () => {
+      GlobalConfig.set({ bbUseDevelopmentBranch: false });
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -484,13 +492,13 @@ describe('modules/platform/bitbucket/index', () => {
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
-        bbUseDevelopmentBranch: false,
       });
 
       expect(res.defaultBranch).toBe('master');
     });
 
     it('enabled: uses development branch when development branch exists', async () => {
+      GlobalConfig.set({ bbUseDevelopmentBranch: true });
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -506,13 +514,13 @@ describe('modules/platform/bitbucket/index', () => {
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
-        bbUseDevelopmentBranch: true,
       });
 
       expect(res.defaultBranch).toBe('develop');
     });
 
     it('enabled: falls back to mainbranch if development branch does not exist', async () => {
+      GlobalConfig.set({ bbUseDevelopmentBranch: true });
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -528,7 +536,6 @@ describe('modules/platform/bitbucket/index', () => {
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
-        bbUseDevelopmentBranch: true,
       });
 
       expect(res.defaultBranch).toBe('master');
