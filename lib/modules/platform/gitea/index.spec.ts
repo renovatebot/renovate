@@ -1,4 +1,6 @@
 import type { EnsureIssueConfig, RepoParams } from '..';
+import { GlobalConfig } from '../../../config/global';
+import type { RepoGlobalConfig } from '../../../config/types';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -231,6 +233,7 @@ describe('modules/platform/gitea/index', () => {
   ];
 
   beforeEach(() => {
+    GlobalConfig.reset();
     gitea.resetPlatform();
     memCache.init();
     repoCache.resetCache();
@@ -254,12 +257,13 @@ describe('modules/platform/gitea/index', () => {
   async function initFakeRepo(
     scope: httpMock.Scope,
     repo?: Partial<Repo>,
-    config?: Partial<RepoParams>,
+    config?: RepoGlobalConfig,
   ): Promise<void> {
     const repoResult = { ...mockRepo, ...repo };
     const repository = repoResult.full_name;
     scope.get(`/repos/${repository}`).reply(200, repoResult);
-    await gitea.initRepo({ repository, ignorePrAuthor: true, ...config });
+    GlobalConfig.set({ ignorePrAuthor: true, ...config });
+    await gitea.initRepo({ repository });
   }
 
   describe('initPlatform()', () => {

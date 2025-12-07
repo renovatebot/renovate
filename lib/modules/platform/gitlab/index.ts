@@ -2,6 +2,7 @@ import { setTimeout } from 'timers/promises';
 import { isArray } from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
+import { GlobalConfig } from '../../../config/global';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -58,9 +59,9 @@ import {
 } from './http';
 import { getMR, updateMR } from './merge-request';
 import { GitlabPrCache } from './pr-cache';
+import type { GitLabMergeRequest } from './schema';
 import { LastPipelineId } from './schema';
 import type {
-  GitLabMergeRequest,
   GitlabComment,
   GitlabIssue,
   GitlabPr,
@@ -179,6 +180,8 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     with_merge_requests_enabled: true,
     min_access_level: 30,
     archived: false,
+    ...(config?.sort && { order_by: config.sort }),
+    ...(config?.order && { sort: config.order }),
   };
   if (config?.topics?.length) {
     queryParams.topic = config.topics.join(',');
@@ -262,16 +265,13 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   cloneSubmodulesFilter,
-  ignorePrAuthor,
   gitUrl,
-  endpoint,
-  includeMirrors,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
   config.cloneSubmodules = cloneSubmodules;
   config.cloneSubmodulesFilter = cloneSubmodulesFilter;
-  config.ignorePrAuthor = ignorePrAuthor;
+  config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
 
   let res: HttpResponse<RepoResponse>;
   try {
@@ -285,7 +285,7 @@ export async function initRepo({
       throw new Error(REPOSITORY_ARCHIVED);
     }
 
-    if (res.body.mirror && includeMirrors !== true) {
+    if (res.body.mirror && GlobalConfig.get('includeMirrors') !== true) {
       logger.debug(
         'Repository is a mirror - throwing error to abort renovation',
       );

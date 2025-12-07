@@ -1,5 +1,6 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types';
+import { instrument } from '../../../instrumentation';
 import { logger } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
 import type { PackageFile } from '../../../modules/manager/types';
@@ -141,7 +142,9 @@ export async function extract(
   const cache = getCache();
   cache.scan ??= {};
   const cachedExtract = cache.scan[baseBranch!];
-  const configHash = fingerprint(generateFingerprintConfig(config));
+  const configHash = instrument('fingerprint', () =>
+    fingerprint(generateFingerprintConfig(config)),
+  );
   // istanbul ignore if
   if (
     overwriteCache &&
@@ -161,8 +164,14 @@ export async function extract(
       logger.info({ err }, 'Error deleting cached dep updates');
     }
   } else {
-    await scm.checkoutBranch(baseBranch!);
-    const extractResult = (await extractAllDependencies(config)) || {};
+    await instrument(
+      'checkoutBranch',
+      async () => await scm.checkoutBranch(baseBranch!),
+    );
+    const extractResult = await instrument(
+      'extractAllDependencies',
+      async () => (await extractAllDependencies(config)) || {},
+    );
     packageFiles = extractResult.packageFiles;
     const { extractionFingerprints } = extractResult;
 

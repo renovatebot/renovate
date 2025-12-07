@@ -4,7 +4,7 @@ import * as memCache from '../../util/cache/memory';
 import { packageCache } from '../../util/cache/package';
 import { setCustomEnv } from '../../util/env';
 import { GlobalConfig } from '../global';
-import type { RenovateConfig } from '../types';
+import type { AllConfig } from '../types';
 import * as _github from './github';
 import * as _local from './local';
 import * as _npm from './npm';
@@ -33,7 +33,7 @@ const presetIkatyang = Fixtures.getJson('renovate-config-ikatyang.json');
 
 describe('config/presets/index', () => {
   describe('resolvePreset', () => {
-    let config: RenovateConfig;
+    let config: AllConfig;
 
     beforeEach(() => {
       config = {};
@@ -64,6 +64,7 @@ describe('config/presets/index', () => {
     });
 
     it('returns same if no presets', async () => {
+      // @ts-expect-error -- invalid config
       config.foo = 1;
       config.extends = [];
       const res = await presets.resolveConfigPresets(config);
@@ -87,6 +88,7 @@ describe('config/presets/index', () => {
     });
 
     it('throws if invalid preset file', async () => {
+      // @ts-expect-error -- invalid config
       config.foo = 1;
       config.extends = ['local>some/repo'];
 
@@ -107,6 +109,7 @@ describe('config/presets/index', () => {
     });
 
     it('throws if invalid preset', async () => {
+      // @ts-expect-error -- invalid config
       config.foo = 1;
       config.extends = ['wrongpreset:invalid-preset'];
       let e: Error | undefined;
@@ -124,6 +127,7 @@ describe('config/presets/index', () => {
     });
 
     it('throws if path + invalid syntax', async () => {
+      // @ts-expect-error -- invalid config
       config.foo = 1;
       config.extends = ['github>user/repo//'];
       let e: Error | undefined;
@@ -139,6 +143,7 @@ describe('config/presets/index', () => {
     });
 
     it('throws if path + sub-preset', async () => {
+      // @ts-expect-error -- invalid config
       config.foo = 1;
       config.extends = ['github>user/repo//path:subpreset'];
       let e: Error | undefined;
@@ -156,6 +161,7 @@ describe('config/presets/index', () => {
     });
 
     it('throws if invalid preset json', async () => {
+      // @ts-expect-error -- invalid config
       config.foo = 1;
       config.extends = ['org/repo'];
       let e: Error | undefined;
@@ -172,6 +178,7 @@ describe('config/presets/index', () => {
     });
 
     it('throws noconfig', async () => {
+      // @ts-expect-error -- invalid config
       config.foo = 1;
       config.extends = ['noconfig:recommended'];
       let e: Error | undefined;
@@ -189,6 +196,7 @@ describe('config/presets/index', () => {
     });
 
     it('throws throw', async () => {
+      // @ts-expect-error -- invalid config
       config.foo = 1;
       config.extends = ['throw:base'];
       let e: Error | undefined;
@@ -206,6 +214,7 @@ describe('config/presets/index', () => {
     });
 
     it('works with valid', async () => {
+      // @ts-expect-error -- invalid config
       config.foo = 1;
       config.ignoreDeps = [];
       config.extends = [':pinVersions'];
@@ -219,6 +228,7 @@ describe('config/presets/index', () => {
     });
 
     it('throws if valid and invalid', async () => {
+      // @ts-expect-error -- invalid config
       config.foo = 1;
       config.extends = ['wrongpreset:invalid-preset', ':pinVersions'];
       let e: Error | undefined;
@@ -268,6 +278,7 @@ describe('config/presets/index', () => {
       config.extends = ['packages:eslint'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
+      // @ts-expect-error -- partial config
       expect(res.matchPackageNames).toHaveLength(10);
     });
 
@@ -275,6 +286,7 @@ describe('config/presets/index', () => {
       config.extends = ['packages:linters'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
+      // @ts-expect-error -- partial config
       expect(res.matchPackageNames).toHaveLength(20);
     });
 
@@ -556,6 +568,9 @@ describe('config/presets/index', () => {
           'mergeConfidence:age-confidence-badges',
           'replacements:all',
           'workarounds:all',
+          'helpers:githubDigestChangelogs',
+          'helpers:goXPackagesChangelogLink',
+          'helpers:goXPackagesNameLink',
         ],
       });
     });
@@ -615,6 +630,7 @@ describe('config/presets/index', () => {
     it('gets linters', async () => {
       const res = await presets.getPreset('packages:linters', {});
       expect(res).toMatchSnapshot();
+      // @ts-expect-error -- partial config
       expect(res.matchPackageNames).toHaveLength(3);
       expect(res.extends).toHaveLength(5);
     });

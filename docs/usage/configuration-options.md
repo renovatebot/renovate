@@ -846,6 +846,10 @@ If you need to _override_ constraints that Renovate detects from the repository,
 
 <!-- prettier-ignore -->
 !!! note
+    When using [`binarySource=global`](./self-hosted-configuration.md#binarysource), the `constraints` options do not take effect.
+
+<!-- prettier-ignore -->
+!!! note
     Make sure not to mix this up with the term `compatibility`, which Renovate uses in the context of version releases, e.g. if a Docker image is `node:12.16.0-alpine` then the `-alpine` suffix represents `compatibility`.
 
 ## constraintsFiltering
@@ -1735,7 +1739,7 @@ Renovate can fetch changelogs when they are hosted on one of these platforms:
 - GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
 
-If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-changelogs) to allow Renovate to fetch changelogs notes from `github.com`.
+If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-changelogs-and-tools) to allow Renovate to fetch changelogs notes from `github.com`.
 
 <!-- prettier-ignore -->
 !!! note
@@ -4002,6 +4006,29 @@ You can configure this object to either:
 <!-- prettier-ignore -->
 !!! tip
     Columns must also be included in the `prBodyColumns` array in order to be used, so that's why it's included above in the example.
+
+## prBodyHeadingDefinitions
+
+You can configure this object to modify the table headers present in the PR body.
+This can include Markdown or any other syntax that the platform supports.
+
+```json title="Modifying the default value for the Package and Age table headers"
+{
+  "prBodyHeadingDefinitions": {
+    "Package": "📦 Package",
+    "Age": "[Age](https://docs.renovatebot.com/merge-confidence)"
+  },
+  "prBodyColumn": ["Package", "Age"]
+}
+```
+
+<!-- prettier-ignore -->
+!!! tip
+    Columns must also be included in the `prBodyColumns` array in order to be used, so that's why it's included above in the example.
+
+<!-- prettier-ignore -->
+!!! note
+    Templating is not supported for this option.
 
 ## prBodyNotes
 

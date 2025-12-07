@@ -1,4 +1,6 @@
 import type { EnsureIssueConfig, RepoParams } from '..';
+import { GlobalConfig } from '../../../config/global';
+import type { RepoGlobalConfig } from '../../../config/types';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -234,6 +236,7 @@ describe('modules/platform/forgejo/index', () => {
   ];
 
   beforeEach(() => {
+    GlobalConfig.reset();
     forgejo.resetPlatform();
     memCache.init();
     repoCache.resetCache();
@@ -257,7 +260,7 @@ describe('modules/platform/forgejo/index', () => {
   async function initFakeRepo(
     scope: httpMock.Scope,
     repo?: Partial<Repo>,
-    config?: Partial<RepoParams>,
+    config?: RepoGlobalConfig,
     orgCode = 200,
   ): Promise<void> {
     const repoResult = { ...mockRepo, ...repo };
@@ -267,7 +270,8 @@ describe('modules/platform/forgejo/index', () => {
       .reply(200, repoResult)
       .get(`/orgs/${repoResult.owner.username}`)
       .reply(orgCode, {});
-    await forgejo.initRepo({ repository, ignorePrAuthor: true, ...config });
+    GlobalConfig.set({ ignorePrAuthor: true, ...config });
+    await forgejo.initRepo({ repository });
   }
 
   describe('initPlatform()', () => {

@@ -1,5 +1,6 @@
 import URL from 'node:url';
 import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
+import { GlobalConfig } from '../../../config/global';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
@@ -193,7 +194,6 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   cloneSubmodulesFilter,
-  ignorePrAuthor,
   bbUseDevelopmentBranch,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
@@ -203,7 +203,7 @@ export async function initRepo({
   });
   config = {
     repository,
-    ignorePrAuthor,
+    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor', false),
   } as Config;
   let info: RepoInfo;
   let mainBranch: string;
@@ -545,6 +545,7 @@ export async function setBranchStatus({
 interface BbIssue {
   id: number;
   title: string;
+  kind: string;
   content?: { raw: string };
 }
 
@@ -602,6 +603,8 @@ async function closeIssue(issueNumber: number): Promise<void> {
 
 export function massageMarkdown(input: string): string {
   // Remove any HTML we use
+  // Bitbucket doesn't currently support collapsible syntax; https://jira.atlassian.com/browse/BCLOUD-20231
+  // See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
   return smartTruncate(input, maxBodyLength())
     .replace(
       'you tick the rebase/retry checkbox',
@@ -611,6 +614,11 @@ export function massageMarkdown(input: string): string {
       'checking the rebase/retry box above',
       'renaming the PR to start with "rebase!"',
     )
+    .replace(
+      regEx(/<summary>View abandoned dependencies(.*)<\/summary>/),
+      '## Abandoned Dependencies $1',
+    )
+    .replace(regEx(/(>[\s\S]+?)(## Abandoned Dependencies.*)/), '$2\n$1')
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?(details|blockquote)>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
@@ -637,6 +645,7 @@ export async function ensureIssue({
   try {
     let issues = await findOpenIssues(title);
     const description = massageMarkdown(sanitize(body));
+    const issueKind = 'task';
 
     if (!issues.length && reuseTitle) {
       issues = await findOpenIssues(reuseTitle);
@@ -650,13 +659,15 @@ export async function ensureIssue({
 
       if (
         issue.title !== title ||
-        String(issue.content?.raw).trim() !== description.trim()
+        String(issue.content?.raw).trim() !== description.trim() ||
+        issue.kind !== issueKind
       ) {
         logger.debug('Issue updated');
         await bitbucketHttp.putJson(
           `/2.0/repositories/${config.repository}/issues/${issue.id}`,
           {
             body: {
+              kind: issueKind,
               content: {
                 raw: readOnlyIssueBody(description),
                 markup: 'markdown',
@@ -673,6 +684,7 @@ export async function ensureIssue({
         {
           body: {
             title,
+            kind: issueKind,
             content: {
               raw: readOnlyIssueBody(description),
               markup: 'markdown',
