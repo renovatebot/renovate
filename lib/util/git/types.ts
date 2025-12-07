@@ -124,3 +124,73 @@ export interface AuthenticationRule {
   url: string;
   insteadOf: string;
 }
+
+export type GitOperationType =
+  /**
+   * The `git clone` sub-command.
+   */
+  | 'clone'
+  /**
+   * The `git reset` sub-command.
+   */
+  | 'reset'
+  /**
+   * The `git checkout` sub-command.
+   */
+  | 'checkout'
+  /**
+   * The `git fetch` sub-command.
+   */
+  | 'fetch'
+  /**
+   * The `git pull` sub-command.
+   */
+  | 'pull'
+  /**
+   * The `git push` sub-command.
+   */
+  | 'push'
+  /**
+   * The `git clean` sub-command.
+   */
+  | 'clean'
+  /**
+   * The `git merge` sub-command.
+   */
+  | 'merge'
+  /**
+   * The `git submodule` sub-command.
+   */
+  | 'submodule'
+  /**
+   * The `git commit` sub-command.
+   */
+  | 'commit'
+  /**
+   * The `git branch` sub-command.
+   */
+  | 'branch'
+  /**
+   * Any internal "plumbing" commands
+   *
+   * - `git update-index`
+   *
+   * See also: https://git-scm.com/book/en/v2/Git-Internals-Plumbing-and-Porcelain
+   */
+  | 'plumbing'
+  /**
+   * Any other operations i.e.
+   *
+   * - `git add`
+   * - `git branch`
+   * - `git config`
+   * - `git diff`
+   * - `git log`
+   * - `git ls-remote`
+   * - `git remote`
+   * - `git rev-parse`
+   * - `git status`
+   *
+   * See also: https://git-scm.com/book/en/v2/Git-Internals-Plumbing-and-Porcelain
+   */
+  | 'other';

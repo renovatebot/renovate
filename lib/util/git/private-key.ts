@@ -115,6 +115,7 @@ class SSHKey extends PrivateKey {
   protected async importKey(): Promise<string | undefined> {
     const keyFileName = upath.join(os.tmpdir() + '/git-private-ssh.key');
     await fs.outputFile(keyFileName, this.key.replace(/\n?$/, '\n'));
+    /* v8 ignore next -- not easily testable */
     process.on('exit', () => fs.rmSync(keyFileName, { force: true }));
     await fs.chmod(keyFileName, 0o600);
 
@@ -139,6 +140,7 @@ class SSHKey extends PrivateKey {
     const { stdout } = await exec(`ssh-keygen -y -f ${keyFileName}`);
     const pubFileName = `${keyFileName}.pub`;
     await fs.outputFile(pubFileName, stdout);
+    /* v8 ignore next -- not easily testable */
     process.on('exit', () => fs.rmSync(pubFileName, { force: true }));
     return keyFileName;
   }

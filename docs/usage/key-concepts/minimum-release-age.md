@@ -26,7 +26,6 @@ The following configuration options can be used to enable and tune the functiona
 - [`minimumReleaseAge`](../configuration-options.md#minimumreleaseage) (previously known as `stabilityDays`)
 - [`minimumReleaseAgeBehaviour`](../configuration-options.md#minimumreleaseagebehaviour)
 - [`internalChecksFilter`](../configuration-options.md#internalchecksfilter)
-- [`prCreation`](../configuration-options.md#prcreation)
 
 ## FAQs
 
@@ -54,12 +53,7 @@ As time goes on, if the 2 updates with a release timestamp are now passed the mi
 
 ### What happens when an update is not yet passing the minimum release age checks?
 
-For this question, consider two key aspects to Renovate updating a dependency:
-
-- the creation of the branch ([`internalChecksFilter`](../configuration-options.md#internalchecksfilter))
-- the creation of the PR ([`prCreation`](../configuration-options.md#prcreation))
-
-Based on the values of `internalChecksFilter` and `prCreation`, different behaviour will occur.
+Renovate will decide whether it will create a branch for a dependency update using [`internalChecksFilter`](../configuration-options.md#internalchecksfilter).
 
 #### `internalChecksFilter=strict`
 
@@ -79,32 +73,19 @@ DEBUG: Branch renovate/actions-checkout-5.x creation is disabled because interna
 
 In this case, no branch is created.
 
-<!-- prettier-ignore -->
-!!! warning
-    However, depending on the value of `prCreation`, the branch may still be created, even if it's pending status checks.
-
-#### `prCreation=immediate` (default)
-
-If you have not configured [`prCreation`](../configuration-options.md#prcreation), Renovate will use `prCreation=immediate` as the default.
-
-If an update is pending the minimum release age checks, Renovate will create a PR.
-When raising this PR, a `renovate/stability-days` status check will be added to the branch, marked as pending.
-
-Renovate will not perform automerge until that check has passed.
-
-If you do not wish Renovate to raise a PR until this status check has passed, you will want to set `prCreation=not-pending`, for instance using a package rule targeting the datasource you're enforcing this functionality on.
-
-#### `prCreation=not-pending`
-
-If an update is pending the minimum release age checks, Renovate will not create a branch, nor raise a PR.
-
 If you have a Dependency Dashboard enabled, it will be found in the Dependency Dashboard in the "Pending Status Checks".
 
 You can force the dependency update by requesting it via the Dependency Dashboard, or if you are self-hosting, you can use the [`checkedBranches`](../self-hosted-configuration.md#checkedbranches) to force the branch creation.
 
+<!-- prettier-ignore -->
+!!! note
+    A previous version of the documentation (up until Renovate 42.19.9) recommended configuring [`prCreation`](../configuration-options.md#prcreation). This is no longer the case.
+
+If no branch is created, Renovate will not raise a PR, regardless of [`prCreation`](../configuration-options.md#prcreation)'s settings.
+
 #### Recommended settings
 
-The recommendation is to set `internalChecksFilter=strict` and `prCreation=not-pending` when using `minimumReleaseAge`, so Renovate will create neither branches nor PRs on updates that haven't yet met minimum release age checks.
+The recommendation is to set `internalChecksFilter=strict` when using `minimumReleaseAge`, so Renovate will create neither branches (nor PRs) on updates that haven't yet met minimum release age checks.
 
 ### Which update types take `minimumReleaseAge` into account?
 
@@ -190,8 +171,11 @@ Note that you will also need to [verify if the registry you're using](#which-reg
 
 The below is a non-exhaustive list of public registries which support release timestamps:
 
+<!-- markdownlint-disable MD060 -->
+
 | Datasource           | Registry URL                                       | Supported | Notes                                                            |
 | -------------------- | -------------------------------------------------- | --------- | ---------------------------------------------------------------- |
+| `crate`              | `https://crates.io`                                | ✅        |                                                                  |
 | `docker`             | `https://ghcr.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/39064)    |
 | `rubygems`           | `https://rubygems.org`                             | ✅        |                                                                  |
 | `docker`             | `https://index.docker.io`                          | ✅        |                                                                  |

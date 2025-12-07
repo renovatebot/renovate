@@ -52,3 +52,4 @@ Remember to:
 
 - Adding assignees to PRs not supported (does not seem to be a Bitbucket concept)
 - `automergeStrategy=rebase` not supported by Bitbucket Cloud, see [Jira issue BCLOUD-16610](https://jira.atlassian.com/browse/BCLOUD-16610)
+- Markdown support for collapsible syntax, see [Jira issue BCLOUD-20231](https://jira.atlassian.com/browse/BCLOUD-20231)

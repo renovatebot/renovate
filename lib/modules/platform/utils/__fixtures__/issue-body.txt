@@ -1,3 +1,15 @@
+## Config Migration Needed
+
+ - [ ] <!-- create-config-migration-pr --> Select this checkbox to let Renovate create an automated Config Migration PR.
+
+## Pending Approval
+
+The following branches are pending approval. To create them, click on a checkbox below.
+
+ - [ ] <!-- approve-branch=branchName1 -->pr1
+ - [ ] <!-- approve-branch=branchName2 -->pr2
+ - [ ] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐
+
 ## Rate-Limited
 
 The following updates are currently rate-limited. To force their creation now, click on a checkbox below.
@@ -6,6 +18,12 @@ The following updates are currently rate-limited. To force their creation now, c
  - [ ] <!-- unlimit-branch=renovate/commander-10.x -->Update dependency commander to v10
  - [ ] <!-- unlimit-branch=renovate/graceful-fs-4.x -->Update dependency graceful-fs to v4
  - [ ] <!-- create-all-rate-limited-prs -->🔐 **Create all rate-limited PRs at once** 🔐
+
+## Edited/Blocked
+
+The following updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox below.
+
+ - [ ] <!-- rebase-branch=renovate/docker-renovate-renovate-16.x -->[Update renovate/renovate Docker tag to v16.13.8](../pull/2)
 
 ## Open
 
@@ -16,14 +34,8 @@ The following updates have all been created. To force a retry/rebase of any, cli
  - [ ] <!-- rebase-branch=branchName3 -->[pr3](../pull/3)
  - [ ] <!-- rebase-all-open-prs -->**Click on this checkbox to rebase all open PRs at once**
 
-## Edited/Blocked
-
-The following updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox below.
-
-- [ ] <!-- rebase-branch=renovate/docker-renovate-renovate-16.x -->[Update renovate/renovate Docker tag to v16.13.8](../pull/2)
-
-## Closed/Ignored
+## Ignored or Blocked
 
 The following updates are blocked by an existing closed PR. To recreate the PR, click on a checkbox below.
 
-- [ ] <!-- recreate-branch=renovate/docker-renovate-renovate-16.10.8 -->[Update renovate/renovate:16.10.8 Docker digest to 6f9a209](../pull/1)
+ - [ ] <!-- recreate-branch=renovate/docker-renovate-renovate-16.10.8 -->[Update renovate/renovate:16.10.8 Docker digest to 6f9a209](../pull/1)
