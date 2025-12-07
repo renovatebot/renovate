@@ -264,7 +264,7 @@
     "url-join": "5.0.0",
     "validate-npm-package-name": "7.0.0",
     "xmldoc": "2.0.2",
-    "yaml": "2.8.1",
+    "yaml": "2.8.2",
     "zod": "3.25.76"
   },
   "optionalDependencies": {
