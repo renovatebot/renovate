@@ -39,8 +39,10 @@ import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
+import { isPromise } from '@sindresorhus/is';
 import { pkg } from '../expose.cjs';
 import { getEnv } from '../util/env';
+import { GitOperationSpanProcessor } from '../util/git/span-processor';
 import type { RenovateSpanOptions } from './types';
 import {
   isTraceDebuggingEnabled,
@@ -68,6 +70,7 @@ export function init(): void {
   if (isTraceSendingEnabled()) {
     const exporter = new OTLPTraceExporter();
     spanProcessors.push(new BatchSpanProcessor(exporter));
+    spanProcessors.push(new GitOperationSpanProcessor());
   }
 
   const env = getEnv();
@@ -182,7 +185,7 @@ export function instrument<F extends () => ReturnType<F>>(
   return getTracer().startActiveSpan(name, options, context, (span: Span) => {
     try {
       const ret = fn();
-      if (ret instanceof Promise) {
+      if (isPromise(ret)) {
         return ret
           .catch((e) => {
             span.recordException(e);

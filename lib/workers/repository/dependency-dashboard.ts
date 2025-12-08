@@ -290,7 +290,7 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
   let newIssueBody = issueBody;
   const repoProblems = extractRepoProblems(config.repository);
   if (repoProblems.size) {
-    newIssueBody += '## Repository problems\n\n';
+    newIssueBody += '## Repository Problems\n\n';
     const repoProblemsHeader =
       config.customizeDashboard?.repoProblemsHeader ??
       'Renovate tried to run on this repository, but found these problems.';
@@ -355,10 +355,10 @@ export async function ensureDependencyDashboard(
   }
   logger.debug('Ensuring Dependency Dashboard');
 
-  // Check packageFiles for any deprecations
-  let hasDeprecations = false;
+  // Check packageFiles for any deprecations or replacements
+  let hasDeprecationsOrReplacements = false;
   const deprecatedPackages: Record<string, Record<string, boolean>> = {};
-  logger.debug('Checking packageFiles for deprecated packages');
+  logger.debug('Checking packageFiles for deprecated or replacement packages');
   if (isNonEmptyObject(packageFiles)) {
     for (const [manager, fileNames] of Object.entries(packageFiles)) {
       for (const fileName of fileNames) {
@@ -368,7 +368,7 @@ export async function ensureDependencyDashboard(
             (updates) => updates.updateType === 'replacement',
           );
           if (name && (dep.deprecationMessage ?? hasReplacement)) {
-            hasDeprecations = true;
+            hasDeprecationsOrReplacements = true;
             deprecatedPackages[manager] ??= {};
             deprecatedPackages[manager][name] ??= hasReplacement;
           }
@@ -378,7 +378,11 @@ export async function ensureDependencyDashboard(
   }
 
   const hasBranches = isNonEmptyArray(branches);
-  if (config.dependencyDashboardAutoclose && !hasBranches && !hasDeprecations) {
+  if (
+    config.dependencyDashboardAutoclose &&
+    !hasBranches &&
+    !hasDeprecationsOrReplacements
+  ) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
         { title: config.dependencyDashboardTitle },
@@ -417,9 +421,11 @@ export async function ensureDependencyDashboard(
 
   issueBody = appendRepoProblems(config, issueBody);
 
-  if (hasDeprecations) {
-    issueBody += '> ⚠ **Warning**\n> \n';
-    issueBody += 'These dependencies are deprecated:\n\n';
+  if (hasDeprecationsOrReplacements) {
+    issueBody += '## Deprecations / Replacements\n';
+    issueBody += '> ⚠️ **Warning**\n> \n';
+    issueBody +=
+      'These dependencies are either deprecated or have replacements available:\n\n';
     issueBody += '| Datasource | Name | Replacement PR? |\n';
     issueBody += '|------------|------|--------------|\n';
     for (const manager of Object.keys(deprecatedPackages).sort()) {
@@ -729,10 +735,10 @@ export async function getDashboardMarkdownVulnerabilities(
 
   result += `\`${resolvedVulnerabilitiesLength}\`/\`${vulnerabilities.length}\``;
   if (isTruthy(config.osvVulnerabilityAlerts)) {
-    result += ' CVEs have Renovate fixes.\n';
+    result += ' CVEs have Renovate fixes.\n\n';
   } else {
     result +=
-      ' CVEs have possible Renovate fixes.\nSee [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n';
+      ' CVEs have possible Renovate fixes.\nSee [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n\n';
   }
 
   let renderedVulnerabilities: Vulnerability[];

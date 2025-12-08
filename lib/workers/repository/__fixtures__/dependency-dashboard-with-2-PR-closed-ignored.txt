@@ -7,7 +7,7 @@ The following updates are blocked by an existing closed PR. To recreate the PR, 
  - [ ] <!-- recreate-branch=branchName1 -->pr1
  - [ ] <!-- recreate-branch=branchName2 -->pr2 (`dep2`, `dep3`)
 
-## Detected dependencies
+## Detected Dependencies
 
 None detected
 
