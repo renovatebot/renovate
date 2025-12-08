@@ -424,6 +424,7 @@ export interface RenovateConfig
   vulnerabilitySeverity?: string;
   customManagers?: CustomManager[];
   customDatasources?: Record<string, CustomDatasourceConfig>;
+  composerMinimalChanges?: boolean;
 
   fetchChangeLogs?: FetchChangeLogsOptions;
   secrets?: Record<string, string>;
