@@ -273,7 +273,7 @@
     "re2": "1.22.3"
   },
   "devDependencies": {
-    "@containerbase/eslint-plugin": "1.1.20",
+    "@containerbase/eslint-plugin": "1.1.21",
     "@containerbase/istanbul-reports-html": "1.1.15",
     "@containerbase/semantic-release-pnpm": "1.3.7",
     "@eslint/js": "9.39.1",
