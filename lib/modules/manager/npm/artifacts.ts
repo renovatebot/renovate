@@ -50,7 +50,7 @@ export async function updateArtifacts({
   // write old updates before executing corepack update so that they are not removed from package file
   await writeLocalFile(packageFileName, existingPackageFileContent);
 
-  // Asumming that only the root package.json needs to modification
+  // Asumming that corepack only needs to modify the package.json file in the root folder
   // As it should not be regular practice to have different package managers in different workspaces
   const pkgFileDir = upath.dirname(packageFileName);
   const { additionalNpmrcContent } = processHostRules();
