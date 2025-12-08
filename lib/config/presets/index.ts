@@ -1,4 +1,9 @@
-import is from '@sindresorhus/is';
+import {
+  isArray,
+  isNullOrUndefined,
+  isObject,
+  isString,
+} from '@sindresorhus/is';
 import {
   CONFIG_VALIDATION,
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -7,7 +12,6 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
-import { getTtlOverride } from '../../util/cache/package/ttl';
 import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
@@ -17,6 +21,7 @@ import * as migration from '../migration';
 import type { AllConfig, RenovateConfig } from '../types';
 import { mergeChildConfig } from '../utils';
 import { removedPresets } from './common';
+import * as forgejo from './forgejo';
 import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
@@ -36,13 +41,14 @@ import {
 } from './util';
 
 const presetSources: Record<string, PresetApi> = {
-  github,
-  npm,
-  gitlab,
+  forgejo,
   gitea,
-  local,
-  internal,
+  github,
+  gitlab,
   http,
+  internal,
+  local,
+  npm,
 };
 
 const presetCacheNamespace = 'preset';
@@ -74,7 +80,7 @@ export function replaceArgs(
   obj: string | string[] | Record<string, any> | Record<string, any>[],
   argMapping: Record<string, any>,
 ): any {
-  if (is.string(obj)) {
+  if (isString(obj)) {
     let returnStr = obj;
     for (const [arg, argVal] of Object.entries(argMapping)) {
       const re = regEx(`{{${arg}}}`, 'g', false);
@@ -82,14 +88,14 @@ export function replaceArgs(
     }
     return returnStr;
   }
-  if (is.array(obj)) {
+  if (isArray(obj)) {
     const returnArray = [];
     for (const item of obj) {
       returnArray.push(replaceArgs(item, argMapping));
     }
     return returnArray;
   }
-  if (is.object(obj)) {
+  if (isObject(obj)) {
     const returnObj: Record<string, any> = {};
     for (const [key, val] of Object.entries(obj)) {
       returnObj[key] = replaceArgs(val, argMapping);
@@ -112,7 +118,7 @@ export async function getPreset(
   if (newPreset === null) {
     return {};
   }
-  const { presetSource, repo, presetPath, presetName, tag, params } =
+  const { presetSource, repo, presetPath, presetName, tag, params, rawParams } =
     parsePreset(preset);
   const cacheKey = `preset:${preset}`;
   const presetCachePersistence = GlobalConfig.get(
@@ -128,7 +134,7 @@ export async function getPreset(
     presetConfig = memCache.get(cacheKey);
   }
 
-  if (is.nullOrUndefined(presetConfig)) {
+  if (isNullOrUndefined(presetConfig)) {
     presetConfig = await presetSources[presetSource].getPreset({
       repo,
       presetPath,
@@ -136,12 +142,7 @@ export async function getPreset(
       tag,
     });
     if (presetCachePersistence) {
-      await packageCache.set(
-        presetCacheNamespace,
-        cacheKey,
-        presetConfig,
-        getTtlOverride(presetCacheNamespace) ?? 15,
-      );
+      await packageCache.set(presetCacheNamespace, cacheKey, presetConfig, 15);
     } else {
       memCache.set(cacheKey, presetConfig);
     }
@@ -154,6 +155,9 @@ export async function getPreset(
     const argMapping: Record<string, string> = {};
     for (const [index, value] of params.entries()) {
       argMapping[`arg${index}`] = value;
+    }
+    if (rawParams) {
+      argMapping.args = rawParams;
     }
     presetConfig = replaceArgs(presetConfig, argMapping);
   }
@@ -224,13 +228,16 @@ export async function resolveConfigPresets(
   delete config.extends;
   delete config.ignorePresets;
   logger.trace({ config }, `Post-merge resolve config`);
-  for (const [key, val] of Object.entries(config)) {
+  for (const [key, val] of Object.entries(config) as [
+    keyof AllConfig,
+    unknown,
+  ][]) {
     const ignoredKeys = ['content', 'onboardingConfig'];
-    if (is.array(val)) {
+    if (isArray(val)) {
       // Resolve nested objects inside arrays
-      config[key] = [];
+      config[key] = [] as never; // type can't be narrowed
       for (const element of val) {
-        if (is.object(element)) {
+        if (isObject(element)) {
           (config[key] as RenovateConfig[]).push(
             await resolveConfigPresets(
               element as RenovateConfig,
@@ -243,15 +250,15 @@ export async function resolveConfigPresets(
           (config[key] as unknown[]).push(element);
         }
       }
-    } else if (is.object(val) && !ignoredKeys.includes(key)) {
+    } else if (isObject(val) && !ignoredKeys.includes(key)) {
       // Resolve nested objects
       logger.trace(`Resolving object "${key}"`);
-      config[key] = await resolveConfigPresets(
+      config[key] = (await resolveConfigPresets(
         val as RenovateConfig,
         baseConfig,
         ignorePresets,
         existingPresets,
-      );
+      )) as never; // type can't be narrowed
     }
   }
   logger.trace({ config: inputConfig }, 'Input config');

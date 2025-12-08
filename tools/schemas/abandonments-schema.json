@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Exceptions for abandoned packages",
+  "description": "Community-sourced overrides for packages that appear abandoned but are still maintained",
+  "type": "object",
+  "properties": {
+    "$schema": { "type": "string" }
+  },
+  "additionalProperties": {
+    "type": "object",
+    "additionalProperties": {
+      "type": "string"
+    }
+  }
+}

@@ -1,7 +1,8 @@
-import is from '@sindresorhus/is';
+import { isString, isUndefined } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { GithubHttp } from '../../../util/http/github';
+import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import * as allVersioning from '../../versioning';
 import { Datasource } from '../datasource';
@@ -71,7 +72,7 @@ export class ConanDatasource extends Datasource {
     { registryUrl, packageName }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    if (is.undefined(newValue) || is.undefined(registryUrl)) {
+    if (isUndefined(newValue) || isUndefined(registryUrl)) {
       return null;
     }
     const url = ensureTrailingSlash(registryUrl);
@@ -104,7 +105,7 @@ export class ConanDatasource extends Datasource {
     const conanPackage = getConanPackage(packageName);
     const userAndChannel = '@' + conanPackage.userAndChannel;
     if (
-      is.string(registryUrl) &&
+      isString(registryUrl) &&
       ensureTrailingSlash(registryUrl) === defaultRegistryUrl
     ) {
       return this.getConanCenterReleases(
@@ -139,8 +140,9 @@ export class ConanDatasource extends Datasource {
 
           try {
             if (isArtifactoryServer(rep)) {
-              const conanApiRegexp =
-                /(?<host>.*)\/artifactory\/api\/conan\/(?<repo>[^/]+)/;
+              const conanApiRegexp = regEx(
+                /(?<host>.*)\/artifactory\/api\/conan\/(?<repo>[^/]+)/,
+              );
               const groups = conanApiRegexp.exec(url)?.groups;
               if (!groups) {
                 return dep;

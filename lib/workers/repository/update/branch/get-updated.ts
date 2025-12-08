@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { get } from '../../../../modules/manager';
@@ -108,7 +107,7 @@ export async function getUpdatedPackageFiles(
   const lockFileMaintenanceFiles: string[] = [];
   let firstUpdate = true;
   for (const upgrade of config.upgrades) {
-    const manager = upgrade.manager!;
+    const manager = upgrade.manager;
     const packageFile = upgrade.packageFile!;
     const depName = upgrade.depName!;
     // TODO: fix types, can be undefined (#22198)
@@ -318,7 +317,7 @@ export async function getUpdatedPackageFiles(
   const updatedArtifacts: FileChange[] = [];
   const artifactErrors: ArtifactError[] = [];
   const artifactNotices: ArtifactNotice[] = [];
-  if (is.nonEmptyArray(updatedPackageFiles)) {
+  if (isNonEmptyArray(updatedPackageFiles)) {
     logger.debug('updateArtifacts for updatedPackageFiles');
     const updatedPackageFileManagers = getManagersForPackageFiles(
       updatedPackageFiles,
@@ -359,7 +358,7 @@ export async function getUpdatedPackageFiles(
     path: name,
     contents: nonUpdatedFileContents[name],
   }));
-  if (is.nonEmptyArray(nonUpdatedPackageFiles)) {
+  if (isNonEmptyArray(nonUpdatedPackageFiles)) {
     logger.debug('updateArtifacts for nonUpdatedPackageFiles');
     const nonUpdatedPackageFileManagers = getManagersForPackageFiles(
       nonUpdatedPackageFiles,
@@ -390,7 +389,7 @@ export async function getUpdatedPackageFiles(
           artifactErrors,
           artifactNotices,
         );
-        if (is.nonEmptyArray(results)) {
+        if (isNonEmptyArray(results)) {
           updatedPackageFiles.push(packageFile);
         }
       }
@@ -402,7 +401,7 @@ export async function getUpdatedPackageFiles(
         path: name,
       }));
     // Only perform lock file maintenance if it's a fresh commit
-    if (is.nonEmptyArray(lockFileMaintenanceFiles)) {
+    if (isNonEmptyArray(lockFileMaintenanceFiles)) {
       logger.debug('updateArtifacts for lockFileMaintenanceFiles');
       const lockFileMaintenanceManagers = getManagersForPackageFiles(
         lockFileMaintenancePackageFiles,
@@ -454,14 +453,15 @@ function patchConfigForArtifactsUpdate(
   packageFileName: string,
 ): UpdateArtifactsConfig {
   // drop any lockFiles that happen to be defined on the branch config
-  const { lockFiles, ...updatedConfig } = config;
-  if (is.nonEmptyArray(updatedConfig.packageFiles?.[manager])) {
+  const updatedConfig = { ...config };
+  delete updatedConfig.lockFiles;
+  if (isNonEmptyArray(updatedConfig.packageFiles?.[manager])) {
     const managerPackageFiles: PackageFile[] =
       updatedConfig.packageFiles?.[manager];
     const packageFile = managerPackageFiles.find(
       (p) => p.packageFile === packageFileName,
     );
-    if (packageFile && is.nonEmptyArray(packageFile.lockFiles)) {
+    if (packageFile && isNonEmptyArray(packageFile.lockFiles)) {
       updatedConfig.lockFiles = packageFile.lockFiles;
     }
   }
@@ -473,10 +473,19 @@ async function managerUpdateArtifacts(
   updateArtifact: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
   const updateArtifacts = get(manager, 'updateArtifacts');
-  if (updateArtifacts) {
-    return await updateArtifacts(updateArtifact);
+  if (!updateArtifacts) {
+    return null;
   }
-  return null;
+
+  if (updateArtifact.config.skipArtifactsUpdate) {
+    logger.debug(
+      { manager, packageFileName: updateArtifact.packageFileName },
+      'Skipping artifact update',
+    );
+    return null;
+  }
+
+  return await updateArtifacts(updateArtifact);
 }
 
 function processUpdateArtifactResults(
@@ -485,7 +494,7 @@ function processUpdateArtifactResults(
   artifactErrors: ArtifactError[],
   artifactNotices: ArtifactNotice[],
 ): void {
-  if (is.nonEmptyArray(results)) {
+  if (isNonEmptyArray(results)) {
     for (const res of results) {
       const { file, notice, artifactError } = res;
       if (file) {

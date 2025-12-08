@@ -1,4 +1,5 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
+import { regEx } from '../util/regex';
 import prepareError from './utils';
 
 Error.stackTraceLimit = 20;
@@ -10,9 +11,9 @@ export default function errSerializer(err: Error): any {
   const redactedFields = ['message', 'stack', 'stdout', 'stderr'];
   for (const field of redactedFields) {
     const val = response[field];
-    if (is.string(val)) {
+    if (isString(val)) {
       response[field] = val.replace(
-        /https:\/\/[^@]*?@/g, // TODO #12874
+        regEx(/https:\/\/[^@]*?@/g),
         'https://**redacted**@',
       );
     }

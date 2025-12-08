@@ -2,6 +2,7 @@ import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import type { GiteaHttpOptions } from '../../../util/http/gitea';
 import { GiteaHttp } from '../../../util/http/gitea';
+import { fromBase64 } from '../../../util/string';
 import { getQueryString } from '../../../util/url';
 import type {
   Branch,
@@ -115,7 +116,7 @@ export async function getRepoContents(
   const res = await giteaHttp.getJsonUnchecked<RepoContents>(url, options);
 
   if (res.body.content) {
-    res.body.contentString = Buffer.from(res.body.content, 'base64').toString();
+    res.body.contentString = fromBase64(res.body.content);
   }
 
   return res.body;

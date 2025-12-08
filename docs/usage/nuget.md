@@ -28,21 +28,20 @@ To convert your .NET Framework `.csproj`, `.fsproj` or `.vbproj` files into an S
 1. Existing dependencies are extracted from `<PackageReference>` and `<PackageVersion>` tags
 1. Renovate looks up the latest version on [nuget.org](https://nuget.org) (or an alternative feed if configured) to see if any upgrades are available
 1. If the source package includes a GitHub URL as its source, and has either:
-
    - a "changelog" file, or
    - uses GitHub releases
 
    then release notes for each version are embedded in the generated PR
 
 If your project file references a `packages.config` file, no dependencies will be extracted.
-Find out here how to [migrate from `packages.config` to `PackageReference`](https://docs.microsoft.com/en-us/nuget/consume-packages/migrate-packages-config-to-package-reference).
+Find out here how to [migrate from `packages.config` to `PackageReference`](https://learn.microsoft.com/nuget/consume-packages/migrate-packages-config-to-package-reference).
 
 ## Alternate feeds
 
 By default Renovate performs all lookups on `https://api.nuget.org/v3/index.json`, but you can set alternative NuGet feeds.
 You can set alternative feeds:
 
-- in a [`NuGet.config` file](https://docs.microsoft.com/en-us/nuget/reference/nuget-config-file#package-source-sections) within your repository (Renovate will not search outside the repository), or
+- in a [`NuGet.config` file](https://learn.microsoft.com/nuget/reference/nuget-config-file#package-source-sections) within your repository (Renovate will not search outside the repository), or
 - in a Renovate configuration options file like `renovate.json`
 
 ```json

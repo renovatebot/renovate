@@ -12,6 +12,8 @@ export const presets: Record<string, Preset> = {
       'helpers:pinGitHubActionDigests',
       ':configMigration',
       ':pinDevDependencies',
+      'abandonments:recommended',
+      'security:minimumReleaseAgeNpm',
     ],
   },
   'js-app': {
@@ -31,8 +33,12 @@ export const presets: Record<string, Preset> = {
       ':ignoreModulesAndTests',
       'group:monorepos',
       'group:recommended',
+      'mergeConfidence:age-confidence-badges',
       'replacements:all',
       'workarounds:all',
+      'helpers:githubDigestChangelogs',
+      'helpers:goXPackagesChangelogLink',
+      'helpers:goXPackagesNameLink',
     ],
   },
   semverAllMonthly: {
@@ -43,6 +49,21 @@ export const presets: Record<string, Preset> = {
       'group:all',
       'schedule:monthly',
       ':maintainLockFilesMonthly',
+    ],
+    lockFileMaintenance: {
+      commitMessageAction: 'Update',
+      extends: ['group:all'],
+    },
+    separateMajorMinor: false,
+  },
+  semverAllWeekly: {
+    description:
+      'Preserve SemVer ranges and update everything together once a week.',
+    extends: [
+      ':preserveSemverRanges',
+      'group:all',
+      'schedule:weekly',
+      ':maintainLockFilesWeekly',
     ],
     lockFileMaintenance: {
       commitMessageAction: 'Update',

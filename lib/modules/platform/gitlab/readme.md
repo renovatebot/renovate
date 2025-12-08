@@ -80,7 +80,7 @@ You may also use a dedicated [Deploy Token](https://docs.gitlab.com/ee/user/proj
 
 #### Get colored output
 
-You may want to set `FORCE_COLOR: 3` or `TERM: ansi` to the job, in order to get colored output.
+You may want to set `FORCE_COLOR: 3` to the job, in order to get colored output.
 [GitLab Runner runs the container’s shell in non-interactive mode, so the shell’s `TERM` environment variable is set to `dumb`.](https://docs.gitlab.com/ee/ci/yaml/script.html#job-log-output-is-not-formatted-as-expected-or-contains-unexpected-characters)
 
 ## Features awaiting implementation
@@ -105,3 +105,11 @@ Because of a safeguard in [GitLab's API](https://github.com/renovatebot/renovate
 ## Verifying users using push rules
 
 When verifying users using [push rules](https://docs.gitlab.com/ee/user/project/repository/push_rules.html#verify-users), you must use the name and email of the bot user for `gitAuthor`.
+
+## Repo autodiscover
+
+Renovate can discover repositories on GitLab using the `autodiscover` feature.
+
+You can change the default server-side sort method and order for autodiscover API.
+Set those via [`autodiscoverRepoSort`](../../../self-hosted-configuration.md#autodiscoverreposort) and [`autodiscoverRepoOrder`](../../../self-hosted-configuration.md#autodiscoverrepoorder).
+Read the [GitLab Projects API docs](https://docs.gitlab.com/api/projects/#list-all-projects) for more details.

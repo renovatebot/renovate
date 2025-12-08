@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
-import { join } from 'upath';
+import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -38,9 +38,9 @@ const hostRules = vi.mocked(_hostRules);
 const googleAuth = vi.mocked(_googleAuth);
 
 const adminConfig: RepoGlobalConfig = {
-  localDir: join('/tmp/github/some/repo'),
-  cacheDir: join('/tmp/cache'),
-  containerbaseDir: join('/tmp/cache/containerbase'),
+  localDir: upath.join('/tmp/github/some/repo'),
+  cacheDir: upath.join('/tmp/cache'),
+  containerbaseDir: upath.join('/tmp/cache/containerbase'),
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -235,9 +235,12 @@ describe('modules/manager/poetry/artifacts', () => {
       const execSnapshots = mockExecAll();
       fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
       googleAuth.mockImplementationOnce(
-        vi.fn().mockImplementationOnce(() => ({
-          getAccessToken: vi.fn().mockResolvedValue('some-token'),
-        })),
+        // TODO: fix typing
+        vi.fn<any>(
+          class {
+            getAccessToken = vi.fn().mockResolvedValue('some-token');
+          },
+        ),
       );
       hostRules.find.mockReturnValue({});
       const updatedDeps = [{ depName: 'dep1' }];
@@ -281,9 +284,12 @@ describe('modules/manager/poetry/artifacts', () => {
       const execSnapshots = mockExecAll();
       fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
       googleAuth.mockImplementation(
-        vi.fn().mockImplementation(() => ({
-          getAccessToken: vi.fn().mockResolvedValue(undefined),
-        })),
+        // TODO: fix typing
+        vi.fn<any>(
+          class {
+            getAccessToken = vi.fn();
+          },
+        ),
       );
       const updatedDeps = [{ depName: 'dep1' }];
       expect(

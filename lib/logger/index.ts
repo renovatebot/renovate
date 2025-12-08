@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import * as bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { nanoid } from 'nanoid';
@@ -49,7 +49,7 @@ export function createDefaultStreams(
     type: 'raw',
   };
 
-  const logFileStream: bunyan.Stream | undefined = is.string(logFile)
+  const logFileStream: bunyan.Stream | undefined = isString(logFile)
     ? createLogFileStream(logFile)
     : undefined;
 
@@ -63,11 +63,22 @@ function createLogFileStream(logFile: string): bunyan.Stream {
   const directoryName = upath.dirname(logFile);
   fs.ensureDirSync(directoryName);
 
-  return {
+  const file: bunyan.Stream = {
     name: 'logfile',
     path: logFile,
     level: validateLogLevel(getEnv('LOG_FILE_LEVEL'), 'debug'),
   };
+
+  const logFileFormat = getEnv('LOG_FILE_FORMAT');
+
+  if (
+    isNonEmptyStringAndNotWhitespace(logFileFormat) &&
+    logFileFormat === 'pretty'
+  ) {
+    file.type = 'raw';
+  }
+
+  return file;
 }
 
 function serializedSanitizedLogger(streams: bunyan.Stream[]): bunyan {

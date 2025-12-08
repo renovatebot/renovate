@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider';
 import type { PackageDependency } from '../types';
@@ -58,7 +58,7 @@ export async function extractLocksForPackageFile(
     const lockFileContent = await readLockFile(lockFilePath);
     if (lockFileContent) {
       const extractedLocks = extractLocks(lockFileContent);
-      if (is.nonEmptyArray(extractedLocks)) {
+      if (isNonEmptyArray(extractedLocks)) {
         locks.push(...extractedLocks);
       }
     }

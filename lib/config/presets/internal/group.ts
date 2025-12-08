@@ -111,6 +111,15 @@ const staticGroups = {
       },
     ],
   },
+  'drupal-core': {
+    description: 'Group Drupal core updates.',
+    packageRules: [
+      {
+        groupName: 'Drupal core',
+        matchPackageNames: ['drupal/core', 'drupal/core-*'],
+      },
+    ],
+  },
   flyway: {
     description: 'Group Java Flyway packages.',
     packageRules: [
@@ -188,6 +197,19 @@ const staticGroups = {
         groupSlug: 'go-openapi',
         matchDatasources: ['go'],
         matchPackageNames: ['github.com/go-openapi/**'],
+      },
+    ],
+  },
+  gradle: {
+    description:
+      "Group anything that looks like Gradle together so that it's updated together.",
+    packageRules: [
+      {
+        commitMessageTopic: 'Gradle',
+        matchDatasources: ['docker', 'gradle-version'],
+        matchPackageNames: [
+          '/(?:^|/)gradle$/', // gradle or ends with "/gradle"
+        ],
       },
     ],
   },
@@ -504,6 +526,7 @@ const staticGroups = {
       'group:githubArtifactActions',
       'group:glimmer',
       'group:goOpenapi',
+      'group:gradle',
       'group:hibernateCore',
       'group:hibernateValidator',
       'group:hibernateOgm',

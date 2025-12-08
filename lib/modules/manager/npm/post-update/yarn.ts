@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
@@ -41,7 +41,7 @@ export async function checkYarnrc(
       upath.join(lockFileDir, '.yarnrc'),
       'utf8',
     );
-    if (is.string(yarnrc)) {
+    if (isString(yarnrc)) {
       const mirrorLine = yarnrc
         .split(newlineRegex)
         .find((line) => line.startsWith('yarn-offline-mirror '));
@@ -77,7 +77,8 @@ export async function checkYarnrc(
         );
       }
     }
-  } catch /* istanbul ignore next */ {
+    /* v8 ignore next -- needs test */
+  } catch {
     // not found
   }
   return { offlineMirror, yarnPath };
@@ -198,7 +199,7 @@ export async function generateLockFile(
       docker: {},
       toolConstraints,
     };
-    // istanbul ignore if
+    /* v8 ignore next 4 -- needs test */
     if (GlobalConfig.get('exposeAllEnv')) {
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
@@ -239,7 +240,7 @@ export async function generateLockFile(
         commands.push(
           `yarn upgrade ${lockUpdates
             .map((update) => update.depName)
-            .filter(is.string)
+            .filter(isString)
             .filter(uniqueStrings)
             .map(quote)
             .join(' ')}${cmdOptions}`,
@@ -290,7 +291,8 @@ export async function generateLockFile(
       // https://github.com/yarnpkg/berry/blob/20612e82d26ead5928cc27bf482bb8d62dde87d3/packages/yarnpkg-core/sources/Project.ts#L284.
       try {
         await writeLocalFile(lockFileName, '');
-      } catch (err) /* istanbul ignore next */ {
+        /* v8 ignore next -- needs test */
+      } catch (err) {
         logger.debug(
           { err, lockFileName },
           'Error clearing `yarn.lock` for lock file maintenance',
@@ -303,7 +305,8 @@ export async function generateLockFile(
 
     // Read the result
     lockFile = await readLocalFile(lockFileName, 'utf8');
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next -- needs test */
+  } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }

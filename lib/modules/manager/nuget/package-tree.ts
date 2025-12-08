@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { Graph, hasCycle } from 'graph-data-structure';
 import upath from 'upath';
 import { logger } from '../../../logger';
@@ -7,6 +7,7 @@ import { scm } from '../../platform/scm';
 import type { ProjectFile } from './types';
 import { readFileAsXmlDocument } from './util';
 
+export const GLOBAL_JSON = 'global.json';
 export const NUGET_CENTRAL_FILE = 'Directory.Packages.props';
 export const MSBUILD_CENTRAL_FILE = 'Packages.props';
 
@@ -16,6 +17,7 @@ export const MSBUILD_CENTRAL_FILE = 'Packages.props';
 export async function getDependentPackageFiles(
   packageFileName: string,
   isCentralManagement = false,
+  isGlobalJson = false,
 ): Promise<ProjectFile[]> {
   const packageFiles = await getAllPackageFiles();
   const graph = new Graph();
@@ -24,16 +26,24 @@ export async function getDependentPackageFiles(
     graph.addNode(packageFileName);
   }
 
+  if (isGlobalJson) {
+    graph.addNode(GLOBAL_JSON);
+  }
+
   const parentDir =
     packageFileName === NUGET_CENTRAL_FILE ||
-    packageFileName === MSBUILD_CENTRAL_FILE
+    packageFileName === MSBUILD_CENTRAL_FILE ||
+    packageFileName === GLOBAL_JSON
       ? ''
       : upath.dirname(packageFileName);
 
   for (const f of packageFiles) {
     graph.addNode(f);
 
-    if (isCentralManagement && upath.dirname(f).startsWith(parentDir)) {
+    if (
+      (isCentralManagement || isGlobalJson) &&
+      upath.dirname(f).startsWith(parentDir)
+    ) {
       graph.addEdge(packageFileName, f);
     }
   }
@@ -49,7 +59,7 @@ export async function getDependentPackageFiles(
       .map((ig) => ig.childrenNamed('ProjectReference'))
       .flat()
       .map((pf) => pf.attr.Include)
-      .filter(is.nonEmptyString);
+      .filter(isNonEmptyString);
 
     const projectReferences = projectReferenceAttributes.map((a) =>
       upath.normalize(a),
@@ -70,7 +80,7 @@ export async function getDependentPackageFiles(
   const deps = new Map<string, boolean>();
   recursivelyGetDependentPackageFiles(packageFileName, graph, deps);
 
-  if (isCentralManagement) {
+  if (isCentralManagement || isGlobalJson) {
     // remove props file, as we don't need it
     deps.delete(packageFileName);
   }

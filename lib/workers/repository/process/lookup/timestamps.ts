@@ -22,7 +22,7 @@ import { asTimestamp } from '../../../../util/timestamp';
  *
  * @returns The `ReleaseResult` value, potentially updated with a `mostRecentTimestamp` timestamp
  */
-export function calculateLatestReleaseBump(
+export function calculateMostRecentTimestamp(
   versioningApi: VersioningApi,
   releaseResult: ReleaseResult,
 ): ReleaseResult {

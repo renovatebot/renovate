@@ -1,5 +1,5 @@
 import { major as getMajor, minor as getMinor } from 'semver';
-import { is as isStable } from 'semver-stable';
+import semver from 'semver-stable';
 import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
@@ -12,11 +12,7 @@ export const urls = [
   'https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies: RangeStrategy[] = [
-  'bump',
-  'pin',
-  'replace',
-];
+export const supportedRangeStrategies: RangeStrategy[] = ['bump', 'replace'];
 
 const isVersion = (input: string): boolean => npm.isVersion(input);
 
@@ -87,6 +83,10 @@ const isSingleVersion = (constraint: string): boolean =>
   constraint.trim().startsWith('=') &&
   isVersion(constraint.trim().substring(1).trim());
 
+function getPinnedValue(newVersion: string): string {
+  return `=${newVersion}`;
+}
+
 function getNewValue({
   currentValue,
   rangeStrategy,
@@ -94,13 +94,13 @@ function getNewValue({
   newVersion,
 }: NewValueConfig): string {
   if (!currentValue || currentValue === '*') {
-    return rangeStrategy === 'pin' ? `=${newVersion}` : currentValue;
+    return currentValue;
   }
   // If the current value is a simple version, bump to fully specified newVersion
   if (rangeStrategy === 'bump' && regEx(/^\d+(?:\.\d+)*$/).test(currentValue)) {
     return newVersion;
   }
-  if (rangeStrategy === 'pin' || isSingleVersion(currentValue)) {
+  if (isSingleVersion(currentValue)) {
     let res = '=';
     if (currentValue.startsWith('= ')) {
       res += ' ';
@@ -153,7 +153,7 @@ function getNewValue({
 
 function isBreaking(current: string, version: string): boolean {
   // The change may be breaking if either version is unstable
-  if (!isStable(version) || !isStable(current)) {
+  if (!semver.is(version) || !semver.is(current)) {
     return true;
   }
   const currentMajor = getMajor(current);
@@ -172,6 +172,7 @@ function isBreaking(current: string, version: string): boolean {
 export const api: VersioningApi = {
   ...npm,
   getNewValue,
+  getPinnedValue,
   isBreaking,
   isLessThanRange,
   isSingleVersion,

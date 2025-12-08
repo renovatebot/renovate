@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>ProxyKit</id>
+    <version>2.3.4+build.119</version>
+    <authors>Damian Hickey</authors>
+    <owners>Damian Hickey</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">Apache-2.0</license>
+    <licenseUrl>https://licenses.nuget.org/Apache-2.0</licenseUrl>
+    <icon>icon.png</icon>
+    <projectUrl>https://github.com/ProxyKit/ProxyKit</projectUrl>
+    <description>An AspNet core middleware toolkit to create proxy servers. Can be embedded in applications or used as a standalone proxy.</description>
+    <releaseNotes>See https://github.com/ProxyKit/ProxyKit/releases for release notes.</releaseNotes>
+    <tags>aspnetcore proxy http</tags>
+    <repository type="git" url="https://github.com/ProxyKit/ProxyKit" commit="5ce814152311938d323762474c8a3307d2beb2cf" />
+    <dependencies>
+      <group targetFramework=".NETCoreApp3.1" />
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="Microsoft.AspNetCore.Http" version="2.1.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Http.Extensions" version="2.1.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.HttpOverrides" version="2.1.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Http" version="2.1.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+    <frameworkReferences>
+      <group targetFramework=".NETCoreApp3.1">
+        <frameworkReference name="Microsoft.AspNetCore.App" />
+      </group>
+    </frameworkReferences>
+  </metadata>
+</package>

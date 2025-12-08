@@ -3,17 +3,15 @@ import 'source-map-support/register';
 import './punycode.cjs';
 import { dequal } from 'dequal';
 import { pathExists, readFile } from 'fs-extra';
-import { configFileNames } from './config/app-strings';
+import { getConfigFileNames } from './config/app-strings';
 import { massageConfig } from './config/massage';
 import { migrateConfig } from './config/migration';
 import type { RenovateConfig } from './config/types';
 import { validateConfig } from './config/validation';
 import { logger } from './logger';
 import { getEnv } from './util/env';
-import {
-  getConfig as getFileConfig,
-  getParsedContent,
-} from './workers/global/config/parse/file';
+import { getConfig as getFileConfig } from './workers/global/config/parse/file';
+import { getParsedContent } from './workers/global/config/parse/util';
 
 let returnVal = 0;
 
@@ -88,7 +86,7 @@ interface PackageJson {
       }
     }
   } else {
-    for (const file of configFileNames.filter(
+    for (const file of getConfigFileNames().filter(
       (name) => name !== 'package.json',
     )) {
       try {

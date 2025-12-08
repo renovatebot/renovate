@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../../../../../logger';
 import { escapeRegExp, regEx } from '../../../../../util/regex';
@@ -13,6 +13,7 @@ import type {
 import type { NpmDepType, NpmManagerData } from '../../types';
 import { getNewGitValue, getNewNpmAliasValue } from './common';
 import { updatePnpmCatalogDependency } from './pnpm';
+import { updateYarnrcCatalogDependency } from './yarn';
 
 function renameObjKey(
   oldObj: DependenciesMeta,
@@ -108,8 +109,8 @@ function replaceAsString(
         return testContent;
       }
     }
+    /* v8 ignore next 3 -- needs test */
   }
-  // istanbul ignore next
   throw new Error();
 }
 
@@ -119,6 +120,9 @@ export function updateDependency({
 }: UpdateDependencyConfig): string | null {
   if (upgrade.depType?.startsWith('pnpm.catalog')) {
     return updatePnpmCatalogDependency({ fileContent, upgrade });
+  }
+  if (upgrade.depType?.startsWith('yarn.catalog')) {
+    return updateYarnrcCatalogDependency({ fileContent, upgrade });
   }
 
   const { depType, managerData } = upgrade;
@@ -194,7 +198,7 @@ export function updateDependency({
         );
       }
     }
-    // istanbul ignore if
+    /* v8 ignore next -- needs test */
     if (!newFileContent) {
       logger.debug(
         { fileContent, parsedContents, depType, depName, newValue },
@@ -202,6 +206,7 @@ export function updateDependency({
       );
       return fileContent;
     }
+
     if (parsedContents?.resolutions) {
       let depKey: string | undefined;
       if (parsedContents.resolutions[depName]) {
@@ -210,7 +215,7 @@ export function updateDependency({
         depKey = `**/${depName}`;
       }
       if (depKey) {
-        // istanbul ignore if
+        /* v8 ignore next -- needs test */
         if (parsedContents.resolutions[depKey] !== oldVersion) {
           logger.debug(
             {
@@ -293,7 +298,7 @@ function overrideDepPosition(
 
 function isOverrideObject(upgrade: Upgrade<NpmManagerData>): boolean {
   return (
-    is.array(upgrade.managerData?.parents, is.nonEmptyStringAndNotWhitespace) &&
+    isArray(upgrade.managerData?.parents, isNonEmptyStringAndNotWhitespace) &&
     upgrade.depType === 'overrides'
   );
 }

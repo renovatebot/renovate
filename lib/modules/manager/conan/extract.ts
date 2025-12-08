@@ -1,10 +1,10 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { isComment } from './common';
 
 const regex = regEx(
-  `(?<name>[-_a-zA-Z0-9]+)/(?<version>[^@#\n{*"']+)(?<userChannel>@[-_a-zA-Z0-9]+(?:/[^#\n.{*"' ]+|))?#?(?<revision>[-_a-f0-9]+[^\n{*"'])?`,
+  `(?:^|["'])(?<name>[-\\w]+)/(?<version>[^@#\n{*"']+)(?<userChannel>@[-\\w]+(?:/[^#\n.{*"' ]+|))?#?(?<revision>[-_a-f0-9]+[^\n{*"'])?`,
 );
 
 function setDepType(content: string, originalType: string): string {
@@ -21,7 +21,7 @@ function setDepType(content: string, originalType: string): string {
 
 export function extractPackageFile(content: string): PackageFileContent | null {
   // only process sections where requirements are defined
-  const sections = content.split(/def |\n\[/).filter(
+  const sections = content.split(regEx(/def |\n\[/)).filter(
     (part) =>
       part.includes('python_requires') || // only matches python_requires
       part.includes('build_require') || // matches [build_requires], build_requirements(), and build_requires
@@ -31,13 +31,13 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   for (const section of sections) {
     let depType = setDepType(section, 'requires');
-    const rawLines = section.split('\n').filter(is.nonEmptyString);
+    const rawLines = section.split('\n').filter(isNonEmptyString);
 
     for (const rawLine of rawLines) {
       if (!isComment(rawLine)) {
         depType = setDepType(rawLine, depType);
         // extract all dependencies from each line
-        const lines = rawLine.split(/["'],/);
+        const lines = rawLine.split(regEx(/["'],/));
         for (const line of lines) {
           const matches = regex.exec(line.trim());
           if (matches?.groups) {

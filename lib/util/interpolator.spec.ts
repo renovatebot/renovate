@@ -1,4 +1,4 @@
-import { options as SECRET_INTERPOLATOR_OPTIONS } from '../config/secrets';
+import { options } from '../config/secrets';
 import {
   CONFIG_SECRETS_INVALID,
   CONFIG_VALIDATION,
@@ -12,25 +12,19 @@ describe('util/interpolator', () => {
   describe('validateInterpolatedValues', () => {
     it('does nothing if not input', () => {
       expect(() =>
-        validateInterpolatedValues(undefined, SECRET_INTERPOLATOR_OPTIONS),
+        validateInterpolatedValues(undefined, options.secrets),
       ).not.toThrow();
     });
 
     it('does not throw error when keys and values are valid', () => {
       expect(() =>
-        validateInterpolatedValues(
-          { SOME_SECRET: 'secret' },
-          SECRET_INTERPOLATOR_OPTIONS,
-        ),
+        validateInterpolatedValues({ SOME_SECRET: 'secret' }, options.secrets),
       ).not.toThrow();
     });
 
     it('throws when input is not a valid object', () => {
       expect(() =>
-        validateInterpolatedValues(
-          'not_an_object',
-          SECRET_INTERPOLATOR_OPTIONS,
-        ),
+        validateInterpolatedValues('not_an_object', options.secrets),
       ).toThrow(CONFIG_SECRETS_INVALID);
     });
 
@@ -38,17 +32,14 @@ describe('util/interpolator', () => {
       expect(() =>
         validateInterpolatedValues(
           { 'SOME-SECRET': 'secret' },
-          SECRET_INTERPOLATOR_OPTIONS,
+          options.secrets,
         ),
       ).toThrow(CONFIG_SECRETS_INVALID);
     });
 
     it('throws when values are not of type string', () => {
       expect(() =>
-        validateInterpolatedValues(
-          { SOME_SECRET: 1 },
-          SECRET_INTERPOLATOR_OPTIONS,
-        ),
+        validateInterpolatedValues({ SOME_SECRET: 1 }, options.secrets),
       ).toThrow(CONFIG_SECRETS_INVALID);
     });
   });
@@ -63,6 +54,7 @@ describe('util/interpolator', () => {
       };
       const res = replaceInterpolatedValuesInObject(
         {
+          // @ts-expect-error -- will be tranformed
           mode: '{{ secrets.SECRET_MODE }}',
           labels: ['{{ secrets.SECRET_LABEL }}', 'renovate'],
           prBodyDefinitions: {
@@ -80,7 +72,7 @@ describe('util/interpolator', () => {
           secrets,
         },
         secrets,
-        SECRET_INTERPOLATOR_OPTIONS,
+        options.secrets,
         true,
       );
 
@@ -105,11 +97,12 @@ describe('util/interpolator', () => {
     it('replaces values and keeps secrets', () => {
       const res = replaceInterpolatedValuesInObject(
         {
+          // @ts-expect-error -- will be tranformed
           mode: '{{ secrets.SECRET_MODE }}',
           secrets: { SECRET_MODE: 'silent' },
         },
         { SECRET_MODE: 'silent' },
-        SECRET_INTERPOLATOR_OPTIONS,
+        options.secrets,
         false,
       );
 
@@ -133,7 +126,7 @@ describe('util/interpolator', () => {
             secrets: { SECRET_HEADER: 'header' },
           },
           { SECRET_HEADER: 'header' },
-          SECRET_INTERPOLATOR_OPTIONS,
+          options.secrets,
           false,
         ),
       ).toThrow(error);
@@ -149,11 +142,12 @@ describe('util/interpolator', () => {
       expect(() =>
         replaceInterpolatedValuesInObject(
           {
+            // @ts-expect-error -- will be tranformed
             mode: '{{ secrets.SECRET_MODE }}',
             secrets: { SECRET_NOT_MODE: 'silent' },
           },
           { SECRET_NOT_MODE: 'silent' },
-          SECRET_INTERPOLATOR_OPTIONS,
+          options.secrets,
           false,
         ),
       ).toThrow(error);

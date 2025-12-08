@@ -48,6 +48,30 @@ describe('util/template/index', () => {
     expect(output).toContain('True');
   });
 
+  it('unless with equals - 1', () => {
+    const userTemplate =
+      '{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} -> {{{newNameLinked}}}{{/unless}}{{/if}}';
+    const input = {
+      depName: 'nodemon',
+      depNameLinked: 'nodemonLinked',
+      newName: 'nodemon-new',
+      newNameLinked: 'nodemonNewLinked',
+    };
+    const output = template.compile(userTemplate, input, false);
+    expect(output).toBe('nodemonLinked -> nodemonNewLinked');
+  });
+
+  it('unless with equals - 2', () => {
+    const userTemplate =
+      '{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} -> {{{newNameLinked}}}{{/unless}}{{/if}}';
+    const input = {
+      depName: 'nodemon',
+      depNameLinked: 'nodemonLinked',
+    };
+    const output = template.compile(userTemplate, input, false);
+    expect(output).toBe('nodemonLinked');
+  });
+
   it('not containsString', () => {
     const userTemplate =
       "{{#if (containsString platform 'hub')}}True{{else}}False{{/if}}";
@@ -91,7 +115,7 @@ describe('util/template/index', () => {
   it('string to pretty JSON', () => {
     const userTemplate =
       '{{{ stringToPrettyJSON \'{"some":{"fancy":"json"}}\'}}}';
-    const output = template.compile(userTemplate, undefined as never);
+    const output = template.compile(userTemplate, {});
     expect(output).toMatchSnapshot();
   });
 
@@ -149,7 +173,7 @@ describe('util/template/index', () => {
 
   it('lowercase', () => {
     const userTemplate = "{{{ lowercase 'FOO'}}}";
-    const output = template.compile(userTemplate, undefined as never);
+    const output = template.compile(userTemplate, {});
     expect(output).toBe('foo');
   });
 
@@ -256,7 +280,7 @@ describe('util/template/index', () => {
     it('encodes values', () => {
       const output = template.compile(
         '{{{encodeURIComponent "@fsouza/prettierd"}}}',
-        undefined as never,
+        {},
       );
       expect(output).toBe('%40fsouza%2Fprettierd');
     });
@@ -264,7 +288,7 @@ describe('util/template/index', () => {
     it('decodes values', () => {
       const output = template.compile(
         '{{{decodeURIComponent "%40fsouza/prettierd"}}}',
-        undefined as never,
+        {},
       );
       expect(output).toBe('@fsouza/prettierd');
     });
@@ -274,7 +298,7 @@ describe('util/template/index', () => {
     it('encodes values', () => {
       const output = template.compile(
         '{{{encodeBase64 "@fsouza/prettierd"}}}',
-        undefined as never,
+        {},
       );
       expect(output).toBe('QGZzb3V6YS9wcmV0dGllcmQ=');
     });
@@ -288,6 +312,30 @@ describe('util/template/index', () => {
 
     it('handles undefined values gracefully', () => {
       const output = template.compile('{{{encodeBase64 packageName}}}', {
+        packageName: undefined,
+      });
+      expect(output).toBe('');
+    });
+  });
+
+  describe('base64 decoding', () => {
+    it('decode values', () => {
+      const output = template.compile(
+        '{{{decodeBase64 "QGZzb3V6YS9wcmV0dGllcmQ="}}}',
+        {},
+      );
+      expect(output).toBe('@fsouza/prettierd');
+    });
+
+    it('handles null values gracefully', () => {
+      const output = template.compile('{{{decodeBase64 packageName}}}', {
+        packageName: null,
+      });
+      expect(output).toBe('');
+    });
+
+    it('handles undefined values gracefully', () => {
+      const output = template.compile('{{{decodeBase64 packageName}}}', {
         packageName: undefined,
       });
       expect(output).toBe('');

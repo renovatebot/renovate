@@ -72,6 +72,7 @@ describe('modules/platform/bitbucket/index', () => {
         username: 'abc',
         password: '123',
       });
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Init: Bitbucket Cloud endpoint should generally be https://api.bitbucket.org/ but is being configured to a different value. Did you mean to use Bitbucket Server?',
       );
@@ -110,6 +111,7 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/user')
         .reply(403, { error: { detail: { required: ['account'] } } });
       await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         `Bitbucket: missing 'account' scope for password`,
       );
@@ -209,7 +211,31 @@ describe('modules/platform/bitbucket/index', () => {
       });
     });
 
-    it('works with only token', async () => {
+    it('works with only API token', async () => {
+      hostRules.clear();
+      hostRules.find.mockReturnValue({
+        password: 'ATATIAMACONTAINERTOKEN3407361359',
+      });
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, {
+          mainbranch: { name: 'master' },
+          uuid: '123',
+          full_name: 'some/repo',
+        });
+      expect(
+        await bitbucket.initRepo({
+          repository: 'some/repo',
+        }),
+      ).toMatchObject({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: expect.any(String),
+      });
+    });
+
+    it('works with only access token', async () => {
       hostRules.clear();
       hostRules.find.mockReturnValue({
         token: 'abc',
@@ -496,18 +522,7 @@ describe('modules/platform/bitbucket/index', () => {
           },
         })
         .post('/2.0/repositories/some/repo/commit/branch_hash/statuses/build')
-        .reply(200)
-        .get(
-          '/2.0/repositories/some/repo/commit/branch_hash/statuses?pagelen=100',
-        )
-        .reply(200, {
-          values: [
-            {
-              key: 'foo',
-              state: 'SUCCESSFUL',
-            },
-          ],
-        });
+        .reply(200);
       await expect(
         bitbucket.setBranchStatus({
           branchName: 'branch',
@@ -534,11 +549,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
@@ -576,11 +593,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
@@ -630,11 +649,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
@@ -667,11 +688,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
@@ -704,11 +727,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
@@ -1642,6 +1667,19 @@ describe('modules/platform/bitbucket/index', () => {
         '\n\n</details>\n\n</blockquote>\n</details>';
 
       expect(bitbucket.massageMarkdown(prBody)).toMatchSnapshot();
+    });
+
+    it('updates abandoned dependencies heading and place note inside', () => {
+      const prBody =
+        '> ℹ **Note**\n>\n' +
+        'These dependencies have not received updates for an extended period and may be unmaintained:\n' +
+        '<details><summary>View abandoned dependencies (6)</summary>';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '## Abandoned Dependencies  (6)\n' +
+          '> ℹ **Note**\n>\n' +
+          'These dependencies have not received updates for an extended period and may be unmaintained:\n',
+      );
     });
   });
 

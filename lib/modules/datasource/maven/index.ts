@@ -144,6 +144,10 @@ export class MavenDatasource extends Datasource {
     };
     if (metadata.tags) {
       result.tags = metadata.tags;
+      if (result.tags.latest) {
+        logger.debug(`Setting respectLatest=false for maven ${packageName}`);
+        result.respectLatest = false;
+      }
     }
 
     if (!this.defaultRegistryUrls.includes(registryUrl)) {
@@ -166,10 +170,10 @@ export class MavenDatasource extends Datasource {
       cacheKey,
     );
 
-    /* v8 ignore start: hard to test */
+    /* v8 ignore if: hard to test */
     if (cachedResult) {
       return cachedResult;
-    } /* v8 ignore stop */
+    }
 
     if (!packageName || !registryUrl) {
       return release;

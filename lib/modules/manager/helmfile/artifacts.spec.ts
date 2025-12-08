@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { join } from 'upath';
+import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -21,9 +21,9 @@ const datasource = vi.mocked(_datasource);
 process.env.CONTAINERBASE = 'true';
 
 const adminConfig: RepoGlobalConfig = {
-  localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
-  cacheDir: join('/tmp/renovate/cache'),
-  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
+  localDir: upath.join('/tmp/github/some/repo'), // `join` fixes Windows CI
+  cacheDir: upath.join('/tmp/renovate/cache'),
+  containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
   dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
@@ -309,7 +309,7 @@ describe('modules/manager/helmfile/artifacts', () => {
 
   it.each([
     {
-      binarySource: 'docker',
+      binarySource: 'docker' as const,
       expectedCommands: [
         { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
@@ -338,7 +338,7 @@ describe('modules/manager/helmfile/artifacts', () => {
       ],
     },
     {
-      binarySource: 'install',
+      binarySource: 'install' as const,
       expectedCommands: [
         { cmd: 'install-tool helm v3.7.2' },
         { cmd: 'install-tool helmfile 0.151.0' },

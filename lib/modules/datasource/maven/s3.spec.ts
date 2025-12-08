@@ -65,6 +65,7 @@ describe('modules/datasource/maven/s3', () => {
           { version: '1.0.2' },
           { version: '1.0.3' },
         ],
+        respectLatest: false,
         tags: {
           latest: '1.0.2',
           release: '1.0.2',
@@ -92,6 +93,7 @@ describe('modules/datasource/maven/s3', () => {
         const res = await get('org.example:package', baseUrlS3);
 
         expect(res).toBeNull();
+
         expect(logger.debug).toHaveBeenCalledWith(
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
@@ -111,6 +113,7 @@ describe('modules/datasource/maven/s3', () => {
         const res = await get('org.example:package', baseUrlS3);
 
         expect(res).toBeNull();
+
         expect(logger.debug).toHaveBeenCalledWith(
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
@@ -130,6 +133,7 @@ describe('modules/datasource/maven/s3', () => {
         const res = await get('org.example:package', baseUrlS3);
 
         expect(res).toBeNull();
+
         expect(logger.trace).toHaveBeenCalledWith(
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
@@ -149,6 +153,7 @@ describe('modules/datasource/maven/s3', () => {
         const res = await get('org.example:package', baseUrlS3);
 
         expect(res).toBeNull();
+
         expect(logger.trace).toHaveBeenCalledWith(
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
@@ -181,6 +186,7 @@ describe('modules/datasource/maven/s3', () => {
         const res = await get('org.example:package', baseUrlS3);
 
         expect(res).toBeNull();
+
         expect(logger.debug).toHaveBeenCalledWith(
           {
             err: expect.objectContaining({ message: 'Unknown error' }),

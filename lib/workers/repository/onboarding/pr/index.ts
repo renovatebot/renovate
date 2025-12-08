@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -23,7 +23,7 @@ import { addParticipants } from '../../update/pr/participants';
 import { isOnboardingBranchConflicted } from '../branch/onboarding-branch-cache';
 import {
   OnboardingState,
-  defaultConfigFile,
+  getDefaultConfigFileName,
   getSemanticCommitPrTitle,
 } from '../common';
 import { getBaseBranchDesc } from './base-branch';
@@ -142,10 +142,10 @@ If you need any further assistance then you can also [request help here](${
   prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
   prBody = prBody.replace('{{PRLIST}}\n', getExpectedPrList(config, branches));
-  if (is.string(config.prHeader)) {
+  if (isString(config.prHeader)) {
     prBody = `${template.compile(config.prHeader, config)}\n\n${prBody}`;
   }
-  if (is.string(config.prFooter)) {
+  if (isString(config.prFooter)) {
     prBody = `${prBody}\n---\n\n${template.compile(config.prFooter, config)}\n`;
   }
 
@@ -153,7 +153,7 @@ If you need any further assistance then you can also [request help here](${
 
   logger.trace('prBody:\n' + prBody);
 
-  prBody = platform.massageMarkdown(prBody);
+  prBody = platform.massageMarkdown(prBody, config.rebaseLabel);
 
   if (existingPr) {
     logger.debug('Found open onboarding PR');
@@ -234,7 +234,7 @@ function getRebaseCheckbox(onboardingRebaseCheckbox?: boolean): string {
 async function getOnboardingConfigHashComment(
   config: RenovateConfig,
 ): Promise<string> {
-  const configFile = defaultConfigFile(config);
+  const configFile = getDefaultConfigFileName(config);
   const existingContents =
     (await getFile(configFile, config.onboardingBranch)) ?? '';
   const hash = toSha256(existingContents);

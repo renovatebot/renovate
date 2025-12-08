@@ -156,6 +156,18 @@ describe('modules/datasource/packagist/schema', () => {
         source: null,
         require: null,
       });
+
+      expect(
+        ComposerRelease.parse({
+          version: 123,
+        }),
+      ).toEqual({
+        version: '123',
+        time: null,
+        homepage: null,
+        source: null,
+        require: null,
+      });
     });
   });
 

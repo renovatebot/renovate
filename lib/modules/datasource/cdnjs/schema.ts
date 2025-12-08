@@ -19,12 +19,12 @@ export const Versions = z
 
 export const Sri = z.record(z.string());
 
-export const CdnjsAPIVersionResponseSchema = z.object({
+export const CdnjsAPIVersionResponse = z.object({
   homepage: Homepage,
   repository: Repository,
   versions: Versions,
 });
 
-export const CdnjsAPISriResponseSchema = z.object({
+export const CdnjsAPISriResponse = z.object({
   sri: Sri,
 });

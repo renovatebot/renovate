@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { getConfig } from '../../../config/defaults';
 import { GlobalConfig } from '../../../config/global';
 import { addMeta } from '../../../logger';
@@ -15,7 +15,7 @@ import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import * as _branchWorker from '../update/branch';
 import * as _limits from './limits';
 import {
-  canSkipBranchUpdateCheck,
+  compareCacheFingerprint,
   generateCommitFingerprintConfig,
   syncBranchState,
   writeUpdates,
@@ -129,14 +129,14 @@ describe('workers/repository/process/write', () => {
 
       scm.branchExists.mockResolvedValueOnce(false).mockResolvedValue(true);
       GlobalConfig.set({ dryRun: 'full' });
-      config.baseBranches = ['main', 'dev'];
+      config.baseBranchPatterns = ['main', 'dev'];
       await writeUpdates(config, branches);
       expect(counts.get('Branches')).toBe(1);
-      expect(addMeta).toHaveBeenCalledWith({
+      expect(addMeta).toHaveBeenNthCalledWith(1, {
         baseBranch: 'main',
         branch: branchName,
       });
-      expect(addMeta).toHaveBeenCalledWith({
+      expect(addMeta).toHaveBeenNthCalledWith(2, {
         baseBranch: 'dev',
         branch: branchName,
       });
@@ -203,7 +203,7 @@ describe('workers/repository/process/write', () => {
         ...new Set(
           branch.upgrades
             .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
-            .filter(is.string),
+            .filter(isString),
         ),
       ].sort();
       const commitFingerprint = fingerprint({
@@ -232,7 +232,7 @@ describe('workers/repository/process/write', () => {
         ...new Set(
           branch.upgrades
             .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
-            .filter(is.string),
+            .filter(isString),
         ),
       ].sort();
 
@@ -277,7 +277,7 @@ describe('workers/repository/process/write', () => {
         ...new Set(
           branch.upgrades
             .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
-            .filter(is.string),
+            .filter(isString),
         ),
       ].sort();
       const commitFingerprint = fingerprint({
@@ -358,7 +358,9 @@ describe('workers/repository/process/write', () => {
         branchName: 'new/some-branch',
         sha: '111',
       };
-      expect(canSkipBranchUpdateCheck(branchCache, '222')).toBe(false);
+      expect(compareCacheFingerprint(branchCache, '222')).toBe(
+        'no-fingerprint',
+      );
     });
 
     it('returns false when fingerprints are not same', () => {
@@ -368,7 +370,7 @@ describe('workers/repository/process/write', () => {
         sha: '111',
         commitFingerprint: '211',
       };
-      expect(canSkipBranchUpdateCheck(branchCache, '222')).toBe(false);
+      expect(compareCacheFingerprint(branchCache, '222')).toBe('no-match');
     });
 
     it('returns true', () => {
@@ -378,7 +380,7 @@ describe('workers/repository/process/write', () => {
         sha: '111',
         commitFingerprint: '222',
       };
-      expect(canSkipBranchUpdateCheck(branchCache, '222')).toBe(true);
+      expect(compareCacheFingerprint(branchCache, '222')).toBe('matched');
     });
   });
 

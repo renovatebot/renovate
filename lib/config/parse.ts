@@ -1,5 +1,6 @@
 import jsonValidator from 'json-dup-key-validator';
 import JSON5 from 'json5';
+import stripJsonComments from 'strip-json-comments';
 import upath from 'upath';
 import { logger } from '../logger';
 import { parseJson } from '../util/common';
@@ -29,9 +30,10 @@ export function parseFileConfig(
       };
     }
   } else {
+    const jsonString = stripJsonComments(fileContents);
     let allowDuplicateKeys = true;
     let jsonValidationError = jsonValidator.validate(
-      fileContents,
+      jsonString,
       allowDuplicateKeys,
     );
     if (jsonValidationError) {
@@ -45,7 +47,7 @@ export function parseFileConfig(
     }
     allowDuplicateKeys = false;
     jsonValidationError = jsonValidator.validate(
-      fileContents,
+      jsonString,
       allowDuplicateKeys,
     );
     if (jsonValidationError) {

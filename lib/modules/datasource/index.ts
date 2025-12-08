@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isFunction, isNonEmptyArray, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { GlobalConfig } from '../../config/global';
 import { HOST_DISABLED } from '../../constants/error-messages';
@@ -7,6 +7,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { coerceArray } from '../../util/array';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
+import type { PackageCacheNamespace } from '../../util/cache/package/types';
 import { clone } from '../../util/clone';
 import { filterMap } from '../../util/filter-map';
 import { AsyncResult, Result } from '../../util/result';
@@ -40,8 +41,6 @@ export { isGetPkgReleasesConfig } from './common';
 export const getDatasources = (): Map<string, DatasourceApi> => datasources;
 export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 
-const cacheNamespace = 'datasource-releases';
-
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
 // TODO: fix error Type
@@ -66,14 +65,18 @@ async function getRegistryReleases(
   config: GetReleasesConfig,
   registryUrl: string,
 ): Promise<ReleaseResult | null> {
-  const cacheKey = `${datasource.id} ${registryUrl} ${config.packageName}`;
-  if (datasource.caching) {
+  const cacheNamespace: PackageCacheNamespace = `datasource-releases-${datasource.id}`;
+  const cacheKey = `${registryUrl}:${config.packageName}`;
+
+  const cacheEnabled = !!datasource.caching; // tells if `isPrivate` flag is supported in datasource result
+  const cacheForced = GlobalConfig.get('cachePrivatePackages', false); // tells if caching is forced via admin config
+
+  if (cacheEnabled || cacheForced) {
     const cachedResult = await packageCache.get<ReleaseResult>(
       cacheNamespace,
       cacheKey,
     );
 
-    // istanbul ignore if
     if (cachedResult) {
       logger.trace({ cacheKey }, 'Returning cached datasource response');
       DatasourceCacheStats.hit(datasource.id, registryUrl, config.packageName);
@@ -88,20 +91,23 @@ async function getRegistryReleases(
     res.registryUrl ??= registryUrl;
   }
 
-  // cache non-null responses unless marked as private
-  if (datasource.caching && res) {
-    const cachePrivatePackages = GlobalConfig.get(
-      'cachePrivatePackages',
-      false,
-    );
-    if (cachePrivatePackages || !res.isPrivate) {
-      logger.trace({ cacheKey }, 'Caching datasource response');
-      const cacheMinutes = 15;
-      await packageCache.set(cacheNamespace, cacheKey, res, cacheMinutes);
-      DatasourceCacheStats.set(datasource.id, registryUrl, config.packageName);
-    } else {
-      DatasourceCacheStats.skip(datasource.id, registryUrl, config.packageName);
-    }
+  if (!res) {
+    return null;
+  }
+
+  let cache = false;
+  if (cacheForced) {
+    cache = true;
+  } else if (cacheEnabled && !res.isPrivate) {
+    cache = true;
+  }
+
+  if (cache) {
+    logger.trace({ cacheKey }, 'Caching datasource response');
+    await packageCache.set(cacheNamespace, cacheKey, res, 15);
+    DatasourceCacheStats.set(datasource.id, registryUrl, config.packageName);
+  } else {
+    DatasourceCacheStats.skip(datasource.id, registryUrl, config.packageName);
   }
 
   return res;
@@ -205,9 +211,9 @@ async function mergeRegistries(
           for (const tag of ['release', 'latest']) {
             const existingTag = combinedRes?.tags?.[tag];
             const newTag = res.tags?.[tag];
-            if (is.string(newTag) && releaseVersioning.isVersion(newTag)) {
+            if (isString(newTag) && releaseVersioning.isVersion(newTag)) {
               if (
-                is.string(existingTag) &&
+                isString(existingTag) &&
                 releaseVersioning.isVersion(existingTag)
               ) {
                 // We need to compare them
@@ -275,9 +281,9 @@ function resolveRegistryUrls(
 ): string[] {
   if (!datasource.customRegistrySupport) {
     if (
-      is.nonEmptyArray(registryUrls) ||
-      is.nonEmptyArray(defaultRegistryUrls) ||
-      is.nonEmptyArray(additionalRegistryUrls)
+      isNonEmptyArray(registryUrls) ||
+      isNonEmptyArray(defaultRegistryUrls) ||
+      isNonEmptyArray(additionalRegistryUrls)
     ) {
       logger.warn(
         {
@@ -289,21 +295,21 @@ function resolveRegistryUrls(
         'Custom registries are not allowed for this datasource and will be ignored',
       );
     }
-    return is.function(datasource.defaultRegistryUrls)
+    return isFunction(datasource.defaultRegistryUrls)
       ? datasource.defaultRegistryUrls()
       : (datasource.defaultRegistryUrls ?? []);
   }
   const customUrls = registryUrls?.filter(Boolean);
   let resolvedUrls: string[] = [];
-  if (is.nonEmptyArray(customUrls)) {
+  if (isNonEmptyArray(customUrls)) {
     resolvedUrls = [...customUrls];
-  } else if (is.nonEmptyArray(defaultRegistryUrls)) {
+  } else if (isNonEmptyArray(defaultRegistryUrls)) {
     resolvedUrls = [...defaultRegistryUrls];
     resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
-  } else if (is.function(datasource.defaultRegistryUrls)) {
+  } else if (isFunction(datasource.defaultRegistryUrls)) {
     resolvedUrls = [...datasource.defaultRegistryUrls()];
     resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
-  } else if (is.nonEmptyArray(datasource.defaultRegistryUrls)) {
+  } else if (isNonEmptyArray(datasource.defaultRegistryUrls)) {
     resolvedUrls = [...datasource.defaultRegistryUrls];
     resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
   }
@@ -333,10 +339,10 @@ async function fetchReleases(
     return null;
   }
   if (datasourceName === 'npm') {
-    if (is.string(config.npmrc)) {
+    if (isString(config.npmrc)) {
       setNpmrc(config.npmrc);
     }
-    if (!is.nonEmptyArray(registryUrls)) {
+    if (!isNonEmptyArray(registryUrls)) {
       registryUrls = [resolveRegistryUrl(config.packageName)];
     }
   }
@@ -356,7 +362,7 @@ async function fetchReleases(
   const registryStrategy =
     config.registryStrategy ?? datasource.registryStrategy ?? 'hunt';
   try {
-    if (is.nonEmptyArray(registryUrls)) {
+    if (isNonEmptyArray(registryUrls)) {
       if (registryStrategy === 'first') {
         dep = await firstRegistry(config, datasource, registryUrls);
       } else if (registryStrategy === 'hunt') {

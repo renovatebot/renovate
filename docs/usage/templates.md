@@ -45,6 +45,14 @@ Returns `true` if a given string is a substring.
 
 `{{#if (containsString depName 'python')}}Python{{else}}Other{{/if}}`
 
+### decodeBase64
+
+If you want to convert a Base64 value to a string, use the built-in function `decodeBase64` like this:
+
+`{{{decodeBase64 body}}}`
+
+In the example above `body` is the base64 encoded value you want to decode.
+
 ### decodeURIComponent
 
 If you want to decode a percent-encoded string, use the built-in function `decodeURIComponent` like this:
@@ -81,9 +89,15 @@ Read the [MDN Web Docs, encodeURIComponent()](https://developer.mozilla.org/en-U
 
 ### equals
 
-Returns `true` if two values equals (checks strict equality, i.e. `===`).
+Returns `true` if two values are equal (checks strict equality, i.e. `===`).
 
 `{{#if (equals datasource 'git-refs')}}git-refs{{else}}Other{{/if}}`
+
+### includes
+
+Returns `true` if an array contains a given string element.
+
+`{{#if (includes labels 'ci')}}Has CI label{{else}}No CI label{{/if}}`
 
 ### lookupArray
 
@@ -118,7 +132,7 @@ Returns `true` if at least one expression is `true`.
 The `replace` helper replaces _all_ found strings matching the given regex with the replacement string.
 If you want to replace some characters in a string, use the built-in function `replace` like this:
 
-`{{{replace '[a-z]+\.github\.com' 'ghc' depName}}}`
+`{{{replace '[a-z]+\\.github\\.com' 'ghc' depName}}}`
 
 In the example above all matches of the regex `[a-z]+\.github\.com` will be replaced by `ghc` in `depName`.
 

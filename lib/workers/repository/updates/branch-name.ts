@@ -1,11 +1,11 @@
 // TODO #22198
 import cleanGitRef from 'clean-git-ref';
 import slugify from 'slugify';
-import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { hash } from '../../../util/hash';
 import { regEx } from '../../../util/regex';
 import * as template from '../../../util/template';
+import type { BranchUpgradeConfig } from '../../types';
 
 const MIN_HASH_LENGTH = 6;
 
@@ -53,7 +53,7 @@ function cleanBranchName(
     .replace(RE_MULTIPLE_DASH, '-'); // chained dashes
 }
 
-export function generateBranchName(update: RenovateConfig): void {
+export function generateBranchName(update: BranchUpgradeConfig): void {
   // Check whether to use a group name
   const newMajor = String(update.newMajor);
   const newMinor = String(update.newMinor);
@@ -128,14 +128,11 @@ export function generateBranchName(update: RenovateConfig): void {
       hashLength,
     )}`;
   } else {
-    update.branchName = template.compile(update.branchName!, update);
+    update.branchName = template.compile(update.branchName, update);
 
     // Compile extra times in case of nested templates
     update.branchName = template.compile(update.branchName, update);
     update.branchName = template.compile(update.branchName, update);
-  }
-  if (update.updateType === 'minor' && update.separateMultipleMinor) {
-    update.branchName = update.branchName.replace('.x', `.${newMinor}.x`);
   }
   update.branchName = cleanBranchName(
     update.branchName,

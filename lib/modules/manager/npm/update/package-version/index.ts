@@ -29,11 +29,13 @@ export function bumpPackageVersion(
     if (isMirrorBumpVersion(bumpVersion)) {
       const mirrorPackage = bumpVersion.replace('mirror:', '');
       const parsedContent = JSON.parse(content);
+      /* v8 ignore next -- needs test */
       newPjVersion =
         parsedContent.dependencies?.[mirrorPackage] ??
         parsedContent.devDependencies?.[mirrorPackage] ??
         parsedContent.optionalDependencies?.[mirrorPackage] ??
         parsedContent.peerDependencies?.[mirrorPackage];
+
       if (!newPjVersion) {
         logger.warn({ mirrorPackage }, 'bumpVersion mirror package not found');
         return { bumpedContent };

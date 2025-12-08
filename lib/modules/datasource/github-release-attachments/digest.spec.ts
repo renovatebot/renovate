@@ -132,6 +132,26 @@ describe('modules/datasource/github-release-attachments/digest', () => {
         );
         expect(digest).toBeNull();
       });
+
+      it('falls back to digesting file when checksum file is removed', async () => {
+        const checksumAssetWithVersion: GithubDigestFile = {
+          assetName: 'SHASUMS.txt',
+          currentVersion: 'v1.0.0',
+          currentDigest: '0'.repeat(64),
+          digestedFileName: 'asset-v1.0.0.zip',
+        };
+        const updatedContent = 'new content';
+        const release = releaseMock.withAssets('v1.0.1', {
+          'asset-v1.0.1.zip': updatedContent,
+        });
+        const contentDigest = toSha256(updatedContent);
+
+        const digest = await githubReleaseAttachments.mapDigestAssetToRelease(
+          checksumAssetWithVersion,
+          release,
+        );
+        expect(digest).toEqual(contentDigest);
+      });
     });
 
     describe('with digested file', () => {

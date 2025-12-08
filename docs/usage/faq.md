@@ -112,17 +112,17 @@ Read our documentation on the [dependencyDashboardApproval](./configuration-opti
 ### Use an alternative branch as my Pull Request target
 
 Say your repository's default branch is `main` but you want Renovate to use the `next` branch as its PR target.
-You can configure the PR target branch via the `baseBranches` option.
+You can configure the PR target branch via the `baseBranchPatterns` option.
 
 Add this line to the `renovate.json` file that's in the _default_ branch (`main` in this example).
 
 ```json
 {
-  "baseBranches": ["next"]
+  "baseBranchPatterns": ["next"]
 }
 ```
 
-You can set more than one PR target branch in the `baseBranches` array.
+You can set more than one PR target branch in the `baseBranchPatterns` array.
 
 ### Support private npm modules
 
@@ -217,7 +217,7 @@ As above, but apply a `groupName`:
   "packageRules": [
     {
       "matchPackageNames": "abc**",
-      "groupName": ["abc packages"]
+      "groupName": "abc packages"
     }
   ]
 }
@@ -307,8 +307,8 @@ plugins {
 
 Renovate will give the dependency these properties:
 
-- `depName=com.gradle.develocity`
-- `packageName: com.gradle.develocity:com.gradle.develocity.gradle.plugin`
+- `depName`: `com.gradle.develocity`
+- `packageName`: `com.gradle.develocity:com.gradle.develocity.gradle.plugin`
 
 Again, often the `depName` and `packageName` are equal.
 The names Renovate uses for the `depName` and `packageName` depend on the package manager (and package ecosystem naming conventions).

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isFalsy, isString, isTruthy, isUndefined } from '@sindresorhus/is';
 import { logger } from '../logger';
 import type { CombinedHostRule, HostRule } from '../types';
 import { clone } from './clone';
@@ -59,7 +59,7 @@ export function add(params: HostRule): void {
   }
   confidentialFields.forEach((field) => {
     const secret = rule[field];
-    if (is.string(secret) && secret.length > 3) {
+    if (isString(secret) && secret.length > 3) {
       sanitize.addSecretForSanitizing(secret);
     }
   });
@@ -78,13 +78,14 @@ export interface HostRuleSearch {
 }
 
 export function matchesHost(url: string, matchHost: string): boolean {
-  if (isHttpUrl(url) && isHttpUrl(matchHost)) {
-    return url.startsWith(matchHost);
-  }
-
   const parsedUrl = parseUrl(url);
   if (!parsedUrl) {
     return false;
+  }
+
+  const parsedMatchHost = parseUrl(matchHost);
+  if (isHttpUrl(parsedUrl) && isHttpUrl(parsedMatchHost)) {
+    return parsedUrl.href.startsWith(parsedMatchHost!.href);
   }
 
   const { hostname } = parsedUrl;
@@ -130,7 +131,7 @@ function fromLowerToHigherRank(a: HostRule, b: HostRule): number {
 }
 
 export function find(search: HostRuleSearch): CombinedHostRule {
-  if ([search.hostType, search.url].every(is.falsy)) {
+  if ([search.hostType, search.url].every(isFalsy)) {
     logger.warn({ search }, 'Invalid hostRules search');
     return {};
   }
@@ -160,7 +161,7 @@ export function find(search: HostRuleSearch): CombinedHostRule {
       }
     }
 
-    if (!is.undefined(rule.readOnly)) {
+    if (!isUndefined(rule.readOnly)) {
       readOnlyMatch = false;
       if (search.readOnly === rule.readOnly) {
         readOnlyMatch = true;
@@ -185,7 +186,7 @@ export function hosts({ hostType }: { hostType: string }): string[] {
   return hostRules
     .filter((rule) => rule.hostType === hostType)
     .map((rule) => rule.resolvedHost)
-    .filter(is.truthy);
+    .filter(isTruthy);
 }
 
 export function hostType({ url }: { url: string }): string | null {
@@ -194,7 +195,7 @@ export function hostType({ url }: { url: string }): string | null {
       .filter((rule) => rule.matchHost && matchesHost(url, rule.matchHost))
       .sort(fromShorterToLongerMatchHost)
       .map((rule) => rule.hostType)
-      .filter(is.truthy)
+      .filter(isTruthy)
       .pop() ?? null
   );
 }

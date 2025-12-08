@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNumber } from '@sindresorhus/is';
 import { getConfig } from '../../../config/defaults';
 import { flattenUpdates, sanitizeDepName } from './flatten';
 import type { RenovateConfig } from '~test/util';
@@ -167,6 +167,7 @@ describe('workers/repository/updates/flatten', () => {
           },
         ],
       };
+      // @ts-expect-error -- TODO: fix types
       const res = await flattenUpdates(config, packageFiles);
       expect(res).toHaveLength(15);
       expect(
@@ -174,7 +175,7 @@ describe('workers/repository/updates/flatten', () => {
           (upgrade) =>
             upgrade.isLockFileMaintenance ??
             upgrade.isRemediation ??
-            is.number(upgrade.depIndex),
+            isNumber(upgrade.depIndex),
         ),
       ).toBeTrue();
       expect(res.find((update) => update.sourceRepoSlug)!.sourceRepoSlug).toBe(

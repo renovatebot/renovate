@@ -27,7 +27,7 @@ export async function getPreset({
       throw err;
     }
 
-    logger.debug(`Preset file ${url} not found`);
+    logger.debug(`Preset file ${url} not found: ${err.message}`);
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 

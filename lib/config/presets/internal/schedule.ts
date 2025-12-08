@@ -6,6 +6,7 @@ const daily = ['* 0-3 * * *'];
 const earlyMondays = ['* 0-3 * * 1'];
 const monthly = ['* 0-3 1 * *'];
 const nonOfficeHours = ['* 0-4,22-23 * * 1-5', '* * * * 0,6'];
+const officeHours = ['* 8-17 * * 1-5'];
 const quarterly = ['* * 1 */3 *'];
 const weekdays = ['* * * * 1-5'];
 const weekends = ['* * * * 0,6'];
@@ -29,6 +30,11 @@ export const presets: Record<string, Preset> = {
     automergeSchedule: nonOfficeHours,
     description:
       'Schedule automerge during typical non-office hours on weekdays (i.e., 10 PM - 5 AM) and anytime on weekends.',
+  },
+  automergeOfficeHours: {
+    automergeSchedule: officeHours,
+    description:
+      'Schedule automerge during typical office hours on weekdays (i.e., 8 AM - 6 PM).',
   },
   automergeQuarterly: {
     automergeSchedule: quarterly,
@@ -69,6 +75,11 @@ export const presets: Record<string, Preset> = {
     description:
       'Schedule during typical non-office hours on weekdays (i.e., 10 PM - 5 AM) and anytime on weekends.',
     schedule: nonOfficeHours,
+  },
+  officeHours: {
+    description:
+      'Schedule during typical office hours on weekdays (i.e., 8 AM - 6 PM).',
+    schedule: officeHours,
   },
   quarterly: {
     description:

@@ -39,7 +39,6 @@ export function findDepConstraints(
     let constraint = requires[depName];
     if (constraint) {
       constraint = constraint.replace(regEx(/(\d)rc$/), '$1-rc');
-      // istanbul ignore else
       if (semver.isValid(constraint)) {
         if (semver.matches(currentVersion, constraint)) {
           if (constraint === currentVersion) {
@@ -52,7 +51,7 @@ export function findDepConstraints(
             constraint,
           });
         }
-      } else {
+      } /* v8 ignore next -- needs test */ else {
         logger.warn(
           { parentDepName, depName, currentVersion, constraint },
           'Parent constraint is invalid',

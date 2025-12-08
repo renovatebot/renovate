@@ -164,7 +164,9 @@ Renovate defaults to separating each dependency update into its own PR.
 But you may want to batch or "group" updates together.
 For example, group all patch updates into one PR or even all non-major updates together (patches and minor updates).
 
-You can configure batched updates by setting a `groupName` as part of `packageRules`.
+You can configure batched updates by setting a [`groupName`](../configuration-options.md#groupname) as part of `packageRules`.
+
+To learn more about batched updates, see [Package grouping](../noise-reduction.md#package-grouping).
 
 ### Scheduled updates
 
@@ -178,7 +180,8 @@ You can set the time ranges during which Renovate creates updates in the `schedu
 
 You can use Renovate's "Dependency Dashboard" on platforms which support dynamic Markdown checkboxes:
 
-- Gitea and Forgejo
+- Forgejo
+- Gitea
 - GitHub
 - GitLab
 

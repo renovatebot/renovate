@@ -6,7 +6,7 @@ import { LooseRecord } from '../../../util/schema-utils';
 import { MaybeTimestamp } from '../../../util/timestamp';
 import type { Release } from '../types';
 
-const HelmReleaseSchema = z.object({
+const HelmRelease = z.object({
   version: z.string(),
   created: MaybeTimestamp,
   digest: z.string().optional().catch(undefined),
@@ -14,7 +14,7 @@ const HelmReleaseSchema = z.object({
   sources: z.array(z.string()).catch([]),
   urls: z.array(z.string()).catch([]),
 });
-type HelmRelease = z.infer<typeof HelmReleaseSchema>;
+type HelmRelease = z.infer<typeof HelmRelease>;
 
 const chartRepo = regEx(/charts?|helm|helm-charts/i);
 
@@ -53,11 +53,11 @@ function getSourceUrl(release: HelmRelease): string | undefined {
   return release.sources[0];
 }
 
-export const HelmRepositorySchema = z
+export const HelmRepository = z
   .object({
     entries: LooseRecord(
       z.string(),
-      HelmReleaseSchema.array()
+      HelmRelease.array()
         .min(1)
         .transform((helmReleases) => {
           const latestRelease = helmReleases[0];
@@ -80,4 +80,4 @@ export const HelmRepositorySchema = z
   })
   .transform(({ entries }) => entries);
 
-export type HelmRepositoryData = z.infer<typeof HelmRepositorySchema>;
+export type HelmRepositoryData = z.infer<typeof HelmRepository>;

@@ -40,7 +40,7 @@ export function setPlatformApi(name: PlatformId): void {
 }
 
 export async function initPlatform(config: AllConfig): Promise<AllConfig> {
-  setPrivateKey(config.gitPrivateKey);
+  setPrivateKey(config.gitPrivateKey, config.gitPrivateKeyPassphrase);
   setNoVerify(config.gitNoVerify ?? []);
   // TODO: `platform` (#22198)
   setPlatformApi(config.platform!);
@@ -75,8 +75,7 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
     ['token', 'username', 'password'] as ('token' | 'username' | 'password')[]
   ).forEach((field) => {
     if (config[field]) {
-      // TODO: types #22198
-      platformRule[field] = config[field] as string;
+      platformRule[field] = config[field];
       delete returnConfig[field];
     }
   });

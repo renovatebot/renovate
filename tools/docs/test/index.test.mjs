@@ -3,7 +3,7 @@ import path from 'node:path';
 import { describe, it } from 'node:test';
 import fs from 'fs-extra';
 import { glob } from 'glob';
-import remark from 'remark';
+import { remark } from 'remark';
 import github from 'remark-github';
 
 const root = path.resolve('tmp/docs');

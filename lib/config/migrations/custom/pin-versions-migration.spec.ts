@@ -1,8 +1,8 @@
 import { PinVersionsMigration } from './pin-versions-migration';
 
 describe('config/migrations/custom/pin-versions-migration', () => {
-  it('should migrate true', () => {
-    expect(PinVersionsMigration).toMigrate(
+  it('should migrate true', async () => {
+    await expect(PinVersionsMigration).toMigrate(
       {
         pinVersions: true,
       },
@@ -12,8 +12,8 @@ describe('config/migrations/custom/pin-versions-migration', () => {
     );
   });
 
-  it('should migrate false', () => {
-    expect(PinVersionsMigration).toMigrate(
+  it('should migrate false', async () => {
+    await expect(PinVersionsMigration).toMigrate(
       {
         pinVersions: false,
       },

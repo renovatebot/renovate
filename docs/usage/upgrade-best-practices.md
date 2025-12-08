@@ -47,7 +47,8 @@ The [`config:best-practices` preset](./presets-config.md#configbest-practices) h
     "docker:pinDigests",
     "helpers:pinGitHubActionDigests",
     ":configMigration",
-    ":pinDevDependencies"
+    ":pinDevDependencies",
+    "abandonments:recommended"
   ]
 }
 ```

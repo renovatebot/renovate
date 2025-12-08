@@ -6,7 +6,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import { XPKGSchema } from './schema';
+import { XPKG } from './schema';
 
 export function extractPackageFile(
   content: string,
@@ -21,7 +21,7 @@ export function extractPackageFile(
 
   // not try and catching this as failureBehaviour is set to filter and therefore it will not throw
   const list = parseYaml(content, {
-    customSchema: XPKGSchema,
+    customSchema: XPKG,
     failureBehaviour: 'filter',
   });
 

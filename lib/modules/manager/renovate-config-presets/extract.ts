@@ -1,11 +1,11 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray, isNullOrUndefined } from '@sindresorhus/is';
 import { parsePreset } from '../../../config/presets/parse';
 import { logger } from '../../../logger';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import type { PackageDependency, PackageFileContent } from '../types';
-import { RenovateJsonSchema } from './schema';
+import { RenovateJson } from './schema';
 
 const supportedPresetSources: Record<string, string> = {
   github: GithubTagsDatasource.id,
@@ -18,7 +18,7 @@ export function extractPackageFile(
   packageFile: string,
 ): PackageFileContent | null {
   logger.trace(`renovate-config-presets.extractPackageFile(${packageFile})`);
-  const config = RenovateJsonSchema.safeParse(content);
+  const config = RenovateJson.safeParse(content);
   if (!config.success) {
     logger.debug({ packageFile, err: config.error }, 'Invalid Renovate Config');
     return null;
@@ -30,7 +30,7 @@ export function extractPackageFile(
     const parsedPreset = parsePreset(preset);
     const datasource = supportedPresetSources[parsedPreset.presetSource];
 
-    if (is.nullOrUndefined(datasource)) {
+    if (isNullOrUndefined(datasource)) {
       if (parsedPreset.presetSource !== 'internal') {
         deps.push({
           depName: parsedPreset.repo,
@@ -40,7 +40,7 @@ export function extractPackageFile(
       continue;
     }
 
-    if (is.nullOrUndefined(parsedPreset.tag)) {
+    if (isNullOrUndefined(parsedPreset.tag)) {
       deps.push({
         depName: parsedPreset.repo,
         skipReason: 'unspecified-version',
@@ -55,5 +55,5 @@ export function extractPackageFile(
     });
   }
 
-  return is.nonEmptyArray(deps) ? { deps } : null;
+  return isNonEmptyArray(deps) ? { deps } : null;
 }

@@ -1,7 +1,7 @@
 import os from 'node:os';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { applySecretsToConfig } from '../../config/secrets';
+import { applySecretsAndVariablesToConfig } from '../../config/secrets';
 import type { AllConfig, RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { resetGlobalLogLevelRemaps } from '../../logger/remap';
@@ -46,9 +46,8 @@ async function setDirectories(input: AllConfig): Promise<AllConfig> {
 }
 
 function limitCommitsPerRun(config: RenovateConfig): void {
-  let limit = config.prCommitsPerRunLimit;
-  limit = typeof limit === 'number' && limit > 0 ? limit : null;
-  setMaxLimit('Commits', limit);
+  const limit = config.prCommitsPerRunLimit;
+  setMaxLimit('Commits', typeof limit === 'number' && limit > 0 ? limit : null);
 }
 
 async function checkVersions(): Promise<void> {
@@ -61,7 +60,11 @@ async function checkVersions(): Promise<void> {
 function setGlobalHostRules(config: RenovateConfig): void {
   if (config.hostRules) {
     logger.debug('Setting global hostRules');
-    applySecretsToConfig(config, undefined, false);
+    applySecretsAndVariablesToConfig({
+      config,
+      deleteVariables: false,
+      deleteSecrets: false,
+    });
     config.hostRules.forEach((rule) => hostRules.add(rule));
   }
 }

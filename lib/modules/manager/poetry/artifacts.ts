@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -21,7 +21,7 @@ import { parseUrl } from '../../../util/url';
 import { PypiDatasource } from '../../datasource/pypi';
 import { getGoogleAuthHostRule } from '../../datasource/util';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { Lockfile, PoetrySchemaToml } from './schema';
+import { Lockfile, PoetryPyProject } from './schema';
 import type { PoetryFile, PoetrySource } from './types';
 
 export function getPythonConstraint(
@@ -31,7 +31,7 @@ export function getPythonConstraint(
   // Read Python version from `pyproject.toml` first as it could have been updated
   const pyprojectPythonConstraint = Result.parse(
     massageToml(pyProjectContent),
-    PoetrySchemaToml.transform(
+    PoetryPyProject.transform(
       ({ packageFileContent }) =>
         packageFileContent.deps.find((dep) => dep.depName === 'python')
           ?.currentValue,
@@ -60,7 +60,7 @@ export function getPoetryRequirement(
 ): undefined | string | null {
   // Read Poetry version from first line of poetry.lock
   const firstLine = existingLockFileContent.split('\n')[0];
-  const poetryVersionMatch = /by Poetry ([\d\\.]+)/.exec(firstLine);
+  const poetryVersionMatch = regEx(/by Poetry ([\d\\.]+)/).exec(firstLine);
   if (poetryVersionMatch?.[1]) {
     const poetryVersion = poetryVersionMatch[1];
     logger.debug(
@@ -82,7 +82,7 @@ export function getPoetryRequirement(
 
   const { val: pyprojectPoetryConstraint } = Result.parse(
     massageToml(pyProjectContent),
-    PoetrySchemaToml.transform(({ poetryRequirement }) => poetryRequirement),
+    PoetryPyProject.transform(({ poetryRequirement }) => poetryRequirement),
   ).unwrap();
   if (pyprojectPoetryConstraint) {
     logger.debug(
@@ -119,7 +119,7 @@ function getPoetrySources(content: string, fileName: string): PoetrySource[] {
 
 async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
   const scopedMatch = find({ hostType: PypiDatasource.id, url });
-  const hostRule = is.nonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
+  const hostRule = isNonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
   if (hostRule && Object.keys(hostRule).length !== 0) {
     return hostRule;
   }
@@ -174,7 +174,7 @@ export async function updateArtifacts({
   logger.debug(`poetry.updateArtifacts(${packageFileName})`);
   const { isLockFileMaintenance } = config;
 
-  if (!is.nonEmptyArray(updatedDeps) && !isLockFileMaintenance) {
+  if (!isNonEmptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated poetry deps - returning null');
     return null;
   }
@@ -201,7 +201,7 @@ export async function updateArtifacts({
       cmd.push(
         `poetry update --lock --no-interaction ${updatedDeps
           .map((dep) => dep.depName)
-          .filter(is.string)
+          .filter(isString)
           .map((dep) => quote(dep))
           .join(' ')}`,
       );

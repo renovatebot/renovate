@@ -25,10 +25,23 @@ describe('modules/manager/nvm/extract', () => {
     });
 
     it('skips non ranges', () => {
-      const res = extractPackageFile('latestn');
+      const res = extractPackageFile('latest\n');
       expect(res.deps).toEqual([
         {
-          currentValue: 'latestn',
+          currentValue: 'latest',
+          datasource: 'node-version',
+          depName: 'node',
+        },
+      ]);
+    });
+
+    it('supports code comments', () => {
+      const res = extractPackageFile(
+        '# This is a comment\nv20.19.3 # This is an inline comment\n# This is another comment',
+      );
+      expect(res.deps).toEqual([
+        {
+          currentValue: 'v20.19.3',
           datasource: 'node-version',
           depName: 'node',
         },

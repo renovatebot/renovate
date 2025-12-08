@@ -20,16 +20,17 @@ let mappingsInitialized = false;
 const shortCodesByHex = new Map<string, string>();
 const hexCodesByShort = new Map<string, string>();
 
-const EmojiShortcodesSchema = Json.pipe(
+const EmojiShortcodes = Json.pipe(
   z.record(
     z.string(),
     z.union([z.string().transform((val) => [val]), z.array(z.string())]),
   ),
 );
-type EmojiShortcodeMapping = z.infer<typeof EmojiShortcodesSchema>;
+type EmojiShortcodeMapping = z.infer<typeof EmojiShortcodes>;
 
 const patchedEmojis: EmojiShortcodeMapping = {
   '26A0-FE0F': ['warning'], // Colorful warning (⚠️) instead of black and white (⚠)
+  '2139-FE0F': ['information_source'], // Colorful info (ℹ️) instead of black and white (ℹ)
 };
 
 function initMapping(mapping: EmojiShortcodeMapping): void {
@@ -51,7 +52,7 @@ function lazyInitMappings(): void {
       'node_modules/emojibase-data/en/shortcodes/github.json',
     );
 
-    Result.parse(githubShortcodes, EmojiShortcodesSchema)
+    Result.parse(githubShortcodes, EmojiShortcodes)
       .onValue((data) => {
         initMapping(data);
         initMapping(patchedEmojis);

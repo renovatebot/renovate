@@ -1,4 +1,4 @@
-import * as upath from 'upath';
+import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';

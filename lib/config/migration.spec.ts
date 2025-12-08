@@ -1,10 +1,12 @@
 import { GlobalConfig } from './global';
 import * as configMigration from './migration';
+import { MigrationsService } from './migrations';
 import type {
   MigratedConfig,
   RenovateConfig,
   RenovateSharedConfig,
 } from './types';
+import { logger } from '~test/util';
 interface TestRenovateConfig extends RenovateConfig {
   node?: RenovateSharedConfig;
 }
@@ -29,6 +31,7 @@ describe('config/migration', () => {
         },
         extends: [
           ':automergeBranchMergeCommit',
+          ':disableLockFiles',
           'default:js-app',
           'config:library',
           ':masterIssue',
@@ -53,6 +56,7 @@ describe('config/migration', () => {
         gomodTidy: true,
         upgradeInRange: true,
         trustLevel: 'high',
+        updateLockFiles: false,
         automergeType: 'branch-push',
         branchName:
           '{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}{{{baseDir}}}',
@@ -168,10 +172,12 @@ describe('config/migration', () => {
         configMigration.migrateConfig(config);
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBeTrue();
+      // @ts-expect-error -- TODO: fix me
       expect(migratedConfig.depTypes).toBeUndefined();
       expect(migratedConfig.automerge).toBe(false);
       expect(migratedConfig.packageRules).toHaveLength(11);
       expect(migratedConfig.hostRules).toHaveLength(1);
+      expect(migratedConfig.baseBranchPatterns).toMatchObject(['next']);
     });
 
     it('migrates before and after schedules', () => {
@@ -210,6 +216,7 @@ describe('config/migration', () => {
         semanticPrefix: 'fix',
       };
       const { isMigrated, migratedConfig } =
+        // @ts-expect-error -- TODO: fix me
         configMigration.migrateConfig(config);
       expect(isMigrated).toBeTrue();
       expect(migratedConfig.semanticCommitScope).toBeNull();
@@ -271,6 +278,7 @@ describe('config/migration', () => {
     it('overrides existing automerge setting', () => {
       const config: TestRenovateConfig = {
         automerge: 'minor' as never,
+        // @ts-expect-error -- TODO: fix me
         packages: [
           {
             packagePatterns: '^(@angular|typescript)',
@@ -299,6 +307,7 @@ describe('config/migration', () => {
     it('migrates subconfig', () => {
       const config: TestRenovateConfig = {
         lockFileMaintenance: {
+          // @ts-expect-error -- TODO: fix me
           depTypes: [
             'dependencies',
             {
@@ -312,6 +321,7 @@ describe('config/migration', () => {
         configMigration.migrateConfig(config);
       expect(isMigrated).toBeTrue();
       expect(migratedConfig).toMatchSnapshot();
+      // @ts-expect-error -- TODO: fix me
       expect(migratedConfig.lockFileMaintenance?.packageRules).toHaveLength(1);
       // TODO: fix types #22198
       expect(
@@ -322,6 +332,7 @@ describe('config/migration', () => {
 
     it('migrates packageFiles', () => {
       const config: TestRenovateConfig = {
+        // @ts-expect-error -- TODO: fix me
         packageFiles: [
           'package.json',
           { packageFile: 'backend/package.json', pinVersions: false },
@@ -338,6 +349,7 @@ describe('config/migration', () => {
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBeTrue();
       expect(migratedConfig.includePaths).toHaveLength(4);
+      // @ts-expect-error -- TODO: fix me
       expect(migratedConfig.packageFiles).toBeUndefined();
       expect(migratedConfig.packageRules).toHaveLength(4);
       expect(migratedConfig.packageRules?.[0].rangeStrategy).toBe('replace');
@@ -346,6 +358,7 @@ describe('config/migration', () => {
 
     it('migrates more packageFiles', () => {
       const config: TestRenovateConfig = {
+        // @ts-expect-error -- TODO: fix me
         packageFiles: [
           {
             packageFile: 'package.json',
@@ -367,12 +380,14 @@ describe('config/migration', () => {
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBeTrue();
       expect(migratedConfig.includePaths).toHaveLength(1);
+      // @ts-expect-error -- TODO: fix me
       expect(migratedConfig.packageFiles).toBeUndefined();
       expect(migratedConfig.packageRules).toHaveLength(2);
     });
 
     it('removes invalid configs', () => {
       const config: TestRenovateConfig = {
+        // @ts-expect-error -- TODO: fix me
         pathRules: {},
         packageFiles: [{ packageFile: 'test' }],
         gomodTidy: false,
@@ -391,7 +406,7 @@ describe('config/migration', () => {
       const { isMigrated, migratedConfig } =
         configMigration.migrateConfig(config);
       expect(migratedConfig).toEqual({
-        baseBranches: [],
+        baseBranchPatterns: [],
         commitMessage: 'test',
         ignorePaths: [],
         includePaths: ['test'],
@@ -426,55 +441,61 @@ describe('config/migration', () => {
       let config: TestRenovateConfig;
       let res: MigratedConfig;
 
+      // @ts-expect-error -- TODO: fix me
       config = { unpublishSafe: true };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
-        extends: ['npm:unpublishSafe'],
+        extends: ['security:minimumReleaseAgeNpm'],
       });
 
       config = { unpublishSafe: true, extends: 'foo' } as never;
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'npm:unpublishSafe'],
+        extends: ['foo', 'security:minimumReleaseAgeNpm'],
       });
 
+      // @ts-expect-error -- TODO: fix me
       config = { unpublishSafe: true, extends: [] };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
-        extends: ['npm:unpublishSafe'],
+        extends: ['security:minimumReleaseAgeNpm'],
       });
 
+      // @ts-expect-error -- TODO: fix me
       config = { unpublishSafe: true, extends: ['foo', 'bar'] };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'bar', 'npm:unpublishSafe'],
+        extends: ['foo', 'bar', 'security:minimumReleaseAgeNpm'],
       });
 
       config = {
+        // @ts-expect-error -- TODO: fix me
         unpublishSafe: true,
         extends: ['foo', ':unpublishSafe', 'bar'],
       };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'npm:unpublishSafe', 'bar'],
+        extends: ['foo', 'security:minimumReleaseAgeNpm', 'bar'],
       });
 
       config = {
+        // @ts-expect-error -- TODO: fix me
         unpublishSafe: true,
         extends: ['foo', 'default:unpublishSafe', 'bar'],
       };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'npm:unpublishSafe', 'bar'],
+        extends: ['foo', 'security:minimumReleaseAgeNpm', 'bar'],
       });
 
       config = {
+        // @ts-expect-error -- TODO: fix me
         unpublishSafe: false,
         extends: ['foo', 'bar'],
       };
@@ -485,23 +506,44 @@ describe('config/migration', () => {
       });
 
       config = {
+        // @ts-expect-error -- TODO: fix me
         unpublishSafe: true,
         extends: ['foo', 'bar'],
       };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'bar', 'npm:unpublishSafe'],
+        extends: ['foo', 'bar', 'security:minimumReleaseAgeNpm'],
       });
 
       config = {
+        // @ts-expect-error -- TODO: fix me
         unpublishSafe: true,
         extends: [':unpublishSafeDisabled'],
       };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
-        extends: [':unpublishSafeDisabled', 'npm:unpublishSafe'],
+        extends: [':unpublishSafeDisabled', 'security:minimumReleaseAgeNpm'],
+      });
+    });
+
+    it('migrates npm:unpublishSafe', () => {
+      let config: TestRenovateConfig;
+      let res: MigratedConfig;
+
+      config = { extends: ['npm:unpublishSafe'] };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBeTrue();
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['security:minimumReleaseAgeNpm'],
+      });
+
+      config = { extends: ['foo', 'npm:unpublishSafe'] } as never;
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBeTrue();
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'security:minimumReleaseAgeNpm'],
       });
     });
 
@@ -509,6 +551,7 @@ describe('config/migration', () => {
       const config: TestRenovateConfig = {
         packageRules: [
           {
+            // @ts-expect-error -- TODO: fix me
             paths: ['package.json'],
             languages: ['python'],
             baseBranchList: ['master'],
@@ -550,10 +593,12 @@ describe('config/migration', () => {
       const config: TestRenovateConfig = {
         packageRules: [
           {
+            // @ts-expect-error -- TODO: fix me
             matchFiles: ['matchFiles'],
             matchPaths: ['matchPaths'],
           },
           {
+            // @ts-expect-error -- TODO: fix me
             matchPaths: ['matchPaths'],
             matchFiles: ['matchFiles'],
           },
@@ -584,6 +629,7 @@ describe('config/migration', () => {
         },
         {
           automerge: true,
+          // @ts-expect-error -- TODO: fix me
           excludePackageNames: ['@types/react-table'],
           packageRules: [
             {
@@ -648,6 +694,7 @@ describe('config/migration', () => {
 
   it('migrates pip-compile', () => {
     const config: RenovateConfig = {
+      // @ts-expect-error -- TODO: fix me
       'pip-compile': {
         enabled: true,
         fileMatch: [
@@ -682,6 +729,7 @@ describe('config/migration', () => {
 
   it('migrates gradle-lite', () => {
     const config: RenovateConfig = {
+      // @ts-expect-error -- TODO: fix me
       'gradle-lite': {
         enabled: true,
         fileMatch: ['foo'],
@@ -701,6 +749,7 @@ describe('config/migration', () => {
 
   it('migrates empty requiredStatusChecks', () => {
     const config: RenovateConfig = {
+      // @ts-expect-error -- TODO: fix me
       requiredStatusChecks: [],
     };
     const { isMigrated, migratedConfig } =
@@ -713,21 +762,25 @@ describe('config/migration', () => {
     const migrate = (config: RenovateConfig): MigratedConfig =>
       configMigration.migrateConfig(config);
 
+    // @ts-expect-error -- TODO: fix me
     expect(migrate({ azureAutoComplete: true })).toEqual({
       isMigrated: true,
       migratedConfig: { platformAutomerge: true },
     });
 
+    // @ts-expect-error -- TODO: fix me
     expect(migrate({ azureAutoComplete: false })).toEqual({
       isMigrated: true,
       migratedConfig: { platformAutomerge: false },
     });
 
+    // @ts-expect-error -- TODO: fix me
     expect(migrate({ automerge: false, azureAutoComplete: true })).toEqual({
       isMigrated: true,
       migratedConfig: { automerge: false, platformAutomerge: true },
     });
 
+    // @ts-expect-error -- TODO: fix me
     expect(migrate({ automerge: true, azureAutoComplete: true })).toEqual({
       isMigrated: true,
       migratedConfig: { automerge: true, platformAutomerge: true },
@@ -738,21 +791,25 @@ describe('config/migration', () => {
     const migrate = (config: RenovateConfig): MigratedConfig =>
       configMigration.migrateConfig(config);
 
+    // @ts-expect-error -- TODO: fix me
     expect(migrate({ gitLabAutomerge: true })).toEqual({
       isMigrated: true,
       migratedConfig: { platformAutomerge: true },
     });
 
+    // @ts-expect-error -- TODO: fix me
     expect(migrate({ gitLabAutomerge: false })).toEqual({
       isMigrated: true,
       migratedConfig: { platformAutomerge: false },
     });
 
+    // @ts-expect-error -- TODO: fix me
     expect(migrate({ automerge: false, gitLabAutomerge: true })).toEqual({
       isMigrated: true,
       migratedConfig: { automerge: false, platformAutomerge: true },
     });
 
+    // @ts-expect-error -- TODO: fix me
     expect(migrate({ automerge: true, gitLabAutomerge: true })).toEqual({
       isMigrated: true,
       migratedConfig: { automerge: true, platformAutomerge: true },
@@ -763,12 +820,35 @@ describe('config/migration', () => {
     let config: TestRenovateConfig;
     let res: MigratedConfig;
 
+    // @ts-expect-error -- TODO: fix me
     config = { dryRun: true };
     res = configMigration.migrateConfig(config);
     expect(res.isMigrated).toBeTrue();
 
+    // @ts-expect-error -- TODO: fix me
     config = { dryRun: false };
     res = configMigration.migrateConfig(config);
     expect(res.isMigrated).toBeTrue();
+  });
+
+  it('migrates baseBranches and baseBranch', () => {
+    const config = { baseBranches: ['main', 'dev'] };
+    const res = configMigration.migrateConfig(config);
+    expect(res.isMigrated).toBeTrue();
+    expect(res.migratedConfig).toEqual({
+      baseBranchPatterns: ['main', 'dev'],
+    });
+  });
+
+  it('logs errors', () => {
+    vi.spyOn(MigrationsService, 'run').mockImplementation(() => {
+      throw new Error('test error');
+    });
+    const config = { baseBranches: ['main', 'dev'] };
+    expect(() => configMigration.migrateConfig(config)).toThrow('test error');
+    expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
+      { config, err: expect.any(Error) },
+      'migrateConfig() error',
+    );
   });
 });

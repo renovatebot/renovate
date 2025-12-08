@@ -2,7 +2,7 @@ import { findUp as _findUp } from 'find-up';
 import fs from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import tmp from 'tmp-promise';
-import { join, resolve } from 'upath';
+import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import {
   cachePathExists,
@@ -188,7 +188,7 @@ describe('util/fs/index', () => {
   describe('ensureCacheDir', () => {
     it('prefers environment variables over global config', async () => {
       const res = await ensureCacheDir('bundler');
-      const path = join(cacheDir, 'others/bundler');
+      const path = upath.join(cacheDir, 'others/bundler');
       expect(res).toEqual(path);
       expect(await fs.pathExists(path)).toBeTrue();
     });
@@ -231,8 +231,8 @@ describe('util/fs/index', () => {
     it('reads symlink', async () => {
       await writeLocalFile('test/test.txt', '');
       await fs.symlink(
-        join(localDir, 'test/test.txt'),
-        join(localDir, 'test/test'),
+        upath.join(localDir, 'test/test.txt'),
+        upath.join(localDir, 'test/test'),
       );
 
       const result = await readLocalSymlink('test/test');
@@ -243,8 +243,8 @@ describe('util/fs/index', () => {
     it('return null when link not exists', async () => {
       await writeLocalFile('test/test.txt', '');
       await fs.symlink(
-        join(localDir, 'test/test.txt'),
-        join(localDir, 'test/test'),
+        upath.join(localDir, 'test/test.txt'),
+        upath.join(localDir, 'test/test'),
       );
 
       const notExistsResult = await readLocalSymlink('test/not-exists');
@@ -363,13 +363,15 @@ describe('util/fs/index', () => {
     });
 
     it('returns false for directory', async () => {
-      const path = resolve(`${localDir}/foobar`);
+      const path = upath.resolve(`${localDir}/foobar`);
       await fs.mkdir(path);
       expect(await localPathIsFile(path)).toBeFalse();
     });
 
     it('returns false for non-existing path', async () => {
-      expect(await localPathIsFile(resolve(`${localDir}/foobar`))).toBeFalse();
+      expect(
+        await localPathIsFile(upath.resolve(`${localDir}/foobar`)),
+      ).toBeFalse();
     });
   });
 

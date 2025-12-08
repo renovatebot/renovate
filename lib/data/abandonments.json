@@ -1,0 +1,7 @@
+{
+  "$schema": "../../tools/schemas/abandonments-schema.json",
+  "npm": {
+    "@types/*": "eternal",
+    "lodash": "6 years"
+  }
+}

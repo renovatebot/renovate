@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider';
 import type { ExtractConfig, PackageDependency } from '../types';
@@ -39,7 +39,7 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
     dep.depName = dep.managerData?.moduleName;
     dep.datasource = TerraformProviderDatasource.id;
 
-    if (is.nonEmptyString(dep.managerData?.source)) {
+    if (isNonEmptyString(dep.managerData?.source)) {
       // TODO #22198
       const source = this.sourceExtractionRegex.exec(dep.managerData.source);
       if (!source?.groups) {

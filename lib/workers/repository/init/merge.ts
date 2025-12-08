@@ -1,13 +1,19 @@
-import is from '@sindresorhus/is';
+import {
+  isNonEmptyArray,
+  isNonEmptyObject,
+  isNonEmptyString,
+  isString,
+} from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../config';
-import { configFileNames } from '../../../config/app-strings';
+import { getConfigFileNames } from '../../../config/app-strings';
 import { decryptConfig } from '../../../config/decrypt';
 import { migrateAndValidate } from '../../../config/migrate-validate';
 import { migrateConfig } from '../../../config/migration';
 import { parseFileConfig } from '../../../config/parse';
 import * as presets from '../../../config/presets';
-import { applySecretsToConfig } from '../../../config/secrets';
+import { applySecretsAndVariablesToConfig } from '../../../config/secrets';
 import type { AllConfig, RenovateConfig } from '../../../config/types';
+import * as configValidation from '../../../config/validation';
 import {
   CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
@@ -20,26 +26,27 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
 import { parseJson } from '../../../util/common';
 import { setUserEnv } from '../../../util/env';
-import { readLocalFile } from '../../../util/fs';
+import { readLocalFile, readSystemFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
 import { maskToken } from '../../../util/mask';
 import { regEx } from '../../../util/regex';
-import { parseAndValidateOrExit } from '../../global/config/parse/env';
 import { getOnboardingConfig } from '../onboarding/branch/config';
-import { getDefaultConfigFileName } from '../onboarding/branch/create';
 import {
   getOnboardingConfigFromCache,
   getOnboardingFileNameFromCache,
   setOnboardingConfigDetails,
 } from '../onboarding/branch/onboarding-branch-cache';
-import { OnboardingState } from '../onboarding/common';
+import {
+  OnboardingState,
+  getDefaultConfigFileName,
+} from '../onboarding/common';
 import type { RepoFileConfig } from './types';
 
 export async function detectConfigFile(): Promise<string | null> {
   const fileList = await scm.getFileList();
-  for (const fileName of configFileNames) {
+  for (const fileName of getConfigFileNames()) {
     if (fileName === 'package.json') {
       try {
         const pJson = JSON.parse(
@@ -66,7 +73,7 @@ export async function detectRepoFileConfig(
 ): Promise<RepoFileConfig> {
   const cache = getCache();
   let { configFileName } = cache;
-  if (is.nonEmptyString(configFileName)) {
+  if (isNonEmptyString(configFileName)) {
     let configFileRaw: string | null;
     try {
       configFileRaw = await platform.getRawFile(
@@ -125,7 +132,7 @@ export async function detectRepoFileConfig(
       // TODO #22198
       (await readLocalFile('package.json', 'utf8'))!,
     ).renovate;
-    if (is.string(configFileParsed)) {
+    if (isString(configFileParsed)) {
       logger.debug('Massaging string renovate config to extends array');
       configFileParsed = { extends: [configFileParsed] };
     }
@@ -133,7 +140,7 @@ export async function detectRepoFileConfig(
   } else {
     configFileRaw = await readLocalFile(configFileName, 'utf8');
     // istanbul ignore if
-    if (!is.string(configFileRaw)) {
+    if (!isString(configFileRaw)) {
       logger.warn({ configFileName }, 'Null contents when reading config file');
       throw new Error(REPOSITORY_CHANGED);
     }
@@ -196,20 +203,20 @@ export async function mergeRenovateConfig(
     };
   }
   const configFileParsed = repoConfig?.configFileParsed ?? {};
-  // I think we do not need to use combined env here as static repo config is meant to be in the env var and not file/repo config
-  const configFileAndEnv = await mergeStaticRepoEnvConfig(
+  const resolvedRepoConfig = await resolveStaticRepoConfig(
     configFileParsed,
-    process.env,
+    process.env.RENOVATE_X_STATIC_REPO_CONFIG_FILE,
   );
-  if (is.nonEmptyArray(returnConfig.extends)) {
-    configFileAndEnv.extends = [
+
+  if (isNonEmptyArray(returnConfig.extends)) {
+    resolvedRepoConfig.extends = [
       ...returnConfig.extends,
-      ...(configFileAndEnv.extends ?? []),
+      ...(resolvedRepoConfig.extends ?? []),
     ];
     delete returnConfig.extends;
   }
   checkForRepoConfigError(repoConfig);
-  const migratedConfig = await migrateAndValidate(config, configFileAndEnv);
+  const migratedConfig = await migrateAndValidate(config, resolvedRepoConfig);
   if (migratedConfig.errors?.length) {
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = repoConfig.configFileName;
@@ -234,7 +241,7 @@ export async function mergeRenovateConfig(
   const decryptedConfig = await decryptConfig(migratedConfig, repository);
   setNpmTokenInNpmrc(decryptedConfig);
   // istanbul ignore if
-  if (is.string(decryptedConfig.npmrc)) {
+  if (isString(decryptedConfig.npmrc)) {
     logger.debug('Found npmrc in decrypted config - setting');
     npmApi.setNpmrc(decryptedConfig.npmrc);
   }
@@ -256,16 +263,24 @@ export async function mergeRenovateConfig(
   }
   setNpmTokenInNpmrc(resolvedConfig);
   // istanbul ignore if
-  if (is.string(resolvedConfig.npmrc)) {
+  if (isString(resolvedConfig.npmrc)) {
     logger.debug(
       'Ignoring any .npmrc files in repository due to configured npmrc',
     );
     npmApi.setNpmrc(resolvedConfig.npmrc);
   }
-  resolvedConfig = applySecretsToConfig(
-    resolvedConfig,
-    mergeChildConfig(config.secrets ?? {}, resolvedConfig.secrets ?? {}),
-  );
+  resolvedConfig = applySecretsAndVariablesToConfig({
+    config: resolvedConfig,
+    secrets: mergeChildConfig(
+      config.secrets ?? {},
+      resolvedConfig.secrets ?? {},
+    ),
+    variables: mergeChildConfig(
+      config.variables ?? {},
+      resolvedConfig.variables ?? {},
+    ),
+  });
+
   // istanbul ignore if
   if (resolvedConfig.hostRules) {
     logger.debug('Setting hostRules from config');
@@ -303,14 +318,14 @@ export async function mergeRenovateConfig(
 
 /** needed when using portal secrets for npmToken */
 export function setNpmTokenInNpmrc(config: RenovateConfig): void {
-  if (!is.string(config.npmToken)) {
+  if (!isString(config.npmToken)) {
     return;
   }
 
   const token = config.npmToken;
   logger.debug({ npmToken: maskToken(token) }, 'Migrating npmToken to npmrc');
 
-  if (!is.string(config.npmrc)) {
+  if (!isString(config.npmrc)) {
     logger.debug('Adding npmrc to config');
     config.npmrc = `//registry.npmjs.org/:_authToken=${token}\n`;
     delete config.npmToken;
@@ -331,24 +346,81 @@ export function setNpmTokenInNpmrc(config: RenovateConfig): void {
   delete config.npmToken;
 }
 
-export async function mergeStaticRepoEnvConfig(
+export async function resolveStaticRepoConfig(
   config: AllConfig,
-  env: NodeJS.ProcessEnv,
+  filename: string | undefined,
 ): Promise<AllConfig> {
-  const repoEnvConfig = await parseAndValidateOrExit(
-    env,
-    'RENOVATE_STATIC_REPO_CONFIG',
-  );
-
-  if (!is.nonEmptyObject(repoEnvConfig)) {
+  if (!isNonEmptyString(filename)) {
     return config;
   }
 
-  // merge extends
-  if (is.nonEmptyArray(repoEnvConfig.extends)) {
-    config.extends = [...repoEnvConfig.extends, ...(config.extends ?? [])];
-    delete repoEnvConfig.extends;
+  let staticRepoConfig: AllConfig;
+
+  try {
+    staticRepoConfig = await tryReadStaticRepoFileConfig(filename);
+  } catch (err) {
+    logger.fatal({ err }, 'Failed to load static repository config file');
+    process.exit(1);
   }
-  // renovate repo config overrides RENOVATE_STATIC_REPO_CONFIG
-  return mergeChildConfig(repoEnvConfig, config);
+
+  if (!isNonEmptyObject(staticRepoConfig)) {
+    return config;
+  }
+
+  return mergeStaticConfig(config, staticRepoConfig);
+}
+
+export async function tryReadStaticRepoFileConfig(
+  staticRepoConfigFile: string,
+): Promise<AllConfig> {
+  logger.debug(`Reading static repo config file from ${staticRepoConfigFile}`);
+
+  let staticRepoConfigRaw: string;
+  try {
+    staticRepoConfigRaw = await readSystemFile(staticRepoConfigFile, 'utf8');
+  } catch (err) {
+    throw new Error(
+      `Failed to read static repo config file: "${staticRepoConfigFile}"`,
+      { cause: err },
+    );
+  }
+
+  const staticRepoConfig = parseJson(
+    staticRepoConfigRaw,
+    staticRepoConfigFile,
+  ) as AllConfig;
+
+  // validate and log issues here to preserve context, caller handles migration and full validation.
+  const { errors, warnings } = await configValidation.validateConfig(
+    'repo',
+    staticRepoConfig,
+  );
+
+  if (isNonEmptyArray(errors) || isNonEmptyArray(warnings)) {
+    logger.info(
+      { errors, warnings },
+      'Static repo config validation issues detected',
+    );
+  } else {
+    logger.debug(
+      { staticRepoConfig },
+      'Static repository config file successfully parsed and validated',
+    );
+  }
+
+  return staticRepoConfig;
+}
+
+export function mergeStaticConfig(
+  config: AllConfig,
+  staticRepoConfig: AllConfig,
+): AllConfig {
+  // merge extends
+  if (isNonEmptyArray(staticRepoConfig.extends)) {
+    config.extends = [...staticRepoConfig.extends, ...(config.extends ?? [])];
+    delete staticRepoConfig.extends;
+  }
+
+  // renovate repo config overrides RENOVATE_STATIC_REPO_CONFIG[_FILE]
+  return mergeChildConfig(staticRepoConfig, config);
 }

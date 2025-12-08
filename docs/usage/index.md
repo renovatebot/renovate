@@ -63,18 +63,19 @@ Multi-platform and multi-language.
 
 Renovate works on these platforms:
 
-- [GitHub (.com and Enterprise Server)](./modules/platform/github/index.md)
-- [GitLab (.com and CE/EE)](./modules/platform/gitlab/index.md)
-- [Bitbucket Cloud](./modules/platform/bitbucket/index.md)
-- [Bitbucket Server](./modules/platform/bitbucket-server/index.md)
 - [Azure DevOps](./modules/platform/azure/index.md)
 - [AWS CodeCommit](./modules/platform/codecommit/index.md)
-- [Gitea and Forgejo](./modules/platform/gitea/index.md)
+- [Bitbucket Cloud](./modules/platform/bitbucket/index.md)
+- [Bitbucket Server](./modules/platform/bitbucket-server/index.md)
+- [Forgejo](./modules/platform/forgejo/index.md)
 - [Gerrit (experimental)](./modules/platform/gerrit/index.md)
+- [Gitea](./modules/platform/gitea/index.md)
+- [GitHub (.com and Enterprise Server)](./modules/platform/github/index.md)
+- [GitLab (.com and CE/EE)](./modules/platform/gitlab/index.md)
 
 ## Who Uses Renovate?
 
-Renovate is used by:
+A non-exhaustive list of companies and projects using Renovate can be seen below:
 
 ![Logos of companies and projects that use Renovate](./assets/images/matrix.png){ loading=lazy }
 

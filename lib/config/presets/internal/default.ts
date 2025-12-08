@@ -173,10 +173,6 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
-  disableLockFiles: {
-    description: 'Disable lock file updates.',
-    updateLockFiles: false,
-  },
   disableMajorUpdates: {
     description: 'Disable `major` updates.',
     major: {
@@ -246,9 +242,17 @@ export const presets: Record<string, Preset> = {
       enabled: true,
     },
   },
+  enableVulnerabilityAlertsWithAdditionalLabel: {
+    description:
+      'Raise PR when vulnerability alerts are detected with label `{{arg0}}`, in addition to any existing list of PR labels.',
+    vulnerabilityAlerts: {
+      addLabels: ['{{arg0}}'],
+      enabled: true,
+    },
+  },
   enableVulnerabilityAlertsWithLabel: {
     description:
-      'Raise PR when vulnerability alerts are detected with label `{{arg0}}`.',
+      'Raise PR when vulnerability alerts are detected with label `{{arg0}}`, replacing any existing list of PR labels.',
     vulnerabilityAlerts: {
       enabled: true,
       labels: ['{{arg0}}'],
@@ -587,6 +591,10 @@ export const presets: Record<string, Preset> = {
         matchManagers: ['poetry'],
         semanticCommitType: 'fix',
       },
+      {
+        matchJsonata: ['isLockfileUpdate = true'],
+        semanticCommitType: 'chore',
+      },
     ],
   },
   separateMajorReleases: {
@@ -609,6 +617,10 @@ export const presets: Record<string, Preset> = {
     description:
       'Separate `patch` and `minor` releases of dependencies into separate PRs.',
     separateMinorPatch: true,
+  },
+  skipArtifactsUpdate: {
+    description: 'Skips artifact updates.',
+    skipArtifactsUpdate: true,
   },
   skipStatusChecks: {
     description: 'Skip status checks and automerge right away.',

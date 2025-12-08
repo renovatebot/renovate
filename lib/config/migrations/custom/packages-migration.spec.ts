@@ -1,8 +1,8 @@
 import { PackagesMigration } from './packages-migration';
 
 describe('config/migrations/custom/packages-migration', () => {
-  it('should migrate to package rules', () => {
-    expect(PackagesMigration).toMigrate(
+  it('should migrate to package rules', async () => {
+    await expect(PackagesMigration).toMigrate(
       {
         packages: [{ matchPackageNames: ['*'] }],
       },
@@ -12,8 +12,8 @@ describe('config/migrations/custom/packages-migration', () => {
     );
   });
 
-  it('should concat with existing package rules', () => {
-    expect(PackagesMigration).toMigrate(
+  it('should concat with existing package rules', async () => {
+    await expect(PackagesMigration).toMigrate(
       {
         packages: [{ matchPackageNames: ['*'] }],
         packageRules: [{ matchPackageNames: [] }],
@@ -24,8 +24,8 @@ describe('config/migrations/custom/packages-migration', () => {
     );
   });
 
-  it('should ignore non array value', () => {
-    expect(PackagesMigration).toMigrate(
+  it('should ignore non array value', async () => {
+    await expect(PackagesMigration).toMigrate(
       {
         packages: { matchPackageNames: ['*'] },
         packageRules: [{ matchPackageNames: [] }],

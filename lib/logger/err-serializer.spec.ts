@@ -109,5 +109,26 @@ describe('logger/err-serializer', () => {
         },
       });
     });
+
+    it('handles AggregateErrors', () => {
+      const err = partial<Error & Record<string, unknown>>({
+        message: 'foo',
+        stack: 'error stack',
+        body: 'error body',
+      });
+      const aggregateError = new AggregateError([err], 'bar');
+      aggregateError.stack = 'aggregate stack';
+      expect(errSerializer(aggregateError)).toEqual({
+        message: 'bar',
+        stack: 'aggregate stack',
+        errors: [
+          {
+            message: 'foo',
+            body: 'error body',
+            stack: 'error stack',
+          },
+        ],
+      });
+    });
   });
 });

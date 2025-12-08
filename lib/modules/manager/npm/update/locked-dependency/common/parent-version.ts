@@ -35,7 +35,7 @@ export async function findFirstParentVersion(
   targetDepName: string,
   targetVersion: string,
 ): Promise<string | null> {
-  // istanbul ignore if
+  /* v8 ignore next -- needs test */
   if (!semver.isVersion(parentStartingVersion)) {
     logger.debug('parentStartingVersion is not a version - cannot remediate');
     return null;
@@ -45,7 +45,7 @@ export async function findFirstParentVersion(
   );
   try {
     const targetDep = await getPkgReleasesCached(targetDepName);
-    // istanbul ignore if
+    /* v8 ignore next -- needs test */
     if (!targetDep) {
       logger.info(
         { targetDepName },
@@ -63,7 +63,7 @@ export async function findFirstParentVersion(
             semver.isGreaterThan(version, targetVersion)),
       );
     const parentDep = await getPkgReleasesCached(parentName);
-    // istanbul ignore if
+    /* v8 ignore next -- needs test */
     if (!parentDep) {
       logger.info(
         { parentName },
@@ -118,7 +118,8 @@ export async function findFirstParentVersion(
         return parentVersion;
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next -- needs test */
+  } catch (err) {
     logger.warn(
       { parentName, parentStartingVersion, targetDepName, targetVersion, err },
       'findFirstParentVersion error',

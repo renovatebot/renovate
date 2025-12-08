@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { MaybeTimestamp } from '../../../util/timestamp';
 
-export const ReleaseTimestampSchema = z
+export const ReleaseTimestamp = z
   .object({
     version: z.object({
       created_at: MaybeTimestamp,

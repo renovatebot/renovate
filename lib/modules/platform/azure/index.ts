@@ -1,6 +1,7 @@
 import { setTimeout } from 'timers/promises';
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import type {
+  GitItem,
   GitPullRequest,
   GitPullRequestCommentThread,
   GitStatus,
@@ -9,6 +10,7 @@ import type {
 import {
   GitPullRequestMergeStrategy,
   GitStatusState,
+  GitVersionType,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import {
@@ -144,25 +146,36 @@ export async function getRawFile(
       return null;
     }
 
+    let item: GitItem | undefined;
     const versionDescriptor: GitVersionDescriptor = {
       version: branchOrTag,
     } satisfies GitVersionDescriptor;
+    // Try to get file from repo with tag first, if not found, then try with branch #36835
+    for (const versionType of [GitVersionType.Tag, GitVersionType.Branch]) {
+      versionDescriptor.versionType = versionType;
 
-    const item = await azureApiGit.getItem(
-      repoId, // repositoryId
-      fileName, // path
-      undefined, // project
-      undefined, // scopePath
-      undefined, // recursionLevel
-      undefined, // includeContentMetadata
-      undefined, // latestProcessedChange
-      undefined, // download
-      branchOrTag ? versionDescriptor : undefined, // versionDescriptor
-      true, // includeContent
-    );
-
+      item = await azureApiGit.getItem(
+        repoId, // repositoryId
+        fileName, // path
+        undefined, // project
+        undefined, // scopePath
+        undefined, // recursionLevel
+        undefined, // includeContentMetadata
+        undefined, // latestProcessedChange
+        undefined, // download
+        branchOrTag ? versionDescriptor : undefined, // versionDescriptor
+        true, // includeContent
+      );
+      if (item) {
+        break; // exit loop if item is found
+      } else {
+        logger.debug(
+          `File: ${fileName} not found in ${repoName} with ${versionType}: ${branchOrTag}`,
+        );
+      }
+    }
     return item?.content ?? null;
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     if (
       err.message?.includes('<title>Azure DevOps Services Unavailable</title>')
     ) {
@@ -178,7 +191,7 @@ export async function getRawFile(
       throw new ExternalHostError(err, id);
     }
     throw err;
-  } /* v8 ignore stop */
+  }
 }
 
 export async function getJsonFile(
@@ -209,11 +222,11 @@ export async function initRepo({
     logger.debug('Repository is disabled- throwing error to abort renovation');
     throw new Error(REPOSITORY_ARCHIVED);
   }
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (!repo.defaultBranch) {
     logger.debug('Repo is empty');
     throw new Error(REPOSITORY_EMPTY);
-  } /* v8 ignore stop */
+  }
   // TODO #22198
   config.repoId = repo.id!;
 
@@ -303,7 +316,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   azurePr.labels = labels
     .filter((label) => label.active)
     .map((label) => label.name)
-    .filter(is.string);
+    .filter(isString);
   return azurePr;
 }
 
@@ -613,12 +626,12 @@ export async function updatePr({
     const existingIndex = config.prList.findIndex(
       (item) => item.number === prNo,
     );
-    /* v8 ignore start: should not happen */
+    /* v8 ignore next: should not happen */
     if (existingIndex === -1) {
       logger.warn({ prNo }, 'PR not found in cache');
       // Add to cache
       config.prList.push(prToCache);
-    } /* v8 ignore stop */ else {
+    } else {
       // overwrite existing PR in cache
       config.prList[existingIndex] = prToCache;
     }
@@ -861,31 +874,31 @@ export function maxBodyLength(): number {
   return 4000;
 }
 
-/* v8 ignore start */
+/* v8 ignore next */
 export function findIssue(): Promise<Issue | null> {
   // TODO: Needs implementation (#9592)
   logger.debug(`findIssue() is not implemented`);
   return Promise.resolve(null);
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
+/* v8 ignore next */
 export function ensureIssue(): Promise<EnsureIssueResult | null> {
   // TODO: Needs implementation (#9592)
   logger.debug(`ensureIssue() is not implemented`);
   return Promise.resolve(null);
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
+/* v8 ignore next */
 export function ensureIssueClosing(): Promise<void> {
   return Promise.resolve();
-} /* v8 ignore stop */
+}
 
-/* v8 ignore start */
+/* v8 ignore next */
 export function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
   // TODO: Needs implementation (#9592)
   return Promise.resolve([]);
-} /* v8 ignore stop */
+}
 
 async function getUserIds(users: string[]): Promise<User[]> {
   const azureApiGit = await azureApi.gitApi();

@@ -6,6 +6,7 @@ import type {
 } from '../../config/types';
 import type { Category } from '../../constants';
 import type {
+  MaybePromise,
   ModuleApi,
   RangeStrategy,
   SkipReason,
@@ -17,8 +18,6 @@ import type { Timestamp } from '../../util/timestamp';
 import type { RegistryStrategy } from '../datasource';
 import type { CustomExtractConfig } from './custom/types';
 
-export type MaybePromise<T> = T | Promise<T>;
-
 export interface ManagerData<T> {
   managerData?: T;
 }
@@ -29,6 +28,8 @@ export interface ExtractConfig extends CustomExtractConfig {
   npmrcMerge?: boolean;
   skipInstalls?: boolean | null;
   repository?: string;
+  currentDigest?: string;
+  newDigest?: string;
 }
 
 export interface UpdateArtifactsConfig {
@@ -45,6 +46,7 @@ export interface UpdateArtifactsConfig {
   newVersion?: string;
   newMajor?: number;
   registryAliases?: Record<string, string>;
+  skipArtifactsUpdate?: boolean;
   lockFiles?: string[];
 }
 
@@ -53,7 +55,7 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   depName?: string;
   depType?: string;
   manager?: string;
-  rangeStrategy: RangeStrategy;
+  rangeStrategy?: RangeStrategy;
 }
 
 export interface PackageFileContent<T = Record<string, any>>
@@ -89,17 +91,25 @@ export interface LookupUpdate {
   isRange?: boolean;
   isRollback?: boolean;
   isReplacement?: boolean;
+  isSingleVersion?: boolean;
+  isVulnerabilityAlert?: boolean;
   newDigest?: string;
   newMajor?: number;
   newMinor?: number;
   newPatch?: number;
   newName?: string;
+  newNameSanitized?: string;
   newValue?: string;
   semanticCommitType?: string;
   pendingChecks?: boolean;
   pendingVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
+  /**
+   *  where this is set?
+   * @deprecated Never set?
+   */
+  updateTypes?: UpdateType[];
   isBreaking?: boolean;
   mergeConfidenceLevel?: MergeConfidence | undefined;
   userStrings?: Record<string, string>;
@@ -109,6 +119,8 @@ export interface LookupUpdate {
   newVersionAgeInDays?: number;
   registryUrl?: string;
   libYears?: number;
+
+  version?: string;
 }
 
 /**
@@ -315,6 +327,7 @@ export interface PostUpdateConfig<T = Record<string, any>>
   constraints?: Record<string, string> | null;
   updatedPackageFiles?: FileChange[];
   postUpdateOptions?: string[];
+  skipArtifactsUpdate?: boolean;
   skipInstalls?: boolean | null;
   ignoreScripts?: boolean;
 

@@ -75,13 +75,14 @@ export function updateLockedDependency(
         newVersion,
       );
     }
-    // istanbul ignore if: cannot test
+    /* v8 ignore next 4 -- cannot test */
     if (newLockFileContent === lockFileContent) {
       logger.debug('Failed to make any changes to lock file');
       return { status: 'update-failed' };
     }
     return { status: 'updated', files: { [lockFile]: newLockFileContent } };
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next -- needs test */
+  } catch (err) {
     logger.error({ err }, 'updateLockedDependency() error');
     return { status: 'update-failed' };
   }

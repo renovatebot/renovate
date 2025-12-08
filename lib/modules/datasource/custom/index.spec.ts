@@ -248,6 +248,7 @@ describe('modules/datasource/custom/index', () => {
         },
       });
       expect(result).toBeNull();
+
       expect(logger.once.warn).toHaveBeenCalledWith(
         { errorMessage: 'The symbol "." cannot be used as a unary operator' },
         'Invalid JSONata expression: $[.name = "Alice" and',
@@ -273,6 +274,7 @@ describe('modules/datasource/custom/index', () => {
         },
       });
       expect(result).toBeNull();
+
       expect(logger.once.warn).toHaveBeenCalledWith(
         { err: expect.any(Object) },
         'Error while evaluating JSONata expression: $notafunction()',
@@ -372,6 +374,86 @@ describe('modules/datasource/custom/index', () => {
           foo: {
             defaultRegistryUrlTemplate: 'file://test.yaml',
             format: 'yaml',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
+    });
+
+    it('returns releases for toml API directly exposing in Renovate format', async () => {
+      const expected = {
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '2.0.0',
+          },
+          {
+            version: '3.0.0',
+          },
+        ],
+      };
+
+      const toml = codeBlock`
+        [[releases]]
+        version = "1.0.0"
+        [[releases]]
+        version = "2.0.0"
+        [[releases]]
+        version = "3.0.0"
+      `;
+
+      httpMock.scope('https://example.com').get('/v1').reply(200, toml, {
+        'Content-Type': 'application/toml',
+      });
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'https://example.com/v1',
+            format: 'toml',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
+    });
+
+    it('return releases for toml file directly exposing in Renovate format', async () => {
+      const expected = {
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '2.0.0',
+          },
+          {
+            version: '3.0.0',
+          },
+        ],
+      };
+
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        [[releases]]
+        version = "1.0.0"
+        [[releases]]
+        version = "2.0.0"
+        [[releases]]
+        version = "3.0.0"
+      `);
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'file://test.toml',
+            format: 'toml',
           },
         },
       });

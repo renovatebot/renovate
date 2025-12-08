@@ -1,5 +1,12 @@
+vi.mock('fs-extra', async () =>
+  (
+    await vi.importActual<typeof import('~test/fixtures')>('~test/fixtures')
+  ).fsExtra(),
+);
+
+import { GlobalConfig } from '../../../config/global';
 import type { LockFile } from './types';
-import { composeLockFile, parseLockFile } from './utils';
+import { composeLockFile, loadPackageJson, parseLockFile } from './utils';
 import { Fixtures } from '~test/fixtures';
 
 describe('modules/manager/npm/utils', () => {
@@ -60,6 +67,43 @@ describe('modules/manager/npm/utils', () => {
       // TODO #22198
       const lockFileComposed = composeLockFile(lockFileParsed!, detectedIndent);
       expect(lockFileComposed).toBe(lockFile);
+    });
+  });
+
+  describe('loadPackageJson', () => {
+    beforeEach(() => {
+      Fixtures.reset();
+      GlobalConfig.set({ localDir: '/', cacheDir: '/tmp/cache' });
+    });
+
+    it('loads and parses package.json correctly', async () => {
+      Fixtures.mock({
+        '/repo/package.json': JSON.stringify({
+          dependencies: { leftpad: '1.0.0' },
+          engines: { node: '>=16.0.0' },
+          volta: { yarn: '1.22.19' },
+          packageManager: 'npm@8.5.1',
+        }),
+      });
+
+      const pkg = await loadPackageJson('/repo');
+      expect(pkg).toStrictEqual({
+        dependencies: { leftpad: '1.0.0' },
+        engines: { node: '>=16.0.0' },
+        volta: { yarn: '1.22.19' },
+        packageManager: { name: 'npm', version: '8.5.1' },
+      });
+    });
+
+    it('returns empty object when package.json is missing', async () => {
+      const pkg = await loadPackageJson('/missing');
+      expect(pkg).toStrictEqual({});
+    });
+
+    it('returns empty object when package.json is invalid', async () => {
+      Fixtures.mock({ '/bad/package.json': '{ invalid json' });
+      const pkg = await loadPackageJson('/bad');
+      expect(pkg).toStrictEqual({});
     });
   });
 });

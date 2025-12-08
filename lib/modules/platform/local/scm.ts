@@ -33,7 +33,8 @@ export class LocalFs implements PlatformScm {
   async getFileList(): Promise<string[]> {
     try {
       // fetch file list using git
-      const stdout = execSync('git ls-files', { encoding: 'utf-8' });
+      const maxBuffer = 10 * 1024 * 1024; // 10 MiB in bytes
+      const stdout = execSync('git ls-files', { encoding: 'utf-8', maxBuffer });
       logger.debug('Got file list using git');
       fileList = stdout.split('\n');
     } catch {

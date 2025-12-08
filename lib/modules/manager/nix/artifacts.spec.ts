@@ -1,5 +1,5 @@
 import type { StatusResult } from 'simple-git';
-import { join } from 'upath';
+import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -15,15 +15,15 @@ vi.mock('../../../util/host-rules', () => mockDeep());
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
-  localDir: join('/tmp/github/some/repo'),
-  cacheDir: join('/tmp/renovate/cache'),
-  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
+  localDir: upath.join('/tmp/github/some/repo'),
+  cacheDir: upath.join('/tmp/renovate/cache'),
+  containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
 };
 const dockerAdminConfig = {
   ...adminConfig,
   binarySource: 'docker',
   dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
-};
+} satisfies RepoGlobalConfig;
 
 process.env.CONTAINERBASE = 'true';
 
@@ -31,11 +31,11 @@ const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 const updateInputCmd = `nix \
 --extra-experimental-features 'nix-command flakes' \
-flake lock --update-input nixpkgs`;
+flake update nixpkgs`;
 const updateInputTokenCmd = `nix \
 --extra-experimental-features 'nix-command flakes' \
 --extra-access-tokens github.com=token \
-flake lock --update-input nixpkgs`;
+flake update nixpkgs`;
 const lockfileMaintenanceCmd = `nix \
 --extra-experimental-features 'nix-command flakes' \
 flake update`;
