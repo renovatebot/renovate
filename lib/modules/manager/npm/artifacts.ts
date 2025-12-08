@@ -52,6 +52,8 @@ export async function updateArtifacts({
 
   // Asumming that corepack only needs to modify the package.json file in the root folder
   // As it should not be regular practice to have different package managers in different workspaces
+  // We compute the hash from npm’s `dist.integrity` (Base64) and convert it to hex, mirroring Corepack’s conversion logic.
+  // Reference: corepackUtils.ts#L300 (commit 57bfb67…) — https://github.com/nodejs/corepack/blob/57bfb67b062ea1b8746b302bcdbf9f8e8438c526/sources/corepackUtils.ts#L300
   const pkgFileDir = upath.dirname(packageFileName);
   const { additionalNpmrcContent } = processHostRules();
   const npmrcContent = await getNpmrcContent(pkgFileDir);
