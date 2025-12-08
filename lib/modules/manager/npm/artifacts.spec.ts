@@ -304,7 +304,7 @@ describe('modules/manager/npm/artifacts', () => {
     ]);
   });
 
-  it('returns artifactError on unexpected hex length', async () => {
+  it('returns artifactError on unexpected hex length (sha512)', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('# dummy') // npmrc
       .mockResolvedValueOnce('{}') // node constraints
@@ -328,6 +328,38 @@ describe('modules/manager/npm/artifacts', () => {
         artifactError: {
           fileName: 'package.json',
           stderr: expect.stringContaining('Unexpected sha512 hex length'),
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'npm view pnpm@8.15.6 dist.integrity' },
+    ]);
+  });
+
+  it('returns artifactError on unexpected hex length (sha256)', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('# dummy') // npmrc
+      .mockResolvedValueOnce('{}') // node constraints
+      .mockResolvedValue(JSON.stringify({ packageManager: 'pnpm@8.15.5' })); // existing package.json
+
+    const integrityStrBadLen = 'sha256-AQID';
+
+    const execSnapshots = mockExecSequence([
+      { stdout: integrityStrBadLen, stderr: '' }, // npm view pnpm@8.15.6 dist.integrity
+    ]);
+
+    const res = await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [validDepUpdate],
+      newPackageFileContent: 'pre-update content',
+      config: { ...config },
+    });
+
+    expect(res).toEqual([
+      {
+        artifactError: {
+          fileName: 'package.json',
+          stderr: expect.stringContaining('Unexpected sha256 hex length'),
         },
       },
     ]);
