@@ -683,12 +683,6 @@ describe('modules/manager/gomod/artifacts', () => {
     expect(res).toEqual([
       {
         file: {
-          path: 'internal/generated/deleted.go',
-          type: 'deletion',
-        },
-      },
-      {
-        file: {
           path: 'vendor/renovate/deleted.go',
           type: 'deletion',
         },
@@ -712,6 +706,12 @@ describe('modules/manager/gomod/artifacts', () => {
           contents: 'Bar go',
           path: 'internal/generated/bar.go',
           type: 'addition',
+        },
+      },
+      {
+        file: {
+          path: 'internal/generated/deleted.go',
+          type: 'deletion',
         },
       },
     ]);

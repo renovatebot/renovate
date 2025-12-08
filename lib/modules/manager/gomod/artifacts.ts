@@ -413,13 +413,15 @@ export async function updateArtifacts({
         }
       }
       for (const f of coerceArray(status.deleted)) {
-        alreadyDeleted.add(f);
-        res.push({
-          file: {
-            type: 'deletion',
-            path: f,
-          },
-        });
+        if (vendorDir && f.startsWith(vendorDir)) {
+          alreadyDeleted.add(f);
+          res.push({
+            file: {
+              type: 'deletion',
+              path: f,
+            },
+          });
+        }
       }
     }
 
