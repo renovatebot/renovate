@@ -335,4 +335,41 @@ describe('modules/manager/npm/artifacts', () => {
       { cmd: 'npm view pnpm@8.15.6 dist.integrity' },
     ]);
   });
+
+  it('updates package.json when integrity uses sha1 (no expected length check)', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('# dummy') // npmrc
+      .mockResolvedValueOnce('{}') // node constraints
+      .mockResolvedValue(JSON.stringify({ packageManager: 'pnpm@8.15.5' })); // existing package.json
+
+    const integrityStrSha1 = 'sha1-AQID';
+    const expectedHexSha1 = '010203';
+    const expectedPmValueSha1 = `pnpm@8.15.6+sha1.${expectedHexSha1}`;
+
+    const execSnapshots = mockExecSequence([
+      { stdout: integrityStrSha1, stderr: '' },
+    ]);
+
+    const res = await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [validDepUpdate],
+      newPackageFileContent: 'pre-update content',
+      config: { ...config },
+    });
+
+    const expectedText =
+      JSON.stringify({ packageManager: expectedPmValueSha1 }, null, 2) + '\n';
+    expect(res).toEqual([
+      {
+        file: {
+          contents: expectedText,
+          path: 'package.json',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'npm view pnpm@8.15.6 dist.integrity' },
+    ]);
+  });
 });
