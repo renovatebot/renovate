@@ -9,7 +9,7 @@ import type { ExecOptions, ExtraEnv } from '../../../util/exec/types';
 import { chmodLocalFile, readLocalFile, statLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { StatusResult } from '../../../util/git/types';
-import { find as findHostRules } from '../../../util/host-rules';
+import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
 import mavenVersioning from '../../versioning/maven';
@@ -170,13 +170,11 @@ async function executeWrapperCommand(
 function getExtraEnvOptions(deps: PackageDependency[]): ExtraEnv {
   const extraEnv: ExtraEnv = {};
 
-  // Set custom Maven wrapper repository URL if present
   const customMavenWrapperUrl = getCustomMavenWrapperRepoUrl(deps);
   if (customMavenWrapperUrl) {
     extraEnv.MVNW_REPOURL = customMavenWrapperUrl;
 
-    // Set credentials for Maven wrapper repository
-    const { username, password } = findHostRules({
+    const { username, password } = hostRules.find({
       hostType: MavenDatasource.id,
       url: customMavenWrapperUrl,
     });
@@ -184,14 +182,9 @@ function getExtraEnvOptions(deps: PackageDependency[]): ExtraEnv {
     if (username && password) {
       extraEnv.MVNW_USERNAME = username;
       extraEnv.MVNW_PASSWORD = password;
-      logger.debug(
+      logger.trace(
         { customMavenWrapperUrl },
         'Using MVNW_USERNAME and MVNW_PASSWORD for private repository',
-      );
-    } else if (username || password) {
-      logger.warn(
-        { customMavenWrapperUrl },
-        'Only found username OR password for private repository.',
       );
     }
   }
