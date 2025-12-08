@@ -14,6 +14,7 @@ The following updates are awaiting their schedule. To get an update now, click o
 
  - [ ] <!-- unschedule-branch=branchName3 -->pr3
  - [ ] <!-- unschedule-branch=branchName4 -->pr4
+ - [ ] <!-- create-all-awaiting-schedule-prs -->🔐 **Create all awaiting schedule PRs at once** 🔐
 
 ## Rate-Limited
 
