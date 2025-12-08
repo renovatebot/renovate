@@ -31,17 +31,14 @@ registry = "https://registry.example.com"
       });
     });
 
-    it('parses registry object with url', () => {
+    it('parses registry object with url and extracts url', () => {
       const toml = `
 [install]
 registry = { url = "https://registry.example.com", token = "abc123" }
 `;
       expect(parseBunfigToml(toml)).toEqual({
         install: {
-          registry: {
-            url: 'https://registry.example.com',
-            token: 'abc123',
-          },
+          registry: 'https://registry.example.com',
         },
       });
     });
@@ -74,10 +71,7 @@ otherorg = { url = "https://registry.other.com", token = "secret" }
           registry: 'https://registry.example.com',
           scopes: {
             myorg: 'https://registry.myorg.com',
-            otherorg: {
-              url: 'https://registry.other.com',
-              token: 'secret',
-            },
+            otherorg: 'https://registry.other.com',
           },
         },
       });
@@ -119,13 +113,11 @@ registry = "https://registry.example.com"
       );
     });
 
-    it('returns default registry object url for unscoped package', () => {
+    it('returns default registry for unscoped package with object config', () => {
+      // After schema transform, registry is always a string URL
       const config = {
         install: {
-          registry: {
-            url: 'https://registry.example.com',
-            token: 'abc',
-          },
+          registry: 'https://registry.example.com',
         },
       };
       expect(resolveRegistryUrl('lodash', config)).toBe(
@@ -147,14 +139,12 @@ registry = "https://registry.example.com"
       );
     });
 
-    it('returns scoped registry object url for scoped package', () => {
+    it('returns scoped registry for scoped package with object config', () => {
+      // After schema transform, scoped registries are always string URLs
       const config = {
         install: {
           scopes: {
-            myorg: {
-              url: 'https://registry.myorg.com',
-              token: 'secret',
-            },
+            myorg: 'https://registry.myorg.com',
           },
         },
       };

@@ -7,17 +7,20 @@ import { parse as parseToml } from '../../../util/toml';
 /**
  * Schema for bunfig.toml registry configuration.
  * Supports both string URLs and object with url/token/username/password.
+ * Transforms to extract just the URL string.
  * See: https://bun.sh/docs/runtime/bunfig#install-registry
  */
-const BunfigRegistrySchema = z.union([
-  z.string(),
-  z.object({
-    url: z.string(),
-    token: z.string().optional(),
-    username: z.string().optional(),
-    password: z.string().optional(),
-  }),
-]);
+const BunfigRegistrySchema = z
+  .union([
+    z.string(),
+    z.object({
+      url: z.string(),
+      token: z.string().optional(),
+      username: z.string().optional(),
+      password: z.string().optional(),
+    }),
+  ])
+  .transform((val) => (typeof val === 'string' ? val : val.url));
 
 const BunfigInstallSchema = z.object({
   registry: BunfigRegistrySchema.optional(),
@@ -29,14 +32,6 @@ const BunfigSchema = z.object({
 });
 
 export type BunfigConfig = z.infer<typeof BunfigSchema>;
-export type BunfigRegistryConfig = z.infer<typeof BunfigRegistrySchema>;
-
-/**
- * Extracts the URL from a registry config (string or object).
- */
-function getRegistryUrl(config: BunfigRegistryConfig): string {
-  return typeof config === 'string' ? config : config.url;
-}
 
 /**
  * Resolves the registry URL for a given package name based on bunfig.toml config.
@@ -53,18 +48,18 @@ export function resolveRegistryUrl(
 
   // Check scoped registries first
   if (install.scopes) {
-    for (const scope in install.scopes) {
+    for (const [scope, registryUrl] of Object.entries(install.scopes)) {
       // Bun scopes in bunfig.toml don't include the @ prefix
       const scopePrefix = scope.startsWith('@') ? scope : `@${scope}`;
       if (packageName.startsWith(`${scopePrefix}/`)) {
-        return getRegistryUrl(install.scopes[scope]);
+        return registryUrl;
       }
     }
   }
 
   // Fall back to default registry
   if (install.registry) {
-    return getRegistryUrl(install.registry);
+    return install.registry;
   }
 
   return null;
