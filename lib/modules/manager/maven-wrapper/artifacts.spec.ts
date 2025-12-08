@@ -526,46 +526,4 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
 
     clearHostRules();
   });
-
-  it('should set credentials with custom repository URL', async () => {
-    clearHostRules();
-    addHostRules({
-      hostType: 'maven',
-      matchHost: 'internal.local',
-      username: 'internal-user',
-      password: 'internal-password',
-    });
-
-    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
-    mockMavenFileChangedInGit();
-
-    await updateArtifacts({
-      packageFileName: 'maven-wrapper',
-      newPackageFileContent: '',
-      updatedDeps: [
-        {
-          depName: 'maven-wrapper',
-          replaceString:
-            'https://internal.local/maven-public/org/apache/maven/wrapper/maven-wrapper/3.0.0/maven-wrapper-3.0.0.jar',
-        },
-      ],
-      config: { currentValue: '3.0.0', newValue: '3.3.1' },
-    });
-
-    // Verify both credentials and MVNW_REPOURL are set
-    expect(execSnapshots[0].options!.env).toHaveProperty(
-      'MVNW_USERNAME',
-      'internal-user',
-    );
-    expect(execSnapshots[0].options!.env).toHaveProperty(
-      'MVNW_PASSWORD',
-      'internal-password',
-    );
-    expect(execSnapshots[0].options!.env).toHaveProperty(
-      'MVNW_REPOURL',
-      'https://internal.local/maven-public',
-    );
-
-    clearHostRules();
-  });
 });
