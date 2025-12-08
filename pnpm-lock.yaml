@@ -2746,8 +2746,8 @@ packages:
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
-  baseline-browser-mapping@2.9.3:
-    resolution: {integrity: sha512-8QdH6czo+G7uBsNo0GiUfouPN1lRzKdJTGnKXwe12gkFbnnOUaUKGN55dMkfy+mnxmvjwl9zcI4VncczcVXDhA==}
+  baseline-browser-mapping@2.9.4:
+    resolution: {integrity: sha512-ZCQ9GEWl73BVm8bu5Fts8nt7MHdbt5vY9bP6WGnUh+r3l8M7CgfyTlwsgCbMC66BNxPr6Xoce3j66Ms5YUQTNA==}
     hasBin: true
 
   before-after-hook@4.0.0:
@@ -4432,8 +4432,8 @@ packages:
   jws@4.0.1:
     resolution: {integrity: sha512-EKI/M/yqPncGUUh44xz0PxSidXFr/+r0pA70+gIYhjv+et7yxM+s29Y+VGDkovRofQem0fs7Uvf4+YmAdyRduA==}
 
-  katex@0.16.25:
-    resolution: {integrity: sha512-woHRUZ/iF23GBP1dkDQMh1QBad9dmr8/PAwNA54VrSOVYgI12MAcE14TqnDdQOdzyEonGzMepYnqBMYdsoAr8Q==}
+  katex@0.16.27:
+    resolution: {integrity: sha512-aeQoDkuRWSqQN6nSvVCEFvfXdqo1OQiCmmW1kc9xSdjutPv7BGO7pqY9sQRJpMOGrEdfDgF2TfRXe5eUAD2Waw==}
     hasBin: true
 
   keyv@4.5.4:
@@ -9613,7 +9613,7 @@ snapshots:
 
   base64-js@1.5.1: {}
 
-  baseline-browser-mapping@2.9.3: {}
+  baseline-browser-mapping@2.9.4: {}
 
   before-after-hook@4.0.0: {}
 
@@ -9660,7 +9660,7 @@ snapshots:
 
   browserslist@4.28.1:
     dependencies:
-      baseline-browser-mapping: 2.9.3
+      baseline-browser-mapping: 2.9.4
       caniuse-lite: 1.0.30001759
       electron-to-chromium: 1.5.266
       node-releases: 2.0.27
@@ -11467,7 +11467,7 @@ snapshots:
       jwa: 2.0.1
       safe-buffer: 5.2.1
 
-  katex@0.16.25:
+  katex@0.16.27:
     dependencies:
       commander: 8.3.0
 
@@ -11984,7 +11984,7 @@ snapshots:
     dependencies:
       '@types/katex': 0.16.7
       devlop: 1.1.0
-      katex: 0.16.25
+      katex: 0.16.27
       micromark-factory-space: 2.0.1
       micromark-util-character: 2.1.1
       micromark-util-symbol: 2.0.1
