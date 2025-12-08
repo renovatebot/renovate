@@ -660,7 +660,10 @@ describe('modules/manager/gomod/artifacts', () => {
         modified: ['internal/generated/foo.go', gomodFile],
         created: ['internal/generated/bar.go'],
         not_added: ['internal/pkg/file.go'],
-        deleted: ['internal/generated/deleted.go'],
+        deleted: [
+          'internal/generated/deleted.go',
+          'vendor/renovate/deleted.go',
+        ],
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.mod');
@@ -675,10 +678,18 @@ describe('modules/manager/gomod/artifacts', () => {
         postUpdateOptions: ['goGenerate'],
       },
     });
+
+    // vendor/renovate/deleted.go should only appear once
     expect(res).toEqual([
       {
         file: {
           path: 'internal/generated/deleted.go',
+          type: 'deletion',
+        },
+      },
+      {
+        file: {
+          path: 'vendor/renovate/deleted.go',
           type: 'deletion',
         },
       },
