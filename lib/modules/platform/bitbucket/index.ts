@@ -616,11 +616,10 @@ export function massageMarkdown(input: string): string {
     )
     .replace(
       regEx(
-        /(> ℹ \*\*Note\*\*[\s\S]*?unmaintained:\n)[\s\S]*?(View abandoned dependencies.*<\/summary>)/m,
+        /(>.*\*\*Note\*\*\n>\s?\n.*unmaintained:\n\n<details>\n)(<summary>View abandoned dependencies.*<\/summary>)([\s\S]*?)<\/details>/,
       ),
-      '## Abandoned Dependencies\n$1',
+      '## Abandoned Dependencies\n$1$3',
     )
-    .replace(regEx(/(>[\s\S]+?)(## Abandoned dependencies.*)/), '$2\n$1') // Move note under heading
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
