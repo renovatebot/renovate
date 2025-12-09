@@ -11,4 +11,5 @@ export interface SourceData {
   repo?: string;
   owner?: string;
   datasource?: string;
+  packageName?: string;
 }

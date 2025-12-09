@@ -175,6 +175,181 @@ source=("https://example.com/package-1.0.0.tar.gz")
       expect(extractPackageFile(content)).toBeNull();
     });
 
+    it('extracts dependency from PyPI source', () => {
+      const content = `
+pkgname=python-requests
+pkgver=2.31.0
+source=("https://files.pythonhosted.org/packages/source/r/requests/requests-\${pkgver}.tar.gz")
+sha256sums=('942c5a758f98d5e4783a997e9c5b0e7e9c2d6f2e6d4e3b2c1a3f6e7d8a9b0c11')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'requests',
+            currentValue: '2.31.0',
+            datasource: 'pypi',
+            managerData: {
+              sourceUrl:
+                'https://files.pythonhosted.org/packages/source/r/requests/requests-${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  '942c5a758f98d5e4783a997e9c5b0e7e9c2d6f2e6d4e3b2c1a3f6e7d8a9b0c11',
+              },
+              pkgver: '2.31.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency from npm registry source', () => {
+      const content = `
+pkgname=nodejs-typescript
+pkgver=5.3.2
+source=("https://registry.npmjs.org/typescript/-/typescript-\${pkgver}.tgz")
+sha256sums=('1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'typescript',
+            currentValue: '5.3.2',
+            datasource: 'npm',
+            managerData: {
+              sourceUrl:
+                'https://registry.npmjs.org/typescript/-/typescript-${pkgver}.tgz',
+              checksums: {
+                sha256:
+                  '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+              },
+              pkgver: '5.3.2',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency from scoped npm package', () => {
+      const content = `
+pkgname=nodejs-angular-core
+pkgver=17.0.5
+source=("https://registry.npmjs.org/@angular/core/-/core-\${pkgver}.tgz")
+sha256sums=('abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: '@angular/core',
+            currentValue: '17.0.5',
+            datasource: 'npm',
+            managerData: {
+              sourceUrl:
+                'https://registry.npmjs.org/@angular/core/-/core-${pkgver}.tgz',
+              checksums: {
+                sha256:
+                  'abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234',
+              },
+              pkgver: '17.0.5',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency from CPAN source', () => {
+      const content = `
+pkgname=perl-module-build
+pkgver=0.4234
+source=("https://cpan.metacpan.org/authors/id/L/LE/LEONT/Module-Build-\${pkgver}.tar.gz")
+sha256sums=('1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'Module::Build',
+            currentValue: '0.4234',
+            datasource: 'cpan',
+            managerData: {
+              sourceUrl:
+                'https://cpan.metacpan.org/authors/id/L/LE/LEONT/Module-Build-${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+              },
+              pkgver: '0.4234',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency from generic Git repository', () => {
+      const content = `
+pkgname=custom-tool
+pkgver=1.5.0
+source=("https://git.example.com/owner/custom-tool/archive/v\${pkgver}.tar.gz")
+sha256sums=('fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'https://git.example.com/owner/custom-tool.git',
+            currentValue: 'v1.5.0',
+            datasource: 'git-tags',
+            managerData: {
+              sourceUrl:
+                'https://git.example.com/owner/custom-tool/archive/v${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  'fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210',
+              },
+              pkgver: '1.5.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency from direct .git URL', () => {
+      const content = `
+pkgname=gitea-package
+pkgver=2.0.0
+source=("https://gitea.example.com/org/repo.git")
+sha256sums=('1111111111111111111111111111111111111111111111111111111111111111')
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'https://gitea.example.com/org/repo.git',
+        datasource: 'git-tags',
+      });
+    });
+
+    it('handles PyPI with different hostname variations', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://pypi.org/packages/source/p/package/package-\${pkgver}.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'package',
+        currentValue: '1.0.0',
+        datasource: 'pypi',
+      });
+    });
+
+    it('returns null for truly unsupported sources', () => {
+      const content = `
+pkgver=1.0.0
+source=("ftp://ftp.example.com/package-1.0.0.tar.gz")
+`;
+      expect(extractPackageFile(content)).toBeNull();
+    });
+
     it('extracts dependency from GitLab source', () => {
       const content = `
 pkgname=example-gitlab-package
