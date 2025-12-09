@@ -722,5 +722,68 @@ source=("https://packagist.org/invalid")
       expect(result).not.toBeNull();
       expect(result?.deps[0].datasource).toBe('repology');
     });
+
+    it('handles tar.bz2 file extension in GitHub archive URLs', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://github.com/owner/repo/archive/v\${pkgver}.tar.bz2")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'owner/repo',
+        currentValue: 'v1.0.0',
+        datasource: 'github-tags',
+      });
+    });
+
+    it('handles tar.xz file extension in GitHub archive URLs', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://github.com/owner/repo/archive/v\${pkgver}.tar.xz")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'owner/repo',
+        currentValue: 'v1.0.0',
+        datasource: 'github-tags',
+      });
+    });
+
+    it('handles .zip file extension in GitHub archive URLs', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://github.com/owner/repo/archive/v\${pkgver}.zip")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'owner/repo',
+        currentValue: 'v1.0.0',
+        datasource: 'github-tags',
+      });
+    });
+
+    it('handles tar.bz2 file extension in PyPI URLs', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://files.pythonhosted.org/packages/source/p/package/package-1.0.0.tar.bz2")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        datasource: 'pypi',
+        currentValue: '1.0.0',
+      });
+    });
+
+    it('handles .zip file extension in PyPI URLs', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://files.pythonhosted.org/packages/source/p/package/package-1.0.0.zip")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        datasource: 'pypi',
+        currentValue: '1.0.0',
+      });
+    });
   });
 });
