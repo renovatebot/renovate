@@ -233,5 +233,44 @@ source=("https://github.com/example/example/archive/\${pkgver}.tar.gz")
       expect(result).toContain('pkgver=2.0.0');
       expect(result).toContain('archive/${pkgver}.tar.gz');
     });
+
+    it('resets pkgrel to 1 when pkgver changes', async () => {
+      const content = `
+pkgname=test-package
+pkgver=1.0.0
+pkgrel=5
+source=("https://github.com/owner/repo/archive/v\${pkgver}.tar.gz")
+sha256sums=('1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
+`;
+
+      const upgrade = {
+        currentValue: 'v1.0.0',
+        newValue: 'v2.0.0',
+        managerData: {
+          sourceUrl: 'https://github.com/owner/repo/archive/v${pkgver}.tar.gz',
+          checksums: {
+            sha256:
+              '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+          },
+          pkgver: '1.0.0',
+        },
+      };
+
+      httpMock
+        .scope('https://github.com')
+        .get('/owner/repo/archive/v2.0.0.tar.gz')
+        .times(4) // Downloaded 4 times for different checksums
+        .reply(200, Readable.from(['test']));
+
+      const result = await updateDependency({
+        fileContent: content,
+        upgrade,
+      });
+
+      expect(result).not.toBeNull();
+      expect(result).toContain('pkgver=2.0.0');
+      expect(result).toContain('pkgrel=1');
+      expect(result).not.toContain('pkgrel=5');
+    });
   });
 });

@@ -23,6 +23,14 @@ function updatePkgver(
 }
 
 /**
+ * Reset pkgrel to 1
+ * According to Arch Linux packaging guidelines, pkgrel should be reset to 1 when pkgver changes
+ */
+function resetPkgrel(content: string): string {
+  return content.replace(regEx('^(pkgrel=)\\d+$', 'm'), '$1' + '1');
+}
+
+/**
  * Update source URL in PKGBUILD
  */
 function updateSource(content: string, oldUrl: string, newUrl: string): string {
@@ -147,6 +155,9 @@ export async function updateDependency({
       pkgver ?? currentValue,
       newValue,
     );
+
+    // Reset pkgrel to 1 when pkgver changes (Arch Linux packaging convention)
+    updatedContent = resetPkgrel(updatedContent);
 
     // Update source URL
     updatedContent = updateSource(updatedContent, sourceUrl, newUrl);
