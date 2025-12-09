@@ -132,7 +132,7 @@ Returns `true` if at least one expression is `true`.
 The `replace` helper replaces _all_ found strings matching the given regex with the replacement string.
 If you want to replace some characters in a string, use the built-in function `replace` like this:
 
-`{{{replace '[a-z]+\.github\.com' 'ghc' depName}}}`
+`{{{replace '[a-z]+\\.github\\.com' 'ghc' depName}}}`
 
 In the example above all matches of the regex `[a-z]+\.github\.com` will be replaced by `ghc` in `depName`.
 

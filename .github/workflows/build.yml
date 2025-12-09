@@ -34,7 +34,7 @@ env:
   # are we on a release branch?
   DO_REALEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
   NODE_VERSION: 24
-  PDM_VERSION: 2.26.1 # renovate: datasource=pypi depName=pdm
+  PDM_VERSION: 2.26.2 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -98,7 +98,7 @@ jobs:
         run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_OUTPUT"
 
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
@@ -137,7 +137,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
@@ -181,7 +181,7 @@ jobs:
     steps:
       - name: Checkout code
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
@@ -203,7 +203,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           show-progress: false
 
@@ -241,7 +241,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           show-progress: false
 
@@ -283,7 +283,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           show-progress: false
 
@@ -294,7 +294,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Lint markdown
-        uses: DavidAnson/markdownlint-cli2-action@992badcdf24e3b8eb7e87ff9287fe931bcb00c6e # v20.0.0
+        run: pnpm markdown-lint
 
       - name: Generate JSON schema
         run: pnpm create-json-schema
@@ -316,7 +316,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           show-progress: false
 
@@ -353,12 +353,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: ${{ matrix.runner-timeout-minutes }}
 
+    permissions:
+      id-token: write # required for codecov OIDC
+
     strategy:
+      fail-fast: false
       matrix:
         include: ${{ fromJSON(needs.setup.outputs.test-shard-matrix) }}
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           show-progress: false
 
@@ -393,17 +397,26 @@ jobs:
               --coverage ${{ matrix.coverage }}
           done
 
+      - name: Codecov Test
+        if: github.event_name != 'merge_group' && !cancelled()
+        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
+        with:
+          use_oidc: true
+          report_type: test_results
+          directory: ./coverage/shard
+          # TODO: compute proper flags per job
+          # flags: ${{ matrix.name }}
+          verbose: true
+
       - name: Move coverage files
         if: success() && github.event.pull_request.draft != true && matrix.coverage
         run: |
           mkdir -p ./coverage/lcov
           mkdir -p ./coverage/json
-          mkdir -p ./coverage/junit
           for shard in ${{ matrix.shards }};
           do
             mv ./coverage/shard/$shard/lcov.info ./coverage/lcov/$shard.lcov
             mv ./coverage/shard/$shard/coverage-final.json ./coverage/json/$shard.json
-            mv ./coverage/shard/$shard/junit.xml ./coverage/junit/junit-$shard.xml
           done
 
       - name: Save coverage artifacts
@@ -414,7 +427,6 @@ jobs:
           path: |
             ./coverage/lcov
             ./coverage/json
-            ./coverage/junit
 
   codecov:
     needs: [test]
@@ -426,7 +438,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           filter: blob:none # we don't need all blobs
           show-progress: false
@@ -447,15 +459,6 @@ jobs:
           fail_ci_if_error: github.event_name != 'pull_request'
           verbose: true
 
-      - name: Codecov Test
-        if: github.event_name != 'merge_group'
-        uses: codecov/test-results-action@47f89e9acb64b76debcd5ea40642d25a4adced9f # v1.1.1
-        with:
-          use_oidc: true
-          directory: coverage/junit
-          fail_ci_if_error: github.event_name != 'pull_request'
-          verbose: true
-
   coverage-threshold:
     needs:
       - test
@@ -465,7 +468,7 @@ jobs:
     if: success() && github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
@@ -493,10 +496,10 @@ jobs:
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --branches 98.16 \
-            --functions 99.51 \
-            --lines 98.22 \
-            --statements 98.22
+            --branches 99.0 \
+            --functions 99.79 \
+            --lines 99.02 \
+            --statements 99.03
 
   # Catch-all required check for test matrix and coverage
   test-success:
@@ -556,7 +559,7 @@ jobs:
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           show-progress: false
 
@@ -577,13 +580,23 @@ jobs:
 
   build-docker:
     needs:
+      - setup-build # we need the outputs
       - build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')
     steps:
+      - run: df -h
+
+      # Ensure docker is using /mnt/docker for data storage on x86_64 runners to avoid disk space issues
+      - name: Prepare docker
+        run: |
+          echo '{"data-root": "/mnt/docker"}' | sudo tee /etc/docker/daemon.json
+          sudo systemctl restart docker
+          docker info
+
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           show-progress: false
 
@@ -613,6 +626,8 @@ jobs:
         env:
           RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - run: df -h
+
   build-docs:
     needs:
       - lint-docs
@@ -622,7 +637,7 @@ jobs:
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           show-progress: false
 
@@ -661,7 +676,9 @@ jobs:
         run: pnpm mkdocs build --no-build
 
   test-e2e:
-    needs: [build]
+    needs:
+      - setup-build
+      - build
     runs-on: 'ubuntu-latest'
     timeout-minutes: 7
 
@@ -669,7 +686,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           show-progress: false
 
@@ -719,14 +736,40 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - run: df -h
+
+      # Ensure docker is using /mnt/docker for data storage on x86_64 runners to avoid disk space issues
+      - name: Prepare docker
+        run: |
+          echo '{"data-root": "/mnt/docker"}' | sudo tee /etc/docker/daemon.json
+          sudo systemctl restart docker
+          docker info
+
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
           filter: blob:none # we don't need all blobs, only the full tree
           show-progress: false
 
+      # To avoid disk space issues when performing a release, we can clear up some disk space ahead of time
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+        with:
+          # we're likely already using some of the globally installed tools
+          tool-cache: false
+          # there are no images by default
+          docker-images: false
+          # but we're definitely not using these
+          android: true
+          dotnet: true
+          haskell: true
+          # and shouldn't be using swap storage
+          swap-storage: true
+
+      - run: df -h
+
       - name: docker-config
-        uses: containerbase/internal-tools@cafacb746b412fd28fc671c1fc1b8a20ea2e34e9 # v3.14.18
+        uses: containerbase/internal-tools@2304a46e39979e468bda0ebd91127e008b0b0723 # v3.14.30
         with:
           command: docker-config
 
@@ -760,3 +803,25 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LOG_LEVEL: debug
+
+      - run: df -h
+
+  notify-release-failure:
+    runs-on: ubuntu-latest
+    if: ${{ always() && (github.repository == 'renovatebot/renovate' && github.ref_name == 'main' && github.event_name == 'push') && (needs.release.result == 'failure' || needs.release.result == 'timed_out') }}
+    needs:
+      - release
+    steps:
+      - name: Post to Slack
+        id: slack
+        uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
+        with:
+          webhook: ${{ secrets.RENOVATEBOT_SLACK_WEBHOOK_MAIN_FAILURES }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "*Release from `main` failed*:\nAction Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\nCommit: ${{ github.event.head_commit.url }}"
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "*Release from `main` failed*:\nAction Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\nCommit: ${{ github.event.head_commit.url }}"

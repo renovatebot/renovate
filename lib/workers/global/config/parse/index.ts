@@ -1,4 +1,5 @@
 import { isNonEmptyArray, isNonEmptyObject } from '@sindresorhus/is';
+import { setUserConfigFileNames } from '../../../../config/app-strings';
 import { setPrivateKeys } from '../../../../config/decrypt';
 import * as defaultsParser from '../../../../config/defaults';
 import { resolveConfigPresets } from '../../../../config/presets';
@@ -180,6 +181,15 @@ export async function parseConfigs(
 
   if (isNonEmptyObject(config.customEnvVariables)) {
     setCustomEnv(config.customEnvVariables);
+  }
+
+  if (isNonEmptyArray(config.configFileNames)) {
+    logger.debug(
+      { configFileNames: config.configFileNames },
+      'Updated the config filenames list',
+    );
+    setUserConfigFileNames(config.configFileNames);
+    delete config.configFileNames;
   }
 
   return config;

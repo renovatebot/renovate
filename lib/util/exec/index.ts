@@ -136,6 +136,16 @@ async function prepareRawExec(
     };
   }
 
+  if (
+    GlobalConfig.get('binarySource') === 'global' &&
+    opts.toolConstraints?.length
+  ) {
+    logger.once.debug(
+      { toolConstraints: opts.toolConstraints },
+      'Ignoring tool contraints because of `binarySource=global`',
+    );
+  }
+
   return { rawCommands, rawOptions };
 }
 
