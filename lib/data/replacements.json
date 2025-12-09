@@ -1033,49 +1033,25 @@
       },
       {
         "matchDatasources": ["npm"],
-        "matchPackageNames": ["@tsconfig/node16"],
-        "replacementName": "@tsconfig/node17",
-        "replacementVersion": "17.0.0"
-      },
-      {
-        "matchDatasources": ["npm"],
-        "matchPackageNames": ["@tsconfig/node17"],
+        "matchPackageNames": ["@tsconfig/node16", "@tsconfig/node17"],
         "replacementName": "@tsconfig/node18",
         "replacementVersion": "18.0.0"
       },
       {
         "matchDatasources": ["npm"],
-        "matchPackageNames": ["@tsconfig/node18"],
-        "replacementName": "@tsconfig/node19",
-        "replacementVersion": "19.0.0"
-      },
-      {
-        "matchDatasources": ["npm"],
-        "matchPackageNames": ["@tsconfig/node19"],
+        "matchPackageNames": ["@tsconfig/node18", "@tsconfig/node19"],
         "replacementName": "@tsconfig/node20",
         "replacementVersion": "20.0.0"
       },
       {
         "matchDatasources": ["npm"],
-        "matchPackageNames": ["@tsconfig/node20"],
-        "replacementName": "@tsconfig/node21",
-        "replacementVersion": "21.0.0"
-      },
-      {
-        "matchDatasources": ["npm"],
-        "matchPackageNames": ["@tsconfig/node21"],
+        "matchPackageNames": ["@tsconfig/node20", "@tsconfig/node21"],
         "replacementName": "@tsconfig/node22",
         "replacementVersion": "22.0.0"
       },
       {
         "matchDatasources": ["npm"],
-        "matchPackageNames": ["@tsconfig/node22"],
-        "replacementName": "@tsconfig/node23",
-        "replacementVersion": "23.0.0"
-      },
-      {
-        "matchDatasources": ["npm"],
-        "matchPackageNames": ["@tsconfig/node23"],
+        "matchPackageNames": ["@tsconfig/node22", "@tsconfig/node23"],
         "replacementName": "@tsconfig/node24",
         "replacementVersion": "24.0.0"
       }
