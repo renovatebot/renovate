@@ -785,5 +785,89 @@ source=("https://files.pythonhosted.org/packages/source/p/package/package-1.0.0.
         currentValue: '1.0.0',
       });
     });
+
+    it('returns null for npm URLs with insufficient path parts', () => {
+      const content = `
+pkgname=invalid-npm
+pkgver=1.0.0
+source=("https://registry.npmjs.org/package")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for npm URLs with invalid filename', () => {
+      const content = `
+pkgname=invalid-npm-filename
+pkgver=1.0.0
+source=("https://registry.npmjs.org/package/-/invalid-filename")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for npm scoped package with insufficient path parts', () => {
+      const content = `
+pkgname=invalid-scoped
+pkgver=1.0.0
+source=("https://registry.npmjs.org/@scope/package/-")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for CPAN URLs without filename', () => {
+      const content = `
+pkgname=invalid-cpan
+pkgver=1.0.0
+source=("https://cpan.metacpan.org/authors/id/")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for CPAN URLs with invalid filename format', () => {
+      const content = `
+pkgname=invalid-cpan-format
+pkgver=1.0.0
+source=("https://cpan.metacpan.org/authors/id/A/AB/ABC/invalidfile")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for generic git URLs without archive path and not ending in .git', () => {
+      const content = `
+pkgname=invalid-git
+pkgver=1.0.0
+source=("https://git.example.com/owner/repo/something")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for generic git URLs with insufficient path parts for .git', () => {
+      const content = `
+pkgname=invalid-git-path
+pkgver=1.0.0
+source=("https://git.example.com/repo.git")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
   });
 });
