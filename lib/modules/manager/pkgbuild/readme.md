@@ -63,16 +63,49 @@ source=("https://registry.npmjs.org/@angular/core/-/core-${pkgver}.tgz")
 source=("https://cpan.metacpan.org/authors/id/L/LE/LEONT/Module-Build-${pkgver}.tar.gz")
 ```
 
-### Generic Git Repositories
-
-For Gitea, Forgejo, cgit, or other Git hosting platforms:
+### Packagist (PHP packages)
 
 ```bash
-# Archive URLs
+source=("https://packagist.org/packages/vendor/package/${pkgver}.tar.gz")
+```
+
+### Gitea
+
+```bash
+# Gitea.com
+source=("https://gitea.com/owner/repo/archive/v${pkgver}.tar.gz")
+
+# Codeberg (runs Gitea/Forgejo)
+source=("https://codeberg.org/owner/repo/archive/v${pkgver}.tar.gz")
+
+# Self-hosted Gitea
+source=("https://gitea.example.com/owner/repo/archive/v${pkgver}.tar.gz")
+```
+
+**Note:** Hostname must contain "gitea" or be a known instance (gitea.com, codeberg.org) for automatic detection.
+
+### Forgejo
+
+```bash
+# Forgejo official instance
+source=("https://code.forgejo.org/owner/repo/archive/v${pkgver}.tar.gz")
+
+# Self-hosted Forgejo
+source=("https://forgejo.example.com/owner/repo/archive/v${pkgver}.tar.gz")
+```
+
+**Note:** Hostname must contain "forgejo" or be code.forgejo.org for automatic detection.
+
+### Generic Git Repositories
+
+For other Git hosting platforms (cgit, etc.) that don't match the above patterns:
+
+```bash
+# Archive URLs (falls back to git-tags datasource)
 source=("https://git.example.com/owner/repo/archive/v${pkgver}.tar.gz")
 
 # Direct Git URLs
-source=("https://gitea.example.com/org/repo.git")
+source=("https://git.example.com/org/repo.git")
 ```
 
 ### Repology (Fallback)

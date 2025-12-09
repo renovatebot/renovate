@@ -1,6 +1,8 @@
 import type { Category } from '../../../constants';
 import { CpanDatasource } from '../../datasource/cpan';
+import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags';
 import { GitTagsDatasource } from '../../datasource/git-tags';
+import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { NpmDatasource } from '../../datasource/npm';
@@ -22,7 +24,9 @@ export const defaultConfig = {
 
 export const supportedDatasources = [
   CpanDatasource.id,
+  ForgejoTagsDatasource.id,
   GitTagsDatasource.id,
+  GiteaTagsDatasource.id,
   GithubTagsDatasource.id,
   GitlabTagsDatasource.id,
   NpmDatasource.id,

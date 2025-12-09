@@ -1,6 +1,8 @@
 import { logger } from '../../../logger';
 import { CpanDatasource } from '../../datasource/cpan';
+import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags';
 import { GitTagsDatasource } from '../../datasource/git-tags';
+import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { NpmDatasource } from '../../datasource/npm';
@@ -176,7 +178,8 @@ function parsePyPIUrl(parsedUrl: URL, expandedUrl: string): SourceData | null {
   }
 
   // Match pattern: packagename-version.tar.gz or similar
-  const match = filename.match(/^(.+?)-([\d.]+.*?)\.(tar\.gz|tar\.bz2|zip)$/);
+  const regex = /^(.+?)-([\d.]+.*?)\.(tar\.gz|tar\.bz2|zip)$/;
+  const match = regex.exec(filename);
   if (!match) {
     return null;
   }
@@ -223,7 +226,8 @@ function parseNpmUrl(parsedUrl: URL, expandedUrl: string): SourceData | null {
 
   // Extract version from filename
   const filename = pathParts[filenameIndex];
-  const match = filename.match(/-([\d.]+.*?)\.tgz$/);
+  const regex = /-([\d.]+.*?)\.tgz$/;
+  const match = regex.exec(filename);
   if (!match) {
     return null;
   }
@@ -252,7 +256,8 @@ function parseCPANUrl(parsedUrl: URL, expandedUrl: string): SourceData | null {
   }
 
   // Match pattern: Module-Name-version.tar.gz
-  const match = filename.match(/^(.+?)-([\d.]+.*?)\.(tar\.gz|tar\.bz2|zip)$/);
+  const regex = /^(.+?)-([\d.]+.*?)\.(tar\.gz|tar\.bz2|zip)$/;
+  const match = regex.exec(filename);
   if (!match) {
     return null;
   }
@@ -297,7 +302,8 @@ function parsePackagistUrl(
   // Try to parse from download URL with filename
   const filename = pathParts[pathParts.length - 1];
   if (filename) {
-    const match = filename.match(/^(.+?)-([\d.]+.*?)\.(tar\.gz|zip)$/);
+    const regex = /^(.+?)-([\d.]+.*?)\.(tar\.gz|zip)$/;
+    const match = regex.exec(filename);
     if (match) {
       const packageName = match[1];
       const version = match[2];
@@ -310,6 +316,84 @@ function parsePackagistUrl(
         datasource: PackagistDatasource.id,
       };
     }
+  }
+
+  return null;
+}
+
+/**
+ * Parse Gitea URLs (includes Codeberg which runs Gitea/Forgejo)
+ * Example: https://gitea.com/owner/repo/archive/v1.0.0.tar.gz
+ *          https://codeberg.org/owner/repo/archive/v1.0.0.tar.gz
+ */
+function parseGiteaUrl(parsedUrl: URL, expandedUrl: string): SourceData | null {
+  const pathParts = parsedUrl.pathname.split('/').filter((p) => p);
+
+  // Handle archive URLs: /owner/repo/archive/tag.tar.gz
+  if (pathParts.includes('archive') && pathParts.length >= 4) {
+    const archiveIndex = pathParts.indexOf('archive');
+    const owner = pathParts[archiveIndex - 2];
+    const repo = pathParts[archiveIndex - 1];
+    let version = pathParts[archiveIndex + 1];
+
+    // Remove file extension
+    if (version) {
+      version = version.replace(/\.(tar\.gz|tar\.bz2|tar\.xz|zip)$/, '');
+    }
+
+    if (!version) {
+      return null;
+    }
+
+    return {
+      url: expandedUrl,
+      version,
+      owner,
+      repo,
+      datasource: GiteaTagsDatasource.id,
+      packageName: `${owner}/${repo}`,
+      registryUrl: `${parsedUrl.protocol}//${parsedUrl.hostname}`,
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Parse Forgejo URLs
+ * Example: https://code.forgejo.org/owner/repo/archive/v1.0.0.tar.gz
+ */
+function parseForgejoUrl(
+  parsedUrl: URL,
+  expandedUrl: string,
+): SourceData | null {
+  const pathParts = parsedUrl.pathname.split('/').filter((p) => p);
+
+  // Handle archive URLs: /owner/repo/archive/tag.tar.gz
+  if (pathParts.includes('archive') && pathParts.length >= 4) {
+    const archiveIndex = pathParts.indexOf('archive');
+    const owner = pathParts[archiveIndex - 2];
+    const repo = pathParts[archiveIndex - 1];
+    let version = pathParts[archiveIndex + 1];
+
+    // Remove file extension
+    if (version) {
+      version = version.replace(/\.(tar\.gz|tar\.bz2|tar\.xz|zip)$/, '');
+    }
+
+    if (!version) {
+      return null;
+    }
+
+    return {
+      url: expandedUrl,
+      version,
+      owner,
+      repo,
+      datasource: ForgejoTagsDatasource.id,
+      packageName: `${owner}/${repo}`,
+      registryUrl: `${parsedUrl.protocol}//${parsedUrl.hostname}`,
+    };
   }
 
   return null;
@@ -403,7 +487,30 @@ function parseSourceUrl(url: string, pkgver: string): SourceData | null {
       return parseGitLabUrl(parsedUrl, expandedUrl);
     }
 
-    // 3. PyPI detection
+    // 3. Gitea detection (includes Codeberg which runs Gitea/Forgejo)
+    if (
+      parsedUrl.hostname === 'gitea.com' ||
+      parsedUrl.hostname === 'codeberg.org' ||
+      parsedUrl.hostname.includes('gitea')
+    ) {
+      const result = parseGiteaUrl(parsedUrl, expandedUrl);
+      if (result) {
+        return result;
+      }
+    }
+
+    // 4. Forgejo detection
+    if (
+      parsedUrl.hostname === 'code.forgejo.org' ||
+      parsedUrl.hostname.includes('forgejo')
+    ) {
+      const result = parseForgejoUrl(parsedUrl, expandedUrl);
+      if (result) {
+        return result;
+      }
+    }
+
+    // 5. PyPI detection
     if (
       parsedUrl.hostname === 'files.pythonhosted.org' ||
       parsedUrl.hostname === 'pypi.org' ||
@@ -412,7 +519,7 @@ function parseSourceUrl(url: string, pkgver: string): SourceData | null {
       return parsePyPIUrl(parsedUrl, expandedUrl);
     }
 
-    // 4. npm detection
+    // 6. npm detection
     if (
       parsedUrl.hostname === 'registry.npmjs.org' ||
       parsedUrl.hostname === 'registry.npmjs.com'
@@ -420,7 +527,7 @@ function parseSourceUrl(url: string, pkgver: string): SourceData | null {
       return parseNpmUrl(parsedUrl, expandedUrl);
     }
 
-    // 5. CPAN detection
+    // 7. CPAN detection
     if (
       parsedUrl.hostname === 'cpan.metacpan.org' ||
       parsedUrl.hostname.includes('cpan')
@@ -428,12 +535,12 @@ function parseSourceUrl(url: string, pkgver: string): SourceData | null {
       return parseCPANUrl(parsedUrl, expandedUrl);
     }
 
-    // 6. Packagist detection
+    // 8. Packagist detection
     if (parsedUrl.hostname.includes('packagist')) {
       return parsePackagistUrl(parsedUrl, expandedUrl);
     }
 
-    // 7. Generic Git repository (gitea, forgejo, cgit, etc.)
+    // 9. Generic Git repository (gitea, forgejo, cgit, etc.)
     if (
       parsedUrl.pathname.includes('/archive/') ||
       parsedUrl.pathname.endsWith('.git')
@@ -527,6 +634,11 @@ export function extractPackageFile(content: string): PackageFileContent | null {
       pkgver,
     },
   };
+
+  // Add registryUrls for self-hosted instances
+  if (sourceData.registryUrl) {
+    dep.registryUrls = [sourceData.registryUrl];
+  }
 
   return { deps: [dep] };
 }

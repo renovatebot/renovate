@@ -329,6 +329,151 @@ sha256sums=('1111111111111111111111111111111111111111111111111111111111111111')
       });
     });
 
+    it('extracts dependency from Gitea archive URL', () => {
+      const content = `
+pkgname=gitea-package
+pkgver=1.2.3
+source=("https://gitea.com/owner/repo/archive/v\${pkgver}.tar.gz")
+sha256sums=('1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'owner/repo',
+            currentValue: 'v1.2.3',
+            datasource: 'gitea-tags',
+            registryUrls: ['https://gitea.com'],
+            managerData: {
+              sourceUrl:
+                'https://gitea.com/owner/repo/archive/v${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+              },
+              pkgver: '1.2.3',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency from Codeberg archive URL', () => {
+      const content = `
+pkgname=codeberg-package
+pkgver=2.0.0
+source=("https://codeberg.org/owner/repo/archive/v\${pkgver}.tar.gz")
+sha256sums=('abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'owner/repo',
+            currentValue: 'v2.0.0',
+            datasource: 'gitea-tags',
+            registryUrls: ['https://codeberg.org'],
+            managerData: {
+              sourceUrl:
+                'https://codeberg.org/owner/repo/archive/v${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  'abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234',
+              },
+              pkgver: '2.0.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency from Forgejo archive URL', () => {
+      const content = `
+pkgname=forgejo-package
+pkgver=3.1.0
+source=("https://code.forgejo.org/owner/repo/archive/v\${pkgver}.tar.gz")
+sha512sums=('11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'owner/repo',
+            currentValue: 'v3.1.0',
+            datasource: 'forgejo-tags',
+            registryUrls: ['https://code.forgejo.org'],
+            managerData: {
+              sourceUrl:
+                'https://code.forgejo.org/owner/repo/archive/v${pkgver}.tar.gz',
+              checksums: {
+                sha512:
+                  '11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111',
+              },
+              pkgver: '3.1.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency from self-hosted Gitea', () => {
+      const content = `
+pkgname=custom-package
+pkgver=1.0.0
+source=("https://gitea.mycompany.com/team/project/archive/v\${pkgver}.tar.gz")
+sha256sums=('fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'team/project',
+            currentValue: 'v1.0.0',
+            datasource: 'gitea-tags',
+            registryUrls: ['https://gitea.mycompany.com'],
+            managerData: {
+              sourceUrl:
+                'https://gitea.mycompany.com/team/project/archive/v${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  'fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210',
+              },
+              pkgver: '1.0.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency from self-hosted Forgejo', () => {
+      const content = `
+pkgname=forge-package
+pkgver=2.5.0
+source=("https://forgejo.example.org/dev/tool/archive/\${pkgver}.tar.gz")
+sha256sums=('0987654321fedcba0987654321fedcba0987654321fedcba0987654321fedcba')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'dev/tool',
+            currentValue: '2.5.0',
+            datasource: 'forgejo-tags',
+            registryUrls: ['https://forgejo.example.org'],
+            managerData: {
+              sourceUrl:
+                'https://forgejo.example.org/dev/tool/archive/${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  '0987654321fedcba0987654321fedcba0987654321fedcba0987654321fedcba',
+              },
+              pkgver: '2.5.0',
+            },
+          },
+        ],
+      });
+    });
+
     it('handles PyPI with different hostname variations', () => {
       const content = `
 pkgver=1.0.0

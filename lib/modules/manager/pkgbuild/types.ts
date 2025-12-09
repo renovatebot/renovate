@@ -12,4 +12,5 @@ export interface SourceData {
   owner?: string;
   datasource?: string;
   packageName?: string;
+  registryUrl?: string;
 }
