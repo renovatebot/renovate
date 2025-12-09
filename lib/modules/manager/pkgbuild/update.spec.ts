@@ -272,5 +272,26 @@ sha256sums=('1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
       expect(result).toContain('pkgrel=1');
       expect(result).not.toContain('pkgrel=5');
     });
+
+    it('returns null when managerData has invalid structure', async () => {
+      const result = await updateDependency({
+        fileContent: simplePkgbuild,
+        upgrade: {
+          depName: 'example/example',
+          currentValue: 'v1.2.3',
+          newValue: 'v1.2.4',
+          managerData: {
+            sourceUrl:
+              'https://github.com/example/example/archive/v${pkgver}.tar.gz',
+            // Missing checksums - this is valid, but test empty checksums path
+            checksums: {},
+            pkgver: '1.2.3',
+          },
+        },
+      });
+
+      expect(result).not.toBeNull();
+      expect(result).toContain('pkgver=1.2.4');
+    });
   });
 });

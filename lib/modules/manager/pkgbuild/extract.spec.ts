@@ -606,5 +606,32 @@ sha256sums=('abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc1')
         datasource: 'gitlab-tags',
       });
     });
+
+    it('falls back to Repology for unparseable source URLs', () => {
+      const content = `
+pkgname=invalid-url-pkg
+pkgver=1.0.0
+source=("hxxp://invalid-protocol-url")
+`;
+      const result = extractPackageFile(content);
+      expect(result).not.toBeNull();
+      // Should fall back to Repology when URL can't be parsed but pkgname exists
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'aur/invalid-url-pkg',
+        currentValue: '1.0.0',
+        datasource: 'repology',
+      });
+    });
+
+    it('logs debug message when no checksums are found', () => {
+      const content = `
+pkgname=no-checksums
+pkgver=1.0.0
+source=("https://github.com/test/test/archive/v\${pkgver}.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].managerData?.checksums).toEqual({});
+    });
   });
 });
