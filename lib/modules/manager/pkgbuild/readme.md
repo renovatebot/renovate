@@ -189,6 +189,32 @@ source=("https://nginx.org/download/nginx-${pkgver}.tar.gz")
 sha256sums=('abc123def456...')
 ```
 
+Architecture-Specific Checksums:
+
+```bash
+pkgname=mypackage
+pkgver=2.0.0
+pkgrel=1
+pkgdesc="Multi-architecture package"
+arch=('x86_64' 'aarch64')
+url="https://github.com/owner/repo"
+license=('MIT')
+source=("https://github.com/owner/repo/archive/v${pkgver}.tar.gz")
+# Renovate will automatically update all architecture-specific checksums
+sha256sums_x86_64=('abc123def456...')
+sha256sums_aarch64=('def456abc123...')
+```
+
+Automatic Filename-Based Fallback:
+
+```bash
+# No pkgname needed - Renovate extracts "custom-tool" from the filename
+pkgver=1.5.0
+source=("https://downloads.example.com/custom-tool-${pkgver}.tar.gz")
+sha256sums=('abc123def456...')
+# Will use Repology datasource with "aur/custom-tool"
+```
+
 **Configuration:**
 
 The PKGBUILD manager is enabled by default and requires no special configuration. However, you can customize its behavior:
@@ -228,7 +254,5 @@ The manager downloads the new source archive and computes all checksums automati
 
 **Limitations:**
 
-- Architecture-specific checksums (e.g., `sha256sums_x86_64`) are supported but all must use the same source URL
 - Multiple sources in a single PKGBUILD are not yet supported
-- Repology fallback requires the `pkgname` field to be present
 - When using Repology, version updates depend on the accuracy of the Repology database

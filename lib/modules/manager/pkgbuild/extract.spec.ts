@@ -141,6 +141,88 @@ md5sums=('44444444444444444444444444444444')
       });
     });
 
+    it('extracts architecture-specific checksums', () => {
+      const content = `
+pkgname=test-arch
+pkgver=1.0.0
+arch=('x86_64' 'aarch64')
+source=("https://github.com/test/arch/archive/v\${pkgver}.tar.gz")
+sha256sums_x86_64=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+sha256sums_aarch64=('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'test/arch',
+            currentValue: 'v1.0.0',
+            datasource: 'github-tags',
+            managerData: {
+              sourceUrl:
+                'https://github.com/test/arch/archive/v${pkgver}.tar.gz',
+              checksums: {
+                sha256: [
+                  {
+                    value:
+                      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                    suffix: '_x86_64',
+                  },
+                  {
+                    value:
+                      'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                    suffix: '_aarch64',
+                  },
+                ],
+              },
+              pkgver: '1.0.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('handles mixed architecture-specific and regular checksums', () => {
+      const content = `
+pkgname=test-mixed
+pkgver=2.5.0
+source=("https://github.com/test/mixed/archive/v\${pkgver}.tar.gz")
+sha256sums=('1111111111111111111111111111111111111111111111111111111111111111')
+sha512sums_x86_64=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1')
+sha512sums_aarch64=('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'test/mixed',
+            currentValue: 'v2.5.0',
+            datasource: 'github-tags',
+            managerData: {
+              sourceUrl:
+                'https://github.com/test/mixed/archive/v${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  '1111111111111111111111111111111111111111111111111111111111111111',
+                sha512: [
+                  {
+                    value:
+                      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1',
+                    suffix: '_x86_64',
+                  },
+                  {
+                    value:
+                      'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                    suffix: '_aarch64',
+                  },
+                ],
+              },
+              pkgver: '2.5.0',
+            },
+          },
+        ],
+      });
+    });
+
     it('handles refs/tags format', () => {
       const content = `
 pkgver=1.0.0
@@ -167,12 +249,26 @@ sha256sums=('abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc1')
       });
     });
 
-    it('returns null for non-GitHub/GitLab sources', () => {
+    it('uses filename fallback for non-GitHub/GitLab sources without pkgname', () => {
       const content = `
 pkgver=1.0.0
 source=("https://example.com/package-1.0.0.tar.gz")
 `;
-      expect(extractPackageFile(content)).toBeNull();
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'aur/package',
+            currentValue: '1.0.0',
+            datasource: 'repology',
+            managerData: {
+              sourceUrl: 'https://example.com/package-1.0.0.tar.gz',
+              checksums: {},
+              pkgver: '1.0.0',
+            },
+          },
+        ],
+      });
     });
 
     it('extracts dependency from PyPI source', () => {
@@ -487,12 +583,26 @@ source=("https://pypi.org/packages/source/p/package/package-\${pkgver}.tar.gz")
       });
     });
 
-    it('returns null for truly unsupported sources', () => {
+    it('uses filename fallback for truly unsupported sources', () => {
       const content = `
 pkgver=1.0.0
 source=("ftp://ftp.example.com/package-1.0.0.tar.gz")
 `;
-      expect(extractPackageFile(content)).toBeNull();
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'aur/package',
+            currentValue: '1.0.0',
+            datasource: 'repology',
+            managerData: {
+              sourceUrl: 'ftp://ftp.example.com/package-1.0.0.tar.gz',
+              checksums: {},
+              pkgver: '1.0.0',
+            },
+          },
+        ],
+      });
     });
 
     it('uses Repology as fallback for unsupported sources with pkgname', () => {

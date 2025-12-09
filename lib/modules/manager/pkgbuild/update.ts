@@ -3,7 +3,7 @@ import { hashStream } from '../../../util/hash';
 import { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';
 import type { UpdateDependencyConfig } from '../types';
-import type { ChecksumData } from './types';
+import type { ChecksumData, ChecksumEntry } from './types';
 
 const http = new Http('pkgbuild');
 
@@ -44,17 +44,59 @@ function updateSource(content: string, oldUrl: string, newUrl: string): string {
 
 /**
  * Update checksum in PKGBUILD
+ * Handles both single checksums and architecture-specific checksum arrays
  */
 function updateChecksum(
   content: string,
   checksumType: string,
   oldChecksum: string,
   newChecksum: string,
+  suffix?: string,
 ): string {
+  const suffixPattern = suffix ?? '(?:_[^=]+)?';
   return content.replace(
-    regEx(`(${checksumType}sums(?:_[^=]+)?=\\(['"]?)${oldChecksum}`, 'm'),
+    regEx(`(${checksumType}sums${suffixPattern}=\\(['"]?)${oldChecksum}`, 'm'),
     `$1${newChecksum}`,
   );
+}
+
+/**
+ * Update checksums - handles both single and multiple architecture-specific checksums
+ */
+function updateChecksums(
+  content: string,
+  checksumType: 'sha256' | 'sha512' | 'b2' | 'md5',
+  oldChecksums: string | ChecksumEntry[] | undefined,
+  newChecksum: string,
+): string {
+  if (!oldChecksums) {
+    return content;
+  }
+
+  let updatedContent = content;
+
+  // Handle array of architecture-specific checksums
+  if (Array.isArray(oldChecksums)) {
+    for (const entry of oldChecksums) {
+      updatedContent = updateChecksum(
+        updatedContent,
+        checksumType,
+        entry.value,
+        newChecksum,
+        entry.suffix,
+      );
+    }
+  } else {
+    // Handle single checksum (backward compatibility)
+    updatedContent = updateChecksum(
+      updatedContent,
+      checksumType,
+      oldChecksums,
+      newChecksum,
+    );
+  }
+
+  return updatedContent;
 }
 
 /**
@@ -171,41 +213,49 @@ export async function updateDependency({
 
         // Update sha256sums
         if (checksums.sha256 && newChecksums.sha256) {
-          updatedContent = updateChecksum(
+          updatedContent = updateChecksums(
             updatedContent,
             'sha256',
             checksums.sha256,
-            newChecksums.sha256,
+            typeof newChecksums.sha256 === 'string'
+              ? newChecksums.sha256
+              : newChecksums.sha256[0].value,
           );
         }
 
         // Update sha512sums
         if (checksums.sha512 && newChecksums.sha512) {
-          updatedContent = updateChecksum(
+          updatedContent = updateChecksums(
             updatedContent,
             'sha512',
             checksums.sha512,
-            newChecksums.sha512,
+            typeof newChecksums.sha512 === 'string'
+              ? newChecksums.sha512
+              : newChecksums.sha512[0].value,
           );
         }
 
         // Update b2sums (BLAKE2)
         if (checksums.b2 && newChecksums.b2) {
-          updatedContent = updateChecksum(
+          updatedContent = updateChecksums(
             updatedContent,
             'b2',
             checksums.b2,
-            newChecksums.b2,
+            typeof newChecksums.b2 === 'string'
+              ? newChecksums.b2
+              : newChecksums.b2[0].value,
           );
         }
 
         // Update md5sums
         if (checksums.md5 && newChecksums.md5) {
-          updatedContent = updateChecksum(
+          updatedContent = updateChecksums(
             updatedContent,
             'md5',
             checksums.md5,
-            newChecksums.md5,
+            typeof newChecksums.md5 === 'string'
+              ? newChecksums.md5
+              : newChecksums.md5[0].value,
           );
         }
 

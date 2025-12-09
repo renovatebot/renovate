@@ -10,40 +10,68 @@ import { PackagistDatasource } from '../../datasource/packagist';
 import { PypiDatasource } from '../../datasource/pypi';
 import { RepologyDatasource } from '../../datasource/repology';
 import type { PackageDependency, PackageFileContent } from '../types';
-import type { ChecksumData, SourceData } from './types';
+import type { ChecksumData, ChecksumEntry, SourceData } from './types';
 
 /**
  * Extract checksums from PKGBUILD content
+ * Supports architecture-specific checksums (e.g., sha256sums_x86_64)
  */
 function extractChecksums(content: string): ChecksumData {
   const checksums: ChecksumData = {};
 
+  // Helper function to extract all checksums of a given type
+  function extractAllChecksumsOfType(
+    type: 'sha256' | 'sha512' | 'b2' | 'md5',
+    length: number,
+  ): ChecksumEntry[] {
+    const regex = new RegExp(
+      `(${type}sums(?:_([^=]+))?)=\\((['"]?)([a-fA-F0-9]{${length}})\\3\\)`,
+      'g',
+    );
+    const entries: ChecksumEntry[] = [];
+    let match: RegExpExecArray | null;
+
+    while ((match = regex.exec(content)) !== null) {
+      entries.push({
+        value: match[4],
+        suffix: match[2] ? `_${match[2]}` : undefined,
+      });
+    }
+
+    return entries;
+  }
+
   // Extract sha256sums
-  const sha256Regex = /sha256sums(?:_[^=]+)?=\((['"]?)([a-fA-F0-9]{64})\1\)/;
-  const sha256Match = sha256Regex.exec(content);
-  if (sha256Match) {
-    checksums.sha256 = sha256Match[2];
+  const sha256Entries = extractAllChecksumsOfType('sha256', 64);
+  if (sha256Entries.length === 1 && !sha256Entries[0].suffix) {
+    // Single non-architecture-specific checksum - use string for backward compatibility
+    checksums.sha256 = sha256Entries[0].value;
+  } else if (sha256Entries.length > 0) {
+    checksums.sha256 = sha256Entries;
   }
 
   // Extract sha512sums
-  const sha512Regex = /sha512sums(?:_[^=]+)?=\((['"]?)([a-fA-F0-9]{128})\1\)/;
-  const sha512Match = sha512Regex.exec(content);
-  if (sha512Match) {
-    checksums.sha512 = sha512Match[2];
+  const sha512Entries = extractAllChecksumsOfType('sha512', 128);
+  if (sha512Entries.length === 1 && !sha512Entries[0].suffix) {
+    checksums.sha512 = sha512Entries[0].value;
+  } else if (sha512Entries.length > 0) {
+    checksums.sha512 = sha512Entries;
   }
 
   // Extract b2sums (BLAKE2)
-  const b2Regex = /b2sums(?:_[^=]+)?=\((['"]?)([a-fA-F0-9]{128})\1\)/;
-  const b2Match = b2Regex.exec(content);
-  if (b2Match) {
-    checksums.b2 = b2Match[2];
+  const b2Entries = extractAllChecksumsOfType('b2', 128);
+  if (b2Entries.length === 1 && !b2Entries[0].suffix) {
+    checksums.b2 = b2Entries[0].value;
+  } else if (b2Entries.length > 0) {
+    checksums.b2 = b2Entries;
   }
 
   // Extract md5sums
-  const md5Regex = /md5sums(?:_[^=]+)?=\((['"]?)([a-fA-F0-9]{32})\1\)/;
-  const md5Match = md5Regex.exec(content);
-  if (md5Match) {
-    checksums.md5 = md5Match[2];
+  const md5Entries = extractAllChecksumsOfType('md5', 32);
+  if (md5Entries.length === 1 && !md5Entries[0].suffix) {
+    checksums.md5 = md5Entries[0].value;
+  } else if (md5Entries.length > 0) {
+    checksums.md5 = md5Entries;
   }
 
   return checksums;
@@ -564,6 +592,43 @@ function extractSource(content: string): string | null {
   return sourceMatch ? sourceMatch[2] : null;
 }
 
+/**
+ * Extract package name from source URL filename as a fallback
+ * Example: "https://example.com/foo-bar-1.2.3.tar.gz" -> "foo-bar"
+ */
+function extractPackageNameFromFilename(sourceUrl: string): string | null {
+  try {
+    // Get the filename from the URL
+    const urlPath = sourceUrl.split('?')[0]; // Remove query params
+    const filename = urlPath.split('/').pop();
+
+    if (!filename) {
+      return null;
+    }
+
+    // Match pattern: packagename-version.ext
+    // Common extensions: .tar.gz, .tar.bz2, .tar.xz, .zip, .tgz
+    const regex = /^(.+?)-(v?[\d.]+[^-]*)\.(tar\.gz|tar\.bz2|tar\.xz|zip|tgz)$/;
+    const match = regex.exec(filename);
+
+    if (match) {
+      return match[1];
+    }
+
+    // Try simpler pattern without version
+    const simpleRegex = /^(.+)\.(tar\.gz|tar\.bz2|tar\.xz|zip|tgz)$/;
+    const simpleMatch = simpleRegex.exec(filename);
+
+    if (simpleMatch) {
+      return simpleMatch[1];
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace('pkgbuild.extractPackageFile()');
 
@@ -610,6 +675,20 @@ export function extractPackageFile(content: string): PackageFileContent | null {
           datasource: RepologyDatasource.id,
           packageName: `aur/${pkgname}`,
         };
+      } else {
+        // Last resort: extract package name from source URL filename
+        const fallbackName = extractPackageNameFromFilename(sourceUrl);
+        if (fallbackName) {
+          logger.debug(
+            `Using Repology datasource with filename-based fallback: ${fallbackName}`,
+          );
+          sourceData = {
+            url: sourceUrl,
+            version: pkgver,
+            datasource: RepologyDatasource.id,
+            packageName: `aur/${fallbackName}`,
+          };
+        }
       }
     }
   }
