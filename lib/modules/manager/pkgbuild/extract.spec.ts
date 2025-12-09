@@ -633,5 +633,94 @@ source=("https://github.com/test/test/archive/v\${pkgver}.tar.gz")
       expect(result).not.toBeNull();
       expect(result?.deps[0].managerData?.checksums).toEqual({});
     });
+
+    it('returns null for GitHub URLs with insufficient path parts', () => {
+      const content = `
+pkgname=invalid-github
+pkgver=1.0.0
+source=("https://github.com/only-one-part")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for GitHub URLs without version info', () => {
+      const content = `
+pkgname=no-version
+pkgver=1.0.0
+source=("https://github.com/owner/repo/somethingelse")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for GitLab URLs with insufficient path parts', () => {
+      const content = `
+pkgname=invalid-gitlab
+pkgver=1.0.0
+source=("https://gitlab.com/only-one")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for GitLab URLs without archive path', () => {
+      const content = `
+pkgname=no-archive
+pkgver=1.0.0
+source=("https://gitlab.com/owner/repo/somethingelse")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('extracts dependency from Packagist URL with packages path', () => {
+      const content = `
+pkgname=packagist-package
+pkgver=1.0.0
+source=("https://packagist.org/packages/vendor/package")
+`;
+      const result = extractPackageFile(content);
+      expect(result).not.toBeNull();
+      expect(result?.deps[0]).toMatchObject({
+        datasource: 'packagist',
+        currentValue: '',
+        depName: 'vendor/package',
+      });
+    });
+
+    it('extracts dependency from Packagist download URL', () => {
+      const content = `
+pkgname=packagist-download
+pkgver=2.5.0
+source=("https://repo.packagist.org/downloads/vendor-package-2.5.0.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      expect(result).not.toBeNull();
+      expect(result?.deps[0]).toMatchObject({
+        datasource: 'packagist',
+        currentValue: '2.5.0',
+      });
+    });
+
+    it('returns null for invalid Packagist URLs', () => {
+      const content = `
+pkgname=invalid-packagist
+pkgver=1.0.0
+source=("https://packagist.org/invalid")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
   });
 });
