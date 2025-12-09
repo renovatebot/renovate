@@ -36,7 +36,10 @@ const DevboxEntry = z
       dep.versioning = versioning.id;
     }
 
-    if (!(versioning?.api ?? api).isValid(currentValue)) {
+    if (
+      !(versioning?.api ?? api).isValid(currentValue) ||
+      !(versioning?.api ?? api).isSingleVersion(currentValue)
+    ) {
       logger.debug(
         { depName },
         'Devbox: skipping invalid devbox dependency in devbox JSON file.',
