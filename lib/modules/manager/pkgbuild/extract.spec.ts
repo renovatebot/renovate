@@ -869,5 +869,77 @@ source=("https://git.example.com/repo.git")
       expect(result).not.toBeNull();
       expect(result?.deps[0].datasource).toBe('repology');
     });
+
+    it('returns null for Gitea URLs with archive but no version after extension removal', () => {
+      const content = `
+pkgname=gitea-noversion
+pkgver=1.0.0
+source=("https://gitea.com/owner/repo/archive/.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for Forgejo URLs with archive but no version after extension removal', () => {
+      const content = `
+pkgname=forgejo-noversion
+pkgver=1.0.0
+source=("https://code.forgejo.org/owner/repo/archive/.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for generic git URLs with archive but no version after extension removal', () => {
+      const content = `
+pkgname=git-noversion
+pkgver=1.0.0
+source=("https://git.example.com/owner/repo/archive/.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('handles pypi.python.org hostname variant', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://pypi.python.org/packages/source/p/package/package-1.0.0.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        datasource: 'pypi',
+        currentValue: '1.0.0',
+      });
+    });
+
+    it('handles registry.npmjs.com hostname variant', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://registry.npmjs.com/package/-/package-1.0.0.tgz")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        datasource: 'npm',
+        currentValue: '1.0.0',
+      });
+    });
+
+    it('handles CPAN URLs with cpan in hostname', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://www.cpan.org/authors/id/A/AB/ABC/Module-Name-1.0.0.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        datasource: 'cpan',
+        currentValue: '1.0.0',
+      });
+    });
   });
 });
