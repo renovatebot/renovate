@@ -350,6 +350,76 @@ source=("ftp://ftp.example.com/package-1.0.0.tar.gz")
       expect(extractPackageFile(content)).toBeNull();
     });
 
+    it('uses Repology as fallback for unsupported sources with pkgname', () => {
+      const content = `
+pkgname=custom-package
+pkgver=1.5.0
+source=("https://example.com/downloads/custom-package-\${pkgver}.tar.gz")
+sha256sums=('1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'aur/custom-package',
+            currentValue: '1.5.0',
+            datasource: 'repology',
+            managerData: {
+              sourceUrl:
+                'https://example.com/downloads/custom-package-${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+              },
+              pkgver: '1.5.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('uses manual Repology configuration from comment', () => {
+      const content = `
+# renovate: repology=arch_linux_stable/nginx
+pkgname=nginx
+pkgver=1.24.0
+source=("https://nginx.org/download/nginx-\${pkgver}.tar.gz")
+sha256sums=('abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'arch_linux_stable/nginx',
+            currentValue: '1.24.0',
+            datasource: 'repology',
+            managerData: {
+              sourceUrl: 'https://nginx.org/download/nginx-${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  'abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234',
+              },
+              pkgver: '1.24.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('prioritizes manual Repology config over automatic detection', () => {
+      const content = `
+# renovate: repology=freebsd/custom-pkg
+pkgname=custom-package
+pkgver=2.0.0
+source=("https://example.com/custom-package-\${pkgver}.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'freebsd/custom-pkg',
+        datasource: 'repology',
+      });
+    });
+
     it('extracts dependency from GitLab source', () => {
       const content = `
 pkgname=example-gitlab-package

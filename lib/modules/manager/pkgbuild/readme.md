@@ -75,6 +75,41 @@ source=("https://git.example.com/owner/repo/archive/v${pkgver}.tar.gz")
 source=("https://gitea.example.com/org/repo.git")
 ```
 
+### Repology (Fallback)
+
+For sources that don't match any of the above patterns, Renovate automatically uses [Repology](https://repology.org/) as a fallback datasource. Repology aggregates package information from many repositories.
+
+**Automatic Detection:**
+
+When a source URL doesn't match any known pattern, Renovate will automatically use Repology with the AUR (Arch User Repository):
+
+```bash
+pkgname=custom-package
+pkgver=1.5.0
+source=("https://example.com/downloads/custom-package-${pkgver}.tar.gz")
+# Will automatically use repology datasource with "aur/custom-package"
+```
+
+**Manual Configuration:**
+
+You can explicitly specify a Repology repository using a comment:
+
+```bash
+# renovate: repology=arch_linux_stable/nginx
+pkgname=nginx
+pkgver=1.24.0
+source=("https://nginx.org/download/nginx-${pkgver}.tar.gz")
+```
+
+Available Repology repositories include:
+
+- `aur` - Arch User Repository
+- `arch_linux_stable` - Arch Linux official repositories
+- `debian_stable` - Debian Stable
+- `freebsd` - FreeBSD ports
+- `gentoo` - Gentoo
+- And many more - see [Repology repositories list](https://repology.org/repositories/statistics)
+
 **Examples:**
 
 GitHub Package:
@@ -103,6 +138,21 @@ url="https://requests.readthedocs.io"
 license=('Apache')
 depends=('python')
 source=("https://files.pythonhosted.org/packages/source/r/requests/requests-${pkgver}.tar.gz")
+sha256sums=('abc123def456...')
+```
+
+Custom Source with Repology:
+
+```bash
+# renovate: repology=arch_linux_stable/nginx
+pkgname=nginx
+pkgver=1.24.0
+pkgrel=1
+pkgdesc="HTTP and reverse proxy server"
+arch=('x86_64')
+url="https://nginx.org"
+license=('BSD')
+source=("https://nginx.org/download/nginx-${pkgver}.tar.gz")
 sha256sums=('abc123def456...')
 ```
 
@@ -147,4 +197,5 @@ The manager downloads the new source archive and computes all checksums automati
 
 - Architecture-specific checksums (e.g., `sha256sums_x86_64`) are supported but all must use the same source URL
 - Multiple sources in a single PKGBUILD are not yet supported
-- For sources not automatically detected, use Renovate's [custom regex manager](https://docs.renovatebot.com/modules/manager/regex/) instead
+- Repology fallback requires the `pkgname` field to be present
+- When using Repology, version updates depend on the accuracy of the Repology database

@@ -6,6 +6,7 @@ import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { NpmDatasource } from '../../datasource/npm';
 import { PackagistDatasource } from '../../datasource/packagist';
 import { PypiDatasource } from '../../datasource/pypi';
+import { RepologyDatasource } from '../../datasource/repology';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { ChecksumData, SourceData } from './types';
 
@@ -52,6 +53,25 @@ function extractChecksums(content: string): ChecksumData {
 function extractPkgver(content: string): string | null {
   const pkgverRegex = /^pkgver=(.+)$/m;
   const match = pkgverRegex.exec(content);
+  return match ? match[1].trim() : null;
+}
+
+/**
+ * Extract pkgname from PKGBUILD
+ */
+function extractPkgname(content: string): string | null {
+  const pkgnameRegex = /^pkgname=(.+)$/m;
+  const match = pkgnameRegex.exec(content);
+  return match ? match[1].trim() : null;
+}
+
+/**
+ * Extract Repology configuration from comment
+ * Example: # renovate: repology=aur/packagename
+ */
+function extractRepologyConfig(content: string): string | null {
+  const repologyRegex = /#\s*renovate:\s*repology=(\S+)/;
+  const match = repologyRegex.exec(content);
   return match ? match[1].trim() : null;
 }
 
@@ -453,7 +473,40 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   }
 
   // Parse URL to detect datasource
-  const sourceData = parseSourceUrl(sourceUrl, pkgver);
+  let sourceData = parseSourceUrl(sourceUrl, pkgver);
+
+  // If no datasource detected, try Repology as fallback
+  if (!sourceData) {
+    // Check for manual Repology configuration first
+    const repologyConfig = extractRepologyConfig(content);
+    if (repologyConfig) {
+      logger.debug(
+        `Using Repology datasource with manual config: ${repologyConfig}`,
+      );
+      sourceData = {
+        url: sourceUrl,
+        version: pkgver,
+        datasource: RepologyDatasource.id,
+        packageName: repologyConfig,
+      };
+    } else {
+      // Try automatic Repology detection using pkgname
+      const pkgname = extractPkgname(content);
+      if (pkgname) {
+        logger.debug(
+          `Using Repology datasource as fallback for package: ${pkgname}`,
+        );
+        // Default to AUR repository for Arch packages
+        sourceData = {
+          url: sourceUrl,
+          version: pkgver,
+          datasource: RepologyDatasource.id,
+          packageName: `aur/${pkgname}`,
+        };
+      }
+    }
+  }
+
   if (!sourceData) {
     logger.debug('Unable to parse source URL or unsupported source');
     return null;
