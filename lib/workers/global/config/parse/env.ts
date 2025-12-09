@@ -144,6 +144,7 @@ export async function getConfig(
       try {
         const parsed = JSON5.parse(envVal);
         if (isArray(parsed)) {
+          // @ts-expect-error -- type can't be narrowed
           config[option.name] = parsed;
         } else {
           logger.debug(
@@ -159,6 +160,7 @@ export async function getConfig(
       }
     } else {
       const coerce = coersions[option.type];
+      // @ts-expect-error -- type can't be narrowed
       config[option.name] = coerce(envVal);
       if (option.name === 'dryRun') {
         if ((config[option.name] as string) === 'true') {

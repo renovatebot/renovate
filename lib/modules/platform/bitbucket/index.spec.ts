@@ -549,11 +549,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
@@ -591,11 +593,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
@@ -645,11 +649,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
@@ -682,11 +688,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
@@ -719,11 +727,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
@@ -1657,6 +1667,19 @@ describe('modules/platform/bitbucket/index', () => {
         '\n\n</details>\n\n</blockquote>\n</details>';
 
       expect(bitbucket.massageMarkdown(prBody)).toMatchSnapshot();
+    });
+
+    it('updates abandoned dependencies heading and place note inside', () => {
+      const prBody =
+        '> ℹ **Note**\n>\n' +
+        'These dependencies have not received updates for an extended period and may be unmaintained:\n' +
+        '<details><summary>View abandoned dependencies (6)</summary>';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '## Abandoned Dependencies  (6)\n' +
+          '> ℹ **Note**\n>\n' +
+          'These dependencies have not received updates for an extended period and may be unmaintained:\n',
+      );
     });
   });
 

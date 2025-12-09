@@ -368,6 +368,82 @@ describe('util/http/github', () => {
         ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
       });
 
+      it('when the rate limit is exceeded, and host rules are set for GitHub.com, a warn is logged', async () => {
+        hostRules.add({
+          matchHost: 'api.github.com',
+          token: 'x-access-token:123test',
+        });
+
+        await expect(
+          fail(403, {
+            message:
+              'Error updating branch: API rate limit exceeded for installation ID 48411. (403)',
+          }),
+        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          'Rate limit exceeded for api.github.com, even though we are authenticated',
+        );
+      });
+
+      it('when the rate limit is exceeded, but no host rules are set for GitHub.com, a warn is logged', async () => {
+        hostRules.clear();
+
+        await expect(
+          fail(403, {
+            message:
+              "API rate limit exceeded for xxx.xxx.xxx.xxx. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)",
+          }),
+        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          {
+            documentationUrl:
+              'https://docs.renovatebot.com/getting-started/running/#githubcom-token-for-changelogs-and-tools',
+          },
+          'Rate limit exceeded for api.github.com, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN',
+        );
+      });
+
+      it('when the rate limit is exceeded to GitHub Enterprise, but no host rules are set, a warn is logged', async () => {
+        async function fail(
+          code: number,
+          body: any = undefined,
+          headers: httpMock.ReplyHeaders = {},
+        ) {
+          const url = '/some-url';
+          httpMock
+            .scope('https://github.enterprise.example.com') // using our Enterprise URL
+            .get(url)
+            .reply(
+              code,
+              function reply() {
+                // https://github.com/nock/nock/issues/1979
+                if (typeof body === 'object' && 'message' in body) {
+                  (this.req as any).response.statusMessage = body?.message;
+                }
+                return body;
+              },
+              headers,
+            );
+          await githubApi.getJsonUnchecked(url);
+        }
+
+        hostRules.clear();
+        setBaseUrl('https://github.enterprise.example.com');
+
+        await expect(
+          fail(403, {
+            message:
+              "API rate limit exceeded for xxx.xxx.xxx.xxx. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)",
+          }),
+        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          'Rate limit exceeded for github.enterprise.example.com, as no hostRules set for this host',
+        );
+      });
+
       it('should throw secondary rate limit exceeded', async () => {
         await expect(
           fail(403, {

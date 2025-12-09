@@ -10,7 +10,7 @@
 
 Please select one of the following:
 
-- [ ] This closes an existing Issue, Closes: #
+- [ ] This closes an existing Issue, Closes: # <!-- NOTE that this should NOT be a Discussion -->
 - [ ] This doesn't close an Issue, but I accept the risk that this PR may be closed if maintainers disagree with its opening or implementation
 
 ## AI assistance disclosure
