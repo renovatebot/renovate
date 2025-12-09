@@ -15,7 +15,6 @@ const apiBaseUrl = 'https://bitbucket.some.domain.org/rest/api/1.0/';
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
   branchName: '',
-  endpoint: apiBaseUrl,
   packageName: 'renovate',
   versioning: semverVersioning.id,
   currentVersion: '5.2.0',

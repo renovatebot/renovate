@@ -1138,7 +1138,7 @@ describe('workers/repository/update/branch/index', () => {
           some notice
         `,
         number: 123,
-        topic: 'ℹ Artifact update notice',
+        topic: 'ℹ️ Artifact update notice',
       });
     });
 
@@ -2464,7 +2464,6 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo hardcoded-string$'],
-        trustLevel: 'high',
         localDir: '/localDir',
       });
 
@@ -2579,7 +2578,6 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo hardcoded-string$'],
-        trustLevel: 'high',
         localDir: '/localDir',
         cacheDir,
       });
@@ -2685,7 +2683,6 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo hardcoded-string$'],
-        trustLevel: 'high',
         localDir: '/localDir',
         cacheDir,
       });

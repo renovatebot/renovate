@@ -7,7 +7,7 @@ The following updates have been manually edited so Renovate will no longer make 
  - [ ] <!-- rebase-branch=branchName1 -->[pr1](../pull/1)
  - [ ] <!-- rebase-branch=branchName2 -->[pr2](../pull/2) (`dep2`, `dep3`)
 
-## Detected dependencies
+## Detected Dependencies
 
 None detected
 
