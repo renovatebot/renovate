@@ -720,7 +720,7 @@ This setting differs from `prHourlyLimit` in an important way:
 - `commitHourlyLimit` limits both branch creation _and_ automatic rebasing, giving you stricter control over CI usage
 
 If you want strict control over CI load, use `commitHourlyLimit`.
-If you only want to limit the rate of _new_ PRs, use `prHourlyLimit`.
+If you only want to limit the rate of _new_ PRs, use [prHourlyLimit](#prhourlylimit).
 
 <!-- prettier-ignore -->
 !!! tip
