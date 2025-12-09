@@ -54,6 +54,7 @@ import type {
   Comment,
   PullRequestActivity,
   PullRequestCommentActivity,
+  PullRequestMerge,
 } from './schema';
 import { ReviewerGroups, User, Users } from './schema';
 import type {
@@ -1076,6 +1077,10 @@ export async function createPr({
     pr,
   );
 
+  if (platformPrOptions?.usePlatformAutomerge) {
+    await tryPrAutomerge(pr.number, pr.version!);
+  }
+
   return pr;
 }
 
@@ -1216,6 +1221,35 @@ export async function mergePr({
 
   logger.debug(`PR merged, PrNo:${prNo}`);
   return true;
+}
+
+// https://confluence.atlassian.com/bitbucketserver094/merge-a-pull-request-1489802114.html#Mergeapullrequest-Auto-mergeapullrequest
+export async function tryPrAutomerge(
+  prNumber: number,
+  prVersion: number,
+): Promise<void> {
+  logger.debug(`automergePr(${prNumber})`);
+
+  if (semver.lt(defaults.version, '8.15.0')) {
+    logger.debug(
+      { prNumber },
+      'Bitbucket Server-native automerge: not supported on this version of Bitbucket. Use 8.15.0 or newer.',
+    );
+    return;
+  }
+
+  try {
+    const body: PullRequestMerge = { autoMerge: true };
+    await bitbucketServerHttp.postJson(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNumber}/merge?version=${prVersion}`,
+      { body },
+    );
+
+    // enabling auto-merge doesn't increase PR version, so we omit updating the cache
+    logger.debug({ prNumber }, 'Bitbucket Server-native automerge: success');
+  } catch (err) {
+    logger.warn({ err, prNumber }, 'Bitbucket Server-native automerge: fail');
+  }
 }
 
 export async function expandGroupMembers(
