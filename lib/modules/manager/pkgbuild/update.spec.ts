@@ -293,5 +293,33 @@ sha256sums=('1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
       expect(result).not.toBeNull();
       expect(result).toContain('pkgver=1.2.4');
     });
+
+    it('handles missing pkgver in managerData by using currentValue', async () => {
+      const content = `
+pkgname=test-package
+pkgver=1.0.0
+pkgrel=1
+source=("https://github.com/owner/repo/archive/v\${pkgver}.tar.gz")
+`;
+
+      const result = await updateDependency({
+        fileContent: content,
+        upgrade: {
+          depName: 'owner/repo',
+          currentValue: 'v1.0.0',
+          newValue: 'v2.0.0',
+          managerData: {
+            sourceUrl:
+              'https://github.com/owner/repo/archive/v${pkgver}.tar.gz',
+            checksums: {},
+            // pkgver is intentionally missing
+          },
+        },
+      });
+
+      expect(result).not.toBeNull();
+      expect(result).toContain('pkgver=2.0.0');
+      expect(result).toContain('pkgrel=1');
+    });
   });
 });
