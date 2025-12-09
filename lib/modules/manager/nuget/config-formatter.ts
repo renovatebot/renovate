@@ -16,14 +16,14 @@ export function createNuGetConfigXml(registries: Registry[]): string {
 
   const credentials: PackageSourceCredential[] = [];
   const packageSourceMaps: PackageSourceMap[] = [];
-  const seenUrls: string[] = [];
+  const seenUrls = new Set<string>();
 
   for (const registry of registries) {
     // Skip if we've already seen this URL
-    if (seenUrls.includes(registry.url)) {
+    if (seenUrls.has(registry.url)) {
       continue;
     }
-    seenUrls.push(registry.url);
+    seenUrls.add(registry.url);
 
     const registryName =
       registry.name ?? `Package source ${++unnamedRegistryCount}`;

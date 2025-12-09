@@ -1,3 +1,4 @@
+import { isNonEmptyString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -42,10 +43,11 @@ async function createCachedNuGetConfigFile(
   const registries =
     (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
 
-  const updatedDepsRegistries: Registry[] = updatedDeps
-    .flatMap((dep) => dep.registryUrls ?? [])
-    .filter((url): url is string => !!url)
-    .map((url) => ({ url }));
+  const updatedDepsRegistries: Registry[] = [
+    ...new Set(
+      updatedDeps.flatMap((d) => d.registryUrls ?? []).filter(isNonEmptyString),
+    ),
+  ].map((url) => ({ url }));
 
   const combinedRegistries = [...registries, ...updatedDepsRegistries];
 
