@@ -1046,7 +1046,7 @@
       {
         "matchDatasources": ["npm"],
         "matchPackageNames": ["@tsconfig/node18"],
-        "replacementName": "@tsconfig/node29",
+        "replacementName": "@tsconfig/node19",
         "replacementVersion": "19.0.0"
       },
       {
