@@ -615,8 +615,10 @@ export function massageMarkdown(input: string): string {
       'renaming the PR to start with "rebase!"',
     )
     .replace(
-      regEx(/<summary>View abandoned dependencies(.*)<\/summary>/),
-      '## Abandoned dependencies $1',
+      regEx(
+        /(> ℹ \*\*Note\*\*[\s\S]*?unmaintained:\n)[\s\S]*?(View abandoned dependencies.*<\/summary>)/m,
+      ),
+      '## Abandoned Dependencies\n$1',
     )
     .replace(regEx(/(>[\s\S]+?)(## Abandoned dependencies.*)/), '$2\n$1') // Move note under heading
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')

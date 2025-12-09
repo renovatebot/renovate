@@ -1680,7 +1680,7 @@ describe('modules/platform/bitbucket/index', () => {
         '\n<details>\n\n';
 
       expect(bitbucket.massageMarkdown(prBody)).toEqual(
-        '## Abandoned dependencies  (6)\n' +
+        '## Abandoned Dependencies\n' +
           '> ℹ **Note**\n>\n' +
           'These dependencies have not received updates for an extended period and may be unmaintained:\n\n\n\n\n' +
           '| Datasource | Name | Last Updated |\n' +
