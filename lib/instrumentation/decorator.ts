@@ -21,3 +21,21 @@ export function instrument<T>({
     });
   });
 }
+
+export function instrumentStandalone<T extends (...args: any[]) => any>(
+  {
+    name,
+    attributes,
+    ignoreParentSpan,
+    kind = SpanKind.INTERNAL,
+  }: SpanParameters,
+  fn: T,
+): T {
+  return async function (...args: any[]) {
+    return await instrumentFunc(name, () => fn(...args), {
+      attributes,
+      root: ignoreParentSpan,
+      kind,
+    });
+  } as T;
+}

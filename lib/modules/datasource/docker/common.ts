@@ -214,10 +214,12 @@ export async function getAuthHeaders(
       authorization: `Bearer ${token}`,
     };
   } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore if */
     if (err.host === 'quay.io') {
       // TODO: debug why quay throws errors (#9604)
       return null;
     }
+    /* v8 ignore if */
     if (err.statusCode === 401) {
       logger.debug(
         { registryHost, dockerRepository },
@@ -226,6 +228,7 @@ export async function getAuthHeaders(
       logger.debug({ err });
       return null;
     }
+    /* v8 ignore if */
     if (err.statusCode === 403) {
       logger.debug(
         { registryHost, dockerRepository },
@@ -237,15 +240,18 @@ export async function getAuthHeaders(
     if (err.name === 'RequestError' && isDockerHost(registryHost)) {
       throw new ExternalHostError(err);
     }
+    /* v8 ignore if */
     if (err.statusCode === 429 && isDockerHost(registryHost)) {
       throw new ExternalHostError(err);
     }
+    /* v8 ignore if */
     if (err.statusCode >= 500 && err.statusCode < 600) {
       throw new ExternalHostError(err);
     }
     if (err.message === PAGE_NOT_FOUND_ERROR) {
       throw err;
     }
+    /* v8 ignore if */
     if (err.message === HOST_DISABLED) {
       logger.trace({ registryHost, dockerRepository, err }, 'Host disabled');
       return null;

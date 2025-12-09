@@ -24,8 +24,10 @@ export function getManagerConfig(
     managerConfig.categories = categories;
   }
   // TODO: fix types #22198
+  // @ts-expect-error -- not easily typed
   managerConfig = mergeChildConfig(managerConfig, config[manager] as any);
   for (const i of allManagersList) {
+    // @ts-expect-error -- not easily typed
     delete managerConfig[i];
   }
   return managerConfig;
@@ -41,18 +43,19 @@ export function removeGlobalConfig(
       continue;
     }
     if (option.globalOnly) {
+      // @ts-expect-error -- not easily typed
       delete outputConfig[option.name];
     }
   }
   return outputConfig;
 }
 
-export function filterConfig(
-  inputConfig: AllConfig,
+export function filterConfig<T extends AllConfig = AllConfig>(
+  inputConfig: T,
   targetStage: RenovateConfigStage,
-): AllConfig {
+): T {
   logger.trace({ config: inputConfig }, `filterConfig('${targetStage}')`);
-  const outputConfig: RenovateConfig = { ...inputConfig };
+  const outputConfig: T = { ...inputConfig };
   const stages: (string | undefined)[] = [
     'global',
     'inherit',
@@ -65,6 +68,7 @@ export function filterConfig(
   for (const option of options.getOptions()) {
     const optionIndex = stages.indexOf(option.stage);
     if (optionIndex !== -1 && optionIndex < targetIndex) {
+      // @ts-expect-error -- not easily typed
       delete outputConfig[option.name];
     }
   }

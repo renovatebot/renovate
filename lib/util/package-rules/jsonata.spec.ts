@@ -34,6 +34,7 @@ describe('util/package-rules/jsonata', () => {
 
   it('should return true for a complex JSONata expression', async () => {
     const result = await matcher.matches(
+      // @ts-expect-error -- TODO: fix me
       { depName: 'lodash', version: '4.17.21' },
       { matchJsonata: ['depName = "lodash" and version = "4.17.21"'] },
     );
@@ -42,6 +43,7 @@ describe('util/package-rules/jsonata', () => {
 
   it('should return false for a complex JSONata expression with non-matching version', async () => {
     const result = await matcher.matches(
+      // @ts-expect-error -- TODO: fix me
       { depName: 'lodash', version: '4.17.20' },
       { matchJsonata: ['depName = "lodash" and version = "4.17.21"'] },
     );
@@ -50,6 +52,7 @@ describe('util/package-rules/jsonata', () => {
 
   it('should return true for a JSONata expression with nested properties', async () => {
     const result = await matcher.matches(
+      // @ts-expect-error -- TODO: fix me
       { dep: { name: 'lodash', version: '4.17.21' } },
       { matchJsonata: ['dep.name = "lodash" and dep.version = "4.17.21"'] },
     );
@@ -58,6 +61,7 @@ describe('util/package-rules/jsonata', () => {
 
   it('should return false for a JSONata expression with nested properties and non-matching version', async () => {
     const result = await matcher.matches(
+      // @ts-expect-error -- TODO: fix me
       { dep: { name: 'lodash', version: '4.17.20' } },
       { matchJsonata: ['dep.name = "lodash" and dep.version = "4.17.21"'] },
     );

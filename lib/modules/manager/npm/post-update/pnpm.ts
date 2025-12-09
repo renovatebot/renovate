@@ -150,18 +150,18 @@ export async function generateLockFile(
       );
       try {
         await deleteLocalFile(lockFileName);
-        /* v8 ignore start -- needs test */
+        /* v8 ignore next -- needs test */
       } catch (err) {
         logger.debug(
           { err, lockFileName },
           'Error removing `pnpm-lock.yaml` for lock file maintenance',
         );
-      } /* v8 ignore stop -- needs test */
+      }
     }
 
     await exec(commands, execOptions);
     lockFile = await readLocalFile(lockFileName, 'utf8');
-    /* v8 ignore start -- needs test */
+    /* v8 ignore next -- needs test */
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
@@ -177,7 +177,7 @@ export async function generateLockFile(
       'lock file error',
     );
     return { error: true, stderr: err.stderr, stdout: err.stdout };
-  } /* v8 ignore stop -- needs test */
+  }
   return { lockFile };
 }
 

@@ -100,6 +100,7 @@ export function replaceInterpolatedValuesInObject(
   }
   for (const [key, value] of Object.entries(config)) {
     if (isPlainObject(value)) {
+      // @ts-expect-error -- type can't be narrowed
       config[key] = replaceInterpolatedValuesInObject(
         value,
         input,
@@ -108,6 +109,7 @@ export function replaceInterpolatedValuesInObject(
       );
     }
     if (isString(value)) {
+      // @ts-expect-error -- type can't be narrowed
       config[key] = replaceInterpolatedValuesInString(
         key,
         value,

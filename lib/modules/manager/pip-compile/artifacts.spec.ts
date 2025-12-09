@@ -63,7 +63,7 @@ const dockerAdminConfig = {
   ...adminConfig,
   binarySource: 'docker',
   dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
-};
+} satisfies RepoGlobalConfig;
 
 process.env.CONTAINERBASE = 'true';
 

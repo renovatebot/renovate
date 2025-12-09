@@ -45,14 +45,13 @@ export const GithubVulnerabilityAlert = LooseArray(
     }),
   }),
   {
-    /* v8 ignore start */
+    /* v8 ignore next */
     onError: ({ error }) => {
       logger.debug(
         { error },
         'Vulnerability Alert: Failed to parse some alerts',
       );
     },
-    /* v8 ignore stop */
   },
 );
 export type GithubVulnerabilityAlert = z.infer<typeof GithubVulnerabilityAlert>;

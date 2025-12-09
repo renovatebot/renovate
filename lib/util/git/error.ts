@@ -29,9 +29,10 @@ export function checkForPlatformFailure(err: Error): Error | null {
       logger.debug({ err }, 'Converting git error to ExternalHostError');
       return new ExternalHostError(err, 'git');
     }
-    /* v8 ignore start -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
   }
 
+  /* v8 ignore next -- TODO: add test */
   const configErrorStrings = [
     {
       error: 'GitLab: Branch name does not follow the pattern',
@@ -59,6 +60,7 @@ export function checkForPlatformFailure(err: Error): Error | null {
         "Renovate cannot push branches if there are tags with names the same as Renovate's branches. Please remove conflicting tag names or change Renovate's branchPrefix to avoid conflicts.",
     },
   ];
+  /* v8 ignore next -- TODO: add test */
   for (const { error, message } of configErrorStrings) {
     if (err.message.includes(error)) {
       logger.debug({ err }, 'Converting git error to CONFIG_VALIDATION error');
@@ -69,11 +71,11 @@ export function checkForPlatformFailure(err: Error): Error | null {
     }
   }
 
+  /* v8 ignore next -- TODO: add test */
   return null;
 }
-/* v8 ignore stop */
 
-/* v8 ignore start -- TODO: add tests */
+/* v8 ignore next -- TODO: add tests */
 export function handleCommitError(
   err: Error,
   branchName: string,
@@ -141,7 +143,6 @@ export function handleCommitError(
   // We don't know why this happened, so this will cause bubble up to a branch error
   throw err;
 }
-/* v8 ignore stop */
 
 export function bulkChangesDisallowed(err: Error): boolean {
   return err.message.includes('update more than');

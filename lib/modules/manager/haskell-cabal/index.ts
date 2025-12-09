@@ -53,5 +53,5 @@ export function getRangeStrategy({
   if (rangeStrategy === 'auto') {
     return 'widen';
   }
-  return rangeStrategy;
+  return rangeStrategy!;
 }

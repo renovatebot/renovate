@@ -7,6 +7,7 @@ describe('config/migrations/custom/package-rules-migration', () => {
     const originalConfig: RenovateConfig = {
       packageRules: [
         {
+          // @ts-expect-error -- old type
           paths: [],
           labels: ['linting'],
           baseBranchList: [],

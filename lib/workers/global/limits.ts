@@ -131,7 +131,7 @@ export function calcLimit(
     // no limit
     if (limit === 0 || limit === null) {
       logger.debug(
-        `${limitName} of this branch is unlimited, because atleast one of the upgrade has it's ${limitName} set to "No limit" ie. 0 or null`,
+        `${limitName} of this branch is unlimited, because at least one of the upgrade has it's ${limitName} set to "No limit" ie. 0 or null`,
       );
       return 0;
     }

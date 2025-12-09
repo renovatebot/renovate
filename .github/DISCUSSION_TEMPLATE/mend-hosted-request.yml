@@ -1,0 +1,21 @@
+labels:
+  - mend-app
+body:
+  - type: dropdown
+    id: request-type
+    attributes:
+      label: 'What would you like help with?'
+      options:
+        - 'Upgrade to the Community (OSS) plan'
+
+  - type: input
+    id: organisation-url
+    attributes:
+      label: Please share the URL to the organisation you're creating this request for
+
+  - type: textarea
+    id: remarks
+    attributes:
+      label: Additional information
+      description: |
+        Please provide any relevant information about your project, such as the license(s) used by your project.

@@ -309,7 +309,7 @@ describe('modules/manager/helmfile/artifacts', () => {
 
   it.each([
     {
-      binarySource: 'docker',
+      binarySource: 'docker' as const,
       expectedCommands: [
         { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
@@ -338,7 +338,7 @@ describe('modules/manager/helmfile/artifacts', () => {
       ],
     },
     {
-      binarySource: 'install',
+      binarySource: 'install' as const,
       expectedCommands: [
         { cmd: 'install-tool helm v3.7.2' },
         { cmd: 'install-tool helmfile 0.151.0' },

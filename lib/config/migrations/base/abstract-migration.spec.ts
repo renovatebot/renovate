@@ -11,6 +11,7 @@ describe('config/migrations/base/abstract-migration', () => {
     }
     const customMigration = new CustomMigration(
       {
+        // @ts-expect-error -- testing invalid usage
         fooBar: true,
       },
       {},
@@ -29,6 +30,7 @@ describe('config/migrations/base/abstract-migration', () => {
     }
     const customMigration = new CustomMigration(
       {
+        // @ts-expect-error -- testing invalid usage
         fooBar: true,
       },
       {},

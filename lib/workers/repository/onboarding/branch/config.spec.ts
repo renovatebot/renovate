@@ -24,7 +24,6 @@ describe('workers/repository/onboarding/branch/config', () => {
       onboardingConfig: {
         $schema: 'https://docs.renovatebot.com/renovate-schema.json',
       },
-      platform: 'github',
       repository: 'some/repo',
     });
   });

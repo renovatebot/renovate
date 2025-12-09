@@ -1,4 +1,5 @@
 import { isTruthy } from '@sindresorhus/is';
+import upath from 'upath';
 import type { Category } from '../../../../constants';
 import { logger } from '../../../../logger';
 import type { MaybePromise } from '../../../../types';
@@ -9,7 +10,11 @@ import type {
 } from '../../types';
 import { validMatchFields } from '../utils';
 import { handleAny, handleCombination, handleRecursive } from './strategies';
-import type { RegexManagerConfig, RegexManagerTemplates } from './types';
+import type {
+  PackageFileInfo,
+  RegexManagerConfig,
+  RegexManagerTemplates,
+} from './types';
 
 export const categories: Category[] = ['custom'];
 
@@ -25,24 +30,28 @@ export function extractPackageFile(
   config: ExtractConfig,
 ): MaybePromise<PackageFileContent | null> {
   let deps: PackageDependency[];
+
+  // till this stage, packageFile is the full path
+  // so we need to extract filename and dir before passing it for template.compile
+  const packageFileName = upath.basename(packageFile);
+  const packageFileDir = upath.dirname(packageFile);
+  const packageFileInfo: PackageFileInfo = {
+    packageFileDir,
+    packageFileName,
+    content,
+    packageFile,
+  };
+
   switch (config.matchStringsStrategy) {
     default:
     case 'any':
-      deps = handleAny(content, packageFile, config as RegexManagerConfig);
+      deps = handleAny(config as RegexManagerConfig, packageFileInfo);
       break;
     case 'combination':
-      deps = handleCombination(
-        content,
-        packageFile,
-        config as RegexManagerConfig,
-      );
+      deps = handleCombination(config as RegexManagerConfig, packageFileInfo);
       break;
     case 'recursive':
-      deps = handleRecursive(
-        content,
-        packageFile,
-        config as RegexManagerConfig,
-      );
+      deps = handleRecursive(config as RegexManagerConfig, packageFileInfo);
       break;
   }
 

@@ -30,6 +30,7 @@ type EmojiShortcodeMapping = z.infer<typeof EmojiShortcodes>;
 
 const patchedEmojis: EmojiShortcodeMapping = {
   '26A0-FE0F': ['warning'], // Colorful warning (⚠️) instead of black and white (⚠)
+  '2139-FE0F': ['information_source'], // Colorful info (ℹ️) instead of black and white (ℹ)
 };
 
 function initMapping(mapping: EmojiShortcodeMapping): void {

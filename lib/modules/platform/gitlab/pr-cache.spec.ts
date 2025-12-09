@@ -7,7 +7,8 @@ import {
 import type { LongCommitSha } from '../../../util/git/types';
 import { GitlabHttp, setBaseUrl } from '../../../util/http/gitlab';
 import { GitlabPrCache } from './pr-cache';
-import type { GitLabMergeRequest, GitlabPrCacheData } from './types';
+import type { GitLabMergeRequest } from './schema';
+import type { GitlabPrCacheData } from './types';
 import { prInfo } from './utils';
 
 const http = new GitlabHttp();
@@ -26,6 +27,8 @@ const pr1: GitLabMergeRequest = {
   merge_status: 'cannot_be_merged',
   description: 'a merge request',
   sha: 'defg' as LongCommitSha,
+  assignee: null,
+  assignees: [],
 };
 
 const pr2: GitLabMergeRequest = {
@@ -41,6 +44,9 @@ const pr2: GitLabMergeRequest = {
   merge_status: 'cannot_be_merged',
   description: 'a merge request',
   sha: 'defg' as LongCommitSha,
+  assignee: null,
+  assignees: [],
+  reviewers: [],
 };
 
 const pr3: GitLabMergeRequest = {
@@ -56,6 +62,9 @@ const pr3: GitLabMergeRequest = {
   merge_status: 'cannot_be_merged',
   description: 'a merge request',
   sha: 'defg' as LongCommitSha,
+  assignee: null,
+  assignees: [],
+  reviewers: [],
 };
 
 describe('modules/platform/gitlab/pr-cache', () => {

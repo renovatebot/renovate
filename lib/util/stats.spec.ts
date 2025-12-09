@@ -2,6 +2,7 @@ import * as memCache from './cache/memory';
 import {
   AbandonedPackageStats,
   DatasourceCacheStats,
+  GitOperationStats,
   HttpCacheStats,
   HttpStats,
   LookupStats,
@@ -664,6 +665,87 @@ describe('util/stats', () => {
     it('does not log report when no data', () => {
       AbandonedPackageStats.report();
       expect(logger.logger.debug).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('GitOperationsStats', () => {
+    beforeEach(() => {
+      memCache.init();
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('returns empty report', () => {
+      const res = GitOperationStats.getReport();
+      expect(res).toEqual({});
+    });
+
+    it('writes data points', () => {
+      GitOperationStats.write('pull', 1000);
+      GitOperationStats.write('push', 100);
+      GitOperationStats.write('push', 50000);
+
+      const report = GitOperationStats.getReport();
+      expect(report).toEqual({
+        pull: {
+          avgMs: 1000,
+          count: 1,
+          maxMs: 1000,
+          medianMs: 1000,
+          totalMs: 1000,
+        },
+        push: {
+          avgMs: 25050,
+          count: 2,
+          maxMs: 50000,
+          medianMs: 50000,
+          totalMs: 50100,
+        },
+      });
+    });
+
+    it('rounds total towards ceiling when preparing report', () => {
+      GitOperationStats.write('pull', 1000.4);
+      GitOperationStats.write('pull', 500.4);
+      GitOperationStats.write('pull', 700.2);
+      GitOperationStats.write('pull', 5.500000001);
+
+      const report = GitOperationStats.getReport();
+      expect(report).toEqual({
+        pull: {
+          avgMs: 552,
+          count: 4,
+          // NOTE these are the raw values
+          maxMs: 1000.4,
+          medianMs: 700.2,
+          // NOTE that the total is rounded toward the ceiling
+          totalMs: 2207,
+        },
+      });
+    });
+
+    it('logs report', () => {
+      for (let i = 0; i < 5; i++) {
+        GitOperationStats.write('other', 4000);
+      }
+
+      GitOperationStats.report();
+
+      expect(logger.logger.debug).toHaveBeenCalledTimes(1);
+      const [data, msg] = logger.logger.debug.mock.calls[0];
+      expect(msg).toBe('Git operations statistics');
+      expect(data).toEqual({
+        other: {
+          avgMs: 4000,
+          count: 5,
+          maxMs: 4000,
+          medianMs: 4000,
+          totalMs: 20_000,
+        },
+      });
     });
   });
 });
