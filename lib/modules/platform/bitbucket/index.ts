@@ -636,23 +636,9 @@ function massageCollapsibleSectionsIntoLists(body: string): string {
   let depth = 0;
   // Parse detail parts to calculate correct list depth
   const detailsParts = body.split('<details>').map((raw, i, arr) => {
-    const hasContent = raw.replace(/[\n\r\t ]+/g, '').length > 0;
-    const isTableContent = raw.startsWith(
-      '\n\n\n| Datasource | Name | Last Updated |\n',
-    );
-    const isFirst = i === 0;
-    const isLast = i === arr.length - 1;
+    const partDepth = depth;
 
-    let partDepth = 0;
-
-    if (!isFirst && !isTableContent && hasContent) {
-      partDepth = depth;
-    }
-
-    if (hasContent && !isLast) {
-      depth += 1;
-    }
-
+    depth += 1;
     const countClosingDetailsTags = raw.split('</details>').length - 1;
     depth = Math.max(0, depth - countClosingDetailsTags);
 
