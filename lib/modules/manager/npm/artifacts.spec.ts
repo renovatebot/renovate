@@ -450,4 +450,38 @@ describe('modules/manager/npm/artifacts', () => {
       },
     ]);
   });
+  it('trims whitespace from CLI stdout when assigning integrity', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('# dummy') // npmrc
+      .mockResolvedValueOnce('{}') // node constraints
+      .mockResolvedValue(JSON.stringify({ packageManager: 'pnpm@8.15.5' })); // existing package.json
+
+    mockPnpmIntegrity('');
+
+    const cliIntegrity = '    ' + integrityStr + '\n   ';
+    const execSnapshots = mockExecSequence([
+      { stdout: cliIntegrity, stderr: '' },
+    ]);
+
+    const res = await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [validDepUpdate],
+      newPackageFileContent: 'pre-update content',
+      config: { ...config },
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          contents:
+            JSON.stringify({ packageManager: expectedPmValue }, null, 2) + '\n',
+          path: 'package.json',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'npm view pnpm@8.15.6 dist.integrity' },
+    ]);
+  });
 });
