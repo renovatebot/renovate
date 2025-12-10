@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger';
 import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
