@@ -85,12 +85,30 @@ export async function updateArtifacts({
 
   await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
   try {
-    const integrity = (
-      await exec(
-        `npm view ${depName}@${newVersion} dist.integrity`,
-        execOptions,
-      )
-    ).stdout.trim();
+    const npmDs = new (
+      await import('../../datasource/npm/index.js')
+    ).NpmDatasource();
+    const registryUrl = 'https://registry.npmjs.org';
+    let integrity =
+      (await npmDs.getDigest(
+        { packageName: depName!, registryUrl },
+        newVersion,
+      )) ?? '';
+
+    if (!integrity) {
+      let res: { stdout?: string } = {};
+      try {
+        res = await exec(
+          `npm view ${depName}@${newVersion} dist.integrity`,
+          execOptions,
+        );
+      } catch (err) {
+        logger.debug(err, 'Error fetching integrity via npm CLI');
+        // ensure the "No integrity found" path is taken
+        res = { stdout: '' };
+      }
+      integrity = (res.stdout ?? '').trim();
+    }
 
     if (!integrity || !/^sha\d+-/.test(integrity)) {
       throw new Error(

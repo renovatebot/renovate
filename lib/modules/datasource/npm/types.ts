@@ -12,6 +12,7 @@ export interface NpmAttestations {
 
 export interface NpmDistribution {
   attestations?: NpmAttestations;
+  integrity?: string;
 }
 
 export interface NpmResponseVersion {
