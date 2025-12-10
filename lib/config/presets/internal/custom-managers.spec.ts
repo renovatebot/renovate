@@ -805,4 +805,45 @@ describe('config/presets/internal/custom-managers', () => {
       ]);
     });
   });
+
+  describe('Update `tsconfig/node` version in tsconfig.json', () => {
+    const customManager = presets.tsconfigNodeVersions.customManagers?.[0];
+
+    it(`find dependencies in file`, async () => {
+      const fileContent = codeBlock`
+        {
+            "extends": "@tsconfig/node20/tsconfig.json",
+            "include": ["src/**/*"]
+        }
+      `;
+
+      const res = await extractPackageFile(
+        'regex',
+        fileContent,
+        'tsconfig.json',
+        customManager!,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '20',
+          datasource: 'npm',
+          depName: '@tsconfig/node20',
+        },
+      ]);
+    });
+
+    describe('matches regexes patterns', () => {
+      it.each`
+        path                   | expected
+        ${'tsconfig.json'}     | ${true}
+        ${'foo/tsconfig.json'} | ${true}
+        ${'tsconfig.yml'}      | ${false}
+      `('$path', ({ path, expected }) => {
+        expect(
+          matchRegexOrGlobList(path, customManager!.managerFilePatterns),
+        ).toBe(expected);
+      });
+    });
+  });
 });
