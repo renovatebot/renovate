@@ -51,7 +51,7 @@ export class NpmDatasource extends Datasource {
     if (!newValue) {
       return null;
     }
-    const packageUrl = `${registryUrl}/${packageName.replace('/', '%2F')}`;
+    const packageUrl = `${registryUrl}/${encodeURIComponent(packageName)}`;
     try {
       const resp = await this.http.getJsonUnchecked<NpmResponse>(packageUrl);
       const integrity = resp.body?.versions?.[newValue]?.dist?.integrity;
