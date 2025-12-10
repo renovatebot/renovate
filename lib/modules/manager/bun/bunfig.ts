@@ -1,4 +1,3 @@
-import { isString } from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger';
 import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
@@ -7,21 +6,14 @@ import { parse as parseToml } from '../../../util/toml';
 
 /**
  * Schema for bunfig.toml registry configuration.
- * Supports both string URLs and object with url/token/username/password.
+ * Supports both string URLs and object with url.
  * Transforms to extract just the URL string.
  * See: https://bun.sh/docs/runtime/bunfig#install-registry
  */
-const BunfigRegistrySchema = z
-  .union([
-    z.string(),
-    z.object({
-      url: z.string(),
-      token: z.string().optional(),
-      username: z.string().optional(),
-      password: z.string().optional(),
-    }),
-  ])
-  .transform((val) => (isString(val) ? val : val.url));
+const BunfigRegistrySchema = z.union([
+  z.string(),
+  z.object({ url: z.string() }).transform((val) => val.url),
+]);
 
 const BunfigInstallSchema = z.object({
   registry: BunfigRegistrySchema.optional(),
