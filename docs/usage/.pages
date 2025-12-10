@@ -43,7 +43,6 @@ nav:
       - 'Helper Presets': 'presets-helpers.md'
       - 'MergeConfidence Presets': 'presets-mergeConfidence.md'
       - 'Monorepo Presets': 'presets-monorepo.md'
-      - 'npm Presets': 'presets-npm.md'
       - 'Package Presets': 'presets-packages.md'
       - 'Preview Presets': 'presets-preview.md'
       - 'Replacement Presets': 'presets-replacements.md'

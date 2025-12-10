@@ -2,7 +2,7 @@ import { codeBlock } from 'common-tags';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { decryptConfig, setPrivateKeys } from '../decrypt';
 import { GlobalConfig } from '../global';
-import type { RenovateConfig } from '../types';
+import type { AllConfig } from '../types';
 import { tryDecryptOpenPgp } from './openpgp';
 import { Fixtures } from '~test/fixtures';
 
@@ -28,7 +28,7 @@ const repository = 'abc/def';
 
 describe('config/decrypt/openpgp', () => {
   describe('decryptConfig()', () => {
-    let config: RenovateConfig;
+    let config: AllConfig;
 
     beforeAll(() => {
       process.env.RENOVATE_X_USE_OPENPGP = 'true';

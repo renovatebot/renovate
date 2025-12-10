@@ -193,7 +193,7 @@ export abstract class HttpBase<
     if (memCacheKey) {
       resPromise = memCache.get(memCacheKey);
 
-      /* v8 ignore start: temporary code */
+      /* v8 ignore next: temporary code */
       if (resPromise && !cacheProvider) {
         ObsoleteCacheHitLogger.write(url);
       }
