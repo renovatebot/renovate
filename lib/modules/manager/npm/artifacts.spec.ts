@@ -423,4 +423,31 @@ describe('modules/manager/npm/artifacts', () => {
       { cmd: 'npm view pnpm@8.15.6 dist.integrity' },
     ]);
   });
+
+  it('triggers error if both datasource and CLI integrity fails', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('# dummy') // npmrc
+      .mockResolvedValueOnce('{}') // node constraints
+      .mockResolvedValue(JSON.stringify({ packageManager: 'pnpm@8.15.5' })); // existing package.json
+
+    mockPnpmIntegrity('');
+
+    mockExecSequence([{ stdout: '', stderr: '' }]); // empty integrity from CLI
+
+    const res = await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [validDepUpdate],
+      newPackageFileContent: 'pre-update content',
+      config: { ...config },
+    });
+
+    expect(res).toEqual([
+      {
+        artifactError: {
+          fileName: 'package.json',
+          stderr: expect.stringContaining('No integrity found'),
+        },
+      },
+    ]);
+  });
 });
