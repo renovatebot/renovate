@@ -71,7 +71,7 @@ export class GitRefsDatasource extends GitDatasource {
     try {
       rawRefs = await this.getRawRefs({ packageName });
     } catch (err) {
-      logger.debug({ err }, 'Error getting git-refs');
+      logger.debug({ err, packageName }, 'Error getting git-refs');
     }
 
     /* v8 ignore next 3 -- TODO: add test */
