@@ -44,7 +44,7 @@ function filterByMaxMajorIncrement(
     }
     const majorIncrement = releaseMajor - currentMajor;
     if (majorIncrement > maxMajorIncrement) {
-      logger.trace(
+      logger.once.debug(
         `Skipping ${depName}@${r.version} because major increment ${majorIncrement} exceeds maxMajorIncrement ${maxMajorIncrement}`,
       );
       return false;
