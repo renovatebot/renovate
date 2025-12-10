@@ -1015,6 +1015,11 @@
     "packageRules": [
       {
         "matchDatasources": ["npm"],
+        "matchPackageNames": ["@tsconfig/node**"],
+        "commitMessageExtra": "to {{#if isReplacement}}{{{newName}}}{{else}}{{{prettyNewVersion}}}{{/if}}"
+      },
+      {
+        "matchDatasources": ["npm"],
         "matchPackageNames": ["@tsconfig/node10"],
         "replacementName": "@tsconfig/node12",
         "replacementVersion": "12.0.0"
