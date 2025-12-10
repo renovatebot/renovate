@@ -8,6 +8,7 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
+import { NpmDatasource } from '../../datasource/npm/index.js';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from './constants';
 import { getNodeToolConstraint } from './post-update/node-version';
@@ -85,12 +86,10 @@ export async function updateArtifacts({
 
   await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
   try {
-    const npmDs = new (
-      await import('../../datasource/npm/index.js')
-    ).NpmDatasource();
+    const datasource = new NpmDatasource();
     const registryUrl = 'https://registry.npmjs.org';
     let integrity =
-      (await npmDs.getDigest(
+      (await datasource.getDigest(
         { packageName: depName!, registryUrl },
         newVersion,
       )) ?? '';
