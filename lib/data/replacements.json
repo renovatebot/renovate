@@ -1170,5 +1170,17 @@
         "replacementVersion": "2.14.0"
       }
     ]
-  }
+  },
+  "express-mung-to-express-response-middleware": {
+    "description": "Replace stale `express-mung` with a maintained fork: `express-response-middleware`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "^0.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["express-mung"],
+        "replacementName": "express-response-middleware",
+        "replacementVersion": "1.0.0"
+      }
+    ]
+  },
 }
