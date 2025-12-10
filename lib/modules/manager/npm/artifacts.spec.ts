@@ -387,4 +387,40 @@ describe('modules/manager/npm/artifacts', () => {
       },
     ]);
   });
+
+  it('falls back to npm CLI when datasource has no integrity', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('# dummy') // npmrc
+      .mockResolvedValueOnce('{}') // node constraints
+      .mockResolvedValue(JSON.stringify({ packageManager: 'pnpm@8.15.5' })); // existing package.json
+
+    mockPnpmIntegrity('');
+
+    const execSnapshots = mockExecSequence([
+      { stdout: integrityStr, stderr: '' },
+    ]);
+
+    const res = await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [validDepUpdate],
+      newPackageFileContent: 'pre-update content',
+      config: { ...config },
+    });
+
+    const expectedText =
+      JSON.stringify({ packageManager: expectedPmValue }, null, 2) + '\n';
+
+    expect(res).toEqual([
+      {
+        file: {
+          contents: expectedText,
+          path: 'package.json',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'npm view pnpm@8.15.6 dist.integrity' },
+    ]);
+  });
 });
