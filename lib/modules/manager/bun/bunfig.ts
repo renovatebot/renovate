@@ -20,7 +20,7 @@ const BunfigRegistrySchema = z
       password: z.string().optional(),
     }),
   ])
-  .transform((val) => (typeof val === 'string' ? val : val.url));
+  .transform((val) => (isString(val) ? val : val.url));
 
 const BunfigInstallSchema = z.object({
   registry: BunfigRegistrySchema.optional(),
