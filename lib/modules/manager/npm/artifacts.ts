@@ -23,6 +23,8 @@ import {
 // eg. 8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589
 const versionWithHashRegString = '^(?<version>.*)\\+(?<hash>.*)';
 
+// Normalize stdout by trimming whitespace and handling undefined values
+// Mostly just for testability
 export function normalizeStdout(stdout?: string): string {
   return (stdout ?? '').trim();
 }
