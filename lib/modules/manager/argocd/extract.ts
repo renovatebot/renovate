@@ -55,7 +55,7 @@ function processSource(source: ApplicationSource): PackageDependency[] {
 
       return [
         {
-          depName: `${registryURL}/${source.chart}`,
+          depName: registryURL,
           currentValue: source.targetRevision,
           datasource: DockerDatasource.id,
         },
