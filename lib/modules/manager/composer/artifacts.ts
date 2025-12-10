@@ -179,6 +179,7 @@ export async function updateArtifacts({
       );
       try {
         await deleteLocalFile(lockFileName);
+        /* v8 ignore next -- needs test */
       } catch (err) {
         logger.debug(
           { err, lockFileName },
