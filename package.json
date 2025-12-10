@@ -143,7 +143,7 @@
     "pnpm": "^10.0.0"
   },
   "volta": {
-    "node": "24.11.1",
+    "node": "24.12.0",
     "pnpm": "10.24.0"
   },
   "dependencies": {
@@ -177,7 +177,7 @@
     "@renovatebot/detect-tools": "1.2.4",
     "@renovatebot/osv-offline": "2.0.0",
     "@renovatebot/pep440": "4.2.1",
-    "@renovatebot/pgp": "1.2.1",
+    "@renovatebot/pgp": "1.2.2",
     "@renovatebot/ruby-semver": "4.1.2",
     "@sindresorhus/is": "7.1.1",
     "@yarnpkg/core": "4.5.0",
