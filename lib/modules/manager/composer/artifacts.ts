@@ -171,6 +171,20 @@ export async function updateArtifacts({
       commands.push('git stash pop || true');
     }
 
+    if (config.isLockFileMaintenance) {
+      logger.debug(
+        `Removing ${lockFileName} first due to lock file maintenance upgrade`,
+      );
+      try {
+        await deleteLocalFile(lockFileName);
+      } catch (err) {
+        logger.debug(
+          { err, lockFileName },
+          'Error removing `composer.lock` for lock file maintenance',
+        );
+      }
+    }
+
     const cmd = 'composer';
     let args: string;
     if (config.isLockFileMaintenance) {
