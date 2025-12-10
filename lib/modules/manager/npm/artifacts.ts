@@ -43,7 +43,7 @@ export async function updateArtifacts({
 
   const { currentValue, depName, newVersion } = packageManagerUpdate;
 
-  // Execute 'corepack use' command only if the currentValue already has hash in it
+  // Continue only if the currentValue already has hash in it
   if (!currentValue || !regEx(versionWithHashRegString).test(currentValue)) {
     return null;
   }
