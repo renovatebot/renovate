@@ -1899,22 +1899,55 @@ describe('modules/platform/bitbucket-server/index', () => {
             expect.stringContaining('automerge: success'),
           );
         });
-      });
 
-      describe('tryPrAutomerge()', () => {
-        it('returns early if Bitbucket Server <= 8.15.0 is used', async () => {
+        it('platform-native automerge returns early if Bitbucket Server <= 8.15.0 is used', async () => {
+          const scope = await initRepo();
+          scope
+            .post(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`,
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100&role.1=AUTHOR&username.1=abc`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [],
+            });
+
           // Assert version < 8.15.0
           vi.spyOn(semver, 'lt').mockReturnValue(true);
-          await expect(bitbucket.tryPrAutomerge(5, 1)).toResolve();
+
+          await bitbucket.createPr({
+            sourceBranch: 'branch',
+            targetBranch: 'master',
+            prTitle: 'title',
+            prBody: 'body',
+            platformPrOptions: {
+              usePlatformAutomerge: true,
+            },
+          });
+
           expect(logger.logger.debug).toHaveBeenCalledWith(
             { prNumber: 5 },
             expect.stringContaining('automerge: not supported'),
           );
         });
 
-        it('catches errors gracefully', async () => {
+        it('platform-native automerge catches errors gracefully', async () => {
           const scope = await initRepo();
           scope
+            .post(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`,
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100&role.1=AUTHOR&username.1=abc`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [],
+            })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`,
             )
@@ -1923,7 +1956,16 @@ describe('modules/platform/bitbucket-server/index', () => {
           // Simulate version >= 8.15.0
           vi.spyOn(semver, 'lt').mockReturnValue(false);
 
-          await expect(bitbucket.tryPrAutomerge(5, 1)).toResolve();
+          await bitbucket.createPr({
+            sourceBranch: 'branch',
+            targetBranch: 'master',
+            prTitle: 'title',
+            prBody: 'body',
+            platformPrOptions: {
+              usePlatformAutomerge: true,
+            },
+          });
+
           expect(logger.logger.warn).toHaveBeenCalledWith(
             { err: expect.any(Error), prNumber: 5 },
             expect.stringContaining('automerge: fail'),

@@ -1223,8 +1223,11 @@ export async function mergePr({
   return true;
 }
 
-// https://confluence.atlassian.com/bitbucketserver094/merge-a-pull-request-1489802114.html#Mergeapullrequest-Auto-mergeapullrequest
-export async function tryPrAutomerge(
+/**
+ * Enables Bitbucket Server-native automerge for the given PR.
+ * https://confluence.atlassian.com/bitbucketserver094/merge-a-pull-request-1489802114.html#Mergeapullrequest-Auto-mergeapullrequest
+ */
+async function tryPrAutomerge(
   prNumber: number,
   prVersion: number,
 ): Promise<void> {
