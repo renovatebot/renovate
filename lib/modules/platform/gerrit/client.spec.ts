@@ -462,12 +462,17 @@ describe('modules/platform/gerrit/client', () => {
     });
 
     it('add too big message', async () => {
-      const okMessage = 'a'.repeat(0x4000);
+      const okMessage = 'a'.repeat(16 * 1024); // 16KB
       const tooBigMessage = okMessage + 'b';
+      const truncationNotice = '\n\n[Truncated by Renovate]';
+      const truncatedMessage =
+        tooBigMessage.slice(0, 16 * 1024 - truncationNotice.length) +
+        truncationNotice;
+      httpMock.scope(gerritEndpointUrl);
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
-          message: okMessage,
+          message: truncatedMessage,
           notify: 'NONE',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
