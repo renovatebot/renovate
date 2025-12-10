@@ -354,14 +354,14 @@ export const PoetryPyProject = Toml.pipe(
 
       deps.push(...dependencyGroups);
 
-      const projectDepsByName = [
+      const projectDepsByName: Record<string, PackageDependency> = {};
+      for (const dep of [
         ...(projectDependencies ?? []),
         ...(dependencyGroups ?? []),
         ...(projectOptionalDependencies ?? []),
-      ].reduce(
-        (obj, dep) => ((obj[dep.depName!] = dep), obj),
-        {} as Record<string, PackageDependency>,
-      );
+      ]) {
+        projectDepsByName[dep.depName!] = dep;
+      }
 
       const poetryDependencies = tool?.poetry?.dependencies;
 
