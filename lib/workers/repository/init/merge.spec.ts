@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import type { MockInstance } from 'vitest';
 import * as decrypt from '../../../config/decrypt';
 import { getConfig } from '../../../config/defaults';
@@ -391,6 +391,7 @@ describe('workers/repository/init/merge', () => {
         await mergeRenovateConfig({
           ...config,
           requireConfig: 'ignored',
+          // @ts-expect-error -- TODO: do we still need this?
           configFileParsed: undefined,
           warnings: undefined,
           secrets: undefined,
@@ -551,7 +552,7 @@ describe('workers/repository/init/merge', () => {
           const [exitMock] = mockProcessExitOnce();
           let configFileName: string | undefined;
 
-          if (!is.nullOrUndefined(staticConfig)) {
+          if (!isNullOrUndefined(staticConfig)) {
             configFileName = 'static_config.json5';
             fs.readSystemFile.mockResolvedValueOnce(
               JSON.stringify(staticConfig),

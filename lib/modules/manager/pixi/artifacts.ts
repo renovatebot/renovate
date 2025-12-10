@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -24,7 +24,7 @@ export async function updateArtifacts({
   logger.debug(`pixi.updateArtifacts(${packageFileName})`);
   const { isLockFileMaintenance } = config;
 
-  if (!is.nonEmptyArray(updatedDeps) && !isLockFileMaintenance) {
+  if (!isNonEmptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated pixi deps - returning null');
     return null;
   }

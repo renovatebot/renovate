@@ -153,9 +153,8 @@ class GerritClient {
     changeNumber: number,
     newMessage: string,
     msgType?: string,
-    messages?: GerritChangeMessageInfo[],
   ): Promise<boolean> {
-    const messagesToSearch = messages ?? (await this.getMessages(changeNumber));
+    const messagesToSearch = await this.getMessages(changeNumber);
 
     return messagesToSearch.some(
       (existingMsg) =>
@@ -168,12 +167,9 @@ class GerritClient {
     changeNumber: number,
     message: string,
     tag?: string,
-    messages?: GerritChangeMessageInfo[],
   ): Promise<void> {
     const newMsg = this.normalizeMessage(message);
-    if (
-      !(await this.checkForExistingMessage(changeNumber, newMsg, tag, messages))
-    ) {
+    if (!(await this.checkForExistingMessage(changeNumber, newMsg, tag))) {
       await this.addMessage(changeNumber, newMsg, tag);
     }
   }

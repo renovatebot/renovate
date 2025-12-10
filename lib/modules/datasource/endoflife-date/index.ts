@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { joinUrlParts } from '../../../util/url';
@@ -32,7 +32,7 @@ export class EndoflifeDateDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    if (!is.nonEmptyString(registryUrl)) {
+    if (!isNonEmptyString(registryUrl)) {
       return null;
     }
 

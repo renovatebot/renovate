@@ -62,6 +62,7 @@ function configureShardingOrFallbackTo(
     test: {
       include,
       exclude,
+      outputFile: `./coverage/shard/${shardKey}/junit.xml`,
       coverage: {
         reportsDirectory,
       },
@@ -83,15 +84,14 @@ export default defineConfig(() =>
           './test/setup.ts',
           'test/to-migrate.ts',
         ],
-        reporters: ci ? ['default', 'github-actions'] : ['default'],
+        reporters: ci ? ['default', 'github-actions', 'junit'] : ['default'],
         mockReset: true,
         coverage: {
           provider: 'v8',
-          ignoreEmptyLines: true,
           skipFull: !ci,
           reporter: ci
             ? ['text-summary', 'lcovonly', 'json']
-            : ['text-summary', 'html', 'json'],
+            : ['text-summary', '@containerbase/istanbul-reports-html', 'json'],
           enabled: true,
           exclude: [
             ...coverageConfigDefaults.exclude,
@@ -100,10 +100,12 @@ export default defineConfig(() =>
             'lib/**/{__fixtures__,__mocks__,__testutil__,test}/**',
             'lib/**/types.ts',
             'lib/types/**',
+            'test/**',
             'tools/**',
             '+(config.js)',
             '__mocks__/**',
             // fully ignored files
+            '*.json',
             'lib/config-validator.ts',
             'lib/constants/category.ts',
             'lib/modules/datasource/hex/v2/package.ts',

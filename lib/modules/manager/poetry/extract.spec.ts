@@ -569,4 +569,51 @@ describe('modules/manager/poetry/extract', () => {
       });
     });
   });
+
+  it('extracts dependencies from pep735 dependency-groups', async () => {
+    const content = codeBlock`
+        [dependency-groups]
+        typing = ["mypy==1.13.0", "types-requests"]
+        coverage = ["pytest-cov==5.0.0"]
+        all = [{include-group = "typing"}, {include-group = "coverage"}, "click==8.1.7"]
+      `;
+    const res = await extractPackageFile(content, 'pyproject.toml');
+    expect(res?.deps).toMatchObject([
+      {
+        packageName: 'mypy',
+        datasource: 'pypi',
+        depType: 'dependency-groups',
+        currentValue: '==1.13.0',
+        currentVersion: '1.13.0',
+        depName: 'mypy',
+        managerData: { depGroup: 'typing' },
+      },
+      {
+        packageName: 'types-requests',
+        datasource: 'pypi',
+        depType: 'dependency-groups',
+        skipReason: 'unspecified-version',
+        depName: 'types-requests',
+        managerData: { depGroup: 'typing' },
+      },
+      {
+        packageName: 'pytest-cov',
+        datasource: 'pypi',
+        depType: 'dependency-groups',
+        currentValue: '==5.0.0',
+        currentVersion: '5.0.0',
+        depName: 'pytest-cov',
+        managerData: { depGroup: 'coverage' },
+      },
+      {
+        packageName: 'click',
+        datasource: 'pypi',
+        depType: 'dependency-groups',
+        currentValue: '==8.1.7',
+        currentVersion: '8.1.7',
+        depName: 'click',
+        managerData: { depGroup: 'all' },
+      },
+    ]);
+  });
 });

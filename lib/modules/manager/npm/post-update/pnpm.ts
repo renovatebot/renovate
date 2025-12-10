@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNumber, isNumericString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
@@ -150,18 +150,18 @@ export async function generateLockFile(
       );
       try {
         await deleteLocalFile(lockFileName);
-        /* v8 ignore start -- needs test */
+        /* v8 ignore next -- needs test */
       } catch (err) {
         logger.debug(
           { err, lockFileName },
           'Error removing `pnpm-lock.yaml` for lock file maintenance',
         );
-      } /* v8 ignore stop -- needs test */
+      }
     }
 
     await exec(commands, execOptions);
     lockFile = await readLocalFile(lockFileName, 'utf8');
-    /* v8 ignore start -- needs test */
+    /* v8 ignore next -- needs test */
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
@@ -177,7 +177,7 @@ export async function generateLockFile(
       'lock file error',
     );
     return { error: true, stderr: err.stderr, stdout: err.stdout };
-  } /* v8 ignore stop -- needs test */
+  }
   return { lockFile };
 }
 
@@ -194,8 +194,8 @@ export async function getConstraintFromLockFile(
     // TODO: use schema (#9610)
     const pnpmLock = parseSingleYaml<PnpmLockFile>(lockfileContent);
     if (
-      !is.number(pnpmLock?.lockfileVersion) &&
-      !is.numericString(pnpmLock?.lockfileVersion)
+      !isNumber(pnpmLock?.lockfileVersion) &&
+      !isNumericString(pnpmLock?.lockfileVersion)
     ) {
       logger.trace(`Invalid pnpm lockfile version: ${lockFileName}`);
       return null;

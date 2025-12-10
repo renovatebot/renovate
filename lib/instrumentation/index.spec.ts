@@ -1,6 +1,7 @@
 import { ProxyTracerProvider } from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
+import { GitOperationSpanProcessor } from '../util/git/span-processor';
 import {
   disableInstrumentations,
   getTracerProvider,
@@ -73,6 +74,7 @@ describe('instrumentation/index', () => {
               },
             },
           },
+          new GitOperationSpanProcessor(),
         ],
       },
     });
@@ -106,6 +108,7 @@ describe('instrumentation/index', () => {
               },
             },
           },
+          new GitOperationSpanProcessor(),
         ],
       },
     });

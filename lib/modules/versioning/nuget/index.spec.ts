@@ -432,6 +432,11 @@ describe('modules/versioning/nuget/index', () => {
     );
   });
 
+  it('returns a pinned value', () => {
+    expect(nuget.getPinnedValue?.('a')).toBe('');
+    expect(nuget.getPinnedValue?.('1.2.3')).toBe('[1.2.3]');
+  });
+
   describe('getNewValue()', () => {
     it('returns newVersion if the range is version too', () => {
       expect(
@@ -465,13 +470,7 @@ describe('modules/versioning/nuget/index', () => {
 
     describe('pin', () => {
       it('returns the new version', () => {
-        expect(
-          nuget.getNewValue({
-            rangeStrategy: 'pin',
-            currentValue: '1.0.0',
-            newVersion: '2.0.0',
-          }),
-        ).toBe('[2.0.0]');
+        expect(nuget.getPinnedValue?.('2.0.0')).toBe('[2.0.0]');
       });
     });
 

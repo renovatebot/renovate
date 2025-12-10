@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { regEx } from '../../util/regex';
 import { isHttpUrl } from '../../util/url';
 import type { ParsedPreset } from './types';
@@ -114,7 +114,7 @@ export function parsePreset(input: string): ParsedPreset {
     if (presetSource === 'npm' && !repo.startsWith('renovate-config-')) {
       repo = `renovate-config-${repo}`;
     }
-    if (!is.nonEmptyString(presetName)) {
+    if (!isNonEmptyString(presetName)) {
       presetName = 'default';
     }
   }

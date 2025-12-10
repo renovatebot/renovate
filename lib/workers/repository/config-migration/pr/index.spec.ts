@@ -30,9 +30,7 @@ describe('workers/repository/config-migration/pr/index', () => {
   let config: RenovateConfig;
 
   beforeEach(() => {
-    GlobalConfig.set({
-      dryRun: null,
-    });
+    GlobalConfig.reset();
 
     config = {
       ...getConfig(),
@@ -195,7 +193,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prTitle).toBe(
-        'Migrate renovate config',
+        'Migrate Renovate config',
       );
     });
 
@@ -213,7 +211,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prTitle).toBe(
-        'chore(config): migrate renovate config',
+        'chore(config): migrate Renovate config',
       );
     });
 

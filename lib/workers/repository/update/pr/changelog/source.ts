@@ -1,4 +1,9 @@
-import is from '@sindresorhus/is';
+import {
+  isEmptyArray,
+  isFalsy,
+  isNonEmptyString,
+  isNullOrUndefined,
+} from '@sindresorhus/is';
 import { logger } from '../../../../../logger';
 import { getPkgReleases } from '../../../../../modules/datasource';
 import type { Release } from '../../../../../modules/datasource/types';
@@ -55,7 +60,7 @@ export abstract class ChangeLogSource {
       })
     )?.releases;
 
-    if (is.nullOrUndefined(tags) || is.emptyArray(tags)) {
+    if (isNullOrUndefined(tags) || isEmptyArray(tags)) {
       logger.debug(
         `No ${this.datasource} tags found for repository: ${repository}`,
       );
@@ -98,7 +103,7 @@ export abstract class ChangeLogSource {
       return null;
     }
 
-    if (is.falsy(this.hasValidRepository(repository))) {
+    if (isFalsy(this.hasValidRepository(repository))) {
       logger.debug(`Invalid ${this.platform} URL found: ${sourceUrl}`);
       return null;
     }
@@ -162,7 +167,7 @@ export abstract class ChangeLogSource {
           next,
           tags,
         );
-        if (is.nonEmptyString(prevHead) && is.nonEmptyString(nextHead)) {
+        if (isNonEmptyString(prevHead) && isNonEmptyString(nextHead)) {
           release.compare.url = this.getCompareURL(
             baseUrl,
             repository,
@@ -235,10 +240,10 @@ export abstract class ChangeLogSource {
       release.version,
       tags,
     );
-    if (is.nonEmptyString(tagName)) {
+    if (isNonEmptyString(tagName)) {
       return tagName;
     }
-    if (is.nonEmptyString(release.gitRef)) {
+    if (isNonEmptyString(release.gitRef)) {
       return release.gitRef;
     }
     return null;
@@ -255,7 +260,7 @@ export abstract class ChangeLogSource {
 
   getBaseUrl(config: BranchUpgradeConfig): string {
     const parsedUrl = parseUrl(config.sourceUrl);
-    if (is.nullOrUndefined(parsedUrl)) {
+    if (isNullOrUndefined(parsedUrl)) {
       return '';
     }
     const protocol = parsedUrl.protocol.replace(regEx(/^git\+/), '');
@@ -265,7 +270,7 @@ export abstract class ChangeLogSource {
 
   getRepositoryFromUrl(config: BranchUpgradeConfig): string {
     const parsedUrl = parseUrl(config.sourceUrl);
-    if (is.nullOrUndefined(parsedUrl)) {
+    if (isNullOrUndefined(parsedUrl)) {
       return '';
     }
     const pathname = parsedUrl.pathname;

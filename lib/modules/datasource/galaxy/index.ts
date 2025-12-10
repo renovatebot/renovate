@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import * as pep440Versioning from '../../versioning/pep440';
@@ -78,7 +78,7 @@ export class GalaxyDatasource extends Datasource {
 
     result.dependencyUrl = galaxyProjectUrl;
     const { github_user: user, github_repo: repo } = resultObject;
-    if (is.nonEmptyString(user) && is.nonEmptyString(repo)) {
+    if (isNonEmptyString(user) && isNonEmptyString(repo)) {
       result.sourceUrl = `https://github.com/${user}/${repo}`;
     }
 

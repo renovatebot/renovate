@@ -50,7 +50,6 @@ describe('modules/versioning/lambda-node/index', () => {
     ${'~8.0.0'}  | ${'replace'}  | ${'8.0.2'}     | ${'v8.2.0'}  | ${'~8.2.0'}
     ${'erbium'}  | ${'replace'}  | ${'12.0.0'}    | ${'v14.1.4'} | ${'fermium'}
     ${'Fermium'} | ${'replace'}  | ${'14.0.0'}    | ${'v16.1.6'} | ${'gallium'}
-    ${'gallium'} | ${'pin'}      | ${'16.1.6'}    | ${'v16.1.6'} | ${'16.1.6'}
     ${'gallium'} | ${'bump'}     | ${'16.0.0'}    | ${'v16.1.6'} | ${'gallium'}
     ${'gallium'} | ${'auto'}     | ${'16.1.6'}    | ${'v16.1.6'} | ${'gallium'}
   `(

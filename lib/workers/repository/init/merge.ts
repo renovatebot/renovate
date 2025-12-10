@@ -1,4 +1,9 @@
-import is from '@sindresorhus/is';
+import {
+  isNonEmptyArray,
+  isNonEmptyObject,
+  isNonEmptyString,
+  isString,
+} from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../config';
 import { getConfigFileNames } from '../../../config/app-strings';
 import { decryptConfig } from '../../../config/decrypt';
@@ -68,7 +73,7 @@ export async function detectRepoFileConfig(
 ): Promise<RepoFileConfig> {
   const cache = getCache();
   let { configFileName } = cache;
-  if (is.nonEmptyString(configFileName)) {
+  if (isNonEmptyString(configFileName)) {
     let configFileRaw: string | null;
     try {
       configFileRaw = await platform.getRawFile(
@@ -127,7 +132,7 @@ export async function detectRepoFileConfig(
       // TODO #22198
       (await readLocalFile('package.json', 'utf8'))!,
     ).renovate;
-    if (is.string(configFileParsed)) {
+    if (isString(configFileParsed)) {
       logger.debug('Massaging string renovate config to extends array');
       configFileParsed = { extends: [configFileParsed] };
     }
@@ -135,7 +140,7 @@ export async function detectRepoFileConfig(
   } else {
     configFileRaw = await readLocalFile(configFileName, 'utf8');
     // istanbul ignore if
-    if (!is.string(configFileRaw)) {
+    if (!isString(configFileRaw)) {
       logger.warn({ configFileName }, 'Null contents when reading config file');
       throw new Error(REPOSITORY_CHANGED);
     }
@@ -203,7 +208,7 @@ export async function mergeRenovateConfig(
     process.env.RENOVATE_X_STATIC_REPO_CONFIG_FILE,
   );
 
-  if (is.nonEmptyArray(returnConfig.extends)) {
+  if (isNonEmptyArray(returnConfig.extends)) {
     resolvedRepoConfig.extends = [
       ...returnConfig.extends,
       ...(resolvedRepoConfig.extends ?? []),
@@ -236,7 +241,7 @@ export async function mergeRenovateConfig(
   const decryptedConfig = await decryptConfig(migratedConfig, repository);
   setNpmTokenInNpmrc(decryptedConfig);
   // istanbul ignore if
-  if (is.string(decryptedConfig.npmrc)) {
+  if (isString(decryptedConfig.npmrc)) {
     logger.debug('Found npmrc in decrypted config - setting');
     npmApi.setNpmrc(decryptedConfig.npmrc);
   }
@@ -258,7 +263,7 @@ export async function mergeRenovateConfig(
   }
   setNpmTokenInNpmrc(resolvedConfig);
   // istanbul ignore if
-  if (is.string(resolvedConfig.npmrc)) {
+  if (isString(resolvedConfig.npmrc)) {
     logger.debug(
       'Ignoring any .npmrc files in repository due to configured npmrc',
     );
@@ -313,14 +318,14 @@ export async function mergeRenovateConfig(
 
 /** needed when using portal secrets for npmToken */
 export function setNpmTokenInNpmrc(config: RenovateConfig): void {
-  if (!is.string(config.npmToken)) {
+  if (!isString(config.npmToken)) {
     return;
   }
 
   const token = config.npmToken;
   logger.debug({ npmToken: maskToken(token) }, 'Migrating npmToken to npmrc');
 
-  if (!is.string(config.npmrc)) {
+  if (!isString(config.npmrc)) {
     logger.debug('Adding npmrc to config');
     config.npmrc = `//registry.npmjs.org/:_authToken=${token}\n`;
     delete config.npmToken;
@@ -345,7 +350,7 @@ export async function resolveStaticRepoConfig(
   config: AllConfig,
   filename: string | undefined,
 ): Promise<AllConfig> {
-  if (!is.nonEmptyString(filename)) {
+  if (!isNonEmptyString(filename)) {
     return config;
   }
 
@@ -358,7 +363,7 @@ export async function resolveStaticRepoConfig(
     process.exit(1);
   }
 
-  if (!is.nonEmptyObject(staticRepoConfig)) {
+  if (!isNonEmptyObject(staticRepoConfig)) {
     return config;
   }
 
@@ -391,7 +396,7 @@ export async function tryReadStaticRepoFileConfig(
     staticRepoConfig,
   );
 
-  if (is.nonEmptyArray(errors) || is.nonEmptyArray(warnings)) {
+  if (isNonEmptyArray(errors) || isNonEmptyArray(warnings)) {
     logger.info(
       { errors, warnings },
       'Static repo config validation issues detected',
@@ -411,7 +416,7 @@ export function mergeStaticConfig(
   staticRepoConfig: AllConfig,
 ): AllConfig {
   // merge extends
-  if (is.nonEmptyArray(staticRepoConfig.extends)) {
+  if (isNonEmptyArray(staticRepoConfig.extends)) {
     config.extends = [...staticRepoConfig.extends, ...(config.extends ?? [])];
     delete staticRepoConfig.extends;
   }
