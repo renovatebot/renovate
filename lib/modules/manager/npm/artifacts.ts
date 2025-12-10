@@ -23,6 +23,10 @@ import {
 // eg. 8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589
 const versionWithHashRegString = '^(?<version>.*)\\+(?<hash>.*)';
 
+export function normalizeStdout(stdout?: string): string {
+  return (stdout ?? '').trim();
+}
+
 // Instead of running 'corepack use' we directly compute the SRI hash from the npm registry
 // This step is necessary because 'corepack use' will fail due to prepare scripts
 export async function updateArtifacts({
@@ -106,7 +110,7 @@ export async function updateArtifacts({
         // ensure the "No integrity found" path is taken
         res = { stdout: '' };
       }
-      integrity = (res.stdout ?? '').trim();
+      integrity = normalizeStdout(res.stdout);
     }
 
     if (!integrity || !/^sha\d+-/.test(integrity)) {
