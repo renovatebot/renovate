@@ -49,6 +49,24 @@ export function getComposerArguments(
   return args;
 }
 
+export function getComposerUpdateArguments(
+  config: UpdateArtifactsConfig,
+  toolConstraint: ToolConstraint,
+): string {
+  let args = getComposerArguments(config, toolConstraint);
+
+  if (
+    !config.isLockFileMaintenance &&
+    !config.postUpdateOptions?.includes('composerNoMinimalChanges') &&
+    is.string(toolConstraint.constraint) &&
+    api.intersects!(toolConstraint.constraint, '>=2.7')
+  ) {
+    args += ' --minimal-changes';
+  }
+
+  return args;
+}
+
 export function getPhpConstraint(
   constraints: Record<string, string>,
 ): string | null {

@@ -34,6 +34,7 @@ import type { AuthJson } from './types';
 import {
   extractConstraints,
   getComposerArguments,
+  getComposerUpdateArguments,
   getPhpConstraint,
   isArtifactAuthEnabled,
   requireComposerDependencyInstallation,
@@ -206,12 +207,9 @@ export async function updateArtifacts({
         ).trim() +
         (config.postUpdateOptions?.includes('composerWithAll')
           ? ' --with-all-dependencies'
-          : ' --with-dependencies') +
-        (config.postUpdateOptions?.includes('composerMinimalChanges')
-          ? ' --minimal-changes'
-          : '');
+          : ' --with-dependencies');
     }
-    args += getComposerArguments(config, composerToolConstraint);
+    args += getComposerUpdateArguments(config, composerToolConstraint);
     logger.trace({ cmd, args }, 'composer command');
     commands.push(`${cmd} ${args}`);
 

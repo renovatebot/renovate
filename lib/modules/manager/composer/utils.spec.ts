@@ -316,6 +316,74 @@ describe('modules/manager/composer/utils', () => {
     });
   });
 
+  describe('getComposerUpdateArguments', () => {
+    it.each`
+      constraint
+      ${'2.6.0'}
+      ${'<=2.6'}
+      ${'<2.7'}
+    `(
+      'does not request an update with minimal changes with $constraint',
+      ({ constraint }) => {
+        expect(
+          getComposerUpdateArguments({}, { toolName: 'composer', constraint }),
+        ).toBe(
+          ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        );
+      },
+    );
+
+    it.each`
+      constraint
+      ${'2.7.0'}
+      ${'2.8.0'}
+      ${'3.0.0'}
+      ${'^2.6'}
+      ${'^2.7'}
+      ${'^2.8'}
+      ${'^3.0'}
+      ${'>=2.6'}
+      ${'>=2.7'}
+      ${'>=2.8'}
+      ${'>=3.0'}
+    `(
+      'requests an update with minimal changes with $constraint',
+      ({ constraint }) => {
+        expect(
+          getComposerUpdateArguments({}, { toolName: 'composer', constraint }),
+        ).toBe(
+          ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes',
+        );
+      },
+    );
+
+    it('does not use --minimal-changes when composerMinimalChanges is set in postUpdateOptions', () => {
+      expect(
+        getComposerUpdateArguments(
+          {
+            postUpdateOptions: ['composerNoMinimalChanges'],
+          },
+          { toolName: 'composer', constraint: '2.7' },
+        ),
+      ).toBe(
+        ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+      );
+    });
+
+    it('does not use --minimal-changes for lock file maintenance', () => {
+      expect(
+        getComposerUpdateArguments(
+          {
+            isLockFileMaintenance: true,
+          },
+          { toolName: 'composer', constraint: '2.7' },
+        ),
+      ).toBe(
+        ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+      );
+    });
+  });
+
   describe('requireComposerDependencyInstallation', () => {
     it('returns true when symfony/flex has been installed', () => {
       const lockfile = Lockfile.parse({
