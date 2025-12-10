@@ -265,54 +265,6 @@ describe('modules/manager/composer/utils', () => {
       );
     });
 
-    it.each`
-      constraint
-      ${'2.6.0'}
-      ${'<=2.6'}
-      ${'<2.7'}
-    `(
-      'does not request a require or an update with minimal changes with $constraint',
-      ({ constraint }) => {
-        expect(
-          getComposerArguments(
-            {
-              composerMinimalChanges: true,
-            },
-            { toolName: 'composer', constraint },
-          ),
-        ).toBe(
-          ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
-        );
-      },
-    );
-
-    it.each`
-      constraint
-      ${'2.7.0'}
-      ${'2.8.0'}
-      ${'3.0.0'}
-      ${'^2.7'}
-      ${'^2.8'}
-      ${'^3.0'}
-      ${'>=2.7'}
-      ${'>=2.8'}
-      ${'>=3.0'}
-    `(
-      'requests a require or an update with minimal changes with $constraint',
-      ({ constraint }) => {
-        expect(
-          getComposerArguments(
-            {
-              composerMinimalChanges: true,
-            },
-            { toolName: 'composer', constraint },
-          ),
-        ).toBe(
-          ' --minimal-changes --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
-        );
-      },
-    );
-
     it('allows scripts when configured', () => {
       GlobalConfig.set({
         allowScripts: true,

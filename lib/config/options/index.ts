@@ -621,13 +621,6 @@ const options: RenovateOptions[] = [
     default: [],
   },
   {
-    name: 'composerMinimalChanges',
-    description:
-      'Run composer commands with --minimal-changes flag to only perform absolutely necessary changes to dependencies.',
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'goGetDirs',
     description: 'Directory pattern to run `go get` on.',
     type: 'array',
@@ -2573,6 +2566,7 @@ const options: RenovateOptions[] = [
     allowedValues: [
       'bundlerConservative',
       'composerWithAll',
+      'composerMinimalChanges',
       'dotnetWorkloadRestore',
       'gomodMassage',
       'gomodTidy',

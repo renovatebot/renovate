@@ -191,7 +191,10 @@ export async function updateArtifacts({
         ).trim() +
         (config.postUpdateOptions?.includes('composerWithAll')
           ? ' --with-all-dependencies'
-          : ' --with-dependencies');
+          : ' --with-dependencies') +
+        (config.postUpdateOptions?.includes('composerMinimalChanges')
+          ? ' --minimal-changes'
+          : '');
     }
     args += getComposerArguments(config, composerToolConstraint);
     logger.trace({ cmd, args }, 'composer command');

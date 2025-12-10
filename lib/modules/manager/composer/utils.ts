@@ -37,14 +37,6 @@ export function getComposerArguments(
     }
   }
 
-  if (
-    config.composerMinimalChanges &&
-    isString(toolConstraint.constraint) &&
-    api.intersects!(toolConstraint.constraint, '>=2.7')
-  ) {
-    args += ' --minimal-changes';
-  }
-
   args += ' --no-ansi --no-interaction';
   if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
     args += ' --no-scripts --no-autoloader';

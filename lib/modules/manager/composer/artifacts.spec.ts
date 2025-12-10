@@ -23,7 +23,6 @@ const datasource = vi.mocked(_datasource);
 
 const config: UpdateArtifactsConfig = {
   composerIgnorePlatformReqs: [],
-  composerMinimalChanges: false,
   ignoreScripts: false,
 };
 
@@ -1231,6 +1230,31 @@ describe('modules/manager/composer/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'composer update foo:1.1.0 --with-all-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
+  it('uses --minimal-changes when composerMinimalChanges is set in postUpdateOptions', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [{ depName: 'foo', newVersion: '1.1.0' }],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          postUpdateOptions: ['composerMinimalChanges'],
+        },
+      }),
+    ).toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'composer update foo:1.1.0 --with-dependencies --minimal-changes --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
