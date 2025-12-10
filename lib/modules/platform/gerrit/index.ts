@@ -1,5 +1,6 @@
 import { isTruthy } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
+import semver from 'semver';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { parseJson } from '../../../util/common';
@@ -45,10 +46,7 @@ export const id = 'gerrit';
 
 const defaults: {
   endpoint?: string;
-  version: string;
-} = {
-  version: '0.0.0',
-};
+} = {};
 
 let config: {
   repository?: string;
@@ -85,16 +83,12 @@ export async function initPlatform({
   let gerritVersion: string;
   try {
     const env = getEnv();
-    /* v8 ignore start: experimental feature */
+    /* v8 ignore next: experimental feature */
     if (env.RENOVATE_X_PLATFORM_VERSION) {
       gerritVersion = env.RENOVATE_X_PLATFORM_VERSION;
-    } /* v8 ignore stop */ else {
+    } else {
       gerritVersion = await client.getVersion();
     }
-    logger.debug('Gerrit version is: ' + gerritVersion);
-    // Example: 3.13.0-rc3-148-gb478dbbb57
-    [gerritVersion] = gerritVersion.split('-');
-    defaults.version = gerritVersion;
   } catch (err) {
     logger.debug(
       { err },
@@ -102,6 +96,15 @@ export async function initPlatform({
     );
     throw new Error('Init: Authentication failure');
   }
+
+  logger.debug('Gerrit version is: ' + gerritVersion);
+  // Example: 3.13.0-rc3-148-gb478dbbb57
+  const parsed = semver.parse(gerritVersion);
+  if (!parsed) {
+    throw new Error(`Unable to parse Gerrit version: ${gerritVersion}`);
+  }
+  gerritVersion = `${parsed.major}.${parsed.minor}.${parsed.patch}`;
+  client.setVersion(gerritVersion);
 
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
@@ -138,7 +141,7 @@ export async function initRepo({
   };
   const baseUrl = defaults.endpoint!;
   const url = getGerritRepoUrl(repository, baseUrl);
-  configureScm(repository, config.gerritUsername!, defaults.version);
+  configureScm(repository, config.gerritUsername!);
   await git.initRepo({ url });
 
   //abandon "open" and "rejected" changes at startup
@@ -146,7 +149,6 @@ export async function initRepo({
     branchName: '',
     state: 'open',
     label: '-2',
-    gerritVersion: defaults.version,
   });
   for (const change of rejectedChanges) {
     await client.abandonChange(
@@ -171,7 +173,6 @@ export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
       ...findPRConfig,
       singleChange: true,
       requestDetails: REQUEST_DETAILS_FOR_PRS,
-      gerritVersion: defaults.version,
     })
   ).pop();
   return change
@@ -221,7 +222,6 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       state: 'open',
       singleChange: true,
       requestDetails: REQUEST_DETAILS_FOR_PRS,
-      gerritVersion: defaults.version,
     })
   ).pop();
   if (change === undefined) {
@@ -258,7 +258,6 @@ export async function getBranchPr(
       targetBranch,
       singleChange: true,
       requestDetails: REQUEST_DETAILS_FOR_PRS,
-      gerritVersion: defaults.version,
     })
   ).pop();
   return change
@@ -272,7 +271,6 @@ export async function getPrList(): Promise<Pr[]> {
   const changes = await client.findChanges(config.repository!, {
     branchName: '',
     requestDetails: REQUEST_DETAILS_FOR_PRS,
-    gerritVersion: defaults.version,
   });
   return changes.map((change) => mapGerritChangeToPr(change)).filter(isTruthy);
 }
@@ -310,7 +308,6 @@ export async function getBranchStatus(
       branchName,
       singleChange: true,
       requestDetails: ['LABELS', 'SUBMITTABLE', 'CHECK'],
-      gerritVersion: defaults.version,
     })
   ).pop();
   if (change) {
@@ -349,7 +346,6 @@ export async function getBranchStatusCheck(
         state: 'open',
         singleChange: true,
         requestDetails: ['LABELS'],
-        gerritVersion: defaults.version,
       })
     ).pop();
     if (change) {
@@ -386,7 +382,6 @@ export async function setBranchStatus(
         state: 'open',
         singleChange: true,
         requestDetails: ['LABELS'],
-        gerritVersion: defaults.version,
       })
     ).pop();
 

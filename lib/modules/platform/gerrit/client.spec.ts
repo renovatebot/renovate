@@ -8,6 +8,7 @@ import type {
   GerritFindPRConfig,
   GerritMergeableInfo,
 } from './types';
+import { MIN_GERRIT_VERSION } from './utils';
 import * as httpMock from '~test/http-mock';
 import { partial } from '~test/util';
 
@@ -15,8 +16,6 @@ const gerritEndpointUrl = 'https://dev.gerrit.com/renovate/';
 const jsonResultHeader = { 'content-type': 'application/json;charset=utf-8' };
 
 describe('modules/platform/gerrit/client', () => {
-  const gerritVersion = '3.0.0'; // default version
-
   beforeAll(() => {
     setBaseUrl(gerritEndpointUrl);
   });
@@ -107,33 +106,25 @@ describe('modules/platform/gerrit/client', () => {
 
   describe('findChanges()', () => {
     it.each([
-      ['owner:self', { branchName: 'dependency-xyz', gerritVersion }],
-      ['project:repo', { branchName: 'dependency-xyz', gerritVersion }],
-      ['-is:wip', { branchName: 'dependency-xyz', gerritVersion }],
+      ['owner:self', { branchName: 'dependency-xyz' }],
+      ['project:repo', { branchName: 'dependency-xyz' }],
+      ['-is:wip', { branchName: 'dependency-xyz' }],
       [
         'footer:Renovate-Branch=dependency-xyz',
-        { branchName: 'dependency-xyz', gerritVersion },
+        { branchName: 'dependency-xyz' },
       ],
-      ['message:"Renovate-Branch: "', { branchName: '', gerritVersion }],
-      ['hasfooter:Renovate-Branch', { branchName: '', gerritVersion: '3.6.0' }],
-      [
-        'label:Code-Review=-2',
-        { branchName: 'dependency-xyz', label: '-2', gerritVersion },
-      ],
+      ['message:"Renovate-Branch: "', { branchName: '' }],
+      ['hasfooter:Renovate-Branch', { branchName: '' }, '3.6.0'],
+      ['label:Code-Review=-2', { branchName: 'dependency-xyz', label: '-2' }],
       [
         'branch:otherTarget',
-        {
-          branchName: 'dependency-xyz',
-          targetBranch: 'otherTarget',
-          gerritVersion,
-        },
+        { branchName: 'dependency-xyz', targetBranch: 'otherTarget' },
       ],
       [
         'status:abandoned',
         {
           branchName: 'dependency-xyz',
           state: 'closed' as FindPRConfig['state'],
-          gerritVersion,
         },
       ],
       [
@@ -141,7 +132,6 @@ describe('modules/platform/gerrit/client', () => {
         {
           branchName: 'dependency-xyz',
           prTitle: 'fix(deps): update dependency react-router-dom to v6.21.2',
-          gerritVersion,
         },
       ],
       [
@@ -150,7 +140,6 @@ describe('modules/platform/gerrit/client', () => {
           branchName: 'dependency-xyz',
           prTitle:
             'fix(deps): update dependency react-router-dom to ~> "v6.21.2"',
-          gerritVersion,
         },
       ],
       [
@@ -159,7 +148,6 @@ describe('modules/platform/gerrit/client', () => {
           branchName: 'dependency-xyz',
           prTitle:
             'fix(deps): "update dependency react-router-dom to ~> "v6.21.2""',
-          gerritVersion,
         },
       ],
       [
@@ -167,12 +155,18 @@ describe('modules/platform/gerrit/client', () => {
         {
           branchName: 'dependency-xyz',
           prTitle: 'fix(deps): update dependency react-router-dom to v6.21.2',
-          gerritVersion: '3.8.0',
         },
+        '3.8.0',
       ],
     ])(
       'query contains %p',
-      async (expectedQueryPart: string, config: GerritFindPRConfig) => {
+      async (
+        expectedQueryPart: string,
+        config: GerritFindPRConfig,
+        gerritVersion?: string,
+      ) => {
+        client.setVersion(gerritVersion ?? MIN_GERRIT_VERSION);
+
         httpMock
           .scope(gerritEndpointUrl)
           .get('/a/changes/')
@@ -200,7 +194,6 @@ describe('modules/platform/gerrit/client', () => {
           branchName: 'dependency-xyz',
           singleChange: true,
           pageLimit: 5, // should be ignored
-          gerritVersion,
         }),
       ).resolves.toEqual([{ _number: 1 }]);
     });
@@ -214,7 +207,6 @@ describe('modules/platform/gerrit/client', () => {
       await expect(
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
-          gerritVersion,
         }),
       ).resolves.toEqual([{ _number: 1 }]);
     });
@@ -229,7 +221,6 @@ describe('modules/platform/gerrit/client', () => {
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
           pageLimit: 5,
-          gerritVersion,
         }),
       ).resolves.toEqual([{ _number: 1 }]);
     });
@@ -244,7 +235,6 @@ describe('modules/platform/gerrit/client', () => {
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
           startOffset: 5,
-          gerritVersion,
         }),
       ).resolves.toEqual([{ _number: 1 }]);
     });
@@ -258,7 +248,6 @@ describe('modules/platform/gerrit/client', () => {
       await expect(
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
-          gerritVersion,
         }),
       ).resolves.toEqual([{ _number: 1 }]);
     });
@@ -297,7 +286,6 @@ describe('modules/platform/gerrit/client', () => {
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
           pageLimit: 2, // to keep the test short
-          gerritVersion,
         }),
       ).resolves.toEqual([
         { _number: 1 },
@@ -334,7 +322,6 @@ describe('modules/platform/gerrit/client', () => {
           branchName: 'dependency-xyz',
           pageLimit: 2,
           startOffset: 2,
-          gerritVersion,
         }),
       ).resolves.toEqual([
         { _number: 3 },
@@ -362,7 +349,6 @@ describe('modules/platform/gerrit/client', () => {
           branchName: 'dependency-xyz',
           noPagination: true,
           pageLimit: 2,
-          gerritVersion,
         }),
       ).resolves.toEqual([{ _number: 1 }, { _number: 2 }]);
     });
@@ -381,7 +367,6 @@ describe('modules/platform/gerrit/client', () => {
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
           requestDetails: ['LABELS', 'MESSAGES'],
-          gerritVersion,
         }),
       ).resolves.toEqual([{ _number: 3 }]);
     });

@@ -1,10 +1,6 @@
 import type { FindPRConfig } from '../types';
 
 export interface GerritFindPRConfig extends FindPRConfig {
-  /**
-   * Gerrit version for choosing the most efficient search operators.
-   */
-  gerritVersion: string;
   label?: string;
   requestDetails?: GerritRequestDetail[];
   /**

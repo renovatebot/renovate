@@ -13,10 +13,9 @@ const clientMock = vi.mocked(_client);
 
 describe('modules/platform/gerrit/scm', () => {
   const gerritScm = new GerritScm();
-  const gerritVersion = '3.0.0'; // default version
 
   beforeEach(() => {
-    configureScm('test/repo', 'user', gerritVersion);
+    configureScm('test/repo', 'user');
   });
 
   describe('isBranchBehindBase()', () => {
@@ -33,7 +32,6 @@ describe('modules/platform/gerrit/scm', () => {
           targetBranch: 'baseBranch',
           singleChange: true,
           requestDetails: ['CURRENT_REVISION', 'CURRENT_ACTIONS'],
-          gerritVersion,
         },
       );
     });
@@ -89,7 +87,6 @@ describe('modules/platform/gerrit/scm', () => {
           targetBranch: 'master',
           singleChange: true,
           requestDetails: ['CURRENT_REVISION', 'DETAILED_ACCOUNTS'],
-          gerritVersion,
         },
       );
     });
@@ -138,7 +135,6 @@ describe('modules/platform/gerrit/scm', () => {
           state: 'open',
           targetBranch: 'target',
           singleChange: true,
-          gerritVersion,
         },
       );
     });
@@ -185,7 +181,6 @@ describe('modules/platform/gerrit/scm', () => {
           branchName: 'myBranchName',
           state: 'open',
           singleChange: true,
-          gerritVersion,
         },
       );
       expect(git.branchExists).toHaveBeenCalledExactlyOnceWith('myBranchName');
@@ -215,7 +210,6 @@ describe('modules/platform/gerrit/scm', () => {
           state: 'open',
           singleChange: true,
           requestDetails: ['CURRENT_REVISION'],
-          gerritVersion,
         },
       );
     });
@@ -247,7 +241,6 @@ describe('modules/platform/gerrit/scm', () => {
           state: 'open',
           singleChange: true,
           requestDetails: ['CURRENT_REVISION'],
-          gerritVersion,
         },
       );
       expect(git.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
@@ -276,7 +269,6 @@ describe('modules/platform/gerrit/scm', () => {
           state: 'open',
           singleChange: true,
           requestDetails: ['CURRENT_REVISION'],
-          gerritVersion,
         },
       );
       expect(git.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
@@ -307,7 +299,6 @@ describe('modules/platform/gerrit/scm', () => {
           targetBranch: 'main',
           singleChange: true,
           requestDetails: ['CURRENT_REVISION'],
-          gerritVersion,
         },
       );
     });

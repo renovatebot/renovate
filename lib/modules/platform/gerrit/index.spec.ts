@@ -42,7 +42,6 @@ describe('modules/platform/gerrit/index', () => {
   const t0 = DateTime.fromISO('2025-04-14T16:33:37.000000000', {
     zone: 'utc',
   }) as DateTime<true>;
-  const gerritVersion = '3.0.0'; // default version
 
   beforeAll(() => {
     vi.useFakeTimers();
@@ -98,6 +97,17 @@ describe('modules/platform/gerrit/index', () => {
           password: '123',
         }),
       ).rejects.toThrow('Init: Authentication failure');
+    });
+
+    it('should throw if version is unparseable', async () => {
+      clientMock.getVersion.mockResolvedValue('not-a-valid-version');
+      await expect(
+        gerrit.initPlatform({
+          endpoint: gerritEndpointUrl,
+          username: 'abc',
+          password: '123',
+        }),
+      ).rejects.toThrow('Unable to parse Gerrit version: not-a-valid-version');
     });
   });
 
@@ -157,7 +167,7 @@ describe('modules/platform/gerrit/index', () => {
 
       expect(clientMock.findChanges.mock.calls[0]).toEqual([
         'test/repo',
-        { branchName: '', label: '-2', state: 'open', gerritVersion },
+        { branchName: '', label: '-2', state: 'open' },
       ]);
       expect(clientMock.abandonChange.mock.calls).toEqual([
         [
@@ -190,7 +200,6 @@ describe('modules/platform/gerrit/index', () => {
           targetBranch: 'master',
           singleChange: true,
           requestDetails: REQUEST_DETAILS_FOR_PRS,
-          gerritVersion,
         },
       );
     });
@@ -353,7 +362,6 @@ describe('modules/platform/gerrit/index', () => {
           state: 'open',
           singleChange: true,
           requestDetails: REQUEST_DETAILS_FOR_PRS,
-          gerritVersion,
         },
       );
     });
@@ -380,7 +388,6 @@ describe('modules/platform/gerrit/index', () => {
           singleChange: true,
           targetBranch: 'master',
           requestDetails: REQUEST_DETAILS_FOR_PRS,
-          gerritVersion,
         },
       ]);
     });
@@ -407,7 +414,6 @@ describe('modules/platform/gerrit/index', () => {
           singleChange: true,
           targetBranch: undefined,
           requestDetails: REQUEST_DETAILS_FOR_PRS,
-          gerritVersion,
         },
       ]);
     });
@@ -422,7 +428,6 @@ describe('modules/platform/gerrit/index', () => {
         {
           branchName: '',
           requestDetails: REQUEST_DETAILS_FOR_PRS,
-          gerritVersion,
         },
       );
     });

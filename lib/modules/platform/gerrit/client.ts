@@ -1,4 +1,5 @@
-import { gte as semverGte } from 'semver';
+import semver from 'semver';
+import { z } from 'zod';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { GerritHttp } from '../../../util/http/gerrit';
@@ -13,15 +14,21 @@ import type {
   GerritProjectInfo,
   GerritRequestDetail,
 } from './types';
-import { mapPrStateToGerritFilter } from './utils';
+import { MIN_GERRIT_VERSION, mapPrStateToGerritFilter } from './utils';
 
 class GerritClient {
   // memCache is disabled because GerritPrCache will provide a smarter caching
   private gerritHttp = new GerritHttp({ memCache: false });
+  private version = MIN_GERRIT_VERSION;
+
+  setVersion(version: string): void {
+    this.version = version;
+  }
 
   async getVersion(): Promise<string> {
-    const res = await this.gerritHttp.getJsonUnchecked<string>(
+    const res = await this.gerritHttp.getJson(
       'a/config/server/version',
+      z.string(),
     );
     return res.body;
   }
@@ -67,7 +74,7 @@ class GerritClient {
       query.o = findPRConfig.requestDetails;
     }
 
-    const filters = GerritClient.buildSearchFilters(repository, findPRConfig);
+    const filters = this.buildSearchFilters(repository, findPRConfig);
 
     const allChanges: GerritChange[] = [];
 
@@ -239,7 +246,7 @@ class GerritClient {
     return message.substring(0, 0x4000).trim();
   }
 
-  private static buildSearchFilters(
+  private buildSearchFilters(
     repository: string,
     searchConfig: GerritFindPRConfig,
   ): string[] {
@@ -255,7 +262,7 @@ class GerritClient {
     }
     if (searchConfig.branchName) {
       filters.push(`footer:Renovate-Branch=${searchConfig.branchName}`);
-    } else if (semverGte(searchConfig.gerritVersion, '3.6.0')) {
+    } else if (semver.gte(this.version, '3.6.0')) {
       filters.push('hasfooter:Renovate-Branch');
     } else {
       filters.push('message:"Renovate-Branch: "');
@@ -270,7 +277,7 @@ class GerritClient {
       // Quotes in the search operators must be escaped with a backslash:
       //   https://gerrit-review.googlesource.com/Documentation/user-search.html#search-operators
       const escapedTitle = searchConfig.prTitle.replaceAll('"', '\\"');
-      if (semverGte(searchConfig.gerritVersion, '3.8.0')) {
+      if (semver.gte(this.version, '3.8.0')) {
         filters.push(`subject:"${escapedTitle}"`);
       } else {
         filters.push(`message:"${escapedTitle}"`);

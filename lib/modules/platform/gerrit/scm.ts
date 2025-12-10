@@ -9,15 +9,9 @@ import type { GerritFindPRConfig } from './types';
 
 let repository: string;
 let username: string;
-let gerritVersion: string;
-export function configureScm(
-  repo: string,
-  login: string,
-  version: string,
-): void {
+export function configureScm(repo: string, login: string): void {
   repository = repo;
   username = login;
-  gerritVersion = version;
 }
 
 export class GerritScm extends DefaultGitScm {
@@ -26,7 +20,6 @@ export class GerritScm extends DefaultGitScm {
       state: 'open',
       branchName,
       singleChange: true,
-      gerritVersion,
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();
     if (change) {
@@ -43,7 +36,6 @@ export class GerritScm extends DefaultGitScm {
       branchName,
       singleChange: true,
       requestDetails: ['CURRENT_REVISION'],
-      gerritVersion,
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();
     if (change) {
@@ -62,7 +54,6 @@ export class GerritScm extends DefaultGitScm {
       targetBranch: baseBranch,
       singleChange: true,
       requestDetails: ['CURRENT_REVISION', 'CURRENT_ACTIONS'],
-      gerritVersion,
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();
     if (change) {
@@ -81,7 +72,6 @@ export class GerritScm extends DefaultGitScm {
       branchName: branch,
       targetBranch: baseBranch,
       singleChange: true,
-      gerritVersion,
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();
     if (change) {
@@ -106,7 +96,6 @@ export class GerritScm extends DefaultGitScm {
       targetBranch: baseBranch,
       singleChange: true,
       requestDetails: ['CURRENT_REVISION', 'DETAILED_ACCOUNTS'],
-      gerritVersion,
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();
     if (change) {
@@ -126,7 +115,6 @@ export class GerritScm extends DefaultGitScm {
       targetBranch: commit.baseBranch,
       singleChange: true,
       requestDetails: ['CURRENT_REVISION'],
-      gerritVersion,
     };
     const existingChange = (
       await client.findChanges(repository, searchConfig)
@@ -192,7 +180,6 @@ export class GerritScm extends DefaultGitScm {
       branchName,
       singleChange: true,
       requestDetails: ['CURRENT_REVISION'],
-      gerritVersion,
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();
     if (change) {
