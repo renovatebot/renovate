@@ -20,19 +20,24 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
   const massagedConfig = clone(config);
   for (const [key, val] of Object.entries(config)) {
     if (allowedStrings.includes(key) && isString(val)) {
+      // @ts-expect-error -- TODO: fix me
       massagedConfig[key] = [val];
     } else if (isArray(val)) {
+      // @ts-expect-error -- TODO: fix me
       massagedConfig[key] = [];
       val.forEach((item) => {
         if (isObject(item)) {
+          // @ts-expect-error -- TODO: fix me
           (massagedConfig[key] as RenovateConfig[]).push(
             massageConfig(item as RenovateConfig),
           );
         } else {
+          // @ts-expect-error -- TODO: fix me
           (massagedConfig[key] as unknown[]).push(item);
         }
       });
     } else if (isObject(val) && key !== 'encrypted') {
+      // @ts-expect-error -- TODO: fix me
       massagedConfig[key] = massageConfig(val as RenovateConfig);
     }
   }
@@ -56,6 +61,7 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
           let newRule = clone(rule);
           Object.keys(newRule).forEach((newKey) => {
             if (!(newKey.startsWith(`match`) || newKey.startsWith('exclude'))) {
+              // @ts-expect-error -- TODO: fix me
               delete newRule[newKey];
             }
           });

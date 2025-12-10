@@ -46,9 +46,8 @@ async function setDirectories(input: AllConfig): Promise<AllConfig> {
 }
 
 function limitCommitsPerRun(config: RenovateConfig): void {
-  let limit = config.prCommitsPerRunLimit;
-  limit = typeof limit === 'number' && limit > 0 ? limit : null;
-  setMaxLimit('Commits', limit);
+  const limit = config.prCommitsPerRunLimit;
+  setMaxLimit('Commits', typeof limit === 'number' && limit > 0 ? limit : null);
 }
 
 async function checkVersions(): Promise<void> {

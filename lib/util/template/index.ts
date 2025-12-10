@@ -232,7 +232,7 @@ export const allowedFields = {
     'The severity for a vulnerability alert upgrade (LOW, MEDIUM, MODERATE, HIGH, CRITICAL, UNKNOWN)',
 };
 
-type CompileInput = Record<string, unknown>;
+type CompileInput<T = Record<string, unknown>> = T;
 
 const allowedTemplateFields = new Set([
   ...Object.keys(allowedFields),
@@ -285,9 +285,9 @@ export function proxyCompileInput(
   );
 }
 
-export function compile(
+export function compile<T>(
   template: string,
-  input: CompileInput,
+  input: CompileInput<T>,
   filterFields = true,
 ): string {
   const env = getChildEnv({});
@@ -310,9 +310,9 @@ export function compile(
   return result;
 }
 
-export function safeCompile(
+export function safeCompile<T>(
   template: string,
-  input: CompileInput,
+  input: CompileInput<T>,
   filterFields = true,
 ): string {
   try {

@@ -14,13 +14,13 @@ export function updatePnpmCatalogDependency({
 
   const catalogName = depType?.split('.').at(-1);
 
-  /* v8 ignore start -- needs test */
+  /* v8 ignore next -- needs test */
   if (!isString(catalogName)) {
     logger.error(
       'No catalogName was found; this is likely an extraction error.',
     );
     return null;
-  } /* v8 ignore stop -- needs test */
+  }
 
   let { newValue } = upgrade;
 

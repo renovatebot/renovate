@@ -12,7 +12,6 @@ import { partial } from '~test/util';
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
   branchName: '',
-  endpoint: 'https://code.forgejo.org/api/v1/',
   packageName: 'renovate',
   versioning: semverVersioning.id,
   currentVersion: '5.2.0',
@@ -338,9 +337,7 @@ describe('workers/repository/update/pr/changelog/forgejo/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          platform: 'forgejo',
           sourceUrl: 'https://git.test.com/meno/dropzone/',
-          endpoint: 'https://git.test.com/api/v1/',
         }),
       ).toMatchObject({
         hasReleaseNotes: false,

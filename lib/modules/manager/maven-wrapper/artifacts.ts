@@ -245,7 +245,7 @@ async function prepareCommand(
   pathFileStats: Stats | null,
   args: string | null,
 ): Promise<string | null> {
-  /* v8 ignore start -- hard to test */
+  /* v8 ignore next -- hard to test */
   if (pathFileStats?.isFile() === true) {
     // if the file is not executable by others
     if (os.platform() !== 'win32' && (pathFileStats.mode & 0o1) === 0) {
@@ -260,6 +260,6 @@ async function prepareCommand(
       return fileName;
     }
     return `${fileName} ${args}`;
-  } /* v8 ignore stop */
+  }
   return null;
 }

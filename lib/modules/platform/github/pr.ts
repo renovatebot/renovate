@@ -129,10 +129,10 @@ export async function getPrCache(
       },
       `PR cache: getPrList success`,
     );
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.debug({ err }, 'PR cache: getPrList err');
     throw new ExternalHostError(err, 'github');
-  } /* v8 ignore stop */
+  }
 
   return prApiCache.getItems();
 }

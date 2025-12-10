@@ -54,6 +54,7 @@ describe('util/interpolator', () => {
       };
       const res = replaceInterpolatedValuesInObject(
         {
+          // @ts-expect-error -- will be tranformed
           mode: '{{ secrets.SECRET_MODE }}',
           labels: ['{{ secrets.SECRET_LABEL }}', 'renovate'],
           prBodyDefinitions: {
@@ -96,6 +97,7 @@ describe('util/interpolator', () => {
     it('replaces values and keeps secrets', () => {
       const res = replaceInterpolatedValuesInObject(
         {
+          // @ts-expect-error -- will be tranformed
           mode: '{{ secrets.SECRET_MODE }}',
           secrets: { SECRET_MODE: 'silent' },
         },
@@ -140,6 +142,7 @@ describe('util/interpolator', () => {
       expect(() =>
         replaceInterpolatedValuesInObject(
           {
+            // @ts-expect-error -- will be tranformed
             mode: '{{ secrets.SECRET_MODE }}',
             secrets: { SECRET_NOT_MODE: 'silent' },
           },

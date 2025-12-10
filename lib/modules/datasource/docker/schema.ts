@@ -170,7 +170,7 @@ export const DockerHubTagsPage = z.object({
   count: z.number(),
   next: z.string().nullable().catch(null),
   results: LooseArray(DockerHubTag, {
-    /* v8 ignore next 6 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
     onError: ({ error }) => {
       logger.debug(
         { error },

@@ -14,7 +14,7 @@ import { tryDecryptBcPgp } from './decrypt/bcpgp';
 import { tryDecryptOpenPgp } from './decrypt/openpgp';
 import { GlobalConfig } from './global';
 import { DecryptedObject } from './schema';
-import type { RenovateConfig } from './types';
+import type { AllConfig, RenovateConfig } from './types';
 
 let privateKey: string | undefined;
 let privateKeyOld: string | undefined;
@@ -130,11 +130,11 @@ export function validateDecryptedValue(
   return null;
 }
 
-export async function decryptConfig(
-  config: RenovateConfig,
+export async function decryptConfig<T extends RenovateConfig = AllConfig>(
+  config: T,
   repository: string,
   existingPath = '$',
-): Promise<RenovateConfig> {
+): Promise<T> {
   logger.trace({ config }, 'decryptConfig()');
   const decryptedConfig = { ...config };
   for (const [key, val] of Object.entries(config)) {
@@ -166,6 +166,7 @@ export async function decryptConfig(
             decryptedConfig[eKey] = token;
             addSecretForSanitizing(token);
           } else {
+            // @ts-expect-error -- type can't be narrowed
             decryptedConfig[eKey] = decryptedStr;
             addSecretForSanitizing(decryptedStr);
           }
@@ -190,19 +191,23 @@ Refer to migration documents here: https://docs.renovatebot.com/mend-hosted/migr
       }
       delete decryptedConfig.encrypted;
     } else if (isArray(val)) {
+      // @ts-expect-error -- type can't be narrowed
       decryptedConfig[key] = [];
       for (const [index, item] of val.entries()) {
         if (isObject(item) && !isArray(item)) {
           const path = `${existingPath}.${key}[${index}]`;
+          // @ts-expect-error -- type can't be narrowed
           (decryptedConfig[key] as RenovateConfig[]).push(
             await decryptConfig(item as RenovateConfig, repository, path),
           );
         } else {
+          // @ts-expect-error -- type can't be narrowed
           (decryptedConfig[key] as unknown[]).push(item);
         }
       }
     } else if (isObject(val) && key !== 'content') {
       const path = `${existingPath}.${key}`;
+      // @ts-expect-error -- type can't be narrowed
       decryptedConfig[key] = await decryptConfig(
         val as RenovateConfig,
         repository,

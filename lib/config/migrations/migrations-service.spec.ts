@@ -40,7 +40,7 @@ describe('config/migrations/migrations-service', () => {
   });
 
   it('should save original order of properties', () => {
-    const originalConfig: RenovateConfig = {
+    const originalConfig = {
       exposeEnv: true,
       versionScheme: 'test',
       excludedPackageNames: ['test'],
@@ -60,6 +60,7 @@ describe('config/migrations/migrations-service', () => {
   it('should allow custom migrations by regexp', () => {
     let isMigrationDone = false;
     const originalConfig: RenovateConfig = {
+      // @ts-expect-error --  testing
       fooBar: 'one',
     };
     class CustomMigration extends AbstractMigration {

@@ -1,7 +1,18 @@
-import type { Attributes, SpanKind } from '@opentelemetry/api';
+import type { Attributes, SpanKind, SpanOptions } from '@opentelemetry/api';
+import type { RenovateSplit } from '../config/types';
 import type { BunyanRecord } from '../logger/types';
 import type { PackageFile } from '../modules/manager/types';
 import type { BranchCache } from '../util/cache/repository/types';
+import type { GitOperationType } from '../util/git/types';
+
+export type RenovateSpanOptions = {
+  attributes?: RenovateSpanAttributes;
+} & SpanOptions;
+
+export type RenovateSpanAttributes = {
+  [ATTR_RENOVATE_SPLIT]?: RenovateSplit;
+  [ATTR_VCS_GIT_OPERATION_TYPE]?: GitOperationType;
+} & Attributes;
 
 /**
  * The instrumentation decorator parameters.
@@ -54,3 +65,21 @@ export interface DependencyStatus {
   outdated: number;
   total: number;
 }
+
+export const ATTR_RENOVATE_SPLIT = 'renovate.split';
+
+/**
+ * the Git Version Control System (VCS)'s Operation Type
+ *
+ * @see GitOperationType
+ * @see https://opentelemetry.io/docs/specs/semconv/registry/attributes/vcs/
+ *
+ */
+export const ATTR_VCS_GIT_OPERATION_TYPE = 'vcs.git.operation.type';
+
+/**
+ * the Git Version Control System (VCS)'s subcommand
+ *
+ * @see https://opentelemetry.io/docs/specs/semconv/registry/attributes/vcs/
+ * */
+export const ATTR_VCS_GIT_SUBCOMMAND = 'vcs.git.subcommand';

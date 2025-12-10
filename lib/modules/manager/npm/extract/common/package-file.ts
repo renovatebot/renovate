@@ -128,14 +128,14 @@ export function extractPackageJson(
             dep.prettyDepType = depTypes[depType];
             deps.push(dep);
           }
-        } /* v8 ignore start -- needs test */
+        } /* v8 ignore next -- needs test */
       } catch (err) {
         logger.debug(
           { fileName: packageFile, depType, err },
           'Error parsing package.json',
         );
         return null;
-      } /* v8 ignore stop -- needs test */
+      }
     }
   }
 

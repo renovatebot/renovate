@@ -24,7 +24,7 @@ export function getConfig(): AllConfig {
   const config: AllConfig = {};
   options.forEach((option) => {
     if (!option.parents || option.parents.includes('.')) {
-      config[option.name] = getDefault(option);
+      config[option.name as keyof AllConfig] = getDefault(option);
     }
   });
   return config;

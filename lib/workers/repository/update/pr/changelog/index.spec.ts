@@ -20,7 +20,6 @@ const githubReleasesMock = vi.mocked(githubGraphql).queryReleases;
 const getInRangeReleasesMock = vi.mocked(releases).getInRangeReleases;
 
 const upgrade = partial<BranchConfig>({
-  endpoint: 'https://api.github.com/',
   packageName: 'renovate',
   versioning: semverVersioning.id,
   currentVersion: '1.0.0',
@@ -301,7 +300,6 @@ describe('workers/repository/update/pr/changelog/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          endpoint: 'https://github-enterprise.example.com/',
         }),
       ).toMatchSnapshot({
         hasReleaseNotes: true,
@@ -342,7 +340,6 @@ describe('workers/repository/update/pr/changelog/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
-          endpoint: 'https://github-enterprise.example.com/',
         }),
       ).toMatchSnapshot({
         hasReleaseNotes: true,

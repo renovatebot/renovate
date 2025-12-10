@@ -81,9 +81,9 @@ export function updateLockedDependency(
       return { status: 'update-failed' };
     }
     return { status: 'updated', files: { [lockFile]: newLockFileContent } };
-    /* v8 ignore start -- needs test */
+    /* v8 ignore next -- needs test */
   } catch (err) {
     logger.error({ err }, 'updateLockedDependency() error');
     return { status: 'update-failed' };
-  } /* v8 ignore stop -- needs test */
+  }
 }

@@ -40,11 +40,12 @@ import {
   raiseConfigWarningIssue,
   raiseCredentialsWarningIssue,
 } from './error-config';
+import type { RepositoryResult } from './result';
 
 export default async function handleError(
   config: RenovateConfig,
   err: Error,
-): Promise<string> {
+): Promise<RepositoryResult> {
   if (err.message === REPOSITORY_UNINITIATED) {
     logger.info('Repository is uninitiated - skipping');
     delete config.branchList;
@@ -55,15 +56,13 @@ export default async function handleError(
     delete config.branchList;
     return err.message;
   }
-  const disabledMessages = [
-    REPOSITORY_CLOSED_ONBOARDING,
-    REPOSITORY_DISABLED,
-    REPOSITORY_DISABLED_BY_CONFIG,
-    REPOSITORY_NO_CONFIG,
-  ];
-  if (disabledMessages.includes(err.message)) {
-    logger.info('Repository is disabled - skipping');
-    return err.message;
+  switch (err.message) {
+    case REPOSITORY_CLOSED_ONBOARDING:
+    case REPOSITORY_DISABLED:
+    case REPOSITORY_DISABLED_BY_CONFIG:
+    case REPOSITORY_NO_CONFIG:
+      logger.info('Repository is disabled - skipping');
+      return err.message;
   }
   if (err.message === REPOSITORY_ARCHIVED) {
     logger.info('Repository is archived - skipping');
@@ -159,7 +158,7 @@ export default async function handleError(
     );
     logger.info('External host error causing abort - skipping');
     delete config.branchList;
-    return err.message;
+    return EXTERNAL_HOST_ERROR;
   }
   if (
     err.message.includes('No space left on device') ||
@@ -167,7 +166,7 @@ export default async function handleError(
   ) {
     logger.error('Disk space error - skipping');
     delete config.branchList;
-    return err.message;
+    return SYSTEM_INSUFFICIENT_DISK_SPACE;
   }
   if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
     logger.warn('Rate limit exceeded - aborting');

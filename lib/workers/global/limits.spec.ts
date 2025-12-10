@@ -96,7 +96,7 @@ describe('workers/global/limits', () => {
       expect(calcLimit(upgrades, 'prConcurrentLimit')).toBe(12);
     });
 
-    it('returns 0 if atleast one upgrade has no limit in the branch', () => {
+    it('returns 0 if at least one upgrade has no limit in the branch', () => {
       const upgrades = partial<BranchUpgradeConfig>([
         {
           prHourlyLimit: 10,

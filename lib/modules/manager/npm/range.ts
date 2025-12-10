@@ -14,7 +14,7 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
     );
     return 'widen';
   }
-  if (rangeStrategy !== 'auto') {
+  if (rangeStrategy && rangeStrategy !== 'auto') {
     return rangeStrategy;
   }
   if (depType === 'peerDependencies') {

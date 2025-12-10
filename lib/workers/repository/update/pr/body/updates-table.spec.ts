@@ -314,4 +314,70 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         '\n',
     );
   });
+
+  it('customizes table headers as per prBodyHeadingDefinitions', () => {
+    const upgrade1 = partial<BranchUpgradeConfig>({
+      manager: 'some-manager',
+      branchName: 'some-branch',
+      prBodyDefinitions: {
+        Package: '{{{depNameLinked}}}',
+        Type: '{{{depType}}}',
+        Update: '{{{updateType}}}',
+        'Current value': '{{{currentValue}}}',
+        'New value': '{{{newValue}}}',
+        Change: 'All locks refreshed',
+        Pending: '{{{displayPending}}}',
+        References: '{{{references}}}',
+        'Package file': '{{{packageFile}}}',
+        Age: "{{#if newVersion}}[![age](https://developer.mend.io/api/mc/badges/age/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/){{/if}}",
+      },
+      updateType: 'pin',
+      depNameLinked: '[koa](https://github.com/koajs/koa)',
+      depName: 'koa',
+      packageName: 'koa',
+      depType: 'dependencies',
+      currentValue: '^1.7.0',
+      newValue: '1.7.0',
+      currentVersion: '1.7.0',
+      newVersion: '1.7.0',
+      displayFrom: '^1.7.0',
+      displayTo: '1.7.0',
+      datasource: 'npm',
+    });
+
+    const configObj: BranchConfig = {
+      manager: 'some-manager',
+      branchName: 'some-branch',
+      baseBranch: 'base',
+      upgrades: [upgrade1],
+      prBodyColumns: ['Package', 'Type', 'Update', 'Change', 'Pending', 'Age'],
+      prBodyDefinitions: {
+        Package: '{{{depNameLinked}}}',
+        Type: '{{{depType}}}',
+        Update: '{{{updateType}}}',
+        'Current value': '{{{currentValue}}}',
+        'New value': '{{{newValue}}}',
+        Change: 'All locks refreshed',
+        Pending: '{{{displayPending}}}',
+        References: '{{{references}}}',
+        'Package file': '{{{packageFile}}}',
+        Age: "{{#if newVersion}}[![age](https://developer.mend.io/api/mc/badges/age/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/){{/if}}",
+      },
+      prBodyHeadingDefinitions: {
+        Age: '[Age](https://docs.renovatebot.com/merge-confidence)',
+      },
+    };
+    const result = getPrUpdatesTable(configObj);
+    expect(result).toMatch(
+      '\n' +
+        '\n' +
+        'This PR contains the following updates:\n' +
+        '\n' +
+        '| Package | Type | Update | Change | [Age](https://docs.renovatebot.com/merge-confidence) |\n' +
+        '|---|---|---|---|---|\n' +
+        '| [koa](https://github.com/koajs/koa) | dependencies | pin | All locks refreshed | [![age](https://developer.mend.io/api/mc/badges/age/npm/koa/1.7.0?slim=true)](https://docs.renovatebot.com/merge-confidence/) |\n' +
+        '\n' +
+        '\n',
+    );
+  });
 });

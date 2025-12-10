@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const BitbucketServerTag = z.object({
   displayId: z.string(),
-  hash: z.string().nullable(),
+  hash: z.string().nullish(),
 });
 
 export const BitbucketServerTags = z.array(BitbucketServerTag);

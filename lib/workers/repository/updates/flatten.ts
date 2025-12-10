@@ -7,6 +7,7 @@ import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { getDefaultConfig } from '../../../modules/datasource';
 import { get } from '../../../modules/manager';
+import type { PackageFile } from '../../../modules/manager/types';
 import { detectSemanticCommits } from '../../../util/git/semantic';
 import { applyPackageRules } from '../../../util/package-rules';
 import { regEx } from '../../../util/regex';
@@ -72,8 +73,8 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
 
 export async function flattenUpdates(
   config: RenovateConfig,
-  packageFiles: Record<string, any[]>,
-): Promise<RenovateConfig[]> {
+  packageFiles: Record<string, PackageFile[]>,
+): Promise<BranchUpgradeConfig[]> {
   const updates = [];
   const updateTypes = [
     'major',
@@ -87,7 +88,10 @@ export async function flattenUpdates(
   for (const [manager, files] of Object.entries(packageFiles)) {
     const managerConfig = getManagerConfig(config, manager);
     for (const packageFile of files) {
-      const packageFileConfig = mergeChildConfig(managerConfig, packageFile);
+      const packageFileConfig: BranchUpgradeConfig = mergeChildConfig(
+        managerConfig,
+        packageFile,
+      ) as never;
       const packagePath = packageFile.packageFile?.split('/');
       if (packagePath.length > 0) {
         packagePath.splice(-1, 1);
@@ -101,24 +105,27 @@ export async function flattenUpdates(
       }
       let depIndex = 0;
       for (const dep of packageFile.deps) {
-        if (dep.updates.length) {
+        if (dep.updates!.length) {
           const depConfig = mergeChildConfig(packageFileConfig, dep);
+          // @ts-expect-error -- not easily typed
           delete depConfig.deps;
           depConfig.depIndex = depIndex; // used for autoreplace
-          for (const update of dep.updates) {
+          for (const update of dep.updates!) {
             let updateConfig = mergeChildConfig(depConfig, update);
             delete updateConfig.updates;
             if (updateConfig.updateType) {
+              // @ts-expect-error -- not easily typed
               updateConfig[`is${upper(updateConfig.updateType)}`] = true;
             }
             if (updateConfig.updateTypes) {
               updateConfig.updateTypes.forEach((updateType: string) => {
+                // @ts-expect-error -- not easily typed
                 updateConfig[`is${upper(updateType)}`] = true;
               });
             }
             // apply config from datasource
             const datasourceConfig = await getDefaultConfig(
-              depConfig.datasource,
+              depConfig.datasource!,
             );
             updateConfig = mergeChildConfig(updateConfig, datasourceConfig);
             updateConfig = await applyPackageRules(
@@ -128,9 +135,11 @@ export async function flattenUpdates(
             // apply major/minor/patch/pin/digest
             updateConfig = mergeChildConfig(
               updateConfig,
+              // @ts-expect-error -- not easily typed
               updateConfig[updateConfig.updateType],
             );
             for (const updateType of updateTypes) {
+              // @ts-expect-error -- not easily typed
               delete updateConfig[updateType];
             }
             // Apply again in case any were added by the updateType config
@@ -148,12 +157,12 @@ export async function flattenUpdates(
       }
       if (
         get(manager, 'supportsLockFileMaintenance') &&
-        packageFileConfig.lockFileMaintenance.enabled
+        packageFileConfig.lockFileMaintenance!.enabled
       ) {
         // Apply lockFileMaintenance config before packageRules
         let lockFileConfig = mergeChildConfig(
           packageFileConfig,
-          packageFileConfig.lockFileMaintenance,
+          packageFileConfig.lockFileMaintenance!,
         );
         lockFileConfig.updateType = 'lockFileMaintenance';
         lockFileConfig.isLockFileMaintenance = true;
@@ -164,7 +173,7 @@ export async function flattenUpdates(
         // Apply lockFileMaintenance and packageRules again
         lockFileConfig = mergeChildConfig(
           lockFileConfig,
-          lockFileConfig.lockFileMaintenance,
+          lockFileConfig.lockFileMaintenance!,
         );
         lockFileConfig = await applyPackageRules(
           lockFileConfig,
@@ -172,9 +181,11 @@ export async function flattenUpdates(
         );
         // Remove unnecessary objects
         for (const updateType of updateTypes) {
+          // @ts-expect-error -- not easily typed
           delete lockFileConfig[updateType];
         }
         delete lockFileConfig.packageRules;
+        // @ts-expect-error -- not easily typed
         delete lockFileConfig.deps;
         generateBranchName(lockFileConfig);
         updates.push(lockFileConfig);

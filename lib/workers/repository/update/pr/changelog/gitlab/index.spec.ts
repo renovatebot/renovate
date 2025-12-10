@@ -10,7 +10,6 @@ import { partial } from '~test/util';
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
   branchName: '',
-  endpoint: 'https://gitlab.com/api/v4/ ',
   packageName: 'renovate',
   versioning: semverVersioning.id,
   currentVersion: '5.2.0',
@@ -268,7 +267,6 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://gitlab-enterprise.example.com/meno/dropzone/',
-          endpoint: 'https://gitlab-enterprise.example.com/',
         }),
       ).toMatchSnapshot({
         hasReleaseNotes: false,
@@ -301,9 +299,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          platform: 'gitlab',
           sourceUrl: 'https://git.test.com/meno/dropzone/',
-          endpoint: 'https://git.test.com/api/v4/',
         }),
       ).toMatchSnapshot({
         hasReleaseNotes: false,

@@ -11,10 +11,6 @@ beforeEach(() => {
     repoIsOnboarded: true,
     branchPrefix: `renovate/`,
     pruneStaleBranches: true,
-    ignoredAuthors: [],
-    platform: 'github',
-    errors: [],
-    warnings: [],
   });
 });
 

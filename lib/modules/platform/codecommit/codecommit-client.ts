@@ -60,10 +60,10 @@ export function buildCodeCommitClient(): void {
     codeCommitClient = new CodeCommitClient({});
   }
 
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (!codeCommitClient) {
     throw new Error('Failed to initialize codecommit client');
-  } /* v8 ignore stop */
+  }
 }
 
 export async function deleteComment(
@@ -301,10 +301,10 @@ export function getCodeCommitUrl(
   });
   const dateTime = signer.getDateTime();
 
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (!isString(dateTime)) {
     throw new Error(REPOSITORY_UNINITIATED);
-  } /* v8 ignore stop */
+  }
 
   const token = `${dateTime}Z${signer.signature()}`;
 
@@ -313,10 +313,10 @@ export function getCodeCommitUrl(
   }`;
 
   // massaging username with the session token,
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (username.includes('/')) {
     username = username.replace(/\//g, '%2F');
-  } /* v8 ignore stop */
+  }
   return `https://${username}:${token}@git-codecommit.${
     env.AWS_REGION ?? 'us-east-1'
   }.amazonaws.com/v1/repos/${repoName}`;

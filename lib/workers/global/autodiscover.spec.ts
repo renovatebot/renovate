@@ -1,4 +1,4 @@
-import type { RenovateConfig } from '../../config/types';
+import type { AllConfig } from '../../config/types';
 import * as platform from '../../modules/platform';
 import * as _ghApi from '../../modules/platform/github';
 import * as _hostRules from '../../util/host-rules';
@@ -14,7 +14,7 @@ const hostRules = vi.mocked(_hostRules);
 const ghApi = vi.mocked(_ghApi);
 
 describe('workers/global/autodiscover', () => {
-  let config: RenovateConfig;
+  let config: AllConfig;
 
   beforeEach(async () => {
     config = {};

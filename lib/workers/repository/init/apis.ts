@@ -65,7 +65,8 @@ async function validateIncludeForks(config: RenovateConfig): Promise<void> {
       );
       throw new Error(REPOSITORY_FORKED);
     }
-    if (repoConfig.includeForks) {
+    // TODO: global only setting
+    if ('includeForks' in repoConfig && repoConfig.includeForks) {
       logger.debug(
         `Found legacy setting includeForks in ${defaultConfigFile} - continuing`,
       );

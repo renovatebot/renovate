@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import * as hostRules from '../../../util/host-rules';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
 import { Fixtures } from '~test/fixtures';
@@ -34,6 +35,12 @@ describe('modules/manager/cargo/extract', () => {
     beforeEach(() => {
       delete process.env.CARGO_REGISTRIES_PRIVATE_CRATES_INDEX;
       delete process.env.CARGO_REGISTRIES_MCORBIN_INDEX;
+
+      hostRules.clear();
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'git.example.com',
+      });
     });
 
     it('returns null for invalid toml', async () => {
@@ -66,7 +73,7 @@ describe('modules/manager/cargo/extract', () => {
     it('extracts multiple dependencies simple', async () => {
       const res = await extractPackageFile(cargo1toml, 'Cargo.toml', config);
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(19);
+      expect(res?.deps).toHaveLength(20);
     });
 
     it('extracts multiple dependencies advanced', async () => {

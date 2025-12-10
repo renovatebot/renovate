@@ -83,7 +83,7 @@ describe('workers/repository/init/inherited', () => {
   it('should warn if validateConfig returns warnings', async () => {
     platform.getRawFile.mockResolvedValue('{"binarySource": "docker"}');
     const res = await mergeInheritedConfig(config);
-    expect(res.binarySource).toBeUndefined();
+    expect(res).not.toContainKey('binarySource');
     expect(logger.warn).toHaveBeenCalled();
   });
 
@@ -220,7 +220,7 @@ describe('workers/repository/init/inherited', () => {
       automerge: true,
     });
     const res = await mergeInheritedConfig(config);
-    expect(res.binarySource).toBeUndefined();
+    expect(res).not.toContainKey('binarySource');
 
     expect(logger.warn).toHaveBeenCalledWith(
       {

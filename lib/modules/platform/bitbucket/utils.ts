@@ -53,9 +53,9 @@ export function prInfo(pr: PrResponse): Pr {
     sourceBranch: pr.source?.branch?.name,
     targetBranch: pr.destination?.branch?.name,
     title: pr.title,
-    state: /* v8 ignore start */ prStates.closed?.includes(pr.state)
+    state: /* v8 ignore next */ prStates.closed?.includes(pr.state)
       ? 'closed'
-      : pr.state?.toLowerCase() /* v8 ignore stop */,
+      : pr.state?.toLowerCase(),
     createdAt: pr.created_on,
   };
 }

@@ -95,9 +95,9 @@ export async function getFile(
           return null;
         }
       }
-    } catch /* v8 ignore start */ {
+    } catch /* v8 ignore next */ {
       // it 's not a JSON, so I send the content directly with the line under
-    } /* v8 ignore stop */
+    }
 
     return fileContent;
   }

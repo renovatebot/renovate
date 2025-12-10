@@ -7,7 +7,7 @@ describe('config/presets/internal/workarounds', () => {
     const preset = presets.bitnamiDockerImageVersioning;
     const packageRule = preset.packageRules![0];
 
-    const versioning = versionings.get(packageRule.versioning as string);
+    const versioning = versionings.get(packageRule.versioning);
     const matchCurrentValue = packageRule.matchCurrentValue!;
 
     it.each`
@@ -47,7 +47,7 @@ describe('config/presets/internal/workarounds', () => {
     describe('Liberica JDK Lite', () => {
       const packageRule = preset.packageRules![0];
 
-      const versioning = versionings.get(packageRule.versioning as string);
+      const versioning = versionings.get(packageRule.versioning);
 
       const matchCurrentValue = packageRule.matchCurrentValue!;
 
@@ -85,7 +85,7 @@ describe('config/presets/internal/workarounds', () => {
     describe('Liberica JDK', () => {
       const packageRule = preset.packageRules![1];
 
-      const versioning = versionings.get(packageRule.versioning as string);
+      const versioning = versionings.get(packageRule.versioning);
 
       const matchCurrentValue = packageRule.matchCurrentValue!;
 
@@ -123,7 +123,7 @@ describe('config/presets/internal/workarounds', () => {
     describe('Liberica JRE', () => {
       const packageRule = preset.packageRules![2];
 
-      const versioning = versionings.get(packageRule.versioning as string);
+      const versioning = versionings.get(packageRule.versioning);
 
       const matchCurrentValue = packageRule.matchCurrentValue!;
 
@@ -165,7 +165,7 @@ describe('config/presets/internal/workarounds', () => {
     describe('bellsoft/liberica-runtime-container', () => {
       const packageRule = preset.packageRules![2];
 
-      const allowedVersions = packageRule.allowedVersions as string;
+      const allowedVersions = packageRule.allowedVersions!;
 
       it.each`
         input                           | expected
