@@ -5,6 +5,7 @@ import { Lockfile, PackageFile } from './schema';
 import {
   extractConstraints,
   getComposerArguments,
+  getComposerUpdateArguments,
   requireComposerDependencyInstallation,
 } from './utils';
 
@@ -357,7 +358,7 @@ describe('modules/manager/composer/utils', () => {
       },
     );
 
-    it('does not use --minimal-changes when composerMinimalChanges is set in postUpdateOptions', () => {
+    it('does not use --minimal-changes when composerNoMinimalChanges is set in postUpdateOptions', () => {
       expect(
         getComposerUpdateArguments(
           {

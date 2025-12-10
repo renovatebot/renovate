@@ -58,7 +58,7 @@ export function getComposerUpdateArguments(
   if (
     !config.isLockFileMaintenance &&
     !config.postUpdateOptions?.includes('composerNoMinimalChanges') &&
-    is.string(toolConstraint.constraint) &&
+    isString(toolConstraint.constraint) &&
     api.intersects!(toolConstraint.constraint, '>=2.7')
   ) {
     args += ' --minimal-changes';
