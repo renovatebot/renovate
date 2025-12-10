@@ -13,6 +13,7 @@ import {
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
+  deleteLocalFile,
   ensureCacheDir,
   ensureLocalDir,
   getSiblingFileName,
