@@ -179,8 +179,8 @@ export async function updateArtifacts({
       );
       try {
         await deleteLocalFile(lockFileName);
-        /* v8 ignore next -- needs test */
       } catch (err) {
+        /* v8 ignore next -- needs test */
         logger.debug(
           { err, lockFileName },
           'Error removing `composer.lock` for lock file maintenance',
