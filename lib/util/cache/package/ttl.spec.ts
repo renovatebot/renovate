@@ -33,6 +33,7 @@ describe('util/cache/package/ttl', () => {
       it('returns undefined when exact match is not a number', () => {
         GlobalConfig.set({
           cacheTtlOverride: {
+            // @ts-expect-error -- testing
             'datasource-npm': 'invalid',
           },
         });
@@ -155,6 +156,7 @@ describe('util/cache/package/ttl', () => {
       it('skips non-numeric values and finds next longest matching pattern', () => {
         GlobalConfig.set({
           cacheTtlOverride: {
+            // @ts-expect-error -- testing
             'datasource-*': 'invalid',
             'datasource-n*': 100,
             '*': 45,
@@ -189,7 +191,9 @@ describe('util/cache/package/ttl', () => {
       it('handles null and undefined values in overrides', () => {
         GlobalConfig.set({
           cacheTtlOverride: {
+            // @ts-expect-error -- testing
             'datasource-npm': null,
+            // @ts-expect-error -- testing
             'datasource-docker': undefined,
             'datasource-maven': 90,
           },
@@ -220,6 +224,7 @@ describe('util/cache/package/ttl', () => {
       it('handles string numbers correctly', () => {
         GlobalConfig.set({
           cacheTtlOverride: {
+            // @ts-expect-error -- testing
             'datasource-npm': '120',
             'datasource-docker': 90,
           },
@@ -350,6 +355,7 @@ describe('util/cache/package/ttl', () => {
       it('uses fallback when override is not a number', () => {
         GlobalConfig.set({
           cacheTtlOverride: {
+            // @ts-expect-error -- testing
             'datasource-npm': 'invalid',
           },
         });

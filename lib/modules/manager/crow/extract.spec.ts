@@ -404,5 +404,108 @@ describe('modules/manager/crow/extract', () => {
 
       expect(res).toBeNull();
     });
+
+    it('extracts images from array-based steps format', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          steps:
+            - name: 'redis'
+              image: quay.io/something/redis:alpine
+            - name: 'worker'
+              image: node:10.0.0
+        `,
+        '',
+        {},
+      );
+
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'quay.io/something/redis',
+            packageName: 'quay.io/something/redis',
+            currentValue: 'alpine',
+            currentDigest: undefined,
+            replaceString: 'quay.io/something/redis:alpine',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'node',
+            packageName: 'node',
+            currentValue: '10.0.0',
+            currentDigest: undefined,
+            replaceString: 'node:10.0.0',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+        ],
+      });
+    });
+
+    it('extracts images from mixed array and object formats', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          clone:
+            git:
+              image: woodpeckerci/plugin-git:2.0.3
+
+          steps:
+            - name: 'db'
+              image: postgres:9.4.0
+            - name: 'worker'
+              image: node:10.0.0
+
+          pipeline:
+            nginx:
+              image: quay.io/nginx:0.0.1
+        `,
+        '',
+        {},
+      );
+
+      expect(res?.deps).toHaveLength(4);
+      expect(res?.deps).toContainEqual({
+        depName: 'postgres',
+        packageName: 'postgres',
+        currentValue: '9.4.0',
+        currentDigest: undefined,
+        replaceString: 'postgres:9.4.0',
+        autoReplaceStringTemplate:
+          '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+        datasource: 'docker',
+      });
+      expect(res?.deps).toContainEqual({
+        depName: 'node',
+        packageName: 'node',
+        currentValue: '10.0.0',
+        currentDigest: undefined,
+        replaceString: 'node:10.0.0',
+        autoReplaceStringTemplate:
+          '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+        datasource: 'docker',
+      });
+      expect(res?.deps).toContainEqual({
+        depName: 'quay.io/nginx',
+        packageName: 'quay.io/nginx',
+        currentValue: '0.0.1',
+        currentDigest: undefined,
+        replaceString: 'quay.io/nginx:0.0.1',
+        autoReplaceStringTemplate:
+          '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+        datasource: 'docker',
+      });
+      expect(res?.deps).toContainEqual({
+        depName: 'woodpeckerci/plugin-git',
+        packageName: 'woodpeckerci/plugin-git',
+        currentValue: '2.0.3',
+        currentDigest: undefined,
+        replaceString: 'woodpeckerci/plugin-git:2.0.3',
+        autoReplaceStringTemplate:
+          '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+        datasource: 'docker',
+      });
+    });
   });
 });

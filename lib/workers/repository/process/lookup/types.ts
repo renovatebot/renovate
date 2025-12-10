@@ -19,14 +19,14 @@ export interface FilterConfig {
   maxMajorIncrement?: number;
   respectLatest?: boolean;
   updatePinnedDependencies?: boolean;
-  versioning: string;
+  versioning?: string;
 }
 
 export interface RollbackConfig {
   currentValue?: string;
   depName?: string;
   packageFile?: string;
-  versioning: string;
+  versioning?: string;
 }
 
 export interface LookupUpdateConfig
@@ -34,16 +34,13 @@ export interface LookupUpdateConfig
     FilterConfig,
     RangeConfig,
     RenovateConfig {
-  separateMinorPatch?: boolean;
+  currentVersion?: string;
+
   digestOneAndOnly?: boolean;
-  pinDigests?: boolean;
   rollbackPrs?: boolean;
   currentDigest?: string;
   lockedVersion?: string;
   isVulnerabilityAlert?: boolean;
-  separateMajorMinor?: boolean;
-  separateMultipleMajor?: boolean;
-  separateMultipleMinor?: boolean;
   datasource: string;
   packageName: string;
   minimumConfidence?: MergeConfidence | undefined;

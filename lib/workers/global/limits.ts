@@ -98,9 +98,10 @@ export function calcLimit(
   upgrades: BranchUpgradeConfig[],
   limitName: BranchLimitName,
 ): number {
+  const uniqueUpgrades = new Map(upgrades.map((u) => [u.depName, u]));
   logger.debug(
     {
-      limits: upgrades.map((upg) => {
+      limits: Array.from(uniqueUpgrades.values()).map((upg) => {
         return { depName: upg.depName, [limitName]: upg[limitName] };
       }),
     },
@@ -130,7 +131,7 @@ export function calcLimit(
     // no limit
     if (limit === 0 || limit === null) {
       logger.debug(
-        `${limitName} of this branch is unlimited, because atleast one of the upgrade has it's ${limitName} set to "No limit" ie. 0 or null`,
+        `${limitName} of this branch is unlimited, because at least one of the upgrade has it's ${limitName} set to "No limit" ie. 0 or null`,
       );
       return 0;
     }
