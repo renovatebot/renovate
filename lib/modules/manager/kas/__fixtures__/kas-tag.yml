@@ -1,0 +1,16 @@
+header:
+  version: 1
+
+build_system: isar
+
+repos:
+  meta-test:
+    path: meta-test/
+    layers:
+      .:
+  isar:
+    url: https://github.com/ilbers/isar.git
+    tag: v0.0.1
+    layers:
+      meta:
+      meta-isar:
