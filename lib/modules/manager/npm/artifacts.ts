@@ -134,8 +134,17 @@ export async function updateArtifacts({
       const [algo, b64] = integrity.split('-', 2);
       const hex = Buffer.from(b64, 'base64').toString('hex');
 
-      const expectedLen =
-        algo === 'sha512' ? 128 : algo === 'sha256' ? 64 : null;
+      const expectedLen = (() => {
+        switch (algo) {
+          case 'sha512':
+            return 128;
+          case 'sha256':
+            return 64;
+          default:
+            return null;
+        }
+      })();
+
       if (expectedLen && hex.length !== expectedLen) {
         throw new Error(
           `Unexpected ${algo} hex length (${hex.length}) for ${depName}@${newVersion}`,
