@@ -27,6 +27,8 @@
       "replacements:middie-to-scoped",
       "replacements:now-to-vercel",
       "replacements:npm-run-all-to-maintenance-fork",
+      "replacements:ojdbc-to-ojdbc11",
+      "replacements:ojdbc10-to-ojdbc11",
       "replacements:opencost-registry-move",
       "replacements:parcel-css-to-lightningcss",
       "replacements:passport-saml",
@@ -805,6 +807,28 @@
         "matchPackageNames": ["npm-run-all"],
         "replacementName": "npm-run-all2",
         "replacementVersion": "5.0.0"
+      }
+    ]
+  },
+  "ojdbc-to-ojdbc11": {
+    "description": "`ojdbc:ojdbc` was moved to `com.oracle.database.jdbc:ojdbc11`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["ojdbc:ojdbc"],
+        "replacementName": "com.oracle.database.jdbc:ojdbc11",
+        "replacementVersion": "21.1.0.0"
+      }
+    ]
+  },
+  "ojdbc10-to-ojdbc11": {
+    "description": "`com.oracle.database.jdbc:ojdbc10` was moved to `com.oracle.database.jdbc:ojdbc11`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["com.oracle.database.jdbc:ojdbc10"],
+        "replacementName": "com.oracle.database.jdbc:ojdbc11",
+        "replacementVersion": "21.1.0.0"
       }
     ]
   },
