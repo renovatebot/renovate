@@ -125,7 +125,7 @@ export class GoDatasource extends Datasource {
 }
 
 const env = getEnv();
-/* v8 ignore start -- hard to test */
+/* v8 ignore if -- hard to test */
 if (isString(env.GOPROXY)) {
   const uri = parseUrl(env.GOPROXY);
   if (uri?.password) {
@@ -134,4 +134,3 @@ if (isString(env.GOPROXY)) {
     addSecretForSanitizing(uri.username, 'global');
   }
 }
-/* v8 ignore stop -- hard to test */

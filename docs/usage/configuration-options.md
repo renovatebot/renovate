@@ -415,10 +415,11 @@ Configuring this to `true` means that Renovate will detect and apply the default
 
 ## branchConcurrentLimit
 
-By default, Renovate won't enforce any concurrent branch limits.
-The `config:recommended` preset that many extend from limits the number of concurrent branches to 10, but in many cases a limit as low as 3 or 5 can be most efficient for a repository.
+By default, Renovate doesn’t enforce its own concurrent branch limit.
+However, it inherits the [prConcurrentLimit](#prconcurrentlimit), which defaults to 10.
+This effectively caps concurrent branches at 10, though in many repositories a lower limit, such as 3 or 5, tends to be more efficient.
 
-If you want the same limit for both concurrent branches and concurrent PRs, then set a value for `prConcurrentLimit` and it will be re-used for branch calculations too.
+If you want the same limit for both concurrent branches and concurrent PRs, then set a value for `prConcurrentLimit` and it will be reused for branch calculations too.
 But if you want to allow more concurrent branches than concurrent PRs, you can configure both values (e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
 
 This limit is enforced on a per-repository basis.
@@ -842,6 +843,10 @@ If you need to _override_ constraints that Renovate detects from the repository,
   }
 }
 ```
+
+<!-- prettier-ignore -->
+!!! note
+    When using [`binarySource=global`](./self-hosted-configuration.md#binarysource), the `constraints` options do not take effect.
 
 <!-- prettier-ignore -->
 !!! note
@@ -1734,7 +1739,7 @@ Renovate can fetch changelogs when they are hosted on one of these platforms:
 - GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
 
-If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-changelogs) to allow Renovate to fetch changelogs notes from `github.com`.
+If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-changelogs-and-tools) to allow Renovate to fetch changelogs notes from `github.com`.
 
 <!-- prettier-ignore -->
 !!! note
@@ -2596,6 +2601,7 @@ Supported lock files:
 | `poetry`          | `poetry.lock`                                      |
 | `pub`             | `pubspec.lock`                                     |
 | `terraform`       | `.terraform.lock.hcl`                              |
+| `uv`              | `uv.lock`                                          |
 
 Support for new lock files may be added via feature request.
 
@@ -2639,6 +2645,42 @@ Be careful with remapping `warn` or `error` messages to lower log levels, as it 
 ## major
 
 Add to this object if you wish to define rules that apply only to major updates.
+
+## maxMajorIncrement
+
+This is particularly useful for preventing upgrades from [SemVer](https://semver.org/)-based versions to [CalVer](https://calver.org/)-based ones.
+
+For example, if you're on version `19.0.0`, Renovate will upgrade to `22.0.0` but filter out versions like `999.0.0` and `2025.0.0`.
+
+You can use `packageRules` to customize this behavior for specific packages:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Allow to upgrade Home Assistant from 0.x to 2025.x",
+      "matchPackageNames": ["homeassistant"],
+      "maxMajorIncrement": 0
+    }
+  ]
+}
+```
+
+The above allows unlimited major version upgrades by setting `maxMajorIncrement` to `0`.
+
+Alternatively, to limit major upgrades to within 10 versions:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Limit xmldoc major upgrades to within 10 versions",
+      "matchPackageNames": ["xmldoc"],
+      "maxMajorIncrement": 10
+    }
+  ]
+}
+```
 
 ## managerFilePatterns
 
@@ -2745,6 +2787,10 @@ You can confirm if your datasource supports the release timestamp by viewing [th
 <!-- prettier-ignore -->
 !!! note
     Configuring this option will add a `renovate/stability-days` option to the status checks.
+
+<!-- prettier-ignore -->
+!!! note
+    As of Renovate 42.19.5, using `minimumReleaseAge=0 days` is treated the same as `minimumReleaseAge=null`.
 
 Examples of how you can use `minimumReleaseAge`:
 
@@ -3859,6 +3905,7 @@ Table with options:
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `bundlerConservative`        | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies. |
 | `composerWithAll`            | Run `composer update` with `--with-all-dependencies` flag instead of the default `--with-dependencies`.                                                    |
+| `composerNoMinimalChanges`   | Run `composer update` with no `--minimal-changes` flag (does not affect lock file maintenance, which will never use `--minimal-changes`).                  |
 | `dotnetWorkloadRestore`      | Run `dotnet workload restore` before `dotnet restore` commands.                                                                                            |
 | `gomodMassage`               | Enable massaging `replace` directives before calling `go` commands.                                                                                        |
 | `gomodTidy`                  | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                   |
@@ -4017,6 +4064,29 @@ You can configure this object to either:
 <!-- prettier-ignore -->
 !!! tip
     Columns must also be included in the `prBodyColumns` array in order to be used, so that's why it's included above in the example.
+
+## prBodyHeadingDefinitions
+
+You can configure this object to modify the table headers present in the PR body.
+This can include Markdown or any other syntax that the platform supports.
+
+```json title="Modifying the default value for the Package and Age table headers"
+{
+  "prBodyHeadingDefinitions": {
+    "Package": "📦 Package",
+    "Age": "[Age](https://docs.renovatebot.com/merge-confidence)"
+  },
+  "prBodyColumn": ["Package", "Age"]
+}
+```
+
+<!-- prettier-ignore -->
+!!! tip
+    Columns must also be included in the `prBodyColumns` array in order to be used, so that's why it's included above in the example.
+
+<!-- prettier-ignore -->
+!!! note
+    Templating is not supported for this option.
 
 ## prBodyNotes
 
@@ -4333,17 +4403,6 @@ By default, `renovate` will update to a version greater than `latest` only if th
 
 Must be valid usernames.
 
-**Required reviewers on GitHub**
-
-If you're assigning a team to review on GitHub, you must use the prefix `team:` and add the _last part_ of the team name.
-Say the full team name on GitHub is `@organization/foo`, then you'd set the config option like this:
-
-```json
-{
-  "reviewers": ["team:foo"]
-}
-```
-
 **Required reviewers on Azure DevOps**
 
 To mark a reviewer as required on Azure DevOps, you must use the prefix `required:`.
@@ -4353,6 +4412,28 @@ For example: if the username or team name is `bar` then you would set the config
 ```json
 {
   "reviewers": ["required:bar"]
+}
+```
+
+**Required reviewers on Forgejo**
+
+If you're assigning a team to review on Forgejo, you must use the prefix `team:` and add the _last part_ of the team name.
+Say the full team name on Forgejo is `organization/foo`, then you'd set the config option like this:
+
+```json
+{
+  "reviewers": ["team:foo"]
+}
+```
+
+**Required reviewers on GitHub**
+
+If you're assigning a team to review on GitHub, you must use the prefix `team:` and add the _last part_ of the team name.
+Say the full team name on GitHub is `@organization/foo`, then you'd set the config option like this:
+
+```json
+{
+  "reviewers": ["team:foo"]
 }
 ```
 
