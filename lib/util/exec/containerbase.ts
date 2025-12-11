@@ -131,6 +131,11 @@ const allToolConfig: Record<ToolName, ToolConfig> = {
     packageName: 'jsonnet-bundler/jsonnet-bundler',
     versioning: semverVersioningId,
   },
+  kas: {
+    datasource: 'pypi',
+    packageName: 'kas',
+    versioning: pep440VersioningId,
+  },
   kustomize: {
     datasource: 'github-releases',
     packageName: 'kubernetes-sigs/kustomize',
