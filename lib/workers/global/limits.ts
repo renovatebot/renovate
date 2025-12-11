@@ -37,7 +37,9 @@ function handleCommitsLimit(): boolean {
   }
   const { max, current } = limit;
   const res = max - current <= 0;
-  logger.debug('Commits limit reached');
+  if (res) {
+    logger.debug({ current, max }, 'Commits limit reached');
+  }
   return res;
 }
 
@@ -83,7 +85,7 @@ function handleConcurrentLimits(
 
   // if a limit is defined ( >0 ) and limit reached return true ie. limit has been reached
   if (hourlyLimit && hourlyPrCount >= hourlyLimit) {
-    logger.debug('Hourly PRs limit reached');
+    logger.debug({ hourlyPrCount, hourlyLimit }, 'Hourly PRs limit reached');
     return true;
   }
 
@@ -91,7 +93,7 @@ function handleConcurrentLimits(
   const currentCount = getCount(key);
 
   if (limitValue && currentCount >= limitValue) {
-    logger.debug(`${key} limit reached`);
+    logger.debug({ limitKey, currentCount }, `${key} limit reached`);
     return true;
   }
 
