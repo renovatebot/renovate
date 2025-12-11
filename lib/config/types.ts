@@ -47,6 +47,16 @@ export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
 export type BinarySource = 'docker' | 'global' | 'install' | 'hermit';
 
 // TODO: Proper typings
+/**
+ * Any configuration that could be used either top-level in a repository config (or Global, Inherited or Shareable Preset configuration), or:
+ *
+ * - in a datasource-specific configuration
+ * - in a manager-specific configuration
+ * - in a Package Rule
+ *
+ * @see RenovateConfig for the superset of all configuration allowed in a given repository
+ *
+ */
 export interface RenovateSharedConfig {
   $schema?: string;
   abandonmentThreshold?: Nullish<string>;
@@ -151,7 +161,8 @@ export interface RenovateSharedConfig {
 
 // Config options used only within the global worker
 // The below should contain config options where stage=global
-export interface GlobalOnlyConfig {
+/** @deprecated use `RepoGlobalConfig` instead **/
+export interface GlobalOnlyConfigLegacy {
   autodiscover?: boolean;
   autodiscoverFilter?: string[] | string;
   autodiscoverNamespaces?: string[];
@@ -185,8 +196,13 @@ export interface GlobalOnlyConfig {
   deleteAdditionalConfigFile?: boolean;
 }
 
-// Config options used within the repository worker, but not user configurable
-// The below should contain config options where globalOnly=true
+/**
+ * Any global-only configuration set by self-hosted administrators.
+ *
+ * Used within the repository worker.
+ *
+ * Should only contain config options where globalOnly=true.
+ */
 export interface RepoGlobalConfig {
   allowedCommands?: string[];
   allowCustomCrateRegistries?: boolean;
@@ -226,10 +242,13 @@ export interface RepoGlobalConfig {
   cachePrivatePackages?: boolean;
   configFileNames?: string[];
   ignorePrAuthor?: boolean;
+  allowedUnsafeExecutions?: AllowedUnsafeExecution[];
 }
 
 /**
  * Those options are global only but still passed into the repository worker config.
+ *
+ * @deprecated https://github.com/renovatebot/renovate/issues/39693
  */
 export interface LegacyAdminConfig {
   baseDir?: string;
@@ -315,6 +334,11 @@ export interface RenovateInternalConfig {
 }
 
 // TODO: Proper typings
+/**
+ * Configuration that could be used either top-level in a repository config (or Global, Inherited or Shareable Preset configuration).
+ *
+ * This is a superset of any configuration that a Renovate user (not self-hosted administrator) can set.
+ */
 export interface RenovateConfig
   extends LegacyAdminConfig,
     RenovateSharedConfig,
@@ -444,9 +468,13 @@ export interface CustomDatasourceConfig {
   transformTemplates?: string[];
 }
 
+/**
+ * The superset of all configuration that a self-hosted administrator can set, alongside all repository-level configuration.
+ *
+ */
 export interface AllConfig
   extends RenovateConfig,
-    GlobalOnlyConfig,
+    GlobalOnlyConfigLegacy,
     RepoGlobalConfig {
   password?: string;
   token?: string;
@@ -505,6 +533,10 @@ export type MergeStrategy =
   | 'rebase'
   | 'rebase-merge'
   | 'squash';
+
+// ref: https://github.com/renovatebot/renovate/issues/39458
+// This list should be added to as any new unsafe execution commands should be permitted
+export type AllowedUnsafeExecution = undefined;
 
 // TODO: Proper typings
 export interface PackageRule

@@ -33,6 +33,7 @@ import { client } from './client';
 import { configureScm } from './scm';
 import type { GerritLabelTypeInfo, GerritProjectInfo } from './types';
 import {
+  MAX_GERRIT_COMMENT_SIZE,
   REQUEST_DETAILS_FOR_PRS,
   TAG_PULL_REQUEST_BODY,
   getGerritRepoUrl,
@@ -463,7 +464,7 @@ export function massageMarkdown(prBody: string, rebaseLabel: string): string {
 }
 
 export function maxBodyLength(): number {
-  return 16384; //TODO: check the real gerrit limit (max. chars)
+  return MAX_GERRIT_COMMENT_SIZE;
 }
 
 export async function deleteLabel(
