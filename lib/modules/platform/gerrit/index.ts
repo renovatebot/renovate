@@ -176,6 +176,9 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
       TAG_PULL_REQUEST_BODY,
     );
   }
+  if (prConfig.targetBranch) {
+    await client.moveChange(prConfig.number, prConfig.targetBranch);
+  }
   if (prConfig.state && prConfig.state === 'closed') {
     await client.abandonChange(prConfig.number);
   }
@@ -223,15 +226,13 @@ export async function getBranchPr(
   branchName: string,
   targetBranch?: string,
 ): Promise<Pr | null> {
-  const change = (
-    await client.findChanges(config.repository!, {
-      branchName,
-      state: 'open',
-      targetBranch,
-      singleChange: true,
-      requestDetails: REQUEST_DETAILS_FOR_PRS,
-    })
-  ).pop();
+  const change = await client.getBranchChange(config.repository!, {
+    branchName,
+    state: 'open',
+    targetBranch,
+    requestDetails: REQUEST_DETAILS_FOR_PRS,
+  });
+
   return change
     ? mapGerritChangeToPr(change, {
         sourceBranch: branchName,
