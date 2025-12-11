@@ -84,7 +84,7 @@ export async function initPlatform({
   let gerritVersion: string;
   try {
     const env = getEnv();
-    /* v8 ignore next: experimental feature */
+    /* v8 ignore if: experimental feature */
     if (env.RENOVATE_X_PLATFORM_VERSION) {
       gerritVersion = env.RENOVATE_X_PLATFORM_VERSION;
     } else {
