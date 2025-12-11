@@ -55,7 +55,8 @@ export class NpmDatasource extends Datasource {
     try {
       const resp = await this.http.getJsonUnchecked<NpmResponse>(packageUrl);
       const integrity = resp.body?.versions?.[newValue]?.dist?.integrity;
-      return integrity ?? null;
+      const shasum = resp.body?.versions?.[newValue]?.dist?.shasum;
+      return integrity ?? shasum ?? null;
     } catch (err) {
       this.handleGenericErrors(err as Error);
     }

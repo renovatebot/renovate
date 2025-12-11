@@ -13,6 +13,7 @@ export interface NpmAttestations {
 export interface NpmDistribution {
   attestations?: NpmAttestations;
   integrity?: string;
+  shasum?: string;
 }
 
 export interface NpmResponseVersion {

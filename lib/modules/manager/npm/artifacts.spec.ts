@@ -46,11 +46,24 @@ describe('modules/manager/npm/artifacts', () => {
     '77b89e9be77a2b06ad8f403a19cae5e22976f61023f98ad323d5c30194958ebc02ee0a6ae5d13ee454f6134e4e8caf29a05f0b1a0e1d2b17bca6b6a1f1159f86';
   const expectedPmValue = `pnpm@8.15.6+sha512.${expectedHex}`;
 
-  const mockPnpmIntegrity = (integrity: string | null) => {
+  const mockPnpmIntegrity = (
+    integrity: string | null,
+    shasum?: string | null,
+  ) => {
+    const dist: Record<string, string> = {};
+
+    if (integrity !== null && integrity !== undefined) {
+      dist.integrity = integrity;
+    }
+    if (shasum !== null && shasum !== undefined) {
+      dist.shasum = shasum;
+    }
+
     const body =
-      integrity === null
+      Object.keys(dist).length === 0
         ? { name: 'pnpm', versions: { '8.15.6': {} } }
-        : { name: 'pnpm', versions: { '8.15.6': { dist: { integrity } } } };
+        : { name: 'pnpm', versions: { '8.15.6': { dist } } };
+
     httpMock.scope('https://registry.npmjs.org').get('/pnpm').reply(200, body);
   };
 
@@ -272,7 +285,7 @@ describe('modules/manager/npm/artifacts', () => {
       {
         artifactError: {
           fileName: 'package.json',
-          stderr: expect.stringContaining('No integrity found'),
+          stderr: expect.stringContaining('No valid integrity or shasum found'),
         },
       },
     ]);
@@ -297,7 +310,7 @@ describe('modules/manager/npm/artifacts', () => {
       {
         artifactError: {
           fileName: 'package.json',
-          stderr: expect.stringContaining('No integrity found'),
+          stderr: expect.stringContaining('No valid integrity or shasum found'),
         },
       },
     ]);
@@ -446,7 +459,7 @@ describe('modules/manager/npm/artifacts', () => {
       {
         artifactError: {
           fileName: 'package.json',
-          stderr: expect.stringContaining('No integrity found'),
+          stderr: expect.stringContaining('No valid integrity or shasum found'),
         },
       },
     ]);
@@ -458,5 +471,136 @@ describe('modules/manager/npm/artifacts', () => {
 
   test('normalizeStdout returns empty string for defined empty string', () => {
     expect(normalizeStdout('')).toBe('');
+  });
+
+  it('uses shasum from datasource digest when integrity is missing', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('# dummy') // npmrc
+      .mockResolvedValueOnce('{}') // node constraints
+      .mockResolvedValue(JSON.stringify({ packageManager: 'pnpm@8.15.5' })); // existing package.json
+
+    const shasumHex = '0123456789abcdef0123456789abcdef01234567';
+
+    mockPnpmIntegrity(null, shasumHex);
+
+    const execSnapshots = mockExecSequence([{ stdout: '', stderr: '' }]); // npm view ... dist.integrity
+
+    const res = await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [validDepUpdate],
+      newPackageFileContent: 'pre-update content',
+      config: { ...config },
+    });
+
+    const expectedPmValueSha1 = `pnpm@8.15.6+sha1.${shasumHex}`;
+    const expectedText =
+      JSON.stringify({ packageManager: expectedPmValueSha1 }, null, 2) + '\n';
+    expect(res).toEqual([
+      {
+        file: {
+          contents: expectedText,
+          path: 'package.json',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'npm view pnpm@8.15.6 dist.integrity' },
+    ]);
+  });
+
+  it('falls back to CLI shasum when datasource digest and CLI integrity are missing', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('# dummy') // npmrc
+      .mockResolvedValueOnce('{}') // node constraints
+      .mockResolvedValue(JSON.stringify({ packageManager: 'pnpm@8.15.5' })); // existing package.json
+
+    const shasumHex = 'abcdefabcdefabcdefabcdefabcdefabcdefabcd';
+
+    mockPnpmIntegrity(null, null);
+
+    const execSnapshots = mockExecSequence([
+      { stdout: '', stderr: '' }, // npm view ... dist.integrity
+      { stdout: shasumHex, stderr: '' }, // npm view ... dist.shasum
+    ]);
+
+    const res = await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [validDepUpdate],
+      newPackageFileContent: 'pre-update content',
+      config: { ...config },
+    });
+
+    const expectedPmValueSha1 = `pnpm@8.15.6+sha1.${shasumHex}`;
+    const expectedText =
+      JSON.stringify({ packageManager: expectedPmValueSha1 }, null, 2) + '\n';
+
+    expect(res).toEqual([
+      {
+        file: {
+          contents: expectedText,
+          path: 'package.json',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'npm view pnpm@8.15.6 dist.integrity' },
+      { cmd: 'npm view pnpm@8.15.6 dist.shasum' },
+    ]);
+  });
+
+  it('returns artifactError when datasource digest and both CLI integrity and CLI shasum are missing', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('# dummy') // npmrc
+      .mockResolvedValueOnce('{}') // node constraints
+      .mockResolvedValue(JSON.stringify({ packageManager: 'pnpm@8.15.5' })); // existing package.json
+
+    mockPnpmIntegrity(null, null);
+
+    mockExecSequence([
+      { stdout: '', stderr: '' }, // npm view ... dist.integrity
+      { stdout: '', stderr: '' }, // npm view ... dist.shasum
+    ]);
+
+    const res = await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [validDepUpdate],
+      newPackageFileContent: 'pre-update content',
+      config: { ...config },
+    });
+
+    expect(res).toEqual([
+      {
+        artifactError: {
+          fileName: 'package.json',
+          stderr: expect.stringContaining('No valid integrity or shasum found'),
+        },
+      },
+    ]);
+  });
+  it('returns artifactError if shasum from datasource is invalid', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('# dummy') // npmrc
+      .mockResolvedValueOnce('{}') // node constraints
+      .mockResolvedValue(JSON.stringify({ packageManager: 'pnpm@8.15.5' })); // existing package.json
+
+    const invalidShasum = 'invalid-shasum-12345';
+    mockPnpmIntegrity(null, invalidShasum);
+
+    const res = await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [validDepUpdate],
+      newPackageFileContent: 'pre-update content',
+      config: { ...config },
+    });
+    expect(res).toEqual([
+      {
+        artifactError: {
+          fileName: 'package.json',
+          stderr: expect.stringContaining('No valid integrity or shasum found'),
+        },
+      },
+    ]);
   });
 });

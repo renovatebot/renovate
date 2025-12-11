@@ -94,11 +94,18 @@ export async function updateArtifacts({
   try {
     const datasource = new NpmDatasource();
     const registryUrl = 'https://registry.npmjs.org';
-    let integrity =
+    let integrity = '';
+    let shasum = '';
+
+    const digest =
       (await datasource.getDigest(
         { packageName: depName!, registryUrl },
         newVersion,
       )) ?? '';
+
+    if (regEx(/^sha\d+-/).test(digest)) {
+      integrity = digest;
+    }
 
     if (!integrity) {
       let res: { stdout?: string } = {};
@@ -109,29 +116,51 @@ export async function updateArtifacts({
         );
       } catch (err) {
         logger.debug(err, 'Error fetching integrity via npm CLI');
-        // ensure the "No integrity found" path is taken
+        // ensure the "No valid integrity or shasum found" path is taken
         res = { stdout: '' };
       }
       integrity = normalizeStdout(res.stdout);
     }
 
-    if (!integrity || !/^sha\d+-/.test(integrity)) {
-      throw new Error(
-        `No integrity found for ${depName}@${newVersion}: "${integrity}"`,
-      );
+    if (!integrity) {
+      if (digest && regEx(/^[a-f0-9]{40,128}$/).test(digest)) {
+        shasum = digest;
+      } else {
+        let res: { stdout?: string } = {};
+        try {
+          res = await exec(
+            `npm view ${depName}@${newVersion} dist.shasum`,
+            execOptions,
+          );
+        } catch (err) {
+          logger.debug(err, 'Error fetching shasum via npm CLI');
+          // ensure the "No valid integrity or shasum found" path is taken
+          res = { stdout: '' };
+        }
+        shasum = normalizeStdout(res.stdout);
+      }
     }
 
-    const [algo, b64] = integrity.split('-', 2);
-    const hex = Buffer.from(b64, 'base64').toString('hex');
+    let newPackageManagerValue = '';
+    if (integrity && /^sha\d+-/.test(integrity)) {
+      const [algo, b64] = integrity.split('-', 2);
+      const hex = Buffer.from(b64, 'base64').toString('hex');
 
-    const expectedLen = algo === 'sha512' ? 128 : algo === 'sha256' ? 64 : null;
-    if (expectedLen && hex.length !== expectedLen) {
+      const expectedLen =
+        algo === 'sha512' ? 128 : algo === 'sha256' ? 64 : null;
+      if (expectedLen && hex.length !== expectedLen) {
+        throw new Error(
+          `Unexpected ${algo} hex length (${hex.length}) for ${depName}@${newVersion}`,
+        );
+      }
+      newPackageManagerValue = `${depName}@${newVersion}+${algo}.${hex}`;
+    } else if (shasum && /^[a-f0-9]{40,128}$/.test(shasum)) {
+      newPackageManagerValue = `${depName}@${newVersion}+sha1.${shasum}`;
+    } else {
       throw new Error(
-        `Unexpected ${algo} hex length (${hex.length}) for ${depName}@${newVersion}`,
+        `No valid integrity or shasum found for ${depName}@${newVersion}`,
       );
     }
-
-    const newPackageManagerValue = `${depName}@${newVersion}+${algo}.${hex}`;
 
     const fileText = await readLocalFile(packageFileName, 'utf8');
     const pkg = JSON.parse(fileText!);
