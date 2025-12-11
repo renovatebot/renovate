@@ -465,11 +465,11 @@ describe('modules/manager/npm/artifacts', () => {
     ]);
   });
 
-  test('normalizeStdout returns empty string for undefined', () => {
+  test('normalize returns empty string for undefined', () => {
     expect(normalize(undefined)).toBe('');
   });
 
-  test('normalizeStdout returns empty string for defined empty string', () => {
+  test('normalize returns empty string for defined empty string', () => {
     expect(normalize('')).toBe('');
   });
 
@@ -601,6 +601,48 @@ describe('modules/manager/npm/artifacts', () => {
           stderr: expect.stringContaining('No valid integrity or shasum found'),
         },
       },
+    ]);
+  });
+
+  it('covers array-shaped dist and normalize calls (CLI fallback)', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('# dummy') // npmrc
+      .mockResolvedValueOnce('{}') // node constraints
+      .mockResolvedValue(JSON.stringify({ packageManager: 'pnpm@8.15.5' })); // existing package.json
+
+    mockPnpmIntegrity('');
+
+    const shasumHex = 'abcdefabcdefabcdefabcdefabcdefabcdefabcd';
+    const execSnapshots = mockExecSequence([
+      {
+        stdout: JSON.stringify([
+          { integrity: `  ${integrityStr}\n`, shasum: `  ${shasumHex}  ` },
+        ]),
+        stderr: '',
+      },
+    ]);
+
+    const res = await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [validDepUpdate],
+      newPackageFileContent: 'pre-update content',
+      config: { ...config },
+    });
+
+    const expectedText =
+      JSON.stringify({ packageManager: expectedPmValue }, null, 2) + '\n';
+
+    expect(res).toEqual([
+      {
+        file: {
+          contents: expectedText,
+          path: 'package.json',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'npm view pnpm@8.15.6 dist --json' },
     ]);
   });
 });
