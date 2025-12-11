@@ -56,6 +56,8 @@ export function getComposerUpdateArguments(
   let args = getComposerArguments(config, toolConstraint);
 
   if (
+    !config.isLockFileMaintenance &&
+    !config.postUpdateOptions?.includes('composerNoMinimalChanges') &&
     isString(toolConstraint.constraint) &&
     api.intersects!(toolConstraint.constraint, '>=2.7')
   ) {
