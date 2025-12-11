@@ -203,7 +203,9 @@ export type EnsureIssueResult = 'updated' | 'created';
 export type RepoSortMethod =
   | 'alpha'
   | 'created'
+  | 'created_at'
   | 'updated'
+  | 'updated_at'
   | 'size'
   | 'id'
   | null;
