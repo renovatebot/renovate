@@ -45,7 +45,6 @@ export const presets: Record<string, Preset> = {
         minimumReleaseAge: '3 days',
         internalChecksFilter: 'strict',
       },
-
       {
         description:
           'Do not require Minimum Release Age for update types that are controlled by the package manager',
