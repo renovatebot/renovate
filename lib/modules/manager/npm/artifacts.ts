@@ -25,8 +25,8 @@ const versionWithHashRegString = '^(?<version>.*)\\+(?<hash>.*)';
 
 // Normalize stdout by trimming whitespace and handling undefined values
 // Mostly just for testability
-export function normalizeStdout(stdout?: string): string {
-  return (stdout ?? '').trim();
+export function normalize(string?: string): string {
+  return (string ?? '').trim();
 }
 
 // Instead of running 'corepack use' we directly compute the SRI hash from the npm registry
@@ -92,10 +92,11 @@ export async function updateArtifacts({
 
   await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
   try {
+    const isSRI = (s: string): boolean => /^sha\d+-/i.test(s);
+    const isShasum = (s: string): boolean => /^[a-f0-9]{40,128}$/i.test(s);
+
     const datasource = new NpmDatasource();
     const registryUrl = 'https://registry.npmjs.org';
-    let integrity = '';
-    let shasum = '';
 
     const digest =
       (await datasource.getDigest(
@@ -103,46 +104,33 @@ export async function updateArtifacts({
         newVersion,
       )) ?? '';
 
-    if (regEx(/^sha\d+-/).test(digest)) {
-      integrity = digest;
-    }
+    let integrity = isSRI(digest) ? digest : '';
+    let shasum = isShasum(digest) ? digest : '';
 
+    const distInfo = { integrity: '', shasum: '' };
     if (!integrity) {
-      let res: { stdout?: string } = {};
       try {
-        res = await exec(
-          `npm view ${depName}@${newVersion} dist.integrity`,
-          execOptions,
+        const { stdout = '' } = await exec(
+          `npm view ${depName}@${newVersion} dist --json`,
+          execOptions as any,
         );
+        const json = JSON.parse(stdout || '{}');
+        const dist = Array.isArray(json) ? json[0] : json;
+        distInfo.integrity = normalize(dist.integrity) ?? '';
+        distInfo.shasum = normalize(dist.shasum) ?? '';
       } catch (err) {
-        logger.debug(err, 'Error fetching integrity via npm CLI');
         // ensure the "No valid integrity or shasum found" path is taken
-        res = { stdout: '' };
+        logger.debug(err, 'Error fetching dist via npm CLI');
       }
-      integrity = normalizeStdout(res.stdout);
-    }
-
-    if (!integrity) {
-      if (digest && regEx(/^[a-f0-9]{40,128}$/).test(digest)) {
-        shasum = digest;
-      } else {
-        let res: { stdout?: string } = {};
-        try {
-          res = await exec(
-            `npm view ${depName}@${newVersion} dist.shasum`,
-            execOptions,
-          );
-        } catch (err) {
-          logger.debug(err, 'Error fetching shasum via npm CLI');
-          // ensure the "No valid integrity or shasum found" path is taken
-          res = { stdout: '' };
-        }
-        shasum = normalizeStdout(res.stdout);
+      integrity = isSRI(distInfo.integrity) ? distInfo.integrity : '';
+      // Only set shasum if shasum from digest integrity is not present
+      if (!shasum && isShasum(distInfo.shasum)) {
+        shasum = distInfo.shasum;
       }
     }
 
     let newPackageManagerValue = '';
-    if (integrity && /^sha\d+-/.test(integrity)) {
+    if (integrity) {
       const [algo, b64] = integrity.split('-', 2);
       const hex = Buffer.from(b64, 'base64').toString('hex');
 
@@ -154,7 +142,7 @@ export async function updateArtifacts({
         );
       }
       newPackageManagerValue = `${depName}@${newVersion}+${algo}.${hex}`;
-    } else if (shasum && /^[a-f0-9]{40,128}$/.test(shasum)) {
+    } else if (shasum) {
       newPackageManagerValue = `${depName}@${newVersion}+sha1.${shasum}`;
     } else {
       throw new Error(

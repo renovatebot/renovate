@@ -4,7 +4,7 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { UpdateArtifactsConfig, Upgrade } from '../types';
-import { normalizeStdout } from './artifacts';
+import { normalize } from './artifacts';
 import * as rules from './post-update/rules';
 import { updateArtifacts } from '.';
 import { envMock, mockExecSequence } from '~test/exec-util';
@@ -173,7 +173,7 @@ describe('modules/manager/npm/artifacts', () => {
     const execSnapshots = mockExecSequence([
       { stdout: '', stderr: '' }, // docker pull
       { stdout: '', stderr: '' }, // docker ps
-      { stdout: integrityStr, stderr: '' }, // docker run npm view
+      { stdout: JSON.stringify({ integrity: integrityStr }), stderr: '' }, // docker run npm view
     ]);
 
     const res = await updateArtifacts({
@@ -213,7 +213,7 @@ describe('modules/manager/npm/artifacts', () => {
           'bash -l -c "' +
           'install-tool node 20.1.0 ' +
           '&& ' +
-          'npm view pnpm@8.15.6 dist.integrity' +
+          'npm view pnpm@8.15.6 dist --json' +
           '"',
       },
     ]);
@@ -230,7 +230,7 @@ describe('modules/manager/npm/artifacts', () => {
 
     const execSnapshots = mockExecSequence([
       { stdout: '', stderr: '' }, // install-tool node
-      { stdout: integrityStr, stderr: '' }, // npm view pnpm@8.15.6 dist.integrity
+      { stdout: JSON.stringify({ integrity: integrityStr }), stderr: '' }, // npm view pnpm@8.15.6 dist.integrity
     ]);
 
     const res = await updateArtifacts({
@@ -262,7 +262,7 @@ describe('modules/manager/npm/artifacts', () => {
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
-        cmd: 'npm view pnpm@8.15.6 dist.integrity',
+        cmd: 'npm view pnpm@8.15.6 dist --json',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -411,7 +411,7 @@ describe('modules/manager/npm/artifacts', () => {
     mockPnpmIntegrity('');
 
     const execSnapshots = mockExecSequence([
-      { stdout: integrityStr, stderr: '' },
+      { stdout: JSON.stringify({ integrity: integrityStr }), stderr: '' },
     ]);
 
     const res = await updateArtifacts({
@@ -434,7 +434,7 @@ describe('modules/manager/npm/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'npm view pnpm@8.15.6 dist.integrity' },
+      { cmd: 'npm view pnpm@8.15.6 dist --json' },
     ]);
   });
 
@@ -466,11 +466,11 @@ describe('modules/manager/npm/artifacts', () => {
   });
 
   test('normalizeStdout returns empty string for undefined', () => {
-    expect(normalizeStdout(undefined)).toBe('');
+    expect(normalize(undefined)).toBe('');
   });
 
   test('normalizeStdout returns empty string for defined empty string', () => {
-    expect(normalizeStdout('')).toBe('');
+    expect(normalize('')).toBe('');
   });
 
   it('uses shasum from datasource digest when integrity is missing', async () => {
@@ -505,7 +505,7 @@ describe('modules/manager/npm/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'npm view pnpm@8.15.6 dist.integrity' },
+      { cmd: 'npm view pnpm@8.15.6 dist --json' },
     ]);
   });
 
@@ -520,8 +520,10 @@ describe('modules/manager/npm/artifacts', () => {
     mockPnpmIntegrity(null, null);
 
     const execSnapshots = mockExecSequence([
-      { stdout: '', stderr: '' }, // npm view ... dist.integrity
-      { stdout: shasumHex, stderr: '' }, // npm view ... dist.shasum
+      {
+        stdout: JSON.stringify({ integrity: null, shasum: shasumHex }),
+        stderr: '',
+      }, // npm view ... dist.integrity
     ]);
 
     const res = await updateArtifacts({
@@ -545,8 +547,7 @@ describe('modules/manager/npm/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'npm view pnpm@8.15.6 dist.integrity' },
-      { cmd: 'npm view pnpm@8.15.6 dist.shasum' },
+      { cmd: 'npm view pnpm@8.15.6 dist --json' },
     ]);
   });
 
@@ -560,7 +561,6 @@ describe('modules/manager/npm/artifacts', () => {
 
     mockExecSequence([
       { stdout: '', stderr: '' }, // npm view ... dist.integrity
-      { stdout: '', stderr: '' }, // npm view ... dist.shasum
     ]);
 
     const res = await updateArtifacts({
