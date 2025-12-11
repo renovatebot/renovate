@@ -190,7 +190,7 @@ Add `"default:pinDigestsDisabled"` to your `extends` array.
 <!-- markdownlint-disable MD046 -->
 <!-- prettier-ignore -->
 !!! note
-    This preset only sets the global default for the [digest pinning flag] (./configuration-options.md#pindigests) to `false`.
+    This preset only sets the global default for the [digest pinning flag](./configuration-options.md#pindigests) to `false`.
     If you have configured package rules that set `pinDigests` to `true`, those will still apply.
     This is also the case if you use the [`docker:pinDigests` preset](./presets-docker.md#dockerpindigests), which adds a package rule that sets `pinDigests` to `true` for all packages from the docker datasource.
 

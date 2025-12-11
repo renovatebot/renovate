@@ -423,7 +423,7 @@ export const presets: Record<string, Preset> = {
   pinDigestsDisabled: {
     description: `Disable pinning of dependency digests.
 
-Note: This preset does not revert the digest pinning set from within the packageRules, when set at root level or via extends (eg. \`docker:pinDigests\`).
+Note: This preset does not revert the digest pinning set from within the packageRules, when set at root level or via extends).
 See [Docker - Disable digest pinning](./docker.md#disable-digest-pinning) for more details.`,
     pinDigests: false,
   },
