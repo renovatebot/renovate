@@ -1016,7 +1016,7 @@
       {
         "matchDatasources": ["npm"],
         "matchPackageNames": ["@tsconfig/node**"],
-        "commitMessageExtra": "to {{#if isReplacement}}{{{newName}}}{{else}}{{{prettyNewVersion}}}{{/if}}"
+        "commitMessageExtra": "{{#if isReplacement}}with {{{newName}}}{{else}}to {{{prettyNewVersion}}}{{/if}}"
       },
       {
         "matchDatasources": ["npm"],
