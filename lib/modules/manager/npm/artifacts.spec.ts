@@ -41,10 +41,12 @@ describe('modules/manager/npm/artifacts', () => {
 
   const integrityB64 =
     'd7iem+d6Kwatj0A6Gcrl4il29hAj+YrTI9XDAZSVjrwC7gpq5dE+5FT2E05OjK8poF8LGg4dKxe8prah8RWfhg==';
+  const shasumHex = '0123456789abcdef0123456789abcdef01234567';
   const integrityStr = `sha512-${integrityB64}`;
   const expectedHex =
     '77b89e9be77a2b06ad8f403a19cae5e22976f61023f98ad323d5c30194958ebc02ee0a6ae5d13ee454f6134e4e8caf29a05f0b1a0e1d2b17bca6b6a1f1159f86';
   const expectedPmValue = `pnpm@8.15.6+sha512.${expectedHex}`;
+  const expectedPmValueSha1 = `pnpm@8.15.6+sha1.${shasumHex}`;
 
   const mockPnpmIntegrity = (
     integrity: string | null,
@@ -479,8 +481,6 @@ describe('modules/manager/npm/artifacts', () => {
       .mockResolvedValueOnce('{}') // node constraints
       .mockResolvedValue(JSON.stringify({ packageManager: 'pnpm@8.15.5' })); // existing package.json
 
-    const shasumHex = '0123456789abcdef0123456789abcdef01234567';
-
     mockPnpmIntegrity(null, shasumHex);
 
     const execSnapshots = mockExecSequence([{ stdout: '', stderr: '' }]); // npm view ... dist.integrity
@@ -492,7 +492,6 @@ describe('modules/manager/npm/artifacts', () => {
       config: { ...config },
     });
 
-    const expectedPmValueSha1 = `pnpm@8.15.6+sha1.${shasumHex}`;
     const expectedText =
       JSON.stringify({ packageManager: expectedPmValueSha1 }, null, 2) + '\n';
     expect(res).toEqual([
@@ -515,8 +514,6 @@ describe('modules/manager/npm/artifacts', () => {
       .mockResolvedValueOnce('{}') // node constraints
       .mockResolvedValue(JSON.stringify({ packageManager: 'pnpm@8.15.5' })); // existing package.json
 
-    const shasumHex = 'abcdefabcdefabcdefabcdefabcdefabcdefabcd';
-
     mockPnpmIntegrity(null, null);
 
     const execSnapshots = mockExecSequence([
@@ -533,7 +530,6 @@ describe('modules/manager/npm/artifacts', () => {
       config: { ...config },
     });
 
-    const expectedPmValueSha1 = `pnpm@8.15.6+sha1.${shasumHex}`;
     const expectedText =
       JSON.stringify({ packageManager: expectedPmValueSha1 }, null, 2) + '\n';
 
@@ -612,7 +608,6 @@ describe('modules/manager/npm/artifacts', () => {
 
     mockPnpmIntegrity('');
 
-    const shasumHex = 'abcdefabcdefabcdefabcdefabcdefabcdefabcd';
     const execSnapshots = mockExecSequence([
       {
         stdout: JSON.stringify([
