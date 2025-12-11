@@ -50,3 +50,14 @@ You can enable this behavior by adding `dotnetWorkloadRestore` to the `postUpdat
   "postUpdateOptions": ["dotnetWorkloadRestore"]
 }
 ```
+
+### Windows targeting
+
+In case you need to allow Windows targeting during package restore, e.g. adding the `-p:EnableWindowsTargeting=true`.
+In Renovate, the same effect is achieved by adding `dotnetEnableWindowsTargeting` to `postUpdateOptions`.
+
+```json
+{
+  "postUpdateOptions": ["dotnetEnableWindowsTargeting"]
+}
+```
