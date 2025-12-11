@@ -13,7 +13,6 @@ import {
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
-  deleteLocalFile,
   ensureCacheDir,
   ensureLocalDir,
   getSiblingFileName,
@@ -171,21 +170,6 @@ export async function updateArtifacts({
       commands.push('git stash -- composer.json');
       commands.push(`${preCmd} ${preArgs}`);
       commands.push('git stash pop || true');
-    }
-
-    if (config.isLockFileMaintenance) {
-      logger.debug(
-        `Removing ${lockFileName} first due to lock file maintenance upgrade`,
-      );
-      try {
-        await deleteLocalFile(lockFileName);
-      } catch (err) {
-        /* v8 ignore next -- needs test */
-        logger.debug(
-          { err, lockFileName },
-          'Error removing `composer.lock` for lock file maintenance',
-        );
-      }
     }
 
     const cmd = 'composer';
