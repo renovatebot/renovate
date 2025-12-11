@@ -2,8 +2,8 @@ import { codeBlock } from 'common-tags';
 import { extractPackageFile } from '.';
 import { Fixtures } from '~test/fixtures';
 
-const aide = Fixtures.get('aide.rb');
-const ibazel = Fixtures.get('ibazel.rb');
+const aide = Fixtures.get('aide.rb.sample');
+const ibazel = Fixtures.get('ibazel.rb.sample');
 
 describe('modules/manager/homebrew/extract', () => {
   describe('extractPackageFile()', () => {

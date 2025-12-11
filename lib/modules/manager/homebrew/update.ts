@@ -5,6 +5,7 @@ import { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';
 import type { UpdateDependencyConfig } from '../types';
 import { parseUrlPath } from './extract';
+import type { HomebrewManagerData } from './types';
 
 const http = new Http('homebrew');
 
@@ -15,7 +16,7 @@ function escapeRegex(str: string): string {
 export async function updateDependency({
   fileContent,
   upgrade,
-}: UpdateDependencyConfig): Promise<string> {
+}: UpdateDependencyConfig<HomebrewManagerData>): Promise<string> {
   logger.trace('updateDependency()');
 
   // Validate upgrade data
@@ -28,16 +29,19 @@ export async function updateDependency({
   }
 
   // Try to download new tarball and compute SHA256
-  const ownerName = String(upgrade.managerData.ownerName);
-  const repoName = String(upgrade.managerData.repoName);
+  const ownerName = upgrade.managerData.ownerName;
+  const repoName = upgrade.managerData.repoName;
   let newUrl: string;
   let newSha256: string;
 
   try {
     // Try releases/download format first
-    newUrl = `https://github.com/${ownerName}/${repoName}/releases/download/${
-      upgrade.newValue
-    }/${repoName}-${String(semver.coerce(upgrade.newValue))}.tar.gz`;
+    const coercedVersion = semver.coerce(upgrade.newValue);
+    if (!coercedVersion) {
+      logger.debug(`Failed to coerce version ${upgrade.newValue}`);
+      return fileContent;
+    }
+    newUrl = `https://github.com/${ownerName}/${repoName}/releases/download/${upgrade.newValue}/${repoName}-${coercedVersion.version}.tar.gz`;
     newSha256 = await hashStream(http.stream(newUrl), 'sha256');
   } catch {
     logger.debug(
@@ -68,6 +72,10 @@ export async function updateDependency({
 
   // Update URL in file content
   const oldUrl = upgrade.managerData.url;
+  if (!oldUrl) {
+    logger.debug(`Missing old URL for dependency ${upgrade.depName}`);
+    return fileContent;
+  }
   const urlRegex = new RegExp(
     `(?<prefix>\\burl\\s+)(?<quote>['"])${escapeRegex(oldUrl)}\\k<quote>`,
     'g',
@@ -83,6 +91,10 @@ export async function updateDependency({
 
   // Update SHA256 in file content
   const oldSha256 = upgrade.managerData.sha256;
+  if (!oldSha256) {
+    logger.debug(`Missing old SHA256 for dependency ${upgrade.depName}`);
+    return fileContent;
+  }
   const sha256Regex = new RegExp(
     `(?<prefix>\\bsha256\\s+)(?<quote>['"])${escapeRegex(oldSha256)}\\k<quote>`,
     'g',

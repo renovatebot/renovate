@@ -3,7 +3,7 @@ import type { SkipReason } from '../../../types';
 import { regEx } from '../../../util/regex';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import type { PackageDependency, PackageFileContent } from '../types';
-import type { UrlPathParsedResult } from './types';
+import type { HomebrewManagerData, UrlPathParsedResult } from './types';
 
 export function parseUrlPath(
   urlStr: string | null | undefined,
@@ -94,7 +94,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     skipReason = 'invalid-sha256';
   }
 
-  const dep: PackageDependency = {
+  const dep: PackageDependency<HomebrewManagerData> = {
     depName: `${ownerName}/${repoName}`,
     managerData: { ownerName, repoName, sha256, url },
     currentValue,
