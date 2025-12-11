@@ -59,9 +59,9 @@ import {
 } from './http';
 import { getMR, updateMR } from './merge-request';
 import { GitlabPrCache } from './pr-cache';
+import type { GitLabMergeRequest } from './schema';
 import { LastPipelineId } from './schema';
 import type {
-  GitLabMergeRequest,
   GitlabComment,
   GitlabIssue,
   GitlabPr,
@@ -180,6 +180,8 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     with_merge_requests_enabled: true,
     min_access_level: 30,
     archived: false,
+    ...(config?.sort && { order_by: config.sort }),
+    ...(config?.order && { sort: config.order }),
   };
   if (config?.topics?.length) {
     queryParams.topic = config.topics.join(',');

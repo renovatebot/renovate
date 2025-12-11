@@ -8,6 +8,7 @@ import type { ValidMatchFields } from '../utils';
 import { validMatchFields } from '../utils';
 import type {
   ExtractionTemplate,
+  PackageFileInfo,
   RegexManagerConfig,
   RegexManagerTemplates,
 } from './types';
@@ -42,17 +43,23 @@ function updateDependency(
 export function createDependency(
   extractionTemplate: ExtractionTemplate,
   config: RegexManagerConfig,
+  packageFileInfo: PackageFileInfo,
   dep?: PackageDependency,
 ): PackageDependency | null {
   const dependency = dep ?? {};
   const { groups, replaceString } = extractionTemplate;
+  const { packageFileName, packageFileDir } = packageFileInfo;
 
   for (const field of validMatchFields) {
     const fieldTemplate = `${field}Template` as keyof RegexManagerTemplates;
     const tmpl = config[fieldTemplate];
     if (tmpl) {
       try {
-        const compiled = template.compile(tmpl, groups, false);
+        const compiled = template.compile(
+          tmpl,
+          { ...groups, packageFile: packageFileName, packageFileDir },
+          false,
+        );
         updateDependency(dependency, field, compiled);
       } catch {
         logger.warn(

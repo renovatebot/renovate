@@ -107,6 +107,7 @@ describe('workers/repository/dependency-dashboard', () => {
         dependencyDashboardChecks: {
           configMigrationCheckboxState: 'no-checkbox',
         },
+        dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: false,
         dependencyDashboardIssue: 1,
@@ -130,6 +131,7 @@ describe('workers/repository/dependency-dashboard', () => {
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
+        dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: false,
         dependencyDashboardChecks: {
@@ -155,6 +157,7 @@ describe('workers/repository/dependency-dashboard', () => {
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
         checkedBranches: ['branch1', 'branch2'],
+        dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: false,
         dependencyDashboardChecks: {
@@ -188,6 +191,7 @@ describe('workers/repository/dependency-dashboard', () => {
           configMigrationCheckboxState: 'no-checkbox',
         },
         dependencyDashboardIssue: 1,
+        dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardRebaseAllOpen: false,
         dependencyDashboardTitle: 'Dependency Dashboard',
         prCreation: 'approval',
@@ -215,11 +219,40 @@ describe('workers/repository/dependency-dashboard', () => {
           configMigrationCheckboxState: 'no-checkbox',
         },
         dependencyDashboardIssue: 1,
+        dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardRebaseAllOpen: false,
         dependencyDashboardTitle: 'Dependency Dashboard',
         prCreation: 'approval',
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: true,
+      });
+    });
+
+    it('reads dashboard body open all awaiting schedule', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: Fixtures.get('dependency-dashboard-with-10-PR.txt').replace(
+          '- [ ] <!-- create-all-awaiting-schedule-prs -->',
+          '- [x] <!-- create-all-awaiting-schedule-prs -->',
+        ),
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        dependencyDashboardChecks: {
+          branchName3: 'unschedule',
+          branchName4: 'unschedule',
+          configMigrationCheckboxState: 'no-checkbox',
+        },
+        dependencyDashboardIssue: 1,
+        dependencyDashboardAllAwaitingSchedule: true,
+        dependencyDashboardRebaseAllOpen: false,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
       });
     });
 
@@ -273,6 +306,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(conf).toEqual({
         checkedBranches: ['branch1', 'branch2'],
         dependencyDashboard: false,
+        dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: false,
         dependencyDashboardChecks: {
@@ -826,7 +860,7 @@ The following branches have not met their minimum group size. To create them, cl
 
  - [ ] <!-- approveGroup-branch=groupBranch1 -->undefined
 
-## Detected dependencies
+## Detected Dependencies
 
 None detected
 `,
@@ -1308,7 +1342,7 @@ None detected
 
 This repository currently has no open or pending branches.
 
-## Detected dependencies
+## Detected Dependencies
 
 None detected
 
@@ -1451,7 +1485,7 @@ None detected
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            'These dependencies are deprecated',
+            'These dependencies are either deprecated or have replacements available',
           );
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
             '| npm | `cookie-parser` | ![Unavailable]',
@@ -1650,7 +1684,7 @@ None detected
       describe('PackageFiles.getDashboardMarkdown()', () => {
         const note =
           '> ℹ **Note**\n> \n> Detected dependencies section has been truncated\n\n';
-        const title = `## Detected dependencies\n\n`;
+        const title = `## Detected Dependencies\n\n`;
 
         beforeEach(() => {
           PackageFiles.clear();
@@ -1800,6 +1834,7 @@ None detected
       expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
 
 \`1\`/\`2\` CVEs have Renovate fixes.
+
 <details><summary>npm</summary>
 <blockquote>
 
@@ -1867,6 +1902,7 @@ None detected
 
 \`1\`/\`2\` CVEs have possible Renovate fixes.
 See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.
+
 <details><summary>npm</summary>
 <blockquote>
 
