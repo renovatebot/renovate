@@ -116,8 +116,8 @@ export async function updateArtifacts({
         );
         const json = JSON.parse(stdout || '{}');
         const dist = Array.isArray(json) ? json[0] : json;
-        distInfo.integrity = normalize(dist.integrity) ?? '';
-        distInfo.shasum = normalize(dist.shasum) ?? '';
+        distInfo.integrity = normalize(dist.integrity);
+        distInfo.shasum = normalize(dist.shasum);
       } catch (err) {
         // ensure the "No valid integrity or shasum found" path is taken
         logger.debug(err, 'Error fetching dist via npm CLI');
