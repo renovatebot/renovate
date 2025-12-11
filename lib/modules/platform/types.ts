@@ -285,6 +285,7 @@ export interface Platform {
     branchName: string,
     internalChecksAsSuccess: boolean,
   ): Promise<BranchStatus>;
+
   /**
    * Get the PR for a given branch.
    *
