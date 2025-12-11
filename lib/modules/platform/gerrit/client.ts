@@ -12,7 +12,7 @@ import type {
   GerritProjectInfo,
   GerritRequestDetail,
 } from './types';
-import { mapPrStateToGerritFilter } from './utils';
+import { MAX_GERRIT_COMMENT_SIZE, mapPrStateToGerritFilter } from './utils';
 
 class GerritClient {
   // memCache is disabled because GerritPrCache will provide a smarter caching
@@ -41,6 +41,40 @@ class GerritClient {
       `a/projects/${encodeURIComponent(repository)}/branches/HEAD`,
     );
     return branchInfo.body;
+  }
+
+  async getBranchChange(
+    repository: string,
+    config: Pick<
+      GerritFindPRConfig,
+      'branchName' | 'state' | 'targetBranch' | 'requestDetails'
+    >,
+  ): Promise<GerritChange | null> {
+    const changes = await this.findChanges(repository, {
+      branchName: config.branchName,
+      state: config.state,
+      singleChange: config.targetBranch ? false : true,
+      requestDetails: config.requestDetails,
+    });
+
+    if (changes.length === 0) {
+      return null;
+    }
+
+    if (changes.length === 1) {
+      return changes[0];
+    }
+
+    // If multiple changes are found, prefer the one matching the target branch
+    if (config.targetBranch) {
+      const change = changes.find((c) => c.branch === config.targetBranch);
+      if (change) {
+        return change;
+      }
+    }
+
+    // Otherwise return the first one
+    return changes[0];
   }
 
   async findChanges(
@@ -226,9 +260,38 @@ class GerritClient {
     return Buffer.from(base64Content.body, 'base64').toString();
   }
 
+  async moveChange(
+    changeNumber: number,
+    destinationBranch: string,
+  ): Promise<GerritChange> {
+    const change = await this.gerritHttp.postJson<GerritChange>(
+      `a/changes/${changeNumber}/move`,
+      {
+        body: {
+          destination_branch: destinationBranch,
+        },
+      },
+    );
+    return change.body;
+  }
+
   normalizeMessage(message: string): string {
-    //the last \n was removed from gerrit after the comment was added...
-    return message.substring(0, 0x4000).trim();
+    // Gerrit would trim it anyway
+    let msg = message.trim();
+
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(msg);
+    if (bytes.length > MAX_GERRIT_COMMENT_SIZE) {
+      const truncationNotice = '\n\n[Truncated by Renovate]';
+      const truncationNoticeBytes = encoder.encode(truncationNotice);
+      const maxContentBytes =
+        MAX_GERRIT_COMMENT_SIZE - truncationNoticeBytes.length;
+      const truncatedBytes = bytes.slice(0, maxContentBytes);
+      const decoded = new TextDecoder().decode(truncatedBytes);
+      msg = decoded + truncationNotice;
+    }
+
+    return msg;
   }
 
   private static buildSearchFilters(

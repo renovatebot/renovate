@@ -143,7 +143,7 @@
     "pnpm": "^10.0.0"
   },
   "volta": {
-    "node": "24.11.1",
+    "node": "24.12.0",
     "pnpm": "10.24.0"
   },
   "dependencies": {
@@ -177,7 +177,7 @@
     "@renovatebot/detect-tools": "1.2.4",
     "@renovatebot/osv-offline": "2.0.0",
     "@renovatebot/pep440": "4.2.1",
-    "@renovatebot/pgp": "1.2.1",
+    "@renovatebot/pgp": "1.2.2",
     "@renovatebot/ruby-semver": "4.1.2",
     "@sindresorhus/is": "7.1.1",
     "@yarnpkg/core": "4.5.0",
@@ -327,7 +327,7 @@
     "common-tags": "1.8.2",
     "conventional-changelog-conventionalcommits": "9.1.0",
     "emojibase-data": "16.0.3",
-    "esbuild": "0.27.0",
+    "esbuild": "0.27.1",
     "eslint": "9.39.1",
     "eslint-config-prettier": "10.1.8",
     "eslint-formatter-gha": "1.6.0",
@@ -355,7 +355,7 @@
     "typescript": "5.9.3",
     "typescript-eslint": "8.48.1",
     "unified": "11.0.5",
-    "vite": "npm:rolldown-vite@7.2.9",
+    "vite": "npm:rolldown-vite@7.2.10",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "4.0.15",
     "vitest-mock-extended": "3.1.0"
@@ -383,8 +383,8 @@
       "re2"
     ],
     "overrides": {
-      "esbuild": "0.27.0",
-      "vite": "npm:rolldown-vite@7.2.9"
+      "esbuild": "0.27.1",
+      "vite": "npm:rolldown-vite@7.2.10"
     }
   }
 }
