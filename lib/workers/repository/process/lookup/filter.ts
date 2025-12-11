@@ -7,6 +7,7 @@ import * as npmVersioning from '../../../../modules/versioning/npm';
 import * as pep440 from '../../../../modules/versioning/pep440';
 import * as poetryVersioning from '../../../../modules/versioning/poetry';
 import { getRegexPredicate } from '../../../../util/string-match';
+import * as template from '../../../../util/template';
 import type { FilterConfig } from './types';
 
 function isReleaseStable(
@@ -60,13 +61,8 @@ export function filterVersions(
   releases: Release[],
   versioningApi: VersioningApi,
 ): Release[] {
-  const {
-    ignoreUnstable,
-    ignoreDeprecated,
-    respectLatest,
-    allowedVersions,
-    maxMajorIncrement,
-  } = config;
+  const { ignoreUnstable, ignoreDeprecated, respectLatest, maxMajorIncrement } =
+    config;
 
   /* v8 ignore next 3 -- shouldn't happen */
   if (!currentVersion) {
@@ -110,7 +106,18 @@ export function filterVersions(
     );
   }
 
-  if (allowedVersions) {
+  const currentMajor = versioningApi.getMajor(currentVersion);
+  const currentMinor = versioningApi.getMinor(currentVersion);
+  const currentPatch = versioningApi.getPatch(currentVersion);
+
+  if (config.allowedVersions) {
+    const input = {
+      currentVersion,
+      major: currentMajor,
+      minor: currentMinor,
+      patch: currentPatch,
+    };
+    const allowedVersions = template.compile(config.allowedVersions, input);
     const isAllowedPred = getRegexPredicate(allowedVersions);
     if (isAllowedPred) {
       filteredReleases = filteredReleases.filter(({ version }) =>
@@ -181,10 +188,6 @@ export function filterVersions(
   if (currentRelease && isReleaseStable(currentRelease, versioningApi)) {
     return filteredReleases.filter((r) => isReleaseStable(r, versioningApi));
   }
-
-  const currentMajor = versioningApi.getMajor(currentVersion);
-  const currentMinor = versioningApi.getMinor(currentVersion);
-  const currentPatch = versioningApi.getPatch(currentVersion);
 
   return filteredReleases.filter((r) => {
     if (isReleaseStable(r, versioningApi)) {

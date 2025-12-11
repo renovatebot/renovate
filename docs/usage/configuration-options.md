@@ -3027,6 +3027,26 @@ For example, if you want to upgrade to Angular v1.5 but _not_ to `angular` v1.6 
 
 Renovate calculates the valid syntax for this at runtime, because it depends on the dynamic versioning scheme.
 
+You can also use the following template fields with `allowedVersions`:
+
+- `currentVersion`
+- `major`
+- `minor`
+- `patch`
+
+For example, if you want to upgrade to Angular to only the next major, you could set `allowedVersions` like this:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["angular"],
+      "allowedVersions": "<={{add major 1}}"
+    }
+  ]
+}
+```
+
 <!-- prettier-ignore -->
 !!! warning
     `allowedVersions` and `matchUpdateTypes` cannot be used in the same package rule.
@@ -3885,6 +3905,7 @@ Table with options:
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `bundlerConservative`        | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies. |
 | `composerWithAll`            | Run `composer update` with `--with-all-dependencies` flag instead of the default `--with-dependencies`.                                                    |
+| `composerNoMinimalChanges`   | Run `composer update` with no `--minimal-changes` flag (does not affect lock file maintenance, which will never use `--minimal-changes`).                  |
 | `dotnetWorkloadRestore`      | Run `dotnet workload restore` before `dotnet restore` commands.                                                                                            |
 | `gomodMassage`               | Enable massaging `replace` directives before calling `go` commands.                                                                                        |
 | `gomodTidy`                  | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                   |
