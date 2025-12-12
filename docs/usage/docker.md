@@ -187,6 +187,25 @@ Add `"docker:enableMajor"` to your `extends` array.
 
 Add `"default:pinDigestsDisabled"` to your `extends` array.
 
+<!-- markdownlint-disable MD046 -->
+<!-- prettier-ignore -->
+!!! note
+    This preset only sets the global default for the [digest pinning flag](./configuration-options.md#pindigests) to `false`.
+    If you have configured package rules that set `pinDigests` to `true`, those will still apply.
+    This is also the case if you use the [`docker:pinDigests` preset](./presets-docker.md#dockerpindigests), which adds a package rule that sets `pinDigests` to `true` for all packages from the docker datasource.
+
+    If you want to disable the `docker:pinDigests` preset (e.g. if you want to use `config:best-practices` but not have digest pinning enabled),
+    ignore the preset like this:
+
+    ```json
+    {
+      "extends": ["config:best-practices"],
+      "ignorePresets": ["docker:pinDigests"]
+    }
+    ```
+
+<!-- markdownlint-enable MD046 -->
+
 ### Automerge digest updates
 
 Add `"default:automergeDigest"` to your `extends` array.
