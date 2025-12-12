@@ -133,11 +133,8 @@ export async function updateArtifacts({
       (await readLocalFile(vendorModulesFileName)) !== null);
   let massagedGoMod = newGoModContent;
   const useGoGenerate = !!config.postUpdateOptions?.includes('goGenerate');
-  const allowedUnsafeExecutions = GlobalConfig.get(
-    'allowedUnsafeExecutions',
-    [],
-  );
-  const goGenerateAllowed = allowedUnsafeExecutions.includes('goGenerate');
+  const allowedUnsafeExecutions = GlobalConfig.get('allowedUnsafeExecutions');
+  const goGenerateAllowed = allowedUnsafeExecutions?.includes('goGenerate');
 
   if (config.postUpdateOptions?.includes('gomodMassage')) {
     // Regex match inline replace directive, example:
