@@ -57,7 +57,7 @@ describe('modules/platform/gerrit/index', () => {
       repository: 'test/repo',
       labels: {},
     });
-    clientMock.getVersion.mockResolvedValue('3.0.0');
+    clientMock.getGerritVersion.mockResolvedValue('3.0.0');
     await gerrit.initPlatform({
       endpoint: gerritEndpointUrl,
       username: 'user',
@@ -89,7 +89,7 @@ describe('modules/platform/gerrit/index', () => {
     });
 
     it('should throw if auth fails', async () => {
-      clientMock.getVersion.mockRejectedValue(new Error('Auth failed'));
+      clientMock.getGerritVersion.mockRejectedValue(new Error('Auth failed'));
       await expect(
         gerrit.initPlatform({
           endpoint: gerritEndpointUrl,
@@ -100,7 +100,7 @@ describe('modules/platform/gerrit/index', () => {
     });
 
     it('should throw if version is unparseable', async () => {
-      clientMock.getVersion.mockResolvedValue('not-a-valid-version');
+      clientMock.getGerritVersion.mockResolvedValue('not-a-valid-version');
       await expect(
         gerrit.initPlatform({
           endpoint: gerritEndpointUrl,

@@ -23,13 +23,13 @@ import {
 class GerritClient {
   // memCache is disabled because GerritPrCache will provide a smarter caching
   private gerritHttp = new GerritHttp({ memCache: false });
-  private version = MIN_GERRIT_VERSION;
+  private gerritVersion = MIN_GERRIT_VERSION;
 
-  setVersion(version: string): void {
-    this.version = version;
+  setGerritVersion(version: string): void {
+    this.gerritVersion = version;
   }
 
-  async getVersion(): Promise<string> {
+  async getGerritVersion(): Promise<string> {
     const res = await this.gerritHttp.getJson(
       'a/config/server/version',
       z.string(),
@@ -329,7 +329,7 @@ class GerritClient {
     }
     if (searchConfig.branchName) {
       filters.push(`footer:Renovate-Branch=${searchConfig.branchName}`);
-    } else if (semver.gte(this.version, '3.6.0')) {
+    } else if (semver.gte(this.gerritVersion, '3.6.0')) {
       filters.push('hasfooter:Renovate-Branch');
     } else {
       filters.push('message:"Renovate-Branch: "');
@@ -344,7 +344,7 @@ class GerritClient {
       // Quotes in the search operators must be escaped with a backslash:
       //   https://gerrit-review.googlesource.com/Documentation/user-search.html#search-operators
       const escapedTitle = searchConfig.prTitle.replaceAll('"', '\\"');
-      if (semver.gte(this.version, '3.8.0')) {
+      if (semver.gte(this.gerritVersion, '3.8.0')) {
         filters.push(`subject:"${escapedTitle}"`);
       } else {
         filters.push(`message:"${escapedTitle}"`);

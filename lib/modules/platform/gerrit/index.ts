@@ -88,7 +88,7 @@ export async function initPlatform({
     if (env.RENOVATE_X_PLATFORM_VERSION) {
       gerritVersion = env.RENOVATE_X_PLATFORM_VERSION;
     } else {
-      gerritVersion = await client.getVersion();
+      gerritVersion = await client.getGerritVersion();
     }
   } catch (err) {
     logger.debug(
@@ -105,7 +105,7 @@ export async function initPlatform({
     throw new Error(`Unable to parse Gerrit version: ${gerritVersion}`);
   }
   gerritVersion = `${parsed.major}.${parsed.minor}.${parsed.patch}`;
-  client.setVersion(gerritVersion);
+  client.setGerritVersion(gerritVersion);
 
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,

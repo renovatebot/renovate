@@ -26,7 +26,7 @@ describe('modules/platform/gerrit/client', () => {
         .scope(gerritEndpointUrl)
         .get('/a/config/server/version')
         .reply(200, gerritRestResponse('3.9.1'), jsonResultHeader);
-      expect(await client.getVersion()).toBe('3.9.1');
+      expect(await client.getGerritVersion()).toBe('3.9.1');
     });
   });
 
@@ -165,7 +165,7 @@ describe('modules/platform/gerrit/client', () => {
         config: GerritFindPRConfig,
         gerritVersion?: string,
       ) => {
-        client.setVersion(gerritVersion ?? MIN_GERRIT_VERSION);
+        client.setGerritVersion(gerritVersion ?? MIN_GERRIT_VERSION);
 
         httpMock
           .scope(gerritEndpointUrl)
