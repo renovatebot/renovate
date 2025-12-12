@@ -427,7 +427,7 @@ export async function ensureDependencyDashboard(
       ` See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
   } else if (configMigrationRes?.result === 'pr-modified') {
     issueBody +=
-      '## Config Migration Needed (error)\n\n' +
+      '## Config Migration Needed (Blocked)\n\n' +
       getMarkdownComment(configMigrationPrInfo) +
       ` The Config Migration branch exists but has been modified by another user. Renovate will not push to this branch unless it is first deleted. \n\n See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
   } else if (configMigrationRes?.result === 'add-checkbox') {
@@ -521,7 +521,7 @@ export async function ensureDependencyDashboard(
   issueBody += getBranchesListMd(
     branches,
     (branch) => branch.result === 'pr-edited',
-    'Edited/Blocked',
+    'PR Edited (Blocked)',
     'The following updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox below.',
     'rebase',
   );
@@ -583,7 +583,7 @@ export async function ensureDependencyDashboard(
   issueBody += getBranchesListMd(
     branches,
     (branch) => branch.result === 'already-existed',
-    'Ignored or Blocked',
+    'PR Closed (Blocked)',
     'The following updates are blocked by an existing closed PR. To recreate the PR, click on a checkbox below.',
     'recreate',
   );

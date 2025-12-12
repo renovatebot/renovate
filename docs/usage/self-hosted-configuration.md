@@ -120,6 +120,12 @@ This is a separate class of commands that could be executed compared to [`allowe
 As there is a security risk of running these commands automatically when a dependency upgrades, self hosted implementations need to explicitly declare which commands are permitted for their installation.
 For more details of where this may be found, see ["Trusting Repository Developers"](./security-and-permissions.md#trusting-repository-developers).
 
+Allowed options:
+
+| Option       | Description                                                               |
+| ------------ | ------------------------------------------------------------------------- |
+| `goGenerate` | Allows the `goGenerate` `postUpdateCommand` to run after a go mod update. |
+
 ## autodiscover
 
 When you enable `autodiscover`, by default, Renovate runs on _every_ repository that the bot account can access.

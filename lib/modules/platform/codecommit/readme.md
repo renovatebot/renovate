@@ -2,9 +2,11 @@
 
 <!-- prettier-ignore -->
 !!! warning "No new features for the Codecommit platform"
-    Amazon has deprecated the Codecommit platform.
-    We will not work on new features for the Codecommit platform.
-    Read the [AWS blog, how to migrate your AWS Codecommit repository](https://aws.amazon.com/blogs/devops/how-to-migrate-your-aws-codecommit-repository-to-another-git-provider/) to learn more.
+    In July 2024, [Amazon deprecated the CodeCommit platform](https://aws.amazon.com/blogs/devops/how-to-migrate-your-aws-codecommit-repository-to-another-git-provider/).
+    In November 2025, [Amazon re-instated support for CodeCommit](https://aws.amazon.com/blogs/devops/aws-codecommit-returns-to-general-availability/).
+    Since July 2024, CodeCommit is in a "feature freeze", and Amazon re-instating support for CodeCommit as of November 2025 does not currently change that.
+    The Renovate maintainers have decided that we will not add any new features unless a company is willing to contribute feature(s) for CodeCommit **and maintain them**.
+    For more details [see Discussion 39741](https://github.com/renovatebot/renovate/discussions/39741#discussioncomment-15172240).
 
 <!-- prettier-ignore -->
 !!! warning "This feature is flagged as experimental"

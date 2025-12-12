@@ -110,7 +110,7 @@ export class PackageFiles {
         );
         deps += `<details><summary>${manager} (${managerPackageFiles.length})</summary>\n<blockquote>\n\n`;
         for (const packageFile of managerPackageFiles) {
-          deps += `<details><summary>${packageFile.packageFile} (${packageFile.deps.length})</summary>\n\n`;
+          deps += `<details><summary>${packageFile.packageFile}${packageFile.deps.length > 0 ? ` (${packageFile.deps.length})` : ''}</summary>\n\n`;
           for (const dep of packageFile.deps) {
             const ver = dep.currentValue;
             const digest = dep.currentDigest;
