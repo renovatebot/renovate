@@ -231,9 +231,9 @@ const options: RenovateOptions[] = [
   {
     name: 'onboardingAutoCloseAge',
     description:
-      'Maximum duration after which Renovate will stop trying to onboard the repository.',
+      'Maximum number of days after which Renovate will stop trying to onboard the repository, and will close any existing onboarding PRs',
     type: 'integer',
-    default: 360,
+    default: null,
     globalOnly: true,
     inheritConfigSupport: true,
     cli: false,
