@@ -46,6 +46,7 @@
       "replacements:semantic-release-replace-plugin-to-unscoped",
       "replacements:spectre-cli-to-spectre-console-cli",
       "replacements:standard-version-to-commit-and-tag",
+      "replacements:tsconfig-bases-node",
       "replacements:typeorm-seeding-to-scoped",
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
@@ -1030,6 +1031,58 @@
         "matchPackageNames": ["standard-version"],
         "replacementName": "commit-and-tag-version",
         "replacementVersion": "9.5.0"
+      }
+    ]
+  },
+  "tsconfig-bases-node": {
+    "description": "`@tsconfig-bases` node updates.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@tsconfig/node**"],
+        "commitMessageExtra": "{{#if isReplacement}}with {{{newName}}}{{else}}to {{{prettyNewVersion}}}{{/if}}"
+      },
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@tsconfig/node10"],
+        "replacementName": "@tsconfig/node12",
+        "replacementVersion": "12.0.0"
+      },
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@tsconfig/node12"],
+        "replacementName": "@tsconfig/node14",
+        "replacementVersion": "14.0.0"
+      },
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@tsconfig/node14"],
+        "replacementName": "@tsconfig/node16",
+        "replacementVersion": "16.0.0"
+      },
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@tsconfig/node16", "@tsconfig/node17"],
+        "replacementName": "@tsconfig/node18",
+        "replacementVersion": "18.0.0"
+      },
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@tsconfig/node18", "@tsconfig/node19"],
+        "replacementName": "@tsconfig/node20",
+        "replacementVersion": "20.0.0"
+      },
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@tsconfig/node20", "@tsconfig/node21"],
+        "replacementName": "@tsconfig/node22",
+        "replacementVersion": "22.0.0"
+      },
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@tsconfig/node22", "@tsconfig/node23"],
+        "replacementName": "@tsconfig/node24",
+        "replacementVersion": "24.0.0"
       }
     ]
   },
