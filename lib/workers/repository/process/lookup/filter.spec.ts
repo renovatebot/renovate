@@ -57,6 +57,44 @@ describe('workers/repository/process/lookup/filter', () => {
       ]);
     });
 
+    it('should filter versions when allowedVersions templating is used', () => {
+      const releases = [
+        {
+          version: '1.1.0',
+          releaseTimestamp: '2021-01-01T00:00:01.000Z' as Timestamp,
+        },
+        {
+          version: '1.2.0',
+          releaseTimestamp: '2021-01-03T00:00:00.000Z' as Timestamp,
+        },
+        {
+          version: '1.3.0',
+          releaseTimestamp: '2021-01-03T00:00:00.000Z' as Timestamp,
+        },
+      ] satisfies Release[];
+
+      const config = partial<FilterConfig>({
+        ignoreUnstable: false,
+        ignoreDeprecated: false,
+        respectLatest: false,
+        allowedVersions: '<={{major}}.{{add minor 1}}.{{patch}}',
+      });
+      const currentVersion = '1.0.0';
+      const latestVersion = '2.0.0';
+
+      const filteredVersions = filterVersions(
+        config,
+        currentVersion,
+        latestVersion,
+        releases,
+        versioning,
+      );
+
+      expect(filteredVersions).toEqual([
+        { version: '1.1.0', releaseTimestamp: '2021-01-01T00:00:01.000Z' },
+      ]);
+    });
+
     it('allows unstable major upgrades', () => {
       const nodeVersioning = allVersioning.get('node');
 
