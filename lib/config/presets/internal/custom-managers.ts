@@ -155,7 +155,7 @@ export const presets: Record<string, Preset> = {
         currentValueTemplate: '{{{major}}}',
         customType: 'regex',
         datasourceTemplate: 'npm',
-        managerFilePatterns: ['/(^|/)tsconfig\\.json$/'],
+        managerFilePatterns: ['**/tsconfig.json'],
         matchStrings: [
           '"extends":\\s*"(?<depName>@tsconfig/node(?<major>\\d+))/tsconfig\\.json"',
         ],
