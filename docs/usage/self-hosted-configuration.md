@@ -122,9 +122,10 @@ For more details of where this may be found, see ["Trusting Repository Developer
 
 Allowed options:
 
-| Option       | Description                                                               |
-| ------------ | ------------------------------------------------------------------------- |
-| `goGenerate` | Allows the `goGenerate` `postUpdateCommand` to run after a go mod update. |
+| Option          | Description                                                                   |
+| --------------- | ----------------------------------------------------------------------------- |
+| `goGenerate`    | Allows the `goGenerate` `postUpdateCommand` to run after a go mod update.     |
+| `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle. |
 
 ## autodiscover
 
