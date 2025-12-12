@@ -72,9 +72,14 @@ export const ATTR_RENOVATE_SPLIT = 'renovate.split';
  * the Git Version Control System (VCS)'s Operation Type
  *
  * @see GitOperationType
+ * @see https://opentelemetry.io/docs/specs/semconv/registry/attributes/vcs/
  *
  */
 export const ATTR_VCS_GIT_OPERATION_TYPE = 'vcs.git.operation.type';
 
-/** the Git Version Control System (VCS)'s subcommand */
+/**
+ * the Git Version Control System (VCS)'s subcommand
+ *
+ * @see https://opentelemetry.io/docs/specs/semconv/registry/attributes/vcs/
+ * */
 export const ATTR_VCS_GIT_SUBCOMMAND = 'vcs.git.subcommand';

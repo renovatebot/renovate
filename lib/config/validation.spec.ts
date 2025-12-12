@@ -1564,6 +1564,80 @@ describe('config/validation', () => {
       expect(errors).toBeEmptyArray();
       expect(warnings).toBeEmptyArray();
     });
+
+    it('errors if no bumpVersion filePattern is provided', async () => {
+      // @ts-expect-error -- TODO: fix test
+      const config = partial<RenovateConfig>({
+        bumpVersion: {
+          matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+          bumpType: 'patch',
+        },
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            bumpVersion: {
+              matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+              bumpType: 'patch',
+            },
+          },
+        ],
+      });
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
+    });
+
+    it('errors if no matchStrings are provided for bumpVersion', async () => {
+      // @ts-expect-error -- TODO: fix test
+      const config = partial<RenovateConfig>({
+        bumpVersion: {
+          filePatterns: ['foo'],
+        },
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            bumpVersion: {
+              filePatterns: ['bar'],
+            },
+          },
+        ],
+      });
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
+    });
+
+    it('allow bumpVersion', async () => {
+      // @ts-expect-error -- TODO: fix test
+      const config = partial<RenovateConfig>({
+        bumpVersion: {
+          filePatterns: ['foo'],
+        },
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            bumpVersion: {
+              filePatterns: ['bar'],
+            },
+          },
+        ],
+      });
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
+    });
   });
 
   describe('validateConfig() -> globaOnly options', () => {
@@ -2168,80 +2242,6 @@ describe('config/validation', () => {
       ]);
       expect(warnings).toHaveLength(2);
       expect(errors).toHaveLength(1);
-    });
-
-    it('errors if no bumpVersion filePattern is provided', async () => {
-      // @ts-expect-error -- TODO: fix test
-      const config = partial<RenovateConfig>({
-        bumpVersion: {
-          matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
-          bumpType: 'patch',
-        },
-        packageRules: [
-          {
-            matchPackageNames: ['foo'],
-            bumpVersion: {
-              matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
-              bumpType: 'patch',
-            },
-          },
-        ],
-      });
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        config,
-        true,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
-    });
-
-    it('errors if no matchStrings are provided for bumpVersion', async () => {
-      // @ts-expect-error -- TODO: fix test
-      const config = partial<RenovateConfig>({
-        bumpVersion: {
-          filePatterns: ['foo'],
-        },
-        packageRules: [
-          {
-            matchPackageNames: ['foo'],
-            bumpVersion: {
-              filePatterns: ['bar'],
-            },
-          },
-        ],
-      });
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        config,
-        true,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
-    });
-
-    it('allow bumpVersion', async () => {
-      // @ts-expect-error -- TODO: fix test
-      const config = partial<RenovateConfig>({
-        bumpVersion: {
-          filePatterns: ['foo'],
-        },
-        packageRules: [
-          {
-            matchPackageNames: ['foo'],
-            bumpVersion: {
-              filePatterns: ['bar'],
-            },
-          },
-        ],
-      });
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        config,
-        true,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
     });
   });
 });

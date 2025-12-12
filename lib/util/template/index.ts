@@ -1,5 +1,6 @@
 import {
   isArray,
+  isNumber,
   isPlainObject,
   isPrimitive,
   isString,
@@ -96,6 +97,13 @@ const helpers: Record<string, handlebars.HelperDelegate> = {
       return true;
     });
   },
+  add: (a, b) => {
+    if (isNumber(a) && isNumber(b)) {
+      return a + b;
+    }
+
+    throw new Error('add: inputs are not valid');
+  },
 };
 
 // Register all helpers from the single source of truth
@@ -109,6 +117,7 @@ export const templateHelperNames = Object.keys(helpers) as readonly string[];
 export const exposedConfigOptions = [
   'additionalBranchPrefix',
   'addLabels',
+  'allowedVersions',
   'branchName',
   'branchPrefix',
   'branchTopic',
@@ -194,6 +203,12 @@ export const allowedFields = {
     'The new value in the upgrade. Can be a range or version e.g. "^3.0.0" or "3.1.0"',
   newVersion: 'The new version in the upgrade, e.g. "3.1.0"',
   newVersionAgeInDays: 'The age of the new version in days',
+  major:
+    'The major version of the current version. e.g. "3" if the current version is "3.1.0"',
+  minor:
+    'The minor version of the current version. e.g. "1" if the current version is "3.1.0"',
+  patch:
+    'The patch version of the current version. e.g. "0" if the current version is "3.1.0"',
   packageFile: 'The filename that the dependency was found in',
   packageFileDir:
     'The directory with full path where the packageFile was found',

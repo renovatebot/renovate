@@ -171,6 +171,8 @@ Note that you will also need to [verify if the registry you're using](#which-reg
 
 The below is a non-exhaustive list of public registries which support release timestamps:
 
+<!-- markdownlint-disable MD060 -->
+
 | Datasource           | Registry URL                                       | Supported | Notes                                                            |
 | -------------------- | -------------------------------------------------- | --------- | ---------------------------------------------------------------- |
 | `crate`              | `https://crates.io`                                | ✅        |                                                                  |

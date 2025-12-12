@@ -222,6 +222,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         await submodule.init();
         await submodule.addConfig('user.email', 'Jest@example.com');
         await submodule.addConfig('user.name', 'Jest');
+        await submodule.addConfig('commit.gpgsign', 'false');
 
         await fs.writeFile(submoduleBasePath + '/init_file', 'init');
         await submodule.add('init_file');

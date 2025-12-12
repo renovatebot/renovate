@@ -1305,6 +1305,27 @@ describe('modules/manager/dockerfile/extract', () => {
     });
   });
 
+  it('handles same argument multiple times', () => {
+    const res = extractPackageFile(
+      'ARG DOCKER=docker\n' + 'FROM ${DOCKER}.io/library/${DOCKER}:29.1.1-dind',
+      '',
+      {},
+    )?.deps;
+    expect(res).toEqual([
+      {
+        autoReplaceStringTemplate:
+          'FROM ${DOCKER}.io/library/${DOCKER}:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}\n',
+        currentDigest: undefined,
+        currentValue: '29.1.1-dind',
+        datasource: 'docker',
+        depName: 'docker.io/library/docker',
+        depType: 'final',
+        packageName: 'docker.io/library/docker',
+        replaceString: 'FROM ${DOCKER}.io/library/${DOCKER}:29.1.1-dind\n',
+      },
+    ]);
+  });
+
   it('handles empty optional parameters', () => {
     const res = extractPackageFile(
       'FROM quay.io/myName/myPackage:0.6.2\n',

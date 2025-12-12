@@ -357,6 +357,32 @@ describe('modules/manager/composer/utils', () => {
         );
       },
     );
+
+    it('does not use --minimal-changes when composerNoMinimalChanges is set in postUpdateOptions', () => {
+      expect(
+        getComposerUpdateArguments(
+          {
+            postUpdateOptions: ['composerNoMinimalChanges'],
+          },
+          { toolName: 'composer', constraint: '2.7' },
+        ),
+      ).toBe(
+        ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+      );
+    });
+
+    it('does not use --minimal-changes for lock file maintenance', () => {
+      expect(
+        getComposerUpdateArguments(
+          {
+            isLockFileMaintenance: true,
+          },
+          { toolName: 'composer', constraint: '2.7' },
+        ),
+      ).toBe(
+        ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+      );
+    });
   });
 
   describe('requireComposerDependencyInstallation', () => {

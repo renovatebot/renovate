@@ -33,6 +33,7 @@ import { client } from './client';
 import { configureScm } from './scm';
 import type { GerritLabelTypeInfo, GerritProjectInfo } from './types';
 import {
+  MAX_GERRIT_COMMENT_SIZE,
   REQUEST_DETAILS_FOR_PRS,
   TAG_PULL_REQUEST_BODY,
   getGerritRepoUrl,
@@ -175,6 +176,9 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
       TAG_PULL_REQUEST_BODY,
     );
   }
+  if (prConfig.targetBranch) {
+    await client.moveChange(prConfig.number, prConfig.targetBranch);
+  }
   if (prConfig.state && prConfig.state === 'closed') {
     await client.abandonChange(prConfig.number);
   }
@@ -222,15 +226,13 @@ export async function getBranchPr(
   branchName: string,
   targetBranch?: string,
 ): Promise<Pr | null> {
-  const change = (
-    await client.findChanges(config.repository!, {
-      branchName,
-      state: 'open',
-      targetBranch,
-      singleChange: true,
-      requestDetails: REQUEST_DETAILS_FOR_PRS,
-    })
-  ).pop();
+  const change = await client.getBranchChange(config.repository!, {
+    branchName,
+    state: 'open',
+    targetBranch,
+    requestDetails: REQUEST_DETAILS_FOR_PRS,
+  });
+
   return change
     ? mapGerritChangeToPr(change, {
         sourceBranch: branchName,
@@ -463,7 +465,7 @@ export function massageMarkdown(prBody: string, rebaseLabel: string): string {
 }
 
 export function maxBodyLength(): number {
-  return 16384; //TODO: check the real gerrit limit (max. chars)
+  return MAX_GERRIT_COMMENT_SIZE;
 }
 
 export async function deleteLabel(

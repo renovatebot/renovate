@@ -1097,7 +1097,7 @@ describe('workers/repository/update/branch/index', () => {
           some notice
         `,
         number: 123,
-        topic: 'ℹ Artifact update notice',
+        topic: 'ℹ️ Artifact update notice',
       });
     });
 

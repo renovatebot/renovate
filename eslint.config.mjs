@@ -32,6 +32,7 @@ export default tseslint.config(
       'tools/mkdocs/site',
       '.github/workflows/**/*.js',
       '.worktrees/**/*',
+      '.markdownlint-cli2.mjs',
     ],
   },
   {
@@ -283,6 +284,7 @@ export default tseslint.config(
     files: [
       '*.config.{cjs,cts,js,mjs,mts,ts}',
       'tools/**/*.{cjs,cts,js,mjs,mts,ts}',
+      '.markdownlint-cli.mjs',
     ],
 
     languageOptions: {

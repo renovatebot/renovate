@@ -23,6 +23,7 @@ import { addSplit, getSplits, splitInit } from '../../util/split';
 import {
   AbandonedPackageStats,
   DatasourceCacheStats,
+  GitOperationStats,
   HttpCacheStats,
   HttpStats,
   LookupStats,
@@ -41,7 +42,7 @@ import { OnboardingState } from './onboarding/common';
 import { ensureOnboardingPr } from './onboarding/pr';
 import { extractDependencies, updateRepo } from './process';
 import type { ExtractResult } from './process/extract-update';
-import type { ProcessResult } from './result';
+import type { ProcessResult, RepositoryResult } from './result';
 import { processResult } from './result';
 
 // istanbul ignore next
@@ -59,7 +60,7 @@ export async function renovateRepository(
       localDir: string;
       errorRes?: string;
     }> => {
-      let errorRes: string | undefined;
+      let errorRes: RepositoryResult | undefined;
       let config = GlobalConfig.set(
         applySecretsAndVariablesToConfig({
           config: repoConfig,
@@ -207,6 +208,7 @@ export async function renovateRepository(
   LookupStats.report();
   ObsoleteCacheHitLogger.report();
   AbandonedPackageStats.report();
+  GitOperationStats.report();
   const cloned = isCloned();
   /* v8 ignore next 11 -- coverage not required of these `undefined` checks, as we're happy receiving an `undefined` in the logs */
   logger.info(
