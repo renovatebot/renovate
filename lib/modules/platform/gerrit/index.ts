@@ -1,8 +1,10 @@
 import { isTruthy } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
+import semver from 'semver';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { parseJson } from '../../../util/common';
+import { getEnv } from '../../../util/env';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import { regEx } from '../../../util/regex';
@@ -61,7 +63,7 @@ export function writeToConfig(newConfig: typeof config): void {
   config = { ...config, ...newConfig };
 }
 
-export function initPlatform({
+export async function initPlatform({
   endpoint,
   username,
   password,
@@ -78,10 +80,37 @@ export function initPlatform({
   config.gerritUsername = username;
   defaults.endpoint = ensureTrailingSlash(endpoint);
   setBaseUrl(defaults.endpoint);
+
+  let gerritVersion: string;
+  try {
+    const env = getEnv();
+    /* v8 ignore if: experimental feature */
+    if (env.RENOVATE_X_PLATFORM_VERSION) {
+      gerritVersion = env.RENOVATE_X_PLATFORM_VERSION;
+    } else {
+      gerritVersion = await client.getGerritVersion();
+    }
+  } catch (err) {
+    logger.debug(
+      { err },
+      'Error authenticating with Gerrit. Check your credentials',
+    );
+    throw new Error('Init: Authentication failure');
+  }
+
+  logger.debug('Gerrit version is: ' + gerritVersion);
+  // Example: 3.13.0-rc3-148-gb478dbbb57
+  const parsed = semver.parse(gerritVersion);
+  if (!parsed) {
+    throw new Error(`Unable to parse Gerrit version: ${gerritVersion}`);
+  }
+  gerritVersion = `${parsed.major}.${parsed.minor}.${parsed.patch}`;
+  client.setGerritVersion(gerritVersion);
+
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
   };
-  return Promise.resolve(platformConfig);
+  return platformConfig;
 }
 
 /**
