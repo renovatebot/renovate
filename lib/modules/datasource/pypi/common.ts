@@ -6,7 +6,7 @@ const githubRepoPattern = regEx(
 
 export function isGitHubRepo(url: string): boolean {
   const m = url.match(githubRepoPattern);
-  return !!m && m.groups?.projectName !== 'sponsors';
+  return m?.groups?.projectName !== 'sponsors';
 }
 
 // https://packaging.python.org/en/latest/specifications/name-normalization/
