@@ -14,6 +14,8 @@ import type {
   GerritRequestDetail,
 } from './types';
 
+export const MIN_GERRIT_VERSION = '3.0.0';
+
 export const TAG_PULL_REQUEST_BODY = 'pull-request';
 
 /**
