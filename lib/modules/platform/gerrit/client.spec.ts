@@ -20,7 +20,7 @@ describe('modules/platform/gerrit/client', () => {
     setBaseUrl(gerritEndpointUrl);
   });
 
-  describe('getVersion()', () => {
+  describe('getGerritVersion()', () => {
     it('returns version', async () => {
       httpMock
         .scope(gerritEndpointUrl)
