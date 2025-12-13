@@ -1,4 +1,5 @@
-import { newlineRegex } from '../../../../util/regex';
+import { isNonEmptyString } from '@sindresorhus/is';
+import { newlineRegex, regEx } from '../../../../util/regex';
 
 export type SourceType = 'nuget';
 export interface Dependency {
