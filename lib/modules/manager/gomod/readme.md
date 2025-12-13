@@ -76,6 +76,40 @@ Rules from this list are converted to environment variable directives if they ma
 - `hostType` is `go`, or
 - `hostType` is a platform (`github`, `gitlab`, `azure`, etc.)
 
+### Private authenticated GOPROXY Module Lookups
+
+Renovate can resolve and update private Go modules from `GOPROXY` servers requiring authentication, updating your `go.mod` and `go.sum` files as needed. This includes modules that exist only in the proxy and not in a backing version control system, for example, in [JFrog Artifactory](https://jfrog.com/help/r/jfrog-artifactory-documentation/connect-your-go-client-to-artifactory) or [Google Artifact Repository](https://docs.cloud.google.com/artifact-registry/docs/go/authentication).
+
+How it works:
+
+- Renovate reads the `GOPROXY` environment variable and uses the listed proxies in order for module lookups.
+- Credentials are taken from hostRules entries where:
+  - hostType is set to go-proxy, or
+  - hostType is omitted and matchHost matches the proxy’s host.
+- With valid credentials, Renovate can authenticate to private proxies and fetch versions.
+
+Define the `GOPROXY` environment variable in your Renovate configuration, either globally or per repository. You can specify multiple proxies and optionally include `direct` as a fallback for lookups via the backing version control system.
+Add `hostRules` for each proxy host to provide authentication (for example, username/password or token) with `matchHost` set to the proxy’s host and hostType `go-proxy`.
+Lastly set the environment variable `GONOSUMDB` to match your private module names to avoid checksum database errors when updating
+`go.sum` files.
+
+```json
+{
+  "env": {
+    "GOPROXY": "https://private-goproxy.example.com,https://proxy.golang.org,direct",
+    "GONOSUMDB": "my-private-go-packages/*"
+  },
+  "hostRules": [
+    {
+      "hostType": "go-proxy",
+      "matchHost": "https://private-goproxy.example.com",
+      "username": "my-username",
+      "password": "my-password"
+    }
+  ]
+}
+```
+
 ### Major upgrades of dependencies
 
 Major upgrades in Go are different from most other ecosystems, because both the version and module name need to be changed.
