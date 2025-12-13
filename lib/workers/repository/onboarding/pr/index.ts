@@ -1,4 +1,4 @@
-import { isString } from '@sindresorhus/is';
+import { isNumber, isString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -54,7 +54,10 @@ export async function ensureOnboardingPr(
     // check if the existing pr crosses the onboarding autoclose age
     const ageOfOnboardingPr = getElapsedDays(existingPr.createdAt);
     const onboardingAutoCloseAge = GlobalConfig.get('onboardingAutoCloseAge')!;
-    if (onboardingAutoCloseAge && ageOfOnboardingPr > onboardingAutoCloseAge) {
+    if (
+      isNumber(onboardingAutoCloseAge) &&
+      ageOfOnboardingPr > onboardingAutoCloseAge
+    ) {
       // close the pr
       await platform.updatePr({
         number: existingPr.number,
