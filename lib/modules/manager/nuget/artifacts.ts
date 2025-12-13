@@ -1,3 +1,4 @@
+import { isNonEmptyString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -18,6 +19,7 @@ import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
+  Upgrade,
 } from '../types';
 import { createNuGetConfigXml } from './config-formatter';
 import {
@@ -26,6 +28,7 @@ import {
   NUGET_CENTRAL_FILE,
   getDependentPackageFiles,
 } from './package-tree';
+import type { Registry } from './types';
 import {
   findGlobalJson,
   getConfiguredRegistries,
@@ -35,11 +38,20 @@ import {
 async function createCachedNuGetConfigFile(
   nugetCacheDir: string,
   packageFileName: string,
+  updatedDeps: Upgrade[],
 ): Promise<string> {
   const registries =
     (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
 
-  const contents = createNuGetConfigXml(registries);
+  const updatedDepsRegistries: Registry[] = [
+    ...new Set(
+      updatedDeps.flatMap((d) => d.registryUrls ?? []).filter(isNonEmptyString),
+    ),
+  ].map((url) => ({ url }));
+
+  const combinedRegistries = [...registries, ...updatedDepsRegistries];
+
+  const contents = createNuGetConfigXml(combinedRegistries);
 
   const cachedNugetConfigFile = upath.join(nugetCacheDir, `nuget.config`);
   await ensureDir(nugetCacheDir);
@@ -52,12 +64,14 @@ async function runDotnetRestore(
   packageFileName: string,
   dependentPackageFileNames: string[],
   config: UpdateArtifactsConfig,
+  updatedDeps: Upgrade[],
 ): Promise<void> {
   const nugetCacheDir = upath.join(privateCacheDir(), 'nuget');
 
   const nugetConfigFile = await createCachedNuGetConfigFile(
     nugetCacheDir,
     packageFileName,
+    updatedDeps,
   );
 
   const dotnetVersion =
@@ -163,7 +177,7 @@ export async function updateArtifacts({
 
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    await runDotnetRestore(packageFileName, packageFiles, config);
+    await runDotnetRestore(packageFileName, packageFiles, config, updatedDeps);
 
     const newLockFileContentMap = await getLocalFiles(lockFileNames);
 

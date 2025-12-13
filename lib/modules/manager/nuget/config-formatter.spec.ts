@@ -261,5 +261,68 @@ describe('modules/manager/nuget/config-formatter', () => {
       );
       expect(packageSourceMapping).toBeUndefined();
     });
+
+    it('skips duplicate registry URLs', () => {
+      const registries: Registry[] = [
+        {
+          name: 'myRegistry',
+          url: 'https://my-registry.example.org',
+        },
+        {
+          name: 'myRegistry2',
+          url: 'https://my-registry2.example.org/index.json',
+        },
+        {
+          name: 'duplicateRegistry',
+          url: 'https://my-registry.example.org', // Duplicate URL with different name
+        },
+        {
+          url: 'https://my-registry2.example.org/index.json', // Duplicate URL without name
+        },
+        {
+          url: 'https://my-unnamed-registry.example.org/index.json',
+        },
+      ];
+
+      const xml = createNuGetConfigXml(registries);
+      const xmlDocument = new XmlDocument(xml);
+      const packageSources = xmlDocument.childNamed('packageSources');
+      expect(packageSources).toBeDefined();
+
+      // First occurrence should be kept
+      const myRegistry = packageSources?.childWithAttribute(
+        'key',
+        'myRegistry',
+      );
+      expect(myRegistry?.name).toBe('add');
+      expect(myRegistry?.attr.value).toBe('https://my-registry.example.org/');
+      expect(myRegistry?.attr.protocolVersion).toBe('2');
+
+      // Second unique registry should be present
+      const myRegistry2 = packageSources?.childWithAttribute(
+        'key',
+        'myRegistry2',
+      );
+      expect(myRegistry2?.name).toBe('add');
+      expect(myRegistry2?.attr.value).toBe(
+        'https://my-registry2.example.org/index.json',
+      );
+      expect(myRegistry2?.attr.protocolVersion).toBe('3');
+
+      // Unnamed registry should be present
+      const myUnnamedRegistry = packageSources?.childWithAttribute(
+        'value',
+        'https://my-unnamed-registry.example.org/index.json',
+      );
+      expect(myUnnamedRegistry?.name).toBe('add');
+      expect(myUnnamedRegistry?.attr.key).toBe('Package source 1');
+
+      // Duplicate registries should not exist
+      const duplicateRegistry = packageSources?.childWithAttribute(
+        'key',
+        'duplicateRegistry',
+      );
+      expect(duplicateRegistry).toBeUndefined();
+    });
   });
 });
