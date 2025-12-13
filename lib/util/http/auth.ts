@@ -1,8 +1,8 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
 import type { Options } from 'got';
 import {
-  GITEA_API_USING_HOST_TYPES,
   FORGEJO_API_USING_HOST_TYPES,
+  GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
 } from '../../constants';
