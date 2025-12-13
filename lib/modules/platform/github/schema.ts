@@ -3,16 +3,7 @@ import { logger } from '../../../logger';
 import { LooseArray } from '../../../util/schema-utils';
 
 const Package = z.object({
-  ecosystem: z.union([
-    z.literal('maven'),
-    z.literal('npm'),
-    z.literal('nuget'),
-    z.literal('pip'),
-    z.literal('rubygems'),
-    z.literal('rust'),
-    z.literal('composer'),
-    z.literal('go'),
-  ]),
+  ecosystem: z.string(),
   name: z.string(),
 });
 
