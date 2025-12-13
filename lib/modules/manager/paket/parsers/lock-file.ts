@@ -1,20 +1,11 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { newlineRegex, regEx } from '../../../../util/regex';
-
-export type SourceType = 'nuget';
-export interface Dependency {
-  source: SourceType;
-  groupName: string;
-  remote: string;
-  packageName: string;
-  version: string;
-}
+import type { LockFileDependency, LockFileSourceType } from '../types';
 
 interface Line {
   text: string;
   indent: number;
 }
-
 function extractLines(content: string): Line[] {
   return content
     .split(newlineRegex)
@@ -26,8 +17,8 @@ function extractLines(content: string): Line[] {
 }
 
 interface ReduceState {
-  dependencies: Dependency[];
-  currentSource: SourceType | null;
+  dependencies: LockFileDependency[];
+  currentSource: LockFileSourceType | null;
   currentGroupName: string;
   currentRemote: string;
 }
@@ -87,7 +78,7 @@ function parseLine(line: Line, state: ReduceState): ReduceState {
   return state;
 }
 
-export function parse(content: string): Dependency[] {
+export function parse(content: string): LockFileDependency[] {
   const lines = extractLines(content);
 
   let result: ReduceState = {

@@ -1,22 +1,11 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { newlineRegex } from '../../../../util/regex';
+import type { DependenciesFile, DependenciesFileGroup } from '../types';
 
-interface DependenciesFile {
-  groups: DependenciesGroup[];
-}
-interface DependenciesGroup {
-  groupName: string;
-  nugetPackages: Package[];
-}
-interface Package {
-  name: string;
-  options: string[];
-}
 interface ReduceState {
-  groups: DependenciesGroup[];
-  currentGroup: DependenciesGroup;
+  groups: DependenciesFileGroup[];
+  currentGroup: DependenciesFileGroup;
 }
-
 function analyzeLine(state: ReduceState, line: string): ReduceState {
   const lineParts = line.split(/\s+/).filter(isNonEmptyString);
   if (lineParts.length < 2) {
