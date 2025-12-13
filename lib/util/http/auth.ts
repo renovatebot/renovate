@@ -1,6 +1,7 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
 import type { Options } from 'got';
 import {
+  FORGEJO_API_USING_HOST_TYPES,
   GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
@@ -42,6 +43,11 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
     ) {
       // Gitea v1.8.0 and later support `Bearer` as alternate to `token`
       // https://github.com/go-gitea/gitea/pull/5378
+      options.headers.authorization = `Bearer ${options.token}`;
+    } else if (
+      options.hostType &&
+      FORGEJO_API_USING_HOST_TYPES.includes(options.hostType)
+    ) {
       options.headers.authorization = `Bearer ${options.token}`;
     } else if (
       options.hostType &&
