@@ -8,6 +8,7 @@ import type {
   GerritFindPRConfig,
   GerritMergeableInfo,
 } from './types';
+import { MIN_GERRIT_VERSION } from './utils';
 import * as httpMock from '~test/http-mock';
 import { partial } from '~test/util';
 
@@ -17,6 +18,16 @@ const jsonResultHeader = { 'content-type': 'application/json;charset=utf-8' };
 describe('modules/platform/gerrit/client', () => {
   beforeAll(() => {
     setBaseUrl(gerritEndpointUrl);
+  });
+
+  describe('getGerritVersion()', () => {
+    it('returns version', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/config/server/version')
+        .reply(200, gerritRestResponse('3.9.1'), jsonResultHeader);
+      expect(await client.getGerritVersion()).toBe('3.9.1');
+    });
   });
 
   describe('getRepos()', () => {
@@ -102,6 +113,8 @@ describe('modules/platform/gerrit/client', () => {
         'footer:Renovate-Branch=dependency-xyz',
         { branchName: 'dependency-xyz' },
       ],
+      ['message:"Renovate-Branch: "', { branchName: '' }],
+      ['hasfooter:Renovate-Branch', { branchName: '' }, '3.6.0'],
       ['label:Code-Review=-2', { branchName: 'dependency-xyz', label: '-2' }],
       [
         'branch:otherTarget',
@@ -137,9 +150,23 @@ describe('modules/platform/gerrit/client', () => {
             'fix(deps): "update dependency react-router-dom to ~> "v6.21.2""',
         },
       ],
+      [
+        'subject:"fix(deps): update dependency react-router-dom to v6.21.2"',
+        {
+          branchName: 'dependency-xyz',
+          prTitle: 'fix(deps): update dependency react-router-dom to v6.21.2',
+        },
+        '3.8.0',
+      ],
     ])(
       'query contains %p',
-      async (expectedQueryPart: string, config: GerritFindPRConfig) => {
+      async (
+        expectedQueryPart: string,
+        config: GerritFindPRConfig,
+        gerritVersion?: string,
+      ) => {
+        client.setGerritVersion(gerritVersion ?? MIN_GERRIT_VERSION);
+
         httpMock
           .scope(gerritEndpointUrl)
           .get('/a/changes/')
