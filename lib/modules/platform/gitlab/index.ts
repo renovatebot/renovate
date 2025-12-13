@@ -596,6 +596,8 @@ async function tryPrAutomerge(
         250,
       );
 
+      let diffHeadSha = '';
+
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         const { body } = await gitlabApi.getJsonUnchecked<{
@@ -604,9 +606,13 @@ async function tryPrAutomerge(
           pipeline: {
             status: string;
           };
+          sha: string;
         }>(`projects/${config.repository}/merge_requests/${pr}`, {
           memCache: false,
         });
+
+        diffHeadSha = body.sha;
+
         // detailed_merge_status is available with Gitlab >=15.6.0
         const use_detailed_merge_status = !!body.detailed_merge_status;
         const detailed_merge_status_check =
@@ -620,12 +626,31 @@ async function tryPrAutomerge(
         if (
           (detailed_merge_status_check || deprecated_merge_status_check) &&
           body.pipeline !== null &&
+          diffHeadSha !== '' &&
           desiredPipelineStatus.includes(body.pipeline.status)
         ) {
           break;
         }
         logger.debug(`PR not yet in mergeable state. Retrying ${attempt}`);
         await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
+      }
+
+      if (platformPrOptions?.gitLabNotesMerge) {
+        // Use the /merge "quick action" to automerge, which will work for
+        // both merge trains or non-train merges
+        // Associated docs:
+        //  - https://docs.gitlab.com/api/notes/#create-new-merge-request-note
+        //  - https://docs.gitlab.com/user/project/quick_actions/
+        await gitlabApi.postJson(
+          `projects/${config.repository}/merge_requests/${pr}/notes`,
+          {
+            body: {
+              body: '/merge',
+              merge_request_diff_head_sha: diffHeadSha,
+            },
+          },
+        );
+        return;
       }
 
       // Even if Gitlab returns a "merge-able" merge request status, enabling auto-merge sometimes
