@@ -19,7 +19,7 @@ function extractLines(content: string): Line[] {
     .split(newlineRegex)
     .map((line) => ({
       text: line.trim(),
-      indent: /^( *)/.exec(line)![1].length,
+      indent: regEx(/^(\s*)/).exec(line)![1].length,
     }))
     .filter((line) => line.text !== '');
 }
