@@ -4,8 +4,8 @@ import { updateDependency } from '.';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
 
-const aide = Fixtures.get('aide.rb');
-const ibazel = Fixtures.get('ibazel.rb');
+const aide = Fixtures.get('aide.rb.sample');
+const ibazel = Fixtures.get('ibazel.rb.sample');
 
 const baseUrl = 'https://github.com';
 
