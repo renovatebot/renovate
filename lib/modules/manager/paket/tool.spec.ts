@@ -1,8 +1,8 @@
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
-import type { UpdatePackage } from './types';
 import { updateAllPackages, updatePackage } from './tool';
+import type { UpdatePackage } from './types';
 import type { ExecResult } from '~test/exec-util';
 import { exec } from '~test/exec-util';
 
