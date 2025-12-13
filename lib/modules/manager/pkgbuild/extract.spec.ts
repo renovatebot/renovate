@@ -1,0 +1,1055 @@
+import { extractPackageFile } from './extract';
+
+describe('modules/manager/pkgbuild/extract', () => {
+  describe('extractPackageFile()', () => {
+    it('returns null for empty content', () => {
+      expect(extractPackageFile('')).toBeNull();
+    });
+
+    it('returns null for invalid PKGBUILD', () => {
+      expect(extractPackageFile('invalid content')).toBeNull();
+    });
+
+    it('returns null when no pkgver found', () => {
+      expect(
+        extractPackageFile(
+          'source=("https://github.com/test/test/archive/v1.0.0.tar.gz")',
+        ),
+      ).toBeNull();
+    });
+
+    it('returns null when no source found', () => {
+      expect(extractPackageFile('pkgver=1.0.0')).toBeNull();
+    });
+
+    it('extracts dependency from simple PKGBUILD', () => {
+      const content = `
+pkgname=example-package
+pkgver=1.2.3
+pkgrel=1
+source=("https://github.com/example/example/archive/v\${pkgver}.tar.gz")
+sha256sums=('abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'example/example',
+            currentValue: 'v1.2.3',
+            datasource: 'github-tags',
+            managerData: {
+              sourceUrl:
+                'https://github.com/example/example/archive/v${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+              },
+              pkgver: '1.2.3',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency with multiple checksums', () => {
+      const content = `
+pkgname=test-multi
+pkgver=2.0.0
+source=("https://github.com/test/multi/releases/download/v\${pkgver}/multi-\${pkgver}.tar.gz")
+sha256sums=('1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
+sha512sums=('fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'test/multi',
+            currentValue: 'v2.0.0',
+            datasource: 'github-tags',
+            managerData: {
+              sourceUrl:
+                'https://github.com/test/multi/releases/download/v${pkgver}/multi-${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+                sha512:
+                  'fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321',
+              },
+              pkgver: '2.0.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency without checksums', () => {
+      const content = `
+pkgname=test-nochecksum
+pkgver=1.0.0
+source=("https://github.com/test/nochecksum/archive/refs/tags/v\${pkgver}.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'test/nochecksum',
+            currentValue: 'v1.0.0',
+            datasource: 'github-tags',
+            managerData: {
+              sourceUrl:
+                'https://github.com/test/nochecksum/archive/refs/tags/v${pkgver}.tar.gz',
+              checksums: {},
+              pkgver: '1.0.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts all checksum types', () => {
+      const content = `
+pkgname=test-allchecksums
+pkgver=3.0.0
+source=("https://github.com/test/allchecksums/archive/v\${pkgver}.tar.gz")
+sha256sums=('1111111111111111111111111111111111111111111111111111111111111111')
+sha512sums=('22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222')
+b2sums=('33333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333')
+md5sums=('44444444444444444444444444444444')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'test/allchecksums',
+            currentValue: 'v3.0.0',
+            datasource: 'github-tags',
+            managerData: {
+              sourceUrl:
+                'https://github.com/test/allchecksums/archive/v${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  '1111111111111111111111111111111111111111111111111111111111111111',
+                sha512:
+                  '22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222',
+                b2: '33333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333',
+                md5: '44444444444444444444444444444444',
+              },
+              pkgver: '3.0.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts architecture-specific checksums', () => {
+      const content = `
+pkgname=test-arch
+pkgver=1.0.0
+arch=('x86_64' 'aarch64')
+source=("https://github.com/test/arch/archive/v\${pkgver}.tar.gz")
+sha256sums_x86_64=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+sha256sums_aarch64=('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'test/arch',
+            currentValue: 'v1.0.0',
+            datasource: 'github-tags',
+            managerData: {
+              sourceUrl:
+                'https://github.com/test/arch/archive/v${pkgver}.tar.gz',
+              checksums: {
+                sha256: [
+                  {
+                    value:
+                      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                    suffix: '_x86_64',
+                  },
+                  {
+                    value:
+                      'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                    suffix: '_aarch64',
+                  },
+                ],
+              },
+              pkgver: '1.0.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('handles mixed architecture-specific and regular checksums', () => {
+      const content = `
+pkgname=test-mixed
+pkgver=2.5.0
+source=("https://github.com/test/mixed/archive/v\${pkgver}.tar.gz")
+sha256sums=('1111111111111111111111111111111111111111111111111111111111111111')
+sha512sums_x86_64=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1')
+sha512sums_aarch64=('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'test/mixed',
+            currentValue: 'v2.5.0',
+            datasource: 'github-tags',
+            managerData: {
+              sourceUrl:
+                'https://github.com/test/mixed/archive/v${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  '1111111111111111111111111111111111111111111111111111111111111111',
+                sha512: [
+                  {
+                    value:
+                      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1',
+                    suffix: '_x86_64',
+                  },
+                  {
+                    value:
+                      'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                    suffix: '_aarch64',
+                  },
+                ],
+              },
+              pkgver: '2.5.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('handles refs/tags format', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://github.com/owner/repo/archive/refs/tags/v\${pkgver}.tar.gz")
+sha256sums=('abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc1')
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'owner/repo',
+        currentValue: 'v1.0.0',
+      });
+    });
+
+    it('handles github archive url without refs/tags', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://github.com/owner/repo/archive/v1.0.0.tar.gz")
+sha256sums=('abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc1')
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'owner/repo',
+        currentValue: 'v1.0.0',
+      });
+    });
+
+    it('uses filename fallback for non-GitHub/GitLab sources without pkgname', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://example.com/package-1.0.0.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'aur/package',
+            currentValue: '1.0.0',
+            datasource: 'repology',
+            managerData: {
+              sourceUrl: 'https://example.com/package-1.0.0.tar.gz',
+              checksums: {},
+              pkgver: '1.0.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency from PyPI source', () => {
+      const content = `
+pkgname=python-requests
+pkgver=2.31.0
+source=("https://files.pythonhosted.org/packages/source/r/requests/requests-\${pkgver}.tar.gz")
+sha256sums=('942c5a758f98d5e4783a997e9c5b0e7e9c2d6f2e6d4e3b2c1a3f6e7d8a9b0c11')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'requests',
+            currentValue: '2.31.0',
+            datasource: 'pypi',
+            managerData: {
+              sourceUrl:
+                'https://files.pythonhosted.org/packages/source/r/requests/requests-${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  '942c5a758f98d5e4783a997e9c5b0e7e9c2d6f2e6d4e3b2c1a3f6e7d8a9b0c11',
+              },
+              pkgver: '2.31.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency from npm registry source', () => {
+      const content = `
+pkgname=nodejs-typescript
+pkgver=5.3.2
+source=("https://registry.npmjs.org/typescript/-/typescript-\${pkgver}.tgz")
+sha256sums=('1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'typescript',
+            currentValue: '5.3.2',
+            datasource: 'npm',
+            managerData: {
+              sourceUrl:
+                'https://registry.npmjs.org/typescript/-/typescript-${pkgver}.tgz',
+              checksums: {
+                sha256:
+                  '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+              },
+              pkgver: '5.3.2',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency from scoped npm package', () => {
+      const content = `
+pkgname=nodejs-angular-core
+pkgver=17.0.5
+source=("https://registry.npmjs.org/@angular/core/-/core-\${pkgver}.tgz")
+sha256sums=('abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: '@angular/core',
+            currentValue: '17.0.5',
+            datasource: 'npm',
+            managerData: {
+              sourceUrl:
+                'https://registry.npmjs.org/@angular/core/-/core-${pkgver}.tgz',
+              checksums: {
+                sha256:
+                  'abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234',
+              },
+              pkgver: '17.0.5',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency from CPAN source', () => {
+      const content = `
+pkgname=perl-module-build
+pkgver=0.4234
+source=("https://cpan.metacpan.org/authors/id/L/LE/LEONT/Module-Build-\${pkgver}.tar.gz")
+sha256sums=('1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'Module::Build',
+            currentValue: '0.4234',
+            datasource: 'cpan',
+            managerData: {
+              sourceUrl:
+                'https://cpan.metacpan.org/authors/id/L/LE/LEONT/Module-Build-${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+              },
+              pkgver: '0.4234',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency from generic Git repository', () => {
+      const content = `
+pkgname=custom-tool
+pkgver=1.5.0
+source=("https://git.example.com/owner/custom-tool/archive/v\${pkgver}.tar.gz")
+sha256sums=('fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'https://git.example.com/owner/custom-tool.git',
+            currentValue: 'v1.5.0',
+            datasource: 'git-tags',
+            managerData: {
+              sourceUrl:
+                'https://git.example.com/owner/custom-tool/archive/v${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  'fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210',
+              },
+              pkgver: '1.5.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency from direct .git URL', () => {
+      const content = `
+pkgname=gitea-package
+pkgver=2.0.0
+source=("https://gitea.example.com/org/repo.git")
+sha256sums=('1111111111111111111111111111111111111111111111111111111111111111')
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'https://gitea.example.com/org/repo.git',
+        datasource: 'git-tags',
+      });
+    });
+
+    it('extracts dependency from Gitea archive URL', () => {
+      const content = `
+pkgname=gitea-package
+pkgver=1.2.3
+source=("https://gitea.com/owner/repo/archive/v\${pkgver}.tar.gz")
+sha256sums=('1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'owner/repo',
+            currentValue: 'v1.2.3',
+            datasource: 'gitea-tags',
+            registryUrls: ['https://gitea.com'],
+            managerData: {
+              sourceUrl:
+                'https://gitea.com/owner/repo/archive/v${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+              },
+              pkgver: '1.2.3',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency from Codeberg archive URL', () => {
+      const content = `
+pkgname=codeberg-package
+pkgver=2.0.0
+source=("https://codeberg.org/owner/repo/archive/v\${pkgver}.tar.gz")
+sha256sums=('abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'owner/repo',
+            currentValue: 'v2.0.0',
+            datasource: 'gitea-tags',
+            registryUrls: ['https://codeberg.org'],
+            managerData: {
+              sourceUrl:
+                'https://codeberg.org/owner/repo/archive/v${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  'abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234',
+              },
+              pkgver: '2.0.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency from Forgejo archive URL', () => {
+      const content = `
+pkgname=forgejo-package
+pkgver=3.1.0
+source=("https://code.forgejo.org/owner/repo/archive/v\${pkgver}.tar.gz")
+sha512sums=('11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'owner/repo',
+            currentValue: 'v3.1.0',
+            datasource: 'forgejo-tags',
+            registryUrls: ['https://code.forgejo.org'],
+            managerData: {
+              sourceUrl:
+                'https://code.forgejo.org/owner/repo/archive/v${pkgver}.tar.gz',
+              checksums: {
+                sha512:
+                  '11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111',
+              },
+              pkgver: '3.1.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency from self-hosted Gitea', () => {
+      const content = `
+pkgname=custom-package
+pkgver=1.0.0
+source=("https://gitea.mycompany.com/team/project/archive/v\${pkgver}.tar.gz")
+sha256sums=('fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'team/project',
+            currentValue: 'v1.0.0',
+            datasource: 'gitea-tags',
+            registryUrls: ['https://gitea.mycompany.com'],
+            managerData: {
+              sourceUrl:
+                'https://gitea.mycompany.com/team/project/archive/v${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  'fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210',
+              },
+              pkgver: '1.0.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts dependency from self-hosted Forgejo', () => {
+      const content = `
+pkgname=forge-package
+pkgver=2.5.0
+source=("https://forgejo.example.org/dev/tool/archive/\${pkgver}.tar.gz")
+sha256sums=('0987654321fedcba0987654321fedcba0987654321fedcba0987654321fedcba')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'dev/tool',
+            currentValue: '2.5.0',
+            datasource: 'forgejo-tags',
+            registryUrls: ['https://forgejo.example.org'],
+            managerData: {
+              sourceUrl:
+                'https://forgejo.example.org/dev/tool/archive/${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  '0987654321fedcba0987654321fedcba0987654321fedcba0987654321fedcba',
+              },
+              pkgver: '2.5.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('handles PyPI with different hostname variations', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://pypi.org/packages/source/p/package/package-\${pkgver}.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'package',
+        currentValue: '1.0.0',
+        datasource: 'pypi',
+      });
+    });
+
+    it('uses filename fallback for truly unsupported sources', () => {
+      const content = `
+pkgver=1.0.0
+source=("ftp://ftp.example.com/package-1.0.0.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'aur/package',
+            currentValue: '1.0.0',
+            datasource: 'repology',
+            managerData: {
+              sourceUrl: 'ftp://ftp.example.com/package-1.0.0.tar.gz',
+              checksums: {},
+              pkgver: '1.0.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('uses Repology as fallback for unsupported sources with pkgname', () => {
+      const content = `
+pkgname=custom-package
+pkgver=1.5.0
+source=("https://example.com/downloads/custom-package-\${pkgver}.tar.gz")
+sha256sums=('1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'aur/custom-package',
+            currentValue: '1.5.0',
+            datasource: 'repology',
+            managerData: {
+              sourceUrl:
+                'https://example.com/downloads/custom-package-${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+              },
+              pkgver: '1.5.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('uses manual Repology configuration from comment', () => {
+      const content = `
+# renovate: repology=arch_linux_stable/nginx
+pkgname=nginx
+pkgver=1.24.0
+source=("https://nginx.org/download/nginx-\${pkgver}.tar.gz")
+sha256sums=('abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'arch_linux_stable/nginx',
+            currentValue: '1.24.0',
+            datasource: 'repology',
+            managerData: {
+              sourceUrl: 'https://nginx.org/download/nginx-${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  'abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234',
+              },
+              pkgver: '1.24.0',
+            },
+          },
+        ],
+      });
+    });
+
+    it('prioritizes manual Repology config over automatic detection', () => {
+      const content = `
+# renovate: repology=freebsd/custom-pkg
+pkgname=custom-package
+pkgver=2.0.0
+source=("https://example.com/custom-package-\${pkgver}.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'freebsd/custom-pkg',
+        datasource: 'repology',
+      });
+    });
+
+    it('extracts dependency from GitLab source', () => {
+      const content = `
+pkgname=example-gitlab-package
+pkgver=1.2.3
+source=("https://gitlab.com/test-owner/test-repo/-/archive/v\${pkgver}/test-repo-v\${pkgver}.tar.gz")
+sha256sums=('1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
+`;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'test-owner/test-repo',
+            currentValue: 'v1.2.3',
+            datasource: 'gitlab-tags',
+            managerData: {
+              sourceUrl:
+                'https://gitlab.com/test-owner/test-repo/-/archive/v${pkgver}/test-repo-v${pkgver}.tar.gz',
+              checksums: {
+                sha256:
+                  '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+              },
+              pkgver: '1.2.3',
+            },
+          },
+        ],
+      });
+    });
+
+    it('handles self-hosted GitLab instances', () => {
+      const content = `
+pkgver=2.5.0
+source=("https://gitlab.example.com/myorg/myproject/-/archive/v\${pkgver}/myproject-v\${pkgver}.tar.gz")
+sha256sums=('abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc1')
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'myorg/myproject',
+        currentValue: 'v2.5.0',
+        datasource: 'gitlab-tags',
+      });
+    });
+
+    it('falls back to Repology for unparseable source URLs', () => {
+      const content = `
+pkgname=invalid-url-pkg
+pkgver=1.0.0
+source=("hxxp://invalid-protocol-url")
+`;
+      const result = extractPackageFile(content);
+      expect(result).not.toBeNull();
+      // Should fall back to Repology when URL can't be parsed but pkgname exists
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'aur/invalid-url-pkg',
+        currentValue: '1.0.0',
+        datasource: 'repology',
+      });
+    });
+
+    it('logs debug message when no checksums are found', () => {
+      const content = `
+pkgname=no-checksums
+pkgver=1.0.0
+source=("https://github.com/test/test/archive/v\${pkgver}.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].managerData?.checksums).toEqual({});
+    });
+
+    it('returns null for GitHub URLs with insufficient path parts', () => {
+      const content = `
+pkgname=invalid-github
+pkgver=1.0.0
+source=("https://github.com/only-one-part")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for GitHub URLs without version info', () => {
+      const content = `
+pkgname=no-version
+pkgver=1.0.0
+source=("https://github.com/owner/repo/somethingelse")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for GitLab URLs with insufficient path parts', () => {
+      const content = `
+pkgname=invalid-gitlab
+pkgver=1.0.0
+source=("https://gitlab.com/only-one")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for GitLab URLs without archive path', () => {
+      const content = `
+pkgname=no-archive
+pkgver=1.0.0
+source=("https://gitlab.com/owner/repo/somethingelse")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('extracts dependency from Packagist URL with packages path', () => {
+      const content = `
+pkgname=packagist-package
+pkgver=1.0.0
+source=("https://packagist.org/packages/vendor/package")
+`;
+      const result = extractPackageFile(content);
+      expect(result).not.toBeNull();
+      expect(result?.deps[0]).toMatchObject({
+        datasource: 'packagist',
+        currentValue: '',
+        depName: 'vendor/package',
+      });
+    });
+
+    it('extracts dependency from Packagist download URL', () => {
+      const content = `
+pkgname=packagist-download
+pkgver=2.5.0
+source=("https://repo.packagist.org/downloads/vendor-package-2.5.0.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      expect(result).not.toBeNull();
+      expect(result?.deps[0]).toMatchObject({
+        datasource: 'packagist',
+        currentValue: '2.5.0',
+      });
+    });
+
+    it('returns null for invalid Packagist URLs', () => {
+      const content = `
+pkgname=invalid-packagist
+pkgver=1.0.0
+source=("https://packagist.org/invalid")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('handles tar.bz2 file extension in GitHub archive URLs', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://github.com/owner/repo/archive/v\${pkgver}.tar.bz2")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'owner/repo',
+        currentValue: 'v1.0.0',
+        datasource: 'github-tags',
+      });
+    });
+
+    it('handles tar.xz file extension in GitHub archive URLs', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://github.com/owner/repo/archive/v\${pkgver}.tar.xz")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'owner/repo',
+        currentValue: 'v1.0.0',
+        datasource: 'github-tags',
+      });
+    });
+
+    it('handles .zip file extension in GitHub archive URLs', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://github.com/owner/repo/archive/v\${pkgver}.zip")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'owner/repo',
+        currentValue: 'v1.0.0',
+        datasource: 'github-tags',
+      });
+    });
+
+    it('handles tar.bz2 file extension in PyPI URLs', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://files.pythonhosted.org/packages/source/p/package/package-1.0.0.tar.bz2")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        datasource: 'pypi',
+        currentValue: '1.0.0',
+      });
+    });
+
+    it('handles .zip file extension in PyPI URLs', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://files.pythonhosted.org/packages/source/p/package/package-1.0.0.zip")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        datasource: 'pypi',
+        currentValue: '1.0.0',
+      });
+    });
+
+    it('returns null for npm URLs with insufficient path parts', () => {
+      const content = `
+pkgname=invalid-npm
+pkgver=1.0.0
+source=("https://registry.npmjs.org/package")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for npm URLs with invalid filename', () => {
+      const content = `
+pkgname=invalid-npm-filename
+pkgver=1.0.0
+source=("https://registry.npmjs.org/package/-/invalid-filename")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for npm scoped package with insufficient path parts', () => {
+      const content = `
+pkgname=invalid-scoped
+pkgver=1.0.0
+source=("https://registry.npmjs.org/@scope/package/-")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for CPAN URLs without filename', () => {
+      const content = `
+pkgname=invalid-cpan
+pkgver=1.0.0
+source=("https://cpan.metacpan.org/authors/id/")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for CPAN URLs with invalid filename format', () => {
+      const content = `
+pkgname=invalid-cpan-format
+pkgver=1.0.0
+source=("https://cpan.metacpan.org/authors/id/A/AB/ABC/invalidfile")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for generic git URLs without archive path and not ending in .git', () => {
+      const content = `
+pkgname=invalid-git
+pkgver=1.0.0
+source=("https://git.example.com/owner/repo/something")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for generic git URLs with insufficient path parts for .git', () => {
+      const content = `
+pkgname=invalid-git-path
+pkgver=1.0.0
+source=("https://git.example.com/repo.git")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for Gitea URLs with archive but no version after extension removal', () => {
+      const content = `
+pkgname=gitea-noversion
+pkgver=1.0.0
+source=("https://gitea.com/owner/repo/archive/.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for Forgejo URLs with archive but no version after extension removal', () => {
+      const content = `
+pkgname=forgejo-noversion
+pkgver=1.0.0
+source=("https://code.forgejo.org/owner/repo/archive/.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('returns null for generic git URLs with archive but no version after extension removal', () => {
+      const content = `
+pkgname=git-noversion
+pkgver=1.0.0
+source=("https://git.example.com/owner/repo/archive/.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      // Should fall back to Repology
+      expect(result).not.toBeNull();
+      expect(result?.deps[0].datasource).toBe('repology');
+    });
+
+    it('handles pypi.python.org hostname variant', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://pypi.python.org/packages/source/p/package/package-1.0.0.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        datasource: 'pypi',
+        currentValue: '1.0.0',
+      });
+    });
+
+    it('handles registry.npmjs.com hostname variant', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://registry.npmjs.com/package/-/package-1.0.0.tgz")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        datasource: 'npm',
+        currentValue: '1.0.0',
+      });
+    });
+
+    it('handles CPAN URLs with cpan in hostname', () => {
+      const content = `
+pkgver=1.0.0
+source=("https://www.cpan.org/authors/id/A/AB/ABC/Module-Name-1.0.0.tar.gz")
+`;
+      const result = extractPackageFile(content);
+      expect(result?.deps[0]).toMatchObject({
+        datasource: 'cpan',
+        currentValue: '1.0.0',
+      });
+    });
+  });
+});
