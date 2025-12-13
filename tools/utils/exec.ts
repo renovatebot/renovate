@@ -3,6 +3,7 @@ import {
   type SpawnSyncReturns,
   spawnSync,
 } from 'node:child_process';
+import { instrument } from '../../lib/instrumentation';
 
 const maxBuffer = 20 * 1024 * 1024;
 
@@ -17,5 +18,7 @@ export function exec(
   opts: SpawnSyncOptions = {},
 ): SpawnSyncReturns<string> {
   // args from shelljs
-  return spawnSync(cmd, args, { ...opts, maxBuffer, encoding: 'utf8' });
+  return instrument(`exec: ${cmd} ${args.join(' ')}`, () =>
+    spawnSync(cmd, args, { ...opts, maxBuffer, encoding: 'utf8' }),
+  );
 }
