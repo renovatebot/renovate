@@ -4,6 +4,7 @@ import './punycode.cjs';
 import { dequal } from 'dequal';
 import { pathExists, readFile } from 'fs-extra';
 import { getConfigFileNames } from './config/app-strings';
+import { GlobalConfig } from './config/global';
 import { massageConfig } from './config/massage';
 import { migrateConfig } from './config/migration';
 import type { RenovateConfig } from './config/types';
@@ -63,6 +64,25 @@ interface PackageJson {
   const strict = strictArgIndex >= 0;
   if (strict) {
     process.argv.splice(strictArgIndex, 1);
+  }
+  try {
+    const env = getEnv();
+    const fileConfig = await getFileConfig(env);
+    if (!dequal(fileConfig, {})) {
+      const file = env.RENOVATE_CONFIG_FILE ?? 'config.js';
+      logger.info(`Validating ${file}`);
+      try {
+        await validate('global', file, fileConfig, strict);
+      } catch (err) {
+        logger.error({ file, err }, 'File is not valid Renovate config');
+        returnVal = 1;
+      }
+      if (returnVal === 0) {
+        GlobalConfig.set(fileConfig);
+      }
+    }
+  } catch {
+    // ignore
   }
   if (process.argv.length > 2) {
     for (const file of process.argv.slice(2)) {
@@ -129,22 +149,6 @@ interface PackageJson {
             strict,
             true,
           );
-        }
-      }
-    } catch {
-      // ignore
-    }
-    try {
-      const env = getEnv();
-      const fileConfig = await getFileConfig(env);
-      if (!dequal(fileConfig, {})) {
-        const file = env.RENOVATE_CONFIG_FILE ?? 'config.js';
-        logger.info(`Validating ${file}`);
-        try {
-          await validate('global', file, fileConfig, strict);
-        } catch (err) {
-          logger.error({ file, err }, 'File is not valid Renovate config');
-          returnVal = 1;
         }
       }
     } catch {
