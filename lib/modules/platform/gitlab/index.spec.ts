@@ -3653,6 +3653,12 @@ These updates have all been created already. To force a retry/rebase of any, cli
       ).toBe('A Merge Request is a MR, multiple Merge Requests are MRs.');
     });
 
+    it('replaces PR reference with MR reference', () => {
+      expect(
+        gitlab.massageMarkdown('See the following PR: #123 for more details'),
+      ).toBe('See the following MR: !123 for more details');
+    });
+
     it('avoids false positives when replacing PR with MR', () => {
       const nothingToReplace = 'PROCESSING APPROPRIATE SUPPRESS NOPR';
       expect(gitlab.massageMarkdown(nothingToReplace)).toBe(nothingToReplace);
