@@ -1036,6 +1036,12 @@ Only set this to `false` if all three statements are true:
 - You want to run Renovate on every repository the bot has access to
 - You want to skip all onboarding PRs
 
+## onboardingAutoCloseAge
+
+Maximum number of days after which Renovate will stop trying to onboard the repository, and will close any existing onboarding PRs.
+
+By default this option is set to `null`.
+
 ## onboardingBranch
 
 <!-- prettier-ignore -->
