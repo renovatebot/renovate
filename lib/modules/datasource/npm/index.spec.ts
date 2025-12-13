@@ -395,4 +395,59 @@ describe('modules/datasource/npm/index', () => {
       Error('env-replace'),
     );
   });
+
+  it('getDigest returns null when registryUrl is falsy', async () => {
+    const ds = new NpmDatasource();
+
+    const res = await ds.getDigest(
+      { packageName: 'foobar', registryUrl: '' },
+      '0.0.1',
+    );
+    expect(res).toBeNull();
+  });
+
+  it('getDigest returns null when newValue (version) is undefined', async () => {
+    const ds = new NpmDatasource();
+
+    const res = await ds.getDigest(
+      { packageName: 'foobar', registryUrl: 'https://registry.npmjs.org' },
+      undefined,
+    );
+    expect(res).toBeNull();
+  });
+
+  it('getDigest returns null when integrity is missing', async () => {
+    const ds = new NpmDatasource();
+
+    const body = {
+      versions: {
+        '0.0.1': {
+          dist: {},
+        },
+      },
+    };
+    httpMock
+      .scope('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, body);
+
+    const res = await ds.getDigest(
+      { packageName: 'foobar', registryUrl: 'https://registry.npmjs.org' },
+      '0.0.1',
+    );
+    expect(res).toBeNull();
+  });
+
+  it('getDigest throws and exercises handleGenericErrors for HTTP errors', async () => {
+    const ds = new NpmDatasource();
+
+    httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(503);
+
+    await expect(
+      ds.getDigest(
+        { packageName: 'foobar', registryUrl: 'https://registry.npmjs.org' },
+        '0.0.1',
+      ),
+    ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+  });
 });
