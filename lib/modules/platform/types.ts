@@ -47,7 +47,6 @@ export interface RepoParams {
   renovateUsername?: string;
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
-  bbUseDevelopmentBranch?: boolean;
 }
 
 export interface PrDebugData {
@@ -98,8 +97,9 @@ export interface PlatformPrOptions {
   autoApprove?: boolean;
   automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
-  bbUseDefaultReviewers?: boolean;
   bbAutoResolvePrTasks?: boolean;
+  bbMendAppDashboardStatus?: boolean;
+  bbUseDefaultReviewers?: boolean;
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;

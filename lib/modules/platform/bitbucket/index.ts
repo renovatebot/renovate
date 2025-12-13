@@ -194,7 +194,6 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   cloneSubmodulesFilter,
-  bbUseDevelopmentBranch,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
@@ -216,6 +215,7 @@ export async function initRepo({
 
     mainBranch = info.mainbranch;
 
+    const bbUseDevelopmentBranch = GlobalConfig.get('bbUseDevelopmentBranch');
     if (bbUseDevelopmentBranch) {
       // Fetch Bitbucket development branch
       const developmentBranch = (
@@ -230,6 +230,30 @@ export async function initRepo({
     }
 
     config.defaultBranch = mainBranch;
+
+    const bbMendAppDashboardStatus = GlobalConfig.get(
+      'bbMendAppDashboardStatus',
+    );
+    if (bbMendAppDashboardStatus) {
+      const statusName = 'Mend.io Dashboard';
+
+      const mendAppDashboardStatus = await getBranchStatusCheck(
+        config.defaultBranch,
+        statusName,
+      );
+
+      if (!mendAppDashboardStatus) {
+        logger.debug(`Creating branch status for ${statusName}`);
+
+        await setBranchStatus({
+          branchName: config.defaultBranch,
+          context: statusName,
+          description: '',
+          state: 'green',
+          url: `https://developer.mend.io/bitbucket/${repository}`,
+        });
+      }
+    }
 
     config = {
       ...config,
@@ -453,6 +477,7 @@ async function getStatus(
     )
   ).body.values;
 }
+
 // Returns the combined status for a branch.
 export async function getBranchStatus(
   branchName: string,

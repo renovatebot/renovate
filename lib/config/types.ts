@@ -242,6 +242,8 @@ export interface RepoGlobalConfig {
   configFileNames?: string[];
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
+  bbMendAppDashboardStatus?: boolean;
+  bbUseDevelopmentBranch?: boolean;
 }
 
 /**
