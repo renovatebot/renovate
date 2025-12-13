@@ -1,5 +1,5 @@
 import type { Attributes, SpanKind, SpanOptions } from '@opentelemetry/api';
-import type { RenovateSplit } from '../config/types';
+import type { GitCloneMode, RenovateSplit } from '../config/types';
 import type { BunyanRecord } from '../logger/types';
 import type { PackageFile } from '../modules/manager/types';
 import type { BranchCache } from '../util/cache/repository/types';
@@ -12,6 +12,7 @@ export type RenovateSpanOptions = {
 export type RenovateSpanAttributes = {
   [ATTR_RENOVATE_SPLIT]?: RenovateSplit;
   [ATTR_VCS_GIT_OPERATION_TYPE]?: GitOperationType;
+  [ATTR_VCS_GIT_CLONE_MODE]?: GitCloneMode;
 } & Attributes;
 
 /**
@@ -83,3 +84,6 @@ export const ATTR_VCS_GIT_OPERATION_TYPE = 'vcs.git.operation.type';
  * @see https://opentelemetry.io/docs/specs/semconv/registry/attributes/vcs/
  * */
 export const ATTR_VCS_GIT_SUBCOMMAND = 'vcs.git.subcommand';
+
+/** the clone mode Renovateis operating with */
+export const ATTR_VCS_GIT_CLONE_MODE = 'vcs.git.clone_mode';

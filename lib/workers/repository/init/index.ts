@@ -6,7 +6,11 @@ import { setRepositoryLogLevelRemaps } from '../../../logger/remap';
 import { platform } from '../../../modules/platform';
 import * as memCache from '../../../util/cache/memory';
 import { clone } from '../../../util/clone';
-import { cloneSubmodules, setUserRepoConfig } from '../../../util/git';
+import {
+  cloneSubmodules,
+  logGitCloneMode,
+  setUserRepoConfig,
+} from '../../../util/git';
 import { getAll } from '../../../util/host-rules';
 import { initMutexes } from '../../../util/mutex';
 import { checkIfConfigured } from '../configured';
@@ -69,6 +73,7 @@ export async function initRepo(
   config = applySecretsAndVariablesToConfig({
     config,
   });
+  logGitCloneMode();
   setUserRepoConfig(config);
   config = await detectVulnerabilityAlerts(config);
   // istanbul ignore if
