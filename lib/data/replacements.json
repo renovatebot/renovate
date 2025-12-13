@@ -19,6 +19,7 @@
       "replacements:framer-motion-to-motion",
       "replacements:hapi-to-scoped",
       "replacements:google-github-action-release-please-to-googleapis",
+      "replacements:grafana-oss-to-grafana",
       "replacements:jade-to-pug",
       "replacements:joi-to-scoped",
       "replacements:joi-to-unscoped",
@@ -704,6 +705,17 @@
         "matchDatasources": ["github-tags"],
         "matchPackageNames": ["google-github-actions/release-please-action"],
         "replacementName": "googleapis/release-please-action"
+      }
+    ]
+  },
+  "grafana-oss-to-grafana": {
+    "description": "`grafana/grafana-oss`` was replaced by `grafana/grafana` with the same images",
+    "packageRules": [
+      {
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["/^(?:docker\\.io/)?grafana/grafana-oss$/"],
+        "matchCurrentVersion": ">=12.1.1",
+        "replacementName": "grafana/grafana"
       }
     ]
   },
