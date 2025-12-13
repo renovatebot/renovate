@@ -99,6 +99,7 @@ export interface RenovateSharedConfig {
   groupName?: string;
   groupSlug?: string;
   hashedBranchLength?: number;
+  hostRules?: HostRule[];
   ignoreDeps?: string[];
   ignorePaths?: string[];
   ignoreTests?: boolean;
@@ -261,7 +262,7 @@ export interface LegacyAdminConfig {
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingRebaseCheckbox?: boolean;
   onboardingPrTitle?: string;
-  onboardingConfig?: RenovateSharedConfig;
+  onboardingConfig?: RenovateConfig;
   onboardingConfigFileName?: string;
 
   optimizeForDisabled?: boolean;
