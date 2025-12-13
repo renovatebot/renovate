@@ -1046,31 +1046,31 @@
         "matchDatasources": ["npm"],
         "matchPackageNames": ["@tsconfig/node10"],
         "replacementName": "@tsconfig/node12",
-        "replacementVersion": "12.0.0"
+        "replacementVersion": "12.1.0"
       },
       {
         "matchDatasources": ["npm"],
         "matchPackageNames": ["@tsconfig/node12"],
         "replacementName": "@tsconfig/node14",
-        "replacementVersion": "14.0.0"
+        "replacementVersion": "14.1.0"
       },
       {
         "matchDatasources": ["npm"],
         "matchPackageNames": ["@tsconfig/node14"],
         "replacementName": "@tsconfig/node16",
-        "replacementVersion": "16.0.0"
+        "replacementVersion": "16.1.0"
       },
       {
         "matchDatasources": ["npm"],
         "matchPackageNames": ["@tsconfig/node16", "@tsconfig/node17"],
         "replacementName": "@tsconfig/node18",
-        "replacementVersion": "18.0.0"
+        "replacementVersion": "18.2.0"
       },
       {
         "matchDatasources": ["npm"],
         "matchPackageNames": ["@tsconfig/node18", "@tsconfig/node19"],
         "replacementName": "@tsconfig/node20",
-        "replacementVersion": "20.0.0"
+        "replacementVersion": "20.1.0"
       },
       {
         "matchDatasources": ["npm"],
