@@ -1,13 +1,7 @@
 import { quote } from 'shlex';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-
-export interface UpdatePackage {
-  filePath: string;
-  packageName?: string;
-  group?: string;
-  version?: string;
-}
+import type { UpdatePackage } from './types';
 
 export async function updatePackage(command: UpdatePackage): Promise<void> {
   const execOptions: ExecOptions = {

@@ -15,6 +15,7 @@ import type {
 import { parse as parseDependenciesFile } from './parsers/dependencies-file';
 import { parse as parseLockFile } from './parsers/lock-file';
 import { updateAllPackages, updatePackage } from './tool';
+import type { PaketPackage } from './types';
 
 export const displayName = 'Paket';
 export const url = 'https://fsprojects.github.io/Paket/';
@@ -27,9 +28,6 @@ export const defaultConfig = {
 
 export const supportedDatasources = [NugetDatasource.id];
 
-interface PaketPackage {
-  paketGroupName: string;
-}
 export async function extractPackageFile(
   content: string,
   packageFile: string,

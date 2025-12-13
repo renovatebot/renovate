@@ -1,4 +1,4 @@
-import type { Dependency } from './lock-file';
+import type { LockFileDependency } from '../types';
 import { parse } from './lock-file';
 
 describe('modules/manager/paket/parsers/lock-file', () => {
@@ -15,7 +15,7 @@ NUGET
       FSharp.Core (>= 4.6.2)
 `);
 
-      expect(result).toEqual<Dependency[]>([
+      expect(result).toEqual<LockFileDependency[]>([
         {
           groupName: 'Main',
           source: 'nuget',
@@ -45,7 +45,7 @@ NUGET
     FSharp.Core (9.0.300)
 `);
 
-      expect(result).toEqual<Dependency[]>([
+      expect(result).toEqual<LockFileDependency[]>([
         {
           groupName: 'Main',
           source: 'nuget',
@@ -86,7 +86,7 @@ NUGET
     FSharp.Core (9.0.300)
 `);
 
-      expect(result).toEqual<Dependency[]>([
+      expect(result).toEqual<LockFileDependency[]>([
         {
           groupName: 'Main',
           source: 'nuget',
