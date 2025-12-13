@@ -58,7 +58,37 @@ interface PackageJson {
   'renovate-config'?: Record<string, RenovateConfig>;
 }
 
+function usage(): void {
+  /* eslint-disable no-console */
+  console.log('Usage: renovate-config-validator [options] [config-files...]');
+  console.log('');
+  console.log(
+    'Validate your Renovate configuration (repo config, shared presets or global configuration)',
+  );
+  console.log('');
+  console.log(
+    'If no [config-files...] are given, renovate-config-validator will look at the default config file locations (https://docs.renovatebot.com/configuration-options/)',
+  );
+
+  console.log('  Examples:');
+  console.log('');
+  console.log('    $ renovate-config-validator');
+  console.log('    $ renovate-config-validator --strict');
+  console.log('    $ renovate-config-validator first_config.json');
+  console.log('    $ renovate-config-validator --strict config.js');
+  console.log(
+    '    $ env RENOVATE_CONFIG_FILE=obscure-name.json renovate-config-validator',
+  );
+  /* eslint-enable no-console */
+}
+
 (async () => {
+  const helpArgIndex = process.argv.indexOf('--help');
+  const help = helpArgIndex >= 0;
+  if (help) {
+    usage();
+    return;
+  }
   const strictArgIndex = process.argv.indexOf('--strict');
   const strict = strictArgIndex >= 0;
   if (strict) {
