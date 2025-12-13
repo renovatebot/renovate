@@ -160,6 +160,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     return {
       ...rawDetailedVersion,
       isDeprecated: basicRelease.isDeprecated,
+      releaseTimestamp: basicRelease.releaseTimestamp,
     };
   }
 }
