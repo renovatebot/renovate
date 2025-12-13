@@ -6,7 +6,10 @@ import type { AllConfig, RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { resetGlobalLogLevelRemaps } from '../../logger/remap';
 import { initPlatform } from '../../modules/platform';
-import * as packageCache from '../../util/cache/package';
+import {
+  destroy as cleanupPackageCache,
+  init as initPackageCache,
+} from '../../util/cache/package';
 import { setEmojiConfig } from '../../util/emoji';
 import { validateGitVersion } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
@@ -88,7 +91,7 @@ export async function globalInitialize(
   setGlobalHostRules(config);
   config = await initPlatform(config);
   config = await setDirectories(config);
-  await packageCache.init(config);
+  await initPackageCache(config);
   limitCommitsPerRun(config);
   setEmojiConfig(config);
   setGlobalHostRules(config);
@@ -98,6 +101,6 @@ export async function globalInitialize(
 }
 
 export async function globalFinalize(config: RenovateConfig): Promise<void> {
-  await packageCache.cleanup(config);
+  await cleanupPackageCache();
   resetGlobalLogLevelRemaps();
 }

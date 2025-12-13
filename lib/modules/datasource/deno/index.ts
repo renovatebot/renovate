@@ -1,7 +1,7 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import pMap from 'p-map';
 import { logger } from '../../../logger';
-import * as packageCache from '../../../util/cache/package';
+import { packageCache } from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
 import { joinUrlParts } from '../../../util/url';

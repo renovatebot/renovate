@@ -1,6 +1,6 @@
 import { DateTime, Settings } from 'luxon';
 import type { Timestamp } from '../../../../util/timestamp';
-import * as packageCache from '../../../cache/package';
+import { packageCache } from '../../../cache/package';
 import { clone } from '../../../clone';
 import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
 import { GithubGraphqlPackageCacheStrategy } from './package-cache-strategy';
@@ -13,6 +13,9 @@ const mockTime = (input: string): void => {
 };
 
 type CacheRecord = GithubGraphqlCacheRecord<GithubDatasourceItem>;
+
+vi.unmock('../../../cache/package');
+vi.unmock('../../../mutex');
 
 describe('util/github/graphql/cache-strategies/package-cache-strategy', () => {
   const cacheGet = vi.spyOn(packageCache, 'get');

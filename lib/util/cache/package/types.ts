@@ -1,17 +1,4 @@
-export type { CombinedKey, PackageCacheNamespace } from './namespaces';
-
-export interface PackageCache {
-  get<T = any>(namespace: string, key: string): Promise<T | undefined>;
-
-  set<T = any>(
-    namespace: string,
-    key: string,
-    value: T,
-    hardTtlMinutes?: number,
-  ): Promise<void>;
-
-  cleanup?(): Promise<void>;
-}
+export type { PackageCacheNamespace } from './namespaces';
 
 export interface DecoratorCachedRecord {
   value: unknown;
