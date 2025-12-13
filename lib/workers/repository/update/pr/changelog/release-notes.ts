@@ -212,7 +212,8 @@ async function releaseNotesResult(
   }
   const { baseUrl, repository } = project;
   const releaseNotes: ChangeLogNotes = releaseMatch;
-  if (detectPlatform(baseUrl) === 'gitlab') {
+  const platform = detectPlatform(baseUrl);
+  if (platform === 'gitlab') {
     releaseNotes.url = `${baseUrl}${repository}/tags/${releaseMatch.tag!}`;
   } else {
     releaseNotes.url = releaseMatch.url
@@ -221,18 +222,9 @@ async function releaseNotesResult(
         `${baseUrl}${repository}/releases/${releaseMatch.tag!}`;
   }
   // set body for release notes
-  releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
   releaseNotes.name = massageName(releaseNotes.name, releaseNotes.tag);
-  if (releaseNotes.body.length || releaseNotes.name?.length) {
-    try {
-      if (baseUrl !== 'https://gitlab.com/') {
-        releaseNotes.body = await linkify(releaseNotes.body, {
-          repository: `${baseUrl}${repository}`,
-        });
-      }
-    } catch (err) /* istanbul ignore next */ {
-      logger.warn({ err, baseUrl, repository }, 'Error linkifying');
-    }
+  if (releaseNotes.body?.length || releaseNotes.name?.length) {
+    releaseNotes.body = await linkifyBody(project, releaseNotes.body);
   } else {
     return null;
   }
@@ -555,16 +547,15 @@ function getNotesSourceUrl(
 
 async function linkifyBody(
   { baseUrl, repository }: ChangeLogProject,
-  bodyStr: string,
+  bodyStr: string | undefined | null,
 ): Promise<string> {
   const body = massageBody(bodyStr, baseUrl);
+
   if (body?.length) {
     try {
-      return await linkify(body, {
-        repository: `${baseUrl}${repository}`,
-      });
+      return await linkify(baseUrl, repository, body);
     } catch (err) /* istanbul ignore next */ {
-      logger.warn({ body, err }, 'linkify error');
+      logger.warn({ body, err, baseUrl, repository }, 'linkify error');
     }
   }
   return body;
