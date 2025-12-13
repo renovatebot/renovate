@@ -496,6 +496,108 @@ describe('modules/manager/bazel-module/extract', () => {
       });
     });
 
+    it('returns images.pull dependencies with name', async () => {
+      const input = codeBlock`
+        images.pull(
+          name = "ubuntu",
+          digest = "sha256:1e622c5f073b4f6bfad6632f2616c7f59ef256e96fe78bf6a595d1dc4376ac02",
+          registry = "index.docker.io",
+          repository = "library/ubuntu",
+          tag = "24.04",
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: DockerDatasource.id,
+            depType: 'img_pull',
+            depName: 'ubuntu',
+            packageName: 'index.docker.io/library/ubuntu',
+            currentValue: '24.04',
+            currentDigest:
+              'sha256:1e622c5f073b4f6bfad6632f2616c7f59ef256e96fe78bf6a595d1dc4376ac02',
+            registryUrls: ['https://index.docker.io'],
+            replaceString: codeBlock`
+              images.pull(
+                name = "ubuntu",
+                digest = "sha256:1e622c5f073b4f6bfad6632f2616c7f59ef256e96fe78bf6a595d1dc4376ac02",
+                registry = "index.docker.io",
+                repository = "library/ubuntu",
+                tag = "24.04",
+              )
+            `,
+          },
+        ],
+      });
+    });
+
+    it('returns images.pull dependencies without name', async () => {
+      const input = codeBlock`
+        images.pull(
+          digest = "sha256:029d4461bd98f124e531380505ceea2072418fdf28752aa73b7b273ba3048903",
+          registry = "gcr.io",
+          repository = "distroless/base",
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: DockerDatasource.id,
+            depType: 'img_pull',
+            depName: 'distroless/base',
+            packageName: 'gcr.io/distroless/base',
+            currentDigest:
+              'sha256:029d4461bd98f124e531380505ceea2072418fdf28752aa73b7b273ba3048903',
+            registryUrls: ['https://gcr.io'],
+            replaceString: codeBlock`
+              images.pull(
+                digest = "sha256:029d4461bd98f124e531380505ceea2072418fdf28752aa73b7b273ba3048903",
+                registry = "gcr.io",
+                repository = "distroless/base",
+              )
+            `,
+          },
+        ],
+      });
+    });
+
+    it('returns images.pull dependencies without registry', async () => {
+      const input = codeBlock`
+        images.pull(
+          name = "alpine",
+          repository = "library/alpine",
+          tag = "3.18",
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: DockerDatasource.id,
+            depType: 'img_pull',
+            depName: 'alpine',
+            packageName: 'library/alpine',
+            currentValue: '3.18',
+            replaceString: codeBlock`
+              images.pull(
+                name = "alpine",
+                repository = "library/alpine",
+                tag = "3.18",
+              )
+            `,
+          },
+        ],
+      });
+    });
+
     it('returns maven.install and bazel_dep dependencies together', async () => {
       const input = codeBlock`
         bazel_dep(name = "bazel_jar_jar", version = "0.1.0")

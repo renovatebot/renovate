@@ -373,6 +373,82 @@ describe('modules/manager/bazel-module/parser/index', () => {
       ]);
     });
 
+    it('finds images.pull with name', () => {
+      const input = codeBlock`
+        images.pull(
+          name = "ubuntu",
+          digest = "sha256:1e622c5f073b4f6bfad6632f2616c7f59ef256e96fe78bf6a595d1dc4376ac02",
+          registry = "index.docker.io",
+          repository = "library/ubuntu",
+          tag = "24.04",
+        )
+      `;
+
+      const res = parse(input);
+      expect(res).toEqual([
+        fragments.extensionTag(
+          'images',
+          'images',
+          'pull',
+          0,
+          {
+            name: fragments.string('ubuntu'),
+            digest: fragments.string(
+              'sha256:1e622c5f073b4f6bfad6632f2616c7f59ef256e96fe78bf6a595d1dc4376ac02',
+            ),
+            registry: fragments.string('index.docker.io'),
+            repository: fragments.string('library/ubuntu'),
+            tag: fragments.string('24.04'),
+          },
+          codeBlock`
+            images.pull(
+              name = "ubuntu",
+              digest = "sha256:1e622c5f073b4f6bfad6632f2616c7f59ef256e96fe78bf6a595d1dc4376ac02",
+              registry = "index.docker.io",
+              repository = "library/ubuntu",
+              tag = "24.04",
+            )
+          `,
+          true,
+        ),
+      ]);
+    });
+
+    it('finds images.pull without name', () => {
+      const input = codeBlock`
+        images.pull(
+          digest = "sha256:029d4461bd98f124e531380505ceea2072418fdf28752aa73b7b273ba3048903",
+          registry = "gcr.io",
+          repository = "distroless/base",
+        )
+      `;
+
+      const res = parse(input);
+      expect(res).toEqual([
+        fragments.extensionTag(
+          'images',
+          'images',
+          'pull',
+          0,
+          {
+            digest: fragments.string(
+              'sha256:029d4461bd98f124e531380505ceea2072418fdf28752aa73b7b273ba3048903',
+            ),
+            registry: fragments.string('gcr.io'),
+            repository: fragments.string('distroless/base'),
+          },
+          codeBlock`
+            images.pull(
+              digest = "sha256:029d4461bd98f124e531380505ceea2072418fdf28752aa73b7b273ba3048903",
+              registry = "gcr.io",
+              repository = "distroless/base",
+            )
+          `,
+          true,
+        ),
+      ]);
+    });
+
     it('finds the git_repository', () => {
       const input = codeBlock`
         git_repository(
