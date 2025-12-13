@@ -21,7 +21,7 @@ function extractLines(content: string): Line[] {
       text: line.trim(),
       indent: regEx(/^(\s*)/).exec(line)![1].length,
     }))
-    .filter((line) => line.text !== '');
+    .filter((line) => isNonEmptyString(line.text));
 }
 
 export function parse(content: string): Dependency[] {
