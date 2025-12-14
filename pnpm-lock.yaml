@@ -94,8 +94,8 @@ importers:
         specifier: 0.1.3
         version: 0.1.3
       '@renovatebot/detect-tools':
-        specifier: 1.2.4
-        version: 1.2.4
+        specifier: 1.2.5
+        version: 1.2.5
       '@renovatebot/osv-offline':
         specifier: 2.0.0
         version: 2.0.0
@@ -1679,8 +1679,8 @@ packages:
     peerDependencies:
       '@redis/client': ^5.10.0
 
-  '@renovatebot/detect-tools@1.2.4':
-    resolution: {integrity: sha512-qKkRWDmwfgPN5vrD6QzMa6UNqb06VXaZL1hxxLFsOauiSTAxz/TVKPhb/hFyf27yu35JyXIN40PiNQR+bidKbQ==}
+  '@renovatebot/detect-tools@1.2.5':
+    resolution: {integrity: sha512-es6Q+81BgRT0PiqmbqztSgmqWRg8lrLXmLRXC5HM34k2Xtt0AIJE46PjfoUugc5KwQvpIJv1TDCaKr1sm6fIJw==}
 
   '@renovatebot/osv-offline-db@2.0.0':
     resolution: {integrity: sha512-qMcbkz/DRIhVEXnPzBdY3Dn7oraKLZ0tBLXwDkiuxsBjgDjKAXTjYHpUeZU+y8fd3I3GLLgLYqHPnbJ276ZBtA==}
@@ -8309,7 +8309,7 @@ snapshots:
     dependencies:
       '@redis/client': 5.10.0
 
-  '@renovatebot/detect-tools@1.2.4':
+  '@renovatebot/detect-tools@1.2.5':
     dependencies:
       fs-extra: 11.3.2
       toml-eslint-parser: 0.10.1
