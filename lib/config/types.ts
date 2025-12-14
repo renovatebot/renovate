@@ -1,9 +1,15 @@
-import type { PlatformId } from '../constants';
+import type { Category, PlatformId } from '../constants';
 import type { LogLevelRemap } from '../logger/types';
 import type { ManagerName } from '../manager-list.generated';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { RepoSortMethod, SortMethod } from '../modules/platform/types';
-import type { HostRule, SkipReason } from '../types';
+import type {
+  AutoMergeType,
+  HostRule,
+  Nullish,
+  RangeStrategy,
+  SkipReason,
+} from '../types';
 import type { StageName } from '../types/skip-reason';
 import type { GitNoVerifyOption } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence/types';
@@ -16,6 +22,13 @@ export type RenovateConfigStage =
   | 'package'
   | 'branch'
   | 'pr';
+
+export type RenovateSplit =
+  | 'init'
+  | 'onboarding'
+  | 'extract'
+  | 'lookup'
+  | 'update';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
@@ -30,19 +43,38 @@ export interface GroupConfig extends Record<string, unknown> {
 
 export type RecreateWhen = 'auto' | 'never' | 'always';
 export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
+
+export type BinarySource = 'docker' | 'global' | 'install' | 'hermit';
+
 // TODO: Proper typings
+/**
+ * Any configuration that could be used either top-level in a repository config (or Global, Inherited or Shareable Preset configuration), or:
+ *
+ * - in a datasource-specific configuration
+ * - in a manager-specific configuration
+ * - in a Package Rule
+ *
+ * @see RenovateConfig for the superset of all configuration allowed in a given repository
+ *
+ */
 export interface RenovateSharedConfig {
   $schema?: string;
+  abandonmentThreshold?: Nullish<string>;
   addLabels?: string[];
+  assignAutomerge?: boolean;
   autoReplaceGlobalMatch?: boolean;
   automerge?: boolean;
   automergeSchedule?: string[];
   automergeStrategy?: MergeStrategy;
-  bumpVersions?: BumpVersionConfig[];
+  automergeType?: AutoMergeType;
+  azureWorkItemId?: number;
   branchName?: string;
   branchNameStrict?: boolean;
   branchPrefix?: string;
   branchPrefixOld?: string;
+  bumpVersions?: BumpVersionConfig[];
+  commitBody?: string;
+  commitBodyTable?: boolean;
   commitMessage?: string;
   commitMessageAction?: string;
   commitMessageExtra?: string;
@@ -56,8 +88,11 @@ export interface RenovateSharedConfig {
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
+  encrypted?: Record<string, string>;
   extends?: string[];
+  extractVersion?: string;
   managerFilePatterns?: string[];
+  followTag?: string;
   force?: RenovateConfig;
   gitIgnoredAuthors?: string[];
   group?: GroupConfig;
@@ -67,22 +102,35 @@ export interface RenovateSharedConfig {
   ignoreDeps?: string[];
   ignorePaths?: string[];
   ignoreTests?: boolean;
+  ignoreUnstable?: boolean;
   includePaths?: string[];
   internalChecksAsSuccess?: boolean;
+  internalChecksFilter?: 'strict' | 'flexible' | 'none';
   keepUpdatedLabel?: string;
   labels?: string[];
   manager?: string;
   milestone?: number;
+  minimumReleaseAge?: Nullish<string>;
   npmrc?: string;
   npmrcMerge?: boolean;
+  npmToken?: string;
+
+  pinDigests?: boolean;
+  platformAutomerge?: boolean;
   platformCommit?: PlatformCommitOptions;
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
+  prBodyHeadingDefinitions?: Record<string, string>;
+  prBodyNotes?: string[];
   prCreation?: 'immediate' | 'not-pending' | 'status-success' | 'approval';
+  prFooter?: string;
+  prHeader?: string;
   prPriority?: number;
+  prTitle?: string;
   productLinks?: Record<string, string>;
   pruneBranchAfterAutomerge?: boolean;
+  rangeStrategy?: RangeStrategy;
   rebaseLabel?: string;
   rebaseWhen?: string;
   recreateClosed?: boolean;
@@ -91,20 +139,29 @@ export interface RenovateSharedConfig {
   repositoryCache?: RepositoryCacheConfig;
   repositoryCacheType?: RepositoryCacheType;
   respectLatest?: boolean;
+  rollbackPrs?: boolean;
   schedule?: string[];
   semanticCommitScope?: string | null;
   semanticCommitType?: string;
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
+  separateMajorMinor?: boolean;
+  separateMinorPatch?: boolean;
+  separateMultipleMajor?: boolean;
+  separateMultipleMinor?: boolean;
   skipArtifactsUpdate?: boolean;
   stopUpdatingLabel?: string;
   suppressNotifications?: string[];
   timezone?: string;
   unicodeEmoji?: boolean;
+  updateNotScheduled?: boolean;
+  versioning?: string;
+  versionCompatibility?: string;
 }
 
 // Config options used only within the global worker
 // The below should contain config options where stage=global
-export interface GlobalOnlyConfig {
+/** @deprecated use `RepoGlobalConfig` instead **/
+export interface GlobalOnlyConfigLegacy {
   autodiscover?: boolean;
   autodiscoverFilter?: string[] | string;
   autodiscoverNamespaces?: string[];
@@ -124,6 +181,7 @@ export interface GlobalOnlyConfig {
   mergeConfidenceDatasources?: string[];
   mergeConfidenceEndpoint?: string;
   platform?: PlatformId;
+  processEnv?: Record<string, string>;
   prCommitsPerRunLimit?: number;
   privateKey?: string;
   privateKeyOld?: string;
@@ -137,8 +195,13 @@ export interface GlobalOnlyConfig {
   deleteAdditionalConfigFile?: boolean;
 }
 
-// Config options used within the repository worker, but not user configurable
-// The below should contain config options where globalOnly=true
+/**
+ * Any global-only configuration set by self-hosted administrators.
+ *
+ * Used within the repository worker.
+ *
+ * Should only contain config options where globalOnly=true.
+ */
 export interface RepoGlobalConfig {
   allowedCommands?: string[];
   allowCustomCrateRegistries?: boolean;
@@ -146,7 +209,7 @@ export interface RepoGlobalConfig {
   allowScripts?: boolean;
   allowedEnv?: string[];
   allowedHeaders?: string[];
-  binarySource?: 'docker' | 'global' | 'install' | 'hermit';
+  binarySource?: BinarySource;
   cacheDir?: string;
   cacheHardTtlMinutes?: number;
   cacheTtlOverride?: Record<string, number>;
@@ -178,9 +241,16 @@ export interface RepoGlobalConfig {
   cachePrivatePackages?: boolean;
   configFileNames?: string[];
   ignorePrAuthor?: boolean;
+  allowedUnsafeExecutions?: AllowedUnsafeExecution[];
 }
 
+/**
+ * Those options are global only but still passed into the repository worker config.
+ *
+ * @deprecated https://github.com/renovatebot/renovate/issues/39693
+ */
 export interface LegacyAdminConfig {
+  baseDir?: string;
   localDir?: string;
 
   logContext?: string;
@@ -194,7 +264,17 @@ export interface LegacyAdminConfig {
   onboardingConfig?: RenovateSharedConfig;
   onboardingConfigFileName?: string;
 
+  optimizeForDisabled?: boolean;
+
+  persistRepoData?: boolean;
+
+  prCommitsPerRunLimit?: number;
+
   requireConfig?: RequiredConfig;
+
+  useCloudMetadataServices?: boolean;
+
+  writeDiscoveredRepos?: string;
 }
 
 export type ExecutionMode = 'branch' | 'update';
@@ -233,14 +313,38 @@ export const allowedStatusCheckStrings = [
 ] as const;
 export type StatusCheckKey = (typeof allowedStatusCheckStrings)[number];
 type UserEnv = Record<string, string>;
+
+/**
+ * Computed properties, for internal use only
+ */
+export interface RenovateInternalConfig {
+  /** computed base branch from patterns - for internal use only */
+  baseBranches?: string[];
+  currentCompatibility?: string;
+  datasource?: string;
+  hasBaseBranches?: boolean;
+  isFork?: boolean;
+  isVulnerabilityAlert?: boolean;
+
+  /** What is this used for? */
+  remediations?: unknown;
+  /** What is this used for? */
+  vulnerabilityAlertsOnly?: boolean;
+}
+
 // TODO: Proper typings
+/**
+ * Configuration that could be used either top-level in a repository config (or Global, Inherited or Shareable Preset configuration).
+ *
+ * This is a superset of any configuration that a Renovate user (not self-hosted administrator) can set.
+ */
 export interface RenovateConfig
   extends LegacyAdminConfig,
     RenovateSharedConfig,
     UpdateConfig<PackageRule>,
     AssigneesAndReviewersConfig,
     ConfigMigration,
-    Record<string, unknown> {
+    RenovateInternalConfig {
   s3Endpoint?: string;
   s3PathStyle?: boolean;
   reportPath?: string;
@@ -248,17 +352,18 @@ export interface RenovateConfig
   depName?: string;
   /** user configurable base branch patterns*/
   baseBranchPatterns?: string[];
-  /** computed base branch from patterns - for internal use only */
-  baseBranches?: string[];
-  commitBody?: string;
   useBaseBranchConfig?: UseBaseBranchConfigType;
   baseBranch?: string;
   defaultBranch?: string;
   branchList?: string[];
+  cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
   description?: string | string[];
-  force?: RenovateConfig;
+  detectGlobalManagerConfig?: boolean;
   errors?: ValidationMessage[];
+  forkModeDisallowMaintainerEdits?: boolean;
+  forkProcessing?: 'auto' | 'enabled' | 'disabled';
+  forkToken?: string;
 
   gitAuthor?: string;
 
@@ -270,8 +375,6 @@ export interface RenovateConfig
   inheritConfigStrict?: boolean;
 
   ignorePresets?: string[];
-  forkProcessing?: 'auto' | 'enabled' | 'disabled';
-  isFork?: boolean;
 
   fileList?: string[];
   configWarningReuseIssue?: boolean;
@@ -285,21 +388,33 @@ export interface RenovateConfig
   dependencyDashboardLabels?: string[];
   dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
   dependencyDashboardReportAbandonment?: boolean;
+  mode?: 'silent' | 'full';
   packageFile?: string;
   packageRules?: PackageRule[];
   postUpdateOptions?: string[];
   branchConcurrentLimit?: number | null;
+  parentOrg?: string;
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
-  forkModeDisallowMaintainerEdits?: boolean;
+
+  printConfig?: boolean;
+
+  pruneStaleBranches?: boolean;
 
   defaultRegistryUrls?: string[];
   registryUrls?: string[] | null;
   registryAliases?: Record<string, string>;
 
+  /**
+   * What is this used for?
+   * @deprecated
+   */
+  renovateJsonPresent?: boolean;
+
   repoIsOnboarded?: boolean;
   repoIsActivated?: boolean;
 
+  topLevelOrg?: string;
   updateInternalDeps?: boolean;
   updateType?: UpdateType;
 
@@ -352,10 +467,18 @@ export interface CustomDatasourceConfig {
   transformTemplates?: string[];
 }
 
+/**
+ * The superset of all configuration that a self-hosted administrator can set, alongside all repository-level configuration.
+ *
+ */
 export interface AllConfig
   extends RenovateConfig,
-    GlobalOnlyConfig,
-    RepoGlobalConfig {}
+    GlobalOnlyConfigLegacy,
+    RepoGlobalConfig {
+  password?: string;
+  token?: string;
+  username?: string;
+}
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
@@ -410,13 +533,17 @@ export type MergeStrategy =
   | 'rebase-merge'
   | 'squash';
 
+// ref: https://github.com/renovatebot/renovate/issues/39458
+// This list should be added to as any new unsafe execution commands should be permitted
+export type AllowedUnsafeExecution = 'goGenerate';
+
 // TODO: Proper typings
 export interface PackageRule
   extends RenovateSharedConfig,
-    UpdateConfig,
-    Record<string, unknown> {
+    RenovateInternalConfig,
+    UpdateConfig {
+  allowedVersions?: string;
   description?: string | string[];
-  isVulnerabilityAlert?: boolean;
   matchBaseBranches?: string[];
   matchCategories?: string[];
   matchConfidence?: MergeConfidence[];
@@ -434,7 +561,14 @@ export interface PackageRule
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
   matchJsonata?: string[];
+  overrideDatasource?: string;
+  overrideDepName?: string;
+  overridePackageName?: string;
   registryUrls?: string[] | null;
+  replacementName?: string;
+  replacementVersion?: string;
+  sourceUrl?: string;
+  sourceDirectory?: string;
   vulnerabilitySeverity?: string;
   vulnerabilityFixVersion?: string;
 }
@@ -586,7 +720,7 @@ export type RenovateOptions =
   | RenovateArrayOption
   | RenovateObjectOption;
 
-export interface PackageRuleInputConfig extends Record<string, unknown> {
+export interface PackageRuleInputConfig extends RenovateConfig {
   versioning?: string;
   packageFile?: string;
   lockFiles?: string[];
@@ -644,6 +778,7 @@ export interface MigratedRenovateConfig extends RenovateConfig {
 
 export interface ManagerConfig extends RenovateConfig {
   manager: string;
+  categories?: Category[];
 }
 
 export interface ValidationResult {

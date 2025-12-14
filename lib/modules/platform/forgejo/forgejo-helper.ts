@@ -1,5 +1,7 @@
+import { isBoolean } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
+import { getCache } from '../../../util/cache/repository';
 import type { ForgejoHttpOptions } from '../../../util/http/forgejo';
 import { ForgejoHttp } from '../../../util/http/forgejo';
 import { fromBase64 } from '../../../util/string';
@@ -61,6 +63,29 @@ export async function getVersion(
     options,
   );
   return res.body.version;
+}
+
+export async function isOrg(organization: string): Promise<boolean> {
+  const repoCache = getCache();
+  repoCache.platform ??= {};
+  repoCache.platform.forgejo ??= {};
+  repoCache.platform.forgejo.orgs ??= {};
+  const cached = repoCache.platform.forgejo.orgs[organization];
+  if (isBoolean(cached)) {
+    return cached;
+  }
+  try {
+    const url = `${API_PATH}/orgs/${organization}`;
+    const res = await forgejoHttp.getJsonUnchecked(url);
+    repoCache.platform.forgejo.orgs[organization] = res.statusCode === 200;
+    return res.statusCode === 200;
+  } catch (err) {
+    if (err.statusCode === 404) {
+      return false;
+    }
+    // throw other errors
+    throw err;
+  }
 }
 
 export async function searchRepos(

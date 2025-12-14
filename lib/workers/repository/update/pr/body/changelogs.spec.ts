@@ -1,4 +1,5 @@
 import * as _template from '../../../../../util/template';
+import type { BranchConfig } from '../../../../types';
 import { getChangelogs } from './changelogs';
 
 vi.mock('../../../../../util/template');
@@ -20,8 +21,8 @@ describe('workers/repository/update/pr/body/changelogs', () => {
 
   it('returns release notes', () => {
     template.compile.mockImplementationOnce((_, config): string => {
-      const upgrades: { releaseNotesSummaryTitle: string }[] =
-        config.upgrades as never;
+      // ts can't infere correct type here
+      const { upgrades } = config as BranchConfig;
       return upgrades
         .map((upgrade) => upgrade.releaseNotesSummaryTitle)
         .join('\n')

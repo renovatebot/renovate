@@ -186,13 +186,13 @@ export async function generateLockFile(
       );
       try {
         await deleteLocalFile(lockFileName);
-        /* v8 ignore start -- needs test */
+        /* v8 ignore next -- needs test */
       } catch (err) {
         logger.debug(
           { err, lockFileName },
           'Error removing `package-lock.json` for lock file maintenance',
         );
-      } /* v8 ignore stop -- needs test */
+      }
     }
 
     if (postUpdateOptions?.includes('npmInstallTwice')) {
@@ -254,7 +254,7 @@ export async function generateLockFile(
         lockFile = composeLockFile(lockFileParsed, detectedIndent);
       }
     }
-    /* v8 ignore start -- needs test */
+    /* v8 ignore next -- needs test */
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
@@ -270,7 +270,7 @@ export async function generateLockFile(
       throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     }
     return { error: true, stderr: err.stderr };
-  } /* v8 ignore stop -- needs test */
+  }
   return { error: !lockFile, lockFile };
 }
 

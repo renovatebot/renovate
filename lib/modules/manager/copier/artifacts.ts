@@ -60,7 +60,7 @@ export async function updateArtifacts({
     // Each answers file (~ packageFileName) has exactly one dependency to update.
     return artifactError(
       packageFileName,
-      `Unexpected number of dependencies: ${updatedDeps.length} (should be 1)`,
+      `Unexpected number of dependencies: ${updatedDeps?.length} (should be 1)`,
     );
   }
 
