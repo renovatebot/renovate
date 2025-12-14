@@ -3,7 +3,7 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
 import { toSha256 } from '../../../../util/hash';
-import { getDefaultConfigFileName } from '../common';
+import { getDefaultConfigFileName, getSemanticCommitPrTitle } from '../common';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
@@ -46,6 +46,11 @@ export async function rebaseOnboardingBranch(
   );
   const commitMessage = commitMessageFactory.create();
 
+  const prTitle =
+    config.semanticCommits === 'enabled'
+      ? getSemanticCommitPrTitle(config)
+      : config.onboardingPrTitle!;
+
   // TODO #22198
   return scm.commitAndPush({
     baseBranch: config.baseBranch,
@@ -59,6 +64,7 @@ export async function rebaseOnboardingBranch(
     ],
     message: commitMessage.toString(),
     platformCommit: config.platformCommit,
-    // TODO: add prTitle for Gerrit
+    // Only needed by Gerrit platform
+    prTitle,
   });
 }

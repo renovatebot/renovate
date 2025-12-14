@@ -32,6 +32,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         force: true,
         message: 'Add renovate.json',
         platformCommit: 'auto',
+        prTitle: 'Configure Renovate',
       });
     });
 
@@ -55,6 +56,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         force: true,
         message,
         platformCommit: 'auto',
+        prTitle: 'Configure Renovate',
       });
     });
 
@@ -76,6 +78,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           force: true,
           message: `Add renovate.json\n\nsome commit body`,
           platformCommit: 'auto',
+          prTitle: 'Configure Renovate',
         });
       });
 
@@ -102,6 +105,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           force: true,
           message: `We can Renovate if we want to, we can leave PRs in decline\n\nSigned Off: <Bot bot@botland.com>`,
           platformCommit: 'auto',
+          prTitle: 'Configure Renovate',
         });
       });
     });
@@ -127,6 +131,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           force: true,
           message,
           platformCommit: 'auto',
+          prTitle: 'Configure Renovate',
         });
       });
 
@@ -155,6 +160,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           force: true,
           message,
           platformCommit: 'auto',
+          prTitle: 'Configure Renovate',
         });
       });
     });
@@ -180,6 +186,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           force: true,
           message,
           platformCommit: 'auto',
+          prTitle: 'chore: Configure Renovate',
         });
       });
 
@@ -208,6 +215,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           force: true,
           message,
           platformCommit: 'auto',
+          prTitle: 'chore: Configure Renovate',
         });
       });
     });
@@ -234,6 +242,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           force: true,
           message,
           platformCommit: 'auto',
+          prTitle: 'chore: Configure Renovate',
         });
       });
 
@@ -258,6 +267,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           force: true,
           message,
           platformCommit: 'auto',
+          prTitle: 'chore: Configure Renovate',
         });
       });
 
@@ -283,6 +293,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           force: true,
           message,
           platformCommit: 'auto',
+          prTitle: 'chore: Configure Renovate',
         });
       });
 
@@ -302,6 +313,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           message,
           force: true,
           platformCommit: 'auto',
+          prTitle: 'chore: Configure Renovate',
         });
       });
     });
