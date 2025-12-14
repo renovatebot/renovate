@@ -19,6 +19,7 @@
       "replacements:framer-motion-to-motion",
       "replacements:hapi-to-scoped",
       "replacements:google-github-action-release-please-to-googleapis",
+      "replacements:gopkg-in-yaml-to-go-yaml-in-yaml",
       "replacements:jade-to-pug",
       "replacements:joi-to-scoped",
       "replacements:joi-to-unscoped",
@@ -704,6 +705,21 @@
         "matchDatasources": ["github-tags"],
         "matchPackageNames": ["google-github-actions/release-please-action"],
         "replacementName": "googleapis/release-please-action"
+      }
+    ]
+  },
+  "gopkg-in-yaml-to-go-yaml-in-yaml": {
+    "description": "`go.yaml.in/yaml` supersedes `gopkg.in/yaml`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["go"],
+        "matchPackageNames": ["gopkg.in/yaml.v2"],
+        "replacementName": "go.yaml.in/yaml/v2"
+      },
+      {
+        "matchDatasources": ["go"],
+        "matchPackageNames": ["gopkg.in/yaml.v3"],
+        "replacementName": "go.yaml.in/yaml/v3"
       }
     ]
   },
