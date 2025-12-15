@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isString } from '@sindresorhus/is';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class BaseBranchMigration extends AbstractMigration {
@@ -7,10 +7,10 @@ export class BaseBranchMigration extends AbstractMigration {
 
   override run(value: unknown): void {
     const baseBranchPatterns = this.get('baseBranchPatterns') ?? [];
-    if (is.array<string>(value)) {
+    if (isArray<string>(value)) {
       this.setHard('baseBranchPatterns', baseBranchPatterns.concat(value));
     }
-    if (is.string(value)) {
+    if (isString(value)) {
       this.setHard('baseBranchPatterns', baseBranchPatterns.concat([value]));
     }
   }

@@ -112,6 +112,20 @@ module.exports = {
 };
 ```
 
+## allowedUnsafeExecutions
+
+This should be configured to a list of commands which are allowed to be run automatically as part of a dependency upgrade.
+
+This is a separate class of commands that could be executed compared to [`allowedCommands`](#allowedcommands), or package managers that are controlled with [`allowScripts=true`](#allowscripts) and [`ignoreScripts=false`](./configuration-options.md#ignorescripts), where seemingly "safe" commands can result in code execution.
+As there is a security risk of running these commands automatically when a dependency upgrades, self hosted implementations need to explicitly declare which commands are permitted for their installation.
+For more details of where this may be found, see ["Trusting Repository Developers"](./security-and-permissions.md#trusting-repository-developers).
+
+Allowed options:
+
+| Option       | Description                                                               |
+| ------------ | ------------------------------------------------------------------------- |
+| `goGenerate` | Allows the `goGenerate` `postUpdateCommand` to run after a go mod update. |
+
 ## autodiscover
 
 When you enable `autodiscover`, by default, Renovate runs on _every_ repository that the bot account can access.
@@ -205,6 +219,13 @@ The order method for autodiscover server side repository search.
 ## autodiscoverRepoSort
 
 The sort method for autodiscover server side repository search.
+
+Platform supported sort options:
+
+| Platform       | Supported sort options                      |
+| -------------- | ------------------------------------------- |
+| GitLab         | `created_at`, `updated_at`, `id`            |
+| Forgejo, Gitea | `alpha`, `created`, `updated`, `size`, `id` |
 
 > If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
 
@@ -374,6 +395,7 @@ Other valid cache namespaces are as follows:
 - `changelog-github-release`
 - `changelog-gitlab-notes@v2`
 - `changelog-gitlab-release`
+- `datasource-azure-tags`
 - `datasource-artifactory`
 - `datasource-aws-machine-image`
 - `datasource-aws-rds`
@@ -431,6 +453,7 @@ Other valid cache namespaces are as follows:
 - `datasource-jsr`
 - `datasource-maven:cache-provider`
 - `datasource-maven:postprocess-reject`
+- `datasource-nextcloud`
 - `datasource-node-version`
 - `datasource-npm:cache-provider`
 - `datasource-nuget-v3`
@@ -485,6 +508,10 @@ Example:
 <!-- prettier-ignore -->
 !!! note
     If you want renovate to use a custom filename for the onboarding branch you also need to change the [`onboardingConfigFileName`](#onboardingconfigfilename).
+
+## configValidationError
+
+If enabled, config validation errors will be reported as errors instead of warnings, and Renovate will exit with a non-zero exit code.
 
 ## containerbaseDir
 
@@ -1437,7 +1464,7 @@ You can control if Renovate should try to access these services with the `useClo
 ## userAgent
 
 If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
-Otherwise, it will default to `RenovateBot/${renovateVersion} (https://github.com/renovatebot/renovate)`.
+Otherwise, it will default to `Renovate/${renovateVersion} (https://github.com/renovatebot/renovate)`.
 
 ## username
 

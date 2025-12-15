@@ -23,9 +23,7 @@ describe('workers/repository/config-migration/branch/index', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      GlobalConfig.set({
-        dryRun: null,
-      });
+      GlobalConfig.reset();
       config = getConfig();
       config.branchPrefix = 'some/';
     });
@@ -43,7 +41,7 @@ describe('workers/repository/config-migration/branch/index', () => {
           migratedData,
         ),
       ).resolves.toMatchObject({ result: 'no-migration-branch' });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Config migration needed but config migration is disabled and checkbox not checked or not present.',
       );
@@ -66,7 +64,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         result: 'migration-branch-exists',
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith('Need to create migration PR');
     });
 
@@ -95,7 +93,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
       expect(platform.refreshPr).toHaveBeenCalledTimes(0);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Config Migration branch has been modified. Skipping branch rebase.',
       );
@@ -127,7 +125,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
       expect(platform.refreshPr).toHaveBeenCalledTimes(1);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Config Migration PR already exists',
       );
@@ -152,7 +150,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith('Need to create migration PR');
     });
 
@@ -177,7 +175,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Config Migration PR already exists',
       );

@@ -1,6 +1,6 @@
 // Singleton S3 instance initialized on-demand.
 import { S3Client } from '@aws-sdk/client-s3';
-import is from '@sindresorhus/is';
+import { isUndefined } from '@sindresorhus/is';
 import { GlobalConfig } from '../config/global';
 import { parseUrl } from './url';
 
@@ -12,7 +12,7 @@ export function getS3Client(
 ): S3Client {
   if (!s3Instance) {
     const endpoint = s3Endpoint ?? GlobalConfig.get('s3Endpoint');
-    const forcePathStyle = is.undefined(s3PathStyle)
+    const forcePathStyle = isUndefined(s3PathStyle)
       ? !!GlobalConfig.get('s3PathStyle')
       : s3PathStyle;
     s3Instance = new S3Client({

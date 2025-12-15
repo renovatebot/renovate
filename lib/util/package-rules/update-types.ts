@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isUndefined } from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { anyMatchRegexOrGlobList } from '../string-match';
 import { Matcher } from './base';
@@ -8,7 +8,7 @@ export class UpdateTypesMatcher extends Matcher {
     { updateType, isBump }: PackageRuleInputConfig,
     { matchUpdateTypes }: PackageRule,
   ): boolean | null {
-    if (is.undefined(matchUpdateTypes)) {
+    if (isUndefined(matchUpdateTypes)) {
       return null;
     }
     if (!updateType) {

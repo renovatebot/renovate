@@ -1,6 +1,6 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
@@ -81,7 +81,7 @@ export async function updateArtifacts({
     );
     const updateArtifactsResult = (
       await getUpdatedArtifacts(status, artifactFileNames)
-    ).filter(is.truthy);
+    ).filter(isTruthy);
 
     logger.debug(
       { files: updateArtifactsResult.map((r) => r.file?.path) },
@@ -245,7 +245,7 @@ async function prepareCommand(
   pathFileStats: Stats | null,
   args: string | null,
 ): Promise<string | null> {
-  /* v8 ignore start -- hard to test */
+  /* v8 ignore next -- hard to test */
   if (pathFileStats?.isFile() === true) {
     // if the file is not executable by others
     if (os.platform() !== 'win32' && (pathFileStats.mode & 0o1) === 0) {
@@ -260,6 +260,6 @@ async function prepareCommand(
       return fileName;
     }
     return `${fileName} ${args}`;
-  } /* v8 ignore stop */
+  }
   return null;
 }

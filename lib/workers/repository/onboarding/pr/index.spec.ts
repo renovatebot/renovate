@@ -274,7 +274,7 @@ describe('workers/repository/onboarding/pr/index', () => {
     it('dryrun of creates PR', async () => {
       GlobalConfig.set({ dryRun: 'full' });
       await ensureOnboardingPr(config, packageFiles, branches);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would check branch renovate/configure',
       );
@@ -292,7 +292,7 @@ describe('workers/repository/onboarding/pr/index', () => {
         }),
       );
       await ensureOnboardingPr(config, packageFiles, branches);
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would check branch renovate/configure',
       );
@@ -327,7 +327,7 @@ describe('workers/repository/onboarding/pr/index', () => {
         await expect(
           ensureOnboardingPr(config, packageFiles, branches),
         ).toResolve();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.warn).toHaveBeenCalledWith(
           'Onboarding PR already exists but cannot find it. It was probably created by a different user.',
         );

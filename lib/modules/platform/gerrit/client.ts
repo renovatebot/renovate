@@ -1,6 +1,7 @@
+import semver from 'semver';
+import { z } from 'zod';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import { GerritHttp } from '../../../util/http/gerrit';
 import type { HttpOptions } from '../../../util/http/types';
 import { getQueryString } from '../../../util/url';
@@ -14,10 +15,31 @@ import type {
   GerritProjectInfo,
   GerritRequestDetail,
 } from './types';
-import { mapPrStateToGerritFilter } from './utils';
+import {
+  MAX_GERRIT_COMMENT_SIZE,
+  MIN_GERRIT_VERSION,
+  mapPrStateToGerritFilter,
+} from './utils';
 
 class GerritClient {
-  private gerritHttp = new GerritHttp();
+  // memCache is disabled because GerritPrCache will provide a smarter caching
+  private gerritHttp = new GerritHttp({ memCache: false });
+  private gerritVersion = MIN_GERRIT_VERSION;
+
+  setGerritVersion(version: string): void {
+    this.gerritVersion = version;
+  }
+
+  async getGerritVersion(
+    options: Pick<HttpOptions, 'username' | 'password'>,
+  ): Promise<string> {
+    const res = await this.gerritHttp.getJson(
+      'a/config/server/version',
+      options,
+      z.string(),
+    );
+    return res.body;
+  }
 
   async getRepos(): Promise<string[]> {
     const res = await this.gerritHttp.getJsonUnchecked<string[]>(
@@ -44,19 +66,44 @@ class GerritClient {
     return branchInfo.body;
   }
 
+  async getBranchChange(
+    repository: string,
+    config: Pick<
+      GerritFindPRConfig,
+      'branchName' | 'state' | 'targetBranch' | 'requestDetails'
+    >,
+  ): Promise<GerritChange | null> {
+    const changes = await this.findChanges(repository, {
+      branchName: config.branchName,
+      state: config.state,
+      singleChange: config.targetBranch ? false : true,
+      requestDetails: config.requestDetails,
+    });
+
+    if (changes.length === 0) {
+      return null;
+    }
+
+    if (changes.length === 1) {
+      return changes[0];
+    }
+
+    // If multiple changes are found, prefer the one matching the target branch
+    if (config.targetBranch) {
+      const change = changes.find((c) => c.branch === config.targetBranch);
+      if (change) {
+        return change;
+      }
+    }
+
+    // Otherwise return the first one
+    return changes[0];
+  }
+
   async findChanges(
     repository: string,
     findPRConfig: GerritFindPRConfig,
   ): Promise<GerritChange[]> {
-    /* v8 ignore start: temporary code */
-    // Disables memCache (enabled by default) to be replaced by memCacheProvider
-    const opts: HttpOptions = { memCache: false };
-    // TODO: should refresh the cache rather than just ignore it
-    if (!findPRConfig.refreshCache) {
-      opts.cacheProvider = memCacheProvider;
-    }
-    /* v8 ignore stop */
-
     const startOffset = findPRConfig.startOffset ?? 0;
     const pageLimit = findPRConfig.singleChange
       ? 1
@@ -69,7 +116,7 @@ class GerritClient {
       query.o = findPRConfig.requestDetails;
     }
 
-    const filters = GerritClient.buildSearchFilters(repository, findPRConfig);
+    const filters = this.buildSearchFilters(repository, findPRConfig);
 
     const allChanges: GerritChange[] = [];
 
@@ -78,7 +125,6 @@ class GerritClient {
       const queryString = `q=${filters.join('+')}&${getQueryString(query)}`;
       const changes = await this.gerritHttp.getJsonUnchecked<GerritChange[]>(
         `a/changes/?${queryString}`,
-        opts,
       );
 
       logger.trace(
@@ -108,22 +154,11 @@ class GerritClient {
 
   async getChange(
     changeNumber: number,
-    refreshCache?: boolean,
     requestDetails?: GerritRequestDetail[],
   ): Promise<GerritChange> {
-    /* v8 ignore start: temporary code */
-    // Disables memCache (enabled by default) to be replaced by memCacheProvider
-    const opts: HttpOptions = { memCache: false };
-    // TODO: should refresh the cache rather than just ignore it
-    if (!refreshCache) {
-      opts.cacheProvider = memCacheProvider;
-    }
-    /* v8 ignore stop */
-
     const queryString = getQueryString({ o: requestDetails });
     const changes = await this.gerritHttp.getJsonUnchecked<GerritChange>(
       `a/changes/${changeNumber}?${queryString}`,
-      opts,
     );
     return changes.body;
   }
@@ -155,7 +190,7 @@ class GerritClient {
   async getMessages(changeNumber: number): Promise<GerritChangeMessageInfo[]> {
     const messages = await this.gerritHttp.getJsonUnchecked<
       GerritChangeMessageInfo[]
-    >(`a/changes/${changeNumber}/messages`, { memCache: false });
+    >(`a/changes/${changeNumber}/messages`);
     return messages.body;
   }
 
@@ -175,9 +210,8 @@ class GerritClient {
     changeNumber: number,
     newMessage: string,
     msgType?: string,
-    messages?: GerritChangeMessageInfo[],
   ): Promise<boolean> {
-    const messagesToSearch = messages ?? (await this.getMessages(changeNumber));
+    const messagesToSearch = await this.getMessages(changeNumber);
 
     return messagesToSearch.some(
       (existingMsg) =>
@@ -190,12 +224,9 @@ class GerritClient {
     changeNumber: number,
     message: string,
     tag?: string,
-    messages?: GerritChangeMessageInfo[],
   ): Promise<void> {
     const newMsg = this.normalizeMessage(message);
-    if (
-      !(await this.checkForExistingMessage(changeNumber, newMsg, tag, messages))
-    ) {
+    if (!(await this.checkForExistingMessage(changeNumber, newMsg, tag))) {
       await this.addMessage(changeNumber, newMsg, tag);
     }
   }
@@ -252,12 +283,41 @@ class GerritClient {
     return Buffer.from(base64Content.body, 'base64').toString();
   }
 
-  normalizeMessage(message: string): string {
-    //the last \n was removed from gerrit after the comment was added...
-    return message.substring(0, 0x4000).trim();
+  async moveChange(
+    changeNumber: number,
+    destinationBranch: string,
+  ): Promise<GerritChange> {
+    const change = await this.gerritHttp.postJson<GerritChange>(
+      `a/changes/${changeNumber}/move`,
+      {
+        body: {
+          destination_branch: destinationBranch,
+        },
+      },
+    );
+    return change.body;
   }
 
-  private static buildSearchFilters(
+  normalizeMessage(message: string): string {
+    // Gerrit would trim it anyway
+    let msg = message.trim();
+
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(msg);
+    if (bytes.length > MAX_GERRIT_COMMENT_SIZE) {
+      const truncationNotice = '\n\n[Truncated by Renovate]';
+      const truncationNoticeBytes = encoder.encode(truncationNotice);
+      const maxContentBytes =
+        MAX_GERRIT_COMMENT_SIZE - truncationNoticeBytes.length;
+      const truncatedBytes = bytes.slice(0, maxContentBytes);
+      const decoded = new TextDecoder().decode(truncatedBytes);
+      msg = decoded + truncationNotice;
+    }
+
+    return msg;
+  }
+
+  private buildSearchFilters(
     repository: string,
     searchConfig: GerritFindPRConfig,
   ): string[] {
@@ -273,9 +333,11 @@ class GerritClient {
     }
     if (searchConfig.branchName) {
       filters.push(`footer:Renovate-Branch=${searchConfig.branchName}`);
+    } else if (semver.gte(this.gerritVersion, '3.6.0')) {
+      filters.push('hasfooter:Renovate-Branch');
+    } else {
+      filters.push('message:"Renovate-Branch: "');
     }
-    // TODO: Use Gerrit 3.6+ hasfooter:Renovate-Branch when branchName is empty:
-    //   https://gerrit-review.googlesource.com/c/gerrit/+/329488
     if (searchConfig.targetBranch) {
       filters.push(`branch:${searchConfig.targetBranch}`);
     }
@@ -283,13 +345,14 @@ class GerritClient {
       filters.push(`label:Code-Review=${searchConfig.label}`);
     }
     if (searchConfig.prTitle) {
-      // Quotes in the commit message must be escaped with a backslash:
+      // Quotes in the search operators must be escaped with a backslash:
       //   https://gerrit-review.googlesource.com/Documentation/user-search.html#search-operators
-      // TODO: Use Gerrit 3.8+ subject query instead:
-      //   https://gerrit-review.googlesource.com/c/gerrit/+/354037
-      filters.push(
-        `message:${encodeURIComponent('"' + searchConfig.prTitle.replaceAll('"', '\\"') + '"')}`,
-      );
+      const escapedTitle = searchConfig.prTitle.replaceAll('"', '\\"');
+      if (semver.gte(this.gerritVersion, '3.8.0')) {
+        filters.push(`subject:"${escapedTitle}"`);
+      } else {
+        filters.push(`message:"${escapedTitle}"`);
+      }
     }
     return filters;
   }

@@ -1,4 +1,9 @@
-import is from '@sindresorhus/is';
+import {
+  isNonEmptyArray,
+  isNonEmptyString,
+  isNumber,
+  isString,
+} from '@sindresorhus/is';
 import jsonata from 'jsonata';
 import { logger } from '../../logger';
 import type { RegexManagerTemplates } from '../../modules/manager/custom/regex/types';
@@ -20,7 +25,7 @@ export function validatePlainObject(
   val: Record<string, unknown>,
 ): true | string {
   for (const [key, value] of Object.entries(val)) {
-    if (!is.string(value)) {
+    if (!isString(value)) {
       return key;
     }
   }
@@ -36,7 +41,7 @@ export function validateNumber(
 ): ValidationMessage[] {
   const errors: ValidationMessage[] = [];
   const path = `${currentPath}${subKey ? '.' + subKey : ''}`;
-  if (is.number(val)) {
+  if (isNumber(val)) {
     if (val < 0 && !allowsNegative) {
       errors.push({
         topic: 'Configuration Error',
@@ -94,7 +99,7 @@ export function validateRegexManagerFields(
   currentPath: string,
   errors: ValidationMessage[],
 ): void {
-  if (is.nonEmptyArray(customManager.matchStrings)) {
+  if (isNonEmptyArray(customManager.matchStrings)) {
     for (const matchString of customManager.matchStrings) {
       try {
         regEx(matchString);
@@ -141,14 +146,14 @@ export function validateJSONataManagerFields(
   currentPath: string,
   errors: ValidationMessage[],
 ): void {
-  if (!is.nonEmptyString(customManager.fileFormat)) {
+  if (!isNonEmptyString(customManager.fileFormat)) {
     errors.push({
       topic: 'Configuration Error',
       message: 'Each JSONata manager must contain a fileFormat field.',
     });
   }
 
-  if (is.nonEmptyArray(customManager.matchStrings)) {
+  if (isNonEmptyArray(customManager.matchStrings)) {
     for (const matchString of customManager.matchStrings) {
       try {
         jsonata(matchString);

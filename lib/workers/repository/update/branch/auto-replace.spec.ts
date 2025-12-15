@@ -218,11 +218,14 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.packageFile = '.gitlab-ci.yml';
       upgrade.autoReplaceStringTemplate =
         "'{{{depName}}}'\nref: {{{newValue}}}";
+      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStringsStrategy = 'combination';
 
       // If the new "name" is not added to the matchStrings, the regex matcher fails to extract from `newContent` as
       // there's nothing defined in there anymore that it can match
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         '[\'"]?(?<depName>pipeline-fragments\\/docker-lint)[\'"]?\\s*ref:\\s[\'"]?(?<currentValue>[\\d-]*)[\'"]?',
         '[\'"]?(?<depName>pipeline-solutions\\/gitlab\\/fragments\\/docker-lint)[\'"]?\\s*ref:\\s[\'"]?(?<currentValue>[\\d-]*)[\'"]?',
@@ -250,9 +253,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.replaceString =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
       upgrade.packageFile = 'k8s/base/defaults.yaml';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*\\\'?\\"?(?<depName>[^:]+):(?<currentValue>[^\\s\\\'\\"]+)\\\'?\\"?\\s*',
       ];
+      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = doAutoReplace(upgrade, yml, reuseExistingBranch);
       await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
@@ -315,9 +320,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.replaceString =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
       upgrade.packageFile = 'k8s/base/defaults.yaml';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*\\\'?\\"?(?<depName>[^:]+):(?<currentValue>[^\\s\\\'\\"]+)\\\'?\\"?\\s*',
       ];
+      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe(yml);
@@ -1313,9 +1320,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newName = 'some.other.url.com/some-new-repo';
       upgrade.newValue = '3.16';
       upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*?\\\'?\\"?(?<depName>[^:\\\'\\"]+):(?<currentValue>[^@\\\'\\"]+)@?(?<currentDigest>[^\\s\\\'\\"]+)?\\"?\\\'?\\s*',
       ];
+      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe('image: "some.other.url.com/some-new-repo:3.16"');
@@ -1337,9 +1346,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newName = 'some.other.url.com/some-new-repo';
       upgrade.newValue = '3.16';
       upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*[\\\'\\"]?(?<depName>[^:]+):(?<currentValue>[^@]+)?@?(?<currentDigest>[^\\s\\\'\\"]+)?[\\\'\\"]?\\s*',
       ];
+      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe(

@@ -33,6 +33,7 @@ describe('config/presets/local/index', () => {
 
     it('throws for unsupported platform', async () => {
       GlobalConfig.set({
+        // @ts-expect-error -- testing invalid platform
         platform: 'unsupported-platform',
       });
       await expect(async () => {

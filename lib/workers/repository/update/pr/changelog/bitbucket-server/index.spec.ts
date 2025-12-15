@@ -15,7 +15,6 @@ const apiBaseUrl = 'https://bitbucket.some.domain.org/rest/api/1.0/';
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
   branchName: '',
-  endpoint: apiBaseUrl,
   packageName: 'renovate',
   versioning: semverVersioning.id,
   currentVersion: '5.2.0',
@@ -219,7 +218,7 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
         changelogFile: 'packages/components/src/CHANGELOG.md',
         changelogMd: changelogMd + '\n#\n##',
       });
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Multiple candidates for changelog file, using packages/components/src/CHANGELOG.md`,
       );

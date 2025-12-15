@@ -6,7 +6,7 @@ export function getRangeStrategy({
   rangeStrategy,
 }: RangeConfig): RangeStrategy {
   if (rangeStrategy !== 'auto') {
-    return rangeStrategy;
+    return rangeStrategy!;
   }
   if (currentValue?.includes('<')) {
     return 'widen';

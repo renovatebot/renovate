@@ -222,6 +222,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         await submodule.init();
         await submodule.addConfig('user.email', 'Jest@example.com');
         await submodule.addConfig('user.name', 'Jest');
+        await submodule.addConfig('commit.gpgsign', 'false');
 
         await fs.writeFile(submoduleBasePath + '/init_file', 'init');
         await submodule.add('init_file');
@@ -338,7 +339,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     it('returns cached value', async () => {
       behindBaseCache.getCachedBehindBaseResult.mockReturnValue(true);
       expect(await git.isBranchBehindBase('develop', defaultBranch)).toBeTrue();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'branch.isBehindBase(): using cached result "true"',
       );
@@ -1359,7 +1360,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
         await git.syncGit();
         await expect(git.syncForkWithUpstream('develop')).toResolve();
-        // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'Checking out branch develop from remote renovate-fork-upstream',
         );

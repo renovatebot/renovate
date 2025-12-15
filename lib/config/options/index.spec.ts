@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import * as manager from '../../modules/manager';
 import * as platform from '../../modules/platform';
 import { getOptions } from '.';
@@ -52,7 +52,7 @@ describe('config/options/index', () => {
   describe('every option with allowedValues and a default must have the default in allowedValues', () => {
     const opts = getOptions();
     for (const option of opts) {
-      if (option.allowedValues && !is.nullOrUndefined(option.default)) {
+      if (option.allowedValues && !isNullOrUndefined(option.default)) {
         it(`${option.name}: \`${option.default}\` is in ${JSON.stringify(option.allowedValues)}`, () => {
           expect(option.allowedValues).toBeDefined();
 
@@ -63,6 +63,30 @@ describe('config/options/index', () => {
             expect(option.allowedValues).toContain(defVal);
           }
         });
+      }
+    }
+  });
+
+  describe('every option with a siblingProperties has a `property` that matches a known option', () => {
+    const opts = getOptions();
+    const optionNames = new Set(opts.map((o) => o.name));
+
+    for (const option of opts) {
+      if (option.requiredIf) {
+        for (const req of option.requiredIf) {
+          for (const prop of req.siblingProperties) {
+            it(`${option.name}'s reference to ${prop.property} is valid`, () => {
+              expect(optionNames).toContain(prop.property);
+            });
+
+            const foundOption = opts.filter((o) => o.name === prop.property);
+            if (foundOption?.length && foundOption[0].allowedValues) {
+              it(`${option.name}'s value for ${prop.property} is valid, according to allowedValues`, () => {
+                expect(foundOption[0].allowedValues).toContain(prop.value);
+              });
+            }
+          }
+        }
       }
     }
   });

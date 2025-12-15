@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
 import { logger } from '../../../logger';
@@ -8,7 +8,7 @@ import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 export async function updateArtifacts({
-  config: { constraints, isLockFileMaintenance, updateType },
+  config: { constraints, isLockFileMaintenance },
   packageFileName,
   updatedDeps,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
@@ -46,7 +46,7 @@ export async function updateArtifacts({
     cmd.push(
       supportsNoInstall ? 'devbox update --no-install' : 'devbox update',
     );
-  } else if (is.nonEmptyArray(updatedDeps)) {
+  } else if (isNonEmptyArray(updatedDeps)) {
     if (supportsNoInstall) {
       const updateCommands: string[] = updatedDeps
         .map(

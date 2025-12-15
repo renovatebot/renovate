@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isDate, isUndefined } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
 import { logger } from '../../../../../logger';
@@ -164,7 +164,7 @@ export async function getReleaseNotes(
     version,
     releases,
   );
-  if (is.undefined(matchedRelease)) {
+  if (isUndefined(matchedRelease)) {
     // no exact match of a release then check other cases
     matchedRelease = releases.find(
       (r) =>
@@ -174,7 +174,7 @@ export async function getReleaseNotes(
         r.tag === `v${gitRef}`,
     );
   }
-  if (is.undefined(matchedRelease) && config.extractVersion) {
+  if (isUndefined(matchedRelease) && config.extractVersion) {
     const extractVersionRegEx = regEx(config.extractVersion);
     matchedRelease = releases.find((r) => {
       const extractedVersion = extractVersionRegEx.exec(r.tag!)?.groups
@@ -448,7 +448,7 @@ export async function getReleaseNotesMd(
  * cache for days.
  */
 export function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
-  const dt = is.date(releaseDate)
+  const dt = isDate(releaseDate)
     ? DateTime.fromJSDate(releaseDate)
     : DateTime.fromISO(releaseDate!);
 

@@ -20,7 +20,6 @@ export class GerritScm extends DefaultGitScm {
       state: 'open',
       branchName,
       singleChange: true,
-      refreshCache: true,
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();
     if (change) {
@@ -36,7 +35,6 @@ export class GerritScm extends DefaultGitScm {
       state: 'open',
       branchName,
       singleChange: true,
-      refreshCache: true,
       requestDetails: ['CURRENT_REVISION'],
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();
@@ -55,7 +53,6 @@ export class GerritScm extends DefaultGitScm {
       branchName,
       targetBranch: baseBranch,
       singleChange: true,
-      refreshCache: true,
       requestDetails: ['CURRENT_REVISION', 'CURRENT_ACTIONS'],
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();
@@ -98,7 +95,6 @@ export class GerritScm extends DefaultGitScm {
       branchName,
       targetBranch: baseBranch,
       singleChange: true,
-      refreshCache: true,
       requestDetails: ['CURRENT_REVISION', 'DETAILED_ACCOUNTS'],
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();
@@ -113,17 +109,12 @@ export class GerritScm extends DefaultGitScm {
     commit: CommitFilesConfig,
   ): Promise<LongCommitSha | null> {
     logger.debug(`commitAndPush(${commit.branchName})`);
-    const searchConfig: GerritFindPRConfig = {
-      state: 'open',
+    const existingChange = await client.getBranchChange(repository, {
       branchName: commit.branchName,
+      state: 'open',
       targetBranch: commit.baseBranch,
-      singleChange: true,
-      refreshCache: true,
       requestDetails: ['CURRENT_REVISION'],
-    };
-    const existingChange = (
-      await client.findChanges(repository, searchConfig)
-    ).pop();
+    });
 
     let hasChanges = true;
     const message =
@@ -161,9 +152,14 @@ export class GerritScm extends DefaultGitScm {
             pushOptions.push(`hashtag=${label}`);
           }
         }
+        // If a change already exists, we push to the same target branch to
+        // avoid creating a new change if the base branch has changed.
+        // updatePr() will take care of moving the existing change to a different base
+        // branch if needed.
+        const changeBranch = existingChange?.branch ?? commit.baseBranch!;
         const pushResult = await git.pushCommit({
           sourceRef: commit.branchName,
-          targetRef: `refs/for/${commit.baseBranch!}`,
+          targetRef: `refs/for/${changeBranch}`,
           files: commit.files,
           pushOptions,
         });
@@ -184,7 +180,6 @@ export class GerritScm extends DefaultGitScm {
       state: 'open',
       branchName,
       singleChange: true,
-      refreshCache: true,
       requestDetails: ['CURRENT_REVISION'],
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();

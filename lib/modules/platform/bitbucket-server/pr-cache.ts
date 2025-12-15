@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
@@ -24,7 +24,10 @@ export class BbsPrCache {
     repoCache.platform.bitbucketServer ??= {};
     let pullRequestCache = repoCache.platform.bitbucketServer
       .pullRequestsCache as BbsPrCacheData;
-    if (!pullRequestCache || pullRequestCache.author !== author) {
+    if (
+      isNullOrUndefined(pullRequestCache) ||
+      pullRequestCache.author !== author
+    ) {
       pullRequestCache = {
         items: {},
         updatedDate: null,
@@ -135,7 +138,7 @@ export class BbsPrCache {
       state: 'ALL',
       limit: this.items.length ? '20' : '100',
     };
-    if (!this.ignorePrAuthor && is.string(this.author)) {
+    if (!this.ignorePrAuthor && isString(this.author)) {
       searchParams['role.1'] = 'AUTHOR';
       searchParams['username.1'] = this.author;
     }

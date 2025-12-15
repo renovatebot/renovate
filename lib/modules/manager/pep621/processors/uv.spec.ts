@@ -350,7 +350,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         'pyproject.toml',
       );
       expect(result).toBeEmptyArray();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { packageFile: 'pyproject.toml' },
         'No uv lock file found',
@@ -375,7 +375,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         partial(),
       );
       expect(result).toBeNull();
-      // eslint-disable-next-line vitest/prefer-called-exactly-once-with
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { packageFileName: undefined },
         'No uv lock file found',
@@ -550,9 +550,12 @@ describe('modules/manager/pep621/processors/uv', () => {
         password: 'pass',
       });
       googleAuth.mockImplementationOnce(
-        vi.fn().mockImplementationOnce(() => ({
-          getAccessToken: vi.fn().mockResolvedValue('some-token'),
-        })),
+        // TODO: fix typing
+        vi.fn<any>(
+          class {
+            getAccessToken = vi.fn().mockResolvedValue('some-token');
+          },
+        ),
       );
       fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce('test content');
@@ -687,9 +690,12 @@ describe('modules/manager/pep621/processors/uv', () => {
         password: 'pass',
       });
       googleAuth.mockImplementation(
-        vi.fn().mockImplementation(() => ({
-          getAccessToken: vi.fn().mockResolvedValue(undefined),
-        })),
+        // TODO: fix typing
+        vi.fn<any>(
+          class {
+            getAccessToken = vi.fn();
+          },
+        ),
       );
       fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce('test content');
@@ -781,9 +787,12 @@ describe('modules/manager/pep621/processors/uv', () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);
       googleAuth.mockImplementation(
-        vi.fn().mockImplementation(() => ({
-          getAccessToken: vi.fn().mockResolvedValue(undefined),
-        })),
+        // TODO: fix typing
+        vi.fn<any>(
+          class {
+            getAccessToken = vi.fn();
+          },
+        ),
       );
       fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce('test content');

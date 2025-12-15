@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isString } from '@sindresorhus/is';
 import { RequestError, type RetryObject } from 'got';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
@@ -38,7 +38,7 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
     opts.httpOptions.throwHttpErrors = true;
 
     const result = await super.requestJsonUnsafe<T>(method, opts);
-    if (opts.httpOptions.paginate && is.array(result.body)) {
+    if (opts.httpOptions.paginate && isArray(result.body)) {
       opts.httpOptions.memCache = false;
 
       // Check if result is paginated
@@ -57,7 +57,7 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
           opts.url = nextUrl;
 
           const nextResult = await this.requestJsonUnsafe<T>(method, opts);
-          if (is.array(nextResult.body)) {
+          if (isArray(nextResult.body)) {
             result.body.push(...nextResult.body);
           }
         }
@@ -96,7 +96,7 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
     // TODO: fix test, should be `RequestError`
     if (
       'code' in err &&
-      is.string(err.code) &&
+      isString(err.code) &&
       platformFailureCodes.includes(err.code)
     ) {
       throw new ExternalHostError(err, 'gitlab');

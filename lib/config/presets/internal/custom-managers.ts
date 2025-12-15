@@ -147,4 +147,20 @@ export const presets: Record<string, Preset> = {
     ],
     description: 'Update `*_version` variables in `.tfvars` files.',
   },
+  tsconfigNodeVersions: {
+    customManagers: [
+      {
+        autoReplaceStringTemplate:
+          '"extends": "@tsconfig/node{{{major}}}/tsconfig.json"',
+        currentValueTemplate: '{{{major}}}',
+        customType: 'regex',
+        datasourceTemplate: 'npm',
+        managerFilePatterns: ['**/tsconfig.json'],
+        matchStrings: [
+          '"extends":\\s*"(?<depName>@tsconfig/node(?<major>\\d+))/tsconfig\\.json"',
+        ],
+      },
+    ],
+    description: 'Update `@tsconfig/node` extends  in `tsconfig.json` files.',
+  },
 };
