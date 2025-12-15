@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { GerritHttp } from '../../../util/http/gerrit';
+import type { HttpOptions } from '../../../util/http/types';
 import { getQueryString } from '../../../util/url';
 import type {
   GerritAccountInfo,
@@ -29,9 +30,12 @@ class GerritClient {
     this.gerritVersion = version;
   }
 
-  async getGerritVersion(): Promise<string> {
+  async getGerritVersion(
+    options: Pick<HttpOptions, 'username' | 'password'>,
+  ): Promise<string> {
     const res = await this.gerritHttp.getJson(
       'a/config/server/version',
+      options,
       z.string(),
     );
     return res.body;
