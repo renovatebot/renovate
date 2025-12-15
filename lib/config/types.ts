@@ -62,6 +62,7 @@ export interface RenovateSharedConfig {
   abandonmentThreshold?: Nullish<string>;
   addLabels?: string[];
   assignAutomerge?: boolean;
+  autoApprove?: boolean;
   autoReplaceGlobalMatch?: boolean;
   automerge?: boolean;
   automergeSchedule?: string[];
@@ -128,6 +129,7 @@ export interface RenovateSharedConfig {
   prHeader?: string;
   prPriority?: number;
   prTitle?: string;
+  prTitleStrict?: boolean;
   productLinks?: Record<string, string>;
   pruneBranchAfterAutomerge?: boolean;
   rangeStrategy?: RangeStrategy;
