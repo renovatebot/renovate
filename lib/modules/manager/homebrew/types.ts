@@ -1,12 +1,9 @@
-export interface UrlPathParsedResult {
-  currentValue: string;
-  ownerName: string;
-  repoName: string;
-}
+import type {
+  GitHubManagerData,
+  GitHubUrlParsedResult,
+} from './handlers/github';
 
-export interface HomebrewManagerData {
-  ownerName: string | null;
-  repoName: string | null;
-  sha256: string | null;
-  url: string | null;
-}
+// Future extensibility for additional datasources
+export type UrlParsedResult = GitHubUrlParsedResult; // | NpmUrlParsedResult
+
+export type HomebrewManagerData = GitHubManagerData; // | NpmManagerData

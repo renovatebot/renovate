@@ -15,11 +15,13 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.16.1',
       depName: 'Aide',
       managerData: {
+        type: 'github' as const,
         ownerName: 'aide',
         repoName: 'aide',
         sha256:
           '0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7',
         url: 'https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz',
+        urlType: 'releases' as const,
       },
       newValue: 'v0.17.7',
     };
@@ -47,11 +49,13 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
@@ -90,11 +94,13 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
@@ -124,11 +130,13 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
@@ -154,11 +162,13 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'invalid_url',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
@@ -176,22 +186,16 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'invalid/repo/name',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
-    httpMock
-      .scope(baseUrl)
-      .get(
-        '/bazelbuild/invalid/repo/name/releases/download/v0.9.3/invalid/repo/name-0.9.3.tar.gz',
-      )
-      .replyWithError('')
-      .get('/bazelbuild/invalid/repo/name/archive/refs/tags/v0.9.3.tar.gz')
-      .reply(200, Readable.from(['foo']));
 
     const newContent = await updateDependency({
       fileContent: ibazel,
@@ -206,24 +210,16 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'wrong-version/archive/refs/tags/v10.2.3.tar.gz',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
-    httpMock
-      .scope(baseUrl)
-      .get(
-        '/bazelbuild/wrong-version/archive/refs/tags/v10.2.3.tar.gz/releases/download/v0.9.3/wrong-version/archive/refs/tags/v10.2.3.tar.gz-0.9.3.tar.gz',
-      )
-      .replyWithError('')
-      .get(
-        '/bazelbuild/wrong-version/archive/refs/tags/v10.2.3.tar.gz/archive/refs/tags/v0.9.3.tar.gz',
-      )
-      .reply(200, Readable.from(['foo']));
 
     const newContent = await updateDependency({
       fileContent: ibazel,
@@ -247,11 +243,13 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
@@ -283,11 +281,13 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
@@ -320,11 +320,13 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
@@ -356,11 +358,13 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
       managerData: {
+        type: 'github' as const,
         ownerName: 'bazelbuild',
         repoName: 'bazel-watcher',
         sha256:
           '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
         url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+        urlType: 'archive' as const,
       },
       newValue: 'v0.9.3',
     };
@@ -384,11 +388,13 @@ describe('modules/manager/homebrew/update', () => {
       currentValue: 'v0.16.1',
       depName: 'Aide',
       managerData: {
+        type: 'github' as const,
         ownerName: 'aide',
         repoName: 'aide',
         sha256:
           '0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7',
         url: 'https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz',
+        urlType: 'releases' as const,
       },
       newValue: 'v0.17.7',
     };
