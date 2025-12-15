@@ -76,14 +76,17 @@ export async function updateDependency({
     logger.debug(`Missing old URL for dependency ${upgrade.depName}`);
     return fileContent;
   }
-  const urlRegex = new RegExp(
-    `(?<prefix>\\burl\\s+)(?<quote>['"])${escapeRegex(oldUrl)}\\k<quote>`,
+  const urlDoubleQuote = new RegExp(
+    `(\\burl\\s+)"${escapeRegex(oldUrl)}"`,
     'g',
   );
-  let newContent = fileContent.replace(
-    urlRegex,
-    `$<prefix>$<quote>${newUrl}$<quote>`,
+  const urlSingleQuote = new RegExp(
+    `(\\burl\\s+)'${escapeRegex(oldUrl)}'`,
+    'g',
   );
+  let newContent = fileContent
+    .replace(urlDoubleQuote, `$1"${newUrl}"`)
+    .replace(urlSingleQuote, `$1'${newUrl}'`);
   if (newContent === fileContent) {
     logger.debug(`Failed to update url for dependency ${upgrade.depName}`);
     return fileContent;
@@ -95,14 +98,17 @@ export async function updateDependency({
     logger.debug(`Missing old SHA256 for dependency ${upgrade.depName}`);
     return fileContent;
   }
-  const sha256Regex = new RegExp(
-    `(?<prefix>\\bsha256\\s+)(?<quote>['"])${escapeRegex(oldSha256)}\\k<quote>`,
+  const sha256DoubleQuote = new RegExp(
+    `(\\bsha256\\s+)"${escapeRegex(oldSha256)}"`,
     'g',
   );
-  newContent = newContent.replace(
-    sha256Regex,
-    `$<prefix>$<quote>${newSha256}$<quote>`,
+  const sha256SingleQuote = new RegExp(
+    `(\\bsha256\\s+)'${escapeRegex(oldSha256)}'`,
+    'g',
   );
+  newContent = newContent
+    .replace(sha256DoubleQuote, `$1"${newSha256}"`)
+    .replace(sha256SingleQuote, `$1'${newSha256}'`);
   if (!newContent.includes(newSha256)) {
     logger.debug(`Failed to update sha256 for dependency ${upgrade.depName}`);
     return fileContent;

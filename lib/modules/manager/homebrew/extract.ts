@@ -60,9 +60,12 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   const className = classMatch.groups.className;
 
   // Extract URL: url "..." or url '...'
-  const urlRegex = regEx(/\burl\s+(?<quote>['"])(?<url>.+?)\k<quote>/);
+  const urlRegex = regEx(
+    /\burl\s+(?:"(?<urlDouble>[^"]+)"|'(?<urlSingle>[^']+)')/,
+  );
   const urlMatch = content.match(urlRegex);
-  const url = urlMatch?.groups?.url ?? null;
+  const url =
+    urlMatch?.groups?.urlDouble ?? urlMatch?.groups?.urlSingle ?? null;
   if (!url) {
     logger.debug('Invalid URL field');
   }
@@ -85,10 +88,13 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   // Extract SHA256: sha256 "..." or sha256 '...'
   // Match any hex characters (not just exactly 64) to handle invalid cases
   const sha256Regex = regEx(
-    /\bsha256\s+(?<quote>['"])(?<sha256>[a-f0-9]+)\k<quote>/,
+    /\bsha256\s+(?:"(?<sha256Double>[a-f0-9]+)"|'(?<sha256Single>[a-f0-9]+)')/,
   );
   const sha256Match = content.match(sha256Regex);
-  const sha256 = sha256Match?.groups?.sha256 ?? null;
+  const sha256 =
+    sha256Match?.groups?.sha256Double ??
+    sha256Match?.groups?.sha256Single ??
+    null;
   if (sha256?.length !== 64) {
     logger.debug('Error: Invalid sha256 field');
     skipReason = 'invalid-sha256';
