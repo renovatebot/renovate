@@ -603,9 +603,9 @@ async function closeIssue(issueNumber: number): Promise<void> {
 
 export function massageMarkdown(input: string): string {
   // Remove any HTML we use
-  // Bitbucket doesn't currently support collapsible syntax; https://jira.atlassian.com/browse/BCLOUD-20231
   // See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
-  return smartTruncate(input, maxBodyLength())
+
+  const after = smartTruncate(input, maxBodyLength())
     .replace(
       'you tick the rebase/retry checkbox',
       'by renaming this PR to start with "rebase!"',
@@ -616,16 +616,51 @@ export function massageMarkdown(input: string): string {
     )
     .replace(
       regEx(
-        /(> ℹ \*\*Note\*\*[\s\S]*?unmaintained:\n)[\s\S]*?(View abandoned dependencies.*<\/summary>)/m,
+        /(>.*\*\*Note\*\*\n>\s?\n.*unmaintained:\n\n)<details>\n(<summary>View abandoned dependencies.*<\/summary>)([\s\S]*?)<\/details>/,
       ),
-      '## Abandoned Dependencies\n$1',
+      '## Abandoned Dependencies\n$1$3',
     )
-    .replace(regEx(/(>[\s\S]+?)(## Abandoned dependencies.*)/), '$2\n$1')
-    .replace(regEx(/<\/?summary>/g), '**')
-    .replace(regEx(/<\/?(details|blockquote)>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
+
+  return massageCollapsibleSectionsIntoLists(after);
+}
+
+/**
+ * Massage collapsible html sections into nested unordered lists
+ *
+ * Bitbucket doesn't currently support collapsible syntax; https://jira.atlassian.com/browse/BCLOUD-20231
+ */
+function massageCollapsibleSectionsIntoLists(body: string): string {
+  let depth = 0;
+  // Parse detail parts to calculate correct list depth
+  const detailsParts = body.split('<details>').map((raw, i, arr) => {
+    const partDepth = depth;
+
+    depth += 1;
+    const countClosingDetailsTags = raw.split('</details>').length - 1;
+    depth = Math.max(0, depth - countClosingDetailsTags);
+
+    return { raw, partDepth };
+  });
+
+  // Reassemble parts while replacing collapsible html elements with markdown list
+  return detailsParts
+    .map(({ raw, partDepth }) => {
+      if (partDepth === 0) {
+        return raw;
+      }
+
+      const t = raw
+        .replace(/<\/?summary>/g, partDepth === 1 ? '**' : '`')
+        .replace(/( - `)/g, '\t'.repeat(partDepth) + ' - `')
+        .replace(/(- \[)/g, '\t'.repeat(partDepth) + '- [');
+
+      return `${'\t'.repeat(partDepth - 1)} - ${t}`;
+    })
+    .join('')
+    .replace(/<\/?(summary|details|blockquote)>/g, '');
 }
 
 export function maxBodyLength(): number {

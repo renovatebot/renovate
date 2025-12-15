@@ -476,7 +476,7 @@ export async function processBranch(
       }
 
       if (depNamesWithoutReleaseTimestamp['timestamp-required'].length) {
-        logger.debug(
+        logger.once.debug(
           { updates: depNamesWithoutReleaseTimestamp['timestamp-required'] },
           `Marking ${depNamesWithoutReleaseTimestamp['timestamp-required'].length} release(s) as pending, as they do not have a releaseTimestamp and we're running with minimumReleaseAgeBehaviour=timestamp-required`,
         );
@@ -485,7 +485,7 @@ export async function processBranch(
         logger.once.warn(
           "Some upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
         );
-        logger.debug(
+        logger.once.debug(
           { updates: depNamesWithoutReleaseTimestamp['timestamp-optional'] },
           `${depNamesWithoutReleaseTimestamp['timestamp-optional'].length} upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding`,
         );
