@@ -39,15 +39,15 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
       }
     } else if (
       options.hostType &&
+      FORGEJO_API_USING_HOST_TYPES.includes(options.hostType)
+    ) {
+      options.headers.authorization = `Bearer ${options.token}`;
+    } else if (
+      options.hostType &&
       GITEA_API_USING_HOST_TYPES.includes(options.hostType)
     ) {
       // Gitea v1.8.0 and later support `Bearer` as alternate to `token`
       // https://github.com/go-gitea/gitea/pull/5378
-      options.headers.authorization = `Bearer ${options.token}`;
-    } else if (
-      options.hostType &&
-      FORGEJO_API_USING_HOST_TYPES.includes(options.hostType)
-    ) {
       options.headers.authorization = `Bearer ${options.token}`;
     } else if (
       options.hostType &&

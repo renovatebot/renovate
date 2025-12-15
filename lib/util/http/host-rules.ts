@@ -126,21 +126,6 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
     };
   }
 
-  // Fallback to `gitea` hostType
-  if (
-    hostType &&
-    GITEA_API_USING_HOST_TYPES.includes(hostType) &&
-    hostType !== 'gitea'
-  ) {
-    res = {
-      ...hostRules.find({
-        hostType: 'gitea',
-        url,
-      }),
-      ...res,
-    };
-  }
-
   // Fallback to `forgejo` hostType
   if (
     hostType &&
@@ -150,6 +135,21 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
     res = {
       ...hostRules.find({
         hostType: 'forgejo',
+        url,
+      }),
+      ...res,
+    };
+  }
+
+  // Fallback to `gitea` hostType
+  if (
+    hostType &&
+    GITEA_API_USING_HOST_TYPES.includes(hostType) &&
+    hostType !== 'gitea'
+  ) {
+    res = {
+      ...hostRules.find({
+        hostType: 'gitea',
         url,
       }),
       ...res,
