@@ -29,6 +29,22 @@ async function decompress<T>(input: Buffer): Promise<T> {
 }
 
 export class PackageCacheSqlite extends PackageCacheBase {
+  static async create(cacheDir: string): Promise<PackageCacheSqlite> {
+    const Sqlite = sqlite();
+    const sqliteDir = upath.join(cacheDir, 'renovate/renovate-cache-sqlite');
+    await ensureDir(sqliteDir);
+    const sqliteFile = upath.join(sqliteDir, 'db.sqlite');
+
+    if (await exists(sqliteFile)) {
+      logger.debug(`Using SQLite package cache: ${sqliteFile}`);
+    } else {
+      logger.debug(`Creating SQLite package cache: ${sqliteFile}`);
+    }
+
+    const client = new Sqlite(sqliteFile);
+    return new PackageCacheSqlite(client);
+  }
+
   private upsertStatement: Statement<unknown[]>;
   private getStatement: Statement<unknown[]>;
   private deleteExpiredRows: Statement<unknown[]>;
@@ -87,22 +103,6 @@ export class PackageCacheSqlite extends PackageCacheBase {
     this.countStatement = this.client
       .prepare('SELECT COUNT(*) FROM package_cache')
       .pluck(true);
-  }
-
-  static async create(cacheDir: string): Promise<PackageCacheSqlite> {
-    const Sqlite = sqlite();
-    const sqliteDir = upath.join(cacheDir, 'renovate/renovate-cache-sqlite');
-    await ensureDir(sqliteDir);
-    const sqliteFile = upath.join(sqliteDir, 'db.sqlite');
-
-    if (await exists(sqliteFile)) {
-      logger.debug(`Using SQLite package cache: ${sqliteFile}`);
-    } else {
-      logger.debug(`Creating SQLite package cache: ${sqliteFile}`);
-    }
-
-    const client = new Sqlite(sqliteFile);
-    return new PackageCacheSqlite(client);
   }
 
   async set<T = unknown>(

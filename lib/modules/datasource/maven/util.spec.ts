@@ -9,7 +9,8 @@ import {
   downloadMavenXml,
   downloadS3Protocol,
 } from './util';
-import { logger, packageCache, partial } from '~test/util';
+import { packageCache } from '~test/cache-mock';
+import { logger, partial } from '~test/util';
 
 const http = new Http('test');
 

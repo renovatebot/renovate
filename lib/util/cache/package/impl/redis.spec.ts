@@ -30,8 +30,8 @@ describe('util/cache/package/impl/redis', () => {
 
     beforeEach(() => {
       vi.resetAllMocks();
-      vi.mocked(createClient).mockReturnValue(clientMock as any);
-      vi.mocked(createCluster).mockReturnValue(clientMock as any);
+      vi.mocked(createClient).mockReturnValue(clientMock as never);
+      vi.mocked(createCluster).mockReturnValue(clientMock as never);
     });
 
     describe('create', () => {

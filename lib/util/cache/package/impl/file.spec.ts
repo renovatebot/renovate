@@ -18,7 +18,6 @@ describe('util/cache/package/impl/file', () => {
   });
 
   afterEach(async () => {
-    await cacache.rm.all(cacheFileName);
     await tmpDir.cleanup();
   });
 

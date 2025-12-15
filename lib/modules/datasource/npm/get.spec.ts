@@ -4,8 +4,8 @@ import { Http } from '../../../util/http';
 import type { HttpResponse } from '../../../util/http/types';
 import { getDependency } from './get';
 import { resolveRegistryUrl, setNpmrc } from './npmrc';
+import { packageCache } from '~test/cache-mock';
 import * as httpMock from '~test/http-mock';
-import { packageCache } from '~test/util';
 
 function getPath(s = ''): string {
   const [x] = s.split('\n');

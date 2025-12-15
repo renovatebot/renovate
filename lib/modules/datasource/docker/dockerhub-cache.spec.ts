@@ -1,7 +1,7 @@
 import type { DockerHubCacheData } from './dockerhub-cache';
 import { DockerHubCache } from './dockerhub-cache';
 import type { DockerHubTag } from './schema';
-import { packageCache } from '~test/util';
+import { packageCache } from '~test/cache-mock';
 
 function oldCacheData(): DockerHubCacheData {
   return {

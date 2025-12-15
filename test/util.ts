@@ -5,7 +5,6 @@ import * as _logger from '../lib/logger';
 import type { Platform } from '../lib/modules/platform';
 import { platform as _platform } from '../lib/modules/platform';
 import { scm as _scm } from '../lib/modules/platform/scm';
-import { packageCache as _packageCache } from '../lib/util/cache/package';
 import * as _env from '../lib/util/exec/env';
 import * as _fs from '../lib/util/fs';
 import * as _git from '../lib/util/git';
@@ -38,7 +37,6 @@ export const scm = vi.mocked(_scm);
 export const env = vi.mocked(_env);
 export const hostRules = vi.mocked(_hostRules);
 export const logger = vi.mocked(_logger, true);
-export const packageCache = vi.mocked(_packageCache);
 
 export type { RenovateConfig };
 

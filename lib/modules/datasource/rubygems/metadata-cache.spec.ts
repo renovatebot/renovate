@@ -1,7 +1,7 @@
 import { Http } from '../../../util/http';
 import { MetadataCache } from './metadata-cache';
+import { packageCache } from '~test/cache-mock';
 import * as httpMock from '~test/http-mock';
-import { packageCache } from '~test/util';
 
 describe('modules/datasource/rubygems/metadata-cache', () => {
   const packageCacheMock = new Map<string, unknown>();

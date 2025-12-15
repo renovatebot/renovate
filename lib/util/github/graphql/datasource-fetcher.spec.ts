@@ -11,8 +11,9 @@ import type {
   GithubGraphqlDatasourceAdapter,
   GithubGraphqlRepoResponse,
 } from './types';
+import { packageCache } from '~test/cache-mock';
 import * as httpMock from '~test/http-mock';
-import { packageCache, partial } from '~test/util';
+import { partial } from '~test/util';
 
 interface TestAdapterInput {
   version: string;

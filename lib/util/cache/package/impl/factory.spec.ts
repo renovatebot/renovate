@@ -3,6 +3,7 @@ import { PackageCacheFile } from './file';
 import { PackageCacheRedis } from './redis';
 import { PackageCacheSqlite } from './sqlite';
 import { PackageCache } from './index';
+import { partial } from '~test/util';
 
 vi.mock('../../../env', () => ({
   getEnv: vi.fn(() => ({})),
@@ -29,7 +30,7 @@ describe('util/cache/package/impl/factory', () => {
 
     describe('Redis backend', () => {
       it('instantiates redis backend when redisUrl is configured', async () => {
-        const backend = { destroy: vi.fn() } as any;
+        const backend = partial<PackageCacheRedis>({ destroy: vi.fn() });
         vi.mocked(PackageCacheRedis.create).mockResolvedValue(backend);
 
         const cache = await PackageCache.create({
@@ -51,7 +52,7 @@ describe('util/cache/package/impl/factory', () => {
         vi.mocked(getEnv).mockReturnValue({
           RENOVATE_X_SQLITE_PACKAGE_CACHE: 'true',
         });
-        const backend = { destroy: vi.fn() } as any;
+        const backend = partial<PackageCacheSqlite>({ destroy: vi.fn() });
         vi.mocked(PackageCacheSqlite.create).mockResolvedValue(backend);
 
         const cache = await PackageCache.create({ cacheDir: '/tmp' });
@@ -64,7 +65,7 @@ describe('util/cache/package/impl/factory', () => {
 
     describe('File backend', () => {
       it('instantiates file backend when cacheDir is configured', async () => {
-        const backend = { destroy: vi.fn() } as any;
+        const backend = partial<PackageCacheFile>({ destroy: vi.fn() });
         vi.mocked(PackageCacheFile.create).mockReturnValue(backend);
 
         const cache = await PackageCache.create({ cacheDir: '/tmp' });

@@ -22,7 +22,8 @@ import {
   getPkgReleases,
   supportsDigests,
 } from '.';
-import { logger, packageCache } from '~test/util';
+import { packageCache } from '~test/cache-mock';
+import { logger } from '~test/util';
 
 const datasource = 'dummy';
 const packageName = 'package';

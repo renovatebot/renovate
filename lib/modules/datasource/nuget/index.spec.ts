@@ -6,9 +6,10 @@ import { GlobalConfig } from '../../../config/global';
 import { id as versioning } from '../../versioning/nuget';
 import { parseRegistryUrl } from './common';
 import { NugetDatasource } from '.';
+import { packageCache } from '~test/cache-mock';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
-import { hostRules, logger, packageCache } from '~test/util';
+import { hostRules, logger } from '~test/util';
 
 const datasource = NugetDatasource.id;
 

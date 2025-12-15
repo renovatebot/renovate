@@ -3,8 +3,8 @@ import { Http, type HttpResponse } from '..';
 import { GlobalConfig } from '../../../config/global';
 import { PackageHttpCacheProvider } from './package-http-cache-provider';
 import type { HttpCache } from './schema';
+import { packageCache } from '~test/cache-mock';
 import * as httpMock from '~test/http-mock';
-import { packageCache } from '~test/util';
 
 const http = new Http('test');
 
