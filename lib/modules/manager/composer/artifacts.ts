@@ -177,15 +177,7 @@ export async function updateArtifacts({
       logger.debug(
         `Removing ${lockFileName} first due to lock file maintenance upgrade`,
       );
-      try {
-        await deleteLocalFile(lockFileName);
-      } catch (err) {
-        /* v8 ignore next -- needs test */
-        logger.debug(
-          { err, lockFileName },
-          'Error removing `composer.lock` for lock file maintenance',
-        );
-      }
+      await deleteLocalFile(lockFileName);
     }
 
     const cmd = 'composer';
