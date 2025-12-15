@@ -255,6 +255,10 @@ For example:
 }
 ```
 
+## bbMendAppDashboardStatus
+
+Configure this to `true` means that Renovate will create a branch status against the repository's main branch, linking to the [Mend App on Bitbucket Repository Dashboard](./mend-hosted/hosted-apps-config.md).
+
 ## bbUseDevelopmentBranch
 
 By default, Renovate will use a repository's "main branch" (typically called `main` or `master`) as the "default branch".
@@ -927,6 +931,7 @@ If the file exists but cannot be parsed, then Renovate will raise a config warni
 
 The inherited config may include all valid repository config and these config options:
 
+- `bbMendAppDashboardStatus`
 - `bbUseDevelopmentBranch`
 - `onboarding`
 - `onboardingBranch`
