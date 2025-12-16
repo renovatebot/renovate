@@ -123,8 +123,12 @@ export class PackageFiles {
             } else {
               version = 'unknown version';
             }
+            let updates = '';
+            if (dep.updates && dep.updates.length > 0) {
+              updates = ` → [Updates: ${dep.updates?.map((u) => `\`${u.newValue}\``).join(', ')}]`;
+            }
             // TODO: types (#22198)
-            deps += ` - \`${dep.depName!} ${version}\`\n`;
+            deps += ` - \`${dep.depName!} ${version}\`${updates}\n`;
           }
           deps += '\n</details>\n\n';
         }
