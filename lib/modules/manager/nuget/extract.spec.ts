@@ -577,5 +577,30 @@ describe('modules/manager/nuget/extract', () => {
         expect(await extractPackageFile('{{', packageFile, config)).toBeNull();
       });
     });
+
+    describe('single-csharp-file', () => {
+      it('reads sdk and package directives', async () => {
+        const packageFile = 'single-csharp-file/singlefile.cs';
+        const contents = Fixtures.get(packageFile);
+        expect(await extractPackageFile(contents, packageFile, config)).toEqual(
+          {
+            deps: [
+              {
+                datasource: 'nuget',
+                currentValue: '6.0.0',
+                depName: 'Some.Sdk',
+                depType: 'msbuild-sdk',
+              },
+              {
+                datasource: 'nuget',
+                currentValue: '3.0.1',
+                depName: 'Some.NuGet.Package',
+                depType: 'nuget',
+              },
+            ],
+          },
+        );
+      });
+    });
   });
 });

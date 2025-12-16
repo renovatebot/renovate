@@ -20,6 +20,8 @@ For Renovate to work with .NET Framework projects, you need to update these file
 - `.props`
 - `.targets`
 
+You can also make use of the single code file projects (since .NET 10), but in this case you need to add the files to check manually to the `managerFilePatterns`.
+
 ### Disabling updates for pinned versions
 
 In NuGet, when you use versions like `Version="1.2.3"` then it means "1.2.3 or greater, up to v2"
