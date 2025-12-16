@@ -96,7 +96,7 @@ export class GitHubUrlHandler extends HomebrewUrlHandler {
     };
   }
 
-  buildNewUrls(
+  buildArchiveUrls(
     managerData: GitHubManagerData,
     newVersion: string,
   ): string[] | null {

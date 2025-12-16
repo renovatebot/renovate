@@ -45,7 +45,7 @@ describe('modules/manager/homebrew/handlers/github', () => {
     });
   });
 
-  describe('buildNewUrls', () => {
+  describe('buildArchiveUrls', () => {
     it('uses original version when semver.coerce fails', () => {
       const managerData = {
         type: 'github' as const,
@@ -55,7 +55,7 @@ describe('modules/manager/homebrew/handlers/github', () => {
         url: 'https://github.com/owner/repo/archive/refs/tags/not-a-semver.tar.gz',
       };
 
-      const urls = handler.buildNewUrls(managerData, 'also-not-semver');
+      const urls = handler.buildArchiveUrls(managerData, 'also-not-semver');
 
       expect(urls).toEqual([
         'https://github.com/owner/repo/releases/download/also-not-semver/repo-also-not-semver.tar.gz',
@@ -72,7 +72,7 @@ describe('modules/manager/homebrew/handlers/github', () => {
         url: 'https://github.com/owner/repo/archive/refs/tags/v1.2.3.tar.gz',
       };
 
-      const urls = handler.buildNewUrls(managerData, 'v1.2.4');
+      const urls = handler.buildArchiveUrls(managerData, 'v1.2.4');
 
       expect(urls).toEqual([
         'https://github.com/owner/repo/releases/download/v1.2.4/repo-1.2.4.tar.gz',

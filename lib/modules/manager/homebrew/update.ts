@@ -37,13 +37,12 @@ export async function updateDependency({
   // Build candidate URLs to try
   const candidateUrls: string[] = [];
 
-  // For other handler types, use the default buildNewUrl
-  const newUrls = handler.buildNewUrls(managerData, newValue);
-  if (!newUrls) {
+  const buildArchiveUrls = handler.buildArchiveUrls(managerData, newValue);
+  if (!buildArchiveUrls) {
     logger.debug(`Failed to build new URL for ${upgrade.depName}`);
     return fileContent;
   }
-  candidateUrls.push(...newUrls);
+  candidateUrls.push(...buildArchiveUrls);
 
   // Try each candidate URL
   let newUrl: string | null = null;

@@ -15,7 +15,7 @@ export abstract class HomebrewUrlHandler {
   ): PackageDependency<HomebrewManagerData>;
 
   // Build new URLs for version update
-  abstract buildNewUrls(
+  abstract buildArchiveUrls(
     managerData: HomebrewManagerData,
     newVersion: string,
   ): string[] | null;
