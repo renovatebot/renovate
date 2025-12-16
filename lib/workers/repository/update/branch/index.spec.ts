@@ -2972,7 +2972,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
-          title: 'unlimited!',
+          title: 'schedule!',
           state: 'open',
           bodyStruct: {
             hash: hashBody(`- [x] <!-- create-all-awaiting-schedule-prs -->`),
