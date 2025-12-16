@@ -41,6 +41,53 @@ describe('config/presets/internal/workarounds', () => {
     });
   });
 
+  describe('clamavDockerImageVersioning', () => {
+    const preset = presets.clamavDockerImageVersioning;
+    const packageRule = preset.packageRules![0];
+    const versioning = versionings.get(packageRule.versioning);
+    const matchCurrentValue = packageRule.matchCurrentValue!;
+
+    it.each`
+      input              | expected
+      ${'latest'}        | ${false}
+      ${'latest_base'}   | ${false}
+      ${'stable'}        | ${false}
+      ${'stable_base'}   | ${false}
+      ${'unstable'}      | ${false}
+      ${'unstable_base'} | ${false}
+      ${'20'}            | ${false}
+      ${'20_base'}       | ${false}
+      ${'1.24'}          | ${true}
+      ${'1.24_base'}     | ${true}
+      ${'1.24.0'}        | ${true}
+      ${'1.24.0_base'}   | ${true}
+      ${'1.5.1-17'}      | ${true}
+      ${'1.5.1-17_base'} | ${true}
+    `('versioning("$input") == "$expected"', ({ input, expected }) => {
+      expect(versioning.isValid(input)).toEqual(expected);
+    });
+
+    it.each`
+      input              | expected
+      ${'latest'}        | ${false}
+      ${'latest_base'}   | ${false}
+      ${'stable'}        | ${false}
+      ${'stable_base'}   | ${false}
+      ${'unstable'}      | ${false}
+      ${'unstable_base'} | ${false}
+      ${'20'}            | ${false}
+      ${'20_base'}       | ${false}
+      ${'1.24'}          | ${false}
+      ${'1.24_base'}     | ${true}
+      ${'1.24.0'}        | ${false}
+      ${'1.24.0_base'}   | ${true}
+      ${'1.5.1-17'}      | ${false}
+      ${'1.5.1-17_base'} | ${true}
+    `('matchCurrentValue("$input") == "$expected"', ({ input, expected }) => {
+      expect(matchRegexOrGlob(input, matchCurrentValue)).toEqual(expected);
+    });
+  });
+
   describe('libericaJdkDockerVersioning', () => {
     const preset = presets.libericaJdkDockerVersioning;
 

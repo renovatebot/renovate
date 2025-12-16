@@ -22,6 +22,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:disableMavenParentRoot',
       'workarounds:containerbase',
       'workarounds:bitnamiDockerImageVersioning',
+      'workarounds:clamavDockerImageVersioning',
       'workarounds:k3sKubernetesVersioning',
       'workarounds:rke2KubernetesVersioning',
       'workarounds:libericaJdkDockerVersioning',
@@ -43,6 +44,19 @@ export const presets: Record<string, Preset> = {
         ],
         versioning:
           'regex:^(?<major>\\d+)(?:\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?)?(:?-(?<compatibility>.+)-(?<build>\\d+)(?:-r(?<revision>\\d+))?)?$',
+      },
+    ],
+  },
+  clamavDockerImageVersioning: {
+    description: 'Use custom regex versioning for ClamAV images',
+    packageRules: [
+      {
+        matchCurrentValue:
+          '/^(?<major>\\d+)\\.(?<minor>\\d+)(\\.(?<patch>\\d+))?(-(?<build>\\d+))?_(?<compatibility>.+)$/',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['clamav/clamav'],
+        versioning:
+          'regex:^(?<major>\\d+)\\.(?<minor>\\d+)(\\.(?<patch>\\d+))?(-(?<build>\\d+))?(_(?<compatibility>.+))?$',
       },
     ],
   },
