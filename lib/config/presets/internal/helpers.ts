@@ -47,7 +47,7 @@ export const presets: Record<string, Preset> = {
         matchUpdateTypes: ['major', 'minor', 'patch'],
         prBodyDefinitions: {
           Change:
-            "{{#if (containsString depName 'golang.org/x/')}}[`{{{displayFrom}}}` -> `{{{displayTo}}}`](https://cs.opensource.google/{{{replace '^golang\\.org' 'go' depName}}}/+/refs/tags/{{{currentValue}}}...refs/tags/{{{newValue}}}){{else}}`{{{displayFrom}}}` -> `{{{displayTo}}}`{{/if}}",
+            "{{#if (containsString depName 'golang.org/x/')}}[`{{{displayFrom}}}` → `{{{displayTo}}}`](https://cs.opensource.google/{{{replace '^golang\\.org' 'go' depName}}}/+/refs/tags/{{{currentValue}}}...refs/tags/{{{newValue}}}){{else}}`{{{displayFrom}}}` → `{{{displayTo}}}`{{/if}}",
         },
       },
     ],

@@ -43,7 +43,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         'Current value': '{{{currentValue}}}',
         'New value': '{{{newValue}}}',
         Change:
-          "[{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if depName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
+          "[{{#if displayFrom}}`{{{displayFrom}}}` → {{else}}{{#if currentValue}}`{{{currentValue}}}` → {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if depName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
         Pending: '{{{displayPending}}}',
         References: '{{{references}}}',
         'Package file': '{{{packageFile}}}',
@@ -70,7 +70,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         'Current value': '{{{currentValue}}}',
         'New value': '{{{newValue}}}',
         Change:
-          "[{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if depName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
+          "[{{#if displayFrom}}`{{{displayFrom}}}` → {{else}}{{#if currentValue}}`{{{currentValue}}}` → {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if depName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
         Pending: '{{{displayPending}}}',
         References: '{{{references}}}',
         'Package file': '{{{packageFile}}}',
@@ -101,7 +101,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         Update: '{{{updateType}}}',
         'Current value': '{{{currentValue}}}',
         'New value': '{{{newValue}}}',
-        Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+        Change: '`{{{displayFrom}}}` → `{{{displayTo}}}`',
         Pending: '{{{displayPending}}}',
         References: '{{{references}}}',
         'Package file': '{{{packageFile}}}',
@@ -162,7 +162,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         Update: '{{{updateType}}}',
         'Current value': '{{{currentValue}}}',
         'New value': '{{{newValue}}}',
-        Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+        Change: '`{{{displayFrom}}}` → `{{{displayTo}}}`',
       },
       updateType: 'pin',
       depNameLinked:
@@ -188,7 +188,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         'Current value': '{{{currentValue}}}',
         'New value': '{{{newValue}}}',
         Change:
-          "[{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if depName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
+          "[{{#if displayFrom}}`{{{displayFrom}}}` → {{else}}{{#if currentValue}}`{{{currentValue}}}` → {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if depName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
       },
       updateType: 'pin',
       depNameLinked:
@@ -266,7 +266,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         'Current value': '{{{currentValue}}}',
         'New value': '{{{newValue}}}',
         Change:
-          "[{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if depName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
+          "[{{#if displayFrom}}`{{{displayFrom}}}` → {{else}}{{#if currentValue}}`{{{currentValue}}}` → {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if depName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
       },
       updateType: 'replacement',
       depNameLinked: '[mocha](https://mochajs.org/)',
