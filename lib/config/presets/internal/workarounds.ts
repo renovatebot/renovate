@@ -54,7 +54,7 @@ export const presets: Record<string, Preset> = {
         matchCurrentValue:
           '/^(?<major>\\d+)\\.(?<minor>\\d+)(\\.(?<patch>\\d+))?(-(?<build>\\d+))?_(?<compatibility>.+)$/',
         matchDatasources: ['docker'],
-        matchPackageNames: ['clamav/clamav'],
+        matchPackageNames: ['clamav/clamav', 'clamav/clamav-debian'],
         versioning:
           'regex:^(?<major>\\d+)\\.(?<minor>\\d+)(\\.(?<patch>\\d+))?(-(?<build>\\d+))?(_(?<compatibility>.+))?$',
       },
