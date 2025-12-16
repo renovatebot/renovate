@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import semver from 'semver';
 import { GithubReleasesDatasource } from '../../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
@@ -28,7 +29,7 @@ export class GitHubUrlHandler extends HomebrewUrlHandler {
   readonly type = 'github';
 
   parseUrl(urlStr: string): GitHubUrlParsedResult | null {
-    if (!urlStr) {
+    if (!is.nonEmptyString(urlStr)) {
       return null;
     }
     try {
@@ -41,7 +42,7 @@ export class GitHubUrlHandler extends HomebrewUrlHandler {
       const ownerName = s[0];
       const repoName = s[1];
       let currentValue: string | undefined;
-      let urlType: 'archive' | 'releases' | undefined;
+      let urlType: GitHubUrlType | undefined;
 
       if (s[2] === 'archive') {
         urlType = 'archive';

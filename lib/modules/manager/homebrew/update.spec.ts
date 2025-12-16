@@ -1,5 +1,6 @@
 import { Readable } from 'node:stream';
 import { codeBlock } from 'common-tags';
+import * as handlers from './handlers';
 import { updateDependency } from '.';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
@@ -411,5 +412,116 @@ describe('modules/manager/homebrew/update', () => {
     });
 
     expect(newContent).toBe(aide);
+  });
+
+  it('returns unchanged content if managerData is missing required fields', async () => {
+    const upgrade = {
+      currentValue: 'v0.8.2',
+      depName: 'Ibazel',
+      managerData: {
+        type: 'github' as const,
+        ownerName: 'bazelbuild',
+        repoName: 'bazel-watcher',
+        sha256: null,
+        url: null,
+      },
+      newValue: 'v0.9.3',
+    };
+
+    const newContent = await updateDependency({
+      fileContent: ibazel,
+      upgrade,
+    });
+
+    expect(newContent).toBe(ibazel);
+  });
+
+  it('returns unchanged content for unknown handler type', async () => {
+    const upgrade = {
+      currentValue: 'v0.8.2',
+      depName: 'Ibazel',
+      managerData: {
+        type: 'unknown' as never,
+        ownerName: 'bazelbuild',
+        repoName: 'bazel-watcher',
+        sha256:
+          '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+        url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+      },
+      newValue: 'v0.9.3',
+    };
+
+    const newContent = await updateDependency({
+      fileContent: ibazel,
+      upgrade,
+    });
+
+    expect(newContent).toBe(ibazel);
+  });
+
+  it('returns unchanged content if newValue is missing', async () => {
+    const upgrade = {
+      currentValue: 'v0.8.2',
+      depName: 'Ibazel',
+      managerData: {
+        type: 'github' as const,
+        ownerName: 'bazelbuild',
+        repoName: 'bazel-watcher',
+        sha256:
+          '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+        url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+      },
+      newValue: undefined as never,
+    };
+
+    const newContent = await updateDependency({
+      fileContent: ibazel,
+      upgrade,
+    });
+
+    expect(newContent).toBe(ibazel);
+  });
+
+  it('returns unchanged content if handler buildNewUrls returns null', async () => {
+    const mockHandler = {
+      type: 'github',
+      parseUrl: vi.fn().mockReturnValue({
+        type: 'github',
+        currentValue: 'v0.8.2',
+        ownerName: 'bazelbuild',
+        repoName: 'bazel-watcher',
+        urlType: 'archive',
+      }),
+      buildNewUrls: vi.fn().mockReturnValue(null),
+      createDependency: vi.fn(),
+    };
+
+    vi.spyOn(handlers, 'findHandlerByType').mockReturnValue(
+      mockHandler as never,
+    );
+
+    const upgrade = {
+      currentValue: 'v0.8.2',
+      depName: 'Ibazel',
+      managerData: {
+        type: 'github' as const,
+        ownerName: 'bazelbuild',
+        repoName: 'bazel-watcher',
+        sha256:
+          '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+        url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+      },
+      newValue: 'v0.9.3',
+    };
+
+    const newContent = await updateDependency({
+      fileContent: ibazel,
+      upgrade,
+    });
+
+    expect(newContent).toBe(ibazel);
+    expect(mockHandler.buildNewUrls).toHaveBeenCalled();
+
+    vi.restoreAllMocks();
   });
 });
