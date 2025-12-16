@@ -144,7 +144,7 @@
   },
   "volta": {
     "node": "24.12.0",
-    "pnpm": "10.24.0"
+    "pnpm": "10.25.0"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.940.0",
@@ -308,7 +308,7 @@
     "@types/mdast": "4.0.4",
     "@types/moo": "0.5.10",
     "@types/ms": "2.1.0",
-    "@types/node": "22.19.1",
+    "@types/node": "22.19.2",
     "@types/parse-link-header": "2.0.3",
     "@types/punycode": "2.1.4",
     "@types/sax": "1.2.7",
@@ -319,7 +319,7 @@
     "@types/tmp": "0.2.6",
     "@types/validate-npm-package-name": "4.0.2",
     "@vitest/coverage-v8": "4.0.15",
-    "@vitest/eslint-plugin": "1.4.4",
+    "@vitest/eslint-plugin": "1.5.2",
     "ajv": "8.17.1",
     "ajv-formats": "3.0.1",
     "aws-sdk-client-mock": "4.1.0",
@@ -353,14 +353,14 @@
     "tsx": "4.21.0",
     "type-fest": "5.3.1",
     "typescript": "5.9.3",
-    "typescript-eslint": "8.48.1",
+    "typescript-eslint": "8.49.0",
     "unified": "11.0.5",
     "vite": "npm:rolldown-vite@7.2.9",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "4.0.15",
     "vitest-mock-extended": "3.1.0"
   },
-  "packageManager": "pnpm@10.24.0",
+  "packageManager": "pnpm@10.25.0",
   "files": [
     "dist",
     "renovate-schema.json"

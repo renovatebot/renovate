@@ -237,6 +237,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'onboardingAutoCloseAge',
+    description:
+      'Maximum number of days after which Renovate will stop trying to onboard the repository, and will close any existing onboarding PRs',
+    type: 'integer',
+    default: null,
+    globalOnly: true,
+    cli: false,
+  },
+  {
     name: 'onboardingCommitMessage',
     description:
       'Change this value to override the default onboarding commit message.',
@@ -602,7 +611,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.25.15',
+    default: 'ghcr.io/containerbase/sidecar:13.25.16',
     globalOnly: true,
   },
   {
