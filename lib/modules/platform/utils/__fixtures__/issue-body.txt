@@ -28,7 +28,7 @@ The following updates are currently rate-limited. To force their creation now, c
  - [ ] <!-- unlimit-branch=renovate/graceful-fs-4.x -->Update dependency graceful-fs to v4
  - [ ] <!-- create-all-rate-limited-prs -->🔐 **Create all rate-limited PRs at once** 🔐
 
-## Edited/Blocked
+## PR Edited (Blocked)
 
 The following updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox below.
 
@@ -43,7 +43,7 @@ The following updates have all been created. To force a retry/rebase of any, cli
  - [ ] <!-- rebase-branch=branchName3 -->[pr3](../pull/3)
  - [ ] <!-- rebase-all-open-prs -->**Click on this checkbox to rebase all open PRs at once**
 
-## Ignored or Blocked
+## PR Closed (Blocked)
 
 The following updates are blocked by an existing closed PR. To recreate the PR, click on a checkbox below.
 
