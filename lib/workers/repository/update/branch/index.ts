@@ -514,6 +514,9 @@ export async function processBranch(
       !!config.rebaseRequested;
     const userApproveAllPendingPR = !!config.dependencyDashboardAllPending;
     const userOpenAllRateLimtedPR = !!config.dependencyDashboardAllRateLimited;
+    const userOpenAllSchedulePendingPR =
+      !!config.dependencyDashboardAllAwaitingSchedule;
+
     if (forceRebase) {
       logger.debug('Force rebase because branch needs updating');
       config.reuseExistingBranch = false;
@@ -531,6 +534,10 @@ export async function processBranch(
     } else if (userOpenAllRateLimtedPR) {
       logger.debug(
         'A user manually approved all rate-limited PRs via the Dependency Dashboard.',
+      );
+    } else if (userOpenAllSchedulePendingPR) {
+      logger.debug(
+        'A user manually requested all awaiting schedule PRs via the Dependency Dashboard.',
       );
     } else if (
       branchExists &&
