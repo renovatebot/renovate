@@ -13,6 +13,7 @@ import type {
   PackageFileContent,
 } from '../types';
 import { extractMsbuildGlobalManifest } from './extract/global-manifest';
+import { extractPackagesFromSingleCsharpFile } from './extract/single-csharp-file';
 import type { DotnetToolsManifest, NugetPackageDependency } from './types';
 import {
   applyRegistries,
@@ -202,6 +203,11 @@ export async function extractPackageFile(
 
   if (packageFile.endsWith('global.json')) {
     return extractMsbuildGlobalManifest(content, packageFile, registries);
+  }
+
+  if (packageFile.endsWith('.cs'))
+  {
+    return extractPackagesFromSingleCsharpFile(content, packageFile, registries);
   }
 
   // Simple xml validation.
