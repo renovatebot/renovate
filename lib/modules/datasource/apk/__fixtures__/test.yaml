@@ -1,5 +1,5 @@
 # Test fixture for APK datasource
-# This represents an Alpine Linux package repository structure
+# This represents an APK package structure
 
 # Example repository URLs that would be used:
 # - https://dl-cdn.alpinelinux.org/alpine/v3.19/main
