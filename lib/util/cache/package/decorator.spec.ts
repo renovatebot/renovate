@@ -18,7 +18,7 @@ describe('util/cache/package/decorator', () => {
     vi.useRealTimers();
     GlobalConfig.reset();
     tmpDir = await dir({ unsafeCleanup: true });
-    await init({ cacheDir: tmpDir.path } as any);
+    await init({ cacheDir: tmpDir.path });
     setCache = vi.spyOn(packageCache, 'setWithRawTtl');
     packageCache.reset();
     count = 1;
@@ -200,7 +200,7 @@ describe('util/cache/package/decorator', () => {
 
     it('skips caching when namespace or key is empty', async () => {
       class Class {
-        @cache({ namespace: (() => '') as any, key: 'key' })
+        @cache({ namespace: () => '' as never, key: 'key' })
         public fn1(): Promise<string> {
           return getValue();
         }

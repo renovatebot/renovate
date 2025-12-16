@@ -50,8 +50,9 @@ describe('util/cache/package/impl/redis', () => {
           });
           expect(clientMock.connect).toHaveBeenCalled();
 
-          const { reconnectStrategy } = vi.mocked(createClient).mock
-            .calls[0][0]!.socket as any;
+          const reconnectStrategy = vi.mocked(createClient).mock.calls[0][0]!
+            .socket?.reconnectStrategy as (_: number) => number;
+          expect(reconnectStrategy).toBeDefined();
           expect(reconnectStrategy(1)).toBe(100);
           expect(reconnectStrategy(100)).toBe(3000);
         });

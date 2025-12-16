@@ -1,6 +1,8 @@
 import { type DirectoryResult, dir } from 'tmp-promise';
+import type { PackageCacheBase } from './base';
 import { PackageCacheFile } from './file';
 import { PackageCache } from './index';
+import { partial } from '~test/util';
 
 vi.unmock('../../../mutex');
 
@@ -71,12 +73,8 @@ describe('util/cache/package/impl/index', () => {
   describe('Memory caching with mocked backend', () => {
     describe('L1 memory cache', () => {
       it('bypasses backend on L1 memory cache hit', async () => {
-        const backend = {
-          get: vi.fn(),
-          set: vi.fn(),
-          destroy: vi.fn(),
-        } as any;
-        const cache = new PackageCache(backend);
+        const backend = { get: vi.fn(), set: vi.fn(), destroy: vi.fn() };
+        const cache = new PackageCache(partial<PackageCacheBase>(backend));
 
         await cache.get('_test-namespace', 'key');
         expect(backend.get).toHaveBeenCalledTimes(1);
@@ -94,8 +92,8 @@ describe('util/cache/package/impl/index', () => {
           get: vi.fn().mockResolvedValue(undefined),
           set: vi.fn(),
           destroy: vi.fn(),
-        } as any;
-        const cache = new PackageCache(backend);
+        };
+        const cache = new PackageCache(partial<PackageCacheBase>(backend));
 
         const firstResult = await cache.get('_test-namespace', 'missing');
         expect(firstResult).toBeUndefined();
@@ -112,8 +110,8 @@ describe('util/cache/package/impl/index', () => {
           get: vi.fn().mockResolvedValue('value'),
           set: vi.fn(),
           destroy: vi.fn(),
-        } as any;
-        const cache = new PackageCache(backend);
+        };
+        const cache = new PackageCache(partial<PackageCacheBase>(backend));
 
         await cache.get('_test-namespace', 'key');
         expect(backend.get).toHaveBeenCalledTimes(1);
@@ -134,8 +132,8 @@ describe('util/cache/package/impl/index', () => {
           get: vi.fn().mockResolvedValue('backend-value'),
           set: vi.fn(),
           destroy: vi.fn(),
-        } as any;
-        const cache = new PackageCache(backend);
+        };
+        const cache = new PackageCache(partial<PackageCacheBase>(backend));
 
         const results = await Promise.all([
           cache.get('_test-namespace', 'concurrent'),
