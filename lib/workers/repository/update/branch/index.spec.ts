@@ -2958,6 +2958,43 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    it('Dependency Dashboard open all awaiting schedule', async () => {
+      vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+          artifactErrors: [{}],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'schedule!',
+          state: 'open',
+          bodyStruct: {
+            hash: hashBody(`- [x] <!-- create-all-awaiting-schedule-prs -->`),
+            rebaseRequested: false,
+          },
+        }),
+      );
+      scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha); //TODO:not needed?
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          dependencyDashboardAllAwaitingSchedule: true,
+        }),
+      ).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        commitSha: '123test',
+        prNo: 5,
+        result: 'done',
+      });
+    });
+
     it('continues branch, skips automerge if there are artifact errors', async () => {
       vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({

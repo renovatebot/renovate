@@ -62,6 +62,7 @@ export interface RenovateSharedConfig {
   abandonmentThreshold?: Nullish<string>;
   addLabels?: string[];
   assignAutomerge?: boolean;
+  autoApprove?: boolean;
   autoReplaceGlobalMatch?: boolean;
   automerge?: boolean;
   automergeSchedule?: string[];
@@ -128,6 +129,7 @@ export interface RenovateSharedConfig {
   prHeader?: string;
   prPriority?: number;
   prTitle?: string;
+  prTitleStrict?: boolean;
   productLinks?: Record<string, string>;
   pruneBranchAfterAutomerge?: boolean;
   rangeStrategy?: RangeStrategy;
@@ -242,6 +244,7 @@ export interface RepoGlobalConfig {
   configFileNames?: string[];
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
+  onboardingAutoCloseAge?: number;
 }
 
 /**
@@ -261,7 +264,7 @@ export interface LegacyAdminConfig {
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingRebaseCheckbox?: boolean;
   onboardingPrTitle?: string;
-  onboardingConfig?: RenovateSharedConfig;
+  onboardingConfig?: RenovateConfig;
   onboardingConfigFileName?: string;
 
   optimizeForDisabled?: boolean;
