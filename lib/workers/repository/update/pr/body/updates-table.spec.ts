@@ -145,8 +145,8 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         '| Package | Type | Update | Change |\n' +
         '|---|---|---|---|\n' +
         '|  |  | lockFileMaintenance | All locks refreshed |\n' +
-        '| [koa](https://github.com/koajs/koa) | dependencies | pin | [`^1.7.0` -> `1.7.0`](https://renovatebot.com/diffs/npm/koa/1.7.0/1.7.0) |\n' +
-        '| [mocha](https://mochajs.org/) ([source](https://github.com/mochajs/mocha)) | devDependencies | pin | [`^6.2.3` -> `6.2.3`](https://renovatebot.com/diffs/npm/mocha/6.2.3/6.2.3) |\n' +
+        '| [koa](https://github.com/koajs/koa) | dependencies | pin | [`^1.7.0` → `1.7.0`](https://renovatebot.com/diffs/npm/koa/1.7.0/1.7.0) |\n' +
+        '| [mocha](https://mochajs.org/) ([source](https://github.com/mochajs/mocha)) | devDependencies | pin | [`^6.2.3` → `6.2.3`](https://renovatebot.com/diffs/npm/mocha/6.2.3/6.2.3) |\n' +
         '\n' +
         '\n',
     );
@@ -248,7 +248,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         '\n' +
         '| Package | Type | Update | Change |\n' +
         '|---|---|---|---|\n' +
-        '| [mocha](https://mochajs.org/) ([source](https://github.com/mochajs/mocha)) | devDependencies | pin | [`^6.2.3` -> `6.2.3`](https://renovatebot.com/diffs/npm/mocha/6.2.3/6.2.3) |\n' +
+        '| [mocha](https://mochajs.org/) ([source](https://github.com/mochajs/mocha)) | devDependencies | pin | [`^6.2.3` → `6.2.3`](https://renovatebot.com/diffs/npm/mocha/6.2.3/6.2.3) |\n' +
         '\n' +
         '\n',
     );
@@ -309,7 +309,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         '\n' +
         '| Package | Type | Update | Change |\n' +
         '|---|---|---|---|\n' +
-        '| [mocha](https://mochajs.org/) → [mochaNew](https://mochajs.org/) | devDependencies | replacement | [`6.2.3` -> `6.2.4`](https://renovatebot.com/diffs/npm/mocha/6.2.3/6.2.4) |\n' +
+        '| [mocha](https://mochajs.org/) → [mochaNew](https://mochajs.org/) | devDependencies | replacement | [`6.2.3` → `6.2.4`](https://renovatebot.com/diffs/npm/mocha/6.2.3/6.2.4) |\n' +
         '\n' +
         '\n',
     );
