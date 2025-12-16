@@ -1,8 +1,18 @@
-import { isString } from '@sindresorhus/is';
+import { isNonEmptyArray, isNumber, isString } from '@sindresorhus/is';
+import upath from 'upath';
 import type { Document } from 'yaml';
 import { CST, isCollection, isPair, isScalar, parseDocument } from 'yaml';
 import { logger } from '../../../../../logger';
+import {
+  getSiblingFileName,
+  localPathExists,
+  readLocalFile,
+  writeLocalFile,
+} from '../../../../../util/fs';
+import { matchRegexOrGlob } from '../../../../../util/string-match';
+import { parseSingleYaml } from '../../../../../util/yaml';
 import type { UpdateDependencyConfig } from '../../../types';
+import type { PnpmWorkspaceFile } from '../../extract/types';
 import { PnpmCatalogs } from '../../schema';
 import { getNewGitValue, getNewNpmAliasValue } from './common';
 
@@ -154,4 +164,97 @@ function getDepPath({
   } else {
     return ['catalogs', catalogName, depName];
   }
+}
+
+/**
+ * Update the minimumReleaseAgeExclude setting in pnpm-workspace.yaml if needed
+ */
+export async function updatePnpmWorkspace({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): Promise<void> {
+  logger.debug('updatePnpmWorkspace()');
+  const pnpmShrinkwrap = upgrade.managerData?.pnpmShrinkwrap;
+  const lockFileDir = upath.dirname(pnpmShrinkwrap);
+  const lockFileName = upath.join(lockFileDir, 'pnpm-lock.yaml');
+  const pnpmWorkspaceFilePath = getSiblingFileName(
+    lockFileName,
+    'pnpm-workspace.yaml',
+  );
+  if (await localPathExists(pnpmWorkspaceFilePath)) {
+    logger.debug('localPathExists()');
+    const oldContent = (await readLocalFile(pnpmWorkspaceFilePath, 'utf8'))!;
+    const pnpmWorkspace = parseSingleYaml<PnpmWorkspaceFile>(oldContent);
+    if (!isNumber(pnpmWorkspace?.minimumReleaseAge)) {
+      logger.debug('minimumReleaeAgeNotFound');
+      return;
+    }
+
+    if (!isNonEmptyArray(pnpmWorkspace.minimumReleaseAgeExclude)) {
+      logger.debug('Adding new exclude block');
+      // add minimumReleaseAgeExclude
+      const addedStr = `
+        minimumReleaseAgeExclude:
+         - ${upgrade.depName}@${upgrade.newValue}
+      `;
+      const newContent = oldContent + addedStr;
+      await writeLocalFile(pnpmWorkspaceFilePath, newContent);
+      return;
+    }
+    // check if exlcude setting exists for the dep
+    let matchingSetting: {
+      match: boolean;
+      matchType?: 'pattern' | 'all-versions' | 'single-versions';
+      settingStr: string;
+    } = { match: false, settingStr: '' };
+    for (const setting of pnpmWorkspace.minimumReleaseAgeExclude ?? []) {
+      const matchingRes = checkExcludeSetting(setting, upgrade.depName!);
+      if (matchingRes.match) {
+        matchingSetting = {
+          match: matchingRes.match,
+          matchType: matchingRes.matchType,
+          settingStr: setting,
+        };
+      }
+    }
+
+    if (matchingSetting.match) {
+      logger.debug('Matching setting found');
+      if (matchingSetting.matchType === 'single-versions') {
+        logger.debug('Matching setting found, appending ||');
+        // need to find and replace the old setting by appending || <newValue>
+        const newSetting =
+          matchingSetting.settingStr + ` || ${upgrade.newValue}`;
+        const newContent = oldContent.replace(
+          matchingSetting.settingStr,
+          newSetting,
+        );
+        await writeLocalFile(pnpmWorkspaceFilePath, newContent);
+      }
+    }
+  }
+}
+
+function checkExcludeSetting(
+  setting: string,
+  depName: string,
+): {
+  match: boolean;
+  matchType?: 'pattern' | 'all-versions' | 'single-versions';
+} {
+  if (setting.includes(depName)) {
+    if (!setting.includes('@')) {
+      return { match: true, matchType: 'all-versions' };
+    }
+    return { match: true, matchType: 'single-versions' };
+  }
+
+  // check if setting is a pattern
+  // TODO: use getRegexOrGlobPredicate method
+  const res = matchRegexOrGlob(depName, setting);
+  if (res) {
+    return { match: true, matchType: 'pattern' };
+  }
+
+  return { match: false };
 }

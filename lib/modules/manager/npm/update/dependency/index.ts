@@ -12,7 +12,7 @@ import type {
 } from '../../extract/types';
 import type { NpmDepType, NpmManagerData } from '../../types';
 import { getNewGitValue, getNewNpmAliasValue } from './common';
-import { updatePnpmCatalogDependency } from './pnpm';
+import { updatePnpmCatalogDependency, updatePnpmWorkspace } from './pnpm';
 import { updateYarnrcCatalogDependency } from './yarn';
 
 function renameObjKey(
@@ -114,16 +114,21 @@ function replaceAsString(
   throw new Error();
 }
 
-export function updateDependency({
+export async function updateDependency({
   fileContent,
   upgrade,
-}: UpdateDependencyConfig): string | null {
+}: UpdateDependencyConfig): Promise<string | null> {
   if (upgrade.depType?.startsWith('pnpm.catalog')) {
     return updatePnpmCatalogDependency({ fileContent, upgrade });
   }
   if (upgrade.depType?.startsWith('yarn.catalog')) {
     return updateYarnrcCatalogDependency({ fileContent, upgrade });
   }
+
+  // check if it's security upgrade & pnpm-workspace has minimumReleaseAge set
+  // if (upgrade.isVulnerabilityAlert) {
+  await updatePnpmWorkspace({ fileContent, upgrade });
+  // }
 
   const { depType, managerData } = upgrade;
   const depName: string = managerData?.key ?? upgrade.depName;
