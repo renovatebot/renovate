@@ -129,7 +129,7 @@ export class PackageFiles {
                 dep.updates?.map((update) => `\`${update.newValue}\``),
               ),
             ];
-            if (dep.updates && dep.updates.length > 0) {
+            if (uniqueUpdates.length > 0) {
               updates = ` → [Updates: ${uniqueUpdates.join(', ')}]`;
             }
             // TODO: types (#22198)
