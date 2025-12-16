@@ -7,6 +7,7 @@ describe('modules/manager/kotlin-script/index', () => {
     expect(defaultConfig.managerFilePatterns).toHaveLength(1);
     defaultConfig.managerFilePatterns.forEach((pattern) => {
       if (isRegexMatch(pattern)) {
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(() => regEx(pattern)).not.toThrow();
       }
     });

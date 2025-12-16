@@ -258,6 +258,27 @@ describe('modules/platform/gitlab/index', () => {
       });
       expect(repos).toEqual(['a/b', 'a/c']);
     });
+
+    it('should include order and sort query parameters', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false&order_by=updated_at&sort=desc',
+        )
+        .reply(200, [
+          {
+            path_with_namespace: 'a/b',
+          },
+          {
+            path_with_namespace: 'a/c',
+          },
+        ]);
+      const repos = await gitlab.getRepos({
+        order: 'desc',
+        sort: 'updated_at',
+      });
+      expect(repos).toEqual(['a/b', 'a/c']);
+    });
   });
 
   async function initRepo(
@@ -3630,6 +3651,12 @@ These updates have all been created already. To force a retry/rebase of any, cli
           'A Pull Request is a PR, multiple Pull Requests are PRs.',
         ),
       ).toBe('A Merge Request is a MR, multiple Merge Requests are MRs.');
+    });
+
+    it('replaces PR reference with MR reference', () => {
+      expect(
+        gitlab.massageMarkdown('See the following PR: #123 for more details'),
+      ).toBe('See the following MR: !123 for more details');
     });
 
     it('avoids false positives when replacing PR with MR', () => {

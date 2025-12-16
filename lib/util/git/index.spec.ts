@@ -104,6 +104,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     await repo.checkout(defaultBranch);
 
+    // eslint-disable-next-line vitest/no-standalone-expect
     expect(git.getBranchList()).toBeEmptyArray();
   });
 
@@ -222,6 +223,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         await submodule.init();
         await submodule.addConfig('user.email', 'Jest@example.com');
         await submodule.addConfig('user.name', 'Jest');
+        await submodule.addConfig('commit.gpgsign', 'false');
 
         await fs.writeFile(submoduleBasePath + '/init_file', 'init');
         await submodule.add('init_file');

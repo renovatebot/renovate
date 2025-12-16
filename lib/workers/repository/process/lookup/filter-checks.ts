@@ -154,7 +154,7 @@ export async function filterInternalChecks(
     }
 
     if (candidateVersionsWithoutReleaseTimestamp['timestamp-required'].length) {
-      logger.debug(
+      logger.once.debug(
         {
           depName,
           versions:
@@ -169,7 +169,7 @@ export async function filterInternalChecks(
       logger.once.warn(
         "Some release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
       );
-      logger.debug(
+      logger.once.debug(
         {
           depName,
           versions:

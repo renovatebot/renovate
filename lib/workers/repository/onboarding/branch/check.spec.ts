@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../../config/global';
 import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform/types';
@@ -12,11 +13,19 @@ vi.mock('../../../../util/cache/repository');
 const cache = vi.mocked(_cache);
 
 describe('workers/repository/onboarding/branch/check', () => {
+  beforeAll(() => {
+    GlobalConfig.reset();
+  });
+
   const config = partial<RenovateConfig>({
     requireConfig: 'required',
     suppressNotifications: [],
     onboarding: true,
   });
+
+  const bodyStruct = {
+    hash: '6aa71f8cb7b1503b883485c8f5bd564b31923b9c7fa765abe2a7338af40e03b1',
+  };
 
   it('returns true if in silent mode', async () => {
     const res = await isOnboarded({ ...config, mode: 'silent' });
@@ -59,13 +68,37 @@ describe('workers/repository/onboarding/branch/check', () => {
     );
   });
 
-  it('continues with normal logic if closedPr exists', async () => {
+  it('continues with normal logic if closedPr exists - adds closing comment', async () => {
     cache.getCache.mockReturnValue({});
-    platform.findPr.mockResolvedValue(partial<Pr>());
+    platform.findPr.mockResolvedValue(
+      partial<Pr>({
+        title: 'Configure Renovate',
+        bodyStruct,
+      }),
+    );
     scm.getFileList.mockResolvedValue([]);
     await expect(isOnboarded(config)).rejects.toThrow(
       REPOSITORY_CLOSED_ONBOARDING,
     );
+    expect(platform.ensureComment).toHaveBeenCalledOnce();
+  });
+
+  // incase pr was autolcosed becasue if it passing the onboardingAutoCloseAge
+  it('continues with normal logic if closedPr exists - skips closing comment', async () => {
+    GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+    cache.getCache.mockReturnValue({});
+    platform.findPr.mockResolvedValue(
+      partial<Pr>({
+        createdAt: '2020-02-29T01:40:21Z',
+        title: 'Configure Renovate',
+        bodyStruct,
+      }),
+    );
+    scm.getFileList.mockResolvedValue([]);
+    await expect(isOnboarded(config)).rejects.toThrow(
+      REPOSITORY_CLOSED_ONBOARDING,
+    );
+    expect(platform.ensureComment).not.toHaveBeenCalled();
   });
 
   it('checks git file list for config file when in fork mode', async () => {

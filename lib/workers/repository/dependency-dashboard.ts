@@ -28,6 +28,7 @@ interface DependencyDashboard {
   dependencyDashboardRebaseAllOpen: boolean;
   dependencyDashboardAllPending: boolean;
   dependencyDashboardAllRateLimited: boolean;
+  dependencyDashboardAllAwaitingSchedule: boolean;
 }
 
 const rateLimitedRe = regEx(
@@ -36,6 +37,10 @@ const rateLimitedRe = regEx(
 );
 const pendingApprovalRe = regEx(
   ` - \\[ \\] ${getMarkdownComment('approve-branch=([^\\s]+)')}`,
+  'g',
+);
+const awaitingScheduleRe = regEx(
+  ` - \\[ \\] ${getMarkdownComment('unschedule-branch=([^\\s]+)')}`,
   'g',
 );
 const generalBranchRe = regEx(
@@ -48,6 +53,7 @@ const markedBranchesRe = regEx(
 
 const approveAllPendingPrs = 'approve-all-pending-prs';
 const createAllRateLimitedPrs = 'create-all-rate-limited-prs';
+const createAllAwaitingSchedulePrs = 'create-all-awaiting-schedule-prs';
 const createConfigMigrationPr = 'create-config-migration-pr';
 const configMigrationPrInfo = 'config-migration-pr-info';
 const rebaseAllOpenPrs = 'rebase-all-open-prs';
@@ -70,6 +76,10 @@ function getCheckbox(type: string, checked = false): string {
 
 function checkOpenAllRateLimitedPR(issueBody: string): boolean {
   return isBoxChecked(issueBody, createAllRateLimitedPrs);
+}
+
+function checkOpenAllAwaitingSchedulePR(issueBody: string): boolean {
+  return isBoxChecked(issueBody, createAllAwaitingSchedulePrs);
 }
 
 function checkApproveAllPendingPR(issueBody: string): boolean {
@@ -102,6 +112,11 @@ function selectAllRelevantBranches(issueBody: string): string[] {
   const checkedBranches = [];
   if (checkOpenAllRateLimitedPR(issueBody)) {
     for (const match of issueBody.matchAll(rateLimitedRe)) {
+      checkedBranches.push(match[0]);
+    }
+  }
+  if (checkOpenAllAwaitingSchedulePR(issueBody)) {
+    for (const match of issueBody.matchAll(awaitingScheduleRe)) {
       checkedBranches.push(match[0]);
     }
   }
@@ -140,6 +155,8 @@ function getCheckedBranches(issueBody: string): Record<string, string> {
 function parseDashboardIssue(issueBody: string): DependencyDashboard {
   const dependencyDashboardChecks = getCheckedBranches(issueBody);
   const dependencyDashboardRebaseAllOpen = checkRebaseAll(issueBody);
+  const dependencyDashboardAllAwaitingSchedule =
+    checkOpenAllAwaitingSchedulePR(issueBody);
   const dependencyDashboardAllPending = checkApproveAllPendingPR(issueBody);
   const dependencyDashboardAllRateLimited =
     checkOpenAllRateLimitedPR(issueBody);
@@ -148,6 +165,7 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
   return {
     dependencyDashboardChecks,
     dependencyDashboardRebaseAllOpen,
+    dependencyDashboardAllAwaitingSchedule,
     dependencyDashboardAllPending,
     dependencyDashboardAllRateLimited,
   };
@@ -158,8 +176,9 @@ export async function readDashboardBody(
 ): Promise<void> {
   let dashboardChecks: DependencyDashboard = {
     dependencyDashboardChecks: {},
-    dependencyDashboardAllPending: false,
     dependencyDashboardRebaseAllOpen: false,
+    dependencyDashboardAllAwaitingSchedule: false,
+    dependencyDashboardAllPending: false,
     dependencyDashboardAllRateLimited: false,
   };
   const stringifiedConfig = JSON.stringify(config);
@@ -408,7 +427,7 @@ export async function ensureDependencyDashboard(
       ` See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
   } else if (configMigrationRes?.result === 'pr-modified') {
     issueBody +=
-      '## Config Migration Needed (error)\n\n' +
+      '## Config Migration Needed (Blocked)\n\n' +
       getMarkdownComment(configMigrationPrInfo) +
       ` The Config Migration branch exists but has been modified by another user. Renovate will not push to this branch unless it is first deleted. \n\n See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
   } else if (configMigrationRes?.result === 'add-checkbox') {
@@ -469,6 +488,9 @@ export async function ensureDependencyDashboard(
     'Awaiting Schedule',
     'The following updates are awaiting their schedule. To get an update now, click on a checkbox below.',
     'unschedule',
+    createAllAwaitingSchedulePrs,
+    'Create all awaiting schedule PRs at once',
+    '🔐',
   );
   issueBody += getBranchesListMd(
     branches,
@@ -499,7 +521,7 @@ export async function ensureDependencyDashboard(
   issueBody += getBranchesListMd(
     branches,
     (branch) => branch.result === 'pr-edited',
-    'Edited/Blocked',
+    'PR Edited (Blocked)',
     'The following updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox below.',
     'rebase',
   );
@@ -561,7 +583,7 @@ export async function ensureDependencyDashboard(
   issueBody += getBranchesListMd(
     branches,
     (branch) => branch.result === 'already-existed',
-    'Ignored or Blocked',
+    'PR Closed (Blocked)',
     'The following updates are blocked by an existing closed PR. To recreate the PR, click on a checkbox below.',
     'recreate',
   );

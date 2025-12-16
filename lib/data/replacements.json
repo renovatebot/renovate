@@ -19,6 +19,7 @@
       "replacements:framer-motion-to-motion",
       "replacements:hapi-to-scoped",
       "replacements:google-github-action-release-please-to-googleapis",
+      "replacements:grafana-oss-to-grafana",
       "replacements:jade-to-pug",
       "replacements:joi-to-scoped",
       "replacements:joi-to-unscoped",
@@ -27,6 +28,8 @@
       "replacements:middie-to-scoped",
       "replacements:now-to-vercel",
       "replacements:npm-run-all-to-maintenance-fork",
+      "replacements:ojdbc-to-ojdbc11",
+      "replacements:ojdbc10-to-ojdbc11",
       "replacements:opencost-registry-move",
       "replacements:parcel-css-to-lightningcss",
       "replacements:passport-saml",
@@ -44,6 +47,7 @@
       "replacements:semantic-release-replace-plugin-to-unscoped",
       "replacements:spectre-cli-to-spectre-console-cli",
       "replacements:standard-version-to-commit-and-tag",
+      "replacements:tsconfig-bases-node",
       "replacements:typeorm-seeding-to-scoped",
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
@@ -704,6 +708,17 @@
       }
     ]
   },
+  "grafana-oss-to-grafana": {
+    "description": "`grafana/grafana-oss`` was replaced by `grafana/grafana` with the same images",
+    "packageRules": [
+      {
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["/^(?:docker\\.io/)?grafana/grafana-oss$/"],
+        "matchCurrentVersion": ">=12.1.1",
+        "replacementName": "grafana/grafana"
+      }
+    ]
+  },
   "hapi-to-scoped": {
     "description": "`hapi` became scoped.",
     "packageRules": [
@@ -805,6 +820,28 @@
         "matchPackageNames": ["npm-run-all"],
         "replacementName": "npm-run-all2",
         "replacementVersion": "5.0.0"
+      }
+    ]
+  },
+  "ojdbc-to-ojdbc11": {
+    "description": "`ojdbc:ojdbc` was moved to `com.oracle.database.jdbc:ojdbc11`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["ojdbc:ojdbc"],
+        "replacementName": "com.oracle.database.jdbc:ojdbc11",
+        "replacementVersion": "21.1.0.0"
+      }
+    ]
+  },
+  "ojdbc10-to-ojdbc11": {
+    "description": "`com.oracle.database.jdbc:ojdbc10` was moved to `com.oracle.database.jdbc:ojdbc11`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["com.oracle.database.jdbc:ojdbc10"],
+        "replacementName": "com.oracle.database.jdbc:ojdbc11",
+        "replacementVersion": "21.1.0.0"
       }
     ]
   },
@@ -1006,6 +1043,58 @@
         "matchPackageNames": ["standard-version"],
         "replacementName": "commit-and-tag-version",
         "replacementVersion": "9.5.0"
+      }
+    ]
+  },
+  "tsconfig-bases-node": {
+    "description": "`@tsconfig-bases` node updates.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@tsconfig/node**"],
+        "commitMessageExtra": "{{#if isReplacement}}with {{{newName}}}{{else}}to {{{prettyNewVersion}}}{{/if}}"
+      },
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@tsconfig/node10"],
+        "replacementName": "@tsconfig/node12",
+        "replacementVersion": "12.1.0"
+      },
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@tsconfig/node12"],
+        "replacementName": "@tsconfig/node14",
+        "replacementVersion": "14.1.0"
+      },
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@tsconfig/node14"],
+        "replacementName": "@tsconfig/node16",
+        "replacementVersion": "16.1.0"
+      },
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@tsconfig/node16", "@tsconfig/node17"],
+        "replacementName": "@tsconfig/node18",
+        "replacementVersion": "18.2.0"
+      },
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@tsconfig/node18", "@tsconfig/node19"],
+        "replacementName": "@tsconfig/node20",
+        "replacementVersion": "20.1.0"
+      },
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@tsconfig/node20", "@tsconfig/node21"],
+        "replacementName": "@tsconfig/node22",
+        "replacementVersion": "22.0.0"
+      },
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@tsconfig/node22", "@tsconfig/node23"],
+        "replacementName": "@tsconfig/node24",
+        "replacementVersion": "24.0.0"
       }
     ]
   },

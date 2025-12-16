@@ -46,6 +46,7 @@ export const removedPresets: Record<string, string | null> = {
     'customManagers:helmChartYamlAppVersions',
   'regexManagers:mavenPropertyVersions': 'customManagers:mavenPropertyVersions',
   'regexManagers:tfvarsVersions': 'customManagers:tfvarsVersions',
+  'regexManagers:tsconfigNodeVersions': 'customManagers:tsconfigNodeVersions',
   'workarounds:reduceRepologyServerLoad': null,
 };
 

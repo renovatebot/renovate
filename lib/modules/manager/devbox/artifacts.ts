@@ -8,7 +8,7 @@ import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 export async function updateArtifacts({
-  config: { constraints, isLockFileMaintenance, updateType },
+  config: { constraints, isLockFileMaintenance },
   packageFileName,
   updatedDeps,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {

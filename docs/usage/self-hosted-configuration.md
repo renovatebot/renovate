@@ -120,6 +120,12 @@ This is a separate class of commands that could be executed compared to [`allowe
 As there is a security risk of running these commands automatically when a dependency upgrades, self hosted implementations need to explicitly declare which commands are permitted for their installation.
 For more details of where this may be found, see ["Trusting Repository Developers"](./security-and-permissions.md#trusting-repository-developers).
 
+Allowed options:
+
+| Option       | Description                                                               |
+| ------------ | ------------------------------------------------------------------------- |
+| `goGenerate` | Allows the `goGenerate` `postUpdateCommand` to run after a go mod update. |
+
 ## autodiscover
 
 When you enable `autodiscover`, by default, Renovate runs on _every_ repository that the bot account can access.
@@ -213,6 +219,13 @@ The order method for autodiscover server side repository search.
 ## autodiscoverRepoSort
 
 The sort method for autodiscover server side repository search.
+
+Platform supported sort options:
+
+| Platform       | Supported sort options                      |
+| -------------- | ------------------------------------------- |
+| GitLab         | `created_at`, `updated_at`, `id`            |
+| Forgejo, Gitea | `alpha`, `created`, `updated`, `size`, `id` |
 
 > If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
 
@@ -1022,6 +1035,12 @@ Only set this to `false` if all three statements are true:
 - You've configured Renovate entirely on the bot side (e.g. empty `renovate.json` in repositories)
 - You want to run Renovate on every repository the bot has access to
 - You want to skip all onboarding PRs
+
+## onboardingAutoCloseAge
+
+Maximum number of days after which Renovate will stop trying to onboard the repository, and will close any existing onboarding PRs.
+
+By default this option is set to `null`.
 
 ## onboardingBranch
 

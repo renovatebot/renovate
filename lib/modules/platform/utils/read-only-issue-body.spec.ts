@@ -36,5 +36,12 @@ describe('modules/platform/utils/read-only-issue-body', () => {
         expect.not.stringMatching('create an automated Config Migration PR'),
       );
     });
+
+    it('removes the create-all-awaiting-schedule-prs', () => {
+      const s = readOnlyIssueBody(issueBody);
+      expect(s).toEqual(
+        expect.not.stringMatching('Create all awaiting schedule PRs at once'),
+      );
+    });
   });
 });

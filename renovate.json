@@ -97,6 +97,11 @@
       "matchDatasources": ["npm"],
       "matchDepNames": ["got"],
       "separateMultipleMajor": true
+    },
+    {
+      "description": "Don't upgrade Vite automagically, due to a possible issue with flakey tests due to the upgrade: https://github.com/renovatebot/renovate/discussions/39921",
+      "matchDepNames": ["vite"],
+      "dependencyDashboardApproval": true
     }
   ],
   "customManagers": [

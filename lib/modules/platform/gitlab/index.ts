@@ -180,6 +180,8 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     with_merge_requests_enabled: true,
     min_access_level: 30,
     archived: false,
+    ...(config?.sort && { order_by: config.sort }),
+    ...(config?.order && { sort: config.order }),
   };
   if (config?.topics?.length) {
     queryParams.topic = config.topics.join(',');
@@ -823,6 +825,7 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
 export function massageMarkdown(input: string): string {
   const desc = input
     .replace(regEx(/Pull Request/g), 'Merge Request')
+    .replace(regEx(/\bPR: #/g), 'MR: !')
     .replace(regEx(/\bPR\b/g), 'MR')
     .replace(regEx(/\bPRs\b/g), 'MRs')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
