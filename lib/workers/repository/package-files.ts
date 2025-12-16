@@ -124,8 +124,13 @@ export class PackageFiles {
               version = 'unknown version';
             }
             let updates = '';
+            const uniqueUpdates = [
+              ...new Set(
+                dep.updates?.map((update) => `\`${update.newValue}\``),
+              ),
+            ];
             if (dep.updates && dep.updates.length > 0) {
-              updates = ` → [Updates: ${dep.updates?.map((u) => `\`${u.newValue}\``).join(', ')}]`;
+              updates = ` → [Updates: ${uniqueUpdates.join(', ')}]`;
             }
             // TODO: types (#22198)
             deps += ` - \`${dep.depName!} ${version}\`${updates}\n`;
