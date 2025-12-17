@@ -31,7 +31,6 @@ export async function updateArtifacts({
   }
 
   const execOptions: ExecOptions = {
-    cwdFile: packageFileName,
     toolConstraints: [
       {
         toolName: 'apko',
@@ -58,7 +57,7 @@ export async function updateArtifacts({
         { isLockFileMaintenance, updatedDepsCount: updatedDeps.length },
         `Regenerating ${lockFileName}`,
       );
-      cmd = `apko lock ${fileName}`;
+      cmd = `apko lock ${packageFileName}`;
     } /* v8 ignore next 3 -- unreachable in practice due to test setup constraints */ else {
       logger.trace('No updated apko packages - returning null');
       return null;

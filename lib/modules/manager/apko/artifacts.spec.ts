@@ -104,7 +104,7 @@ describe('modules/manager/apko/artifacts', () => {
         {
           cmd: 'apko lock apko.yaml',
           options: {
-            cwd: '.',
+            cwd: '',
             encoding: 'utf-8',
             env: {},
             maxBuffer: 10485760,
@@ -149,7 +149,7 @@ describe('modules/manager/apko/artifacts', () => {
         {
           cmd: 'apko lock apko.yaml',
           options: {
-            cwd: '.',
+            cwd: '',
             encoding: 'utf-8',
             env: {},
             maxBuffer: 10485760,
@@ -178,7 +178,7 @@ describe('modules/manager/apko/artifacts', () => {
         {
           cmd: 'apko lock apko.yaml',
           options: {
-            cwd: '.',
+            cwd: '',
             encoding: 'utf-8',
             env: {},
             maxBuffer: 10485760,
@@ -213,7 +213,7 @@ describe('modules/manager/apko/artifacts', () => {
         {
           cmd: 'apko lock apko.yaml',
           options: {
-            cwd: '.',
+            cwd: '',
             encoding: 'utf-8',
             env: {},
             maxBuffer: 10485760,
@@ -242,7 +242,7 @@ describe('modules/manager/apko/artifacts', () => {
         {
           cmd: 'apko lock apko.yaml',
           options: {
-            cwd: '.',
+            cwd: '',
             encoding: 'utf-8',
             env: {},
             maxBuffer: 10485760,
@@ -278,9 +278,9 @@ describe('modules/manager/apko/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'apko lock apko.yml',
+          cmd: 'apko lock config/apko.yml',
           options: {
-            cwd: 'config',
+            cwd: '',
             encoding: 'utf-8',
             env: {},
             maxBuffer: 10485760,
@@ -324,7 +324,7 @@ describe('modules/manager/apko/artifacts', () => {
         {
           cmd: 'apko lock image.yaml',
           options: {
-            cwd: '.',
+            cwd: '',
             encoding: 'utf-8',
             env: {},
             maxBuffer: 10485760,
