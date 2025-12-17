@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isBoolean } from '@sindresorhus/is';
 
 const stringMapping: ReadonlyMap<string, boolean> = new Map<string, boolean>([
   ['True', true],
@@ -9,7 +9,7 @@ export const booleanStringValues = Array.from(stringMapping.keys());
 
 export function asBoolean(value: string): boolean {
   const result = stringMapping.get(value);
-  if (is.boolean(result)) {
+  if (isBoolean(result)) {
     return result;
   }
   throw new Error(`Invalid Starlark boolean string: ${value}`);

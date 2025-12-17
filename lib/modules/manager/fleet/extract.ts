@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isUndefined } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import { parseYaml } from '../../../util/yaml';
 import { GitTagsDatasource } from '../../datasource/git-tags';
@@ -103,7 +103,7 @@ function extractFleetFile(doc: FleetFile): PackageDependency[] {
 
   result.push(extractFleetHelmBlock(doc.helm));
 
-  if (!is.undefined(doc.targetCustomizations)) {
+  if (!isUndefined(doc.targetCustomizations)) {
     // remove version from helm block to allow usage of variables defined in the global block, but do not create PRs
     // if there is no version defined in the customization.
     const helmBlockContext: FleetHelmBlock = { ...doc.helm };

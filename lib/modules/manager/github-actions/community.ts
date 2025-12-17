@@ -212,6 +212,34 @@ const SetupPixi = z
     };
   });
 
+const SetupHatch = z
+  .object({
+    // https://github.com/pypa/hatch/tree/install
+    uses: matchAction('pypa/hatch'),
+    with: z.object({ version: z.string().optional() }),
+  })
+  .transform(({ with: val }): PackageDependency => {
+    let skipStage: StageName | undefined;
+    let skipReason: SkipReason | undefined;
+
+    if (!val.version) {
+      skipStage = 'extract';
+      skipReason = 'unspecified-version';
+    }
+
+    return {
+      datasource: GithubReleasesDatasource.id,
+      depName: 'pypa/hatch',
+      packageName: 'pypa/hatch',
+      ...(skipStage && { skipStage }),
+      ...(skipReason && { skipReason }),
+      currentValue: val.version,
+      depType: 'uses-with',
+      // Strip hatch- prefix from release tags
+      extractVersion: '^hatch-(?<version>.+)$',
+    };
+  });
+
 /**
  * schema here should match the whole step,
  * there may be some actions use env as arguments version.
@@ -227,4 +255,5 @@ export const CommunityActions = z.union([
   SetupBun,
   SetupDeno,
   SetupRuby,
+  SetupHatch,
 ]);

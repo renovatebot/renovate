@@ -191,6 +191,11 @@ spec:
             depName: 'somechart',
             registryUrls: ['https://git.example.com/foo/bar.git'],
           },
+          {
+            currentValue: '0.4.0',
+            datasource: 'docker',
+            depName: 'somecontainer.registry.io/org/chart',
+          },
         ],
       });
     });

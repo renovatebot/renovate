@@ -1,174 +1,388 @@
+import { codeBlock } from 'common-tags';
 import { extractPackageFile } from '.';
 import { Fixtures } from '~test/fixtures';
 
-const aalib = Fixtures.get('aalib.rb');
-const aap = Fixtures.get('aap.rb');
-const acmetool = Fixtures.get('acmetool.rb');
 const aide = Fixtures.get('aide.rb');
 const ibazel = Fixtures.get('ibazel.rb');
 
 describe('modules/manager/homebrew/extract', () => {
   describe('extractPackageFile()', () => {
     it('skips sourceforge dependency 1', () => {
-      const res = extractPackageFile(aalib);
-      expect(res).not.toBeNull();
-      expect(res?.deps[0].skipReason).toBe('unsupported-url');
-      expect(res).toMatchSnapshot();
+      const content = codeBlock`
+        class Aalib < Formula
+        desc "Portable ASCII art graphics library"
+        homepage "https://aa-project.sourceforge.io/aalib/"
+        url "https://downloads.sourceforge.net/aa-project/aalib-1.4rc5.tar.gz"
+        sha256 "fbddda9230cf6ee2a4f5706b4b11e2190ae45f5eda1f0409dc4f99b35e0a70ee"
+        end
+      `;
+
+      const res = extractPackageFile(content);
+
+      expect(res).toStrictEqual({
+        deps: [
+          {
+            currentValue: null,
+            datasource: undefined,
+            depName: 'Aalib',
+            managerData: {
+              ownerName: null,
+              repoName: null,
+              sha256:
+                'fbddda9230cf6ee2a4f5706b4b11e2190ae45f5eda1f0409dc4f99b35e0a70ee',
+              url: 'https://downloads.sourceforge.net/aa-project/aalib-1.4rc5.tar.gz',
+            },
+            skipReason: 'unsupported-url',
+          },
+        ],
+      });
     });
 
     it('skips sourceforge dependency 2', () => {
-      const res = extractPackageFile(aap);
-      expect(res).not.toBeNull();
-      expect(res?.deps[0].skipReason).toBe('unsupported-url');
-      expect(res).toMatchSnapshot();
+      const content = codeBlock`
+        class Aap < Formula
+        desc "Make-like tool to download, build, and install software"
+        homepage "http://www.a-a-p.org"
+        url "https://downloads.sourceforge.net/project/a-a-p/aap-1.094.zip"
+        sha256 "3f53b2fc277756042449416150acc477f29de93692944f8a77e8cef285a1efd8"
+        end
+      `;
+
+      const res = extractPackageFile(content);
+
+      expect(res).toStrictEqual({
+        deps: [
+          {
+            currentValue: null,
+            datasource: undefined,
+            depName: 'Aap',
+            managerData: {
+              ownerName: null,
+              repoName: null,
+              sha256:
+                '3f53b2fc277756042449416150acc477f29de93692944f8a77e8cef285a1efd8',
+              url: 'https://downloads.sourceforge.net/project/a-a-p/aap-1.094.zip',
+            },
+            skipReason: 'unsupported-url',
+          },
+        ],
+      });
     });
 
     it('skips github dependency with wrong format', () => {
-      const res = extractPackageFile(acmetool);
-      expect(res).not.toBeNull();
-      expect(res?.deps[0].skipReason).toBe('unsupported-url');
-      expect(res).toMatchSnapshot();
+      const content = codeBlock`
+        class Acmetool < Formula
+        desc "Automatic certificate acquisition tool for ACME (Let's Encrypt)"
+        homepage "https://github.com/hlandau/acme"
+        url "https://github.com/hlandau/acme.git",
+          :tag      => "v0.0.67",
+          :revision => "221ea15246f0bbcf254b350bee272d43a1820285"
+        end
+      `;
+
+      const res = extractPackageFile(content);
+
+      expect(res).toStrictEqual({
+        deps: [
+          {
+            currentValue: null,
+            datasource: 'github-tags',
+            depName: 'null/null',
+            managerData: {
+              ownerName: null,
+              repoName: null,
+              sha256: null,
+              url: 'https://github.com/hlandau/acme.git',
+            },
+            skipReason: 'invalid-sha256',
+          },
+        ],
+      });
     });
 
     it('extracts "releases" github dependency', () => {
       const res = extractPackageFile(aide);
-      expect(res).not.toBeNull();
-      expect(res?.deps[0].skipReason).toBeUndefined();
-      expect(res).toMatchSnapshot();
+
+      expect(res).toStrictEqual({
+        deps: [
+          {
+            currentValue: 'v0.16.1',
+            datasource: 'github-tags',
+            depName: 'aide/aide',
+            managerData: {
+              ownerName: 'aide',
+              repoName: 'aide',
+              sha256:
+                '0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7',
+              url: 'https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz',
+            },
+          },
+        ],
+      });
     });
 
     it('extracts "archive" github dependency', () => {
       const res = extractPackageFile(ibazel);
-      expect(res).not.toBeNull();
-      expect(res?.deps[0].skipReason).toBeUndefined();
-      expect(res).toMatchSnapshot();
+
+      expect(res).toStrictEqual({
+        deps: [
+          {
+            currentValue: 'v0.8.2',
+            datasource: 'github-tags',
+            depName: 'bazelbuild/bazel-watcher',
+            managerData: {
+              ownerName: 'bazelbuild',
+              repoName: 'bazel-watcher',
+              sha256:
+                '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+              url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+            },
+          },
+        ],
+      });
     });
 
     it('handles old "archive" github url format', () => {
-      const content = `class Ibazel < Formula
-          desc 'IBazel is a tool for building Bazel targets when source files change.'
-          homepage 'https://github.com/bazelbuild/bazel-watcher'
-          url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
-          sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-          end
+      const content = codeBlock`
+        class Ibazel < Formula
+        desc 'IBazel is a tool for building Bazel targets when source files change.'
+        homepage 'https://github.com/bazelbuild/bazel-watcher'
+        url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
+        sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+        end
       `;
+
       const res = extractPackageFile(content);
-      expect(res).not.toBeNull();
-      expect(res?.deps[0].skipReason).toBeUndefined();
-      expect(res).toMatchSnapshot();
+
+      expect(res).toStrictEqual({
+        deps: [
+          {
+            currentValue: 'v0.8.2',
+            datasource: 'github-tags',
+            depName: 'bazelbuild/bazel-watcher',
+            managerData: {
+              ownerName: 'bazelbuild',
+              repoName: 'bazel-watcher',
+              sha256:
+                '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+              url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
+            },
+          },
+        ],
+      });
     });
 
     it('handles no space before class header', () => {
-      const content = `class Ibazel < Formula
-          desc 'IBazel is a tool for building Bazel targets when source files change.'
-          homepage 'https://github.com/bazelbuild/bazel-watcher'
-          url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
-          sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-          end
+      const content = codeBlock`
+        class Ibazel < Formula
+        desc 'IBazel is a tool for building Bazel targets when source files change.'
+        homepage 'https://github.com/bazelbuild/bazel-watcher'
+        url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+        sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+        end
       `;
+
       const res = extractPackageFile(content);
-      expect(res).not.toBeNull();
-      expect(res?.deps[0].skipReason).toBeUndefined();
-      expect(res).toMatchSnapshot();
+
+      expect(res).toStrictEqual({
+        deps: [
+          {
+            currentValue: 'v0.8.2',
+            datasource: 'github-tags',
+            depName: 'bazelbuild/bazel-watcher',
+            managerData: {
+              ownerName: 'bazelbuild',
+              repoName: 'bazel-watcher',
+              sha256:
+                '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+              url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+            },
+          },
+        ],
+      });
     });
 
     it('returns null for invalid class header 1', () => {
-      const content = `
-          class Ibazel !?# Formula
-          desc 'IBazel is a tool for building Bazel targets when source files change.'
-          homepage 'https://github.com/bazelbuild/bazel-watcher'
-          url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
-          sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-          end
+      const content = codeBlock`
+        class Ibazel !?# Formula
+        desc 'IBazel is a tool for building Bazel targets when source files change.'
+        homepage 'https://github.com/bazelbuild/bazel-watcher'
+        url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+        sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+        end
       `;
-      expect(extractPackageFile(content)).toBeNull();
+
+      const res = extractPackageFile(content);
+
+      expect(res).toBeNull();
     });
 
     it('returns null for invalid class header 2', () => {
-      const content = `
-          class Ibazel < NotFormula
-          desc 'IBazel is a tool for building Bazel targets when source files change.'
-          homepage 'https://github.com/bazelbuild/bazel-watcher'
-          url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
-          sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-          end
+      const content = codeBlock`
+        class Ibazel < NotFormula
+        desc 'IBazel is a tool for building Bazel targets when source files change.'
+        homepage 'https://github.com/bazelbuild/bazel-watcher'
+        url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+        sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+        end
       `;
-      expect(extractPackageFile(content)).toBeNull();
+
+      const res = extractPackageFile(content);
+
+      expect(res).toBeNull();
     });
 
     it('skips if there is no url field', () => {
-      const content = `
-          class Ibazel < Formula
-          desc 'IBazel is a tool for building Bazel targets when source files change.'
-          homepage 'https://github.com/bazelbuild/bazel-watcher'
-          not_url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
-          sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-          end
+      const content = codeBlock`
+        class Ibazel < Formula
+        desc 'IBazel is a tool for building Bazel targets when source files change.'
+        homepage 'https://github.com/bazelbuild/bazel-watcher'
+        not_url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+        sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+        end
       `;
+
       const res = extractPackageFile(content);
-      expect(res).not.toBeNull();
-      expect(res?.deps[0].skipReason).toBe('unsupported-url');
-      expect(res).toMatchSnapshot();
+
+      expect(res).toStrictEqual({
+        deps: [
+          {
+            currentValue: null,
+            datasource: undefined,
+            depName: 'Ibazel',
+            managerData: {
+              ownerName: null,
+              repoName: null,
+              sha256:
+                '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+              url: null,
+            },
+            skipReason: 'unsupported-url',
+          },
+        ],
+      });
     });
 
     it('skips if invalid url protocol', () => {
-      const content = `
-          class Ibazel < Formula
-          desc 'IBazel is a tool for building Bazel targets when source files change.'
-          homepage 'https://github.com/bazelbuild/bazel-watcher'
-          url ??https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
-          sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-          end
+      const content = codeBlock`
+        class Ibazel < Formula
+        desc 'IBazel is a tool for building Bazel targets when source files change.'
+        homepage 'https://github.com/bazelbuild/bazel-watcher'
+        url ??https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+        sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+        end
       `;
+
       const res = extractPackageFile(content);
-      expect(res).toMatchSnapshot({
-        deps: [{ depName: 'Ibazel', skipReason: 'unsupported-url' }],
+
+      expect(res).toStrictEqual({
+        deps: [
+          {
+            currentValue: null,
+            datasource: undefined,
+            depName: 'Ibazel',
+            managerData: {
+              ownerName: null,
+              repoName: null,
+              sha256:
+                '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+              url: null,
+            },
+            skipReason: 'unsupported-url',
+          },
+        ],
       });
     });
 
     it('skips if invalid url', () => {
-      const content = `
-          class Ibazel < Formula
-          desc 'IBazel is a tool for building Bazel targets when source files change.'
-          homepage 'https://github.com/bazelbuild/bazel-watcher'
-          url "invalid_url"
-          sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-          end
+      const content = codeBlock`
+        class Ibazel < Formula
+        desc 'IBazel is a tool for building Bazel targets when source files change.'
+        homepage 'https://github.com/bazelbuild/bazel-watcher'
+        url "invalid_url"
+        sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+        end
       `;
+
       const res = extractPackageFile(content);
-      expect(res).toMatchSnapshot({
-        deps: [{ depName: 'Ibazel', skipReason: 'unsupported-url' }],
+
+      expect(res).toStrictEqual({
+        deps: [
+          {
+            currentValue: null,
+            datasource: undefined,
+            depName: 'Ibazel',
+            managerData: {
+              ownerName: null,
+              repoName: null,
+              sha256:
+                '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+              url: 'invalid_url',
+            },
+            skipReason: 'unsupported-url',
+          },
+        ],
       });
     });
 
     it('skips if there is no sha256 field', () => {
-      const content = `
-          class Ibazel < Formula
-          desc 'IBazel is a tool for building Bazel targets when source files change.'
-          homepage 'https://github.com/bazelbuild/bazel-watcher'
-          url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
-          not_sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-          end
+      const content = codeBlock`
+        class Ibazel < Formula
+        desc 'IBazel is a tool for building Bazel targets when source files change.'
+        homepage 'https://github.com/bazelbuild/bazel-watcher'
+        url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+        not_sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+        end
       `;
+
       const res = extractPackageFile(content);
-      expect(res).not.toBeNull();
-      expect(res?.deps[0].skipReason).toBe('invalid-sha256');
-      expect(res).toMatchSnapshot();
+
+      expect(res).toStrictEqual({
+        deps: [
+          {
+            currentValue: 'v0.8.2',
+            datasource: 'github-tags',
+            depName: 'bazelbuild/bazel-watcher',
+            managerData: {
+              ownerName: 'bazelbuild',
+              repoName: 'bazel-watcher',
+              sha256: null,
+              url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+            },
+            skipReason: 'invalid-sha256',
+          },
+        ],
+      });
     });
 
     it('skips if sha256 field is invalid', () => {
-      const content = `
-          class Ibazel < Formula
-          desc 'IBazel is a tool for building Bazel targets when source files change.'
-          homepage 'https://github.com/bazelbuild/bazel-watcher'
-          url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
-          sha256 '26f5125218fad2741d3caf937b0229'
-          end
+      const content = codeBlock`
+        class Ibazel < Formula
+        desc 'IBazel is a tool for building Bazel targets when source files change.'
+        homepage 'https://github.com/bazelbuild/bazel-watcher'
+        url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+        sha256 '26f5125218fad2741d3caf937b0229'
+        end
       `;
+
       const res = extractPackageFile(content);
-      expect(res).not.toBeNull();
-      expect(res?.deps[0].skipReason).toBe('invalid-sha256');
-      expect(res).toMatchSnapshot();
+
+      expect(res).toStrictEqual({
+        deps: [
+          {
+            currentValue: 'v0.8.2',
+            datasource: 'github-tags',
+            depName: 'bazelbuild/bazel-watcher',
+            managerData: {
+              ownerName: 'bazelbuild',
+              repoName: 'bazel-watcher',
+              sha256: '26f5125218fad2741d3caf937b0229',
+              url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
+            },
+            skipReason: 'invalid-sha256',
+          },
+        ],
+      });
     });
   });
 });

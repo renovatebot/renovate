@@ -48,6 +48,7 @@ exports[`modules/platform/bitbucket/index > getIssueList() > get issues 1`] = `
       "raw": "content",
     },
     "id": 25,
+    "kind": "task",
     "title": "title",
   },
   {
@@ -55,6 +56,7 @@ exports[`modules/platform/bitbucket/index > getIssueList() > get issues 1`] = `
       "raw": "content",
     },
     "id": 26,
+    "kind": "task",
     "title": "title",
   },
 ]
@@ -132,11 +134,11 @@ exports[`modules/platform/bitbucket/index > getPrList() > filters PR list by aut
 ]
 `;
 
-exports[`modules/platform/bitbucket/index > massageMarkdown() > returns diff files 1`] = `
-"**foo**
+exports[`modules/platform/bitbucket/index > massageMarkdown() > removes html tags 1`] = `
+" - **foo**
 
 
-**text**
+	 - \`text\`
 
 
 

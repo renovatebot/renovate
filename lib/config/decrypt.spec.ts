@@ -34,6 +34,7 @@ describe('config/decrypt', () => {
 
       expect(logger.logger.once.warn).toHaveBeenCalledWith('text');
       expect(res.encrypted).toBeUndefined();
+      // @ts-expect-error -- invalid option
       expect(res.a).toBeUndefined();
     });
 

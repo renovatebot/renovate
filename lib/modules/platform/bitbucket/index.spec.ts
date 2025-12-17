@@ -72,6 +72,7 @@ describe('modules/platform/bitbucket/index', () => {
         username: 'abc',
         password: '123',
       });
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Init: Bitbucket Cloud endpoint should generally be https://api.bitbucket.org/ but is being configured to a different value. Did you mean to use Bitbucket Server?',
       );
@@ -110,6 +111,7 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/user')
         .reply(403, { error: { detail: { required: ['account'] } } });
       await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         `Bitbucket: missing 'account' scope for password`,
       );
@@ -547,11 +549,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
@@ -589,11 +593,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
@@ -643,11 +649,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
@@ -680,11 +688,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
@@ -717,11 +727,13 @@ describe('modules/platform/bitbucket/index', () => {
             {
               id: 25,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
             {
               id: 26,
               title: 'title',
+              kind: 'task',
               content: { raw: 'content' },
             },
           ],
@@ -1648,13 +1660,84 @@ describe('modules/platform/bitbucket/index', () => {
   });
 
   describe('massageMarkdown()', () => {
-    it('returns diff files', () => {
+    it('removes html tags', () => {
       const prBody =
         '<details><summary>foo</summary>\n<blockquote>\n\n<details><summary>text</summary>' +
         '\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->' +
         '\n\n</details>\n\n</blockquote>\n</details>';
 
       expect(bitbucket.massageMarkdown(prBody)).toMatchSnapshot();
+    });
+
+    it('updates abandoned dependencies heading and place note inside', () => {
+      const prBody =
+        '> ℹ **Note**\n>\n' +
+        'These dependencies have not received updates for an extended period and may be unmaintained:\n\n' +
+        '<details>\n<summary>View abandoned dependencies (6)</summary>\n\n' +
+        '| Datasource | Name | Last Updated |\n' +
+        '|------------|------|-------------|\n' +
+        '| npm | node | unknown |\n' +
+        '\n</details>\n\n';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '## Abandoned Dependencies\n' +
+          '> ℹ **Note**\n>\n' +
+          'These dependencies have not received updates for an extended period and may be unmaintained:\n\n\n\n' +
+          '| Datasource | Name | Last Updated |\n' +
+          '|------------|------|-------------|\n' +
+          '| npm | node | unknown |\n\n\n\n',
+      );
+    });
+
+    it('updates vulnerabilities section to block quote with nested list', () => {
+      const prBody =
+        '## Vulnerabilities\n\n' +
+        '`2`/`2` CVEs have Renovate fixes.\n' +
+        '<details><summary>maven</summary>\n<blockquote>\n\n' +
+        '<details><summary>pom.xml</summary>\n<blockquote>\n\n' +
+        '<details><summary>org.eclipse.jetty.http2:http2-common</summary>\n' +
+        '<blockquote>\n\n- [GHSA-mmxm-8w33-wc4h](https://osv.dev/vulnerability/GHSA-mmxm-8w33-wc4h) (fixed in [11.0.26,))\n</blockquote>\n' +
+        '</details>\n\n' +
+        '<details><summary>org.apache.commons:commons-lang3</summary>\n' +
+        '<blockquote>\n\n- [GHSA-j288-q9x7-2f5v](https://osv.dev/vulnerability/GHSA-j288-q9x7-2f5v) (fixed in [3.18.0,))\n</blockquote>\n' +
+        '</details>\n\n</blockquote>\n</details>\n\n</blockquote>\n</details>\n\n';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '## Vulnerabilities\n\n' +
+          '`2`/`2` CVEs have Renovate fixes.\n' +
+          ' - **maven**\n\n\n' +
+          '\t - `pom.xml`\n\n\n' +
+          '\t\t - `org.eclipse.jetty.http2:http2-common`\n\n\n' +
+          '\t\t\t- [GHSA-mmxm-8w33-wc4h](https://osv.dev/vulnerability/GHSA-mmxm-8w33-wc4h) (fixed in [11.0.26,))\n\n\n\n' +
+          '\t\t - `org.apache.commons:commons-lang3`\n\n\n' +
+          '\t\t\t- [GHSA-j288-q9x7-2f5v](https://osv.dev/vulnerability/GHSA-j288-q9x7-2f5v) (fixed in [3.18.0,))\n\n\n\n\n\n\n\n\n\n',
+      );
+    });
+
+    it('updates detected dependencies section to block quote with nested list', () => {
+      const prBody =
+        '## Detected dependencies\n\n' +
+        '<details><summary>dockerfile</summary>\n<blockquote>\n\n' +
+        '<details><summary>app1/Dockerfile</summary>\n - `node:24`\n - `temurin:27`\n</details>\n\n' +
+        '<details><summary>app2/Dockerfile</summary>\n - `node:20`\n - `python:3:14`\n</details>\n\n' +
+        '</blockquote>\n</details>\n\n' +
+        '<details><summary>npm</summary>\n<blockquote>\n\n' +
+        '<details><summary>package.json</summary>\n - `@biomejs/biome:2.0.0`</details>\n\n' +
+        '</blockquote>\n</details>';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '## Detected dependencies\n\n' +
+          ' - **dockerfile**\n\n\n' +
+          '\t - `app1/Dockerfile`\n' +
+          '\t\t - `node:24`\n' +
+          '\t\t - `temurin:27`\n\n\n' +
+          '\t - `app2/Dockerfile`\n' +
+          '\t\t - `node:20`\n' +
+          '\t\t - `python:3:14`\n\n\n\n\n\n' +
+          ' - **npm**\n\n\n' +
+          '\t - `package.json`\n' +
+          '\t\t - `@biomejs/biome:2.0.0`\n\n\n',
+      );
     });
   });
 

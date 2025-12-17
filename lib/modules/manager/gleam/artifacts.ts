@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isEmptyArray, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -20,7 +20,7 @@ export async function updateArtifacts(
   logger.debug(`gleam.updateArtifacts(${packageFileName})`);
   const { isLockFileMaintenance } = config;
 
-  if (is.emptyArray(updatedDeps) && !isLockFileMaintenance) {
+  if (isEmptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated gleam deps - returning null');
     return null;
   }
@@ -53,7 +53,7 @@ export async function updateArtifacts(
     // `gleam deps update` with no packages rebuilds the lock file
     const packagesToUpdate = isLockFileMaintenance
       ? []
-      : updatedDeps.map((dep) => dep.depName).filter(is.string);
+      : updatedDeps.map((dep) => dep.depName).filter(isString);
 
     const updateCommand = [
       'gleam deps update',

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isPlainObject, isString } from '@sindresorhus/is';
 import type { RenovateConfig } from '../config/types';
 import {
   CONFIG_SECRETS_INVALID,
@@ -25,12 +25,12 @@ export function validateInterpolatedValues(
   const { name, nameRegex } = options;
 
   const validationErrors: string[] = [];
-  if (is.plainObject(input)) {
+  if (isPlainObject(input)) {
     for (const [key, value] of Object.entries(input)) {
       if (!nameRegex.test(key)) {
         validationErrors.push(`Invalid ${name} name "${key}"`);
       }
-      if (!is.string(value)) {
+      if (!isString(value)) {
         validationErrors.push(
           `${capitalize(name)} values must be strings. Found type ${typeof value} for ${name} ${key}`,
         );
@@ -99,7 +99,8 @@ export function replaceInterpolatedValuesInObject(
     delete config[name];
   }
   for (const [key, value] of Object.entries(config)) {
-    if (is.plainObject(value)) {
+    if (isPlainObject(value) && key !== 'onboardingConfig') {
+      // @ts-expect-error -- type can't be narrowed
       config[key] = replaceInterpolatedValuesInObject(
         value,
         input,
@@ -107,7 +108,8 @@ export function replaceInterpolatedValuesInObject(
         deleteValues,
       );
     }
-    if (is.string(value)) {
+    if (isString(value)) {
+      // @ts-expect-error -- type can't be narrowed
       config[key] = replaceInterpolatedValuesInString(
         key,
         value,
@@ -115,16 +117,16 @@ export function replaceInterpolatedValuesInObject(
         options,
       );
     }
-    if (is.array(value)) {
+    if (isArray(value)) {
       for (const [arrayIndex, arrayItem] of value.entries()) {
-        if (is.plainObject(arrayItem)) {
+        if (isPlainObject(arrayItem)) {
           value[arrayIndex] = replaceInterpolatedValuesInObject(
             arrayItem,
             input,
             options,
             deleteValues,
           );
-        } else if (is.string(arrayItem)) {
+        } else if (isString(arrayItem)) {
           value[arrayIndex] = replaceInterpolatedValuesInString(
             key,
             arrayItem,

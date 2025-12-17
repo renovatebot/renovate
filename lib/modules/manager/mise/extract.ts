@@ -1,4 +1,11 @@
-import is from '@sindresorhus/is';
+import {
+  isArray,
+  isFunction,
+  isNonEmptyObject,
+  isNonEmptyString,
+  isObject,
+  isString,
+} from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import type { ToolingConfig } from '../asdf/upgradeable-tooling';
@@ -49,7 +56,7 @@ export function extractPackageFile(
       const toolName = depName.substring(delimiterIndex + 1);
       const options = parseOptions(
         optionsInName,
-        is.nonEmptyObject(toolData) ? toolData : {},
+        isNonEmptyObject(toolData) ? toolData : {},
       );
       const toolConfig =
         version === null
@@ -64,17 +71,17 @@ export function extractPackageFile(
 }
 
 function parseVersion(toolData: MiseTool): string | null {
-  if (is.nonEmptyString(toolData)) {
+  if (isNonEmptyString(toolData)) {
     // Handle the string case
     // e.g. 'erlang = "23.3"'
     return toolData;
   }
-  if (is.array(toolData, is.string)) {
+  if (isArray(toolData, isString)) {
     // Handle the array case
     // e.g. 'erlang = ["23.3", "24.0"]'
     return toolData.length ? toolData[0] : null; // Get the first version in the array
   }
-  if (is.object(toolData) && is.nonEmptyString(toolData.version)) {
+  if (isObject(toolData) && isNonEmptyString(toolData.version)) {
     // Handle the object case with a string version
     // e.g. 'python = { version = "3.11.2" }'
     return toolData.version;
@@ -86,7 +93,7 @@ function parseOptions(
   optionsInName: string,
   toolOptions: MiseToolOptions,
 ): MiseToolOptions {
-  const options = is.nonEmptyString(optionsInName)
+  const options = isNonEmptyString(optionsInName)
     ? Object.fromEntries(
         optionsInName.split(',').map((option) => option.split('=', 2)),
       )
@@ -169,7 +176,7 @@ function getConfigFromTooling(
   } // Return null if no toolDefinition is found
 
   return (
-    (is.function(toolDefinition.config)
+    (isFunction(toolDefinition.config)
       ? toolDefinition.config(version)
       : toolDefinition.config) ?? null
   ); // Ensure null is returned instead of undefined

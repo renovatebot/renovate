@@ -12,7 +12,7 @@ export const presets: Record<string, Preset> = {
           '/azure.*pipelines?.*\\.ya?ml$/',
         ],
         matchStrings: [
-          '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
+          '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
         ],
       },
     ],
@@ -69,7 +69,7 @@ export const presets: Record<string, Preset> = {
           '/(^|/)action\\.ya?ml$/',
         ],
         matchStrings: [
-          '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
+          '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
         ],
       },
     ],
@@ -146,5 +146,21 @@ export const presets: Record<string, Preset> = {
       },
     ],
     description: 'Update `*_version` variables in `.tfvars` files.',
+  },
+  tsconfigNodeVersions: {
+    customManagers: [
+      {
+        autoReplaceStringTemplate:
+          '"extends": "@tsconfig/node{{{major}}}/tsconfig.json"',
+        currentValueTemplate: '{{{major}}}',
+        customType: 'regex',
+        datasourceTemplate: 'npm',
+        managerFilePatterns: ['**/tsconfig.json'],
+        matchStrings: [
+          '"extends":\\s*"(?<depName>@tsconfig/node(?<major>\\d+))/tsconfig\\.json"',
+        ],
+      },
+    ],
+    description: 'Update `@tsconfig/node` extends  in `tsconfig.json` files.',
   },
 };

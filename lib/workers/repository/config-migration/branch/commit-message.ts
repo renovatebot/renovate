@@ -39,6 +39,6 @@ export class ConfigMigrationCommitMessageFactory {
   }
 
   getPrTitle(): string {
-    return this.create(`Migrate renovate config`).toString();
+    return this.create(`Migrate Renovate config`).toString();
   }
 }

@@ -19,7 +19,8 @@ import { normalizePythonDepName } from '../../datasource/pypi/common';
 import * as gitVersioning from '../../versioning/git';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
-import { ProjectSection } from '../pep621/schema';
+import { DependencyGroup, ProjectSection } from '../pep621/schema';
+import { depTypes } from '../pep621/utils';
 import { dependencyPattern } from '../pip_requirements/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 
@@ -309,6 +310,7 @@ export const PoetryPyProject = Toml.pipe(
     .object({
       project: ProjectSection.optional().catch(undefined),
       tool: z.object({ poetry: PoetrySection }).optional().catch(undefined),
+      'dependency-groups': DependencyGroup(depTypes.dependencyGroups).catch([]),
       'build-system': z
         .object({
           'build-backend': z.string().refine(
@@ -320,7 +322,9 @@ export const PoetryPyProject = Toml.pipe(
           requires: LooseArray(BuildSystemRequireVal).transform((vals) => {
             const req = vals.find(
               ({ depName }) =>
-                depName === 'poetry' || depName === 'poetry_core',
+                depName === 'poetry' ||
+                depName === 'poetry_core' ||
+                depName === 'poetry-core',
             );
             return req?.poetryRequirement;
           }),
@@ -329,7 +333,14 @@ export const PoetryPyProject = Toml.pipe(
         .optional()
         .catch(undefined),
     })
-    .transform(({ project, tool, 'build-system': poetryRequirement }) => {
+    .transform((pyproject) => {
+      const {
+        project,
+        tool,
+        'build-system': poetryRequirement,
+        'dependency-groups': dependencyGroups,
+      } = pyproject;
+
       const deps: PackageDependency[] = [];
 
       const projectDependencies = project?.dependencies;
@@ -341,6 +352,8 @@ export const PoetryPyProject = Toml.pipe(
       if (projectOptionalDependencies) {
         deps.push(...projectOptionalDependencies);
       }
+
+      deps.push(...dependencyGroups);
 
       const poetryDependencies = tool?.poetry?.dependencies;
       if (poetryDependencies) {

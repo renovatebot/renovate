@@ -146,7 +146,8 @@ export async function extractAllPackageFiles(
         if (packageFileContent.managerData?.requirementsFiles) {
           packageFileContent.managerData.requirementsFiles =
             packageFileContent.managerData.requirementsFiles.map(
-              (file: string) => upath.normalize(upath.join(compileDir, file)),
+              (file: string) =>
+                upath.normalize(upath.join(upath.dirname(packageFile), file)),
             );
           for (const file of packageFileContent.managerData.requirementsFiles) {
             depsBetweenFiles.push({

@@ -54,6 +54,7 @@ describe('util/interpolator', () => {
       };
       const res = replaceInterpolatedValuesInObject(
         {
+          // @ts-expect-error -- will be tranformed
           mode: '{{ secrets.SECRET_MODE }}',
           labels: ['{{ secrets.SECRET_LABEL }}', 'renovate'],
           prBodyDefinitions: {
@@ -96,6 +97,7 @@ describe('util/interpolator', () => {
     it('replaces values and keeps secrets', () => {
       const res = replaceInterpolatedValuesInObject(
         {
+          // @ts-expect-error -- will be tranformed
           mode: '{{ secrets.SECRET_MODE }}',
           secrets: { SECRET_MODE: 'silent' },
         },
@@ -107,6 +109,46 @@ describe('util/interpolator', () => {
       expect(res).toEqual({
         mode: 'silent',
         secrets: { SECRET_MODE: 'silent' },
+      });
+    });
+
+    it('does not resolve secrets in onboaringConfig', () => {
+      const res = replaceInterpolatedValuesInObject(
+        {
+          // @ts-expect-error as we are using secrets to pass the value
+          mode: '{{ secrets.SECRET_MODE }}',
+          secrets: { SECRET_MODE: 'silent', ARTIFACTORY_API_TOKEN: 'token' },
+          onboardingConfig: {
+            hostRules: [
+              {
+                hostType: 'maven',
+                matchHost:
+                  'http://artifactory-artifactory-nginx.artifactory.svc.cluster.local',
+                username: process.env.ARTIFACTORY_API_USER, // this can be displayed public, not a secret
+                password: '{{ secrets.ARTIFACTORY_API_TOKEN }}',
+              },
+            ],
+          },
+        },
+        { SECRET_MODE: 'silent', ARTIFACTORY_API_TOKEN: 'token' },
+        options.secrets,
+        false,
+      );
+
+      expect(res).toEqual({
+        mode: 'silent',
+        secrets: { SECRET_MODE: 'silent', ARTIFACTORY_API_TOKEN: 'token' },
+        onboardingConfig: {
+          hostRules: [
+            {
+              hostType: 'maven',
+              matchHost:
+                'http://artifactory-artifactory-nginx.artifactory.svc.cluster.local',
+              username: process.env.ARTIFACTORY_API_USER, // this can be displayed public, not a secret
+              password: '{{ secrets.ARTIFACTORY_API_TOKEN }}',
+            },
+          ],
+        },
       });
     });
 
@@ -140,6 +182,7 @@ describe('util/interpolator', () => {
       expect(() =>
         replaceInterpolatedValuesInObject(
           {
+            // @ts-expect-error -- will be tranformed
             mode: '{{ secrets.SECRET_MODE }}',
             secrets: { SECRET_NOT_MODE: 'silent' },
           },

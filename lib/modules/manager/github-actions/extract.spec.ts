@@ -188,6 +188,13 @@ describe('modules/manager/github-actions/extract', () => {
           versioning: 'docker',
         },
         {
+          currentValue: '1.37.0-glibc',
+          datasource: 'docker',
+          depName: 'busybox',
+          depType: 'docker',
+          replaceString: 'busybox:1.37.0-glibc',
+        },
+        {
           currentValue: 'latest',
           datasource: 'github-runners',
           depName: 'ubuntu',
@@ -1171,6 +1178,37 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'uses-with',
           packageName: 'ruby',
           versioning: 'ruby',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pypa/hatch@install',
+        with: { version: '1.14.2' },
+      },
+      expected: [
+        {
+          currentValue: '1.14.2',
+          datasource: 'github-releases',
+          depName: 'pypa/hatch',
+          depType: 'uses-with',
+          packageName: 'pypa/hatch',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pypa/hatch@install',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'pypa/hatch',
+          depType: 'uses-with',
+          packageName: 'pypa/hatch',
         },
       ],
     },

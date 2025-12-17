@@ -52,6 +52,7 @@ describe('workers/repository/update/pr/pr-cache', () => {
     it('logs if branch not found', () => {
       cache.getCache.mockReturnValue(dummyCache);
       setPrCache('branch_1', 'fingerprint_hash', false);
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'setPrCache(): Branch cache not present',
       );

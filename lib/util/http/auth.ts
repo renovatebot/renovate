@@ -1,6 +1,7 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import type { Options } from 'got';
 import {
+  FORGEJO_API_USING_HOST_TYPES,
   GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
@@ -23,7 +24,7 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
 ): GotOptions {
   const options: GotOptions = { ...inOptions };
 
-  if (is.nonEmptyString(options.headers?.authorization) || options.noAuth) {
+  if (isNonEmptyString(options.headers?.authorization) || options.noAuth) {
     return options;
   }
 
@@ -36,6 +37,11 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
       } else {
         options.headers.authorization = `${authType} ${options.token}`;
       }
+    } else if (
+      options.hostType &&
+      FORGEJO_API_USING_HOST_TYPES.includes(options.hostType)
+    ) {
+      options.headers.authorization = `Bearer ${options.token}`;
     } else if (
       options.hostType &&
       GITEA_API_USING_HOST_TYPES.includes(options.hostType)
@@ -51,7 +57,7 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
       if (options.token.startsWith('x-access-token:')) {
         const appToken = options.token.replace('x-access-token:', '');
         options.headers.authorization = `token ${appToken}`;
-        if (is.string(options.headers.accept)) {
+        if (isString(options.headers.accept)) {
           options.headers.accept = options.headers.accept.replace(
             'application/vnd.github.v3+json',
             'application/vnd.github.machine-man-preview+json',

@@ -81,7 +81,7 @@ describe('workers/repository/onboarding/pr/index', () => {
         packageFiles,
         branches,
       );
-      expect(platform.createPr).toHaveBeenCalledWith(
+      expect(platform.createPr).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           prTitle: 'chore: Configure Renovate',
         }),
@@ -227,6 +227,26 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
 
+    it('ensures comment,when onboarding pr is older than onboardingAutoCloseAge', async () => {
+      config.baseBranch = 'some-branch';
+      GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'Configure Renovate',
+          bodyStruct,
+          createdAt: '2020-02-29T01:40:21Z',
+          number: 1,
+        }),
+      );
+      await ensureOnboardingPr(config, {}, branches);
+      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+      expect(platform.updatePr).toHaveBeenCalledWith({
+        number: 1,
+        state: 'closed',
+        prTitle: 'Configure Renovate',
+      });
+    });
+
     it('does nothing in dry run when PR is conflicted', async () => {
       GlobalConfig.set({ dryRun: 'full' });
       config.baseBranch = 'some-branch';
@@ -274,6 +294,7 @@ describe('workers/repository/onboarding/pr/index', () => {
     it('dryrun of creates PR', async () => {
       GlobalConfig.set({ dryRun: 'full' });
       await ensureOnboardingPr(config, packageFiles, branches);
+
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would check branch renovate/configure',
       );
@@ -291,6 +312,7 @@ describe('workers/repository/onboarding/pr/index', () => {
         }),
       );
       await ensureOnboardingPr(config, packageFiles, branches);
+
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would check branch renovate/configure',
       );
@@ -325,6 +347,7 @@ describe('workers/repository/onboarding/pr/index', () => {
         await expect(
           ensureOnboardingPr(config, packageFiles, branches),
         ).toResolve();
+
         expect(logger.warn).toHaveBeenCalledWith(
           'Onboarding PR already exists but cannot find it. It was probably created by a different user.',
         );

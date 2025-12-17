@@ -1,5 +1,8 @@
 import { pipenv as pipenvDetect } from '@renovatebot/detect-tools';
-import is from '@sindresorhus/is';
+import {
+  isNonEmptyStringAndNotWhitespace,
+  isUrlInstance,
+} from '@sindresorhus/is';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
@@ -43,8 +46,8 @@ async function findPipfileSourceUrlsWithCredentials(
   return (
     pipfile?.registryUrls
       ?.map(parseUrl)
-      .filter(is.urlInstance)
-      .filter((url) => is.nonEmptyStringAndNotWhitespace(url.username)) ?? []
+      .filter(isUrlInstance)
+      .filter((url) => isNonEmptyStringAndNotWhitespace(url.username)) ?? []
   );
 }
 
