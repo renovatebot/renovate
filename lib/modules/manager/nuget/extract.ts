@@ -205,9 +205,12 @@ export async function extractPackageFile(
     return extractMsbuildGlobalManifest(content, packageFile, registries);
   }
 
-  if (packageFile.endsWith('.cs'))
-  {
-    return extractPackagesFromSingleCsharpFile(content, packageFile, registries);
+  if (packageFile.endsWith('.cs')) {
+    return extractPackagesFromSingleCsharpFile(
+      content,
+      packageFile,
+      registries,
+    );
   }
 
   // Simple xml validation.
