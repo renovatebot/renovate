@@ -77,11 +77,11 @@ describe('config/presets/internal/workarounds', () => {
       ${'unstable_base'} | ${false}
       ${'20'}            | ${false}
       ${'20_base'}       | ${false}
-      ${'1.24'}          | ${false}
+      ${'1.24'}          | ${true}
       ${'1.24_base'}     | ${true}
-      ${'1.24.0'}        | ${false}
+      ${'1.24.0'}        | ${true}
       ${'1.24.0_base'}   | ${true}
-      ${'1.5.1-17'}      | ${false}
+      ${'1.5.1-17'}      | ${true}
       ${'1.5.1-17_base'} | ${true}
     `('matchCurrentValue("$input") == "$expected"', ({ input, expected }) => {
       expect(matchRegexOrGlob(input, matchCurrentValue)).toEqual(expected);
