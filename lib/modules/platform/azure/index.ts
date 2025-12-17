@@ -219,7 +219,9 @@ export async function initRepo({
   }
   logger.debug({ repositoryDetails: repo }, 'Repository details');
   if (repo.isDisabled) {
-    logger.debug('Repository is disabled- throwing error to abort renovation');
+    logger.debug(
+      'Repository is disabled- throwing error to abort Renovate run',
+    );
     throw new Error(REPOSITORY_ARCHIVED);
   }
   /* v8 ignore next */

@@ -7,7 +7,7 @@ export const KubernetesResource = z.object({
     name: z.string(),
     // For Flux, the namespace property is optional, but matching HelmReleases to HelmRepositories would be
     // much more difficult without it (we'd have to examine the parent Kustomizations to discover the value),
-    // so we require it for renovation.
+    // so we require it for Renovate run.
     namespace: z.string().optional(),
   }),
 });

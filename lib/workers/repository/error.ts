@@ -123,7 +123,7 @@ export default async function handleError(
     return err.message;
   }
   if (err.message === REPOSITORY_CHANGED) {
-    logger.info('Repository has changed during renovation - aborting');
+    logger.info('Repository has changed during Renovate run - aborting');
     delete config.branchList;
     return err.message;
   }
