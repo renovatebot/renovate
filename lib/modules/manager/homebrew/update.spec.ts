@@ -482,7 +482,7 @@ describe('modules/manager/homebrew/update', () => {
     expect(newContent).toBe(ibazel);
   });
 
-  it('returns unchanged content if handler buildNewUrls returns null', async () => {
+  it('returns unchanged content if handler buildArchiveUrls returns null', async () => {
     const mockHandler = {
       type: 'github',
       parseUrl: vi.fn().mockReturnValue({
@@ -492,7 +492,7 @@ describe('modules/manager/homebrew/update', () => {
         repoName: 'bazel-watcher',
         urlType: 'archive',
       }),
-      buildNewUrls: vi.fn().mockReturnValue(null),
+      buildArchiveUrls: vi.fn().mockReturnValue(null),
       createDependency: vi.fn(),
     };
 
@@ -520,8 +520,6 @@ describe('modules/manager/homebrew/update', () => {
     });
 
     expect(newContent).toBe(ibazel);
-    expect(mockHandler.buildNewUrls).toHaveBeenCalled();
-
-    vi.restoreAllMocks();
+    expect(mockHandler.buildArchiveUrls).toHaveBeenCalled();
   });
 });

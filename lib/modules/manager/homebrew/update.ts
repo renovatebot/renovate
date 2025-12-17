@@ -12,25 +12,33 @@ export async function updateDependency({
   fileContent,
   upgrade,
 }: UpdateDependencyConfig<HomebrewManagerData>): Promise<string> {
+  const { packageFile, depName } = upgrade;
+
   logger.trace('updateDependency()');
 
   const { managerData, newValue } = upgrade;
   if (!managerData?.url || !managerData.sha256 || !newValue) {
-    logger.debug(`Missing data for ${upgrade.depName}`);
+    logger.debug({ packageFile, depName }, `Missing data`);
     return fileContent;
   }
 
   // Find handler by type
   const handler = findHandlerByType(managerData.type);
   if (!handler) {
-    logger.debug(`Unknown handler type ${managerData.type}`);
+    logger.debug(
+      { packageFile, depName },
+      `Unknown handler type ${managerData.type}`,
+    );
     return fileContent;
   }
 
   // Validate old URL can be parsed
   const oldParsed = handler.parseUrl(managerData.url);
   if (!oldParsed) {
-    logger.debug(`Failed to parse old URL for ${upgrade.depName}`);
+    logger.debug(
+      { packageFile, depName },
+      `Failed to parse old URL '${managerData.url}'`,
+    );
     return fileContent;
   }
 
@@ -39,7 +47,7 @@ export async function updateDependency({
 
   const buildArchiveUrls = handler.buildArchiveUrls(managerData, newValue);
   if (!buildArchiveUrls) {
-    logger.debug(`Failed to build new URL for ${upgrade.depName}`);
+    logger.debug({ packageFile, depName }, `Failed to build new URL`);
     return fileContent;
   }
   candidateUrls.push(...buildArchiveUrls);
@@ -53,7 +61,8 @@ export async function updateDependency({
     const newParsed = handler.parseUrl(candidateUrl);
     if (!newParsed || newParsed?.currentValue !== newValue) {
       logger.debug(
-        `URL validation failed for ${candidateUrl} (${upgrade.depName})`,
+        { packageFile, depName },
+        `URL validation failed for '${candidateUrl}'`,
       );
       continue;
     }
@@ -62,15 +71,21 @@ export async function updateDependency({
     try {
       newSha256 = await hashStream(http.stream(candidateUrl), 'sha256');
       newUrl = candidateUrl;
-      logger.debug(`Successfully downloaded ${candidateUrl}`);
+      logger.trace(
+        { packageFile, depName },
+        `Successfully downloaded '${candidateUrl}'`,
+      );
       break;
     } catch {
-      logger.debug(`Failed to download ${candidateUrl}`);
+      logger.debug(
+        { packageFile, depName },
+        `Failed to download ${candidateUrl}`,
+      );
     }
   }
 
   if (!newUrl || !newSha256) {
-    logger.debug(`All download attempts failed for ${upgrade.depName}`);
+    logger.debug({ packageFile, depName }, `All download attempts failed`);
     return fileContent;
   }
 
@@ -82,7 +97,7 @@ export async function updateDependency({
     newUrl,
   );
   if (!newContent) {
-    logger.debug(`Failed to update URL for ${upgrade.depName}`);
+    logger.debug({ packageFile, depName }, `Failed to update URL`);
     return fileContent;
   }
 
@@ -93,7 +108,7 @@ export async function updateDependency({
     newSha256,
   );
   if (!newContent) {
-    logger.debug(`Failed to update SHA256 for ${upgrade.depName}`);
+    logger.debug({ packageFile, depName }, `Failed to update SHA256`);
     return fileContent;
   }
 
