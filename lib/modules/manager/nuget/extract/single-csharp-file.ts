@@ -1,4 +1,3 @@
-import { logger } from '../../../../logger';
 import { regEx } from '../../../../util/regex';
 import { NugetDatasource } from '../../../datasource/nuget';
 import type { PackageDependency, PackageFileContent } from '../../types';
