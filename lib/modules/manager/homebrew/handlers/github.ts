@@ -33,46 +33,42 @@ export class GitHubUrlHandler extends HomebrewUrlHandler {
     if (!is.nonEmptyString(urlStr)) {
       return null;
     }
-    try {
-      const url = parseUrl(urlStr);
-      if (url?.hostname !== 'github.com') {
-        return null;
-      }
-      let s = url.pathname.split('/');
-      s = s.filter((val) => val);
-      const ownerName = s[0];
-      const repoName = s[1];
-      let currentValue: string | undefined;
-      let urlType: GitHubUrlType | undefined;
-
-      if (s[2] === 'archive') {
-        urlType = 'archive';
-        // old archive url in form: [...]/archive/<tag>.tar.gz
-        currentValue = s[3];
-        if (currentValue === 'refs') {
-          // new archive url in form: [...]/archive/refs/tags/<tag>.tar.gz
-          currentValue = s[5];
-        }
-        const targz = currentValue.slice(
-          currentValue.length - 7,
-          currentValue.length,
-        );
-        if (targz === '.tar.gz') {
-          currentValue = currentValue.substring(0, currentValue.length - 7);
-        }
-      } else if (s[2] === 'releases' && s[3] === 'download') {
-        urlType = 'releases';
-        currentValue = s[4];
-      }
-
-      if (!currentValue || !urlType) {
-        return null;
-      }
-
-      return { type: 'github', currentValue, ownerName, repoName, urlType };
-    } catch {
+    const url = parseUrl(urlStr);
+    if (url?.hostname !== 'github.com') {
       return null;
     }
+    let s = url.pathname.split('/');
+    s = s.filter((val) => val);
+    const ownerName = s[0];
+    const repoName = s[1];
+    let currentValue: string | undefined;
+    let urlType: GitHubUrlType | undefined;
+
+    if (s[2] === 'archive') {
+      urlType = 'archive';
+      // old archive url in form: [...]/archive/<tag>.tar.gz
+      currentValue = s[3];
+      if (currentValue === 'refs') {
+        // new archive url in form: [...]/archive/refs/tags/<tag>.tar.gz
+        currentValue = s[5];
+      }
+      const targz = currentValue.slice(
+        currentValue.length - 7,
+        currentValue.length,
+      );
+      if (targz === '.tar.gz') {
+        currentValue = currentValue.substring(0, currentValue.length - 7);
+      }
+    } else if (s[2] === 'releases' && s[3] === 'download') {
+      urlType = 'releases';
+      currentValue = s[4];
+    }
+
+    if (!currentValue || !urlType) {
+      return null;
+    }
+
+    return { type: 'github', currentValue, ownerName, repoName, urlType };
   }
 
   createDependency(
