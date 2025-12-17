@@ -202,7 +202,7 @@ export async function updateLockedDependency(
           currentVersion,
           newVersion,
         })!;
-        newPackageJsonContent = await updateDependency({
+        newPackageJsonContent = updateDependency({
           // TODO #22198
           fileContent: packageFileContent!,
           upgrade: { depName, depType, newValue },

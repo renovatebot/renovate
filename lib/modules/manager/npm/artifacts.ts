@@ -168,9 +168,9 @@ async function updatePnpmWorkspace(
   let updated = false;
 
   for (const upgrade of updateArtifactsConfig.updatedDeps) {
-    // if (!upgrade.isVulnerabilityAlert) {
-    //   continue;
-    // }
+    if (!upgrade.isVulnerabilityAlert) {
+      continue;
+    }
     logger.debug('updatePnpmWorkspace()');
 
     const pnpmWorkspace =
@@ -183,9 +183,8 @@ async function updatePnpmWorkspace(
       logger.debug('Adding new exclude block');
       // add minimumReleaseAgeExclude
       const addedStr = `
-        minimumReleaseAgeExclude:
-         - ${upgrade.depName}@${upgrade.newValue}
-      `;
+minimumReleaseAgeExclude:
+  - ${upgrade.depName}@${upgrade.newValue}`;
       const newContent = oldContent + addedStr;
       await writeLocalFile(pnpmWorkspaceFilePath, newContent);
       packageFileContent = newContent;
