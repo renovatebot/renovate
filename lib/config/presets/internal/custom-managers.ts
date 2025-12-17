@@ -150,14 +150,13 @@ export const presets: Record<string, Preset> = {
   tsconfigNodeVersions: {
     customManagers: [
       {
-        autoReplaceStringTemplate:
-          '"extends": "@tsconfig/node{{{major}}}/tsconfig.json"',
+        autoReplaceStringTemplate: '"@tsconfig/node{{{major}}}/tsconfig.json"',
         currentValueTemplate: '{{{major}}}',
         customType: 'regex',
         datasourceTemplate: 'npm',
         managerFilePatterns: ['**/tsconfig.json'],
         matchStrings: [
-          '"extends":\\s*"(?<depName>@tsconfig/node(?<major>\\d+))/tsconfig\\.json"',
+          '"(?<depName>@tsconfig/node(?<major>\\d+))/tsconfig\\.json"',
         ],
       },
     ],
