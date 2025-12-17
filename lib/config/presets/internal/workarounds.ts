@@ -51,8 +51,6 @@ export const presets: Record<string, Preset> = {
     description: 'Use custom regex versioning for ClamAV images',
     packageRules: [
       {
-        matchCurrentValue:
-          '/^(?<major>\\d+)\\.(?<minor>\\d+)(\\.(?<patch>\\d+))?(-(?<build>\\d+))?(_(?<compatibility>.+))?$/',
         matchDatasources: ['docker'],
         matchPackageNames: ['clamav/clamav', 'clamav/clamav-debian'],
         versioning:
