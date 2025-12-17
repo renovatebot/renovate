@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
+import { parseUrl } from '../../../../util/url';
 import { GithubReleasesDatasource } from '../../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import type { PackageDependency } from '../../types';
@@ -33,8 +34,8 @@ export class GitHubUrlHandler extends HomebrewUrlHandler {
       return null;
     }
     try {
-      const url = new URL(urlStr);
-      if (url.hostname !== 'github.com') {
+      const url = parseUrl(urlStr);
+      if (url?.hostname !== 'github.com') {
         return null;
       }
       let s = url.pathname.split('/');
