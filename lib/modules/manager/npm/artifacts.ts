@@ -168,9 +168,9 @@ async function updatePnpmWorkspace(
   let updated = false;
 
   for (const upgrade of updateArtifactsConfig.updatedDeps) {
-    // if (!upgrade.isVulnerabilityAlert) {
-    //   continue;
-    // }
+    if (!upgrade.isVulnerabilityAlert) {
+      continue;
+    }
     logger.debug('updatePnpmWorkspace()');
 
     const pnpmWorkspace =
