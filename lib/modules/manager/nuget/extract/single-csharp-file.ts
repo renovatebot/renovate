@@ -21,26 +21,18 @@ export function extractPackagesFromSingleCsharpFile(
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
 
-  try {
-    for (const match of content.matchAll(packageRegex)) {
-      const { type, depName, currentValue } = match.groups!;
+  for (const match of content.matchAll(packageRegex)) {
+    const { type, depName, currentValue } = match.groups!;
 
-      const dep: NugetPackageDependency = {
-        depName,
-        currentValue,
-        datasource: NugetDatasource.id,
-        depType: type === 'package' ? 'nuget' : 'msbuild-sdk',
-      };
+    const dep: NugetPackageDependency = {
+      depName,
+      currentValue,
+      datasource: NugetDatasource.id,
+      depType: type === 'package' ? 'nuget' : 'msbuild-sdk',
+    };
 
-      applyRegistries(dep, registries);
-      deps.push(dep);
-    }
-  } catch {
-    logger.debug(
-      { packageFile },
-      `Error trying to find nuget packages and SDKs from single code file.`,
-    );
-    return null;
+    applyRegistries(dep, registries);
+    deps.push(dep);
   }
 
   return { deps };
