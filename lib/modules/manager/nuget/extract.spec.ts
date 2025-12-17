@@ -602,5 +602,38 @@ describe('modules/manager/nuget/extract', () => {
         );
       });
     });
+
+    describe('single-csharp-file-nuget', () => {
+      it('respects nuget.config', async () => {
+        const packageFile = 'single-csharp-file-nuget/singlefile.cs';
+        const contents = Fixtures.get(packageFile);
+        expect(await extractPackageFile(contents, packageFile, config)).toEqual(
+          {
+            deps: [
+              {
+                datasource: 'nuget',
+                currentValue: '6.0.0',
+                depName: 'Some.Sdk',
+                depType: 'msbuild-sdk',
+                registryUrls: [
+                  'https://api.nuget.org/v3/index.json#protocolVersion=3',
+                  'https://contoso.com/packages/',
+                ],
+              },
+              {
+                datasource: 'nuget',
+                currentValue: '3.0.1',
+                depName: 'Some.NuGet.Package',
+                depType: 'nuget',
+                registryUrls: [
+                  'https://api.nuget.org/v3/index.json#protocolVersion=3',
+                  'https://contoso.com/packages/',
+                ],
+              },
+            ],
+          },
+        );
+      });
+    });
   });
 });
