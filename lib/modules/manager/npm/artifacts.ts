@@ -168,9 +168,9 @@ async function updatePnpmWorkspace(
   let updated = false;
 
   for (const upgrade of updateArtifactsConfig.updatedDeps) {
-    if (!upgrade.isVulnerabilityAlert) {
-      continue;
-    }
+    // if (!upgrade.isVulnerabilityAlert) {
+    //   continue;
+    // }
     logger.debug('updatePnpmWorkspace()');
 
     const pnpmWorkspace =
@@ -224,6 +224,20 @@ async function updatePnpmWorkspace(
         packageFileContent = newContent;
         updated = true;
       }
+    } else {
+      logger.debug(
+        'Matching setting not found but minimumReleaseAgeExclude is present',
+      );
+      logger.debug('Matching setting found, appending ||');
+      const addedStr = `minimumReleaseAgeExclude:
+  - ${upgrade.depName}@${upgrade.newValue}`;
+      const newContent = oldContent.replace(
+        'minimumReleaseAgeExclude:',
+        addedStr,
+      );
+      await writeLocalFile(pnpmWorkspaceFilePath, newContent);
+      packageFileContent = newContent;
+      updated = true;
     }
   }
 
@@ -255,7 +269,6 @@ function checkExcludeSetting(
   }
 
   // check if setting is a pattern
-  // TODO: use getRegexOrGlobPredicate method
   const res = matchRegexOrGlob(depName, setting);
   if (res) {
     return { match: true, matchType: 'pattern' };
