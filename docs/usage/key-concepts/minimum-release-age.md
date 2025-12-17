@@ -1,5 +1,5 @@
 ---
-title: Minimum Release Age
+title: #Minimum Release Age
 description: Requires Renovate to wait for a specified amount of time before suggesting a dependency update.
 ---
 
