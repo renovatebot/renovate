@@ -163,9 +163,6 @@ export function mapBranchStatusToLabel(
 }
 
 // Convert Gerrit date format to ISO format
-export function convertGerritDateToISO(
-  // Optionality is only for simplifying tests
-  date: string | undefined,
-): string | undefined {
-  return date?.replace(' ', 'T');
+export function convertGerritDateToISO(date: string): string {
+  return date.replace(' ', 'T');
 }

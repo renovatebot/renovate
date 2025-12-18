@@ -368,9 +368,5 @@ describe('modules/platform/gerrit/utils', () => {
         utils.convertGerritDateToISO('2023-05-20 14:25:30.123456789'),
       ).toBe('2023-05-20T14:25:30.123456789');
     });
-
-    it('returns undefined when date is undefined', () => {
-      expect(utils.convertGerritDateToISO(undefined)).toBeUndefined();
-    });
   });
 });
