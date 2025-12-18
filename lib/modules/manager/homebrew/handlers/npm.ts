@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { logger } from '../../../../logger';
 import { regEx } from '../../../../util/regex';
 import { parseUrl } from '../../../../util/url';
 import { NpmDatasource } from '../../../datasource/npm';
@@ -25,11 +26,16 @@ export class NpmUrlHandler extends HomebrewUrlHandler {
 
   parseUrl(urlStr: string): NpmUrlParsedResult | null {
     if (!is.nonEmptyString(urlStr)) {
+      logger.debug({ urlStr }, 'Invalid URL string');
       return null;
     }
 
     const url = parseUrl(urlStr);
     if (url?.hostname !== 'registry.npmjs.org') {
+      logger.once.debug(
+        { hostname: url?.hostname },
+        'Homebrew only support NPM packages hosted on registry.npmjs.org',
+      );
       return null;
     }
 
@@ -45,6 +51,10 @@ export class NpmUrlHandler extends HomebrewUrlHandler {
     const version = match?.groups?.version;
     const packageName = match?.groups?.packageName;
     if (!packageName || !version) {
+      logger.debug(
+        { pathname: url.pathname },
+        'Path does not contain a valid NPM package name or version',
+      );
       return null;
     }
 

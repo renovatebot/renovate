@@ -28,9 +28,7 @@ When a new version is available, Renovate:
 ### Limitations
 
 - **GitHub packages**: Only supports packages hosted on `github.com`
-- **npm packages**: Only supports packages from `registry.npmjs.org` (custom registries are not supported)
-- **Archive format**: Only `.tar.gz` and `.tgz` formats are supported
-- **Datasources**: Uses `github-tags`, `github-releases`, or `npm` datasource depending on the URL format
+- **NPM packages**: Only supports packages from `registry.npmjs.org` (custom registries are not supported)
 
 ### Example Formulas
 
