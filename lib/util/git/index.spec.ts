@@ -104,6 +104,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     await repo.checkout(defaultBranch);
 
+    // eslint-disable-next-line vitest/no-standalone-expect
     expect(git.getBranchList()).toBeEmptyArray();
   });
 
