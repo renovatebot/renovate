@@ -1,8 +1,8 @@
 import { Readable } from 'node:stream';
 import { codeBlock } from 'common-tags';
 import * as handlers from './handlers';
-import { updateDependency } from '.';
 import * as utils from './utils';
+import { updateDependency } from '.';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
 
