@@ -100,18 +100,14 @@ export async function postUpgradeCommandsExecutor(
         }
       }
 
-      const localDir = GlobalConfig.get('localDir');
       const workingDirTemplate = upgrade.postUpgradeTasks?.workingDirTemplate;
-      let workingDir = localDir;
+      let workingDir = GlobalConfig.get('localDir');
 
       if (workingDirTemplate) {
         workingDir = sanitize(
           compile(workingDirTemplate, mergeChildConfig(config, upgrade)),
         );
-        if (localDir) {
-          workingDir = upath.join(localDir, workingDir);
-        }
-        await ensureLocalDir(workingDir);
+        workingDir = await ensureLocalDir(workingDir);
         logger.trace(
           { workingDirTemplate },
           'Processed post-upgrade commands working directory template.',

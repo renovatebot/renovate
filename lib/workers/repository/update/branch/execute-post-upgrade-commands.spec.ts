@@ -672,9 +672,15 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         allowedCommands: ['some-command'],
       });
       exec.exec.mockResolvedValue({ stdout: '', stderr: '' });
+      fs.ensureLocalDir.mockResolvedValue(
+        '/default/dir/projects/npm/jest-29.5.0',
+      );
 
       await postUpgradeCommands.postUpgradeCommandsExecutor(commands, config);
 
+      expect(fs.ensureLocalDir).toHaveBeenCalledExactlyOnceWith(
+        'projects/npm/jest-29.5.0',
+      );
       expect(exec.exec).toHaveBeenCalledExactlyOnceWith('some-command', {
         cwd: '/default/dir/projects/npm/jest-29.5.0',
       });
