@@ -17,5 +17,8 @@ describe('config/app-strings', () => {
     const filenames = getConfigFileNames('gitea');
     expect(filenames.includes('.github/renovate.json')).toBeFalse();
     expect(filenames.includes('.gitea/renovate.json')).toBeTrue();
+    expect(
+      getConfigFileNames('github').includes('.github/renovate.json'),
+    ).toBeTrue();
   });
 });
