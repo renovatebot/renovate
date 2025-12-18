@@ -1,4 +1,3 @@
-import { parse } from 'node:path';
 import moo from 'moo';
 import type { Category } from '../../../constants';
 import { regEx } from '../../../util/regex';
