@@ -10,8 +10,6 @@ export abstract class HomebrewUrlHandler {
   // Create dependency object from parsed URL
   abstract createDependency(
     parsed: UrlParsedResult,
-    sha256: string | null,
-    url: string,
   ): PackageDependency<HomebrewManagerData>;
 
   // Build new URLs for version update

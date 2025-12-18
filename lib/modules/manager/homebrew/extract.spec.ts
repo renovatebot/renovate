@@ -330,9 +330,6 @@ describe('modules/manager/homebrew/extract', () => {
             managerData: {
               type: 'npm',
               packageName: '@anthropic-ai/claude-code',
-              sha256:
-                '345eae3fe4c682df3d8876141f32035bb2898263ce5a406e76e1d74ccb13f601',
-              url: 'https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-0.1.0.tgz',
             },
           },
         ],
@@ -361,9 +358,6 @@ describe('modules/manager/homebrew/extract', () => {
             managerData: {
               type: 'npm',
               packageName: 'express',
-              sha256:
-                'abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234',
-              url: 'https://registry.npmjs.org/express/-/express-4.18.2.tgz',
             },
           },
         ],

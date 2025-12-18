@@ -2,6 +2,7 @@ import { Readable } from 'node:stream';
 import { codeBlock } from 'common-tags';
 import * as handlers from './handlers';
 import { updateDependency } from '.';
+import * as utils from './utils';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
 
@@ -541,5 +542,109 @@ describe('modules/manager/homebrew/update', () => {
     });
 
     expect(newContent).toBe(content);
+  });
+
+  it('returns unchanged content if current URL cannot be parsed by handler', async () => {
+    // Formula has valid URL syntax but URL is not a GitHub URL
+    const nonGitHubUrlFormula = codeBlock`
+      class Example < Formula
+      url "https://example.com/file.tar.gz"
+      sha256 "26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4"
+      end
+    `;
+
+    const upgrade = {
+      currentValue: 'v1.0.0',
+      depName: 'Example',
+      managerData: {
+        type: 'github' as const,
+        ownerName: 'owner',
+        repoName: 'repo',
+      },
+      newValue: 'v1.1.0',
+    };
+
+    const newContent = await updateDependency({
+      fileContent: nonGitHubUrlFormula,
+      upgrade,
+    });
+
+    expect(newContent).toBe(nonGitHubUrlFormula);
+  });
+
+  it('returns unchanged content if URL update fails', async () => {
+    const upgrade = {
+      currentValue: 'v0.8.2',
+      depName: 'Ibazel',
+      managerData: {
+        type: 'github' as const,
+        ownerName: 'bazelbuild',
+        repoName: 'bazel-watcher',
+      },
+      newValue: 'v0.9.3',
+    };
+
+    httpMock
+      .scope(baseUrl)
+      .get(
+        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
+      )
+      .reply(200, Readable.from(['foo']));
+
+    vi.spyOn(utils, 'updateRubyString').mockImplementation(
+      (_content, keyword, _oldValue, _newValue) => {
+        if (keyword === 'url') {
+          return null;
+        }
+        return 'mocked';
+      },
+    );
+
+    const newContent = await updateDependency({
+      fileContent: ibazel,
+      upgrade,
+    });
+
+    expect(newContent).toBe(ibazel);
+  });
+
+  it('returns unchanged content if SHA256 update fails', async () => {
+    const upgrade = {
+      currentValue: 'v0.8.2',
+      depName: 'Ibazel',
+      managerData: {
+        type: 'github' as const,
+        ownerName: 'bazelbuild',
+        repoName: 'bazel-watcher',
+      },
+      newValue: 'v0.9.3',
+    };
+
+    httpMock
+      .scope(baseUrl)
+      .get(
+        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
+      )
+      .reply(200, Readable.from(['foo']));
+
+    let callCount = 0;
+    vi.spyOn(utils, 'updateRubyString').mockImplementation(
+      (content, keyword, _oldValue, _newValue) => {
+        callCount++;
+        if (callCount === 1) {
+          // First call (url) - return modified content
+          return content.replace('v0.8.2', 'v0.9.3');
+        }
+        // Second call (sha256) - return null to trigger error
+        return null;
+      },
+    );
+
+    const newContent = await updateDependency({
+      fileContent: ibazel,
+      upgrade,
+    });
+
+    expect(newContent).toBe(ibazel);
   });
 });

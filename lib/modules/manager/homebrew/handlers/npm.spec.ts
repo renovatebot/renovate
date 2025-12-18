@@ -93,11 +93,7 @@ describe('modules/manager/homebrew/handlers/npm', () => {
         packageName: '@anthropic-ai/claude-code',
       };
 
-      const dep = handler.createDependency(
-        parsed,
-        '345eae3fe4c682df3d8876141f32035bb2898263ce5a406e76e1d74ccb13f601',
-        'https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-0.1.0.tgz',
-      );
+      const dep = handler.createDependency(parsed);
 
       expect(dep).toMatchObject({
         datasource: 'npm',
@@ -106,9 +102,6 @@ describe('modules/manager/homebrew/handlers/npm', () => {
         managerData: {
           type: 'npm',
           packageName: '@anthropic-ai/claude-code',
-          sha256:
-            '345eae3fe4c682df3d8876141f32035bb2898263ce5a406e76e1d74ccb13f601',
-          url: 'https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-0.1.0.tgz',
         },
       });
     });
@@ -120,11 +113,7 @@ describe('modules/manager/homebrew/handlers/npm', () => {
         packageName: 'express',
       };
 
-      const dep = handler.createDependency(
-        parsed,
-        'abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234',
-        'https://registry.npmjs.org/express/-/express-4.18.2.tgz',
-      );
+      const dep = handler.createDependency(parsed);
 
       expect(dep).toMatchObject({
         datasource: 'npm',
@@ -133,9 +122,6 @@ describe('modules/manager/homebrew/handlers/npm', () => {
         managerData: {
           type: 'npm',
           packageName: 'express',
-          sha256:
-            'abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234',
-          url: 'https://registry.npmjs.org/express/-/express-4.18.2.tgz',
         },
       });
     });

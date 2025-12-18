@@ -71,8 +71,6 @@ export class GitHubUrlHandler extends HomebrewUrlHandler {
 
   createDependency(
     parsed: GitHubUrlParsedResult,
-    _sha256: string | null,
-    _url: string,
   ): PackageDependency<GitHubManagerData> {
     return {
       depName: `${parsed.ownerName}/${parsed.repoName}`,
