@@ -536,9 +536,8 @@ export type MergeStrategy =
   | 'rebase-merge'
   | 'squash';
 
-// ref: https://github.com/renovatebot/renovate/issues/39458
 // This list should be added to as any new unsafe execution commands should be permitted
-export type AllowedUnsafeExecution = 'goGenerate';
+export type AllowedUnsafeExecution = 'goGenerate' | 'gradleWrapper';
 
 // TODO: Proper typings
 export interface PackageRule
