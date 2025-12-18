@@ -676,7 +676,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       await postUpgradeCommands.postUpgradeCommandsExecutor(commands, config);
 
       expect(exec.exec).toHaveBeenCalledExactlyOnceWith('some-command', {
-        cwd: 'projects/npm/jest-29.5.0',
+        cwd: '/default/dir/projects/npm/jest-29.5.0',
       });
     });
 

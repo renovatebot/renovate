@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 // TODO #22198
-import { isArray, isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
+import { isArray, isNonEmptyArray } from '@sindresorhus/is';
 import upath from 'upath';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
@@ -100,13 +100,17 @@ export async function postUpgradeCommandsExecutor(
         }
       }
 
+      const localDir = GlobalConfig.get('localDir');
       const workingDirTemplate = upgrade.postUpgradeTasks?.workingDirTemplate;
-      let workingDir: string | null = null;
+      let workingDir = localDir;
 
       if (workingDirTemplate) {
         workingDir = sanitize(
           compile(workingDirTemplate, mergeChildConfig(config, upgrade)),
         );
+        if (localDir) {
+          workingDir = upath.join(localDir, workingDir);
+        }
         await ensureLocalDir(workingDir);
         logger.trace(
           { workingDirTemplate },
@@ -129,9 +133,7 @@ export async function postUpgradeCommandsExecutor(
             logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
 
             const execOpts: ExecOptions = {
-              cwd: isNonEmptyString(workingDir)
-                ? workingDir
-                : GlobalConfig.get('localDir'),
+              cwd: workingDir,
               extraEnv: getGitEnvironmentVariables(),
             };
             if (dataFilePath) {
