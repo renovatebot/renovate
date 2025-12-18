@@ -12,4 +12,10 @@ describe('config/app-strings', () => {
     expect(filenames.includes('abc')).toBeTrue();
     expect(filenames.includes('def')).toBeTrue();
   });
+
+  it('filters based on platform', () => {
+    const filenames = getConfigFileNames('gitea');
+    expect(filenames.includes('.github/renovate.json')).toBeFalse();
+    expect(filenames.includes('.gitea/renovate.json')).toBeTrue();
+  });
 });
