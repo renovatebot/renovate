@@ -374,8 +374,8 @@ importers:
         specifier: 1.1.22
         version: 1.1.22(eslint-plugin-import@2.32.0)(eslint-plugin-promise@7.2.1(eslint@9.39.1))(eslint@9.39.1)
       '@containerbase/istanbul-reports-html':
-        specifier: 1.1.17
-        version: 1.1.17
+        specifier: 1.1.18
+        version: 1.1.18
       '@containerbase/semantic-release-pnpm':
         specifier: 1.3.9
         version: 1.3.9(semantic-release@25.0.2(typescript@5.9.3))
@@ -633,8 +633,8 @@ importers:
         specifier: 12.5.0
         version: 12.5.0
       openpgp:
-        specifier: 6.2.2
-        version: 6.2.2
+        specifier: 6.3.0
+        version: 6.3.0
       re2:
         specifier: 1.22.3
         version: 1.22.3
@@ -956,8 +956,8 @@ packages:
       eslint-plugin-import: ^2.31.0
       eslint-plugin-promise: ^7.0.0
 
-  '@containerbase/istanbul-reports-html@1.1.17':
-    resolution: {integrity: sha512-s+GTjtYtaWkAqdbxKUUvFR0FjsAWdp1/icjcozG4oGxEgjTVz2LdW98sMgmFmLfiWta1r9Y9A9LGkpNggegFug==}
+  '@containerbase/istanbul-reports-html@1.1.18':
+    resolution: {integrity: sha512-BHK4aGBUoVmnCBUQKhiMhf2DAuqi5QKhsqd6scW5v9xQrD3CBwtCTFhUjZG5+m6WcvX0eG5MmrgwLjq6BS+xsQ==}
     engines: {node: ^20.9.0 || ^22.11.0 || ^24.0.0, pnpm: ^10.0.0}
 
   '@containerbase/semantic-release-pnpm@1.3.9':
@@ -5177,8 +5177,8 @@ packages:
     resolution: {integrity: sha512-VXJjc87FScF88uafS3JllDgvAm+c/Slfz06lorj2uAY34rlUu0Nt+v8wreiImcrgAjjIHp1rXpTDlLOGw29WwQ==}
     engines: {node: '>=18'}
 
-  openpgp@6.2.2:
-    resolution: {integrity: sha512-P/dyEqQ3gfwOCo+xsqffzXjmUhGn4AZTOJ1LCcN21S23vAk+EAvMJOQTsb/C8krL6GjOSBxqGYckhik7+hneNw==}
+  openpgp@6.3.0:
+    resolution: {integrity: sha512-pLzCU8IgyKXPSO11eeharQkQ4GzOKNWhXq79pQarIRZEMt1/ssyr+MIuWBv1mNoenJLg04gvPx+fi4gcKZ4bag==}
     engines: {node: '>= 18.0.0'}
 
   optionator@0.9.4:
@@ -7612,7 +7612,7 @@ snapshots:
       eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.49.0(eslint@9.39.1)(typescript@5.9.3))(eslint-import-resolver-typescript@4.4.4)(eslint@9.39.1)
       eslint-plugin-promise: 7.2.1(eslint@9.39.1)
 
-  '@containerbase/istanbul-reports-html@1.1.17':
+  '@containerbase/istanbul-reports-html@1.1.18':
     dependencies:
       istanbul-lib-report: 3.0.1
       istanbul-reports: 3.2.0
@@ -12343,7 +12343,7 @@ snapshots:
     dependencies:
       mimic-function: 5.0.1
 
-  openpgp@6.2.2:
+  openpgp@6.3.0:
     optional: true
 
   optionator@0.9.4:

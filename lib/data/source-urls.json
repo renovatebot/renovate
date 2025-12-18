@@ -57,5 +57,27 @@
     "mkdocs": "https://github.com/mkdocs/mkdocs",
     "mkdocs-material": "https://github.com/squidfunk/mkdocs-material",
     "mypy": "https://github.com/python/mypy"
+  },
+  "packagist": {
+    "api-platform/doctrine-common": "https://github.com/api-platform/core",
+    "api-platform/doctrine-odm": "https://github.com/api-platform/core",
+    "api-platform/doctrine-orm": "https://github.com/api-platform/core",
+    "api-platform/documentation": "https://github.com/api-platform/core",
+    "api-platform/elasticsearch": "https://github.com/api-platform/core",
+    "api-platform/graphql": "https://github.com/api-platform/core",
+    "api-platform/hal": "https://github.com/api-platform/core",
+    "api-platform/http-cache": "https://github.com/api-platform/core",
+    "api-platform/hydra": "https://github.com/api-platform/core",
+    "api-platform/json-api": "https://github.com/api-platform/core",
+    "api-platform/json-schema": "https://github.com/api-platform/core",
+    "api-platform/jsonld": "https://github.com/api-platform/core",
+    "api-platform/laravel": "https://github.com/api-platform/core",
+    "api-platform/metadata": "https://github.com/api-platform/core",
+    "api-platform/openapi": "https://github.com/api-platform/core",
+    "api-platform/ramsey-uuid": "https://github.com/api-platform/core",
+    "api-platform/serializer": "https://github.com/api-platform/core",
+    "api-platform/state": "https://github.com/api-platform/core",
+    "api-platform/symfony": "https://github.com/api-platform/core",
+    "api-platform/validator": "https://github.com/api-platform/core"
   }
 }
