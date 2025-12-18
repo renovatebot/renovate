@@ -2,8 +2,8 @@ import { codeBlock } from 'common-tags';
 import { extractPackageFile } from '.';
 import { Fixtures } from '~test/fixtures';
 
-const aide = Fixtures.get('aide.rb');
-const ibazel = Fixtures.get('ibazel.rb');
+const aide = Fixtures.get('aide.rb.sample');
+const ibazel = Fixtures.get('ibazel.rb.sample');
 
 describe('modules/manager/homebrew/extract', () => {
   describe('extractPackageFile()', () => {
@@ -22,16 +22,7 @@ describe('modules/manager/homebrew/extract', () => {
       expect(res).toStrictEqual({
         deps: [
           {
-            currentValue: null,
-            datasource: undefined,
             depName: 'Aalib',
-            managerData: {
-              ownerName: null,
-              repoName: null,
-              sha256:
-                'fbddda9230cf6ee2a4f5706b4b11e2190ae45f5eda1f0409dc4f99b35e0a70ee',
-              url: 'https://downloads.sourceforge.net/aa-project/aalib-1.4rc5.tar.gz',
-            },
             skipReason: 'unsupported-url',
           },
         ],
@@ -53,16 +44,7 @@ describe('modules/manager/homebrew/extract', () => {
       expect(res).toStrictEqual({
         deps: [
           {
-            currentValue: null,
-            datasource: undefined,
             depName: 'Aap',
-            managerData: {
-              ownerName: null,
-              repoName: null,
-              sha256:
-                '3f53b2fc277756042449416150acc477f29de93692944f8a77e8cef285a1efd8',
-              url: 'https://downloads.sourceforge.net/project/a-a-p/aap-1.094.zip',
-            },
             skipReason: 'unsupported-url',
           },
         ],
@@ -85,15 +67,7 @@ describe('modules/manager/homebrew/extract', () => {
       expect(res).toStrictEqual({
         deps: [
           {
-            currentValue: null,
-            datasource: 'github-tags',
-            depName: 'null/null',
-            managerData: {
-              ownerName: null,
-              repoName: null,
-              sha256: null,
-              url: 'https://github.com/hlandau/acme.git',
-            },
+            depName: 'Acmetool',
             skipReason: 'invalid-sha256',
           },
         ],
@@ -107,9 +81,10 @@ describe('modules/manager/homebrew/extract', () => {
         deps: [
           {
             currentValue: 'v0.16.1',
-            datasource: 'github-tags',
+            datasource: 'github-releases',
             depName: 'aide/aide',
             managerData: {
+              type: 'github',
               ownerName: 'aide',
               repoName: 'aide',
               sha256:
@@ -131,6 +106,7 @@ describe('modules/manager/homebrew/extract', () => {
             datasource: 'github-tags',
             depName: 'bazelbuild/bazel-watcher',
             managerData: {
+              type: 'github',
               ownerName: 'bazelbuild',
               repoName: 'bazel-watcher',
               sha256:
@@ -161,6 +137,7 @@ describe('modules/manager/homebrew/extract', () => {
             datasource: 'github-tags',
             depName: 'bazelbuild/bazel-watcher',
             managerData: {
+              type: 'github',
               ownerName: 'bazelbuild',
               repoName: 'bazel-watcher',
               sha256:
@@ -191,6 +168,7 @@ describe('modules/manager/homebrew/extract', () => {
             datasource: 'github-tags',
             depName: 'bazelbuild/bazel-watcher',
             managerData: {
+              type: 'github',
               ownerName: 'bazelbuild',
               repoName: 'bazel-watcher',
               sha256:
@@ -247,16 +225,7 @@ describe('modules/manager/homebrew/extract', () => {
       expect(res).toStrictEqual({
         deps: [
           {
-            currentValue: null,
-            datasource: undefined,
             depName: 'Ibazel',
-            managerData: {
-              ownerName: null,
-              repoName: null,
-              sha256:
-                '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
-              url: null,
-            },
             skipReason: 'unsupported-url',
           },
         ],
@@ -278,16 +247,7 @@ describe('modules/manager/homebrew/extract', () => {
       expect(res).toStrictEqual({
         deps: [
           {
-            currentValue: null,
-            datasource: undefined,
             depName: 'Ibazel',
-            managerData: {
-              ownerName: null,
-              repoName: null,
-              sha256:
-                '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
-              url: null,
-            },
             skipReason: 'unsupported-url',
           },
         ],
@@ -309,16 +269,7 @@ describe('modules/manager/homebrew/extract', () => {
       expect(res).toStrictEqual({
         deps: [
           {
-            currentValue: null,
-            datasource: undefined,
             depName: 'Ibazel',
-            managerData: {
-              ownerName: null,
-              repoName: null,
-              sha256:
-                '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
-              url: 'invalid_url',
-            },
             skipReason: 'unsupported-url',
           },
         ],
@@ -340,15 +291,7 @@ describe('modules/manager/homebrew/extract', () => {
       expect(res).toStrictEqual({
         deps: [
           {
-            currentValue: 'v0.8.2',
-            datasource: 'github-tags',
-            depName: 'bazelbuild/bazel-watcher',
-            managerData: {
-              ownerName: 'bazelbuild',
-              repoName: 'bazel-watcher',
-              sha256: null,
-              url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
-            },
+            depName: 'Ibazel',
             skipReason: 'invalid-sha256',
           },
         ],
@@ -370,15 +313,7 @@ describe('modules/manager/homebrew/extract', () => {
       expect(res).toStrictEqual({
         deps: [
           {
-            currentValue: 'v0.8.2',
-            datasource: 'github-tags',
-            depName: 'bazelbuild/bazel-watcher',
-            managerData: {
-              ownerName: 'bazelbuild',
-              repoName: 'bazel-watcher',
-              sha256: '26f5125218fad2741d3caf937b0229',
-              url: 'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
-            },
+            depName: 'Ibazel',
             skipReason: 'invalid-sha256',
           },
         ],
