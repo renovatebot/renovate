@@ -150,6 +150,11 @@ async function handlePackageManagerUpdates(
 async function updatePnpmWorkspace(
   updateArtifactsConfig: UpdateArtifact,
 ): Promise<UpdateArtifactsResult | null> {
+  // return early if no security updates are present
+  if (!updateArtifactsConfig.updatedDeps.some((u) => u.isVulnerabilityAlert)) {
+    return null;
+  }
+
   const pnpmShrinkwrap = updateArtifactsConfig.updatedDeps[0].managerData
     ?.pnpmShrinkwrap as string;
   const lockFileDir = upath.dirname(pnpmShrinkwrap);
