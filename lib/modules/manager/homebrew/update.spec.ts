@@ -158,7 +158,7 @@ describe('modules/manager/homebrew/update', () => {
     expect(newContent).toBe(ibazel);
   });
 
-  it('returns unchanged content if url field in upgrade object is invalid', async () => {
+  it('returns unchanged content if url field in upgrade object is invalid but file content url is valid', async () => {
     const upgrade = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
@@ -174,12 +174,22 @@ describe('modules/manager/homebrew/update', () => {
       newValue: 'v0.9.3',
     };
 
+    httpMock
+      .scope(baseUrl)
+      .get(
+        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
+      )
+      .reply(200, Readable.from(['foo']));
+
     const newContent = await updateDependency({
       fileContent: ibazel,
       upgrade,
     });
 
-    expect(newContent).toBe(ibazel);
+    expect(newContent).not.toBe(ibazel);
+    expect(newContent).toContain(
+      'https://github.com/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
+    );
   });
 
   it('returns unchanged content if repoName in upgrade object is invalid', async () => {
@@ -254,12 +264,6 @@ describe('modules/manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    httpMock
-      .scope(baseUrl)
-      .get(
-        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
-      )
-      .reply(200, Readable.from(['foo']));
 
     const newContent = await updateDependency({
       fileContent: invalidUrlFormula,
@@ -292,12 +296,6 @@ describe('modules/manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    httpMock
-      .scope(baseUrl)
-      .get(
-        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
-      )
-      .reply(200, Readable.from(['foo']));
 
     const newContent = await updateDependency({
       fileContent: missingUrlFormula,
@@ -331,12 +329,6 @@ describe('modules/manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    httpMock
-      .scope(baseUrl)
-      .get(
-        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
-      )
-      .reply(200, Readable.from(['foo']));
 
     const newContent = await updateDependency({
       fileContent: invalidSha256Formula,
@@ -369,12 +361,6 @@ describe('modules/manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    httpMock
-      .scope(baseUrl)
-      .get(
-        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
-      )
-      .reply(200, Readable.from(['foo']));
 
     const newContent = await updateDependency({
       fileContent: missingSha256Formula,

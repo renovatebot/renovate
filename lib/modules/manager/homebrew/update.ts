@@ -4,7 +4,7 @@ import { Http } from '../../../util/http';
 import type { UpdateDependencyConfig } from '../types';
 import { findHandlerByType } from './handlers';
 import type { HomebrewManagerData } from './types';
-import { updateRubyString } from './utils';
+import { extractRubyString, updateRubyString } from './utils';
 
 const http = new Http('homebrew');
 
@@ -22,6 +22,19 @@ export async function updateDependency({
     return fileContent;
   }
 
+  // Extract current URL and SHA256 from file content
+  // (may differ from managerData if PR was already updated)
+  const currentUrl = extractRubyString(fileContent, 'url');
+  const currentSha256 = extractRubyString(fileContent, 'sha256');
+
+  if (!currentUrl || !currentSha256) {
+    logger.debug(
+      { packageFile, depName },
+      `Failed to extract current URL or SHA256 from file`,
+    );
+    return fileContent;
+  }
+
   // Find handler by type
   const handler = findHandlerByType(managerData.type);
   if (!handler) {
@@ -33,11 +46,11 @@ export async function updateDependency({
   }
 
   // Validate old URL can be parsed
-  const oldParsed = handler.parseUrl(managerData.url);
+  const oldParsed = handler.parseUrl(currentUrl);
   if (!oldParsed) {
     logger.debug(
       { packageFile, depName },
-      `Failed to parse old URL '${managerData.url}'`,
+      `Failed to parse current URL '${currentUrl}'`,
     );
     return fileContent;
   }
@@ -90,23 +103,13 @@ export async function updateDependency({
   }
 
   // Update URL and SHA256 in file
-  let newContent = updateRubyString(
-    fileContent,
-    'url',
-    managerData.url,
-    newUrl,
-  );
+  let newContent = updateRubyString(fileContent, 'url', currentUrl, newUrl);
   if (!newContent) {
     logger.debug({ packageFile, depName }, `Failed to update URL`);
     return fileContent;
   }
 
-  newContent = updateRubyString(
-    newContent,
-    'sha256',
-    managerData.sha256,
-    newSha256,
-  );
+  newContent = updateRubyString(newContent, 'sha256', currentSha256, newSha256);
   if (!newContent) {
     logger.debug({ packageFile, depName }, `Failed to update SHA256`);
     return fileContent;
