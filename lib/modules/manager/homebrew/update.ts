@@ -17,7 +17,7 @@ export async function updateDependency({
   logger.trace('updateDependency()');
 
   const { managerData, newValue } = upgrade;
-  if (!managerData?.url || !managerData.sha256 || !newValue) {
+  if (!managerData?.type || !newValue) {
     logger.debug({ packageFile, depName }, `Missing data`);
     return fileContent;
   }

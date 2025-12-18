@@ -22,8 +22,6 @@ export interface GitHubManagerData {
   type: 'github';
   ownerName: string;
   repoName: string;
-  sha256: string | null;
-  url: string | null;
 }
 
 export class GitHubUrlHandler extends HomebrewUrlHandler {
@@ -73,8 +71,8 @@ export class GitHubUrlHandler extends HomebrewUrlHandler {
 
   createDependency(
     parsed: GitHubUrlParsedResult,
-    sha256: string | null,
-    url: string,
+    _sha256: string | null,
+    _url: string,
   ): PackageDependency<GitHubManagerData> {
     return {
       depName: `${parsed.ownerName}/${parsed.repoName}`,
@@ -87,8 +85,6 @@ export class GitHubUrlHandler extends HomebrewUrlHandler {
         type: 'github',
         ownerName: parsed.ownerName,
         repoName: parsed.repoName,
-        sha256,
-        url,
       },
     };
   }
