@@ -809,10 +809,37 @@ describe('config/presets/internal/custom-managers', () => {
   describe('Update `tsconfig/node` version in tsconfig.json', () => {
     const customManager = presets.tsconfigNodeVersions.customManagers?.[0];
 
-    it(`find dependencies in file`, async () => {
+    it(`find in tsconfig.json extends string`, async () => {
       const fileContent = codeBlock`
         {
             "extends": "@tsconfig/node20/tsconfig.json",
+            "include": ["src/**/*"]
+        }
+      `;
+
+      const res = await extractPackageFile(
+        'regex',
+        fileContent,
+        'tsconfig.json',
+        customManager!,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '20',
+          datasource: 'npm',
+          depName: '@tsconfig/node20',
+        },
+      ]);
+    });
+
+    it(`find in tsconfig.json extends array`, async () => {
+      const fileContent = codeBlock`
+        {
+            "extends": [
+              "@tsconfig/strictest/tsconfig.json",
+              "@tsconfig/node20/tsconfig.json"
+            ],
             "include": ["src/**/*"]
         }
       `;
