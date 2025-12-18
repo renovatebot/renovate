@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../../../util/regex';
+import { parseUrl } from '../../../../util/url';
 import { NpmDatasource } from '../../../datasource/npm';
 import type { PackageDependency } from '../../types';
 import { HomebrewUrlHandler } from './base';
@@ -27,24 +28,22 @@ export class NpmUrlHandler extends HomebrewUrlHandler {
       return null;
     }
 
-    // Only support registry.npmjs.org
-    if (!urlStr.startsWith('https://registry.npmjs.org/')) {
+    const url = parseUrl(urlStr);
+    if (url?.hostname !== 'registry.npmjs.org') {
       return null;
     }
 
-    // Pattern: https://registry.npmjs.org/<packageName>/-/<filename>-<version>.tgz
-    // For scoped: https://registry.npmjs.org/@scope/name/-/name-version.tgz
-    // For unscoped: https://registry.npmjs.org/name/-/name-version.tgz
+    // Pattern: /<packageName>/-/<filename>-<version>.tgz
+    // For scoped: /@scope/name/-/name-version.tgz
+    // For unscoped: /name/-/name-version.tgz
     const pattern = regEx(
-      /^https:\/\/registry\.npmjs\.org\/(?<packageName>(?:@[^/]+\/)?[^/]+)\/-\/[^/]+-(?<version>[\d.]+(?:-[a-zA-Z0-9.-]*)?)\.tgz$/,
+      /^\/(?<packageName>(?:@[^/]+\/)?[^/]+)\/-\/[^/]+-(?<version>[\d.]+(?:-[a-zA-Z0-9.-]*)?)\.tgz$/,
     );
 
-    const match = pattern.exec(urlStr);
-    if (!match?.groups) {
-      return null;
-    }
+    const match = pattern.exec(url.pathname);
 
-    const { packageName, version } = match.groups;
+    const version = match?.groups?.version;
+    const packageName = match?.groups?.packageName;
     if (!packageName || !version) {
       return null;
     }
