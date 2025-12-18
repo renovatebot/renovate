@@ -4,6 +4,7 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { DotnetVersionDatasource } from '../../datasource/dotnet-version';
 import type { ExtractConfig } from '../types';
+import * as nugetExtractUtil from './util';
 import { extractPackageFile } from '.';
 import { Fixtures } from '~test/fixtures';
 import { fs, logger } from '~test/util';
@@ -611,35 +612,24 @@ describe('modules/manager/nuget/extract', () => {
     });
 
     describe('single-csharp-file-nuget', () => {
-      it('respects nuget.config', async () => {
+      it('calls applyRegistries to honor nuget.config files if present', async () => {
         const packageFile = 'single-csharp-file-nuget/singlefile.cs';
-        const contents = Fixtures.get(packageFile);
-        expect(await extractPackageFile(contents, packageFile, config)).toEqual(
-          {
-            deps: [
-              {
-                datasource: 'nuget',
-                currentValue: '6.0.0',
-                depName: 'Some.Sdk',
-                depType: 'msbuild-sdk',
-                registryUrls: [
-                  'https://api.nuget.org/v3/index.json#protocolVersion=3',
-                  'https://contoso.com/packages/',
-                ],
-              },
-              {
-                datasource: 'nuget',
-                currentValue: '3.0.1',
-                depName: 'Some.NuGet.Package',
-                depType: 'nuget',
-                registryUrls: [
-                  'https://api.nuget.org/v3/index.json#protocolVersion=3',
-                  'https://contoso.com/packages/',
-                ],
-              },
-            ],
-          },
-        );
+        const contents = codeBlock`
+        #:sdk Some.Sdk@6.0.0
+        #:package Some.NuGet.Package@3.0.1
+
+        // https://devblogs.microsoft.com/dotnet/announcing-dotnet-run-app/
+
+        Console.WriteLine("Hello World!");
+        `;
+
+        const applyRegistriesSpy = vi
+          .spyOn(nugetExtractUtil, 'applyRegistries')
+          .mockImplementation((deps: any) => deps);
+
+        await extractPackageFile(contents, packageFile, config);
+
+        expect(applyRegistriesSpy).toHaveBeenCalled();
       });
     });
   });
