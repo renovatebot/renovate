@@ -1,3 +1,4 @@
+import { parse } from 'node:path';
 import moo from 'moo';
 import type { Category } from '../../../constants';
 import { regEx } from '../../../util/regex';
@@ -26,10 +27,8 @@ const lexer = moo.states({
       value: (s: string) => s.trim().slice(1, -1),
     },
     dependencyFromInstallTools: {
-      match:
-        /(?:InstallTools?\s*\([^"]*|,\s*"dotnet:)[^?]*\?package=[^&"]+&version=[^&"]+(?:")/,
+      match: /(?:InstallTools?\s*\()[^)]+(?:\s*\)\s*;)/,
       lineBreaks: true,
-      value: (s: string) => s.trim().slice(1, -1),
     },
     unknown: moo.fallback,
   },
@@ -75,14 +74,19 @@ export function extractPackageFile(content: string): PackageFileContent {
   let token = lexer.next();
   while (token) {
     const { type, value } = token;
-    if (
-      type === 'dependency' ||
-      type === 'dependencyQuoted' ||
-      type === 'dependencyFromInstallTools'
-    ) {
+    if (type === 'dependency' || type === 'dependencyQuoted') {
       const dep = parseDependencyLine(value);
       if (dep) {
         deps.push(dep);
+      }
+    } else if (type === 'dependencyFromInstallTools') {
+      const matches = value.matchAll(/"dotnet:[^"]+"/g);
+      for (const match of matches) {
+        const withoutQuote = match.toString().slice(1, -1);
+        const dep = parseDependencyLine(withoutQuote);
+        if (dep) {
+          deps.push(dep);
+        }
       }
     }
     token = lexer.next();

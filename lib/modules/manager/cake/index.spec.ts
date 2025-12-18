@@ -27,7 +27,7 @@ describe('modules/manager/cake/index', () => {
 
     // Install single tool
     InstallTool("dotnet:https://api.nuget.org/v3/index.json?package=SingleTool.Install.First&version=1.0.0");
-    InstallTool("dotnet:?package=SingleTool.Install.Second&version=1.2.0")
+    InstallTool("dotnet:?package=SingleTool.Install.Second&version=1.2.0");
 
     // Install multiple tools at once
     InstallTools(
@@ -52,20 +52,24 @@ describe('modules/manager/cake/index', () => {
         {
           depName: 'SingleTool.Install.First',
           currentValue: '1.0.0',
+          datasource: 'nuget',
           registryUrls: ['https://api.nuget.org/v3/index.json'],
         },
         {
           depName: 'SingleTool.Install.Second',
           currentValue: '1.2.0',
+          datasource: 'nuget',
         },
         {
           depName: 'MultipleTools.Install.First',
           currentValue: '2.0.0',
+          datasource: 'nuget',
           registryUrls: ['https://api.nuget.org/v3/index.json'],
         },
         {
           depName: 'MultipleTools.Install.Second',
           currentValue: '2.1.1',
+          datasource: 'nuget',
         },
       ],
     });
