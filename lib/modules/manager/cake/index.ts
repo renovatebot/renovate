@@ -27,7 +27,7 @@ const lexer = moo.states({
     },
     dependencyFromInstallTools: {
       match:
-        /(?:InstallTools?\s*\([^"]*|,\s*)"dotnet:([^?]*\?package=[^&"]+&version=[^&"]+)/,
+        /(?:InstallTools?\s*\([^"]*|,\s*"dotnet:)[^?]*\?package=[^&"]+&version=[^&"]+(?:")/,
       lineBreaks: true,
       value: (s: string) => s.trim().slice(1, -1),
     },

@@ -32,7 +32,7 @@ describe('modules/manager/cake/index', () => {
     // Install multiple tools at once
     InstallTools(
         "dotnet:https://api.nuget.org/v3/index.json?package=MultipleTools.Install.First&version=2.0.0",
-        "dotnet:https://api.nuget.org/v3/index.json?package=MultipleTools.Install.Second&version=2.1.1"
+        "dotnet:?package=MultipleTools.Install.Second&version=2.1.1"
     );
 
     var target = Argument("target", "Default");
@@ -43,10 +43,31 @@ describe('modules/manager/cake/index', () => {
         Information("Hello from Cake.Sdk!");
     });
 
+    var installTools = "dotnet:?Should.Not.Match&version=1.0.0";
+
     RunTarget(target);
     `;
-    expect(extractPackageFile(content)).toEqual({
-      deps: [{ depName: '', currentValue: '', registryUrls: [''] }],
+    expect(extractPackageFile(content)).toMatchObject({
+      deps: [
+        {
+          depName: 'SingleTool.Install.First',
+          currentValue: '1.0.0',
+          registryUrls: ['https://api.nuget.org/v3/index.json'],
+        },
+        {
+          depName: 'SingleTool.Install.Second',
+          currentValue: '1.2.0',
+        },
+        {
+          depName: 'MultipleTools.Install.First',
+          currentValue: '2.0.0',
+          registryUrls: ['https://api.nuget.org/v3/index.json'],
+        },
+        {
+          depName: 'MultipleTools.Install.Second',
+          currentValue: '2.1.1',
+        },
+      ],
     });
   });
 });
