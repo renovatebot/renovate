@@ -27,6 +27,12 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         changelogUrl: '{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}',
+        matchDatasources: [
+          'git-refs',
+          'git-tags',
+          'github-releases',
+          'github-tags',
+        ],
         matchSourceUrls: ['https://github.com/**'],
         matchUpdateTypes: ['digest'],
       },
@@ -41,7 +47,7 @@ export const presets: Record<string, Preset> = {
         matchUpdateTypes: ['major', 'minor', 'patch'],
         prBodyDefinitions: {
           Change:
-            "{{#if (containsString depName 'golang.org/x/')}}[`{{{displayFrom}}}` -> `{{{displayTo}}}`](https://cs.opensource.google/{{{replace '^golang\\.org' 'go' depName}}}/+/refs/tags/{{{currentValue}}}...refs/tags/{{{newValue}}}){{else}}`{{{displayFrom}}}` -> `{{{displayTo}}}`{{/if}}",
+            "{{#if (containsString depName 'golang.org/x/')}}[`{{{displayFrom}}}` → `{{{displayTo}}}`](https://cs.opensource.google/{{{replace '^golang\\.org' 'go' depName}}}/+/refs/tags/{{{currentValue}}}...refs/tags/{{{newValue}}}){{else}}`{{{displayFrom}}}` → `{{{displayTo}}}`{{/if}}",
         },
       },
     ],

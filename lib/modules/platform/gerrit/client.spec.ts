@@ -26,7 +26,12 @@ describe('modules/platform/gerrit/client', () => {
         .scope(gerritEndpointUrl)
         .get('/a/config/server/version')
         .reply(200, gerritRestResponse('3.9.1'), jsonResultHeader);
-      expect(await client.getGerritVersion()).toBe('3.9.1');
+      expect(
+        await client.getGerritVersion({
+          username: 'user',
+          password: 'pass',
+        }),
+      ).toBe('3.9.1');
     });
   });
 

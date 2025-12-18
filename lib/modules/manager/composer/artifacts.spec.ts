@@ -737,6 +737,7 @@ describe('modules/manager/composer/artifacts', () => {
         },
       },
     ]);
+    expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'composer update --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',

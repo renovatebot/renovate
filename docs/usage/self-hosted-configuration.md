@@ -122,9 +122,10 @@ For more details of where this may be found, see ["Trusting Repository Developer
 
 Allowed options:
 
-| Option       | Description                                                               |
-| ------------ | ------------------------------------------------------------------------- |
-| `goGenerate` | Allows the `goGenerate` `postUpdateCommand` to run after a go mod update. |
+| Option          | Description                                                                   |
+| --------------- | ----------------------------------------------------------------------------- |
+| `goGenerate`    | Allows the `goGenerate` `postUpdateCommand` to run after a go mod update.     |
+| `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle. |
 
 ## autodiscover
 
@@ -1035,6 +1036,12 @@ Only set this to `false` if all three statements are true:
 - You've configured Renovate entirely on the bot side (e.g. empty `renovate.json` in repositories)
 - You want to run Renovate on every repository the bot has access to
 - You want to skip all onboarding PRs
+
+## onboardingAutoCloseAge
+
+Maximum number of days after which Renovate will stop trying to onboard the repository, and will close any existing onboarding PRs.
+
+By default this option is set to `null`.
 
 ## onboardingBranch
 
