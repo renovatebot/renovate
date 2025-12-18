@@ -4911,12 +4911,12 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('handles replacements - Digest configured with replacementNameTemplate and validating getDigest function call', async () => {
-      config.packageName = 'mirror.some.org/library/openjdk';
+      config.packageName = 'mirror-some-org/library/openjdk';
       config.currentDigest = 'sha256:fedcba0987654321';
       config.currentValue = '17.0.0';
       config.datasource = DockerDatasource.id;
       config.versioning = dockerVersioningId;
-      config.replacementNameTemplate = `{{{replace 'mirror.some.org/' 'new.registry.io/' packageName}}}`;
+      config.replacementNameTemplate = `{{{replace 'mirror-some-org/' 'new.registry.io/' packageName}}}`;
       config.replacementVersion = '19.0.0';
       getDockerReleases.mockResolvedValueOnce({
         releases: [
@@ -4927,7 +4927,7 @@ describe('workers/repository/process/lookup/index', () => {
             version: '17.0.1',
           },
         ],
-        lookupName: 'mirror.some.org/library/openjdk',
+        lookupName: 'mirror-some-org/library/openjdk',
       });
       getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
       getDockerDigest.mockResolvedValueOnce('sha256:fedcba0987654321');
@@ -4969,8 +4969,8 @@ describe('workers/repository/process/lookup/index', () => {
         {
           currentDigest: 'sha256:fedcba0987654321',
           currentValue: '17.0.0',
-          lookupName: 'mirror.some.org/library/openjdk',
-          packageName: 'mirror.some.org/library/openjdk',
+          lookupName: 'mirror-some-org/library/openjdk',
+          packageName: 'mirror-some-org/library/openjdk',
           registryUrl: 'https://index.docker.io',
         },
         '17.0.1',
@@ -4991,8 +4991,8 @@ describe('workers/repository/process/lookup/index', () => {
         {
           currentDigest: 'sha256:fedcba0987654321',
           currentValue: '17.0.0',
-          lookupName: 'mirror.some.org/library/openjdk',
-          packageName: 'mirror.some.org/library/openjdk',
+          lookupName: 'mirror-some-org/library/openjdk',
+          packageName: 'mirror-some-org/library/openjdk',
           registryUrl: 'https://index.docker.io',
         },
         '17.0.0',
@@ -5034,9 +5034,9 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('handles replacements - can template replacement name without a replacement version', async () => {
-      config.packageName = 'mirror.some.org/library/openjdk';
+      config.packageName = 'mirror-registry/library/openjdk';
       config.currentValue = '17.0.0';
-      config.replacementNameTemplate = `{{{replace 'mirror.some.org/' 'new.registry.io/' packageName}}}`;
+      config.replacementNameTemplate = `{{{replace 'mirror-registry/' 'new.registry.io/' packageName}}}`;
       config.datasource = DockerDatasource.id;
       getDockerReleases.mockResolvedValueOnce({
         releases: [
@@ -5073,9 +5073,9 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('handles replacements - can template replacement name with a replacement version', async () => {
-      config.packageName = 'mirror.some.org/library/openjdk';
+      config.packageName = 'mirror-registry/library/openjdk';
       config.currentValue = '17.0.0';
-      config.replacementNameTemplate = `{{{replace 'mirror.some.org/' 'new.registry.io/' packageName}}}`;
+      config.replacementNameTemplate = `{{{replace 'mirror-registry/' 'new.registry.io/' packageName}}}`;
       config.replacementVersion = '18.0.0';
       config.datasource = DockerDatasource.id;
       getDockerReleases.mockResolvedValueOnce({
@@ -5113,9 +5113,9 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('handles replacements - replacementName takes precedence over replacementNameTemplate', async () => {
-      config.packageName = 'mirror.some.org/library/openjdk';
+      config.packageName = 'mirror-registry/library/openjdk';
       config.currentValue = '17.0.0';
-      config.replacementNameTemplate = `{{{replace 'mirror.some.org/' 'new.registry.io/' packageName}}}`;
+      config.replacementNameTemplate = `{{{replace 'mirror-registry/' 'new.registry.io/' packageName}}}`;
       config.replacementName = 'eclipse-temurin';
       config.datasource = DockerDatasource.id;
       getDockerReleases.mockResolvedValueOnce({
