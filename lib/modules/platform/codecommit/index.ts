@@ -191,6 +191,7 @@ export async function getPrList(): Promise<CodeCommitPr[]> {
       number: Number.parseInt(prId),
       title: prInfo.title!,
       body: prInfo.description!,
+      createdAt: prInfo.creationDate?.toISOString(),
     };
     fetchedPrs.push(pr);
   }

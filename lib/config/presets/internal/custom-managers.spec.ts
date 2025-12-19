@@ -862,10 +862,12 @@ describe('config/presets/internal/custom-managers', () => {
 
     describe('matches regexes patterns', () => {
       it.each`
-        path                   | expected
-        ${'tsconfig.json'}     | ${true}
-        ${'foo/tsconfig.json'} | ${true}
-        ${'tsconfig.yml'}      | ${false}
+        path                        | expected
+        ${'tsconfig.json'}          | ${true}
+        ${'tsconfig.base.json'}     | ${true}
+        ${'foo/tsconfig.json'}      | ${true}
+        ${'foo/tsconfig.base.json'} | ${true}
+        ${'tsconfig.yml'}           | ${false}
       `('$path', ({ path, expected }) => {
         expect(
           matchRegexOrGlobList(path, customManager!.managerFilePatterns),
