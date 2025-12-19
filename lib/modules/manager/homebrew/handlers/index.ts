@@ -1,10 +1,11 @@
 import type { UrlParsedResult } from '../types';
 import type { HomebrewUrlHandler } from './base';
 import { GitHubUrlHandler } from './github';
+import { NpmUrlHandler } from './npm';
 
 const handlers: HomebrewUrlHandler[] = [
   new GitHubUrlHandler(),
-  // Future: new NpmUrlHandler(),
+  new NpmUrlHandler(),
 ];
 
 export function findHandler(
