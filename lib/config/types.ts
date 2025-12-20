@@ -254,6 +254,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
   onboardingAutoCloseAge?: number;
+  gradleWrapper?: GradleWrapperOptions;
 }
 
 /**
@@ -808,4 +809,9 @@ export interface BumpVersionConfig {
   filePatterns: string[];
   matchStrings: string[];
   name?: string;
+}
+
+export interface GradleWrapperOptions {
+  jvmMaxMemory?: bigint;
+  jvmMemory?: bigint;
 }

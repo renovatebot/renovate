@@ -2,6 +2,7 @@ import { lang, query as q } from '@renovatebot/good-enough-parser';
 import { isTruthy } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
+import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
@@ -156,6 +157,17 @@ export async function updateArtifacts({
       return null;
     }
 
+    // Limit the Gradle daemon Java heap memory size to prevent OOM errors
+    // leading to Renovate kernel-OOMs and timeouts.
+    // This command line option effectively overrides any custom setting
+    // in a project's `gradle.properties` file.
+    // See https://github.com/renovatebot/renovate/issues/39558
+    const globalConfig = GlobalConfig.get();
+    const gradleWrapperJvmMaxMemory =
+      globalConfig.gradleWrapper?.jvmMaxMemory ?? 256;
+    const gradleWrapperJvmMemory =
+      globalConfig.gradleWrapper?.jvmMemory ?? gradleWrapperJvmMaxMemory;
+    cmd += ` -Dorg.gradle.jvmargs="-Xms${gradleWrapperJvmMemory}m -Xmx${gradleWrapperJvmMaxMemory}m"`;
     cmd += ' :wrapper';
 
     let checksum: string | null = null;

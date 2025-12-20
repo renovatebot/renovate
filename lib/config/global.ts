@@ -33,6 +33,7 @@ export class GlobalConfig {
     'exposeAllEnv',
     'gitTimeout',
     'githubTokenWarn',
+    'gradleWrapper',
     'httpCacheTtlDays',
     'ignorePrAuthor',
     'includeMirrors',
