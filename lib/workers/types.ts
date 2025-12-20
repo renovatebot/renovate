@@ -169,6 +169,7 @@ export interface BranchConfig
   dependencyDashboardRebaseAllOpen?: boolean;
   dependencyDashboardAllPending?: boolean;
   dependencyDashboardAllRateLimited?: boolean;
+  dependencyDashboardAllAwaitingSchedule?: boolean;
 
   errors?: ValidationMessage[];
   forcePr?: boolean;
@@ -234,6 +235,7 @@ export interface SelectAllConfig extends RenovateConfig {
   dependencyDashboardRebaseAllOpen?: boolean;
   dependencyDashboardAllPending?: boolean;
   dependencyDashboardAllRateLimited?: boolean;
+  dependencyDashboardAllAwaitingSchedule?: boolean;
 }
 
 export interface UpgradeFingerprintConfig {

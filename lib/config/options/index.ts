@@ -237,6 +237,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'onboardingAutoCloseAge',
+    description:
+      'Maximum number of days after which Renovate will stop trying to onboard the repository, and will close any existing onboarding PRs',
+    type: 'integer',
+    default: null,
+    globalOnly: true,
+    cli: false,
+  },
+  {
     name: 'onboardingCommitMessage',
     description:
       'Change this value to override the default onboarding commit message.',
@@ -2850,7 +2859,7 @@ const options: RenovateOptions[] = [
       Update: '{{{updateType}}}',
       'Current value': '{{{currentValue}}}',
       'New value': '{{{newValue}}}',
-      Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+      Change: '`{{{displayFrom}}}` → `{{{displayTo}}}`',
       Pending: '{{{displayPending}}}',
       References: '{{{references}}}',
       'Package file': '{{{packageFile}}}',
@@ -3117,8 +3126,8 @@ const options: RenovateOptions[] = [
         which run automatically, and are not explicitly added in \`postUpgradeTasks\``,
     type: 'array',
     subType: 'string',
-    default: [],
-    allowedValues: ['goGenerate'],
+    default: ['gradleWrapper'],
+    allowedValues: ['goGenerate', 'gradleWrapper'],
     stage: 'repository',
     globalOnly: true,
   },
