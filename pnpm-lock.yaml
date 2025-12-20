@@ -377,8 +377,8 @@ importers:
         specifier: 1.1.19
         version: 1.1.19
       '@containerbase/semantic-release-pnpm':
-        specifier: 1.3.9
-        version: 1.3.9(semantic-release@25.0.2(typescript@5.9.3))
+        specifier: 1.3.10
+        version: 1.3.10(semantic-release@25.0.2(typescript@5.9.3))
       '@eslint/js':
         specifier: 9.39.1
         version: 9.39.1
@@ -960,8 +960,8 @@ packages:
     resolution: {integrity: sha512-AP11Q5i5VMCHf0SFz2xJ0tigsPY0ztcjdiEbw7ZXjFS57xtOb3/zdES4JykR922Nya3yo03zyxXlM+w7aDESFg==}
     engines: {node: ^20.9.0 || ^22.11.0 || ^24.0.0, pnpm: ^10.0.0}
 
-  '@containerbase/semantic-release-pnpm@1.3.9':
-    resolution: {integrity: sha512-BHyplOMmAiYTTYmKgo4XkO4XExqKqzaWJaFQjVJPCE+Lz6VfKbDnexECBsVIJoPMioAKqz/EERv/f+5IUkZCsA==}
+  '@containerbase/semantic-release-pnpm@1.3.10':
+    resolution: {integrity: sha512-0A3zmskigW6nzdYT/6LjZ1rH8UVKt0SO33pmzGADhsHQmJyBU4COW/4S1neX5lXp15mlDyTwGJ+DDCYDcgA9gg==}
     engines: {node: ^22.11.0 || ^24}
     peerDependencies:
       semantic-release: ^24.0.0 || ^25.0.0
@@ -7617,7 +7617,7 @@ snapshots:
       istanbul-lib-report: 3.0.1
       istanbul-reports: 3.2.0
 
-  '@containerbase/semantic-release-pnpm@1.3.9(semantic-release@25.0.2(typescript@5.9.3))':
+  '@containerbase/semantic-release-pnpm@1.3.10(semantic-release@25.0.2(typescript@5.9.3))':
     dependencies:
       '@semantic-release/error': 4.0.0
       aggregate-error: 5.0.0
