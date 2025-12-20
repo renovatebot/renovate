@@ -1,4 +1,3 @@
-import { GlobalConfig } from '../../../../config/global';
 import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform/types';
@@ -13,10 +12,6 @@ vi.mock('../../../../util/cache/repository');
 const cache = vi.mocked(_cache);
 
 describe('workers/repository/onboarding/branch/check', () => {
-  beforeAll(() => {
-    GlobalConfig.reset();
-  });
-
   const config = partial<RenovateConfig>({
     requireConfig: 'required',
     suppressNotifications: [],
@@ -85,7 +80,6 @@ describe('workers/repository/onboarding/branch/check', () => {
 
   // incase pr was autolcosed becasue if it passing the onboardingAutoCloseAge
   it('continues with normal logic if closedPr exists - skips closing comment', async () => {
-    GlobalConfig.set({ onboardingAutoCloseAge: 1 });
     cache.getCache.mockReturnValue({});
     platform.findPr.mockResolvedValue(
       partial<Pr>({
@@ -95,6 +89,7 @@ describe('workers/repository/onboarding/branch/check', () => {
       }),
     );
     scm.getFileList.mockResolvedValue([]);
+    config.onboardingAutoCloseAge = 1;
     await expect(isOnboarded(config)).rejects.toThrow(
       REPOSITORY_CLOSED_ONBOARDING,
     );
