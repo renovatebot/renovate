@@ -150,13 +150,13 @@ async function handlePackageManagerUpdates(
 async function updatePnpmWorkspace(
   updateArtifactsConfig: UpdateArtifact,
 ): Promise<UpdateArtifactsResult | null> {
+  const { updatedDeps: upgrades } = updateArtifactsConfig;
   // return early if no security updates are present
-  if (!updateArtifactsConfig.updatedDeps.some((u) => u.isVulnerabilityAlert)) {
+  if (!upgrades.some((u) => u.isVulnerabilityAlert)) {
     return null;
   }
 
-  const pnpmShrinkwrap = updateArtifactsConfig.updatedDeps[0].managerData
-    ?.pnpmShrinkwrap as string;
+  const pnpmShrinkwrap = upgrades[0].managerData?.pnpmShrinkwrap as string;
   const lockFileDir = upath.dirname(pnpmShrinkwrap);
   const lockFileName = upath.join(lockFileDir, 'pnpm-lock.yaml');
   const pnpmWorkspaceFilePath = getSiblingFileName(
@@ -172,7 +172,7 @@ async function updatePnpmWorkspace(
   let packageFileContent = oldContent;
   let updated = false;
 
-  for (const upgrade of updateArtifactsConfig.updatedDeps) {
+  for (const upgrade of upgrades) {
     if (!upgrade.isVulnerabilityAlert) {
       continue;
     }
