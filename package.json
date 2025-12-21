@@ -308,7 +308,7 @@
     "@types/mdast": "4.0.4",
     "@types/moo": "0.5.10",
     "@types/ms": "2.1.0",
-    "@types/node": "22.19.2",
+    "@types/node": "22.19.3",
     "@types/parse-link-header": "2.0.3",
     "@types/punycode": "2.1.4",
     "@types/sax": "1.2.7",
