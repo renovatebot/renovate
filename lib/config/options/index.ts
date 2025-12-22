@@ -386,6 +386,17 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'customPresets',
+    description:
+      'Define presets here which can be extended by repositories. Note: they must be referenced with a `custom:` prefix.',
+    type: 'object',
+    globalOnly: true,
+    default: {},
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'minimumGroupSize',
     description:
       'The minimum number of updates which must be in a group for branches to be created.',

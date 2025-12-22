@@ -1,6 +1,6 @@
 import { getConfigFileNames } from './app-strings';
 import { GlobalConfig } from './global';
-import type { RenovateConfig } from './types';
+import type { AllConfig, RenovateConfig } from './types';
 import * as configValidation from './validation';
 import { partial } from '~test/util';
 
@@ -1959,6 +1959,43 @@ describe('config/validation', () => {
             ),
           },
         ]);
+      });
+
+      it('customPresets', async () => {
+        const config = {
+          customPresets: {
+            myPreset: {
+              description: ['My custom preset'],
+              labels: ['custom-label'],
+            },
+          },
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+        expect(errors).toHaveLength(0);
+        expect(warnings).toHaveLength(0);
+      });
+
+      it('customPresets validates each preset config', async () => {
+        const config = {
+          customPresets: {
+            badPreset: {
+              // match* selectors are only valid in packageRules
+              matchPackageNames: ['foo'],
+            },
+          },
+        } as AllConfig;
+        const { warnings, errors } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+        expect(errors).toHaveLength(0);
+        expect(warnings).toHaveLength(1);
+        expect(warnings[0].message).toContain(
+          'matchPackageNames should be inside a `packageRule` only',
+        );
       });
 
       it('gitUrl', async () => {

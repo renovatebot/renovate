@@ -954,6 +954,28 @@ async function validateGlobalConfig(
           )) {
             warnings.push(warning);
           }
+        } else if (key === 'customPresets') {
+          for (const [presetName, presetConfig] of Object.entries(val)) {
+            if (!isPlainObject(presetConfig)) {
+              warnings.push({
+                topic: 'Configuration Error',
+                message: `Invalid \`${currentPath}.${presetName}\` configuration: value must be a JSON object.`,
+              });
+              continue;
+            }
+
+            const subValidation = await validateConfig(
+              'repo',
+              presetConfig as unknown as AllConfig,
+              true,
+              `${currentPath}.${presetName}`,
+            );
+            for (const warning of subValidation.warnings.concat(
+              subValidation.errors,
+            )) {
+              warnings.push(warning);
+            }
+          }
         } else if (key === 'force') {
           const subValidation = await validateConfig('global', val);
           for (const warning of subValidation.warnings.concat(

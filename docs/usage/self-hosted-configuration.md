@@ -549,6 +549,32 @@ The above configuration approach will mean the values are redacted in logs like 
          "customEnvVariables": {"SECRET_TOKEN": "{{ secrets.SECRET_TOKEN }}"},
 ```
 
+## customPresets
+
+For example, in your `config.js`:
+
+```js
+module.exports = {
+  customPresets: {
+    myPreset: {
+      description: 'My custom preset',
+      labels: ['custom-label'],
+    },
+    'group:my-group': {
+      groupName: 'My Group',
+    },
+  },
+};
+```
+
+Then in a repository's `renovate.json`:
+
+```json
+{
+  "extends": ["custom:myPreset", "custom:group:my-group"]
+}
+```
+
 ## deleteAdditionalConfigFile
 
 If set to `true` Renovate tries to delete the additional self-hosted config file after reading it.

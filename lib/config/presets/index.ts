@@ -107,7 +107,7 @@ export function replaceArgs(
 
 export async function getPreset(
   preset: string,
-  baseConfig?: RenovateConfig,
+  baseConfig?: AllConfig,
 ): Promise<RenovateConfig> {
   logger.trace(`getPreset(${preset})`);
   // Check if the preset has been removed or replaced
@@ -120,18 +120,32 @@ export async function getPreset(
   }
   const { presetSource, repo, presetPath, presetName, tag, params, rawParams } =
     parsePreset(preset);
+
+  let presetConfig: Preset | null | undefined;
+  if (preset.startsWith('custom:')) {
+    const customPresetName = preset.replace(/^custom:/, '').split('(')[0];
+    if (baseConfig?.customPresets?.[customPresetName]) {
+      presetConfig = clone(
+        baseConfig.customPresets[customPresetName],
+      ) as Preset;
+    } else {
+      // Fail fast so we don't attempt to fetch as a remote preset
+      throw new Error(PRESET_DEP_NOT_FOUND);
+    }
+  }
+
   const cacheKey = `preset:${preset}`;
   const presetCachePersistence = GlobalConfig.get(
     'presetCachePersistence',
     false,
   );
 
-  let presetConfig: Preset | null | undefined;
-
-  if (presetCachePersistence) {
-    presetConfig = await packageCache.get(presetCacheNamespace, cacheKey);
-  } else {
-    presetConfig = memCache.get(cacheKey);
+  if (!presetConfig) {
+    if (presetCachePersistence) {
+      presetConfig = await packageCache.get(presetCacheNamespace, cacheKey);
+    } else {
+      presetConfig = memCache.get(cacheKey);
+    }
   }
 
   if (isNullOrUndefined(presetConfig)) {
@@ -181,7 +195,7 @@ export async function getPreset(
 
 export async function resolveConfigPresets(
   inputConfig: AllConfig,
-  baseConfig?: RenovateConfig,
+  baseConfig?: AllConfig,
   _ignorePresets?: string[],
   existingPresets: string[] = [],
 ): Promise<AllConfig> {
@@ -232,7 +246,7 @@ export async function resolveConfigPresets(
     keyof AllConfig,
     unknown,
   ][]) {
-    const ignoredKeys = ['content', 'onboardingConfig'];
+    const ignoredKeys = ['content', 'onboardingConfig', 'customPresets'];
     if (isArray(val)) {
       // Resolve nested objects inside arrays
       config[key] = [] as never; // type can't be narrowed
@@ -268,7 +282,7 @@ export async function resolveConfigPresets(
 
 async function fetchPreset(
   preset: string,
-  baseConfig: RenovateConfig | undefined,
+  baseConfig: AllConfig | undefined,
   inputConfig: AllConfig,
   existingPresets: string[],
 ): Promise<AllConfig> {

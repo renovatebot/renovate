@@ -517,6 +517,51 @@ describe('config/presets/index', () => {
         PLATFORM_RATE_LIMIT_EXCEEDED,
       );
     });
+
+    it('resolves custom presets defined in config', async () => {
+      config.customPresets = {
+        myPreset: {
+          description: 'My custom preset',
+          labels: ['custom-label'],
+        },
+      };
+      config.extends = ['custom:myPreset'];
+
+      const res = await presets.resolveConfigPresets(config);
+
+      expect(res.labels).toEqual(['custom-label']);
+      expect(res.description).toEqual(['My custom preset']);
+    });
+
+    it('resolves custom presets with params', async () => {
+      config.customPresets = {
+        group: {
+          groupName: '{{arg0}}',
+        },
+      };
+      config.extends = ['custom:group(my-group)'];
+
+      const res = await presets.resolveConfigPresets(config);
+
+      expect(res.groupName).toEqual('my-group');
+    });
+
+    it('resolves nested custom presets', async () => {
+      config.customPresets = {
+        base: {
+          addLabels: ['base-label'],
+        },
+        derived: {
+          extends: ['custom:base'],
+          addLabels: ['derived-label'],
+        },
+      };
+      config.extends = ['custom:derived'];
+
+      const res = await presets.resolveConfigPresets(config);
+
+      expect(res.addLabels).toEqual(['base-label', 'derived-label']);
+    });
   });
 
   describe('replaceArgs', () => {
