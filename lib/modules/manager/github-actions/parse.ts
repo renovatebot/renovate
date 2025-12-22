@@ -273,10 +273,12 @@ export function parseUsesLine(line: string): ParsedUsesLine | null {
     partBeforeHash.trimEnd().length,
   );
 
+  let cleanCommentBody = '';
+  if (commentPart.startsWith('#')) {
+    cleanCommentBody = commentPart.slice(1);
+  }
+
   const { value, quote } = parseQuote(rawValuePart);
-  const cleanCommentBody = commentPart.startsWith('#')
-    ? commentPart.slice(1)
-    : '';
 
   return {
     indentation,
