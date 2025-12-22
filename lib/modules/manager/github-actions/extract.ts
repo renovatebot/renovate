@@ -9,6 +9,7 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
+import * as dummyVersioning from '../../versioning/dummy';
 import * as nodeVersioning from '../../versioning/node';
 import * as npmVersioning from '../../versioning/npm';
 import { getDep } from '../dockerfile/extract';
@@ -121,6 +122,12 @@ function extractRepositoryAction(
     dep.currentDigestShort = ref;
   } else {
     dep.currentValue = ref;
+  }
+
+  // For non-semver tags (like tool names), use dummy versioning
+  if (dep.currentValue && !dockerVersioning.api.isValid(dep.currentValue)) {
+    dep.versioning = dummyVersioning.id;
+    dep.autoReplaceStringTemplate = `${quote}{{depName}}${pathSuffix}@{{#if newDigest}}{{newDigest}}${quote}{{#if newValue}}${commentWs}# tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quote}{{/unless}}`;
   }
 
   return dep;
