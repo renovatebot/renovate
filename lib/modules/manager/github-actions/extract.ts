@@ -239,21 +239,18 @@ function extractVersionedAction(step: Steps): PackageDependency | null {
       continue;
     }
 
-    const fieldName = `${action}-version`;
-    const currentValue = step.with?.[fieldName];
-    if (!currentValue) {
-      return null;
+    const currentValue = step.with?.[`${action}-version`];
+    if (currentValue) {
+      return {
+        datasource: GithubReleasesDatasource.id,
+        depName: action,
+        packageName: `actions/${action}-versions`,
+        versioning,
+        extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+        currentValue,
+        depType: 'uses-with',
+      };
     }
-
-    return {
-      datasource: GithubReleasesDatasource.id,
-      depName: action,
-      packageName: `actions/${action}-versions`,
-      versioning,
-      extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
-      currentValue,
-      depType: 'uses-with',
-    };
   }
   return null;
 }
