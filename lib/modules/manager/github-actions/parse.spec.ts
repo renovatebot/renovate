@@ -245,6 +245,40 @@ describe('modules/manager/github-actions/parse', () => {
         pinnedVersion: 'node/v20',
       });
     });
+
+    it('parses tag=<value> for non-semver tags', () => {
+      const result = parseComment('tag=cargo-llvm-cov');
+      expect(result).toEqual({
+        index: 0,
+        matchedString: 'tag=cargo-llvm-cov',
+        pinnedVersion: 'cargo-llvm-cov',
+        pinTag: true,
+      });
+    });
+
+    it('parses tag=<value> with leading whitespace', () => {
+      const result = parseComment(' tag=nextest');
+      expect(result).toEqual({
+        index: 0,
+        matchedString: ' tag=nextest',
+        pinnedVersion: 'nextest',
+        pinTag: true,
+      });
+    });
+
+    it('parses standalone tag marker', () => {
+      const result = parseComment('tag');
+      expect(result).toEqual({
+        pinTag: true,
+      });
+    });
+
+    it('parses standalone tag marker with whitespace', () => {
+      const result = parseComment('  tag  ');
+      expect(result).toEqual({
+        pinTag: true,
+      });
+    });
   });
 
   describe('parseQuote', () => {

@@ -196,6 +196,8 @@ export interface CommentData {
   ratchetExclude?: boolean;
   matchedString?: string;
   index?: number;
+  /** Indicates `# pin` marker for non-semver tags that should use dummy versioning */
+  pinTag?: boolean;
 }
 
 // Matches version strings with optional prefixes, e.g.:
@@ -206,6 +208,12 @@ export interface CommentData {
 const pinnedVersionRe = regEx(
   /^\s*(?:(?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+\/[.\w-]+))?@?(?<version>([\w-]*[-/])?v?\d+(?:\.\d+(?:\.\d+)?)?)/,
 );
+
+// Matches `tag=<value>` format for non-semver tags (e.g., `tag=cargo-llvm-cov`)
+const tagEqualsRe = regEx(/^\s*tag=(?<version>[^\s]+)/);
+
+// Matches standalone `tag` marker (without `=`)
+const tagMarkerRe = regEx(/^\s*tag\s*$/);
 
 export function parseComment(commentBody: string): CommentData {
   const trimmed = commentBody.trim();
@@ -221,6 +229,22 @@ export function parseComment(commentBody: string): CommentData {
       matchedString: match[0],
       index: match.index,
     };
+  }
+
+  // Try tag=<value> format for non-semver tags
+  const tagMatch = tagEqualsRe.exec(commentBody);
+  if (tagMatch?.groups?.version) {
+    return {
+      pinnedVersion: tagMatch.groups.version,
+      matchedString: tagMatch[0],
+      index: tagMatch.index,
+      pinTag: true,
+    };
+  }
+
+  // Check for standalone `tag` marker
+  if (tagMarkerRe.test(commentBody)) {
+    return { pinTag: true };
   }
 
   return {};
