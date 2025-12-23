@@ -2,7 +2,7 @@ import { spawn as _spawn } from 'node:child_process';
 import type { SendHandle, Serializable } from 'node:child_process';
 import { Readable } from 'node:stream';
 import { regEx } from '../regex';
-import { exec } from './common';
+import { exec, rawExec } from './common';
 import type { DataListener, RawExecOptions } from './types';
 import { partial } from '~test/util';
 
@@ -159,7 +159,7 @@ describe('util/exec/common', () => {
   const stdout = 'out message';
   const stderr = 'err message';
 
-  describe('rawExec', () => {
+  describe('exec', () => {
     it('command exits with code 0', async () => {
       const cmd = 'ls -l';
       const stub = getSpawnStub({
@@ -328,6 +328,29 @@ describe('util/exec/common', () => {
         message: 'stderr maxBuffer exceeded',
         stderr: '',
         stdout: '',
+      });
+    });
+  });
+
+  describe('rawExec', () => {
+    it('command exits with code 0', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      spawn.mockImplementationOnce((cmd, opts) => stub);
+      await expect(
+        rawExec(
+          cmd,
+          partial<RawExecOptions>({ encoding: 'utf8', shell: 'bin/bash' }),
+        ),
+      ).resolves.toEqual({
+        stderr,
+        stdout,
       });
     });
   });
