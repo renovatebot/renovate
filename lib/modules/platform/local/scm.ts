@@ -1,5 +1,6 @@
 import { execSync } from 'node:child_process';
 import { glob } from 'glob';
+import type { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
 import type { PlatformScm } from '../types';
@@ -19,6 +20,9 @@ export class LocalFs implements PlatformScm {
     return Promise.resolve(true);
   }
   getBranchCommit(branchName: string): Promise<LongCommitSha | null> {
+    return Promise.resolve(null);
+  }
+  getBranchUpdateDate(branchName: string): Promise<DateTime | null> {
     return Promise.resolve(null);
   }
   deleteBranch(branchName: string): Promise<void> {

@@ -398,6 +398,7 @@ export interface RenovateConfig
   branchConcurrentLimit?: number | null;
   parentOrg?: string;
   prConcurrentLimit?: number;
+  commitHourlyLimit?: number;
   prHourlyLimit?: number;
 
   printConfig?: boolean;
