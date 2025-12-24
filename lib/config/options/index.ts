@@ -2586,6 +2586,7 @@ const options: RenovateOptions[] = [
       'bundlerConservative',
       'composerWithAll',
       'composerNoMinimalChanges',
+      'dotnetEnableWindowsTargeting',
       'dotnetWorkloadRestore',
       'gomodMassage',
       'gomodTidy',
