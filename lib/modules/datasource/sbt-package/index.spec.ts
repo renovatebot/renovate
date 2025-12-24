@@ -1,16 +1,13 @@
 import { codeBlock } from 'common-tags';
 import { getPkgReleases } from '..';
-import * as _packageCache from '../../../util/cache/package';
 import { regEx } from '../../../util/regex';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
 import { extractPageLinks } from './util';
 import { SbtPackageDatasource } from '.';
+import { packageCache } from '~test/cache-mock';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
-
-vi.mock('../../../util/cache/package');
-const packageCache = vi.mocked(_packageCache);
 
 describe('modules/datasource/sbt-package/index', () => {
   it('parses Maven index directory', () => {

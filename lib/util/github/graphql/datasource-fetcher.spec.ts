@@ -1,4 +1,3 @@
-import * as _packageCache from '../../../util/cache/package';
 import type { Timestamp } from '../../../util/timestamp';
 import type { GithubGraphqlResponse } from '../../http/github';
 import { GithubHttp } from '../../http/github';
@@ -12,11 +11,9 @@ import type {
   GithubGraphqlDatasourceAdapter,
   GithubGraphqlRepoResponse,
 } from './types';
+import { packageCache } from '~test/cache-mock';
 import * as httpMock from '~test/http-mock';
 import { partial } from '~test/util';
-
-vi.mock('../../../util/cache/package');
-const packageCache = vi.mocked(_packageCache);
 
 interface TestAdapterInput {
   version: string;

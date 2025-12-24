@@ -21,10 +21,7 @@ export function set(key: string, value: unknown): void {
 export function cleanDatasourceKeys(): void {
   if (memCache) {
     for (const key of Object.keys(memCache)) {
-      if (
-        key.startsWith('datasource-mem:pkg-fetch:') ||
-        key.startsWith('datasource-mem:releases:')
-      ) {
+      if (key.startsWith('datasource-mem:releases:')) {
         delete memCache[key];
       }
     }
