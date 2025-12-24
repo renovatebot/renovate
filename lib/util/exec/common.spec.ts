@@ -1,14 +1,22 @@
 import { spawn as _spawn } from 'node:child_process';
 import type { SendHandle, Serializable } from 'node:child_process';
 import { Readable } from 'node:stream';
+import * as _instrumentation from '../../instrumentation';
 import { regEx } from '../regex';
-import { exec } from './common';
+import {
+  addSecretForSanitizing,
+  clearGlobalSanitizedSecretsList,
+  clearRepoSanitizedSecretsList,
+} from '../sanitize';
+import { exec, rawExec } from './common';
 import type { DataListener, RawExecOptions } from './types';
 import { partial } from '~test/util';
 
+vi.mock('../../instrumentation');
 vi.mock('node:child_process');
 vi.unmock('./common');
 
+const instrument = vi.spyOn(_instrumentation, 'instrument');
 const spawn = vi.mocked(_spawn);
 
 type MessageListener = (message: Serializable, sendHandle: SendHandle) => void;
@@ -159,7 +167,11 @@ describe('util/exec/common', () => {
   const stdout = 'out message';
   const stderr = 'err message';
 
-  describe('rawExec', () => {
+  beforeEach(() => {
+    instrument.mockImplementationOnce((_name: string, fn: () => any) => fn());
+  });
+
+  describe('exec', () => {
     it('command exits with code 0', async () => {
       const cmd = 'ls -l';
       const stub = getSpawnStub({
@@ -328,6 +340,85 @@ describe('util/exec/common', () => {
         message: 'stderr maxBuffer exceeded',
         stderr: '',
         stdout: '',
+      });
+    });
+  });
+
+  describe('rawExec', () => {
+    it('command exits with code 0', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      spawn.mockImplementationOnce((cmd, opts) => stub);
+      await expect(
+        rawExec(
+          cmd,
+          partial<RawExecOptions>({ encoding: 'utf8', shell: 'bin/bash' }),
+        ),
+      ).resolves.toEqual({
+        stderr,
+        stdout,
+      });
+    });
+
+    describe('is instrumented', () => {
+      beforeEach(() => {
+        clearRepoSanitizedSecretsList();
+        clearGlobalSanitizedSecretsList();
+      });
+
+      it('calls instrument function', async () => {
+        const cmd = 'ls -l';
+        const stub = getSpawnStub({
+          cmd,
+          exitCode: 0,
+          exitSignal: null,
+          stdout,
+          stderr,
+        });
+        spawn.mockImplementationOnce((cmd, opts) => stub);
+
+        await rawExec(
+          cmd,
+          partial<RawExecOptions>({ encoding: 'utf8', shell: 'bin/bash' }),
+        );
+
+        expect(instrument).toHaveBeenCalledTimes(1);
+        expect(instrument).toHaveBeenCalledWith(
+          'rawExec: ls -l',
+          expect.any(Function),
+        );
+      });
+
+      it('command name and arguments are sanitized', async () => {
+        addSecretForSanitizing('ls', 'global');
+        addSecretForSanitizing('npm_nOTValidSecret', 'repo');
+
+        const cmd = 'ls -al /path/to/secret --npm-token npm_nOTValidSecret';
+        const stub = getSpawnStub({
+          cmd,
+          exitCode: 0,
+          exitSignal: null,
+          stdout,
+          stderr,
+        });
+        spawn.mockImplementationOnce((cmd, opts) => stub);
+
+        await rawExec(
+          cmd,
+          partial<RawExecOptions>({ encoding: 'utf8', shell: 'bin/bash' }),
+        );
+
+        expect(instrument).toHaveBeenCalledTimes(1);
+        expect(instrument).toHaveBeenCalledWith(
+          'rawExec: **redacted** -al /path/to/secret --npm-token **redacted**',
+          expect.any(Function),
+        );
       });
     });
   });

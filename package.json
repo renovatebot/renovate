@@ -318,7 +318,7 @@
     "@types/tar": "6.1.13",
     "@types/tmp": "0.2.6",
     "@types/validate-npm-package-name": "4.0.2",
-    "@vitest/coverage-v8": "4.0.15",
+    "@vitest/coverage-v8": "4.0.16",
     "@vitest/eslint-plugin": "1.5.2",
     "ajv": "8.17.1",
     "ajv-formats": "3.0.1",
@@ -327,7 +327,7 @@
     "common-tags": "1.8.2",
     "conventional-changelog-conventionalcommits": "9.1.0",
     "emojibase-data": "16.0.3",
-    "esbuild": "0.27.1",
+    "esbuild": "0.27.2",
     "eslint": "9.39.2",
     "eslint-config-prettier": "10.1.8",
     "eslint-formatter-gha": "1.6.0",
@@ -357,7 +357,7 @@
     "unified": "11.0.5",
     "vite": "8.0.0-beta.2",
     "vite-tsconfig-paths": "5.1.4",
-    "vitest": "4.0.15",
+    "vitest": "4.0.16",
     "vitest-mock-extended": "3.1.0"
   },
   "packageManager": "pnpm@10.26.0",
@@ -383,7 +383,7 @@
       "re2"
     ],
     "overrides": {
-      "esbuild": "0.27.1",
+      "esbuild": "0.27.2",
       "vite": "8.0.0-beta.2"
     }
   }
