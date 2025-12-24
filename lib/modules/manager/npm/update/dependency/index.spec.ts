@@ -445,5 +445,39 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       expect(testContent).toEqual(expected);
     });
+
+    it('removes a dependency when a newer replacement already exists', () => {
+      const input = JSON.stringify(
+        {
+          dependencies: {
+            '@material-ui/core': '^4.9.13', // should be removed
+            '@mui/material': '^6.1.7', // should be kept as is
+          },
+        },
+        null,
+        2,
+      );
+
+      const upgrade = {
+        depType: 'dependencies',
+        depName: '@material-ui/core',
+        newName: '@mui/material',
+        newValue: '^5.0.0',
+      };
+
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        upgrade,
+      });
+
+      expect(res).toBeJsonString();
+      const parsed = JSON.parse(res!);
+      expect(parsed.dependencies['@material-ui/core']).toBeUndefined();
+      expect(parsed.dependencies['@mui/material']).toBe('^6.1.7');
+
+      // Check that we don't have duplicate keys
+      const matches = res!.match(/"@mui\/material":/g);
+      expect(matches).toHaveLength(1);
+    });
   });
 });

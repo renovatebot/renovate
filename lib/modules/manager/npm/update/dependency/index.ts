@@ -187,15 +187,27 @@ export function updateDependency({
         overrideDepParents,
       );
       if (upgrade.newName) {
-        newFileContent = replaceAsString(
-          parsedContents,
-          newFileContent,
-          depType as NpmDepType,
-          depName,
-          depName,
-          upgrade.newName,
-          overrideDepParents,
-        );
+        const newNameExists =
+          parsedContents[depType as NpmDepType]?.[upgrade.newName];
+        if (newNameExists) {
+          newFileContent = removeDependency(
+            parsedContents,
+            newFileContent,
+            depType as NpmDepType,
+            depName,
+            newValue!,
+          );
+        } else {
+          newFileContent = replaceAsString(
+            parsedContents,
+            newFileContent,
+            depType as NpmDepType,
+            depName,
+            depName,
+            upgrade.newName,
+            overrideDepParents,
+          );
+        }
       }
     }
     /* v8 ignore next -- needs test */
@@ -301,4 +313,44 @@ function isOverrideObject(upgrade: Upgrade<NpmManagerData>): boolean {
     isArray(upgrade.managerData?.parents, isNonEmptyStringAndNotWhitespace) &&
     upgrade.depType === 'overrides'
   );
+}
+
+function removeDependency(
+  parsedContents: NpmPackage,
+  fileContent: string,
+  depType: NpmDepType,
+  depName: string,
+  currentValue: string,
+): string {
+  delete parsedContents[depType]![depName];
+  const escapedDepName = escapeRegExp(depName);
+  const escapedValue = escapeRegExp(currentValue);
+  const regexes = [
+    // Try removing with trailing comma first
+    regEx(`(\\s*"${escapedDepName}"\\s*:\\s*"${escapedValue}"\\s*,)`),
+    // Try removing with preceding comma (if it's the last item)
+    regEx(`(,\\s*"${escapedDepName}"\\s*:\\s*"${escapedValue}"\\s*)`),
+    // Try removing without comma (single item)
+    regEx(`(\\s*"${escapedDepName}"\\s*:\\s*"${escapedValue}"\\s*)`),
+  ];
+
+  for (const regex of regexes) {
+    const newContent = fileContent.replace(regex, '');
+    if (
+      newContent !== fileContent &&
+      dequal(parsedContents, safeJsonParse(newContent))
+    ) {
+      return newContent;
+    }
+  }
+
+  throw new Error('Could not remove dependency');
+}
+
+function safeJsonParse(content: string): NpmPackage | null {
+  try {
+    return JSON.parse(content);
+  } catch {
+    return null;
+  }
 }
