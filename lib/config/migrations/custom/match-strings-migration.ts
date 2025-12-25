@@ -18,7 +18,7 @@ export class MatchStringsMigration extends AbstractMigration {
         if (res.startsWith('/') && res.endsWith('/')) {
           logger.warn(
             { matchString },
-            'Found leading and trailing slashes in match string, removing them. "matchStrings" work fine without the slashes, please consiuder removing them',
+            'Found leading and trailing slashes in match string, removing them. "matchStrings" work fine without the slashes, please consider removing them',
           );
           res = trimSlashes(res);
         }

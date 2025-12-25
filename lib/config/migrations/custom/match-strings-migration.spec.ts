@@ -24,7 +24,7 @@ describe('config/migrations/custom/match-strings-migration', () => {
     );
     expect(logger.logger.warn).toHaveBeenCalledWith(
       { matchString: '/someregex/' },
-      'Found leading and trailing slashes in match string, removing them. "matchStrings" work fine without the slashes, please consiuder removing them',
+      'Found leading and trailing slashes in match string, removing them. "matchStrings" work fine without the slashes, please consider removing them',
     );
   });
 });
