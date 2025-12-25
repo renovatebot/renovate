@@ -159,9 +159,10 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   logger.debug('Repo is not onboarded and no merged PRs exist');
   if (!config.suppressNotifications!.includes('onboardingClose')) {
     const ageOfOnboardingPr = getElapsedDays(closedOnboardingPr.createdAt!);
+    const onboardingAutoCloseAge = config.onboardingAutoCloseAge;
     if (
-      !config.onboardingAutoCloseAge ||
-      ageOfOnboardingPr <= config.onboardingAutoCloseAge
+      !onboardingAutoCloseAge ||
+      ageOfOnboardingPr <= onboardingAutoCloseAge
     ) {
       // ensure PR comment
       await ensureComment({

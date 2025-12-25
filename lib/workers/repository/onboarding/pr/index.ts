@@ -53,9 +53,10 @@ export async function ensureOnboardingPr(
   if (existingPr) {
     // check if the existing pr crosses the onboarding autoclose age
     const ageOfOnboardingPr = getElapsedDays(existingPr.createdAt!);
+    const onboardingAutoCloseAge = config.onboardingAutoCloseAge;
     if (
-      isNumber(config.onboardingAutoCloseAge) &&
-      ageOfOnboardingPr > config.onboardingAutoCloseAge
+      isNumber(onboardingAutoCloseAge) &&
+      ageOfOnboardingPr > onboardingAutoCloseAge
     ) {
       // close the pr
       await platform.updatePr({
@@ -67,14 +68,14 @@ export async function ensureOnboardingPr(
       await ensureComment({
         number: existingPr.number,
         topic: `Renovate is disabled`,
-        content: `Renovate is disabled because the onboarding PR has been unmerged for more than ${config.onboardingAutoCloseAge} days. To enable Renovate, you can either (a) change this PR's title to get a new onboarding PR, and merge the new onboarding PR, or (b) create a Renovate config file, and commit that file to your base branch.`,
+        content: `Renovate is disabled because the onboarding PR has been unmerged for more than ${onboardingAutoCloseAge} days. To enable Renovate, you can either (a) change this PR's title to get a new onboarding PR, and merge the new onboarding PR, or (b) create a Renovate config file, and commit that file to your base branch.`,
       });
       logger.debug(
         {
           ageOfOnboardingPr,
-          onboardingAutoCloseAge: config.onboardingAutoCloseAge,
+          onboardingAutoCloseAge,
         },
-        `Renovate is being disabled for this repository as the onboarding PR has been umerged for more than ${config.onboardingAutoCloseAge} days`,
+        `Renovate is being disabled for this repository as the onboarding PR has been umerged for more than ${onboardingAutoCloseAge} days`,
       );
       return;
     }
