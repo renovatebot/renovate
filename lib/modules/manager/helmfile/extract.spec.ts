@@ -550,6 +550,7 @@ describe('modules/manager/helmfile/extract', () => {
             version: 0.4.0
       `;
       const result = await extractPackageFile(content, 'helmfile.yaml', {});
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           repo: {

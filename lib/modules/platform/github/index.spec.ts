@@ -42,6 +42,7 @@ const git = vi.mocked(_git);
 
 describe('modules/platform/github/index', () => {
   beforeEach(() => {
+    GlobalConfig.reset();
     github.resetConfigs();
 
     setBaseUrl(githubApiHost);
@@ -958,7 +959,7 @@ describe('modules/platform/github/index', () => {
       expect(res).toBeFalse();
     });
 
-    it('should detect non_fast_forward ruleset', async () => {
+    it('should ignore non_fast_forward ruleset for determining rebase', async () => {
       httpMock
         .scope(githubApiHost)
         .get('/repos/undefined/rules/branches/main')
@@ -970,8 +971,16 @@ describe('modules/platform/github/index', () => {
             ruleset_id: 12345,
           },
         ]);
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/main/protection')
+        .reply(200, {
+          required_status_checks: {
+            strict: false,
+          },
+        });
       const res = await github.getBranchForceRebase('main');
-      expect(res).toBeTrue();
+      expect(res).toBeFalse();
     });
 
     it('should detect strict required status checks ruleset', async () => {
@@ -1338,10 +1347,10 @@ describe('modules/platform/github/index', () => {
         const scope = httpMock.scope(githubApiHost);
         initRepoMock(scope, 'some/repo');
         scope.get(pagePath(1)).reply(200, [renovatePr, otherPr]);
+        GlobalConfig.set({ ignorePrAuthor: true });
         await github.initRepo({
           repository: 'some/repo',
           renovateUsername: 'renovate-bot',
-          ignorePrAuthor: true,
         });
 
         const res = await github.getPrList();
@@ -1429,16 +1438,63 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
-      const pr = await github.tryReuseAutoclosedPr({
-        number: 91,
-        title: 'old title - autoclosed',
-        state: 'closed',
-        closedAt: DateTime.now().minus({ days: 6 }).toISO(),
-        sourceBranch: 'somebranch',
-        sha: '1234' as LongCommitSha,
-      });
+      const pr = await github.tryReuseAutoclosedPr(
+        {
+          number: 91,
+          title: 'old title - autoclosed',
+          state: 'closed',
+          closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+          sourceBranch: 'somebranch',
+          sha: '1234' as LongCommitSha,
+        },
+        'new title',
+      );
 
       expect(pr).toMatchObject({ number: 91, sourceBranch: 'somebranch' });
+    });
+
+    it('force pushes when local SHA differs from PR SHA', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .head('/repos/some/repo/git/commits/1234')
+        .reply(200)
+        .post('/repos/some/repo/git/refs')
+        .reply(201)
+        .patch('/repos/some/repo/pulls/91')
+        .reply(200, {
+          number: 91,
+          base: { sha: '1234' },
+          head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+          state: 'open',
+          title: 'old title',
+          updated_at: '01-09-2022',
+        });
+      await github.initRepo({ repository: 'some/repo' });
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
+      git.getBranchCommit.mockReturnValueOnce('5678' as LongCommitSha);
+
+      const pr = await github.tryReuseAutoclosedPr(
+        {
+          number: 91,
+          title: 'old title - autoclosed',
+          state: 'closed',
+          closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+          sourceBranch: 'somebranch',
+          sha: '1234' as LongCommitSha,
+        },
+        'new title',
+      );
+
+      expect(pr).toMatchObject({
+        number: 91,
+        sourceBranch: 'somebranch',
+        sha: '5678',
+      });
+      expect(git.forcePushToRemote).toHaveBeenCalledExactlyOnceWith(
+        'somebranch',
+        'origin',
+      );
     });
 
     it('aborts reopening if branch recreation fails', async () => {
@@ -1455,14 +1511,17 @@ describe('modules/platform/github/index', () => {
 
       await github.initRepo({ repository: 'some/repo' });
 
-      const pr = await github.tryReuseAutoclosedPr({
-        number: 91,
-        title: 'old title - autoclosed',
-        state: 'closed',
-        closedAt: DateTime.now().minus({ days: 6 }).toISO(),
-        sourceBranch: 'somebranch',
-        sha: '1234' as LongCommitSha,
-      });
+      const pr = await github.tryReuseAutoclosedPr(
+        {
+          number: 91,
+          title: 'old title - autoclosed',
+          state: 'closed',
+          closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+          sourceBranch: 'somebranch',
+          sha: '1234' as LongCommitSha,
+        },
+        'new title',
+      );
 
       expect(pr).toBeNull();
     });
@@ -1474,14 +1533,17 @@ describe('modules/platform/github/index', () => {
 
       await github.initRepo({ repository: 'some/repo' });
 
-      const pr = await github.tryReuseAutoclosedPr({
-        number: 91,
-        title: 'old title - autoclosed',
-        state: 'closed',
-        closedAt: DateTime.now().minus({ days: 6 }).toISO(),
-        sourceBranch: 'somebranch',
-        sha: '1234' as LongCommitSha,
-      });
+      const pr = await github.tryReuseAutoclosedPr(
+        {
+          number: 91,
+          title: 'old title - autoclosed',
+          state: 'closed',
+          closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+          sourceBranch: 'somebranch',
+          sha: '1234' as LongCommitSha,
+        },
+        'new title',
+      );
 
       expect(pr).toBeNull();
     });
@@ -1849,6 +1911,7 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getIssue(1);
       expect(res).toBeNull();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Issue #1 has been deleted',
       );
@@ -3380,6 +3443,7 @@ describe('modules/platform/github/index', () => {
           milestone: 1,
         });
         expect(pr?.number).toBe(123);
+
         expect(logger.logger.warn).toHaveBeenCalledWith(
           {
             err: {
@@ -3689,9 +3753,11 @@ describe('modules/platform/github/index', () => {
         .reply(200, pr);
 
       await expect(github.updatePr(pr)).toResolve();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Adding labels 'new_label' to #1234`,
       );
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Deleting label old_label from #1234`,
       );
@@ -3704,6 +3770,7 @@ describe('modules/platform/github/index', () => {
           message: 'Failed to add labels',
         });
         await expect(github.addLabels(2, ['fail'])).toResolve();
+
         expect(logger.logger.warn).toHaveBeenCalledWith(
           {
             err: expect.any(Object),
@@ -3951,6 +4018,7 @@ describe('modules/platform/github/index', () => {
       });
 
       expect(mergeResult).toBeTrue();
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Fast-forward merge strategy is not supported by Github. Falling back to merge strategy set for the repository.',
       );
@@ -3969,6 +4037,7 @@ describe('modules/platform/github/index', () => {
       });
 
       expect(mergeResult).toBeTrue();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           options: {
@@ -4251,6 +4320,7 @@ describe('modules/platform/github/index', () => {
         ]);
       await github.initRepo({ repository: 'some/repo' });
       await github.getVulnerabilityAlerts();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { alerts: { 'npm/left-pad': { '0.0.2': '0.0.3' } } },
         'GitHub vulnerability details',

@@ -1,3 +1,4 @@
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -26,7 +27,10 @@ export class ForgejoPrCache {
     let pullRequestCache = repoCache.platform.forgejo.pullRequestsCache as
       | ForgejoPrCacheData
       | undefined;
-    if (!pullRequestCache || pullRequestCache.author !== author) {
+    if (
+      isNullOrUndefined(pullRequestCache) ||
+      pullRequestCache.author !== author
+    ) {
       pullRequestCache = {
         items: {},
         updated_at: null,

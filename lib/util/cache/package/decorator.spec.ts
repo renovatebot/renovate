@@ -87,7 +87,12 @@ describe('util/cache/package/decorator', () => {
     expect(await obj.fn()).toBe('111');
 
     expect(getValue).toHaveBeenCalledTimes(1);
-    expect(setCache).toHaveBeenCalledOnce();
+    expect(setCache).toHaveBeenCalledExactlyOnceWith(
+      '_test-namespace',
+      'cache-decorator:key',
+      { cachedAt: expect.any(String), value: '111' },
+      30,
+    );
   });
 
   it('caches null values', async () => {

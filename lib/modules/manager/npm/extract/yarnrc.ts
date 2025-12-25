@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import { regEx } from '../../../../util/regex';
 import { Result } from '../../../../util/result';
@@ -13,7 +13,7 @@ export function loadConfigFromLegacyYarnrc(
 ): YarnConfig | null {
   const registryMatches = [...legacyYarnrc.matchAll(registryRegEx)]
     .map((m) => m.groups)
-    .filter(is.truthy);
+    .filter(isTruthy);
 
   const yarnrcConfig: YarnConfig = {};
   for (const registryMatch of registryMatches) {

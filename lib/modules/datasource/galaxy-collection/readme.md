@@ -24,7 +24,7 @@ collections:
       "registryUrls": [
         "https://hub.mydomain.com/api/galaxy/content/community/",
         "https://hub.mydomain.com/api/galaxy/content/certified/",
-        "https://hub.mydomain.com/api/galaxy/content/myprivaterepo/"
+        "https://hub.mydomain.com/api/galaxy/content/myprivaterepo/",
         "https://mydomain.com/artifactory/api/ansible/myrepository/"
       ]
     }

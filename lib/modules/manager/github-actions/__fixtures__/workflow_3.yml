@@ -18,3 +18,6 @@ jobs:
 
       - name: Run a one-line script
         run: echo Hello, world!
+
+      - name: Quoted Docker image reference
+        uses: "docker://busybox:1.37.0-glibc"

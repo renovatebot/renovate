@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isPlainObject } from '@sindresorhus/is';
 import type { InterpolatorOptions } from '../util/interpolator';
 import {
   replaceInterpolatedValuesInObject,
@@ -33,7 +33,7 @@ function validateNestedInterpolatedValues<T extends 'secrets' | 'variables'>(
   validateInterpolatedValues(config[key], options[key]);
   if (config.repositories) {
     for (const repository of config.repositories) {
-      if (is.plainObject(repository)) {
+      if (isPlainObject(repository)) {
         validateInterpolatedValues(repository[key], options[key]);
       }
     }
@@ -66,7 +66,7 @@ export function applySecretsAndVariablesToConfig(
   const variables = applyConfig.variables ?? config.variables;
 
   // Add all secrets to be sanitized
-  if (is.plainObject(secrets)) {
+  if (isPlainObject(secrets)) {
     for (const secret of Object.values(secrets)) {
       addSecretForSanitizing(secret);
     }

@@ -74,7 +74,9 @@ describe('workers/repository/config-migration/branch/rebase', () => {
 
       await rebaseMigrationBranch(config, migratedConfigData);
 
-      expect(scm.checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
+      expect(scm.checkoutBranch).toHaveBeenCalledExactlyOnceWith(
+        config.defaultBranch,
+      );
       expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
     });
 
@@ -92,9 +94,11 @@ describe('workers/repository/config-migration/branch/rebase', () => {
 
         await rebaseMigrationBranch(config, migratedConfigData);
 
-        expect(scm.checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
+        expect(scm.checkoutBranch).toHaveBeenCalledExactlyOnceWith(
+          config.defaultBranch,
+        );
         expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
-        expect(scm.commitAndPush).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
           branchName: 'renovate/migrate-config',
           files: [
             {
@@ -106,6 +110,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
           message: `Migrate config ${filename}`,
           platformCommit: 'auto',
           baseBranch: 'dev',
+          labels: [],
         });
       },
     );

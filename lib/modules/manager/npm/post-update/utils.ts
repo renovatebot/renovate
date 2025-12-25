@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray } from '@sindresorhus/is';
 import semver from 'semver';
 import { logger } from '../../../../logger';
 import { Lazy } from '../../../../util/lazy';
@@ -23,7 +23,7 @@ export function getPackageManagerVersion(
     return version;
   }
   if (pkg.devEngines?.packageManager) {
-    const packageManagers = is.array(pkg.devEngines.packageManager)
+    const packageManagers = isArray(pkg.devEngines.packageManager)
       ? pkg.devEngines.packageManager
       : [pkg.devEngines.packageManager];
     const packageMgr = packageManagers.find((pm) => pm.name === name);

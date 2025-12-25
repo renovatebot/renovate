@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { getPkgReleases } from '..';
+import { setBaseUrl } from '../../../util/http/github';
 import { toBase64 } from '../../../util/string';
 import { TypstDatasource } from '.';
 import * as httpMock from '~test/http-mock';
@@ -53,7 +54,51 @@ describe('modules/datasource/typst/index', () => {
           { version: '1.0.0' },
         ],
         sourceUrl: 'https://github.com/example/repo',
-        registryUrl: 'https://github.com',
+        registryUrl: 'https://api.github.com',
+      });
+    });
+
+    it('request package from github.com even on GitHub Enterprise Server', async () => {
+      const packageName = 'preview/example-package';
+      setBaseUrl('https://github.enterprise.com');
+
+      httpMock
+        .scope(baseUrl)
+        .get(versionsPathFor('example-package'))
+        .reply(200, [
+          { type: 'dir', name: '0.1.0' },
+          { type: 'dir', name: '0.2.0' },
+          { type: 'dir', name: '1.0.0' },
+        ]);
+
+      const metadata = codeBlock`
+        [package]
+        name = "example-package"
+        version = "1.0.0"
+        repository = "https://github.com/example/repo"
+      `;
+
+      httpMock
+        .scope(baseUrl)
+        .get(manifestPathFor('example-package', '1.0.0'))
+        .reply(200, {
+          content: toBase64(metadata),
+          encoding: 'base64',
+        });
+
+      const res = await getPkgReleases({
+        datasource: TypstDatasource.id,
+        packageName,
+      });
+
+      expect(res).toEqual({
+        releases: [
+          { version: '0.1.0' },
+          { version: '0.2.0' },
+          { version: '1.0.0' },
+        ],
+        sourceUrl: 'https://github.com/example/repo',
+        registryUrl: 'https://api.github.com',
       });
     });
 
@@ -117,7 +162,7 @@ describe('modules/datasource/typst/index', () => {
       expect(res).toEqual({
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
         sourceUrl: 'https://github.com/example/repo',
-        registryUrl: 'https://github.com',
+        registryUrl: 'https://api.github.com',
       });
     });
 
@@ -144,7 +189,7 @@ describe('modules/datasource/typst/index', () => {
 
       expect(res).toEqual({
         releases: [{ version: '1.0.0' }],
-        registryUrl: 'https://github.com',
+        registryUrl: 'https://api.github.com',
       });
     });
 

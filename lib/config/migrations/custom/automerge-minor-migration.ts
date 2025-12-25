@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isObject } from '@sindresorhus/is';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class AutomergeMinorMigration extends AbstractMigration {
@@ -8,7 +8,7 @@ export class AutomergeMinorMigration extends AbstractMigration {
   override run(value: unknown): void {
     const minor = this.get('minor');
 
-    const newMinor = is.object(minor) ? minor : {};
+    const newMinor = isObject(minor) ? minor : {};
     newMinor.automerge = Boolean(value);
     this.setHard('minor', newMinor);
   }

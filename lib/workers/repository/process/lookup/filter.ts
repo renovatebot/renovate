@@ -7,6 +7,7 @@ import * as npmVersioning from '../../../../modules/versioning/npm';
 import * as pep440 from '../../../../modules/versioning/pep440';
 import * as poetryVersioning from '../../../../modules/versioning/poetry';
 import { getRegexPredicate } from '../../../../util/string-match';
+import * as template from '../../../../util/template';
 import type { FilterConfig } from './types';
 
 function isReleaseStable(
@@ -24,6 +25,35 @@ function isReleaseStable(
   return true;
 }
 
+function filterByMaxMajorIncrement(
+  releases: Release[],
+  currentVersion: string,
+  maxMajorIncrement: number,
+  versioningApi: VersioningApi,
+  depName: string,
+): Release[] {
+  const currentMajor = versioningApi.getMajor(currentVersion);
+  /* v8 ignore next 3 -- shouldn't happen */
+  if (currentMajor === null) {
+    return releases;
+  }
+  return releases.filter((r) => {
+    const releaseMajor = versioningApi.getMajor(r.version);
+    /* v8 ignore next 3 -- shouldn't happen */
+    if (releaseMajor === null) {
+      return true;
+    }
+    const majorIncrement = releaseMajor - currentMajor;
+    if (majorIncrement > maxMajorIncrement) {
+      logger.once.debug(
+        `Skipping ${depName}@${r.version} because major increment ${majorIncrement} exceeds maxMajorIncrement ${maxMajorIncrement}`,
+      );
+      return false;
+    }
+    return true;
+  });
+}
+
 export function filterVersions(
   config: FilterConfig,
   currentVersion: string,
@@ -31,29 +61,27 @@ export function filterVersions(
   releases: Release[],
   versioningApi: VersioningApi,
 ): Release[] {
-  const { ignoreUnstable, ignoreDeprecated, respectLatest, allowedVersions } =
+  const { ignoreUnstable, ignoreDeprecated, respectLatest, maxMajorIncrement } =
     config;
 
-  // istanbul ignore if: shouldn't happen
+  /* v8 ignore next 3 -- shouldn't happen */
   if (!currentVersion) {
     return [];
   }
 
   // Leave only versions greater than current
-  let filteredReleases = releases.filter(
-    (r) =>
-      versioningApi.isVersion(r.version) &&
-      versioningApi.isGreaterThan(r.version, currentVersion),
+  const versionedReleases = releases.filter((r) =>
+    versioningApi.isVersion(r.version),
+  );
+  let filteredReleases = versionedReleases.filter((r) =>
+    versioningApi.isGreaterThan(r.version, currentVersion),
   );
 
-  const currentRelease = releases.find(
-    (r) =>
-      versioningApi.isValid(r.version) &&
-      versioningApi.isVersion(r.version) &&
-      versioningApi.isValid(currentVersion) &&
-      versioningApi.isVersion(currentVersion) &&
-      versioningApi.equals(r.version, currentVersion),
-  );
+  const currentRelease = versioningApi.isVersion(currentVersion)
+    ? versionedReleases.find((r) =>
+        versioningApi.equals(r.version, currentVersion),
+      )
+    : undefined;
 
   // Don't upgrade from non-deprecated to deprecated
   if (ignoreDeprecated && currentRelease && !currentRelease.isDeprecated) {
@@ -68,7 +96,28 @@ export function filterVersions(
     });
   }
 
-  if (allowedVersions) {
+  if (maxMajorIncrement && maxMajorIncrement > 0) {
+    filteredReleases = filterByMaxMajorIncrement(
+      filteredReleases,
+      currentVersion,
+      maxMajorIncrement,
+      versioningApi,
+      config.depName!,
+    );
+  }
+
+  const currentMajor = versioningApi.getMajor(currentVersion);
+  const currentMinor = versioningApi.getMinor(currentVersion);
+  const currentPatch = versioningApi.getPatch(currentVersion);
+
+  if (config.allowedVersions) {
+    const input = {
+      currentVersion,
+      major: currentMajor,
+      minor: currentMinor,
+      patch: currentPatch,
+    };
+    const allowedVersions = template.compile(config.allowedVersions, input);
     const isAllowedPred = getRegexPredicate(allowedVersions);
     if (isAllowedPred) {
       filteredReleases = filteredReleases.filter(({ version }) =>
@@ -139,10 +188,6 @@ export function filterVersions(
   if (currentRelease && isReleaseStable(currentRelease, versioningApi)) {
     return filteredReleases.filter((r) => isReleaseStable(r, versioningApi));
   }
-
-  const currentMajor = versioningApi.getMajor(currentVersion);
-  const currentMinor = versioningApi.getMinor(currentVersion);
-  const currentPatch = versioningApi.getPatch(currentVersion);
 
   return filteredReleases.filter((r) => {
     if (isReleaseStable(r, versioningApi)) {

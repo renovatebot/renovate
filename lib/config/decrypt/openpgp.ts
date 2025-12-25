@@ -8,10 +8,6 @@ export async function tryDecryptOpenPgp(
   privateKey: string,
   encryptedStr: string,
 ): Promise<string | null> {
-  if (encryptedStr.length < 500) {
-    // optimization during transition of public key -> pgp
-    return null;
-  }
   if (pgp === undefined) {
     try {
       pgp = openpgp();

@@ -1,4 +1,9 @@
-import is from '@sindresorhus/is';
+import {
+  isArray,
+  isNonEmptyObject,
+  isNullOrUndefined,
+  isPlainObject,
+} from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import {
   PLATFORM_BAD_CREDENTIALS,
@@ -10,6 +15,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { getCache } from '../cache/repository';
 import { getEnv } from '../env';
+import * as hostRules from '../host-rules';
 import { maskToken } from '../mask';
 import * as p from '../promises';
 import { range } from '../range';
@@ -70,7 +76,7 @@ function handleGotError(
   const path = url.toString();
   let message = err.message || '';
   const body = err.response?.body;
-  if (is.plainObject(body) && 'message' in body) {
+  if (isPlainObject(body) && 'message' in body) {
     message = String(body.message);
   }
   if (
@@ -111,6 +117,30 @@ function handleGotError(
   }
   if (err.statusCode === 403 && message.includes('rate limit exceeded')) {
     logger.debug({ err }, 'GitHub failure: rate limit');
+
+    const parsed = parseUrl(baseUrl);
+
+    const rule = hostRules.find({ url: baseUrl });
+    if (rule.token || rule.password) {
+      logger.once.warn(
+        'Rate limit exceeded for api.github.com, even though we are authenticated',
+      );
+    } else {
+      if (parsed?.hostname === 'api.github.com') {
+        logger.once.warn(
+          {
+            documentationUrl:
+              'https://docs.renovatebot.com/getting-started/running/#githubcom-token-for-changelogs-and-tools',
+          },
+          `Rate limit exceeded for ${parsed.host}, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN`,
+        );
+      } else {
+        logger.once.warn(
+          `Rate limit exceeded for ${parsed!.host}, as no hostRules set for this host`,
+        );
+      }
+    }
+
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (
@@ -386,22 +416,22 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
           },
         );
         const pages = await p.all(queue);
-        if (httpOptions.paginationField && is.plainObject(result.body)) {
+        if (httpOptions.paginationField && isPlainObject(result.body)) {
           const paginatedResult = result.body[httpOptions.paginationField];
-          if (is.array<T>(paginatedResult)) {
+          if (isArray<T>(paginatedResult)) {
             for (const nextPage of pages) {
-              if (is.plainObject(nextPage.body)) {
+              if (isPlainObject(nextPage.body)) {
                 const nextPageResults =
                   nextPage.body[httpOptions.paginationField];
-                if (is.array<T>(nextPageResults)) {
+                if (isArray<T>(nextPageResults)) {
                   paginatedResult.push(...nextPageResults);
                 }
               }
             }
           }
-        } else if (is.array<T>(result.body)) {
+        } else if (isArray<T>(result.body)) {
           for (const nextPage of pages) {
-            if (is.array<T>(nextPage.body)) {
+            if (isArray<T>(nextPage.body)) {
               result.body.push(...nextPage.body);
             }
           }
@@ -479,8 +509,8 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       });
       const repositoryData = res?.data?.repository;
       if (
-        is.nonEmptyObject(repositoryData) &&
-        !is.nullOrUndefined(repositoryData[fieldName])
+        isNonEmptyObject(repositoryData) &&
+        !isNullOrUndefined(repositoryData[fieldName])
       ) {
         optimalCount = count;
 

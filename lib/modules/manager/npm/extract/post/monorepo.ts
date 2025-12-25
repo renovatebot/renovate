@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isArray, isString } from '@sindresorhus/is';
 import { logger } from '../../../../../logger';
 import { getParentDir, getSiblingFileName } from '../../../../../util/fs';
 import type { PackageFile } from '../../../types';
@@ -24,7 +24,7 @@ export async function detectMonorepos(
     const packages = workspacesPackages as string[] | undefined;
     if (packages?.length) {
       const internalPackagePatterns = (
-        is.array(packages) ? packages : [packages]
+        isArray(packages) ? packages : [packages]
       ).map((pattern) => getSiblingFileName(packageFile!, pattern));
       const internalPackageFiles = packageFiles.filter((sp) =>
         matchesAnyPattern(
@@ -38,7 +38,7 @@ export async function detectMonorepos(
 
       p.deps?.forEach((dep) => {
         if (
-          is.string(dep.depName) &&
+          isString(dep.depName) &&
           internalPackageNames.includes(dep.depName)
         ) {
           dep.isInternal = true;

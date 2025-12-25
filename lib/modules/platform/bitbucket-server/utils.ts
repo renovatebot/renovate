@@ -1,6 +1,6 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
 import { URL } from 'node:url';
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
@@ -70,7 +70,7 @@ export function getInvalidReviewers(err: BitbucketError): string[] {
       invalidReviewers = invalidReviewers.concat(
         error.reviewerErrors
           ?.map(({ context }) => context)
-          .filter(is.nonEmptyString) ?? [],
+          .filter(isNonEmptyString) ?? [],
       );
     }
   }
@@ -89,9 +89,8 @@ function generateUrlFromEndpoint(
     // TODO: types (#22198)
     auth: `${opts.username}:${opts.password}`,
     host: `${url.host}${url.pathname}${
-      /* v8 ignore start */
+      /* v8 ignore next */
       url.pathname.endsWith('/') ? '' : '/'
-      /* v8 ignore stop */
     }scm`,
     repository,
   });

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isPlainObject } from '@sindresorhus/is';
 import { parseDepsEdnFile } from './parser';
 import { Fixtures } from '~test/fixtures';
 
@@ -47,9 +47,9 @@ describe('modules/manager/deps-edn/parser', () => {
       });
 
       const dep =
-        is.plainObject(res) &&
-        is.plainObject(res.data.deps) &&
-        is.plainObject(res.data.deps['persistent-sorted-set']) &&
+        isPlainObject(res) &&
+        isPlainObject(res.data.deps) &&
+        isPlainObject(res.data.deps['persistent-sorted-set']) &&
         res.data.deps['persistent-sorted-set'];
       expect(dep && res?.metadata?.get(dep)).toEqual({
         replaceString: '{:mvn/version,"0.1.2"}',

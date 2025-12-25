@@ -8,6 +8,7 @@ import { resetPrefetchedImages } from '../../../util/exec/docker';
 import { ExecError } from '../../../util/exec/exec-error';
 import type { StatusResult } from '../../../util/git/types';
 import { getPkgReleases } from '../../datasource';
+import { isGradleExecutionAllowed } from './artifacts';
 import { updateArtifacts } from '.';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
 import { env, fs, git, logger, partial, scm } from '~test/util';
@@ -82,6 +83,54 @@ describe('modules/manager/gradle/artifacts', () => {
     });
   });
 
+  describe('isGradleExecutionAllowed', () => {
+    it('returns true when allowedUnsafeExecutions is empty (as it is a default option)', () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedUnsafeExecutions: undefined,
+      });
+
+      const res = isGradleExecutionAllowed('gradlew');
+
+      expect(res).toBeTrue();
+    });
+
+    it('returns true when allowedUnsafeExecutions includes `gradleWrapper`', () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedUnsafeExecutions: ['gradleWrapper'],
+      });
+
+      const res = isGradleExecutionAllowed('gradlew');
+
+      expect(res).toBeTrue();
+    });
+
+    it('returns false when allowedUnsafeExecutions does not include `gradleWrapper`', () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedUnsafeExecutions: [],
+      });
+
+      const res = isGradleExecutionAllowed('gradlew');
+
+      expect(res).toBeFalse();
+    });
+
+    it('logs when allowedUnsafeExecutions does not include `gradleWrapper`', () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedUnsafeExecutions: [],
+      });
+
+      isGradleExecutionAllowed('some_gradle-wrapper.command');
+
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        'Gradle wrapper command, `some_gradle-wrapper.command`, was requested to run, but `gradleWrapper` is not permitted in the allowedUnsafeExecutions',
+      );
+    });
+  });
+
   describe('lockfile tests', () => {
     it('aborts if no lockfile is found', async () => {
       const execSnapshots = mockExecAll();
@@ -117,6 +166,32 @@ describe('modules/manager/gradle/artifacts', () => {
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Found Gradle dependency lockfiles but no gradlew - aborting update',
+      );
+      expect(execSnapshots).toBeEmptyArray();
+    });
+
+    it('aborts if allowedUnsafeExecutions does not include `gradleWrapper`', async () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedUnsafeExecutions: [],
+      });
+
+      const execSnapshots = mockExecAll();
+
+      expect(
+        await updateArtifacts({
+          packageFileName: 'build.gradle',
+          updatedDeps: [
+            { depName: 'org.junit.jupiter:junit-jupiter-api' },
+            { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+          ],
+          newPackageFileContent: '',
+          config: {},
+        }),
+      ).toBeNull();
+
+      expect(logger.logger.trace).toHaveBeenCalledWith(
+        'Not allowed to execute gradle due to allowedUnsafeExecutions - aborting update',
       );
       expect(execSnapshots).toBeEmptyArray();
     });
@@ -585,6 +660,40 @@ describe('modules/manager/gradle/artifacts', () => {
           },
         },
       ]);
+    });
+
+    it('aborts verification metadata updates if allowedUnsafeExecutions does not include `gradleWrapper`', async () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedUnsafeExecutions: [],
+      });
+
+      const execSnapshots = mockExecAll();
+      scm.getFileList.mockResolvedValue([
+        'gradlew',
+        'build.gradle',
+        'gradle/wrapper/gradle-wrapper.properties',
+        'gradle/verification-metadata.xml',
+      ]);
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['build.gradle', 'gradle/verification-metadata.xml'],
+        }),
+      );
+
+      expect(
+        await updateArtifacts({
+          packageFileName: 'build.gradle',
+          updatedDeps: [
+            { depName: 'org.junit.jupiter:junit-jupiter-api' },
+            { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+          ],
+          newPackageFileContent: '',
+          config: {},
+        }),
+      ).toBeNull();
+
+      expect(execSnapshots).toBeEmptyArray();
     });
 
     it('updates existing checksums also if verify-checksums is disabled', async () => {

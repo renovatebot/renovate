@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isEmptyObject, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { z } from 'zod';
 import {
@@ -13,6 +13,7 @@ import {
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
+  deleteLocalFile,
   ensureCacheDir,
   ensureLocalDir,
   getSiblingFileName,
@@ -101,7 +102,7 @@ function getAuthJson(): string | null {
     }
   }
 
-  return is.emptyObject(authJson) ? null : JSON.stringify(authJson);
+  return isEmptyObject(authJson) ? null : JSON.stringify(authJson);
 }
 
 export async function updateArtifacts({
@@ -172,6 +173,13 @@ export async function updateArtifacts({
       commands.push('git stash pop || true');
     }
 
+    if (config.isLockFileMaintenance) {
+      logger.debug(
+        `Removing ${lockFileName} first due to lock file maintenance upgrade`,
+      );
+      await deleteLocalFile(lockFileName);
+    }
+
     const cmd = 'composer';
     let args: string;
     if (config.isLockFileMaintenance) {
@@ -186,7 +194,7 @@ export async function updateArtifacts({
                 ? quote(`${dep.depName}:${dep.newVersion}`)
                 : quote(dep.depName!),
             )
-            .filter(is.string)
+            .filter(isString)
             .map((dep) => quote(dep))
             .join(' ')
         ).trim() +

@@ -28,6 +28,7 @@ path_dep_without_version = { path = "foo" }
 git_dep_with_tag = { git = "https://github.com/foo/bar", tag = "1.10.3" }
 git_dep_with_rev = { git = "https://github.com/foo/bar", rev = "abc1234" }
 git_dep_with_branch = { git = "https://github.com/foo/bar", branch = "next" }
+git_dep_with_custom_hostname = { git = "ssh://git@git.example.com/a/b.git", tag = "1.0.0", version = "1.0.0" }
 same_version_1__ = "0.0.0"
 same_version_1_ = "0.0.0"
 same_version_1 = "0.0.0"

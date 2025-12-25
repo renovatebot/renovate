@@ -10,8 +10,6 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
 import * as nodeVersioning from '../../versioning/node';
 import * as npmVersioning from '../../versioning/npm';
-import * as rubyVersioning from '../../versioning/ruby';
-import * as semanticVersioning from '../../versioning/semver';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -22,7 +20,7 @@ import { CommunityActions } from './community';
 import type { Steps } from './schema';
 import { Workflow } from './schema';
 
-const dockerActionRe = regEx(/^\s+uses\s*: ['"]?docker:\/\/([^'"]+)\s*$/);
+const dockerActionRe = regEx(/^\s+uses\s*: ['"]?docker:\/\/([^'"\s]+)/);
 const actionRe = regEx(
   /^\s+-?\s+?uses\s*: (?<replaceString>['"]?(?<depName>(?<registryUrl>https:\/\/[.\w-]+\/)?(?<packageName>[\w-]+\/[.\w-]+))(?<path>\/.*)?@(?<currentValue>[^\s'"]+)['"]?(?:(?<commentWhiteSpaces>\s+)#\s*(((?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+\/[.\w-]+)?)@?(?<tag>([\w-]*[-/])?v?\d+(?:\.\d+(?:\.\d+)?)?)|(?:ratchet:exclude)))?)/,
 );
@@ -177,13 +175,11 @@ function extractRunner(runner: string): PackageDependency | null {
   return dependency;
 }
 
+// For official https://github.com/actions
 const versionedActions: Record<string, string> = {
-  bun: npmVersioning.id,
-  deno: semanticVersioning.id,
   go: npmVersioning.id,
   node: nodeVersioning.id,
   python: npmVersioning.id,
-  ruby: rubyVersioning.id,
 
   // Not covered yet because they use different datasources/packageNames:
   // - dotnet

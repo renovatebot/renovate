@@ -38,7 +38,9 @@
     "config.js",
     "tmp",
     "tools/mkdocs/docs",
-    "tools/mkdocs/site"
+    "tools/mkdocs/site",
+    ".github/workflows/**/*.js",
+    ".worktrees/**/*"
   ],
   "ts-node": {
     "transpileOnly": true,

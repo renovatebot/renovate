@@ -63,7 +63,7 @@ const dockerAdminConfig = {
   ...adminConfig,
   binarySource: 'docker',
   dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
-};
+} satisfies RepoGlobalConfig;
 
 process.env.CONTAINERBASE = 'true';
 
@@ -132,6 +132,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         },
       }),
     ).toBeNull();
+
     expect(logger.warn).toHaveBeenCalledWith(
       { packageFileName: 'requirements.in' },
       'pip-compile: No lock files associated with a package file',
