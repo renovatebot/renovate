@@ -1,5 +1,6 @@
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { NpmDatasource } from '../../datasource/npm';
 
 export { extractPackageFile } from './extract';
 export { updateDependency } from './update';
@@ -14,4 +15,5 @@ export const defaultConfig = {
 export const supportedDatasources = [
   GithubTagsDatasource.id,
   GithubReleasesDatasource.id,
+  NpmDatasource.id,
 ];
