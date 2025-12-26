@@ -229,7 +229,7 @@ describe('workers/repository/onboarding/pr/index', () => {
 
     it('ensures comment,when onboarding pr is older than onboardingAutoCloseAge', async () => {
       config.baseBranch = 'some-branch';
-      GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+      config.onboardingAutoCloseAge = 1;
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
           title: 'Configure Renovate',

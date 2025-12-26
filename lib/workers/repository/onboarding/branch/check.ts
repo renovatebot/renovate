@@ -1,6 +1,5 @@
 import { isNonEmptyObject } from '@sindresorhus/is';
 import { getConfigFileNames } from '../../../../config/app-strings';
-import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import {
   REPOSITORY_CLOSED_ONBOARDING,
@@ -160,7 +159,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   logger.debug('Repo is not onboarded and no merged PRs exist');
   if (!config.suppressNotifications!.includes('onboardingClose')) {
     const ageOfOnboardingPr = getElapsedDays(closedOnboardingPr.createdAt!);
-    const onboardingAutoCloseAge = GlobalConfig.get('onboardingAutoCloseAge');
+    const onboardingAutoCloseAge = config.onboardingAutoCloseAge;
     if (
       !onboardingAutoCloseAge ||
       ageOfOnboardingPr <= onboardingAutoCloseAge

@@ -53,7 +53,7 @@ export async function ensureOnboardingPr(
   if (existingPr) {
     // check if the existing pr crosses the onboarding autoclose age
     const ageOfOnboardingPr = getElapsedDays(existingPr.createdAt!);
-    const onboardingAutoCloseAge = GlobalConfig.get('onboardingAutoCloseAge')!;
+    const onboardingAutoCloseAge = config.onboardingAutoCloseAge;
     if (
       isNumber(onboardingAutoCloseAge) &&
       ageOfOnboardingPr > onboardingAutoCloseAge
