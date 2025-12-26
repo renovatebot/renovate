@@ -91,11 +91,7 @@ describe('modules/manager/homebrew/handlers/github', () => {
         urlType: 'releases' as const,
       };
 
-      const dep = handler.createDependency(
-        parsed,
-        '0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7',
-        'https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz',
-      );
+      const dep = handler.createDependency(parsed);
 
       expect(dep).toMatchObject({
         datasource: 'github-releases',
@@ -113,11 +109,7 @@ describe('modules/manager/homebrew/handlers/github', () => {
         urlType: 'archive' as const,
       };
 
-      const dep = handler.createDependency(
-        parsed,
-        '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
-        'https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz',
-      );
+      const dep = handler.createDependency(parsed);
 
       expect(dep).toMatchObject({
         datasource: 'github-tags',
