@@ -144,7 +144,7 @@
   },
   "volta": {
     "node": "24.12.0",
-    "pnpm": "10.26.0"
+    "pnpm": "10.26.1"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.940.0",
@@ -163,19 +163,19 @@
     "@opentelemetry/instrumentation": "0.208.0",
     "@opentelemetry/instrumentation-bunyan": "0.54.0",
     "@opentelemetry/instrumentation-http": "0.208.0",
-    "@opentelemetry/instrumentation-redis": "0.57.1",
-    "@opentelemetry/resource-detector-aws": "2.8.0",
-    "@opentelemetry/resource-detector-azure": "0.16.0",
-    "@opentelemetry/resource-detector-gcp": "0.43.0",
-    "@opentelemetry/resource-detector-github": "0.31.2",
+    "@opentelemetry/instrumentation-redis": "0.57.2",
+    "@opentelemetry/resource-detector-aws": "2.9.0",
+    "@opentelemetry/resource-detector-azure": "0.17.0",
+    "@opentelemetry/resource-detector-gcp": "0.44.0",
+    "@opentelemetry/resource-detector-github": "0.32.0",
     "@opentelemetry/resources": "2.2.0",
     "@opentelemetry/sdk-trace-base": "2.2.0",
     "@opentelemetry/sdk-trace-node": "2.2.0",
     "@opentelemetry/semantic-conventions": "1.38.0",
     "@pnpm/parse-overrides": "1001.0.3",
     "@qnighy/marshal": "0.1.3",
-    "@renovatebot/detect-tools": "1.2.5",
-    "@renovatebot/osv-offline": "2.0.0",
+    "@renovatebot/detect-tools": "1.2.6",
+    "@renovatebot/osv-offline": "2.0.1",
     "@renovatebot/pep440": "4.2.1",
     "@renovatebot/pgp": "1.2.2",
     "@renovatebot/ruby-semver": "4.1.2",
@@ -209,7 +209,7 @@
     "extract-zip": "2.0.1",
     "find-packages": "10.0.4",
     "find-up": "7.0.0",
-    "fs-extra": "11.3.2",
+    "fs-extra": "11.3.3",
     "git-url-parse": "16.1.0",
     "github-url-from-git": "1.5.0",
     "glob": "11.1.0",
@@ -262,7 +262,7 @@
     "tslib": "2.8.1",
     "upath": "2.0.1",
     "url-join": "5.0.0",
-    "validate-npm-package-name": "7.0.0",
+    "validate-npm-package-name": "7.0.1",
     "xmldoc": "2.0.3",
     "yaml": "2.8.2",
     "zod": "3.25.76"
@@ -281,7 +281,7 @@
     "@ls-lint/ls-lint": "2.3.1",
     "@openpgp/web-stream-tools": "0.3.0",
     "@semantic-release/exec": "7.1.0",
-    "@smithy/util-stream": "4.5.7",
+    "@smithy/util-stream": "4.5.8",
     "@types/auth-header": "1.0.6",
     "@types/aws4": "1.11.6",
     "@types/better-sqlite3": "7.6.13",
@@ -360,7 +360,7 @@
     "vitest": "4.0.16",
     "vitest-mock-extended": "3.1.0"
   },
-  "packageManager": "pnpm@10.26.0",
+  "packageManager": "pnpm@10.26.1",
   "files": [
     "dist",
     "renovate-schema.json"
