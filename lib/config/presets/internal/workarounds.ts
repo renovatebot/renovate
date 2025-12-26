@@ -41,6 +41,7 @@ export const presets: Record<string, Preset> = {
           'bitnami/**',
           'docker.io/bitnami/**',
           'gcr.io/bitnami-containers/**',
+          '*-docker.pkg.dev/vmw-app-catalog/**',
         ],
         versioning:
           'regex:^(?<major>\\d+)(?:\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?)?(:?-(?<compatibility>.+)-(?<build>\\d+)(?:-r(?<revision>\\d+))?)?$',
