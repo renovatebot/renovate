@@ -718,6 +718,7 @@ export async function processBranch(
     if (branchPr) {
       const platformPrOptions = getPlatformPrOptions(config);
       if (
+        commitSha &&
         platformPrOptions.usePlatformAutomerge &&
         platform.reattemptPlatformAutomerge
       ) {
