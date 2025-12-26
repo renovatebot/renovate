@@ -1,6 +1,7 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
+import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -22,6 +23,21 @@ import {
   isGcvPropsFile,
 } from './extract/consistent-versions-plugin';
 import { isGradleBuildFile } from './utils';
+
+export function isGradleExecutionAllowed(command: string): boolean {
+  const allowlist = GlobalConfig.get('allowedUnsafeExecutions', [
+    'gradleWrapper',
+  ]);
+
+  if (!allowlist.includes('gradleWrapper')) {
+    logger.once.warn(
+      `Gradle wrapper command, \`${command}\`, was requested to run, but \`gradleWrapper\` is not permitted in the allowedUnsafeExecutions`,
+    );
+    return false;
+  }
+
+  return true;
+}
 
 // .lockfile is gradle default lockfile, /versions.lock is gradle-consistent-versions plugin lockfile
 function isLockFile(fileName: string): boolean {
@@ -173,6 +189,13 @@ export async function updateArtifacts({
   ) {
     logger.trace(
       'No build.gradle(.kts) file or not in root project - skipping lock file maintenance',
+    );
+    return null;
+  }
+
+  if (!isGradleExecutionAllowed(gradlewFile)) {
+    logger.trace(
+      'Not allowed to execute gradle due to allowedUnsafeExecutions - aborting update',
     );
     return null;
   }
