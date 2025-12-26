@@ -291,7 +291,11 @@ export async function doAutoReplace(
       } else if (
         currentDigestShort &&
         newDigest &&
-        currentDigestShort !== newDigest
+        currentDigestShort !== newDigest &&
+        // Only use short digest replacement when there's no full currentDigest
+        // that already matches newDigest (otherwise we'd incorrectly replace
+        // part of an already-correct digest)
+        !(currentDigest && currentDigest === newDigest)
       ) {
         if (!newString.includes(currentDigestShort)) {
           logger.debug(
