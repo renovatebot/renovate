@@ -41,6 +41,7 @@ import type {
   ValidationResult,
 } from './types';
 import { allowedStatusCheckStrings } from './types';
+import { validateExtractVersion } from './validation-helpers/extract-version';
 import * as matchBaseBranchesValidator from './validation-helpers/match-base-branches';
 import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers';
 import {
@@ -279,6 +280,14 @@ export async function validateConfig(
             topic: 'Configuration Error',
             message: `Invalid ${currentPath}: \`${errorMessage}\``,
           });
+        }
+      } else if (key === 'extractVersion') {
+        const validationWarning = validateExtractVersion(
+          val as string | [string] | [string, string],
+          currentPath,
+        );
+        if (validationWarning) {
+          warnings.push(validationWarning);
         }
       } else if (
         [

@@ -35,7 +35,7 @@ Given the above `.tfvars` file, you put this in your `renovate.json`:
     {
       "matchDatasources": ["endoflife-date"],
       "matchPackageNames": ["amazon-eks"],
-      "extractVersion": "^(?<version>.*)-eks.+$"
+      "extractVersion": ["^(?<version>.*)-eks.+$"]
     }
   ]
 }

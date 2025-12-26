@@ -1675,50 +1675,69 @@ Learn how to use presets by reading the [Key concepts, Presets](./key-concepts/p
 
 ## extractVersion
 
-Only use this config option when the raw version strings from the datasource do not match the expected format that you need in your package file.
-You must define a "named capture group" called `version` like in the examples below.
+Only use this config option when the raw version strings from the datasource do not match the expected format that you need in your package file. This is particularly useful when:
 
-For example, to extract only the major.minor precision from a GitHub release, the following would work:
+- The datasource returns a version in a format that is not same as the version format in your package file
+- You want to extract a specific part of a version string
 
-```json
-{
-  "packageRules": [
-    {
-      "matchPackageNames": ["foo"],
-      "extractVersion": "^(?<version>v\\d+\\.\\d+)"
-    }
-  ]
-}
-```
+**Array Format**: Must be an array with 1 or 2 elements:
 
-The above will change a raw version of `v1.31.5` to `v1.31`, for example.
+- First element (required): A regex pattern with at least one named capture group (e.g., `version`)
+- Second element (optional): A handlebars template string for custom formatting using the captured groups
 
-Alternatively, to strip a `release-` prefix:
+**Basic Extraction**
+
+Provide just a regex pattern with a named capture group to extract part of a version string:
 
 ```json
 {
   "packageRules": [
     {
-      "matchPackageNames": ["bar"],
-      "extractVersion": "^release-(?<version>.*)$"
+      "matchPackageNames": ["my-package"],
+      "extractVersion": ["^(?<version>v\\d+\\.\\d+)"]
     }
   ]
 }
 ```
 
-The above will change a raw version of `release-2.0.0` to `2.0.0`, for example.
-A similar one could strip leading `v` prefixes:
+This extracts the captured `version` group, transforming `v1.31.5` to `v1.31`
+
+**Pattern with Custom Formatting**
+
+For more control over the output, provide both a pattern and a handlebars template:
 
 ```json
 {
   "packageRules": [
     {
-      "matchPackageNames": ["baz"],
-      "extractVersion": "^v(?<version>.*)$"
+      "matchPackageNames": ["my-package"],
+      "extractVersion": ["^release-(?<version>.*)$", "v{{version}}"]
     }
   ]
 }
 ```
+
+This transforms `release-2.0.0` to `v2.0.0`
+
+**Complex Transformations**
+
+Use multiple named capture groups and handlebars logic for advanced transformations:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["my-package"],
+      "extractVersion": [
+        "^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<prerelease>.*))?$",
+        "{{major}}-{{minor}}-{{patch}}{{#if prerelease}}-{{prerelease}}{{/if}}"
+      ]
+    }
+  ]
+}
+```
+
+This would transform to `1.2.3` to `1-2-3` or in case of pre releases `1.2.3-beta.1` to `1-2-3-beta.1`
 
 ## fetchChangeLogs
 

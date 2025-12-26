@@ -101,6 +101,10 @@ function updateDependency(
     case 'datasource':
       dependency.datasource = migrateDatasource(value);
       break;
+    case 'extractVersion':
+      // Convert extractVersion to array format
+      dependency.extractVersion = [value];
+      break;
     default:
       dependency[field] = value;
       break;

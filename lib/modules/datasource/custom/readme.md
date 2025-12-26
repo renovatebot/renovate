@@ -449,7 +449,7 @@ Let's use nginx itself as an example:
   "packageRules": [
     {
       "matchDatasources": ["custom.nginx"],
-      "extractVersion": "^nginx-(?<version>.+)\\.tar\\.gz$"
+      "extractVersion": ["^nginx-(?<version>.+)\\.tar\\.gz$"]
     }
   ]
 }
@@ -470,7 +470,7 @@ You can use the `html` format to extract versions from a typical "Downloads" pag
   "packageRules": [
     {
       "matchDatasources": ["custom.curl"],
-      "extractVersion": "/curl-(?<version>.+)\\.tar\\.gz$"
+      "extractVersion": ["/curl-(?<version>.+)\\.tar\\.gz$"]
     }
   ]
 }

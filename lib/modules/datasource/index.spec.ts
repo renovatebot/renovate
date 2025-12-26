@@ -361,7 +361,7 @@ describe('modules/datasource/index', () => {
       const res = await getPkgReleases({
         datasource,
         packageName,
-        extractVersion: '^(?<version>v\\d+\\.\\d+)',
+        extractVersion: ['^(?<version>v\\d+\\.\\d+)'],
         versioning: 'loose',
       });
       expect(res).toMatchObject({ releases: [{ version: 'v4.3' }] });
@@ -989,6 +989,36 @@ describe('modules/datasource/index', () => {
             ],
           });
         });
+      });
+    });
+
+    it('applies extractVersion with array format', async () => {
+      const registries: RegistriesMock = {
+        'https://reg1.com': {
+          releases: [
+            { version: '1.2.3' },
+            { version: '2.4.6' },
+            { version: 'v3.0.0' },
+            { version: 'invalid-version' },
+          ],
+        },
+      };
+      datasources.set(datasource, new DummyDatasource(registries));
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName,
+        extractVersion: [
+          '^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
+          '{{major}}-{{minor}}-{{patch}}',
+        ],
+        versioning: 'loose',
+      });
+      expect(res).toMatchObject({
+        releases: [
+          { version: '1-2-3', versionOrig: '1.2.3' },
+          { version: '2-4-6', versionOrig: '2.4.6' },
+        ],
       });
     });
   });

@@ -83,7 +83,7 @@ describe('config/presets/internal/custom-managers', () => {
           replaceString:
             '# renovate: datasource=github-releases depName=hashicorp/terraform versioning=hashicorp extractVersion=^v(?<version>.+)$\n          TERRAFORM_VERSION: 1.5.7\n',
           versioning: 'hashicorp',
-          extractVersion: '^v(?<version>.+)$',
+          extractVersion: ['^v(?<version>.+)$'],
         },
         {
           currentValue: 'kustomize/v5.2.1',
@@ -260,7 +260,7 @@ describe('config/presets/internal/custom-managers', () => {
           depName: 'kubernetes-sigs/kustomize',
           replaceString:
             '# renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$ extractVersion=^kustomize/(?<version>.+)$\n  - export KUSTOMIZE_VERSION v5.2.1\n',
-          extractVersion: '^kustomize/(?<version>.+)$',
+          extractVersion: ['^kustomize/(?<version>.+)$'],
           versioning:
             'regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
         },
@@ -385,7 +385,7 @@ describe('config/presets/internal/custom-managers', () => {
           depName: 'kubernetes-sigs/kustomize',
           replaceString:
             '# renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$ extractVersion=^kustomize/(?<version>.+)$\nENV KUSTOMIZE_VERSION v5.2.1\n',
-          extractVersion: '^kustomize/(?<version>.+)$',
+          extractVersion: ['^kustomize/(?<version>.+)$'],
           versioning:
             'regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
         },
@@ -492,7 +492,7 @@ describe('config/presets/internal/custom-managers', () => {
           replaceString:
             '# renovate: datasource=github-releases depName=hashicorp/terraform versioning=hashicorp extractVersion=^v(?<version>.+)$\n  TERRAFORM_VERSION: 1.5.7\n',
           versioning: 'hashicorp',
-          extractVersion: '^v(?<version>.+)$',
+          extractVersion: ['^v(?<version>.+)$'],
         },
         {
           currentValue: 'kustomize/v5.2.1',

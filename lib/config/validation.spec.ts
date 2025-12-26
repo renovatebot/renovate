@@ -2244,4 +2244,115 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
     });
   });
+
+  describe('validateConfig() -> extractVersion validation', () => {
+    it('returns no warning when extractVersion template variables match regex capture groups', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchPackageNames: ['test'],
+            extractVersion: ['^(?<version>\\d+\\.\\d+)', '{{version}}'] as [
+              string,
+              string,
+            ],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('returns warning when extractVersion template uses uncaptured variables', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchPackageNames: ['test'],
+            extractVersion: ['^(?<version>\\d+)', '{{major}}.{{minor}}'] as [
+              string,
+              string,
+            ],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toMatchObject([
+        {
+          topic: 'Configuration Warning',
+          message: expect.stringContaining('major, minor'),
+        },
+      ]);
+      expect(warnings[0].message).toContain(
+        'not captured by the regex pattern',
+      );
+      expect(warnings[0].message).toContain('packageRules[0].extractVersion');
+    });
+
+    it('validates extractVersion at top level', async () => {
+      const config = {
+        extractVersion: ['^(?<version>\\d+)', '{{major}}.{{minor}}'] as [
+          string,
+          string,
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toMatchObject([
+        {
+          topic: 'Configuration Warning',
+          message: expect.stringContaining('major, minor'),
+        },
+      ]);
+      expect(warnings[0].message).toContain('extractVersion');
+    });
+
+    it('allows complex templates with conditionals when all variables are captured', async () => {
+      const config = {
+        extractVersion: [
+          '^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<prerelease>.*))?$',
+          '{{major}}.{{minor}}.{{patch}}{{#if prerelease}}-{{prerelease}}{{/if}}',
+        ] as [string, string],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('does not validate string format (legacy)', async () => {
+      const config = {
+        extractVersion: '^(?<version>\\d+)',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('does not validate single-element array format', async () => {
+      const config = {
+        extractVersion: ['^(?<version>\\d+)'] as [string],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+  });
 });

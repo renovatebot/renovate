@@ -129,7 +129,7 @@ To let Renovate use the Azure DevOps internal API, you must set these variables 
   "packageRules": [
     {
       "matchDatasources": ["azure-pipelines-tasks"],
-      "extractVersion": "^(?<version>\\d+)"
+      "extractVersion": ["^(?<version>\\d+)"]
     }
   ]
 }
