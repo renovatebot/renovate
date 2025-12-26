@@ -177,6 +177,28 @@ describe('modules/manager/flux/extract', () => {
       });
     });
 
+    it('uses registryAliases with an OCI URL for HelmRelease sourceRef name', () => {
+      const result = extractPackageFile(
+        Fixtures.get('helmRelease.yaml'),
+        'helmRelease.yaml',
+        {
+          registryAliases: {
+            'sealed-secrets': 'oci://ghcr.io/charts',
+          },
+        },
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: DockerDatasource.id,
+            depName: 'sealed-secrets',
+            packageName: 'ghcr.io/charts/sealed-secrets',
+          },
+        ],
+      });
+    });
+
     it('ignores HelmRelease resources without an apiVersion', () => {
       const result = extractPackageFile('kind: HelmRelease', 'test.yaml');
       expect(result).toBeNull();
