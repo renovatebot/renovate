@@ -111,11 +111,12 @@ Separately, there are also opportunities for malicious external code to execute,
 
 For instance:
 
+<!-- prettier-ignore -->
 - updates that invoke Gradle (i.e. `./gradlew`), such as [updating the Gradle Wrapper](./modules/manager/gradle-wrapper/index.md) or [performing Gradle Verification Metadata](./modules/manager/gradle/index.md#dependency-verification)
-  - because the Gradle buildscript is evaluated at this time (i.e. to determine which dependencies are available to then update the verification metadata)
+    - because the Gradle buildscript is evaluated at this time (i.e. to determine which dependencies are available to then update the verification metadata)
 - executing any `postUpgradeTasks` in a way that may use an updated dependency
-  - i.e. if you have a postUpgradeTask for `make docs`, where the version of your docs builder has updated
-  - i.e. if your pre-commit hook, where the version of a linter has updated
+    - i.e. if you have a postUpgradeTask for `make docs`, where the version of your docs builder has updated
+    - i.e. if your pre-commit hook, where the version of a linter has updated
 
 Depending on the self-hosted configuration, it may also be possible for package manager scripts to execute post-update (if using [`allowScripts=true`](./self-hosted-configuration.md#allowscripts) alongside [`ignoreScripts=false`](./configuration-options.md#ignorescripts)):
 
