@@ -1,7 +1,6 @@
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as memCache from '../../cache/memory';
 import * as packageCache from '../../cache/package';
 import type { PackageCacheNamespace } from '../../cache/package/types';
 import type {
@@ -10,6 +9,7 @@ import type {
   GithubHttpOptions,
 } from '../../http/github';
 import type { HttpResponse } from '../../http/types';
+import { acquireLock } from '../../mutex';
 import { getApiBaseUrl } from '../url';
 import { GithubGraphqlMemoryCacheStrategy } from './cache-strategies/memory-cache-strategy';
 import { GithubGraphqlPackageCacheStrategy } from './cache-strategies/package-cache-strategy';
@@ -313,12 +313,15 @@ export class GithubGraphqlDatasourceFetcher<
    * This method ensures the only one query is executed
    * to a particular package during single run.
    */
-  private doUniqueQuery(): Promise<ResultItem[]> {
-    const cacheKey = `github-pending:${this.getCacheNs()}:${this.getCacheKey()}`;
-    let resultPromise = memCache.get<Promise<ResultItem[]>>(cacheKey);
-    resultPromise ??= this.doCachedQuery();
-    memCache.set(cacheKey, resultPromise);
-    return resultPromise;
+  private async doUniqueQuery(): Promise<ResultItem[]> {
+    const lockKey = `${this.getCacheNs()}:${this.getCacheKey()}`;
+    const releaseLock = await acquireLock(lockKey, 'github-graphql');
+    try {
+      const result = await this.doCachedQuery();
+      return result;
+    } finally {
+      releaseLock();
+    }
   }
 
   async getItems(): Promise<ResultItem[]> {
