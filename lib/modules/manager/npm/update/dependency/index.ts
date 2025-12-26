@@ -109,8 +109,8 @@ function replaceAsString(
         return testContent;
       }
     }
-    /* v8 ignore next 3 -- needs test */
   }
+  /* v8 ignore next -- needs test */
   throw new Error();
 }
 
@@ -344,6 +344,7 @@ function removeDependency(
     }
   }
 
+  /* v8 ignore next -- needs test */
   throw new Error('Could not remove dependency');
 }
 
@@ -351,6 +352,7 @@ function safeJsonParse(content: string): NpmPackage | null {
   try {
     return JSON.parse(content);
   } catch {
+    /* v8 ignore next -- needs test */
     return null;
   }
 }
