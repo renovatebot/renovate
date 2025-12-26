@@ -4,7 +4,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
+import isDocker, { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import { findUpLocal, readLocalFile, writeLocalFile } from '../../../util/fs';
 import { getFiles, getRepoStatus } from '../../../util/git';
@@ -206,7 +206,16 @@ export async function updateArtifacts({
     const oldLockFileContentMap = await getFiles(lockFiles);
     await prepareGradleCommand(gradlewFile);
 
-    const baseCmd = `${gradlewName} --console=plain --dependency-verification lenient -q`;
+    // Limit the Gradle daemon Java heap memory size to prevent OOM errors
+    // leading to Renovate kernel-OOMs and timeouts.
+    // This command line option effectively overrides any custom setting
+    // in a project's `gradle.properties` file.
+    // See https://github.com/renovatebot/renovate/issues/39558
+    //
+    // The heap limit here is higher than the one for the Gradle wrapper update
+    // to allow for more complex build operations.
+    const gradleDamonLimit = '-Dorg.gradle.jvmargs="-Xms768m -Xmx768m"';
+    const baseCmd = `${gradlewName} ${gradleDamonLimit} --console=plain --dependency-verification lenient -q`;
     const execOptions: ExecOptions = {
       cwdFile: gradlewFile,
       docker: {},
@@ -264,13 +273,24 @@ export async function updateArtifacts({
       return null;
     }
 
-    await writeLocalFile(packageFileName, newPackageFileContent);
-    await exec(cmds, { ...execOptions, ignoreStdout: true });
+    try {
+      await writeLocalFile(packageFileName, newPackageFileContent);
+      await exec(cmds, { ...execOptions, ignoreStdout: true });
 
-    const res = await getUpdatedLockfiles(oldLockFileContentMap);
-    logger.debug('Returning updated Gradle dependency lockfiles');
-
-    return res.length > 0 ? res : null;
+      const res = await getUpdatedLockfiles(oldLockFileContentMap);
+      logger.debug('Returning updated Gradle dependency lockfiles');
+      return res.length > 0 ? res : null;
+    } finally {
+      const { docker } = execOptions;
+      if (!isDocker(docker)) {
+        // Stop any dangling Gradle daemon (free up memory) if not running in Docker.
+        // Ran unconditionally to get it run even if one of the commands in `cmds` fails.
+        await exec(`${gradlewName} ${gradleDamonLimit} --stop`, {
+          ...execOptions,
+          ignoreStdout: true,
+        });
+      }
+    }
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;

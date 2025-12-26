@@ -69,6 +69,8 @@ function isDocker(docker: Opt<DockerOptions>): docker is DockerOptions {
   return GlobalConfig.get('binarySource') === 'docker' && !!docker;
 }
 
+export default isDocker;
+
 interface RawExecArguments {
   rawCommands: string[];
   rawOptions: RawExecOptions;

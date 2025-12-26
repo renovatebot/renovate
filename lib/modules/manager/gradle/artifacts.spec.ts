@@ -220,16 +220,21 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
         },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --stop',
+          options: {
+            cwd: '/tmp/github/some/repo',
           },
         },
       ]);
@@ -263,16 +268,21 @@ describe('modules/manager/gradle/artifacts', () => {
       // In win32, gradle.bat will be used and /dev/null redirection isn't used yet
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'gradlew.bat --console=plain --dependency-verification lenient -q properties',
+          cmd: 'gradlew.bat -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
         },
         {
-          cmd: 'gradlew.bat --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
+          cmd: 'gradlew.bat -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+        {
+          cmd: 'gradlew.bat -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --stop',
+          options: {
+            cwd: '/tmp/github/some/repo',
           },
         },
       ]);
@@ -306,16 +316,21 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
         },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --update-locks org.springframework.boot:org.springframework.boot.gradle.plugin',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q :dependencies --update-locks org.springframework.boot:org.springframework.boot.gradle.plugin',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --stop',
+          options: {
+            cwd: '/tmp/github/some/repo',
           },
         },
       ]);
@@ -357,16 +372,21 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
         },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --write-locks',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q :dependencies --write-locks',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --stop',
+          options: {
+            cwd: '/tmp/github/some/repo',
           },
         },
       ]);
@@ -407,7 +427,7 @@ describe('modules/manager/gradle/artifacts', () => {
             ' bash -l -c "' +
             'install-tool java 16.0.1' +
             ' && ' +
-            './gradlew --console=plain --dependency-verification lenient -q properties' +
+            './gradlew -Dorg.gradle.jvmargs=\\"-Xms768m -Xmx768m\\" --console=plain --dependency-verification lenient -q properties' +
             '"',
           options: { cwd: '/tmp/github/some/repo' },
         },
@@ -424,7 +444,7 @@ describe('modules/manager/gradle/artifacts', () => {
             ' bash -l -c "' +
             'install-tool java 16.0.1' +
             ' && ' +
-            './gradlew --console=plain --dependency-verification lenient -q :dependencies --write-locks' +
+            './gradlew -Dorg.gradle.jvmargs=\\"-Xms768m -Xmx768m\\" --console=plain --dependency-verification lenient -q :dependencies --write-locks' +
             '"',
           options: {
             cwd: '/tmp/github/some/repo',
@@ -457,15 +477,22 @@ describe('modules/manager/gradle/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         { cmd: 'install-tool java 16.0.1' },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q properties',
           options: { cwd: '/tmp/github/some/repo' },
         },
         { cmd: 'install-tool java 16.0.1' },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --write-locks',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q :dependencies --write-locks',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+        { cmd: 'install-tool java 16.0.1' },
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --stop',
+          options: {
+            cwd: '/tmp/github/some/repo',
           },
         },
       ]);
@@ -474,10 +501,20 @@ describe('modules/manager/gradle/artifacts', () => {
     it('updates all included projects', async () => {
       const execSnapshots = mockExecSequence([
         {
+          // ... properties
           stdout: "subprojects: [project ':sub1', project ':sub2']",
           stderr: '',
         },
-        { stdout: '', stderr: '' },
+        {
+          // dependencies
+          stdout: '',
+          stderr: '',
+        },
+        {
+          // --stop
+          stdout: '',
+          stderr: '',
+        },
       ]);
 
       const res = await updateArtifacts({
@@ -498,16 +535,22 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
         },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies :sub1:dependencies :sub2:dependencies --write-locks',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q :dependencies :sub1:dependencies :sub2:dependencies --write-locks',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --stop',
+          options: {
+            cwd: '/tmp/github/some/repo',
           },
         },
       ]);
@@ -548,7 +591,7 @@ describe('modules/manager/gradle/artifacts', () => {
 
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
@@ -601,15 +644,22 @@ describe('modules/manager/gradle/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         { cmd: 'install-tool java 11.0.1' },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q properties',
           options: { cwd: '/tmp/github/some/repo' },
         },
         { cmd: 'install-tool java 11.0.1' },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --write-locks',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q :dependencies --write-locks',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+        { cmd: 'install-tool java 11.0.1' },
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --stop',
+          options: {
+            cwd: '/tmp/github/some/repo',
           },
         },
       ]);
@@ -653,10 +703,16 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --stop',
+          options: {
+            cwd: '/tmp/github/some/repo',
           },
         },
       ]);
@@ -740,10 +796,16 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --stop',
+          options: {
+            cwd: '/tmp/github/some/repo',
           },
         },
       ]);
@@ -797,23 +859,29 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
         },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
           },
         },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --stop',
+          options: {
+            cwd: '/tmp/github/some/repo',
           },
         },
       ]);
@@ -853,10 +921,16 @@ describe('modules/manager/gradle/artifacts', () => {
 
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --stop',
+          options: {
+            cwd: '/tmp/github/some/repo',
           },
         },
       ]);
@@ -895,10 +969,16 @@ describe('modules/manager/gradle/artifacts', () => {
 
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256,pgp dependencies',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256,pgp dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms768m -Xmx768m" --stop',
+          options: {
+            cwd: '/tmp/github/some/repo',
           },
         },
       ]);
