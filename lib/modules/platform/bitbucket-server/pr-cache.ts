@@ -15,13 +15,12 @@ function migrateBitbucketServerCache(platform: unknown): void {
     return;
   }
 
-  const bitbucketServer = platform.bitbucketServer;
-  if (!isPlainObject(bitbucketServer)) {
+  if (!isPlainObject(platform.bitbucketServer)) {
     return;
   }
 
+  platform['bitbucket-server'] = platform.bitbucketServer;
   delete platform.bitbucketServer;
-  platform['bitbucket-server'] = bitbucketServer;
 }
 
 export class BbsPrCache {
