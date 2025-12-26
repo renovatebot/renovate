@@ -30,11 +30,15 @@ When a referenced `HelmRepository` resource is not present in the scanned manife
 
 ```json
 {
-  "flux": {
-    "registryAliases": {
-      "podinfo-repo": "https://stefanprodan.github.io/podinfo"
+  "packageRules": [
+    {
+      "matchManagers": ["flux"],
+      "matchDatasources": ["helm"],
+      "registryAliases": {
+        "podinfo-repo": "https://stefanprodan.github.io/podinfo"
+      }
     }
-  }
+  ]
 }
 ```
 
