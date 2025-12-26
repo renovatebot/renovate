@@ -280,26 +280,26 @@ export async function initRepo({
     );
     if (res.body.archived) {
       logger.debug(
-        'Repository is archived - throwing error to abort renovation',
+        'Repository is archived - throwing error to abort Renovate run',
       );
       throw new Error(REPOSITORY_ARCHIVED);
     }
 
     if (res.body.mirror && GlobalConfig.get('includeMirrors') !== true) {
       logger.debug(
-        'Repository is a mirror - throwing error to abort renovation',
+        'Repository is a mirror - throwing error to abort Renovate run',
       );
       throw new Error(REPOSITORY_MIRRORED);
     }
     if (res.body.repository_access_level === 'disabled') {
       logger.debug(
-        'Repository portion of project is disabled - throwing error to abort renovation',
+        'Repository portion of project is disabled - throwing error to abort Renovate run',
       );
       throw new Error(REPOSITORY_DISABLED);
     }
     if (res.body.merge_requests_access_level === 'disabled') {
       logger.debug(
-        'MRs are disabled for the project - throwing error to abort renovation',
+        'MRs are disabled for the project - throwing error to abort Renovate run',
       );
       throw new Error(REPOSITORY_DISABLED);
     }

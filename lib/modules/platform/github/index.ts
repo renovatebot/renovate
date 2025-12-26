@@ -570,7 +570,7 @@ export async function initRepo({
     }
     if (repo.isArchived) {
       logger.debug(
-        'Repository is archived - throwing error to abort renovation',
+        'Repository is archived - throwing error to abort Renovate run',
       );
       throw new Error(REPOSITORY_ARCHIVED);
     }

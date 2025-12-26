@@ -164,7 +164,7 @@ For example, to disable digest updates for Docker Compose only but leave them fo
 
 The following configuration options are applicable to Docker:
 
-### Disable all Docker Renovation
+### Disable all Docker updates
 
 Add `"docker:disable"` to your `extends` array.
 
