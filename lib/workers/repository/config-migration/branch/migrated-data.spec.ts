@@ -7,7 +7,7 @@ import { EditorConfig } from '../../../../util/json-writer';
 import { detectRepoFileConfig } from '../../init/merge';
 import { MigratedDataFactory, applyPrettierFormatting } from './migrated-data';
 import { Fixtures } from '~test/fixtures';
-import { scm } from '~test/util';
+import { platform, scm } from '~test/util';
 
 vi.mock('../../../../config/migration');
 vi.mock('../../../../util/fs');
@@ -17,7 +17,8 @@ vi.mock('detect-indent');
 
 const migratedData = Fixtures.getJson('./migrated-data.json');
 const migratedDataJson5 = Fixtures.getJson('./migrated-data.json5');
-const migratedConfigObj = Fixtures.getJson('./migrated.json');
+const migratedConfigObj = Fixtures.getJsonc('./migrated.json');
+const renovateJson = Fixtures.get('./renovate.json');
 const formattedMigratedData = Fixtures.getJson(
   './migrated-data-formatted.json',
 );
@@ -37,6 +38,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
         isMigrated: true,
         migratedConfig: migratedConfigObj,
       });
+      platform.getRawFile.mockResolvedValue(renovateJson);
     });
 
     it('Calls getAsync a first when migration not needed', async () => {
