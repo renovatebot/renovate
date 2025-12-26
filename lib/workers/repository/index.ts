@@ -214,6 +214,7 @@ export async function renovateRepository(
   logger.info(
     {
       cloned,
+      gitCloneMode: GlobalConfig.get('gitCloneMode'),
       durationMs: splits.total,
       result: repoResult?.res,
       status: repoResult?.status,

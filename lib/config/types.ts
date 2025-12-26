@@ -226,6 +226,8 @@ export interface RepoGlobalConfig {
   endpoint?: string;
   executionTimeout?: number;
   exposeAllEnv?: boolean;
+  gitCloneMode?: GitCloneMode;
+  gitShallowCloneDepth?: number;
   gitTimeout?: number;
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;
@@ -794,3 +796,5 @@ export interface BumpVersionConfig {
   matchStrings: string[];
   name?: string;
 }
+
+export type GitCloneMode = 'blobless' | 'shallow';

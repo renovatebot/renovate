@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../config/global';
 import * as memCache from './cache/memory';
 import {
   AbandonedPackageStats,
@@ -672,6 +673,7 @@ describe('util/stats', () => {
     beforeEach(() => {
       memCache.init();
       vi.useFakeTimers();
+      GlobalConfig.reset();
     });
 
     afterEach(() => {
@@ -681,6 +683,16 @@ describe('util/stats', () => {
     it('returns empty report', () => {
       const res = GitOperationStats.getReport();
       expect(res).toEqual({});
+    });
+
+    it('logs the gitCloneMode', () => {
+      GlobalConfig.set({
+        gitCloneMode: 'shallow',
+      });
+      const res = GitOperationStats.getReport();
+      expect(res).toEqual({
+        cloneMode: 'shallow',
+      });
     });
 
     it('writes data points', () => {
