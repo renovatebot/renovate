@@ -11,6 +11,7 @@ import type {
   GerritChange,
   GerritChangeMessageInfo,
   GerritFindPRConfig,
+  GerritHashtagsInput,
   GerritMergeableInfo,
   GerritProjectInfo,
   GerritRequestDetail,
@@ -242,10 +243,21 @@ class GerritClient {
     );
   }
 
-  async deleteHashtag(changeNumber: number, hashtag: string): Promise<void> {
-    await this.gerritHttp.postJson(`a/changes/${changeNumber}/hashtags`, {
-      body: { remove: [hashtag] },
-    });
+  async setHashtags(
+    changeNumber: number,
+    hashtagsInput: GerritHashtagsInput,
+  ): Promise<void> {
+    if (hashtagsInput.add?.length === 0) {
+      delete hashtagsInput.add;
+    }
+    if (hashtagsInput.remove?.length === 0) {
+      delete hashtagsInput.remove;
+    }
+    if (hashtagsInput.add || hashtagsInput.remove) {
+      await this.gerritHttp.postJson(`a/changes/${changeNumber}/hashtags`, {
+        body: hashtagsInput,
+      });
+    }
   }
 
   async addReviewers(changeNumber: number, reviewers: string[]): Promise<void> {
