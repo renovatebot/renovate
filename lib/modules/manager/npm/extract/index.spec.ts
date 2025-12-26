@@ -24,6 +24,17 @@ const workspacesContent = Fixtures.get('inputs/workspaces.json', '..');
 const vendorisedContent = Fixtures.get('is-object.json', '..');
 const invalidNameContent = Fixtures.get('invalid-name.json', '..');
 
+const input01YamlContent = `
+name: renovate
+version: 1.0.0
+dependencies:
+  autoprefixer: 6.5.0
+  config: 1.21.0
+devDependencies:
+  angular-touch: 1.5.8
+resolution:
+  config: 1.21.0`;
+
 describe('modules/manager/npm/extract/index', () => {
   describe('.extractPackageFile()', () => {
     beforeEach(async () => {
@@ -37,6 +48,15 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         'not json',
         'package.json',
+        defaultExtractConfig,
+      );
+      expect(res).toBeNull();
+    });
+
+    it('returns null if cannot parse the yaml', async () => {
+      const res = await npmExtract.extractPackageFile(
+        'invalid: yaml :',
+        'package.yaml',
         defaultExtractConfig,
       );
       expect(res).toBeNull();
@@ -114,6 +134,54 @@ describe('modules/manager/npm/extract/index', () => {
           { depName: 'angular', currentValue: '1.33.0' },
           { depName: 'glob', currentValue: '1.0.0' },
         ],
+      });
+    });
+
+    it('returns an array of dependencies in yaml', async () => {
+      const res = await npmExtract.extractPackageFile(
+        input01YamlContent,
+        'package.yaml',
+        defaultExtractConfig,
+      );
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: '6.5.0',
+            datasource: 'npm',
+            depName: 'autoprefixer',
+            depType: 'dependencies',
+            prettyDepType: 'dependency',
+          },
+          {
+            currentValue: '1.21.0',
+            datasource: 'npm',
+            depName: 'config',
+            depType: 'dependencies',
+            prettyDepType: 'dependency',
+          },
+          {
+            currentValue: '1.5.8',
+            datasource: 'npm',
+            depName: 'angular-touch',
+            depType: 'devDependencies',
+            prettyDepType: 'devDependency',
+          },
+        ],
+        extractedConstraints: {},
+        managerData: {
+          hasPackageManager: false,
+          npmLock: undefined,
+          npmrcFileName: undefined,
+          packageJsonName: 'renovate',
+          pnpmShrinkwrap: undefined,
+          workspaces: undefined,
+          workspacesPackages: undefined,
+          yarnLock: undefined,
+          yarnZeroInstall: false,
+        },
+        npmrc: undefined,
+        packageFileVersion: '1.0.0',
+        skipInstalls: true,
       });
     });
 
