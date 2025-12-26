@@ -112,6 +112,7 @@ function resolveHelmRepository(
   dep: PackageDependency,
   matchingRepositories: HelmRepository[],
   registryAliases: Record<string, string> | undefined,
+  sourceRefName?: string,
 ): void {
   if (matchingRepositories.length) {
     dep.registryUrls = matchingRepositories
@@ -136,9 +137,28 @@ function resolveHelmRepository(
     if (!dep.registryUrls?.length) {
       delete dep.registryUrls;
     }
-  } else {
-    dep.skipReason = 'unknown-registry';
+    return;
   }
+
+  if (sourceRefName && registryAliases) {
+    const aliasUrl = registryAliases[sourceRefName];
+    if (aliasUrl) {
+      if (isOCIRegistry(aliasUrl)) {
+        // Treat alias value as an OCI registry URL
+        dep.datasource = DockerDatasource.id;
+        dep.packageName = getDep(
+          `${removeOCIPrefix(aliasUrl)}/${dep.depName}`,
+          false,
+          registryAliases,
+        ).packageName;
+      } else {
+        dep.registryUrls = [aliasUrl];
+      }
+      return;
+    }
+  }
+
+  dep.skipReason = 'unknown-registry';
 }
 
 function resolveSystemManifest(
@@ -182,15 +202,20 @@ function resolveResourceManifest(
             dep.skipReason = 'local-chart';
             delete dep.datasource;
           } else {
+            const sourceRef = chartSpec.sourceRef;
             const matchingRepositories = helmRepositories.filter(
               (rep) =>
-                rep.kind === chartSpec.sourceRef?.kind &&
-                rep.metadata.name === chartSpec.sourceRef.name &&
+                rep.kind === sourceRef?.kind &&
+                rep.metadata.name === sourceRef.name &&
                 rep.metadata.namespace ===
-                  (chartSpec.sourceRef.namespace ??
-                    resource.metadata?.namespace),
+                  (sourceRef?.namespace ?? resource.metadata?.namespace),
             );
-            resolveHelmRepository(dep, matchingRepositories, registryAliases);
+            resolveHelmRepository(
+              dep,
+              matchingRepositories,
+              registryAliases,
+              sourceRef?.name,
+            );
           }
           deps.push(dep);
         } else {
@@ -222,13 +247,19 @@ function resolveResourceManifest(
           dep.currentValue = resource.spec.version;
           dep.datasource = HelmDatasource.id;
 
+          const sourceRef = resource.spec.sourceRef;
           const matchingRepositories = helmRepositories.filter(
             (rep) =>
-              rep.kind === resource.spec.sourceRef?.kind &&
-              rep.metadata.name === resource.spec.sourceRef.name &&
+              rep.kind === sourceRef?.kind &&
+              rep.metadata.name === sourceRef.name &&
               rep.metadata.namespace === resource.metadata?.namespace,
           );
-          resolveHelmRepository(dep, matchingRepositories, registryAliases);
+          resolveHelmRepository(
+            dep,
+            matchingRepositories,
+            registryAliases,
+            sourceRef?.name,
+          );
         } else {
           dep.skipReason = 'unsupported-datasource';
         }

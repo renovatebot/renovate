@@ -133,6 +133,72 @@ describe('modules/manager/flux/extract', () => {
       });
     });
 
+    it('falls back to unknown-registry when registryAliases has no matching HelmRelease sourceRef name', () => {
+      const result = extractPackageFile(
+        Fixtures.get('helmRelease.yaml'),
+        'helmRelease.yaml',
+        {
+          registryAliases: {
+            'other-repo': 'https://example.com/charts',
+          },
+        },
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
+    });
+
+    it('uses registryAliases to resolve HelmRelease sourceRef name when repository is missing', () => {
+      const result = extractPackageFile(
+        Fixtures.get('helmRelease.yaml'),
+        'helmRelease.yaml',
+        {
+          registryAliases: {
+            'sealed-secrets': 'https://example.com/charts',
+          },
+        },
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            registryUrls: ['https://example.com/charts'],
+          },
+        ],
+      });
+    });
+
+    it('uses registryAliases with an OCI URL for HelmRelease sourceRef name', () => {
+      const result = extractPackageFile(
+        Fixtures.get('helmRelease.yaml'),
+        'helmRelease.yaml',
+        {
+          registryAliases: {
+            'sealed-secrets': 'oci://ghcr.io/charts',
+          },
+        },
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: DockerDatasource.id,
+            depName: 'sealed-secrets',
+            packageName: 'ghcr.io/charts/sealed-secrets',
+          },
+        ],
+      });
+    });
+
     it('ignores HelmRelease resources without an apiVersion', () => {
       const result = extractPackageFile('kind: HelmRelease', 'test.yaml');
       expect(result).toBeNull();
@@ -470,6 +536,50 @@ describe('modules/manager/flux/extract', () => {
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
             skipReason: 'unknown-registry',
+          },
+        ],
+      });
+    });
+
+    it('falls back to unknown-registry when registryAliases has no matching HelmChart sourceRef name', () => {
+      const result = extractPackageFile(
+        Fixtures.get('helmChart.yaml'),
+        'helmChart.yaml',
+        {
+          registryAliases: {
+            'other-repo': 'https://example.com/charts',
+          },
+        },
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
+    });
+
+    it('uses registryAliases to resolve HelmChart sourceRef name when repository is missing', () => {
+      const result = extractPackageFile(
+        Fixtures.get('helmChart.yaml'),
+        'helmChart.yaml',
+        {
+          registryAliases: {
+            'sealed-secrets': 'https://example.com/charts',
+          },
+        },
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            registryUrls: ['https://example.com/charts'],
           },
         ],
       });
