@@ -1,26 +1,27 @@
-import { isNullOrUndefined, isString } from '@sindresorhus/is';
+import { isNullOrUndefined, isPlainObject, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
-import type { RepoCacheData } from '../../../util/cache/repository/types';
 import type { BitbucketServerHttp } from '../../../util/http/bitbucket-server';
 import { getQueryString } from '../../../util/url';
 import type { BbsPr, BbsPrCacheData, BbsRestPr } from './types';
 import { prInfo } from './utils';
 
 /* v8 ignore next */
-function migrateBitbucketServerCache(
-  platform: RepoCacheData['platform'],
-): void {
-  const legacy = platform as Record<string, unknown> | undefined;
-  if (legacy?.bitbucketServer) {
-    platform!['bitbucket-server'] = legacy.bitbucketServer as NonNullable<
-      RepoCacheData['platform']
-    >['bitbucket-server'];
-    delete legacy.bitbucketServer;
+function migrateBitbucketServerCache(platform: unknown): void {
+  if (!isPlainObject(platform)) {
+    return;
   }
+
+  const bitbucketServer = platform.bitbucketServer;
+  if (!isPlainObject(bitbucketServer)) {
+    return;
+  }
+
+  delete platform.bitbucketServer;
+  platform['bitbucket-server'] = bitbucketServer;
 }
 
 export class BbsPrCache {
