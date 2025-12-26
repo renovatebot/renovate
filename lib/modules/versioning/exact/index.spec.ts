@@ -1,6 +1,6 @@
-import dummy from '.';
+import exact from '.';
 
-describe('modules/versioning/dummy/index', () => {
+describe('modules/versioning/exact/index', () => {
   describe('isValid', () => {
     it.each`
       input              | expected
@@ -11,7 +11,7 @@ describe('modules/versioning/dummy/index', () => {
       ${'abc123'}        | ${true}
       ${'sha256:abcdef'} | ${true}
     `('isValid("$input") === $expected', ({ input, expected }) => {
-      expect(dummy.isValid(input)).toBe(expected);
+      expect(exact.isValid(input)).toBe(expected);
     });
   });
 
@@ -24,35 +24,35 @@ describe('modules/versioning/dummy/index', () => {
       ${'v1'}      | ${true}
       ${'1.0.0'}   | ${true}
     `('isVersion($input) === $expected', ({ input, expected }) => {
-      expect(dummy.isVersion(input)).toBe(expected);
+      expect(exact.isVersion(input)).toBe(expected);
     });
   });
 
   describe('isSingleVersion', () => {
     it('returns true for any valid version', () => {
-      expect(dummy.isSingleVersion('1.0.0')).toBe(true);
-      expect(dummy.isSingleVersion('any-string')).toBe(true);
+      expect(exact.isSingleVersion('1.0.0')).toBe(true);
+      expect(exact.isSingleVersion('any-string')).toBe(true);
     });
   });
 
   describe('isStable', () => {
     it('returns true for any version', () => {
-      expect(dummy.isStable('1.0.0-alpha')).toBe(true);
-      expect(dummy.isStable('1.0.0')).toBe(true);
+      expect(exact.isStable('1.0.0-alpha')).toBe(true);
+      expect(exact.isStable('1.0.0')).toBe(true);
     });
   });
 
   describe('isCompatible', () => {
     it('returns true for any valid version', () => {
-      expect(dummy.isCompatible('v1', 'v2')).toBe(true);
+      expect(exact.isCompatible('v1', 'v2')).toBe(true);
     });
   });
 
   describe('getMajor/getMinor/getPatch', () => {
     it('returns null for all', () => {
-      expect(dummy.getMajor('1.2.3')).toBeNull();
-      expect(dummy.getMinor('1.2.3')).toBeNull();
-      expect(dummy.getPatch('1.2.3')).toBeNull();
+      expect(exact.getMajor('1.2.3')).toBeNull();
+      expect(exact.getMinor('1.2.3')).toBeNull();
+      expect(exact.getPatch('1.2.3')).toBeNull();
     });
   });
 
@@ -64,7 +64,7 @@ describe('modules/versioning/dummy/index', () => {
       ${'1.0.0'} | ${'1.0'}   | ${false}
       ${'v1'}    | ${'v2'}    | ${false}
     `('equals("$a", "$b") === $expected', ({ a, b, expected }) => {
-      expect(dummy.equals(a, b)).toBe(expected);
+      expect(exact.equals(a, b)).toBe(expected);
     });
   });
 
@@ -75,7 +75,7 @@ describe('modules/versioning/dummy/index', () => {
       ${'1.0'} | ${'2.0'} | ${false}
       ${'a'}   | ${'b'}   | ${false}
     `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
-      expect(dummy.isGreaterThan(a, b)).toBe(expected);
+      expect(exact.isGreaterThan(a, b)).toBe(expected);
     });
   });
 
@@ -89,7 +89,7 @@ describe('modules/versioning/dummy/index', () => {
     `(
       'matches("$version", "$range") === $expected',
       ({ version, range, expected }) => {
-        expect(dummy.matches(version, range)).toBe(expected);
+        expect(exact.matches(version, range)).toBe(expected);
       },
     );
   });
@@ -97,23 +97,23 @@ describe('modules/versioning/dummy/index', () => {
   describe('getSatisfyingVersion', () => {
     it('returns exact match only', () => {
       const versions = ['1.0.0', '1.0.1', '2.0.0'];
-      expect(dummy.getSatisfyingVersion(versions, '1.0.0')).toBe('1.0.0');
-      expect(dummy.getSatisfyingVersion(versions, '1.0.2')).toBeNull();
+      expect(exact.getSatisfyingVersion(versions, '1.0.0')).toBe('1.0.0');
+      expect(exact.getSatisfyingVersion(versions, '1.0.2')).toBeNull();
     });
   });
 
   describe('minSatisfyingVersion', () => {
     it('returns exact match only', () => {
       const versions = ['1.0.0', '1.0.1', '2.0.0'];
-      expect(dummy.minSatisfyingVersion(versions, '1.0.1')).toBe('1.0.1');
-      expect(dummy.minSatisfyingVersion(versions, '3.0.0')).toBeNull();
+      expect(exact.minSatisfyingVersion(versions, '1.0.1')).toBe('1.0.1');
+      expect(exact.minSatisfyingVersion(versions, '3.0.0')).toBeNull();
     });
   });
 
   describe('getNewValue', () => {
     it('returns currentValue unchanged', () => {
       expect(
-        dummy.getNewValue({
+        exact.getNewValue({
           currentValue: 'v1',
           rangeStrategy: 'auto',
           currentVersion: 'v1',
@@ -125,8 +125,8 @@ describe('modules/versioning/dummy/index', () => {
 
   describe('sortVersions', () => {
     it('returns 0 for any comparison', () => {
-      expect(dummy.sortVersions('1.0', '2.0')).toBe(0);
-      expect(dummy.sortVersions('a', 'b')).toBe(0);
+      expect(exact.sortVersions('1.0', '2.0')).toBe(0);
+      expect(exact.sortVersions('a', 'b')).toBe(0);
     });
   });
 });

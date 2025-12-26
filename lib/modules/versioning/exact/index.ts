@@ -1,11 +1,11 @@
 import type { NewValueConfig, VersioningApi } from '../types';
 
-export const id = 'dummy';
-export const displayName = 'Dummy';
+export const id = 'exact';
+export const displayName = 'Exact';
 export const urls: string[] = [];
 export const supportsRanges = false;
 
-class DummyVersioningApi implements VersioningApi {
+class ExactVersioningApi implements VersioningApi {
   isValid(version: string): boolean {
     return version.length > 0;
   }
@@ -67,6 +67,6 @@ class DummyVersioningApi implements VersioningApi {
   }
 }
 
-export const api: VersioningApi = new DummyVersioningApi();
+export const api: VersioningApi = new ExactVersioningApi();
 
 export default api;
