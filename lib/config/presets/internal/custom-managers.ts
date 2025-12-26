@@ -8,8 +8,12 @@ export const presets: Record<string, Preset> = {
       {
         customType: 'regex',
         managerFilePatterns: [
-          '/(^|/).azuredevops/.+\\.ya?ml$/',
-          '/azure.*pipelines?.*\\.ya?ml$/',
+          '**/.azuredevops/**/*.yml',
+          '**/.azuredevops/**/*.yaml',
+          'azure*pipeline*.yml',
+          'azure*pipeline*.yaml',
+          'azure*pipelines*.yml',
+          'azure*pipelines*.yaml',
         ],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
@@ -26,7 +30,7 @@ export const presets: Record<string, Preset> = {
         datasourceTemplate: 'npm',
         depNameTemplate: '@biomejs/biome',
         fileFormat: 'json',
-        managerFilePatterns: ['/(^|/)biome.jsonc?$/'],
+        managerFilePatterns: ['**/biome.json', '**/biome.jsonc'],
         matchStrings: ['{"currentValue": $split($."$schema",("/"))[-2]}'],
       },
     ],
@@ -37,7 +41,10 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        managerFilePatterns: ['/(^|/)bitbucket-pipelines\\.ya?ml$/'],
+        managerFilePatterns: [
+          '**/bitbucket-pipelines.yml',
+          '**/bitbucket-pipelines.yaml',
+        ],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+.*\\s+[A-Za-z0-9_]+?_VERSION[ =:]\\s?["\']?(?<currentValue>.+?)["\']?\\s',
         ],
@@ -50,8 +57,10 @@ export const presets: Record<string, Preset> = {
       {
         customType: 'regex',
         managerFilePatterns: [
-          '/(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$/',
-          '/(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$/',
+          '**/[Dd]ockerfile*',
+          '**/[Cc]ontainerfile*',
+          '**/.[Dd]ockerfile*',
+          '**/.[Cc]ontainerfile*',
         ],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s(?:ENV|ARG)\\s+[A-Za-z0-9_]+?_VERSION[ =]["\']?(?<currentValue>.+?)["\']?\\s',
@@ -80,7 +89,7 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        managerFilePatterns: ['/\\.gitlab-ci\\.ya?ml$/'],
+        managerFilePatterns: ['.gitlab-ci.yml', '.gitlab-ci.yaml'],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
         ],
@@ -94,7 +103,7 @@ export const presets: Record<string, Preset> = {
       {
         customType: 'regex',
         datasourceTemplate: 'docker',
-        managerFilePatterns: ['/(^|/)Chart\\.yaml$/'],
+        managerFilePatterns: ['**/Chart.yaml'],
         matchStrings: [
           '#\\s*renovate: image=(?<depName>.*?)\\s+appVersion:\\s*["\']?(?<currentValue>[\\w+\\.\\-]*)',
         ],
@@ -106,12 +115,7 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        managerFilePatterns: [
-          '/(^|/)Makefile$/',
-          '/(^|/)makefile$/',
-          '/(^|/)GNUMakefile$/',
-          '/\\.mk$/',
-        ],
+        managerFilePatterns: ['**/[Mm]akefile', '**/GNUMakefile', '*.mk'],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:*\\??=\\s*["\']?(?<currentValue>.+?)["\']?\\s',
         ],
@@ -125,7 +129,7 @@ export const presets: Record<string, Preset> = {
         customType: 'regex',
         datasourceTemplate:
           '{{#if datasource}}{{{datasource}}}{{else}}maven{{/if}}',
-        managerFilePatterns: ['/(^|/)pom\\.xml$/'],
+        managerFilePatterns: ['**/pom.xml'],
         matchStrings: [
           '<!--\\s?renovate:( datasource=(?<datasource>[a-zA-Z0-9-._]+?))? depName=(?<depName>[^\\s]+?)(?: packageName=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?\\s+-->\\s+<.+\\.version>(?<currentValue>.+)<\\/.+\\.version>',
         ],
@@ -138,7 +142,7 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        managerFilePatterns: ['/.+\\.tfvars$/'],
+        managerFilePatterns: ['**/*.tfvars'],
         matchStrings: [
           '#\\s*renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?(?: extractVersion=(?<extractVersion>.*?))?\\s.*?_version\\s*=\\s*"(?<currentValue>.*)"',
         ],
