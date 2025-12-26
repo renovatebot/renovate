@@ -610,6 +610,19 @@ describe('modules/manager/gradle/parser', () => {
       });
     });
 
+    describe('dependencySubstitution constructs', () => {
+      it.each`
+        input                                                                   | output
+        ${'substitute module("foo:bar:1.2.3")'}                                 | ${null}
+        ${'substitute(module("foo:bar:1.2.3"))'}                                | ${null}
+        ${'substitute module("foo:bar:1.2.3") with module("bar:qux:4.5.6")'}    | ${{ depName: 'bar:qux', currentValue: '4.5.6' }}
+        ${'substitute(module("foo:bar:1.2.3")).using(module("bar:qux:4.5.6"))'} | ${{ depName: 'bar:qux', currentValue: '4.5.6' }}
+      `('$input', ({ input, output }) => {
+        const { deps } = parseGradle(input);
+        expect(deps).toMatchObject([output].filter(isTruthy));
+      });
+    });
+
     describe('plugins', () => {
       it.each`
         def                 | input                                      | output
