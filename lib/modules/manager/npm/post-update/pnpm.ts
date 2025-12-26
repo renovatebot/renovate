@@ -17,6 +17,7 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../../util/fs';
+import { getGitEnvironmentVariables } from '../../../../util/git/auth';
 import { uniqueStrings } from '../../../../util/string';
 import { parseSingleYaml } from '../../../../util/yaml';
 import type { PostUpdateConfig, Upgrade } from '../../types';
@@ -70,6 +71,8 @@ export async function generateLockFile(
       // pnpm stops reading npm_config_* env vars since v11
       pnpm_config_cache_dir: pnpmConfigCacheDir,
       pnpm_config_store_dir: pnpmConfigStoreDir,
+      // allows pnpm to resolve git-hosted private packages
+      ...getGitEnvironmentVariables(),
     };
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,

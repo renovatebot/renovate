@@ -7,6 +7,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
+import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from './constants';
@@ -78,6 +79,9 @@ export async function updateArtifacts({
       npm_config_store_dir: pnpmConfigStoreDir,
       pnpm_config_cache_dir: pnpmConfigCacheDir,
       pnpm_config_store_dir: pnpmConfigStoreDir,
+      // corepack use installs the dependencies, so we need to pass
+      // the git environment variables to it to resolve git-hosted private packages
+      ...getGitEnvironmentVariables(),
     },
     toolConstraints: [
       nodeConstraints,
