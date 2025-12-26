@@ -94,7 +94,7 @@ describe('modules/platform/bitbucket-server/pr-cache', () => {
     ]);
     expect(cache).toEqual({
       platform: {
-        bitbucketServer: {
+        'bitbucket-server': {
           pullRequestsCache: {
             author: 'some-author',
             items: {
@@ -138,7 +138,7 @@ describe('modules/platform/bitbucket-server/pr-cache', () => {
     ]);
     expect(cache).toEqual({
       platform: {
-        bitbucketServer: {
+        'bitbucket-server': {
           pullRequestsCache: {
             items: {
               '1': prInfo(pr1),
@@ -153,7 +153,7 @@ describe('modules/platform/bitbucket-server/pr-cache', () => {
 
   it('resets cache for not matching authors', async () => {
     cache.platform = {
-      bitbucketServer: {
+      'bitbucket-server': {
         pullRequestsCache: {
           items: {
             '1': prInfo(pr1),
@@ -186,7 +186,7 @@ describe('modules/platform/bitbucket-server/pr-cache', () => {
     ]);
     expect(cache).toEqual({
       platform: {
-        bitbucketServer: {
+        'bitbucket-server': {
           pullRequestsCache: {
             author: 'some-author',
             items: {
@@ -201,7 +201,7 @@ describe('modules/platform/bitbucket-server/pr-cache', () => {
 
   it('syncs cache', async () => {
     cache.platform = {
-      bitbucketServer: {
+      'bitbucket-server': {
         pullRequestsCache: {
           items: {
             '1': prInfo(pr1),
@@ -232,7 +232,7 @@ describe('modules/platform/bitbucket-server/pr-cache', () => {
     ]);
     expect(cache).toEqual({
       platform: {
-        bitbucketServer: {
+        'bitbucket-server': {
           pullRequestsCache: {
             items: {
               '1': prInfo(pr1),
