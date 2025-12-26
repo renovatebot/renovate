@@ -153,6 +153,23 @@ describe('modules/platform/gerrit/index', () => {
       });
     });
 
+    it('initRepo() - passes cloneSubmodules', async () => {
+      clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
+      clientMock.findChanges.mockResolvedValueOnce([]);
+
+      await gerrit.initRepo({
+        repository: 'test/repo',
+        cloneSubmodules: true,
+        cloneSubmodulesFilter: ['test'],
+      });
+
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
+        url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+        cloneSubmodules: true,
+        cloneSubmodulesFilter: ['test'],
+      });
+    });
+
     it('initRepo() - abandon rejected changes', async () => {
       clientMock.getProjectInfo.mockResolvedValueOnce({
         ...projectInfo,

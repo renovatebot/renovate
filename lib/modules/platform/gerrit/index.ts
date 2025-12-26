@@ -130,6 +130,8 @@ export async function getRepos(): Promise<string[]> {
  */
 export async function initRepo({
   repository,
+  cloneSubmodules,
+  cloneSubmodulesFilter,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo(${repository}, ${gitUrl})`);
@@ -146,7 +148,7 @@ export async function initRepo({
   const baseUrl = defaults.endpoint!;
   const url = getGerritRepoUrl(repository, baseUrl);
   configureScm(repository, config.gerritUsername!);
-  await git.initRepo({ url });
+  await git.initRepo({ url, cloneSubmodules, cloneSubmodulesFilter });
 
   //abandon "open" and "rejected" changes at startup
   const rejectedChanges = await client.findChanges(config.repository!, {
