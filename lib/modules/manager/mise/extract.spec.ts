@@ -78,6 +78,8 @@ describe('modules/manager/mise/extract', () => {
       sops = "3.10.2"
       sqlite = "3.50.1"
       stripe = "1.25.0"
+      swiftformat = "0.58.0"
+      swiftlint = "0.55.1"
       taplo = "0.10.0"
       terragrunt = "0.72.6"
       tilt = "0.34.0"
@@ -269,6 +271,18 @@ describe('modules/manager/mise/extract', () => {
             depName: 'stripe',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'stripe/stripe-cli',
+          },
+          {
+            currentValue: '0.58.0',
+            datasource: 'github-releases',
+            depName: 'swiftformat',
+            packageName: 'nicklockwood/SwiftFormat',
+          },
+          {
+            currentValue: '0.55.1',
+            datasource: 'github-releases',
+            depName: 'swiftlint',
+            packageName: 'realm/SwiftLint',
           },
           {
             currentValue: '0.10.0',
