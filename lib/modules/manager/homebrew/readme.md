@@ -14,23 +14,25 @@ The manager extracts and updates:
 
 - **GitHub releases**: URLs in the format `https://github.com/owner/repo/releases/download/v1.2.3/repo-1.2.3.tar.gz`
 - **GitHub archives**: URLs in the format `https://github.com/owner/repo/archive/refs/tags/v1.2.3.tar.gz`
+- **NPM packages**: URLs in the format `https://registry.npmjs.org/package/-/package-1.2.3.tgz` or `https://registry.npmjs.org/@scope/package/-/package-1.2.3.tgz`
 - **SHA256 checksums**: Automatically computed for new versions
 
 ### How It Works
 
 When a new version is available, Renovate:
 
-1. Downloads the new tarball from GitHub
+1. Downloads the new tarball from GitHub or NPM registry
 2. Calculates the SHA256 checksum
 3. Updates both the `url` and `sha256` fields in the Formula file
 
 ### Limitations
 
-- **Only GitHub-hosted packages**: Currently only supports packages hosted on `github.com`
-- **Only tar.gz archives**: Only `.tar.gz` format is supported
-- **GitHub Tags datasource**: Uses the `github-tags` datasource to fetch available versions
+- **GitHub packages**: Only supports packages hosted on `github.com`
+- **NPM packages**: Only supports packages from `registry.npmjs.org` (custom registries are not supported)
 
-### Example Formula
+### Example Formulas
+
+#### GitHub Package
 
 ```ruby
 class MyPackage < Formula
@@ -45,11 +47,24 @@ class MyPackage < Formula
 end
 ```
 
+#### npm Package
+
+```ruby
+class ClaudeCode < Formula
+  desc "Anthropic's official CLI for Claude"
+  homepage "https://www.anthropic.com/claude-code"
+  url "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-1.0.0.tgz"
+  sha256 "abc123def456..."
+  license "Proprietary"
+end
+```
+
 ### Unsupported Formulas
 
 Formulas with the following characteristics will be skipped:
 
-- Non-GitHub URLs (e.g., SourceForge, custom domains)
+- Non-GitHub and non-NPM URLs (e.g., SourceForge, custom domains)
+- NPPM packages from custom registries (only `registry.npmjs.org` is supported)
 - Missing or invalid `sha256` field
 - Git repository URLs (e.g., `url "https://github.com/owner/repo.git"`)
 - Invalid class definitions

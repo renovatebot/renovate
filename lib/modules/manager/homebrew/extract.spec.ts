@@ -319,5 +319,89 @@ describe('modules/manager/homebrew/extract', () => {
         ],
       });
     });
+
+    it('extracts npm scoped package dependency', () => {
+      const content = codeBlock`
+        class ClaudeCode < Formula
+        desc "Anthropic's official CLI for Claude"
+        homepage "https://www.anthropic.com/claude-code"
+        url "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-0.1.0.tgz"
+        sha256 "345eae3fe4c682df3d8876141f32035bb2898263ce5a406e76e1d74ccb13f601"
+        license "Proprietary"
+        end
+      `;
+
+      const res = extractPackageFile(content);
+
+      expect(res).toStrictEqual({
+        deps: [
+          {
+            currentValue: '0.1.0',
+            datasource: 'npm',
+            depName: '@anthropic-ai/claude-code',
+            managerData: {
+              type: 'npm',
+              packageName: '@anthropic-ai/claude-code',
+              sha256:
+                '345eae3fe4c682df3d8876141f32035bb2898263ce5a406e76e1d74ccb13f601',
+              url: 'https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-0.1.0.tgz',
+            },
+          },
+        ],
+      });
+    });
+
+    it('extracts npm unscoped package dependency', () => {
+      const content = codeBlock`
+        class Express < Formula
+        desc "Fast, unopinionated, minimalist web framework"
+        homepage "https://expressjs.com/"
+        url "https://registry.npmjs.org/express/-/express-4.18.2.tgz"
+        sha256 "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+        license "MIT"
+        end
+      `;
+
+      const res = extractPackageFile(content);
+
+      expect(res).toStrictEqual({
+        deps: [
+          {
+            currentValue: '4.18.2',
+            datasource: 'npm',
+            depName: 'express',
+            managerData: {
+              type: 'npm',
+              packageName: 'express',
+              sha256:
+                'abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234',
+              url: 'https://registry.npmjs.org/express/-/express-4.18.2.tgz',
+            },
+          },
+        ],
+      });
+    });
+
+    it('skips npm package from custom registry', () => {
+      const content = codeBlock`
+        class CustomPackage < Formula
+        desc "Package from custom registry"
+        homepage "https://example.com"
+        url "https://registry.company.com/package/-/package-1.0.0.tgz"
+        sha256 "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+        end
+      `;
+
+      const res = extractPackageFile(content);
+
+      expect(res).toStrictEqual({
+        deps: [
+          {
+            depName: 'CustomPackage',
+            skipReason: 'unsupported-url',
+          },
+        ],
+      });
+    });
   });
 });
