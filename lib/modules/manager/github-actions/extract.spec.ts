@@ -68,9 +68,13 @@ describe('modules/manager/github-actions/extract', () => {
         'workflow_2.yml',
       );
       expect(res?.deps).toMatchSnapshot();
+      // Version-like refs (v1, v2, v1.0.0) use github-tags, non-version refs (master) use github-digest
       expect(
         res?.deps.filter((d) => d.datasource === 'github-tags'),
-      ).toHaveLength(8);
+      ).toHaveLength(7);
+      expect(
+        res?.deps.filter((d) => d.datasource === 'github-digest'),
+      ).toHaveLength(1);
     });
 
     it('use github.com as registry when no settings provided', () => {
@@ -486,7 +490,7 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res?.deps[0]).toMatchObject({
         depName: 'taiki-e/install-action',
         currentValue: 'cargo-llvm-cov',
-        versioning: 'dummy',
+        versioning: 'exact',
         autoReplaceStringTemplate:
           '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
       });
@@ -506,7 +510,7 @@ describe('modules/manager/github-actions/extract', () => {
         depName: 'taiki-e/install-action',
         currentValue: 'cargo-llvm-cov',
         currentDigest: '4b1248585248751e3b12fd020cf7ac91540ca09c',
-        versioning: 'dummy',
+        versioning: 'exact',
         replaceString:
           'taiki-e/install-action@4b1248585248751e3b12fd020cf7ac91540ca09c # tag=cargo-llvm-cov',
         autoReplaceStringTemplate:

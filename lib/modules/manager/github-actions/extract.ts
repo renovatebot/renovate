@@ -5,6 +5,7 @@ import { detectPlatform } from '../../../util/common';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
+import { GithubDigestDatasource } from '../../datasource/github-digest';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -124,8 +125,13 @@ function extractRepositoryAction(
     dep.currentValue = ref;
   }
 
-  // For non-semver tags (like tool names), use dummy versioning
-  if (dep.currentValue && !dockerVersioning.api.isValid(dep.currentValue)) {
+  // For non-version refs (branches like master, or tool names like install),
+  // use exact versioning and github-digest datasource.
+  // github-digest checks both tags and branches, with tag priority.
+  // Version-like refs (v1, v1.0, v1.0.0) use github-tags, non-version refs use github-digest.
+  const isVersionLike = dep.currentValue && /^v?\d+/.test(dep.currentValue);
+  if (dep.currentValue && !isVersionLike) {
+    dep.datasource = GithubDigestDatasource.id;
     dep.versioning = exactVersioning.id;
     dep.autoReplaceStringTemplate = `${quote}{{depName}}${pathSuffix}@{{#if newDigest}}{{newDigest}}${quote}{{#if newValue}}${commentWs}# tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quote}{{/unless}}`;
   }
