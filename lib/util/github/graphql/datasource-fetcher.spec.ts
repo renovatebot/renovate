@@ -438,17 +438,17 @@ describe('util/github/graphql/datasource-fetcher', () => {
       );
     });
 
-    describe('maxPages limit', () => {
-      const adapterWithMaxPages: GithubGraphqlDatasourceAdapter<
+    describe('maxItems limit', () => {
+      const adapterWithMaxItems: GithubGraphqlDatasourceAdapter<
         TestAdapterInput,
         TestAdapterOutput
       > = {
         ...adapter,
-        maxPages: 2,
+        maxItems: 2,
       };
 
-      it('stops pagination after maxPages', async () => {
-        // Set up 3 pages but only 2 should be fetched due to maxPages: 2
+      it('stops pagination after maxItems', async () => {
+        // Set up 3 pages but only 2 items should be fetched due to maxItems: 2
         httpMock
           .scope('https://api.github.com/')
           .post('/graphql')
@@ -473,10 +473,10 @@ describe('util/github/graphql/datasource-fetcher', () => {
         const res = await Datasource.query(
           { packageName: 'foo/bar' },
           http,
-          adapterWithMaxPages,
+          adapterWithMaxItems,
         );
 
-        // Should only have 2 items (2 pages)
+        // Should only have 2 items due to maxItems: 2
         expect(res).toHaveLength(2);
         expect(httpMock.getTrace()).toHaveLength(2);
       });

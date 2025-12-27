@@ -32,11 +32,11 @@ export interface GithubGraphqlDatasourceAdapter<
   transform(input: Input): Output | null;
 
   /**
-   * Maximum number of pages to fetch. Undefined means unlimited.
+   * Maximum number of items to fetch. Undefined means unlimited.
    * When set, disables early termination based on stabilization.
    * Useful for refs that can't be sorted by date (e.g. branches).
    */
-  maxPages?: number;
+  maxItems?: number;
 }
 
 export type RawQueryResponse<Payload> = [Payload, null] | [null, Error];

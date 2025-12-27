@@ -55,4 +55,4 @@ function transform(item: GithubGraphqlBranch): GithubBranchItem | null {
 export const adapter: GithubGraphqlDatasourceAdapter<
   GithubGraphqlBranch,
   GithubBranchItem
-> = { key, query, transform, maxPages: 3 };
+> = { key, query, transform, maxItems: 300 };

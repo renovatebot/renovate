@@ -229,7 +229,7 @@ export class GithubGraphqlDatasourceFetcher<
       'cachePrivatePackages',
       false,
     );
-    const skipStabilization = !is.undefined(this.datasourceAdapter.maxPages);
+    const skipStabilization = !is.undefined(this.datasourceAdapter.maxItems);
     this._cacheStrategy =
       cachePrivatePackages || this.isPersistent
         ? new GithubGraphqlPackageCacheStrategy<ResultItem>(
@@ -253,13 +253,12 @@ export class GithubGraphqlDatasourceFetcher<
     let hasNextPage = true;
     let isPaginationDone = false;
     let nextCursor: string | undefined;
-    let pageCount = 0;
-    const maxPages = this.datasourceAdapter.maxPages;
+    let itemCount = 0;
+    const maxItems = this.datasourceAdapter.maxItems;
     while (hasNextPage && !isPaginationDone && !this.hasReachedQueryLimit()) {
-      if (!is.undefined(maxPages) && pageCount >= maxPages) {
+      if (!is.undefined(maxItems) && itemCount >= maxItems) {
         break;
       }
-      pageCount += 1;
       const queryResult = await this.doShrinkableQuery();
 
       const resultItems: ResultItem[] = [];
@@ -277,6 +276,7 @@ export class GithubGraphqlDatasourceFetcher<
         }
         resultItems.push(item);
       }
+      itemCount += resultItems.length;
 
       // It's important to call `getCacheStrategy()` after `doShrinkableQuery()`
       // because `doShrinkableQuery()` may change `this.isCacheable`.
