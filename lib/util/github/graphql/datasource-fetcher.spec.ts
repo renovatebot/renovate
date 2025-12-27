@@ -454,12 +454,20 @@ describe('util/github/graphql/datasource-fetcher', () => {
           .post('/graphql')
           .reply(
             200,
-            resp(false, [{ version: v1, releaseTimestamp: t1, foo: '1' }], 'page-2'),
+            resp(
+              false,
+              [{ version: v1, releaseTimestamp: t1, foo: '1' }],
+              'page-2',
+            ),
           )
           .post('/graphql')
           .reply(
             200,
-            resp(false, [{ version: v2, releaseTimestamp: t2, foo: '2' }], 'page-3'),
+            resp(
+              false,
+              [{ version: v2, releaseTimestamp: t2, foo: '2' }],
+              'page-3',
+            ),
           );
 
         const res = await Datasource.query(
