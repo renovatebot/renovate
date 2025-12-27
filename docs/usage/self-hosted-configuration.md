@@ -474,6 +474,7 @@ Other valid cache namespaces are as follows:
 - `datasource-typst:releases`
 - `datasource-unity3d`
 - `datasource-unity3d-packages`
+- `github-branches-datasource-v1`
 - `github-releases-datasource-v2`
 - `github-tags-datasource-v2`
 - `merge-confidence`

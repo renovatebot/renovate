@@ -30,6 +30,13 @@ export interface GithubGraphqlDatasourceAdapter<
    * @param input GraphQL node data
    */
   transform(input: Input): Output | null;
+
+  /**
+   * Maximum number of pages to fetch. Undefined means unlimited.
+   * When set, disables early termination based on stabilization.
+   * Useful for refs that can't be sorted by date (e.g. branches).
+   */
+  maxPages?: number;
 }
 
 export type RawQueryResponse<Payload> = [Payload, null] | [null, Error];
@@ -76,6 +83,14 @@ export interface GithubReleaseItem extends GithubDatasourceItem {
  * Result of GraphQL response transformation for tags (via tags)
  */
 export interface GithubTagItem extends GithubDatasourceItem {
+  hash: string;
+  gitRef: string;
+}
+
+/**
+ * Result of GraphQL response transformation for branches
+ */
+export interface GithubBranchItem extends GithubDatasourceItem {
   hash: string;
   gitRef: string;
 }

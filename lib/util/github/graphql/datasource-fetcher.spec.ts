@@ -437,5 +437,41 @@ describe('util/github/graphql/datasource-fetcher', () => {
         },
       );
     });
+
+    describe('maxPages limit', () => {
+      const adapterWithMaxPages: GithubGraphqlDatasourceAdapter<
+        TestAdapterInput,
+        TestAdapterOutput
+      > = {
+        ...adapter,
+        maxPages: 2,
+      };
+
+      it('stops pagination after maxPages', async () => {
+        // Set up 3 pages but only 2 should be fetched due to maxPages: 2
+        httpMock
+          .scope('https://api.github.com/')
+          .post('/graphql')
+          .reply(
+            200,
+            resp(false, [{ version: v1, releaseTimestamp: t1, foo: '1' }], 'page-2'),
+          )
+          .post('/graphql')
+          .reply(
+            200,
+            resp(false, [{ version: v2, releaseTimestamp: t2, foo: '2' }], 'page-3'),
+          );
+
+        const res = await Datasource.query(
+          { packageName: 'foo/bar' },
+          http,
+          adapterWithMaxPages,
+        );
+
+        // Should only have 2 items (2 pages)
+        expect(res).toHaveLength(2);
+        expect(httpMock.getTrace()).toHaveLength(2);
+      });
+    });
   });
 });

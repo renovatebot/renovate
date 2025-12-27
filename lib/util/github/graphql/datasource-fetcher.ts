@@ -228,10 +228,19 @@ export class GithubGraphqlDatasourceFetcher<
       'cachePrivatePackages',
       false,
     );
+    const skipStabilization = this.datasourceAdapter.maxPages !== undefined;
     this._cacheStrategy =
       cachePrivatePackages || this.isPersistent
-        ? new GithubGraphqlPackageCacheStrategy<ResultItem>(cacheNs, cacheKey)
-        : new GithubGraphqlMemoryCacheStrategy<ResultItem>(cacheNs, cacheKey);
+        ? new GithubGraphqlPackageCacheStrategy<ResultItem>(
+            cacheNs,
+            cacheKey,
+            skipStabilization,
+          )
+        : new GithubGraphqlMemoryCacheStrategy<ResultItem>(
+            cacheNs,
+            cacheKey,
+            skipStabilization,
+          );
     return this._cacheStrategy;
   }
 
@@ -243,7 +252,13 @@ export class GithubGraphqlDatasourceFetcher<
     let hasNextPage = true;
     let isPaginationDone = false;
     let nextCursor: string | undefined;
+    let pageCount = 0;
+    const maxPages = this.datasourceAdapter.maxPages;
     while (hasNextPage && !isPaginationDone && !this.hasReachedQueryLimit()) {
+      if (maxPages !== undefined && pageCount >= maxPages) {
+        break;
+      }
+      pageCount += 1;
       const queryResult = await this.doShrinkableQuery();
 
       const resultItems: ResultItem[] = [];
