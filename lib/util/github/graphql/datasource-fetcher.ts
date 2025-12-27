@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -228,7 +229,7 @@ export class GithubGraphqlDatasourceFetcher<
       'cachePrivatePackages',
       false,
     );
-    const skipStabilization = this.datasourceAdapter.maxPages !== undefined;
+    const skipStabilization = !is.undefined(this.datasourceAdapter.maxPages);
     this._cacheStrategy =
       cachePrivatePackages || this.isPersistent
         ? new GithubGraphqlPackageCacheStrategy<ResultItem>(
@@ -255,7 +256,7 @@ export class GithubGraphqlDatasourceFetcher<
     let pageCount = 0;
     const maxPages = this.datasourceAdapter.maxPages;
     while (hasNextPage && !isPaginationDone && !this.hasReachedQueryLimit()) {
-      if (maxPages !== undefined && pageCount >= maxPages) {
+      if (!is.undefined(maxPages) && pageCount >= maxPages) {
         break;
       }
       pageCount += 1;
