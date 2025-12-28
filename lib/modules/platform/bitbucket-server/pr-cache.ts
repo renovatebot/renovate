@@ -11,7 +11,11 @@ import { prInfo } from './utils';
 
 /* v8 ignore next */
 function migrateBitbucketServerCache(platform: unknown): void {
-  if (!isPlainObject(platform?.bitbucketServer)) {
+  if (!isPlainObject(platform)) {
+    return;
+  }
+
+  if (!isPlainObject(platform.bitbucketServer)) {
     return;
   }
 
