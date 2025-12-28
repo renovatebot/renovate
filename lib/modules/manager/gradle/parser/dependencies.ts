@@ -239,6 +239,19 @@ const qImplicitTestSuites = qDotOrBraceExpr(
   .handler(handleImplicitDep)
   .handler(cleanupTempVars);
 
+// substitute module("foo:bar:1.2.3") using "baz:qux:4.5.6"
+// substitute(module("foo:bar:1.2.3")).using("baz:qux:4.5.6")
+const qIgnoreSubstitutedDependencies = q.sym<Ctx>('substitute').alt(
+  q.sym<Ctx>('module').tree(),
+  q.tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q.sym<Ctx>('module').tree(),
+  }),
+);
+
 export const qDependencies = q.alt(
   qDependencyStrings,
   qDependencySet,
@@ -249,4 +262,6 @@ export const qDependencies = q.alt(
   qImplicitTestSuites,
   // avoid heuristic matching of gradle feature variant capabilities
   qDotOrBraceExpr('java', q.sym<Ctx>('registerFeature').tree()),
+  // avoid matching substituted dependency modules
+  qIgnoreSubstitutedDependencies,
 );
