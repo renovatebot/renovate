@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "incremental": true,
+    "tsBuildInfoFile": ".cache/tsbuildinfo",
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
