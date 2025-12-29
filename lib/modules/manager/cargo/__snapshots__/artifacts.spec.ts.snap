@@ -6,7 +6,6 @@ exports[`modules/manager/cargo/artifacts > returns null if unchanged 1`] = `
     "cmd": "cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace",
     "options": {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -29,7 +28,6 @@ exports[`modules/manager/cargo/artifacts > returns updated Cargo.lock 1`] = `
     "cmd": "cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace",
     "options": {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -52,7 +50,6 @@ exports[`modules/manager/cargo/artifacts > returns updated Cargo.lock for lockfi
     "cmd": "cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml",
     "options": {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -75,7 +72,6 @@ exports[`modules/manager/cargo/artifacts > returns updated workspace Cargo.lock 
     "cmd": "cargo update --config net.git-fetch-with-cli=true --manifest-path crates/one/Cargo.toml --workspace",
     "options": {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -98,7 +94,6 @@ exports[`modules/manager/cargo/artifacts > updates Cargo.lock based on the packa
     "cmd": "cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace",
     "options": {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",

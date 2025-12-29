@@ -6,7 +6,6 @@ exports[`modules/manager/vendir/artifacts > returns null if unchanged 1`] = `
     "cmd": "vendir sync",
     "options": {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",

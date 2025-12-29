@@ -31,11 +31,6 @@ export interface OutputListeners {
 }
 
 export interface RawExecOptions extends ChildProcessSpawnOptions {
-  // TODO: to be removed in #16655
-  /**
-   * @deprecated renovate uses utf8, encoding property is ignored.
-   */
-  encoding: string;
   maxBuffer?: number | undefined;
   cwd?: string;
   outputListeners?: OutputListeners;

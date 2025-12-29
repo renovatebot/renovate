@@ -183,10 +183,7 @@ describe('util/exec/common', () => {
       });
       spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
-        exec(
-          cmd,
-          partial<RawExecOptions>({ encoding: 'utf8', shell: 'bin/bash' }),
-        ),
+        exec(cmd, partial<RawExecOptions>({ shell: 'bin/bash' })),
       ).resolves.toEqual({
         stderr,
         stdout,
@@ -218,7 +215,6 @@ describe('util/exec/common', () => {
         exec(
           cmd,
           partial<RawExecOptions>({
-            encoding: 'utf8',
             shell: 'bin/bash',
             outputListeners: {
               stdout: [stdoutListener],
@@ -242,7 +238,7 @@ describe('util/exec/common', () => {
       const stub = getSpawnStub({ cmd, exitCode, exitSignal: null, stderr });
       spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
-        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' })),
+        exec(cmd, partial<RawExecOptions>({})),
       ).rejects.toMatchObject({
         cmd,
         message: `Command failed: ${cmd}\n${stderr}`,
@@ -257,7 +253,7 @@ describe('util/exec/common', () => {
       const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });
       spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
-        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' })),
+        exec(cmd, partial<RawExecOptions>({})),
       ).rejects.toMatchObject({
         cmd,
         signal: exitSignal,
@@ -274,9 +270,7 @@ describe('util/exec/common', () => {
         timeout: 500,
       });
       spawn.mockImplementationOnce((cmd, opts) => stub);
-      await expect(
-        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' })),
-      ).toReject();
+      await expect(exec(cmd, partial<RawExecOptions>({}))).toReject();
     });
 
     it('process exits due to error', async () => {
@@ -290,7 +284,7 @@ describe('util/exec/common', () => {
       });
       spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
-        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' })),
+        exec(cmd, partial<RawExecOptions>({})),
       ).rejects.toMatchObject({ cmd: 'ls -l', message: 'error message' });
     });
 
@@ -307,7 +301,6 @@ describe('util/exec/common', () => {
         exec(
           cmd,
           partial<RawExecOptions>({
-            encoding: 'utf8',
             maxBuffer: 5,
           }),
         ),
@@ -331,7 +324,6 @@ describe('util/exec/common', () => {
         exec(
           cmd,
           partial<RawExecOptions>({
-            encoding: 'utf8',
             maxBuffer: 5,
           }),
         ),
@@ -356,10 +348,7 @@ describe('util/exec/common', () => {
       });
       spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
-        rawExec(
-          cmd,
-          partial<RawExecOptions>({ encoding: 'utf8', shell: 'bin/bash' }),
-        ),
+        rawExec(cmd, partial<RawExecOptions>({ shell: 'bin/bash' })),
       ).resolves.toEqual({
         stderr,
         stdout,
@@ -383,10 +372,7 @@ describe('util/exec/common', () => {
         });
         spawn.mockImplementationOnce((cmd, opts) => stub);
 
-        await rawExec(
-          cmd,
-          partial<RawExecOptions>({ encoding: 'utf8', shell: 'bin/bash' }),
-        );
+        await rawExec(cmd, partial<RawExecOptions>({ shell: 'bin/bash' }));
 
         expect(instrument).toHaveBeenCalledTimes(1);
         expect(instrument).toHaveBeenCalledWith(
@@ -409,10 +395,7 @@ describe('util/exec/common', () => {
         });
         spawn.mockImplementationOnce((cmd, opts) => stub);
 
-        await rawExec(
-          cmd,
-          partial<RawExecOptions>({ encoding: 'utf8', shell: 'bin/bash' }),
-        );
+        await rawExec(cmd, partial<RawExecOptions>({ shell: 'bin/bash' }));
 
         expect(instrument).toHaveBeenCalledTimes(1);
         expect(instrument).toHaveBeenCalledWith(
@@ -439,7 +422,7 @@ describe('util/exec/common', () => {
       spawn.mockImplementationOnce((cmd, opts) => stub);
       killSpy.mockImplementationOnce((pid, signal) => true);
       await expect(
-        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' })),
+        exec(cmd, partial<RawExecOptions>({})),
       ).rejects.toMatchObject({
         cmd,
         signal: exitSignal,
@@ -461,7 +444,7 @@ describe('util/exec/common', () => {
         throw new Error();
       });
       await expect(
-        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' })),
+        exec(cmd, partial<RawExecOptions>({})),
       ).rejects.toMatchObject({
         cmd,
         signal: exitSignal,

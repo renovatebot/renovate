@@ -363,7 +363,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
         options: {
           cwd: 'some-folder',
-          encoding: 'utf-8',
           env: {
             HTTP_PROXY: 'http://example.com',
             HTTPS_PROXY: 'https://example.com',
@@ -405,7 +404,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
         options: {
           cwd: 'some-folder',
-          encoding: 'utf-8',
           env: {
             HTTP_PROXY: 'http://example.com',
             HTTPS_PROXY: 'https://example.com',
@@ -460,7 +458,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
         options: {
           cwd: 'some-folder',
-          encoding: 'utf-8',
           env: {
             HTTP_PROXY: 'http://example.com',
             HTTPS_PROXY: 'https://example.com',

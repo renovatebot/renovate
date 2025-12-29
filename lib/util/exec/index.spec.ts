@@ -70,12 +70,11 @@ describe('util/exec/index', () => {
     undefined,
     [volume_2_from, volume_2_to],
   ];
-  const encoding = 'utf-8';
   const docker = {};
   const processEnv = envMock.full;
   const dockerPullCmd = `docker pull ${fullImage}`;
   const dockerRemoveCmd = `docker ps --filter name=${name} -aq`;
-  const dockerPullOpts = { encoding };
+  const dockerPullOpts = {};
   const dockerRemoveOpts = dockerPullOpts;
 
   const containerbaseEnv = {
@@ -98,7 +97,6 @@ describe('util/exec/index', () => {
         outOpts: [
           {
             cwd,
-            encoding,
             env: envMock.basic,
             timeout: 900000,
             maxBuffer: 10485760,
@@ -117,7 +115,6 @@ describe('util/exec/index', () => {
         outOpts: [
           {
             cwd,
-            encoding,
             env: envMock.basic,
             timeout: 900000,
             maxBuffer: 10485760,
@@ -136,21 +133,18 @@ describe('util/exec/index', () => {
         outOpts: [
           {
             cwd,
-            encoding,
             env: envMock.basic,
             timeout: 900000,
             maxBuffer: 10485760,
           },
           {
             cwd,
-            encoding,
             env: envMock.basic,
             timeout: 900000,
             maxBuffer: 10485760,
           },
           {
             cwd,
-            encoding,
             env: envMock.basic,
             timeout: 900000,
             maxBuffer: 10485760,
@@ -169,7 +163,6 @@ describe('util/exec/index', () => {
         outOpts: [
           {
             cwd,
-            encoding,
             env: { ...envMock.basic, FOO: 'BAR' },
             timeout: 900000,
             maxBuffer: 10485760,
@@ -188,7 +181,6 @@ describe('util/exec/index', () => {
         outOpts: [
           {
             cwd,
-            encoding,
             env: envMock.basic,
             timeout: 900000,
             maxBuffer: 10485760,
@@ -207,7 +199,6 @@ describe('util/exec/index', () => {
         outOpts: [
           {
             cwd,
-            encoding,
             env: envMock.full,
             timeout: 900000,
             maxBuffer: 10485760,
@@ -233,7 +224,6 @@ describe('util/exec/index', () => {
           dockerRemoveOpts,
           {
             cwd,
-            encoding,
             env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
@@ -260,7 +250,6 @@ describe('util/exec/index', () => {
         outOpts: [
           {
             cwd,
-            encoding,
             env: containerbaseEnvFiltered,
             timeout: 900000,
             maxBuffer: 10485760,
@@ -295,7 +284,6 @@ describe('util/exec/index', () => {
           dockerRemoveOpts,
           {
             cwd,
-            encoding,
             env: containerbaseEnvFiltered,
             timeout: 900000,
             maxBuffer: 10485760,
@@ -315,7 +303,6 @@ describe('util/exec/index', () => {
         outOpts: [
           {
             cwd,
-            encoding,
             env: { ...containerbaseEnv, SELECTED_ENV_VAR: 'Default value' },
             timeout: 900000,
             maxBuffer: 10485760,
@@ -345,7 +332,6 @@ describe('util/exec/index', () => {
           dockerRemoveOpts,
           {
             cwd,
-            encoding,
             env: { ...containerbaseEnv, SELECTED_ENV_VAR: 'Default value' },
             timeout: 900000,
             maxBuffer: 10485760,
@@ -371,7 +357,6 @@ describe('util/exec/index', () => {
           dockerRemoveOpts,
           {
             cwd,
-            encoding,
             env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
@@ -397,7 +382,6 @@ describe('util/exec/index', () => {
           dockerRemoveOpts,
           {
             cwd,
-            encoding,
             env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
@@ -426,7 +410,6 @@ describe('util/exec/index', () => {
           dockerRemoveOpts,
           {
             cwd,
-            encoding,
             env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
@@ -455,7 +438,6 @@ describe('util/exec/index', () => {
           dockerRemoveOpts,
           {
             cwd,
-            encoding,
             env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
@@ -487,7 +469,6 @@ describe('util/exec/index', () => {
           dockerRemoveOpts,
           {
             cwd,
-            encoding,
             env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
@@ -513,7 +494,6 @@ describe('util/exec/index', () => {
           dockerRemoveOpts,
           {
             cwd,
-            encoding,
             env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
@@ -535,7 +515,6 @@ describe('util/exec/index', () => {
         outOpts: [
           {
             cwd,
-            encoding,
             env: containerbaseEnv,
             timeout: 20 * 60 * 1000,
             maxBuffer: 10485760,
@@ -555,7 +534,6 @@ describe('util/exec/index', () => {
         outOpts: [
           {
             cwd,
-            encoding,
             env: envMock.basic,
             timeout: 30 * 60 * 1000,
             maxBuffer: 10485760,
@@ -577,7 +555,6 @@ describe('util/exec/index', () => {
         outOpts: [
           {
             cwd,
-            encoding,
             env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 1024,
@@ -597,7 +574,6 @@ describe('util/exec/index', () => {
         outOpts: [
           {
             cwd,
-            encoding,
             env: {
               ...containerbaseEnv,
               CUSTOM_KEY: 'CUSTOM_VALUE',
@@ -625,7 +601,6 @@ describe('util/exec/index', () => {
         outOpts: [
           {
             cwd,
-            encoding,
             env: {
               ...containerbaseEnv,
               CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
@@ -659,7 +634,6 @@ describe('util/exec/index', () => {
           dockerRemoveOpts,
           {
             cwd,
-            encoding,
             env: {
               ...containerbaseEnv,
               CUSTOM_KEY: 'CUSTOM_VALUE',
@@ -693,7 +667,6 @@ describe('util/exec/index', () => {
           dockerRemoveOpts,
           {
             cwd,
-            encoding,
             env: {
               ...containerbaseEnv,
               CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
@@ -724,7 +697,6 @@ describe('util/exec/index', () => {
         outOpts: [
           {
             cwd,
-            encoding,
             env: envMock.basic,
             timeout: 900000,
             maxBuffer: 10485760,
@@ -750,7 +722,6 @@ describe('util/exec/index', () => {
         outOpts: [
           {
             cwd,
-            encoding,
             env: {
               ...envMock.basic,
               CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
