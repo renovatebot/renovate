@@ -189,6 +189,69 @@ describe('util/exec/common', () => {
       });
     });
 
+    it('can specify a shell', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((cmd, opts) => stub);
+
+      await exec(
+        cmd,
+        partial<RawExecOptions>({ encoding: 'utf8', shell: '/bin/zsh' }),
+      );
+
+      expect(execa).toHaveBeenCalledWith(
+        cmd,
+        expect.objectContaining({ shell: '/bin/zsh' }),
+      );
+    });
+
+    it('defaults to shell=true', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((cmd, opts) => stub);
+
+      await exec(cmd, partial<RawExecOptions>({}));
+
+      expect(execa).toHaveBeenCalledWith(
+        cmd,
+        expect.objectContaining({ shell: true }),
+      );
+    });
+
+    it('cannot specify shell=false', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((cmd, opts) => stub);
+
+      await exec(
+        cmd,
+        partial<RawExecOptions>({ encoding: 'utf8', shell: false }),
+      );
+
+      expect(execa).toHaveBeenCalledWith(
+        cmd,
+        expect.objectContaining({ shell: true }),
+      );
+    });
+
     it('should invoke the output listeners', async () => {
       const cmd = 'ls -l';
       const stub = getSpawnStub({
