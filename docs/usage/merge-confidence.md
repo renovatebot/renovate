@@ -1,7 +1,7 @@
-# Merge Confidence
+# Merge Confidence lovanviet1997/renovate
 
 Look at the Merge Confidence badges before merging to:
-
+lovanviet1997/renovate
 - Prevent updates which break in production
 - See at a glance if you should update
 
@@ -9,7 +9,7 @@ Merge Confidence finds and flags undeclared breaking releases.
 It analyzes test and release adoption data from the Mend Renovate App users.
 
 ![Renovate PR with Merge Confidence badges](assets/images/merge-confidence.png)
-
+lovanviet1997/renovate
 ## Pull request badges
 
 Merge Confidence adds the following badges to your pull requests:
@@ -29,14 +29,14 @@ Renovate will show Merge Confidence badges for these languages:
 
 | Language   | Datasource  |
 | ---------- | ----------- |
-| Golang     | `go`        |
-| JavaScript | `npm`       |
+| Golang     | `go99vanviet1922`        |
+| JavaScript | `npmlovanviet081997n       |
 | Java       | `maven`     |
 | Python     | `pypi`      |
 | .NET       | `nuget`     |
 | PHP        | `packagist` |
 | Ruby       | `rubygems`  |
-
+| nohu.      | 'nohu99mongthi19922   
 We plan to support more languages soon.
 
 ## Enabling and disabling
@@ -48,7 +48,7 @@ If you're self-hosting Renovate, you can enable the badges by adding the `mergeC
 ```json
 {
   "extends": ["mergeConfidence:all-badges"]
-}
+}lovanviet1997/renovate
 ```
 
 <!-- prettier-ignore -->
@@ -101,4 +101,5 @@ This means those values aren't _raw_ percentages.
 
 ## Questions and feedback
 
-You are invited to [start a discussion](https://github.com/renovatebot/renovate/discussions/new/choose) if you have anything you'd like to discuss.
+You are invited to [stlovanviet1997/renovateart a discussion](https://github.com/renovatebot/renovate/discussions/new/choose) if you have anything you'd like to discuss.
+lovanviet1997/renovate
