@@ -2,8 +2,9 @@ import {
   isEmptyObject,
   isNonEmptyObject,
   isPlainObject,
+  isString,
 } from '@sindresorhus/is';
-import type { Document } from 'yaml';
+import type { Document, Pair } from 'yaml';
 import { isMap, isScalar, isSeq } from 'yaml';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
@@ -167,18 +168,20 @@ function findDependencies(
   const repoComments: Record<number, string | undefined> = {};
   if (doc?.contents && isMap(doc.contents)) {
     const reposPair = doc.contents.items.find(
-      (pair: any) => pair.key?.value === 'repos',
+      (pair): pair is Pair<unknown, unknown> =>
+        isScalar(pair.key) && pair.key?.value === 'repos',
     );
     if (reposPair?.value && isSeq(reposPair.value)) {
       for (const [idx, repoItem] of reposPair.value.items.entries()) {
         if (repoItem && isMap(repoItem)) {
           const revPair = repoItem.items.find(
-            (pair: any) => pair.key?.value === 'rev',
+            (pair): pair is Pair<unknown, unknown> =>
+              isScalar(pair.key) && pair.key?.value === 'rev',
           );
           if (
             revPair?.value &&
             isScalar(revPair.value) &&
-            typeof revPair.value.comment === 'string'
+            isString(revPair.value.comment)
           ) {
             repoComments[idx] = revPair.value.comment;
           }
