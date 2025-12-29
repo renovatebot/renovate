@@ -54,6 +54,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
   constructor(
     protected readonly cacheNs: PackageCacheNamespace,
     protected readonly cacheKey: string,
+    protected readonly skipStabilization = false,
   ) {}
 
   /**
@@ -116,7 +117,10 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
       // the entire page of items. This protects us from unusual cases
       // when release authors intentionally break the timeline. Therefore,
       // while it feels appealing to break early, please don't do that.
-      if (oldItem && this.isStabilized(oldItem)) {
+      //
+      // Skip this optimization if skipStabilization is set (e.g. for branches
+      // where we can't rely on date-based ordering).
+      if (!this.skipStabilization && oldItem && this.isStabilized(oldItem)) {
         isPaginationDone = true;
       }
 

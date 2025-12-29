@@ -62,6 +62,7 @@ export interface RenovateSharedConfig {
   abandonmentThreshold?: Nullish<string>;
   addLabels?: string[];
   assignAutomerge?: boolean;
+  autoApprove?: boolean;
   autoReplaceGlobalMatch?: boolean;
   automerge?: boolean;
   automergeSchedule?: string[];
@@ -128,6 +129,7 @@ export interface RenovateSharedConfig {
   prHeader?: string;
   prPriority?: number;
   prTitle?: string;
+  prTitleStrict?: boolean;
   productLinks?: Record<string, string>;
   pruneBranchAfterAutomerge?: boolean;
   rangeStrategy?: RangeStrategy;
@@ -242,6 +244,7 @@ export interface RepoGlobalConfig {
   configFileNames?: string[];
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
+  onboardingAutoCloseAge?: number;
 }
 
 /**
@@ -261,7 +264,7 @@ export interface LegacyAdminConfig {
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingRebaseCheckbox?: boolean;
   onboardingPrTitle?: string;
-  onboardingConfig?: RenovateSharedConfig;
+  onboardingConfig?: RenovateConfig;
   onboardingConfigFileName?: string;
 
   optimizeForDisabled?: boolean;
@@ -533,9 +536,8 @@ export type MergeStrategy =
   | 'rebase-merge'
   | 'squash';
 
-// ref: https://github.com/renovatebot/renovate/issues/39458
 // This list should be added to as any new unsafe execution commands should be permitted
-export type AllowedUnsafeExecution = undefined;
+export type AllowedUnsafeExecution = 'goGenerate' | 'gradleWrapper';
 
 // TODO: Proper typings
 export interface PackageRule

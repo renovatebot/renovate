@@ -1,210 +1,116 @@
-// TODO: types (#22198)
-import semver from 'semver';
 import { logger } from '../../../logger';
 import { hashStream } from '../../../util/hash';
 import { Http } from '../../../util/http';
 import type { UpdateDependencyConfig } from '../types';
-import { parseUrlPath } from './extract';
-import { isSpace, removeComments, skip } from './util';
+import { findHandlerByType } from './handlers';
+import type { HomebrewManagerData } from './types';
+import { updateRubyString } from './utils';
 
 const http = new Http('homebrew');
 
-function replaceUrl(
-  idx: number,
-  content: string,
-  oldUrl: string,
-  newUrl: string,
-): string | null {
-  let i = idx;
-  i += 'url'.length;
-  i = skip(i, content, (c) => isSpace(c));
-  const chr = content[i];
-  if (chr !== '"' && chr !== "'") {
-    return null;
-  }
-  i += 1;
-  const newContent =
-    content.substring(0, i) + content.substring(i).replace(oldUrl, newUrl);
-  return newContent;
-}
-
-function getUrlTestContent(
-  content: string,
-  oldUrl: string,
-  newUrl: string,
-): string | null {
-  const urlRegExp = /(^|\s)url(\s)/;
-  const cleanContent = removeComments(content);
-  let j = cleanContent.search(urlRegExp);
-  if (isSpace(cleanContent[j])) {
-    j += 1;
-  }
-  const testContent = replaceUrl(j, cleanContent, oldUrl, newUrl);
-  return testContent;
-}
-
-function updateUrl(
-  content: string,
-  oldUrl: string,
-  newUrl: string,
-): string | null {
-  const urlRegExp = /(^|\s)url(\s)/;
-  let i = content.search(urlRegExp);
-  if (i === -1) {
-    return null;
-  }
-  if (isSpace(content[i])) {
-    i += 1;
-  }
-  let newContent = replaceUrl(i, content, oldUrl, newUrl);
-  const testContent = getUrlTestContent(content, oldUrl, newUrl);
-  if (!newContent || !testContent) {
-    return null;
-  }
-  while (newContent && removeComments(newContent) !== testContent) {
-    i += 'url'.length;
-    i += content.substring(i).search(urlRegExp);
-    if (isSpace(content[i])) {
-      i += 1;
-    }
-    newContent = replaceUrl(i, content, oldUrl, newUrl);
-  }
-  return newContent;
-}
-
-function replaceSha256(
-  idx: number,
-  content: string,
-  oldSha256: string,
-  newSha256: string,
-): string | null {
-  let i = idx;
-  i += 'sha256'.length;
-  i = skip(i, content, (c) => isSpace(c));
-  const chr = content[i];
-  if (chr !== '"' && chr !== "'") {
-    return null;
-  }
-  i += 1;
-  const newContent =
-    content.substring(0, i) +
-    content.substring(i).replace(oldSha256, newSha256);
-  return newContent;
-}
-
-function getSha256TestContent(
-  content: string,
-  oldSha256: string,
-  newSha256: string,
-): string | null {
-  const sha256RegExp = /(^|\s)sha256(\s)/;
-  const cleanContent = removeComments(content);
-  let j = cleanContent.search(sha256RegExp);
-  if (isSpace(cleanContent[j])) {
-    j += 1;
-  }
-  const testContent = replaceSha256(j, cleanContent, oldSha256, newSha256);
-  return testContent;
-}
-
-function updateSha256(
-  content: string,
-  oldSha256: string,
-  newSha256: string,
-): string | null {
-  const sha256RegExp = /(^|\s)sha256(\s)/;
-  let i = content.search(sha256RegExp);
-  if (i === -1) {
-    return null;
-  }
-  if (isSpace(content[i])) {
-    i += 1;
-  }
-  let newContent = replaceSha256(i, content, oldSha256, newSha256);
-  const testContent = getSha256TestContent(content, oldSha256, newSha256);
-  if (!newContent || !testContent) {
-    return null;
-  }
-  while (newContent && removeComments(newContent) !== testContent) {
-    i += 'sha256'.length;
-    i += content.substring(i).search(sha256RegExp);
-    if (isSpace(content[i])) {
-      i += 1;
-    }
-    newContent = replaceSha256(i, content, oldSha256, newSha256);
-  }
-  return newContent;
-}
-
-// TODO: Refactor (#9591)
 export async function updateDependency({
   fileContent,
   upgrade,
-}: UpdateDependencyConfig): Promise<string> {
+}: UpdateDependencyConfig<HomebrewManagerData>): Promise<string> {
+  const { packageFile, depName } = upgrade;
+
   logger.trace('updateDependency()');
-  /*
-    1. Update url field 2. Update sha256 field
-   */
-  let newUrl: string;
-  // Example urls:
-  // "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
-  // "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz"
-  const oldParsedUrlPath = parseUrlPath(upgrade.managerData?.url);
-  if (!oldParsedUrlPath || !upgrade.managerData) {
+
+  const { managerData, newValue } = upgrade;
+  if (!managerData?.url || !managerData.sha256 || !newValue) {
+    logger.debug({ packageFile, depName }, `Missing data`);
+    return fileContent;
+  }
+
+  // Find handler by type
+  const handler = findHandlerByType(managerData.type);
+  if (!handler) {
     logger.debug(
-      `Failed to update - upgrade.managerData.url is invalid ${upgrade.depName}`,
+      { packageFile, depName },
+      `Unknown handler type ${managerData.type}`,
     );
     return fileContent;
   }
-  let newSha256: string;
-  try {
-    const ownerName = String(upgrade.managerData.ownerName);
-    const repoName = String(upgrade.managerData.repoName);
-    newUrl = `https://github.com/${ownerName}/${repoName}/releases/download/${
-      upgrade.newValue
-    }/${repoName}-${String(semver.coerce(upgrade.newValue))}.tar.gz`;
-    newSha256 = await hashStream(http.stream(newUrl), 'sha256');
-  } catch {
+
+  // Validate old URL can be parsed
+  const oldParsed = handler.parseUrl(managerData.url);
+  if (!oldParsed) {
     logger.debug(
-      `Failed to download release download for ${upgrade.depName} - trying archive instead`,
+      { packageFile, depName },
+      `Failed to parse old URL '${managerData.url}'`,
     );
+    return fileContent;
+  }
+
+  // Build candidate URLs to try
+  const candidateUrls: string[] = [];
+
+  const buildArchiveUrls = handler.buildArchiveUrls(managerData, newValue);
+  if (!buildArchiveUrls) {
+    logger.debug({ packageFile, depName }, `Failed to build new URL`);
+    return fileContent;
+  }
+  candidateUrls.push(...buildArchiveUrls);
+
+  // Try each candidate URL
+  let newUrl: string | null = null;
+  let newSha256: string | null = null;
+
+  for (const candidateUrl of candidateUrls) {
+    // Validate URL parses correctly
+    const newParsed = handler.parseUrl(candidateUrl);
+    if (!newParsed || newParsed?.currentValue !== newValue) {
+      logger.debug(
+        { packageFile, depName },
+        `URL validation failed for '${candidateUrl}'`,
+      );
+      continue;
+    }
+
+    // Try to download and compute SHA256
     try {
-      const ownerName = String(upgrade.managerData.ownerName);
-      const repoName = String(upgrade.managerData.repoName);
-      newUrl = `https://github.com/${ownerName}/${repoName}/archive/refs/tags/${upgrade.newValue}.tar.gz`;
-      newSha256 = await hashStream(http.stream(newUrl), 'sha256');
+      newSha256 = await hashStream(http.stream(candidateUrl), 'sha256');
+      newUrl = candidateUrl;
+      logger.trace(
+        { packageFile, depName },
+        `Successfully downloaded '${candidateUrl}'`,
+      );
+      break;
     } catch {
       logger.debug(
-        `Failed to download archive download for ${upgrade.depName} - update failed`,
+        { packageFile, depName },
+        `Failed to download ${candidateUrl}`,
       );
-      return fileContent;
     }
   }
-  // istanbul ignore next
-  if (!newSha256) {
-    logger.debug(
-      `Failed to generate new sha256 for ${upgrade.depName} - update failed`,
-    );
+
+  if (!newUrl || !newSha256) {
+    logger.debug({ packageFile, depName }, `All download attempts failed`);
     return fileContent;
   }
-  const newParsedUrlPath = parseUrlPath(newUrl);
-  if (!newParsedUrlPath) {
-    logger.debug(`Failed to update url for dependency ${upgrade.depName}`);
-    return fileContent;
-  }
-  if (upgrade.newValue !== newParsedUrlPath.currentValue) {
-    logger.debug(`Failed to update url for dependency ${upgrade.depName}`);
-    return fileContent;
-  }
-  let newContent = updateUrl(fileContent, upgrade.managerData.url, newUrl);
+
+  // Update URL and SHA256 in file
+  let newContent = updateRubyString(
+    fileContent,
+    'url',
+    managerData.url,
+    newUrl,
+  );
   if (!newContent) {
-    logger.debug(`Failed to update url for dependency ${upgrade.depName}`);
+    logger.debug({ packageFile, depName }, `Failed to update URL`);
     return fileContent;
   }
-  newContent = updateSha256(newContent, upgrade.managerData.sha256, newSha256);
+
+  newContent = updateRubyString(
+    newContent,
+    'sha256',
+    managerData.sha256,
+    newSha256,
+  );
   if (!newContent) {
-    logger.debug(`Failed to update sha256 for dependency ${upgrade.depName}`);
+    logger.debug({ packageFile, depName }, `Failed to update SHA256`);
     return fileContent;
   }
+
   return newContent;
 }
