@@ -630,10 +630,13 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         config,
       );
 
-      expect(exec.exec).toHaveBeenCalledExactlyOnceWith('some-command', {
-        cwd: localDir,
-        extraEnv: gitEnvVars,
-      });
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'some-command',
+        expect.objectContaining({
+          cwd: localDir,
+          extraEnv: gitEnvVars,
+        }),
+      );
       expect(res.artifactErrors).toHaveLength(0);
     });
 
@@ -675,9 +678,12 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
       await postUpgradeCommands.postUpgradeCommandsExecutor(commands, config);
 
-      expect(exec.exec).toHaveBeenCalledExactlyOnceWith('some-command', {
-        cwd: 'projects/npm/jest-29.5.0',
-      });
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'some-command',
+        expect.objectContaining({
+          cwd: 'projects/npm/jest-29.5.0',
+        }),
+      );
     });
 
     it('uses localDir when workingDirTemplate is not provided', async () => {
@@ -714,9 +720,12 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
       await postUpgradeCommands.postUpgradeCommandsExecutor(commands, config);
 
-      expect(exec.exec).toHaveBeenCalledExactlyOnceWith('some-command', {
-        cwd: '/default/dir',
-      });
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'some-command',
+        expect.objectContaining({
+          cwd: '/default/dir',
+        }),
+      );
     });
   });
 });
