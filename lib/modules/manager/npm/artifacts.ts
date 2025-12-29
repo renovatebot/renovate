@@ -1,4 +1,9 @@
-import { isNonEmptyArray, isNonEmptyObject, isNumber } from '@sindresorhus/is';
+import {
+  isEmptyArray,
+  isNonEmptyArray,
+  isNonEmptyObject,
+  isNumber,
+} from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -150,9 +155,11 @@ async function handlePackageManagerUpdates(
 async function updatePnpmWorkspace(
   updateArtifactsConfig: UpdateArtifact,
 ): Promise<UpdateArtifactsResult | null> {
-  const { updatedDeps: upgrades } = updateArtifactsConfig;
+  const upgrades = updateArtifactsConfig.updatedDeps.filter(
+    (u) => u.isVulnerabilityAlert,
+  );
   // return early if no security updates are present
-  if (!upgrades.some((u) => u.isVulnerabilityAlert)) {
+  if (isEmptyArray(upgrades)) {
     return null;
   }
 
@@ -173,11 +180,6 @@ async function updatePnpmWorkspace(
   let updated = false;
 
   for (const upgrade of upgrades) {
-    if (!upgrade.isVulnerabilityAlert) {
-      continue;
-    }
-    logger.debug('updatePnpmWorkspace()');
-
     const pnpmWorkspace =
       parseSingleYaml<PnpmWorkspaceFile>(packageFileContent);
     if (!isNumber(pnpmWorkspace?.minimumReleaseAge)) {

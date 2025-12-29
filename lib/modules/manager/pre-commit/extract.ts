@@ -3,6 +3,7 @@ import {
   isNonEmptyObject,
   isPlainObject,
 } from '@sindresorhus/is';
+import { isMap, isScalar, isSeq } from 'yaml';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { detectPlatform } from '../../../util/common';
@@ -19,6 +20,8 @@ import {
   matchesPrecommitDependencyHeuristic,
 } from './parsing';
 import type { PreCommitConfig } from './types';
+let rev: any;
+isMap(rev?.haha);
 
 /**
  * Determines the datasource(id) to be used for this dependency

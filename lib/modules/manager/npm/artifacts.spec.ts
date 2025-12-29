@@ -235,4 +235,77 @@ describe('modules/manager/npm/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([{ cmd: 'corepack use pnpm@8.15.6' }]);
   });
+
+  describe('updatePnpmWorkspace()', () => {
+    it('returns null if no security updates are found', async () => {
+      const res = await updateArtifacts({
+        packageFileName: 'flake.nix',
+        updatedDeps: [{ ...validDepUpdate, currentValue: '8.15.5' }],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('returns null if pnpm workspace file does not exist', async () => {
+      fs.getSiblingFileName.mockResolvedValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(false);
+      const res = await updateArtifacts({
+        packageFileName: 'flake.nix',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            currentValue: '8.15.5',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('returns null if no minimumReleaseAge setting found', async () => {
+      fs.getSiblingFileName.mockResolvedValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(''); // for pnpm-workspace.yaml
+      const res = await updateArtifacts({
+        packageFileName: 'flake.nix',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            currentValue: '8.15.5',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+
+      expect(res).toBeNull();
+    });
+
+    // it('updates pnpm workspace', async () => {
+    //   fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    //   fsExtra.stat.mockResolvedValueOnce({} as never);
+    //   fs.readLocalFile.mockResolvedValueOnce(''); // for pnpm-workspace.yaml
+    //   const res = await updateArtifacts({
+    //     packageFileName: 'flake.nix',
+    //     updatedDeps: [
+    //       {
+    //         ...validDepUpdate,
+    //         currentValue: '8.15.5',
+    //         managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+    //       },
+    //     ],
+    //     newPackageFileContent: 'some new content',
+    //     config,
+    //   });
+    //   expect(res).toBeNull();
+    // });
+  });
 });

@@ -18,7 +18,11 @@ export function getSiblingFileName(
   fileName: string,
   siblingName: string,
 ): string {
+  // eslint-disable-next-line
+  console.log(fileName, siblingName);
   const subDirectory = getParentDir(fileName);
+  // eslint-disable-next-line
+  console.log(subDirectory);
   return upath.join(subDirectory, siblingName);
 }
 
