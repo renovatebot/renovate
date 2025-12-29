@@ -1,6 +1,6 @@
-import { execSync } from 'node:child_process';
 import { glob } from 'glob';
 import { logger } from '../../../logger';
+import { rawExec } from '../../../util/exec/common';
 import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
 import type { PlatformScm } from '../types';
 
@@ -34,7 +34,9 @@ export class LocalFs implements PlatformScm {
     try {
       // fetch file list using git
       const maxBuffer = 10 * 1024 * 1024; // 10 MiB in bytes
-      const stdout = execSync('git ls-files', { encoding: 'utf-8', maxBuffer });
+      const stdout = (
+        await rawExec('git ls-files', { encoding: 'utf-8', maxBuffer })
+      ).stdout;
       logger.debug('Got file list using git');
       fileList = stdout.split('\n');
     } catch {
