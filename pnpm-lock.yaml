@@ -371,14 +371,14 @@ importers:
         version: 3.25.76
     devDependencies:
       '@containerbase/eslint-plugin':
-        specifier: 1.1.23
-        version: 1.1.23(eslint-plugin-import@2.32.0)(eslint-plugin-promise@7.2.1(eslint@9.39.2))(eslint@9.39.2)
+        specifier: 1.1.24
+        version: 1.1.24(eslint-plugin-import@2.32.0)(eslint-plugin-promise@7.2.1(eslint@9.39.2))(eslint@9.39.2)
       '@containerbase/istanbul-reports-html':
-        specifier: 1.1.20
-        version: 1.1.20
+        specifier: 1.1.21
+        version: 1.1.21
       '@containerbase/semantic-release-pnpm':
-        specifier: 1.3.11
-        version: 1.3.11(semantic-release@25.0.2(typescript@5.9.3))
+        specifier: 1.3.12
+        version: 1.3.12(semantic-release@25.0.2(typescript@5.9.3))
       '@eslint/js':
         specifier: 9.39.2
         version: 9.39.2
@@ -948,20 +948,20 @@ packages:
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
     engines: {node: '>=0.1.90'}
 
-  '@containerbase/eslint-plugin@1.1.23':
-    resolution: {integrity: sha512-uSAxsF1eSnqAXmabXiwi5FrgOJDoM3qnx5KGG/VhoWlztgWO6FD5sUizxQahDmZwT1iDN23y0RZW4iRERImuWQ==}
+  '@containerbase/eslint-plugin@1.1.24':
+    resolution: {integrity: sha512-nx6VpAQoUXYGI4oOKDFHz9rkisazG1z0YzRDYk0A6smf2jLqNeblE1AMm4RB7KzXjl48ak4uTnMNZOAuvPgWvA==}
     engines: {node: ^20.9.0 || ^22.11.0 || >=24.10.0, pnpm: ^10.0.0}
     peerDependencies:
       eslint: ^9.0.0
       eslint-plugin-import: ^2.31.0
       eslint-plugin-promise: ^7.0.0
 
-  '@containerbase/istanbul-reports-html@1.1.20':
-    resolution: {integrity: sha512-WlurFJNjx6309G0wAtXuUXzN4lJ9BjBsGFKdIzQiv9p20J4XQnd/qADsrLOS63I+jmYS8h4d2hhZHvNrx/PMdg==}
+  '@containerbase/istanbul-reports-html@1.1.21':
+    resolution: {integrity: sha512-e7rXJiw/9xlWTW+Wk5vNasVrUTIhsWOg4ZcFe+SPwh2Gu9aGNz9MoYpENjINi8DfJ3TxxztTp8WEYmkhP8Td5A==}
     engines: {node: ^20.9.0 || ^22.11.0 || ^24.0.0, pnpm: ^10.0.0}
 
-  '@containerbase/semantic-release-pnpm@1.3.11':
-    resolution: {integrity: sha512-t55qyLiVn9BeeIV7UsW9G7oRxNN+wZvOwWkm3/abJEs1jb2DwlepmtgiXr5+1088o/S8Wb8iGF7kaUSjYpC2pw==}
+  '@containerbase/semantic-release-pnpm@1.3.12':
+    resolution: {integrity: sha512-BFDlzL3m8Ot3LAcqyq8arMKZNyGgDfTxJT+Q2LO5mtZwHoQIoR1KdeUsfPyheNmJGncM1DQp36SB/z0ZTwHXjA==}
     engines: {node: ^22.11.0 || ^24}
     peerDependencies:
       semantic-release: ^24.0.0 || ^25.0.0
@@ -7591,18 +7591,18 @@ snapshots:
   '@colors/colors@1.5.0':
     optional: true
 
-  '@containerbase/eslint-plugin@1.1.23(eslint-plugin-import@2.32.0)(eslint-plugin-promise@7.2.1(eslint@9.39.2))(eslint@9.39.2)':
+  '@containerbase/eslint-plugin@1.1.24(eslint-plugin-import@2.32.0)(eslint-plugin-promise@7.2.1(eslint@9.39.2))(eslint@9.39.2)':
     dependencies:
       eslint: 9.39.2
       eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.50.0(eslint@9.39.2)(typescript@5.9.3))(eslint-import-resolver-typescript@4.4.4)(eslint@9.39.2)
       eslint-plugin-promise: 7.2.1(eslint@9.39.2)
 
-  '@containerbase/istanbul-reports-html@1.1.20':
+  '@containerbase/istanbul-reports-html@1.1.21':
     dependencies:
       istanbul-lib-report: 3.0.1
       istanbul-reports: 3.2.0
 
-  '@containerbase/semantic-release-pnpm@1.3.11(semantic-release@25.0.2(typescript@5.9.3))':
+  '@containerbase/semantic-release-pnpm@1.3.12(semantic-release@25.0.2(typescript@5.9.3))':
     dependencies:
       '@semantic-release/error': 4.0.0
       aggregate-error: 5.0.0

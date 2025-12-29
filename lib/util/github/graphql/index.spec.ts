@@ -1,5 +1,5 @@
 import { GithubHttp } from '../../http/github';
-import { queryReleases, queryTags } from '.';
+import { queryBranches, queryReleases, queryTags } from '.';
 import * as httpMock from '~test/http-mock';
 
 const http = new GithubHttp();
@@ -77,6 +77,42 @@ describe('util/github/graphql/index', () => {
         id: 123,
         name: 'name',
         description: 'description',
+      },
+    ]);
+  });
+
+  it('queryBranches', async () => {
+    httpMock
+      .scope('https://api.github.com/')
+      .post('/graphql')
+      .reply(200, {
+        data: {
+          repository: {
+            isPrivate: false,
+            payload: {
+              nodes: [
+                {
+                  version: 'main',
+                  target: {
+                    type: 'Commit',
+                    oid: 'abc123',
+                    releaseTimestamp: '2022-09-24',
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+
+    const res = await queryBranches({ packageName: 'foo/bar' }, http);
+
+    expect(res).toEqual([
+      {
+        version: 'main',
+        gitRef: 'main',
+        hash: 'abc123',
+        releaseTimestamp: '2022-09-24',
       },
     ]);
   });
