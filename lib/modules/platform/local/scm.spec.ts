@@ -1,11 +1,13 @@
-import { execSync as _execSync } from 'node:child_process';
+import { rawExec as _rawExec } from '../../../util/exec/common';
+import type { ExecResult } from '../../../util/exec/types';
 import { LocalFs } from './scm';
+import { partial } from '~test/util';
 
 vi.mock('glob', () => ({
   glob: vi.fn().mockImplementation(() => Promise.resolve(['file1', 'file2'])),
 }));
-vi.mock('node:child_process');
-const execSync = vi.mocked(_execSync);
+vi.mock('../../../util/exec/common');
+const execSync = vi.mocked(_rawExec);
 
 describe('modules/platform/local/scm', () => {
   let localFs: LocalFs;
@@ -50,7 +52,13 @@ describe('modules/platform/local/scm', () => {
 
   describe('getFileList', () => {
     it('should return file list using git', async () => {
-      execSync.mockReturnValueOnce('file1\nfile2');
+      execSync.mockReturnValueOnce(
+        Promise.resolve(
+          partial<ExecResult>({
+            stdout: 'file1\nfile2',
+          }),
+        ),
+      );
       expect(await localFs.getFileList()).toHaveLength(2);
 
       expect(execSync).toHaveBeenCalledExactlyOnceWith('git ls-files', {
