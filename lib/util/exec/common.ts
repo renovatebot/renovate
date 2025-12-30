@@ -1,7 +1,7 @@
 import type { ChildProcess } from 'node:child_process';
-import { spawn } from 'node:child_process';
 import type { Readable } from 'node:stream';
 import { isNullOrUndefined } from '@sindresorhus/is';
+import { execa } from 'execa';
 import { instrument } from '../../instrumentation';
 import { getEnv } from '../env';
 import { sanitize } from '../sanitize';
@@ -82,7 +82,7 @@ function registerDataListeners(
 export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
   return new Promise((resolve, reject) => {
     const maxBuffer = opts.maxBuffer ?? 10 * 1024 * 1024; // Set default max buffer size to 10MB
-    const cp = spawn(cmd, {
+    const cp = execa(cmd, {
       ...opts,
       // force detached on non WIN platforms
       // https://github.com/nodejs/node/issues/21825#issuecomment-611328888

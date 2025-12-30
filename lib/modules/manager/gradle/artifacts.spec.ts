@@ -229,7 +229,9 @@ describe('modules/manager/gradle/artifacts', () => {
           cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -272,7 +274,9 @@ describe('modules/manager/gradle/artifacts', () => {
           cmd: 'gradlew.bat --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -315,7 +319,9 @@ describe('modules/manager/gradle/artifacts', () => {
           cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --update-locks org.springframework.boot:org.springframework.boot.gradle.plugin',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -366,7 +372,9 @@ describe('modules/manager/gradle/artifacts', () => {
           cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --write-locks',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -428,7 +436,9 @@ describe('modules/manager/gradle/artifacts', () => {
             '"',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -465,7 +475,9 @@ describe('modules/manager/gradle/artifacts', () => {
           cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --write-locks',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -507,7 +519,9 @@ describe('modules/manager/gradle/artifacts', () => {
           cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies :sub1:dependencies :sub2:dependencies --write-locks',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -609,7 +623,9 @@ describe('modules/manager/gradle/artifacts', () => {
           cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --write-locks',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -656,7 +672,9 @@ describe('modules/manager/gradle/artifacts', () => {
           cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -743,7 +761,9 @@ describe('modules/manager/gradle/artifacts', () => {
           cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -806,14 +826,18 @@ describe('modules/manager/gradle/artifacts', () => {
           cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
         {
           cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -856,7 +880,9 @@ describe('modules/manager/gradle/artifacts', () => {
           cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -898,7 +924,9 @@ describe('modules/manager/gradle/artifacts', () => {
           cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256,pgp dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
-            stdio: ['pipe', 'ignore', 'pipe'],
+            stdin: 'pipe',
+            stdout: 'ignore',
+            stderr: 'pipe',
           },
         },
       ]);

@@ -89,6 +89,9 @@ describe('modules/manager/devbox/artifacts', () => {
             env: {},
             maxBuffer: 10485760,
             timeout: 900000,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -136,6 +139,9 @@ describe('modules/manager/devbox/artifacts', () => {
             env: {},
             maxBuffer: 10485760,
             timeout: 900000,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -184,6 +190,9 @@ describe('modules/manager/devbox/artifacts', () => {
             env: {},
             maxBuffer: 10485760,
             timeout: 900000,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
           },
         },
         {
@@ -193,6 +202,9 @@ describe('modules/manager/devbox/artifacts', () => {
             env: {},
             maxBuffer: 10485760,
             timeout: 900000,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -276,6 +288,9 @@ describe('modules/manager/devbox/artifacts', () => {
             env: {},
             maxBuffer: 10485760,
             timeout: 900000,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -323,6 +338,9 @@ describe('modules/manager/devbox/artifacts', () => {
             env: {},
             maxBuffer: 10485760,
             timeout: 900000,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
           },
         },
       ]);
