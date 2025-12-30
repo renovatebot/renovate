@@ -473,6 +473,47 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res!.deps[14]).not.toHaveProperty('skipReason');
     });
 
+    it('extracts non-semver tag automatically', () => {
+      const res = extractPackageFile(
+        `
+        jobs:
+          build:
+            steps:
+              - uses: taiki-e/install-action@cargo-llvm-cov
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'taiki-e/install-action',
+        currentValue: 'cargo-llvm-cov',
+        versioning: 'exact',
+        autoReplaceStringTemplate:
+          '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+      });
+    });
+
+    it('extracts pinned non-semver tag with digest', () => {
+      const res = extractPackageFile(
+        `
+        jobs:
+          build:
+            steps:
+              - uses: taiki-e/install-action@4b1248585248751e3b12fd020cf7ac91540ca09c # tag=cargo-llvm-cov
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'taiki-e/install-action',
+        currentValue: 'cargo-llvm-cov',
+        currentDigest: '4b1248585248751e3b12fd020cf7ac91540ca09c',
+        versioning: 'exact',
+        replaceString:
+          'taiki-e/install-action@4b1248585248751e3b12fd020cf7ac91540ca09c # tag=cargo-llvm-cov',
+        autoReplaceStringTemplate:
+          '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+      });
+    });
+
     it('extracts actions with fqdn', () => {
       const res = extractPackageFile(
         codeBlock`
@@ -484,6 +525,8 @@ describe('modules/manager/github-actions/extract', () => {
               - name: "test2"
                 uses: https://code.forgejo.org/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1
               - name: "test3"
+                uses: https://gitea.com/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1
+              - name: "test4"
                 uses: https://code.domain.test/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1
 
           `,
@@ -512,12 +555,22 @@ describe('modules/manager/github-actions/extract', () => {
             registryUrls: ['https://code.forgejo.org/'],
           },
           {
+            depName: 'https://gitea.com/actions/setup-node',
+            packageName: 'actions/setup-node',
+            currentDigest: '56337c425554a6be30cdef71bf441f15be286854',
+            currentValue: 'v3.1.1',
+            replaceString:
+              'https://gitea.com/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1',
+            datasource: 'gitea-tags',
+            registryUrls: ['https://gitea.com/'],
+          },
+          {
             skipReason: 'unsupported-url',
           },
         ],
       });
 
-      expect(res!.deps[2]).not.toHaveProperty('registryUrls');
+      expect(res!.deps[3]).not.toHaveProperty('registryUrls');
     });
 
     it('extracts multiple action runners from yaml configuration file', () => {
@@ -850,6 +903,26 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'uses-with',
         },
       ]);
+    });
+
+    it('handles actions/setup-x without x-version field', () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - name: "Setup Node.js without version"
+                uses: actions/setup-node@v3
+                with:
+                  registry-url: 'https://npm.pkg.github.com'
+        `;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      // Should only extract the action itself, not an x-version dep
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'actions/setup-node',
+        depType: 'action',
+      });
     });
 
     it('logs unknown schema', () => {
