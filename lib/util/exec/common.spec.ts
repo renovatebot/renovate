@@ -235,7 +235,30 @@ describe('util/exec/common', () => {
       );
     });
 
-    it('defaults to shell=true', async () => {
+    it('can specify a command with spaces, with no shell', async () => {
+      const cmd = 'ls "Application Support"';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((cmd, opts) => stub);
+
+      await exec(
+        cmd,
+        partial<RawExecOptions>({ encoding: 'utf8', shell: false }),
+      );
+
+      expect(execa).toHaveBeenCalledWith(
+        'ls',
+        ['Application Support'],
+        expect.objectContaining({ shell: false }),
+      );
+    });
+
+    it('defaults to shell=false', async () => {
       const cmd = 'ls -l';
       const stub = getSpawnStub({
         cmd,
@@ -249,13 +272,96 @@ describe('util/exec/common', () => {
       await exec(cmd, partial<RawExecOptions>({}));
 
       expect(execa).toHaveBeenCalledWith(
+        'ls',
+        ['-l'],
+        expect.objectContaining({ shell: false }),
+      );
+    });
+
+    it('the command is provided as a string with no arguments when shell is a string', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((cmd, opts) => stub);
+
+      await exec(cmd, partial<RawExecOptions>({ shell: '/bin/fish' }));
+
+      expect(execa).toHaveBeenCalledWith(
+        'ls -l',
+        [],
+        expect.objectContaining({}),
+      );
+    });
+
+    it('the command is provided as a string with no arguments when shell=true', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((cmd, opts) => stub);
+
+      await exec(cmd, partial<RawExecOptions>({ shell: true }));
+
+      expect(execa).toHaveBeenCalledWith(
+        'ls -l',
+        [],
+        expect.objectContaining({}),
+      );
+    });
+
+    it('the command is split into the command and arguments when shell=false', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((cmd, opts) => stub);
+
+      await exec(cmd, partial<RawExecOptions>({}));
+
+      expect(execa).toHaveBeenCalledWith(
+        'ls',
+        ['-l'],
+        expect.objectContaining({ shell: false }),
+      );
+    });
+
+    it('can specify shell=true', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((cmd, opts) => stub);
+
+      await exec(
+        cmd,
+        partial<RawExecOptions>({ encoding: 'utf8', shell: true }),
+      );
+
+      expect(execa).toHaveBeenCalledWith(
         cmd,
         [],
         expect.objectContaining({ shell: true }),
       );
     });
 
-    it('cannot specify shell=false', async () => {
+    it('can specify shell=false', async () => {
       const cmd = 'ls -l';
       const stub = getSpawnStub({
         cmd,
@@ -272,9 +378,9 @@ describe('util/exec/common', () => {
       );
 
       expect(execa).toHaveBeenCalledWith(
-        cmd,
-        [],
-        expect.objectContaining({ shell: true }),
+        'ls',
+        ['-l'],
+        expect.objectContaining({ shell: false }),
       );
     });
 
