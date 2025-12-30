@@ -197,6 +197,8 @@ export interface CommentData {
   ratchetExclude?: boolean;
   matchedString?: string;
   index?: number;
+  /** Indicates `# ref` marker for non-semver refs that should use exact versioning */
+  pinRef?: boolean;
 }
 
 // Matches version strings with optional prefixes, e.g.:
@@ -207,6 +209,12 @@ export interface CommentData {
 const pinnedVersionRe = regEx(
   /^\s*(?:(?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+\/[.\w-]+))?@?(?<version>([\w-]*[-/])?v?\d+(?:\.\d+(?:\.\d+)?)?)/,
 );
+
+// Matches `ref=<value>` format for non-semver refs (e.g., `ref=cargo-llvm-cov`, `ref=main`)
+const refEqualsRe = regEx(/^\s*ref=(?<version>[^\s]+)/);
+
+// Matches standalone `ref` marker (without `=`)
+const refMarkerRe = regEx(/^\s*ref\s*$/);
 
 export function parseComment(commentBody: string): CommentData {
   const trimmed = commentBody.trim();
@@ -222,6 +230,22 @@ export function parseComment(commentBody: string): CommentData {
       matchedString: match[0],
       index: match.index,
     };
+  }
+
+  // Try ref=<value> format for non-semver refs
+  const refMatch = refEqualsRe.exec(commentBody);
+  if (refMatch?.groups?.version) {
+    return {
+      pinnedVersion: refMatch.groups.version,
+      matchedString: refMatch[0],
+      index: refMatch.index,
+      pinRef: true,
+    };
+  }
+
+  // Check for standalone `ref` marker
+  if (refMarkerRe.test(commentBody)) {
+    return { pinRef: true };
   }
 
   return {};
@@ -290,8 +314,9 @@ export function parseUsesLine(line: string): ParsedUsesLine | null {
   );
 
   const { value, quote } = parseQuote(rawValuePart);
-  // commentPart always starts with '#' since we found ' #' and sliced after the space
-  const cleanCommentBody = commentPart.slice(1);
+  const cleanCommentBody = commentPart.startsWith('#')
+    ? commentPart.slice(1)
+    : '';
 
   return {
     indentation,
