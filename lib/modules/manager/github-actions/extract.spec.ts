@@ -70,7 +70,10 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res?.deps).toMatchSnapshot();
       expect(
         res?.deps.filter((d) => d.datasource === 'github-tags'),
-      ).toHaveLength(8);
+      ).toHaveLength(7);
+      expect(
+        res?.deps.filter((d) => d.datasource === 'github-digest'),
+      ).toHaveLength(1);
     });
 
     it('use github.com as registry when no settings provided', () => {
@@ -471,6 +474,47 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ]);
       expect(res!.deps[14]).not.toHaveProperty('skipReason');
+    });
+
+    it('extracts non-semver ref automatically', () => {
+      const res = extractPackageFile(
+        `
+        jobs:
+          build:
+            steps:
+              - uses: taiki-e/install-action@cargo-llvm-cov
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'taiki-e/install-action',
+        currentValue: 'cargo-llvm-cov',
+        versioning: 'exact',
+        autoReplaceStringTemplate:
+          '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # ref={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+      });
+    });
+
+    it('extracts pinned non-semver ref with digest', () => {
+      const res = extractPackageFile(
+        `
+        jobs:
+          build:
+            steps:
+              - uses: taiki-e/install-action@4b1248585248751e3b12fd020cf7ac91540ca09c # ref=cargo-llvm-cov
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'taiki-e/install-action',
+        currentValue: 'cargo-llvm-cov',
+        currentDigest: '4b1248585248751e3b12fd020cf7ac91540ca09c',
+        versioning: 'exact',
+        replaceString:
+          'taiki-e/install-action@4b1248585248751e3b12fd020cf7ac91540ca09c # ref=cargo-llvm-cov',
+        autoReplaceStringTemplate:
+          '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # ref={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+      });
     });
 
     it('extracts actions with fqdn', () => {
