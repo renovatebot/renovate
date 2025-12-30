@@ -5,10 +5,12 @@ import { detectPlatform } from '../../../util/common.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
+import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubRunnersDatasource } from '../../datasource/github-runners/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import * as dockerVersioning from '../../versioning/docker/index.ts';
+import * as exactVersioning from '../../versioning/exact/index.ts';
 import * as nodeVersioning from '../../versioning/node/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
@@ -84,7 +86,6 @@ function extractRepositoryAction(
   const dep: PackageDependency = {
     depName,
     commitMessageTopic: '{{{depName}}} action',
-    datasource: GithubTagsDatasource.id,
     versioning: dockerVersioning.id,
     depType: 'action',
     replaceString: valueString,
@@ -125,6 +126,16 @@ function extractRepositoryAction(
   } else {
     dep.currentValue = ref;
   }
+
+  const isVersionLike =
+    dep.currentValue && versionLikeRe.test(dep.currentValue);
+  if (!dep.datasource && dep.currentValue && !isVersionLike) {
+    dep.datasource = GithubDigestDatasource.id;
+    dep.versioning = exactVersioning.id;
+    dep.autoReplaceStringTemplate = `${quote}{{depName}}${pathSuffix}@{{#if newDigest}}{{newDigest}}${quote}{{#if newValue}}${commentWs}# ref={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quote}{{/unless}}`;
+  }
+
+  dep.datasource ??= GithubTagsDatasource.id;
 
   return dep;
 }
@@ -191,6 +202,8 @@ function detectDatasource(registryUrl: string): PackageDependency {
     skipReason: 'unsupported-url',
   };
 }
+
+const versionLikeRe = regEx(/^v?\d+/);
 
 const runnerVersionRegex = regEx(
   /^\s*(?<depName>[a-zA-Z]+)-(?<currentValue>[^\s]+)/,

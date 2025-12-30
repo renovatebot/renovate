@@ -39,6 +39,29 @@ If you want to automatically pin action digests add the `helpers:pinGitHubAction
 }
 ```
 
+### Non-semver refs (branches and feature tags)
+
+Renovate supports GitHub Actions that reference non-semver refs like branch names (`main`, `master`) or feature-oriented tags (`cargo-llvm-cov`).
+
+When the action reference doesn't look like a version number (i.e., doesn't match `/^v?\d+/`), Renovate routes to the `github-digest` datasource which fetches both tags and branches.
+Since these refs have no version ordering, only digest pinning updates are supported.
+
+**Routing logic:**
+
+- `actions/checkout@v4.2.0` → `github-tags` datasource (version updates)
+- `actions/checkout@v4` → `github-tags` datasource (version updates)
+- `taiki-e/install-action@cargo-llvm-cov` → `github-digest` datasource (digest pinning only)
+- `actions/checkout@main` → `github-digest` datasource (digest pinning only)
+
+When pinning, Renovate uses a `# ref=<value>` comment to preserve the original ref:
+
+```yaml
+- uses: taiki-e/install-action@d8c10dae823f48238abff23fee4146b448aed2f1 # ref=cargo-llvm-cov
+```
+
+Non-semver ref support is currently limited to GitHub-hosted actions.
+Gitea and Forgejo support the same ref types, but Renovate does not yet handle them for these platforms.
+
 ### Non-support of Variables
 
 Renovate ignores any GitHub runners which are configured in variables.

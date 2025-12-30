@@ -245,6 +245,24 @@ describe('modules/manager/github-actions/parse', () => {
         pinnedVersion: 'node/v20',
       });
     });
+
+    it('parses ref=<value> for non-semver refs', () => {
+      const result = parseComment('ref=cargo-llvm-cov');
+      expect(result).toEqual({
+        index: 0,
+        matchedString: 'ref=cargo-llvm-cov',
+        pinnedVersion: 'cargo-llvm-cov',
+      });
+    });
+
+    it('parses ref=<value> with leading whitespace', () => {
+      const result = parseComment(' ref=nextest');
+      expect(result).toEqual({
+        index: 0,
+        matchedString: ' ref=nextest',
+        pinnedVersion: 'nextest',
+      });
+    });
   });
 
   describe('parseQuote', () => {
