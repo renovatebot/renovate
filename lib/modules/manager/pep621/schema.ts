@@ -5,6 +5,7 @@ import { normalizePythonDepName } from '../../datasource/pypi/common';
 import { api as pep440 } from '../../versioning/pep440';
 import type { PackageDependency } from '../types';
 import { depTypes, pep508ToPackageDependency } from './utils';
+
 type Pep508Dependency = z.ZodType<PackageDependency<Record<string, any>>>;
 
 function Pep508Dependency(depType: string): Pep508Dependency {

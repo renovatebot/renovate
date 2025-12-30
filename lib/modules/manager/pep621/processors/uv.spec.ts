@@ -410,7 +410,6 @@ describe('modules/manager/pep621/processors/uv', () => {
       expect(result).toHaveLength(1);
 
       const dep = result[0];
-
       expect(dep.lockedVersion).toBe('8.4.2');
     });
   });
