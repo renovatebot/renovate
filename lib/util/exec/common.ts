@@ -111,19 +111,25 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
       if (signal) {
         kill(cp, signal);
         reject(
-          new ExecError(`Command failed: ${cmd}\nInterrupted by ${signal}`, {
-            ...rejectInfo(),
-            signal,
-          }),
+          new ExecError(
+            `Command failed: ${cp.spawnargs.join(' ')}\nInterrupted by ${signal}`,
+            {
+              ...rejectInfo(),
+              signal,
+            },
+          ),
         );
         return;
       }
       if (code !== 0) {
         reject(
-          new ExecError(`Command failed: ${cmd}\n${stringify(stderr)}`, {
-            ...rejectInfo(),
-            exitCode: code,
-          }),
+          new ExecError(
+            `Command failed: ${cp.spawnargs.join(' ')}\n${stringify(stderr)}`,
+            {
+              ...rejectInfo(),
+              exitCode: code,
+            },
+          ),
         );
         return;
       }
