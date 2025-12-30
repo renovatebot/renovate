@@ -22,8 +22,8 @@ class ExactVersioningApi implements VersioningApi {
     return true;
   }
 
-  isCompatible(version: string): boolean {
-    return this.isValid(version);
+  isCompatible(version: string, current?: string): boolean {
+    return version === current;
   }
 
   getMajor(_version: string): number | null {
