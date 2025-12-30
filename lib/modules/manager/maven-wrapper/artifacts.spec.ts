@@ -132,6 +132,9 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
@@ -164,6 +167,9 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
@@ -223,6 +229,9 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
@@ -295,6 +304,9 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
@@ -342,6 +354,9 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
@@ -383,6 +398,9 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
@@ -421,6 +439,9 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
@@ -459,6 +480,9 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);

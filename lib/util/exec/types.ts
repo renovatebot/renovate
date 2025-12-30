@@ -1,4 +1,4 @@
-import type { SpawnOptions as ChildProcessSpawnOptions } from 'node:child_process';
+import type { Options as ExecaOptions } from 'execa';
 
 export interface ToolConstraint {
   toolName: string;
@@ -30,7 +30,7 @@ export interface OutputListeners {
   stderr?: DataListener[];
 }
 
-export interface RawExecOptions extends ChildProcessSpawnOptions {
+export interface RawExecOptions extends ExecaOptions {
   maxBuffer?: number | undefined;
   cwd?: string;
   outputListeners?: OutputListeners;

@@ -1,6 +1,6 @@
-import { spawn as _spawn } from 'node:child_process';
 import type { SendHandle, Serializable } from 'node:child_process';
 import { Readable } from 'node:stream';
+import { execa as _execa } from 'execa';
 import * as _instrumentation from '../../instrumentation';
 import { regEx } from '../regex';
 import {
@@ -14,10 +14,11 @@ import { partial } from '~test/util';
 
 vi.mock('../../instrumentation');
 vi.mock('node:child_process');
+vi.mock('execa');
 vi.unmock('./common');
 
 const instrument = vi.spyOn(_instrumentation, 'instrument');
-const spawn = vi.mocked(_spawn);
+const execa = vi.mocked(_execa);
 
 type MessageListener = (message: Serializable, sendHandle: SendHandle) => void;
 type NoArgListener = () => void;
@@ -181,7 +182,7 @@ describe('util/exec/common', () => {
         stdout,
         stderr,
       });
-      spawn.mockImplementationOnce((cmd, opts) => stub);
+      execa.mockImplementationOnce((cmd, opts) => stub);
       await expect(
         exec(cmd, partial<RawExecOptions>({ shell: 'bin/bash' })),
       ).resolves.toEqual({
@@ -199,7 +200,7 @@ describe('util/exec/common', () => {
         stdout,
         stderr,
       });
-      spawn.mockImplementationOnce((cmd, opts) => stub);
+      execa.mockImplementationOnce((cmd, opts) => stub);
 
       const stdoutListenerBuffer: Buffer[] = [];
       const stdoutListener: DataListener = (chunk: Buffer) => {
@@ -236,7 +237,7 @@ describe('util/exec/common', () => {
       const stderr = 'err';
       const exitCode = 1;
       const stub = getSpawnStub({ cmd, exitCode, exitSignal: null, stderr });
-      spawn.mockImplementationOnce((cmd, opts) => stub);
+      execa.mockImplementationOnce((cmd, opts) => stub);
       await expect(
         exec(cmd, partial<RawExecOptions>({})),
       ).rejects.toMatchObject({
@@ -251,7 +252,7 @@ describe('util/exec/common', () => {
       const cmd = 'ls -l';
       const exitSignal = 'SIGTERM';
       const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });
-      spawn.mockImplementationOnce((cmd, opts) => stub);
+      execa.mockImplementationOnce((cmd, opts) => stub);
       await expect(
         exec(cmd, partial<RawExecOptions>({})),
       ).rejects.toMatchObject({
@@ -269,7 +270,7 @@ describe('util/exec/common', () => {
         exitSignal: 'SIGSTOP',
         timeout: 500,
       });
-      spawn.mockImplementationOnce((cmd, opts) => stub);
+      execa.mockImplementationOnce((cmd, opts) => stub);
       await expect(exec(cmd, partial<RawExecOptions>({}))).toReject();
     });
 
@@ -282,7 +283,7 @@ describe('util/exec/common', () => {
         exitSignal: null,
         error: new Error(errMsg),
       });
-      spawn.mockImplementationOnce((cmd, opts) => stub);
+      execa.mockImplementationOnce((cmd, opts) => stub);
       await expect(
         exec(cmd, partial<RawExecOptions>({})),
       ).rejects.toMatchObject({ cmd: 'ls -l', message: 'error message' });
@@ -296,7 +297,7 @@ describe('util/exec/common', () => {
         exitSignal: null,
         stdout: 'some message',
       });
-      spawn.mockImplementationOnce((cmd, opts) => stub);
+      execa.mockImplementationOnce((cmd, opts) => stub);
       await expect(
         exec(
           cmd,
@@ -319,7 +320,7 @@ describe('util/exec/common', () => {
         exitSignal: null,
         stderr: 'some message',
       });
-      spawn.mockImplementationOnce((cmd, opts) => stub);
+      execa.mockImplementationOnce((cmd, opts) => stub);
       await expect(
         exec(
           cmd,
@@ -346,7 +347,7 @@ describe('util/exec/common', () => {
         stdout,
         stderr,
       });
-      spawn.mockImplementationOnce((cmd, opts) => stub);
+      execa.mockImplementationOnce((cmd, opts) => stub);
       await expect(
         rawExec(cmd, partial<RawExecOptions>({ shell: 'bin/bash' })),
       ).resolves.toEqual({
@@ -370,7 +371,7 @@ describe('util/exec/common', () => {
           stdout,
           stderr,
         });
-        spawn.mockImplementationOnce((cmd, opts) => stub);
+        execa.mockImplementationOnce((cmd, opts) => stub);
 
         await rawExec(cmd, partial<RawExecOptions>({ shell: 'bin/bash' }));
 
@@ -393,7 +394,7 @@ describe('util/exec/common', () => {
           stdout,
           stderr,
         });
-        spawn.mockImplementationOnce((cmd, opts) => stub);
+        execa.mockImplementationOnce((cmd, opts) => stub);
 
         await rawExec(cmd, partial<RawExecOptions>({ shell: 'bin/bash' }));
 
@@ -419,7 +420,7 @@ describe('util/exec/common', () => {
       const cmd = 'ls -l';
       const exitSignal = 'SIGTERM';
       const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });
-      spawn.mockImplementationOnce((cmd, opts) => stub);
+      execa.mockImplementationOnce((cmd, opts) => stub);
       killSpy.mockImplementationOnce((pid, signal) => true);
       await expect(
         exec(cmd, partial<RawExecOptions>({})),
@@ -439,7 +440,7 @@ describe('util/exec/common', () => {
       const cmd = 'ls -l';
       const exitSignal = 'SIGTERM';
       const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });
-      spawn.mockImplementationOnce((cmd, opts) => stub);
+      execa.mockImplementationOnce((cmd, opts) => stub);
       killSpy.mockImplementationOnce((pid, signal) => {
         throw new Error();
       });
