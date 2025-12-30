@@ -17,15 +17,16 @@ export class TerraformWorkspaceExtractor extends TerraformVersionExtractor {
     }
 
     for (const workspace of Object.values(workspaces).flat()) {
-      const dep: PackageDependency = this.analyseTerraformVersion({
+      const dep: PackageDependency = {
         currentValue: workspace.terraform_version,
-      });
+      };
+      const analysedDep = this.analyseTerraformVersion(dep);
 
       if (isNullOrUndefined(workspace.terraform_version)) {
-        dep.skipReason = 'unspecified-version';
+        analysedDep.skipReason = 'unspecified-version';
       }
       dependencies.push({
-        ...dep,
+        ...analysedDep,
         depType: 'tfe_workspace',
       });
     }

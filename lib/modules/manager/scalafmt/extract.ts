@@ -21,7 +21,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     packageName: 'scalameta/scalafmt',
     versioning: semverVersioning.id,
     currentValue: scalafmtVersion,
-    extractVersion: '^v(?<version>\\S+)',
+    extractVersion: ['^v(?<version>\\S+)'],
   };
 
   return {

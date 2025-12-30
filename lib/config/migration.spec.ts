@@ -851,4 +851,24 @@ describe('config/migration', () => {
       'migrateConfig() error',
     );
   });
+  it('migrates extractVersion from string to array format', () => {
+    const config = { extractVersion: '^v(?<version>.*)$' };
+    const res = configMigration.migrateConfig(config);
+    expect(res.isMigrated).toBeTrue();
+    expect(res.migratedConfig).toEqual({
+      extractVersion: ['^v(?<version>.*)$'],
+    });
+  });
+
+  it('does not migrate extractVersion when already in array format', () => {
+    const config = {
+      extractVersion: [
+        '^v(?<version>.*)-(?<prerelease>.*)$',
+        '{{version}}-{{prerelease}}.final',
+      ] as [string, string],
+    };
+    const res = configMigration.migrateConfig(config);
+    expect(res.isMigrated).toBeFalse();
+    expect(res.migratedConfig).toEqual(config);
+  });
 });

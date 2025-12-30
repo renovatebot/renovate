@@ -10,7 +10,7 @@ export const categories: Category[] = ['terraform'];
 export const defaultConfig = {
   managerFilePatterns: ['/(^|/)\\.terragrunt-version$/'],
   versioning: hashicorpVersioning.id,
-  extractVersion: '^v(?<version>.+)$',
+  extractVersion: ['^v(?<version>.+)$'],
 };
 
 export const supportedDatasources = [GithubReleasesDatasource.id];
