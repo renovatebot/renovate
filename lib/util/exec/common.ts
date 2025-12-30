@@ -97,13 +97,13 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
     });
 
     // handle process events
-    cp.on('error', (error) => {
+    void cp.on('error', (error) => {
       kill(cp, 'SIGTERM');
       // rethrowing, use originally emitted error message
       reject(new ExecError(error.message, rejectInfo(), error));
     });
 
-    cp.on('exit', (code: number, signal: NodeJS.Signals) => {
+    void cp.on('exit', (code: number, signal: NodeJS.Signals) => {
       if (NONTERM.includes(signal)) {
         return;
       }
