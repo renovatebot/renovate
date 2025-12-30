@@ -81,8 +81,9 @@ function registerDataListeners(
 
 export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
   return new Promise((resolve, reject) => {
+    const args: string[] = [];
     const maxBuffer = opts.maxBuffer ?? 10 * 1024 * 1024; // Set default max buffer size to 10MB
-    const cp = execa(cmd, {
+    const cp = execa(cmd, args, {
       ...opts,
       // force detached on non WIN platforms
       // https://github.com/nodejs/node/issues/21825#issuecomment-611328888

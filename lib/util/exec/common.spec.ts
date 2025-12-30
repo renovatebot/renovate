@@ -207,6 +207,7 @@ describe('util/exec/common', () => {
 
       expect(execa).toHaveBeenCalledWith(
         cmd,
+        [],
         expect.objectContaining({ shell: '/bin/zsh' }),
       );
     });
@@ -226,6 +227,7 @@ describe('util/exec/common', () => {
 
       expect(execa).toHaveBeenCalledWith(
         cmd,
+        [],
         expect.objectContaining({ shell: true }),
       );
     });
@@ -248,6 +250,7 @@ describe('util/exec/common', () => {
 
       expect(execa).toHaveBeenCalledWith(
         cmd,
+        [],
         expect.objectContaining({ shell: true }),
       );
     });
