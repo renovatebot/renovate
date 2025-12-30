@@ -62,7 +62,6 @@ describe('modules/platform/local/scm', () => {
       expect(await localFs.getFileList()).toHaveLength(2);
 
       expect(execSync).toHaveBeenCalledExactlyOnceWith('git ls-files', {
-        encoding: 'utf-8',
         maxBuffer: 1024 * 1024 * 10,
       });
     });

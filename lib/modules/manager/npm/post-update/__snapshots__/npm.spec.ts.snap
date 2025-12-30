@@ -6,7 +6,6 @@ exports[`modules/manager/npm/post-update/npm > generates lock files 1`] = `
     "cmd": "npm install --package-lock-only --no-audit --prefer-dedupe --ignore-scripts",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -29,7 +28,6 @@ exports[`modules/manager/npm/post-update/npm > performs lock file maintenance 1`
     "cmd": "npm install --package-lock-only --no-audit --ignore-scripts",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -52,7 +50,6 @@ exports[`modules/manager/npm/post-update/npm > performs lock file updates 1`] = 
     "cmd": "npm install --package-lock-only --no-audit --ignore-scripts some-dep@1.0.1",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -162,7 +159,6 @@ exports[`modules/manager/npm/post-update/npm > performs lock file updates retain
     "cmd": "npm install --package-lock-only --no-audit --ignore-scripts postcss@8.4.8",
     "options": {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",

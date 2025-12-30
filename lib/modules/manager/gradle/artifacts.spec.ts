@@ -561,7 +561,7 @@ describe('modules/manager/gradle/artifacts', () => {
         cmd: '',
         stdout: '',
         stderr: '',
-        options: { encoding: 'utf8' },
+        options: {},
       });
       mockExecAll(execError);
 

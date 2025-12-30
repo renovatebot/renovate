@@ -41,7 +41,6 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
   const cwd = getCwd(opts);
   const rawExecOptions: RawExecOptions = {
     cwd,
-    encoding: 'utf-8',
     env: childEnv,
     maxBuffer: opts.maxBuffer,
     timeout: opts.timeout,
