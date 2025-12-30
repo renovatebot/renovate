@@ -48,7 +48,7 @@ describe('modules/versioning/exact/index', () => {
     });
 
     it('returns false when version differs from current', () => {
-      expect(exact.isCompatible('v1', 'v2')).toBe(false);
+      expect(exact.isCompatible('v1.0.0', 'v1.1.0')).toBe(false);
     });
   });
 
