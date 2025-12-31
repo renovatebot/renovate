@@ -60,6 +60,8 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
     stdin: 'pipe',
     stdout: opts.ignoreStdout ? 'ignore' : 'pipe',
     stderr: 'pipe',
+    // only set shell if it has a value
+    ...(opts.shell === undefined ? {} : { shell: opts.shell }),
   };
 }
 
@@ -86,6 +88,10 @@ async function prepareRawExec(
     logger.debug(`Setting CONTAINERBASE_CACHE_DIR to ${containerbaseDir!}`);
     opts.env ??= {};
     opts.env.CONTAINERBASE_CACHE_DIR = containerbaseDir;
+
+    // WARNING this is required to allow executing `hash`, which is a shell built-in. We should be very careful that commands executed here are controlled only by Renovate's code, and that arguments are quoted
+    // TODO #40232 to replace this
+    opts.shell = true;
   }
 
   let rawOptions = getRawExecOptions(opts);

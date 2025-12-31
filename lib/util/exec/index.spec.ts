@@ -251,6 +251,7 @@ describe('util/exec/index', () => {
             env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
+            shell: true,
             stdin: 'pipe',
             stdout: 'pipe',
             stderr: 'pipe',
@@ -280,6 +281,7 @@ describe('util/exec/index', () => {
             env: containerbaseEnvFiltered,
             timeout: 900000,
             maxBuffer: 10485760,
+            shell: true,
             stdin: 'pipe',
             stdout: 'pipe',
             stderr: 'pipe',
@@ -317,6 +319,7 @@ describe('util/exec/index', () => {
             env: containerbaseEnvFiltered,
             timeout: 900000,
             maxBuffer: 10485760,
+            shell: true,
             stdin: 'pipe',
             stdout: 'pipe',
             stderr: 'pipe',
@@ -339,6 +342,7 @@ describe('util/exec/index', () => {
             env: { ...containerbaseEnv, SELECTED_ENV_VAR: 'Default value' },
             timeout: 900000,
             maxBuffer: 10485760,
+            shell: true,
             stdin: 'pipe',
             stdout: 'pipe',
             stderr: 'pipe',
@@ -371,6 +375,7 @@ describe('util/exec/index', () => {
             env: { ...containerbaseEnv, SELECTED_ENV_VAR: 'Default value' },
             timeout: 900000,
             maxBuffer: 10485760,
+            shell: true,
             stdin: 'pipe',
             stdout: 'pipe',
             stderr: 'pipe',
@@ -399,6 +404,7 @@ describe('util/exec/index', () => {
             env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
+            shell: true,
             stdin: 'pipe',
             stdout: 'pipe',
             stderr: 'pipe',
@@ -427,6 +433,7 @@ describe('util/exec/index', () => {
             env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
+            shell: true,
             stdin: 'pipe',
             stdout: 'pipe',
             stderr: 'pipe',
@@ -458,6 +465,7 @@ describe('util/exec/index', () => {
             env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
+            shell: true,
             stdin: 'pipe',
             stdout: 'pipe',
             stderr: 'pipe',
@@ -489,6 +497,7 @@ describe('util/exec/index', () => {
             env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
+            shell: true,
             stdin: 'pipe',
             stdout: 'pipe',
             stderr: 'pipe',
@@ -523,6 +532,7 @@ describe('util/exec/index', () => {
             env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
+            shell: true,
             stdin: 'pipe',
             stdout: 'pipe',
             stderr: 'pipe',
@@ -551,6 +561,7 @@ describe('util/exec/index', () => {
             env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
+            shell: true,
             stdin: 'pipe',
             stdout: 'pipe',
             stderr: 'pipe',
@@ -575,6 +586,7 @@ describe('util/exec/index', () => {
             env: containerbaseEnv,
             timeout: 20 * 60 * 1000,
             maxBuffer: 10485760,
+            shell: true,
             stdin: 'pipe',
             stdout: 'pipe',
             stderr: 'pipe',
@@ -621,6 +633,7 @@ describe('util/exec/index', () => {
             env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 1024,
+            shell: true,
             stdin: 'pipe',
             stdout: 'pipe',
             stderr: 'pipe',
@@ -646,6 +659,7 @@ describe('util/exec/index', () => {
             },
             timeout: 900000,
             maxBuffer: 10485760,
+            shell: true,
             stdin: 'pipe',
             stdout: 'pipe',
             stderr: 'pipe',
@@ -676,6 +690,7 @@ describe('util/exec/index', () => {
             },
             timeout: 900000,
             maxBuffer: 10485760,
+            shell: true,
             stdin: 'pipe',
             stdout: 'pipe',
             stderr: 'pipe',
@@ -712,6 +727,7 @@ describe('util/exec/index', () => {
             },
             timeout: 900000,
             maxBuffer: 10485760,
+            shell: true,
             stdin: 'pipe',
             stdout: 'pipe',
             stderr: 'pipe',
@@ -748,6 +764,7 @@ describe('util/exec/index', () => {
             },
             timeout: 900000,
             maxBuffer: 10485760,
+            shell: true,
             stdin: 'pipe',
             stdout: 'pipe',
             stderr: 'pipe',
@@ -913,6 +930,27 @@ describe('util/exec/index', () => {
     process.env.CONTAINERBASE = 'true';
     const promise = exec('foobar', { toolConstraints: [{ toolName: 'npm' }] });
     await expect(promise).rejects.toThrow('No tool releases found.');
+  });
+
+  // TODO #40232 to remove this
+  it('Sets shell=true when using binarySource=install', async () => {
+    process.env = processEnv;
+    cpExec.mockImplementation(() => {
+      return Promise.resolve({ stdout: '', stderr: '' });
+    });
+
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.CONTAINERBASE = 'true';
+    await exec('foobar', {
+      toolConstraints: [{ toolName: 'npm', constraint: '2.5.0' }],
+    });
+
+    expect(cpExec).toHaveBeenCalledWith(
+      'install-tool npm 2.5.0',
+      expect.objectContaining({
+        shell: true,
+      }),
+    );
   });
 
   it('Supports binarySource=install preCommands', async () => {

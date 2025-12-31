@@ -375,6 +375,8 @@ export async function generateInstallCommands(
       const installCommand = `install-tool ${toolName} ${quote(toolVersion)}`;
       installCommands.push(installCommand);
       if (allToolConfig[toolName].hash) {
+        // WARNING this requires `shell: true` when executing
+        // TODO #40232 to rework this
         installCommands.push(`hash -d ${toolName} 2>/dev/null || true`);
       }
     }
