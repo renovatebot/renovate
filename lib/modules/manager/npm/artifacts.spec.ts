@@ -308,6 +308,13 @@ minimumReleaseAgeExclude:
             managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
+          {
+            ...validDepUpdate,
+            depName: '@myorg/fs-alternative',
+            currentValue: '8.15.5',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
         ],
         newPackageFileContent: 'some new content',
         config,
