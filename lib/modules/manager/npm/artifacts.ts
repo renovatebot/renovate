@@ -191,7 +191,7 @@ async function updatePnpmWorkspace(
       // add minimumReleaseAgeExclude
       const addedStr = `
 minimumReleaseAgeExclude:
-  - ${upgrade.depName}@${upgrade.newValue}`;
+  - ${upgrade.depName}@${upgrade.newValue ?? upgrade.newVersion}`;
       const newContent = oldContent + addedStr;
       await writeLocalFile(pnpmWorkspaceFilePath, newContent);
       packageFileContent = newContent;
@@ -221,7 +221,8 @@ minimumReleaseAgeExclude:
         logger.debug('Matching setting found, appending ||');
         // need to find and replace the old setting by appending || <newValue>
         const newSetting =
-          matchingSetting.settingStr + ` || ${upgrade.newValue}`;
+          matchingSetting.settingStr +
+          ` || ${upgrade.newValue ?? upgrade.newVersion}`;
         const newContent = oldContent.replace(
           matchingSetting.settingStr,
           newSetting,
@@ -236,7 +237,7 @@ minimumReleaseAgeExclude:
       );
       logger.debug('Matching setting found, appending ||');
       const addedStr = `minimumReleaseAgeExclude:
-  - ${upgrade.depName}@${upgrade.newValue}`;
+  - ${upgrade.depName}@${upgrade.newValue ?? upgrade.newVersion}`;
       const newContent = oldContent.replace(
         'minimumReleaseAgeExclude:',
         addedStr,

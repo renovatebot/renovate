@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -239,7 +240,7 @@ describe('modules/manager/npm/artifacts', () => {
   describe('updatePnpmWorkspace()', () => {
     it('returns null if no security updates are found', async () => {
       const res = await updateArtifacts({
-        packageFileName: 'flake.nix',
+        packageFileName: 'package.json',
         updatedDeps: [{ ...validDepUpdate, currentValue: '8.15.5' }],
         newPackageFileContent: 'some new content',
         config,
@@ -249,10 +250,10 @@ describe('modules/manager/npm/artifacts', () => {
     });
 
     it('returns null if pnpm workspace file does not exist', async () => {
-      fs.getSiblingFileName.mockResolvedValueOnce('pnpm-workspace.yaml');
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
       fs.localPathExists.mockResolvedValueOnce(false);
       const res = await updateArtifacts({
-        packageFileName: 'flake.nix',
+        packageFileName: 'package.json',
         updatedDeps: [
           {
             ...validDepUpdate,
@@ -269,11 +270,11 @@ describe('modules/manager/npm/artifacts', () => {
     });
 
     it('returns null if no minimumReleaseAge setting found', async () => {
-      fs.getSiblingFileName.mockResolvedValueOnce('pnpm-workspace.yaml');
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
       fs.localPathExists.mockResolvedValueOnce(true);
       fs.readLocalFile.mockResolvedValueOnce(''); // for pnpm-workspace.yaml
       const res = await updateArtifacts({
-        packageFileName: 'flake.nix',
+        packageFileName: 'package.json',
         updatedDeps: [
           {
             ...validDepUpdate,
@@ -289,23 +290,111 @@ describe('modules/manager/npm/artifacts', () => {
       expect(res).toBeNull();
     });
 
-    // it('updates pnpm workspace', async () => {
-    //   fsExtra.ensureDir.mockResolvedValue(undefined as never);
-    //   fsExtra.stat.mockResolvedValueOnce({} as never);
-    //   fs.readLocalFile.mockResolvedValueOnce(''); // for pnpm-workspace.yaml
-    //   const res = await updateArtifacts({
-    //     packageFileName: 'flake.nix',
-    //     updatedDeps: [
-    //       {
-    //         ...validDepUpdate,
-    //         currentValue: '8.15.5',
-    //         managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
-    //       },
-    //     ],
-    //     newPackageFileContent: 'some new content',
-    //     config,
-    //   });
-    //   expect(res).toBeNull();
-    // });
+    it('updates pnpm workspace - adds minimumReleaseAgeExclude block if not found', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 10080`,
+      ); // for pnpm-workspace.yaml
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            currentValue: '8.15.5',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents:
+              'minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  - pnpm@8.15.6',
+          },
+        },
+      ]);
+    });
+
+    it('updates pnpm workspace - appends new minimumReleaseAgeExclude setting', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - otherdep@5.6.7`,
+      ); // for pnpm-workspace.yaml
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            currentValue: '8.15.5',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents:
+              'minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  - pnpm@8.15.6\n  - otherdep@5.6.7',
+          },
+        },
+      ]);
+    });
+
+    it('updates pnpm workspace - expands existing minimumReleaseAgeExclude setting', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - pnpm@5.6.7
+  - '@next/env@16.0.7 || 16.0.9'`,
+      ); // for pnpm-workspace.yaml
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            currentValue: '8.15.5',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+          {
+            ...validDepUpdate,
+            depName: '@next/env',
+            depType: 'dependency',
+            currentValue: '16.0.9',
+            newValue: '16.0.10',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents:
+              "minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  - pnpm@5.6.7\n  - '@next/env@16.0.7 || 16.0.9 || 16.0.10'",
+          },
+        },
+      ]);
+    });
   });
 });
