@@ -29,6 +29,8 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowScripts
 
+## allowShellExecutorForPostUpgradeCommands
+
 ## allowedCommands
 
 A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.

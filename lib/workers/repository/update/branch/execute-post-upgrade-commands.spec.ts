@@ -136,7 +136,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(1);
     });
 
-    it('executes command with shell mode', async () => {
+    it('executes command with shell mode by default', async () => {
       const commands = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
@@ -188,6 +188,122 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         expect.objectContaining({
           cwd: localDir,
           shell: true,
+        }),
+      );
+      expect(res.artifactErrors).toHaveLength(0);
+    });
+
+    it('executes command with shell mode when allowShellExecutorForPostUpgradeCommands=true', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
+        ],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      exec.exec.mockResolvedValueOnce({
+        stdout: 'success',
+        stderr: '',
+      });
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      const localDir = upath.join(tmpDir.path, 'local');
+      GlobalConfig.set({
+        localDir,
+        allowedCommands: ['some-command'],
+        allowShellExecutorForPostUpgradeCommands: true,
+      });
+      fs.localPathIsFile.mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'some-command',
+        expect.objectContaining({
+          cwd: localDir,
+          shell: true,
+        }),
+      );
+      expect(res.artifactErrors).toHaveLength(0);
+    });
+
+    it('does not execute command with shell mode when allowShellExecutorForPostUpgradeCommands=false', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
+        ],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      exec.exec.mockResolvedValueOnce({
+        stdout: 'success',
+        stderr: '',
+      });
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      const localDir = upath.join(tmpDir.path, 'local');
+      GlobalConfig.set({
+        localDir,
+        allowedCommands: ['some-command'],
+        allowShellExecutorForPostUpgradeCommands: false,
+      });
+      fs.localPathIsFile.mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'some-command',
+        expect.objectContaining({
+          cwd: localDir,
+          shell: false,
         }),
       );
       expect(res.artifactErrors).toHaveLength(0);
