@@ -40,7 +40,6 @@ interface StubArgs {
   cmd: string;
   exitCode: number | null;
   exitSignal: NodeJS.Signals | null;
-  encoding?: BufferEncoding;
   error?: Error;
   stdout?: string;
   stderr?: string;
@@ -78,7 +77,6 @@ function getSpawnStub(args: StubArgs): any {
     exitSignal,
     stdout,
     stderr,
-    encoding,
     timeout,
     pid = 31415,
   } = args;
@@ -103,8 +101,8 @@ function getSpawnStub(args: StubArgs): any {
   };
 
   // init readable streams
-  const stdoutStream = getReadable(stdout, encoding ?? 'utf8');
-  const stderrStream = getReadable(stderr, encoding ?? 'utf8');
+  const stdoutStream = getReadable(stdout, 'utf8');
+  const stderrStream = getReadable(stderr, 'utf8');
 
   // define class methods
   const emit = (name: string, ...arg: (string | number | Error)[]): boolean => {
