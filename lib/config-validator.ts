@@ -156,7 +156,7 @@ interface PackageJson {
   }
   logger.info('Config validated successfully');
 })().catch((e) => {
-  // eslint-disable-next-line no-console
+  // oxlint-disable-next-line no-console -- intentional: display critical error on CLI
   console.error(e);
   process.exit(99);
 });
