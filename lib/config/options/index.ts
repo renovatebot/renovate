@@ -974,6 +974,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'allowShellExecutorForPostUpgradeCommands',
+    description:
+      'Whether to run commands for `postUpgradeTasks` inside a shell. This has security implications, as it means that they can call out to other commands or access shell variables. It is difficult to craft an `allowedCommands` regex to restrict this.',
+    globalOnly: true,
+    type: 'boolean',
+    default: true,
+  },
+  {
     name: 'allowCustomCrateRegistries',
     description: 'Set this to `true` to allow custom crate registries.',
     globalOnly: true,

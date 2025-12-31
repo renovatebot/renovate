@@ -131,7 +131,10 @@ export async function postUpgradeCommandsExecutor(
             const execOpts: ExecOptions = {
               // WARNING to self-hosted administrators: always run post-upgrade commands with `shell` mode on, which has the risk of arbitrary environment variable access or additional command execution
               // It is very likely this will be susceptible to these risks, even if you allowlist (via `allowedCommands`), as there may be special characters included in the given commands that can be leveraged here
-              shell: true,
+              shell: GlobalConfig.get(
+                'allowShellExecutorForPostUpgradeCommands',
+                true,
+              ),
 
               cwd: isNonEmptyString(workingDir)
                 ? workingDir
