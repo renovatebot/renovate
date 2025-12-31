@@ -204,7 +204,7 @@ minimumReleaseAgeExclude:
       matchType?: 'pattern' | 'all-versions' | 'single-versions';
       settingStr: string;
     } = { match: false, settingStr: '' };
-    for (const setting of pnpmWorkspace.minimumReleaseAgeExclude ?? []) {
+    for (const setting of pnpmWorkspace.minimumReleaseAgeExclude) {
       const matchingRes = checkExcludeSetting(setting, upgrade.depName!);
       if (matchingRes.match) {
         matchingSetting = {
