@@ -268,10 +268,14 @@ function checkExcludeSetting(
   match: boolean;
   matchType?: 'pattern' | 'all-versions' | 'single-versions';
 } {
-  if (setting.includes(depName)) {
-    if (!setting.includes('@')) {
-      return { match: true, matchType: 'all-versions' };
-    }
+  // Check for exact match (all-versions)
+  if (setting === depName) {
+    return { match: true, matchType: 'all-versions' };
+  }
+
+  // Check for versioned match (single-versions)
+  // The version specifier follows the package name with @
+  if (setting.startsWith(depName + '@')) {
     return { match: true, matchType: 'single-versions' };
   }
 
