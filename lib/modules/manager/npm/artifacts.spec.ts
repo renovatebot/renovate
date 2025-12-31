@@ -290,6 +290,32 @@ describe('modules/manager/npm/artifacts', () => {
       expect(res).toBeNull();
     });
 
+    it('returns null if minimumReleaseAgeExclude excludes all versions of updated dep', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - '@myorg/*'
+  - pnpm`,
+      ); // for pnpm-workspace.yaml
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            currentValue: '8.15.5',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+
+      expect(res).toBeNull();
+    });
+
     it('updates pnpm workspace - adds minimumReleaseAgeExclude block if not found', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
       fs.localPathExists.mockResolvedValueOnce(true);
