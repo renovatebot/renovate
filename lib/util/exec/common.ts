@@ -2,6 +2,7 @@ import type { ChildProcess } from 'node:child_process';
 import type { Readable } from 'node:stream';
 import { isNullOrUndefined } from '@sindresorhus/is';
 import { execa } from 'execa';
+import { split } from 'shlex';
 import { instrument } from '../../instrumentation';
 import { getEnv } from '../env';
 import { sanitize } from '../sanitize';
@@ -79,15 +80,32 @@ function registerDataListeners(
   }
 }
 
-export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
+export function exec(
+  theCmd: string,
+  opts: RawExecOptions,
+): Promise<ExecResult> {
   return new Promise((resolve, reject) => {
+    let cmd = theCmd;
+    let args: string[] = [];
     const maxBuffer = opts.maxBuffer ?? 10 * 1024 * 1024; // Set default max buffer size to 10MB
-    const cp = execa(cmd, {
+
+    // don't use shell by default, as it leads to potential security issues
+    const shell = opts.shell ?? false;
+    // if we're not in shell mode, we need to provide the command and arguments
+    if (shell === false) {
+      const parts = split(cmd);
+      if (parts) {
+        cmd = parts[0];
+        args = parts.slice(1);
+      }
+    }
+
+    const cp = execa(cmd, args, {
       ...opts,
       // force detached on non WIN platforms
       // https://github.com/nodejs/node/issues/21825#issuecomment-611328888
       detached: process.platform !== 'win32',
-      shell: typeof opts.shell === 'string' ? opts.shell : true, // force shell
+      shell,
     });
 
     // handle streams
@@ -110,19 +128,25 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
       if (signal) {
         kill(cp, signal);
         reject(
-          new ExecError(`Command failed: ${cmd}\nInterrupted by ${signal}`, {
-            ...rejectInfo(),
-            signal,
-          }),
+          new ExecError(
+            `Command failed: ${cp.spawnargs.join(' ')}\nInterrupted by ${signal}`,
+            {
+              ...rejectInfo(),
+              signal,
+            },
+          ),
         );
         return;
       }
       if (code !== 0) {
         reject(
-          new ExecError(`Command failed: ${cmd}\n${stringify(stderr)}`, {
-            ...rejectInfo(),
-            exitCode: code,
-          }),
+          new ExecError(
+            `Command failed: ${cp.spawnargs.join(' ')}\n${stringify(stderr)}`,
+            {
+              ...rejectInfo(),
+              exitCode: code,
+            },
+          ),
         );
         return;
       }

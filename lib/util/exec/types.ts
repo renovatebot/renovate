@@ -9,7 +9,6 @@ export interface ToolConfig {
   datasource: string;
   extractVersion?: string;
   packageName: string;
-  hash?: boolean;
   versioning: string;
 }
 
@@ -55,4 +54,5 @@ export interface ExecOptions {
   // Following are pass-through to child process
   maxBuffer?: number | undefined;
   timeout?: number | undefined;
+  shell?: boolean | string | undefined;
 }
