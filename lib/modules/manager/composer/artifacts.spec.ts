@@ -741,7 +741,7 @@ describe('modules/manager/composer/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'composer update --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
-        options: { cwd: '/tmp/github/some/repo', encoding: 'utf-8' },
+        options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
   });
@@ -788,15 +788,11 @@ describe('modules/manager/composer/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'docker pull ghcr.io/containerbase/sidecar',
-        options: {
-          encoding: 'utf-8',
-        },
+        options: {},
       },
       {
         cmd: 'docker ps --filter name=renovate_sidecar -aq',
-        options: {
-          encoding: 'utf-8',
-        },
+        options: {},
       },
       {
         cmd:
@@ -1127,14 +1123,14 @@ describe('modules/manager/composer/artifacts', () => {
       },
       {
         cmd: 'composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
-        options: { cwd: '/tmp/github/some/repo', encoding: 'utf-8' },
+        options: { cwd: '/tmp/github/some/repo' },
       },
       {
         cmd: 'git stash pop || true',
       },
       {
         cmd: 'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
-        options: { cwd: '/tmp/github/some/repo', encoding: 'utf-8' },
+        options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
   });

@@ -6,6 +6,7 @@ export class GlobalConfig {
     'allowCustomCrateRegistries',
     'allowPlugins',
     'allowScripts',
+    'allowShellExecutorForPostUpgradeCommands',
     'allowedCommands',
     'allowedEnv',
     'allowedHeaders',

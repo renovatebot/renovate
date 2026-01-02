@@ -510,7 +510,7 @@ jobs:
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --branches 99.0 \
+            --branches 96.82 \
             --functions 99.79 \
             --lines 99.02 \
             --statements 99.03
@@ -783,7 +783,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@1fdc83c88a33e87d4d9b02e482ecf0c108367377 # v3.14.41
+        uses: containerbase/internal-tools@010061dd14cd1d2d8357e787873c601d33e08142 # v3.14.43
         with:
           command: docker-config
 

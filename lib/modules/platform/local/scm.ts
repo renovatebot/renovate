@@ -34,9 +34,7 @@ export class LocalFs implements PlatformScm {
     try {
       // fetch file list using git
       const maxBuffer = 10 * 1024 * 1024; // 10 MiB in bytes
-      const stdout = (
-        await rawExec('git ls-files', { encoding: 'utf-8', maxBuffer })
-      ).stdout;
+      const stdout = (await rawExec('git ls-files', { maxBuffer })).stdout;
       logger.debug('Got file list using git');
       fileList = stdout.split('\n');
     } catch {

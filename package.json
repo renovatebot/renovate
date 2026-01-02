@@ -144,16 +144,16 @@
   },
   "volta": {
     "node": "24.12.0",
-    "pnpm": "10.26.1"
+    "pnpm": "10.26.2"
   },
   "dependencies": {
-    "@aws-sdk/client-codecommit": "3.940.0",
-    "@aws-sdk/client-ec2": "3.940.0",
-    "@aws-sdk/client-ecr": "3.940.0",
-    "@aws-sdk/client-eks": "3.940.0",
-    "@aws-sdk/client-rds": "3.940.0",
-    "@aws-sdk/client-s3": "3.940.0",
-    "@aws-sdk/credential-providers": "3.940.0",
+    "@aws-sdk/client-codecommit": "3.958.0",
+    "@aws-sdk/client-ec2": "3.958.0",
+    "@aws-sdk/client-ecr": "3.958.0",
+    "@aws-sdk/client-eks": "3.958.0",
+    "@aws-sdk/client-rds": "3.958.0",
+    "@aws-sdk/client-s3": "3.958.0",
+    "@aws-sdk/credential-providers": "3.958.0",
     "@baszalmstra/rattler": "0.2.1",
     "@breejs/later": "4.2.0",
     "@cdktf/hcl2json": "0.21.0",
@@ -206,6 +206,7 @@
     "emoji-regex": "10.6.0",
     "emojibase": "16.0.0",
     "emojibase-regex": "16.0.0",
+    "execa": "8.0.1",
     "extract-zip": "2.0.1",
     "find-packages": "10.0.4",
     "find-up": "7.0.0",
@@ -360,7 +361,7 @@
     "vitest": "4.0.16",
     "vitest-mock-extended": "3.1.0"
   },
-  "packageManager": "pnpm@10.26.1",
+  "packageManager": "pnpm@10.26.2",
   "files": [
     "dist",
     "renovate-schema.json"
