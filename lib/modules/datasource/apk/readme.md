@@ -15,4 +15,3 @@ Example APK repository URLs:
 - Community repositories (e.g., `https://dl-cdn.alpinelinux.org/alpine/v3.19/community`)
 - Wolfi APK repositories (e.g., `https://packages.wolfi.dev/os`)
 
-This datasource is used by the [apko manager](../../manager/apko/index.md) to provide version information for packages defined in `apko.yaml` files.
