@@ -355,10 +355,16 @@ describe('modules/versioning/apk/index', () => {
   });
 
   describe('getPatch edge cases', () => {
-    it('should return null for _p patterns in getPatch', () => {
+    it('should return null for versions with _p package fix suffix', () => {
+      // Versions with _p (package fix) suffix have no patch in release array position [2]
       expect(apk.getPatch('6.5_p20250503-r0')).toBe(null);
       expect(apk.getPatch('1.0_p1-r0')).toBe(null);
-      expect(apk.getPatch('2.0_package-r0')).toBe(null);
+    });
+
+    it('should return null for invalid versions', () => {
+      // Invalid versions return null from getPatch
+      expect(apk.getPatch('invalid')).toBe(null);
+      expect(apk.getPatch('2.0_package-r0')).toBe(null); // _package is not a valid suffix
     });
 
     it('should return patch version for non-_p patterns', () => {
@@ -476,6 +482,15 @@ describe('modules/versioning/apk/index', () => {
   });
 
   describe('version comparison edge cases for coverage', () => {
+    it('should handle major-only versions without minor/patch', () => {
+      // Test versions without minorPatch to cover the false branch of `if (minorPatch)`
+      expect(apk.isValid('1')).toBe(true);
+      expect(apk.isValid('42')).toBe(true);
+      expect(apk.sortVersions('1', '2')).toBeLessThan(0);
+      expect(apk.sortVersions('2', '1')).toBeGreaterThan(0);
+      expect(apk.sortVersions('1', '1')).toBe(0);
+    });
+
     it('should handle letter vs number comparison in _compareVersionParts', () => {
       // Test case where we compare a letter to a number
       // This should trigger the "letters are less than numbers" path
@@ -504,6 +519,20 @@ describe('modules/versioning/apk/index', () => {
       // This should trigger the lexicographic comparison path
       expect(apk.sortVersions('2.39.0a-r0', '2.39.0b-r0')).toBeLessThan(0);
       expect(apk.sortVersions('2.39.0b-r0', '2.39.0a-r0')).toBeGreaterThan(0);
+    });
+
+    it('should handle equal strings in _compareVersionParts', () => {
+      // Test case where both strings at same position are equal
+      // This covers the false branch of `if (matchv1 !== matchv2)`
+      expect(apk.sortVersions('2.39.0a', '2.39.0a')).toBe(0);
+      expect(apk.sortVersions('1.0a', '1.0a')).toBe(0);
+      // Test where letter 'a' and package fix '_p' have equal strings at same position
+      // but different numbers following, triggering the continue-loop path
+      // v1: 1.0a_p1-r0 -> version='10a_p1' -> regex matches ['10','a','p','1']
+      // v2: 1.0a_p2-r0 -> version='10a_p2' -> regex matches ['10','a','p','2']
+      // At index 1&2, both have 'a' and 'p' (equal strings, continue loop)
+      expect(apk.sortVersions('1.0a_p1-r0', '1.0a_p2-r0')).toBeLessThan(0);
+      expect(apk.sortVersions('1.0a_p2-r0', '1.0a_p1-r0')).toBeGreaterThan(0);
     });
 
     it('should handle undefined vs string comparison in _compareVersionParts', () => {

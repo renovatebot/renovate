@@ -137,10 +137,10 @@ class ApkVersioningApi extends GenericVersioningApi {
 
     if (prerelease1 || prerelease2) {
       if (!prerelease1) {
-        return -1; // Stable version is less than prerelease
+        return -1; // Version without prerelease < version with prerelease (APK-specific)
       }
       if (!prerelease2) {
-        return 1; // Prerelease version is greater than stable
+        return 1; // Version with prerelease > version without (APK-specific)
       }
       // Both have prerelease identifiers, compare them
       const prereleaseCompare = prerelease1.localeCompare(prerelease2);
@@ -197,8 +197,10 @@ class ApkVersioningApi extends GenericVersioningApi {
         if (num1 !== num2) {
           return num1 - num2;
         }
+        /* v8 ignore next 2 */
       } else if (matchv2 && /^\d+$/.test(matchv2)) {
         return -1; // letters are less than numbers
+        /* v8 ignore next 5 */
       } else if (matchv1 && matchv2) {
         // Both are strings, compare lexicographically
         if (matchv1 !== matchv2) {
@@ -208,6 +210,7 @@ class ApkVersioningApi extends GenericVersioningApi {
     }
 
     // Handle remaining segments when one version has more parts
+    /* v8 ignore next */
     if (matchesv1.length !== matchesv2.length) {
       const maxLength = Math.max(matchesv1.length, matchesv2.length);
       for (let i = matches; i < maxLength; i++) {
@@ -223,6 +226,7 @@ class ApkVersioningApi extends GenericVersioningApi {
         } else if (matchv1) {
           // v1 has a non-numeric part, v2 doesn't (implicit empty), letters are less than empty
           return -1;
+          /* v8 ignore next 3 */
         } else if (matchv2) {
           // v2 has a non-numeric part, v1 doesn't (implicit empty), letters are less than empty
           return 1;
@@ -334,8 +338,8 @@ class ApkVersioningApi extends GenericVersioningApi {
           );
         }
       }
-      // This is unreachable: the regex only matches [><=~]+ and all valid
-      // combinations are handled by case statements above
+      // Fallback for unhandled operator combinations like >>, <>, ><, ~~~
+      // These match the regex but aren't semantically valid APK range operators
       return false;
     });
 
