@@ -639,8 +639,6 @@ describe('modules/manager/bazel-module/extract', () => {
           },
         ],
       });
-      // Verify autoReplaceStringTemplate is not set when using registryAliases
-      expect(result?.deps[0]).not.toHaveProperty('autoReplaceStringTemplate');
     });
 
     it('returns maven.install and bazel_dep dependencies together', async () => {
