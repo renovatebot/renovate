@@ -14,4 +14,3 @@ Example APK repository URLs:
 - Official Alpine Linux repositories (e.g., `https://dl-cdn.alpinelinux.org/alpine/v3.19/main`)
 - Community repositories (e.g., `https://dl-cdn.alpinelinux.org/alpine/v3.19/community`)
 - Wolfi APK repositories (e.g., `https://packages.wolfi.dev/os`)
-
