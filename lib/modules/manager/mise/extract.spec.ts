@@ -662,6 +662,56 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts github backend tools', () => {
+      const content = codeBlock`
+      [tools]
+      "github:cli/cli" = "2.64.0"
+      "github:junegunn/fzf" = "v0.56.3"
+      "github:BurntSushi/ripgrep" = { version = "14.1.1" }
+      "github:owner/repo[tag_regex=^\\\\d+\\\\.]" = "1.0.0"
+      'github:owner/repo' = { tag_regex = '^\\d+\\.\\d+\\.', version = "2.0.0" }
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'github:cli/cli',
+            currentValue: '2.64.0',
+            packageName: 'cli/cli',
+            datasource: 'github-releases',
+            extractVersion: '^v?(?<version>.+)',
+          },
+          {
+            depName: 'github:junegunn/fzf',
+            currentValue: 'v0.56.3',
+            packageName: 'junegunn/fzf',
+            datasource: 'github-releases',
+          },
+          {
+            depName: 'github:BurntSushi/ripgrep',
+            currentValue: '14.1.1',
+            packageName: 'BurntSushi/ripgrep',
+            datasource: 'github-releases',
+            extractVersion: '^v?(?<version>.+)',
+          },
+          {
+            depName: 'github:owner/repo',
+            currentValue: '1.0.0',
+            packageName: 'owner/repo',
+            datasource: 'github-releases',
+            extractVersion: '^v?(?<version>\\d+\\.)',
+          },
+          {
+            depName: 'github:owner/repo',
+            currentValue: '2.0.0',
+            packageName: 'owner/repo',
+            datasource: 'github-releases',
+            extractVersion: '^v?(?<version>\\d+\\.\\d+\\.)',
+          },
+        ],
+      });
+    });
+
     it('provides skipReason for lines with unsupported tooling', () => {
       const content = codeBlock`
       [tools]
