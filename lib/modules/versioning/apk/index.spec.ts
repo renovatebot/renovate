@@ -439,12 +439,23 @@ describe('modules/versioning/apk/index', () => {
     it('should handle unknown range operators', () => {
       const versions = ['2.39.0-r0', '2.40.0-r0'];
 
-      // Test unknown operators that would hit the default case
+      // Test unknown operators that don't match the regex - these go to exact match lookup
       expect(apk.getSatisfyingVersion(versions, '!2.39.0-r0')).toBe(null);
       expect(apk.getSatisfyingVersion(versions, '?2.39.0-r0')).toBe(null);
       expect(apk.getSatisfyingVersion(versions, '*2.39.0-r0')).toBe(null);
       expect(apk.getSatisfyingVersion(versions, '@2.39.0-r0')).toBe(null);
       expect(apk.getSatisfyingVersion(versions, '#2.39.0-r0')).toBe(null);
+    });
+
+    it('should handle unhandled range operators that match regex', () => {
+      const versions = ['2.39.0-r0', '2.40.0-r0'];
+
+      // These operators match the regex pattern [><=~]+ but are not handled by switch cases
+      // They hit the fallback return false path
+      expect(apk.getSatisfyingVersion(versions, '>>2.39.0-r0')).toBe(null);
+      expect(apk.getSatisfyingVersion(versions, '<>2.39.0-r0')).toBe(null);
+      expect(apk.getSatisfyingVersion(versions, '><2.39.0-r0')).toBe(null);
+      expect(apk.getSatisfyingVersion(versions, '~~~2.39.0-r0')).toBe(null);
     });
 
     it('should handle tilde range with invalid target version', () => {

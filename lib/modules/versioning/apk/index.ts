@@ -204,9 +204,6 @@ class ApkVersioningApi extends GenericVersioningApi {
         if (matchv1 !== matchv2) {
           return matchv1.localeCompare(matchv2);
         }
-      } /* v8 ignore next 3 -- unreachable in practice due to regex matching behavior */ else {
-        // One is undefined, the other exists
-        return matchv1 ? 1 : -1;
       }
     }
 
@@ -223,10 +220,6 @@ class ApkVersioningApi extends GenericVersioningApi {
         } else if (matchv2 && /^\d+$/.test(matchv2)) {
           // v2 has a number, v1 doesn't (implicit 0), numbers are greater
           return -1;
-          /* v8 ignore next 3 -- unreachable in practice, lengths differ so both can't have parts at same index */
-        } else if (matchv1 && matchv2) {
-          // Both have non-numeric parts, compare lexicographically
-          return matchv1.localeCompare(matchv2);
         } else if (matchv1) {
           // v1 has a non-numeric part, v2 doesn't (implicit empty), letters are less than empty
           return -1;
@@ -340,10 +333,10 @@ class ApkVersioningApi extends GenericVersioningApi {
             this.equals(version, targetVersion)
           );
         }
-        /* v8 ignore next 2 -- unreachable defensive code for unknown range operators */
-        default:
-          return false;
       }
+      // This is unreachable: the regex only matches [><=~]+ and all valid
+      // combinations are handled by case statements above
+      return false;
     });
 
     if (satisfyingVersions.length === 0) {
