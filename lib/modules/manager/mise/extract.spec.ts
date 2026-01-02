@@ -140,7 +140,6 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '2.24.0',
             datasource: 'github-releases',
             depName: 'conan',
-            extractVersion: '^(?<version>\\S+)',
             packageName: 'conan-io/conan',
           },
           {

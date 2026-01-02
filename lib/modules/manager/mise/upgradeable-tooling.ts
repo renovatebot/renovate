@@ -241,7 +241,6 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'conan-io/conan',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^(?<version>\\S+)',
     },
   },
   consul: {
