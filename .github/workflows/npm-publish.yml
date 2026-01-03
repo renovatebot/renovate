@@ -31,8 +31,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@dominic-r'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -67,7 +65,10 @@ jobs:
             fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
           "
 
+      - name: Setup .npmrc for GitHub Packages
+        run: |
+          echo "@dominic-r:registry=https://npm.pkg.github.com" >> .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
+
       - name: Publish to GitHub Packages
-        run: pnpm publish --no-git-checks --tag dev
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm publish --tag dev
