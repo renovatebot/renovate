@@ -19,4 +19,7 @@ The command doesn't do any "compare" - or before and after analysis - if you wan
 
 - `local>` presets can't be resolved. Normally these would point to the local platform such as GitHub, but in the case of running locally, it does not exist
 - `baseBranchPatterns` are ignored
-- Branch creation is not supported
+
+## Branch Creation
+
+When running in local mode, Renovate will create branches locally in your git repository. These branches contain the dependency update commits but are not pushed to any remote. You can inspect them with `git branch` and review the changes before deciding to push them yourself.
