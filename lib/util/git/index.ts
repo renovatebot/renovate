@@ -414,7 +414,6 @@ export const syncGit = instrumentStandalone(
     /* For local platform, the repo already exists - just initialize git and get the current branch */
     if (GlobalConfig.get('platform') === 'local') {
       gitInitialized = true;
-      const localDir = GlobalConfig.get('localDir')!;
       config.currentBranch = config.currentBranch || (await git.revparse(['--abbrev-ref', 'HEAD'])).trim();
       logger.debug({ currentBranch: config.currentBranch }, 'Local platform: using existing repository');
       return;
