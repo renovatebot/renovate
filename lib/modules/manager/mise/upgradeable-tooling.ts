@@ -236,6 +236,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  conan: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'conan-io/conan',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
   consul: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
