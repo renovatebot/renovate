@@ -1,4 +1,4 @@
-name: Publish to npm
+name: Publish to GitHub Packages
 
 on:
   push:
@@ -31,6 +31,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
+          registry-url: 'https://npm.pkg.github.com'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -41,7 +42,6 @@ jobs:
       - name: Generate version
         id: version
         run: |
-          # Use short commit SHA and timestamp for unique version
           SHORT_SHA=$(git rev-parse --short HEAD)
           TIMESTAMP=$(date +%Y%m%d%H%M%S)
           VERSION="0.0.0-${TIMESTAMP}-${SHORT_SHA}"
@@ -49,7 +49,6 @@ jobs:
 
       - name: Update package.json for publish
         run: |
-          # Update package name and version for scoped publish
           node -e "
             const fs = require('fs');
             const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
@@ -65,10 +64,9 @@ jobs:
             fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
           "
 
-      - name: Setup .npmrc for GitHub Packages
-        run: |
-          echo "@dominic-r:registry=https://npm.pkg.github.com" >> .npmrc
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
-
-      - name: Publish to GitHub Packages
-        run: npm publish --tag dev
+      - name: Publish
+        uses: JS-DevTools/npm-publish@19c28f1ef146469e409470805ea4279d47c3d35c # v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          registry: https://npm.pkg.github.com
+          tag: dev
