@@ -86,10 +86,12 @@ describe('modules/manager/devbox/artifacts', () => {
           cmd: 'devbox update nodejs --no-install',
           options: {
             cwd: '.',
-            encoding: 'utf-8',
             env: {},
             maxBuffer: 10485760,
             timeout: 900000,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -134,10 +136,12 @@ describe('modules/manager/devbox/artifacts', () => {
           cmd: 'devbox install',
           options: {
             cwd: '.',
-            encoding: 'utf-8',
             env: {},
             maxBuffer: 10485760,
             timeout: 900000,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -183,20 +187,24 @@ describe('modules/manager/devbox/artifacts', () => {
           cmd: 'devbox update nodejs --no-install',
           options: {
             cwd: '.',
-            encoding: 'utf-8',
             env: {},
             maxBuffer: 10485760,
             timeout: 900000,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
           },
         },
         {
           cmd: 'devbox update ruby --no-install',
           options: {
             cwd: '.',
-            encoding: 'utf-8',
             env: {},
             maxBuffer: 10485760,
             timeout: 900000,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -277,10 +285,12 @@ describe('modules/manager/devbox/artifacts', () => {
           cmd: 'devbox update --no-install',
           options: {
             cwd: '.',
-            encoding: 'utf-8',
             env: {},
             maxBuffer: 10485760,
             timeout: 900000,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
           },
         },
       ]);
@@ -325,10 +335,12 @@ describe('modules/manager/devbox/artifacts', () => {
           cmd: 'devbox update',
           options: {
             cwd: '.',
-            encoding: 'utf-8',
             env: {},
             maxBuffer: 10485760,
             timeout: 900000,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
           },
         },
       ]);

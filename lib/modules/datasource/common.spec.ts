@@ -40,6 +40,7 @@ describe('modules/datasource/common', () => {
 
     it('returns default versioning for unknown datasource', () => {
       expect(getDefaultVersioning('foobar')).toBe(defaultVersioning.id);
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { datasourceName: 'foobar' },
         'Missing datasource!',
@@ -186,6 +187,7 @@ describe('modules/datasource/common', () => {
       expect(result).toEqual({
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
       });
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { datasourceName: 'foobar' },
         'Missing datasource!',
@@ -259,6 +261,7 @@ describe('modules/datasource/common', () => {
           { version: '1.0.0' },
           { version: '2.0.0' },
           { version: '2.0.0-alpine' },
+          { version: 'v3.0.0-alpine' },
         ],
       };
     });
@@ -273,7 +276,10 @@ describe('modules/datasource/common', () => {
       expect(
         applyVersionCompatibility(input, versionCompatibility, undefined),
       ).toMatchObject({
-        releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
+        releases: [
+          { version: '1.0.0', versionOrig: '1.0.0' },
+          { version: '2.0.0', versionOrig: '2.0.0' },
+        ],
       });
     });
 
@@ -282,7 +288,20 @@ describe('modules/datasource/common', () => {
       expect(
         applyVersionCompatibility(input, versionCompatibility, '-alpine'),
       ).toMatchObject({
-        releases: [{ version: '2.0.0' }],
+        releases: [
+          { version: '2.0.0', versionOrig: '2.0.0-alpine' },
+          { version: 'v3.0.0', versionOrig: 'v3.0.0-alpine' },
+        ],
+      });
+    });
+
+    it('does not override versionOrig from extractVersion', () => {
+      const versionCompatibility = '^(?<version>[^-]+)(?<compatibility>.*)?$';
+      const res = applyExtractVersion(input, '^v(?<version>.+)$');
+      expect(
+        applyVersionCompatibility(res, versionCompatibility, '-alpine'),
+      ).toMatchObject({
+        releases: [{ version: '3.0.0', versionOrig: 'v3.0.0-alpine' }],
       });
     });
   });

@@ -78,7 +78,7 @@ describe('workers/repository/update/pr/labels', () => {
     it('template labels with empty datasource', () => {
       const result = prepareLabels({
         labels: ['{{{datasource}}}', ' {{{datasource}}} '],
-        datasource: null,
+        datasource: undefined,
       });
       expect(result).toBeArrayOfSize(0);
       expect(result).toEqual([]);

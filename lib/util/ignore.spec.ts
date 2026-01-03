@@ -22,6 +22,7 @@ describe('util/ignore', () => {
 
   it('logs unknown command for "renovate:" comments without "ignore"', () => {
     isSkipComment('renovate:update');
+
     expect(logger.debug).toHaveBeenCalledWith(
       'Unknown comment command: update',
     );

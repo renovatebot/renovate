@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isRegExp } from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
 import { re2 } from '../expose.cjs';
 import { getEnv } from './env';
@@ -41,7 +41,7 @@ export function regEx(
   if (canBeCached && flags?.includes('g')) {
     canBeCached = false;
   }
-  if (canBeCached && is.regExp(pattern) && pattern.flags.includes('g')) {
+  if (canBeCached && isRegExp(pattern) && pattern.flags.includes('g')) {
     canBeCached = false;
   }
 

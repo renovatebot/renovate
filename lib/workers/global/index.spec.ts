@@ -79,6 +79,7 @@ describe('workers/global/index', () => {
   it('handles config warnings and errors', async () => {
     parseConfigs.mockResolvedValueOnce({
       repositories: [],
+      // @ts-expect-error -- testing
       maintainYarnLock: true,
       foo: 1,
     });
@@ -215,7 +216,7 @@ describe('workers/global/index', () => {
 
       expect(await globalWorker.start()).toBe(0);
       expect(fs.writeFile).toHaveBeenCalledTimes(1);
-      expect(fs.writeFile).toHaveBeenCalledWith(
+      expect(fs.writeFile).toHaveBeenCalledExactlyOnceWith(
         '/tmp/renovate-output.json',
         '["myOrg/myRepo"]',
       );

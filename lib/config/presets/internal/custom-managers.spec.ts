@@ -33,6 +33,8 @@ describe('config/presets/internal/custom-managers', () => {
                   TERRAFORM_VERSION: 1.5.7
                   # renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$
                   KUSTOMIZE_VERSION: kustomize/v5.2.1
+                  # renovate: datasource=deb depName=docker-ce-cli versioning=deb registryUrl=https://download.docker.com/linux/ubuntu?suite=noble&components=stable&binaryArch=amd64
+                  DOCKER_CE_CLI_VERSION: '5:28.5.1-1~ubuntu.24.04~noble'
               - script: echo Hello, world!
                 displayName: 'Run a one-line script'
       `;
@@ -91,6 +93,17 @@ describe('config/presets/internal/custom-managers', () => {
             '# renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$\n          KUSTOMIZE_VERSION: kustomize/v5.2.1\n',
           versioning:
             'regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
+        },
+        {
+          currentValue: '5:28.5.1-1~ubuntu.24.04~noble',
+          datasource: 'deb',
+          depName: 'docker-ce-cli',
+          replaceString:
+            "# renovate: datasource=deb depName=docker-ce-cli versioning=deb registryUrl=https://download.docker.com/linux/ubuntu?suite=noble&components=stable&binaryArch=amd64\n          DOCKER_CE_CLI_VERSION: '5:28.5.1-1~ubuntu.24.04~noble'\n",
+          versioning: 'deb',
+          registryUrls: [
+            'https://download.docker.com/linux/ubuntu?suite=noble&components=stable&binaryArch=amd64',
+          ],
         },
       ]);
     });
@@ -420,6 +433,8 @@ describe('config/presets/internal/custom-managers', () => {
           TERRAFORM_VERSION: 1.5.7
           # renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$
           KUSTOMIZE_VERSION: kustomize/v5.2.1
+          # renovate: datasource=deb depName=docker-ce-cli versioning=deb registryUrl=https://download.docker.com/linux/ubuntu?suite=noble&components=stable&binaryArch=amd64
+          DOCKER_CE_CLI_VERSION: '5:28.5.1-1~ubuntu.24.04~noble'
 
         jobs:
           lint:
@@ -487,6 +502,17 @@ describe('config/presets/internal/custom-managers', () => {
             '# renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$\n  KUSTOMIZE_VERSION: kustomize/v5.2.1\n',
           versioning:
             'regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
+        },
+        {
+          currentValue: '5:28.5.1-1~ubuntu.24.04~noble',
+          datasource: 'deb',
+          depName: 'docker-ce-cli',
+          replaceString:
+            "# renovate: datasource=deb depName=docker-ce-cli versioning=deb registryUrl=https://download.docker.com/linux/ubuntu?suite=noble&components=stable&binaryArch=amd64\n  DOCKER_CE_CLI_VERSION: '5:28.5.1-1~ubuntu.24.04~noble'\n",
+          versioning: 'deb',
+          registryUrls: [
+            'https://download.docker.com/linux/ubuntu?suite=noble&components=stable&binaryArch=amd64',
+          ],
         },
       ]);
     });
@@ -777,6 +803,76 @@ describe('config/presets/internal/custom-managers', () => {
             '<!-- renovate: datasource=docker depName=mongo -->\n<mongo.container.version>4.4.6</mongo.container.version>',
         },
       ]);
+    });
+  });
+
+  describe('Update `tsconfig/node` version in tsconfig.json', () => {
+    const customManager = presets.tsconfigNodeVersions.customManagers?.[0];
+
+    it(`find in tsconfig.json extends string`, async () => {
+      const fileContent = codeBlock`
+        {
+            "extends": "@tsconfig/node20/tsconfig.json",
+            "include": ["src/**/*"]
+        }
+      `;
+
+      const res = await extractPackageFile(
+        'regex',
+        fileContent,
+        'tsconfig.json',
+        customManager!,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '20',
+          datasource: 'npm',
+          depName: '@tsconfig/node20',
+        },
+      ]);
+    });
+
+    it(`find in tsconfig.json extends array`, async () => {
+      const fileContent = codeBlock`
+        {
+            "extends": [
+              "@tsconfig/strictest/tsconfig.json",
+              "@tsconfig/node20/tsconfig.json"
+            ],
+            "include": ["src/**/*"]
+        }
+      `;
+
+      const res = await extractPackageFile(
+        'regex',
+        fileContent,
+        'tsconfig.json',
+        customManager!,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '20',
+          datasource: 'npm',
+          depName: '@tsconfig/node20',
+        },
+      ]);
+    });
+
+    describe('matches regexes patterns', () => {
+      it.each`
+        path                        | expected
+        ${'tsconfig.json'}          | ${true}
+        ${'tsconfig.base.json'}     | ${true}
+        ${'foo/tsconfig.json'}      | ${true}
+        ${'foo/tsconfig.base.json'} | ${true}
+        ${'tsconfig.yml'}           | ${false}
+      `('$path', ({ path, expected }) => {
+        expect(
+          matchRegexOrGlobList(path, customManager!.managerFilePatterns),
+        ).toBe(expected);
+      });
     });
   });
 });

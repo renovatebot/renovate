@@ -1,4 +1,10 @@
-import is from '@sindresorhus/is';
+import {
+  isNonEmptyArray,
+  isNonEmptyObject,
+  isNonEmptyString,
+  isNullOrUndefined,
+  isTruthy,
+} from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
@@ -22,6 +28,7 @@ interface DependencyDashboard {
   dependencyDashboardRebaseAllOpen: boolean;
   dependencyDashboardAllPending: boolean;
   dependencyDashboardAllRateLimited: boolean;
+  dependencyDashboardAllAwaitingSchedule: boolean;
 }
 
 const rateLimitedRe = regEx(
@@ -30,6 +37,10 @@ const rateLimitedRe = regEx(
 );
 const pendingApprovalRe = regEx(
   ` - \\[ \\] ${getMarkdownComment('approve-branch=([^\\s]+)')}`,
+  'g',
+);
+const awaitingScheduleRe = regEx(
+  ` - \\[ \\] ${getMarkdownComment('unschedule-branch=([^\\s]+)')}`,
   'g',
 );
 const generalBranchRe = regEx(
@@ -42,6 +53,7 @@ const markedBranchesRe = regEx(
 
 const approveAllPendingPrs = 'approve-all-pending-prs';
 const createAllRateLimitedPrs = 'create-all-rate-limited-prs';
+const createAllAwaitingSchedulePrs = 'create-all-awaiting-schedule-prs';
 const createConfigMigrationPr = 'create-config-migration-pr';
 const configMigrationPrInfo = 'config-migration-pr-info';
 const rebaseAllOpenPrs = 'rebase-all-open-prs';
@@ -64,6 +76,10 @@ function getCheckbox(type: string, checked = false): string {
 
 function checkOpenAllRateLimitedPR(issueBody: string): boolean {
   return isBoxChecked(issueBody, createAllRateLimitedPrs);
+}
+
+function checkOpenAllAwaitingSchedulePR(issueBody: string): boolean {
+  return isBoxChecked(issueBody, createAllAwaitingSchedulePrs);
 }
 
 function checkApproveAllPendingPR(issueBody: string): boolean {
@@ -96,6 +112,11 @@ function selectAllRelevantBranches(issueBody: string): string[] {
   const checkedBranches = [];
   if (checkOpenAllRateLimitedPR(issueBody)) {
     for (const match of issueBody.matchAll(rateLimitedRe)) {
+      checkedBranches.push(match[0]);
+    }
+  }
+  if (checkOpenAllAwaitingSchedulePR(issueBody)) {
+    for (const match of issueBody.matchAll(awaitingScheduleRe)) {
       checkedBranches.push(match[0]);
     }
   }
@@ -134,6 +155,8 @@ function getCheckedBranches(issueBody: string): Record<string, string> {
 function parseDashboardIssue(issueBody: string): DependencyDashboard {
   const dependencyDashboardChecks = getCheckedBranches(issueBody);
   const dependencyDashboardRebaseAllOpen = checkRebaseAll(issueBody);
+  const dependencyDashboardAllAwaitingSchedule =
+    checkOpenAllAwaitingSchedulePR(issueBody);
   const dependencyDashboardAllPending = checkApproveAllPendingPR(issueBody);
   const dependencyDashboardAllRateLimited =
     checkOpenAllRateLimitedPR(issueBody);
@@ -142,6 +165,7 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
   return {
     dependencyDashboardChecks,
     dependencyDashboardRebaseAllOpen,
+    dependencyDashboardAllAwaitingSchedule,
     dependencyDashboardAllPending,
     dependencyDashboardAllRateLimited,
   };
@@ -152,8 +176,9 @@ export async function readDashboardBody(
 ): Promise<void> {
   let dashboardChecks: DependencyDashboard = {
     dependencyDashboardChecks: {},
-    dependencyDashboardAllPending: false,
     dependencyDashboardRebaseAllOpen: false,
+    dependencyDashboardAllAwaitingSchedule: false,
+    dependencyDashboardAllPending: false,
     dependencyDashboardAllRateLimited: false,
   };
   const stringifiedConfig = JSON.stringify(config);
@@ -284,7 +309,7 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
   let newIssueBody = issueBody;
   const repoProblems = extractRepoProblems(config.repository);
   if (repoProblems.size) {
-    newIssueBody += '## Repository problems\n\n';
+    newIssueBody += '## Repository Problems\n\n';
     const repoProblemsHeader =
       config.customizeDashboard?.repoProblemsHeader ??
       'Renovate tried to run on this repository, but found these problems.';
@@ -349,11 +374,11 @@ export async function ensureDependencyDashboard(
   }
   logger.debug('Ensuring Dependency Dashboard');
 
-  // Check packageFiles for any deprecations
-  let hasDeprecations = false;
+  // Check packageFiles for any deprecations or replacements
+  let hasDeprecationsOrReplacements = false;
   const deprecatedPackages: Record<string, Record<string, boolean>> = {};
-  logger.debug('Checking packageFiles for deprecated packages');
-  if (is.nonEmptyObject(packageFiles)) {
+  logger.debug('Checking packageFiles for deprecated or replacement packages');
+  if (isNonEmptyObject(packageFiles)) {
     for (const [manager, fileNames] of Object.entries(packageFiles)) {
       for (const fileName of fileNames) {
         for (const dep of fileName.deps) {
@@ -362,7 +387,7 @@ export async function ensureDependencyDashboard(
             (updates) => updates.updateType === 'replacement',
           );
           if (name && (dep.deprecationMessage ?? hasReplacement)) {
-            hasDeprecations = true;
+            hasDeprecationsOrReplacements = true;
             deprecatedPackages[manager] ??= {};
             deprecatedPackages[manager][name] ??= hasReplacement;
           }
@@ -371,8 +396,12 @@ export async function ensureDependencyDashboard(
     }
   }
 
-  const hasBranches = is.nonEmptyArray(branches);
-  if (config.dependencyDashboardAutoclose && !hasBranches && !hasDeprecations) {
+  const hasBranches = isNonEmptyArray(branches);
+  if (
+    config.dependencyDashboardAutoclose &&
+    !hasBranches &&
+    !hasDeprecationsOrReplacements
+  ) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
         { title: config.dependencyDashboardTitle },
@@ -398,7 +427,7 @@ export async function ensureDependencyDashboard(
       ` See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
   } else if (configMigrationRes?.result === 'pr-modified') {
     issueBody +=
-      '## Config Migration Needed (error)\n\n' +
+      '## Config Migration Needed (Blocked)\n\n' +
       getMarkdownComment(configMigrationPrInfo) +
       ` The Config Migration branch exists but has been modified by another user. Renovate will not push to this branch unless it is first deleted. \n\n See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
   } else if (configMigrationRes?.result === 'add-checkbox') {
@@ -411,9 +440,11 @@ export async function ensureDependencyDashboard(
 
   issueBody = appendRepoProblems(config, issueBody);
 
-  if (hasDeprecations) {
-    issueBody += '> ⚠ **Warning**\n> \n';
-    issueBody += 'These dependencies are deprecated:\n\n';
+  if (hasDeprecationsOrReplacements) {
+    issueBody += '## Deprecations / Replacements\n';
+    issueBody += '> ⚠️ **Warning**\n> \n';
+    issueBody +=
+      'These dependencies are either deprecated or have replacements available:\n\n';
     issueBody += '| Datasource | Name | Replacement PR? |\n';
     issueBody += '|------------|------|--------------|\n';
     for (const manager of Object.keys(deprecatedPackages).sort()) {
@@ -457,6 +488,9 @@ export async function ensureDependencyDashboard(
     'Awaiting Schedule',
     'The following updates are awaiting their schedule. To get an update now, click on a checkbox below.',
     'unschedule',
+    createAllAwaitingSchedulePrs,
+    'Create all awaiting schedule PRs at once',
+    '🔐',
   );
   issueBody += getBranchesListMd(
     branches,
@@ -487,7 +521,7 @@ export async function ensureDependencyDashboard(
   issueBody += getBranchesListMd(
     branches,
     (branch) => branch.result === 'pr-edited',
-    'Edited/Blocked',
+    'PR Edited (Blocked)',
     'The following updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox below.',
     'rebase',
   );
@@ -549,7 +583,7 @@ export async function ensureDependencyDashboard(
   issueBody += getBranchesListMd(
     branches,
     (branch) => branch.result === 'already-existed',
-    'Ignored or Blocked',
+    'PR Closed (Blocked)',
     'The following updates are blocked by an existing closed PR. To recreate the PR, click on a checkbox below.',
     'recreate',
   );
@@ -695,7 +729,7 @@ export async function getDashboardMarkdownVulnerabilities(
   let result = '';
 
   if (
-    is.nullOrUndefined(config.dependencyDashboardOSVVulnerabilitySummary) ||
+    isNullOrUndefined(config.dependencyDashboardOSVVulnerabilitySummary) ||
     config.dependencyDashboardOSVVulnerabilitySummary === 'none'
   ) {
     return result;
@@ -716,17 +750,17 @@ export async function getDashboardMarkdownVulnerabilities(
   }
 
   const unresolvedVulnerabilities = vulnerabilities.filter((value) =>
-    is.nullOrUndefined(value.fixedVersion),
+    isNullOrUndefined(value.fixedVersion),
   );
   const resolvedVulnerabilitiesLength =
     vulnerabilities.length - unresolvedVulnerabilities.length;
 
   result += `\`${resolvedVulnerabilitiesLength}\`/\`${vulnerabilities.length}\``;
-  if (is.truthy(config.osvVulnerabilityAlerts)) {
-    result += ' CVEs have Renovate fixes.\n';
+  if (isTruthy(config.osvVulnerabilityAlerts)) {
+    result += ' CVEs have Renovate fixes.\n\n';
   } else {
     result +=
-      ' CVEs have possible Renovate fixes.\nSee [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n';
+      ' CVEs have possible Renovate fixes.\nSee [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n\n';
   }
 
   let renderedVulnerabilities: Vulnerability[];
@@ -745,14 +779,14 @@ export async function getDashboardMarkdownVulnerabilities(
   > = {};
   for (const vulnerability of renderedVulnerabilities) {
     const { manager, packageFile } = vulnerability.packageFileConfig;
-    if (is.nullOrUndefined(managerRecords[manager!])) {
+    if (isNullOrUndefined(managerRecords[manager!])) {
       managerRecords[manager!] = {};
     }
-    if (is.nullOrUndefined(managerRecords[manager!][packageFile])) {
+    if (isNullOrUndefined(managerRecords[manager!][packageFile])) {
       managerRecords[manager!][packageFile] = {};
     }
     if (
-      is.nullOrUndefined(
+      isNullOrUndefined(
         managerRecords[manager!][packageFile][vulnerability.packageName],
       )
     ) {
@@ -773,7 +807,7 @@ export async function getDashboardMarkdownVulnerabilities(
         result += `<details><summary>${packageName}</summary>\n<blockquote>\n\n`;
         for (const vul of cves) {
           const id = vul.vulnerability.id;
-          const suffix = is.nonEmptyString(vul.fixedVersion)
+          const suffix = isNonEmptyString(vul.fixedVersion)
             ? ` (fixed in ${vul.fixedVersion})`
             : '';
           result += `- [${id}](https://osv.dev/vulnerability/${id})${suffix}\n`;

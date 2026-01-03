@@ -3,26 +3,9 @@ import type {
   RenovateOptions,
   RenovateRequiredOption,
 } from '../../lib/config/types';
+import { pkg } from '../../lib/expose.cjs';
 import { hasKey } from '../../lib/util/object';
 import { updateFile } from '../utils';
-
-const schema = {
-  title: 'JSON schema for Renovate config files (https://renovatebot.com/)',
-  $schema: 'http://json-schema.org/draft-04/schema#',
-  type: 'object',
-  properties: {},
-};
-const options = getOptions();
-options.sort((a, b) => {
-  if (a.name < b.name) {
-    return -1;
-  }
-  if (a.name > b.name) {
-    return 1;
-  }
-  return 0;
-});
-const properties = schema.properties as Record<string, any>;
 
 type JsonSchemaBasicType =
   | 'string'
@@ -94,7 +77,10 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
   return temp;
 }
 
-function createSchemaForParentConfigs(): void {
+function createSchemaForParentConfigs(
+  options: RenovateOptions[],
+  properties: Record<string, any>,
+): void {
   for (const option of options) {
     if (!option.parents || option.parents.includes('.')) {
       properties[option.name] = createSingleConfig(option);
@@ -102,7 +88,10 @@ function createSchemaForParentConfigs(): void {
   }
 }
 
-function addChildrenArrayInParents(): void {
+function addChildrenArrayInParents(
+  options: RenovateOptions[],
+  properties: Record<string, any>,
+): void {
   for (const option of options) {
     if (option.parents) {
       for (const parent of option.parents.filter((parent) => parent !== '.')) {
@@ -158,7 +147,10 @@ function toRequiredPropertiesRule(
   };
 }
 
-function createSchemaForChildConfigs(): void {
+function createSchemaForChildConfigs(
+  options: RenovateOptions[],
+  properties: Record<string, any>,
+): void {
   for (const option of options) {
     if (option.parents) {
       for (const parent of option.parents.filter((parent) => parent !== '.')) {
@@ -175,12 +167,62 @@ function createSchemaForChildConfigs(): void {
   }
 }
 
-export async function generateSchema(dist: string): Promise<void> {
-  createSchemaForParentConfigs();
-  addChildrenArrayInParents();
-  createSchemaForChildConfigs();
+interface GenerateSchemaOpts {
+  filename?: string;
+  version?: string;
+  isGlobal?: boolean;
+}
+
+export async function generateSchema(
+  dist: string,
+  {
+    filename = 'renovate-schema.json',
+    version = pkg.version,
+    isGlobal = false,
+  }: GenerateSchemaOpts = {},
+): Promise<void> {
+  const schema = {
+    title: isGlobal
+      ? `JSON schema for Renovate ${version} global self-hosting configuration (https://renovatebot.com/)`
+      : `JSON schema for Renovate ${version} config files (https://renovatebot.com/)`,
+    $schema: 'http://json-schema.org/draft-07/schema#',
+    'x-renovate-version': `${version}`,
+    allowComments: true,
+    type: 'object',
+    properties: {},
+  };
+  const configurationOptions = getOptions();
+
+  if (!isGlobal) {
+    configurationOptions.map((v) => {
+      // TODO #38728 remove any global-only options in the repository configuration schema
+      if (v.globalOnly) {
+        // NOTE that the JSON Schema version we're using does not have support for deprecating, so we need to use the `description` field
+        v.description =
+          "Deprecated: This configuration option is only intended to be used with 'global' configuration when self-hosting, not used in a repository configuration file. Renovate likely won't use the configuration, and these fields will be removed from the repository configuration documentation in Renovate v43 (https://github.com/renovatebot/renovate/issues/38728)\n\n" +
+          v.description;
+      }
+
+      return v;
+    });
+  }
+
+  configurationOptions.sort((a, b) => {
+    if (a.name < b.name) {
+      return -1;
+    }
+    if (a.name > b.name) {
+      return 1;
+    }
+    return 0;
+  });
+  const properties = schema.properties as Record<string, any>;
+
+  createSchemaForParentConfigs(configurationOptions, properties);
+  addChildrenArrayInParents(configurationOptions, properties);
+  createSchemaForChildConfigs(configurationOptions, properties);
   await updateFile(
-    `${dist}/renovate-schema.json`,
+    `${dist}/${filename}`,
     `${JSON.stringify(schema, null, 2)}\n`,
   );
 }

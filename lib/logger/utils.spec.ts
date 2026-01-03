@@ -38,7 +38,7 @@ describe('logger/utils', () => {
     expect(() => {
       validateLogLevel(input, 'info');
     }).toThrow();
-    expect(mockExit).toHaveBeenCalledWith(1);
+    expect(mockExit).toHaveBeenCalledExactlyOnceWith(1);
   });
 
   it.each`
@@ -241,11 +241,11 @@ describe('logger/utils', () => {
         cmd: '',
         stdout: '',
         stderr: '',
-        options: { encoding: 'utf8', env: { key: 'val' } },
+        options: { env: { key: 'val' } },
       });
 
       expect(prepareError(execError)).toMatchObject({
-        options: { encoding: 'utf8', env: ['key'] },
+        options: { env: ['key'] },
       });
     });
 

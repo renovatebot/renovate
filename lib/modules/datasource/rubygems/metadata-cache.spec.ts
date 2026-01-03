@@ -182,7 +182,7 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
         { version: '3.0.0' },
       ],
     });
-    expect(packageCache.set).toHaveBeenCalledWith(
+    expect(packageCache.set).toHaveBeenCalledExactlyOnceWith(
       'datasource-rubygems',
       'metadata-cache:https://rubygems.org:foobar',
       {
@@ -229,7 +229,12 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
     );
 
     expect(res1).toEqual(res2);
-    expect(packageCache.set).toHaveBeenCalledOnce();
+    expect(packageCache.set).toHaveBeenCalledExactlyOnceWith(
+      'datasource-rubygems',
+      expect.any(String),
+      expect.any(Object),
+      expect.any(Number),
+    );
   });
 
   it('fetches for stale key', async () => {

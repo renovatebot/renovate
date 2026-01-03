@@ -42,6 +42,7 @@ const git = vi.mocked(_git);
 
 describe('modules/platform/github/index', () => {
   beforeEach(() => {
+    GlobalConfig.reset();
     github.resetConfigs();
 
     setBaseUrl(githubApiHost);
@@ -1346,10 +1347,10 @@ describe('modules/platform/github/index', () => {
         const scope = httpMock.scope(githubApiHost);
         initRepoMock(scope, 'some/repo');
         scope.get(pagePath(1)).reply(200, [renovatePr, otherPr]);
+        GlobalConfig.set({ ignorePrAuthor: true });
         await github.initRepo({
           repository: 'some/repo',
           renovateUsername: 'renovate-bot',
-          ignorePrAuthor: true,
         });
 
         const res = await github.getPrList();
@@ -1490,7 +1491,7 @@ describe('modules/platform/github/index', () => {
         sourceBranch: 'somebranch',
         sha: '5678',
       });
-      expect(git.forcePushToRemote).toHaveBeenCalledWith(
+      expect(git.forcePushToRemote).toHaveBeenCalledExactlyOnceWith(
         'somebranch',
         'origin',
       );
@@ -1910,6 +1911,7 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getIssue(1);
       expect(res).toBeNull();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Issue #1 has been deleted',
       );
@@ -3441,6 +3443,7 @@ describe('modules/platform/github/index', () => {
           milestone: 1,
         });
         expect(pr?.number).toBe(123);
+
         expect(logger.logger.warn).toHaveBeenCalledWith(
           {
             err: {
@@ -3750,9 +3753,11 @@ describe('modules/platform/github/index', () => {
         .reply(200, pr);
 
       await expect(github.updatePr(pr)).toResolve();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Adding labels 'new_label' to #1234`,
       );
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Deleting label old_label from #1234`,
       );
@@ -3765,6 +3770,7 @@ describe('modules/platform/github/index', () => {
           message: 'Failed to add labels',
         });
         await expect(github.addLabels(2, ['fail'])).toResolve();
+
         expect(logger.logger.warn).toHaveBeenCalledWith(
           {
             err: expect.any(Object),
@@ -4012,6 +4018,7 @@ describe('modules/platform/github/index', () => {
       });
 
       expect(mergeResult).toBeTrue();
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Fast-forward merge strategy is not supported by Github. Falling back to merge strategy set for the repository.',
       );
@@ -4030,6 +4037,7 @@ describe('modules/platform/github/index', () => {
       });
 
       expect(mergeResult).toBeTrue();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           options: {
@@ -4312,6 +4320,7 @@ describe('modules/platform/github/index', () => {
         ]);
       await github.initRepo({ repository: 'some/repo' });
       await github.getVulnerabilityAlerts();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { alerts: { 'npm/left-pad': { '0.0.2': '0.0.3' } } },
         'GitHub vulnerability details',

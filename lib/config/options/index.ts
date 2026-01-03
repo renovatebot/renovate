@@ -32,7 +32,7 @@ const options: RenovateOptions[] = [
     default: null,
     globalOnly: true,
     allowedValues: ['asc', 'desc'],
-    supportedPlatforms: ['forgejo', 'gitea'],
+    supportedPlatforms: ['forgejo', 'gitea', 'gitlab'],
   },
   {
     name: 'autodiscoverRepoSort',
@@ -41,8 +41,16 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: null,
     globalOnly: true,
-    allowedValues: ['alpha', 'created', 'updated', 'size', 'id'],
-    supportedPlatforms: ['forgejo', 'gitea'],
+    allowedValues: [
+      'alpha',
+      'created',
+      'created_at',
+      'updated',
+      'updated_at',
+      'size',
+      'id',
+    ],
+    supportedPlatforms: ['forgejo', 'gitea', 'gitlab'],
   },
   {
     name: 'allowedEnv',
@@ -229,6 +237,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'onboardingAutoCloseAge',
+    description:
+      'Maximum number of days after which Renovate will stop trying to onboard the repository, and will close any existing onboarding PRs',
+    type: 'integer',
+    default: null,
+    globalOnly: true,
+    cli: false,
+  },
+  {
     name: 'onboardingCommitMessage',
     description:
       'Change this value to override the default onboarding commit message.',
@@ -237,6 +254,15 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     inheritConfigSupport: true,
     cli: false,
+  },
+  {
+    name: 'configFileNames',
+    description: 'List of filenames where repository config will be stored.',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    globalOnly: true,
+    inheritConfigSupport: true,
   },
   {
     name: 'onboardingConfigFileName',
@@ -585,7 +611,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.18.2',
+    default: 'ghcr.io/containerbase/sidecar:13.25.20',
     globalOnly: true,
   },
   {
@@ -948,6 +974,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'allowShellExecutorForPostUpgradeCommands',
+    description:
+      'Whether to run commands for `postUpgradeTasks` inside a shell. This has security implications, as it means that they can call out to other commands or access shell variables. It is difficult to craft an `allowedCommands` regex to restrict this.',
+    globalOnly: true,
+    type: 'boolean',
+    default: true,
+  },
+  {
     name: 'allowCustomCrateRegistries',
     description: 'Set this to `true` to allow custom crate registries.',
     globalOnly: true,
@@ -1122,7 +1156,7 @@ const options: RenovateOptions[] = [
   {
     name: 'useBaseBranchConfig',
     description:
-      'Whether to read configuration from `baseBranches` instead of only the default branch.',
+      'Whether to read configuration from base branches instead of only the default branch.',
     type: 'string',
     allowedValues: ['merge', 'none'],
     default: 'none',
@@ -1719,6 +1753,16 @@ const options: RenovateOptions[] = [
     advancedUse: true,
   },
   {
+    name: 'maxMajorIncrement',
+    description:
+      'Limit the maximum major version increment allowed. Set to 0 to disable.',
+    stage: 'package',
+    type: 'integer',
+    default: 500,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'respectLatest',
     description: 'Ignore versions newer than npm "latest" version.',
     stage: 'package',
@@ -1965,6 +2009,14 @@ const options: RenovateOptions[] = [
     description: 'Time required before a new release is considered stable.',
     type: 'string',
     default: null,
+  },
+  {
+    name: 'minimumReleaseAgeBehaviour',
+    description:
+      'When set in conjunction with `minimumReleaseAge`, controls whether the `releaseTimestamp` for a dependency update is required.',
+    type: 'string',
+    default: 'timestamp-required',
+    allowedValues: ['timestamp-required', 'timestamp-optional'],
   },
   {
     name: 'abandonmentThreshold',
@@ -2541,6 +2593,7 @@ const options: RenovateOptions[] = [
     allowedValues: [
       'bundlerConservative',
       'composerWithAll',
+      'composerNoMinimalChanges',
       'dotnetWorkloadRestore',
       'gomodMassage',
       'gomodTidy',
@@ -2814,17 +2867,34 @@ const options: RenovateOptions[] = [
       Update: '{{{updateType}}}',
       'Current value': '{{{currentValue}}}',
       'New value': '{{{newValue}}}',
-      Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+      Change: '`{{{displayFrom}}}` → `{{{displayTo}}}`',
       Pending: '{{{displayPending}}}',
       References: '{{{references}}}',
       'Package file': '{{{packageFile}}}',
-      Age: "{{#if newVersion}}[![age](https://developer.mend.io/api/mc/badges/age/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/){{/if}}",
+      Age: "{{#if newVersion}}![age](https://developer.mend.io/api/mc/badges/age/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true){{/if}}",
+
       Adoption:
-        "{{#if newVersion}}[![adoption](https://developer.mend.io/api/mc/badges/adoption/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/){{/if}}",
+        "{{#if newVersion}}![adoption](https://developer.mend.io/api/mc/badges/adoption/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true){{/if}}",
+
       Passing:
-        "{{#if newVersion}}[![passing](https://developer.mend.io/api/mc/badges/compatibility/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/){{/if}}",
+        "{{#if newVersion}}![passing](https://developer.mend.io/api/mc/badges/compatibility/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true){{/if}}",
+
       Confidence:
-        "{{#if newVersion}}[![confidence](https://developer.mend.io/api/mc/badges/confidence/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/){{/if}}",
+        "{{#if newVersion}}![confidence](https://developer.mend.io/api/mc/badges/confidence/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true){{/if}}",
+    },
+  },
+  {
+    name: 'prBodyHeadingDefinitions',
+    description: 'Table header definitions to use in PR tables.',
+    type: 'object',
+    freeChoice: true,
+    mergeable: true,
+    default: {
+      Age: '[Age](https://docs.renovatebot.com/merge-confidence/)',
+      Adoption: '[Adoption](https://docs.renovatebot.com/merge-confidence/)',
+      Passing: '[Passing](https://docs.renovatebot.com/merge-confidence/)',
+      Confidence:
+        '[Confidence](https://docs.renovatebot.com/merge-confidence/)',
     },
   },
   {
@@ -3058,6 +3128,18 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'allowedUnsafeExecutions',
+    description: `List of possibly unsafe executions which are permitted to run. This enables global control over any implicit commands
+        which are run as part of a renovate run. This is similar to \`allowedCommands\` but is specifically used to control executions
+        which run automatically, and are not explicitly added in \`postUpgradeTasks\``,
+    type: 'array',
+    subType: 'string',
+    default: ['gradleWrapper'],
+    allowedValues: ['goGenerate', 'gradleWrapper'],
+    stage: 'repository',
+    globalOnly: true,
+  },
+  {
     name: 'gitNoVerify',
     description:
       'Which Git commands will be run with the `--no-verify` option.',
@@ -3238,6 +3320,14 @@ const options: RenovateOptions[] = [
     name: 'cachePrivatePackages',
     description:
       'Cache private packages in the datasource cache. This is useful for self-hosted setups',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
+    name: 'configValidationError',
+    description:
+      'If enabled, config validation errors will be reported as errors instead of warnings, and Renovate will exit with a non-zero exit code.',
     type: 'boolean',
     default: false,
     globalOnly: true,

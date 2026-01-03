@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 
 export const TokenType = {
@@ -275,8 +275,8 @@ export function parseMavenBasedRange(input: string): MavenBasedRange | null {
     if (!rightVal) {
       rightVal = null;
     }
-    const isVersionLeft = is.string(leftVal) && isVersion(leftVal);
-    const isVersionRight = is.string(rightVal) && isVersion(rightVal);
+    const isVersionLeft = isString(leftVal) && isVersion(leftVal);
+    const isVersionRight = isString(rightVal) && isVersion(rightVal);
     if (
       (leftVal === null || isVersionLeft) &&
       (rightVal === null || isVersionRight)

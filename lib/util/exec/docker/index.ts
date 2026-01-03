@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -24,9 +24,7 @@ export async function prefetchDockerImage(taggedImage: string): Promise<void> {
     );
   } else {
     logger.debug(`Fetching Docker image: ${taggedImage}`);
-    const res = await rawExec(`docker pull ${taggedImage}`, {
-      encoding: 'utf-8',
-    });
+    const res = await rawExec(`docker pull ${taggedImage}`, {});
     const imageDigest = digestRegex.exec(res?.stdout)?.[1] ?? 'unknown';
     logger.debug(
       `Finished fetching Docker image ${taggedImage}@${imageDigest}`,
@@ -40,12 +38,12 @@ export function resetPrefetchedImages(): void {
 }
 
 function expandVolumeOption(x: VolumeOption): VolumesPair | null {
-  if (is.nonEmptyString(x)) {
+  if (isNonEmptyString(x)) {
     return [x, x];
   }
   if (Array.isArray(x) && x.length === 2) {
     const [from, to] = x;
-    if (is.nonEmptyString(from) && is.nonEmptyString(to)) {
+    if (isNonEmptyString(from) && isNonEmptyString(to)) {
       return [from, to];
     }
   }
@@ -69,7 +67,7 @@ function prepareVolumes(volumes: VolumeOption[]): string[] {
 
 function prepareCommands(commands: Opt<string>[]): string[] {
   return commands.filter<string>((command): command is string =>
-    is.string(command),
+    isString(command),
   );
 }
 
@@ -145,16 +143,12 @@ export async function removeDockerContainer(
   const containerName = getContainerName(image, prefix);
   let cmd = `docker ps --filter name=${containerName} -aq`;
   try {
-    const res = await rawExec(cmd, {
-      encoding: 'utf-8',
-    });
+    const res = await rawExec(cmd, {});
     const containerId = res?.stdout?.trim() || '';
     if (containerId.length) {
       logger.debug(`Removing container with ID: ${containerId}`);
       cmd = `docker rm -f ${containerId}`;
-      await rawExec(cmd, {
-        encoding: 'utf-8',
-      });
+      await rawExec(cmd, {});
     } else {
       logger.trace({ image, containerName }, 'No running containers to remove');
     }
@@ -180,9 +174,7 @@ export async function removeDanglingContainers(): Promise<void> {
     );
     const res = await rawExec(
       `docker ps --filter label=${containerLabel} -aq`,
-      {
-        encoding: 'utf-8',
-      },
+      {},
     );
     if (res?.stdout?.trim().length) {
       const containerIds = res.stdout
@@ -191,9 +183,7 @@ export async function removeDanglingContainers(): Promise<void> {
         .map((container) => container.trim())
         .filter(Boolean);
       logger.debug({ containerIds }, 'Removing dangling child containers');
-      await rawExec(`docker rm -f ${containerIds.join(' ')}`, {
-        encoding: 'utf-8',
-      });
+      await rawExec(`docker rm -f ${containerIds.join(' ')}`, {});
     } else {
       logger.debug('No dangling containers to remove');
     }
@@ -255,7 +245,7 @@ export async function generateDockerCommand(
   if (envVars) {
     result.push(
       ...uniq(envVars)
-        .filter(is.string)
+        .filter(isString)
         .map((e) => `-e ${e}`),
     );
   }

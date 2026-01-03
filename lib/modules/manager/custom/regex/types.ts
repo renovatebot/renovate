@@ -23,9 +23,18 @@ export interface RegexManagerConfig extends RegexManagerTemplates {
   autoReplaceStringTemplate?: string;
 }
 
+export interface PackageFileInfo {
+  /** full package file path ie. dir/folder/package.json */
+  packageFile: string;
+  /** extracted package file name ie. package.json */
+  packageFileName: string;
+  content: string;
+  packageFileDir: string;
+}
+
 export interface RecursionParameter {
   content: string;
-  packageFile: string;
+  packageFileInfo: PackageFileInfo;
   config: RegexManagerConfig;
   regexes: RegExp[];
   index: number;

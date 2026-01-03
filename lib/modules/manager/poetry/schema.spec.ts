@@ -1,4 +1,4 @@
-import { PoetrySection, PoetrySources } from './schema';
+import { PoetryPyProject, PoetrySection, PoetrySources } from './schema';
 
 describe('modules/manager/poetry/schema', () => {
   it('parses project version', () => {
@@ -363,6 +363,36 @@ describe('modules/manager/poetry/schema', () => {
           url: 'https://explicit.com/simple/',
         },
       ]);
+    });
+  });
+
+  describe('PoetryPyProject', () => {
+    it('filters out invalid build-system requirements', () => {
+      const input = `
+[tool.poetry]
+name = "test"
+version = "1.0.0"
+
+[build-system]
+requires = ["poetry-core>=2", "@@invalid@@", "wheel"]
+build-backend = "poetry.masonry.api"
+`;
+      const result = PoetryPyProject.parse(input);
+      expect(result.poetryRequirement).toBe('>=2');
+    });
+
+    it('handles build-system without poetry requirement', () => {
+      const input = `
+[tool.poetry]
+name = "test"
+version = "1.0.0"
+
+[build-system]
+requires = ["wheel"]
+build-backend = "poetry.masonry.api"
+`;
+      const result = PoetryPyProject.parse(input);
+      expect(result.poetryRequirement).toBeUndefined();
     });
   });
 });

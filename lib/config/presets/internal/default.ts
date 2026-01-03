@@ -242,9 +242,17 @@ export const presets: Record<string, Preset> = {
       enabled: true,
     },
   },
+  enableVulnerabilityAlertsWithAdditionalLabel: {
+    description:
+      'Raise PR when vulnerability alerts are detected with label `{{arg0}}`, in addition to any existing list of PR labels.',
+    vulnerabilityAlerts: {
+      addLabels: ['{{arg0}}'],
+      enabled: true,
+    },
+  },
   enableVulnerabilityAlertsWithLabel: {
     description:
-      'Raise PR when vulnerability alerts are detected with label `{{arg0}}`.',
+      'Raise PR when vulnerability alerts are detected with label `{{arg0}}`, replacing any existing list of PR labels.',
     vulnerabilityAlerts: {
       enabled: true,
       labels: ['{{arg0}}'],
@@ -413,7 +421,10 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinDigestsDisabled: {
-    description: 'Disable pinning of Docker dependency digests.',
+    description: `Disable pinning of dependency digests.
+
+Note: This preset does not revert the digest pinning set from within the packageRules, when set at root level or via extends).
+See [Docker - Disable digest pinning](./docker.md#disable-digest-pinning) for more details.`,
     pinDigests: false,
   },
   pinOnlyDevDependencies: {

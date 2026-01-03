@@ -15,6 +15,8 @@ The config options below _must_ be configured in the bot/admin config, so in eit
 !!! note
      Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
 
+For information about how to configure Renovate with a `config.js` see the [Using `config.js` documentation](./getting-started/running.md#using-configjs).
+
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
 <!-- prettier-ignore -->
@@ -26,6 +28,8 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 ## allowPlugins
 
 ## allowScripts
+
+## allowShellExecutorForPostUpgradeCommands
 
 ## allowedCommands
 
@@ -109,6 +113,21 @@ module.exports = {
   allowedHeaders: ['custom-header'],
 };
 ```
+
+## allowedUnsafeExecutions
+
+This should be configured to a list of commands which are allowed to be run automatically as part of a dependency upgrade.
+
+This is a separate class of commands that could be executed compared to [`allowedCommands`](#allowedcommands), or package managers that are controlled with [`allowScripts=true`](#allowscripts) and [`ignoreScripts=false`](./configuration-options.md#ignorescripts), where seemingly "safe" commands can result in code execution.
+As there is a security risk of running these commands automatically when a dependency upgrades, self hosted implementations need to explicitly declare which commands are permitted for their installation.
+For more details of where this may be found, see ["Trusting Repository Developers"](./security-and-permissions.md#trusting-repository-developers).
+
+Allowed options:
+
+| Option          | Description                                                                   |
+| --------------- | ----------------------------------------------------------------------------- |
+| `goGenerate`    | Allows the `goGenerate` `postUpdateCommand` to run after a go mod update.     |
+| `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle. |
 
 ## autodiscover
 
@@ -203,6 +222,13 @@ The order method for autodiscover server side repository search.
 ## autodiscoverRepoSort
 
 The sort method for autodiscover server side repository search.
+
+Platform supported sort options:
+
+| Platform       | Supported sort options                      |
+| -------------- | ------------------------------------------- |
+| GitLab         | `created_at`, `updated_at`, `id`            |
+| Forgejo, Gitea | `alpha`, `created`, `updated`, `size`, `id` |
 
 > If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
 
@@ -372,6 +398,7 @@ Other valid cache namespaces are as follows:
 - `changelog-github-release`
 - `changelog-gitlab-notes@v2`
 - `changelog-gitlab-release`
+- `datasource-azure-tags`
 - `datasource-artifactory`
 - `datasource-aws-machine-image`
 - `datasource-aws-rds`
@@ -429,6 +456,7 @@ Other valid cache namespaces are as follows:
 - `datasource-jsr`
 - `datasource-maven:cache-provider`
 - `datasource-maven:postprocess-reject`
+- `datasource-nextcloud`
 - `datasource-node-version`
 - `datasource-npm:cache-provider`
 - `datasource-nuget-v3`
@@ -445,9 +473,10 @@ Other valid cache namespaces are as follows:
 - `datasource-terraform-provider`
 - `datasource-terraform`
 - `datasource-typst:cache-provider`
-- `datasource-typst:releases`
+- `datasource-typst:registry-releases`
 - `datasource-unity3d`
 - `datasource-unity3d-packages`
+- `github-branches-datasource-v1`
 - `github-releases-datasource-v2`
 - `github-tags-datasource-v2`
 - `merge-confidence`
@@ -465,6 +494,28 @@ It has been designed with the intention of being run on one repository, in a one
 It is highly unlikely that you should ever need to add this to your permanent global config.
 
 Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/checked` will rebase the `renovate/chalk-4.x` branch in the `renovate-reproductions/checked` repository.`
+
+## configFileNames
+
+A list of filenames where repository config can be stored.
+
+This list doesn't replace the existing list of default config filenames used internally, instead these filenames are prepended to the list.
+
+Example:
+
+```json
+{
+  "configFileNames": ["myrenovate.json"]
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+    If you want renovate to use a custom filename for the onboarding branch you also need to change the [`onboardingConfigFileName`](#onboardingconfigfilename).
+
+## configValidationError
+
+If enabled, config validation errors will be reported as errors instead of warnings, and Renovate will exit with a non-zero exit code.
 
 ## containerbaseDir
 
@@ -989,6 +1040,12 @@ Only set this to `false` if all three statements are true:
 - You want to run Renovate on every repository the bot has access to
 - You want to skip all onboarding PRs
 
+## onboardingAutoCloseAge
+
+Maximum number of days after which Renovate will stop trying to onboard the repository, and will close any existing onboarding PRs.
+
+By default this option is set to `null`.
+
 ## onboardingBranch
 
 <!-- prettier-ignore -->
@@ -1008,6 +1065,10 @@ If `commitMessagePrefix` or `semanticCommits` values are set then they will be p
 
 If set to one of the valid [config file names](./configuration-options.md), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
 Falls back to `renovate.json` if the name provided is not valid.
+
+<!-- prettier-ignore -->
+!!! note
+    If you want renovate to use a custom filename for the onboarding branch you need add allow that filename using the [`configFileNames`](#configfilenames) option.
 
 ## onboardingNoDeps
 
@@ -1413,7 +1474,7 @@ You can control if Renovate should try to access these services with the `useClo
 ## userAgent
 
 If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
-Otherwise, it will default to `RenovateBot/${renovateVersion} (https://github.com/renovatebot/renovate)`.
+Otherwise, it will default to `Renovate/${renovateVersion} (https://github.com/renovatebot/renovate)`.
 
 ## username
 

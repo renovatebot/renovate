@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { getExpression } from '../../../util/jsonata';
 import { Datasource } from '../datasource';
@@ -20,7 +20,7 @@ export class CustomDatasource extends Datasource {
     getReleasesConfig: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     const config = getCustomConfig(getReleasesConfig);
-    if (is.nullOrUndefined(config)) {
+    if (isNullOrUndefined(config)) {
       return null;
     }
 

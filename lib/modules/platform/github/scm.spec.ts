@@ -26,7 +26,7 @@ describe('modules/platform/github/scm', () => {
       platformCommit: 'disabled',
     });
 
-    expect(git.commitFiles).toHaveBeenCalledWith({
+    expect(git.commitFiles).toHaveBeenCalledExactlyOnceWith({
       ...commitObj,
       platformCommit: 'disabled',
     });
@@ -40,7 +40,7 @@ describe('modules/platform/github/scm', () => {
     });
 
     expect(git.commitFiles).not.toHaveBeenCalled();
-    expect(github.commitFiles).toHaveBeenCalledWith({
+    expect(github.commitFiles).toHaveBeenCalledExactlyOnceWith({
       ...commitObj,
       platformCommit: 'enabled',
     });
@@ -52,7 +52,7 @@ describe('modules/platform/github/scm', () => {
       platformCommit: 'auto',
     });
 
-    expect(git.commitFiles).toHaveBeenCalledWith({
+    expect(git.commitFiles).toHaveBeenCalledExactlyOnceWith({
       ...commitObj,
       platformCommit: 'auto',
     });
@@ -68,7 +68,7 @@ describe('modules/platform/github/scm', () => {
     });
 
     expect(git.commitFiles).not.toHaveBeenCalled();
-    expect(github.commitFiles).toHaveBeenCalledWith({
+    expect(github.commitFiles).toHaveBeenCalledExactlyOnceWith({
       ...commitObj,
       platformCommit: 'auto',
     });

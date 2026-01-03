@@ -1,5 +1,5 @@
 import url from 'node:url';
-import is from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import ini from 'ini';
 import { GlobalConfig } from '../../../config/global';
 import type { PackageRule } from '../../../config/types';
@@ -19,7 +19,7 @@ let packageRules: PackageRule[] = [];
 
 function envReplace(value: any, env = getEnv()): any {
   /* v8 ignore next 3 -- TODO: add test */
-  if (!is.string(value)) {
+  if (!isString(value)) {
     return value;
   }
 
@@ -54,7 +54,7 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
   const hostType = 'npm';
   const hosts: Record<string, HostRule> = {};
   for (const [key, value] of Object.entries(npmrc)) {
-    if (!is.nonEmptyString(value)) {
+    if (!isNonEmptyString(value)) {
       continue;
     }
     const keyParts = key.split(':');
@@ -89,7 +89,7 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
   const matchDatasources = ['npm'];
   const { registry } = npmrc;
   // packageRules order matters, so look for a default registry first
-  if (is.nonEmptyString(registry)) {
+  if (isNonEmptyString(registry)) {
     if (isHttpUrl(registry)) {
       // Default registry
       rules.packageRules?.push({
@@ -102,12 +102,12 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
   }
   // Now look for scoped registries
   for (const [key, value] of Object.entries(npmrc)) {
-    if (!is.nonEmptyString(value)) {
+    if (!isNonEmptyString(value)) {
       continue;
     }
     const keyParts = key.split(':');
     const keyType = keyParts.pop();
-    if (keyType === 'registry' && keyParts.length && is.nonEmptyString(value)) {
+    if (keyType === 'registry' && keyParts.length && isNonEmptyString(value)) {
       const scope = keyParts.join(':');
       if (isHttpUrl(value)) {
         rules.packageRules?.push({
@@ -137,7 +137,7 @@ export function setNpmrc(input?: string): void {
       if (
         !exposeAllEnv &&
         key.endsWith('registry') &&
-        is.string(val) &&
+        isString(val) &&
         val.includes('localhost')
       ) {
         logger.debug(

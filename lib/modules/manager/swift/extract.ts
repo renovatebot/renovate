@@ -1,5 +1,8 @@
+import { detectPlatform } from '../../../util/common';
 import { regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { MatchResult } from './types';
 
@@ -117,20 +120,38 @@ function getMatch(str: string, state: string | null): MatchResult | null {
   return result;
 }
 
-function getDepName(url: string | null): string | null {
+function parseUrl(
+  url: string | null,
+): { depName: string; datasource: string; registryUrls?: string[] } | null {
   // istanbul ignore if
   if (!url) {
     return null;
   }
   try {
-    const { host, pathname } = new URL(url);
-    if (host === 'github.com' || host === 'gitlab.com') {
-      return pathname
+    const parsedUrl = new URL(url);
+    const { host, pathname, protocol } = parsedUrl;
+    const platform = detectPlatform(url);
+    if (platform === 'github' || platform === 'gitlab') {
+      const depName = pathname
         .replace(regEx(/^\//), '')
         .replace(regEx(/\.git$/), '')
         .replace(regEx(/\/$/), '');
+      const datasource =
+        platform === 'github'
+          ? GithubTagsDatasource.id
+          : GitlabTagsDatasource.id;
+
+      const isGitHubPublic = host === 'github.com';
+      const isGitLabPublic = host === 'gitlab.com';
+
+      if (!isGitHubPublic && !isGitLabPublic) {
+        const baseUrl = `${protocol}//${host}`;
+        return { depName, datasource, registryUrls: [baseUrl] };
+      }
+
+      return { depName, datasource };
     }
-    return url;
+    return { depName: url, datasource: GitTagsDatasource.id };
   } catch {
     return null;
   }
@@ -158,13 +179,15 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     if (!packageName) {
       return;
     }
-    const depName = getDepName(packageName);
-    if (depName && currentValue) {
+    const parsedUrl = parseUrl(packageName);
+    if (parsedUrl && currentValue) {
+      const { depName, datasource, registryUrls } = parsedUrl;
+
       const dep: PackageDependency = {
-        datasource: GitTagsDatasource.id,
+        datasource,
         depName,
-        packageName,
         currentValue,
+        ...(registryUrls?.length && { registryUrls }),
       };
 
       deps.push(dep);
