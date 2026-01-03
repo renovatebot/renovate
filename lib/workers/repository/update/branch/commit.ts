@@ -36,7 +36,7 @@ export function commitFilesToBranch(
   const fileLength = [...new Set(updatedFiles.map((file) => file.path))].length;
   logger.debug(`${fileLength} file(s) to commit`);
   // istanbul ignore if
-  if (GlobalConfig.get('dryRun')) {
+  if (GlobalConfig.get('dryRun') && GlobalConfig.get('platform') !== 'local') {
     logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
     return Promise.resolve(null);
   }

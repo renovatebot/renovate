@@ -125,9 +125,11 @@ export async function renovateRepository(
       config.semanticCommits = await detectSemanticCommits();
     }
 
+    const isLocalPlatform = GlobalConfig.get('platform') === 'local';
     if (
-      GlobalConfig.get('dryRun') !== 'lookup' &&
-      GlobalConfig.get('dryRun') !== 'extract'
+      isLocalPlatform ||
+      (GlobalConfig.get('dryRun') !== 'lookup' &&
+        GlobalConfig.get('dryRun') !== 'extract')
     ) {
       await instrument(
         'onboarding',
