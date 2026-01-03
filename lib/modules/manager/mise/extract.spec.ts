@@ -58,6 +58,7 @@ describe('modules/manager/mise/extract', () => {
       buf = "1.27.0"
       ccache = "4.11.3"
       committed = "1.1.7"
+      conan = "2.24.0"
       consul = "1.14.3"
       dotenv-linter = "3.3.0"
       hivemind = "1.1.0"
@@ -134,6 +135,12 @@ describe('modules/manager/mise/extract', () => {
             depName: 'committed',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'crate-ci/committed',
+          },
+          {
+            currentValue: '2.24.0',
+            datasource: 'github-releases',
+            depName: 'conan',
+            packageName: 'conan-io/conan',
           },
           {
             currentValue: '1.14.3',
