@@ -1084,6 +1084,15 @@ export async function getFile(
 ): Promise<string | null> {
   await syncGit();
   try {
+    // For local platform, read directly from filesystem since there's no origin remote
+    if (GlobalConfig.get('platform') === 'local') {
+      const localDir = GlobalConfig.get('localDir')!;
+      const fullPath = upath.join(localDir, filePath);
+      if (await fs.pathExists(fullPath)) {
+        return await fs.readFile(fullPath, 'utf8');
+      }
+      return null;
+    }
     const content = await git.show([
       'origin/' + (branchName ?? config.currentBranch) + ':' + filePath,
     ]);
