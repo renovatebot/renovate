@@ -44,7 +44,9 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
       const toApply = removeMatchers({ ...packageRule });
       if (config.groupSlug && packageRule.groupName && !packageRule.groupSlug) {
         // Need to apply groupSlug otherwise the existing one will take precedence
-        toApply.groupSlug = slugify(packageRule.groupName, {
+        // Compile the template first to handle templated groupNames
+        const compiledGroupName = compile(packageRule.groupName, config);
+        toApply.groupSlug = slugify(compiledGroupName, {
           lower: true,
         });
       }

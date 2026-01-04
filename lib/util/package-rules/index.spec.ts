@@ -1080,6 +1080,26 @@ describe('util/package-rules/index', () => {
     expect(res.groupSlug).toBe('b');
   });
 
+  it('compiles templated groupName before creating groupSlug', async () => {
+    const config: TestConfig = {
+      packageName: 'foo',
+      packageFileDir: 'apps/myapp',
+      groupSlug: 'existing-slug', // Simulates preset like pinDigest setting this
+      packageRules: [
+        {
+          matchPackageNames: ['*'],
+          groupName: '{{packageFileDir}}',
+          // Note: no groupSlug set - this triggers the bug
+        },
+      ],
+    };
+    const res = await applyPackageRules(config);
+    // Should be slugified from compiled template, not raw template string
+    // slugify removes slashes, so 'apps/myapp' becomes 'appsmyapp'
+    expect(res.groupSlug).toBe('appsmyapp');
+    expect(res.groupName).toBe('{{packageFileDir}}'); // groupName stays as template
+  });
+
   it('matches matchSourceUrls with patterns (case-insensitive)', async () => {
     const config: TestConfig = {
       packageRules: [
