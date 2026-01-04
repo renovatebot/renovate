@@ -54,11 +54,14 @@ class ApkVersioningApi extends GenericVersioningApi {
     } = match.groups;
 
     // Build the full version string (without release number and prerelease)
+    // Note: packageFixNum/extra/prereleaseNum use ?? '' defensively but regex always matches (empty string)
+    /* v8 ignore next 3 */
     const packageFixFull = packageFixType
       ? packageFixType + (packageFixNum ?? '')
       : '';
 
     // Build minorPatch string for version comparison
+    /* v8 ignore next 2 */
     const minorPatchStr =
       (minor ? `.${minor}` : '') + (patch ? `.${patch}` : '') + (extra ?? '');
 
@@ -68,6 +71,7 @@ class ApkVersioningApi extends GenericVersioningApi {
     // Extract prerelease identifier if present
     let prerelease: string | undefined;
     if (prereleaseType) {
+      /* v8 ignore next */
       prerelease = prereleaseType.substring(1) + (prereleaseNum ?? '');
     }
 
