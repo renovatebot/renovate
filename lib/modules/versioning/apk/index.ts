@@ -30,78 +30,67 @@ class ApkVersioningApi extends GenericVersioningApi {
    * Based on: https://github.com/chainguard-dev/apko/blob/main/pkg/apk/apk/version.go
    */
   protected _parse(version: string): ApkVersion | null {
-    // Original Go regex pattern from apko
-    // Groups: 1=major, 2=minor.patch, 3=unused, 4=letter, 5=prerelease_type, 6=prerelease_num, 7=package_fix_type, 8=package_fix_num, 9=release_prefix, 10=release_num
-    // Regex from https://github.com/chainguard-dev/apko/blob/main/pkg/apk/apk/version.go
+    // Regex with named capture groups for used values, non-capturing groups for structure
     const versionRegex = regEx(
-      /^v?([0-9]+)((\.[0-9]+)*)([a-z]?)((_alpha|_beta|_pre|_rc)([0-9]*))?((_cvs|_svn|_git|_hg|_p)([0-9]*))?((-r)([0-9]+))?$/,
+      /^v?(?<major>[0-9]+)(?:\.(?<minor>[0-9]+))?(?:\.(?<patch>[0-9]+))?(?<extra>(?:\.[0-9]+)*)(?<letter>[a-z])?(?:(?<prereleaseType>_alpha|_beta|_pre|_rc)(?<prereleaseNum>[0-9]*))?(?:(?<packageFixType>_cvs|_svn|_git|_hg|_p)(?<packageFixNum>[0-9]*))?(?:-r(?<releaseNum>[0-9]+))?$/,
     );
 
-    // /^v?([0-9]+)((\.[0-9]+)*)([a-z]?)((_alpha|_beta|_pre|_rc)([0-9]*))?((_cvs|_svn|_git|_hg|_p)([0-9]*))?((-r)([0-9]+))?$/
-    //  ^1^    ^2^^^^^^^^^^^ ^3^      ^4^      ^5^              ^6^        ^7^              ^8^        ^9^^ ^10^
-    //  |      |             |        |        |                |          |                |          |    |
-    //  |      |             |        |        |                |          |                |          |    └─ Release number (used)
-    //  |      |             |        |        |                |          |                |          └─ Release prefix (unused - needed for ? quantifier)
-    //  |      |             |        |        |                |          |                └─ Package fix number (used)
-    //  |      |             |        |        |                |          └─ Package fix type (used)
-    //  |      |             |        |        |                └─ Prerelease number (used)
-    //  |      |             |        |        └─ Prerelease type (used)
-    //  |      |             |        └─ Letter (used)
-    //  |      |             └─ Inner repetition group (unused - needed for * quantifier)
-    //  |      └─ Minor.patch (used)
-    //  └─ Major (used)
-    //
-    // Note: Groups 3 and 9 are "unused" in destructuring but required for the regex to work:
-    // - Group 3: Inner group needed for the * quantifier to repeat the full \.[0-9]+ pattern
-    // - Group 9: Outer group needed for the ? quantifier to make the entire -r[0-9]+ optional
     const match = versionRegex.exec(version);
-    if (!match) {
+    if (!match?.groups) {
       return null;
     }
 
-    const [
-      ,
+    const {
       major,
-      minorPatch,
-      ,
+      minor,
+      patch,
+      extra,
       letter,
-      ,
       prereleaseType,
       prereleaseNum,
       packageFixType,
       packageFixNum,
-      ,
-      ,
-      ,
       releaseNum,
-    ] = match;
+    } = match.groups;
 
     // Build the full version string (without release number and prerelease)
-    /* v8 ignore next 3 -- defensive fallback for optional regex groups */
     const packageFixFull = packageFixType
-      ? packageFixType + (packageFixNum || '')
+      ? packageFixType + (packageFixNum ?? '')
       : '';
 
+    // Build minorPatch string for version comparison
+    const minorPatchStr =
+      (minor ? `.${minor}` : '') + (patch ? `.${patch}` : '') + (extra ?? '');
+
     // For version comparison, we only include the base version + package fix, not prerelease
-    /* v8 ignore next 2 -- defensive fallback for optional regex groups */
-    const versionStr =
-      major + (minorPatch || '') + (letter || '') + (packageFixFull || '');
+    const versionStr = major + minorPatchStr + (letter ?? '') + packageFixFull;
 
     // Extract prerelease identifier if present
     let prerelease: string | undefined;
     if (prereleaseType) {
-      prerelease = prereleaseType.substring(1) + (prereleaseNum || '');
+      prerelease = prereleaseType.substring(1) + (prereleaseNum ?? '');
     }
 
-    // Extract numeric parts for major/minor/patch
+    // Extract numeric parts for major/minor/patch/extra
     const release = [parseInt(major)];
-    if (minorPatch) {
-      const minorPatchParts = minorPatch.substring(1).split('.').map(Number);
-      release.push(...minorPatchParts);
+    if (minor) {
+      release.push(parseInt(minor));
+    }
+    if (patch) {
+      release.push(parseInt(patch));
+    }
+    // Handle any additional version parts (e.g., 1.2.3.4.5)
+    if (extra) {
+      const extraParts = extra
+        .substring(1)
+        .split('.')
+        .filter(Boolean)
+        .map(Number);
+      release.push(...extraParts);
     }
 
     // Extract release string (just the number part)
-    const releaseString = releaseNum || '';
+    const releaseString = releaseNum ?? '';
 
     return {
       version: versionStr,
