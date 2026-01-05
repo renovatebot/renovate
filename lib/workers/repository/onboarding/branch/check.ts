@@ -1,5 +1,6 @@
 import { isNonEmptyObject } from '@sindresorhus/is';
 import { getConfigFileNames } from '../../../../config/app-strings';
+import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import {
   REPOSITORY_CLOSED_ONBOARDING,
@@ -11,6 +12,7 @@ import { platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
+import { getElapsedDays } from '../../../../util/date';
 import { readLocalFile } from '../../../../util/fs';
 import { getBranchCommit } from '../../../../util/git';
 import { getSemanticCommitPrTitle } from '../common';
@@ -157,12 +159,19 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   }
   logger.debug('Repo is not onboarded and no merged PRs exist');
   if (!config.suppressNotifications!.includes('onboardingClose')) {
-    // ensure PR comment
-    await ensureComment({
-      number: closedOnboardingPr.number,
-      topic: `Renovate is disabled`,
-      content: `Renovate is disabled because there is no Renovate configuration file. To enable Renovate, you can either (a) change this PR's title to get a new onboarding PR, and merge the new onboarding PR, or (b) create a Renovate config file, and commit that file to your base branch.`,
-    });
+    const ageOfOnboardingPr = getElapsedDays(closedOnboardingPr.createdAt!);
+    const onboardingAutoCloseAge = GlobalConfig.get('onboardingAutoCloseAge');
+    if (
+      !onboardingAutoCloseAge ||
+      ageOfOnboardingPr <= onboardingAutoCloseAge
+    ) {
+      // ensure PR comment
+      await ensureComment({
+        number: closedOnboardingPr.number,
+        topic: `Renovate is disabled`,
+        content: `Renovate is disabled because there is no Renovate configuration file. To enable Renovate, you can either (a) change this PR's title to get a new onboarding PR, and merge the new onboarding PR, or (b) create a Renovate config file, and commit that file to your base branch.`,
+      });
+    }
   }
   throw new Error(REPOSITORY_CLOSED_ONBOARDING);
 }

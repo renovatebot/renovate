@@ -125,7 +125,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         cmd: './mvnw wrapper:wrapper',
         options: {
           cwd: '/tmp/github',
-          encoding: 'utf-8',
           env: {
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
@@ -137,6 +136,9 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
@@ -158,7 +160,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         cmd: './mvnw wrapper:wrapper',
         options: {
           cwd: '/tmp/github',
-          encoding: 'utf-8',
           env: {
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
@@ -170,6 +171,9 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
@@ -202,7 +206,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'docker pull ghcr.io/containerbase/sidecar',
-        options: { encoding: 'utf-8' },
+        options: {},
       },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
@@ -218,7 +222,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           './mvnw wrapper:wrapper"',
         options: {
           cwd: '../..',
-          encoding: 'utf-8',
           env: {
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
@@ -230,6 +233,9 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
@@ -291,7 +297,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         cmd: './mvnw wrapper:wrapper',
         options: {
           cwd: '/tmp/github',
-          encoding: 'utf-8',
           env: {
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
@@ -303,6 +308,9 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
@@ -339,7 +347,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         cmd: './mvnw wrapper:wrapper',
         options: {
           cwd: '/tmp/github/some/repo',
-          encoding: 'utf-8',
           env: {
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
@@ -351,6 +358,9 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
@@ -380,7 +390,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         cmd: './mvnw wrapper:wrapper',
         options: {
           cwd: '/tmp/github',
-          encoding: 'utf-8',
           env: {
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
@@ -393,6 +402,9 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
@@ -420,7 +432,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         cmd: './mvnw wrapper:wrapper',
         options: {
           cwd: '/tmp/github',
-          encoding: 'utf-8',
           env: {
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
@@ -432,6 +443,9 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);
@@ -459,7 +473,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         cmd: './mvnw wrapper:wrapper',
         options: {
           cwd: '/tmp/github',
-          encoding: 'utf-8',
           env: {
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
@@ -471,6 +484,9 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
+          stdin: 'pipe',
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       },
     ]);

@@ -107,6 +107,7 @@ describe('workers/repository/dependency-dashboard', () => {
         dependencyDashboardChecks: {
           configMigrationCheckboxState: 'no-checkbox',
         },
+        dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: false,
         dependencyDashboardIssue: 1,
@@ -130,6 +131,7 @@ describe('workers/repository/dependency-dashboard', () => {
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
+        dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: false,
         dependencyDashboardChecks: {
@@ -155,6 +157,7 @@ describe('workers/repository/dependency-dashboard', () => {
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
         checkedBranches: ['branch1', 'branch2'],
+        dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: false,
         dependencyDashboardChecks: {
@@ -188,6 +191,7 @@ describe('workers/repository/dependency-dashboard', () => {
           configMigrationCheckboxState: 'no-checkbox',
         },
         dependencyDashboardIssue: 1,
+        dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardRebaseAllOpen: false,
         dependencyDashboardTitle: 'Dependency Dashboard',
         prCreation: 'approval',
@@ -215,11 +219,40 @@ describe('workers/repository/dependency-dashboard', () => {
           configMigrationCheckboxState: 'no-checkbox',
         },
         dependencyDashboardIssue: 1,
+        dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardRebaseAllOpen: false,
         dependencyDashboardTitle: 'Dependency Dashboard',
         prCreation: 'approval',
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: true,
+      });
+    });
+
+    it('reads dashboard body open all awaiting schedule', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: Fixtures.get('dependency-dashboard-with-10-PR.txt').replace(
+          '- [ ] <!-- create-all-awaiting-schedule-prs -->',
+          '- [x] <!-- create-all-awaiting-schedule-prs -->',
+        ),
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        dependencyDashboardChecks: {
+          branchName3: 'unschedule',
+          branchName4: 'unschedule',
+          configMigrationCheckboxState: 'no-checkbox',
+        },
+        dependencyDashboardIssue: 1,
+        dependencyDashboardAllAwaitingSchedule: true,
+        dependencyDashboardRebaseAllOpen: false,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
       });
     });
 
@@ -273,6 +306,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(conf).toEqual({
         checkedBranches: ['branch1', 'branch2'],
         dependencyDashboard: false,
+        dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: false,
         dependencyDashboardChecks: {

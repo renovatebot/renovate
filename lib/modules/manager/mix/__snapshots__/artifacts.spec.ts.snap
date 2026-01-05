@@ -16,15 +16,12 @@ exports[`modules/manager/mix/artifacts > authenticates to private repositories i
 [
   {
     "cmd": "docker ps --filter name=renovate_sidecar -aq",
-    "options": {
-      "encoding": "utf-8",
-    },
+    "options": {},
   },
   {
     "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/containerbase/sidecar bash -l -c "install-tool erlang 25.0.0.0 && install-tool elixir v1.13.4 && mix hex.organization auth renovate_test --key valid_test_token && mix deps.update private_package other_package"",
     "options": {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": {
         "CONTAINERBASE_CACHE_DIR": "/tmp/cache/containerbase",
         "HOME": "/home/user",
@@ -36,6 +33,9 @@ exports[`modules/manager/mix/artifacts > authenticates to private repositories i
         "PATH": "/tmp/path",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -48,7 +48,6 @@ exports[`modules/manager/mix/artifacts > returns null if unchanged 1`] = `
     "cmd": "mix deps.update plug",
     "options": {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -59,6 +58,9 @@ exports[`modules/manager/mix/artifacts > returns null if unchanged 1`] = `
         "PATH": "/tmp/path",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },
@@ -69,21 +71,16 @@ exports[`modules/manager/mix/artifacts > returns updated mix.lock 1`] = `
 [
   {
     "cmd": "docker pull ghcr.io/containerbase/sidecar",
-    "options": {
-      "encoding": "utf-8",
-    },
+    "options": {},
   },
   {
     "cmd": "docker ps --filter name=renovate_sidecar -aq",
-    "options": {
-      "encoding": "utf-8",
-    },
+    "options": {},
   },
   {
     "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/containerbase/sidecar bash -l -c "install-tool erlang 25.0.0.0 && install-tool elixir v1.13.4 && mix deps.update plug"",
     "options": {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": {
         "CONTAINERBASE_CACHE_DIR": "/tmp/cache/containerbase",
         "HOME": "/home/user",
@@ -95,6 +92,9 @@ exports[`modules/manager/mix/artifacts > returns updated mix.lock 1`] = `
         "PATH": "/tmp/path",
       },
       "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
       "timeout": 900000,
     },
   },

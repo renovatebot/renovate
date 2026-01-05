@@ -1,4 +1,4 @@
-import type { SpawnOptions as ChildProcessSpawnOptions } from 'node:child_process';
+import type { Options as ExecaOptions } from 'execa';
 
 export interface ToolConstraint {
   toolName: string;
@@ -9,7 +9,6 @@ export interface ToolConfig {
   datasource: string;
   extractVersion?: string;
   packageName: string;
-  hash?: boolean;
   versioning: string;
 }
 
@@ -30,12 +29,7 @@ export interface OutputListeners {
   stderr?: DataListener[];
 }
 
-export interface RawExecOptions extends ChildProcessSpawnOptions {
-  // TODO: to be removed in #16655
-  /**
-   * @deprecated renovate uses utf8, encoding property is ignored.
-   */
-  encoding: string;
+export interface RawExecOptions extends ExecaOptions {
   maxBuffer?: number | undefined;
   cwd?: string;
   outputListeners?: OutputListeners;
@@ -60,4 +54,5 @@ export interface ExecOptions {
   // Following are pass-through to child process
   maxBuffer?: number | undefined;
   timeout?: number | undefined;
+  shell?: boolean | string | undefined;
 }
