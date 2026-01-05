@@ -79,6 +79,40 @@ describe('modules/manager/bun/artifacts', () => {
         ]);
       });
 
+      it('updates lock file when workspace package is updated', async () => {
+        updateArtifact.packageFileName = 'packages/workspace-a/package.json';
+        updateArtifact.updatedDeps = [
+          { manager: 'bun', lockFiles: ['bun.lockb'] },
+        ];
+        const oldLock = Buffer.from('old');
+        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        fs.readFile.mockResolvedValueOnce('# dummy' as never);
+        const newLock = Buffer.from('new');
+        fs.readFile.mockResolvedValueOnce(newLock as never);
+
+        const result = await updateArtifacts(updateArtifact);
+
+        expect(result).toEqual([
+          {
+            file: {
+              path: 'bun.lockb',
+              type: 'addition',
+              contents: newLock,
+            },
+          },
+        ]);
+
+        expect(exec).toHaveBeenCalledWith('bun install --ignore-scripts', {
+          cwdFile: 'bun.lockb',
+          docker: {},
+          toolConstraints: [
+            {
+              toolName: 'bun',
+            },
+          ],
+        });
+      });
+
       it('supports lockFileMaintenance', async () => {
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lockb'] },
@@ -349,7 +383,7 @@ describe('modules/manager/bun/artifacts', () => {
           await updateArtifacts(updateArtifact);
 
           expect(exec).toHaveBeenCalledExactlyOnceWith(testCase.expectedCmd, {
-            cwdFile: '',
+            cwdFile: lockFile,
             docker: {},
             toolConstraints: [
               {

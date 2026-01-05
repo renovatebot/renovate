@@ -66,7 +66,7 @@ export async function updateArtifacts(
     }
 
     const execOptions: ExecOptions = {
-      cwdFile: packageFileName,
+      cwdFile: lockFileName,
       docker: {},
       toolConstraints: [
         {
