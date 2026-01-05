@@ -4,7 +4,6 @@ import { partial } from '~test/util';
 
 const changelogSource = new GitHubChangeLogSource();
 const upgrade = partial<BranchConfig>({
-  endpoint: 'https://api.github.com/',
   packageName: 'renovate',
   sourceUrl: 'https://github.com/renovatebot/renovate',
 });

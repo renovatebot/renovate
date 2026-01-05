@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { isNonEmptyArray } from '@sindresorhus/is';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
@@ -108,7 +107,7 @@ export async function getUpdatedPackageFiles(
   const lockFileMaintenanceFiles: string[] = [];
   let firstUpdate = true;
   for (const upgrade of config.upgrades) {
-    const manager = upgrade.manager!;
+    const manager = upgrade.manager;
     const packageFile = upgrade.packageFile!;
     const depName = upgrade.depName!;
     // TODO: fix types, can be undefined (#22198)
@@ -454,7 +453,8 @@ function patchConfigForArtifactsUpdate(
   packageFileName: string,
 ): UpdateArtifactsConfig {
   // drop any lockFiles that happen to be defined on the branch config
-  const { lockFiles, ...updatedConfig } = config;
+  const updatedConfig = { ...config };
+  delete updatedConfig.lockFiles;
   if (isNonEmptyArray(updatedConfig.packageFiles?.[manager])) {
     const managerPackageFiles: PackageFile[] =
       updatedConfig.packageFiles?.[manager];

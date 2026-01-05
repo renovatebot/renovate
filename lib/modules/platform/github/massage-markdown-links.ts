@@ -69,8 +69,8 @@ export function massageMarkdownLinks(content: string): string {
       return leftPart + replaceTo + rightPart;
     }, content);
     return result.trimEnd() + rightSpaces;
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.warn({ err }, `Unable to massage markdown text`);
     return content;
-  } /* v8 ignore stop */
+  }
 }

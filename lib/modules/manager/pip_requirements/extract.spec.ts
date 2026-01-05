@@ -181,6 +181,20 @@ some-package==0.3.1`;
       expect(res?.deps).toHaveLength(3);
     });
 
+    it('should handle package with extras and no version specifiers', () => {
+      const res = extractPackageFile('Django[argon2]');
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: undefined,
+            datasource: 'pypi',
+            depName: 'Django',
+            packageName: 'django',
+          },
+        ],
+      });
+    });
+
     it('should handle dependency and ignore env markers', () => {
       const res = extractPackageFile(requirementsWithEnvMarkers);
       expect(res).toEqual({

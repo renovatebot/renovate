@@ -228,11 +228,14 @@ export async function resolveConfigPresets(
   delete config.extends;
   delete config.ignorePresets;
   logger.trace({ config }, `Post-merge resolve config`);
-  for (const [key, val] of Object.entries(config)) {
+  for (const [key, val] of Object.entries(config) as [
+    keyof AllConfig,
+    unknown,
+  ][]) {
     const ignoredKeys = ['content', 'onboardingConfig'];
     if (isArray(val)) {
       // Resolve nested objects inside arrays
-      config[key] = [];
+      config[key] = [] as never; // type can't be narrowed
       for (const element of val) {
         if (isObject(element)) {
           (config[key] as RenovateConfig[]).push(
@@ -250,12 +253,12 @@ export async function resolveConfigPresets(
     } else if (isObject(val) && !ignoredKeys.includes(key)) {
       // Resolve nested objects
       logger.trace(`Resolving object "${key}"`);
-      config[key] = await resolveConfigPresets(
+      config[key] = (await resolveConfigPresets(
         val as RenovateConfig,
         baseConfig,
         ignorePresets,
         existingPresets,
-      );
+      )) as never; // type can't be narrowed
     }
   }
   logger.trace({ config: inputConfig }, 'Input config');

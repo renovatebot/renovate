@@ -129,6 +129,13 @@ export async function postUpgradeCommandsExecutor(
             logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
 
             const execOpts: ExecOptions = {
+              // WARNING to self-hosted administrators: always run post-upgrade commands with `shell` mode on, which has the risk of arbitrary environment variable access or additional command execution
+              // It is very likely this will be susceptible to these risks, even if you allowlist (via `allowedCommands`), as there may be special characters included in the given commands that can be leveraged here
+              shell: GlobalConfig.get(
+                'allowShellExecutorForPostUpgradeCommands',
+                true,
+              ),
+
               cwd: isNonEmptyString(workingDir)
                 ? workingDir
                 : GlobalConfig.get('localDir'),
@@ -198,6 +205,7 @@ export async function postUpgradeCommandsExecutor(
         (ua) => ua.type === 'deletion',
       );
       for (const previouslyDeletedFile of previouslyDeletedFiles) {
+        /* v8 ignore if -- TODO: needs test */
         if (!changedFiles.includes(previouslyDeletedFile.path)) {
           logger.debug(
             { file: previouslyDeletedFile.path },
@@ -318,7 +326,6 @@ export default async function executePostUpgradeCommands(
         config.postUpgradeTasks!.executionMode === 'branch'
           ? config.postUpgradeTasks
           : undefined,
-      fileFilters: config.fileFilters,
     },
   ];
 

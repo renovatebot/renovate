@@ -144,6 +144,7 @@ describe('modules/platform/gerrit/utils', () => {
               'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
           }),
         },
+        created: '2025-04-14 16:33:37.000000000',
       });
       expect(utils.mapGerritChangeToPr(change)).toEqual({
         number: 123456,
@@ -156,6 +157,7 @@ describe('modules/platform/gerrit/utils', () => {
         bodyStruct: {
           hash: hashBody(''),
         },
+        createdAt: '2025-04-14T16:33:37.000000000',
       });
     });
 
@@ -172,6 +174,7 @@ describe('modules/platform/gerrit/utils', () => {
               'Some change\n\nRenovate-Broke: renovate/dependency-1.x\nChange-Id: ...',
           }),
         },
+        created: '2025-04-14 16:33:37.000000000',
       });
       expect(utils.mapGerritChangeToPr(change)).toBeNull();
     });
@@ -189,6 +192,7 @@ describe('modules/platform/gerrit/utils', () => {
               'Some change\n\nRenovate-Broke: renovate/dependency-1.x\nChange-Id: ...',
           }),
         },
+        created: '2025-04-14 16:33:37.000000000',
       });
       expect(
         utils.mapGerritChangeToPr(change, {
@@ -205,6 +209,7 @@ describe('modules/platform/gerrit/utils', () => {
         bodyStruct: {
           hash: hashBody(''),
         },
+        createdAt: '2025-04-14T16:33:37.000000000',
       });
     });
 
@@ -221,6 +226,7 @@ describe('modules/platform/gerrit/utils', () => {
               'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
           }),
         },
+        created: '2025-04-14 16:33:37.000000000',
       });
       expect(
         utils.mapGerritChangeToPr(change, {
@@ -237,6 +243,7 @@ describe('modules/platform/gerrit/utils', () => {
         bodyStruct: {
           hash: hashBody('PR Body'),
         },
+        createdAt: '2025-04-14T16:33:37.000000000',
       });
     });
   });

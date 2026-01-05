@@ -282,6 +282,40 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         expect(res.pendingReleases).toHaveLength(0);
         expect(res.release?.version).toBe('1.0.4');
       });
+
+      it('returns latest release, if minimumReleaseAgeBehaviour=timestamp-required but minimumReleaseAge=0 days', async () => {
+        const releasesWithMissingReleaseTimestamp: Release[] = [
+          {
+            version: '1.0.1',
+            releaseTimestamp: '2021-01-01T00:00:01.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.2',
+            releaseTimestamp: '2021-01-03T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.3',
+            releaseTimestamp: '2021-01-05T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.4',
+            // no releaseTimestamp
+          },
+        ];
+
+        config.internalChecksFilter = 'strict';
+        config.minimumReleaseAge = '0 days';
+        config.minimumReleaseAgeBehaviour = 'timestamp-required';
+        const res = await filterInternalChecks(
+          config,
+          versioning,
+          'patch',
+          releasesWithMissingReleaseTimestamp,
+        );
+        expect(res.pendingChecks).toBeFalse();
+        expect(res.pendingReleases).toHaveLength(0);
+        expect(res.release?.version).toBe('1.0.4');
+      });
     });
 
     it('picks up minimumConfidence settings from updateType', async () => {
