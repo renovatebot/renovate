@@ -88,7 +88,10 @@ export async function initPlatform({
     if (env.RENOVATE_X_PLATFORM_VERSION) {
       gerritVersion = env.RENOVATE_X_PLATFORM_VERSION;
     } else {
-      gerritVersion = await client.getGerritVersion();
+      gerritVersion = await client.getGerritVersion({
+        username,
+        password,
+      });
     }
   } catch (err) {
     logger.debug(

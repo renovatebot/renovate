@@ -738,7 +738,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     const config = util.partial<PostUpdateConfig<NpmManagerData>>({});
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe(plocktest1YarnLockV1);
-    const options = { encoding: 'utf-8', cwd: 'some-dir' };
+    const options = { cwd: 'some-dir' };
     expect(execSnapshots).toMatchObject([
       {
         cmd: `sed -i 's/ steps,/ steps.slice(0,1),/' some-dir/.yarn/cli.js || true`,
@@ -777,7 +777,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     const config = util.partial<PostUpdateConfig<NpmManagerData>>({});
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe(plocktest1YarnLockV1);
-    const options = { encoding: 'utf-8' };
+    const options = {};
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull ghcr.io/containerbase/sidecar', options },
       {

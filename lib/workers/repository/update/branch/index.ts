@@ -476,7 +476,7 @@ export async function processBranch(
       }
 
       if (depNamesWithoutReleaseTimestamp['timestamp-required'].length) {
-        logger.debug(
+        logger.once.debug(
           { updates: depNamesWithoutReleaseTimestamp['timestamp-required'] },
           `Marking ${depNamesWithoutReleaseTimestamp['timestamp-required'].length} release(s) as pending, as they do not have a releaseTimestamp and we're running with minimumReleaseAgeBehaviour=timestamp-required`,
         );
@@ -485,7 +485,7 @@ export async function processBranch(
         logger.once.warn(
           "Some upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
         );
-        logger.debug(
+        logger.once.debug(
           { updates: depNamesWithoutReleaseTimestamp['timestamp-optional'] },
           `${depNamesWithoutReleaseTimestamp['timestamp-optional'].length} upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding`,
         );
@@ -514,6 +514,9 @@ export async function processBranch(
       !!config.rebaseRequested;
     const userApproveAllPendingPR = !!config.dependencyDashboardAllPending;
     const userOpenAllRateLimtedPR = !!config.dependencyDashboardAllRateLimited;
+    const userOpenAllSchedulePendingPR =
+      !!config.dependencyDashboardAllAwaitingSchedule;
+
     if (forceRebase) {
       logger.debug('Force rebase because branch needs updating');
       config.reuseExistingBranch = false;
@@ -531,6 +534,10 @@ export async function processBranch(
     } else if (userOpenAllRateLimtedPR) {
       logger.debug(
         'A user manually approved all rate-limited PRs via the Dependency Dashboard.',
+      );
+    } else if (userOpenAllSchedulePendingPR) {
+      logger.debug(
+        'A user manually requested all awaiting schedule PRs via the Dependency Dashboard.',
       );
     } else if (
       branchExists &&

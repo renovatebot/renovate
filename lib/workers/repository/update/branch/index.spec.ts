@@ -2199,10 +2199,13 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
-      expect(exec.exec).toHaveBeenCalledExactlyOnceWith('echo semver', {
-        cwd: '/localDir',
-        extraEnv: {},
-      });
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'echo semver',
+        expect.objectContaining({
+          cwd: '/localDir',
+          extraEnv: {},
+        }),
+      );
     });
 
     it('executes post-upgrade tasks with multiple dependecy in one branch', async () => {
@@ -2327,14 +2330,22 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
-      expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo some-dep-name-1', {
-        cwd: '/localDir',
-        extraEnv: {},
-      });
-      expect(exec.exec).toHaveBeenNthCalledWith(2, 'echo some-dep-name-2', {
-        cwd: '/localDir',
-        extraEnv: {},
-      });
+      expect(exec.exec).toHaveBeenNthCalledWith(
+        1,
+        'echo some-dep-name-1',
+        expect.objectContaining({
+          cwd: '/localDir',
+          extraEnv: {},
+        }),
+      );
+      expect(exec.exec).toHaveBeenNthCalledWith(
+        2,
+        'echo some-dep-name-2',
+        expect.objectContaining({
+          cwd: '/localDir',
+          extraEnv: {},
+        }),
+      );
       expect(exec.exec).toHaveBeenCalledTimes(2);
       const calledWithConfig = commit.commitFilesToBranch.mock.calls[0][0];
       const updatedArtifacts = calledWithConfig.updatedArtifacts;
@@ -2476,10 +2487,14 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
-      expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
-        cwd: '/localDir',
-        extraEnv: {},
-      });
+      expect(exec.exec).toHaveBeenNthCalledWith(
+        1,
+        'echo hardcoded-string',
+        expect.objectContaining({
+          cwd: '/localDir',
+          extraEnv: {},
+        }),
+      );
       expect(exec.exec).toHaveBeenCalledTimes(1);
       expect(
         findFileContent(
@@ -2681,10 +2696,14 @@ describe('workers/repository/update/branch/index', () => {
           result: 'done',
           commitSha: null,
         });
-        expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
-          cwd: '/localDir',
-          extraEnv: {},
-        });
+        expect(exec.exec).toHaveBeenNthCalledWith(
+          1,
+          'echo hardcoded-string',
+          expect.objectContaining({
+            cwd: '/localDir',
+            extraEnv: {},
+          }),
+        );
         expect(exec.exec).toHaveBeenCalledTimes(1);
         expect(
           findFileContent(
@@ -2948,6 +2967,43 @@ describe('workers/repository/update/branch/index', () => {
         await branchWorker.processBranch({
           ...config,
           dependencyDashboardAllRateLimited: true,
+        }),
+      ).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        commitSha: '123test',
+        prNo: 5,
+        result: 'done',
+      });
+    });
+
+    it('Dependency Dashboard open all awaiting schedule', async () => {
+      vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+          artifactErrors: [{}],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'schedule!',
+          state: 'open',
+          bodyStruct: {
+            hash: hashBody(`- [x] <!-- create-all-awaiting-schedule-prs -->`),
+            rebaseRequested: false,
+          },
+        }),
+      );
+      scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha); //TODO:not needed?
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          dependencyDashboardAllAwaitingSchedule: true,
         }),
       ).toEqual({
         branchExists: true,
