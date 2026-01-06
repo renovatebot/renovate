@@ -1,7 +1,8 @@
-import { isString } from '@sindresorhus/is';
+import { isBoolean, isString } from '@sindresorhus/is';
+import { join } from 'shlex';
 import { getCustomEnv, getUserEnv } from '../env';
 import { getChildProcessEnv } from './env';
-import type { ExecOptions } from './types';
+import type { CommandWithOptions, ExecOptions } from './types';
 
 export function getChildEnv({
   extraEnv,
@@ -34,4 +35,45 @@ export function getChildEnv({
   }
 
   return result;
+}
+
+export function isCommandWithOptions(cmd: unknown): cmd is CommandWithOptions {
+  if (!(typeof cmd === 'object' && cmd !== null && 'command' in cmd)) {
+    return false;
+  }
+
+  if (!Array.isArray(cmd.command)) {
+    return false;
+  }
+
+  if (!cmd.command.length) {
+    return false;
+  }
+
+  if (cmd.command.some((v) => !isString(v))) {
+    return false;
+  }
+
+  if ('ignoreFailure' in cmd && !isBoolean(cmd.ignoreFailure)) {
+    return false;
+  }
+
+  return true;
+}
+
+export function asRawCommand(cmd: string | CommandWithOptions): string {
+  if (isCommandWithOptions(cmd)) {
+    return join(cmd.command);
+  }
+
+  return cmd;
+}
+
+export function asRawCommands(
+  cmds: string | (string | CommandWithOptions)[],
+): string[] {
+  if (isString(cmds)) {
+    return [cmds];
+  }
+  return cmds.map((cmd) => asRawCommand(cmd));
 }

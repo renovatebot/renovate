@@ -2,14 +2,20 @@ import type { ChildProcess } from 'node:child_process';
 import type { Readable } from 'node:stream';
 import { isNullOrUndefined } from '@sindresorhus/is';
 import { execa } from 'execa';
-import { split } from 'shlex';
+import { join, split } from 'shlex';
 import { instrument } from '../../instrumentation';
+import { logger } from '../../logger';
 import { getEnv } from '../env';
 import { sanitize } from '../sanitize';
 import type { ExecErrorData } from './exec-error';
 import { ExecError } from './exec-error';
-import type { DataListener, ExecResult, RawExecOptions } from './types';
-
+import type {
+  CommandWithOptions,
+  DataListener,
+  ExecResult,
+  RawExecOptions,
+} from './types';
+import { asRawCommand, isCommandWithOptions } from './utils';
 // https://man7.org/linux/man-pages/man7/signal.7.html#NAME
 // Non TERM/CORE signals
 // The following is step 3. in https://github.com/renovatebot/renovate/issues/16197#issuecomment-1171423890
@@ -81,11 +87,20 @@ function registerDataListeners(
 }
 
 export function exec(
-  theCmd: string,
+  commandArgument: string | CommandWithOptions,
   opts: RawExecOptions,
 ): Promise<ExecResult> {
+  let theCmd = commandArgument;
+  let ignoreFailure = false;
+  if (isCommandWithOptions(commandArgument)) {
+    theCmd = join(commandArgument.command);
+    if (commandArgument.ignoreFailure !== undefined) {
+      ignoreFailure = commandArgument.ignoreFailure;
+    }
+  }
+
   return new Promise((resolve, reject) => {
-    let cmd = theCmd;
+    let cmd = asRawCommand(theCmd);
     let args: string[] = [];
     const maxBuffer = opts.maxBuffer ?? 10 * 1024 * 1024; // Set default max buffer size to 10MB
 
@@ -139,15 +154,34 @@ export function exec(
         return;
       }
       if (code !== 0) {
-        reject(
-          new ExecError(
-            `Command failed: ${cp.spawnargs.join(' ')}\n${stringify(stderr)}`,
-            {
-              ...rejectInfo(),
-              exitCode: code,
-            },
-          ),
+        if (ignoreFailure === undefined || ignoreFailure === false) {
+          reject(
+            new ExecError(
+              `Command failed: ${cp.spawnargs.join(' ')}\n${stringify(stderr)}`,
+              {
+                ...rejectInfo(),
+                exitCode: code,
+              },
+            ),
+          );
+          return;
+        }
+
+        logger.once.debug(
+          {
+            command: cp.spawnargs.join(' '),
+            stdout: stringify(stdout),
+            stderr: stringify(stderr),
+            exitCode: code,
+          },
+          `Ignoring failure to execute comamnd \`${cp.spawnargs.join(' ')}\`, as ignoreFailure=true is set`,
         );
+
+        resolve({
+          stderr: stringify(stderr),
+          stdout: stringify(stdout),
+          exitCode: code,
+        });
         return;
       }
       resolve({
@@ -193,7 +227,10 @@ function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
 }
 
 export const rawExec: (
-  cmd: string,
+  cmd: string | CommandWithOptions,
   opts: RawExecOptions,
-) => Promise<ExecResult> = (cmd: string, opts: RawExecOptions) =>
-  instrument(`rawExec: ${sanitize(cmd)}`, () => exec(cmd, opts));
+) => Promise<ExecResult> = (
+  cmd: string | CommandWithOptions,
+  opts: RawExecOptions,
+) =>
+  instrument(`rawExec: ${sanitize(asRawCommand(cmd))}`, () => exec(cmd, opts));

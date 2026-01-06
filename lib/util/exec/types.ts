@@ -38,6 +38,13 @@ export interface RawExecOptions extends ExecaOptions {
 export interface ExecResult {
   stdout: string;
   stderr: string;
+  /**
+   * The process' exit code in the case of a failure.
+   *
+   * This is only set if using `ignoreFailure` when executing a command
+   *
+   */
+  exitCode?: number;
 }
 
 export type ExtraEnv<T = unknown> = Record<string, T>;
@@ -55,4 +62,14 @@ export interface ExecOptions {
   maxBuffer?: number | undefined;
   timeout?: number | undefined;
   shell?: boolean | string | undefined;
+}
+
+/**
+ * configuration that can be configured on a per-command basis, that doesn't make sense to be on the `RawExecOptions`
+ */
+export interface CommandWithOptions {
+  command: string[];
+
+  /** do not throw errors when a command fails, but do log that an error occurred */
+  ignoreFailure?: boolean;
 }
