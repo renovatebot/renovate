@@ -160,7 +160,10 @@ export async function updateArtifacts({
       docker: {},
     };
 
-    const commands: string[] = [];
+    const commands: {
+      command: string;
+      shell?: boolean;
+    }[] = [];
 
     // Determine whether install is required before update
     if (requireComposerDependencyInstallation(lockfile)) {
@@ -168,9 +171,9 @@ export async function updateArtifacts({
       const preArgs =
         'install' + getComposerArguments(config, composerToolConstraint);
       logger.trace({ preCmd, preArgs }, 'composer pre-update command');
-      commands.push('git stash -- composer.json');
-      commands.push(`${preCmd} ${preArgs}`);
-      commands.push('git stash pop || true');
+      commands.push({ command: 'git stash -- composer.json' });
+      commands.push({ command: `${preCmd} ${preArgs}` });
+      commands.push({ command: 'git stash pop || true', shell: true });
     }
 
     if (config.isLockFileMaintenance) {
@@ -204,7 +207,7 @@ export async function updateArtifacts({
     }
     args += getComposerUpdateArguments(config, composerToolConstraint);
     logger.trace({ cmd, args }, 'composer command');
-    commands.push(`${cmd} ${args}`);
+    commands.push({ command: `${cmd} ${args}` });
 
     await exec(commands, execOptions);
     const status = await getRepoStatus();

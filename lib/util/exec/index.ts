@@ -13,10 +13,12 @@ import {
 } from './docker';
 import { getHermitEnvs, isHermit } from './hermit';
 import type {
+  Commands,
   DockerOptions,
   ExecOptions,
   ExecResult,
   ExtraEnv,
+  MaybeShellCommand,
   Opt,
   RawExecOptions,
 } from './types';
@@ -73,7 +75,7 @@ interface RawExecArguments {
 }
 
 async function prepareRawExec(
-  cmd: string | string[],
+  cmd: Commands,
   opts: ExecOptions,
 ): Promise<RawExecArguments> {
   const { docker } = opts;
@@ -90,7 +92,7 @@ async function prepareRawExec(
 
   let rawOptions = getRawExecOptions(opts);
 
-  let rawCommands = typeof cmd === 'string' ? [cmd] : cmd;
+  let rawCommands = asMaybeShellCommands(cmd);
 
   if (isDocker(docker)) {
     logger.debug({ image: sideCarImage }, 'Using docker to execute');
@@ -151,7 +153,7 @@ async function prepareRawExec(
 }
 
 export async function exec(
-  cmd: string | string[],
+  cmd: Commands,
   opts: ExecOptions = {},
 ): Promise<ExecResult> {
   const { docker } = opts;
@@ -204,4 +206,38 @@ export async function exec(
   }
 
   return res;
+}
+
+function isMaybeShellCommand(cmd: any): cmd is MaybeShellCommand[] {
+  if (!Array.isArray(cmd)) {
+    return false;
+  }
+
+  return cmd.every((item) => {
+    if (!(typeof item === 'object' && item !== null && 'command' in item)) {
+      return false;
+    }
+
+    if ('shell' in item && typeof item.shell !== 'boolean') {
+      return false;
+    }
+
+    return true;
+  });
+}
+
+export function asMaybeShellCommands(
+  cmd: string | string[] | MaybeShellCommand[],
+): MaybeShellCommand[] {
+  if (isMaybeShellCommand(cmd)) {
+    return cmd;
+  }
+
+  const cmds = typeof cmd === 'string' ? [cmd] : cmd;
+  return cmds.map((cmd: string) => {
+    return {
+      command: cmd,
+      shell: false,
+    } as MaybeShellCommand;
+  });
 }

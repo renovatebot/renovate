@@ -56,3 +56,17 @@ export interface ExecOptions {
   timeout?: number | undefined;
   shell?: boolean | string | undefined;
 }
+
+/** A command or many commands, with the option of specifying whether a shell is required to execute any command(s) */
+export type Commands = string | string[] | MaybeShellCommand[];
+
+/** A command that may require executing as a shell */
+export interface MaybeShellCommand {
+  command: string;
+  /**
+   * Whether to execute this within a shell.
+   *
+   * WARNING be careful if this is set when `command` contains user-controlled data
+   */
+  shell?: boolean;
+}

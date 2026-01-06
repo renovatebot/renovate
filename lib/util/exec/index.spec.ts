@@ -6,7 +6,7 @@ import { setCustomEnv } from '../env';
 import * as dockerModule from './docker';
 import { getHermitEnvs } from './hermit';
 import type { ExecOptions, RawExecOptions, VolumeOption } from './types';
-import { exec } from '.';
+import { asMaybeShellCommands, exec } from '.';
 import { exec as cpExec, envMock } from '~test/exec-util';
 
 const getHermitEnvsMock = vi.mocked(getHermitEnvs);
@@ -994,5 +994,102 @@ describe('util/exec/index', () => {
     const promise = exec('foobar', {});
     await expect(promise).rejects.toThrow(TEMPORARY_ERROR);
     expect(removeDockerContainerSpy).toHaveBeenCalledTimes(0);
+  });
+
+  describe('asMaybeShellCommands', () => {
+    describe('with a single command', () => {
+      it('returns an array of 1 `MaybeShellCommand`s', () => {
+        const res = asMaybeShellCommands('go mod tidy');
+
+        expect(res).toBeArrayOfSize(1);
+        expect(res).toMatchInlineSnapshot([
+          {
+            command: 'go mod tidy',
+          },
+        ]);
+      });
+
+      it('defaults shell=false', () => {
+        const res = asMaybeShellCommands('go mod tidy');
+
+        expect(res).toBeArrayOfSize(1);
+        expect(res).toMatchInlineSnapshot([
+          {
+            shell: false,
+          },
+        ]);
+      });
+    });
+
+    describe('with many commands', () => {
+      it('returns an array of many `MaybeShellCommand`s', () => {
+        const res = asMaybeShellCommands([
+          'go mod tidy',
+          'make tidy',
+          'make generate',
+        ]);
+
+        expect(res).toBeArrayOfSize(3);
+        expect(res).toMatchInlineSnapshot([
+          {
+            command: 'go mod tidy',
+          },
+          {
+            command: 'make tidy',
+          },
+          {
+            command: 'make generate',
+          },
+        ]);
+      });
+
+      it('defaults shell=false', () => {
+        const res = asMaybeShellCommands([
+          'go mod tidy',
+          'make tidy',
+          'make generate',
+        ]);
+
+        expect(res).toBeArrayOfSize(3);
+        expect(res).toMatchInlineSnapshot([
+          {
+            shell: false,
+          },
+          {
+            shell: false,
+          },
+          {
+            shell: false,
+          },
+        ]);
+      });
+    });
+
+    describe('with MaybeShellCommands', () => {
+      it("returns what it's given", () => {
+        const res = asMaybeShellCommands([
+          {
+            command: 'ls',
+            shell: true,
+          },
+          {
+            command: 'go mod tidy',
+          },
+        ]);
+
+        expect(res).toBeArrayOfSize(2);
+        expect(res).toMatchInlineSnapshot([
+          {
+            command: 'ls',
+            shell: true,
+          },
+          {
+            command: 'go mod tidy',
+          },
+        ]);
+
+        expect(res[1].shell).not.toBeDefined();
+      });
+    });
   });
 });
