@@ -787,6 +787,75 @@ describe('util/exec/index', () => {
     ],
 
     [
+      'Shell is not set if not specified',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {},
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
+          },
+        ],
+      },
+    ],
+
+    [
+      'Shell=true is set if specified',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          shell: true,
+        },
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+            shell: true,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
+          },
+        ],
+      },
+    ],
+
+    [
+      'Shell={string} is set if specified',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          shell: '/usr/bin/another-shell',
+        },
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+            shell: '/usr/bin/another-shell',
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
+          },
+        ],
+      },
+    ],
+
+    [
       'Hermit',
       {
         processEnv: {

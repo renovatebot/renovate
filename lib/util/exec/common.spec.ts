@@ -9,6 +9,7 @@ import {
   clearRepoSanitizedSecretsList,
 } from '../sanitize';
 import { exec, rawExec } from './common';
+import { ExecError } from './exec-error';
 import type { DataListener, RawExecOptions } from './types';
 import { partial } from '~test/util';
 
@@ -187,6 +188,30 @@ describe('util/exec/common', () => {
         stderr,
         stdout,
       });
+    });
+
+    it('throws if an error occurs', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 1,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((cmd, opts) => stub);
+
+      await expect(
+        exec(cmd, partial<RawExecOptions>({ timeout: 5 })),
+      ).rejects.toThrow(
+        new ExecError(`Command failed: ls -l\nerr message`, {
+          cmd: 'ls -l',
+          exitCode: 1,
+          stdout,
+          stderr,
+          options: { timeout: 5 },
+        }),
+      );
     });
 
     it('can specify a shell', async () => {

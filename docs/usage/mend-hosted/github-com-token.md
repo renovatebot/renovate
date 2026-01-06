@@ -1,6 +1,6 @@
 # Purpose of github.com Token
 
-Users of Mend's Renovate apps on Bitbucket Cloud and Azure DevOps need to provide a github.com token retrieve release notes and changelogs, plus some package files.
+Users of Mend's Renovate apps on Bitbucket Cloud and Azure DevOps need to provide a github.com token to retrieve release notes and changelogs, plus some package files.
 
 If github.com credentials are not provided, Renovate will continue to run, but with the following limitations:
 
@@ -46,7 +46,7 @@ Use the token generated in the previous step to provide a secret and host rule f
 
 > [!NOTE]
 >
-> If a github.com token is added to the settings for an Org, Workspace or Project, the token will be inherited by of its all child repositories.
+> If a github.com token is added to the settings for an Org, Workspace or Project, the token will be inherited by all of its child repositories.
 
 1. Log in to [Developer Portal](https://developer.mend.io/)
 2. Navigate to the Settings for an Org/Workspace/Project or a Repo
