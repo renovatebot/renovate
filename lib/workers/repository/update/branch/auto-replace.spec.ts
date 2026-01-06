@@ -1547,6 +1547,37 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
+    it('docker: replacement with same digest should not corrupt digest via currentDigestShort', async () => {
+      // Regression test for https://github.com/renovatebot/renovate/discussions/38703
+      // When doing a replacement where currentDigest === newDigest, the currentDigestShort
+      // should not be used to incorrectly replace part of the correct digest
+      const dockerfile = codeBlock`
+        FROM redis:8.2.1@sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621 AS base
+      `;
+      upgrade.manager = 'dockerfile';
+      upgrade.updateType = 'replacement';
+      upgrade.depName = 'redis';
+      upgrade.currentValue = '8.2.1';
+      upgrade.currentDigest =
+        'sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621';
+      upgrade.currentDigestShort = '5fa2edb';
+      upgrade.depIndex = 0;
+      upgrade.replaceString =
+        'redis:8.2.1@sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621';
+      upgrade.newName = 'docker.io/library/redis';
+      upgrade.newValue = '8.2.1';
+      // Same digest as currentDigest - this is the key scenario
+      upgrade.newDigest =
+        'sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        codeBlock`
+          FROM docker.io/library/redis:8.2.1@sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621 AS base
+        `,
+      );
+    });
+
     it('updates only digest', async () => {
       const githubAction = codeBlock`
         """Rules/toolchains for angular with Bazel."""
