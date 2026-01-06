@@ -1450,4 +1450,20 @@ describe('modules/manager/nix/extract', () => {
       ],
     });
   });
+
+  it('returns null when node is missing', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "root": {
+          "inputs": {
+            "unknown-flake": "unknown-flake"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
 });
