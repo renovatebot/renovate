@@ -1441,7 +1441,7 @@ describe('modules/manager/nix/extract', () => {
       deps: [
         {
           currentValue: 'nixos-unstable',
-          depName: 'nixpkgs_2',
+          depName: 'nixpkgs',
           datasource: GitRefsDatasource.id,
           packageName: 'https://github.com/NixOS/nixpkgs',
           versioning: nixpkgsVersioning,

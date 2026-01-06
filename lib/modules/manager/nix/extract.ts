@@ -43,27 +43,18 @@ export async function extractPackageFile(
   }
 
   const flakeLock = flakeLockParsed.data;
-  const rootInputs = Object.values(flakeLock.nodes.root.inputs ?? []).flat();
+  const rootInputs = flakeLock.nodes.root.inputs;
 
-  if (rootInputs.length === 0) {
-    logger.debug(
-      { flakeLockFile, error: flakeLockParsed.error },
-      `flake.lock is missing "root" node`,
-    );
-    return null;
-  }
-
-  for (const [depName, flakeInput] of Object.entries(flakeLock.nodes)) {
-    // the root input is a magic string for the entrypoint and only references other flake inputs
-    if (depName === 'root') {
+  for (const [depName, nodeName] of Object.entries(rootInputs)) {
+    if (Object.hasOwn(flakeLock.nodes, nodeName) === false) {
+      logger.debug(
+        { flakeLockFile, nodeName },
+        `input node not found in flake.lock, skipping`,
+      );
       continue;
     }
 
-    // skip all locked and transitivie nodes as they cannot be updated by regular means
-    if (!rootInputs.includes(depName)) {
-      continue;
-    }
-
+    const flakeInput = flakeLock.nodes[nodeName];
     // flakeLocked example: { rev: '56a49ffef2908dad1e9a8adef1f18802bc760962', type: 'github' }
     const flakeLocked = flakeInput.locked;
     // flakeOriginal example: { owner: 'NuschtOS', repo: 'search', type: 'github' }
