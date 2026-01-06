@@ -7,7 +7,13 @@ import * as allVersioning from '../../../modules/versioning';
 import { newlineRegex, regEx } from '../../regex';
 import { uniq } from '../../uniq';
 import { rawExec } from '../common';
-import type { DockerOptions, Opt, VolumeOption, VolumesPair } from '../types';
+import type {
+  DockerOptions,
+  MaybeShellCommand,
+  Opt,
+  VolumeOption,
+  VolumesPair,
+} from '../types';
 
 const prefetchedImages = new Map<string, string>();
 
@@ -203,7 +209,7 @@ export async function generateDockerCommand(
   commands: string[],
   preCommands: string[],
   options: DockerOptions,
-): Promise<string> {
+): Promise<MaybeShellCommand> {
   const { envVars, cwd } = options;
   let image = sideCarImage;
   const volumes = options.volumes ?? [];
@@ -272,5 +278,7 @@ export async function generateDockerCommand(
   );
   result.push(`bash -l -c "${bashCommand.replace(regEx(/"/g), '\\"')}"`); // lgtm [js/incomplete-sanitization]
 
-  return result.join(' ');
+  return {
+    command: result.join(' '),
+  };
 }

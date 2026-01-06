@@ -70,7 +70,7 @@ function isDocker(docker: Opt<DockerOptions>): docker is DockerOptions {
 }
 
 interface RawExecArguments {
-  rawCommands: string[];
+  rawCommands: MaybeShellCommand[];
   rawOptions: RawExecOptions;
 }
 
@@ -109,7 +109,7 @@ async function prepareRawExec(
     const cwd = getCwd(opts);
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
     const dockerCommand = await generateDockerCommand(
-      rawCommands,
+      rawCommands.map((c) => c.command),
       [
         ...(await generateInstallCommands(opts.toolConstraints)),
         ...preCommands,
