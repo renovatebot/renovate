@@ -43,9 +43,9 @@ export async function extractPackageFile(
   }
 
   const flakeLock = flakeLockParsed.data;
-  const rootInputs = flakeLock.nodes.root.inputs;
+  const rootInputs = Object.values(flakeLock.nodes.root.inputs ?? []).flat();
 
-  if (!rootInputs) {
+  if (rootInputs.length === 0) {
     logger.debug(
       { flakeLockFile, error: flakeLockParsed.error },
       `flake.lock is missing "root" node`,
@@ -60,7 +60,7 @@ export async function extractPackageFile(
     }
 
     // skip all locked and transitivie nodes as they cannot be updated by regular means
-    if (!(depName in rootInputs)) {
+    if (!rootInputs.includes(depName)) {
       continue;
     }
 
