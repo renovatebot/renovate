@@ -46,7 +46,7 @@ export async function extractPackageFile(
   const rootInputs = flakeLock.nodes.root.inputs;
 
   for (const [depName, nodeName] of Object.entries(rootInputs)) {
-    if (Object.hasOwn(flakeLock.nodes, nodeName) === false) {
+    if (!Object.hasOwn(flakeLock.nodes, nodeName)) {
       logger.debug(
         { flakeLockFile, nodeName },
         `input node not found in flake.lock, skipping`,
