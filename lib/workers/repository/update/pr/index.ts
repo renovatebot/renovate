@@ -170,9 +170,16 @@ export async function ensurePr(
   );
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
+
+  // for Bitbucket
+  let effectiveBaseBranch = config.baseBranch;
+  if (GlobalConfig.get('bbUseDevelopmentBranch') && config.defaultBranch) {
+    effectiveBaseBranch = config.defaultBranch;
+  }
+
   // Check if PR already exists
   const existingPr =
-    (await platform.getBranchPr(branchName, config.baseBranch)) ??
+    (await platform.getBranchPr(branchName, effectiveBaseBranch)) ??
     (await tryReuseAutoclosedPr(branchName, prTitle));
   const prCache = getPrCache(branchName);
   if (existingPr) {
@@ -366,7 +373,7 @@ export async function ensurePr(
     config,
     {
       debugData: updatePrDebugData(
-        config.baseBranch,
+        effectiveBaseBranch,
         prepareLabels(config), // include labels in debug data
         existingPr?.bodyStruct?.debugData,
       ),
@@ -391,6 +398,7 @@ export async function ensurePr(
       // Check if existing PR needs updating
       const existingPrTitle = stripEmojis(existingPr.title);
       const existingPrBodyHash = existingPr.bodyStruct?.hash;
+      const existingTargetBranch = existingPr?.targetBranch;
       const newPrTitle = stripEmojis(prTitle);
       const newPrBodyHash = hashBody(prBody);
 
@@ -405,7 +413,7 @@ export async function ensurePr(
       );
 
       if (
-        existingPr?.targetBranch === config.baseBranch &&
+        existingTargetBranch === effectiveBaseBranch &&
         existingPrTitle === newPrTitle &&
         existingPrBodyHash === newPrBodyHash &&
         !labelsNeedUpdate
@@ -425,16 +433,16 @@ export async function ensurePr(
         platformPrOptions: getPlatformPrOptions(config),
       };
       // PR must need updating
-      if (existingPr?.targetBranch !== config.baseBranch) {
+      if (existingTargetBranch !== effectiveBaseBranch) {
         logger.debug(
           {
             branchName,
-            oldBaseBranch: existingPr?.targetBranch,
-            newBaseBranch: config.baseBranch,
+            oldBaseBranch: existingTargetBranch,
+            newBaseBranch: effectiveBaseBranch,
           },
           'PR base branch has changed',
         );
-        updatePrConfig.targetBranch = config.baseBranch;
+        updatePrConfig.targetBranch = effectiveBaseBranch;
       }
 
       if (labelsNeedUpdate) {
@@ -498,7 +506,7 @@ export async function ensurePr(
           ...existingPr,
           bodyStruct: getPrBodyStruct(prBody),
           title: prTitle,
-          targetBranch: config.baseBranch,
+          targetBranch: effectiveBaseBranch,
         },
       };
     }
@@ -522,7 +530,7 @@ export async function ensurePr(
         }
         pr = await platform.createPr({
           sourceBranch: branchName,
-          targetBranch: config.baseBranch,
+          targetBranch: effectiveBaseBranch,
           prTitle,
           prBody,
           labels: prepareLabels(config),
