@@ -1136,7 +1136,7 @@ Example:
 
 <!--prettier-ignore-->
 !!! note
-    You do not need to add leading and trailing backslashes in `matchStrings`.
+    You do not need to add leading and trailing slashes in `matchStrings`.
 
 ### matchStringsStrategy
 
