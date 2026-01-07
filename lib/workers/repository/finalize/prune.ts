@@ -101,7 +101,7 @@ async function cleanUpBranches(
 
           // Clean up any abandoned references
           if (pr.title.endsWith(abandonedPrSuffix)) {
-            newPrTitle = newPrTitle.replaceAll(abandonedPrSuffix, '');
+            newPrTitle = newPrTitle.replaceAll(abandonedPrSuffix, '').trim();
 
             await ensureCommentRemoval({
               type: 'by-topic',

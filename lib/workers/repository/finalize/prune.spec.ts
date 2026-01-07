@@ -221,5 +221,56 @@ describe('workers/repository/finalize/prune', () => {
       expect(scm.deleteBranch).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
+
+    it('autoclosed PR when target branch differs from base branch', async () => {
+      config.branchList = ['renovate/a', 'renovate/b'];
+      config.baseBranch = 'main';
+      git.getBranchList.mockReturnValueOnce(
+        config.branchList.concat(['renovate/c']),
+      );
+      scm.isBranchModified.mockResolvedValueOnce(true);
+      platform.findPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 42,
+          title: 'Update foo',
+          targetBranch: 'develop',
+        }),
+      );
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(git.getBranchList).toHaveBeenCalledTimes(1);
+      expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
+      expect(platform.updatePr).toHaveBeenCalledTimes(1);
+      expect(platform.updatePr).toHaveBeenCalledWith({
+        number: 42,
+        prTitle: 'Update foo - autoclosed',
+        state: 'closed',
+      });
+    });
+
+    it('removes abandoned suffix when autoclosing PR with different target branch', async () => {
+      config.branchList = ['renovate/a', 'renovate/b'];
+      config.baseBranch = 'main';
+      git.getBranchList.mockReturnValueOnce(
+        config.branchList.concat(['renovate/c']),
+      );
+      scm.isBranchModified.mockResolvedValueOnce(true);
+      platform.findPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 42,
+          title: 'Update foo - abandoned',
+          targetBranch: 'develop',
+        }),
+      );
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(git.getBranchList).toHaveBeenCalledTimes(1);
+      expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
+      expect(platform.updatePr).toHaveBeenCalledTimes(1);
+      expect(platform.updatePr).toHaveBeenCalledWith({
+        number: 42,
+        prTitle: 'Update foo - autoclosed',
+        state: 'closed',
+      });
+      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
+    });
   });
 });
