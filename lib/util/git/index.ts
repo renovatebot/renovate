@@ -788,7 +788,9 @@ export async function isBranchModified(
     return isModified;
   }
 
-  logger.debug('branch.isModified(): using git to calculate');
+  logger.debug(
+    `branch.isModified(): using git to calculate against baseBranch "${baseBranch}"`,
+  );
 
   await syncGit();
   const committedAuthors = new Set<string>();
