@@ -88,7 +88,7 @@ Keep reading to learn more.
 Since the update process runs with the _same_ user privileges as the Renovate process, it inherently has access to the same information and resources.
 This includes sensitive data that may be stored within the environment where Renovate is hosted.
 
-###### Execution of code
+###### Execution of code (insider attack)
 
 In certain scenarios, code from the monitored repository is executed as part of the update process.
 This is particularly true during, for example:
@@ -100,6 +100,31 @@ These scripts can contain arbitrary code.
 This may pose a significant security risk if the repository's integrity is compromised, or if the repository maintainers have malicious intentions.
 
 Because such insider attack is an inherent and unavoidable risk, the Renovate project will not issue CVEs for such attacks or weaknesses other than in exceptional circumstances.
+
+Note that when Renovate runs `postUpgradeTasks`, the script executes inside a shell, which means that they can call out to other commands or access shell variables, if the allowlist via `allowedCommands` does not restrict it.
+As it is difficult to craft a regular expression that may deny usage of special characters to shells, it is likely that this will not be possible to avoid at this time.
+This can be disabled using [`allowShellExecutorForPostUpgradeCommands=false`](./self-hosted-configuration.md#allowshellexecutorforpostupgradecommands).
+
+###### Execution of code (outsider attack)
+
+Separately, there are also opportunities for malicious external code to execute, as part of Renovate's update process.
+
+<!-- prettier-ignore -->
+!!! warning
+    Below are _some_ of the options, but note that this is **not exhaustive**.
+
+For instance:
+
+- updates that invoke Gradle (i.e. `./gradlew`), such as [updating the Gradle Wrapper](./modules/manager/gradle-wrapper/index.md) or [performing Gradle Verification Metadata](./modules/manager/gradle/index.md#dependency-verification)
+  - because the Gradle buildscript is evaluated at this time (i.e. to determine which dependencies are available to then update the verification metadata)
+- executing any `postUpgradeTasks` in a way that may use an updated dependency
+  - i.e. if you have a postUpgradeTask for `make docs`, where the version of your docs builder has updated
+  - i.e. if your pre-commit hook, where the version of a linter has updated
+
+Depending on the self-hosted configuration, it may also be possible for package manager scripts to execute post-update (if using [`allowScripts=true`](./self-hosted-configuration.md#allowscripts) alongside [`ignoreScripts=false`](./configuration-options.md#ignorescripts)):
+
+- when an `npm install`, `composer install`, etc is executed on a branch update
+- performing [lock file maintenance](./configuration-options.md#lockfilemaintenance)
 
 ##### Centralized logging and sensitive information management
 
@@ -131,6 +156,10 @@ This reduces the impact of any malicious code execution.
 
 Regularly review the actions taken by `postUpgradeTasks` to make sure they do not execute unnecessary or risky operations.
 Consider implementing a review process for changes to these tasks within repositories.
+
+Where possible, restrict the commands executed to an allowlist you control, and try to limit the opportunity for those commands to execute additional commands.
+
+For instance, allowlisting the command `make lint-fix` could run other tasks, including running `npm install --foreground-scripts`, which would bypass the global [`allowScripts`](./self-hosted-configuration.md#allowscripts) configuration
 
 ###### Use security tools
 

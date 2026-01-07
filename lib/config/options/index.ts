@@ -32,7 +32,7 @@ const options: RenovateOptions[] = [
     default: null,
     globalOnly: true,
     allowedValues: ['asc', 'desc'],
-    supportedPlatforms: ['forgejo', 'gitea'],
+    supportedPlatforms: ['forgejo', 'gitea', 'gitlab'],
   },
   {
     name: 'autodiscoverRepoSort',
@@ -41,8 +41,16 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: null,
     globalOnly: true,
-    allowedValues: ['alpha', 'created', 'updated', 'size', 'id'],
-    supportedPlatforms: ['forgejo', 'gitea'],
+    allowedValues: [
+      'alpha',
+      'created',
+      'created_at',
+      'updated',
+      'updated_at',
+      'size',
+      'id',
+    ],
+    supportedPlatforms: ['forgejo', 'gitea', 'gitlab'],
   },
   {
     name: 'allowedEnv',
@@ -229,6 +237,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'onboardingAutoCloseAge',
+    description:
+      'Maximum number of days after which Renovate will stop trying to onboard the repository, and will close any existing onboarding PRs',
+    type: 'integer',
+    default: null,
+    globalOnly: true,
+    cli: false,
+  },
+  {
     name: 'onboardingCommitMessage',
     description:
       'Change this value to override the default onboarding commit message.',
@@ -246,8 +263,6 @@ const options: RenovateOptions[] = [
     default: null,
     globalOnly: true,
     inheritConfigSupport: true,
-    cli: false,
-    env: false,
   },
   {
     name: 'onboardingConfigFileName',
@@ -596,7 +611,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.24.3',
+    default: 'ghcr.io/containerbase/sidecar:13.25.21',
     globalOnly: true,
   },
   {
@@ -957,6 +972,14 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'allowShellExecutorForPostUpgradeCommands',
+    description:
+      'Whether to run commands for `postUpgradeTasks` inside a shell. This has security implications, as it means that they can call out to other commands or access shell variables. It is difficult to craft an `allowedCommands` regex to restrict this.',
+    globalOnly: true,
+    type: 'boolean',
+    default: true,
   },
   {
     name: 'allowCustomCrateRegistries',
@@ -1728,6 +1751,16 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     advancedUse: true,
+  },
+  {
+    name: 'maxMajorIncrement',
+    description:
+      'Limit the maximum major version increment allowed. Set to 0 to disable.',
+    stage: 'package',
+    type: 'integer',
+    default: 500,
+    cli: false,
+    env: false,
   },
   {
     name: 'respectLatest',
@@ -2560,6 +2593,7 @@ const options: RenovateOptions[] = [
     allowedValues: [
       'bundlerConservative',
       'composerWithAll',
+      'composerNoMinimalChanges',
       'dotnetWorkloadRestore',
       'gomodMassage',
       'gomodTidy',
@@ -2833,17 +2867,34 @@ const options: RenovateOptions[] = [
       Update: '{{{updateType}}}',
       'Current value': '{{{currentValue}}}',
       'New value': '{{{newValue}}}',
-      Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+      Change: '`{{{displayFrom}}}` → `{{{displayTo}}}`',
       Pending: '{{{displayPending}}}',
       References: '{{{references}}}',
       'Package file': '{{{packageFile}}}',
-      Age: "{{#if newVersion}}[![age](https://developer.mend.io/api/mc/badges/age/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/){{/if}}",
+      Age: "{{#if newVersion}}![age](https://developer.mend.io/api/mc/badges/age/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true){{/if}}",
+
       Adoption:
-        "{{#if newVersion}}[![adoption](https://developer.mend.io/api/mc/badges/adoption/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/){{/if}}",
+        "{{#if newVersion}}![adoption](https://developer.mend.io/api/mc/badges/adoption/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true){{/if}}",
+
       Passing:
-        "{{#if newVersion}}[![passing](https://developer.mend.io/api/mc/badges/compatibility/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/){{/if}}",
+        "{{#if newVersion}}![passing](https://developer.mend.io/api/mc/badges/compatibility/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true){{/if}}",
+
       Confidence:
-        "{{#if newVersion}}[![confidence](https://developer.mend.io/api/mc/badges/confidence/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/){{/if}}",
+        "{{#if newVersion}}![confidence](https://developer.mend.io/api/mc/badges/confidence/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true){{/if}}",
+    },
+  },
+  {
+    name: 'prBodyHeadingDefinitions',
+    description: 'Table header definitions to use in PR tables.',
+    type: 'object',
+    freeChoice: true,
+    mergeable: true,
+    default: {
+      Age: '[Age](https://docs.renovatebot.com/merge-confidence/)',
+      Adoption: '[Adoption](https://docs.renovatebot.com/merge-confidence/)',
+      Passing: '[Passing](https://docs.renovatebot.com/merge-confidence/)',
+      Confidence:
+        '[Confidence](https://docs.renovatebot.com/merge-confidence/)',
     },
   },
   {
@@ -3075,6 +3126,18 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     globalOnly: true,
     default: false,
+  },
+  {
+    name: 'allowedUnsafeExecutions',
+    description: `List of possibly unsafe executions which are permitted to run. This enables global control over any implicit commands
+        which are run as part of a renovate run. This is similar to \`allowedCommands\` but is specifically used to control executions
+        which run automatically, and are not explicitly added in \`postUpgradeTasks\``,
+    type: 'array',
+    subType: 'string',
+    default: ['gradleWrapper'],
+    allowedValues: ['goGenerate', 'gradleWrapper'],
+    stage: 'repository',
+    globalOnly: true,
   },
   {
     name: 'gitNoVerify',

@@ -326,9 +326,7 @@ describe('modules/manager/hermit/artifacts', () => {
           stdout: '',
           stderr: 'error executing hermit uninstall',
           cmd: '',
-          options: {
-            encoding: 'utf-8',
-          },
+          options: {},
         }),
       );
 
@@ -422,9 +420,7 @@ describe('modules/manager/hermit/artifacts', () => {
           stdout: '',
           stderr: 'error executing hermit install',
           cmd: '',
-          options: {
-            encoding: 'utf-8',
-          },
+          options: {},
         }),
       );
 

@@ -1,8 +1,10 @@
 import type { GithubHttp } from '../../http/github';
 import { GithubGraphqlDatasourceFetcher } from './datasource-fetcher';
+import { adapter as branchesAdapter } from './query-adapters/branches-query-adapter';
 import { adapter as releasesAdapter } from './query-adapters/releases-query-adapter';
 import { adapter as tagsAdapter } from './query-adapters/tags-query-adapter';
 import type {
+  GithubBranchItem,
   GithubPackageConfig,
   GithubReleaseItem,
   GithubTagItem,
@@ -28,6 +30,18 @@ export async function queryReleases(
     config,
     http,
     releasesAdapter,
+  );
+  return res;
+}
+
+export async function queryBranches(
+  config: GithubPackageConfig,
+  http: GithubHttp,
+): Promise<GithubBranchItem[]> {
+  const res = await GithubGraphqlDatasourceFetcher.query(
+    config,
+    http,
+    branchesAdapter,
   );
   return res;
 }

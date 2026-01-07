@@ -158,6 +158,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
       const defaultBranch = 'main';
       const config: RenovateConfig = {
         defaultBranch,
+        // @ts-expect-error -- TODO: should we remove this test?
         branchSummaryExtended: true,
       };
       const branchCache = partial<BranchCache>({

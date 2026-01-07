@@ -235,9 +235,12 @@ describe('modules/manager/poetry/artifacts', () => {
       const execSnapshots = mockExecAll();
       fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
       googleAuth.mockImplementationOnce(
-        vi.fn().mockImplementationOnce(() => ({
-          getAccessToken: vi.fn().mockResolvedValue('some-token'),
-        })),
+        // TODO: fix typing
+        vi.fn<any>(
+          class {
+            getAccessToken = vi.fn().mockResolvedValue('some-token');
+          },
+        ),
       );
       hostRules.find.mockReturnValue({});
       const updatedDeps = [{ depName: 'dep1' }];
@@ -281,9 +284,12 @@ describe('modules/manager/poetry/artifacts', () => {
       const execSnapshots = mockExecAll();
       fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
       googleAuth.mockImplementation(
-        vi.fn().mockImplementation(() => ({
-          getAccessToken: vi.fn().mockResolvedValue(undefined),
-        })),
+        // TODO: fix typing
+        vi.fn<any>(
+          class {
+            getAccessToken = vi.fn();
+          },
+        ),
       );
       const updatedDeps = [{ depName: 'dep1' }];
       expect(

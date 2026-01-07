@@ -34,7 +34,7 @@ export class PackageFiles {
   static getDashboardMarkdown(maxLength: number, setHeader = true): string {
     const note =
       '> ℹ **Note**\n> \n> Detected dependencies section has been truncated\n\n';
-    const title = `## Detected dependencies\n\n`;
+    const title = `## Detected Dependencies\n\n`;
 
     // exclude header length from the available space
     const maxHeaderLen = setHeader ? (title + note).length : 0;
@@ -105,11 +105,12 @@ export class PackageFiles {
       }
 
       for (const manager of managers) {
-        deps += `<details><summary>${manager}</summary>\n<blockquote>\n\n`;
-        for (const packageFile of Array.from(packageFiles[manager]).sort(
+        const managerPackageFiles = Array.from(packageFiles[manager]).sort(
           (a, b) => a.packageFile.localeCompare(b.packageFile),
-        )) {
-          deps += `<details><summary>${packageFile.packageFile}</summary>\n\n`;
+        );
+        deps += `<details><summary>${manager} (${managerPackageFiles.length})</summary>\n<blockquote>\n\n`;
+        for (const packageFile of managerPackageFiles) {
+          deps += `<details><summary>${packageFile.packageFile}${packageFile.deps.length > 0 ? ` (${packageFile.deps.length})` : ''}</summary>\n\n`;
           for (const dep of packageFile.deps) {
             const ver = dep.currentValue;
             const digest = dep.currentDigest;
@@ -122,8 +123,17 @@ export class PackageFiles {
             } else {
               version = 'unknown version';
             }
+            let updates = '';
+            const uniqueUpdates = [
+              ...new Set(
+                dep.updates?.map((update) => `\`${update.newValue}\``),
+              ),
+            ];
+            if (uniqueUpdates.length > 0) {
+              updates = ` → [Updates: ${uniqueUpdates.join(', ')}]`;
+            }
             // TODO: types (#22198)
-            deps += ` - \`${dep.depName!} ${version}\`\n`;
+            deps += ` - \`${dep.depName!} ${version}\`${updates}\n`;
           }
           deps += '\n</details>\n\n';
         }

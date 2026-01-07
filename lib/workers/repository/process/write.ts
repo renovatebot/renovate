@@ -1,5 +1,11 @@
+import {
+  ATTR_VCS_REF_BASE_TYPE,
+  ATTR_VCS_REF_HEAD_NAME,
+  ATTR_VCS_REF_TYPE,
+} from '@opentelemetry/semantic-conventions/incubating';
 import { isString } from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types';
+import { instrument } from '../../../instrumentation';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
 import { scm } from '../../../modules/platform/scm';
@@ -141,50 +147,66 @@ export async function writeUpdates(
 
   for (const branch of branches) {
     const { baseBranch, branchName } = branch;
-    const meta: Record<string, string> = { branch: branchName };
-    if (config.baseBranchPatterns?.length && baseBranch) {
-      meta.baseBranch = baseBranch;
-    }
-    addMeta(meta);
-    const branchExisted = await scm.branchExists(branchName);
-    const branchState = await syncBranchState(branchName, baseBranch);
+    const res = await instrument(
+      branchName,
+      async () => {
+        const meta: Record<string, string> = { branch: branchName };
+        if (config.baseBranchPatterns?.length && baseBranch) {
+          meta.baseBranch = baseBranch;
+        }
+        addMeta(meta);
+        const branchExisted = await scm.branchExists(branchName);
+        const branchState = await syncBranchState(branchName, baseBranch);
 
-    const managers = [
-      ...new Set(
-        branch.upgrades
-          .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
-          .filter(isString),
-      ),
-    ].sort();
-    const commitFingerprint = fingerprint({
-      commitFingerprintConfig: generateCommitFingerprintConfig(branch),
-      managers,
-    });
-    branch.cacheFingerprintMatch = compareCacheFingerprint(
-      branchState,
-      commitFingerprint,
+        const managers = [
+          ...new Set(
+            branch.upgrades
+              .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
+              .filter(isString),
+          ),
+        ].sort();
+        const commitFingerprint = fingerprint({
+          commitFingerprintConfig: generateCommitFingerprintConfig(branch),
+          managers,
+        });
+        branch.cacheFingerprintMatch = compareCacheFingerprint(
+          branchState,
+          commitFingerprint,
+        );
+
+        const res = await processBranch(branch);
+        branch.prBlockedBy = res?.prBlockedBy;
+        branch.prNo = res?.prNo;
+        branch.result = res?.result;
+        branch.commitFingerprint = res?.updatesVerified
+          ? commitFingerprint
+          : branchState.commitFingerprint;
+
+        if (res?.commitSha) {
+          setBranchNewCommit(branchName, baseBranch, res.commitSha);
+        }
+        if (
+          branch.result === 'automerged' &&
+          branch.automergeType !== 'pr-comment'
+        ) {
+          // Stop processing other branches because base branch has been changed
+          return 'automerged';
+        }
+        if (!branchExisted && (await scm.branchExists(branch.branchName))) {
+          incCountValue('Branches');
+        }
+      },
+      {
+        attributes: {
+          [ATTR_VCS_REF_TYPE]: 'branch',
+          [ATTR_VCS_REF_BASE_TYPE]: 'branch',
+          [ATTR_VCS_REF_HEAD_NAME]: branchName,
+        },
+      },
     );
 
-    const res = await processBranch(branch);
-    branch.prBlockedBy = res?.prBlockedBy;
-    branch.prNo = res?.prNo;
-    branch.result = res?.result;
-    branch.commitFingerprint = res?.updatesVerified
-      ? commitFingerprint
-      : branchState.commitFingerprint;
-
-    if (res?.commitSha) {
-      setBranchNewCommit(branchName, baseBranch, res.commitSha);
-    }
-    if (
-      branch.result === 'automerged' &&
-      branch.automergeType !== 'pr-comment'
-    ) {
-      // Stop processing other branches because base branch has been changed
-      return 'automerged';
-    }
-    if (!branchExisted && (await scm.branchExists(branch.branchName))) {
-      incCountValue('Branches');
+    if (res !== undefined) {
+      return res;
     }
   }
   removeMeta(['branch', 'baseBranch']);

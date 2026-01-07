@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "incremental": true,
+    "tsBuildInfoFile": ".cache/tsbuildinfo",
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -27,7 +29,7 @@
   },
   "include": ["**/*.mts", "**/*.ts", "**/*.js", "**/*.mjs", "**/*.cjs"],
   "exclude": [
-    "node_modules",
+    "**/node_modules",
     "./.cache",
     "./dist",
     "./.pnpm-store/",
@@ -39,6 +41,7 @@
     "tmp",
     "tools/mkdocs/docs",
     "tools/mkdocs/site",
+    ".github/workflows/**/*.js",
     ".worktrees/**/*"
   ],
   "ts-node": {

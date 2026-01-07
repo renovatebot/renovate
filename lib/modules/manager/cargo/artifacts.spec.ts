@@ -167,7 +167,7 @@ describe('modules/manager/cargo/artifacts', () => {
       cmd,
       stdout: '',
       stderr: '',
-      options: { encoding: 'utf8' },
+      options: {},
     });
     fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
@@ -249,7 +249,7 @@ describe('modules/manager/cargo/artifacts', () => {
         cmd: packageDep2Cmd,
         stdout: '',
         stderr: '... error: package ID specification ...',
-        options: { encoding: 'utf8' },
+        options: {},
       }),
       // Iter 2: packageDep3Cmd (updates dep3)
       { stdout: '', stderr: '' },
@@ -824,7 +824,6 @@ describe('modules/manager/cargo/artifacts', () => {
         cmd: 'install-tool rust 1.65.0',
         options: {
           cwd: '/tmp/github/some/repo',
-          encoding: 'utf-8',
           env: {
             CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
           },

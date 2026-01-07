@@ -82,7 +82,12 @@ export async function filterInternalChecks(
       // Now check for a minimumReleaseAge config
       const { minimumConfidence, minimumReleaseAge, updateType } =
         releaseConfig;
-      if (isNonEmptyString(minimumReleaseAge)) {
+
+      const minimumReleaseAgeMs = isNonEmptyString(minimumReleaseAge)
+        ? coerceNumber(toMs(minimumReleaseAge), 0)
+        : 0;
+
+      if (minimumReleaseAgeMs) {
         const minimumReleaseAgeBehaviour =
           releaseConfig.minimumReleaseAgeBehaviour;
 
@@ -91,7 +96,7 @@ export async function filterInternalChecks(
           // we should skip this if we have a timestamp that isn't passing checks:
           if (
             getElapsedMs(candidateRelease.releaseTimestamp) <
-            coerceNumber(toMs(minimumReleaseAge), 0)
+            minimumReleaseAgeMs
           ) {
             // Skip it if it doesn't pass checks
             logger.trace(
@@ -149,14 +154,14 @@ export async function filterInternalChecks(
     }
 
     if (candidateVersionsWithoutReleaseTimestamp['timestamp-required'].length) {
-      logger.debug(
+      logger.once.debug(
         {
           depName,
           versions:
             candidateVersionsWithoutReleaseTimestamp['timestamp-required'],
           check: 'minimumReleaseAge',
         },
-        `Marking ${candidateVersionsWithoutReleaseTimestamp['timestamp-required'].length} release(s) as pending, as they do not have a releaseTimestamp and we're running with minimumReleaseAgeBehaviour=require-timestamp`,
+        `Marking ${candidateVersionsWithoutReleaseTimestamp['timestamp-required'].length} release(s) as pending, as they do not have a releaseTimestamp and we're running with minimumReleaseAgeBehaviour=timestamp-required`,
       );
     }
 
@@ -164,7 +169,7 @@ export async function filterInternalChecks(
       logger.once.warn(
         "Some release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
       );
-      logger.debug(
+      logger.once.debug(
         {
           depName,
           versions:
