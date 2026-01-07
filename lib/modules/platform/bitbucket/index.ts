@@ -194,7 +194,6 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   cloneSubmodulesFilter,
-  bbUseDevelopmentBranch,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
@@ -207,6 +206,10 @@ export async function initRepo({
   } as Config;
   let info: RepoInfo;
   let mainBranch: string;
+  const bbUseDevelopmentBranch = GlobalConfig.get(
+    'bbUseDevelopmentBranch',
+    false,
+  );
   try {
     const { body: repoInfo } = await bitbucketHttp.getJson(
       `/2.0/repositories/${repository}`,
