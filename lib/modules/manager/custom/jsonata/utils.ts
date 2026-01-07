@@ -21,9 +21,7 @@ export async function handleMatching(
     // won't fail as this is verified during config validation
     const jsonataExpression = jsonata(query);
     // this does not throw error, just returns undefined if no matches
-    // {} so that this evaluate call uses a new JSONata environment and avoids $$ being overwritten concurrently
-    // see #40311 for details
-    const queryResult = await jsonataExpression.evaluate(json, {});
+    const queryResult = await jsonataExpression.evaluate(json);
 
     // allows empty dep object cause templates can be used to configure the required fields
     // if some issues arise then the isValidDependency call will catch them later on

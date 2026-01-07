@@ -60,9 +60,7 @@ export class CustomDatasource extends Datasource {
       }
 
       try {
-        // {} so that this evaluate call uses a new JSONata environment and avoids $$ being overwritten concurrently
-        // see #40311 for details
-        const modifiedData = await expression.evaluate(data, {});
+        const modifiedData = await expression.evaluate(data);
 
         logger.trace(
           { before: data, after: modifiedData },
