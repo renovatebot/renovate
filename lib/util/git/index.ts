@@ -741,7 +741,9 @@ export async function isBranchBehindBase(
     return isBehind;
   }
 
-  logger.debug('branch.isBehindBase(): using git to calculate');
+  logger.debug(
+    `branch.isBehindBase(): using git to calculate against baseBranch "${baseBranch}"`,
+  );
 
   await syncGit();
   try {
@@ -855,7 +857,7 @@ export async function isBranchModified(
     'branch.isModified() = true',
   );
   logger.debug(
-    { branchName, unrecognizedAuthors: [...includedAuthors] },
+    { baseBranch, branchName, unrecognizedAuthors: [...includedAuthors] },
     'branch.isModified() = true',
   );
   config.branchIsModified[branchName] = true;
@@ -892,7 +894,9 @@ export async function isBranchConflicted(
     return isConflicted;
   }
 
-  logger.debug('branch.isConflicted(): using git to calculate');
+  logger.debug(
+    `branch.isConflicted(): using git to calculate against baseBranch ${baseBranch}`,
+  );
 
   let result = false;
   await syncGit();
