@@ -25,6 +25,7 @@ import { isOnboardingBranchConflicted } from '../branch/onboarding-branch-cache'
 import {
   OnboardingState,
   getDefaultConfigFileName,
+  getOnboardingAutoCloseAge,
   getSemanticCommitPrTitle,
 } from '../common';
 import { getBaseBranchDesc } from './base-branch';
@@ -53,17 +54,13 @@ export async function ensureOnboardingPr(
   if (existingPr) {
     // check if the existing pr crosses the onboarding autoclose age
     const ageOfOnboardingPr = getElapsedDays(existingPr.createdAt!);
-    const onboardingAutoCloseAge = config.onboardingAutoCloseAge;
+    const onboardingAutoCloseAge = getOnboardingAutoCloseAge(
+      config.onboardingAutoCloseAge,
+    );
     if (
       isNumber(onboardingAutoCloseAge) &&
       ageOfOnboardingPr > onboardingAutoCloseAge
     ) {
-      // close the pr
-      await platform.updatePr({
-        number: existingPr.number,
-        state: 'closed',
-        prTitle: existingPr.title,
-      });
       // ensure comment
       await ensureComment({
         number: existingPr.number,
@@ -77,6 +74,12 @@ export async function ensureOnboardingPr(
         },
         `Renovate is being disabled for this repository as the onboarding PR has been umerged for more than ${onboardingAutoCloseAge} days`,
       );
+      // close the pr
+      await platform.updatePr({
+        number: existingPr.number,
+        state: 'closed',
+        prTitle: existingPr.title,
+      });
       return;
     }
     // skip pr-update if branch is conflicted

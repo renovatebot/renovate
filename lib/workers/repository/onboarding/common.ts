@@ -1,7 +1,37 @@
+import { isNumber } from '@sindresorhus/is';
 import { getConfigFileNames } from '../../../config/app-strings';
+import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
+
+export function getOnboardingAutoCloseAge(
+  onboardingAutoCloseAge: number | undefined,
+): number | null {
+  if (!isNumber(onboardingAutoCloseAge)) {
+    return null;
+  }
+
+  const onboardingAutoCloseAgeLimit = GlobalConfig.get(
+    'onboardingAutoCloseAgeLimit',
+  );
+  if (!isNumber(onboardingAutoCloseAgeLimit)) {
+    return onboardingAutoCloseAge;
+  }
+
+  if (onboardingAutoCloseAgeLimit < onboardingAutoCloseAge) {
+    logger.warn(
+      {
+        onboardingAutoCloseAge,
+        onboardingAutoCloseAgeLimit,
+      },
+      'Re-setting "onboardingAutoCloseAge" value to "onboardingAutoCloseAgeLimit" because it is greater than the allowed limit',
+    );
+    return onboardingAutoCloseAgeLimit;
+  }
+
+  return onboardingAutoCloseAge;
+}
 
 export function getSemanticCommitPrTitle(config: RenovateConfig): string {
   return `${config.semanticCommitType ?? 'chore'}: ${config.onboardingPrTitle}`;

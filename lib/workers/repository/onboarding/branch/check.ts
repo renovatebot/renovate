@@ -14,7 +14,7 @@ import { getCache } from '../../../../util/cache/repository';
 import { getElapsedDays } from '../../../../util/date';
 import { readLocalFile } from '../../../../util/fs';
 import { getBranchCommit } from '../../../../util/git';
-import { getSemanticCommitPrTitle } from '../common';
+import { getOnboardingAutoCloseAge, getSemanticCommitPrTitle } from '../common';
 
 async function findFile(fileName: string): Promise<boolean> {
   logger.debug(`findFile(${fileName})`);
@@ -159,7 +159,9 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   logger.debug('Repo is not onboarded and no merged PRs exist');
   if (!config.suppressNotifications!.includes('onboardingClose')) {
     const ageOfOnboardingPr = getElapsedDays(closedOnboardingPr.createdAt!);
-    const onboardingAutoCloseAge = config.onboardingAutoCloseAge;
+    const onboardingAutoCloseAge = getOnboardingAutoCloseAge(
+      config.onboardingAutoCloseAge,
+    );
     if (
       !onboardingAutoCloseAge ||
       ageOfOnboardingPr <= onboardingAutoCloseAge

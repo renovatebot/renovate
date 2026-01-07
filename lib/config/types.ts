@@ -245,6 +245,7 @@ export interface RepoGlobalConfig {
   configFileNames?: string[];
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
+  onboardingAutoCloseAgeLimit?: number;
 }
 
 /**
