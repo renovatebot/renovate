@@ -247,15 +247,6 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'onboardingAutoCloseAgeLimit',
-    description:
-      'Limit set by admin for the value of "onbardingAutoCloseAge" which cannot be crossed by the org settings',
-    type: 'integer',
-    default: null,
-    globalOnly: true,
-    cli: false,
-  },
-  {
     name: 'onboardingCommitMessage',
     description:
       'Change this value to override the default onboarding commit message.',

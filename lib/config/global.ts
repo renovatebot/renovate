@@ -36,7 +36,7 @@ export class GlobalConfig {
     'includeMirrors',
     'localDir',
     'migratePresets',
-    'onboardingAutoCloseAgeLimit',
+    'onboardingAutoCloseAge',
     'platform',
     'presetCachePersistence',
     's3Endpoint',

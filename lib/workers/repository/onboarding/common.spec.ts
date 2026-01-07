@@ -11,24 +11,29 @@ describe('workers/repository/onboarding/common', () => {
     expect(getOnboardingAutoCloseAge(undefined)).toBeNull();
   });
 
-  it('returns onboardingAutoCloseAge if onboardingAutoCloseAgeLimit is not set', () => {
+  it('returns inherited onboardingAutoCloseAge if global onboardingAutoCloseAge is not set', () => {
     expect(getOnboardingAutoCloseAge(100)).toBe(100);
   });
 
-  it('returns onboardingAutoCloseAge if it is within onboardingAutoCloseAgeLimit', () => {
-    GlobalConfig.set({ onboardingAutoCloseAgeLimit: 200 });
-    expect(getOnboardingAutoCloseAge(100)).toBe(100);
+  it('returns global onboardingAutoCloseAge if inherited onboardingAutoCloseAge is not set ', () => {
+    GlobalConfig.set({ onboardingAutoCloseAge: 100 });
+    expect(getOnboardingAutoCloseAge(undefined)).toBe(100);
   });
 
-  it('returns onboardingAutoCloseAgeLimit if onboardingAutoCloseAge is greater than onboardingAutoCloseAgeLimit', () => {
-    GlobalConfig.set({ onboardingAutoCloseAgeLimit: 50 });
+  it('returns global onboardingAutoCloseAge if inherited onboardingAutoCloseAge is set but is greater', () => {
+    GlobalConfig.set({ onboardingAutoCloseAge: 50 });
     expect(getOnboardingAutoCloseAge(100)).toBe(50);
     expect(logger.logger.warn).toHaveBeenCalledWith(
       {
-        onboardingAutoCloseAge: 100,
-        onboardingAutoCloseAgeLimit: 50,
+        inheritedOnboardingAutoCloseAge: 100,
+        globalOnboardingAutoCloseAge: 50,
       },
-      'Re-setting "onboardingAutoCloseAge" value to "onboardingAutoCloseAgeLimit" because it is greater than the allowed limit',
+      'Re-setting "onboardingAutoCloseAge" value as it crosses the global limit',
     );
+  });
+
+  it('returns inherited onboardingAutoCloseAge if it is <= global onboardingAutoCloseAge', () => {
+    GlobalConfig.set({ onboardingAutoCloseAge: 50 });
+    expect(getOnboardingAutoCloseAge(20)).toBe(20);
   });
 });

@@ -6,31 +6,39 @@ import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 
 export function getOnboardingAutoCloseAge(
-  onboardingAutoCloseAge: number | undefined,
+  inheritedOnboardingAutoCloseAge: number | undefined,
 ): number | null {
-  if (!isNumber(onboardingAutoCloseAge)) {
+  const globalOnboardingAutoCloseAge = GlobalConfig.get(
+    'onboardingAutoCloseAge',
+  )!;
+
+  if (
+    !isNumber(inheritedOnboardingAutoCloseAge) &&
+    !isNumber(globalOnboardingAutoCloseAge)
+  ) {
     return null;
   }
 
-  const onboardingAutoCloseAgeLimit = GlobalConfig.get(
-    'onboardingAutoCloseAgeLimit',
-  );
-  if (!isNumber(onboardingAutoCloseAgeLimit)) {
-    return onboardingAutoCloseAge;
+  if (!isNumber(inheritedOnboardingAutoCloseAge)) {
+    return globalOnboardingAutoCloseAge;
   }
 
-  if (onboardingAutoCloseAgeLimit < onboardingAutoCloseAge) {
+  if (!isNumber(globalOnboardingAutoCloseAge)) {
+    return inheritedOnboardingAutoCloseAge;
+  }
+
+  if (globalOnboardingAutoCloseAge < inheritedOnboardingAutoCloseAge) {
     logger.warn(
       {
-        onboardingAutoCloseAge,
-        onboardingAutoCloseAgeLimit,
+        inheritedOnboardingAutoCloseAge,
+        globalOnboardingAutoCloseAge,
       },
-      'Re-setting "onboardingAutoCloseAge" value to "onboardingAutoCloseAgeLimit" because it is greater than the allowed limit',
+      'Re-setting "onboardingAutoCloseAge" value as it crosses the global limit',
     );
-    return onboardingAutoCloseAgeLimit;
+    return globalOnboardingAutoCloseAge;
   }
 
-  return onboardingAutoCloseAge;
+  return inheritedOnboardingAutoCloseAge;
 }
 
 export function getSemanticCommitPrTitle(config: RenovateConfig): string {

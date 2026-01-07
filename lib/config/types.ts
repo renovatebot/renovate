@@ -158,7 +158,6 @@ export interface RenovateSharedConfig {
   updateNotScheduled?: boolean;
   versioning?: string;
   versionCompatibility?: string;
-  onboardingAutoCloseAge?: number;
 }
 
 // Config options used only within the global worker
@@ -245,7 +244,7 @@ export interface RepoGlobalConfig {
   configFileNames?: string[];
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
-  onboardingAutoCloseAgeLimit?: number;
+  onboardingAutoCloseAge?: number;
 }
 
 /**
