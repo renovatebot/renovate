@@ -11,7 +11,18 @@ export function getExpression(input: string): jsonata.Expression | Error {
   }
   let result: jsonata.Expression | Error;
   try {
-    result = jsonata(input);
+    const expression = jsonata(input);
+    // Wrap the evaluate method to default bindings to {} for concurrent evaluation safety
+    // This prevents race conditions when the same cached expression is evaluated
+    // concurrently with different data
+    const originalEvaluate = expression.evaluate.bind(expression);
+    expression.evaluate = (
+      data: unknown,
+      bindings: Record<string, unknown> = {},
+    ) => {
+      return originalEvaluate(data, bindings);
+    };
+    result = expression;
   } catch (err) {
     // JSONata errors aren't detected as TypeOf Error
     result = new Error(err.message);
