@@ -4,7 +4,10 @@ import type { RenovateConfig } from '../../../config/types';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
-import { ensureComment } from '../../../modules/platform/comment';
+import {
+  ensureComment,
+  ensureCommentRemoval,
+} from '../../../modules/platform/comment';
 import { scm } from '../../../modules/platform/scm';
 import { getBranchList, setUserRepoConfig } from '../../../util/git';
 import { escapeRegExp, regEx } from '../../../util/regex';
@@ -25,11 +28,14 @@ async function cleanUpBranches(
   // calculate regex to extract base branch from branch name
   const baseBranchRe = calculateBaseBranchRegex(config);
 
+  const autoClosingSkippedTopic = 'Autoclosing Skipped';
+  const abandonedPrSuffix = '- abandoned';
+
   for (const branchName of remainingBranches) {
     try {
       // get base branch from branch name if base branches are configured
       // use default branch if no base branches are configured
-      // use defaul branch name if no match (can happen when base branches are configured later)
+      // use default branch name if no match (can happen when base branches are configured later)
       const baseBranch =
         baseBranchRe?.exec(branchName)?.[1] ?? config.defaultBranch!;
       const pr = await platform.findPr({
@@ -37,12 +43,14 @@ async function cleanUpBranches(
         state: 'open',
         targetBranch: baseBranch,
       });
+
       const branchIsModified = await scm.isBranchModified(
         branchName,
         baseBranch,
       );
       if (pr) {
-        if (branchIsModified) {
+        const isTargetAndBaseBranchesSame = pr.targetBranch === baseBranch;
+        if (branchIsModified && isTargetAndBaseBranchesSame) {
           logger.debug(
             { prNo: pr.number, prTitle: pr.title },
             'Branch is modified - skipping PR autoclosing',
@@ -50,8 +58,8 @@ async function cleanUpBranches(
           if (GlobalConfig.get('dryRun')) {
             logger.info(`DRY-RUN: Would update PR title and ensure comment.`);
           } else {
-            if (!pr.title.endsWith('- abandoned')) {
-              const newPrTitle = pr.title + ' - abandoned';
+            if (!pr.title.endsWith(abandonedPrSuffix)) {
+              const newPrTitle = pr.title + abandonedPrSuffix;
               await platform.updatePr({
                 number: pr.number,
                 prTitle: newPrTitle,
@@ -61,7 +69,7 @@ async function cleanUpBranches(
 
             await ensureComment({
               number: pr.number,
-              topic: 'Autoclosing Skipped',
+              topic: autoClosingSkippedTopic,
               content:
                 'This PR has been flagged for autoclosing. However, it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.',
             });
@@ -72,11 +80,36 @@ async function cleanUpBranches(
             `DRY-RUN: Would autoclose PR`,
           );
         } else {
+          if (!isTargetAndBaseBranchesSame) {
+            logger.debug(
+              {
+                prNo: pr.number,
+                prTitle: pr.title,
+                baseBranch,
+                prBranch: pr.targetBranch,
+              },
+              'PR target branch does not match base branch - Autoclosing PR',
+            );
+          }
+
           logger.info(
             { branchName, prNo: pr.number, prTitle: pr.title },
             'Autoclosing PR',
           );
+
           let newPrTitle = pr.title;
+
+          // Clean up any abandoned references
+          if (pr.title.endsWith(abandonedPrSuffix)) {
+            newPrTitle = newPrTitle.replaceAll(abandonedPrSuffix, '');
+
+            await ensureCommentRemoval({
+              type: 'by-topic',
+              number: pr.number,
+              topic: autoClosingSkippedTopic,
+            });
+          }
+
           if (!pr.title.endsWith('- autoclosed')) {
             newPrTitle += ' - autoclosed';
           }
