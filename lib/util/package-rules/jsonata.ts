@@ -21,7 +21,9 @@ export class JsonataMatcher extends Matcher {
         );
       } else {
         try {
-          const result = await expression.evaluate(inputConfig);
+          // {} so that this evaluate call uses a new JSONata environment and avoids $$ being overwritten concurrently
+          // see #40311 for details
+          const result = await expression.evaluate(inputConfig, {});
           if (result) {
             // Only one needs to match, so return early
             return true;
