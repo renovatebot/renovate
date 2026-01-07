@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../config/global';
 import * as memCache from '../../../util/cache/memory';
 import { setBaseUrl } from '../../../util/http/bitbucket';
 import type { PlatformResult, RepoParams } from '../types';
@@ -22,6 +23,7 @@ const pr = {
 
 describe('modules/platform/bitbucket/index', () => {
   beforeEach(() => {
+    GlobalConfig.reset();
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);
     hostRules.clear();
@@ -262,6 +264,8 @@ describe('modules/platform/bitbucket/index', () => {
 
   describe('bbUseDevelopmentBranch', () => {
     it('not enabled: defaults to using main branch', async () => {
+      GlobalConfig.set({ bbUseDevelopmentBranch: false });
+
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -273,13 +277,14 @@ describe('modules/platform/bitbucket/index', () => {
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
-        bbUseDevelopmentBranch: false,
       });
 
       expect(res.defaultBranch).toBe('master');
     });
 
     it('enabled: uses development branch when development branch exists', async () => {
+      GlobalConfig.set({ bbUseDevelopmentBranch: true });
+
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -295,13 +300,14 @@ describe('modules/platform/bitbucket/index', () => {
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
-        bbUseDevelopmentBranch: true,
       });
 
       expect(res.defaultBranch).toBe('develop');
     });
 
     it('enabled: falls back to mainbranch if development branch does not exist', async () => {
+      GlobalConfig.set({ bbUseDevelopmentBranch: true });
+
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -317,7 +323,6 @@ describe('modules/platform/bitbucket/index', () => {
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
-        bbUseDevelopmentBranch: true,
       });
 
       expect(res.defaultBranch).toBe('master');

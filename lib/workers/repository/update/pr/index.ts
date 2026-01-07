@@ -173,7 +173,10 @@ export async function ensurePr(
 
   // for Bitbucket
   let effectiveBaseBranch = config.baseBranch;
-  if (GlobalConfig.get('bbUseDevelopmentBranch') && config.defaultBranch) {
+  if (
+    GlobalConfig.get('bbUseDevelopmentBranch', false) &&
+    config.defaultBranch
+  ) {
     effectiveBaseBranch = config.defaultBranch;
   }
 
