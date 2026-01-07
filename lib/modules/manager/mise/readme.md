@@ -1,4 +1,4 @@
-Renovate can update [mise](https://mise.jdx.dev/configuration.html#mise-toml) configuration files.
+Renovate can update [mise configuration files](https://mise.jdx.dev/configuration.html#mise-toml).
 
 ### Supported configuration files
 

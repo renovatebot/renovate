@@ -21,12 +21,23 @@ export const url = 'https://mise.jdx.dev';
 
 export const defaultConfig = {
   managerFilePatterns: [
-    '/(^|/)\\.?mise(\\.[^.]+)?\\.toml$/',
-    '/(^|/)\\.?mise/config(\\.[^.]+)?\\.toml$/',
-    '/(^|/)\\.config/mise(\\.[^.]+)?\\.toml$/',
-    '/(^|/)\\.config/mise/config(\\.[^.]+)?\\.toml$/',
-    '/(^|/)\\.config/mise/mise(\\.[^.]+)?\\.toml$/',
-    '/(^|/)\\.rtx(\\.[^.]+)?\\.toml$/',
+    '**/mise.toml',
+    '**/mise.*.toml',
+    '**/.mise.toml',
+    '**/.mise.*.toml',
+    '**/mise/config.toml',
+    '**/mise/config.*.toml',
+    '**/.mise/config.toml',
+    '**/.mise/config.*.toml',
+    '**/.config/mise.toml',
+    '**/.config/mise.*.toml',
+    '**/.config/mise/config.toml',
+    '**/.config/mise/config.*.toml',
+    '**/.config/mise/mise.toml',
+    '**/.config/mise/mise.*.toml',
+    '**/.config/mise/conf.d/*.toml',
+    '**/.rtx.toml',
+    '**/.rtx.*.toml',
   ],
 };
 

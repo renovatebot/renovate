@@ -2,7 +2,7 @@ import { matchRegexOrGlobList } from '../../../util/string-match';
 import { defaultConfig } from '.';
 
 describe('modules/manager/mise/index', () => {
-  describe('file names match managerFilePatterns', () => {
+  describe('managerFilePatterns', () => {
     it.each`
       path                                     | expected
       ${'mise.toml'}                           | ${true}
