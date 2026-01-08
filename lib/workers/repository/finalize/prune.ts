@@ -96,7 +96,6 @@ async function cleanUpBranches(
             { branchName, prNo: pr.number, prTitle: pr.title },
             'Autoclosing PR',
           );
-
           let newPrTitle = pr.title;
 
           // Clean up any abandoned references
