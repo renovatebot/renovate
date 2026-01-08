@@ -79,8 +79,13 @@ async function cleanUpBranches(
             `DRY-RUN: Would autoclose PR`,
           );
         } else {
-          if (!isTargetAndBaseBranchesSame) {
-            logger.debug(
+          if (isTargetAndBaseBranchesSame) {
+            logger.info(
+              { branchName, prNo: pr.number, prTitle: pr.title },
+              'Autoclosing PR',
+            );
+          } else {
+            logger.info(
               {
                 prNo: pr.number,
                 prTitle: pr.title,
@@ -91,10 +96,6 @@ async function cleanUpBranches(
             );
           }
 
-          logger.info(
-            { branchName, prNo: pr.number, prTitle: pr.title },
-            'Autoclosing PR',
-          );
           let newPrTitle = pr.title;
 
           // Clean up any abandoned references
