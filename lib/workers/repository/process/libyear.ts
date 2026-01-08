@@ -18,9 +18,9 @@ interface DepInfo {
 export function calculateLibYears(
   config: RenovateConfig,
   packageFiles?: Record<string, PackageFile[]>,
-): void {
+): LibYearsWithStatus | undefined {
   if (!packageFiles) {
-    return;
+    return undefined;
   }
   const allDeps: DepInfo[] = [];
   for (const [manager, files] of Object.entries(packageFiles)) {
@@ -77,6 +77,8 @@ export function calculateLibYears(
   logger.debug(libYearsWithStatus, 'Repository libYears');
 
   addLibYears(config, libYearsWithStatus);
+
+  return libYearsWithStatus;
 }
 
 function getLibYears(allDeps: DepInfo[]): LibYearsWithStatus {

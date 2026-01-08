@@ -2033,6 +2033,13 @@ const options: RenovateOptions[] = [
     default: true,
   },
   {
+    name: 'dependencyDashboardReportStatistics',
+    description:
+      'Controls whether repository statistic information is reported in the dependency dashboard.',
+    type: 'boolean',
+    default: true,
+  },
+  {
     name: 'internalChecksAsSuccess',
     description:
       'Whether to consider passing internal checks such as `minimumReleaseAge` when determining branch status.',

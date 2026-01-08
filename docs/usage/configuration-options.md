@@ -1499,6 +1499,14 @@ This helps you identify dependencies that may need attention due to lack of main
 
 Set this to `false` if you prefer not to see abandoned packages in your dependency dashboard.
 
+## dependencyDashboardReportStatistics
+
+Controls whether repository statistic information is are reported in the dependency dashboard.
+
+When enabled (default), Renovate will display a collapsible section in the dependency dashboard listing repository statistics.
+
+Set this to `false` if you prefer not to see repository statistic information in your dependency dashboard.
+
 ## dependencyDashboardTitle
 
 Configure this option if you prefer a different title for the Dependency Dashboard.

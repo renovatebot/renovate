@@ -620,6 +620,10 @@ export function massageMarkdown(input: string): string {
       ),
       '## Abandoned Dependencies\n$1$3',
     )
+    .replace(
+      regEx(/<details>\n(<summary>(.*)<\/summary>)([\s\S]*?)<\/details>/g),
+      '### $1\n$3',
+    )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
