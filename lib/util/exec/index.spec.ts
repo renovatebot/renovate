@@ -5,7 +5,14 @@ import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { setCustomEnv } from '../env';
 import * as dockerModule from './docker';
 import { getHermitEnvs } from './hermit';
-import type { ExecOptions, RawExecOptions, VolumeOption } from './types';
+import type {
+  CommandWithOptions,
+  ExecOptions,
+  ExecResult,
+  RawExecOptions,
+  VolumeOption,
+} from './types';
+import { asRawCommand } from './utils';
 import { exec } from '.';
 import { exec as cpExec, envMock } from '~test/exec-util';
 
@@ -787,6 +794,75 @@ describe('util/exec/index', () => {
     ],
 
     [
+      'Shell is not set if not specified',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {},
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
+          },
+        ],
+      },
+    ],
+
+    [
+      'Shell=true is set if specified',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          shell: true,
+        },
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+            shell: true,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
+          },
+        ],
+      },
+    ],
+
+    [
+      'Shell={string} is set if specified',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          shell: '/usr/bin/another-shell',
+        },
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+            shell: '/usr/bin/another-shell',
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
+          },
+        ],
+      },
+    ],
+
+    [
       'Hermit',
       {
         processEnv: {
@@ -845,7 +921,7 @@ describe('util/exec/index', () => {
     const actualCmd: string[] = [];
     const actualOpts: RawExecOptions[] = [];
     cpExec.mockImplementation((execCmd, execOpts) => {
-      actualCmd.push(execCmd);
+      actualCmd.push(asRawCommand(execCmd));
       actualOpts.push(execOpts);
 
       return Promise.resolve({ stdout: '', stderr: '' });
@@ -867,7 +943,7 @@ describe('util/exec/index', () => {
 
     const actualCmd: string[] = [];
     cpExec.mockImplementation((execCmd) => {
-      actualCmd.push(execCmd);
+      actualCmd.push(asRawCommand(execCmd));
       return Promise.resolve({ stdout: '', stderr: '' });
     });
 
@@ -904,6 +980,97 @@ describe('util/exec/index', () => {
     ]);
   });
 
+  it('throws when an error is thrown', async () => {
+    process.env = processEnv;
+    cpExec.mockImplementation(() => {
+      throw new Error('some error occurred');
+    });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    const promise = exec('foobar');
+    await expect(promise).rejects.toThrow('some error occurred');
+  });
+
+  it('rejects and throws if an error is thrown, even if we specify ignoreFailure=true', async () => {
+    process.env = processEnv;
+    cpExec.mockImplementation(() => {
+      throw new Error('some error occurred');
+    });
+    GlobalConfig.set({ ...globalConfig });
+    const promise = exec([
+      {
+        command: ['foobar'],
+        ignoreFailure: true,
+      },
+    ]);
+    await expect(promise).rejects.toThrow('some error occurred');
+  });
+
+  it('does not reject and throw if rawExec returns an exit code, and we specify ignoreFailure=true', async () => {
+    process.env = processEnv;
+    const stdout = 'out';
+    const stderr = 'err';
+    cpExec.mockImplementation(
+      (): Promise<ExecResult> =>
+        // NOTE that this only makes sense as a return value when `ignoreFailure=true` is set
+        Promise.resolve({
+          stdout,
+          stderr,
+          exitCode: 10,
+        }),
+    );
+    GlobalConfig.set({ ...globalConfig });
+    const promise = exec([
+      {
+        command: ['foobar'],
+        // NOTE that the implementation would only work if `ignoreFailure: true`
+        ignoreFailure: true,
+      },
+    ]);
+    await expect(promise).resolves.toEqual({
+      stdout,
+      stderr,
+      exitCode: 10,
+    });
+  });
+
+  it('exec takes an array with both `string`s and `CommandWithOptions` as an argument', async () => {
+    const command: CommandWithOptions = {
+      command: ['exit 1'],
+      ignoreFailure: true,
+    };
+
+    cpExec.mockImplementationOnce((execCmd, execOpts) => {
+      return Promise.resolve({ stdout: '', stderr: '' });
+    });
+
+    cpExec.mockImplementationOnce((execCmd, execOpts) => {
+      return Promise.resolve({ stdout: 'out', stderr: 'err', exitCode: 5 });
+    });
+
+    await expect(exec(['ls', command])).resolves.toEqual({
+      stdout: 'out',
+      stderr: 'err',
+      exitCode: 5,
+    });
+  });
+
+  it('exec takes CommandWithOptions as an argument', async () => {
+    const command: CommandWithOptions = {
+      command: ['exit 1'],
+      ignoreFailure: true,
+    };
+
+    cpExec.mockImplementation((execCmd, execOpts) => {
+      return Promise.resolve({ stdout: 'out', stderr: 'err', exitCode: 5 });
+    });
+
+    await expect(exec([command])).resolves.toEqual({
+      stdout: 'out',
+      stderr: 'err',
+      exitCode: 5,
+    });
+  });
+
   it('Supports binarySource=install', async () => {
     process.env = processEnv;
     cpExec.mockImplementation(() => {
@@ -919,7 +1086,7 @@ describe('util/exec/index', () => {
     process.env = processEnv;
     const actualCmd: string[] = [];
     cpExec.mockImplementation((execCmd) => {
-      actualCmd.push(execCmd);
+      actualCmd.push(asRawCommand(execCmd));
       return Promise.resolve({ stdout: '', stderr: '' });
     });
 
