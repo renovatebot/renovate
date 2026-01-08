@@ -83,7 +83,7 @@ describe('workers/repository/onboarding/branch/check', () => {
     expect(platform.ensureComment).toHaveBeenCalledOnce();
   });
 
-  // incase pr was autolcosed becasue if it passing the onboardingAutoCloseAge
+  // in the case that the PR was autoclosed as it passes `onboardingAutoCloseAge`
   it('continues with normal logic if closedPr exists - skips closing comment', async () => {
     GlobalConfig.set({ onboardingAutoCloseAge: 1 });
     cache.getCache.mockReturnValue({});
@@ -98,6 +98,7 @@ describe('workers/repository/onboarding/branch/check', () => {
     await expect(isOnboarded(config)).rejects.toThrow(
       REPOSITORY_CLOSED_ONBOARDING,
     );
+    // NOTE that that no comment is added, because it is handled as part of `ensureOnboardingPr`
     expect(platform.ensureComment).not.toHaveBeenCalled();
   });
 
