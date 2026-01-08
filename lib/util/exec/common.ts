@@ -105,7 +105,14 @@ export function exec(
     const maxBuffer = opts.maxBuffer ?? 10 * 1024 * 1024; // Set default max buffer size to 10MB
 
     // don't use shell by default, as it leads to potential security issues
-    const shell = opts.shell ?? false;
+    let shell = opts.shell ?? false;
+    if (
+      isCommandWithOptions(commandArgument) &&
+      commandArgument.shell !== undefined
+    ) {
+      shell = commandArgument.shell;
+    }
+
     // if we're not in shell mode, we need to provide the command and arguments
     if (shell === false) {
       const parts = split(cmd);
