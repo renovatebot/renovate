@@ -1,4 +1,8 @@
-import { isBoolean, isString } from '@sindresorhus/is';
+import {
+  isBoolean,
+  isNonEmptyStringAndNotWhitespace,
+  isString,
+} from '@sindresorhus/is';
 import { join } from 'shlex';
 import { getCustomEnv, getUserEnv } from '../env';
 import { getChildProcessEnv } from './env';
@@ -55,6 +59,13 @@ export function isCommandWithOptions(cmd: unknown): cmd is CommandWithOptions {
   }
 
   if ('ignoreFailure' in cmd && !isBoolean(cmd.ignoreFailure)) {
+    return false;
+  }
+
+  if (
+    'shell' in cmd &&
+    !(isBoolean(cmd.shell) || isNonEmptyStringAndNotWhitespace(cmd.shell))
+  ) {
     return false;
   }
 

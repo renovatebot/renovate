@@ -72,4 +72,11 @@ export interface CommandWithOptions {
 
   /** do not throw errors when a command fails, but do log that an error occurred */
   ignoreFailure?: boolean;
+
+  /**
+   * Execute the `command` within a shell
+   *
+   * WARNING this can result in security issues if this includes user-controlled commands
+   * **/
+  shell?: boolean | string;
 }
