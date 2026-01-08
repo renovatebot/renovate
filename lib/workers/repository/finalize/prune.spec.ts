@@ -222,7 +222,7 @@ describe('workers/repository/finalize/prune', () => {
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
 
-    it('autoclosed PR when target branch differs from base branch', async () => {
+    it('autocloses PR when target branch differs from base branch', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       config.baseBranch = 'main';
       git.getBranchList.mockReturnValueOnce(
