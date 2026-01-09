@@ -1091,7 +1091,7 @@ const platform: Platform = {
 };
 
 export function maxBodyLength(): number {
-  return 1000000;
+  return 250000;
 }
 
 /* eslint-disable @typescript-eslint/unbound-method */
