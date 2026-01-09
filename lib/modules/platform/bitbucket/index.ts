@@ -622,9 +622,31 @@ export function massageMarkdown(input: string): string {
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
-    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
+    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
+    .replace(regEx(/&#8203;/g), '');
 
-  return massageCollapsibleSectionsIntoLists(after);
+  // Convert fenced code blocks to indented code blocks
+  // Remove the fence indentation from code lines
+  let massaged = after;
+  const codeBlockRegex = /^([ \t]*)```[\w]*\n([\s\S]*?)\n\1```/gm;
+  let codeMatch;
+  while ((codeMatch = codeBlockRegex.exec(after)) !== null) {
+    const indentLength = codeMatch[1].length;
+    const code = codeMatch[2];
+    const lines = code.split('\n');
+    const cleanedLines = lines.map((line) => {
+      // Remove `indentLength` characters from the start of each line
+      if (line.length >= indentLength) {
+        return line.slice(indentLength);
+      }
+      return line;
+    });
+    const cleaned = cleanedLines.join('\n');
+    const replacement = `\`\`\`\n${cleaned}\n\`\`\``;
+    massaged = massaged.replace(codeMatch[0], replacement);
+  }
+
+  return massageCollapsibleSectionsIntoLists(massaged);
 }
 
 /**
