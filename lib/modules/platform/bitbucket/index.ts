@@ -624,15 +624,15 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 
-  return massageCollapsibleSectionsIntoLists(after);
+  return massageNestedCollapsibleSectionsIntoLists(after);
 }
 
 /**
- * Massage collapsible html sections into nested unordered lists
+ * Massage collapsible html sections into nested unordered lists shown on Dependency Dashboard issue.
  *
  * Bitbucket doesn't currently support collapsible syntax; https://jira.atlassian.com/browse/BCLOUD-20231
  */
-function massageCollapsibleSectionsIntoLists(body: string): string {
+function massageNestedCollapsibleSectionsIntoLists(body: string): string {
   let depth = 0;
   // Parse detail parts to calculate correct list depth
   const detailsParts = body.split('<details>').map((raw, i, arr) => {
@@ -648,16 +648,29 @@ function massageCollapsibleSectionsIntoLists(body: string): string {
   // Reassemble parts while replacing collapsible html elements with markdown list
   return detailsParts
     .map(({ raw, partDepth }) => {
+      let t = raw;
+
       if (partDepth === 0) {
-        return raw;
+        return t;
       }
 
-      const t = raw
-        .replace(/<\/?summary>/g, partDepth === 1 ? '**' : '`')
-        .replace(/( - `)/g, '\t'.repeat(partDepth) + ' - `')
-        .replace(/(- \[)/g, '\t'.repeat(partDepth) + '- [');
+      const partIndentation = '\t'.repeat(partDepth - 1);
+      const nestedListItemIndentation = '\t'.repeat(partDepth);
 
-      return `${'\t'.repeat(partDepth - 1)} - ${t}`;
+      const rawContainsBlockquote = raw.includes('<blockquote>');
+
+      t = t
+        .replace(regEx(/<\/?summary>/g), partDepth === 1 ? '**' : '`')
+        .replace(regEx(/( - `)/g), `${nestedListItemIndentation}$1`)
+        .replace(regEx(/(- \[)/g), `${nestedListItemIndentation}$1`);
+
+      let result = partIndentation;
+      if (rawContainsBlockquote || partDepth > 1) {
+        result += ' - ';
+      }
+      result += t;
+
+      return result;
     })
     .join('')
     .replace(/<\/?(summary|details|blockquote)>/g, '');
