@@ -601,10 +601,12 @@ async function closeIssue(issueNumber: number): Promise<void> {
   );
 }
 
+/**
+ * Remove or transform markdown into Bitbucket supported syntax.
+ *
+ * See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
+ */
 export function massageMarkdown(input: string): string {
-  // Remove any HTML we use
-  // See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
-
   const after = smartTruncate(input, maxBodyLength())
     .replace(
       'you tick the rebase/retry checkbox',
@@ -624,15 +626,15 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 
-  return massageNestedCollapsibleSectionsIntoLists(after);
+  return massageDetailSummaryHtmlIntNestedLists(after);
 }
 
 /**
- * Massage collapsible html sections into nested unordered lists shown on Dependency Dashboard issue.
+ * Massage collapsible html sections into nested unordered lists.
  *
  * Bitbucket doesn't currently support collapsible syntax; https://jira.atlassian.com/browse/BCLOUD-20231
  */
-function massageNestedCollapsibleSectionsIntoLists(body: string): string {
+function massageDetailSummaryHtmlIntNestedLists(body: string): string {
   let depth = 0;
   // Parse detail parts to calculate correct list depth
   const detailsParts = body.split('<details>').map((raw, i, arr) => {
@@ -661,8 +663,7 @@ function massageNestedCollapsibleSectionsIntoLists(body: string): string {
 
       t = t
         .replace(regEx(/<\/?summary>/g), partDepth === 1 ? '**' : '`')
-        .replace(regEx(/( - `)/g), `${nestedListItemIndentation}$1`)
-        .replace(regEx(/(- \[)/g), `${nestedListItemIndentation}$1`);
+        .replace(regEx(/^([ \t]*- [`[])/gm), `${nestedListItemIndentation}$1`);
 
       let result = partIndentation;
       if (rawContainsBlockquote || partDepth > 1) {
