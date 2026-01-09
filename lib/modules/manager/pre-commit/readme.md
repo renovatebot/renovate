@@ -45,7 +45,7 @@ Examples for the supported languages are listed below.
     - id: actionlint
       language: golang
       additional_dependencies:
-        - "github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.10.0"
+        - 'github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.10.0'
 ```
 
 #### Node.js
