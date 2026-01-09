@@ -661,9 +661,14 @@ function massageDetailSummaryHtmlIntNestedLists(body: string): string {
 
       const rawContainsBlockquote = raw.includes('<blockquote>');
 
-      t = t
-        .replace(regEx(/<\/?summary>/g), partDepth === 1 ? '**' : '`')
-        .replace(regEx(/^([ \t]*- [`[])/gm), `${nestedListItemIndentation}$1`);
+      t = t.replace(regEx(/<\/?summary>/g), partDepth === 1 ? '**' : '`');
+
+      if (partDepth > 1) {
+        t = t.replace(
+          regEx(/^([ \t]*- [`[])/gm),
+          `${nestedListItemIndentation}$1`,
+        );
+      }
 
       let result = partIndentation;
       if (rawContainsBlockquote || partDepth > 1) {
