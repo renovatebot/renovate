@@ -601,11 +601,13 @@ async function closeIssue(issueNumber: number): Promise<void> {
   );
 }
 
+/**
+ * Remove or transform markdown into Bitbucket supported syntax
+ *
+ * See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
+ */
 export function massageMarkdown(input: string): string {
-  // Remove any HTML we use
-  // See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
-
-  const after = smartTruncate(input, maxBodyLength())
+  let massaged = smartTruncate(input, maxBodyLength())
     .replace(
       'you tick the rebase/retry checkbox',
       'by renaming this PR to start with "rebase!"',
@@ -622,17 +624,25 @@ export function massageMarkdown(input: string): string {
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
-    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
-    .replace(regEx(/&#8203;/g), '');
+    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 
-  // Convert fenced code blocks to indented code blocks
-  // Remove the fence indentation from code lines
-  let massaged = after;
-  const codeBlockRegex = /^([ \t]*)```[\w]*\n([\s\S]*?)\n\1```/gm;
+  massaged = massageCodeblockMarkdown(massaged);
+
+  return massageDetailSummaryHtmlIntNestedLists(massaged);
+}
+
+/**
+ * Massage codeblocks indentation to ensure correct rendering in Bitbucket.
+ */
+function massageCodeblockMarkdown(body: string): string {
+  const codeBlockRegex = /^([ \t]*)```([\w]*)\n([\s\S]*?)\n\1```/gm;
   let codeMatch;
-  while ((codeMatch = codeBlockRegex.exec(after)) !== null) {
+  let result = body;
+
+  while ((codeMatch = codeBlockRegex.exec(body)) !== null) {
     const indentLength = codeMatch[1].length;
-    const code = codeMatch[2];
+    const lang = codeMatch[2];
+    const code = codeMatch[3];
     const lines = code.split('\n');
     const cleanedLines = lines.map((line) => {
       // Remove `indentLength` characters from the start of each line
@@ -641,20 +651,22 @@ export function massageMarkdown(input: string): string {
       }
       return line;
     });
+
     const cleaned = cleanedLines.join('\n');
-    const replacement = `\`\`\`\n${cleaned}\n\`\`\``;
-    massaged = massaged.replace(codeMatch[0], replacement);
+    const replacement = `\`\`\`${lang}\n${cleaned}\n\`\`\``;
+
+    result = result.replace(codeMatch[0], replacement);
   }
 
-  return massageCollapsibleSectionsIntoLists(massaged);
+  return result;
 }
 
 /**
- * Massage collapsible html sections into nested unordered lists
+ * Massage collapsible html sections into nested unordered lists.
  *
  * Bitbucket doesn't currently support collapsible syntax; https://jira.atlassian.com/browse/BCLOUD-20231
  */
-function massageCollapsibleSectionsIntoLists(body: string): string {
+function massageDetailSummaryHtmlIntNestedLists(body: string): string {
   let depth = 0;
   // Parse detail parts to calculate correct list depth
   const detailsParts = body.split('<details>').map((raw, i, arr) => {
