@@ -105,6 +105,83 @@ describe('util/exec/utils', () => {
         expect(isCommandWithOptions(valid)).toBeTrue();
       });
     });
+
+    describe('when command is valid, and no shell is present', () => {
+      it('is a CommandWithOptions', () => {
+        const valid: CommandWithOptions = {
+          command: ['go'],
+        };
+
+        expect(isCommandWithOptions(valid)).toBeTrue();
+      });
+    });
+
+    describe('when command is valid, and shell is not a string or a boolean', () => {
+      it('is not a CommandWithOptions', () => {
+        const invalid = {
+          command: ['go'],
+          shell: 1234.0,
+        };
+
+        expect(isCommandWithOptions(invalid)).toBeFalse();
+      });
+    });
+
+    describe('when command is valid, and shell is an empty string', () => {
+      it('is not a CommandWithOptions', () => {
+        const invalid = {
+          command: ['go'],
+          shell: '',
+        };
+
+        expect(isCommandWithOptions(invalid)).toBeFalse();
+      });
+    });
+
+    describe('when command is valid, and shell is a string with only whitespace', () => {
+      it('is not a CommandWithOptions', () => {
+        const invalid = {
+          command: ['go'],
+          shell: ' \t\r\n',
+        };
+
+        expect(isCommandWithOptions(invalid)).toBeFalse();
+      });
+    });
+
+    describe('when command is valid, and shell is a non-empty string', () => {
+      it('is not a CommandWithOptions', () => {
+        const valid: CommandWithOptions = {
+          command: ['go'],
+          // NOTE that this isn't a likely case, but proves that this works
+          shell: 'a',
+        };
+
+        expect(isCommandWithOptions(valid)).toBeTrue();
+      });
+    });
+
+    describe('when command is valid, and shell=false', () => {
+      it('is a CommandWithOptions', () => {
+        const valid: CommandWithOptions = {
+          command: ['go'],
+          shell: false,
+        };
+
+        expect(isCommandWithOptions(valid)).toBeTrue();
+      });
+    });
+
+    describe('when command is valid, and shell=true', () => {
+      it('is a CommandWithOptions', () => {
+        const valid: CommandWithOptions = {
+          command: ['go'],
+          shell: true,
+        };
+
+        expect(isCommandWithOptions(valid)).toBeTrue();
+      });
+    });
   });
 
   describe('asRawCommands', () => {

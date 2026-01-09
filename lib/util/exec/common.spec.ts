@@ -319,6 +319,52 @@ describe('util/exec/common', () => {
       );
     });
 
+    it('can specify a specific shell with CommandWithOptions', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((cmd, opts) => stub);
+
+      await exec(
+        { command: ['ls', '-l'], shell: '/bin/zsh' },
+        partial<RawExecOptions>({ encoding: 'utf8' }),
+      );
+
+      expect(execa).toHaveBeenCalledWith(
+        cmd,
+        [],
+        expect.objectContaining({ shell: '/bin/zsh' }),
+      );
+    });
+
+    it('can specify shell=true with CommandWithOptions', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((cmd, opts) => stub);
+
+      await exec(
+        { command: ['ls', '-l'], shell: true },
+        partial<RawExecOptions>({ encoding: 'utf8' }),
+      );
+
+      expect(execa).toHaveBeenCalledWith(
+        cmd,
+        [],
+        expect.objectContaining({ shell: true }),
+      );
+    });
+
     it('can specify a command with spaces, with a shell', async () => {
       const cmd = 'ls "Application Support"';
       const stub = getSpawnStub({
