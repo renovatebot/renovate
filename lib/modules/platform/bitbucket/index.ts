@@ -626,23 +626,24 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 
-  massaged = massageCodeblockMarkdown(massaged);
+  massaged = massageDetailSummaryHtmlIntNestedLists(massaged);
 
-  return massageDetailSummaryHtmlIntNestedLists(massaged);
+  return massageCodeblockMarkdown(massaged);
 }
 
 /**
  * Massage codeblocks indentation to ensure correct rendering in Bitbucket.
  */
 function massageCodeblockMarkdown(body: string): string {
-  const codeBlockRegex = /^([ \t]*)```([\w]*)\n([\s\S]*?)\n\1```/gm;
+  const codeBlockRegex = regEx(
+    /^(?<indent>[ \t]*)```(?<lang>\w*)[^\n]*\n(?<code>[\s\S]*?)\n[ \t]*```/gm,
+  );
   let codeMatch;
   let result = body;
 
   while ((codeMatch = codeBlockRegex.exec(body)) !== null) {
-    const indentLength = codeMatch[1].length;
-    const lang = codeMatch[2];
-    const code = codeMatch[3];
+    const { indent, lang, code } = codeMatch.groups!;
+    const indentLength = indent.length;
     const lines = code.split('\n');
     const cleanedLines = lines.map((line) => {
       // Remove `indentLength` characters from the start of each line

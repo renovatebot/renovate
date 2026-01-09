@@ -1740,10 +1740,31 @@ describe('modules/platform/bitbucket/index', () => {
       );
     });
 
-    it('updates indented codeblocks to correct indendation level', () => {
+    it('updates codeblocks to correct indentation level', () => {
       const prBody =
         '  Examples:\n' +
         '  ```vue\n' +
+        '  <template src="./foo.html">content</template>\n' +
+        '  ```\n' +
+        '  ```vue\n' +
+        '  <template></template>\n' +
+        '  ```';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '  Examples:\n' +
+          '```vue\n' +
+          '<template src="./foo.html">content</template>\n' +
+          '```\n' +
+          '```vue\n' +
+          '<template></template>\n' +
+          '```',
+      );
+    });
+
+    it('updates codeblocks to drop extra language data', () => {
+      const prBody =
+        '  Examples:\n' +
+        '  ```vue,expect_diagnostic\n' +
         '  <template src="./foo.html">content</template>\n' +
         '  ```\n' +
         '  ```vue\n' +
