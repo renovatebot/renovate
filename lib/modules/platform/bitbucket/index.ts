@@ -602,7 +602,7 @@ async function closeIssue(issueNumber: number): Promise<void> {
 }
 
 /**
- * Remove or transform markdown into Bitbucket supported syntax
+ * Remove or transform markdown into Bitbucket supported syntax.
  *
  * See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
  */
