@@ -52,6 +52,7 @@
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
       "replacements:xmldom-to-scoped",
+      "replacements:yaml-gopkg-to-go-yaml",
       "replacements:zap"
     ],
     "ignoreDeps": []
@@ -1141,6 +1142,16 @@
         "matchPackageNames": ["xmldom", "xmldom-alpha"],
         "replacementName": "@xmldom/xmldom",
         "replacementVersion": "0.7.5"
+      }
+    ]
+  },
+  "yaml-gopkg-to-go-yaml": {
+    "description": "The `gopkg.in/yaml.v2` package is no longer maintained. Use `go.yaml.in/yaml/v2` instead.",
+    "packageRules": [
+      {
+        "matchDatasources": ["go"],
+        "matchPackageNames": ["gopkg.in/yaml.v2"],
+        "replacementName": "go.yaml.in/yaml/v2"
       }
     ]
   },
