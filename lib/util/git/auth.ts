@@ -35,10 +35,12 @@ export function getGitAuthenticatedEnvironmentVariables(
   }
 
   const env = getEnv();
+
   // check if the environmentVariables already contain a GIT_CONFIG_COUNT or if the process has one
   const gitConfigCountEnvVariable =
     environmentVariables?.GIT_CONFIG_COUNT ?? env.GIT_CONFIG_COUNT;
   let gitConfigCount = 0;
+  let gitEnvConfigs: Record<string, string | undefined> = {};
   if (gitConfigCountEnvVariable) {
     // passthrough the gitConfigCountEnvVariable environment variable as start value of the index count
     gitConfigCount = parseInt(gitConfigCountEnvVariable);
@@ -50,8 +52,19 @@ export function getGitAuthenticatedEnvironmentVariables(
         `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer. Ignoring it.`,
       );
       gitConfigCount = 0;
+    } else {
+      // retrieves git config key/value environment variables
+      const gitEnvConfigCount = parseInt(env.GIT_CONFIG_COUNT ?? '0');
+      for (let i = 0; i < gitEnvConfigCount; i++) {
+        const combinedEnvVars = { ...environmentVariables, ...env };
+        gitEnvConfigs[`GIT_CONFIG_KEY_${i}`] =
+          combinedEnvVars[`GIT_CONFIG_KEY_${i}`];
+        gitEnvConfigs[`GIT_CONFIG_VALUE_${i}`] =
+          combinedEnvVars[`GIT_CONFIG_VALUE_${i}`];
+      }
     }
   }
+
   let authenticationRules: AuthenticationRule[];
   if (token) {
     authenticationRules = getAuthenticationRulesWithToken(
@@ -75,6 +88,7 @@ export function getGitAuthenticatedEnvironmentVariables(
   // increase the CONFIG_COUNT by one for each rule and add it to the object
   const newEnvironmentVariables = {
     ...environmentVariables,
+    ...gitEnvConfigs,
   };
   for (const rule of authenticationRules) {
     newEnvironmentVariables[`GIT_CONFIG_KEY_${gitConfigCount}`] =
