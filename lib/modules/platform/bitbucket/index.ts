@@ -664,7 +664,7 @@ function massageCollapsibleSectionsIntoLists(body: string): string {
 }
 
 export function maxBodyLength(): number {
-  return 1000000;
+  return 250000;
 }
 
 export async function ensureIssue({
