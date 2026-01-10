@@ -1,11 +1,11 @@
 import type { ReleaseResult } from '..';
 import { logger } from '../../../logger';
 import * as fs from '../../../util/fs';
-import type { Http } from '../../../util/http';
+import type { Http, HttpResponse } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
-import { type PackageDescription, ReleaseFiles } from './types';
+import { type PackageDescription } from './types';
 import { checkIfModified } from './url';
-import { getFileCreationTime } from './utils';
+import { ReleaseFiles, getFileCreationTime } from './utils';
 
 /**
  * Checks if two release metadata objects match.
@@ -84,12 +84,12 @@ export async function getReleaseFileContent(
     }
 
     if (needsDownload) {
-      logger.debug(
+      logger.trace(
         { url: baseReleaseUrl, targetFile: downloadedReleaseFile },
         'Downloading Debian release file',
       );
 
-      let res;
+      let res: HttpResponse<string>;
       try {
         res = await http.getText(releaseUrl);
       } catch (err) {

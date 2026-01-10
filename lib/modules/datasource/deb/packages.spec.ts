@@ -1,13 +1,17 @@
-import { copyFileSync, createReadStream, readFileSync } from 'fs';
+import { copyFile } from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
-import { hashStream, toSha256 } from '../../../util/hash';
+import { toSha256 } from '../../../util/hash';
 import { Http } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
 import { cacheSubDir } from './common';
-import { getPackageUrl, mockFetchInReleaseContent } from './index.spec';
+import {
+  computeFileChecksum,
+  getPackageUrl,
+  mockFetchInReleaseContent,
+} from './index.spec';
 import {
   downloadAndExtractPackage,
   downloadPackageFile,
@@ -22,18 +26,15 @@ const debBaseUrl = 'http://deb.debian.org';
 
 describe('modules/datasource/deb/packages', () => {
   let downloadedPackageFile: string;
-  const fixtureInRelease = readFileSync(Fixtures.getPath('InRelease'), 'utf-8');
+
+  const fixtureInRelease = Fixtures.get('InRelease');
+  const fixtureInReleaseBookworm = Fixtures.get('InReleaseBookworm');
+  const fixtureInReleaseInvalid = Fixtures.get('InReleaseInvalid');
+
   const fixturePackagesArchiveXzPath = Fixtures.getPath('Packages.xz');
   const fixturePackagesArchivePath2 = Fixtures.getPath(`Packages2.gz`);
   const fixturePackagesArchiveNoCompr = Fixtures.getPath(`Packages`);
-  const fixtureInReleaseBookworm = readFileSync(
-    Fixtures.getPath('InReleaseBookworm'),
-    'utf-8',
-  );
-  const fixtureInReleaseInvalid = readFileSync(
-    Fixtures.getPath('InReleaseInvalid'),
-    'utf-8',
-  );
+
   const packageArgs: [release: string, component: string, arch: string] = [
     'stable',
     'non-free',
@@ -122,7 +123,6 @@ describe('modules/datasource/deb/packages', () => {
 
     afterEach(async () => {
       await cacheDir?.cleanup();
-      cacheDir = null;
     });
 
     it('should download the package file if it has not been downloaded before', async () => {
@@ -181,9 +181,7 @@ describe('modules/datasource/deb/packages', () => {
 
     it('should not download if the package file has not been modified', async () => {
       // write cached file from fixturePackagesArchiveXzPath
-      const read = createReadStream(fixturePackagesArchiveXzPath);
-      const write = fs.createCacheWriteStream(downloadedPackageFile);
-      await fs.pipeline(read, write);
+      await copyFile(fixturePackagesArchiveXzPath, downloadedPackageFile);
 
       const fixturePackageHash = await computeFileChecksum(
         fixturePackagesArchiveXzPath,
@@ -265,7 +263,6 @@ describe('modules/datasource/deb/packages', () => {
 
     afterEach(async () => {
       await cacheDir?.cleanup();
-      cacheDir = null;
     });
 
     it('should ignore error when fetching of InRelease or Release content fails', async () => {
@@ -456,10 +453,10 @@ describe('modules/datasource/deb/packages', () => {
       );
 
       // write cached compressed package file
-      copyFileSync(fixturePackagesArchiveXzPath, downloadedPackageFile);
+      await copyFile(fixturePackagesArchiveXzPath, downloadedPackageFile);
 
       // write cached extracted package file
-      copyFileSync(fixturePackagesArchiveNoCompr, extractedFile);
+      await copyFile(fixturePackagesArchiveNoCompr, extractedFile);
 
       const fixturePackageHash = await computeFileChecksum(
         fixturePackagesArchiveXzPath,
@@ -505,15 +502,4 @@ export function getComponentUrl(
   arch: string,
 ): string {
   return `${baseUrl}/debian/dists/${release}/${component}/binary-${arch}`;
-}
-
-/**
- * Computes the SHA256 checksum of a specified file.
- *
- * @param filePath - path of the file
- * @returns resolves to the SHA256 checksum
- */
-export function computeFileChecksum(filePath: string): Promise<string> {
-  const stream = createReadStream(filePath);
-  return hashStream(stream, 'sha256');
 }

@@ -152,13 +152,13 @@ export function getPackageFromReleaseFile(
     }
     // 64 --> SHA256
     const regex = regEx(
-      `\\s+([a-f0-9]{64})\\s+\\d+\\s+(${escapeRegExp(packagesFile)})\r?\n`,
+      `\\s+(?<hash>[a-f0-9]{64})\\s+\\d+(?:\\s+(${escapeRegExp(packagesFile)}))?\\r?\\n`,
     );
 
     const match = regex.exec(releaseFileContent);
     if (match) {
       return {
-        hash: match[1],
+        hash: match.groups!.hash,
         compression: compressionMethod,
         packagesFile,
       };

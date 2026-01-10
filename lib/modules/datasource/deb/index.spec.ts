@@ -1,11 +1,10 @@
-import { createReadStream } from 'fs';
-import { copyFile } from 'fs-extra';
+import { copyFile, readFile } from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { getPkgReleases } from '..';
 import { GlobalConfig } from '../../../config/global';
-import { hashStream, toSha256 } from '../../../util/hash';
+import { hash, toSha256 } from '../../../util/hash';
 import { joinUrlParts } from '../../../util/url';
 import type { GetPkgReleasesConfig } from '../types';
 import { cacheSubDir } from './common';
@@ -65,7 +64,6 @@ describe('modules/datasource/deb/index', () => {
 
   afterEach(async () => {
     await cacheDir?.cleanup();
-    cacheDir = null;
   });
 
   describe('getReleases', () => {
@@ -555,7 +553,7 @@ function getRegistryUrl(
  * @param filePath - path of the file
  * @returns resolves to the SHA256 checksum
  */
-export function computeFileChecksum(filePath: string): Promise<string> {
-  const stream = createReadStream(filePath);
-  return hashStream(stream, 'sha256');
+export async function computeFileChecksum(filePath: string): Promise<string> {
+  const content = await readFile(filePath);
+  return hash(content, 'sha256');
 }

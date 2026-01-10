@@ -44,7 +44,6 @@ describe('modules/datasource/deb/release', () => {
 
     afterEach(async () => {
       await cacheDir?.cleanup();
-      cacheDir = null;
     });
 
     it('falls back to Release file if InRelease is not available', async () => {
