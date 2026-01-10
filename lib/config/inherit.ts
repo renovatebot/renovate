@@ -16,21 +16,10 @@ export class InheritConfig {
 
   private static config: RepoInheritConfig = {};
 
-  static get(): RepoInheritConfig;
   static get<Key extends keyof RepoInheritConfig>(
     key: Key,
-  ): RepoInheritConfig[Key];
-  static get<Key extends keyof RepoInheritConfig>(
-    key: Key,
-    defaultValue: Required<RepoInheritConfig>[Key],
-  ): Required<RepoInheritConfig>[Key];
-  static get<Key extends keyof RepoInheritConfig>(
-    key?: Key,
-    defaultValue?: RepoInheritConfig[Key],
-  ): RepoInheritConfig | RepoInheritConfig[Key] {
-    return key
-      ? (InheritConfig.config[key] ?? defaultValue)
-      : InheritConfig.config;
+  ): RepoInheritConfig[Key] {
+    return InheritConfig.config[key];
   }
 
   static set(config: RenovateConfig & RepoInheritConfig): RenovateConfig {
