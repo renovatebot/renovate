@@ -1,6 +1,8 @@
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
+import * as httpMock from '~test/http-mock.ts';
+import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { toSha256 } from '../../../util/hash.ts';
 import { Http } from '../../../util/http/index.ts';
@@ -8,8 +10,6 @@ import { joinUrlParts } from '../../../util/url.ts';
 import { cacheSubDir } from './common.ts';
 import { getComponentUrl } from './index.spec.ts';
 import { getReleaseFileContent } from './release.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { fs } from '~test/util.ts';
 
 const debBaseUrl = 'http://deb.debian.org';
 
@@ -44,7 +44,6 @@ describe('modules/datasource/deb/release', () => {
 
     afterEach(async () => {
       await cacheDir?.cleanup();
-      cacheDir = null;
     });
 
     it('falls back to Release file if InRelease is not available', async () => {
