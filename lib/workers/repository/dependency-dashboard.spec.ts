@@ -1684,7 +1684,7 @@ None detected
 
       describe('PackageFiles.getDashboardMarkdown()', () => {
         const note = emojify(
-          `> :information_source: **Note**\n> \n'> Detected dependencies section has been truncated\n\n`,
+          `> :information_source: **Note**\n> \n> Detected dependencies section has been truncated\n\n`,
         );
         const title = `## Detected Dependencies\n\n`;
 

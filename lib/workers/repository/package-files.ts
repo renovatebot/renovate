@@ -33,9 +33,9 @@ export class PackageFiles {
    * @param setHeader
    */
   static getDashboardMarkdown(maxLength: number, setHeader = true): string {
-    const note =
-      emojify('> :information_source: **Note**\n> \n') +
-      '> Detected dependencies section has been truncated\n\n';
+    const note = emojify(
+      `> :information_source: **Note**\n> \n> Detected dependencies section has been truncated\n\n`,
+    );
     const title = `## Detected Dependencies\n\n`;
 
     // exclude header length from the available space
