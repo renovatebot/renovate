@@ -140,12 +140,12 @@ export async function checkOnboardingBranch(
     // TODO #22198
     if (!isConflicted) {
       logger.debug('Merge onboarding branch in default branch');
-      await scm.mergeToLocal(onboardingBranch!);
+      await scm.mergeToLocal(onboardingBranch);
     }
   }
   setOnboardingCache(
     getBranchCommit(config.defaultBranch!)!,
-    getBranchCommit(onboardingBranch!)!,
+    getBranchCommit(onboardingBranch)!,
     isConflicted,
     isModified,
   );

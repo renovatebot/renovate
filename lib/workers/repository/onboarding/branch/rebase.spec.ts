@@ -57,6 +57,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         platform: 'github',
         onboardingBranch: 'renovate/configure',
         onboardingConfigFileName: '.github/renovate.json',
+        onboardingConfig: onboardingConfigMock,
       });
       await rebaseOnboardingBranch(config, hash);
       expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
@@ -74,6 +75,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         platform: 'github',
         onboardingBranch: 'renovate/configure',
         onboardingConfigFileName: undefined,
+        onboardingConfig: onboardingConfigMock,
       });
       await rebaseOnboardingBranch(config, hash);
       expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
@@ -104,6 +106,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         platform: 'github',
         onboardingBranch: 'renovate/configure',
         onboardingConfigFileName: 'renovate.json',
+        onboardingConfig: onboardingConfigMock,
       });
       await rebaseOnboardingBranch(config, hash);
 
@@ -126,6 +129,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         localDir: '',
         onboardingBranch: 'renovate/configure',
         onboardingConfigFileName: 'renovate.json',
+        onboardingConfig: onboardingConfigMock,
       });
       const res = await rebaseOnboardingBranch(config, hash);
       expect(res).toBeNull();

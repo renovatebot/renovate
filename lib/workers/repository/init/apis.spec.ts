@@ -1,4 +1,5 @@
 import { getConfig } from '../../../config/defaults';
+import { GlobalConfig } from '../../../config/global';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_FORKED,
@@ -17,6 +18,9 @@ describe('workers/repository/init/apis', () => {
       config.warnings = [];
       delete config.optimizeForDisabled;
       delete config.forkProcessing;
+      GlobalConfig.set({
+        onboardingConfigFileName: 'renovate.json',
+      });
     });
 
     it('runs', async () => {
@@ -128,15 +132,14 @@ describe('workers/repository/init/apis', () => {
       platform.getJsonFile.mockResolvedValueOnce({
         forkProcessing: 'disabled',
       });
+      GlobalConfig.set({
+        onboardingConfigFileName: '.github/renovate.json',
+      });
       const workerPlatformConfig = await initApis({
         ...config,
         optimizeForDisabled: true,
-        onboardingConfigFileName: '.github/renovate.json',
       });
       expect(workerPlatformConfig).toBeTruthy();
-      expect(workerPlatformConfig.onboardingConfigFileName).toBe(
-        '.github/renovate.json',
-      );
       expect(platform.getJsonFile).toHaveBeenCalledExactlyOnceWith(
         '.github/renovate.json',
       );
@@ -154,13 +157,14 @@ describe('workers/repository/init/apis', () => {
       platform.getJsonFile.mockResolvedValueOnce({
         forkProcessing: 'disabled',
       });
+      GlobalConfig.set({
+        onboardingConfigFileName: undefined,
+      });
       const workerPlatformConfig = await initApis({
         ...config,
         optimizeForDisabled: true,
-        onboardingConfigFileName: undefined,
       });
       expect(workerPlatformConfig).toBeTruthy();
-      expect(workerPlatformConfig.onboardingConfigFileName).toBeUndefined();
       expect(platform.getJsonFile).toHaveBeenCalledExactlyOnceWith(
         'renovate.json',
       );
