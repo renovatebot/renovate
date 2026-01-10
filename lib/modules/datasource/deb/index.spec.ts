@@ -1,19 +1,18 @@
-import { copyFile } from 'fs-extra';
+import { copyFile, readFile } from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { fs } from '~test/util.ts';
-import { joinUrlParts } from '../../../util/url.ts';
-import { getBaseSuiteUrl } from './url.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import { toSha256 } from '../../../util/hash.ts';
+import { hash, toSha256 } from '../../../util/hash.ts';
+import { joinUrlParts } from '../../../util/url.ts';
 import { getPkgReleases } from '../index.ts';
 import type { GetPkgReleasesConfig } from '../types.ts';
 import { cacheSubDir } from './common.ts';
 import { DebDatasource } from './index.ts';
-import { computeFileChecksum } from './checksum.ts';
+import { getBaseSuiteUrl } from './url.ts';
 
 const debBaseUrl = 'http://deb.debian.org';
 
@@ -65,7 +64,6 @@ describe('modules/datasource/deb/index', () => {
 
   afterEach(async () => {
     await cacheDir?.cleanup();
-    cacheDir = null;
   });
 
   describe('getReleases', () => {
@@ -547,4 +545,15 @@ function getRegistryUrl(
   arch: string,
 ) {
   return `${baseUrl}/debian?suite=${release}&components=${components.join(',')}&binaryArch=${arch}`;
+}
+
+/**
+ * Computes the SHA256 checksum of a specified file.
+ *
+ * @param filePath - path of the file
+ * @returns resolves to the SHA256 checksum
+ */
+export async function computeFileChecksum(filePath: string): Promise<string> {
+  const content = await readFile(filePath);
+  return hash(content, 'sha256');
 }

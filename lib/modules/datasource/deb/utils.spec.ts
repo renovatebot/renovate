@@ -29,7 +29,6 @@ describe('modules/datasource/deb/utils', () => {
 
   afterEach(async () => {
     await cacheDir?.cleanup();
-    cacheDir = null;
   });
 
   describe('extract', () => {

@@ -1,11 +1,11 @@
 import * as httpMock from '~test/http-mock.ts';
 import { Http } from '../../../util/http/index.ts';
+import { getPackageUrl } from './index.spec.ts';
 import {
   checkIfModified,
   constructComponentUrls,
   getBaseSuiteUrl,
 } from './url.ts';
-import { getPackageUrl } from './index.spec.ts';
 
 describe('modules/datasource/deb/url', () => {
   describe('constructComponentUrls', () => {

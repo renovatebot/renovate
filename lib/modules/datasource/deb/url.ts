@@ -51,7 +51,7 @@ export async function checkIfModified(
  */
 export function getPackagePath(basePackageUrl: string): string {
   const urlParts = basePackageUrl.split('/');
-  return urlParts.slice(urlParts.length - 2, urlParts.length).join('/');
+  return urlParts.slice(urlParts.length - 2).join('/');
 }
 
 /**

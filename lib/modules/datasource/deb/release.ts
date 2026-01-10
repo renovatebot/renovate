@@ -1,11 +1,11 @@
-import type { ReleaseResult } from '../index.ts';
 import { logger } from '../../../logger/index.ts';
 import * as fs from '../../../util/fs/index.ts';
-import type { Http } from '../../../util/http/index.ts';
+import type { Http, HttpResponse } from '../../../util/http/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
-import { type PackageDescription, ReleaseFiles } from './types.ts';
+import type { ReleaseResult } from '../index.ts';
+import { type PackageDescription } from './types.ts';
 import { checkIfModified } from './url.ts';
-import { getFileCreationTime } from './utils.ts';
+import { ReleaseFiles, getFileCreationTime } from './utils.ts';
 
 /**
  * Checks if two release metadata objects match.
@@ -84,12 +84,12 @@ export async function getReleaseFileContent(
     }
 
     if (needsDownload) {
-      logger.debug(
+      logger.trace(
         { url: baseReleaseUrl, targetFile: downloadedReleaseFile },
         'Downloading Debian release file',
       );
 
-      let res;
+      let res: HttpResponse<string>;
       try {
         res = await http.getText(releaseUrl);
       } catch (err) {
