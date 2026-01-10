@@ -3,6 +3,7 @@ import { dequal } from 'dequal';
 import { mergeChildConfig, removeGlobalConfig } from '../../../config';
 import { setUserConfigFileNames } from '../../../config/app-strings';
 import { decryptConfig } from '../../../config/decrypt';
+import { InheritConfig } from '../../../config/inherit';
 import { parseFileConfig } from '../../../config/parse';
 import { resolveConfigPresets } from '../../../config/presets';
 import { applySecretsAndVariablesToConfig } from '../../../config/secrets';
@@ -127,6 +128,7 @@ export async function mergeInheritedConfig(
       variables: config.variables ?? {},
     });
     setInheritedHostRules(filteredConfig);
+    filteredConfig = InheritConfig.set(filteredConfig);
     return mergeChildConfig(config, filteredConfig);
   }
 
@@ -171,6 +173,7 @@ export async function mergeInheritedConfig(
     variables: config.variables ?? {},
   });
   setInheritedHostRules(filteredConfig);
+  filteredConfig = InheritConfig.set(filteredConfig);
   return mergeChildConfig(config, filteredConfig);
 }
 

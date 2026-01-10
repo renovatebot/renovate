@@ -93,7 +93,7 @@ describe('workers/repository/init/inherited', () => {
     );
     const res = await mergeInheritedConfig(config);
     expect(res.labels).toEqual(['test']);
-    expect(res.onboarding).toBeFalse();
+    expect(res).not.toContainKey('onboarding'); // should go to inherited config now
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
@@ -188,7 +188,7 @@ describe('workers/repository/init/inherited', () => {
     });
     const res = await mergeInheritedConfig(config);
     expect(res.labels).toEqual(['test']);
-    expect(res.onboarding).toBeFalse();
+    expect(res).not.toContainKey('onboarding'); // should go to inherited config now
     expect(logger.warn).not.toHaveBeenCalled();
 
     expect(logger.debug).toHaveBeenCalledWith(
@@ -221,6 +221,7 @@ describe('workers/repository/init/inherited', () => {
     });
     const res = await mergeInheritedConfig(config);
     expect(res).not.toContainKey('binarySource');
+    expect(res).not.toContainKey('onboarding');
 
     expect(logger.warn).toHaveBeenCalledWith(
       {
@@ -316,7 +317,7 @@ describe('workers/repository/init/inherited', () => {
     );
     const res = await mergeInheritedConfig(config);
     expect(res.labels).toEqual(['test']);
-    expect(res.onboarding).toBeFalse();
+    expect(res).not.toContainKey('onboarding'); // should go to inherited config now
     expect(getConfigFileNames()[0]).toBe('some-other-file.json');
   });
 
@@ -329,7 +330,7 @@ describe('workers/repository/init/inherited', () => {
     );
     const res = await mergeInheritedConfig(config);
     expect(res.labels).toEqual(['test']);
-    expect(res.onboarding).toBeFalse();
+    expect(res).not.toContainKey('onboarding'); // should go to inherited config now
     expect(getConfigFileNames()[0]).toBe('some-file.json');
   });
 });

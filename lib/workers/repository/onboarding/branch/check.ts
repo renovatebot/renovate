@@ -12,6 +12,7 @@ import { platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
+import { getInheritedOrGlobal } from '../../../../util/common';
 import { getElapsedDays } from '../../../../util/date';
 import { readLocalFile } from '../../../../util/fs';
 import { getBranchCommit } from '../../../../util/git';
@@ -49,13 +50,13 @@ async function packageJsonConfigExists(): Promise<boolean> {
 async function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
   return (
     (await platform.findPr({
-      branchName: config.onboardingBranch!,
-      prTitle: config.onboardingPrTitle,
+      branchName: getInheritedOrGlobal('onboardingBranch'),
+      prTitle: getInheritedOrGlobal('onboardingPrTitle'),
       state: '!open',
       targetBranch: config.baseBranch,
     })) ??
     (await platform.findPr({
-      branchName: config.onboardingBranch!,
+      branchName: getInheritedOrGlobal('onboardingBranch'),
       prTitle: getSemanticCommitPrTitle(config),
       state: '!open',
       targetBranch: config.baseBranch,
@@ -66,6 +67,8 @@ async function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
 export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   logger.debug('isOnboarded()');
   const title = `Action required: Add a Renovate config`;
+  const onboarding = getInheritedOrGlobal('onboarding');
+  const requireConfig = getInheritedOrGlobal('requireConfig');
 
   // Repo is onboarded if in silent mode
   if (config.mode === 'silent') {
@@ -79,11 +82,11 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   // - An onboarding cache is present, and
   // - The current default branch SHA matches the default SHA found in the cache
   // Also if there is a closed pr skip using cache as it is outdated
-  if (config.requireConfig === 'optional' && config.onboarding === false) {
+  if (requireConfig === 'optional' && onboarding === false) {
     // Return early and avoid checking for config files
     return true;
   }
-  if (config.requireConfig === 'ignored') {
+  if (requireConfig === 'ignored') {
     logger.debug('Config file will be ignored');
     return true;
   }
@@ -94,7 +97,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   // if onboarding cache is present and base branch has not been updated; branch is not onboarded
   // if closed pr exists then presence of onboarding cache doesn't matter as we need to skip onboarding
   if (
-    config.onboarding &&
+    onboarding &&
     !closedOnboardingPr &&
     isNonEmptyObject(onboardingBranchCache) &&
     onboardingBranchCache.defaultBranchSha ===
@@ -144,7 +147,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
 
   // If onboarding has been disabled and config files are required then the
   // repository has not been onboarded yet
-  if (config.requireConfig === 'required' && config.onboarding === false) {
+  if (requireConfig === 'required' && onboarding === false) {
     throw new Error(REPOSITORY_NO_CONFIG);
   }
 
@@ -153,7 +156,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
     return false;
   }
   logger.debug('Found closed onboarding PR');
-  if (config.requireConfig === 'optional') {
+  if (requireConfig === 'optional') {
     logger.debug('Config not mandatory so repo is considered onboarded');
     return true;
   }
@@ -180,7 +183,7 @@ export async function getOnboardingPr(
   config: RenovateConfig,
 ): Promise<Pr | null> {
   return await platform.getBranchPr(
-    config.onboardingBranch!,
+    getInheritedOrGlobal('onboardingBranch'),
     config.baseBranch,
   );
 }

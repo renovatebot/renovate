@@ -1,4 +1,5 @@
 import { getConfig } from '../../../../config/defaults';
+import { GlobalConfig } from '../../../../config/global';
 import { createOnboardingBranch } from './create';
 import type { RenovateConfig } from '~test/util';
 import { scm } from '~test/util';
@@ -14,6 +15,10 @@ describe('workers/repository/onboarding/branch/create', () => {
   let config: RenovateConfig;
 
   beforeEach(() => {
+    GlobalConfig.set({
+      onboardingBranch: 'renovate/configure',
+      onboardingConfigFileName: 'renovate.json',
+    });
     config = getConfig();
   });
 
@@ -226,7 +231,10 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message = `${prefix}: add renovate.json`;
 
         config.semanticCommits = 'enabled';
-        config.onboardingConfigFileName = undefined;
+        GlobalConfig.set({
+          onboardingBranch: 'renovate/configure',
+          onboardingConfigFileName: undefined,
+        });
 
         await createOnboardingBranch(config);
 
@@ -251,7 +259,10 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message = `${prefix}: add renovate.json`;
 
         config.semanticCommits = 'enabled';
-        config.onboardingConfigFileName = 'superConfigFile.yaml';
+        GlobalConfig.set({
+          onboardingBranch: 'renovate/configure',
+          onboardingConfigFileName: 'superConfigFile.yaml',
+        });
 
         await createOnboardingBranch(config);
 
@@ -277,7 +288,10 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message = `${prefix}: add ${path}`;
 
         config.semanticCommits = 'enabled';
-        config.onboardingConfigFileName = path;
+        GlobalConfig.set({
+          onboardingBranch: 'renovate/configure',
+          onboardingConfigFileName: path,
+        });
 
         await createOnboardingBranch(config);
 
@@ -303,7 +317,10 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message = `${prefix}: add ${path}`;
 
         config.semanticCommits = 'enabled';
-        config.onboardingConfigFileName = path;
+        GlobalConfig.set({
+          onboardingBranch: 'renovate/configure',
+          onboardingConfigFileName: path,
+        });
 
         await createOnboardingBranch(config);
 

@@ -44,6 +44,12 @@ describe('workers/repository/onboarding/branch/index', () => {
       OnboardingState.prUpdateRequested = false;
       scm.getFileList.mockResolvedValue([]);
       cache.getCache.mockReturnValue({});
+      // default values
+      GlobalConfig.set({
+        requireConfig: 'required',
+        onboarding: true,
+        onboardingBranch: 'renovate/configure',
+      });
     });
 
     it('throws if no package files', async () => {
@@ -53,7 +59,11 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it("doesn't throw if there are no package files and onboardingNoDeps config option is set", async () => {
-      config.onboardingNoDeps = 'enabled';
+      GlobalConfig.set({
+        requireConfig: 'required',
+        onboarding: true,
+        onboardingNoDeps: 'enabled',
+      });
       await expect(checkOnboardingBranch(config)).resolves.not.toThrow(
         REPOSITORY_NO_PACKAGE_FILES,
       );
@@ -158,29 +168,38 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     it('handles skipped onboarding combined with requireConfig = optional', async () => {
       config.requireConfig = 'optional';
-      config.onboarding = false;
+      GlobalConfig.set({
+        requireConfig: 'optional',
+        onboarding: false,
+      });
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
     });
 
     it('handles skipped onboarding, requireConfig=required, and a config file', async () => {
-      config.requireConfig = 'required';
-      config.onboarding = false;
+      GlobalConfig.set({
+        requireConfig: 'required',
+        onboarding: false,
+      });
       scm.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
     });
 
     it('handles skipped onboarding, requireConfig=ignored', async () => {
-      config.requireConfig = 'ignored';
-      config.onboarding = false;
+      GlobalConfig.set({
+        requireConfig: 'ignored',
+        onboarding: false,
+      });
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
     });
 
     it('handles skipped onboarding, requireConfig=required, and no config file', async () => {
-      config.requireConfig = 'required';
-      config.onboarding = false;
+      GlobalConfig.set({
+        requireConfig: 'required',
+        onboarding: false,
+      });
       scm.getFileList.mockResolvedValueOnce(['package.json']);
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const onboardingResult = checkOnboardingBranch(config);
@@ -258,14 +277,16 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it('detects repo is onboarded via PR', async () => {
-      config.requireConfig = 'optional';
+      GlobalConfig.set({
+        requireConfig: 'optional',
+        onboarding: true,
+      });
       platform.findPr.mockResolvedValueOnce(mock<Pr>());
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
     });
 
     it('throws if no required config', async () => {
-      config.requireConfig = 'required';
       platform.findPr.mockResolvedValue(mock<Pr>());
       platform.getPrList.mockResolvedValueOnce([
         {
@@ -306,7 +327,7 @@ describe('workers/repository/onboarding/branch/index', () => {
 
       expect(logger.info).toHaveBeenCalledWith(
         {
-          branch: config.onboardingBranch,
+          branch: 'renovate/configure',
           commit: 'new-onboarding-sha',
           onboarding: true,
         },
@@ -315,7 +336,12 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it('skips processing onboarding branch when main/onboarding SHAs have not changed', async () => {
-      GlobalConfig.set({ platform: 'github' });
+      GlobalConfig.set({
+        platform: 'github',
+        requireConfig: 'required',
+        onboarding: true,
+        onboardingBranch: 'renovate/configure',
+      });
       const dummyCache = {
         onboardingBranchCache: {
           defaultBranchSha: 'default-sha',
@@ -425,7 +451,12 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     describe('tests onboarding rebase/retry checkbox handling', () => {
       beforeEach(() => {
-        GlobalConfig.set({ platform: 'github' });
+        GlobalConfig.set({
+          platform: 'github',
+          requireConfig: 'required',
+          onboarding: true,
+          onboardingBranch: 'renovate/configure',
+        });
         config.onboardingRebaseCheckbox = true;
         OnboardingState.prUpdateRequested = false;
         scm.getFileList.mockResolvedValueOnce(['package.json']);
@@ -435,7 +466,12 @@ describe('workers/repository/onboarding/branch/index', () => {
 
       it('detects unsupported platfom', async () => {
         const pl = 'bitbucket';
-        GlobalConfig.set({ platform: pl });
+        GlobalConfig.set({
+          platform: pl,
+          requireConfig: 'required',
+          onboarding: true,
+          onboardingBranch: 'renovate/configure',
+        });
         platform.getBranchPr.mockResolvedValueOnce(mock<Pr>({}));
 
         await checkOnboardingBranch(config);
@@ -445,7 +481,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
         expect(scm.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
-          config.onboardingBranch,
+          'renovate/configure',
         );
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
@@ -461,7 +497,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
         expect(scm.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
-          config.onboardingBranch,
+          'renovate/configure',
         );
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
@@ -477,7 +513,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
         expect(scm.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
-          config.onboardingBranch,
+          'renovate/configure',
         );
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
@@ -490,7 +526,7 @@ describe('workers/repository/onboarding/branch/index', () => {
 
         expect(OnboardingState.prUpdateRequested).toBeFalse();
         expect(scm.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
-          config.onboardingBranch,
+          'renovate/configure',
         );
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });

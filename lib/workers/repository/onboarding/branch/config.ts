@@ -7,12 +7,13 @@ import type {
 } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { clone } from '../../../../util/clone';
+import { getInheritedOrGlobal } from '../../../../util/common';
 import { EditorConfig, JSONWriter } from '../../../../util/json-writer';
 
 async function getOnboardingConfig(
   config: RenovateConfig,
 ): Promise<RenovateSharedConfig | undefined> {
-  let onboardingConfig = clone(config.onboardingConfig);
+  let onboardingConfig = clone(getInheritedOrGlobal('onboardingConfig'));
 
   // TODO #22198 fix types
   const foundPreset = await searchDefaultOnboardingPreset(config.repository!);

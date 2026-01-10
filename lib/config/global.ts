@@ -43,6 +43,18 @@ export class GlobalConfig {
     's3Endpoint',
     's3PathStyle',
     'userAgent',
+
+    // inherited options
+    'bbUseDevelopmentBranch',
+    'configFileNames',
+    'onboarding',
+    'onboardingBranch',
+    'onboardingCommitMessage',
+    'onboardingConfig',
+    'onboardingConfigFileName',
+    'onboardingNoDeps',
+    'onboardingPrTitle',
+    'requireConfig',
   ];
 
   private static config: RepoGlobalConfig = {};

@@ -2,6 +2,7 @@ import { isNullOrUndefined } from '@sindresorhus/is';
 import type { MockInstance } from 'vitest';
 import * as decrypt from '../../../config/decrypt';
 import { getConfig } from '../../../config/defaults';
+import { GlobalConfig } from '../../../config/global';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
 import * as _migrate from '../../../config/migration';
 import type { AllConfig } from '../../../config/types';
@@ -44,6 +45,7 @@ function mockProcessExitOnce(): [MockInstance<NodeJS.Process['exit']>, Error] {
 
 beforeEach(() => {
   memCache.init();
+  GlobalConfig.reset();
   config = getConfig();
   config.errors = [];
   config.warnings = [];
@@ -387,10 +389,12 @@ describe('workers/repository/init/merge', () => {
         warnings: [],
         errors: [],
       });
+      GlobalConfig.set({
+        requireConfig: 'ignored',
+      });
       expect(
         await mergeRenovateConfig({
           ...config,
-          requireConfig: 'ignored',
           // @ts-expect-error -- TODO: do we still need this?
           configFileParsed: undefined,
           warnings: undefined,

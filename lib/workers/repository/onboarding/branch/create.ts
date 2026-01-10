@@ -2,6 +2,7 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
+import { getInheritedOrGlobal } from '../../../../util/common';
 import { compile } from '../../../../util/template';
 import { getDefaultConfigFileName } from '../common';
 import { OnboardingCommitMessageFactory } from './commit-message';
@@ -40,7 +41,7 @@ export async function createOnboardingBranch(
 
   return scm.commitAndPush({
     baseBranch: config.baseBranch,
-    branchName: config.onboardingBranch!,
+    branchName: getInheritedOrGlobal('onboardingBranch'),
     files: [
       {
         type: 'addition',

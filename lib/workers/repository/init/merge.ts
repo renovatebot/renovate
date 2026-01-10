@@ -24,7 +24,7 @@ import { platform } from '../../../modules/platform';
 import { scm } from '../../../modules/platform/scm';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
-import { parseJson } from '../../../util/common';
+import { getInheritedOrGlobal, parseJson } from '../../../util/common';
 import { setUserEnv } from '../../../util/env';
 import { readLocalFile, readSystemFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
@@ -189,7 +189,7 @@ export async function mergeRenovateConfig(
 ): Promise<RenovateConfig> {
   let returnConfig = { ...config };
   let repoConfig: RepoFileConfig = {};
-  if (config.requireConfig !== 'ignored') {
+  if (getInheritedOrGlobal('requireConfig') !== 'ignored') {
     repoConfig = await detectRepoFileConfig(branchName);
   }
   if (!repoConfig.configFileParsed && config.mode === 'silent') {

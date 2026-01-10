@@ -72,7 +72,7 @@ Based on the default config's presets, Renovate will:
   - something else
   - this is Docker-only
 
-🔡 Do you want to change how Renovate upgrades your dependencies? Add your custom config to \`renovate.json\` in this branch. Renovate will update the Pull Request description the next time it runs.
+🔡 Do you want to change how Renovate upgrades your dependencies? Add your custom config to \`.github/renovate.json\` in this branch. Renovate will update the Pull Request description the next time it runs.
 
 ---
 "

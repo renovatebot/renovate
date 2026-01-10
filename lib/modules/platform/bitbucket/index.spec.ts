@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../config/global';
 import * as memCache from '../../../util/cache/memory';
 import { setBaseUrl } from '../../../util/http/bitbucket';
 import type { PlatformResult, RepoParams } from '../types';
@@ -34,6 +35,7 @@ describe('modules/platform/bitbucket/index', () => {
 
     setBaseUrl(baseUrl);
     memCache.init();
+    GlobalConfig.reset();
   });
 
   async function initRepoMock(
@@ -262,6 +264,9 @@ describe('modules/platform/bitbucket/index', () => {
 
   describe('bbUseDevelopmentBranch', () => {
     it('not enabled: defaults to using main branch', async () => {
+      GlobalConfig.set({
+        bbUseDevelopmentBranch: false,
+      });
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -273,7 +278,6 @@ describe('modules/platform/bitbucket/index', () => {
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
-        bbUseDevelopmentBranch: false,
       });
 
       expect(res.defaultBranch).toBe('master');
@@ -293,9 +297,11 @@ describe('modules/platform/bitbucket/index', () => {
           development: { name: 'develop', branch: { name: 'develop' } },
         });
 
+      GlobalConfig.set({
+        bbUseDevelopmentBranch: true,
+      });
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
-        bbUseDevelopmentBranch: true,
       });
 
       expect(res.defaultBranch).toBe('develop');
@@ -315,9 +321,11 @@ describe('modules/platform/bitbucket/index', () => {
           development: { name: 'develop' },
         });
 
+      GlobalConfig.set({
+        bbUseDevelopmentBranch: true,
+      });
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
-        bbUseDevelopmentBranch: true,
       });
 
       expect(res.defaultBranch).toBe('master');

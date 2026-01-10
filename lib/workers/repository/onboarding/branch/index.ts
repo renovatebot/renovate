@@ -7,6 +7,7 @@ import { logger } from '../../../../logger';
 import { type Pr, platform } from '../../../../modules/platform';
 import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
+import { getInheritedOrGlobal } from '../../../../util/common';
 import { getBranchCommit, setGitAuthor } from '../../../../util/git';
 import { checkIfConfigured } from '../../configured';
 import { extractAllDependencies } from '../../extract';
@@ -29,7 +30,7 @@ export async function checkOnboardingBranch(
 ): Promise<RenovateConfig> {
   logger.debug('checkOnboarding()');
   logger.trace({ config });
-  let onboardingBranch = config.onboardingBranch;
+  let onboardingBranch = getInheritedOrGlobal('onboardingBranch');
   const defaultBranch = config.defaultBranch!;
   let isConflicted = false;
   let isModified = false;
@@ -53,7 +54,7 @@ export async function checkOnboardingBranch(
     logger.debug('Onboarding PR already exists');
 
     isModified = await isOnboardingBranchModified(
-      config.onboardingBranch!,
+      getInheritedOrGlobal('onboardingBranch'),
       defaultBranch,
     );
     // if onboarding branch is not modified, check if onboarding config has been changed and rebase if true
@@ -64,7 +65,11 @@ export async function checkOnboardingBranch(
       );
       if (commit) {
         logger.info(
-          { branch: config.onboardingBranch, commit, onboarding: true },
+          {
+            branch: getInheritedOrGlobal('onboardingBranch'),
+            commit,
+            onboarding: true,
+          },
           'Branch updated',
         );
       }
@@ -79,7 +84,10 @@ export async function checkOnboardingBranch(
 
     if (
       isConfigHashPresent(onboardingPr) && // needed so that existing onboarding PRs are updated with config hash comment
-      isOnboardingCacheValid(defaultBranch, config.onboardingBranch!) &&
+      isOnboardingCacheValid(
+        defaultBranch,
+        getInheritedOrGlobal('onboardingBranch'),
+      ) &&
       !(config.onboardingRebaseCheckbox && OnboardingState.prUpdateRequested)
     ) {
       logger.debug(
@@ -90,12 +98,14 @@ export async function checkOnboardingBranch(
     }
     OnboardingState.onboardingCacheValid = false;
     if (isModified) {
-      if (hasOnboardingBranchChanged(config.onboardingBranch!)) {
+      if (
+        hasOnboardingBranchChanged(getInheritedOrGlobal('onboardingBranch'))
+      ) {
         invalidateExtractCache(config.baseBranch!);
       }
       isConflicted = await isOnboardingBranchConflicted(
         config.baseBranch!,
-        config.onboardingBranch!,
+        getInheritedOrGlobal('onboardingBranch'),
       );
     }
   } else {
@@ -109,7 +119,7 @@ export async function checkOnboardingBranch(
       Object.entries((await extractAllDependencies(mergedConfig)).packageFiles)
         .length === 0
     ) {
-      if (config.onboardingNoDeps !== 'enabled') {
+      if (getInheritedOrGlobal('onboardingNoDeps') !== 'enabled') {
         throw new Error(REPOSITORY_NO_PACKAGE_FILES);
       }
     }

@@ -2,6 +2,7 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
+import { getInheritedOrGlobal } from '../../../../util/common';
 import { toSha256 } from '../../../../util/hash';
 import { getDefaultConfigFileName } from '../common';
 import { OnboardingCommitMessageFactory } from './commit-message';
@@ -49,7 +50,7 @@ export async function rebaseOnboardingBranch(
   // TODO #22198
   return scm.commitAndPush({
     baseBranch: config.baseBranch,
-    branchName: config.onboardingBranch!,
+    branchName: getInheritedOrGlobal('onboardingBranch'),
     files: [
       {
         type: 'addition',

@@ -1,6 +1,8 @@
 import JSON5 from 'json5';
 import * as JSONC from 'jsonc-parser';
 import type { JsonValue } from 'type-fest';
+import { GlobalConfig } from '../config/global';
+import { InheritConfig } from '../config/inherit';
 import {
   AZURE_API_USING_HOST_TYPES,
   BITBUCKET_API_USING_HOST_TYPES,
@@ -143,4 +145,15 @@ export function parseJsonc(content: string): JsonValue {
     return value;
   }
   throw new Error('Invalid JSONC');
+}
+
+// TODO: handle the return type
+/**
+ * Use only if an option is inheirt + global
+ * for only global use GlobalConfig.class
+ */
+export function getInheritedOrGlobal(key: any): any {
+  const inheritedValue = InheritConfig.get(key);
+  const globalValue = GlobalConfig.get(key);
+  return inheritedValue ?? globalValue;
 }

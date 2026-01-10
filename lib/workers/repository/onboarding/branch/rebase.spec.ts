@@ -12,36 +12,35 @@ const configModule = vi.mocked(_config);
 vi.mock('./config');
 
 describe('workers/repository/onboarding/branch/rebase', () => {
-  beforeAll(() => {
-    GlobalConfig.set({
-      localDir: '',
-      platform: 'github',
-    });
-  });
-
   describe('rebaseOnboardingBranch()', () => {
     let config: RenovateConfig;
     const hash = 'hash';
+    const onboardingConfigMock = {
+      $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+    };
 
     beforeEach(() => {
       memCache.init();
+      GlobalConfig.set({
+        localDir: '',
+        platform: 'github',
+        onboardingBranch: 'renovate/configure',
+        onboardingConfigFileName: 'renovate.json',
+        onboardingConfig: onboardingConfigMock,
+      });
 
       // using default options
       config = {
         semanticCommits: 'auto',
         semanticCommitScope: 'deps',
         semanticCommitType: 'chore',
-        onboardingConfig: {
-          $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-        },
-        onboardingConfigFileName: 'renovate.json',
         repository: 'some/repo',
       };
       configModule.getOnboardingConfigContents.mockResolvedValue('');
     });
 
     it('does nothing if branch is up to date', async () => {
-      const contents = JSON.stringify(config.onboardingConfig, null, 2) + '\n';
+      const contents = JSON.stringify(onboardingConfigMock, null, 2) + '\n';
       configModule.getOnboardingConfigContents.mockResolvedValueOnce(contents);
       await rebaseOnboardingBranch(config, toSha256(contents));
       expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
@@ -53,13 +52,13 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('uses the onboardingConfigFileName if set', async () => {
-      await rebaseOnboardingBranch(
-        {
-          ...config,
-          onboardingConfigFileName: '.github/renovate.json',
-        },
-        hash,
-      );
+      GlobalConfig.set({
+        localDir: '',
+        platform: 'github',
+        onboardingBranch: 'renovate/configure',
+        onboardingConfigFileName: '.github/renovate.json',
+      });
+      await rebaseOnboardingBranch(config, hash);
       expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
       expect(scm.commitAndPush.mock.calls[0][0].message).toContain(
         '.github/renovate.json',
@@ -70,13 +69,13 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('falls back to "renovate.json" if onboardingConfigFileName is not set', async () => {
-      await rebaseOnboardingBranch(
-        {
-          ...config,
-          onboardingConfigFileName: undefined,
-        },
-        hash,
-      );
+      GlobalConfig.set({
+        localDir: '',
+        platform: 'github',
+        onboardingBranch: 'renovate/configure',
+        onboardingConfigFileName: undefined,
+      });
+      await rebaseOnboardingBranch(config, hash);
       expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
       expect(scm.commitAndPush.mock.calls[0][0].message).toContain(
         'renovate.json',
@@ -92,14 +91,20 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('does nothing if config hashes match', async () => {
-      const contents = JSON.stringify(config.onboardingConfig, null, 2) + '\n';
+      const contents = JSON.stringify(onboardingConfigMock, null, 2) + '\n';
       configModule.getOnboardingConfigContents.mockResolvedValueOnce(contents);
       await rebaseOnboardingBranch(config, toSha256(contents));
       expect(scm.commitAndPush).not.toHaveBeenCalled();
     });
 
     it('dryRun=full', async () => {
-      GlobalConfig.set({ localDir: '', dryRun: 'full', platform: 'github' });
+      GlobalConfig.set({
+        localDir: '',
+        dryRun: 'full',
+        platform: 'github',
+        onboardingBranch: 'renovate/configure',
+        onboardingConfigFileName: 'renovate.json',
+      });
       await rebaseOnboardingBranch(config, hash);
 
       expect(logger.info).toHaveBeenCalledWith(
@@ -116,7 +121,12 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       ${'bitbucket-server'}
       ${'codecommit'}
     `('returns null for $platform', async ({ platform }) => {
-      GlobalConfig.set({ platform, localDir: '' });
+      GlobalConfig.set({
+        platform,
+        localDir: '',
+        onboardingBranch: 'renovate/configure',
+        onboardingConfigFileName: 'renovate.json',
+      });
       const res = await rebaseOnboardingBranch(config, hash);
       expect(res).toBeNull();
       expect(scm.commitAndPush).not.toHaveBeenCalled();

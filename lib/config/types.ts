@@ -173,7 +173,7 @@ export interface RepoInheritConfig {
   onboarding?: boolean;
   onboardingConfig?: RenovateConfig;
   requireConfig?: RequiredConfig;
-  bbUseDevelopmentBranch?: string;
+  bbUseDevelopmentBranch?: boolean;
 }
 
 // Config options used only within the global worker

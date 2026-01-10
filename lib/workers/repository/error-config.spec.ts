@@ -14,8 +14,10 @@ let config: RenovateConfig;
 
 beforeEach(() => {
   // default values
-  config = partial<RenovateConfig>({
+  GlobalConfig.set({
     onboardingBranch: 'configure/renovate',
+  });
+  config = partial<RenovateConfig>({
     configWarningReuseIssue: true,
     confidential: false,
   });
@@ -23,10 +25,6 @@ beforeEach(() => {
 
 describe('workers/repository/error-config', () => {
   describe('raiseConfigWarningIssue()', () => {
-    beforeEach(() => {
-      GlobalConfig.reset();
-    });
-
     it('returns if mode is silent', async () => {
       config.mode = 'silent';
 
@@ -73,7 +71,10 @@ Message: some-message
       error.validationSource = 'package.json';
       error.validationMessage = 'some-message';
       platform.ensureIssue.mockResolvedValueOnce('created');
-      GlobalConfig.set({ dryRun: 'full' });
+      GlobalConfig.set({
+        dryRun: 'full',
+        onboardingBranch: 'configure/renovate',
+      });
 
       const res = await raiseConfigWarningIssue(config, error);
 
@@ -113,7 +114,10 @@ Message: some-message
         state: 'open',
       });
       platform.getBranchPr.mockResolvedValue(pr);
-      GlobalConfig.set({ dryRun: 'full' });
+      GlobalConfig.set({
+        dryRun: 'full',
+        onboardingBranch: 'configure/renovate',
+      });
 
       const res = await raiseConfigWarningIssue(config, error);
 

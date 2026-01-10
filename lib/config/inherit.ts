@@ -2,16 +2,16 @@ import type { RenovateConfig, RepoInheritConfig } from './types';
 
 export class InheritConfig {
   static OPTIONS: readonly (keyof RepoInheritConfig)[] = [
+    'bbUseDevelopmentBranch',
+    'configFileNames',
+    'onboarding',
     'onboardingBranch',
     'onboardingCommitMessage',
-    'configFileNames',
+    'onboardingConfig',
     'onboardingConfigFileName',
     'onboardingNoDeps',
     'onboardingPrTitle',
-    'onboarding',
-    'onboardingConfig',
     'requireConfig',
-    'bbUseDevelopmentBranch',
   ];
 
   private static config: RepoInheritConfig = {};

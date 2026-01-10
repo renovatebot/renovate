@@ -12,18 +12,17 @@ const mockedPresets = vi.mocked(presets);
 describe('workers/repository/onboarding/branch/config', () => {
   let config: RenovateConfig;
 
-  beforeAll(() => {
+  const defaultOnboardingConfig = {
+    $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  };
+
+  beforeEach(() => {
     GlobalConfig.set({
       localDir: '',
       platform: 'github',
+      onboardingConfig: defaultOnboardingConfig,
     });
-  });
-
-  beforeEach(() => {
     config = partial<RenovateConfig>({
-      onboardingConfig: {
-        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-      },
       repository: 'some/repo',
     });
   });
@@ -122,7 +121,7 @@ describe('workers/repository/onboarding/branch/config', () => {
       );
       const onboardingConfig = await getOnboardingConfig(config);
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(2);
-      expect(onboardingConfig).toEqual(config.onboardingConfig);
+      expect(onboardingConfig).toEqual(defaultOnboardingConfig);
     });
 
     it('ignores an unknown error', async () => {
@@ -131,7 +130,7 @@ describe('workers/repository/onboarding/branch/config', () => {
       );
       const onboardingConfig = await getOnboardingConfig(config);
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(2);
-      expect(onboardingConfig).toEqual(config.onboardingConfig);
+      expect(onboardingConfig).toEqual(defaultOnboardingConfig);
     });
 
     it('ignores unsupported platform', async () => {
@@ -140,7 +139,7 @@ describe('workers/repository/onboarding/branch/config', () => {
       );
       const onboardingConfig = await getOnboardingConfig(config);
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(2);
-      expect(onboardingConfig).toEqual(config.onboardingConfig);
+      expect(onboardingConfig).toEqual(defaultOnboardingConfig);
     });
   });
 });

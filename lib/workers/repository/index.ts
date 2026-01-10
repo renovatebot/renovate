@@ -13,6 +13,7 @@ import { addExtractionStats } from '../../instrumentation/reporting';
 import { ATTR_RENOVATE_SPLIT } from '../../instrumentation/types';
 import { logger, setMeta } from '../../logger';
 import { resetRepositoryLogLevelRemaps } from '../../logger/remap';
+import { getInheritedOrGlobal } from '../../util/common';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import { isCloned } from '../../util/git';
@@ -235,7 +236,7 @@ function emptyExtract(config: RenovateConfig): ExtractResult {
       addSplit('lookup');
       return {
         branches: [],
-        branchList: [config.onboardingBranch!], // to prevent auto closing
+        branchList: [getInheritedOrGlobal('onboardingBranch')!], // to prevent auto closing
         packageFiles: {},
       };
     },

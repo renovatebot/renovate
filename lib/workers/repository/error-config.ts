@@ -4,6 +4,7 @@ import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { Pr } from '../../modules/platform';
 import { platform } from '../../modules/platform';
+import { getInheritedOrGlobal } from '../../util/common';
 
 export function raiseConfigWarningIssue(
   config: RenovateConfig,
@@ -52,7 +53,7 @@ async function raiseWarningIssue(
   }
 
   const pr = await platform.getBranchPr(
-    config.onboardingBranch!,
+    getInheritedOrGlobal('onboardingBranch'),
     config.baseBranch,
   );
   if (pr?.state === 'open') {

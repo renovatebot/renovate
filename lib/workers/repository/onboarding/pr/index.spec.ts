@@ -33,7 +33,11 @@ describe('workers/repository/onboarding/pr/index', () => {
       branches = [];
       platform.massageMarkdown.mockImplementation((input) => input);
       platform.createPr.mockResolvedValueOnce(partial<Pr>());
-      GlobalConfig.reset();
+      GlobalConfig.set({
+        onboardingBranch: 'renovate/configure',
+        onboardingPrTitle: 'Configure Renovate',
+        requireConfig: 'required',
+      });
     });
 
     it('returns if onboarded', async () => {
@@ -280,19 +284,26 @@ describe('workers/repository/onboarding/pr/index', () => {
     });
 
     it('creates PR (no require config)', async () => {
-      config.requireConfig = 'optional';
+      GlobalConfig.set({
+        requireConfig: 'optional',
+      });
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
     });
 
     it('creates PR (require config)', async () => {
-      config.requireConfig = 'required';
+      GlobalConfig.set({
+        requireConfig: 'required',
+      });
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
     });
 
     it('dryrun of creates PR', async () => {
-      GlobalConfig.set({ dryRun: 'full' });
+      GlobalConfig.set({
+        dryRun: 'full',
+        onboardingBranch: 'renovate/configure',
+      });
       await ensureOnboardingPr(config, packageFiles, branches);
 
       expect(logger.info).toHaveBeenCalledWith(
@@ -304,7 +315,10 @@ describe('workers/repository/onboarding/pr/index', () => {
     });
 
     it('dryrun of updates PR', async () => {
-      GlobalConfig.set({ dryRun: 'full' });
+      GlobalConfig.set({
+        dryRun: 'full',
+        onboardingBranch: 'renovate/configure',
+      });
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
           title: 'Configure Renovate',
@@ -326,7 +340,11 @@ describe('workers/repository/onboarding/pr/index', () => {
       const err = partial<RequestError>({ response });
 
       beforeEach(() => {
-        GlobalConfig.reset();
+        GlobalConfig.set({
+          onboardingBranch: 'renovate/configure',
+          onboardingPrTitle: 'Configure Renovate',
+          requireConfig: 'required',
+        });
         scm.deleteBranch.mockResolvedValue();
         platform.createPr.mockReset();
       });
