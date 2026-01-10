@@ -1831,11 +1831,14 @@ None detected
         },
         packageFiles,
       );
-      expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
 
-\`1\`/\`2\` CVEs have Renovate fixes.
+      const heading =
+        '## Vulnerabilities\n\n> ❗ **Important**\n> \n' +
+        '> `1`/`2` CVEs have Renovate fixes.\n\n';
 
-<details><summary>npm</summary>
+      expect(result.trimEnd()).toBe(
+        heading +
+          codeBlock`<details><summary>npm</summary>
 <blockquote>
 
 <details><summary>undefined</summary>
@@ -1859,7 +1862,8 @@ None detected
 </details>
 
 </blockquote>
-</details>`);
+</details>`,
+      );
     });
 
     it('return unresolved vulnerabilities if set to "unresolved"', async () => {
@@ -1891,6 +1895,12 @@ None detected
           },
         },
       ]);
+
+      const heading =
+        '## Vulnerabilities\n\n> ❗ **Important**\n> \n' +
+        '> `1`/`2` CVEs have possible Renovate fixes.\n' +
+        '> See [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n\n';
+
       const result = await getDashboardMarkdownVulnerabilities(
         {
           ...config,
@@ -1898,12 +1908,9 @@ None detected
         },
         packageFiles,
       );
-      expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
-
-\`1\`/\`2\` CVEs have possible Renovate fixes.
-See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.
-
-<details><summary>npm</summary>
+      expect(result.trimEnd()).toBe(
+        heading +
+          codeBlock`<details><summary>npm</summary>
 <blockquote>
 
 <details><summary>undefined</summary>
@@ -1920,7 +1927,8 @@ See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-opti
 </details>
 
 </blockquote>
-</details>`);
+</details>`,
+      );
     });
   });
 
@@ -1960,7 +1968,7 @@ See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-opti
 
       const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
 
-      expect(result).toContain('> ℹ **Note**');
+      expect(result).toContain('> ℹ️ **Note**');
       expect(result).toContain('| Datasource | Name | Last Updated |');
       expect(result).toContain('| npm | `abandoned-pkg` | `2020-05-15` |');
       expect(result).toContain('abandonmentThreshold');
