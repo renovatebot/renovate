@@ -1,3 +1,4 @@
+import { copyFile } from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
@@ -7,9 +8,10 @@ import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { toSha256 } from '../../../util/hash.ts';
 import { Http } from '../../../util/http/index.ts';
+import { joinUrlParts } from '../../../util/url.ts';
 import { cacheSubDir } from './common.ts';
-import * as fileUtils from './utils.ts';
 import {
+  computeFileChecksum,
   getComponentUrl,
   getPackageUrl,
   mockFetchInReleaseContent,
@@ -19,14 +21,13 @@ import {
   downloadPackageFile,
   getPackageFromReleaseFile,
 } from './packages.ts';
-import { joinUrlParts } from '../../../util/url.ts';
-import { computeFileChecksum } from './checksum.ts';
-import { copyFile } from 'fs-extra';
+import * as fileUtils from './utils.ts';
 
 const debBaseUrl = 'http://deb.debian.org';
 
 describe('modules/datasource/deb/packages', () => {
   let downloadedPackageFile: string;
+
   const fixtureInRelease = Fixtures.get('InRelease');
   const fixtureInReleaseBookworm = Fixtures.get('InReleaseBookworm');
   const fixtureInReleaseInvalid = Fixtures.get('InReleaseInvalid');
@@ -34,15 +35,12 @@ describe('modules/datasource/deb/packages', () => {
   const fixturePackagesArchiveXzPath = Fixtures.getPath('Packages.xz');
   const fixturePackagesArchivePath2 = Fixtures.getPath(`Packages2.gz`);
   const fixturePackagesArchiveNoCompr = Fixtures.getPath(`Packages`);
+
   const packageArgs: [release: string, component: string, arch: string] = [
     'stable',
     'non-free',
     'amd64',
   ];
-
-  beforeEach(() => {
-    vi.resetAllMocks();
-  });
 
   describe('getPackageFromReleaseFile', () => {
     it('retrieves Packages.xz file from the release file', () => {
@@ -122,7 +120,6 @@ describe('modules/datasource/deb/packages', () => {
 
     afterEach(async () => {
       await cacheDir?.cleanup();
-      cacheDir = null;
     });
 
     it('should download the package file if it has not been downloaded before', async () => {
@@ -250,7 +247,6 @@ describe('modules/datasource/deb/packages', () => {
     let extractionFolder: string;
 
     beforeEach(async () => {
-      vi.resetAllMocks();
       cacheDir = await dir({ unsafeCleanup: true });
       GlobalConfig.set({ cacheDir: cacheDir.path });
 
@@ -263,7 +259,6 @@ describe('modules/datasource/deb/packages', () => {
 
     afterEach(async () => {
       await cacheDir?.cleanup();
-      cacheDir = null;
     });
 
     it('should ignore error when fetching of InRelease or Release content fails', async () => {
