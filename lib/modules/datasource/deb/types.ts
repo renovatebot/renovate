@@ -30,15 +30,6 @@ export interface PackageDescription {
 }
 
 /**
- * Represents the names of the Release files.
- * According to the debian documentation, "... apt would download an InRelease or Release file
- * from the $ARCHIVE_ROOT/dists/$DISTRIBUTION directory."
- *
- * See https://wiki.debian.org/DebianRepository/Format#Overview
- */
-export const ReleaseFiles = ['InRelease', 'Release'] as const;
-
-/**
  * Represents the names of the Package Index file compression algorithms.
  * Ordered by preference.
  *
@@ -46,7 +37,7 @@ export const ReleaseFiles = ['InRelease', 'Release'] as const;
  */
 export const PackagesCompressionAlgos = ['xz', 'bz2', 'gz'] as const;
 
-export type CompressionAlgorithms = (typeof PackagesCompressionAlgos)[number];
+export type PackageCompressionAlgos = (typeof PackagesCompressionAlgos)[number];
 
 export interface DownloadedPackage {
   extractedFile: string;

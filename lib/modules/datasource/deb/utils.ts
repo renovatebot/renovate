@@ -46,3 +46,12 @@ export async function getFileCreationTime(
   const stats = await fs.statCacheFile(filePath);
   return stats?.ctime;
 }
+
+/**
+ * Represents the names of the Release files.
+ * According to the debian documentation, "... apt would download an InRelease or Release file
+ * from the $ARCHIVE_ROOT/dists/$DISTRIBUTION directory."
+ *
+ * See https://wiki.debian.org/DebianRepository/Format#Overview
+ */
+export const ReleaseFiles = ['InRelease', 'Release'] as const;
