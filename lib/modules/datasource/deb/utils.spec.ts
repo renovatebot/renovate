@@ -1,4 +1,4 @@
-import { copyFile } from 'fs-extra';
+import { copyFile } from 'node:fs/promises';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
