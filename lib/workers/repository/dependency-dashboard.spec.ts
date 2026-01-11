@@ -12,6 +12,7 @@ import type {
 import type { Platform } from '../../modules/platform';
 import { massageMarkdown } from '../../modules/platform/github';
 import { clone } from '../../util/clone';
+import { emojify } from '../../util/emoji';
 import { regEx } from '../../util/regex';
 import { asTimestamp } from '../../util/timestamp';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
@@ -1682,8 +1683,9 @@ None detected
       });
 
       describe('PackageFiles.getDashboardMarkdown()', () => {
-        const note =
-          '> ℹ **Note**\n> \n> Detected dependencies section has been truncated\n\n';
+        const note = emojify(
+          `> :information_source: **Note**\n> \n> Detected dependencies section has been truncated\n\n`,
+        );
         const title = `## Detected Dependencies\n\n`;
 
         beforeEach(() => {
