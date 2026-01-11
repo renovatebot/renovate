@@ -1,10 +1,10 @@
 import type { PathLike, Stats } from 'node:fs';
 import callsite from 'callsite';
-import * as JSONC from 'jsonc-parser';
 import type { DirectoryJSON } from 'memfs';
 import { fs as memfs, vol } from 'memfs';
 import type { TDataOut } from 'memfs/lib/encoding';
 import upath from 'upath';
+import { parseJsonc } from '../lib/util/common';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const realFs: typeof import('node:fs') = require('node:fs'); // used to bypass vitest mock
@@ -74,7 +74,7 @@ export class Fixtures {
    * @returns
    */
   static getJsonc<T = any>(name: string, fixturesRoot = '.'): T {
-    return JSONC.parse(
+    return parseJsonc(
       realFs.readFileSync(
         upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name),
         {

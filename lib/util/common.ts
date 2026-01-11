@@ -1,5 +1,5 @@
+import { parse as jsoncWeaverParse } from '@felipecrs/jsonc-weaver';
 import JSON5 from 'json5';
-import * as JSONC from 'jsonc-parser';
 import type { JsonValue } from 'type-fest';
 import {
   AZURE_API_USING_HOST_TYPES,
@@ -137,10 +137,5 @@ export function parseJsonWithFallback(
 }
 
 export function parseJsonc(content: string): JsonValue {
-  const errors: JSONC.ParseError[] = [];
-  const value = JSONC.parse(content, errors, { allowTrailingComma: true });
-  if (errors.length === 0) {
-    return value;
-  }
-  throw new Error('Invalid JSONC');
+  return jsoncWeaverParse(content);
 }
