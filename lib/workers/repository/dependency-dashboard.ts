@@ -681,9 +681,15 @@ export function getAbandonedPackagesMd(
     return '';
   }
 
-  let abandonedMd = '> ℹ **Note**\n> \n';
+  let abandonedMd = '## Abandoned Dependencies\n\n> ℹ **Note**\n> \n';
+
   abandonedMd +=
-    'These dependencies have not received updates for an extended period and may be unmaintained:\n\n';
+    '> Packages are marked as abandoned when they exceed the [`abandonmentThreshold`](https://docs.renovatebot.com/configuration-options/#abandonmentthreshold) since their last release. ';
+  abandonedMd +=
+    'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n> \n';
+
+  abandonedMd +=
+    '> These dependencies have not received updates for an extended period and may be unmaintained:\n';
 
   abandonedMd += '<details>\n';
   abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
@@ -701,13 +707,9 @@ export function getAbandonedPackagesMd(
     }
   }
 
-  abandonedMd += '\n</details>\n\n';
-  abandonedMd +=
-    'Packages are marked as abandoned when they exceed the [`abandonmentThreshold`](https://docs.renovatebot.com/configuration-options/#abandonmentthreshold) since their last release.\n';
-  abandonedMd +=
-    'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n\n';
+  abandonedMd += '\n</details>\n\n\n';
 
-  return abandonedMd + '\n';
+  return abandonedMd;
 }
 
 function getFooter(config: RenovateConfig): string {
