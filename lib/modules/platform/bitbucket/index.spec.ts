@@ -1669,7 +1669,7 @@ describe('modules/platform/bitbucket/index', () => {
       expect(bitbucket.massageMarkdown(prBody)).toMatchSnapshot();
     });
 
-    it('updates abandoned dependencies heading and place note inside', () => {
+    it('dependency dashboard: updates abandoned dependencies heading and place note inside', () => {
       const prBody =
         '> ℹ **Note**\n>\n' +
         'These dependencies have not received updates for an extended period and may be unmaintained:\n\n' +
@@ -1689,7 +1689,7 @@ describe('modules/platform/bitbucket/index', () => {
       );
     });
 
-    it('updates vulnerabilities section with multiple collapsible details sections to nested list', () => {
+    it('dependency dashboard: updates vulnerabilities section with multiple collapsible details sections to nested list', () => {
       const prBody =
         '## Vulnerabilities\n\n' +
         '`2`/`2` CVEs have Renovate fixes.\n' +
@@ -1714,7 +1714,7 @@ describe('modules/platform/bitbucket/index', () => {
       );
     });
 
-    it('updates detected dependencies section with multiple collapsible details sections to nested list', () => {
+    it('dependency dashboard: updates detected dependencies section with multiple collapsible details sections to nested list', () => {
       const prBody =
         '## Detected Dependencies\n\n' +
         '<details><summary>dockerfile</summary>\n<blockquote>\n\n' +
@@ -1746,13 +1746,15 @@ describe('modules/platform/bitbucket/index', () => {
         '<details><summary>biomejs/biome (@&#8203;biomejs/biome)</summary>\n\n\n' +
         '### [\\`v2.3.11\\`](https://github.com/biomejs/biome/blob/HEAD/packages/@&#8203;biomejs/biome/CHANGELOG.md#2311)\n\n' +
         '[Compare Source](https://github.com/biomejs/biome/compare/@biomejs/biome@2.3.10...@biomejs/biome@2.3.11)\n\n' +
+        '- [#&#8203;8583](https://github.com/biomejs/biome/pull/8583) [`83be210`](https://github.com/biomejs/biome/commit/83be2101cb14969e3affda260773e33e50874df0) Thanks [@&#8203;dyc3](https://github.com/dyc3)! - Added the new nursery rule [`useVueValidTemplateRoot`](https://biomejs.dev/linter/rules/use-vue-valid-template-root/).' +
         '</details>';
 
       expect(bitbucket.massageMarkdown(prBody)).toEqual(
         '## Release Notes\n\n' +
           '**biomejs/biome (@&#8203;biomejs/biome)**\n\n\n' +
           '### [\\`v2.3.11\\`](https://github.com/biomejs/biome/blob/HEAD/packages/@&#8203;biomejs/biome/CHANGELOG.md#2311)\n\n' +
-          '[Compare Source](https://github.com/biomejs/biome/compare/@biomejs/biome@2.3.10...@biomejs/biome@2.3.11)\n\n',
+          '[Compare Source](https://github.com/biomejs/biome/compare/@biomejs/biome@2.3.10...@biomejs/biome@2.3.11)\n\n' +
+          '- [#&#8203;8583](https://github.com/biomejs/biome/pull/8583) [`83be210`](https://github.com/biomejs/biome/commit/83be2101cb14969e3affda260773e33e50874df0) Thanks [@&#8203;dyc3](https://github.com/dyc3)! - Added the new nursery rule [`useVueValidTemplateRoot`](https://biomejs.dev/linter/rules/use-vue-valid-template-root/).',
       );
     });
   });
