@@ -287,6 +287,17 @@ describe('modules/platform/bitbucket-server/utils', () => {
         });
       });
     });
+    it('actually respects the gitUrl Setting', () => {
+      expect(
+        getRepoGitUrl(
+          'SOME/repo',
+          'https://some.external.url/',
+          'endpoint',
+          infoMock('https://some.internal.url/', 'SOME', 'repo'),
+          {},
+        ),
+      ).toBe(httpLink('https://some.external.url/', 'SOME', 'repo'));
+    });
   });
 
   describe('getExtraCloneOpts', () => {

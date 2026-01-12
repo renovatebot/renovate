@@ -12,6 +12,7 @@ import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { platform } from '../../modules/platform';
 import { coerceArray } from '../../util/array';
+import { emojify } from '../../util/emoji';
 import { regEx } from '../../util/regex';
 import { coerceString } from '../../util/string';
 import * as template from '../../util/template';
@@ -427,7 +428,7 @@ export async function ensureDependencyDashboard(
       ` See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
   } else if (configMigrationRes?.result === 'pr-modified') {
     issueBody +=
-      '## Config Migration Needed (error)\n\n' +
+      '## Config Migration Needed (Blocked)\n\n' +
       getMarkdownComment(configMigrationPrInfo) +
       ` The Config Migration branch exists but has been modified by another user. Renovate will not push to this branch unless it is first deleted. \n\n See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
   } else if (configMigrationRes?.result === 'add-checkbox') {
@@ -442,7 +443,7 @@ export async function ensureDependencyDashboard(
 
   if (hasDeprecationsOrReplacements) {
     issueBody += '## Deprecations / Replacements\n';
-    issueBody += '> ⚠️ **Warning**\n> \n';
+    issueBody += emojify('> :warning: **Warning**\n> \n');
     issueBody +=
       'These dependencies are either deprecated or have replacements available:\n\n';
     issueBody += '| Datasource | Name | Replacement PR? |\n';
@@ -521,7 +522,7 @@ export async function ensureDependencyDashboard(
   issueBody += getBranchesListMd(
     branches,
     (branch) => branch.result === 'pr-edited',
-    'Edited/Blocked',
+    'PR Edited (Blocked)',
     'The following updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox below.',
     'rebase',
   );
@@ -583,7 +584,7 @@ export async function ensureDependencyDashboard(
   issueBody += getBranchesListMd(
     branches,
     (branch) => branch.result === 'already-existed',
-    'Ignored or Blocked',
+    'PR Closed (Blocked)',
     'The following updates are blocked by an existing closed PR. To recreate the PR, click on a checkbox below.',
     'recreate',
   );
@@ -681,9 +682,9 @@ export function getAbandonedPackagesMd(
     return '';
   }
 
-  let abandonedMd = '> ℹ **Note**\n> \n';
+  let abandonedMd = emojify('> :information_source: **Note**\n> \n');
   abandonedMd +=
-    'These dependencies have not received updates for an extended period and may be unmaintained:\n\n';
+    '> These dependencies have not received updates for an extended period and may be unmaintained:\n\n';
 
   abandonedMd += '<details>\n';
   abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
@@ -755,12 +756,13 @@ export async function getDashboardMarkdownVulnerabilities(
   const resolvedVulnerabilitiesLength =
     vulnerabilities.length - unresolvedVulnerabilities.length;
 
-  result += `\`${resolvedVulnerabilitiesLength}\`/\`${vulnerabilities.length}\``;
+  result += emojify('> :exclamation: **Important**\n> \n');
+  result += `> \`${resolvedVulnerabilitiesLength}\`/\`${vulnerabilities.length}\``;
   if (isTruthy(config.osvVulnerabilityAlerts)) {
     result += ' CVEs have Renovate fixes.\n\n';
   } else {
     result +=
-      ' CVEs have possible Renovate fixes.\nSee [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n\n';
+      ' CVEs have possible Renovate fixes.\n> See [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n\n';
   }
 
   let renderedVulnerabilities: Vulnerability[];

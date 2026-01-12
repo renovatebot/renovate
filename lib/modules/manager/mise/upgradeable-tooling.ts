@@ -236,6 +236,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  conan: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'conan-io/conan',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
   consul: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
@@ -397,6 +404,20 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       packageName: 'stripe/stripe-cli',
       datasource: GithubReleasesDatasource.id,
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  swiftformat: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'nicklockwood/SwiftFormat',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
+  swiftlint: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'realm/SwiftLint',
+      datasource: GithubReleasesDatasource.id,
     },
   },
   taplo: {

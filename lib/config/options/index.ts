@@ -237,6 +237,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'onboardingAutoCloseAge',
+    description:
+      'Maximum number of days after which Renovate will stop trying to onboard the repository, and will close any existing onboarding PRs',
+    type: 'integer',
+    default: null,
+    globalOnly: true,
+    cli: false,
+  },
+  {
     name: 'onboardingCommitMessage',
     description:
       'Change this value to override the default onboarding commit message.',
@@ -602,7 +611,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.25.12',
+    default: 'ghcr.io/containerbase/sidecar:13.25.23',
     globalOnly: true,
   },
   {
@@ -963,6 +972,14 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'allowShellExecutorForPostUpgradeCommands',
+    description:
+      'Whether to run commands for `postUpgradeTasks` inside a shell. This has security implications, as it means that they can call out to other commands or access shell variables. It is difficult to craft an `allowedCommands` regex to restrict this.',
+    globalOnly: true,
+    type: 'boolean',
+    default: true,
   },
   {
     name: 'allowCustomCrateRegistries',
@@ -1734,6 +1751,16 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     advancedUse: true,
+  },
+  {
+    name: 'maxMajorIncrement',
+    description:
+      'Limit the maximum major version increment allowed. Set to 0 to disable.',
+    stage: 'package',
+    type: 'integer',
+    default: 500,
+    cli: false,
+    env: false,
   },
   {
     name: 'respectLatest',
@@ -2566,6 +2593,7 @@ const options: RenovateOptions[] = [
     allowedValues: [
       'bundlerConservative',
       'composerWithAll',
+      'composerNoMinimalChanges',
       'dotnetWorkloadRestore',
       'gomodMassage',
       'gomodTidy',
@@ -2839,7 +2867,7 @@ const options: RenovateOptions[] = [
       Update: '{{{updateType}}}',
       'Current value': '{{{currentValue}}}',
       'New value': '{{{newValue}}}',
-      Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+      Change: '`{{{displayFrom}}}` → `{{{displayTo}}}`',
       Pending: '{{{displayPending}}}',
       References: '{{{references}}}',
       'Package file': '{{{packageFile}}}',
@@ -3106,7 +3134,8 @@ const options: RenovateOptions[] = [
         which run automatically, and are not explicitly added in \`postUpgradeTasks\``,
     type: 'array',
     subType: 'string',
-    default: [],
+    default: ['gradleWrapper'],
+    allowedValues: ['goGenerate', 'gradleWrapper'],
     stage: 'repository',
     globalOnly: true,
   },

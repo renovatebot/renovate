@@ -1,5 +1,5 @@
 import { setTimeout } from 'timers/promises';
-import { isArray } from '@sindresorhus/is';
+import { isArray, isEmptyArray, isNonEmptyArray } from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global';
@@ -825,6 +825,7 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
 export function massageMarkdown(input: string): string {
   const desc = input
     .replace(regEx(/Pull Request/g), 'Merge Request')
+    .replace(regEx(/\bPR: #/g), 'MR: !')
     .replace(regEx(/\bPR\b/g), 'MR')
     .replace(regEx(/\bPRs\b/g), 'MRs')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
@@ -1214,21 +1215,21 @@ export async function addReviewers(
 
   // Gather the IDs for all the reviewers we want to add
   let newReviewerIDs: number[];
-  try {
-    newReviewerIDs = (
-      await p.all(
-        newReviewers.map((r) => async () => {
-          try {
-            return [await getUserID(r)];
-          } catch {
-            // Unable to fetch userId, try resolve as a group
-            return getMemberUserIDs(r);
-          }
-        }),
-      )
-    ).flat();
-  } catch (err) {
-    logger.warn({ err }, 'Failed to get IDs of the new reviewers');
+  newReviewerIDs = (
+    await p.all(
+      newReviewers.map((r) => async () => {
+        try {
+          return [await getUserID(r)];
+        } catch {
+          // Unable to fetch userId, try resolve as a group
+          return getMemberUserIDs(r);
+        }
+      }),
+    )
+  ).flat();
+
+  if (isNonEmptyArray(newReviewers) && isEmptyArray(newReviewerIDs)) {
+    logger.warn('Failed to get IDs of the new reviewers');
     return;
   }
 
