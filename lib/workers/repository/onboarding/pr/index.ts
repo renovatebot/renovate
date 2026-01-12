@@ -108,7 +108,7 @@ export async function ensureOnboardingPr(
   logger.debug('Filling in onboarding PR template');
   let prTemplate = `Welcome to [Renovate](${
     config.productLinks!.homepage
-  })! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
+  })! ${config.onboardingWelcomeMessage}\n\n`;
   prTemplate +=
     config.requireConfig === 'required'
       ? emojify(
