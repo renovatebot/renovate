@@ -645,13 +645,10 @@ function massageCodeblockMarkdown(body: string): string {
     const { indent, lang, code } = codeMatch.groups!;
     const indentLength = indent.length;
     const lines = code.split('\n');
-    const cleanedLines = lines.map((line) => {
+    const cleanedLines = lines.map((line) =>
       // Remove `indentLength` characters from the start of each line
-      if (line.length >= indentLength) {
-        return line.slice(indentLength);
-      }
-      return line;
-    });
+      line.slice(indentLength),
+    );
 
     const cleaned = cleanedLines.join('\n');
     const replacement = `\`\`\`${lang}\n${cleaned}\n\`\`\``;
