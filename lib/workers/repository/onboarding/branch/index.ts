@@ -54,7 +54,7 @@ export async function checkOnboardingBranch(
     logger.debug('Onboarding PR already exists');
 
     isModified = await isOnboardingBranchModified(
-      getInheritedOrGlobal('onboardingBranch'),
+      getInheritedOrGlobal('onboardingBranch')!,
       defaultBranch,
     );
     // if onboarding branch is not modified, check if onboarding config has been changed and rebase if true
@@ -86,7 +86,7 @@ export async function checkOnboardingBranch(
       isConfigHashPresent(onboardingPr) && // needed so that existing onboarding PRs are updated with config hash comment
       isOnboardingCacheValid(
         defaultBranch,
-        getInheritedOrGlobal('onboardingBranch'),
+        getInheritedOrGlobal('onboardingBranch')!,
       ) &&
       !(config.onboardingRebaseCheckbox && OnboardingState.prUpdateRequested)
     ) {
@@ -99,13 +99,13 @@ export async function checkOnboardingBranch(
     OnboardingState.onboardingCacheValid = false;
     if (isModified) {
       if (
-        hasOnboardingBranchChanged(getInheritedOrGlobal('onboardingBranch'))
+        hasOnboardingBranchChanged(getInheritedOrGlobal('onboardingBranch')!)
       ) {
         invalidateExtractCache(config.baseBranch!);
       }
       isConflicted = await isOnboardingBranchConflicted(
         config.baseBranch!,
-        getInheritedOrGlobal('onboardingBranch'),
+        getInheritedOrGlobal('onboardingBranch')!,
       );
     }
   } else {
@@ -140,12 +140,12 @@ export async function checkOnboardingBranch(
     // TODO #22198
     if (!isConflicted) {
       logger.debug('Merge onboarding branch in default branch');
-      await scm.mergeToLocal(onboardingBranch);
+      await scm.mergeToLocal(onboardingBranch!);
     }
   }
   setOnboardingCache(
     getBranchCommit(config.defaultBranch!)!,
-    getBranchCommit(onboardingBranch)!,
+    getBranchCommit(onboardingBranch!)!,
     isConflicted,
     isModified,
   );

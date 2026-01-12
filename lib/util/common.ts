@@ -3,6 +3,7 @@ import * as JSONC from 'jsonc-parser';
 import type { JsonValue } from 'type-fest';
 import { GlobalConfig } from '../config/global';
 import { InheritConfig } from '../config/inherit';
+import type { RepoInheritConfig } from '../config/types';
 import {
   AZURE_API_USING_HOST_TYPES,
   BITBUCKET_API_USING_HOST_TYPES,
@@ -152,7 +153,9 @@ export function parseJsonc(content: string): JsonValue {
  * Use only if an option is inheirt + global
  * for only global use GlobalConfig.class
  */
-export function getInheritedOrGlobal(key: any): any {
+export function getInheritedOrGlobal<Key extends keyof RepoInheritConfig>(
+  key: Key,
+): RepoInheritConfig[Key] {
   const inheritedValue = InheritConfig.get(key);
   const globalValue = GlobalConfig.get(key);
   return inheritedValue ?? globalValue;

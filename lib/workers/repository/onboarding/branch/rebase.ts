@@ -50,7 +50,7 @@ export async function rebaseOnboardingBranch(
   // TODO #22198
   return scm.commitAndPush({
     baseBranch: config.baseBranch,
-    branchName: getInheritedOrGlobal('onboardingBranch'),
+    branchName: getInheritedOrGlobal('onboardingBranch')!,
     files: [
       {
         type: 'addition',

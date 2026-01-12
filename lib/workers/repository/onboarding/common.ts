@@ -12,9 +12,9 @@ export function getDefaultConfigFileName(config: RenovateConfig): string {
   const configFileNames = getConfigFileNames();
   const onboardingConfigFileName = getInheritedOrGlobal(
     'onboardingConfigFileName',
-  );
+  )!;
   return configFileNames.includes(onboardingConfigFileName)
-    ? onboardingConfigFileName!
+    ? onboardingConfigFileName
     : configFileNames[0];
 }
 

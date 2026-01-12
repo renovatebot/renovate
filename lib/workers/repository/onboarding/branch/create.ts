@@ -41,7 +41,7 @@ export async function createOnboardingBranch(
 
   return scm.commitAndPush({
     baseBranch: config.baseBranch,
-    branchName: getInheritedOrGlobal('onboardingBranch'),
+    branchName: getInheritedOrGlobal('onboardingBranch')!,
     files: [
       {
         type: 'addition',

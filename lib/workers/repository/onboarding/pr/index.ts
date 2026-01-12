@@ -48,7 +48,7 @@ export async function ensureOnboardingPr(
   logger.trace({ config });
   // TODO #22198
   const existingPr = await platform.getBranchPr(
-    getInheritedOrGlobal('onboardingBranch'),
+    getInheritedOrGlobal('onboardingBranch')!,
     config.defaultBranch,
   );
   if (existingPr) {
@@ -84,7 +84,7 @@ export async function ensureOnboardingPr(
     if (
       await isOnboardingBranchConflicted(
         config.defaultBranch!,
-        getInheritedOrGlobal('onboardingBranch'),
+        getInheritedOrGlobal('onboardingBranch')!,
       )
     ) {
       if (GlobalConfig.get('dryRun')) {
@@ -218,9 +218,9 @@ If you need any further assistance then you can also [request help here](${
       const prTitle =
         config.semanticCommits === 'enabled'
           ? getSemanticCommitPrTitle(config)
-          : getInheritedOrGlobal('onboardingPrTitle');
+          : getInheritedOrGlobal('onboardingPrTitle')!;
       const pr = await platform.createPr({
-        sourceBranch: getInheritedOrGlobal('onboardingBranch'),
+        sourceBranch: getInheritedOrGlobal('onboardingBranch')!,
         targetBranch: config.defaultBranch!,
         prTitle,
         prBody,
@@ -246,7 +246,7 @@ If you need any further assistance then you can also [request help here](${
       logger.warn(
         'Onboarding PR already exists but cannot find it. It was probably created by a different user.',
       );
-      await scm.deleteBranch(getInheritedOrGlobal('onboardingBranch'));
+      await scm.deleteBranch(getInheritedOrGlobal('onboardingBranch')!);
       return;
     }
     throw err;

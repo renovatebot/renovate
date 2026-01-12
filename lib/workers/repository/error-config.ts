@@ -53,7 +53,7 @@ async function raiseWarningIssue(
   }
 
   const pr = await platform.getBranchPr(
-    getInheritedOrGlobal('onboardingBranch'),
+    getInheritedOrGlobal('onboardingBranch')!,
     config.baseBranch,
   );
   if (pr?.state === 'open') {
