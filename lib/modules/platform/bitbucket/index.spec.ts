@@ -1670,7 +1670,7 @@ describe('modules/platform/bitbucket/index', () => {
     });
 
     it('dependency dashboard: updates abandoned dependencies heading and place note inside', () => {
-      const prBody =
+      const dashboardBody =
         '> ℹ **Note**\n>\n' +
         'These dependencies have not received updates for an extended period and may be unmaintained:\n\n' +
         '<details>\n<summary>View abandoned dependencies (6)</summary>\n\n' +
@@ -1679,7 +1679,7 @@ describe('modules/platform/bitbucket/index', () => {
         '| npm | node | unknown |\n' +
         '\n</details>\n\n';
 
-      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+      expect(bitbucket.massageMarkdown(dashboardBody)).toEqual(
         '## Abandoned Dependencies\n' +
           '> ℹ **Note**\n>\n' +
           'These dependencies have not received updates for an extended period and may be unmaintained:\n\n\n\n' +
@@ -1690,7 +1690,7 @@ describe('modules/platform/bitbucket/index', () => {
     });
 
     it('dependency dashboard: updates vulnerabilities section with multiple collapsible details sections to nested list', () => {
-      const prBody =
+      const dashboardBody =
         '## Vulnerabilities\n\n' +
         '`2`/`2` CVEs have Renovate fixes.\n' +
         '<details><summary>maven</summary>\n<blockquote>\n\n' +
@@ -1702,7 +1702,7 @@ describe('modules/platform/bitbucket/index', () => {
         '<blockquote>\n\n- [GHSA-j288-q9x7-2f5v](https://osv.dev/vulnerability/GHSA-j288-q9x7-2f5v) (fixed in [3.18.0,))\n</blockquote>\n' +
         '</details>\n\n</blockquote>\n</details>\n\n</blockquote>\n</details>\n\n';
 
-      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+      expect(bitbucket.massageMarkdown(dashboardBody)).toEqual(
         '## Vulnerabilities\n\n' +
           '`2`/`2` CVEs have Renovate fixes.\n' +
           ' - **maven**\n\n\n' +
@@ -1715,7 +1715,7 @@ describe('modules/platform/bitbucket/index', () => {
     });
 
     it('dependency dashboard: updates detected dependencies section with multiple collapsible details sections to nested list', () => {
-      const prBody =
+      const dashboardBody =
         '## Detected Dependencies\n\n' +
         '<details><summary>dockerfile</summary>\n<blockquote>\n\n' +
         '<details><summary>app1/Dockerfile</summary>\n - `node:24`\n - `temurin:27`\n</details>\n\n' +
@@ -1725,7 +1725,7 @@ describe('modules/platform/bitbucket/index', () => {
         '<details><summary>package.json</summary>\n - `@biomejs/biome:2.0.0`</details>\n\n' +
         '</blockquote>\n</details>';
 
-      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+      expect(bitbucket.massageMarkdown(dashboardBody)).toEqual(
         '## Detected Dependencies\n\n' +
           ' - **dockerfile**\n\n\n' +
           '\t - `app1/Dockerfile`\n' +
