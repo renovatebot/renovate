@@ -846,7 +846,7 @@ export async function getDashboardMarkdownStatistics(
     const prStats = runRenovateRepoStats(config, prLists);
 
     statisticsMd += '<details>\n';
-    statisticsMd += `<summary>PRs</summary>\n\n`;
+    statisticsMd += `<summary>Pull Requests</summary>\n\n`;
     statisticsMd += '| PR State | Count |\n';
     statisticsMd += '|---|---|\n';
     statisticsMd += `| Open | ${prStats.open} |\n`;
@@ -860,7 +860,7 @@ export async function getDashboardMarkdownStatistics(
   const libYears = calculateLibYears(config, packageFiles);
 
   statisticsMd += '<details>\n';
-  statisticsMd += `<summary>Dependency status</summary>\n\n`;
+  statisticsMd += `<summary>Dependency Status</summary>\n\n`;
   statisticsMd += '| Status | Count |\n';
   statisticsMd += '|---|---|\n';
   statisticsMd += `| Outdated | ${libYears?.dependencyStatus.outdated} |\n`;
