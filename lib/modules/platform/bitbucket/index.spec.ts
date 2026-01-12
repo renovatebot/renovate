@@ -1669,6 +1669,22 @@ describe('modules/platform/bitbucket/index', () => {
       expect(bitbucket.massageMarkdown(prBody)).toMatchSnapshot();
     });
 
+    it('updates pull request url links', () => {
+      const prBody = '[Some pull request](../pull/123)';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '[Some pull request](../../pull-requests/123)',
+      );
+    });
+
+    it('updates issues url links', () => {
+      const prBody = '[Some issue](../issues/123)';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '[Some issue](../../issues/123)',
+      );
+    });
+
     it('updates abandoned dependencies heading and place note inside', () => {
       const prBody =
         '## Abandoned Dependencies\n' +

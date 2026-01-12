@@ -622,6 +622,7 @@ export function massageMarkdown(input: string): string {
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
+    .replace(regEx(/\]\(\.\.\/issues\//g), '](../../issues/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 
   return massageNestedCollapsibleSectionsIntoLists(after);
