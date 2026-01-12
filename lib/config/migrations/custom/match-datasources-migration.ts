@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class MatchDatasourcesMigration extends AbstractMigration {
@@ -6,7 +6,7 @@ export class MatchDatasourcesMigration extends AbstractMigration {
 
   override run(value: unknown): void {
     if (Array.isArray(value)) {
-      const newValue = value.filter(is.nonEmptyString).map((datasource) => {
+      const newValue = value.filter(isNonEmptyString).map((datasource) => {
         switch (datasource) {
           case 'adoptium-java':
             return 'java-version';

@@ -1,4 +1,9 @@
-import is from '@sindresorhus/is';
+import {
+  isEmptyString,
+  isNullOrUndefined,
+  isString,
+  isUndefined,
+} from '@sindresorhus/is';
 import parse from 'github-url-from-git';
 import { detectPlatform } from '../../util/common';
 import { parseGitUrl } from '../../util/git/url';
@@ -129,7 +134,7 @@ export function addMetaData(
   if (dep.sourceUrl) {
     // try massaging it
     const massagedUrl = massageUrl(dep.sourceUrl);
-    if (is.emptyString(massagedUrl)) {
+    if (isEmptyString(massagedUrl)) {
       delete dep.sourceUrl;
     } else {
       // parse from github-url-from-git only supports Github URLs as its name implies
@@ -160,7 +165,7 @@ export function addMetaData(
   ];
   for (const urlKey of urlKeys) {
     const urlVal = dep[urlKey];
-    if (is.string(urlVal) && isHttpUrl(urlVal.trim())) {
+    if (isString(urlVal) && isHttpUrl(urlVal.trim())) {
       dep[urlKey] = urlVal.trim() as never;
     } else {
       delete dep[urlKey];
@@ -179,14 +184,14 @@ export function shouldDeleteHomepage(
   sourceUrl: string | null | undefined,
   homepage: string | undefined,
 ): boolean {
-  if (is.nullOrUndefined(sourceUrl) || is.undefined(homepage)) {
+  if (isNullOrUndefined(sourceUrl) || isUndefined(homepage)) {
     return false;
   }
   const massagedSourceUrl = massageUrl(sourceUrl);
   const platform = detectPlatform(homepage);
   if (platform === 'github' || platform === 'gitlab') {
     const sourceUrlParsed = parseUrl(massagedSourceUrl);
-    if (is.nullOrUndefined(sourceUrlParsed)) {
+    if (isNullOrUndefined(sourceUrlParsed)) {
       return false;
     }
     const homepageParsed = parseUrl(homepage);

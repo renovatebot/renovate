@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
 import * as packageCache from '../../cache/package';
@@ -34,9 +34,9 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   }: PackageHttpCacheProviderOptions) {
     super();
     this.namespace = namespace;
-    const ttl = resolveTtlValues(this.namespace, softTtlMinutes);
-    this.softTtlMinutes = ttl.softTtlMinutes;
-    this.hardTtlMinutes = ttl.hardTtlMinutes;
+    const ttlValues = resolveTtlValues(this.namespace, softTtlMinutes);
+    this.softTtlMinutes = ttlValues.softTtlMinutes;
+    this.hardTtlMinutes = ttlValues.hardTtlMinutes;
     this.checkCacheControlHeader = checkCacheControlHeader;
     this.checkAuthorizationHeader = checkAuthorizationHeader;
   }
@@ -98,7 +98,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
 
     if (
       this.checkCacheControlHeader &&
-      is.string(resp.headers['cache-control'])
+      isString(resp.headers['cache-control'])
     ) {
       const isPublic = resp.headers['cache-control']
         .toLocaleLowerCase()

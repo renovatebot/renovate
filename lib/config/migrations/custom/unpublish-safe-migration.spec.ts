@@ -7,7 +7,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
         unpublishSafe: true,
       },
       {
-        extends: ['npm:unpublishSafe'],
+        extends: ['security:minimumReleaseAgeNpm'],
       },
     );
   });
@@ -19,7 +19,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
         unpublishSafe: true,
       } as any,
       {
-        extends: ['test', 'npm:unpublishSafe'],
+        extends: ['test', 'security:minimumReleaseAgeNpm'],
       },
     );
   });
@@ -31,7 +31,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
         unpublishSafe: true,
       } as any,
       {
-        extends: ['npm:unpublishSafe'],
+        extends: ['security:minimumReleaseAgeNpm'],
       },
     );
   });
@@ -43,7 +43,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
         unpublishSafe: true,
       } as any,
       {
-        extends: ['foo', 'npm:unpublishSafe', 'bar'],
+        extends: ['foo', 'security:minimumReleaseAgeNpm', 'bar'],
       },
     );
 
@@ -53,17 +53,17 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
         unpublishSafe: true,
       } as any,
       {
-        extends: ['foo', 'npm:unpublishSafe', 'bar'],
+        extends: ['foo', 'security:minimumReleaseAgeNpm', 'bar'],
       },
     );
 
     await expect(UnpublishSafeMigration).toMigrate(
       {
-        extends: ['foo', 'npm:unpublishSafe', 'bar'],
+        extends: ['foo', 'security:minimumReleaseAgeNpm', 'bar'],
         unpublishSafe: true,
       } as any,
       {
-        extends: ['foo', 'npm:unpublishSafe', 'bar'],
+        extends: ['foo', 'security:minimumReleaseAgeNpm', 'bar'],
       },
     );
   });
@@ -83,12 +83,26 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
   it('prevent duplicates', async () => {
     await expect(UnpublishSafeMigration).toMigrate(
       {
-        extends: ['npm:unpublishSafe'],
+        extends: ['security:minimumReleaseAgeNpm'],
         unpublishSafe: true,
+      },
+      {
+        extends: ['security:minimumReleaseAgeNpm'],
+      },
+    );
+  });
+
+  it('should not migrate npm:unpublishSafe', async () => {
+    // NOTE that this preset name is now deprecated, but will be handled by `ExtendsMigration` instead of handled in this migration
+
+    await expect(UnpublishSafeMigration).toMigrate(
+      {
+        extends: ['npm:unpublishSafe'],
       },
       {
         extends: ['npm:unpublishSafe'],
       },
+      false,
     );
   });
 });

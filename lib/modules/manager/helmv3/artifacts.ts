@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString, isTruthy } from '@sindresorhus/is';
 import pMap from 'p-map';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -151,10 +151,10 @@ export async function updateArtifacts({
 
     const fileChanges: UpdateArtifactsResult[] = [];
 
-    if (is.truthy(existingLockFileContent)) {
+    if (isTruthy(existingLockFileContent)) {
       const newHelmLockContent = await readLocalFile(lockFileName, 'utf8');
       const isLockFileChanged =
-        !is.string(newHelmLockContent) ||
+        !isString(newHelmLockContent) ||
         isHelmLockChanged(existingLockFileContent, newHelmLockContent);
       if (isLockFileChanged) {
         fileChanges.push({
@@ -170,7 +170,7 @@ export async function updateArtifacts({
     }
 
     // add modified helm chart archives to artifacts
-    if (is.truthy(isUpdateOptionAddChartArchives)) {
+    if (isTruthy(isUpdateOptionAddChartArchives)) {
       const chartsPath = getSiblingFileName(packageFileName, 'charts');
       const status = await getRepoStatus();
       const chartsAddition = status.not_added ?? [];

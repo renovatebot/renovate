@@ -2,7 +2,6 @@ import type { Category } from '../../../constants';
 import { DartDatasource } from '../../datasource/dart';
 import { DartVersionDatasource } from '../../datasource/dart-version';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version';
-import * as npmVersioning from '../../versioning/npm';
 
 export { updateArtifacts } from './artifacts';
 export { extractPackageFile } from './extract';
@@ -15,7 +14,6 @@ export const categories: Category[] = ['dart'];
 
 export const defaultConfig = {
   managerFilePatterns: ['/(^|/)pubspec\\.ya?ml$/'],
-  versioning: npmVersioning.id,
 };
 
 export const supportedDatasources = [

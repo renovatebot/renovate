@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import { isValid } from '../../versioning/ruby';
 import { extractPackageFile } from '.';
@@ -48,7 +48,7 @@ describe('modules/manager/bundler/extract', () => {
             Object.prototype.hasOwnProperty.call(dep, 'lockedVersion'),
           )
           .every(
-            (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion),
+            (dep) => isString(dep.lockedVersion) && isValid(dep.lockedVersion),
           ),
       ).toBeTrue();
       expect(res?.deps).toHaveLength(68);
@@ -66,7 +66,7 @@ describe('modules/manager/bundler/extract', () => {
       expect(res).toMatchSnapshot();
       expect(
         res?.deps.every(
-          (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion),
+          (dep) => isString(dep.lockedVersion) && isValid(dep.lockedVersion),
         ),
       ).toBeTrue();
       expect(res?.deps).toHaveLength(5);
@@ -82,7 +82,7 @@ describe('modules/manager/bundler/extract', () => {
             Object.prototype.hasOwnProperty.call(dep, 'lockedVersion'),
           )
           .every(
-            (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion),
+            (dep) => isString(dep.lockedVersion) && isValid(dep.lockedVersion),
           ),
       ).toBeTrue();
       expect(res?.deps).toHaveLength(125);
@@ -94,7 +94,7 @@ describe('modules/manager/bundler/extract', () => {
       expect(res).toMatchSnapshot();
       expect(
         res?.deps.every(
-          (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion),
+          (dep) => isString(dep.lockedVersion) && isValid(dep.lockedVersion),
         ),
       ).toBeTrue();
       expect(res?.deps).toHaveLength(14);
@@ -107,7 +107,7 @@ describe('modules/manager/bundler/extract', () => {
     expect(res).toMatchSnapshot();
     expect(
       res?.deps.every(
-        (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion),
+        (dep) => isString(dep.lockedVersion) && isValid(dep.lockedVersion),
       ),
     ).toBeTrue();
     expect(res?.deps).toHaveLength(252);

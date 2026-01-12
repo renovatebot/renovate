@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNullOrUndefined, isPlainObject, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
@@ -8,6 +8,20 @@ import type { BitbucketServerHttp } from '../../../util/http/bitbucket-server';
 import { getQueryString } from '../../../util/url';
 import type { BbsPr, BbsPrCacheData, BbsRestPr } from './types';
 import { prInfo } from './utils';
+
+/* v8 ignore next */
+function migrateBitbucketServerCache(platform: unknown): void {
+  if (!isPlainObject(platform)) {
+    return;
+  }
+
+  if (!isPlainObject(platform.bitbucketServer)) {
+    return;
+  }
+
+  platform['bitbucket-server'] = platform.bitbucketServer;
+  delete platform.bitbucketServer;
+}
 
 export class BbsPrCache {
   private cache: BbsPrCacheData;
@@ -21,17 +35,21 @@ export class BbsPrCache {
   ) {
     const repoCache = getCache();
     repoCache.platform ??= {};
-    repoCache.platform.bitbucketServer ??= {};
-    let pullRequestCache = repoCache.platform.bitbucketServer
+    migrateBitbucketServerCache(repoCache.platform);
+    repoCache.platform['bitbucket-server'] ??= {};
+    let pullRequestCache = repoCache.platform['bitbucket-server']
       .pullRequestsCache as BbsPrCacheData;
-    if (!pullRequestCache || pullRequestCache.author !== author) {
+    if (
+      isNullOrUndefined(pullRequestCache) ||
+      pullRequestCache.author !== author
+    ) {
       pullRequestCache = {
         items: {},
         updatedDate: null,
         author,
       };
     }
-    repoCache.platform.bitbucketServer.pullRequestsCache = pullRequestCache;
+    repoCache.platform['bitbucket-server'].pullRequestsCache = pullRequestCache;
     this.cache = pullRequestCache;
     this.updateItems();
   }
@@ -135,7 +153,7 @@ export class BbsPrCache {
       state: 'ALL',
       limit: this.items.length ? '20' : '100',
     };
-    if (!this.ignorePrAuthor && is.string(this.author)) {
+    if (!this.ignorePrAuthor && isString(this.author)) {
       searchParams['role.1'] = 'AUTHOR';
       searchParams['username.1'] = this.author;
     }

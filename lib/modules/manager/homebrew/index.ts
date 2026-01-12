@@ -1,4 +1,7 @@
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { NpmDatasource } from '../../datasource/npm';
+
 export { extractPackageFile } from './extract';
 export { updateDependency } from './update';
 
@@ -9,4 +12,8 @@ export const defaultConfig = {
   managerFilePatterns: ['/^Formula/[^/]+[.]rb$/'],
 };
 
-export const supportedDatasources = [GithubTagsDatasource.id];
+export const supportedDatasources = [
+  GithubTagsDatasource.id,
+  GithubReleasesDatasource.id,
+  NpmDatasource.id,
+];

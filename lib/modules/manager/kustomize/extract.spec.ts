@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
@@ -10,25 +11,22 @@ import {
   parseKustomize,
 } from './extract';
 import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
-
-const kustomizeGitSSHBase = Fixtures.get('gitSshBase.yaml');
-const kustomizeEmpty = Fixtures.get('kustomizeEmpty.yaml');
-const kustomizeGitSSHSubdir = Fixtures.get('gitSubdir.yaml');
-const kustomizeHTTP = Fixtures.get('kustomizeHttp.yaml');
-const kustomizeWithLocal = Fixtures.get('kustomizeWithLocal.yaml');
-const nonKustomize = Fixtures.get('service.yaml');
-const gitImages = Fixtures.get('gitImages.yaml');
-const kustomizeDepsInResources = Fixtures.get('depsInResources.yaml');
-const kustomizeComponent = Fixtures.get('component.yaml');
-const newTag = Fixtures.get('newTag.yaml');
-const newName = Fixtures.get('newName.yaml');
-const digest = Fixtures.get('digest.yaml');
-const kustomizeHelmChart = Fixtures.get('kustomizeHelmChart.yaml');
 
 describe('modules/manager/kustomize/extract', () => {
   it('should successfully parse a valid kustomize file', () => {
-    const file = parseKustomize(kustomizeGitSSHBase);
+    const content = codeBlock`
+    apiVersion: kustomize.config.k8s.io/v1beta1
+    kind: Kustomization
+
+    bases:
+      - git@github.com:moredhel/remote-kustomize.git?ref=v0.0.1
+
+    namespace: testing-namespace
+
+    resources:
+      - deployment.yaml
+`;
+    const file = parseKustomize(content);
     expect(file).not.toBeNull();
   });
 
@@ -247,6 +245,25 @@ describe('modules/manager/kustomize/extract', () => {
       });
       expect(pkg).toEqual(sample);
     });
+
+    it('should correctly extract an OCI chart with registryAliases', () => {
+      const sample = {
+        depName: 'redis',
+        packageName: 'registry-1.docker.io/bitnamicharts/redis',
+        currentValue: '18.12.1',
+        datasource: DockerDatasource.id,
+        pinDigests: false,
+      };
+      const pkg = extractHelmChart(
+        {
+          name: sample.depName,
+          version: sample.currentValue,
+          repo: 'oci://localhost:5000/bitnamicharts',
+        },
+        { 'localhost:5000': 'registry-1.docker.io' },
+      );
+      expect(pkg).toEqual(sample);
+    });
   });
 
   describe('image extraction', () => {
@@ -381,57 +398,189 @@ describe('modules/manager/kustomize/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('returns null for non kustomize kubernetes files', () => {
-      expect(
-        extractPackageFile(nonKustomize, 'kustomization.yaml', {}),
-      ).toBeNull();
+      const content = codeBlock`
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: sample-service
+      spec:
+        ports:
+        - port: 80
+          protocol: TCP
+          targetPort: http
+          name: http
+      `;
+      expect(extractPackageFile(content, 'kustomization.yaml', {})).toBeNull();
     });
 
     it('extracts multiple image lines', () => {
-      const res = extractPackageFile(
-        kustomizeWithLocal,
-        'kustomization.yaml',
-        {},
-      );
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(2);
+      const content = codeBlock`
+      apiVersion: kustomize.config.k8s.io/v1beta1
+      kind: Kustomization
+      bases:
+      - service-1
+      - https://moredhel/remote-kustomize.git?ref=v0.0.1
+      - https://moredhel/remote-kustomize.git//deploy?ref=v0.0.1
+      `;
+      const res = extractPackageFile(content, 'kustomization.yaml', {});
+      expect(res?.deps).toEqual([
+        {
+          currentValue: 'v0.0.1',
+          datasource: GitTagsDatasource.id,
+          depName: 'moredhel/remote-kustomize',
+          depType: 'Kustomization',
+          packageName: 'https://moredhel/remote-kustomize.git',
+        },
+        {
+          currentValue: 'v0.0.1',
+          datasource: GitTagsDatasource.id,
+          depName: 'moredhel/remote-kustomize',
+          depType: 'Kustomization',
+          packageName: 'https://moredhel/remote-kustomize.git',
+        },
+      ]);
     });
 
     it('extracts ssh dependency', () => {
-      const res = extractPackageFile(
-        kustomizeGitSSHBase,
-        'kustomization.yaml',
-        {},
-      );
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(1);
+      const content = codeBlock`
+      apiVersion: kustomize.config.k8s.io/v1beta1
+      kind: Kustomization
+      bases:
+        - git@github.com:moredhel/remote-kustomize.git?ref=v0.0.1
+`;
+      const res = extractPackageFile(content, 'kustomization.yaml', {});
+      expect(res?.deps).toEqual([
+        {
+          currentValue: 'v0.0.1',
+          datasource: GithubTagsDatasource.id,
+          depName: 'moredhel/remote-kustomize',
+          depType: 'Kustomization',
+        },
+      ]);
     });
 
     it('extracts ssh dependency with a subdir', () => {
-      const res = extractPackageFile(
-        kustomizeGitSSHSubdir,
-        'kustomization.yaml',
-        {},
-      );
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(1);
+      const content = codeBlock`
+        apiVersion: kustomize.config.k8s.io/v1beta1
+        kind: Kustomization
+        bases:
+        - git@github.com:kubernetes-sigs/kustomize.git//examples/helloWorld?ref=v2.0.0
+`;
+
+      const res = extractPackageFile(content, 'kustomization.yaml', {});
+      expect(res?.deps).toEqual([
+        {
+          currentValue: 'v2.0.0',
+          datasource: GithubTagsDatasource.id,
+          depName: 'kubernetes-sigs/kustomize',
+          depType: 'Kustomization',
+        },
+      ]);
     });
 
     it('extracts http dependency', () => {
-      const res = extractPackageFile(kustomizeHTTP, 'kustomization.yaml', {});
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(2);
-      expect(res?.deps[0].currentValue).toBe('v0.0.1');
-      expect(res?.deps[1].currentValue).toBe('1.19.0');
-      expect(res?.deps[1].depName).toBe('fluxcd/flux');
+      const content = codeBlock`
+      apiVersion: kustomize.config.k8s.io/v1beta1
+      kind: Kustomization
+      bases:
+      - github.com/user/repo//deploy?ref=v0.0.1
+      - github.com/fluxcd/flux/deploy?ref=1.19.0
+      `;
+      const res = extractPackageFile(content, 'kustomization.yaml', {});
+      expect(res?.deps).toEqual([
+        {
+          currentValue: 'v0.0.1',
+          datasource: GithubTagsDatasource.id,
+          depName: 'user/repo',
+          depType: 'Kustomization',
+        },
+        {
+          currentValue: '1.19.0',
+          datasource: GithubTagsDatasource.id,
+          depName: 'fluxcd/flux',
+          depType: 'Kustomization',
+        },
+      ]);
     });
 
     it('should extract out image versions', () => {
-      const res = extractPackageFile(gitImages, 'kustomization.yaml', {});
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(6);
-      expect(res?.deps[0].currentValue).toBe('v0.1.0');
-      expect(res?.deps[1].currentValue).toBe('v0.0.1');
-      expect(res?.deps[5].skipReason).toBe('invalid-value');
+      const content = codeBlock`
+      apiVersion: kustomize.config.k8s.io/v1beta1
+      kind: Kustomization
+      images:
+      - name: node
+        newTag: v0.1.0
+      - newTag: v0.0.1
+        name: group/instance
+      - name: quay.io/test/repo
+        newTag: v0.0.2
+      - name: gitlab.com/org/suborg/image
+        newTag: v0.0.3
+      - name: this-lives/on-docker-hub
+        newName: but.this.lives.on.local/private-registry # and therefore we need to check the versions available here
+        newTag: v0.0.4
+      - name: nginx
+        newTag: 2.5
+      `;
+      const res = extractPackageFile(content, 'kustomization.yaml', {});
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: 'v0.1.0',
+          datasource: DockerDatasource.id,
+          depName: 'node',
+          depType: 'Kustomization',
+          packageName: 'node',
+          replaceString: 'v0.1.0',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: 'v0.0.1',
+          datasource: DockerDatasource.id,
+          depName: 'group/instance',
+          depType: 'Kustomization',
+          packageName: 'group/instance',
+          replaceString: 'v0.0.1',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: 'v0.0.2',
+          datasource: DockerDatasource.id,
+          depName: 'quay.io/test/repo',
+          depType: 'Kustomization',
+          packageName: 'quay.io/test/repo',
+          replaceString: 'v0.0.2',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: 'v0.0.3',
+          datasource: DockerDatasource.id,
+          depName: 'gitlab.com/org/suborg/image',
+          depType: 'Kustomization',
+          packageName: 'gitlab.com/org/suborg/image',
+          replaceString: 'v0.0.3',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: 'v0.0.4',
+          datasource: DockerDatasource.id,
+          depName: 'but.this.lives.on.local/private-registry',
+          depType: 'Kustomization',
+          packageName: 'but.this.lives.on.local/private-registry',
+          replaceString: 'v0.0.4',
+        },
+        {
+          currentValue: 2.5,
+          depName: 'nginx',
+          depType: 'Kustomization',
+          skipReason: 'invalid-value',
+        },
+      ]);
     });
 
     it('ignores non-Kubernetes empty files', () => {
@@ -439,58 +588,107 @@ describe('modules/manager/kustomize/extract', () => {
     });
 
     it('does nothing with kustomize empty kustomize files', () => {
-      expect(
-        extractPackageFile(kustomizeEmpty, 'kustomization.yaml', {}),
-      ).toBeNull();
+      const content = codeBlock`
+      apiVersion: kustomize.config.k8s.io/v1beta1
+      kind: Kustomization
+      `;
+      expect(extractPackageFile(content, 'kustomization.yaml', {})).toBeNull();
     });
 
     it('should extract bases resources and components from their respective blocks', () => {
-      const res = extractPackageFile(
-        kustomizeDepsInResources,
-        'kustomization.yaml',
-        {},
-      );
-      expect(res).not.toBeNull();
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(3);
-      expect(res?.deps[0].currentValue).toBe('v0.0.1');
-      expect(res?.deps[1].currentValue).toBe('1.19.0');
-      expect(res?.deps[2].currentValue).toBe('1.18.0');
-      expect(res?.deps[0].depName).toBe('moredhel/remote-kustomize');
-      expect(res?.deps[1].depName).toBe('fluxcd/flux');
-      expect(res?.deps[2].depName).toBe('fluxcd/flux');
-      expect(res?.deps[0].depType).toBe('Kustomization');
-      expect(res?.deps[1].depType).toBe('Kustomization');
-      expect(res?.deps[2].depType).toBe('Kustomization');
+      const content = codeBlock`
+      apiVersion: kustomize.config.k8s.io/v1beta1
+      kind: Kustomization
+      bases:
+      - git@github.com:moredhel/remote-kustomize.git?ref=v0.0.1
+      resources:
+      - github.com/fluxcd/flux/deploy?ref=1.19.0
+      components:
+      - github.com/fluxcd/flux/memcache-dep?ref=1.18.0
+      `;
+      const res = extractPackageFile(content, 'kustomization.yaml', {});
+      expect(res?.deps).toEqual([
+        {
+          currentValue: 'v0.0.1',
+          datasource: GithubTagsDatasource.id,
+          depName: 'moredhel/remote-kustomize',
+          depType: 'Kustomization',
+        },
+        {
+          currentValue: '1.19.0',
+          datasource: GithubTagsDatasource.id,
+          depName: 'fluxcd/flux',
+          depType: 'Kustomization',
+        },
+        {
+          currentValue: '1.18.0',
+          datasource: GithubTagsDatasource.id,
+          depName: 'fluxcd/flux',
+          depType: 'Kustomization',
+        },
+      ]);
     });
 
     it('should extract dependencies when kind is Component', () => {
-      const res = extractPackageFile(
-        kustomizeComponent,
-        'kustomization.yaml',
-        {},
-      );
-      expect(res).not.toBeNull();
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(3);
-      expect(res?.deps[0].currentValue).toBe('1.19.0');
-      expect(res?.deps[1].currentValue).toBe('1.18.0');
-      expect(res?.deps[2].currentValue).toBe('v0.1.0');
-      expect(res?.deps[0].depName).toBe('fluxcd/flux');
-      expect(res?.deps[1].depName).toBe('fluxcd/flux');
-      expect(res?.deps[2].depName).toBe('node');
-      expect(res?.deps[0].depType).toBe('Component');
-      expect(res?.deps[1].depType).toBe('Component');
-      expect(res?.deps[2].depType).toBe('Component');
+      const content = codeBlock`
+      apiVersion: kustomize.config.k8s.io/v1alpha1
+      kind: Component
+      resources:
+      - deployment.yaml
+      - github.com/fluxcd/flux/deploy?ref=1.19.0
+      components:
+      - github.com/fluxcd/flux/memcache-dep?ref=1.18.0
+      images:
+      - name: node
+        newTag: v0.1.0
+      `;
+      const res = extractPackageFile(content, 'kustomization.yaml', {});
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '1.19.0',
+          datasource: GithubTagsDatasource.id,
+          depName: 'fluxcd/flux',
+          depType: 'Component',
+        },
+        {
+          currentValue: '1.18.0',
+          datasource: GithubTagsDatasource.id,
+          depName: 'fluxcd/flux',
+          depType: 'Component',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: 'v0.1.0',
+          datasource: DockerDatasource.id,
+          depName: 'node',
+          depType: 'Component',
+          packageName: 'node',
+          replaceString: 'v0.1.0',
+        },
+      ]);
     });
 
     const postgresDigest =
       'sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c';
 
     it('extracts from newTag', () => {
+      const content = codeBlock`
+      apiVersion: kustomize.config.k8s.io/v1beta1
+      kind: Kustomization
+      namespace: hasura
+      images:
+        - name: postgres
+          newTag: "11"
+        - name: postgres
+          newTag: 11@sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c
+        # invalid - renders as \`postgres:sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c\`
+        - name: postgres
+          newTag: sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c
+      `;
       expect(
-        extractPackageFile(newTag, 'kustomization.yaml', {}),
-      ).toMatchSnapshot({
+        extractPackageFile(content, 'kustomization.yaml', {}),
+      ).toMatchObject({
         deps: [
           {
             currentDigest: undefined,
@@ -510,9 +708,28 @@ describe('modules/manager/kustomize/extract', () => {
     });
 
     it('extracts from digest', () => {
+      const content = codeBlock`
+      apiVersion: kustomize.config.k8s.io/v1beta1
+      kind: Kustomization
+      images:
+        - name: postgres
+          digest: sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c
+        - name: postgres:11
+          digest: sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c
+        # invalid - includes newTag and digest
+        - name: postgres
+          newTag: 11
+          digest: sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c
+        # invalid - not a string
+        - name: postgres
+          digest: 02641143766
+        # invalid - missing prefix
+        - name: postgres
+          digest: b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c
+      `;
       expect(
-        extractPackageFile(digest, 'kustomization.yaml', {}),
-      ).toMatchSnapshot({
+        extractPackageFile(content, 'kustomization.yaml', {}),
+      ).toMatchObject({
         deps: [
           {
             currentDigest: postgresDigest,
@@ -538,9 +755,21 @@ describe('modules/manager/kustomize/extract', () => {
     });
 
     it('extracts newName', () => {
+      const content = codeBlock`
+      apiVersion: kustomize.config.k8s.io/v1beta1
+      kind: Kustomization
+      images:
+        - name: postgres
+          newName: awesome/postgres:11@sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c
+        - name: postgres
+          newName: awesome/postgres:11
+        - name: postgres
+          newName: awesome/postgres@sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c
+      `;
+
       expect(
-        extractPackageFile(newName, 'kustomization.yaml', {}),
-      ).toMatchSnapshot({
+        extractPackageFile(content, 'kustomization.yaml', {}),
+      ).toMatchObject({
         deps: [
           {
             depName: 'awesome/postgres',
@@ -568,12 +797,28 @@ describe('modules/manager/kustomize/extract', () => {
     });
 
     it('parses helmChart field', () => {
-      const res = extractPackageFile(
-        kustomizeHelmChart,
-        'kustomization.yaml',
-        {},
-      );
-      expect(res).toMatchSnapshot({
+      const content = codeBlock`
+      apiVersion: kustomize.config.k8s.io/v1beta1
+      kind: Kustomization
+      helmCharts:
+      - name: minecraft
+        includeCRDs: false
+        valuesInline:
+          minecraftServer:
+            eula: true
+            difficulty: hard
+            rcon:
+              enabled: true
+        releaseName: moria
+        version: 3.1.3
+        repo: https://itzg.github.io/minecraft-server-charts
+      - name: redis
+        releaseName: redis
+        version: 18.12.1
+        repo: oci://registry-1.docker.io/bitnamicharts
+      `;
+      const res = extractPackageFile(content, 'kustomization.yaml', {});
+      expect(res).toEqual({
         deps: [
           {
             depType: 'HelmChart',

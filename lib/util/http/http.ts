@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isPlainObject, isUndefined } from '@sindresorhus/is';
 import merge from 'deepmerge';
 import type { Options, RetryObject } from 'got';
 import type { Merge, SetRequired } from 'type-fest';
@@ -12,6 +12,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { getEnv } from '../env';
 import { hash } from '../hash';
+import { acquireLock } from '../mutex';
 import { type AsyncResult, Result } from '../result';
 import { Toml } from '../schema-utils';
 import { ObsoleteCacheHitLogger } from '../stats';
@@ -67,7 +68,7 @@ export function applyDefaultHeaders(options: Options): void {
     ...options.headers,
     'user-agent':
       GlobalConfig.get('userAgent') ??
-      `RenovateBot/${renovateVersion} (https://github.com/renovatebot/renovate)`,
+      `Renovate/${renovateVersion} (https://github.com/renovatebot/renovate)`,
   };
 }
 
@@ -98,7 +99,7 @@ export abstract class HttpBase<
           maxRetryAfter: 0, // Don't rely on `got` retry-after handling, just let it fail and then we'll handle it
         },
       },
-      { isMergeableObject: is.plainObject },
+      { isMergeableObject: isPlainObject },
     );
   }
   private async request(
@@ -133,7 +134,7 @@ export abstract class HttpBase<
         hostType: this.hostType,
       },
       httpOptions,
-      { isMergeableObject: is.plainObject },
+      { isMergeableObject: isPlainObject },
     );
 
     const method = options.method.toLowerCase();
@@ -147,7 +148,7 @@ export abstract class HttpBase<
 
     applyDefaultHeaders(options);
 
-    if (is.undefined(options.readOnly) && isReadMethod) {
+    if (isUndefined(options.readOnly) && isReadMethod) {
       options.readOnly = true;
     }
 
@@ -179,21 +180,13 @@ export abstract class HttpBase<
           )
         : null;
 
-    const cachedResponse = await cacheProvider?.bypassServer<unknown>(
-      method,
-      url,
-    );
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-
     let resPromise: Promise<HttpResponse<unknown>> | null = null;
 
     // Cache GET requests unless memCache=false
     if (memCacheKey) {
       resPromise = memCache.get(memCacheKey);
 
-      /* v8 ignore start: temporary code */
+      /* v8 ignore next: temporary code */
       if (resPromise && !cacheProvider) {
         ObsoleteCacheHitLogger.write(url);
       }
@@ -206,18 +199,35 @@ export abstract class HttpBase<
       }
 
       const startTime = Date.now();
-      const httpTask: GotTask = () => {
-        const queueMs = Date.now() - startTime;
-        return fetch(url, options, { queueMs });
+      const httpTask: GotTask = async () => {
+        let releaseLock: undefined | (() => void);
+        if (isReadMethod) {
+          releaseLock = await acquireLock(
+            `${options.method} ${url}`,
+            'http-mutex',
+          );
+        }
+        try {
+          const cachedResponse = await cacheProvider?.bypassServer<unknown>(
+            options.method,
+            url,
+          );
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+
+          const queueMs = Date.now() - startTime;
+          return fetch(url, options, { queueMs });
+        } finally {
+          releaseLock?.();
+        }
       };
 
       const throttle = getThrottle(url);
       const throttledTask = throttle ? () => throttle.add(httpTask) : httpTask;
 
       const queue = getQueue(url);
-      const queuedTask = queue
-        ? () => queue.add(throttledTask, { throwOnTimeout: true })
-        : throttledTask;
+      const queuedTask = queue ? () => queue.add(throttledTask) : throttledTask;
 
       const { maxRetryAfter = 60 } = hostRule;
       resPromise = wrapWithRetry(queuedTask, url, getRetryAfter, maxRetryAfter);
@@ -651,7 +661,7 @@ export abstract class HttpBase<
     applyDefaultHeaders(combinedOptions);
 
     if (
-      is.undefined(combinedOptions.readOnly) &&
+      isUndefined(combinedOptions.readOnly) &&
       ['head', 'get'].includes(combinedOptions.method)
     ) {
       combinedOptions.readOnly = true;

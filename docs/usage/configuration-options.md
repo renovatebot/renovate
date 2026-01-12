@@ -21,6 +21,9 @@ You can store your Renovate configuration file in one of these locations:
 1. `.renovaterc.json5`
 1. `package.json` _(within a `"renovate"` section)_
 
+Or in a custom file present within the [`configFileNames`](./self-hosted-configuration.md#configfilenames).
+The bot first checks all the files in the `configFileNames` array before checking from the above file list.
+
 <!-- prettier-ignore -->
 !!! warning
     Storing the Renovate configuration in a `package.json` file is deprecated and support may be removed in the future.
@@ -368,6 +371,8 @@ Renovate also allows users to explicitly configure `baseBranchPatterns`, e.g. fo
 It's possible to add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR.
 If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch(es) instead of default.
 
+Also, check [useBaseBranchConfig](#usebasebranchconfig) if you want to configure different configuration for each base branch.
+
 The simplest approach is exact matches, e.g. `["main", "dev"]`.
 `baseBranchPatterns` also supports Regular Expressions that must begin and end with `/`, e.g.:
 
@@ -410,10 +415,11 @@ Configuring this to `true` means that Renovate will detect and apply the default
 
 ## branchConcurrentLimit
 
-By default, Renovate won't enforce any concurrent branch limits.
-The `config:recommended` preset that many extend from limits the number of concurrent branches to 10, but in many cases a limit as low as 3 or 5 can be most efficient for a repository.
+By default, Renovate doesn’t enforce its own concurrent branch limit.
+However, it inherits the [prConcurrentLimit](#prconcurrentlimit), which defaults to 10.
+This effectively caps concurrent branches at 10, though in many repositories a lower limit, such as 3 or 5, tends to be more efficient.
 
-If you want the same limit for both concurrent branches and concurrent PRs, then set a value for `prConcurrentLimit` and it will be re-used for branch calculations too.
+If you want the same limit for both concurrent branches and concurrent PRs, then set a value for `prConcurrentLimit` and it will be reused for branch calculations too.
 But if you want to allow more concurrent branches than concurrent PRs, you can configure both values (e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
 
 This limit is enforced on a per-repository basis.
@@ -593,6 +599,14 @@ All messages are prefixed with `bumpVersions` or `bumpVersions(<name>)` to help 
   ]
 }
 ```
+
+**short versions**
+
+It's possible to bump short versions:
+
+- `1` -> `2` (major)
+- `1.1` -> `2.0` (major)
+- `1.2` -> `1.3` (minor)
 
 ### bumpType
 
@@ -829,6 +843,10 @@ If you need to _override_ constraints that Renovate detects from the repository,
   }
 }
 ```
+
+<!-- prettier-ignore -->
+!!! note
+    When using [`binarySource=global`](./self-hosted-configuration.md#binarysource), the `constraints` options do not take effect.
 
 <!-- prettier-ignore -->
 !!! note
@@ -1116,6 +1134,10 @@ Example:
 }
 ```
 
+<!--prettier-ignore-->
+!!! note
+    You do not need to add leading and trailing slashes in `matchStrings`.
+
 ### matchStringsStrategy
 
 `matchStringsStrategy` controls behavior when multiple `matchStrings` values are provided.
@@ -1189,6 +1211,7 @@ But the second custom manager will upgrade both definitions as its first `matchS
       "datasourceTemplate": "docker"
     },
     {
+      "customType": "regex",
       "managerFilePatterns": ["/^example.json$/"],
       "matchStringsStrategy": "recursive",
       "matchStrings": [
@@ -1244,6 +1267,7 @@ Matched group values will be merged to form a single dependency.
       "datasourceTemplate": "docker"
     },
     {
+      "customType": "regex",
       "managerFilePatterns": ["/^main.yml$/"],
       "matchStringsStrategy": "combination",
       "matchStrings": [
@@ -1719,7 +1743,7 @@ Renovate can fetch changelogs when they are hosted on one of these platforms:
 - GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
 
-If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-changelogs) to allow Renovate to fetch changelogs notes from `github.com`.
+If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-changelogs-and-tools) to allow Renovate to fetch changelogs notes from `github.com`.
 
 <!-- prettier-ignore -->
 !!! note
@@ -2581,6 +2605,7 @@ Supported lock files:
 | `poetry`          | `poetry.lock`                                      |
 | `pub`             | `pubspec.lock`                                     |
 | `terraform`       | `.terraform.lock.hcl`                              |
+| `uv`              | `uv.lock`                                          |
 
 Support for new lock files may be added via feature request.
 
@@ -2624,6 +2649,42 @@ Be careful with remapping `warn` or `error` messages to lower log levels, as it 
 ## major
 
 Add to this object if you wish to define rules that apply only to major updates.
+
+## maxMajorIncrement
+
+This is particularly useful for preventing upgrades from [SemVer](https://semver.org/)-based versions to [CalVer](https://calver.org/)-based ones.
+
+For example, if you're on version `19.0.0`, Renovate will upgrade to `22.0.0` but filter out versions like `999.0.0` and `2025.0.0`.
+
+You can use `packageRules` to customize this behavior for specific packages:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Allow to upgrade Home Assistant from 0.x to 2025.x",
+      "matchPackageNames": ["homeassistant"],
+      "maxMajorIncrement": 0
+    }
+  ]
+}
+```
+
+The above allows unlimited major version upgrades by setting `maxMajorIncrement` to `0`.
+
+Alternatively, to limit major upgrades to within 10 versions:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Limit xmldoc major upgrades to within 10 versions",
+      "matchPackageNames": ["xmldoc"],
+      "maxMajorIncrement": 10
+    }
+  ]
+}
+```
 
 ## managerFilePatterns
 
@@ -2703,9 +2764,14 @@ Example:
 
 ## minimumReleaseAge
 
-This feature used to be called `stabilityDays`.
+`minimumReleaseAge` is a feature that requires Renovate to wait for a specified amount of time before suggesting a dependency update.
 
-If `minimumReleaseAge` is set to a time duration _and_ the update has a release timestamp header, then Renovate will check if the set duration has passed.
+<!-- prettier-ignore -->
+!!! note
+    Minimum Release Age has [a separate documentation page](./key-concepts/minimum-release-age.md) for more in-depth documentation about the functionality.
+    This also includes documentation that was previously in this section, regarding how to specify release timestamps for custom registries.
+
+If `minimumReleaseAge` is set to a time duration _and_ the update has a release timestamp header, then Renovate will check if the set duration has passed. This behaviour can be changed using [`minimumReleaseAgeBehaviour`](#minimumreleaseagebehaviour).
 
 Note: Renovate will wait for the set duration to pass for each **separate** version.
 Renovate does not wait until the package has seen no releases for x time-duration(`minimumReleaseAge`).
@@ -2720,24 +2786,15 @@ The datasource that Renovate uses must have a release timestamp for the `minimum
 Some datasources may have a release timestamp, but in a format Renovate does not support.
 In those cases a feature request needs to be implemented.
 
-<!-- prettier-ignore -->
-!!! warning "Warning for Maven users"
-    For `minimumReleaseAge` to work, the Maven source must return reliable `last-modified` headers.
-
-    <!-- markdownlint-disable MD046 -->
-    If your custom Maven source registry is **pull-through** and does _not_ support the `last-modified` header, like GAR (Google Artifact Registry's Maven implementation) then you can extend the Maven source registry URL with `https://repo1.maven.org/maven2` as the first item. Then the `currentVersionTimestamp` via `last-modified` will be taken from Maven central for public dependencies.
-
-    ```json
-    "registryUrls": [
-      "https://repo1.maven.org/maven2",
-      "https://europe-maven.pkg.dev/org-artifacts/maven-virtual"
-    ],
-    ```
-    <!-- markdownlint-enable MD046 -->
+You can confirm if your datasource supports the release timestamp by viewing [the documentation for the given datasource](./modules/datasource/index.md).
 
 <!-- prettier-ignore -->
 !!! note
     Configuring this option will add a `renovate/stability-days` option to the status checks.
+
+<!-- prettier-ignore -->
+!!! note
+    As of Renovate 42.19.5, using `minimumReleaseAge=0 days` is treated the same as `minimumReleaseAge=null`.
 
 Examples of how you can use `minimumReleaseAge`:
 
@@ -2745,7 +2802,7 @@ Examples of how you can use `minimumReleaseAge`:
 
 #### Suppress branch/PR creation for X days
 
-If you use `minimumReleaseAge=3 days` and `internalChecksFilter="strict"` then Renovate only creates branches when 3 (or more days) have passed since the version was released.
+If you use `minimumReleaseAge=3 days`, `prCreation="not-pending"` and `internalChecksFilter="strict"` then Renovate only creates branches when 3 (or more days) have passed since the version was released.
 We recommend you set `dependencyDashboard=true`, so you can see these pending PRs.
 
 #### Prevent holding broken npm packages
@@ -2766,12 +2823,24 @@ Set `minimumReleaseAge` to `3 days` for npm packages to prevent relying on a pac
 
 #### Await X time duration before Automerging
 
-If you enable `automerge` _and_ `minimumReleaseAge`, Renovate will create PRs immediately, but only automerge them when the `minimumReleaseAge` time-duration has passed.
+If you enable `automerge` _and_ `minimumReleaseAge`, Renovate Renovate will create PRs immediately, but only automerge them when the `minimumReleaseAge` time-duration has passed.
+
+It's recommended to also apply `prCreation="not-pending"` and `internalChecksFilter="strict"` to make sure that branches and PRs are only created after the `minimumReleaseAge` has passed.
 
 Renovate adds a "renovate/stability-days" pending status check to each branch/PR.
 This pending check prevents the branch going green to automerge before the time has passed.
 
 <!-- markdownlint-enable MD001 -->
+
+## minimumReleaseAgeBehaviour
+
+When `minimumReleaseAge` is set to a time duration, the `minimumReleaseAgeBehaviour` will be used to control whether the release timestamp is required.
+
+When set to `timestamp-required`, this version is not treated stable unless there is release timestamp, and that release timestamp is past the [`minimumReleaseAge`](#minimumreleaseage).
+
+When set to `timestamp-optional`, Renovate will treat a release without a releaseTimestamp as stable.
+
+This only applies when used with [`minimumReleaseAge`](#minimumreleaseage).
 
 ## minor
 
@@ -2834,6 +2903,8 @@ Renovate only queries the OSV database for dependencies that use one of these da
 - [`packagist`](./modules/datasource/packagist/index.md)
 - [`pypi`](./modules/datasource/pypi/index.md)
 - [`rubygems`](./modules/datasource/rubygems/index.md)
+
+The entire database is downloaded locally by [renovate-offline](https://github.com/renovatebot/osv-offline) and queried offline.
 
 ## packageRules
 
@@ -2959,6 +3030,26 @@ For example, if you want to upgrade to Angular v1.5 but _not_ to `angular` v1.6 
 ```
 
 Renovate calculates the valid syntax for this at runtime, because it depends on the dynamic versioning scheme.
+
+You can also use the following template fields with `allowedVersions`:
+
+- `currentVersion`
+- `major`
+- `minor`
+- `patch`
+
+For example, if you want to upgrade to Angular to only the next major, you could set `allowedVersions` like this:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["angular"],
+      "allowedVersions": "<={{add major 1}}"
+    }
+  ]
+}
+```
 
 <!-- prettier-ignore -->
 !!! warning
@@ -3609,7 +3700,7 @@ Here's an example of how you would define PR priority so that `devDependencies` 
 ### replacementName
 
 This config option only works with some managers.
-We're working to support more managers, subscribe to issue [renovatebot/renovate#14149](https://github.com/renovatebot/renovate/issues/14149) to follow our progress.
+We're working to support more managers, subscribe to issue [renovatebot/renovate#24883](https://github.com/renovatebot/renovate/discussions/24883) to follow our progress.
 
 Managers which do not support replacement:
 
@@ -3796,7 +3887,7 @@ For example, GitHub might automerge a Renovate branch even if it's behind the ba
 
 Please check platform specific docs for version requirements.
 
-To learn how to use GitHub's Merge Queue feature with Renovate, read our [Key Concepts, Automerge, GitHub Merge Queue](./key-concepts/automerge.md#github-merge-queue) docs.
+To learn how to use GitHub's Merge Queue feature with Renovate, read our [GitHub Merge Queue](./key-concepts/automerge.md#github-merge-queue) docs.
 
 ## platformCommit
 
@@ -3814,25 +3905,27 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 Table with options:
 
-| Name                         | Description                                                                                                                                                |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bundlerConservative`        | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies. |
-| `composerWithAll`            | Run `composer update` with `--with-all-dependencies` flag instead of the default `--with-dependencies`.                                                    |
-| `dotnetWorkloadRestore`      | Run `dotnet workload restore` before `dotnet restore` commands.                                                                                            |
-| `gomodMassage`               | Enable massaging `replace` directives before calling `go` commands.                                                                                        |
-| `gomodTidy`                  | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                   |
-| `gomodTidy1.17`              | Run `go mod tidy -compat=1.17` after Go module updates.                                                                                                    |
-| `gomodTidyE`                 | Run `go mod tidy -e` after Go module updates.                                                                                                              |
-| `gomodUpdateImportPaths`     | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
-| `gomodSkipVendor`            | Never run `go mod vendor` after Go module updates.                                                                                                         |
-| `gomodVendor`                | Always run `go mod vendor` after Go module updates even if vendor files aren't detected.                                                                   |
-| `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                          |
-| `kustomizeInflateHelmCharts` | Inflate updated helm charts referenced in the kustomization.                                                                                               |
-| `npmDedupe`                  | Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.                                       |
-| `npmInstallTwice`            | Run `npm install` commands _twice_ to work around bugs where `npm` generates invalid lock files if run only once                                           |
-| `pnpmDedupe`                 | Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.                                                                                         |
-| `yarnDedupeFewer`            | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
-| `yarnDedupeHighest`          | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
+| Name                         | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bundlerConservative`        | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies.                                                                                                                                                                                                                                                                                                                         |
+| `composerNoMinimalChanges`   | Run `composer update` with no `--minimal-changes` flag (does not affect lock file maintenance, which will never use `--minimal-changes`).                                                                                                                                                                                                                                                                                                                                          |
+| `composerWithAll`            | Run `composer update` with `--with-all-dependencies` flag instead of the default `--with-dependencies`.                                                                                                                                                                                                                                                                                                                                                                            |
+| `dotnetWorkloadRestore`      | Run `dotnet workload restore` before `dotnet restore` commands.                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `gomodMassage`               | Enable massaging `replace` directives before calling `go` commands.                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `gomodTidy`                  | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                                                                                                                                                                                                                                                                                                                                           |
+| `gomodTidy1.17`              | Run `go mod tidy -compat=1.17` after Go module updates.                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `gomodTidyE`                 | Run `go mod tidy -e` after Go module updates.                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `gomodUpdateImportPaths`     | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                                                                                                                                                                                                                                                                                                                                            |
+| `gomodSkipVendor`            | Never run `go mod vendor` after Go module updates.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `gomodVendor`                | Always run `go mod vendor` after Go module updates even if vendor files aren't detected.                                                                                                                                                                                                                                                                                                                                                                                           |
+| `goGenerate`                 | Run `go generate ./...` after vendoring (if vendoring was required). This will then commit any files which were added or modified by running `go generate`. Note this will not install any other tools as part of the process. See [Go Tool](https://tip.golang.org/doc/go1.24#tools) usage for how to incorporate these as part of your build process. In order for this option to function, the global configuration option `allowedUnsafeExecutions` must include `goGenerate`. |
+| `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `kustomizeInflateHelmCharts` | Inflate updated helm charts referenced in the kustomization.                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `npmDedupe`                  | Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.                                                                                                                                                                                                                                                                                                                                                               |
+| `npmInstallTwice`            | Run `npm install` commands _twice_ to work around bugs where `npm` generates invalid lock files if run only once                                                                                                                                                                                                                                                                                                                                                                   |
+| `pnpmDedupe`                 | Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `yarnDedupeFewer`            | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `yarnDedupeHighest`          | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                                                                                                                                                                                                                                                                                                                                           |
 
 ## postUpgradeTasks
 
@@ -3976,6 +4069,29 @@ You can configure this object to either:
 <!-- prettier-ignore -->
 !!! tip
     Columns must also be included in the `prBodyColumns` array in order to be used, so that's why it's included above in the example.
+
+## prBodyHeadingDefinitions
+
+You can configure this object to modify the table headers present in the PR body.
+This can include Markdown or any other syntax that the platform supports.
+
+```json title="Modifying the default value for the Package and Age table headers"
+{
+  "prBodyHeadingDefinitions": {
+    "Package": "📦 Package",
+    "Age": "[Age](https://docs.renovatebot.com/merge-confidence)"
+  },
+  "prBodyColumn": ["Package", "Age"]
+}
+```
+
+<!-- prettier-ignore -->
+!!! tip
+    Columns must also be included in the `prBodyColumns` array in order to be used, so that's why it's included above in the example.
+
+<!-- prettier-ignore -->
+!!! note
+    Templating is not supported for this option.
 
 ## prBodyNotes
 
@@ -4131,7 +4247,7 @@ Behavior:
 - `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, and update nothing otherwise
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
-- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `cargo`, `composer`, `gleam`, `npm`, `yarn`, `pnpm`, `terraform` and `poetry` so far
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `cargo`, `composer`, `gleam`, `npm`, `yarn`, `pnpm`, `terraform`, `poetry` and `uv` so far
 - `in-range-only` = Update the lock file when in-range updates are available, ignore package file updates
 
 Renovate's `"auto"` strategy works like this for npm:
@@ -4292,17 +4408,6 @@ By default, `renovate` will update to a version greater than `latest` only if th
 
 Must be valid usernames.
 
-**Required reviewers on GitHub**
-
-If you're assigning a team to review on GitHub, you must use the prefix `team:` and add the _last part_ of the team name.
-Say the full team name on GitHub is `@organization/foo`, then you'd set the config option like this:
-
-```json
-{
-  "reviewers": ["team:foo"]
-}
-```
-
 **Required reviewers on Azure DevOps**
 
 To mark a reviewer as required on Azure DevOps, you must use the prefix `required:`.
@@ -4312,6 +4417,28 @@ For example: if the username or team name is `bar` then you would set the config
 ```json
 {
   "reviewers": ["required:bar"]
+}
+```
+
+**Required reviewers on Forgejo**
+
+If you're assigning a team to review on Forgejo, you must use the prefix `team:` and add the _last part_ of the team name.
+Say the full team name on Forgejo is `organization/foo`, then you'd set the config option like this:
+
+```json
+{
+  "reviewers": ["team:foo"]
+}
+```
+
+**Required reviewers on GitHub**
+
+If you're assigning a team to review on GitHub, you must use the prefix `team:` and add the _last part_ of the team name.
+Say the full team name on GitHub is `@organization/foo`, then you'd set the config option like this:
+
+```json
+{
+  "reviewers": ["team:foo"]
 }
 ```
 

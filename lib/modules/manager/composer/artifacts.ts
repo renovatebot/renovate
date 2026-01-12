@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isEmptyObject, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { z } from 'zod';
 import {
@@ -11,8 +11,13 @@ import {
   takePersonalAccessTokenIfPossible,
 } from '../../../util/check-token';
 import { exec } from '../../../util/exec';
-import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
+import type {
+  CommandWithOptions,
+  ExecOptions,
+  ToolConstraint,
+} from '../../../util/exec/types';
 import {
+  deleteLocalFile,
   ensureCacheDir,
   ensureLocalDir,
   getSiblingFileName,
@@ -101,7 +106,7 @@ function getAuthJson(): string | null {
     }
   }
 
-  return is.emptyObject(authJson) ? null : JSON.stringify(authJson);
+  return isEmptyObject(authJson) ? null : JSON.stringify(authJson);
 }
 
 export async function updateArtifacts({
@@ -159,7 +164,7 @@ export async function updateArtifacts({
       docker: {},
     };
 
-    const commands: string[] = [];
+    const commands: (string | CommandWithOptions)[] = [];
 
     // Determine whether install is required before update
     if (requireComposerDependencyInstallation(lockfile)) {
@@ -169,7 +174,14 @@ export async function updateArtifacts({
       logger.trace({ preCmd, preArgs }, 'composer pre-update command');
       commands.push('git stash -- composer.json');
       commands.push(`${preCmd} ${preArgs}`);
-      commands.push('git stash pop || true');
+      commands.push({ command: ['git', 'stash', 'pop'], ignoreFailure: true });
+    }
+
+    if (config.isLockFileMaintenance) {
+      logger.debug(
+        `Removing ${lockFileName} first due to lock file maintenance upgrade`,
+      );
+      await deleteLocalFile(lockFileName);
     }
 
     const cmd = 'composer';
@@ -186,7 +198,7 @@ export async function updateArtifacts({
                 ? quote(`${dep.depName}:${dep.newVersion}`)
                 : quote(dep.depName!),
             )
-            .filter(is.string)
+            .filter(isString)
             .map((dep) => quote(dep))
             .join(' ')
         ).trim() +

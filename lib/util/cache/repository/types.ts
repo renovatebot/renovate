@@ -137,6 +137,7 @@ export interface RepoCacheData {
   platform?: {
     forgejo?: {
       pullRequestsCache?: unknown;
+      orgs?: Record<string, boolean>;
     };
     gitea?: {
       pullRequestsCache?: unknown;
@@ -155,7 +156,7 @@ export interface RepoCacheData {
     gitlab?: {
       pullRequestsCache?: unknown;
     };
-    bitbucketServer?: {
+    'bitbucket-server'?: {
       pullRequestsCache?: unknown;
     };
   };

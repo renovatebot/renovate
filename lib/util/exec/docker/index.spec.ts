@@ -237,6 +237,64 @@ describe('util/exec/docker/index', () => {
       expect(res).toBe(command(image));
     });
 
+    it('adds `|| true` if ignoreFailure is set on a pre-command', async () => {
+      mockExecAll();
+      const res = await generateDockerCommand(
+        ['ls'],
+        [
+          'foo',
+          {
+            command: ['bar'],
+            ignoreFailure: true,
+          },
+          {
+            command: ['bleh'],
+          },
+          'baz',
+        ],
+        dockerOptions,
+      );
+      expect(res).toBe(
+        `docker run --rm ` +
+          `--name=renovate_${image} ` +
+          `--label=renovate_child ` +
+          `--user=some-user ` +
+          `-e FOO -e BAR ` +
+          `-w "/tmp/foobar" ` +
+          `ghcr.io/containerbase/sidecar ` +
+          `bash -l -c "foo && bar || true && bleh && baz && ls"`,
+      );
+    });
+
+    it('adds `|| true` if ignoreFailure is set on a command', async () => {
+      mockExecAll();
+      const res = await generateDockerCommand(
+        [
+          'foo',
+          {
+            command: ['bar'],
+            ignoreFailure: true,
+          },
+          {
+            command: ['bleh'],
+          },
+          'baz',
+        ],
+        ['pre'],
+        dockerOptions,
+      );
+      expect(res).toBe(
+        `docker run --rm ` +
+          `--name=renovate_${image} ` +
+          `--label=renovate_child ` +
+          `--user=some-user ` +
+          `-e FOO -e BAR ` +
+          `-w "/tmp/foobar" ` +
+          `ghcr.io/containerbase/sidecar ` +
+          `bash -l -c "pre && foo && bar || true && bleh && baz"`,
+      );
+    });
+
     it('handles volumes', async () => {
       mockExecAll();
       const volumes: VolumeOption[] = [

@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import validateNpmPackageName from 'validate-npm-package-name';
 import { logger } from '../../../../../logger';
 import { regEx } from '../../../../../util/regex';
@@ -214,7 +214,7 @@ export function getExtractedConstraints(
       (dep.depType === 'engines' || dep.depType === 'packageManager') &&
       dep.depName &&
       constraints.includes(dep.depName) &&
-      is.string(dep.currentValue)
+      isString(dep.currentValue)
     ) {
       extractedConstraints[dep.depName] = dep.currentValue;
     }

@@ -192,7 +192,7 @@ describe('modules/manager/vendir/artifacts', () => {
       cmd: '',
       stdout: '',
       stderr: '',
-      options: { encoding: 'utf8' },
+      options: {},
     });
     const updatedDeps = [{ depName: 'dep1' }];
     mockExecAll(execError);

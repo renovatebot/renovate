@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { z } from 'zod';
 import { Toml } from '../../../util/schema-utils';
 import { depTypes, pep508ToPackageDependency } from '../pep621/utils';
@@ -20,7 +20,7 @@ export const Pep723 = Toml.pipe(
     .transform(({ 'requires-python': requiresPython, dependencies }) => {
       const res: PackageFileContent = { deps: dependencies ?? [] };
 
-      if (is.nonEmptyString(requiresPython)) {
+      if (isNonEmptyString(requiresPython)) {
         res.extractedConstraints = { python: requiresPython };
       }
 

@@ -190,32 +190,67 @@ const qImplicitGradlePlugin = q
   .handler(handleImplicitDep)
   .handler(cleanupTempVars);
 
+// Match the use* method call with version parameter
+const qTestSuiteMethod = q
+  .sym(
+    regEx(`^(?:${Object.keys(GRADLE_TEST_SUITES).join('|')})$`),
+    storeVarToken,
+  )
+  .handler((ctx) => storeInTokenMap(ctx, 'implicitDepName'))
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    maxMatches: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q.begin<Ctx>().join(qVersion).end(),
+  });
+
 // testing { suites { test { useSpock("1.2.3") } } }
+// testing.suites.test { useJunit("1.2.3") }
+// testing { suites.withType(JvmTestSuite).configureEach { useJUnitJupiter("5.13.4") } }
+// testing { suites.withType(JvmTestSuite::class).configureEach { useSpock("2.3") } }
 const qImplicitTestSuites = qDotOrBraceExpr(
   'testing',
   qDotOrBraceExpr(
     'suites',
-    qDotOrBraceExpr(
-      'test',
+    q.alt(
+      qDotOrBraceExpr('test', qTestSuiteMethod),
       q
-        .sym(
-          regEx(`^(?:${Object.keys(GRADLE_TEST_SUITES).join('|')})$`),
-          storeVarToken,
-        )
-        .handler((ctx) => storeInTokenMap(ctx, 'implicitDepName'))
+        .sym<Ctx>('withType')
         .tree({
           type: 'wrapped-tree',
           maxDepth: 1,
-          maxMatches: 1,
           startsWith: '(',
           endsWith: ')',
-          search: q.begin<Ctx>().join(qVersion).end(),
+        })
+        .op('.')
+        .sym('configureEach')
+        .tree({
+          type: 'wrapped-tree',
+          maxDepth: 1,
+          startsWith: '{',
+          endsWith: '}',
+          search: qTestSuiteMethod,
         }),
     ),
   ),
 )
   .handler(handleImplicitDep)
   .handler(cleanupTempVars);
+
+// substitute module("foo:bar:1.2.3") using "baz:qux:4.5.6"
+// substitute(module("foo:bar:1.2.3")).using("baz:qux:4.5.6")
+const qIgnoreSubstitutedDependencies = q.sym<Ctx>('substitute').alt(
+  q.sym<Ctx>('module').tree(),
+  q.tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q.sym<Ctx>('module').tree(),
+  }),
+);
 
 export const qDependencies = q.alt(
   qDependencyStrings,
@@ -227,4 +262,6 @@ export const qDependencies = q.alt(
   qImplicitTestSuites,
   // avoid heuristic matching of gradle feature variant capabilities
   qDotOrBraceExpr('java', q.sym<Ctx>('registerFeature').tree()),
+  // avoid matching substituted dependency modules
+  qIgnoreSubstitutedDependencies,
 );

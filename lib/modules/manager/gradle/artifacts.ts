@@ -1,6 +1,7 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
+import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -22,6 +23,21 @@ import {
   isGcvPropsFile,
 } from './extract/consistent-versions-plugin';
 import { isGradleBuildFile } from './utils';
+
+export function isGradleExecutionAllowed(command: string): boolean {
+  const allowlist = GlobalConfig.get('allowedUnsafeExecutions', [
+    'gradleWrapper',
+  ]);
+
+  if (!allowlist.includes('gradleWrapper')) {
+    logger.once.warn(
+      `Gradle wrapper command, \`${command}\`, was requested to run, but \`gradleWrapper\` is not permitted in the allowedUnsafeExecutions`,
+    );
+    return false;
+  }
+
+  return true;
+}
 
 // .lockfile is gradle default lockfile, /versions.lock is gradle-consistent-versions plugin lockfile
 function isLockFile(fileName: string): boolean {
@@ -177,6 +193,13 @@ export async function updateArtifacts({
     return null;
   }
 
+  if (!isGradleExecutionAllowed(gradlewFile)) {
+    logger.trace(
+      'Not allowed to execute gradle due to allowedUnsafeExecutions - aborting update',
+    );
+    return null;
+  }
+
   logger.debug('Updating found Gradle dependency lockfiles');
 
   try {
@@ -218,7 +241,7 @@ export async function updateArtifacts({
       } else {
         const updatedDepNames = updatedDeps
           .map(({ depName, packageName }) => packageName ?? depName)
-          .filter(is.nonEmptyStringAndNotWhitespace);
+          .filter(isNonEmptyStringAndNotWhitespace);
 
         lockfileCmd += ` --update-locks ${updatedDepNames
           .map(quote)

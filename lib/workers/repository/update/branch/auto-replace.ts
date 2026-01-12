@@ -1,5 +1,5 @@
 // TODO #22198
-import is from '@sindresorhus/is';
+import { isNumber, isString, isUndefined } from '@sindresorhus/is';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { extractPackageFile } from '../../../../modules/manager';
@@ -43,14 +43,15 @@ export async function confirmIfDepUpdated(
       return false;
     }
     // istanbul ignore if
-    if (is.number(depIndex) && depIndex >= newExtract.deps.length) {
+    if (isNumber(depIndex) && depIndex >= newExtract.deps.length) {
       logger.debug(
         `Extracted ${packageFile!} after autoreplace has fewer deps than expected.`,
       );
       return false;
     }
     newUpgrade = newExtract.deps[depIndex!];
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
+    /* istanbul ignore next */
     logger.debug({ manager, packageFile, err }, 'Failed to parse newContent');
   }
 
@@ -260,12 +261,11 @@ export async function doAutoReplace(
   }
 
   const replaceWithoutReplaceString =
-    (is.string(newName) &&
-      newName !== depName &&
-      (is.undefined(upgrade.replaceString) ||
-        !upgrade.replaceString?.includes(depName!))) ||
+    isString(newName) &&
+    newName !== depName &&
     // for jsonata manager, fixes #36461
-    (is.undefined(upgrade.replaceString) && changedCount > 1);
+    ((isUndefined(upgrade.replaceString) && changedCount > 1) ||
+      !upgrade.replaceString?.includes(depName!));
   const replaceString = upgrade.replaceString ?? currentValue ?? currentDigest;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex: number;
@@ -327,7 +327,11 @@ export async function doAutoReplace(
       } else if (
         currentDigestShort &&
         newDigest &&
-        currentDigestShort !== newDigest
+        currentDigestShort !== newDigest &&
+        // Only use short digest replacement when there's no full currentDigest
+        // that already matches newDigest (otherwise we'd incorrectly replace
+        // part of an already-correct digest)
+        !(currentDigest && currentDigest === newDigest)
       ) {
         if (!newString.includes(currentDigestShort)) {
           logger.debug(
@@ -491,7 +495,8 @@ export async function doAutoReplace(
         newContent = existingContent;
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
+    /* istanbul ignore next */
     logger.debug({ packageFile, depName, err }, 'doAutoReplace error');
   }
   // istanbul ignore next
