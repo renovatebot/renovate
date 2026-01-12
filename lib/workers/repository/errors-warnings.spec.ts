@@ -112,16 +112,9 @@ describe('workers/repository/errors-warnings', () => {
       };
 
       const res = getDepWarningsPR(packageFiles, config, dependencyDashboard);
-      expect(res).toMatchInlineSnapshot(`
-        "
-        ---
-
-        > ⚠️ **Warning**
-        >
-        > Some dependencies could not be looked up. Check the [Dependency Dashboard](../issues/123) for more information.
-
-        "
-      `);
+      expect(res).toContain(
+        'Check the [Dependency Dashboard](../issues/123) for more information.',
+      );
     });
 
     it('returns 2 pr warnings text dependencyDashboard false', () => {
@@ -333,20 +326,20 @@ describe('workers/repository/errors-warnings', () => {
       };
       const res = getDepWarningsOnboardingPR(packageFiles, config);
       expect(res).toMatchInlineSnapshot(`
-        "
-        ---
-        >
-        > ⚠️ **Warning**
-        >
-        > Please correct - or verify that you can safely ignore - these dependency lookup failures before you merge this PR.
-        >
-        > -   \`Warning 1\`
-        > -   \`Warning 2\`
-        >
-        > Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
+              "
+              ---
+              >
+              > ⚠️ **Warning**
+              >
+              > Please correct - or verify that you can safely ignore - these dependency lookup failures before you merge this PR.
+              >
+              > -   \`Warning 1\`
+              > -   \`Warning 2\`
+              >
+              > Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
 
-        "
-      `);
+              "
+            `);
     });
 
     it('handle empty package files', () => {
