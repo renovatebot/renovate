@@ -100,7 +100,6 @@ describe('workers/repository/update/branch/automerge', () => {
       config.baseBranch = 'test-branch';
       config.branchName = 'branch-to-be-merged';
       config.commitMessage = 'custom commit message';
-      //GlobalConfig.set({ dryRun: 'full' });
       platform.getBranchStatus.mockResolvedValueOnce('green');
       expect(await tryBranchAutomerge(config)).toBe('automerged');
       expect(scm.checkoutBranch).toHaveBeenCalledExactlyOnceWith('test-branch');
@@ -118,7 +117,6 @@ describe('workers/repository/update/branch/automerge', () => {
       config.baseBranch = 'test-branch';
       config.branchName = 'branch-to-be-merged';
       config.commitMessage = 'custom commit message';
-      //GlobalConfig.set({ dryRun: 'full' });
       platform.getBranchStatus.mockResolvedValueOnce('green');
       expect(await tryBranchAutomerge(config)).toBe('automerged');
       expect(scm.checkoutBranch).toHaveBeenCalledExactlyOnceWith('test-branch');
@@ -136,7 +134,6 @@ describe('workers/repository/update/branch/automerge', () => {
       config.baseBranch = 'test-branch';
       config.branchName = 'branch-to-be-merged';
       config.commitMessage = 'custom commit message';
-      //GlobalConfig.set({ dryRun: 'full' });
       platform.getBranchStatus.mockResolvedValueOnce('green');
       expect(await tryBranchAutomerge(config)).toBe('automerged');
       expect(scm.checkoutBranch).toHaveBeenCalledExactlyOnceWith('test-branch');
