@@ -6,6 +6,7 @@ import type { PackageDependency, PackageFileContent } from '../types';
 import * as bazelrc from './bazelrc';
 import { parse } from './parser';
 import type { ResultFragment } from './parser/fragments';
+import { ImgExtensionToDockerPackageDep } from './parser/img';
 import { RuleToMavenPackageDep, fillRegistryUrls } from './parser/maven';
 import { RuleToDockerPackageDep } from './parser/oci';
 import {
@@ -25,6 +26,7 @@ export async function extractPackageFile(
     const gitRepositoryDeps = extractGitRepositoryDeps(records);
     const mavenDeps = extractMavenDeps(records);
     const dockerDeps = LooseArray(RuleToDockerPackageDep).parse(records);
+    const imgDeps = LooseArray(ImgExtensionToDockerPackageDep).parse(records);
     const rulesImgDeps = transformRulesImgCalls(records);
 
     if (gitRepositoryDeps.length) {
@@ -37,6 +39,10 @@ export async function extractPackageFile(
 
     if (dockerDeps.length) {
       pfc.deps.push(...dockerDeps);
+    }
+
+    if (imgDeps.length) {
+      pfc.deps.push(...imgDeps);
     }
 
     if (rulesImgDeps.length) {
