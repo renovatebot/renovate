@@ -1671,8 +1671,7 @@ describe('modules/platform/bitbucket/index', () => {
 
     it('dependency dashboard: updates abandoned dependencies heading and place note inside', () => {
       const dashboardBody =
-        '> ℹ **Note**\n>\n' +
-        'These dependencies have not received updates for an extended period and may be unmaintained:\n\n' +
+        '## Abandoned Dependencies\n' +
         '<details>\n<summary>View abandoned dependencies (6)</summary>\n\n' +
         '| Datasource | Name | Last Updated |\n' +
         '|------------|------|-------------|\n' +
@@ -1681,8 +1680,6 @@ describe('modules/platform/bitbucket/index', () => {
 
       expect(bitbucket.massageMarkdown(dashboardBody)).toEqual(
         '## Abandoned Dependencies\n' +
-          '> ℹ **Note**\n>\n' +
-          'These dependencies have not received updates for an extended period and may be unmaintained:\n\n\n\n' +
           '| Datasource | Name | Last Updated |\n' +
           '|------------|------|-------------|\n' +
           '| npm | node | unknown |\n\n\n\n',

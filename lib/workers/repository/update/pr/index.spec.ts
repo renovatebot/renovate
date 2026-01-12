@@ -1056,7 +1056,7 @@ describe('workers/repository/update/pr/index', () => {
               upgrades: [
                 {
                   prBodyNotes: [
-                    `> :exclamation: **Warning**
+                    `> :stop_sign: **Caution**
 >
 > bar 1.2.3 was released with an attestation, but 2.3.4 has no attestation.
 > Verify that release 2.3.4 was published by the expected author.
