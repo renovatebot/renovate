@@ -12,6 +12,7 @@ import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { platform } from '../../modules/platform';
 import { coerceArray } from '../../util/array';
+import { emojify } from '../../util/emoji';
 import { regEx } from '../../util/regex';
 import { coerceString } from '../../util/string';
 import * as template from '../../util/template';
@@ -442,7 +443,7 @@ export async function ensureDependencyDashboard(
 
   if (hasDeprecationsOrReplacements) {
     issueBody += '## Deprecations / Replacements\n';
-    issueBody += '> ⚠️ **Warning**\n> \n';
+    issueBody += emojify('> :warning: **Warning**\n> \n');
     issueBody +=
       'These dependencies are either deprecated or have replacements available:\n\n';
     issueBody += '| Datasource | Name | Replacement PR? |\n';
@@ -681,7 +682,9 @@ export function getAbandonedPackagesMd(
     return '';
   }
 
-  let abandonedMd = '## Abandoned Dependencies\n\n> ℹ **Note**\n> \n';
+  let abandonedMd = emojify(
+    '## Abandoned Dependencies\n\n> :information_source: **Note**\n> \n',
+  );
 
   abandonedMd +=
     'Packages are marked as abandoned when they exceed the [`abandonmentThreshold`](https://docs.renovatebot.com/configuration-options/#abandonmentthreshold) since their last release. ';
@@ -689,7 +692,7 @@ export function getAbandonedPackagesMd(
     'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n> \n';
 
   abandonedMd +=
-    'These dependencies have not received updates for an extended period and may be unmaintained:\n\n';
+    '> These dependencies have not received updates for an extended period and may be unmaintained:\n\n';
 
   abandonedMd += '<details>\n';
   abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
@@ -757,12 +760,13 @@ export async function getDashboardMarkdownVulnerabilities(
   const resolvedVulnerabilitiesLength =
     vulnerabilities.length - unresolvedVulnerabilities.length;
 
-  result += `\`${resolvedVulnerabilitiesLength}\`/\`${vulnerabilities.length}\``;
+  result += emojify('> :exclamation: **Important**\n> \n');
+  result += `> \`${resolvedVulnerabilitiesLength}\`/\`${vulnerabilities.length}\``;
   if (isTruthy(config.osvVulnerabilityAlerts)) {
     result += ' CVEs have Renovate fixes.\n\n';
   } else {
     result +=
-      ' CVEs have possible Renovate fixes.\nSee [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n\n';
+      ' CVEs have possible Renovate fixes.\n> See [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n\n';
   }
 
   let renderedVulnerabilities: Vulnerability[];
