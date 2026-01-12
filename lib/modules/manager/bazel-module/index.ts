@@ -1,5 +1,6 @@
 import type { Category } from '../../../constants';
 import { BazelDatasource } from '../../datasource/bazel';
+import { CrateDatasource } from '../../datasource/crate';
 import { DockerDatasource } from '../../datasource/docker';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { MavenDatasource } from '../../datasource/maven';
@@ -16,6 +17,7 @@ export const defaultConfig = {
 
 export const supportedDatasources = [
   BazelDatasource.id,
+  CrateDatasource.id,
   DockerDatasource.id,
   GithubTagsDatasource.id,
   MavenDatasource.id,

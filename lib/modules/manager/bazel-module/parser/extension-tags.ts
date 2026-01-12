@@ -2,6 +2,7 @@ import { query as q } from 'good-enough-parser';
 import { regEx } from '../../../../util/regex';
 import { kvParams } from './common';
 import type { Ctx } from './context';
+import { crateExtensionPrefix, crateExtensionTags } from './crate';
 
 import { mavenExtensionPrefix, mavenExtensionTags } from './maven';
 import { ociExtensionPrefix, ociExtensionTags } from './oci';
@@ -20,10 +21,14 @@ import { ociExtensionPrefix, ociExtensionTags } from './oci';
 // by assuming the extension names start with well-known prefixes.
 
 const supportedExtensionRegex = regEx(
-  `^(${ociExtensionPrefix}|${mavenExtensionPrefix}).*$`,
+  `^(${crateExtensionPrefix}|${ociExtensionPrefix}|${mavenExtensionPrefix}).*$`,
 );
 
-const supportedExtensionTags = [...mavenExtensionTags, ...ociExtensionTags];
+const supportedExtensionTags = [
+  ...crateExtensionTags,
+  ...mavenExtensionTags,
+  ...ociExtensionTags,
+];
 
 const supportedExtensionTagsRegex = regEx(
   `^(${supportedExtensionTags.join('|')})$`,
