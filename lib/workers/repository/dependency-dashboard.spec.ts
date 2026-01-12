@@ -860,6 +860,19 @@ The following branches have not met their minimum group size. To create them, cl
 
  - [ ] <!-- approveGroup-branch=groupBranch1 -->undefined
 
+## Statistics
+
+<details>
+<summary>Dependency Status</summary>
+
+| Status | Count |
+|---|---|
+| Outdated | 0 |
+| **Total** | **0** |
+
+</details>
+
+
 ## Detected Dependencies
 
 None detected
@@ -1341,6 +1354,19 @@ None detected
         body: `This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 This repository currently has no open or pending branches.
+
+## Statistics
+
+<details>
+<summary>Dependency Status</summary>
+
+| Status | Count |
+|---|---|
+| Outdated | 0 |
+| **Total** | **0** |
+
+</details>
+
 
 ## Detected Dependencies
 

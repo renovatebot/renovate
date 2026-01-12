@@ -9,6 +9,19 @@ The following updates have all been created. To force a retry/rebase of any, cli
  - [ ] <!-- rebase-branch=branchName3 -->[pr3](../pull/3)
  - [ ] <!-- rebase-all-open-prs -->**Click on this checkbox to rebase all open PRs at once**
 
+## Statistics
+
+<details>
+<summary>Dependency Status</summary>
+
+| Status | Count |
+|---|---|
+| Outdated | 0 |
+| **Total** | **0** |
+
+</details>
+
+
 ## Detected Dependencies
 
 None detected
