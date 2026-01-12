@@ -626,7 +626,7 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 
-  massaged = massageDetailSummaryHtmlIntNestedLists(massaged);
+  massaged = massageDetailSummaryHtmlToNestedLists(massaged);
 
   return massageCodeblockMarkdown(massaged);
 }
@@ -667,7 +667,7 @@ function massageCodeblockMarkdown(body: string): string {
  *
  * Bitbucket doesn't currently support collapsible syntax; https://jira.atlassian.com/browse/BCLOUD-20231
  */
-function massageDetailSummaryHtmlIntNestedLists(body: string): string {
+function massageDetailSummaryHtmlToNestedLists(body: string): string {
   let depth = 0;
   // Parse detail parts to calculate correct list depth
   const detailsParts = body.split('<details>').map((raw, i, arr) => {
