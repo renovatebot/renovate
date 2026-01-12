@@ -1689,7 +1689,7 @@ describe('modules/platform/bitbucket/index', () => {
       );
     });
 
-    it('updates vulnerabilities section to block quote with nested list', () => {
+    it('updates vulnerabilities section with multiple collapsible details sections to nested list', () => {
       const prBody =
         '## Vulnerabilities\n\n' +
         '`2`/`2` CVEs have Renovate fixes.\n' +
@@ -1714,9 +1714,9 @@ describe('modules/platform/bitbucket/index', () => {
       );
     });
 
-    it('updates detected dependencies section to block quote with nested list', () => {
+    it('updates detected dependencies section with multiple collapsible details sections to nested list', () => {
       const prBody =
-        '## Detected dependencies\n\n' +
+        '## Detected Dependencies\n\n' +
         '<details><summary>dockerfile</summary>\n<blockquote>\n\n' +
         '<details><summary>app1/Dockerfile</summary>\n - `node:24`\n - `temurin:27`\n</details>\n\n' +
         '<details><summary>app2/Dockerfile</summary>\n - `node:20`\n - `python:3:14`\n</details>\n\n' +
@@ -1726,7 +1726,7 @@ describe('modules/platform/bitbucket/index', () => {
         '</blockquote>\n</details>';
 
       expect(bitbucket.massageMarkdown(prBody)).toEqual(
-        '## Detected dependencies\n\n' +
+        '## Detected Dependencies\n\n' +
           ' - **dockerfile**\n\n\n' +
           '\t - `app1/Dockerfile`\n' +
           '\t\t - `node:24`\n' +
@@ -1737,6 +1737,22 @@ describe('modules/platform/bitbucket/index', () => {
           ' - **npm**\n\n\n' +
           '\t - `package.json`\n' +
           '\t\t - `@biomejs/biome:2.0.0`\n\n\n',
+      );
+    });
+
+    it('updates release notes section', () => {
+      const prBody =
+        '## Release Notes\n\n' +
+        '<details><summary>biomejs/biome (@&#8203;biomejs/biome)</summary>\n\n\n' +
+        '### [\\`v2.3.11\\`](https://github.com/biomejs/biome/blob/HEAD/packages/@&#8203;biomejs/biome/CHANGELOG.md#2311)\n\n' +
+        '[Compare Source](https://github.com/biomejs/biome/compare/@biomejs/biome@2.3.10...@biomejs/biome@2.3.11)\n\n' +
+        '</details>';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '## Release Notes\n\n' +
+          '**biomejs/biome (@&#8203;biomejs/biome)**\n\n\n' +
+          '### [\\`v2.3.11\\`](https://github.com/biomejs/biome/blob/HEAD/packages/@&#8203;biomejs/biome/CHANGELOG.md#2311)\n\n' +
+          '[Compare Source](https://github.com/biomejs/biome/compare/@biomejs/biome@2.3.10...@biomejs/biome@2.3.11)\n\n',
       );
     });
 

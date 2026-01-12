@@ -26,7 +26,7 @@ describe('modules/platform/utils/pr-body', () => {
 
     it('truncates to 10', () => {
       const body = smartTruncate('Lorem ipsum dolor sit amet', 10);
-      expect(body).toBe('> **Note:*');
+      expect(body).toBe('> ℹ️ **Not');
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Truncating PR body due to platform limitation of 10 characters',
       );
