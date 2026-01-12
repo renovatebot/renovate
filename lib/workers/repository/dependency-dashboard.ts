@@ -684,12 +684,12 @@ export function getAbandonedPackagesMd(
   let abandonedMd = '## Abandoned Dependencies\n\n> ℹ **Note**\n> \n';
 
   abandonedMd +=
-    '> Packages are marked as abandoned when they exceed the [`abandonmentThreshold`](https://docs.renovatebot.com/configuration-options/#abandonmentthreshold) since their last release. ';
+    'Packages are marked as abandoned when they exceed the [`abandonmentThreshold`](https://docs.renovatebot.com/configuration-options/#abandonmentthreshold) since their last release. ';
   abandonedMd +=
     'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n> \n';
 
   abandonedMd +=
-    '> These dependencies have not received updates for an extended period and may be unmaintained:\n';
+    'These dependencies have not received updates for an extended period and may be unmaintained:\n\n';
 
   abandonedMd += '<details>\n';
   abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
