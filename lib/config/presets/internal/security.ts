@@ -39,12 +39,12 @@ export const presets: Record<string, Preset> = {
   minimumReleaseAgeNpm: {
     description:
       'Wait until the npm package is three days old before raising the update. This a) introduces a short delay to allow for malware researchers and scanners to (possibly) detect any malicious behaviour in packages, and b) prevents the maintainer and/or NPM from unpublishing a package you already upgraded to, breaking builds.',
-    npm: {
-      minimumReleaseAge: '3 days',
-      internalChecksFilter: 'strict',
-      prCreation: 'not-pending',
-    },
     packageRules: [
+      {
+        matchDatasources: ['npm'],
+        minimumReleaseAge: '3 days',
+        internalChecksFilter: 'strict',
+      },
       {
         description:
           'Do not require Minimum Release Age for update types that are controlled by the package manager',
@@ -62,6 +62,15 @@ export const presets: Record<string, Preset> = {
         matchUpdateTypes: ['replacement'],
         prBodyNotes: [
           "⚠️ Renovate's replacement functionality [does not currently](https://github.com/renovatebot/renovate/issues/39400) wire in the release age for a package, so the Minimum Release Age checks can apply. You will need to manually validate the Minimum Release Age for these package(s).",
+        ],
+        minimumReleaseAge: null,
+      },
+      {
+        description: 'Do not require Minimum Release Age for package pinning',
+        matchDatasources: ['npm'],
+        matchUpdateTypes: ['pin'],
+        prBodyNotes: [
+          "⚠️ Renovate's pin functionality [does not currently](https://github.com/renovatebot/renovate/issues/40288) wire in the release age for a package, so the Minimum Release Age checks can apply. You will need to manually validate the Minimum Release Age for these package(s).",
         ],
         minimumReleaseAge: null,
       },

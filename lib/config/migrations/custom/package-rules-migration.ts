@@ -22,6 +22,7 @@ type RenameMapKey = keyof typeof renameMap;
 function renameKeys(packageRule: PackageRule): PackageRule {
   const newPackageRule: PackageRule = {};
   for (const [key, val] of Object.entries(packageRule)) {
+    // @ts-expect-error -- TODO: fix me
     newPackageRule[renameMap[key as RenameMapKey] ?? key] = val;
   }
   return newPackageRule;
@@ -38,6 +39,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
         newPackageRule.matchDepNames ??= [];
         newPackageRule.matchDepNames.push(...patterns.map((v) => `${v}{/,}**`));
       }
+      // @ts-expect-error -- TODO: fix me
       delete newPackageRule.matchDepPrefixes;
     }
     if (key === 'matchDepPatterns') {
@@ -45,6 +47,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
         newPackageRule.matchDepNames ??= [];
         newPackageRule.matchDepNames.push(...patterns.map((v) => `/${v}/`));
       }
+      // @ts-expect-error -- TODO: fix me
       delete newPackageRule.matchDepPatterns;
     }
     if (key === 'excludeDepNames') {
@@ -52,6 +55,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
         newPackageRule.matchDepNames ??= [];
         newPackageRule.matchDepNames.push(...patterns.map((v) => `!${v}`));
       }
+      // @ts-expect-error -- TODO: fix me
       delete newPackageRule.excludeDepNames;
     }
     if (key === 'excludeDepPrefixes') {
@@ -61,6 +65,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
           ...patterns.map((v) => `!${v}{/,}**`),
         );
       }
+      // @ts-expect-error -- TODO: fix me
       delete newPackageRule.excludeDepPrefixes;
     }
     if (key === 'excludeDepPatterns') {
@@ -68,6 +73,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
         newPackageRule.matchDepNames ??= [];
         newPackageRule.matchDepNames.push(...patterns.map((v) => `!/${v}/`));
       }
+      // @ts-expect-error -- TODO: fix me
       delete newPackageRule.excludeDepPatterns;
     }
     // packageName
@@ -78,6 +84,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
           ...patterns.map((v) => `${v}{/,}**`),
         );
       }
+      // @ts-expect-error -- TODO: fix me
       delete newPackageRule.matchPackagePrefixes;
     }
     if (key === 'matchPackagePatterns') {
@@ -92,6 +99,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
           }),
         );
       }
+      // @ts-expect-error -- TODO: fix me
       delete newPackageRule.matchPackagePatterns;
     }
     if (key === 'excludePackageNames') {
@@ -99,6 +107,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
         newPackageRule.matchPackageNames ??= [];
         newPackageRule.matchPackageNames.push(...patterns.map((v) => `!${v}`));
       }
+      // @ts-expect-error -- TODO: fix me
       delete newPackageRule.excludePackageNames;
     }
     if (key === 'excludePackagePrefixes') {
@@ -108,6 +117,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
           ...patterns.map((v) => `!${v}{/,}**`),
         );
       }
+      // @ts-expect-error -- TODO: fix me
       delete newPackageRule.excludePackagePrefixes;
     }
     if (key === 'excludePackagePatterns') {
@@ -117,6 +127,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
           ...patterns.map((v) => `!/${v}/`),
         );
       }
+      // @ts-expect-error -- TODO: fix me
       delete newPackageRule.excludePackagePatterns;
     }
     // sourceUrl
@@ -127,6 +138,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
           ...patterns.map((v) => `${v}{/,}**`),
         );
       }
+      // @ts-expect-error -- TODO: fix me
       delete newPackageRule.matchSourceUrlPrefixes;
     }
     // repository
@@ -135,6 +147,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
         newPackageRule.matchRepositories ??= [];
         newPackageRule.matchRepositories.push(...patterns.map((v) => `!${v}`));
       }
+      // @ts-expect-error -- TODO: fix me
       delete newPackageRule.excludeRepositories;
     }
   }

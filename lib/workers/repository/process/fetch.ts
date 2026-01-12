@@ -2,6 +2,7 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
+import { instrument } from '../../../instrumentation';
 import { logger } from '../../../logger';
 import { getDefaultConfig } from '../../../modules/datasource';
 import { getDefaultVersioning } from '../../../modules/datasource/common';
@@ -169,7 +170,9 @@ export async function fetchUpdates(
 ): Promise<void> {
   const managers = Object.keys(packageFiles);
   const allManagerJobs = managers.map((manager) =>
-    fetchManagerUpdates(config, packageFiles, manager),
+    instrument(manager, () =>
+      fetchManagerUpdates(config, packageFiles, manager),
+    ),
   );
   await Promise.all(allManagerJobs);
   PackageFiles.add(config.baseBranch!, { ...packageFiles });

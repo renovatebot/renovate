@@ -1,4 +1,5 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { join } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -7,8 +8,13 @@ import * as allVersioning from '../../../modules/versioning';
 import { newlineRegex, regEx } from '../../regex';
 import { uniq } from '../../uniq';
 import { rawExec } from '../common';
-import type { DockerOptions, Opt, VolumeOption, VolumesPair } from '../types';
-
+import type {
+  CommandWithOptions,
+  DockerOptions,
+  VolumeOption,
+  VolumesPair,
+} from '../types';
+import { isCommandWithOptions } from '../utils';
 const prefetchedImages = new Map<string, string>();
 
 const digestRegex = regEx('Digest: (.*?)\n');
@@ -24,9 +30,7 @@ export async function prefetchDockerImage(taggedImage: string): Promise<void> {
     );
   } else {
     logger.debug(`Fetching Docker image: ${taggedImage}`);
-    const res = await rawExec(`docker pull ${taggedImage}`, {
-      encoding: 'utf-8',
-    });
+    const res = await rawExec(`docker pull ${taggedImage}`, {});
     const imageDigest = digestRegex.exec(res?.stdout)?.[1] ?? 'unknown';
     logger.debug(
       `Finished fetching Docker image ${taggedImage}@${imageDigest}`,
@@ -65,12 +69,6 @@ function prepareVolumes(volumes: VolumeOption[]): string[] {
   );
   const unique: VolumesPair[] = uniq<VolumesPair>(filtered, volumesEql);
   return unique.map(([from, to]) => `-v "${from}":"${to}"`);
-}
-
-function prepareCommands(commands: Opt<string>[]): string[] {
-  return commands.filter<string>((command): command is string =>
-    isString(command),
-  );
 }
 
 export async function getDockerTag(
@@ -145,16 +143,12 @@ export async function removeDockerContainer(
   const containerName = getContainerName(image, prefix);
   let cmd = `docker ps --filter name=${containerName} -aq`;
   try {
-    const res = await rawExec(cmd, {
-      encoding: 'utf-8',
-    });
+    const res = await rawExec(cmd, {});
     const containerId = res?.stdout?.trim() || '';
     if (containerId.length) {
       logger.debug(`Removing container with ID: ${containerId}`);
       cmd = `docker rm -f ${containerId}`;
-      await rawExec(cmd, {
-        encoding: 'utf-8',
-      });
+      await rawExec(cmd, {});
     } else {
       logger.trace({ image, containerName }, 'No running containers to remove');
     }
@@ -180,9 +174,7 @@ export async function removeDanglingContainers(): Promise<void> {
     );
     const res = await rawExec(
       `docker ps --filter label=${containerLabel} -aq`,
-      {
-        encoding: 'utf-8',
-      },
+      {},
     );
     if (res?.stdout?.trim().length) {
       const containerIds = res.stdout
@@ -191,9 +183,7 @@ export async function removeDanglingContainers(): Promise<void> {
         .map((container) => container.trim())
         .filter(Boolean);
       logger.debug({ containerIds }, 'Removing dangling child containers');
-      await rawExec(`docker rm -f ${containerIds.join(' ')}`, {
-        encoding: 'utf-8',
-      });
+      await rawExec(`docker rm -f ${containerIds.join(' ')}`, {});
     } else {
       logger.debug('No dangling containers to remove');
     }
@@ -210,8 +200,8 @@ export async function removeDanglingContainers(): Promise<void> {
 }
 
 export async function generateDockerCommand(
-  commands: string[],
-  preCommands: string[],
+  commands: (string | CommandWithOptions)[],
+  preCommands: (string | CommandWithOptions)[],
   options: DockerOptions,
 ): Promise<string> {
   const { envVars, cwd } = options;
@@ -277,9 +267,36 @@ export async function generateDockerCommand(
   await prefetchDockerImage(taggedImage);
   result.push(taggedImage);
 
-  const bashCommand = [...prepareCommands(preCommands), ...commands].join(
-    ' && ',
-  );
+  const bashCommandParts = [];
+
+  for (const preCommand of preCommands) {
+    if (
+      isCommandWithOptions(preCommand) &&
+      isString(join(preCommand.command))
+    ) {
+      if (preCommand.ignoreFailure) {
+        bashCommandParts.push(`${join(preCommand.command)} || true`);
+      } else {
+        bashCommandParts.push(join(preCommand.command));
+      }
+    } else if (isString(preCommand)) {
+      bashCommandParts.push(preCommand);
+    }
+  }
+
+  for (const command of commands) {
+    if (isCommandWithOptions(command)) {
+      if (command.ignoreFailure) {
+        bashCommandParts.push(`${join(command.command)} || true`);
+      } else {
+        bashCommandParts.push(join(command.command));
+      }
+    } else {
+      bashCommandParts.push(command);
+    }
+  }
+
+  const bashCommand = bashCommandParts.join(' && ');
   result.push(`bash -l -c "${bashCommand.replace(regEx(/"/g), '\\"')}"`); // lgtm [js/incomplete-sanitization]
 
   return result.join(' ');

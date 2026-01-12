@@ -1,3 +1,4 @@
+import { isPlainObject } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { HttpCacheStats } from '../../stats';
 import type { GotOptions, HttpResponse } from '../types';
@@ -18,6 +19,10 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     const httpCache = HttpCache.parse(cache);
     if (!httpCache) {
       return null;
+    }
+
+    if (isPlainObject(httpCache.httpResponse)) {
+      httpCache.httpResponse.cached = true;
     }
 
     return httpCache;
@@ -57,7 +62,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
-    if (resp.statusCode === 200) {
+    if (!resp.cached && resp.statusCode === 200) {
       const etag = resp.headers?.etag;
       const lastModified = resp.headers?.['last-modified'];
 
@@ -73,11 +78,11 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
         timestamp,
       });
 
-      /* v8 ignore start: should never happen */
+      /* v8 ignore next: should never happen */
       if (!newHttpCache) {
         logger.debug(`http cache: failed to persist cache for ${url}`);
         return resp;
-      } /* v8 ignore stop */
+      }
 
       logger.debug(
         `http cache: saving ${url} (etag=${etag}, lastModified=${lastModified})`,

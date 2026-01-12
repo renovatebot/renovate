@@ -12,6 +12,7 @@ import { ExternalHostError } from '../../../../types/errors/external-host-error'
 import { getEnv } from '../../../../util/env';
 import { exec } from '../../../../util/exec';
 import type {
+  CommandWithOptions,
   ExecOptions,
   ExtraEnv,
   ToolConstraint,
@@ -77,15 +78,15 @@ export async function checkYarnrc(
         );
       }
     }
-    /* v8 ignore start -- needs test */
+    /* v8 ignore next -- needs test */
   } catch {
     // not found
-  } /* v8 ignore stop -- needs test */
+  }
   return { offlineMirror, yarnPath };
 }
 
-export function getOptimizeCommand(fileName: string): string {
-  return `sed -i 's/ steps,/ steps.slice(0,1),/' ${quote(fileName)}`;
+export function getOptimizeCommand(fileName: string): string[] {
+  return ['sed', '-i', 's/ steps,/ steps.slice(0,1),/', fileName];
 }
 
 export function isYarnUpdate(upgrade: Upgrade): boolean {
@@ -148,7 +149,7 @@ export async function generateLockFile(
       CI: 'true',
     };
 
-    const commands: string[] = [];
+    const commands: (string | CommandWithOptions)[] = [];
     let cmdOptions = ''; // should have a leading space
     if (config.skipInstalls !== false) {
       if (isYarn1) {
@@ -158,7 +159,10 @@ export async function generateLockFile(
           // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
           yarnTool.toolName = 'yarn-slim';
           if (yarnPath) {
-            commands.push(getOptimizeCommand(yarnPath) + ' || true');
+            commands.push({
+              command: getOptimizeCommand(yarnPath),
+              ignoreFailure: true,
+            });
           }
         }
       } else if (isYarnModeAvailable) {
@@ -291,13 +295,13 @@ export async function generateLockFile(
       // https://github.com/yarnpkg/berry/blob/20612e82d26ead5928cc27bf482bb8d62dde87d3/packages/yarnpkg-core/sources/Project.ts#L284.
       try {
         await writeLocalFile(lockFileName, '');
-        /* v8 ignore start -- needs test */
+        /* v8 ignore next -- needs test */
       } catch (err) {
         logger.debug(
           { err, lockFileName },
           'Error clearing `yarn.lock` for lock file maintenance',
         );
-      } /* v8 ignore stop -- needs test */
+      }
     }
 
     // Run the commands
@@ -305,7 +309,7 @@ export async function generateLockFile(
 
     // Read the result
     lockFile = await readLocalFile(lockFileName, 'utf8');
-    /* v8 ignore start -- needs test */
+    /* v8 ignore next -- needs test */
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
@@ -332,7 +336,7 @@ export async function generateLockFile(
       throw new ExternalHostError(err, NpmDatasource.id);
     }
     return { error: true, stderr: err.stderr, stdout: err.stdout };
-  } /* v8 ignore stop -- needs test */
+  }
   return { lockFile };
 }
 

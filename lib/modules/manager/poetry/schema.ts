@@ -322,7 +322,9 @@ export const PoetryPyProject = Toml.pipe(
           requires: LooseArray(BuildSystemRequireVal).transform((vals) => {
             const req = vals.find(
               ({ depName }) =>
-                depName === 'poetry' || depName === 'poetry_core',
+                depName === 'poetry' ||
+                depName === 'poetry_core' ||
+                depName === 'poetry-core',
             );
             return req?.poetryRequirement;
           }),

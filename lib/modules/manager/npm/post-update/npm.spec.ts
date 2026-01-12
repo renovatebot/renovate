@@ -432,8 +432,6 @@ describe('modules/manager/npm/post-update/npm', () => {
           '&& ' +
           'install-tool npm 6.0.0 ' +
           '&& ' +
-          'hash -d npm 2>/dev/null || true ' +
-          '&& ' +
           'npm install --package-lock-only --no-audit' +
           '"',
       },
@@ -460,7 +458,6 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool node 16.16.0' },
       { cmd: 'install-tool npm 6.0.0' },
-      { cmd: 'hash -d npm 2>/dev/null || true' },
       {
         cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
       },
