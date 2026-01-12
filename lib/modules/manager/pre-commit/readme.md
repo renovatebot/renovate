@@ -40,12 +40,12 @@ Examples for the supported languages are listed below.
 
 ```yaml
 - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.7
-    hooks:
-      - id: actionlint
-        language: golang
-        additional_dependencies:
-          - "github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.10.0"
+  rev: v1.7.7
+  hooks:
+    - id: actionlint
+      language: golang
+      additional_dependencies:
+        - 'github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.10.0'
 ```
 
 #### Node.js
