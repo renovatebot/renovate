@@ -3,10 +3,10 @@ import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { getPkgReleases } from '..';
 import { GlobalConfig } from '../../../config/global';
-import * as _packageCache from '../../../util/cache/package';
 import { id as versioning } from '../../versioning/nuget';
 import { parseRegistryUrl } from './common';
 import { NugetDatasource } from '.';
+import { packageCache } from '~test/cache-mock';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
 import { hostRules, logger } from '~test/util';
@@ -15,8 +15,6 @@ const datasource = NugetDatasource.id;
 
 vi.mock('../../../util/host-rules', () => mockDeep());
 vi.mock('../../../util/cache/package', () => mockDeep());
-
-const packageCache = vi.mocked(_packageCache);
 
 const pkgInfoV3FromNuget = Fixtures.get('nunit/v3_nuget_org.xml');
 const pkgListV3Registration = Fixtures.get('nunit/v3_registration.json');

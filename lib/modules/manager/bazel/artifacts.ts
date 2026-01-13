@@ -1,6 +1,6 @@
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import * as packageCache from '../../../util/cache/package';
+import { packageCache } from '../../../util/cache/package';
 import { hashStream } from '../../../util/hash';
 import { Http } from '../../../util/http';
 import { map as pMap } from '../../../util/promises';
