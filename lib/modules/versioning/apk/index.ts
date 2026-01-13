@@ -11,6 +11,14 @@ export const urls = [
 ];
 export const supportsRanges = false;
 
+// Regex with named capture groups for APK version parsing
+const versionRegex = regEx(
+  /^v?(?<major>[0-9]+)(?:\.(?<minor>[0-9]+))?(?:\.(?<patch>[0-9]+))?(?<extra>(?:\.[0-9]+)*)(?<letter>[a-z])?(?:(?<prereleaseType>_alpha|_beta|_pre|_rc)(?<prereleaseNum>[0-9]*))?(?:(?<packageFixType>_cvs|_svn|_git|_hg|_p)(?<packageFixNum>[0-9]*))?(?:-r(?<releaseNum>[0-9]+))?$/,
+);
+
+// Regex for splitting version strings into alphanumeric parts
+const alphaNumRegex = regEx(/([a-zA-Z]+)|(\d+)/g);
+
 export interface ApkVersion extends GenericVersion {
   /**
    * version is the main version part: it defines the version of origin software
@@ -30,11 +38,6 @@ class ApkVersioningApi extends GenericVersioningApi {
    * Based on `Apache-2.0` code in https://github.com/chainguard-dev/apko/blob/v0.30.35/pkg/apk/apk/version.go
    */
   protected _parse(version: string): ApkVersion | null {
-    // Regex with named capture groups for used values, non-capturing groups for structure
-    const versionRegex = regEx(
-      /^v?(?<major>[0-9]+)(?:\.(?<minor>[0-9]+))?(?:\.(?<patch>[0-9]+))?(?<extra>(?:\.[0-9]+)*)(?<letter>[a-z])?(?:(?<prereleaseType>_alpha|_beta|_pre|_rc)(?<prereleaseNum>[0-9]*))?(?:(?<packageFixType>_cvs|_svn|_git|_hg|_p)(?<packageFixNum>[0-9]*))?(?:-r(?<releaseNum>[0-9]+))?$/,
-    );
-
     const match = versionRegex.exec(version);
     if (!match?.groups) {
       return null;
@@ -169,11 +172,10 @@ class ApkVersioningApi extends GenericVersioningApi {
     if (v1 === v2) {
       return 0;
     }
-    const alphaNumPattern = regEx(/([a-zA-Z]+)|(\d+)/g);
     /* v8 ignore next -- defensive null handling, regex always matches valid version strings */
-    const matchesv1 = v1.match(alphaNumPattern) ?? [];
+    const matchesv1 = v1.match(alphaNumRegex) ?? [];
     /* v8 ignore next -- defensive null handling, regex always matches valid version strings */
-    const matchesv2 = v2.match(alphaNumPattern) ?? [];
+    const matchesv2 = v2.match(alphaNumRegex) ?? [];
     const matches = Math.min(matchesv1.length, matchesv2.length);
 
     for (let i = 0; i < matches; i++) {
