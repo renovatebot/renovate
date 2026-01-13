@@ -14,10 +14,7 @@ describe('util/cache/package/index', () => {
     expect(
       await set('_test-namespace', 'some-key', 'some-value', 5),
     ).toBeUndefined();
-    // eslint-disable-next-line vitest/no-unneeded-async-expect-function -- cleanup isn't async without init
-    expect(async () => {
-      await cleanup({});
-    }).not.toThrow();
+    await expect(cleanup({})).resolves.toBeUndefined();
   });
 
   it('sets and gets file', async () => {
