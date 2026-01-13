@@ -3010,7 +3010,16 @@ describe('modules/platform/forgejo/index', () => {
         '[#123](../pull/123) [#124](../pull/124) [#125](../pull/125)';
 
       expect(forgejo.massageMarkdown(body)).toBe(
-        '[#123](pulls/123) [#124](pulls/124) [#125](pulls/125)',
+        '[#123](!123) [#124](!124) [#125](!125)',
+      );
+    });
+
+    it('replaces issue links', () => {
+      const body =
+        '[#123](../issues/123) [#124](../issues/124) [#125](../issues/125)';
+
+      expect(forgejo.massageMarkdown(body)).toBe(
+        '[#123](#123) [#124](#124) [#125](#125)',
       );
     });
   });
