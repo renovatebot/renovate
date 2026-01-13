@@ -1,5 +1,5 @@
 import cronstrue from 'cronstrue';
-import type { BranchConfig } from '../../../types';
+import type { RenovateConfig } from '../../../../config/types';
 import * as schedule from './schedule';
 
 describe('workers/repository/update/branch/schedule', () => {
@@ -139,7 +139,7 @@ describe('workers/repository/update/branch/schedule', () => {
   });
 
   describe('isScheduledNow(config)', () => {
-    let config: BranchConfig;
+    let config: RenovateConfig;
 
     beforeAll(() => {
       vi.useFakeTimers();
@@ -148,12 +148,7 @@ describe('workers/repository/update/branch/schedule', () => {
     beforeEach(() => {
       vi.setSystemTime(new Date('2017-06-30T10:50:00.000')); // Locally 2017-06-30 10:50am
 
-      config = {
-        baseBranch: 'main',
-        upgrades: [],
-        branchName: 'update-branch',
-        manager: '',
-      };
+      config = {};
     });
 
     it('returns true if no schedule', () => {
