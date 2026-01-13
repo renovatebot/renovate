@@ -44,7 +44,7 @@ resources:
     - container: linux
       image: ubuntu:24.04
     - container: python
-      image: python:3.14@sha256:6d58c1a9444bc2664f0fa20c43a592fcdb2698eb9a9c32257516538a2746c19a
+      image: python:3.14@sha256:99536892f722b2a8f83c7b3a1e26734e1c183aa914f6cad1d89d9adb68b4dd90
 
 stages:
   - stage: StageOne
