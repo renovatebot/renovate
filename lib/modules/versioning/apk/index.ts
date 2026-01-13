@@ -388,7 +388,6 @@ class ApkVersioningApi extends GenericVersioningApi {
   }): string | null {
     // APK packages in apko.yaml only use exact versions
     // currentValue is stored without the = operator for cleaner PR display
-
     const hasRevision = /-r\d+$/.test(currentValue);
 
     // If current version has no revision, strip revision from newVersion
