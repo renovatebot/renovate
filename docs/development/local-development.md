@@ -174,6 +174,23 @@ You usually don't need to fix any Prettier errors by hand.
 
 If you're only working on the documentation files, you can use the `pnpm doc-fix` command to format your work.
 
+### IDE extensions
+
+We recommend installing the extensions listed in `.vscode/extensions.json`.
+VS Code will prompt you to install them when you open the project.
+
+For linting, we use both ESLint and [oxlint](https://oxc.rs):
+
+- **ESLint** handles type-aware rules (requires TypeScript)
+- **oxlint** handles syntax rules (near-instant feedback)
+
+To get real-time oxlint diagnostics, install the extension for your editor:
+
+- **VS Code**: [oxc](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode)
+- **Zed**: [oxc](https://github.com/zed-extensions/oxc)
+- **IntelliJ/WebStorm**: [Oxlint](https://plugins.jetbrains.com/plugin/25948-oxlint)
+- **Neovim**: [nvim-oxlint](https://github.com/soulsam480/nvim-oxlint) or via native LSP
+
 ## Documentation
 
 We use [MkDocs](https://www.mkdocs.org) to generate the documentation.
