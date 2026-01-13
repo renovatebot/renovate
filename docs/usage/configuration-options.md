@@ -1134,6 +1134,10 @@ Example:
 }
 ```
 
+<!--prettier-ignore-->
+!!! note
+    You do not need to add leading and trailing slashes in `matchStrings`.
+
 ### matchStringsStrategy
 
 `matchStringsStrategy` controls behavior when multiple `matchStrings` values are provided.
@@ -4320,6 +4324,7 @@ Renovate applies _all_ `registryAliases` objects, from top to bottom.
 This feature works with the following managers:
 
 - [`ansible`](modules/manager/ansible/index.md)
+- [`bazel-module`](modules/manager/bazel-module/index.md)
 - [`bitbucket-pipelines`](modules/manager/bitbucket-pipelines/index.md)
 - [`circleci`](modules/manager/circleci/index.md)
 - [`crow`](modules/manager/crow/index.md)

@@ -2,6 +2,7 @@ import { isEmptyArray, isEmptyObject, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { clone } from '../../util/clone';
+import { emojify } from '../../util/emoji';
 
 export class PackageFiles {
   private static data = new Map<string, Record<string, PackageFile[]> | null>();
@@ -32,8 +33,9 @@ export class PackageFiles {
    * @param setHeader
    */
   static getDashboardMarkdown(maxLength: number, setHeader = true): string {
-    const note =
-      '> ℹ **Note**\n> \n> Detected dependencies section has been truncated\n\n';
+    const note = emojify(
+      `> :information_source: **Note**\n> \n> Detected dependencies section has been truncated\n\n`,
+    );
     const title = `## Detected Dependencies\n\n`;
 
     // exclude header length from the available space

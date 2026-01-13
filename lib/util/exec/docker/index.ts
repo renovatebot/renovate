@@ -1,4 +1,5 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { join } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -7,8 +8,13 @@ import * as allVersioning from '../../../modules/versioning';
 import { newlineRegex, regEx } from '../../regex';
 import { uniq } from '../../uniq';
 import { rawExec } from '../common';
-import type { DockerOptions, Opt, VolumeOption, VolumesPair } from '../types';
-
+import type {
+  CommandWithOptions,
+  DockerOptions,
+  VolumeOption,
+  VolumesPair,
+} from '../types';
+import { isCommandWithOptions } from '../utils';
 const prefetchedImages = new Map<string, string>();
 
 const digestRegex = regEx('Digest: (.*?)\n');
@@ -63,12 +69,6 @@ function prepareVolumes(volumes: VolumeOption[]): string[] {
   );
   const unique: VolumesPair[] = uniq<VolumesPair>(filtered, volumesEql);
   return unique.map(([from, to]) => `-v "${from}":"${to}"`);
-}
-
-function prepareCommands(commands: Opt<string>[]): string[] {
-  return commands.filter<string>((command): command is string =>
-    isString(command),
-  );
 }
 
 export async function getDockerTag(
@@ -200,8 +200,8 @@ export async function removeDanglingContainers(): Promise<void> {
 }
 
 export async function generateDockerCommand(
-  commands: string[],
-  preCommands: string[],
+  commands: (string | CommandWithOptions)[],
+  preCommands: (string | CommandWithOptions)[],
   options: DockerOptions,
 ): Promise<string> {
   const { envVars, cwd } = options;
@@ -267,9 +267,36 @@ export async function generateDockerCommand(
   await prefetchDockerImage(taggedImage);
   result.push(taggedImage);
 
-  const bashCommand = [...prepareCommands(preCommands), ...commands].join(
-    ' && ',
-  );
+  const bashCommandParts = [];
+
+  for (const preCommand of preCommands) {
+    if (
+      isCommandWithOptions(preCommand) &&
+      isString(join(preCommand.command))
+    ) {
+      if (preCommand.ignoreFailure) {
+        bashCommandParts.push(`${join(preCommand.command)} || true`);
+      } else {
+        bashCommandParts.push(join(preCommand.command));
+      }
+    } else if (isString(preCommand)) {
+      bashCommandParts.push(preCommand);
+    }
+  }
+
+  for (const command of commands) {
+    if (isCommandWithOptions(command)) {
+      if (command.ignoreFailure) {
+        bashCommandParts.push(`${join(command.command)} || true`);
+      } else {
+        bashCommandParts.push(join(command.command));
+      }
+    } else {
+      bashCommandParts.push(command);
+    }
+  }
+
+  const bashCommand = bashCommandParts.join(' && ');
   result.push(`bash -l -c "${bashCommand.replace(regEx(/"/g), '\\"')}"`); // lgtm [js/incomplete-sanitization]
 
   return result.join(' ');

@@ -9,8 +9,9 @@ import {
   clearRepoSanitizedSecretsList,
 } from '../sanitize';
 import { exec, rawExec } from './common';
+import { ExecError } from './exec-error';
 import type { DataListener, RawExecOptions } from './types';
-import { partial } from '~test/util';
+import { logger, partial } from '~test/util';
 
 vi.mock('../../instrumentation');
 vi.mock('node:child_process');
@@ -189,6 +190,112 @@ describe('util/exec/common', () => {
       });
     });
 
+    it('throws if an error occurs, when using CommandWithOptions', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 1,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((cmd, opts) => stub);
+
+      await expect(
+        exec(
+          { command: ['ls', '-l'] },
+          partial<RawExecOptions>({ timeout: 5 }),
+        ),
+      ).rejects.toThrow(
+        new ExecError(`Command failed: ls -l\nerr message`, {
+          cmd: 'ls -l',
+          exitCode: 1,
+          stdout,
+          stderr,
+          options: { timeout: 5 },
+        }),
+      );
+    });
+
+    it('throws if an error occurs', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 1,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((cmd, opts) => stub);
+
+      await expect(
+        exec(cmd, partial<RawExecOptions>({ timeout: 5 })),
+      ).rejects.toThrow(
+        new ExecError(`Command failed: ls -l\nerr message`, {
+          cmd: 'ls -l',
+          exitCode: 1,
+          stdout,
+          stderr,
+          options: { timeout: 5 },
+        }),
+      );
+    });
+
+    it('throws if an error occurs, and we specify ignoreFailure=false', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 1,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((cmd, opts) => stub);
+
+      await expect(
+        exec(
+          { command: ['ls', '-l'], ignoreFailure: false },
+          partial<RawExecOptions>({ timeout: 5 }),
+        ),
+      ).rejects.toThrow(
+        new ExecError(`Command failed: ls -l\nerr message`, {
+          cmd: 'ls -l',
+          exitCode: 1,
+          stdout,
+          stderr,
+          options: { timeout: 5 },
+        }),
+      );
+    });
+
+    it('does not throw if an error occurs, but we specify ignoreFailure=true', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 1,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((cmd, opts) => stub);
+
+      await expect(
+        exec(
+          { command: ['ls', '-l'], ignoreFailure: true },
+          partial<RawExecOptions>({ timeout: 5 }),
+        ),
+      ).resolves.toEqual({
+        stderr,
+        stdout,
+        exitCode: 1,
+      });
+
+      expect(logger.logger.once.debug).toHaveBeenCalledWith(
+        { command: 'ls -l', stdout, stderr, exitCode: 1 },
+        'Ignoring failure to execute comamnd `ls -l`, as ignoreFailure=true is set',
+      );
+    });
+
     it('can specify a shell', async () => {
       const cmd = 'ls -l';
       const stub = getSpawnStub({
@@ -209,6 +316,52 @@ describe('util/exec/common', () => {
         cmd,
         [],
         expect.objectContaining({ shell: '/bin/zsh' }),
+      );
+    });
+
+    it('can specify a specific shell with CommandWithOptions', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((cmd, opts) => stub);
+
+      await exec(
+        { command: ['ls', '-l'], shell: '/bin/zsh' },
+        partial<RawExecOptions>({ encoding: 'utf8' }),
+      );
+
+      expect(execa).toHaveBeenCalledWith(
+        cmd,
+        [],
+        expect.objectContaining({ shell: '/bin/zsh' }),
+      );
+    });
+
+    it('can specify shell=true with CommandWithOptions', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((cmd, opts) => stub);
+
+      await exec(
+        { command: ['ls', '-l'], shell: true },
+        partial<RawExecOptions>({ encoding: 'utf8' }),
+      );
+
+      expect(execa).toHaveBeenCalledWith(
+        cmd,
+        [],
+        expect.objectContaining({ shell: true }),
       );
     });
 

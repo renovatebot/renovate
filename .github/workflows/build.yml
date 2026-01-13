@@ -34,7 +34,7 @@ env:
   # are we on a release branch?
   DO_REALEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
   NODE_VERSION: 24
-  PDM_VERSION: 2.26.3 # renovate: datasource=pypi depName=pdm
+  PDM_VERSION: 2.26.4 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -786,7 +786,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@fd8989f49fd9085ba8e3bab61af8f4bb6bdcf5ff # v3.14.44
+        uses: containerbase/internal-tools@b43d039a13b994ec09557a423ae0560019e99c7c # v3.14.48
         with:
           command: docker-config
 

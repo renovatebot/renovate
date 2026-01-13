@@ -44,6 +44,9 @@ describe('modules/manager/flux/artifacts', () => {
     expect(snapshots).toMatchObject([
       {
         cmd: 'flux install --export --components source-controller,kustomize-controller,helm-controller,notification-controller > clusters/my-cluster/flux-system/gotk-components.yaml',
+        options: {
+          shell: true,
+        },
       },
     ]);
   });
