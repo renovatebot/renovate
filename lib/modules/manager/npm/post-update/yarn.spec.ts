@@ -741,7 +741,15 @@ describe('modules/manager/npm/post-update/yarn', () => {
     const options = { cwd: 'some-dir' };
     expect(execSnapshots).toMatchObject([
       {
-        cmd: `sed -i 's/ steps,/ steps.slice(0,1),/' some-dir/.yarn/cli.js || true`,
+        cmd: {
+          command: [
+            'sed',
+            '-i',
+            `s/ steps,/ steps.slice(0,1),/`,
+            'some-dir/.yarn/cli.js',
+          ],
+          ignoreFailure: true,
+        },
         options,
       },
       {
@@ -788,7 +796,8 @@ describe('modules/manager/npm/post-update/yarn', () => {
           ` && ` +
           `install-tool yarn-slim 1.22.18` +
           ` && ` +
-          `sed -i 's/ steps,/ steps.slice(0,1),/' some-dir/.yarn/cli.js || true` +
+          // NOTE that this has a `|| true` appended inside the `exec(...)` function
+          `sed -i 's/ steps,/ steps.slice(0,1),/' some-dir/.yarn/cli.js` +
           ` && ` +
           `yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts` +
           `"`,

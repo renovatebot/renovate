@@ -139,7 +139,7 @@ function addPullRequestNoteIfAttestationHasBeenLost(
     upgrade.prBodyNotes ??= [];
     upgrade.prBodyNotes.push(
       [
-        '> :exclamation: **Warning**',
+        '> :stop_sign: **Caution**',
         '>',
         `> ${name} ${currentVersion} was released with an attestation, but ${newVersion} has no attestation.`,
         `> Verify that release ${newVersion} was published by the expected author.`,

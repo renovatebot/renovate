@@ -1134,6 +1134,10 @@ Example:
 }
 ```
 
+<!--prettier-ignore-->
+!!! note
+    You do not need to add leading and trailing slashes in `matchStrings`.
+
 ### matchStringsStrategy
 
 `matchStringsStrategy` controls behavior when multiple `matchStrings` values are provided.
