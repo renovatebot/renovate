@@ -27,7 +27,7 @@ export interface ApkVersion extends GenericVersion {
 class ApkVersioningApi extends GenericVersioningApi {
   /**
    * Parse APK version format using apko's version parsing patterns
-   * Based on: https://github.com/chainguard-dev/apko/blob/main/pkg/apk/apk/version.go
+   * Based on `Apache-2.0` code in https://github.com/chainguard-dev/apko/blob/v0.30.35/pkg/apk/apk/version.go
    */
   protected _parse(version: string): ApkVersion | null {
     // Regex with named capture groups for used values, non-capturing groups for structure
