@@ -43,3 +43,23 @@ export function getPreset({
 }: PresetConfig): Preset | undefined {
   return groups[repo] && presetName ? groups[repo][presetName] : undefined;
 }
+
+function computeInternalPresets(): string[] {
+  const internalPresets: string[] = [];
+
+  for (const k in groups) {
+    const v = groups[k];
+    for (const kk in v) {
+      if (k === 'default') {
+        internalPresets.push(`:${kk}`);
+        internalPresets.push(`default:${kk}`);
+      } else {
+        internalPresets.push(`${k}:${kk}`);
+      }
+    }
+  }
+
+  return internalPresets;
+}
+
+export const internalPresetNames = new Set(computeInternalPresets());
