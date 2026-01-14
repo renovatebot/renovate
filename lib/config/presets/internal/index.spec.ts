@@ -32,7 +32,7 @@ describe('config/presets/internal/index', () => {
       if (presetName !== 'description' && !ignoredPresets.includes(preset)) {
         it(`${preset} validates`, async () => {
           try {
-            const config = await resolveConfigPresets(
+            const { config } = await resolveConfigPresets(
               massageConfig(presetConfig),
             );
             const configType = groupName === 'global' ? 'global' : 'repo';
