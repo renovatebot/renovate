@@ -28,7 +28,7 @@ export async function resolveGlobalExtends(
   try {
     // Make a "fake" config to pass to resolveConfigPresets and resolve globalPresets
     const config = { extends: globalExtends, ignorePresets };
-    const resolvedConfig = await resolveConfigPresets(config);
+    const { config: resolvedConfig } = await resolveConfigPresets(config);
     return resolvedConfig;
   } catch (err) {
     logger.error({ err }, 'Error resolving config preset');
