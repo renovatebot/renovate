@@ -1,4 +1,5 @@
 import { glob } from 'glob';
+import type { MergeStrategy } from '../../../config/types';
 import { logger } from '../../../logger';
 import { rawExec } from '../../../util/exec/common';
 import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
@@ -53,7 +54,11 @@ export class LocalFs implements PlatformScm {
     return Promise.resolve('' as LongCommitSha);
   }
 
-  mergeAndPush(branchName: string): Promise<void> {
+  mergeAndPush(
+    branchName: string,
+    mergeStrategy: MergeStrategy,
+    commitMessage?: string,
+  ): Promise<void> {
     return Promise.resolve();
   }
 

@@ -43,10 +43,15 @@ export async function tryBranchAutomerge(
     try {
       if (GlobalConfig.get('dryRun')) {
         // TODO: types (#22198)
-        logger.info(`DRY-RUN: Would automerge branch ${config.branchName!}`);
+        logger.info(`DRY-RUN: Would automerge branch ${config.branchName}`);
       } else {
         await scm.checkoutBranch(config.baseBranch!);
-        await scm.mergeAndPush(config.branchName!);
+        const automergeStrategy = config.automergeStrategy ?? 'auto';
+        await scm.mergeAndPush(
+          config.branchName!,
+          automergeStrategy,
+          automergeStrategy === 'squash' ? config.commitMessage : undefined,
+        );
       }
       logger.info({ branch: config.branchName }, 'Branch automerged');
       return 'automerged'; // Branch no longer exists

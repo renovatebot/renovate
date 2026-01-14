@@ -92,5 +92,56 @@ describe('workers/repository/update/branch/automerge', () => {
       platform.getBranchStatus.mockResolvedValueOnce('green');
       expect(await tryBranchAutomerge(config)).toBe('automerged');
     });
+
+    it('uses commitMessage if automergeStrategy is squash', async () => {
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.automergeStrategy = 'squash';
+      config.baseBranch = 'test-branch';
+      config.branchName = 'branch-to-be-merged';
+      config.commitMessage = 'custom commit message';
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      expect(await tryBranchAutomerge(config)).toBe('automerged');
+      expect(scm.checkoutBranch).toHaveBeenCalledExactlyOnceWith('test-branch');
+      expect(scm.mergeAndPush).toHaveBeenCalledExactlyOnceWith(
+        'branch-to-be-merged',
+        'squash',
+        'custom commit message',
+      );
+    });
+
+    it('does not use commitMessage if automergeStrategy is merge-commit', async () => {
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.automergeStrategy = 'merge-commit';
+      config.baseBranch = 'test-branch';
+      config.branchName = 'branch-to-be-merged';
+      config.commitMessage = 'custom commit message';
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      expect(await tryBranchAutomerge(config)).toBe('automerged');
+      expect(scm.checkoutBranch).toHaveBeenCalledExactlyOnceWith('test-branch');
+      expect(scm.mergeAndPush).toHaveBeenCalledExactlyOnceWith(
+        'branch-to-be-merged',
+        'merge-commit',
+        undefined,
+      );
+    });
+
+    it('does not use commitMessage if automergeStrategy is auto', async () => {
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.automergeStrategy = 'auto';
+      config.baseBranch = 'test-branch';
+      config.branchName = 'branch-to-be-merged';
+      config.commitMessage = 'custom commit message';
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      expect(await tryBranchAutomerge(config)).toBe('automerged');
+      expect(scm.checkoutBranch).toHaveBeenCalledExactlyOnceWith('test-branch');
+      expect(scm.mergeAndPush).toHaveBeenCalledExactlyOnceWith(
+        'branch-to-be-merged',
+        'auto',
+        undefined,
+      );
+    });
   });
 });
