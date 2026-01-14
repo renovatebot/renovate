@@ -23,7 +23,7 @@ export const defaultConfig = {
   managerFilePatterns: [
     '**/{,.}mise{,.*}.toml',
     '**/{,.}mise/config{,.*}.toml',
-    '**/.config/mise{,,*}.toml',
+    '**/.config/mise{,.*}.toml',
     '**/.config/mise/{mise,config}{,.*}.toml',
     '**/.config/mise/conf.d/*.toml',
     '**/.rtx{,.*}.toml',
