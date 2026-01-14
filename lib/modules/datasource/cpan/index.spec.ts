@@ -24,6 +24,33 @@ describe('modules/datasource/cpan/index', () => {
       ).toBeNull();
     });
 
+    it('filters out modules with missing version field', async () => {
+      httpMock
+        .scope(baseUrl)
+        .post(
+          '/v1/file/_search',
+          (body) =>
+            body.query.bool.filter[0].term['module.name'] ===
+            'HTML::Selector::XPath',
+        )
+        .reply(200, Fixtures.get('empty-version.json'));
+      const res = await getPkgReleases({
+        datasource: CpanDatasource.id,
+        packageName: 'HTML::Selector::XPath',
+      });
+      expect(res).toMatchObject({
+        changelogUrl: 'https://metacpan.org/dist/HTML-Selector-XPath/changes',
+        homepage: 'https://metacpan.org/pod/HTML::Selector::XPath',
+        releases: expect.toBeArrayOfSize(1),
+      });
+      expect(res?.releases[0]).toMatchObject({
+        version: '0.27',
+        distribution: 'HTML-Selector-XPath',
+        isDeprecated: false,
+        isStable: true,
+      });
+    });
+
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).post('/v1/file/_search').reply(404);
       expect(

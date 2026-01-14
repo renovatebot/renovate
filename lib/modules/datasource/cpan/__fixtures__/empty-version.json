@@ -1,0 +1,94 @@
+{
+  "_shards": {
+    "failed": 0,
+    "total": 1,
+    "successful": 1,
+    "skipped": 0
+  },
+  "timed_out": false,
+  "hits": {
+    "hits": [
+      {
+        "sort": [
+          1691404803000
+        ],
+        "_id": "euSaCXoAzzP8jdTthVCBWWc7xSM",
+        "_index": "file_01",
+        "_source": {
+          "maturity": "released",
+          "module": [],
+          "date": "2023-08-07T10:40:03",
+          "deprecated": false,
+          "status": "latest",
+          "distribution": "HTML-Selector-XPath"
+        },
+        "_score": null
+      },
+      {
+        "_score": null,
+        "_source": {
+          "deprecated": false,
+          "module": [
+            {
+              "name": "HTML::Selector::XPath",
+              "version": "0.27"
+            }
+          ],
+          "maturity": "released",
+          "date": "2023-08-06T17:05:24",
+          "status": "backpan",
+          "distribution": "HTML-Selector-XPath"
+        },
+        "sort": [
+          1691341524000
+        ],
+        "_id": "zri_X7F9nAQxgrMX2qqjN5rfJT0",
+        "_index": "file_01"
+      },
+      {
+        "_index": "file_01",
+        "sort": [
+          1474659556000
+        ],
+        "_id": "z_cyaQG1LXl4k9W2R2iW0eZysmU",
+        "_source": {
+          "status": "backpan",
+          "date": "2016-09-23T19:39:16",
+          "module": [
+            {
+              "name": "HTML::Selector::XPath",
+              "version": "undef"
+            }
+          ],
+          "maturity": "released",
+          "deprecated": false,
+          "distribution": "HTML-Selector-XPath"
+        },
+        "_score": null
+      },
+      {
+        "_score": null,
+        "_source": {
+          "deprecated": false,
+          "module": [
+            {
+              "name": "HTML::Selector::XPath"
+            }
+          ],
+          "date": "2016-09-23T15:43:25",
+          "maturity": "released",
+          "status": "backpan",
+          "distribution": "HTML-Selector-XPath"
+        },
+        "_index": "file_01",
+        "sort": [
+          1474645405000
+        ],
+        "_id": "6Uop_yncuLyJOoja93oineEHeaA"
+      }
+    ],
+    "total": 4,
+    "max_score": null
+  },
+  "took": 8
+}
