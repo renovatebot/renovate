@@ -3,7 +3,7 @@ import { getCache } from '../../cache/repository';
 import type { HttpResponse } from '../types';
 import { copyResponse } from '../util';
 import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
-import { HttpCache } from './schema';
+import type { HttpCache } from './schema';
 
 export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
   constructor(private aggressive = false) {
@@ -82,12 +82,14 @@ export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
       return null;
     }
 
-    const cache = await this.load(method, url);
-    const httpCache = HttpCache.parse(cache);
+    const httpCache = await this.get(method, url);
     if (!httpCache) {
       return null;
     }
 
+    // Deep copy is needed because the underlying storage for repository cache is the plain object.
+    // This object gets persisted at the end of the run.
+    // However, during the run, we don't want to accidentally return the same response objects.
     return copyResponse(httpCache.httpResponse as HttpResponse<T>, true);
   }
 }

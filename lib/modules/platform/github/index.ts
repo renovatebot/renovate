@@ -2047,8 +2047,10 @@ export function massageMarkdown(input: string): string {
       ']: https://redirect.github.com/',
     )
     .replaceAll('> ℹ **Note**\n> \n', '> [!NOTE]\n')
+    .replaceAll('> ℹ️ **Note**\n> \n', '> [!NOTE]\n')
     .replaceAll('> ⚠ **Warning**\n> \n', '> [!WARNING]\n')
     .replaceAll('> ⚠️ **Warning**\n> \n', '> [!WARNING]\n')
+    .replaceAll('> ❗ **Caution**\n> \n', '> [!CAUTION]\n')
     .replaceAll('> ❗ **Important**\n> \n', '> [!IMPORTANT]\n');
   return smartTruncate(massagedInput, maxBodyLength());
 }
