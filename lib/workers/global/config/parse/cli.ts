@@ -62,7 +62,7 @@ export function getConfig(input: string[]): AllConfig {
     }
   });
 
-  /* eslint-disable no-console */
+  /* oxlint-disable no-console -- intentional: CLI help output */
   /* istanbul ignore next */
   function helpConsole(): void {
     console.log('  Examples:');
@@ -75,7 +75,7 @@ export function getConfig(input: string[]): AllConfig {
     console.log(
       `    $ renovate singapore/lint-condo --onboarding-config='{"extends":["config:recommended"]}'`,
     );
-    /* eslint-enable no-console */
+    /* oxlint-enable no-console */
   }
 
   program = program

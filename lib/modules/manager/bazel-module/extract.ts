@@ -2,7 +2,12 @@ import upath from 'upath';
 import { logger } from '../../../logger';
 import { isNotNullOrUndefined } from '../../../util/array';
 import { LooseArray } from '../../../util/schema-utils';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { getDep } from '../dockerfile/extract';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import * as bazelrc from './bazelrc';
 import { parse } from './parser';
 import { RuleToCratePackageDep } from './parser/crate';
@@ -19,13 +24,29 @@ import { transformRulesImgCalls } from './rules-img';
 export async function extractPackageFile(
   content: string,
   packageFile: string,
+  config?: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   try {
     const records = parse(content);
     const pfc = await extractBazelPfc(records, packageFile);
     const gitRepositoryDeps = extractGitRepositoryDeps(records);
     const mavenDeps = extractMavenDeps(records);
-    const dockerDeps = LooseArray(RuleToDockerPackageDep).parse(records);
+    const dockerDeps = LooseArray(RuleToDockerPackageDep)
+      .transform((deps) =>
+        deps.map((dep) => {
+          // Reconstruct the image reference from parsed data
+          const imageRef = `${dep.packageName}${dep.currentValue ? `:${dep.currentValue}` : ''}${dep.currentDigest ? `@${dep.currentDigest}` : ''}`;
+          // Use getDep to handle registry aliases properly
+          const processedDep = getDep(imageRef, false, config?.registryAliases);
+          return {
+            ...processedDep,
+            depType: 'oci_pull',
+            depName: dep.depName, // Keep the original name field from bazel
+            replaceString: dep.replaceString, // Keep the original replace string
+          };
+        }),
+      )
+      .parse(records);
     const rulesImgDeps = transformRulesImgCalls(records);
     const crateDeps = LooseArray(RuleToCratePackageDep).parse(records);
 
