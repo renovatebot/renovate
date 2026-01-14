@@ -36,6 +36,7 @@ describe('config/presets/local/index', () => {
         // @ts-expect-error -- testing invalid platform
         platform: 'unsupported-platform',
       });
+      // eslint-disable-next-line vitest/no-unneeded-async-expect-function -- local isn't async
       await expect(async () => {
         await local.getPreset({
           repo: 'some/repo',
@@ -48,6 +49,7 @@ describe('config/presets/local/index', () => {
       GlobalConfig.set({
         platform: undefined,
       });
+      // eslint-disable-next-line vitest/no-unneeded-async-expect-function -- local isn't async
       await expect(async () => {
         await local.getPreset({
           repo: 'some/repo',
