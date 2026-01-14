@@ -6,7 +6,7 @@ import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import { resetPrefetchedImages } from '../../../util/exec/docker';
 import {
-  add as addHostRules,
+  add as addHostRule,
   clear as clearHostRules,
 } from '../../../util/host-rules';
 import { getPkgReleases } from '../../datasource';
@@ -42,6 +42,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     );
 
     resetPrefetchedImages();
+    clearHostRules();
 
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
@@ -496,8 +497,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
   });
 
   it('should set MVNW_USERNAME and MVNW_PASSWORD when hostRules are configured', async () => {
-    clearHostRules();
-    addHostRules({
+    addHostRule({
       hostType: 'maven',
       matchHost: 'private-registry.example.com',
       username: 'test-user',
@@ -524,18 +524,11 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     });
 
     // Verify environment variables are set
-    expect(execSnapshots[0].options!.env).toHaveProperty(
-      'MVNW_USERNAME',
-      'test-user',
-    );
-    expect(execSnapshots[0].options!.env).toHaveProperty(
-      'MVNW_PASSWORD',
-      'test-password',
-    );
-    expect(execSnapshots[0].options!.env).toHaveProperty(
-      'MVNW_REPOURL',
-      'https://private-registry.example.com/maven2',
-    );
+    expect(execSnapshots[0].options!.env).toMatchObject({
+      MVNW_USERNAME: 'test-user',
+      MVNW_PASSWORD: 'test-password',
+      MVNW_REPOURL: 'https://private-registry.example.com/maven2',
+    });
 
     // Verify command is still just wrapper:wrapper
     expect(execSnapshots[0].cmd).toBe('./mvnw wrapper:wrapper');
