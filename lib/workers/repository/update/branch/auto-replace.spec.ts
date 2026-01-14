@@ -1367,8 +1367,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newValue = '1.2.4';
       upgrade.depIndex = 0;
       upgrade.packageFile = 'deps.json';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.fileFormat = 'json';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'github-releases';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
       ];
@@ -1388,8 +1391,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newDigest = 'badbeef';
       upgrade.depIndex = 0;
       upgrade.packageFile = 'deps.json';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.fileFormat = 'json';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'github-releases';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
       ];
@@ -1410,8 +1416,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newDigest = 'badbeef';
       upgrade.depIndex = 0;
       upgrade.packageFile = 'deps.json';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.fileFormat = 'json';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'github-releases';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
       ];

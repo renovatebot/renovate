@@ -261,11 +261,12 @@ export async function doAutoReplace(
   }
 
   const replaceWithoutReplaceString =
-    isString(newName) &&
-    newName !== depName &&
+    (isString(newName) &&
+      newName !== depName &&
+      (isUndefined(upgrade.replaceString) ||
+        !upgrade.replaceString?.includes(depName!))) ||
     // for jsonata manager, fixes #36461
-    ((isUndefined(upgrade.replaceString) && changedCount > 1) ||
-      !upgrade.replaceString?.includes(depName!));
+    (isUndefined(upgrade.replaceString) && changedCount > 1);
   const replaceString = upgrade.replaceString ?? currentValue ?? currentDigest;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex: number;
