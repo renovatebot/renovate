@@ -15,7 +15,7 @@ import type { PR, PRMergeMethod, Repo } from './types';
 export function smartLinks(body: string): string {
   return body
     ?.replace(regEx(/\]\(\.\.\/issues\//g), '](#')
-    .replace(regEx(/\]\(\.\.\/pull\//g), '](!');
+    .replace(regEx(/\]\(\.\.\/pull\//g), '](pulls/');
 }
 
 export function trimTrailingApiPath(url: string): string {

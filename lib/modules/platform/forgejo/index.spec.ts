@@ -3010,7 +3010,7 @@ describe('modules/platform/forgejo/index', () => {
         '[#123](../pull/123) [#124](../pull/124) [#125](../pull/125)';
 
       expect(forgejo.massageMarkdown(body)).toBe(
-        '[#123](!123) [#124](!124) [#125](!125)',
+        '[#123](pulls/123) [#124](pulls/124) [#125](pulls/125)',
       );
     });
 
