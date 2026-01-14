@@ -29,7 +29,7 @@
         "disallowTypeAnnotations": false
       }
     ],
-    "no-unused-vars": "off",
+    "no-unused-vars": "error",
     "no-unassigned-vars": "error"
   },
   "overrides": [

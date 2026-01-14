@@ -2068,9 +2068,9 @@ describe('modules/platform/azure/index', () => {
         latestProcessedChange?: boolean,
         download?: boolean,
         versionDescriptor?: GitVersionDescriptor,
-        includeContent?: boolean,
-        resolveLfs?: boolean,
-        sanitize?: boolean,
+        _includeContent?: boolean,
+        _resolveLfs?: boolean,
+        _sanitize?: boolean,
       ) => {
         callArgs.push(versionDescriptor?.versionType);
         if (versionDescriptor?.versionType === GitVersionType.Branch) {

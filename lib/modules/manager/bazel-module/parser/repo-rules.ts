@@ -35,7 +35,7 @@ export const useRepoRuleAssignment = q
         return ctx;
       }),
     ),
-    postHandler: (ctx, tree) => {
+    postHandler: (ctx, _tree) => {
       const variableName = (ctx as any)._tempVariableName;
       const strings = (ctx as any)._tempStrings;
 

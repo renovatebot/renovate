@@ -394,7 +394,7 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('finds complex yarn workspaces', async () => {
-      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+      fs.readLocalFile.mockImplementation((): Promise<any> => {
         return Promise.resolve(null);
       });
       const res = await npmExtract.extractPackageFile(
