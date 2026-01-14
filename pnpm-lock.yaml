@@ -512,8 +512,8 @@ importers:
         specifier: 4.0.16
         version: 4.0.16(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.3)(esbuild@0.27.2)(tsx@4.21.0)(yaml@2.8.2))
       '@vitest/eslint-plugin':
-        specifier: 1.6.5
-        version: 1.6.5(eslint@9.39.2)(typescript@5.9.3)(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.3)(esbuild@0.27.2)(tsx@4.21.0)(yaml@2.8.2))
+        specifier: 1.6.6
+        version: 1.6.6(eslint@9.39.2)(typescript@5.9.3)(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.3)(esbuild@0.27.2)(tsx@4.21.0)(yaml@2.8.2))
       ajv:
         specifier: 8.17.1
         version: 8.17.1
@@ -2547,8 +2547,8 @@ packages:
       '@vitest/browser':
         optional: true
 
-  '@vitest/eslint-plugin@1.6.5':
-    resolution: {integrity: sha512-+wKYGmvXQJjq58qBx/AwiZr5bFfMiWBdgHViSQoFW/+wl5MQhJeOGP/3HM7GO7W1+AoiW9Gcyy2Hdwcao4LnfQ==}
+  '@vitest/eslint-plugin@1.6.6':
+    resolution: {integrity: sha512-bwgQxQWRtnTVzsUHK824tBmHzjV0iTx3tZaiQIYDjX3SA7TsQS8CuDVqxXrRY3FaOUMgbGavesCxI9MOfFLm7Q==}
     engines: {node: '>=18'}
     peerDependencies:
       eslint: '>=8.57.0'
@@ -9390,7 +9390,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/eslint-plugin@1.6.5(eslint@9.39.2)(typescript@5.9.3)(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.3)(esbuild@0.27.2)(tsx@4.21.0)(yaml@2.8.2))':
+  '@vitest/eslint-plugin@1.6.6(eslint@9.39.2)(typescript@5.9.3)(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.3)(esbuild@0.27.2)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@typescript-eslint/scope-manager': 8.53.0
       '@typescript-eslint/utils': 8.53.0(eslint@9.39.2)(typescript@5.9.3)
