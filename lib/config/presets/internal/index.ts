@@ -63,3 +63,21 @@ function computeInternalPresets(): string[] {
 }
 
 export const internalPresetNames = new Set(computeInternalPresets());
+
+export function isInternal(preset: string): boolean {
+  if (internalPresetNames.has(preset)) {
+    return true;
+  }
+
+  // a parameterised preset is one that  that is parameterised will receive the argument `(...)`.
+  // As we can't look up on the preset's values itself (as it could be in any property), we can look at the preset name itself, and see if it includes the start of an opening parenthesis
+  const withoutParameterParts = preset.split('(');
+  if (
+    withoutParameterParts?.length &&
+    internalPresetNames.has(withoutParameterParts[0])
+  ) {
+    return true;
+  }
+
+  return false;
+}
