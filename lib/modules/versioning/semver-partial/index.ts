@@ -195,7 +195,6 @@ function isLessThanRange(version: string, range: string): boolean {
 function getNewValue({
   currentValue,
   rangeStrategy,
-  currentVersion,
   newVersion,
 }: NewValueConfig): string | null {
   if (rangeStrategy === 'pin') {

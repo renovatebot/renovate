@@ -209,6 +209,7 @@ export interface RepoGlobalConfig {
   allowCustomCrateRegistries?: boolean;
   allowPlugins?: boolean;
   allowScripts?: boolean;
+  allowShellExecutorForPostUpgradeCommands?: boolean;
   allowedEnv?: string[];
   allowedHeaders?: string[];
   binarySource?: BinarySource;

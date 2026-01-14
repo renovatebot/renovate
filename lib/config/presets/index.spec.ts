@@ -32,7 +32,7 @@ const packageCache = vi.mocked(_packageCache);
 const presetIkatyang = Fixtures.getJson('renovate-config-ikatyang.json');
 
 describe('config/presets/index', () => {
-  describe('resolvePreset', () => {
+  describe('resolveConfigPresets', () => {
     let config: AllConfig;
 
     beforeEach(() => {
@@ -49,7 +49,7 @@ describe('config/presets/index', () => {
           namespace: string,
           key: string,
           value: unknown,
-          minutes: number,
+          _minutes: number,
         ): Promise<void> => {
           memCache.set(`${namespace}-${key}`, value);
           return Promise.resolve();

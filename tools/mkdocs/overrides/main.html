@@ -2,7 +2,18 @@
 <!-- https://squidfunk.github.io/mkdocs-material/setup/setting-up-the-header/#announcement-bar -->
 <!-- https://squidfunk.github.io/mkdocs-material/customization/#overriding-blocks -->
 
+<!-- To disable the announcement bar: -->
+<!-- 1. Open the tools/mkdocs/mkdocs.yml file. -->
+<!-- 2. Comment out the `theme.custom_dir` entry. -->
+
+<!-- To enable the announcement bar: -->
+<!-- 1. Open the tools/mkdocs/mkdocs.yml file. -->
+<!-- 2. Make sure the `theme.custom_dir` entry is plain code. -->
+
 {% extends "base.html" %}
 
 {% block announce %}
+We released a new major version of Renovate. Read the <a href="https://github.com/renovatebot/renovate/releases/tag/42.0.0">Renovate 42 changelog on GitHub</a>.
+
+As of 2025-11-18, the Mend Developer Platform is now running Renovate 42.x.
 {% endblock %}

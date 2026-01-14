@@ -99,7 +99,11 @@ This is particularly true during, for example:
 These scripts can contain arbitrary code.
 This may pose a significant security risk if the repository's integrity is compromised, or if the repository maintainers have malicious intentions.
 
-Because such insider attack is an inherent and unavoidable risk, the Renovate project will not issue CVEs for such attacks or weaknesses other than in exceptional circumstances.
+Because such insider attack is an inherent and unavoidable risk, the Renovate project will not issue CVEs (or GHSAs) for such attacks or weaknesses other than in exceptional circumstances.
+
+Note that when Renovate runs `postUpgradeTasks`, the script executes inside a shell, which means that they can call out to other commands or access shell variables, if the allowlist via `allowedCommands` does not restrict it.
+As it is difficult to craft a regular expression that may deny usage of special characters to shells, it is likely that this will not be possible to avoid at this time.
+This can be disabled using [`allowShellExecutorForPostUpgradeCommands=false`](./self-hosted-configuration.md#allowshellexecutorforpostupgradecommands).
 
 ###### Execution of code (outsider attack)
 

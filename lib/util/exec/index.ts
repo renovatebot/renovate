@@ -13,6 +13,7 @@ import {
 } from './docker';
 import { getHermitEnvs, isHermit } from './hermit';
 import type {
+  CommandWithOptions,
   DockerOptions,
   ExecOptions,
   ExecResult,
@@ -20,7 +21,7 @@ import type {
   Opt,
   RawExecOptions,
 } from './types';
-import { getChildEnv } from './utils';
+import { asRawCommands, getChildEnv } from './utils';
 
 function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
   const extraEnvKeys = Object.keys(extraEnv);
@@ -39,30 +40,29 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
   const defaultExecutionTimeout = GlobalConfig.get('executionTimeout');
   const childEnv = getChildEnv(opts);
   const cwd = getCwd(opts);
-  const rawExecOptions: RawExecOptions = {
-    cwd,
-    encoding: 'utf-8',
-    env: childEnv,
-    maxBuffer: opts.maxBuffer,
-    timeout: opts.timeout,
-  };
+  let timeout = opts.timeout;
   // Set default timeout config.executionTimeout if specified; othrwise to 15 minutes
-  if (!rawExecOptions.timeout) {
+  if (!timeout) {
     if (defaultExecutionTimeout) {
-      rawExecOptions.timeout = defaultExecutionTimeout * 60 * 1000;
+      timeout = defaultExecutionTimeout * 60 * 1000;
     } else {
-      rawExecOptions.timeout = 15 * 60 * 1000;
+      timeout = 15 * 60 * 1000;
     }
   }
 
   // Set default max buffer size to 10MB
-  rawExecOptions.maxBuffer = rawExecOptions.maxBuffer ?? 10 * 1024 * 1024;
+  const maxBuffer = opts.maxBuffer ?? 10 * 1024 * 1024;
 
-  if (opts.ignoreStdout) {
-    rawExecOptions.stdio = ['pipe', 'ignore', 'pipe'];
-  }
-
-  return rawExecOptions;
+  return {
+    cwd,
+    env: childEnv,
+    maxBuffer,
+    timeout,
+    ...(opts.shell !== undefined && { shell: opts.shell }),
+    stdin: 'pipe',
+    stdout: opts.ignoreStdout ? 'ignore' : 'pipe',
+    stderr: 'pipe',
+  };
 }
 
 function isDocker(docker: Opt<DockerOptions>): docker is DockerOptions {
@@ -70,12 +70,16 @@ function isDocker(docker: Opt<DockerOptions>): docker is DockerOptions {
 }
 
 interface RawExecArguments {
-  rawCommands: string[];
+  rawCommands: (string | CommandWithOptions)[];
   rawOptions: RawExecOptions;
 }
 
 async function prepareRawExec(
-  cmd: string | string[],
+  cmd:
+    | string
+    | string[]
+    | CommandWithOptions[]
+    | (string | CommandWithOptions)[],
   opts: ExecOptions,
 ): Promise<RawExecArguments> {
   const { docker } = opts;
@@ -90,7 +94,7 @@ async function prepareRawExec(
     opts.env.CONTAINERBASE_CACHE_DIR = containerbaseDir;
   }
 
-  const rawOptions = getRawExecOptions(opts);
+  let rawOptions = getRawExecOptions(opts);
 
   let rawCommands = typeof cmd === 'string' ? [cmd] : cmd;
 
@@ -109,7 +113,7 @@ async function prepareRawExec(
     const cwd = getCwd(opts);
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
     const dockerCommand = await generateDockerCommand(
-      rawCommands,
+      asRawCommands(rawCommands),
       [
         ...(await generateInstallCommands(opts.toolConstraints)),
         ...preCommands,
@@ -130,9 +134,12 @@ async function prepareRawExec(
       { hermitEnvVars },
       'merging hermit environment variables into the execution options',
     );
-    rawOptions.env = {
-      ...rawOptions.env,
-      ...hermitEnvVars,
+    rawOptions = {
+      ...rawOptions,
+      env: {
+        ...rawOptions.env,
+        ...hermitEnvVars,
+      },
     };
   }
 
@@ -150,7 +157,11 @@ async function prepareRawExec(
 }
 
 export async function exec(
-  cmd: string | string[],
+  cmd:
+    | string
+    | string[]
+    | CommandWithOptions[]
+    | (string | CommandWithOptions)[],
   opts: ExecOptions = {},
 ): Promise<ExecResult> {
   const { docker } = opts;

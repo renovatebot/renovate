@@ -1,4 +1,4 @@
-import type { SpawnOptions as ChildProcessSpawnOptions } from 'node:child_process';
+import type { Options as ExecaOptions } from 'execa';
 
 export interface ToolConstraint {
   toolName: string;
@@ -9,7 +9,6 @@ export interface ToolConfig {
   datasource: string;
   extractVersion?: string;
   packageName: string;
-  hash?: boolean;
   versioning: string;
 }
 
@@ -30,12 +29,7 @@ export interface OutputListeners {
   stderr?: DataListener[];
 }
 
-export interface RawExecOptions extends ChildProcessSpawnOptions {
-  // TODO: to be removed in #16655
-  /**
-   * @deprecated renovate uses utf8, encoding property is ignored.
-   */
-  encoding: string;
+export interface RawExecOptions extends ExecaOptions {
   maxBuffer?: number | undefined;
   cwd?: string;
   outputListeners?: OutputListeners;
@@ -44,6 +38,13 @@ export interface RawExecOptions extends ChildProcessSpawnOptions {
 export interface ExecResult {
   stdout: string;
   stderr: string;
+  /**
+   * The process' exit code in the case of a failure.
+   *
+   * This is only set if using `ignoreFailure` when executing a command
+   *
+   */
+  exitCode?: number;
 }
 
 export type ExtraEnv<T = unknown> = Record<string, T>;
@@ -60,4 +61,22 @@ export interface ExecOptions {
   // Following are pass-through to child process
   maxBuffer?: number | undefined;
   timeout?: number | undefined;
+  shell?: boolean | string | undefined;
+}
+
+/**
+ * configuration that can be configured on a per-command basis, that doesn't make sense to be on the `RawExecOptions`
+ */
+export interface CommandWithOptions {
+  command: string[];
+
+  /** do not throw errors when a command fails, but do log that an error occurred */
+  ignoreFailure?: boolean;
+
+  /**
+   * Execute the `command` within a shell
+   *
+   * WARNING this can result in security issues if this includes user-controlled commands
+   * **/
+  shell?: boolean | string;
 }

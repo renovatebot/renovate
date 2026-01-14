@@ -489,7 +489,7 @@ describe('modules/manager/bundler/artifacts', () => {
         cmd: '',
         stdout: ' foo was resolved to',
         stderr: '',
-        options: { encoding: 'utf8' },
+        options: {},
       });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
@@ -544,7 +544,7 @@ describe('modules/manager/bundler/artifacts', () => {
           cmd: '',
           stdout: ' foo was resolved to',
           stderr: '',
-          options: { encoding: 'utf8' },
+          options: {},
         });
         fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
         const execSnapshots = mockExecAll(execError);
@@ -578,7 +578,7 @@ describe('modules/manager/bundler/artifacts', () => {
           cmd: '',
           stdout: '',
           stderr: '',
-          options: { encoding: 'utf8' },
+          options: {},
         });
         fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
         mockExecAll(execError);
@@ -600,7 +600,7 @@ describe('modules/manager/bundler/artifacts', () => {
           cmd: '',
           stdout: 'but that version could not be found',
           stderr: '',
-          options: { encoding: 'utf8' },
+          options: {},
         });
         fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
         mockExecAll(execError);
@@ -622,7 +622,7 @@ describe('modules/manager/bundler/artifacts', () => {
           cmd: '',
           stdout: 'Please supply credentials for this source',
           stderr: 'Please make sure you have the correct access rights',
-          options: { encoding: 'utf8' },
+          options: {},
         });
         fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
         mockExecAll(execError);
@@ -644,7 +644,7 @@ describe('modules/manager/bundler/artifacts', () => {
           cmd: '',
           stdout: 'foo was resolved to foo',
           stderr: 'bar was resolved to bar',
-          options: { encoding: 'utf8' },
+          options: {},
         });
         fs.readLocalFile.mockResolvedValue('Current Gemfile.lock');
         const execSnapshots = mockExecSequence([
