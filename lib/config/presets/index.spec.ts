@@ -49,7 +49,7 @@ describe('config/presets/index', () => {
           namespace: string,
           key: string,
           value: unknown,
-          minutes: number,
+          _minutes: number,
         ): Promise<void> => {
           memCache.set(`${namespace}-${key}`, value);
           return Promise.resolve();

@@ -10,7 +10,6 @@ import type { FluxManagerData } from './types';
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
-  config,
 }: UpdateArtifact<FluxManagerData>): Promise<UpdateArtifactsResult[] | null> {
   const systemDep = updatedDeps[0];
   if (!isSystemManifest(packageFileName) || !systemDep?.newVersion) {
