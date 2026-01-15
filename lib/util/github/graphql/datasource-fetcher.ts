@@ -206,7 +206,7 @@ export class GithubGraphqlDatasourceFetcher<
         if (!shrinkResult) {
           throw err;
         }
-        const { body, ...options } = this.getRawQueryOptions();
+        const { body: _, ...options } = this.getRawQueryOptions();
         logger.debug(
           { options, newSize: this.itemsPerQuery },
           'Shrinking GitHub GraphQL page size after error',

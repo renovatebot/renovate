@@ -43,7 +43,6 @@ async function addIfUpdated(
 
 export async function updateArtifacts({
   packageFileName,
-  newPackageFileContent,
   updatedDeps,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {

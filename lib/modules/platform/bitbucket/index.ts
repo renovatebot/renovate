@@ -635,7 +635,7 @@ export function massageMarkdown(input: string): string {
 function massageNestedCollapsibleSectionsIntoLists(body: string): string {
   let depth = 0;
   // Parse detail parts to calculate correct list depth
-  const detailsParts = body.split('<details>').map((raw, i, arr) => {
+  const detailsParts = body.split('<details>').map((raw) => {
     const partDepth = depth;
 
     depth += 1;

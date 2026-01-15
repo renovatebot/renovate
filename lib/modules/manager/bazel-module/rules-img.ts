@@ -14,7 +14,6 @@ export const RulesImgPullCallToDep = RepoRuleCallFragment.extend({
 }).transform(
   ({
     rawString,
-    functionName,
     children: { name, repository, registry, tag, digest },
   }): PackageDependency => {
     // Note: Validation that this is a rules_img pull call is done in transformRulesImgCalls
