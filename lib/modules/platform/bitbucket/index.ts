@@ -606,6 +606,11 @@ async function closeIssue(issueNumber: number): Promise<void> {
  *
  * See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
  */
+/**
+ * Remove or transform markdown into Bitbucket supported syntax.
+ *
+ * See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
+ */
 export function massageMarkdown(input: string): string {
   let massaged = smartTruncate(input, maxBodyLength())
     .replace(
@@ -618,9 +623,9 @@ export function massageMarkdown(input: string): string {
     )
     .replace(
       regEx(
-        /(>.*\*\*Note\*\*\n>\s?\n.*unmaintained:\n\n)<details>\n(<summary>View abandoned dependencies.*<\/summary>)([\s\S]*?)<\/details>/,
+        /<details>\n(<summary>View abandoned dependencies.*<\/summary>\n\n)([\s\S]*?)<\/details>/,
       ),
-      '## Abandoned Dependencies\n$1$3',
+      '$2',
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
@@ -667,7 +672,7 @@ function massageCodeblockMarkdown(body: string): string {
 function massageDetailSummaryHtmlToNestedLists(body: string): string {
   let depth = 0;
   // Parse detail parts to calculate correct list depth
-  const detailsParts = body.split('<details>').map((raw, i, arr) => {
+  const detailsParts = body.split('<details>').map((raw) => {
     const partDepth = depth;
 
     depth += 1;
@@ -691,10 +696,14 @@ function massageDetailSummaryHtmlToNestedLists(body: string): string {
 
       const rawContainsBlockquote = raw.includes('<blockquote>');
 
-      t = t
-        .replace(regEx(/<\/?summary>/g), partDepth === 1 ? '**' : '`')
-        .replace(regEx(/( - `)/g), `${nestedListItemIndentation}$1`)
-        .replace(regEx(/(- \[)/g), `${nestedListItemIndentation}$1`);
+      t = t.replace(regEx(/<\/?summary>/g), partDepth === 1 ? '**' : '`');
+
+      if (partDepth > 1) {
+        t = t.replace(
+          regEx(/^([ \t]*- [`[])/gm),
+          `${nestedListItemIndentation}$1`,
+        );
+      }
 
       let result = partIndentation;
       if (rawContainsBlockquote || partDepth > 1) {

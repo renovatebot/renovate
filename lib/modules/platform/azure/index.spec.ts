@@ -2068,21 +2068,15 @@ describe('modules/platform/azure/index', () => {
         latestProcessedChange?: boolean,
         download?: boolean,
         versionDescriptor?: GitVersionDescriptor,
-        includeContent?: boolean,
-        resolveLfs?: boolean,
-        sanitize?: boolean,
+        _includeContent?: boolean,
+        _resolveLfs?: boolean,
+        _sanitize?: boolean,
       ) => {
         callArgs.push(versionDescriptor?.versionType);
-        if (
-          versionDescriptor &&
-          versionDescriptor.versionType === GitVersionType.Branch
-        ) {
+        if (versionDescriptor?.versionType === GitVersionType.Branch) {
           return Promise.resolve({ content: '{ "test": "branch content" }' });
         }
-        if (
-          versionDescriptor &&
-          versionDescriptor.versionType === GitVersionType.Tag
-        ) {
+        if (versionDescriptor?.versionType === GitVersionType.Tag) {
           return Promise.resolve(null);
         }
         throw new Error('Unexpected call');

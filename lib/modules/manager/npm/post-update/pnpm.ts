@@ -44,8 +44,6 @@ export async function generateLockFile(
   const lockFileName = upath.join(lockFileDir, 'pnpm-lock.yaml');
   logger.debug(`Spawning pnpm install to create ${lockFileName}`);
   let lockFile: string | null = null;
-  let stdout: string | undefined;
-  let stderr: string | undefined;
   const commands: string[] = [];
   try {
     const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
@@ -170,8 +168,8 @@ export async function generateLockFile(
       {
         commands,
         err,
-        stdout,
-        stderr,
+        stdout: err.stdout,
+        stderr: err.stderr,
         type: 'pnpm',
       },
       'lock file error',

@@ -6,7 +6,7 @@ interface WrapParameters {
 }
 
 function wrap<T>({ mock }: WrapParameters): Decorator<T> {
-  return decorate(async ({ args, instance, callback }) => {
+  return decorate(async ({ callback }) => {
     mock('before');
     await callback();
     mock('after');

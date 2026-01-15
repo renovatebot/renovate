@@ -1039,11 +1039,11 @@ describe('util/exec/index', () => {
       ignoreFailure: true,
     };
 
-    cpExec.mockImplementationOnce((execCmd, execOpts) => {
+    cpExec.mockImplementationOnce(() => {
       return Promise.resolve({ stdout: '', stderr: '' });
     });
 
-    cpExec.mockImplementationOnce((execCmd, execOpts) => {
+    cpExec.mockImplementationOnce(() => {
       return Promise.resolve({ stdout: 'out', stderr: 'err', exitCode: 5 });
     });
 
@@ -1060,7 +1060,7 @@ describe('util/exec/index', () => {
       ignoreFailure: true,
     };
 
-    cpExec.mockImplementation((execCmd, execOpts) => {
+    cpExec.mockImplementation(() => {
       return Promise.resolve({ stdout: 'out', stderr: 'err', exitCode: 5 });
     });
 

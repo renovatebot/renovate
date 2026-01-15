@@ -301,7 +301,7 @@ function handleUpperBound(range: Range, newVersion: string): string | null {
 }
 
 function updateRangeValue(
-  { currentValue, rangeStrategy, currentVersion, newVersion }: NewValueConfig,
+  { currentValue, newVersion }: NewValueConfig,
   range: Range,
 ): string | null {
   // used to exclude versions,
