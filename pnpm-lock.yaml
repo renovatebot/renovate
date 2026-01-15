@@ -94,8 +94,8 @@ importers:
         specifier: 0.1.3
         version: 0.1.3
       '@renovatebot/detect-tools':
-        specifier: 1.2.6
-        version: 1.2.6
+        specifier: 1.2.7
+        version: 1.2.7
       '@renovatebot/osv-offline':
         specifier: 2.0.1
         version: 2.0.1
@@ -1728,8 +1728,8 @@ packages:
     peerDependencies:
       '@redis/client': ^5.10.0
 
-  '@renovatebot/detect-tools@1.2.6':
-    resolution: {integrity: sha512-sWC2NfAI/ODxrf5Y+uiPjgwML5JibROpikXrgxvYDlq0ySG8kpepwhPnvW9vO7JaTL8j/z3tX/fJc8Aicy+yLg==}
+  '@renovatebot/detect-tools@1.2.7':
+    resolution: {integrity: sha512-bH1NPnf2ZxD6Um6LCgUhT7zm69CMHnu9e5ln+m/ggbG3T/BUyapfDTpLb9gDZ3NWmEgQ0PPH2Vrfu/3hemVqsg==}
 
   '@renovatebot/osv-offline-db@2.0.1':
     resolution: {integrity: sha512-DB3tPESeQ3Qw0hysgZJogxYJLIcQ0g9nR7xTuYFXTrJzwchRIftNqMd/K5lTeC7tFpjz8JwAY6D669sgUp2oYQ==}
@@ -6215,10 +6215,6 @@ packages:
   to-vfile@8.0.0:
     resolution: {integrity: sha512-IcmH1xB5576MJc9qcfEC/m/nQCFt3fzMHz45sSlgJyTWjRbKW1HAkJpuf3DgE57YzIlZcwcBZA5ENQbBo4aLkg==}
 
-  toml-eslint-parser@0.10.1:
-    resolution: {integrity: sha512-9mjy3frhioGIVGcwamlVlUyJ9x+WHw/TXiz9R4YOlmsIuBN43r9Dp8HZ35SF9EKjHrn3BUZj04CF+YqZ2oJ+7w==}
-    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
-
   toml-eslint-parser@0.11.0:
     resolution: {integrity: sha512-piZPVcbZEhLjYEJrH2Go0F4oCLOJ/kptOSc7aYc604NvUY9+Te0l7DPQgeYjXtEnGslTlUDHUAfVOsEoYbsqOw==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
@@ -8422,10 +8418,10 @@ snapshots:
     dependencies:
       '@redis/client': 5.10.0
 
-  '@renovatebot/detect-tools@1.2.6':
+  '@renovatebot/detect-tools@1.2.7':
     dependencies:
       fs-extra: 11.3.3
-      toml-eslint-parser: 0.10.1
+      toml-eslint-parser: 0.11.0
       upath: 2.0.1
       zod: 3.25.76
 
@@ -13600,10 +13596,6 @@ snapshots:
   to-vfile@8.0.0:
     dependencies:
       vfile: 6.0.3
-
-  toml-eslint-parser@0.10.1:
-    dependencies:
-      eslint-visitor-keys: 3.4.3
 
   toml-eslint-parser@0.11.0:
     dependencies:
