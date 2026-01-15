@@ -1,4 +1,4 @@
-import type { RenovateConfig, GlobalInheritableConfig } from './types';
+import type { GlobalInheritableConfig, RenovateConfig } from './types';
 
 export class InheritConfig {
   static OPTIONS: readonly (keyof GlobalInheritableConfig)[] = [
