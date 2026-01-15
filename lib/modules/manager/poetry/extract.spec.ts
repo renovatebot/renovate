@@ -51,7 +51,7 @@ describe('modules/manager/poetry/extract', () => {
     it('extracts multiple dependencies', async () => {
       const res = await extractPackageFile(pyproject1toml, filename);
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(7);
+      expect(res?.deps).toHaveLength(9);
       expect(res?.extractedConstraints).toEqual({
         python: '~2.7 || ^3.4',
       });
@@ -60,7 +60,7 @@ describe('modules/manager/poetry/extract', () => {
     it('extracts multiple dependencies (with dep = {version = "1.2.3"} case)', async () => {
       const res = await extractPackageFile(pyproject2toml, filename);
       expect(res).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(12);
+      expect(res?.deps).toHaveLength(14);
     });
 
     it('handles case with no dependencies', async () => {
@@ -71,7 +71,42 @@ describe('modules/manager/poetry/extract', () => {
     it('handles multiple constraint dependencies', async () => {
       const res = await extractPackageFile(pyproject4toml, filename);
       expect(res).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps).toHaveLength(4);
+    });
+
+    it('extracts build-system.requires dependencies', async () => {
+      const content = codeBlock`
+        [build-system]
+        requires = ["poetry-core>=1.0.0", "setuptools>=40.0"]
+        build-backend = "poetry.core.masonry.api"
+
+        [tool.poetry]
+        name = "test"
+        version = "1.0.0"
+
+        [tool.poetry.dependencies]
+        abc = "^5.5"
+      `;
+
+      const res = await extractPackageFile(content, 'pyproject.toml');
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'poetry-core',
+          currentValue: '>=1.0.0',
+          depType: 'build-system.requires',
+        },
+        {
+          depName: 'setuptools',
+          currentValue: '>=40.0',
+          depType: 'build-system.requires',
+        },
+        {
+          depName: 'abc',
+          currentValue: '^5.5',
+          depType: 'dependencies',
+        },
+      ]);
     });
 
     it('can parse TOML v1 heterogeneous arrays', async () => {
@@ -562,6 +597,14 @@ describe('modules/manager/poetry/extract', () => {
               depGroup: 'decouple',
             },
             packageName: 'python-decouple',
+          },
+          {
+            currentValue: '==2.0.0',
+            currentVersion: '2.0.0',
+            datasource: 'pypi',
+            depName: 'poetry-core',
+            depType: 'build-system.requires',
+            packageName: 'poetry-core',
           },
         ],
         extractedConstraints: {},
