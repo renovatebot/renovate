@@ -1,7 +1,9 @@
 import { codeBlock } from 'common-tags';
-import { detectPlatform, parseJson } from './common';
+import { detectPlatform, getInheritedOrGlobal, parseJson } from './common';
 import * as hostRules from './host-rules';
 import { logger } from '~test/util';
+import { GlobalConfig } from '../config/global';
+import { InheritConfig } from '../config/inherit';
 
 const validJsonString = `
 {
@@ -184,6 +186,41 @@ describe('util/common', () => {
 
     it('throws error for invalid jsonc', () => {
       expect(() => parseJson(invalidJsonString, 'renovate.jsonc')).toThrow();
+    });
+  });
+
+  describe('getInheritedOrGlobal', () => {
+    beforeEach(() => {
+      GlobalConfig.reset();
+      InheritConfig.reset();
+    });
+
+    it('returns undefined', () => {
+      expect(getInheritedOrGlobal('configFileNames')).toBeUndefined();
+    });
+
+    it('returns inherited value', () => {
+      InheritConfig.set({
+        configFileNames: ['inherited'],
+      });
+      expect(getInheritedOrGlobal('configFileNames')).toEqual(['inherited']);
+    });
+
+    it('returns global value', () => {
+      GlobalConfig.set({
+        configFileNames: ['global'],
+      });
+      expect(getInheritedOrGlobal('configFileNames')).toEqual(['global']);
+    });
+
+    it('returns inherited value - when both global + inherited are available', () => {
+      InheritConfig.set({
+        configFileNames: ['inherited'],
+      });
+      GlobalConfig.set({
+        configFileNames: ['global'],
+      });
+      expect(getInheritedOrGlobal('configFileNames')).toEqual(['inherited']);
     });
   });
 });
