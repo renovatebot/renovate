@@ -63,6 +63,10 @@ Go to the [`renovatebot/pre-commit-hooks` repository](https://github.com/renovat
 
 ### Validation of Renovate config change PRs
 
+<!-- prettier-ignore -->
+!!! tip
+    Using the Mend-hosted apps? Push a branch to `renovate/reconfigure` for feedback, and if there's a PR, Renovate will add comments to it!
+
 Renovate can validate configuration changes in Pull Requests when you use a special branch name.
 
 Follow these steps to validate your configuration:
