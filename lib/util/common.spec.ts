@@ -1,9 +1,9 @@
 import { codeBlock } from 'common-tags';
+import { GlobalConfig } from '../config/global';
+import { InheritConfig } from '../config/inherit';
 import { detectPlatform, getInheritedOrGlobal, parseJson } from './common';
 import * as hostRules from './host-rules';
 import { logger } from '~test/util';
-import { GlobalConfig } from '../config/global';
-import { InheritConfig } from '../config/inherit';
 
 const validJsonString = `
 {
