@@ -1,6 +1,9 @@
 import JSON5 from 'json5';
 import * as JSONC from 'jsonc-parser';
 import type { JsonValue } from 'type-fest';
+import { GlobalConfig } from '../config/global';
+import { InheritConfig } from '../config/inherit';
+import type { RepoInheritConfig } from '../config/types';
 import {
   AZURE_API_USING_HOST_TYPES,
   BITBUCKET_API_USING_HOST_TYPES,
@@ -14,9 +17,6 @@ import { logger } from '../logger';
 import type { Nullish } from '../types';
 import * as hostRules from './host-rules';
 import { parseUrl } from './url';
-import { RepoInheritConfig } from '../config/types';
-import { InheritConfig } from '../config/inherit';
-import { GlobalConfig } from '../config/global';
 
 /**
  * Tries to detect the `platform` from a url.
@@ -149,8 +149,8 @@ export function parseJsonc(content: string): JsonValue {
 }
 
 /**
- * Use only if an option is inheirt + global
- * for only global use GlobalConfig.class
+ * Use only if an option is inherited + globalOnly
+ * For globalOnly options use GlobalConfig.get
  */
 export function getInheritedOrGlobal<Key extends keyof RepoInheritConfig>(
   key: Key,

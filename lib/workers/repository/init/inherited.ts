@@ -3,6 +3,7 @@ import { dequal } from 'dequal';
 import { mergeChildConfig, removeGlobalConfig } from '../../../config';
 import { setUserConfigFileNames } from '../../../config/app-strings';
 import { decryptConfig } from '../../../config/decrypt';
+import { InheritConfig } from '../../../config/inherit';
 import { parseFileConfig } from '../../../config/parse';
 import { resolveConfigPresets } from '../../../config/presets';
 import { applySecretsAndVariablesToConfig } from '../../../config/secrets';
@@ -19,7 +20,6 @@ import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
 import * as template from '../../../util/template';
-import { InheritConfig } from '../../../config/inherit';
 
 export async function mergeInheritedConfig(
   config: RenovateConfig,
