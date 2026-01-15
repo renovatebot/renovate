@@ -260,46 +260,6 @@
             "sort" : [
                1449401380000
             ]
-         },
-         {
-            "_type" : "file",
-            "_source" : {
-               "deprecated" : false,
-               "maturity" : "released",
-               "module" : [
-                  {
-                     "name" : "Plack"
-                  }
-               ],
-               "date" : "2015-01-01T10:00:00",
-               "distribution" : "Plack",
-               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0037.tar.gz"
-            },
-            "status": "backpan",
-            "_index" : "cpan_v1_01",
-            "_id" : "missing_version_1",
-            "_score" : null,
-            "sort" : [
-               1420106400000
-            ]
-         },
-         {
-            "_type" : "file",
-            "_source" : {
-               "deprecated" : false,
-               "maturity" : "released",
-               "module" : [],
-               "date" : "2014-12-01T10:00:00",
-               "distribution" : "Plack",
-               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0036.tar.gz"
-            },
-            "status": "backpan",
-            "_index" : "cpan_v1_01",
-            "_id" : "empty_module_array",
-            "_score" : null,
-            "sort" : [
-               1417428000000
-            ]
          }
       ],
       "max_score" : null
