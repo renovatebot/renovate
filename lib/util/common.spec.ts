@@ -195,25 +195,25 @@ describe('util/common', () => {
       InheritConfig.reset();
     });
 
-    it('returns undefined', () => {
+    it('returns undefined if not set', () => {
       expect(getInheritedOrGlobal('configFileNames')).toBeUndefined();
     });
 
-    it('returns inherited value', () => {
+    it('returns inherited value if only inherited value is set', () => {
       InheritConfig.set({
         configFileNames: ['inherited'],
       });
       expect(getInheritedOrGlobal('configFileNames')).toEqual(['inherited']);
     });
 
-    it('returns global value', () => {
+    it('returns global value if only global value is set', () => {
       GlobalConfig.set({
         configFileNames: ['global'],
       });
       expect(getInheritedOrGlobal('configFileNames')).toEqual(['global']);
     });
 
-    it('returns inherited value - when both global + inherited are available', () => {
+    it('returns inherited value - when both global + inherited are set', () => {
       InheritConfig.set({
         configFileNames: ['inherited'],
       });
