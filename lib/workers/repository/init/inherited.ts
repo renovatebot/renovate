@@ -19,6 +19,7 @@ import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
 import * as template from '../../../util/template';
+import { InheritConfig } from '../../../config/inherit';
 
 export async function mergeInheritedConfig(
   config: RenovateConfig,
@@ -127,6 +128,7 @@ export async function mergeInheritedConfig(
       variables: config.variables ?? {},
     });
     setInheritedHostRules(filteredConfig);
+    filteredConfig = InheritConfig.set(filteredConfig);
     return mergeChildConfig(config, filteredConfig);
   }
 
@@ -171,6 +173,7 @@ export async function mergeInheritedConfig(
     variables: config.variables ?? {},
   });
   setInheritedHostRules(filteredConfig);
+  filteredConfig = InheritConfig.set(filteredConfig);
   return mergeChildConfig(config, filteredConfig);
 }
 

@@ -14,6 +14,9 @@ import { logger } from '../logger';
 import type { Nullish } from '../types';
 import * as hostRules from './host-rules';
 import { parseUrl } from './url';
+import { RepoInheritConfig } from '../config/types';
+import { InheritConfig } from '../config/inherit';
+import { GlobalConfig } from '../config/global';
 
 /**
  * Tries to detect the `platform` from a url.
@@ -143,4 +146,16 @@ export function parseJsonc(content: string): JsonValue {
     return value;
   }
   throw new Error('Invalid JSONC');
+}
+
+/**
+ * Use only if an option is inheirt + global
+ * for only global use GlobalConfig.class
+ */
+export function getInheritedOrGlobal<Key extends keyof RepoInheritConfig>(
+  key: Key,
+): RepoInheritConfig[Key] {
+  const inheritedValue = InheritConfig.get(key);
+  const globalValue = GlobalConfig.get(key);
+  return inheritedValue ?? globalValue;
 }
