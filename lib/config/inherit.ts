@@ -1,17 +1,19 @@
-import type { RenovateConfig, RepoInheritConfig } from './types';
+import type { RenovateConfig, GlobalInheritableConfig } from './types';
 
 export class InheritConfig {
-  static OPTIONS: readonly (keyof RepoInheritConfig)[] = ['configFileNames'];
+  static OPTIONS: readonly (keyof GlobalInheritableConfig)[] = [
+    'configFileNames',
+  ];
 
-  private static config: RepoInheritConfig = {};
+  private static config: GlobalInheritableConfig = {};
 
-  static get<Key extends keyof RepoInheritConfig>(
+  static get<Key extends keyof GlobalInheritableConfig>(
     key: Key,
-  ): RepoInheritConfig[Key] {
+  ): GlobalInheritableConfig[Key] {
     return InheritConfig.config[key];
   }
 
-  static set(config: RenovateConfig & RepoInheritConfig): RenovateConfig {
+  static set(config: RenovateConfig & GlobalInheritableConfig): RenovateConfig {
     InheritConfig.reset();
 
     const result = { ...config };

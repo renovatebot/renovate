@@ -163,7 +163,7 @@ export interface RenovateSharedConfig {
 /**
  * Contains all options with globalOnly=true && inheritConfigSupport=true
  */
-export interface RepoInheritConfig {
+export interface GlobalInheritableConfig {
   configFileNames?: string[];
 }
 
@@ -211,7 +211,7 @@ export interface GlobalOnlyConfigLegacy {
  *
  * Should only contain config options where globalOnly=true.
  */
-export interface RepoGlobalConfig extends RepoInheritConfig {
+export interface RepoGlobalConfig extends GlobalInheritableConfig {
   allowedCommands?: string[];
   allowCustomCrateRegistries?: boolean;
   allowPlugins?: boolean;
