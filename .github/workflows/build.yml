@@ -213,6 +213,9 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
+      - name: Lint with oxlint
+        run: pnpm oxlint -f github
+
       - name: Restore eslint cache
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
@@ -221,7 +224,7 @@ jobs:
           key: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
           restore-keys: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-
 
-      - name: Lint
+      - name: Lint with eslint
         run: pnpm eslint-ci
         env:
           NODE_OPTIONS: --max-old-space-size=8192
@@ -783,7 +786,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@b43d039a13b994ec09557a423ae0560019e99c7c # v3.14.48
+        uses: containerbase/internal-tools@35d75d7932bab1fade28fa532997aa53eec3eca8 # v3.14.49
         with:
           command: docker-config
 

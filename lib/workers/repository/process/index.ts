@@ -75,7 +75,10 @@ export async function getBaseBranchConfig(
       throw error;
     }
 
-    baseBranchConfig = await resolveConfigPresets(baseBranchConfig, config);
+    ({ config: baseBranchConfig } = await resolveConfigPresets(
+      baseBranchConfig,
+      config,
+    ));
     baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
 
     // istanbul ignore if

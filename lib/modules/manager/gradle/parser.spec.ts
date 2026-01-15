@@ -16,7 +16,7 @@ import { fs, logger } from '~test/util';
 
 vi.mock('../../../util/fs');
 
-function mockFs(files: Record<string, string>): void {
+function mockFs(): void {
   fs.getSiblingFileName.mockImplementation(
     (existingFileNameWithPath: string, otherFileName: string) => {
       return existingFileNameWithPath
@@ -1282,7 +1282,7 @@ describe('modules/manager/gradle/parser', () => {
       ${'base="foo"'}            | ${'apply(from = File(base, "bar.gradle"))'}               | ${validOutput}
       ${'base="foo"'}            | ${'apply(from = File("${base}", "bar.gradle"))'}          | ${validOutput}
     `('$def | $input', ({ def, input, output }) => {
-      mockFs(fileContents);
+      mockFs();
       const { vars } = parseGradle(
         [def, input].join('\n'),
         {},

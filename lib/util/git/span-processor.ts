@@ -12,7 +12,7 @@ export class GitOperationSpanProcessor implements SpanProcessor {
   async forceFlush(): Promise<void> {
     // no implementation
   }
-  onStart(span: Span, parentContext: Context): void {
+  onStart(_span: Span, _parentContext: Context): void {
     // no implementation
   }
   onEnd(span: ReadableSpan): void {
