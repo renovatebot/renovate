@@ -1669,8 +1669,8 @@ describe('modules/platform/bitbucket/index', () => {
       expect(bitbucket.massageMarkdown(prBody)).toMatchSnapshot();
     });
 
-    it('updates abandoned dependencies heading and place note inside', () => {
-      const prBody =
+    it('dependency dashboard: updates abandoned dependencies heading and place note inside', () => {
+      const dashboardBody =
         '## Abandoned Dependencies\n' +
         '<details>\n<summary>View abandoned dependencies (6)</summary>\n\n' +
         '| Datasource | Name | Last Updated |\n' +
@@ -1678,7 +1678,7 @@ describe('modules/platform/bitbucket/index', () => {
         '| npm | node | unknown |\n' +
         '\n</details>\n\n';
 
-      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+      expect(bitbucket.massageMarkdown(dashboardBody)).toEqual(
         '## Abandoned Dependencies\n' +
           '| Datasource | Name | Last Updated |\n' +
           '|------------|------|-------------|\n' +
@@ -1686,8 +1686,8 @@ describe('modules/platform/bitbucket/index', () => {
       );
     });
 
-    it('updates vulnerabilities section with multiple collapsible details sections to nested list', () => {
-      const prBody =
+    it('dependency dashboard: updates vulnerabilities section with multiple collapsible details sections to nested list', () => {
+      const dashboardBody =
         '## Vulnerabilities\n\n' +
         '`2`/`2` CVEs have Renovate fixes.\n' +
         '<details><summary>maven</summary>\n<blockquote>\n\n' +
@@ -1699,7 +1699,7 @@ describe('modules/platform/bitbucket/index', () => {
         '<blockquote>\n\n- [GHSA-j288-q9x7-2f5v](https://osv.dev/vulnerability/GHSA-j288-q9x7-2f5v) (fixed in [3.18.0,))\n</blockquote>\n' +
         '</details>\n\n</blockquote>\n</details>\n\n</blockquote>\n</details>\n\n';
 
-      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+      expect(bitbucket.massageMarkdown(dashboardBody)).toEqual(
         '## Vulnerabilities\n\n' +
           '`2`/`2` CVEs have Renovate fixes.\n' +
           ' - **maven**\n\n\n' +
@@ -1711,8 +1711,8 @@ describe('modules/platform/bitbucket/index', () => {
       );
     });
 
-    it('updates detected dependencies section with multiple collapsible details sections to nested list', () => {
-      const prBody =
+    it('dependency dashboard: updates detected dependencies section with multiple collapsible details sections to nested list', () => {
+      const dashboardBody =
         '## Detected Dependencies\n\n' +
         '<details><summary>dockerfile</summary>\n<blockquote>\n\n' +
         '<details><summary>app1/Dockerfile</summary>\n - `node:24`\n - `temurin:27`\n</details>\n\n' +
@@ -1722,7 +1722,7 @@ describe('modules/platform/bitbucket/index', () => {
         '<details><summary>package.json</summary>\n - `@biomejs/biome:2.0.0`</details>\n\n' +
         '</blockquote>\n</details>';
 
-      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+      expect(bitbucket.massageMarkdown(dashboardBody)).toEqual(
         '## Detected Dependencies\n\n' +
           ' - **dockerfile**\n\n\n' +
           '\t - `app1/Dockerfile`\n' +
@@ -1743,13 +1743,57 @@ describe('modules/platform/bitbucket/index', () => {
         '<details><summary>biomejs/biome (@&#8203;biomejs/biome)</summary>\n\n\n' +
         '### [\\`v2.3.11\\`](https://github.com/biomejs/biome/blob/HEAD/packages/@&#8203;biomejs/biome/CHANGELOG.md#2311)\n\n' +
         '[Compare Source](https://github.com/biomejs/biome/compare/@biomejs/biome@2.3.10...@biomejs/biome@2.3.11)\n\n' +
+        '- [#&#8203;8583](https://github.com/biomejs/biome/pull/8583) [`83be210`](https://github.com/biomejs/biome/commit/83be2101cb14969e3affda260773e33e50874df0) Thanks [@&#8203;dyc3](https://github.com/dyc3)! - Added the new nursery rule [`useVueValidTemplateRoot`](https://biomejs.dev/linter/rules/use-vue-valid-template-root/).' +
         '</details>';
 
       expect(bitbucket.massageMarkdown(prBody)).toEqual(
         '## Release Notes\n\n' +
           '**biomejs/biome (@&#8203;biomejs/biome)**\n\n\n' +
           '### [\\`v2.3.11\\`](https://github.com/biomejs/biome/blob/HEAD/packages/@&#8203;biomejs/biome/CHANGELOG.md#2311)\n\n' +
-          '[Compare Source](https://github.com/biomejs/biome/compare/@biomejs/biome@2.3.10...@biomejs/biome@2.3.11)\n\n',
+          '[Compare Source](https://github.com/biomejs/biome/compare/@biomejs/biome@2.3.10...@biomejs/biome@2.3.11)\n\n' +
+          '- [#&#8203;8583](https://github.com/biomejs/biome/pull/8583) [`83be210`](https://github.com/biomejs/biome/commit/83be2101cb14969e3affda260773e33e50874df0) Thanks [@&#8203;dyc3](https://github.com/dyc3)! - Added the new nursery rule [`useVueValidTemplateRoot`](https://biomejs.dev/linter/rules/use-vue-valid-template-root/).',
+      );
+    });
+
+    it('updates codeblocks to correct indentation level', () => {
+      const prBody =
+        '  Examples:\n' +
+        '  ```vue\n' +
+        '  <template src="./foo.html">content</template>\n' +
+        '  ```\n' +
+        '  ```vue\n' +
+        '  <template></template>\n' +
+        '  ```';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '  Examples:\n' +
+          '```vue\n' +
+          '<template src="./foo.html">content</template>\n' +
+          '```\n' +
+          '```vue\n' +
+          '<template></template>\n' +
+          '```',
+      );
+    });
+
+    it('updates codeblocks to drop extra language data', () => {
+      const prBody =
+        '  Examples:\n' +
+        '  ```vue,expect_diagnostic\n' +
+        '  <template src="./foo.html">content</template>\n' +
+        '  ```\n' +
+        '  ```vue\n' +
+        '  <template></template>\n' +
+        '  ```';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '  Examples:\n' +
+          '```vue\n' +
+          '<template src="./foo.html">content</template>\n' +
+          '```\n' +
+          '```vue\n' +
+          '<template></template>\n' +
+          '```',
       );
     });
   });

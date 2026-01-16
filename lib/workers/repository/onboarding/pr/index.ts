@@ -75,7 +75,7 @@ export async function ensureOnboardingPr(
           ageOfOnboardingPr,
           onboardingAutoCloseAge,
         },
-        `Renovate is being disabled for this repository as the onboarding PR has been umerged for more than ${onboardingAutoCloseAge} days`,
+        `Renovate is being disabled for this repository as the onboarding PR has been unmerged for more than ${onboardingAutoCloseAge} days`,
       );
       return;
     }
