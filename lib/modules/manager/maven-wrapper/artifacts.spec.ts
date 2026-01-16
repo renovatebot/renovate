@@ -119,7 +119,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     expect(updatedDeps).toEqual(expected);
     expect(execSnapshots).toEqual([
       {
-        cmd: './mvnw wrapper:wrapper',
+        cmd: './mvnw wrapper:wrapper -Dtype=script',
         options: {
           cwd: '/tmp/github',
           env: {
@@ -154,7 +154,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     expect(updatedDeps).toEqual([]);
     expect(execSnapshots).toEqual([
       {
-        cmd: './mvnw wrapper:wrapper',
+        cmd: './mvnw wrapper:wrapper -Dtype=script',
         options: {
           cwd: '/tmp/github',
           env: {
@@ -216,7 +216,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           ' bash -l -c "' +
           'install-tool java 17.0.0 ' +
           '&& ' +
-          './mvnw wrapper:wrapper"',
+          './mvnw wrapper:wrapper -Dtype=script"',
         options: {
           cwd: '../..',
           env: {
@@ -291,7 +291,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool java 17.0.0' },
       {
-        cmd: './mvnw wrapper:wrapper',
+        cmd: './mvnw wrapper:wrapper -Dtype=script',
         options: {
           cwd: '/tmp/github',
           env: {
@@ -341,7 +341,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool java 17.0.0' },
       {
-        cmd: './mvnw wrapper:wrapper',
+        cmd: './mvnw wrapper:wrapper -Dtype=script',
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
@@ -384,7 +384,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: './mvnw wrapper:wrapper',
+        cmd: './mvnw wrapper:wrapper -Dtype=script',
         options: {
           cwd: '/tmp/github',
           env: {
@@ -426,7 +426,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: './mvnw wrapper:wrapper',
+        cmd: './mvnw wrapper:wrapper -Dtype=script',
         options: {
           cwd: '/tmp/github',
           env: {
@@ -467,7 +467,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: './mvnw wrapper:wrapper',
+        cmd: './mvnw wrapper:wrapper -Dtype=script',
         options: {
           cwd: '/tmp/github',
           env: {

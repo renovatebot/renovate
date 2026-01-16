@@ -56,6 +56,11 @@ function getWrapperVersion(content: string): string | null {
   return match ? match[1].trim() : null;
 }
 
+function getDistributionType(content: string): string | null {
+  const match = regEx(/^distributionType\s*=\s*(.+)$/m).exec(content);
+  return match ? match[1].trim() : null;
+}
+
 async function updateChecksums(
   content: string,
   updatedDeps: PackageDependency[],
@@ -174,12 +179,13 @@ export async function updateArtifacts({
     const hasWrapperUpdate = updatedDeps.some(
       (dep) => dep.depName === 'maven-wrapper',
     );
-    // Remember if original content had checksums - we'll restore them after wrapper:wrapper
+    // Remember original content properties - we'll restore them after wrapper:wrapper
     const hadDistributionChecksum = newPackageFileContent.includes(
       'distributionSha256Sum=',
     );
     const hadWrapperChecksum =
       newPackageFileContent.includes('wrapperSha256Sum=');
+    const originalDistributionType = getDistributionType(newPackageFileContent);
 
     // Skip if no relevant updates
     if (!hasWrapperUpdate && !(hasMavenUpdate && hadDistributionChecksum)) {
@@ -192,7 +198,10 @@ export async function updateArtifacts({
     // If wrapper is being updated, check if mvnw exists first
     let cmd: string | null = null;
     if (hasWrapperUpdate) {
-      cmd = await createWrapperCommand(packageFileName, hadWrapperChecksum);
+      cmd = await createWrapperCommand(
+        packageFileName,
+        originalDistributionType,
+      );
 
       if (!cmd) {
         logger.info('No mvnw found - skipping Artifacts update');
@@ -378,7 +387,7 @@ function getCustomMavenWrapperRepoUrl(
 
 async function createWrapperCommand(
   packageFileName: string,
-  hadWrapperChecksum: boolean,
+  distributionType: string | null,
 ): Promise<string | null> {
   const {
     wrapperExecutableFileName,
@@ -386,11 +395,10 @@ async function createWrapperCommand(
     wrapperFullyQualifiedPath,
   } = getMavenPaths(packageFileName);
 
-  // If user had wrapperSha256Sum, use -Dtype=script to preserve JAR-based mode
-  // (prevents Maven 3.3.x from defaulting to only-script which removes checksums)
-  const args = hadWrapperChecksum
-    ? 'wrapper:wrapper -Dtype=script'
-    : 'wrapper:wrapper';
+  // Use existing distributionType or default to 'script' to preserve JAR-based mode
+  // (prevents Maven 3.3.x from defaulting to only-script which doesn't support checksums)
+  const type = distributionType ?? 'script';
+  const args = `wrapper:wrapper -Dtype=${type}`;
 
   return await prepareCommand(
     wrapperExecutableFileName,
