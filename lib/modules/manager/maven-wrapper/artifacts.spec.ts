@@ -647,5 +647,167 @@ wrapperSha256Sum=oldwrapperhash456`;
       const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
       expect(finalWrittenContent).not.toContain('oldwrapperhash456');
     });
+
+    it('should add distribution checksum when it does not exist', async () => {
+      const propertiesWithoutDistChecksum = `distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip`;
+
+      httpMock
+        .scope('https://repo.maven.apache.org')
+        .get(
+          '/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip',
+        )
+        .reply(200, Buffer.from('fake-maven-distribution-content'));
+      mockMavenFileChangedInGit();
+      mockExecAll({ stdout: '', stderr: '' });
+      // Mock readLocalFile to return content after wrapper:wrapper runs
+      fs.readLocalFile.mockResolvedValueOnce(propertiesWithoutDistChecksum);
+
+      await updateArtifacts({
+        packageFileName: '.mvn/wrapper/maven-wrapper.properties',
+        newPackageFileContent: `distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
+distributionSha256Sum=oldhash123`,
+        updatedDeps: [{ depName: 'maven-wrapper' }],
+        config: { currentValue: '3.3.1', newValue: '3.3.2' },
+      });
+
+      // writeLocalFile called twice: initial write (stripped), then after checksum update
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
+      const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
+      // Should have added the checksum after distributionUrl
+      expect(finalWrittenContent).toContain('distributionSha256Sum=');
+    });
+
+    it('should add wrapper checksum when it does not exist', async () => {
+      const propertiesWithoutWrapperChecksum = `distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
+wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar`;
+
+      httpMock
+        .scope('https://repo.maven.apache.org')
+        .get(
+          '/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar',
+        )
+        .reply(200, Buffer.from('fake-wrapper-content'));
+      mockMavenFileChangedInGit();
+      mockExecAll({ stdout: '', stderr: '' });
+      // Mock readLocalFile to return content after wrapper:wrapper runs
+      fs.readLocalFile.mockResolvedValueOnce(propertiesWithoutWrapperChecksum);
+
+      await updateArtifacts({
+        packageFileName: '.mvn/wrapper/maven-wrapper.properties',
+        newPackageFileContent: `distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
+wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar
+wrapperSha256Sum=oldwrapperhash456`,
+        updatedDeps: [{ depName: 'maven-wrapper', newValue: '3.3.2' }],
+        config: { currentValue: '3.3.1', newValue: '3.3.2' },
+      });
+
+      // writeLocalFile called twice: initial write (stripped), then after checksum update
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
+      const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
+      // Should have added the checksum after wrapperUrl
+      expect(finalWrittenContent).toContain('wrapperSha256Sum=');
+    });
+
+    it('should preserve wrapper checksum when fetch fails', async () => {
+      const propertiesWithWrapperChecksumOnly = `wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar
+wrapperSha256Sum=oldwrapperhash456`;
+
+      httpMock
+        .scope('https://repo.maven.apache.org')
+        .get(
+          '/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar',
+        )
+        .replyWithError('Network error');
+      mockMavenFileChangedInGit();
+      mockExecAll({ stdout: '', stderr: '' });
+      fs.readLocalFile.mockResolvedValueOnce(propertiesWithWrapperChecksumOnly);
+
+      await updateArtifacts({
+        packageFileName: '.mvn/wrapper/maven-wrapper.properties',
+        newPackageFileContent: propertiesWithWrapperChecksumOnly,
+        updatedDeps: [{ depName: 'maven-wrapper', newValue: '3.3.2' }],
+        config: { currentValue: '3.3.1', newValue: '3.3.2' },
+      });
+
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
+      const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
+      expect(finalWrittenContent).toContain(
+        'wrapperSha256Sum=oldwrapperhash456',
+      );
+    });
+
+    it('should unescape distributionUrl, honor wrapperVersion, and keep distributionType', async () => {
+      const propertiesWithEscapedUrlsAndType = `distributionUrl=https\\://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
+distributionSha256Sum=oldhash123
+distributionType=bin
+wrapperVersion=3.3.2
+wrapperSha256Sum=oldwrapperhash456`;
+
+      httpMock
+        .scope('https://repo.maven.apache.org')
+        .get(
+          '/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip',
+        )
+        .reply(200, Buffer.from('fake-maven-content'))
+        .get(
+          '/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar',
+        )
+        .reply(200, Buffer.from('fake-wrapper-content'));
+      mockMavenFileChangedInGit();
+      const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+      fs.readLocalFile.mockResolvedValueOnce(propertiesWithEscapedUrlsAndType);
+
+      await updateArtifacts({
+        packageFileName: '.mvn/wrapper/maven-wrapper.properties',
+        newPackageFileContent: propertiesWithEscapedUrlsAndType,
+        updatedDeps: [{ depName: 'maven-wrapper', newValue: '3.3.2' }],
+        config: { currentValue: '3.3.1', newValue: '3.3.2' },
+      });
+
+      expect(execSnapshots[0].cmd).toContain('-Dtype=bin');
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
+      const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
+      expect(finalWrittenContent).not.toContain('oldhash123');
+      expect(finalWrittenContent).not.toContain('oldwrapperhash456');
+    });
+
+    it('should skip distribution checksum update when distributionUrl is missing', async () => {
+      const propertiesWithoutDistributionUrl = `distributionSha256Sum=oldhash123`;
+
+      mockMavenFileChangedInGit();
+      fs.readLocalFile.mockResolvedValueOnce(propertiesWithoutDistributionUrl);
+
+      await updateArtifacts({
+        packageFileName: '.mvn/wrapper/maven-wrapper.properties',
+        newPackageFileContent: propertiesWithoutDistributionUrl,
+        updatedDeps: [{ depName: 'maven' }],
+        config: { currentValue: '3.9.8', newValue: '3.9.9' },
+      });
+
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
+      const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
+      expect(finalWrittenContent).toContain('distributionSha256Sum=oldhash123');
+    });
+
+    it('should skip wrapper checksum update when wrapperVersion is missing', async () => {
+      const propertiesWithoutWrapperInfo = `wrapperSha256Sum=oldwrapperhash456`;
+
+      mockMavenFileChangedInGit();
+      mockExecAll({ stdout: '', stderr: '' });
+      fs.readLocalFile.mockResolvedValueOnce(propertiesWithoutWrapperInfo);
+
+      await updateArtifacts({
+        packageFileName: '.mvn/wrapper/maven-wrapper.properties',
+        newPackageFileContent: propertiesWithoutWrapperInfo,
+        updatedDeps: [{ depName: 'maven-wrapper', newValue: '3.3.2' }],
+        config: { currentValue: '3.3.1', newValue: '3.3.2' },
+      });
+
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
+      const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
+      expect(finalWrittenContent).toContain(
+        'wrapperSha256Sum=oldwrapperhash456',
+      );
+    });
   });
 });
