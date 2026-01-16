@@ -398,7 +398,7 @@ describe('modules/manager/mise/extract', () => {
           {
             depName: 'core:node',
             currentValue: '16',
-            packageName: 'nodejs',
+            packageName: 'node',
             datasource: 'node-version',
           },
           {
