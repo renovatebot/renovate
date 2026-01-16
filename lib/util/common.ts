@@ -2,7 +2,7 @@ import JSON5 from 'json5';
 import * as JSONC from 'jsonc-parser';
 import type { JsonValue } from 'type-fest';
 import { GlobalConfig } from '../config/global';
-import { InheritConfig } from '../config/inherit';
+import { InheritConfig, NOT_PRESET } from '../config/inherit';
 import type { GlobalInheritableConfig } from '../config/types';
 import {
   AZURE_API_USING_HOST_TYPES,
@@ -156,6 +156,9 @@ export function getInheritedOrGlobal<Key extends keyof GlobalInheritableConfig>(
   key: Key,
 ): GlobalInheritableConfig[Key] {
   const inheritedValue = InheritConfig.get(key);
-  const globalValue = GlobalConfig.get(key);
-  return inheritedValue ?? globalValue;
+  if (inheritedValue !== NOT_PRESET) {
+    return inheritedValue;
+  }
+
+  return GlobalConfig.get(key);
 }
