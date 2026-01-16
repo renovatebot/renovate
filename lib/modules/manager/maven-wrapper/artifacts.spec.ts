@@ -509,7 +509,10 @@ distributionSha256Sum=oldhash123`;
         )
         .reply(200, Buffer.from('fake-maven-distribution-content'));
       mockMavenFileChangedInGit();
-      mockExecAll({ stdout: '', stderr: '' });
+      // Mock readLocalFile to return content after first write (simulates reading back)
+      fs.readLocalFile.mockResolvedValueOnce(
+        propertiesWithDistributionChecksumOnly,
+      );
 
       await updateArtifacts({
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
@@ -518,14 +521,13 @@ distributionSha256Sum=oldhash123`;
         config: { currentValue: '3.9.8', newValue: '3.9.9' },
       });
 
-      // Verify writeLocalFile was called with updated checksum
-      expect(fs.writeLocalFile).toHaveBeenCalledWith(
-        '.mvn/wrapper/maven-wrapper.properties',
-        expect.stringContaining('distributionSha256Sum='),
-      );
+      // Verify writeLocalFile was called twice (initial write, then checksum update)
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
+      // Check the second (final) write contains updated checksum
+      const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
+      expect(finalWrittenContent).toContain('distributionSha256Sum=');
       // Should not contain the old hash
-      const writtenContent = vi.mocked(fs.writeLocalFile).mock.calls[0][1];
-      expect(writtenContent).not.toContain('oldhash123');
+      expect(finalWrittenContent).not.toContain('oldhash123');
     });
 
     it('should update both checksums when wrapper version changes', async () => {
@@ -541,6 +543,8 @@ distributionSha256Sum=oldhash123`;
         .reply(200, Buffer.from('fake-wrapper-content'));
       mockMavenFileChangedInGit();
       mockExecAll({ stdout: '', stderr: '' });
+      // Mock readLocalFile to return content after wrapper:wrapper runs
+      fs.readLocalFile.mockResolvedValueOnce(propertiesWithChecksums);
 
       await updateArtifacts({
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
@@ -549,10 +553,11 @@ distributionSha256Sum=oldhash123`;
         config: { currentValue: '3.3.1', newValue: '3.3.2' },
       });
 
-      expect(fs.writeLocalFile).toHaveBeenCalled();
-      const writtenContent = vi.mocked(fs.writeLocalFile).mock.calls[0][1];
-      expect(writtenContent).not.toContain('oldhash123');
-      expect(writtenContent).not.toContain('oldwrapperhash456');
+      // writeLocalFile called twice: initial write, then after checksum update
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
+      const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
+      expect(finalWrittenContent).not.toContain('oldhash123');
+      expect(finalWrittenContent).not.toContain('oldwrapperhash456');
     });
 
     it('should preserve old checksum when fetch fails', async () => {
@@ -563,7 +568,10 @@ distributionSha256Sum=oldhash123`;
         )
         .replyWithError('Network error');
       mockMavenFileChangedInGit();
-      mockExecAll({ stdout: '', stderr: '' });
+      // Mock readLocalFile to return content for checksum update
+      fs.readLocalFile.mockResolvedValueOnce(
+        propertiesWithDistributionChecksumOnly,
+      );
 
       await updateArtifacts({
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
@@ -572,11 +580,11 @@ distributionSha256Sum=oldhash123`;
         config: { currentValue: '3.9.8', newValue: '3.9.9' },
       });
 
-      // Should still write file but with old checksum preserved
-      expect(fs.writeLocalFile).toHaveBeenCalledWith(
-        '.mvn/wrapper/maven-wrapper.properties',
-        expect.stringContaining('distributionSha256Sum=oldhash123'),
-      );
+      // writeLocalFile called twice: initial write, then checksum update (even if fetch fails, it still writes)
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
+      // On fetch failure, checksum is not updated (original value preserved)
+      const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
+      expect(finalWrittenContent).toContain('distributionSha256Sum=oldhash123');
     });
 
     it('should skip HTTP when no checksums in properties file', async () => {
@@ -624,6 +632,8 @@ wrapperSha256Sum=oldwrapperhash456`;
         .reply(200, Buffer.from('fake-wrapper-content'));
       mockMavenFileChangedInGit();
       mockExecAll({ stdout: '', stderr: '' });
+      // Mock readLocalFile to return content after wrapper:wrapper runs
+      fs.readLocalFile.mockResolvedValueOnce(propertiesWithWrapperVersion);
 
       await updateArtifacts({
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
@@ -632,9 +642,10 @@ wrapperSha256Sum=oldwrapperhash456`;
         config: { currentValue: '3.3.1', newValue: '3.3.2' },
       });
 
-      expect(fs.writeLocalFile).toHaveBeenCalled();
-      const writtenContent = vi.mocked(fs.writeLocalFile).mock.calls[0][1];
-      expect(writtenContent).not.toContain('oldwrapperhash456');
+      // writeLocalFile called twice: initial write, then after checksum update
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
+      const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
+      expect(finalWrittenContent).not.toContain('oldwrapperhash456');
     });
   });
 });
