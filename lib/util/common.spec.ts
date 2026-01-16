@@ -222,5 +222,27 @@ describe('util/common', () => {
       });
       expect(getInheritedOrGlobal('configFileNames')).toEqual(['inherited']);
     });
+
+    // is not possiblle as config validation will error out: only for coverage
+    it('handles null inherited values', () => {
+      InheritConfig.set({
+        configFileNames: null as never,
+      });
+      GlobalConfig.set({
+        configFileNames: ['global'],
+      });
+      expect(getInheritedOrGlobal('configFileNames')).toBeNull();
+    });
+
+    // is not possiblle as config validation will error out: only for coverage
+    it('handles undefined inherited values', () => {
+      InheritConfig.set({
+        configFileNames: undefined as never,
+      });
+      GlobalConfig.set({
+        configFileNames: ['global'],
+      });
+      expect(getInheritedOrGlobal('configFileNames')).toBeUndefined();
+    });
   });
 });
