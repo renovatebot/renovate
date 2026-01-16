@@ -26,7 +26,7 @@ exports[`config/presets/index > getPreset > handles 404 packages 2`] = `undefine
 
 exports[`config/presets/index > getPreset > handles 404 packages 3`] = `undefined`;
 
-exports[`config/presets/index > resolvePreset > migrates automerge in presets 1`] = `
+exports[`config/presets/index > resolveConfigPresets > migrates automerge in presets 1`] = `
 {
   "automergeType": "pr",
   "branchPrefix": "renovate/",
@@ -142,7 +142,7 @@ exports[`config/presets/index > resolvePreset > migrates automerge in presets 1`
 }
 `;
 
-exports[`config/presets/index > resolvePreset > resolves eslint 1`] = `
+exports[`config/presets/index > resolveConfigPresets > resolves eslint 1`] = `
 {
   "matchPackageNames": [
     "@types/eslint",
@@ -159,7 +159,7 @@ exports[`config/presets/index > resolvePreset > resolves eslint 1`] = `
 }
 `;
 
-exports[`config/presets/index > resolvePreset > resolves linters 1`] = `
+exports[`config/presets/index > resolveConfigPresets > resolves linters 1`] = `
 {
   "description": [
     "All lint-related packages.",
@@ -189,7 +189,7 @@ exports[`config/presets/index > resolvePreset > resolves linters 1`] = `
 }
 `;
 
-exports[`config/presets/index > resolvePreset > resolves nested groups 1`] = `
+exports[`config/presets/index > resolveConfigPresets > resolves nested groups 1`] = `
 {
   "description": [
     "Update lint packages automatically if tests pass.",
@@ -227,7 +227,7 @@ exports[`config/presets/index > resolvePreset > resolves nested groups 1`] = `
 }
 `;
 
-exports[`config/presets/index > resolvePreset > resolves self-hosted presets without baseConfig 1`] = `
+exports[`config/presets/index > resolveConfigPresets > resolves self-hosted presets without baseConfig 1`] = `
 {
   "labels": [
     "self-hosted resolved",

@@ -217,7 +217,7 @@ describe('workers/repository/process/extract-update', () => {
 
     it('invalid if no extractionFingerprints', () => {
       cachedExtract.configHash = 'hash';
-      const { extractionFingerprints, ...restOfCache } = cachedExtract;
+      const { extractionFingerprints: _, ...restOfCache } = cachedExtract;
       expect(
         isCacheExtractValid(
           'sha',

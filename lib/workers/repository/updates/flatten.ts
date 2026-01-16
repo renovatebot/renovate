@@ -230,7 +230,7 @@ export async function flattenUpdates(
   }
   const filteredUpdates = updates
     .filter((update) => update.enabled !== false)
-    .map(({ vulnerabilityAlerts, ...update }) => update)
+    .map(({ vulnerabilityAlerts: _, ...update }) => update)
     .map((update) => filterConfig(update, 'branch'));
   if (filteredUpdates.length < updates.length) {
     logger.debug(

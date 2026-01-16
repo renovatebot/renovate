@@ -167,7 +167,7 @@ export function writeLockUpdates(
     const newProviderBlockLines: string[] = [];
     let hashLinePrefix = '';
     let hashLineSuffix = '';
-    providerBlockLines.forEach((providerBlockLine, providerBlockIndex) => {
+    providerBlockLines.forEach((providerBlockLine) => {
       const versionLine = providerBlockLine.replace(
         versionLineRegex,
         `$<prefix>${update.newVersion}$<suffix>`,

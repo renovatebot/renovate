@@ -19,16 +19,16 @@ export class HatchProcessor extends BasePyProjectProcessor {
   }
 
   extractLockedVersions(
-    project: PyProject,
+    _project: PyProject,
     deps: PackageDependency[],
-    packageFile: string,
+    _packageFile: string,
   ): Promise<PackageDependency[]> {
     return Promise.resolve(deps);
   }
 
   updateArtifacts(
-    updateArtifact: UpdateArtifact,
-    project: PyProject,
+    _updateArtifact: UpdateArtifact,
+    _project: PyProject,
   ): Promise<UpdateArtifactsResult[] | null> {
     // Hatch does not have lock files at the moment
     // https://github.com/pypa/hatch/issues/749
