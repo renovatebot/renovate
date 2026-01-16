@@ -686,7 +686,7 @@ describe('workers/repository/update/pr/index', () => {
         platform.createPr.mockResolvedValueOnce(pr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
         vi.spyOn(platform, 'massageMarkdown').mockImplementation(
-          (prBody) => 'markdown content',
+          () => 'markdown content',
         );
         await ensurePr({
           ...config,

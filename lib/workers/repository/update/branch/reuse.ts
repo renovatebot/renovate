@@ -6,8 +6,8 @@ import type { BranchConfig } from '../../../types';
 
 async function shouldKeepUpdated(
   config: BranchConfig,
-  baseBranch: string,
-  branchName: string,
+  _baseBranch: string,
+  _branchName: string,
 ): Promise<boolean> {
   const keepUpdatedLabel = config.keepUpdatedLabel;
   if (!keepUpdatedLabel) {

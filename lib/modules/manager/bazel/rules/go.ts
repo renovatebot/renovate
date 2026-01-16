@@ -39,7 +39,7 @@ export const GoTarget = z
         const remoteMatch = regEx(
           /https:\/\/github\.com(?:.*\/)(([a-zA-Z]+)([-])?([a-zA-Z]+))/,
         ).exec(remote);
-        if (remoteMatch && remoteMatch[0].length === remote.length) {
+        if (remoteMatch?.[0].length === remote.length) {
           dep.packageName = remote.replace('https://', '');
         } else {
           dep.skipReason = 'unsupported-remote';

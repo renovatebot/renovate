@@ -131,7 +131,7 @@ export async function mergeInheritedConfig(
   }
 
   logger.debug('Resolving presets found in inherited config');
-  const resolvedConfig = await resolveConfigPresets(
+  const { config: resolvedConfig } = await resolveConfigPresets(
     filteredConfig,
     config,
     config.ignorePresets,

@@ -270,12 +270,7 @@ class NugetVersioningApi implements VersioningApi {
     return rangeToString({ type: 'nuget-exact-range', version: v });
   }
 
-  getNewValue({
-    currentValue,
-    rangeStrategy,
-    currentVersion,
-    newVersion,
-  }: NewValueConfig): string | null {
+  getNewValue({ currentValue, newVersion }: NewValueConfig): string | null {
     const v = parseVersion(newVersion);
     if (!v) {
       return null;

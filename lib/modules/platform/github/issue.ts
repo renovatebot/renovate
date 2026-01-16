@@ -123,8 +123,7 @@ export class GithubIssueCache {
       // If we reached the item which is already in the cache,
       // it means sync is done.
       if (
-        cachedIssue &&
-        cachedIssue.number === issue.number &&
+        cachedIssue?.number === issue.number &&
         cachedIssue.lastModified === issue.lastModified
       ) {
         isReconciled = true;
