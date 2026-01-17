@@ -346,8 +346,8 @@ importers:
         specifier: 5.0.3
         version: 5.0.3
       toml-eslint-parser:
-        specifier: 0.11.0
-        version: 0.11.0
+        specifier: 0.12.0
+        version: 0.12.0
       tslib:
         specifier: 2.8.1
         version: 2.8.1
@@ -6226,10 +6226,6 @@ packages:
 
   to-vfile@8.0.0:
     resolution: {integrity: sha512-IcmH1xB5576MJc9qcfEC/m/nQCFt3fzMHz45sSlgJyTWjRbKW1HAkJpuf3DgE57YzIlZcwcBZA5ENQbBo4aLkg==}
-
-  toml-eslint-parser@0.11.0:
-    resolution: {integrity: sha512-piZPVcbZEhLjYEJrH2Go0F4oCLOJ/kptOSc7aYc604NvUY9+Te0l7DPQgeYjXtEnGslTlUDHUAfVOsEoYbsqOw==}
-    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
   toml-eslint-parser@0.12.0:
     resolution: {integrity: sha512-4qHgkGXl0LyFp/3aNoi6dKWuPuxFsCiDtBl5IbJljeYR57+5l3pJHJEW9xPSOu2U1drGlG82tpGqkJz/uJZ2Fw==}
@@ -13640,10 +13636,6 @@ snapshots:
   to-vfile@8.0.0:
     dependencies:
       vfile: 6.0.3
-
-  toml-eslint-parser@0.11.0:
-    dependencies:
-      eslint-visitor-keys: 3.4.3
 
   toml-eslint-parser@0.12.0:
     dependencies:
