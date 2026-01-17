@@ -20,53 +20,61 @@ describe('modules/versioning/debian/index', () => {
   });
 
   it.each`
-    version           | expected
-    ${undefined}      | ${false}
-    ${null}           | ${false}
-    ${''}             | ${false}
-    ${'buzz'}         | ${true}
-    ${'rex'}          | ${true}
-    ${'bo'}           | ${true}
-    ${'hamm'}         | ${true}
-    ${'slink'}        | ${true}
-    ${'potato'}       | ${true}
-    ${'woody'}        | ${true}
-    ${'sarge'}        | ${true}
-    ${'etch'}         | ${true}
-    ${'lenny'}        | ${true}
-    ${'squeeze'}      | ${true}
-    ${'wheezy'}       | ${true}
-    ${'jessie'}       | ${true}
-    ${'stretch'}      | ${true}
-    ${'buster'}       | ${true}
-    ${'Buster'}       | ${false}
-    ${'bullseye'}     | ${true}
-    ${'bookworm'}     | ${true}
-    ${'forky'}        | ${false}
-    ${'sid'}          | ${false}
-    ${'1.1'}          | ${true}
-    ${'1.2'}          | ${true}
-    ${'1.3'}          | ${true}
-    ${'2'}            | ${true}
-    ${'2.1'}          | ${true}
-    ${'2.2'}          | ${true}
-    ${'3'}            | ${true}
-    ${'4'}            | ${true}
-    ${'5'}            | ${true}
-    ${'6'}            | ${true}
-    ${'7'}            | ${true}
-    ${'8'}            | ${true}
-    ${'9'}            | ${true}
-    ${'10'}           | ${true}
-    ${'10-slim'}      | ${false}
-    ${'11'}           | ${true}
-    ${'12'}           | ${true}
-    ${'14'}           | ${false}
-    ${'sid'}          | ${false}
-    ${'stable'}       | ${true}
-    ${'oldstable'}    | ${true}
-    ${'oldoldstable'} | ${true}
-    ${'experimental'} | ${false}
+    version                    | expected
+    ${undefined}               | ${false}
+    ${null}                    | ${false}
+    ${''}                      | ${false}
+    ${'buzz'}                  | ${true}
+    ${'rex'}                   | ${true}
+    ${'bo'}                    | ${true}
+    ${'hamm'}                  | ${true}
+    ${'slink'}                 | ${true}
+    ${'potato'}                | ${true}
+    ${'woody'}                 | ${true}
+    ${'sarge'}                 | ${true}
+    ${'etch'}                  | ${true}
+    ${'lenny'}                 | ${true}
+    ${'squeeze'}               | ${true}
+    ${'wheezy'}                | ${true}
+    ${'jessie'}                | ${true}
+    ${'stretch'}               | ${true}
+    ${'buster'}                | ${true}
+    ${'Buster'}                | ${false}
+    ${'bullseye'}              | ${true}
+    ${'bookworm'}              | ${true}
+    ${'forky'}                 | ${false}
+    ${'sid'}                   | ${false}
+    ${'1.1'}                   | ${true}
+    ${'1.2'}                   | ${true}
+    ${'1.3'}                   | ${true}
+    ${'2'}                     | ${true}
+    ${'2.1'}                   | ${true}
+    ${'2.2'}                   | ${true}
+    ${'3'}                     | ${true}
+    ${'4'}                     | ${true}
+    ${'5'}                     | ${true}
+    ${'6'}                     | ${true}
+    ${'7'}                     | ${true}
+    ${'8'}                     | ${true}
+    ${'9'}                     | ${true}
+    ${'10'}                    | ${true}
+    ${'10-slim'}               | ${false}
+    ${'11'}                    | ${true}
+    ${'12'}                    | ${true}
+    ${'14'}                    | ${false}
+    ${'sid'}                   | ${false}
+    ${'stable'}                | ${true}
+    ${'oldstable'}             | ${true}
+    ${'oldoldstable'}          | ${true}
+    ${'experimental'}          | ${false}
+    ${'bookworm-20230816'}     | ${true}
+    ${'bullseye-20220101'}     | ${true}
+    ${'buster-20190101'}       | ${true}
+    ${'bookworm-20230816.1'}   | ${true}
+    ${'bullseye-20220101.2'}   | ${true}
+    ${'invalid-20230816'}      | ${false}
+    ${'bookworm-2023081'}      | ${false}
+    ${'bookworm-20230816.123'} | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     expect(debian.isValid(version)).toBe(expected);
   });
@@ -105,51 +113,55 @@ describe('modules/versioning/debian/index', () => {
   });
 
   it.each`
-    version           | expected
-    ${undefined}      | ${false}
-    ${null}           | ${false}
-    ${''}             | ${false}
-    ${'buzz'}         | ${false}
-    ${'rex'}          | ${false}
-    ${'bo'}           | ${false}
-    ${'hamm'}         | ${false}
-    ${'slink'}        | ${false}
-    ${'potato'}       | ${false}
-    ${'woody'}        | ${false}
-    ${'sarge'}        | ${false}
-    ${'etch'}         | ${false}
-    ${'lenny'}        | ${false}
-    ${'squeeze'}      | ${false}
-    ${'wheezy'}       | ${false}
-    ${'jessie'}       | ${false}
-    ${'stretch'}      | ${false}
-    ${'buster'}       | ${true}
-    ${'bullseye'}     | ${true}
-    ${'bookworm'}     | ${true}
-    ${'trixie'}       | ${false}
-    ${'sid'}          | ${false}
-    ${'1.1'}          | ${false}
-    ${'1.2'}          | ${false}
-    ${'1.3'}          | ${false}
-    ${'2'}            | ${false}
-    ${'2.1'}          | ${false}
-    ${'2.2'}          | ${false}
-    ${'3'}            | ${false}
-    ${'4'}            | ${false}
-    ${'5'}            | ${false}
-    ${'6'}            | ${false}
-    ${'7'}            | ${false}
-    ${'8'}            | ${false}
-    ${'9'}            | ${false}
-    ${'10'}           | ${true}
-    ${'11'}           | ${true}
-    ${'12'}           | ${true}
-    ${'13'}           | ${false}
-    ${'sid'}          | ${false}
-    ${'experimental'} | ${false}
-    ${'stable'}       | ${true}
-    ${'oldstable'}    | ${true}
-    ${'oldoldstable'} | ${true}
+    version                | expected
+    ${undefined}           | ${false}
+    ${null}                | ${false}
+    ${''}                  | ${false}
+    ${'buzz'}              | ${false}
+    ${'rex'}               | ${false}
+    ${'bo'}                | ${false}
+    ${'hamm'}              | ${false}
+    ${'slink'}             | ${false}
+    ${'potato'}            | ${false}
+    ${'woody'}             | ${false}
+    ${'sarge'}             | ${false}
+    ${'etch'}              | ${false}
+    ${'lenny'}             | ${false}
+    ${'squeeze'}           | ${false}
+    ${'wheezy'}            | ${false}
+    ${'jessie'}            | ${false}
+    ${'stretch'}           | ${false}
+    ${'buster'}            | ${true}
+    ${'bullseye'}          | ${true}
+    ${'bookworm'}          | ${true}
+    ${'trixie'}            | ${false}
+    ${'sid'}               | ${false}
+    ${'1.1'}               | ${false}
+    ${'1.2'}               | ${false}
+    ${'1.3'}               | ${false}
+    ${'2'}                 | ${false}
+    ${'2.1'}               | ${false}
+    ${'2.2'}               | ${false}
+    ${'3'}                 | ${false}
+    ${'4'}                 | ${false}
+    ${'5'}                 | ${false}
+    ${'6'}                 | ${false}
+    ${'7'}                 | ${false}
+    ${'8'}                 | ${false}
+    ${'9'}                 | ${false}
+    ${'10'}                | ${true}
+    ${'11'}                | ${true}
+    ${'12'}                | ${true}
+    ${'13'}                | ${false}
+    ${'sid'}               | ${false}
+    ${'experimental'}      | ${false}
+    ${'stable'}            | ${true}
+    ${'oldstable'}         | ${true}
+    ${'oldoldstable'}      | ${true}
+    ${'bookworm-20230816'} | ${true}
+    ${'bullseye-20220101'} | ${true}
+    ${'buster-20190101'}   | ${true}
+    ${'wheezy-20140101'}   | ${false}
   `('isStable("$version") === $expected', ({ version, expected }) => {
     expect(debian.isStable(version)).toBe(expected);
   });
@@ -259,47 +271,64 @@ describe('modules/versioning/debian/index', () => {
   );
 
   it.each`
-    a                 | b                 | expected
-    ${'woody'}        | ${'sarge'}        | ${false}
-    ${'lenny'}        | ${'3'}            | ${false}
-    ${'lenny'}        | ${'5'}            | ${true}
-    ${'squeeze'}      | ${'6'}            | ${true}
-    ${'10'}           | ${'buster'}       | ${true}
-    ${'6'}            | ${'squeeze'}      | ${true}
-    ${'buster'}       | ${'10'}           | ${true}
-    ${'oldoldstable'} | ${'10'}           | ${true}
-    ${'oldstable'}    | ${'11'}           | ${true}
-    ${'stable'}       | ${'12'}           | ${true}
-    ${'10'}           | ${'oldoldstable'} | ${true}
-    ${'11'}           | ${'oldstable'}    | ${true}
-    ${'12'}           | ${'stable'}       | ${true}
+    a                        | b                        | expected
+    ${'woody'}               | ${'sarge'}               | ${false}
+    ${'lenny'}               | ${'3'}                   | ${false}
+    ${'lenny'}               | ${'5'}                   | ${true}
+    ${'squeeze'}             | ${'6'}                   | ${true}
+    ${'10'}                  | ${'buster'}              | ${true}
+    ${'6'}                   | ${'squeeze'}             | ${true}
+    ${'buster'}              | ${'10'}                  | ${true}
+    ${'oldoldstable'}        | ${'10'}                  | ${true}
+    ${'oldstable'}           | ${'11'}                  | ${true}
+    ${'stable'}              | ${'12'}                  | ${true}
+    ${'10'}                  | ${'oldoldstable'}        | ${true}
+    ${'11'}                  | ${'oldstable'}           | ${true}
+    ${'12'}                  | ${'stable'}              | ${true}
+    ${'bookworm-20230816'}   | ${'bookworm-20230816'}   | ${true}
+    ${'bookworm-20230816'}   | ${'bookworm-20230817'}   | ${false}
+    ${'bullseye-20220101'}   | ${'bullseye-20220101'}   | ${true}
+    ${'bookworm-20230816.1'} | ${'bookworm-20230816.2'} | ${false}
   `('equals($a, $b) === $expected', ({ a, b, expected }) => {
     expect(debian.equals(a, b)).toBe(expected);
   });
 
   it.each`
-    a                 | b                 | expected
-    ${'5'}            | ${'6'}            | ${false}
-    ${'6'}            | ${'5'}            | ${true}
-    ${'5'}            | ${'10'}           | ${false}
-    ${'11'}           | ${'10'}           | ${true}
-    ${'5'}            | ${'6'}            | ${false}
-    ${'11'}           | ${'1.1'}          | ${true}
-    ${'xxx'}          | ${'yyy'}          | ${true}
-    ${'yyy'}          | ${'xxx'}          | ${true}
-    ${'lenny'}        | ${'squeeze'}      | ${false}
-    ${'squeeze'}      | ${'lenny'}        | ${true}
-    ${'lenny'}        | ${'buster'}       | ${false}
-    ${'bookworm'}     | ${'etch'}         | ${true}
-    ${'sarge'}        | ${'bo'}           | ${true}
-    ${'bullseye'}     | ${'rex'}          | ${true}
-    ${'buzz'}         | ${'jessie'}       | ${false}
-    ${'oldoldstable'} | ${'8'}            | ${true}
-    ${'oldstable'}    | ${'oldoldstable'} | ${true}
-    ${'stable'}       | ${'oldstable'}    | ${true}
-    ${'12'}           | ${'oldoldstable'} | ${true}
-    ${'11'}           | ${'oldstable'}    | ${false}
-    ${'10'}           | ${'stable'}       | ${false}
+    a                        | b                        | expected
+    ${'5'}                   | ${'6'}                   | ${false}
+    ${'6'}                   | ${'5'}                   | ${true}
+    ${'5'}                   | ${'10'}                  | ${false}
+    ${'11'}                  | ${'10'}                  | ${true}
+    ${'5'}                   | ${'6'}                   | ${false}
+    ${'11'}                  | ${'1.1'}                 | ${true}
+    ${'xxx'}                 | ${'yyy'}                 | ${true}
+    ${'yyy'}                 | ${'xxx'}                 | ${true}
+    ${'lenny'}               | ${'squeeze'}             | ${false}
+    ${'squeeze'}             | ${'lenny'}               | ${true}
+    ${'lenny'}               | ${'buster'}              | ${false}
+    ${'bookworm'}            | ${'etch'}                | ${true}
+    ${'sarge'}               | ${'bo'}                  | ${true}
+    ${'bullseye'}            | ${'rex'}                 | ${true}
+    ${'buzz'}                | ${'jessie'}              | ${false}
+    ${'oldoldstable'}        | ${'8'}                   | ${true}
+    ${'oldstable'}           | ${'oldoldstable'}        | ${true}
+    ${'stable'}              | ${'oldstable'}           | ${true}
+    ${'12'}                  | ${'oldoldstable'}        | ${true}
+    ${'11'}                  | ${'oldstable'}           | ${false}
+    ${'10'}                  | ${'stable'}              | ${false}
+    ${'bookworm-20230816'}   | ${'bullseye-20220101'}   | ${true}
+    ${'bullseye-20220101'}   | ${'bookworm-20230816'}   | ${false}
+    ${'bookworm-20230816'}   | ${'bookworm-20230817'}   | ${false}
+    ${'bookworm-20230817'}   | ${'bookworm-20230816'}   | ${true}
+    ${'bookworm-20230816.1'} | ${'bookworm-20230816'}   | ${true}
+    ${'bookworm-20230816'}   | ${'bookworm-20230816.1'} | ${false}
+    ${'1.1'}                 | ${'1.2'}                 | ${false}
+    ${'1.2'}                 | ${'1.1'}                 | ${true}
+    ${'11.1'}                | ${'bullseye-20220101'}   | ${false}
+    ${'bullseye-20220101'}   | ${'11.1'}                | ${true}
+    ${'3.1'}                 | ${'woody-20010101'}      | ${true}
+    ${'woody-20010101'}      | ${'3.1'}                 | ${false}
+    ${'bookworm-20230816'}   | ${'bookworm-20230816'}   | ${false}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(debian.isGreaterThan(a, b)).toBe(expected);
   });
