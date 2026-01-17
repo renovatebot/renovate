@@ -1,0 +1,26 @@
+[
+  {
+    "checksum": "sha256:abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+    "created_at": "2025-03-28T22:04:32.319048",
+    "features": [],
+    "file_type": "tar.gz",
+    "image_type": "jre",
+    "java_version": "21.0.5",
+    "jvm_impl": "hotspot",
+    "url": "https://download.oracle.com/graalvm/21/archive/graalvm-jre-21.0.5_linux-x64_bin.tar.gz",
+    "vendor": "oracle-graalvm",
+    "version": "21.0.5"
+  },
+  {
+    "checksum": null,
+    "created_at": "2025-03-28T22:04:32.319048",
+    "features": [],
+    "file_type": "tar.gz",
+    "image_type": "jre",
+    "java_version": "17.0.13",
+    "jvm_impl": "hotspot",
+    "url": "https://download.oracle.com/graalvm/17/latest/graalvm-jre-17_linux-x64_bin.tar.gz",
+    "vendor": "oracle-graalvm",
+    "version": "17.0.13"
+  }
+]

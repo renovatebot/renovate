@@ -1,0 +1,20 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`modules/datasource/graalvm-version/index > getReleases > processes real data for JDK 1`] = `
+{
+  "homepage": "https://www.oracle.com/java/graalvm/",
+  "registryUrl": "https://mise-java.jdx.dev/",
+  "releases": [
+    {
+      "version": "17.0.13",
+    },
+    {
+      "version": "21.0.5",
+    },
+    {
+      "version": "23.0.1",
+    },
+  ],
+  "sourceUrl": "https://github.com/oracle/graal",
+}
+`;
