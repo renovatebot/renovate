@@ -58,9 +58,13 @@ describe('modules/datasource/graalvm-version/index', () => {
         datasource,
         packageName: 'oracle-graalvm-jdk?os=linux&architecture=x86_64',
       });
-      expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(3);
       expect(res?.homepage).toBe('https://www.oracle.com/java/graalvm/');
+      expect(res?.sourceUrl).toBe('https://github.com/oracle/graal');
+      const versions = res?.releases.map((r) => r.version);
+      expect(versions).toContain('23.0.1');
+      expect(versions).toContain('21.0.5');
+      expect(versions).toContain('17.0.13');
     });
 
     it('processes real data for JRE', async () => {
