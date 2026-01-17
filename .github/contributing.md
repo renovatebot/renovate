@@ -63,6 +63,29 @@ _The above AI Assistance Notice is largely copy/pasted from the Ghostty project 
 
 Pull Requests can only be merged once all status checks are green, which means `pnpm test` passes, and coverage is 100%.
 
+#### Code Quality Checks
+
+Before submitting your PR, you can locally verify that your changes comply with our code quality standards:
+
+```bash
+pnpm check-undesirable
+```
+
+This runs the same script that CI uses to check for:
+
+- **No new snapshots**: Use explicit assertions like `toMatch()`, `toContain()`, `toBe()` instead of `toMatchSnapshot()` or `toMatchInlineSnapshot()`
+- **No net increase in fixture files**: Prefer inline test data for small datasets. If you add fixture files, ensure you remove an equivalent number
+
+The script compares your current branch against `main` by default, or you can specify a different base:
+
+```bash
+pnpm check-undesirable origin/main
+```
+
+This check runs automatically in CI for all pull requests via the `.github/workflows/undesirable-test-additions.yaml` workflow, which calls `tools/check-undesirable-code.sh`.
+
+#### Running Tests
+
 Use these commands to help run your tests:
 
 - To run a single test folder, specify the path
