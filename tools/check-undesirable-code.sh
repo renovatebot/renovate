@@ -5,8 +5,8 @@ set -e
 # Usage: ./tools/check-undesirable-code.sh [base-branch]
 # Default base branch: main
 
-BASE_BRANCH="${1:-main}"
-echo "Comparing against base branch: $BASE_BRANCH"
+BASE_REF="${1:-main}"
+echo "Comparing against base: $BASE_REF"
 
 # Ensure we're in a git repository
 if ! git rev-parse --git-dir > /dev/null 2>&1; then
@@ -14,14 +14,22 @@ if ! git rev-parse --git-dir > /dev/null 2>&1; then
     exit 1
 fi
 
-# Check if base branch exists
-if ! git rev-parse --verify "$BASE_BRANCH" > /dev/null 2>&1; then
-    echo "❌ Error: Base branch '$BASE_BRANCH' does not exist"
+# Check if it's a valid git reference (branch name or SHA)
+if ! git rev-parse --verify "$BASE_REF" > /dev/null 2>&1; then
+    echo "❌ Error: '$BASE_REF' is not a valid git reference"
     exit 1
 fi
 
-BASE_BRANCH_REF=$(git merge-base "$BASE_BRANCH" HEAD)
-echo "Base branch ref: $BASE_BRANCH_REF"
+# If it looks like a branch name, find the merge base
+# If it's already a SHA, use it directly
+if git show-ref --verify --quiet "refs/heads/$BASE_REF" || git show-ref --verify --quiet "refs/remotes/$BASE_REF"; then
+    BASE_BRANCH_REF=$(git merge-base "$BASE_REF" HEAD)
+    echo "Using merge base with $BASE_REF: $BASE_BRANCH_REF"
+else
+    # Assume it's a SHA or other ref
+    BASE_BRANCH_REF="$BASE_REF"
+    echo "Using ref directly: $BASE_BRANCH_REF"
+fi
 echo ""
 
 # ============================================================================
