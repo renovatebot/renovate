@@ -13,6 +13,7 @@
     "build:docs": "tsx tools/generate-docs.ts",
     "clean": "rimraf dist tmp",
     "clean-cache": "node tools/clean-cache.mjs",
+    "check-undesirable": "bash tools/check-undesirable-code.sh",
     "compile:ts": "tsc -p tsconfig.app.json",
     "config-validator": "tsx lib/config-validator.ts",
     "create-json-schema": "tsx tools/generate-schema.ts && prettier --write --cache 'renovate-schema.json' renovate-global-schema.json",
