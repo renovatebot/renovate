@@ -1,8 +1,51 @@
 import { DateTime } from 'luxon';
-import { logger } from '../../../logger/index.ts';
+import { logger } from '../../../logger.ts';
+import { regEx } from '../../../util/regex.ts';
 import type { DistroInfo, DistroInfoRecordWithVersion } from '../distro.ts';
 
 const refreshInterval = { days: 1 };
+
+const datedRegex = regEx(
+  /^(?<codename>\w+)-(?<date>\d{8})(?<suffix>\.\d{1,2})?$/,
+);
+
+export function isDatedCodeName(
+  input: string,
+  distroInfo: DistroInfo,
+): boolean {
+  const match = datedRegex.exec(input);
+  if (!match?.groups) {
+    return false;
+  }
+  const codename = match.groups.codename;
+  return distroInfo.isCodename(codename);
+}
+
+export function getDatedContainerImageCodename(version: string): null | string {
+  const groups = datedRegex.exec(version);
+  if (!groups?.groups) {
+    return null;
+  }
+  return groups.groups.codename;
+}
+
+export function getDatedContainerImageVersion(version: string): null | number {
+  const groups = datedRegex.exec(version);
+  if (!groups?.groups) {
+    return null;
+  }
+
+  return parseInt(groups.groups.date);
+}
+
+export function getDatedContainerImageSuffix(version: string): null | string {
+  const groups = datedRegex.exec(version);
+  if (!groups?.groups?.suffix) {
+    return null;
+  }
+
+  return groups.groups.suffix;
+}
 
 export class RollingReleasesData {
   private ltsToVer = new Map<string, DistroInfoRecordWithVersion>();
