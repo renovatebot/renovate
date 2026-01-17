@@ -24,17 +24,13 @@ The package name encodes the vendor and image type:
 Fetch Oracle GraalVM JDK for the current system:
 
 ```json
-{
-  "packageName": "oracle-graalvm-jdk?system=true"
-}
+{ "packageNames": ["oracle-graalvm-jdk?system=true"] }
 ```
 
 Fetch Oracle GraalVM JRE for macOS on Apple Silicon:
 
 ```json
-{
-  "packageName": "oracle-graalvm-jre?os=macosx&architecture=aarch64"
-}
+{ "packageNames": ["oracle-graalvm-jre?os=macosx&architecture=aarch64"] }
 ```
 
 ## Supported Platforms
