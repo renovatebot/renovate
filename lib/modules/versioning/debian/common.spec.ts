@@ -1,5 +1,5 @@
 import dataFiles from '../../../data-files.generated.ts';
-import { logger } from '../../../logger.ts';
+import { logger } from '../../../logger/index.ts';
 import { DistroInfo } from '../distro.ts';
 import {
   RollingReleasesData,

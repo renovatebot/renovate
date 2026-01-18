@@ -289,6 +289,7 @@ describe('modules/versioning/debian/index', () => {
     ${'bookworm-20230816'}   | ${'bookworm-20230817'}   | ${false}
     ${'bullseye-20220101'}   | ${'bullseye-20220101'}   | ${true}
     ${'bookworm-20230816.1'} | ${'bookworm-20230816.2'} | ${false}
+    ${'bookworm-20230816'}   | ${'bookworm-20230816.1'} | ${false}
   `('equals($a, $b) === $expected', ({ a, b, expected }) => {
     expect(debian.equals(a, b)).toBe(expected);
   });
@@ -322,6 +323,7 @@ describe('modules/versioning/debian/index', () => {
     ${'bookworm-20230817'}   | ${'bookworm-20230816'}   | ${true}
     ${'bookworm-20230816.1'} | ${'bookworm-20230816'}   | ${true}
     ${'bookworm-20230816'}   | ${'bookworm-20230816.1'} | ${false}
+    ${'buster-2022010'}      | ${'buster-2022010'}      | ${true}
     ${'1.1'}                 | ${'1.2'}                 | ${false}
     ${'1.2'}                 | ${'1.1'}                 | ${true}
     ${'11.1'}                | ${'bullseye-20220101'}   | ${false}
@@ -329,6 +331,8 @@ describe('modules/versioning/debian/index', () => {
     ${'3.1'}                 | ${'woody-20010101'}      | ${true}
     ${'woody-20010101'}      | ${'3.1'}                 | ${false}
     ${'bookworm-20230816'}   | ${'bookworm-20230816'}   | ${false}
+    ${'11'}                  | ${'bullseye-20220101'}   | ${false}
+    ${'bullseye-20220101'}   | ${'11'}                  | ${true}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(debian.isGreaterThan(a, b)).toBe(expected);
   });

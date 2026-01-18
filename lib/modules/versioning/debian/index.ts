@@ -1,4 +1,4 @@
-import type { RangeStrategy } from '../../../types.ts';
+import type { RangeStrategy } from '../../../types/index.ts';
 import { DistroInfo } from '../distro.ts';
 import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
@@ -42,18 +42,15 @@ export class DebianVersioningApi extends GenericVersioningApi {
 
   override isStable(version: string): boolean {
     if (isDatedCodeName(version, this._distroInfo)) {
-      const codename = getDatedContainerImageCodename(version);
-      if (codename) {
-        return (
-          this._distroInfo.isReleased(
-            this._distroInfo.getVersionByCodename(codename),
-          ) &&
-          !this._distroInfo.isEolLts(
-            this._distroInfo.getVersionByCodename(codename),
-          )
-        );
-      }
-      return false;
+      const codename = getDatedContainerImageCodename(version)!;
+      return (
+        this._distroInfo.isReleased(
+          this._distroInfo.getVersionByCodename(codename),
+        ) &&
+        !this._distroInfo.isEolLts(
+          this._distroInfo.getVersionByCodename(codename),
+        )
+      );
     }
     let ver: string;
     ver = this._rollingReleases.getVersionByLts(version);
@@ -88,10 +85,8 @@ export class DebianVersioningApi extends GenericVersioningApi {
 
   private _getBaseVersion(version: string): string {
     if (isDatedCodeName(version, this._distroInfo)) {
-      const codename = getDatedContainerImageCodename(version);
-      return codename
-        ? this._distroInfo.getVersionByCodename(codename)
-        : version;
+      const codename = getDatedContainerImageCodename(version)!;
+      return this._distroInfo.getVersionByCodename(codename);
     }
     return version;
   }
@@ -166,7 +161,7 @@ export class DebianVersioningApi extends GenericVersioningApi {
     const ver = this._getBaseVersion(version);
     if (this.isValid(ver)) {
       const parsed = this._parse(ver);
-      return parsed?.release[0] ?? null;
+      return parsed!.release[0];
     }
     return null;
   }
@@ -192,12 +187,8 @@ export class DebianVersioningApi extends GenericVersioningApi {
   protected override _parse(version: string): GenericVersion | null {
     let ver: string;
     if (isDatedCodeName(version, this._distroInfo)) {
-      const codename = getDatedContainerImageCodename(version);
-      if (codename) {
-        ver = this._distroInfo.getVersionByCodename(codename);
-      } else {
-        return null;
-      }
+      const codename = getDatedContainerImageCodename(version)!;
+      ver = this._distroInfo.getVersionByCodename(codename);
     } else {
       ver = this._rollingReleases.getVersionByLts(version);
       ver = this._distroInfo.getVersionByCodename(ver);
