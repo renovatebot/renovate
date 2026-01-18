@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { logger } from '../../../logger.ts';
+import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { DistroInfo, DistroInfoRecordWithVersion } from '../distro.ts';
 
