@@ -65,6 +65,10 @@ Pull Requests can only be merged once all status checks are green, which means `
 
 #### Code Quality Checks
 
+> [!IMPORTANT]
+>
+> This check doesn't run on **Windows** locally due to shell script compatibility.
+
 Before submitting your PR, you can locally verify that your changes comply with our code quality standards:
 
 ```bash
