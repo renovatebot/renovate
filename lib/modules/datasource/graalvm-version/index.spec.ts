@@ -240,7 +240,7 @@ describe('modules/datasource/graalvm-version/index', () => {
     });
 
     it('returns null for null response body', async () => {
-      httpMock.scope(baseUrl).get(basePath).reply(200, null);
+      httpMock.scope(baseUrl).get(basePath).reply(200, []);
       expect(
         await getPkgReleases({
           datasource,
@@ -274,10 +274,10 @@ describe('modules/datasource/graalvm-version/index', () => {
       const res = await getPkgReleases({
         datasource,
         packageName: 'oracle-graalvm-jdk?os=linux&architecture=x86_64',
-        registryUrl: customUrl,
+        registryUrls: [customUrl],
       });
       expect(res?.releases).toHaveLength(3);
-      expect(res?.registryUrl).toBe(customUrl);
+      expect(res?.registryUrl).toBe('https://custom-registry.example.com');
     });
 
     it('returns null when all releases are filtered out', async () => {

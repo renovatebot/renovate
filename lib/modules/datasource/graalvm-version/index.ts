@@ -15,7 +15,7 @@ export class GraalvmVersionDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = true;
 
   override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
