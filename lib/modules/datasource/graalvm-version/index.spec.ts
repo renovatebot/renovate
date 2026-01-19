@@ -239,8 +239,8 @@ describe('modules/datasource/graalvm-version/index', () => {
       expect(versions).toContain('17.0.13');
     });
 
-    it('returns null for null response body', async () => {
-      httpMock.scope(baseUrl).get(basePath).reply(200, []);
+    it('returns null for undefined response body', async () => {
+      httpMock.scope(baseUrl).get(basePath).reply(200, undefined);
       expect(
         await getPkgReleases({
           datasource,
