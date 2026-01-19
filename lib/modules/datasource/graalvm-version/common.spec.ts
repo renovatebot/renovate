@@ -94,6 +94,31 @@ describe('modules/datasource/graalvm-version/common', () => {
           expect.stringContaining('Unknown system OS'),
         );
       });
+
+      it('handles all supported architectures with matching OS', () => {
+        // Test each supported architecture case
+        const architectures = [
+          { arch: 'ia32', expected: 'i686' },
+          { arch: 'x64', expected: 'x86_64' },
+          { arch: 'arm64', expected: 'aarch64' },
+          { arch: 'arm', expected: 'arm32' },
+        ];
+        const platforms = [
+          { platform: 'linux', expected: 'linux' },
+          { platform: 'darwin', expected: 'macosx' },
+          { platform: 'win32', expected: 'windows' },
+        ];
+
+        architectures.forEach(({ arch, expected: expectedArch }) => {
+          platforms.forEach(({ platform, expected: expectedOs }) => {
+            archMock.mockReturnValue(arch);
+            osMock.mockReturnValue(platform);
+            const result = parsePackage(input);
+            expect(result.architecture).toBe(expectedArch);
+            expect(result.os).toBe(expectedOs);
+          });
+        });
+      });
     });
   });
 });
