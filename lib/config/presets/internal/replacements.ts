@@ -3,7 +3,7 @@ import type { Preset } from '../types';
 import type { PresetTemplate, Replacement } from './auto-generate-replacements';
 import { addPresets } from './auto-generate-replacements';
 
-const { $schema, ...replacementPresets } = replacementGroupsJson;
+const { $schema: _, ...replacementPresets } = replacementGroupsJson;
 
 /* eslint sort-keys: ["error", "asc", {"caseSensitive": false, "natural": true}] */
 export const presets: Record<string, Preset> = replacementPresets;

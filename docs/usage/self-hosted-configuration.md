@@ -29,6 +29,8 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowScripts
 
+## allowShellExecutorForPostUpgradeCommands
+
 ## allowedCommands
 
 A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
@@ -471,9 +473,10 @@ Other valid cache namespaces are as follows:
 - `datasource-terraform-provider`
 - `datasource-terraform`
 - `datasource-typst:cache-provider`
-- `datasource-typst:releases`
+- `datasource-typst:registry-releases`
 - `datasource-unity3d`
 - `datasource-unity3d-packages`
+- `github-branches-datasource-v1`
 - `github-releases-datasource-v2`
 - `github-tags-datasource-v2`
 - `merge-confidence`

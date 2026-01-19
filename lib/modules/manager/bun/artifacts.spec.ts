@@ -126,7 +126,7 @@ describe('modules/manager/bun/artifacts', () => {
           cmd: '',
           stdout: '',
           stderr: '',
-          options: { encoding: 'utf8' },
+          options: {},
         });
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lockb'] },
@@ -144,7 +144,7 @@ describe('modules/manager/bun/artifacts', () => {
           cmd: '',
           stdout: '',
           stderr: '',
-          options: { encoding: 'utf8' },
+          options: {},
         });
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lockb'] },
@@ -244,7 +244,7 @@ describe('modules/manager/bun/artifacts', () => {
           cmd: '',
           stdout: '',
           stderr: '',
-          options: { encoding: 'utf8' },
+          options: {},
         });
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lock'] },
@@ -262,7 +262,7 @@ describe('modules/manager/bun/artifacts', () => {
           cmd: '',
           stdout: '',
           stderr: '',
-          options: { encoding: 'utf8' },
+          options: {},
         });
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lock'] },

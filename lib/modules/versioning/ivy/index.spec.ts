@@ -36,8 +36,8 @@ describe('modules/versioning/ivy/index', () => {
     ${''}
     ${'.+'}
     ${'[0,1),(1,)'}
-  `('parseDynamicRevision("$input") === null', ({ input, type, value }) => {
-    expect(parseDynamicRevision(value)).toBeNull();
+  `('parseDynamicRevision("$input") === null', ({ input }) => {
+    expect(parseDynamicRevision(input)).toBeNull();
   });
 
   it.each`

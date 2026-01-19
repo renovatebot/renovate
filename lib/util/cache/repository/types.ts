@@ -161,7 +161,7 @@ export interface RepoCacheData {
     gitlab?: {
       pullRequestsCache?: unknown;
     };
-    bitbucketServer?: {
+    'bitbucket-server'?: {
       pullRequestsCache?: unknown;
     };
   };

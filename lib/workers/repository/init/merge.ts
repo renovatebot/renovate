@@ -246,14 +246,12 @@ export async function mergeRenovateConfig(
     npmApi.setNpmrc(decryptedConfig.npmrc);
   }
   // Decrypt after resolving in case the preset contains npm authentication instead
-  let resolvedConfig = await decryptConfig(
-    await presets.resolveConfigPresets(
-      decryptedConfig,
-      config,
-      config.ignorePresets,
-    ),
-    repository,
+  const { config: configToDecrypt } = await presets.resolveConfigPresets(
+    decryptedConfig,
+    config,
+    config.ignorePresets,
   );
+  let resolvedConfig = await decryptConfig(configToDecrypt, repository);
   logger.trace({ config: resolvedConfig }, 'resolved config');
   const migrationResult = migrateConfig(resolvedConfig);
   if (migrationResult.isMigrated) {
@@ -300,7 +298,10 @@ export async function mergeRenovateConfig(
     delete resolvedConfig.hostRules;
   }
   returnConfig = mergeChildConfig(returnConfig, resolvedConfig);
-  returnConfig = await presets.resolveConfigPresets(returnConfig, config);
+  ({ config: returnConfig } = await presets.resolveConfigPresets(
+    returnConfig,
+    config,
+  ));
   returnConfig.renovateJsonPresent = true;
   // istanbul ignore if
   if (returnConfig.ignorePaths?.length) {

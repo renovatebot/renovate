@@ -126,6 +126,7 @@ describe('modules/datasource/metadata', () => {
       addMetaData(dep, datasource, packageName);
       expect(dep).toMatchObject({
         sourceUrl: expectedSourceUrl,
+        sourceDirectory: expectedSourceDirectory,
       });
     },
   );
@@ -137,7 +138,7 @@ describe('modules/datasource/metadata', () => {
     ${'git@somehost.com:group/sub-group/repo.git'} | ${'https://somehost.com/group/sub-group/repo'}
   `(
     'Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts: $sourceUrl -> $expectedSourceUrl',
-    ({ sourceUrl, expectedSourceUrl, expectedSourceDirectory }) => {
+    ({ sourceUrl, expectedSourceUrl }) => {
       const dep: ReleaseResult = { sourceUrl, releases: [] };
       const datasource = GitTagsDatasource.id;
       const packageName = 'some-dep';

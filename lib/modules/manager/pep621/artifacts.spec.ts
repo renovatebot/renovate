@@ -104,15 +104,11 @@ requires-python = "<3.9"
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'docker pull ghcr.io/containerbase/sidecar',
-          options: {
-            encoding: 'utf-8',
-          },
+          options: {},
         },
         {
           cmd: 'docker ps --filter name=renovate_sidecar -aq',
-          options: {
-            encoding: 'utf-8',
-          },
+          options: {},
         },
         {
           cmd:
@@ -131,7 +127,6 @@ requires-python = "<3.9"
             '"',
           options: {
             cwd: '/tmp/github/some/repo',
-            encoding: 'utf-8',
             env: {
               CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
             },

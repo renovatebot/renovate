@@ -226,11 +226,11 @@ function sortVersions(a: string, b: string): number {
   return isGreaterThan(a, b) ? 1 : -1;
 }
 
-function isStable(version: string): boolean {
+function isStable(_version: string): boolean {
   return true;
 }
 
-function isCompatible(version: string): boolean {
+function isCompatible(_version: string): boolean {
   return true;
 }
 

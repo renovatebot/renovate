@@ -43,15 +43,12 @@ export class CpanDatasource extends Datasource {
     try {
       const body = {
         query: {
-          filtered: {
-            query: { match_all: {} },
-            filter: {
-              and: [
-                { term: { 'module.name': packageName } },
-                { term: { 'module.authorized': true } },
-                { exists: { field: 'module.associated_pod' } },
-              ],
-            },
+          bool: {
+            filter: [
+              { term: { 'module.name': packageName } },
+              { term: { 'module.authorized': true } },
+              { exists: { field: 'module.associated_pod' } },
+            ],
           },
         },
         _source: [
