@@ -280,6 +280,24 @@ describe('modules/datasource/graalvm-version/index', () => {
       expect(res?.registryUrl).toBe('https://custom-registry.example.com');
     });
 
+    it('supports different custom registry URL for JRE releases', async () => {
+      const customUrl = 'https://mirror.company.org/graalvm/';
+      httpMock
+        .scope(customUrl)
+        .get('/jvm/ga/linux/x86_64.json')
+        .reply(200, oracleGraalvmJreReleases);
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'oracle-graalvm-jre?os=linux&architecture=x86_64',
+        registryUrls: [customUrl],
+      });
+      expect(res?.releases).toHaveLength(2);
+      expect(res?.registryUrl).toBe('https://mirror.company.org/graalvm');
+      const versions = res?.releases.map((r) => r.version);
+      expect(versions).toContain('21.0.5');
+      expect(versions).toContain('17.0.13');
+    });
+
     it('returns null when all releases are filtered out', async () => {
       // Mock data has vendor='graalvm' (not matching oracle-graalvm)
       const nonMatchingReleases = [
