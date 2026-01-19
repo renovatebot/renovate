@@ -202,17 +202,23 @@ describe('modules/versioning/rust-release-channel/index', () => {
   );
 
   test.each`
-    version                 | current                 | expected
-    ${'nightly-2025-11-24'} | ${'nightly-2025-11-23'} | ${true}
-    ${'nightly-2025-11-25'} | ${'nightly-2025-11-24'} | ${true}
-    ${'1.83.0'}             | ${'1.82.0'}             | ${true}
-    ${'1.83.0-beta.5'}      | ${'1.82.0'}             | ${true}
-    ${'1.83.0'}             | ${'1.82.0-beta.1'}      | ${true}
-    ${'nightly-2025-11-24'} | ${'1.82.0'}             | ${false}
-    ${'1.82.0'}             | ${'nightly-2025-11-24'} | ${false}
-    ${'1.82.0'}             | ${undefined}            | ${true}
-    ${'invalid'}            | ${'1.82.0'}             | ${false}
-    ${'1.82.0'}             | ${'invalid'}            | ${false}
+    version                                          | current                                          | expected
+    ${'nightly-2025-11-24'}                          | ${'nightly-2025-11-23'}                          | ${true}
+    ${'nightly-2025-11-25'}                          | ${'nightly-2025-11-24'}                          | ${true}
+    ${'1.83.0'}                                      | ${'1.82.0'}                                      | ${true}
+    ${'1.83.0-beta.5'}                               | ${'1.82.0'}                                      | ${true}
+    ${'1.83.0'}                                      | ${'1.82.0-beta.1'}                               | ${true}
+    ${'nightly-2025-11-24'}                          | ${'1.82.0'}                                      | ${false}
+    ${'1.82.0'}                                      | ${'nightly-2025-11-24'}                          | ${false}
+    ${'1.82.0'}                                      | ${undefined}                                     | ${true}
+    ${'invalid'}                                     | ${'1.82.0'}                                      | ${false}
+    ${'1.82.0'}                                      | ${'invalid'}                                     | ${false}
+    ${'1.83.0-x86_64-unknown-linux-gnu'}             | ${'1.82.0-x86_64-unknown-linux-gnu'}             | ${true}
+    ${'1.83.0-x86_64-unknown-linux-gnu'}             | ${'1.82.0-aarch64-apple-darwin'}                 | ${false}
+    ${'1.83.0-x86_64-unknown-linux-gnu'}             | ${'1.82.0'}                                      | ${false}
+    ${'1.83.0'}                                      | ${'1.82.0-x86_64-unknown-linux-gnu'}             | ${false}
+    ${'nightly-2025-11-24-x86_64-unknown-linux-gnu'} | ${'nightly-2025-11-23-x86_64-unknown-linux-gnu'} | ${true}
+    ${'nightly-2025-11-24-x86_64-unknown-linux-gnu'} | ${'nightly-2025-11-23-aarch64-apple-darwin'}     | ${false}
   `(
     'isCompatible("$version", "$current") === $expected',
     ({ version, current, expected }) => {

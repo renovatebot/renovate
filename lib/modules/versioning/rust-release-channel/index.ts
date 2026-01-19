@@ -87,6 +87,11 @@ class RustReleaseChannelVersioning implements VersioningApi {
       return false;
     }
 
+    // Host triples must match (both undefined, or both the same value)
+    if (parsedVersion.host !== parsedCurrent.host) {
+      return false;
+    }
+
     const channelVersion = parsedVersion.channel;
     const channelCurrent = parsedCurrent.channel;
 
