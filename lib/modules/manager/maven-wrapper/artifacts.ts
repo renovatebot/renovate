@@ -61,30 +61,58 @@ function getDistributionType(content: string): string | null {
   return match ? match[1].trim() : null;
 }
 
+function getChecksumValue(content: string, key: string): string | null {
+  const match = regEx(new RegExp(`^${key}\\s*=\\s*(.+)$`, 'm')).exec(content);
+  return match ? match[1].trim() : null;
+}
+
+function addChecksumAfterLine(
+  content: string,
+  lineRegex: RegExp,
+  key: string,
+  value: string,
+): string {
+  return content.replace(
+    regEx(lineRegex),
+    (lineMatch) => `${lineMatch}\n${key}=${value}`,
+  );
+}
+
 async function updateChecksums(
   content: string,
   updatedDeps: PackageDependency[],
   addDistributionChecksum: boolean,
   addWrapperChecksum: boolean,
+  originalContent: string,
 ): Promise<string> {
   let updatedContent = content;
 
   // Update or add distribution checksum
   if (addDistributionChecksum) {
+    const existingChecksum = getChecksumValue(
+      updatedContent,
+      'distributionSha256Sum',
+    );
+    const fallbackChecksum = getChecksumValue(
+      originalContent,
+      'distributionSha256Sum',
+    );
     const distUrl = getDistributionUrl(updatedContent);
     if (distUrl) {
       try {
         const checksum = await getChecksumFromUrl(distUrl);
-        if (updatedContent.includes('distributionSha256Sum=')) {
+        if (existingChecksum) {
           updatedContent = updatedContent.replace(
             regEx(/distributionSha256Sum=.*/),
             `distributionSha256Sum=${checksum}`,
           );
         } else {
           // Add checksum after distributionUrl
-          updatedContent = updatedContent.replace(
-            regEx(/^(distributionUrl\s*=\s*.+)$/m),
-            `$1\ndistributionSha256Sum=${checksum}`,
+          updatedContent = addChecksumAfterLine(
+            updatedContent,
+            /^(distributionUrl\s*=\s*.+)$/m,
+            'distributionSha256Sum',
+            checksum,
           );
         }
       } catch (err) {
@@ -92,12 +120,28 @@ async function updateChecksums(
           { err, url: distUrl },
           'Failed to fetch distribution checksum',
         );
+        if (!existingChecksum && fallbackChecksum) {
+          updatedContent = addChecksumAfterLine(
+            updatedContent,
+            /^(distributionUrl\s*=\s*.+)$/m,
+            'distributionSha256Sum',
+            fallbackChecksum,
+          );
+        }
       }
     }
   }
 
   // Update or add wrapper checksum
   if (addWrapperChecksum) {
+    const existingChecksum = getChecksumValue(
+      updatedContent,
+      'wrapperSha256Sum',
+    );
+    const fallbackChecksum = getChecksumValue(
+      originalContent,
+      'wrapperSha256Sum',
+    );
     let wrapperUrl = getWrapperUrl(updatedContent);
 
     // If no wrapperUrl, try to construct from wrapperVersion
@@ -115,28 +159,33 @@ async function updateChecksums(
     if (wrapperUrl) {
       try {
         const checksum = await getChecksumFromUrl(wrapperUrl);
-        if (updatedContent.includes('wrapperSha256Sum=')) {
+        if (existingChecksum) {
           updatedContent = updatedContent.replace(
             regEx(/wrapperSha256Sum=.*/),
             `wrapperSha256Sum=${checksum}`,
           );
         } else {
           // Add checksum after wrapperUrl or wrapperVersion
-          const wrapperLineMatch = regEx(
+          updatedContent = addChecksumAfterLine(
+            updatedContent,
             /^(wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m,
-          ).exec(updatedContent);
-          if (wrapperLineMatch) {
-            updatedContent = updatedContent.replace(
-              wrapperLineMatch[0],
-              `${wrapperLineMatch[0]}\nwrapperSha256Sum=${checksum}`,
-            );
-          }
+            'wrapperSha256Sum',
+            checksum,
+          );
         }
       } catch (err) {
         logger.warn(
           { err, url: wrapperUrl },
           'Failed to fetch wrapper checksum',
         );
+        if (!existingChecksum && fallbackChecksum) {
+          updatedContent = addChecksumAfterLine(
+            updatedContent,
+            /^(wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m,
+            'wrapperSha256Sum',
+            fallbackChecksum,
+          );
+        }
       }
     }
   }
@@ -209,9 +258,9 @@ export async function updateArtifacts({
       }
     }
 
-    // Delete old maven-wrapper.jar if checksums exist
+    // Delete old maven-wrapper.jar if checksums exist and wrapper:wrapper will run
     // This prevents checksum validation failure when wrapper:wrapper runs
-    if (hadWrapperChecksum || hadDistributionChecksum) {
+    if (hasWrapperUpdate && (hadWrapperChecksum || hadDistributionChecksum)) {
       const jarPath = packageFileName.replace(
         'maven-wrapper.properties',
         'maven-wrapper.jar',
@@ -252,6 +301,7 @@ export async function updateArtifacts({
           updatedDeps,
           hadDistributionChecksum,
           hadWrapperChecksum,
+          newPackageFileContent,
         );
         await writeLocalFile(packageFileName, contentWithChecksums);
       }

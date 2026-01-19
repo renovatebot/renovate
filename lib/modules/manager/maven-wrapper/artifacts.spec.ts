@@ -501,6 +501,28 @@ wrapperSha256Sum=oldwrapperhash456`;
     const propertiesWithDistributionChecksumOnly = `distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
 distributionSha256Sum=oldhash123`;
 
+    it('should not delete wrapper jar when only maven distribution checksum is updated', async () => {
+      httpMock
+        .scope('https://repo.maven.apache.org')
+        .get(
+          '/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip',
+        )
+        .reply(200, Buffer.from('fake-maven-distribution-content'));
+      mockMavenFileChangedInGit();
+      fs.readLocalFile.mockResolvedValueOnce(
+        propertiesWithDistributionChecksumOnly,
+      );
+
+      await updateArtifacts({
+        packageFileName: '.mvn/wrapper/maven-wrapper.properties',
+        newPackageFileContent: propertiesWithDistributionChecksumOnly,
+        updatedDeps: [{ depName: 'maven' }],
+        config: { currentValue: '3.9.8', newValue: '3.9.9' },
+      });
+
+      expect(fs.deleteLocalFile).not.toHaveBeenCalled();
+    });
+
     it('should update distribution checksum when maven version changes', async () => {
       httpMock
         .scope('https://repo.maven.apache.org')
@@ -583,6 +605,31 @@ distributionSha256Sum=oldhash123`;
       // writeLocalFile called twice: initial write, then checksum update (even if fetch fails, it still writes)
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       // On fetch failure, checksum is not updated (original value preserved)
+      const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
+      expect(finalWrittenContent).toContain('distributionSha256Sum=oldhash123');
+    });
+
+    it('should restore distribution checksum when fetch fails after stripping', async () => {
+      const propertiesWithoutDistChecksum = `distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip`;
+
+      httpMock
+        .scope('https://repo.maven.apache.org')
+        .get(
+          '/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip',
+        )
+        .replyWithError('Network error');
+      mockMavenFileChangedInGit();
+      mockExecAll({ stdout: '', stderr: '' });
+      fs.readLocalFile.mockResolvedValueOnce(propertiesWithoutDistChecksum);
+
+      await updateArtifacts({
+        packageFileName: '.mvn/wrapper/maven-wrapper.properties',
+        newPackageFileContent: propertiesWithDistributionChecksumOnly,
+        updatedDeps: [{ depName: 'maven-wrapper', newValue: '3.3.2' }],
+        config: { currentValue: '3.3.1', newValue: '3.3.2' },
+      });
+
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
       expect(finalWrittenContent).toContain('distributionSha256Sum=oldhash123');
     });
@@ -721,6 +768,35 @@ wrapperSha256Sum=oldwrapperhash456`;
       mockMavenFileChangedInGit();
       mockExecAll({ stdout: '', stderr: '' });
       fs.readLocalFile.mockResolvedValueOnce(propertiesWithWrapperChecksumOnly);
+
+      await updateArtifacts({
+        packageFileName: '.mvn/wrapper/maven-wrapper.properties',
+        newPackageFileContent: propertiesWithWrapperChecksumOnly,
+        updatedDeps: [{ depName: 'maven-wrapper', newValue: '3.3.2' }],
+        config: { currentValue: '3.3.1', newValue: '3.3.2' },
+      });
+
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
+      const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
+      expect(finalWrittenContent).toContain(
+        'wrapperSha256Sum=oldwrapperhash456',
+      );
+    });
+
+    it('should restore wrapper checksum when fetch fails after stripping', async () => {
+      const propertiesWithoutWrapperChecksum = `wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar`;
+      const propertiesWithWrapperChecksumOnly = `wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar
+wrapperSha256Sum=oldwrapperhash456`;
+
+      httpMock
+        .scope('https://repo.maven.apache.org')
+        .get(
+          '/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar',
+        )
+        .replyWithError('Network error');
+      mockMavenFileChangedInGit();
+      mockExecAll({ stdout: '', stderr: '' });
+      fs.readLocalFile.mockResolvedValueOnce(propertiesWithoutWrapperChecksum);
 
       await updateArtifacts({
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
