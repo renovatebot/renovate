@@ -338,8 +338,8 @@ describe('workers/repository/update/pr/body/index', () => {
         '\n\n\n\nWarnings were logged while processing this repo. ' +
         'Please check the Dependency Dashboard for more information\n\n\n\n---';
 
-      platform.massageMarkdown.mockImplementation((x) => massagedMarkDown);
-      template.compile.mockImplementation((x) => compiledContent);
+      platform.massageMarkdown.mockImplementation(() => massagedMarkDown);
+      template.compile.mockImplementation(() => compiledContent);
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {

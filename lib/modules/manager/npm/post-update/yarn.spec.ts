@@ -741,7 +741,15 @@ describe('modules/manager/npm/post-update/yarn', () => {
     const options = { cwd: 'some-dir' };
     expect(execSnapshots).toMatchObject([
       {
-        cmd: `sed -i 's/ steps,/ steps.slice(0,1),/' some-dir/.yarn/cli.js || true`,
+        cmd: {
+          command: [
+            'sed',
+            '-i',
+            `s/ steps,/ steps.slice(0,1),/`,
+            'some-dir/.yarn/cli.js',
+          ],
+          ignoreFailure: true,
+        },
         options,
       },
       {

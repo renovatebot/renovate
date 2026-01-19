@@ -9,7 +9,8 @@ import { keyValueExtractionRegex } from './util';
 export function extractTFLintPlugin(
   startingLine: number,
   lines: string[],
-  pluginName: string,
+  // TODO: remove unused parameter
+  _pluginName: string,
 ): ExtractionResult {
   let lineNumber = startingLine;
   const deps: PackageDependency[] = [];

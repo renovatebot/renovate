@@ -12,6 +12,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { getEnv } from '../env';
 import { hash } from '../hash';
+import { acquireLock } from '../mutex';
 import { type AsyncResult, Result } from '../result';
 import { Toml } from '../schema-utils';
 import { ObsoleteCacheHitLogger } from '../stats';
@@ -179,14 +180,6 @@ export abstract class HttpBase<
           )
         : null;
 
-    const cachedResponse = await cacheProvider?.bypassServer<unknown>(
-      method,
-      url,
-    );
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-
     let resPromise: Promise<HttpResponse<unknown>> | null = null;
 
     // Cache GET requests unless memCache=false
@@ -206,9 +199,28 @@ export abstract class HttpBase<
       }
 
       const startTime = Date.now();
-      const httpTask: GotTask = () => {
-        const queueMs = Date.now() - startTime;
-        return fetch(url, options, { queueMs });
+      const httpTask: GotTask = async () => {
+        let releaseLock: undefined | (() => void);
+        if (isReadMethod) {
+          releaseLock = await acquireLock(
+            `${options.method} ${url}`,
+            'http-mutex',
+          );
+        }
+        try {
+          const cachedResponse = await cacheProvider?.bypassServer<unknown>(
+            options.method,
+            url,
+          );
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+
+          const queueMs = Date.now() - startTime;
+          return fetch(url, options, { queueMs });
+        } finally {
+          releaseLock?.();
+        }
       };
 
       const throttle = getThrottle(url);

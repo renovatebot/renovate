@@ -154,7 +154,7 @@ function getLabelList(): Promise<Label[]> {
         logger.debug(`Retrieved ${labels.length} org labels`);
         return labels;
       })
-      .catch((err) => {
+      .catch(() => {
         // Will fail if owner of repo is not org or Gitea version < 1.12
         logger.debug(`Unable to fetch organization labels`);
         return [] as Label[];
