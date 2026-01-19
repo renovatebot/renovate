@@ -348,7 +348,7 @@ minimumReleaseAgeExclude:
             type: 'addition',
             path: 'pnpm-workspace.yaml',
             contents:
-              'minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  - pnpm@8.15.6',
+              'minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  # Renovate security update: pnpm@8.15.6\n  - pnpm@8.15.6\n',
           },
         },
       ]);
@@ -381,7 +381,7 @@ minimumReleaseAgeExclude:
             type: 'addition',
             path: 'pnpm-workspace.yaml',
             contents:
-              'minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  - pnpm@8.15.6\n  - otherdep@5.6.7',
+              'minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  - otherdep@5.6.7\n  # Renovate security update: pnpm@8.15.6\n  - pnpm@8.15.6\n',
           },
         },
       ]);
@@ -424,7 +424,49 @@ minimumReleaseAgeExclude:
             type: 'addition',
             path: 'pnpm-workspace.yaml',
             contents:
-              "minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  - pnpm@5.6.7\n  - '@next/env@16.0.7 || 16.0.9 || 16.0.10'",
+              "minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  # Renovate security update: pnpm@8.15.6\n  - pnpm@5.6.7 || 8.15.6\n  # Renovate security update: @next/env@16.0.10\n  - '@next/env@16.0.7 || 16.0.9 || 16.0.10'\n",
+          },
+        },
+      ]);
+    });
+
+    it('handles multiple security upgrades correctly (bug fix test)', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 10080`,
+      ); // for pnpm-workspace.yaml
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'lodash',
+            currentValue: '4.17.20',
+            newVersion: '4.17.21',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+          {
+            ...validDepUpdate,
+            depName: 'axios',
+            currentValue: '0.21.0',
+            newVersion: '0.21.1',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      // Both upgrades should be present - this confirms the oldContent bug fix
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents:
+              'minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  # Renovate security update: lodash@4.17.21\n  - lodash@4.17.21\n  # Renovate security update: axios@0.21.1\n  - axios@0.21.1\n',
           },
         },
       ]);
