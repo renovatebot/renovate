@@ -30,8 +30,6 @@ export class GraalvmVersionDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    registryUrl ??= defaultRegistryUrl;
-
     const pkgConfig = parsePackage(packageName);
 
     logger.trace(
@@ -50,7 +48,7 @@ export class GraalvmVersionDatasource extends Datasource {
     }
 
     const url = joinUrlParts(
-      registryUrl,
+      registryUrl ?? defaultRegistryUrl,
       'jvm',
       pkgConfig.releaseType,
       pkgConfig.os,
@@ -60,7 +58,7 @@ export class GraalvmVersionDatasource extends Datasource {
     const result: ReleaseResult = {
       homepage: 'https://www.oracle.com/java/graalvm/',
       sourceUrl: 'https://github.com/oracle/graal',
-      registryUrl,
+      registryUrl: registryUrl ?? defaultRegistryUrl,
       releases: [],
     };
 
