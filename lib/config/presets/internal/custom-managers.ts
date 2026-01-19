@@ -8,12 +8,8 @@ export const presets: Record<string, Preset> = {
       {
         customType: 'regex',
         managerFilePatterns: [
-          '**/.azuredevops/**/*.yml',
-          '**/.azuredevops/**/*.yaml',
-          'azure*pipeline*.yml',
-          'azure*pipeline*.yaml',
-          'azure*pipelines*.yml',
-          'azure*pipelines*.yaml',
+          '**/.azuredevops/**/*.{yml,yaml}',
+          'azure*pipeline*.{yml,yaml}',
         ],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
@@ -30,7 +26,7 @@ export const presets: Record<string, Preset> = {
         datasourceTemplate: 'npm',
         depNameTemplate: '@biomejs/biome',
         fileFormat: 'json',
-        managerFilePatterns: ['**/biome.json', '**/biome.jsonc'],
+        managerFilePatterns: ['**/biome.{json,jsonc}'],
         matchStrings: ['{"currentValue": $split($."$schema",("/"))[-2]}'],
       },
     ],
@@ -41,10 +37,7 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        managerFilePatterns: [
-          '**/bitbucket-pipelines.yml',
-          '**/bitbucket-pipelines.yaml',
-        ],
+        managerFilePatterns: ['**/bitbucket-pipelines.{yml,yaml}'],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+.*\\s+[A-Za-z0-9_]+?_VERSION[ =:]\\s?["\']?(?<currentValue>.+?)["\']?\\s',
         ],
@@ -89,7 +82,7 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        managerFilePatterns: ['.gitlab-ci.yml', '.gitlab-ci.yaml'],
+        managerFilePatterns: ['.gitlab-ci.{yml,yaml}'],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
         ],
