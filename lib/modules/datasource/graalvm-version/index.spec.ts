@@ -198,6 +198,30 @@ describe('modules/datasource/graalvm-version/index', () => {
       expect(res).toBeNull();
     });
 
+    it('returns null when only OS is missing', async () => {
+      vi.spyOn(process, 'arch', 'get').mockReturnValueOnce('x64');
+      vi.spyOn(process, 'platform', 'get').mockReturnValueOnce(
+        'unsupported' as any,
+      );
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'oracle-graalvm-jdk?system=true',
+      });
+      expect(res).toBeNull();
+    });
+
+    it('returns null when only architecture is missing', async () => {
+      vi.spyOn(process, 'arch', 'get').mockReturnValueOnce(
+        'unsupported' as any,
+      );
+      vi.spyOn(process, 'platform', 'get').mockReturnValueOnce('linux');
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'oracle-graalvm-jdk?system=true',
+      });
+      expect(res).toBeNull();
+    });
+
     it('filters by vendor correctly', async () => {
       httpMock
         .scope(baseUrl)
@@ -223,6 +247,61 @@ describe('modules/datasource/graalvm-version/index', () => {
           packageName: 'oracle-graalvm-jdk?os=linux&architecture=x86_64',
         }),
       ).toBeNull();
+    });
+
+    it('returns null when OS is explicitly missing', async () => {
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'oracle-graalvm-jdk?architecture=x86_64',
+      });
+      expect(res).toBeNull();
+    });
+
+    it('returns null when architecture is explicitly missing', async () => {
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'oracle-graalvm-jdk?os=linux',
+      });
+      expect(res).toBeNull();
+    });
+
+    it('supports custom registry URL', async () => {
+      const customUrl = 'https://custom-registry.example.com/';
+      httpMock
+        .scope(customUrl)
+        .get('/jvm/ga/linux/x86_64.json')
+        .reply(200, oracleGraalvmJdkReleases);
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'oracle-graalvm-jdk?os=linux&architecture=x86_64',
+        registryUrl: customUrl,
+      });
+      expect(res?.releases).toHaveLength(3);
+      expect(res?.registryUrl).toBe(customUrl);
+    });
+
+    it('returns null when all releases are filtered out', async () => {
+      // Mock data has vendor='graalvm' (not matching oracle-graalvm)
+      const nonMatchingReleases = [
+        {
+          checksum: 'sha256:abc',
+          created_at: '2025-03-28T22:04:32.319048',
+          features: [],
+          file_type: 'tar.gz',
+          image_type: 'jdk',
+          java_version: '11.0.22',
+          jvm_impl: 'hotspot',
+          url: 'https://example.com/graalvm.tar.gz',
+          vendor: 'graalvm',
+          version: '11.0.22',
+        },
+      ];
+      httpMock.scope(baseUrl).get(basePath).reply(200, nonMatchingReleases);
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'oracle-graalvm-jdk?os=linux&architecture=x86_64',
+      });
+      expect(res).toBeNull();
     });
   });
 });
