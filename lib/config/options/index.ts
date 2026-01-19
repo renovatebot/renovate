@@ -2602,6 +2602,7 @@ const options: RenovateOptions[] = [
       'gomodUpdateImportPaths',
       'gomodSkipVendor',
       'gomodVendor',
+      'goGenerate',
       'helmUpdateSubChartArchives',
       'kustomizeInflateHelmCharts',
       'npmDedupe',
