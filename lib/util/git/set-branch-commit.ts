@@ -37,9 +37,7 @@ export function setBranchNewCommit(
   branch.pristine = true;
   branch.sha = commitSha;
   if (commitTimestamp) {
-    const isoString = commitTimestamp.toISO();
-    if (isoString) {
-      branch.commitTimestamp = isoString;
-    }
+    const isoString = commitTimestamp.toISO()!;
+    branch.commitTimestamp = isoString;
   }
 }

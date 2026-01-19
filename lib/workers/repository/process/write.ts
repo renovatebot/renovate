@@ -118,10 +118,8 @@ export async function syncBranchState(
     // Update commit timestamp when SHA changes
     const commitDate = await scm.getBranchUpdateDate(branchName);
     if (commitDate) {
-      const isoString = commitDate.toISO();
-      if (isoString) {
-        branchState.commitTimestamp = isoString;
-      }
+      const isoString = commitDate.toISO()!;
+      branchState.commitTimestamp = isoString;
     }
 
     // update cached branchSha
