@@ -26,6 +26,16 @@ describe('modules/datasource/graalvm-version/common', () => {
       });
     });
 
+    it('defaults to oracle-graalvm vendor for unknown package names', () => {
+      expect(parsePackage('graalvm-jdk')).toEqual({
+        vendor: 'oracle-graalvm',
+        imageType: 'jdk',
+        os: null,
+        architecture: null,
+        releaseType: 'ga',
+      });
+    });
+
     it('uses explicit os and architecture', () => {
       expect(
         parsePackage('oracle-graalvm-jdk?os=macosx&architecture=aarch64'),

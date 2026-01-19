@@ -214,5 +214,15 @@ describe('modules/datasource/graalvm-version/index', () => {
       expect(versions).toContain('21.0.5');
       expect(versions).toContain('17.0.13');
     });
+
+    it('returns null for null response body', async () => {
+      httpMock.scope(baseUrl).get(basePath).reply(200, null);
+      expect(
+        await getPkgReleases({
+          datasource,
+          packageName: 'oracle-graalvm-jdk?os=linux&architecture=x86_64',
+        }),
+      ).toBeNull();
+    });
   });
 });

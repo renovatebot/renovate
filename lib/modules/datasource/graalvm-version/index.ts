@@ -88,10 +88,9 @@ export class GraalvmVersionDatasource extends Datasource {
           logger.debug({ url }, 'GraalVM releases not found (404)');
           return null;
         }
-        if (err.response?.statusCode !== 404) {
-          throw new ExternalHostError(err);
-        }
+        throw new ExternalHostError(err);
       }
+      /* v8 ignore next -- should never happen, all http errors are HttpError */
       this.handleGenericErrors(err);
     }
 
