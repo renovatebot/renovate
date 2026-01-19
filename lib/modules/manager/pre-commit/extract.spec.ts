@@ -1,4 +1,5 @@
 import { mockDeep } from 'vitest-mock-extended';
+import { GoDatasource } from '../../datasource/go';
 import { NpmDatasource } from '../../datasource/npm';
 import { PypiDatasource } from '../../datasource/pypi';
 import { extractPackageFile } from '.';
@@ -122,6 +123,13 @@ describe('modules/manager/pre-commit/extract', () => {
             packageName: 'prettier',
           },
           { depName: 'pre-commit/mirrors-prettier', currentValue: 'v3.1.0' },
+          {
+            currentValue: 'v0.10.0',
+            datasource: GoDatasource.id,
+            depName: 'github.com/wasilibs/go-shellcheck/cmd/shellcheck',
+            depType: 'pre-commit-golang',
+          },
+          { depName: 'rhysd/actionlint', currentValue: 'v1.7.7' },
         ],
       });
     });

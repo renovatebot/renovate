@@ -92,7 +92,7 @@ function isDefaultRepository(repository: PackageRepository): boolean {
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config?: ExtractConfig,
+  _config?: ExtractConfig,
 ): PackageFileContent | null {
   const { packages, repositories } = parseResources(content, packageFile);
   const deps = resolvePackageDependencies(packages, repositories);
@@ -100,7 +100,7 @@ export function extractPackageFile(
 }
 
 export async function extractAllPackageFiles(
-  config: ExtractConfig,
+  _config: ExtractConfig,
   packageFiles: string[],
 ): Promise<PackageFile[] | null> {
   const allRepositories: PackageRepository[] = [];

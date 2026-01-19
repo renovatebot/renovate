@@ -120,7 +120,7 @@ describe('modules/manager/gleam/artifacts', () => {
         cmd: '',
         stdout: '',
         stderr: '',
-        options: { encoding: 'utf8' },
+        options: {},
       });
       updateArtifact.updatedDeps = [{ manager: 'gleam' }];
       fs.readLocalFile.mockResolvedValueOnce('old');
@@ -147,7 +147,7 @@ describe('modules/manager/gleam/artifacts', () => {
         cmd: '',
         stdout: '',
         stderr: '',
-        options: { encoding: 'utf8' },
+        options: {},
       });
       updateArtifact.updatedDeps = [{ manager: 'gleam' }];
       const oldLock = Buffer.from('old');
