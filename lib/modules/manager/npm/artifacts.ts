@@ -1,10 +1,7 @@
-import {
-  isEmptyArray,
-  isNonEmptyArray,
-  isNonEmptyObject,
-  isNumber,
-} from '@sindresorhus/is';
+import { isEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
 import upath from 'upath';
+import type { Scalar, YAMLSeq } from 'yaml';
+import { isScalar, isSeq, parseDocument } from 'yaml';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
@@ -17,10 +14,8 @@ import {
 } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { matchRegexOrGlob } from '../../../util/string-match';
-import { parseSingleYaml } from '../../../util/yaml';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from './constants';
-import type { PnpmWorkspaceFile } from './extract/types';
 import { getNodeToolConstraint } from './post-update/node-version';
 import { processHostRules } from './post-update/rules';
 import { lazyLoadPackageJson } from './post-update/utils';
@@ -175,75 +170,59 @@ async function updatePnpmWorkspace(
     return null;
   }
 
-  const oldContent = (await readLocalFile(pnpmWorkspaceFilePath, 'utf8'))!;
-  let packageFileContent = oldContent;
+  const packageFileContent = (await readLocalFile(
+    pnpmWorkspaceFilePath,
+    'utf8',
+  ))!;
+  const doc = parseDocument(packageFileContent);
+
+  if (!doc.get('minimumReleaseAge')) {
+    return null;
+  }
+
   let updated = false;
 
   for (const upgrade of upgrades) {
-    const pnpmWorkspace =
-      parseSingleYaml<PnpmWorkspaceFile>(packageFileContent);
-    if (!isNumber(pnpmWorkspace?.minimumReleaseAge)) {
-      continue;
+    let excludeNode = doc.get('minimumReleaseAgeExclude') as YAMLSeq | null;
+    const newVersion = upgrade.newValue ?? upgrade.newVersion;
+
+    /* v8 ignore if -- should not happen, adding for type narrowing*/
+    if (excludeNode && !isSeq(excludeNode)) {
+      return null;
     }
 
-    if (!isNonEmptyArray(pnpmWorkspace.minimumReleaseAgeExclude)) {
+    if (!excludeNode) {
       logger.debug('Adding new exclude block');
-      // add minimumReleaseAgeExclude
-      const addedStr = `
-minimumReleaseAgeExclude:
-  - ${upgrade.depName}@${upgrade.newValue ?? upgrade.newVersion}`;
-      const newContent = oldContent + addedStr;
-      await writeLocalFile(pnpmWorkspaceFilePath, newContent);
-      packageFileContent = newContent;
+      excludeNode = doc.createNode([]) as YAMLSeq;
+      const newItem = doc.createNode(`${upgrade.depName}@${newVersion}`);
+      newItem.commentBefore = ` Renovate security update: ${upgrade.depName}@${newVersion}`;
+      excludeNode.items.push(newItem);
+      doc.set('minimumReleaseAgeExclude', excludeNode);
       updated = true;
       continue;
     }
-    // check if exlcude setting exists for the dep
-    let matchingSetting: {
-      match: boolean;
-      matchType?: 'pattern' | 'all-versions' | 'single-versions';
-      settingStr: string;
-    } = { match: false, settingStr: '' };
-    for (const setting of pnpmWorkspace.minimumReleaseAgeExclude) {
-      const matchingRes = checkExcludeSetting(setting, upgrade.depName!);
-      if (matchingRes.match) {
-        matchingSetting = {
-          match: matchingRes.match,
-          matchType: matchingRes.matchType,
-          settingStr: setting,
-        };
-      }
+
+    const { item: matchedItem, allExcluded } = getMatchedItem(
+      upgrade.depName!,
+      excludeNode.items,
+    );
+
+    if (allExcluded) {
+      continue;
     }
 
-    if (matchingSetting.match) {
-      logger.debug('Matching setting found');
-      if (matchingSetting.matchType === 'single-versions') {
-        logger.debug('Matching setting found, appending ||');
-        // need to find and replace the old setting by appending || <newValue>
-        const newSetting =
-          matchingSetting.settingStr +
-          ` || ${upgrade.newValue ?? upgrade.newVersion}`;
-        const newContent = oldContent.replace(
-          matchingSetting.settingStr,
-          newSetting,
-        );
-        await writeLocalFile(pnpmWorkspaceFilePath, newContent);
-        packageFileContent = newContent;
-        updated = true;
-      }
+    if (isScalar<string>(matchedItem)) {
+      matchedItem.commentBefore = ` Renovate security update: ${upgrade.depName}@${newVersion}`;
+
+      // normalize value (no quote handling needed)
+      matchedItem.value = matchedItem.value + ` || ${newVersion}`;
+      updated = true;
     } else {
-      logger.debug(
-        'Matching setting not found but minimumReleaseAgeExclude is present',
-      );
-      logger.debug('Matching setting found, appending ||');
-      const addedStr = `minimumReleaseAgeExclude:
-  - ${upgrade.depName}@${upgrade.newValue ?? upgrade.newVersion}`;
-      const newContent = oldContent.replace(
-        'minimumReleaseAgeExclude:',
-        addedStr,
-      );
-      await writeLocalFile(pnpmWorkspaceFilePath, newContent);
-      packageFileContent = newContent;
+      // add new entry
+      const newItem = doc.createNode(`${upgrade.depName}@${newVersion}`);
+      newItem.commentBefore = ` Renovate security update: ${upgrade.depName}@${newVersion}`;
+
+      excludeNode.items.push(newItem);
       updated = true;
     }
   }
@@ -252,38 +231,48 @@ minimumReleaseAgeExclude:
     return null;
   }
 
+  const newContent = doc.toString();
+  await writeLocalFile(pnpmWorkspaceFilePath, newContent);
+
   return {
     file: {
       type: 'addition',
       path: pnpmWorkspaceFilePath,
-      contents: packageFileContent,
+      contents: newContent,
     },
   };
 }
 
-function checkExcludeSetting(
-  setting: string,
+function getMatchedItem(
   depName: string,
+  items: unknown[],
 ): {
-  match: boolean;
-  matchType?: 'pattern' | 'all-versions' | 'single-versions';
+  item: Scalar | null;
+  allExcluded: boolean;
 } {
-  // Check for exact match (all-versions)
-  if (setting === depName) {
-    return { match: true, matchType: 'all-versions' };
+  for (const item of items) {
+    /* v8 ignore if -- should not happen */
+    if (!isScalar(item) || !isString(item.value)) {
+      continue;
+    }
+
+    if (item.value.startsWith(`${depName}@`)) {
+      return {
+        allExcluded: false,
+        item,
+      };
+    }
+
+    if (item.value === depName || matchRegexOrGlob(depName, item.value)) {
+      return {
+        allExcluded: true,
+        item,
+      };
+    }
   }
 
-  // Check for versioned match (single-versions)
-  // The version specifier follows the package name with @
-  if (setting.startsWith(depName + '@')) {
-    return { match: true, matchType: 'single-versions' };
-  }
-
-  // check if setting is a pattern
-  const res = matchRegexOrGlob(depName, setting);
-  if (res) {
-    return { match: true, matchType: 'pattern' };
-  }
-
-  return { match: false };
+  return {
+    item: null,
+    allExcluded: false,
+  };
 }
