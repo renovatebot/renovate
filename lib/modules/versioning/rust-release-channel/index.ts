@@ -351,11 +351,11 @@ function sortParsed(
     const dateB = parsedB.date;
 
     if (dateA.year !== dateB.year) {
-      return dateA.year > dateB.year ? 1 : -1;
+      return dateA.year - dateB.year;
     } else if (dateA.month !== dateB.month) {
-      return dateA.month > dateB.month ? 1 : -1;
+      return dateA.month - dateB.month;
     } else if (dateA.day !== dateB.day) {
-      return dateA.day > dateB.day ? 1 : -1;
+      return dateA.day - dateB.day;
     }
 
     return 0;
@@ -364,16 +364,16 @@ function sortParsed(
   // Both versioned -> compare by semver
   if (isObject(channelA) && isObject(channelB)) {
     if (channelA.major !== channelB.major) {
-      return channelA.major > channelB.major ? 1 : -1;
+      return channelA.major - channelB.major;
     }
     if (channelA.minor !== channelB.minor) {
-      return channelA.minor > channelB.minor ? 1 : -1;
+      return channelA.minor - channelB.minor;
     }
 
     const patchA = channelA.patch ?? 0;
     const patchB = channelB.patch ?? 0;
     if (patchA !== patchB) {
-      return patchA > patchB ? 1 : -1;
+      return patchA - patchB;
     }
 
     // Handle prerelease comparison
@@ -392,7 +392,7 @@ function sortParsed(
       const numA = channelA.prerelease!.number ?? 0;
       const numB = channelB.prerelease!.number ?? 0;
       if (numA !== numB) {
-        return numA > numB ? 1 : -1;
+        return numA - numB;
       }
     }
   }
