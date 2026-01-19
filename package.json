@@ -349,7 +349,7 @@
     "nock": "14.0.10",
     "npm-run-all2": "8.0.4",
     "nyc": "17.1.0",
-    "oxlint": "1.38.0",
+    "oxlint": "1.39.0",
     "rimraf": "6.1.2",
     "semantic-release": "25.0.2",
     "tar": "7.5.3",
