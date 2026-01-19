@@ -1754,6 +1754,48 @@ describe('modules/platform/bitbucket/index', () => {
           '- [#&#8203;8583](https://github.com/biomejs/biome/pull/8583) [`83be210`](https://github.com/biomejs/biome/commit/83be2101cb14969e3affda260773e33e50874df0) Thanks [@&#8203;dyc3](https://github.com/dyc3)! - Added the new nursery rule [`useVueValidTemplateRoot`](https://biomejs.dev/linter/rules/use-vue-valid-template-root/).',
       );
     });
+
+    it('updates codeblocks to correct indentation level', () => {
+      const prBody =
+        '  Examples:\n' +
+        '  ```vue\n' +
+        '  <template src="./foo.html">content</template>\n' +
+        '  ```\n' +
+        '  ```vue\n' +
+        '  <template></template>\n' +
+        '  ```';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '  Examples:\n' +
+          '```vue\n' +
+          '<template src="./foo.html">content</template>\n' +
+          '```\n' +
+          '```vue\n' +
+          '<template></template>\n' +
+          '```',
+      );
+    });
+
+    it('updates codeblocks to drop extra language data', () => {
+      const prBody =
+        '  Examples:\n' +
+        '  ```vue,expect_diagnostic\n' +
+        '  <template src="./foo.html">content</template>\n' +
+        '  ```\n' +
+        '  ```vue\n' +
+        '  <template></template>\n' +
+        '  ```';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '  Examples:\n' +
+          '```vue\n' +
+          '<template src="./foo.html">content</template>\n' +
+          '```\n' +
+          '```vue\n' +
+          '<template></template>\n' +
+          '```',
+      );
+    });
   });
 
   describe('updatePr()', () => {

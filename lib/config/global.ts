@@ -18,6 +18,7 @@ export class GlobalConfig {
     'cacheHardTtlMinutes',
     'cachePrivatePackages',
     'cacheTtlOverride',
+    'configFileNames',
     'containerbaseDir',
     'customEnvVariables',
     'dockerChildPrefix',

@@ -606,8 +606,13 @@ async function closeIssue(issueNumber: number): Promise<void> {
  *
  * See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
  */
+/**
+ * Remove or transform markdown into Bitbucket supported syntax.
+ *
+ * See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
+ */
 export function massageMarkdown(input: string): string {
-  const after = smartTruncate(input, maxBodyLength())
+  let massaged = smartTruncate(input, maxBodyLength())
     .replace(
       'you tick the rebase/retry checkbox',
       'by renaming this PR to start with "rebase!"',
@@ -626,7 +631,37 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 
-  return massageDetailSummaryHtmlToNestedLists(after);
+  massaged = massageDetailSummaryHtmlToNestedLists(massaged);
+
+  return massageCodeblockMarkdown(massaged);
+}
+
+/**
+ * Massage codeblocks indentation to ensure correct rendering in Bitbucket.
+ */
+function massageCodeblockMarkdown(body: string): string {
+  const codeBlockRegex = regEx(
+    /^(?<indent>[ \t]*)```(?<lang>\w*)[^\n]*\n(?<code>[\s\S]*?)\n[ \t]*```/gm,
+  );
+  let codeMatch;
+  let result = body;
+
+  while ((codeMatch = codeBlockRegex.exec(body)) !== null) {
+    const { indent, lang, code } = codeMatch.groups!;
+    const indentLength = indent.length;
+    const lines = code.split('\n');
+    const cleanedLines = lines.map((line) =>
+      // Remove `indentLength` characters from the start of each line
+      line.slice(indentLength),
+    );
+
+    const cleaned = cleanedLines.join('\n');
+    const replacement = `\`\`\`${lang}\n${cleaned}\n\`\`\``;
+
+    result = result.replace(codeMatch[0], replacement);
+  }
+
+  return result;
 }
 
 /**
