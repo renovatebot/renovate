@@ -450,7 +450,6 @@ export async function updatePr({
 export async function mergePr({
   branchName,
   id: prNo,
-  strategy,
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName!})`);
   await client.getPr(`${prNo}`);
@@ -542,21 +541,24 @@ export async function addReviewers(
 }
 
 /* v8 ignore next */
-export function addAssignees(iid: number, assignees: string[]): Promise<void> {
+export function addAssignees(
+  _iid: number,
+  _assignees: string[],
+): Promise<void> {
   // CodeCommit does not support adding reviewers
   return Promise.resolve();
 }
 
 /* v8 ignore next */
-export function findIssue(title: string): Promise<Issue | null> {
+export function findIssue(_title: string): Promise<Issue | null> {
   // CodeCommit does not have issues
   return Promise.resolve(null);
 }
 
 /* v8 ignore next */
-export function ensureIssue({
-  title,
-}: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
+export function ensureIssue(
+  _cfg: EnsureIssueConfig,
+): Promise<EnsureIssueResult | null> {
   // CodeCommit does not have issues
   return Promise.resolve(null);
 }
@@ -568,13 +570,13 @@ export function getIssueList(): Promise<Issue[]> {
 }
 
 /* v8 ignore next */
-export function ensureIssueClosing(title: string): Promise<void> {
+export function ensureIssueClosing(_title: string): Promise<void> {
   // CodeCommit does not have issues
   return Promise.resolve();
 }
 
 /* v8 ignore next */
-export function deleteLabel(prNumber: number, label: string): Promise<void> {
+export function deleteLabel(_prNumber: number, _label: string): Promise<void> {
   return Promise.resolve();
 }
 
@@ -601,13 +603,7 @@ export function getBranchStatusCheck(
 }
 
 /* v8 ignore next */
-export function setBranchStatus({
-  branchName,
-  context,
-  description,
-  state,
-  url: targetUrl,
-}: BranchStatusConfig): Promise<void> {
+export function setBranchStatus(_cfg: BranchStatusConfig): Promise<void> {
   return Promise.resolve();
 }
 

@@ -241,11 +241,11 @@ describe('logger/utils', () => {
         cmd: '',
         stdout: '',
         stderr: '',
-        options: { encoding: 'utf8', env: { key: 'val' } },
+        options: { env: { key: 'val' } },
       });
 
       expect(prepareError(execError)).toMatchObject({
-        options: { encoding: 'utf8', env: ['key'] },
+        options: { env: ['key'] },
       });
     });
 
