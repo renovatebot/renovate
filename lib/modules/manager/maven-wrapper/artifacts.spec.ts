@@ -552,6 +552,20 @@ distributionSha256Sum=oldhash123`;
       expect(finalWrittenContent).not.toContain('oldhash123');
     });
 
+    it('should skip checksum update when current content is missing', async () => {
+      mockMavenFileChangedInGit();
+      fs.readLocalFile.mockResolvedValueOnce(null);
+
+      await updateArtifacts({
+        packageFileName: '.mvn/wrapper/maven-wrapper.properties',
+        newPackageFileContent: propertiesWithDistributionChecksumOnly,
+        updatedDeps: [{ depName: 'maven' }],
+        config: { currentValue: '3.9.8', newValue: '3.9.9' },
+      });
+
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(1);
+    });
+
     it('should update both checksums when wrapper version changes', async () => {
       httpMock
         .scope('https://repo.maven.apache.org')
