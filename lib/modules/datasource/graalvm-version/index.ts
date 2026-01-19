@@ -30,6 +30,8 @@ export class GraalvmVersionDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    registryUrl ??= defaultRegistryUrl;
+
     const pkgConfig = parsePackage(packageName);
 
     logger.trace(
@@ -48,7 +50,7 @@ export class GraalvmVersionDatasource extends Datasource {
     }
 
     const url = joinUrlParts(
-      registryUrl ?? defaultRegistryUrl,
+      registryUrl,
       'jvm',
       pkgConfig.releaseType,
       pkgConfig.os,
@@ -58,7 +60,7 @@ export class GraalvmVersionDatasource extends Datasource {
     const result: ReleaseResult = {
       homepage: 'https://www.oracle.com/java/graalvm/',
       sourceUrl: 'https://github.com/oracle/graal',
-      registryUrl: registryUrl ?? defaultRegistryUrl,
+      registryUrl,
       releases: [],
     };
 
@@ -90,7 +92,8 @@ export class GraalvmVersionDatasource extends Datasource {
         }
         throw new ExternalHostError(err);
       }
-      /* v8 ignore next -- should never happen, all http errors are HttpError */
+
+      /* v8 ignore next 2 -- should never happen, all http errors are HttpError */
       this.handleGenericErrors(err);
     }
 
