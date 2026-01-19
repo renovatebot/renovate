@@ -370,6 +370,9 @@ importers:
         specifier: 3.25.76
         version: 3.25.76
     devDependencies:
+      '@commander-js/extra-typings':
+        specifier: 14.0.0
+        version: 14.0.0(commander@14.0.2)
       '@containerbase/eslint-plugin':
         specifier: 1.1.27
         version: 1.1.27(eslint-plugin-import@2.32.0)(eslint-plugin-promise@7.2.1(eslint@9.39.2))(eslint@9.39.2)
@@ -957,6 +960,11 @@ packages:
   '@colors/colors@1.5.0':
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
     engines: {node: '>=0.1.90'}
+
+  '@commander-js/extra-typings@14.0.0':
+    resolution: {integrity: sha512-hIn0ncNaJRLkZrxBIp5AsW/eXEHNKYQBh0aPdoUqNgD+Io3NIykQqpKFyKcuasZhicGaEZJX/JBSIkZ4e5x8Dg==}
+    peerDependencies:
+      commander: ~14.0.0
 
   '@containerbase/eslint-plugin@1.1.27':
     resolution: {integrity: sha512-sz9CR/viM+7/e8fiFBEPdt2x76MUfMl4WP5s1fVG1y4LUBdf9OHdNGr6rrwV4r1GCYulsUhX/ScnSDK53ssl/Q==}
@@ -7723,6 +7731,10 @@ snapshots:
 
   '@colors/colors@1.5.0':
     optional: true
+
+  '@commander-js/extra-typings@14.0.0(commander@14.0.2)':
+    dependencies:
+      commander: 14.0.2
 
   '@containerbase/eslint-plugin@1.1.27(eslint-plugin-import@2.32.0)(eslint-plugin-promise@7.2.1(eslint@9.39.2))(eslint@9.39.2)':
     dependencies:
