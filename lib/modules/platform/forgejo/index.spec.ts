@@ -3019,7 +3019,7 @@ describe('modules/platform/forgejo/index', () => {
         '[#123](../issues/123) [#124](../issues/124) [#125](../issues/125)';
 
       expect(forgejo.massageMarkdown(body)).toBe(
-        '[#123](#123) [#124](#124) [#125](#125)',
+        '[#123](issues/123) [#124](issues/124) [#125](issues/125)',
       );
     });
   });
