@@ -108,7 +108,7 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        managerFilePatterns: ['**/[Mm]akefile', '**/GNUMakefile', '*.mk'],
+        managerFilePatterns: ['**/[Mm]akefile', '**/GNUMakefile', '**/*.mk'],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:*\\??=\\s*["\']?(?<currentValue>.+?)["\']?\\s',
         ],
