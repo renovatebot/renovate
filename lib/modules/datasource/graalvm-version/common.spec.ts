@@ -97,43 +97,28 @@ describe('modules/datasource/graalvm-version/common', () => {
 
       it('handles all supported architectures with matching OS', () => {
         // Test each supported architecture case
-        const architectures = [
-          { arch: 'ia32' as NodeJS.Architecture, expected: 'i686' },
-          { arch: 'x64' as NodeJS.Architecture, expected: 'x86_64' },
-          { arch: 'arm64' as NodeJS.Architecture, expected: 'aarch64' },
-          { arch: 'arm' as NodeJS.Architecture, expected: 'arm32' },
-        ];
-        const platforms = [
-          { platform: 'linux' as NodeJS.Platform, expected: 'linux' },
-          { platform: 'darwin' as NodeJS.Platform, expected: 'macosx' },
-          { platform: 'win32' as NodeJS.Platform, expected: 'windows' },
+        const architectures: { arch: NodeJS.Architecture; expected: string }[] =
+          [
+            { arch: 'ia32', expected: 'i686' },
+            { arch: 'x64', expected: 'x86_64' },
+            { arch: 'arm64', expected: 'aarch64' },
+            { arch: 'arm', expected: 'arm32' },
+          ];
+        const platforms: { platform: NodeJS.Platform; expected: string }[] = [
+          { platform: 'linux', expected: 'linux' },
+          { platform: 'darwin', expected: 'macosx' },
+          { platform: 'win32', expected: 'windows' },
         ];
 
-        architectures.forEach(
-          ({
-            arch,
-            expected: expectedArch,
-          }: {
-            arch: NodeJS.Architecture;
-            expected: string;
-          }) => {
-            platforms.forEach(
-              ({
-                platform,
-                expected: expectedOs,
-              }: {
-                platform: NodeJS.Platform;
-                expected: string;
-              }) => {
-                archMock.mockReturnValue(arch);
-                osMock.mockReturnValue(platform);
-                const result = parsePackage(input);
-                expect(result.architecture).toBe(expectedArch);
-                expect(result.os).toBe(expectedOs);
-              },
-            );
-          },
-        );
+        architectures.forEach(({ arch, expected: expectedArch }) => {
+          platforms.forEach(({ platform, expected: expectedOs }) => {
+            archMock.mockReturnValue(arch);
+            osMock.mockReturnValue(platform);
+            const result = parsePackage(input);
+            expect(result.architecture).toBe(expectedArch);
+            expect(result.os).toBe(expectedOs);
+          });
+        });
       });
     });
   });
