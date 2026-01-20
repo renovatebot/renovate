@@ -17,7 +17,7 @@ import { generateVersioning } from './versioning';
 export async function generateDocs(
   root = 'tmp',
   pack = true,
-  version = undefined,
+  version: string | undefined = undefined,
 ): Promise<void> {
   try {
     const dist = `${root}/docs`;
