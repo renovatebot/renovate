@@ -7,7 +7,6 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureCacheDir,
-  getSiblingFileName,
   localPathExists,
   readLocalFile,
   writeLocalFile,
@@ -160,11 +159,7 @@ async function updatePnpmWorkspace(
 
   const pnpmShrinkwrap = upgrades[0].managerData?.pnpmShrinkwrap as string;
   const lockFileDir = upath.dirname(pnpmShrinkwrap);
-  const lockFileName = upath.join(lockFileDir, 'pnpm-lock.yaml');
-  const pnpmWorkspaceFilePath = getSiblingFileName(
-    lockFileName,
-    'pnpm-workspace.yaml',
-  );
+  const pnpmWorkspaceFilePath = upath.join(lockFileDir, 'pnpm-workspace.yaml');
 
   if (!(await localPathExists(pnpmWorkspaceFilePath))) {
     return null;
