@@ -275,6 +275,7 @@
     "re2": "1.23.0"
   },
   "devDependencies": {
+    "@commander-js/extra-typings": "14.0.0",
     "@containerbase/eslint-plugin": "1.1.27",
     "@containerbase/istanbul-reports-html": "1.1.24",
     "@containerbase/semantic-release-pnpm": "1.3.15",
