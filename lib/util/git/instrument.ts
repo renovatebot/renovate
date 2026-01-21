@@ -5,6 +5,7 @@ import type {
   DiffResult,
   LogOptions,
   LogResult,
+  MergeResult,
   Options,
   RemoteWithRefs,
   RemoteWithoutRefs,
@@ -122,7 +123,7 @@ export class InstrumentedSimpleGit {
   async checkoutBranch(branch: string, startPoint: string): Promise<void> {
     const { spanName, options } = prepareInstrumentation('checkout');
 
-    await instrument(
+    return await instrument(
       spanName,
       () => this.git.checkoutBranch(branch, startPoint),
       options,
@@ -143,25 +144,33 @@ export class InstrumentedSimpleGit {
 
     return await instrument(spanName, () => this.git.add(files), options);
   }
-  async addConfig(key: string, value: string): Promise<void> {
+  async addConfig(key: string, value: string): Promise<string> {
     const { spanName, options } = prepareInstrumentation('config');
 
-    await instrument(spanName, () => this.git.addConfig(key, value), options);
+    return await instrument(
+      spanName,
+      () => this.git.addConfig(key, value),
+      options,
+    );
   }
   async rm(files: string | string[]): Promise<void> {
     const { spanName, options } = prepareInstrumentation('rm');
 
-    await instrument(spanName, () => this.git.rm(files), options);
+    return await instrument(spanName, () => this.git.rm(files), options);
   }
-  async reset(modeOrOptions: any): Promise<void> {
+  async reset(modeOrOptions: any): Promise<string> {
     const { spanName, options } = prepareInstrumentation('reset');
 
-    await instrument(spanName, () => this.git.reset(modeOrOptions), options);
+    return await instrument(
+      spanName,
+      () => this.git.reset(modeOrOptions),
+      options,
+    );
   }
-  async merge(args: string[]): Promise<void> {
+  async merge(args: string[]): Promise<MergeResult> {
     const { spanName, options } = prepareInstrumentation('merge');
 
-    await instrument(spanName, () => this.git.merge(args), options);
+    return await instrument(spanName, () => this.git.merge(args), options);
   }
   async push(...args: any[]): Promise<any> {
     const { spanName, options } = prepareInstrumentation('push');
@@ -178,10 +187,10 @@ export class InstrumentedSimpleGit {
 
     return await instrument(spanName, () => this.git.fetch(args), options);
   }
-  async clone(repo: string, dir: string, options: string[]): Promise<void> {
+  async clone(repo: string, dir: string, options: string[]): Promise<string> {
     const { spanName, options: spanOptions } = prepareInstrumentation('clone');
 
-    await instrument(
+    return await instrument(
       spanName,
       () => this.git.clone(repo, dir, options),
       spanOptions,
@@ -264,10 +273,14 @@ export class InstrumentedSimpleGit {
       options,
     );
   }
-  async addRemote(name: string, repo: string): Promise<void> {
+  async addRemote(name: string, repo: string): Promise<string> {
     const { spanName, options } = prepareInstrumentation('remote');
 
-    await instrument(spanName, () => this.git.addRemote(name, repo), options);
+    return await instrument(
+      spanName,
+      () => this.git.addRemote(name, repo),
+      options,
+    );
   }
   env(env: Record<string, string>): this {
     this.git = this.git.env(env);
@@ -283,9 +296,13 @@ export class InstrumentedSimpleGit {
 
     return await instrument(spanName, () => this.git.listRemote(args), options);
   }
-  async submoduleUpdate(args: string[]): Promise<void> {
+  async submoduleUpdate(args: string[]): Promise<string> {
     const { spanName, options } = prepareInstrumentation('submodule');
 
-    await instrument(spanName, () => this.git.submoduleUpdate(args), options);
+    return await instrument(
+      spanName,
+      () => this.git.submoduleUpdate(args),
+      options,
+    );
   }
 }
