@@ -4,8 +4,7 @@
 node = "24.13.0"
 
 [hooks]
-# Enabling corepack will install the `pnpm` package manager specified in package.json
-# alternatively, you can also install `pnpm` with mise
+# Enabling corepack will install the `pnpm` package manager specified in package.json#packageManager
 postinstall = 'npx corepack enable'
 
 [settings]
