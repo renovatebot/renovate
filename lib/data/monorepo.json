@@ -545,6 +545,7 @@
     "prometheus-net": "https://github.com/prometheus-net/prometheus-net",
     "promster": "https://github.com/tdeekens/promster",
     "protobuf": "https://github.com/protocolbuffers/protobuf",
+    "protobuf-ts": "https://github.com/timostamm/protobuf-ts",
     "quartznet": "https://github.com/quartznet/quartznet",
     "radix-ui-primitives": "https://github.com/radix-ui/primitives",
     "reach-ui": "https://github.com/reach/reach-ui",
