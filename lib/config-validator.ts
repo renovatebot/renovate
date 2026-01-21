@@ -70,12 +70,15 @@ interface PackageJson {
     .addHelpText(
       'after',
       `
+When specifying [config-files...], Renovate will treat them as global self-hosted configuration files. You can disable this behaviour with --no-global
+
 Examples:
 
   $ renovate-config-validator
   $ renovate-config-validator --strict
   $ renovate-config-validator first_config.json
   $ renovate-config-validator --strict config.js
+  $ renovate-config-validator --no-global renovate.json5
   $ env RENOVATE_CONFIG_FILE=obscure-name.json renovate-config-validator`,
     )
     .argument('[config-files...]')
@@ -84,6 +87,11 @@ Examples:
       '--strict',
       'Fail command if any configuration warnings, errors, or a migration is needed',
     )
+    .option(
+      '--no-global',
+      'When specifying [config-files], do not treat them as global self-hosted configuration file(s)',
+      true,
+    )
     // allow us to manage the exit code
     .exitOverride();
 
@@ -91,6 +99,11 @@ Examples:
     const strict = opts.strict ?? false;
 
     if (files.length) {
+      let isGlobalConfig = true;
+      if (opts.global === false) {
+        isGlobalConfig = false;
+      }
+      const configType = isGlobalConfig ? 'global' : 'repo';
       for (const file of files) {
         try {
           if (!(await pathExists(file))) {
@@ -100,8 +113,8 @@ Examples:
           }
           const parsedContent = await getParsedContent(file);
           try {
-            logger.info(`Validating ${file}`);
-            await validate('global', file, parsedContent, strict);
+            logger.info(`Validating ${file} as ${configType} config`);
+            await validate(configType, file, parsedContent, strict);
           } catch (err) {
             logger.warn({ file, err }, 'File is not valid Renovate config');
             returnVal = 1;
