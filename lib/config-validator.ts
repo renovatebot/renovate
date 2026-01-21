@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { Command, CommanderError } from 'commander';
 import 'source-map-support/register';
 import './punycode.cjs';
 import { dequal } from 'dequal';
@@ -8,6 +9,7 @@ import { massageConfig } from './config/massage';
 import { migrateConfig } from './config/migration';
 import type { RenovateConfig } from './config/types';
 import { validateConfig } from './config/validation';
+import { pkg } from './expose.cjs';
 import { logger } from './logger';
 import { getEnv } from './util/env';
 import { getConfig as getFileConfig } from './workers/global/config/parse/file';
@@ -59,103 +61,139 @@ interface PackageJson {
 }
 
 (async () => {
-  const strictArgIndex = process.argv.indexOf('--strict');
-  const strict = strictArgIndex >= 0;
-  if (strict) {
-    process.argv.splice(strictArgIndex, 1);
-  }
-  if (process.argv.length > 2) {
-    for (const file of process.argv.slice(2)) {
-      try {
-        if (!(await pathExists(file))) {
-          returnVal = 1;
-          logger.error({ file }, 'File does not exist');
-          break;
-        }
-        const parsedContent = await getParsedContent(file);
+  const program = new Command('renovate-config-validator')
+    .summary('Validate Renovate configuration files')
+    .description(
+      `Validate your Renovate configuration (repo config, shared presets or global configuration) files\n` +
+        'If no [config-files...] are given, renovate-config-validator will look at the default config file locations (https://docs.renovatebot.com/configuration-options/)',
+    )
+    .addHelpText(
+      'after',
+      `
+Examples:
+
+  $ renovate-config-validator
+  $ renovate-config-validator --strict
+  $ renovate-config-validator first_config.json
+  $ renovate-config-validator --strict config.js
+  $ env RENOVATE_CONFIG_FILE=obscure-name.json renovate-config-validator`,
+    )
+    .argument('[config-files...]')
+    .version(pkg.version, '-v, --version')
+    .option(
+      '--strict',
+      'Fail command if any configuration warnings, errors, or a migration is needed',
+    )
+    // allow us to manage the exit code
+    .exitOverride();
+
+  program.action(async (files, opts) => {
+    const strict = opts.strict ?? false;
+
+    if (files.length) {
+      for (const file of files) {
         try {
-          logger.info(`Validating ${file}`);
-          await validate('global', file, parsedContent, strict);
+          if (!(await pathExists(file))) {
+            returnVal = 1;
+            logger.error({ file }, 'File does not exist');
+            break;
+          }
+          const parsedContent = await getParsedContent(file);
+          try {
+            logger.info(`Validating ${file}`);
+            await validate('global', file, parsedContent, strict);
+          } catch (err) {
+            logger.warn({ file, err }, 'File is not valid Renovate config');
+            returnVal = 1;
+          }
         } catch (err) {
-          logger.warn({ file, err }, 'File is not valid Renovate config');
+          logger.warn({ file, err }, 'File could not be parsed');
           returnVal = 1;
         }
-      } catch (err) {
-        logger.warn({ file, err }, 'File could not be parsed');
-        returnVal = 1;
       }
-    }
-  } else {
-    for (const file of getConfigFileNames().filter(
-      (name) => name !== 'package.json',
-    )) {
-      try {
-        if (!(await pathExists(file))) {
-          continue;
-        }
-        const parsedContent = await getParsedContent(file);
+    } else {
+      for (const file of getConfigFileNames().filter(
+        (name) => name !== 'package.json',
+      )) {
         try {
-          logger.info(`Validating ${file}`);
-          await validate('repo', file, parsedContent, strict);
+          if (!(await pathExists(file))) {
+            continue;
+          }
+          const parsedContent = await getParsedContent(file);
+          try {
+            logger.info(`Validating ${file}`);
+            await validate('repo', file, parsedContent, strict);
+          } catch (err) {
+            logger.warn({ file, err }, 'File is not valid Renovate config');
+            returnVal = 1;
+          }
         } catch (err) {
-          logger.warn({ file, err }, 'File is not valid Renovate config');
+          logger.warn({ file, err }, 'File could not be parsed');
           returnVal = 1;
         }
-      } catch (err) {
-        logger.warn({ file, err }, 'File could not be parsed');
-        returnVal = 1;
       }
-    }
-    try {
-      const pkgJson = JSON.parse(
-        await readFile('package.json', 'utf8'),
-      ) as PackageJson;
-      if (pkgJson.renovate) {
-        logger.info(`Validating package.json > renovate`);
-        await validate(
-          'repo',
-          'package.json > renovate',
-          pkgJson.renovate,
-          strict,
-        );
-      }
-      if (pkgJson['renovate-config']) {
-        logger.info(`Validating package.json > renovate-config`);
-        for (const presetConfig of Object.values(pkgJson['renovate-config'])) {
+      try {
+        const pkgJson = JSON.parse(
+          await readFile('package.json', 'utf8'),
+        ) as PackageJson;
+        if (pkgJson.renovate) {
+          logger.info(`Validating package.json > renovate`);
           await validate(
             'repo',
-            'package.json > renovate-config',
-            presetConfig,
+            'package.json > renovate',
+            pkgJson.renovate,
             strict,
-            true,
           );
         }
-      }
-    } catch {
-      // ignore
-    }
-    try {
-      const env = getEnv();
-      const fileConfig = await getFileConfig(env);
-      if (!dequal(fileConfig, {})) {
-        const file = env.RENOVATE_CONFIG_FILE ?? 'config.js';
-        logger.info(`Validating ${file}`);
-        try {
-          await validate('global', file, fileConfig, strict);
-        } catch (err) {
-          logger.error({ file, err }, 'File is not valid Renovate config');
-          returnVal = 1;
+        if (pkgJson['renovate-config']) {
+          logger.info(`Validating package.json > renovate-config`);
+          for (const presetConfig of Object.values(
+            pkgJson['renovate-config'],
+          )) {
+            await validate(
+              'repo',
+              'package.json > renovate-config',
+              presetConfig,
+              strict,
+              true,
+            );
+          }
         }
+      } catch {
+        // ignore
       }
-    } catch {
-      // ignore
+      try {
+        const env = getEnv();
+        const fileConfig = await getFileConfig(env);
+        if (!dequal(fileConfig, {})) {
+          const file = env.RENOVATE_CONFIG_FILE ?? 'config.js';
+          logger.info(`Validating ${file}`);
+          try {
+            await validate('global', file, fileConfig, strict);
+          } catch (err) {
+            logger.error({ file, err }, 'File is not valid Renovate config');
+            returnVal = 1;
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+    if (returnVal !== 0) {
+      process.exit(returnVal);
+    }
+    logger.info('Config validated successfully');
+  });
+
+  await program.parseAsync();
+})().catch((e) => {
+  if (e instanceof CommanderError) {
+    // Commander throws an error at the end of Action execution i.e. as part of the `help` command, and so we don't want to return an error code in this case
+    if (e.code === 'commander.helpDisplayed') {
+      return;
     }
   }
-  if (returnVal !== 0) {
-    process.exit(returnVal);
-  }
-  logger.info('Config validated successfully');
-})().catch((e) => {
+
   // oxlint-disable-next-line no-console -- intentional: display critical error on CLI
   console.error(e);
   process.exit(99);
