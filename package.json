@@ -144,10 +144,6 @@
     "node": "^22.13.0 || ^24.11.0",
     "pnpm": "^10.0.0"
   },
-  "volta": {
-    "node": "24.13.0",
-    "pnpm": "10.28.0"
-  },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.958.0",
     "@aws-sdk/client-ec2": "3.958.0",
