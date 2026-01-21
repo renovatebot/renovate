@@ -5,7 +5,7 @@ import { GolangVersionDatasource } from '../../datasource/golang-version';
 import { isVersion } from '../../versioning/semver';
 import type { PackageDependency } from '../types';
 
-function trimQuotes(str: string): string {
+export function trimQuotes(str: string): string {
   return str.replace(regEx(/^"(.*)"$/), '$1');
 }
 
@@ -13,7 +13,7 @@ const requireRegex = regEx(
   /^(?<keyword>require)?\s+(?<module>[^\s]+\/?[^\s]+)\s+(?<version>[^\s]+)(?:\s*\/\/\s*(?<comment>[^\s]+)\s*)?$/,
 );
 
-const replaceRegex = regEx(
+export const replaceRegex = regEx(
   /^(?<keyword>replace)?\s+(?<module>[^\s]+\/[^\s]+)\s*=>\s*(?<replacement>[^\s]+)(?:\s+(?<version>[^\s]+))?(?:\s*\/\/\s*(?<comment>[^\s]+)\s*)?$/,
 );
 
