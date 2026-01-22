@@ -410,7 +410,7 @@ minimumReleaseAgeExclude:
             depName: '@next/env',
             depType: 'dependency',
             currentValue: '16.0.9',
-            newValue: '16.0.10',
+            newVersion: '16.0.10',
             managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
@@ -425,6 +425,43 @@ minimumReleaseAgeExclude:
             path: 'pnpm-workspace.yaml',
             contents:
               "minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  # Renovate security update: pnpm@8.15.6\n  - pnpm@5.6.7 || 8.15.6\n  # Renovate security update: @next/env@16.0.10\n  - '@next/env@16.0.7 || 16.0.9 || 16.0.10'\n",
+          },
+        },
+      ]);
+    });
+
+    // As per https://github.com/renovatebot/renovate/issues/40610, we don't want to allow version constraints with i.e. a caret like `^4.17.15`
+    it('updates pnpm workspace - uses newVersion over newValue in minimumReleaseAgeExclude', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 10080`,
+      ); // for pnpm-workspace.yaml
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'lodash',
+            depType: 'devDependencies',
+            currentValue: '^4.17.15',
+            currentVersion: '4.17.21',
+            newVersion: '4.17.23',
+            newValue: '^4.17.15',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents:
+              'minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  # Renovate security update: lodash@4.17.23\n  - lodash@4.17.23\n',
           },
         },
       ]);
