@@ -816,7 +816,7 @@ async function validateGlobalConfig(
   warnings: ValidationMessage[],
   errors: ValidationMessage[],
   currentPath: string | undefined,
-  config: RenovateConfig,
+  config: AllConfig,
 ): Promise<void> {
   /* v8 ignore next 5 -- not testable yet */
   if (getDeprecationMessage(key)) {
@@ -830,7 +830,7 @@ async function validateGlobalConfig(
       if (isString(val)) {
         if (
           key === 'onboardingConfigFileName' &&
-          !getConfigFileNames().includes(val)
+          !getConfigFileNames(config.platform).includes(val)
         ) {
           warnings.push({
             topic: 'Configuration Error',
