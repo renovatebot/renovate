@@ -1,4 +1,5 @@
 import type { RequestError, Response } from 'got';
+import { DateTime } from 'luxon';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
@@ -227,23 +228,100 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
 
-    it('ensures comment,when onboarding pr is older than onboardingAutoCloseAge', async () => {
-      config.baseBranch = 'some-branch';
-      GlobalConfig.set({ onboardingAutoCloseAge: 1 });
-      platform.getBranchPr.mockResolvedValueOnce(
-        partial<Pr>({
-          title: 'Configure Renovate',
-          bodyStruct,
-          createdAt: '2020-02-29T01:40:21Z',
+    describe('when onboardingAutoCloseAge is set', () => {
+      beforeAll(() => {
+        vi.useFakeTimers();
+      });
+
+      it('does not comment, when onboarding pr is exactly at onboardingAutoCloseAge', async () => {
+        const now = DateTime.now();
+        vi.setSystemTime(now.toMillis());
+        // at exactly 1 day ago, which means that an `onboardingAutoCloseAge=1` SHOULD NOT trigger, as it's > 1
+        const createdAt = now.minus({ hour: 24 });
+
+        config.baseBranch = 'some-branch';
+        GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({
+            title: 'Configure Renovate',
+            bodyStruct,
+            createdAt: createdAt.toISO(),
+            number: 1,
+          }),
+        );
+        await ensureOnboardingPr(config, {}, branches);
+        expect(platform.ensureComment).toHaveBeenCalledTimes(0);
+        expect(platform.createPr).toHaveBeenCalledTimes(0);
+      });
+
+      it('ensures comment, when onboarding pr is partially over onboardingAutoCloseAge', async () => {
+        const now = DateTime.now();
+        vi.setSystemTime(now.toMillis());
+        // we're currently 1 day and 1 second ahead of the creation time, which is 1.x days since the PR was created, which means that an `onboardingAutoCloseAge=1` should trigger, as it's > 1
+        const createdAt = now.minus({ hour: 24, seconds: 1 });
+
+        config.baseBranch = 'some-branch';
+        GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({
+            title: 'Configure Renovate',
+            bodyStruct,
+            createdAt: createdAt.toISO(),
+            number: 1,
+          }),
+        );
+        await ensureOnboardingPr(config, {}, branches);
+        expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+        expect(platform.updatePr).toHaveBeenCalledWith({
           number: 1,
-        }),
-      );
-      await ensureOnboardingPr(config, {}, branches);
-      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-      expect(platform.updatePr).toHaveBeenCalledWith({
-        number: 1,
-        state: 'closed',
-        prTitle: 'Configure Renovate',
+          state: 'closed',
+          prTitle: 'Configure Renovate',
+        });
+      });
+
+      it('ensures comment, when onboarding pr is 1 day older than onboardingAutoCloseAge', async () => {
+        const now = DateTime.now();
+        vi.setSystemTime(now.toMillis());
+        // we're currently 25 hours ahead of the creation time, which is 1.x days since the PR was created, which means that an `onboardingAutoCloseAge=1` should trigger, as it's > 1
+        const createdAt = now.minus({ hour: 48 });
+
+        config.baseBranch = 'some-branch';
+        GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({
+            title: 'Configure Renovate',
+            bodyStruct,
+            createdAt: createdAt.toISO(),
+            number: 1,
+          }),
+        );
+        await ensureOnboardingPr(config, {}, branches);
+        expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+        expect(platform.updatePr).toHaveBeenCalledWith({
+          number: 1,
+          state: 'closed',
+          prTitle: 'Configure Renovate',
+        });
+      });
+
+      it('ensures comment,when onboarding pr is significantly older than onboardingAutoCloseAge', async () => {
+        config.baseBranch = 'some-branch';
+        GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({
+            title: 'Configure Renovate',
+            bodyStruct,
+            createdAt: '2020-02-29T01:40:21Z',
+            number: 1,
+          }),
+        );
+        await ensureOnboardingPr(config, {}, branches);
+        expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+        expect(platform.updatePr).toHaveBeenCalledWith({
+          number: 1,
+          state: 'closed',
+          prTitle: 'Configure Renovate',
+        });
       });
     });
 
