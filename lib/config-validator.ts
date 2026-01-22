@@ -5,6 +5,7 @@ import './punycode.cjs';
 import { dequal } from 'dequal';
 import { pathExists, readFile } from 'fs-extra';
 import { getConfigFileNames } from './config/app-strings';
+import { GlobalConfig } from './config/global';
 import { massageConfig } from './config/massage';
 import { migrateConfig } from './config/migration';
 import type { RenovateConfig } from './config/types';
@@ -12,10 +13,24 @@ import { validateConfig } from './config/validation';
 import { pkg } from './expose.cjs';
 import { logger } from './logger';
 import { getEnv } from './util/env';
+import { parseConfigs } from './workers/global/config/parse';
 import { getConfig as getFileConfig } from './workers/global/config/parse/file';
 import { getParsedContent } from './workers/global/config/parse/util';
 
 let returnVal = 0;
+
+/**
+ * Make sure that we've resolved configuration from the different places that Renovate users would expect them to be specified
+ *
+ * This then allows a `configType=repo` config to i.e. be validated alongside a `config.js` or `env RENOVATE_ALLOWED_COMMANDS=...`
+ *
+ * Note that we intentionally don't fully initialize Renovate and its modules, as we're not fully running, and it would require a Platform to be configured
+ * */
+async function partiallyGlobalInitialize(): Promise<void> {
+  // NOTE that this doesn't allow command-line arguments
+  const globalConfig = await parseConfigs(getEnv(), []);
+  GlobalConfig.set(globalConfig);
+}
 
 async function validate(
   configType: 'global' | 'repo',
@@ -61,6 +76,8 @@ interface PackageJson {
 }
 
 (async () => {
+  await partiallyGlobalInitialize();
+
   const program = new Command('renovate-config-validator')
     .summary('Validate Renovate configuration files')
     .description(
@@ -79,7 +96,15 @@ Examples:
   $ renovate-config-validator first_config.json
   $ renovate-config-validator --strict config.js
   $ renovate-config-validator --no-global renovate.json5
-  $ env RENOVATE_CONFIG_FILE=obscure-name.json renovate-config-validator`,
+  $ env RENOVATE_CONFIG_FILE=obscure-name.json renovate-config-validator
+
+Global configuration:
+
+If you have specified global self-hosted configuration (https://docs.renovatebot.com/self-hosted-configuration/) in environment variables or in a \`config.js\`, this will be detected:
+
+  $ env RENOVATE_ALLOWED_ENV='["GO*"]' renovate-config-validator
+  # if passing the filename, make sure it's not validating as a global config
+  $ env RENOVATE_ALLOWED_ENV='["GO*"]' renovate-config-validator --no-global renovate.json`,
     )
     .argument('[config-files...]')
     .version(pkg.version, '-v, --version')
