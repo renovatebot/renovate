@@ -63,6 +63,7 @@ import type {
   StorageConfig,
   TreeItem,
 } from './types';
+import { ATTR_VCS_GIT_CLONE_MODE } from '../../instrumentation/types';
 
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
@@ -420,6 +421,7 @@ export const syncGit = instrumentStandalone(
     logger.debug(`syncGit(): Initializing git repository into ${localDir}`);
     const gitHead = upath.join(localDir, '.git/HEAD');
     let clone = true;
+    const cloneMode = GlobalConfig.get('gitCloneMode');
 
     if (await fs.pathExists(gitHead)) {
       await instrument('fetch', async () => {
@@ -429,7 +431,14 @@ export const syncGit = instrumentStandalone(
         try {
           await git.raw(['remote', 'set-url', 'origin', config.url]);
           const fetchStart = Date.now();
-          await gitRetry(() => git.fetch(['--prune', 'origin']));
+          const opts = ['--prune', 'origin'];
+
+          if (cloneMode === 'shallow') {
+            const depth = GlobalConfig.get('gitShallowCloneDepth');
+            opts.push(`--depth=${depth}`);
+          }
+
+          await gitRetry(() => git.fetch(opts));
           config.currentBranch =
             config.currentBranch || (await getDefaultBranch(git));
           await resetToBranch(config.currentBranch);
@@ -447,48 +456,60 @@ export const syncGit = instrumentStandalone(
       });
     }
     if (clone) {
-      await instrument('clone', async () => {
-        const cloneStart = Date.now();
-        try {
-          const opts: string[] = [];
-          if (config.defaultBranch) {
-            opts.push('-b', config.defaultBranch);
-          }
-          if (config.fullClone) {
-            logger.debug('Performing full clone');
-          } else {
-            logger.debug('Performing blobless clone');
-            opts.push('--filter=blob:none');
-          }
-          if (config.extraCloneOpts) {
-            Object.entries(config.extraCloneOpts).forEach((e) =>
-              // TODO: types (#22198)
-              opts.push(e[0], `${e[1]!}`),
+      await instrument(
+        'clone',
+        async () => {
+          const cloneStart = Date.now();
+          try {
+            const opts: string[] = [];
+            if (config.defaultBranch) {
+              opts.push('-b', config.defaultBranch);
+            }
+            if (config.fullClone) {
+              logger.debug('Performing full clone');
+            } else if (cloneMode === 'shallow') {
+              const depth = GlobalConfig.get('gitShallowCloneDepth');
+              logger.debug(`Performing shallow clone with depth ${depth}`);
+              opts.push(`--depth=${depth}`);
+            } else {
+              logger.debug('Performing blobless clone');
+              opts.push('--filter=blob:none');
+            }
+            if (config.extraCloneOpts) {
+              Object.entries(config.extraCloneOpts).forEach((e) =>
+                // TODO: types (#22198)
+                opts.push(e[0], `${e[1]!}`),
+              );
+            }
+            const emptyDirAndClone = async (): Promise<void> => {
+              await instrument(`fs.emptyDir(${localDir})`, () =>
+                fs.emptyDir(localDir),
+              );
+              await git.clone(config.url, '.', opts);
+            };
+            await gitRetry(() =>
+              instrument('emptyDirAndClone', emptyDirAndClone),
             );
+            /* v8 ignore next 10 -- TODO: add test */
+          } catch (err) {
+            logger.debug({ err }, 'git clone error');
+            if (err.message?.includes('No space left on device')) {
+              throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
+            }
+            if (err.message === REPOSITORY_EMPTY) {
+              throw err;
+            }
+            throw new ExternalHostError(err, 'git');
           }
-          const emptyDirAndClone = async (): Promise<void> => {
-            await instrument(`fs.emptyDir(${localDir})`, () =>
-              fs.emptyDir(localDir),
-            );
-            await git.clone(config.url, '.', opts);
-          };
-          await gitRetry(() =>
-            instrument('emptyDirAndClone', emptyDirAndClone),
-          );
-          /* v8 ignore next 10 -- TODO: add test */
-        } catch (err) {
-          logger.debug({ err }, 'git clone error');
-          if (err.message?.includes('No space left on device')) {
-            throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
-          }
-          if (err.message === REPOSITORY_EMPTY) {
-            throw err;
-          }
-          throw new ExternalHostError(err, 'git');
-        }
-        const durationMs = Math.round(Date.now() - cloneStart);
-        logger.debug({ durationMs }, 'git clone completed');
-      });
+          const durationMs = Math.round(Date.now() - cloneStart);
+          logger.debug({ durationMs }, 'git clone completed');
+        },
+        {
+          attributes: {
+            [ATTR_VCS_GIT_CLONE_MODE]: cloneMode,
+          },
+        },
+      );
     }
     try {
       config.currentBranchSha = (
@@ -570,6 +591,8 @@ export async function getRepoStatus(path?: string): Promise<StatusResult> {
 }
 
 export function branchExists(branchName: string): boolean {
+  // TODO
+
   return !!config.branchCommits[branchName];
 }
 
@@ -1589,5 +1612,18 @@ export async function getRemotes(): Promise<string[]> {
   } catch (err) /* v8 ignore next */ {
     logger.error({ err }, 'Error getting remotes');
     throw err;
+  }
+}
+
+export function logGitCloneMode(): void {
+  const cloneMode = GlobalConfig.get('gitCloneMode');
+  if (cloneMode === 'blobless') {
+    logger.debug({ cloneMode }, 'Running in blobless clone mode');
+  } else if (cloneMode === 'shallow') {
+    const shallowCloneDepth = GlobalConfig.get('gitShallowCloneDepth');
+    logger.debug(
+      { cloneMode },
+      `Running in shallow clone mode with depth ${shallowCloneDepth}`,
+    );
   }
 }

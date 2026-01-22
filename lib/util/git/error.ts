@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
@@ -30,6 +31,30 @@ export function checkForPlatformFailure(err: Error): Error | null {
       return new ExternalHostError(err, 'git');
     }
     /* v8 ignore next -- TODO: add test */
+  }
+
+  /* v8 ignore next -- TODO: add test */
+  if (GlobalConfig.get('gitCloneMode') === 'shallow') {
+    const errorStrings = [
+      'MERGE_HEAD missing',
+      'unknown revision or path not in the working tree',
+      '[rejected] (stale info)',
+    ];
+    /* v8 ignore next -- TODO: add test */
+    for (const error of errorStrings) {
+      if (err.message.includes(error)) {
+        logger.debug(
+          { err },
+          'Converting gitCloneMode=shallow git error to CONFIG_VALIDATION error',
+        );
+        // TODO is this right???
+        const res = new Error(CONFIG_VALIDATION);
+        res.validationError = `Running in gitCloneMode=shallow with gitShallowCloneDepth=${GlobalConfig.get('gitShallowCloneDepth')}, but target branch was too many commits behind`;
+        res.validationMessage = `\`${err.message.replaceAll('`', "'")}\``;
+        // TODO is this right???
+        return res;
+      }
+    }
   }
 
   /* v8 ignore next -- TODO: add test */

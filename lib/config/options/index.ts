@@ -1200,6 +1200,27 @@ const options: RenovateOptions[] = [
     default: 0,
   },
   {
+    name: 'gitCloneMode',
+    description:
+      'Modify whether Renovate should use a blobless Git clone, or perform a shallow clone',
+    type: 'string',
+    allowedValues: ['blobless', 'shallow'],
+    default: 'blobless',
+    globalOnly: true,
+    cli: false,
+    experimental: true,
+  },
+  {
+    name: 'gitShallowCloneDepth',
+    description:
+      'When using `gitCloneMode=shallow`, how many commits to fetch before the current HEAD commit',
+    type: 'integer',
+    default: 10,
+    globalOnly: true,
+    cli: false,
+    experimental: true,
+  },
+  {
     name: 'enabledManagers',
     description:
       'A list of package managers to enable. Only managers on the list are enabled.',
