@@ -179,7 +179,7 @@ async function updatePnpmWorkspace(
 
   for (const upgrade of upgrades) {
     let excludeNode = doc.get('minimumReleaseAgeExclude') as YAMLSeq | null;
-    const newVersion = upgrade.newValue ?? upgrade.newVersion;
+    const newVersion = upgrade.newVersion ?? upgrade.newValue;
 
     /* v8 ignore if -- should not happen, adding for type narrowing*/
     if (excludeNode && !isSeq(excludeNode)) {
