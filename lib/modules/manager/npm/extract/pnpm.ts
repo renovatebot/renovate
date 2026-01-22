@@ -17,13 +17,21 @@ import {
   readLocalFile,
 } from '../../../../util/fs';
 import { parseSingleYaml } from '../../../../util/yaml';
-import type { PackageFile, PackageFileContent } from '../../types';
+import { NpmDatasource } from '../../../datasource/npm';
+import type {
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../../types';
 import type { PnpmDependency, PnpmLockFile } from '../post-update/types';
-import type { PnpmCatalogs } from '../schema';
+import type { PnpmCatalogs, PnpmConfigDependencies } from '../schema';
 import { PnpmWorkspaceFile } from '../schema';
 import type { NpmManagerData } from '../types';
 import { extractCatalogDeps } from './common/catalogs';
+import { extractDependency } from './common/dependency';
 import type { Catalog, LockFile } from './types';
+
+export const PNPM_CONFIG_DEPENDENCY = 'pnpm.configDependencies';
 
 function isPnpmLockfile(obj: any): obj is PnpmLockFile {
   return isPlainObject(obj) && 'lockfileVersion' in obj;
@@ -38,6 +46,7 @@ export async function extractPnpmFilters(
       (await readLocalFile(fileName, 'utf8'))!,
     );
     if (
+      !contents.packages ||
       !Array.isArray(contents.packages) ||
       !contents.packages.every((item) => isString(item))
     ) {
@@ -272,16 +281,49 @@ export function tryParsePnpmWorkspaceYaml(content: string):
 }
 
 type PnpmCatalogs = z.TypeOf<typeof PnpmCatalogs>;
+type PnpmConfigDependencies = z.TypeOf<typeof PnpmConfigDependencies>;
+function extractConfigDeps(
+  configDeps: NonNullable<PnpmConfigDependencies['configDependencies']>,
+): PackageDependency<NpmManagerData>[] {
+  const deps: PackageDependency<NpmManagerData>[] = [];
+  for (const [key, val] of Object.entries(configDeps)) {
+    const depType = PNPM_CONFIG_DEPENDENCY;
+    const depName = key;
+    let currentValue: string;
+
+    if (isString(val)) {
+      currentValue = val;
+    } else if (isPlainObject(val) && isString(val.integrity)) {
+      currentValue = val.integrity;
+    } else {
+      continue;
+    }
+
+    const dep: PackageDependency<NpmManagerData> = {
+      depType,
+      depName,
+      ...extractDependency(depType, depName, currentValue),
+      datasource: NpmDatasource.id,
+      prettyDepType: depType,
+    };
+    deps.push(dep);
+  }
+  return deps;
+}
 
 export async function extractPnpmWorkspaceFile(
-  catalogs: PnpmCatalogs,
+  workspaceFile: PnpmWorkspaceFile,
   packageFile: string,
 ): Promise<PackageFileContent<NpmManagerData> | null> {
   logger.trace(`pnpm.extractPnpmWorkspaceFile(${packageFile})`);
 
-  const pnpmCatalogs = pnpmCatalogsToArray(catalogs);
+  const pnpmCatalogs = pnpmCatalogsToArray(workspaceFile);
 
   const deps = extractCatalogDeps(pnpmCatalogs);
+
+  if (isNonEmptyObject(workspaceFile.configDependencies)) {
+    deps.push(...extractConfigDeps(workspaceFile.configDependencies));
+  }
 
   let pnpmShrinkwrap;
   const filePath = getSiblingFileName(packageFile, 'pnpm-lock.yaml');

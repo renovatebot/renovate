@@ -3,7 +3,7 @@ import type { Document } from 'yaml';
 import { CST, isCollection, isPair, isScalar, parseDocument } from 'yaml';
 import { logger } from '../../../../../logger';
 import type { UpdateDependencyConfig } from '../../../types';
-import { PnpmCatalogs } from '../../schema';
+import { PnpmCatalogs, PnpmConfigDependencies } from '../../schema';
 import { getNewGitValue, getNewNpmAliasValue } from './common';
 
 export function updatePnpmCatalogDependency({
@@ -84,6 +84,100 @@ export function updatePnpmCatalogDependency({
 
   /* v8 ignore next 3 -- this should not happen in practice, but we must satisfy the types */
   if (!modifiedDocument.contents?.srcToken) {
+    return null;
+  }
+
+  return CST.stringify(modifiedDocument.contents.srcToken);
+}
+
+export function updatePnpmConfigDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
+  const { depType, depName } = upgrade;
+
+  let { newValue } = upgrade;
+
+  newValue = getNewGitValue(upgrade) ?? newValue;
+  newValue = getNewNpmAliasValue(newValue, upgrade) ?? newValue;
+
+  if (upgrade.newDigest) {
+    newValue = `${newValue}+${upgrade.newDigest}`;
+  }
+
+  logger.trace(
+    `npm.updatePnpmConfigDependency(): ${depType}.${depName} = ${newValue}`,
+  );
+
+  let document;
+  let parsedContents;
+
+  try {
+    document = parseDocument(fileContent, { keepSourceTokens: true });
+    parsedContents = PnpmConfigDependencies.parse(document.toJS());
+  } catch (err) {
+    logger.debug({ err }, 'Could not parse pnpm-workspace YAML file.');
+    return null;
+  }
+
+  const oldVersion = parsedContents.configDependencies?.[depName!];
+
+  if (oldVersion === newValue) {
+    logger.trace('Version is already updated');
+    return fileContent;
+  }
+
+  const configDeps = document.get('configDependencies', true);
+  if (!isCollection(configDeps)) {
+    return null;
+  }
+
+  const oldNode = configDeps.get(depName!, true);
+
+  if (!oldNode) {
+    return null;
+  }
+
+  let modifiedDocument: Document | null = null;
+  if (isScalar(oldNode)) {
+    const path = ['configDependencies', depName!];
+    modifiedDocument = changeDependencyIn(document, path, {
+      newValue,
+      newName: upgrade.newName,
+    });
+  } else if (isCollection(oldNode)) {
+    if (!upgrade.downloadUrl) {
+      logger.warn(
+        { depName, packageFile: upgrade.packageFile },
+        'Cannot update pnpm configDependency object without downloadUrl',
+      );
+      return null;
+    }
+
+    // If it's an object, we try to update the 'integrity' field if it exists
+    const integrityPath = ['configDependencies', depName!, 'integrity'];
+    const oldIntegrityNode = (oldNode as any).get('integrity', true);
+    if (isScalar(oldIntegrityNode)) {
+      modifiedDocument = changeDependencyIn(document, integrityPath, {
+        newValue,
+      });
+    }
+
+    // Also try to update 'tarball' if it exists
+    const tarballPath = ['configDependencies', depName!, 'tarball'];
+    const oldTarballNode = (oldNode as any).get('tarball', true);
+    if (isScalar(oldTarballNode)) {
+      modifiedDocument = changeDependencyIn(
+        modifiedDocument ?? document,
+        tarballPath,
+        {
+          newValue: upgrade.downloadUrl,
+        },
+      );
+    }
+  }
+
+  if (!modifiedDocument?.contents?.srcToken) {
     return null;
   }
 

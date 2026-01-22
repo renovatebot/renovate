@@ -153,6 +153,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
+          downloadUrl: expect.any(String),
           newValue: '1.4.1',
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
@@ -211,6 +212,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 0,
           newMinor: 9,
           newPatch: 7,
+          downloadUrl: expect.any(String),
           newValue: '^0.9.0',
           newVersion: '0.9.7',
           newVersionAgeInDays: expect.any(Number),
@@ -224,6 +226,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
+          downloadUrl: expect.any(String),
           newValue: '^1.0.0',
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
@@ -255,6 +258,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 0,
           newMinor: 4,
           newPatch: 4,
+          downloadUrl: expect.any(String),
           newValue: '^0.4.0',
           newVersion: '0.4.4',
           newVersionAgeInDays: expect.any(Number),
@@ -268,6 +272,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 0,
           newMinor: 9,
           newPatch: 7,
+          downloadUrl: expect.any(String),
           newValue: '^0.9.0',
           newVersion: '0.9.7',
           newVersionAgeInDays: expect.any(Number),
@@ -281,6 +286,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
+          downloadUrl: expect.any(String),
           newValue: '^1.0.0',
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
@@ -309,6 +315,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 0,
           newMinor: 9,
           newPatch: 7,
+          downloadUrl: expect.any(String),
           newValue: '0.9.7',
           newVersion: '0.9.7',
           newVersionAgeInDays: expect.any(Number),
@@ -321,6 +328,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
+          downloadUrl: expect.any(String),
           newValue: '1.4.1',
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
@@ -350,6 +358,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 0,
           newMinor: 4,
           newPatch: 4,
+          downloadUrl: expect.any(String),
           newValue: '0.4.4',
           newVersion: '0.4.4',
           newVersionAgeInDays: expect.any(Number),
@@ -362,6 +371,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 0,
           newMinor: 9,
           newPatch: 7,
+          downloadUrl: expect.any(String),
           newValue: '0.9.7',
           newVersion: '0.9.7',
           newVersionAgeInDays: expect.any(Number),
@@ -374,6 +384,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
+          downloadUrl: expect.any(String),
           newValue: '1.4.1',
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
@@ -403,6 +414,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
+          downloadUrl: expect.any(String),
           newValue: '1.4.1',
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
@@ -439,6 +451,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 0,
           newMinor: 9,
           newPatch: 7,
+          downloadUrl: expect.any(String),
           newValue: '^0.9.0',
           newVersion: '0.9.7',
           newVersionAgeInDays: expect.any(Number),
@@ -452,6 +465,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
+          downloadUrl: expect.any(String),
           newValue: '^1.0.0',
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
@@ -479,6 +493,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 0,
           newMinor: 9,
           newPatch: 7,
+          downloadUrl: expect.any(String),
           newValue: '0.9.7',
           newVersion: '0.9.7',
           newVersionAgeInDays: expect.any(Number),
@@ -506,6 +521,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 0,
           newMinor: 9,
           newPatch: 7,
+          downloadUrl: expect.any(String),
           newValue: '0.9.7',
           newVersion: '0.9.7',
           newVersionAgeInDays: expect.any(Number),
@@ -533,6 +549,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 0,
           newMinor: 9,
           newPatch: 7,
+          downloadUrl: expect.any(String),
           newValue: '0.9.7',
           newVersion: '0.9.7',
           newVersionAgeInDays: expect.any(Number),
@@ -561,6 +578,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 0,
           newMinor: 9,
           newPatch: 7,
+          downloadUrl: expect.any(String),
           newValue: '0.9.7',
           newVersion: '0.9.7',
           newVersionAgeInDays: expect.any(Number),
@@ -589,6 +607,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 0,
           newMinor: 9,
           newPatch: 4,
+          downloadUrl: expect.any(String),
           newValue: '0.9.4',
           newVersion: '0.9.4',
           newVersionAgeInDays: expect.any(Number),
@@ -628,6 +647,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 0,
           newMinor: 9,
           newPatch: 7,
+          downloadUrl: expect.any(String),
           newValue: '0.9.7',
           newVersion: '0.9.7',
           newVersionAgeInDays: expect.any(Number),
@@ -640,6 +660,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
+          downloadUrl: expect.any(String),
           newValue: '1.4.1',
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
@@ -673,6 +694,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 0,
           newMinor: 9,
           newPatch: 7,
+          downloadUrl: expect.any(String),
           newValue: '0.9.7',
           newVersion: '0.9.7',
           newVersionAgeInDays: expect.any(Number),
@@ -685,6 +707,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
+          downloadUrl: expect.any(String),
           newValue: '1.4.1',
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
@@ -713,6 +736,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 0,
           newMinor: 9,
           newPatch: 7,
+          downloadUrl: expect.any(String),
           newValue: '0.9.7',
           newVersion: '0.9.7',
           newVersionAgeInDays: expect.any(Number),
@@ -725,6 +749,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
+          downloadUrl: expect.any(String),
           newValue: '1.4.1',
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
@@ -753,6 +778,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 0,
           newMinor: 8,
           newPatch: 12,
+          downloadUrl: expect.any(String),
           newValue: '0.8.12',
           newVersion: '0.8.12',
           newVersionAgeInDays: expect.any(Number),
@@ -765,6 +791,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 0,
           newMinor: 9,
           newPatch: 7,
+          downloadUrl: expect.any(String),
           newValue: '0.9.7',
           newVersion: '0.9.7',
           newVersionAgeInDays: expect.any(Number),
@@ -777,6 +804,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
+          downloadUrl: expect.any(String),
           newValue: '1.4.1',
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
@@ -813,6 +841,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
+          downloadUrl: expect.any(String),
           newValue: '^1.0.0',
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
@@ -841,6 +870,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
+          downloadUrl: expect.any(String),
           newValue: '1.4.1',
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
@@ -868,6 +898,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 0,
           newPatch: 1,
+          downloadUrl: expect.any(String),
           newValue: '1.0.1',
           newVersion: '1.0.1',
           newVersionAgeInDays: expect.any(Number),
@@ -896,6 +927,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
+          downloadUrl: expect.any(String),
           newValue: '1.4.1',
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
@@ -924,6 +956,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 1,
           newPatch: 0,
+          downloadUrl: expect.any(String),
           newValue: '1.1.0',
           newVersion: '1.1.0',
           newVersionAgeInDays: expect.any(Number),
@@ -952,6 +985,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 1,
           newPatch: 0,
+          downloadUrl: expect.any(String),
           newValue: '1.1.0',
           newVersion: '1.1.0',
           newVersionAgeInDays: expect.any(Number),
@@ -980,6 +1014,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 1,
           newPatch: 0,
+          downloadUrl: expect.any(String),
           newValue: '1.1.0',
           newVersion: '1.1.0',
           newVersionAgeInDays: expect.any(Number),
@@ -1009,6 +1044,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
+          downloadUrl: expect.any(String),
           newValue: '1.4.1',
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
@@ -1037,6 +1073,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 0,
           newPatch: 1,
+          downloadUrl: expect.any(String),
           newValue: '1.0.1',
           newVersion: '1.0.1',
           newVersionAgeInDays: expect.any(Number),
@@ -1087,6 +1124,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 0,
           newMinor: 9,
           newPatch: 7,
+          downloadUrl: expect.any(String),
           newValue: '~0.9.0',
           newVersion: '0.9.7',
           newVersionAgeInDays: expect.any(Number),
@@ -1095,6 +1133,7 @@ describe('workers/repository/process/lookup/index', () => {
         },
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 1,
@@ -1241,6 +1280,7 @@ describe('workers/repository/process/lookup/index', () => {
         },
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 1,
@@ -1276,6 +1316,7 @@ describe('workers/repository/process/lookup/index', () => {
         },
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: false,
           isRange: true,
           newMajor: 1,
@@ -1308,6 +1349,7 @@ describe('workers/repository/process/lookup/index', () => {
           isBreaking: false,
           isLockfileUpdate: true,
           isRange: true,
+          downloadUrl: expect.any(String),
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
@@ -1338,6 +1380,7 @@ describe('workers/repository/process/lookup/index', () => {
           isBreaking: false,
           isLockfileUpdate: true,
           isRange: true,
+          downloadUrl: expect.any(String),
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
@@ -1365,6 +1408,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: false,
           isLockfileUpdate: true,
           isRange: true,
@@ -1394,6 +1438,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: false,
           isLockfileUpdate: true,
           isRange: true,
@@ -1452,6 +1497,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: false,
           isRange: true,
           newMajor: 1,
@@ -1480,6 +1526,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: false,
           isRange: true,
           newMajor: 1,
@@ -1511,6 +1558,8 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
+          newDigest: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 3,
@@ -1542,6 +1591,8 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
+          newDigest: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 3,
@@ -1651,6 +1702,7 @@ describe('workers/repository/process/lookup/index', () => {
         },
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: false,
           isRange: true,
           newMajor: 1,
@@ -1686,6 +1738,7 @@ describe('workers/repository/process/lookup/index', () => {
         },
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: false,
           isRange: true,
           newMajor: 1,
@@ -1714,6 +1767,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: false,
           isRange: true,
           newMajor: 1,
@@ -1742,6 +1796,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 1,
@@ -1770,6 +1825,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: false,
           isRange: true,
           newMajor: 1,
@@ -1798,6 +1854,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: false,
           isRange: true,
           newMajor: 1,
@@ -1826,6 +1883,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 1,
@@ -1854,6 +1912,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: false,
           isRange: true,
           newMajor: 1,
@@ -1882,6 +1941,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 0,
@@ -1895,6 +1955,7 @@ describe('workers/repository/process/lookup/index', () => {
         },
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 1,
@@ -1923,6 +1984,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 0,
@@ -1936,6 +1998,7 @@ describe('workers/repository/process/lookup/index', () => {
         },
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 1,
@@ -1964,6 +2027,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 0,
@@ -1977,6 +2041,7 @@ describe('workers/repository/process/lookup/index', () => {
         },
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 1,
@@ -2008,6 +2073,8 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
+          newDigest: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 3,
@@ -2039,6 +2106,8 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
+          newDigest: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 3,
@@ -2070,8 +2139,10 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
+          newDigest: expect.any(String),
           newMajor: 3,
           newMinor: 8,
           newPatch: 1,
@@ -2101,6 +2172,8 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
+          newDigest: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 3,
@@ -2129,6 +2202,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: false,
           isRange: true,
           newMajor: 1,
@@ -2171,6 +2245,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 0,
@@ -2184,6 +2259,7 @@ describe('workers/repository/process/lookup/index', () => {
         },
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 1,
@@ -2212,6 +2288,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 0,
@@ -2225,6 +2302,7 @@ describe('workers/repository/process/lookup/index', () => {
         },
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 1,
@@ -2253,6 +2331,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 1,
@@ -2281,6 +2360,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: false,
           isRange: true,
           newMajor: 1,
@@ -2309,6 +2389,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: false,
           isRange: true,
           newMajor: 1,
@@ -2338,6 +2419,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 2,
@@ -2366,6 +2448,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: false,
           isRange: true,
           newMajor: 1,
@@ -2394,6 +2477,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 1,
@@ -2422,6 +2506,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 1,
@@ -2450,6 +2535,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 0,
@@ -2463,6 +2549,7 @@ describe('workers/repository/process/lookup/index', () => {
         },
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 1,
@@ -2491,6 +2578,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 0,
@@ -2504,6 +2592,7 @@ describe('workers/repository/process/lookup/index', () => {
         },
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 1,
@@ -2547,6 +2636,7 @@ describe('workers/repository/process/lookup/index', () => {
         {
           bucket: 'major',
           isBreaking: true,
+          downloadUrl: expect.any(String),
           newMajor: 2,
           newMinor: 0,
           newPatch: 3,
@@ -2745,6 +2835,8 @@ describe('workers/repository/process/lookup/index', () => {
         {
           bucket: 'non-major',
           isBreaking: true,
+          downloadUrl: expect.any(String),
+          newDigest: expect.any(String),
           newMajor: 2,
           newMinor: 5,
           newPatch: 17,
@@ -2774,6 +2866,8 @@ describe('workers/repository/process/lookup/index', () => {
         {
           bucket: 'non-major',
           isBreaking: true,
+          downloadUrl: expect.any(String),
+          newDigest: expect.any(String),
           newMajor: 3,
           newMinor: 1,
           newPatch: 0,
@@ -2803,6 +2897,8 @@ describe('workers/repository/process/lookup/index', () => {
         {
           bucket: 'non-major',
           isBreaking: true,
+          downloadUrl: expect.any(String),
+          newDigest: expect.any(String),
           newMajor: 3,
           newMinor: 0,
           newPatch: 1,
@@ -2833,6 +2929,7 @@ describe('workers/repository/process/lookup/index', () => {
         {
           bucket: 'non-major',
           isBreaking: true,
+          downloadUrl: expect.any(String),
           newMajor: 0,
           newMinor: 0,
           newPatch: 35,
@@ -2879,6 +2976,8 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
+          newDigest: expect.any(String),
           isBreaking: true,
           newMajor: 3,
           newMinor: 0,
@@ -2937,6 +3036,8 @@ describe('workers/repository/process/lookup/index', () => {
         {
           bucket: 'non-major',
           isBreaking: true,
+          downloadUrl: expect.any(String),
+          newDigest: expect.any(String),
           newMajor: 3,
           newMinor: 0,
           newPatch: 1,
@@ -3132,6 +3233,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isRange: true,
           newMajor: 0,
@@ -3188,6 +3290,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: false,
           newMajor: 1,
           newMinor: 15,
@@ -3200,6 +3303,8 @@ describe('workers/repository/process/lookup/index', () => {
         },
         {
           bucket: 'major',
+          downloadUrl: expect.any(String),
+          newDigest: expect.any(String),
           isBreaking: true,
           newMajor: 3,
           newMinor: 8,
@@ -3230,6 +3335,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: false,
           newMajor: 1,
           newMinor: 15,
@@ -3243,6 +3349,8 @@ describe('workers/repository/process/lookup/index', () => {
         {
           bucket: 'v2',
           isBreaking: true,
+          downloadUrl: expect.any(String),
+          newDigest: expect.any(String),
           newMajor: 2,
           newMinor: 7,
           newPatch: 0,
@@ -3255,7 +3363,8 @@ describe('workers/repository/process/lookup/index', () => {
         {
           bucket: 'v3',
           isBreaking: true,
-
+          downloadUrl: expect.any(String),
+          newDigest: expect.any(String),
           newMajor: 3,
           newMinor: 8,
           newPatch: 1,
@@ -3317,6 +3426,7 @@ describe('workers/repository/process/lookup/index', () => {
           isBreaking: false,
           isBump: true,
           isRange: true,
+          downloadUrl: expect.any(String),
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
@@ -3347,6 +3457,7 @@ describe('workers/repository/process/lookup/index', () => {
           isBreaking: false,
           isBump: true,
           isRange: true,
+          downloadUrl: expect.any(String),
           newMajor: 1,
           newMinor: 0,
           newPatch: 1,
@@ -3360,6 +3471,7 @@ describe('workers/repository/process/lookup/index', () => {
           bucket: 'minor',
           isBreaking: false,
           isRange: true,
+          downloadUrl: expect.any(String),
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
@@ -3390,6 +3502,7 @@ describe('workers/repository/process/lookup/index', () => {
           isBreaking: false,
           isBump: true,
           isRange: true,
+          downloadUrl: expect.any(String),
           newMajor: 1,
           newMinor: 0,
           newPatch: 1,
@@ -3403,6 +3516,7 @@ describe('workers/repository/process/lookup/index', () => {
           bucket: 'minor',
           isBreaking: false,
           isRange: true,
+          downloadUrl: expect.any(String),
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
@@ -3429,6 +3543,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'non-major',
+          downloadUrl: expect.any(String),
           isBreaking: false,
           isBump: true,
           isRange: true,
@@ -3459,6 +3574,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'latest',
+          downloadUrl: expect.any(String),
           isBreaking: true,
           isBump: true,
           isRange: true,
@@ -3532,6 +3648,7 @@ describe('workers/repository/process/lookup/index', () => {
         {
           bucket: 'non-major',
           isBreaking: false,
+          downloadUrl: expect.any(String),
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
@@ -3640,6 +3757,7 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 1,
           newMinor: 4,
           newPatch: 1,
+          downloadUrl: expect.any(String),
           newValue: '~=1.4',
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
@@ -4530,6 +4648,7 @@ describe('workers/repository/process/lookup/index', () => {
             newMajor: 1,
             newMinor: 3,
             newPatch: 0,
+            downloadUrl: expect.any(String),
             newValue: '1.3.0',
             newVersion: '1.3.0',
             newVersionAgeInDays: expect.any(Number),
@@ -5349,6 +5468,8 @@ describe('workers/repository/process/lookup/index', () => {
           {
             bucket: 'non-major',
             isBreaking: false,
+            downloadUrl: expect.any(String),
+            newDigest: expect.any(String),
             mergeConfidenceLevel: 'high',
             newMajor: 3,
             newMinor: 8,
@@ -5379,6 +5500,8 @@ describe('workers/repository/process/lookup/index', () => {
         expect(updates).toEqual([
           {
             bucket: 'non-major',
+            downloadUrl: expect.any(String),
+            newDigest: expect.any(String),
             isBreaking: false,
             newMajor: 3,
             newMinor: 8,
