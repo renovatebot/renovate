@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { logger } from '../../../logger';
 import { getEnv } from '../../../util/env';
 import { parseGitUrl } from '../../../util/git/url';
-import { regEx } from '../../../util/regex';
 import {
   LooseArray,
   LooseRecord,
@@ -20,8 +19,7 @@ import * as gitVersioning from '../../versioning/git';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
 import { DependencyGroup, ProjectSection } from '../pep621/schema';
-import { depTypes } from '../pep621/utils';
-import { dependencyPattern } from '../pip_requirements/extract';
+import { depTypes, pep508ToPackageDependency } from '../pep621/utils';
 import type { PackageDependency, PackageFileContent } from '../types';
 
 const PoetryOptionalDependencyMixin = z
@@ -288,22 +286,15 @@ export const PoetrySection = z.object({
 
 export type PoetrySection = z.infer<typeof PoetrySection>;
 
-const BuildSystemRequireVal = z
-  .string()
-  .nonempty()
-  .transform((val) => regEx(`^${dependencyPattern}$`).exec(val))
-  .transform((match, ctx) => {
-    if (!match) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'invalid requirement',
-      });
-      return z.NEVER;
-    }
-
-    const [, depName, , poetryRequirement] = match;
-    return { depName, poetryRequirement };
-  });
+const BuildSystemRequires = LooseArray(
+  z
+    .string()
+    .nonempty()
+    .transform((val) =>
+      pep508ToPackageDependency(depTypes.buildSystemRequires, val),
+    )
+    .refine((dep) => dep !== null),
+).catch([]);
 
 export const PoetryPyProject = Toml.pipe(
   z
@@ -319,17 +310,20 @@ export const PoetryPyProject = Toml.pipe(
               buildBackend === 'poetry.masonry.api' ||
               buildBackend === 'poetry.core.masonry.api',
           ),
-          requires: LooseArray(BuildSystemRequireVal).transform((vals) => {
-            const req = vals.find(
-              ({ depName }) =>
-                depName === 'poetry' ||
-                depName === 'poetry_core' ||
-                depName === 'poetry-core',
-            );
-            return req?.poetryRequirement;
-          }),
+          requires: BuildSystemRequires,
         })
-        .transform(({ requires: poetryRequirement }) => poetryRequirement)
+        .transform(({ requires }) => {
+          const req = requires.find(
+            ({ depName }) =>
+              depName === 'poetry' ||
+              depName === 'poetry_core' ||
+              depName === 'poetry-core',
+          );
+          return {
+            poetryRequirement: req?.currentValue,
+            requires,
+          };
+        })
         .optional()
         .catch(undefined),
     })
@@ -337,7 +331,7 @@ export const PoetryPyProject = Toml.pipe(
       const {
         project,
         tool,
-        'build-system': poetryRequirement,
+        'build-system': buildSystem,
         'dependency-groups': dependencyGroups,
       } = pyproject;
 
@@ -354,6 +348,10 @@ export const PoetryPyProject = Toml.pipe(
       }
 
       deps.push(...dependencyGroups);
+
+      if (buildSystem?.requires) {
+        deps.push(...buildSystem.requires);
+      }
 
       const poetryDependencies = tool?.poetry?.dependencies;
       if (poetryDependencies) {
@@ -399,7 +397,10 @@ export const PoetryPyProject = Toml.pipe(
         }
       }
 
-      return { packageFileContent, poetryRequirement };
+      return {
+        packageFileContent,
+        poetryRequirement: buildSystem?.poetryRequirement,
+      };
     }),
 );
 
