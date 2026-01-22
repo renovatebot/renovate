@@ -11,6 +11,7 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as memCache from '../../../util/cache/memory';
+import type { Timestamp } from '../../../util/timestamp';
 import type { RegistryInfo } from './types';
 import { CrateDatasource } from '.';
 import { Fixtures } from '~test/fixtures';
@@ -488,6 +489,23 @@ describe('modules/datasource/crate/index', () => {
         {
           packageName: 'clap',
           registryUrl: 'https://example.com',
+        },
+        releaseOrig,
+      );
+
+      expect(res).toBe(releaseOrig);
+    });
+
+    it('no-op for release with timestamp', async () => {
+      const releaseOrig = {
+        version: '4.5.17',
+        releaseTimestamp: '2024-09-04T19:16:41.355Z' as Timestamp,
+      };
+
+      const res = await datasource.postprocessRelease(
+        {
+          packageName: 'clap',
+          registryUrl: 'https://crates.io',
         },
         releaseOrig,
       );
