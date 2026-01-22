@@ -3,6 +3,7 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { defaultRegistryUrls as npmDefaultRegistryUrl } from './common';
 import { getDependency } from './get';
+import type { NpmResponse } from './types';
 
 export { setNpmrc } from './npmrc';
 
@@ -39,5 +40,25 @@ export class NpmDatasource extends Datasource {
 
     const res = await getDependency(this.http, registryUrl, packageName);
     return res;
+  }
+  override async getDigest(
+    { packageName, registryUrl }: { packageName: string; registryUrl: string },
+    newValue?: string,
+  ): Promise<string | null> {
+    if (!registryUrl) {
+      return null;
+    }
+    if (!newValue) {
+      return null;
+    }
+    const packageUrl = `${registryUrl}/${encodeURIComponent(packageName)}`;
+    try {
+      const resp = await this.http.getJsonUnchecked<NpmResponse>(packageUrl);
+      const integrity = resp.body?.versions?.[newValue]?.dist?.integrity;
+      const shasum = resp.body?.versions?.[newValue]?.dist?.shasum;
+      return integrity ?? shasum ?? null;
+    } catch (err) {
+      this.handleGenericErrors(err as Error);
+    }
   }
 }
