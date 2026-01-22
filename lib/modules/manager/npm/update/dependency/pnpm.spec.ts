@@ -571,4 +571,104 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     });
     expect(testContent).toBeNull();
   });
+
+  it('handles pnpm configDependencies (scalar)', () => {
+    const upgrade = {
+      depType: 'pnpm.configDependencies',
+      depName: '@pnpm/plugin-better-defaults',
+      newValue: '0.2.2',
+    };
+    const pnpmWorkspaceYaml = codeBlock`
+      configDependencies:
+        '@pnpm/plugin-better-defaults': 0.2.1+sha512-abc
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(codeBlock`
+      configDependencies:
+        '@pnpm/plugin-better-defaults': 0.2.2
+    `);
+  });
+
+  it('handles pnpm configDependencies (scalar) with newDigest', () => {
+    const upgrade = {
+      depType: 'pnpm.configDependencies',
+      depName: '@pnpm/plugin-better-defaults',
+      newValue: '0.2.2',
+      newDigest: 'sha512-def',
+    };
+    const pnpmWorkspaceYaml = codeBlock`
+      configDependencies:
+        '@pnpm/plugin-better-defaults': 0.2.1+sha512-abc
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(codeBlock`
+      configDependencies:
+        '@pnpm/plugin-better-defaults': 0.2.2+sha512-def
+    `);
+  });
+
+  it('handles pnpm configDependencies (object)', () => {
+    const upgrade = {
+      depType: 'pnpm.configDependencies',
+      depName: '@myorg/pnpm-config-myorg',
+      currentValue:
+        '0.0.9+sha512-M2/VDjgxKrrY6lAo9rcCC1GE40uJBRHKFqvtdQTAdAPasr2MG0qfN/HeLByjd1bYiKWK2MWv0gDfUGGbs+DXDQ==',
+      currentVersion: '0.0.9',
+      newValue: '0.1.0',
+      newVersion: '0.1.0',
+    };
+    const pnpmWorkspaceYaml = codeBlock`
+      configDependencies:
+        '@myorg/pnpm-config-myorg':
+          integrity: 0.0.9+sha512-M2/VDjgxKrrY6lAo9rcCC1GE40uJBRHKFqvtdQTAdAPasr2MG0qfN/HeLByjd1bYiKWK2MWv0gDfUGGbs+DXDQ==
+          tarball: https://npm.pkg.github.com/download/@myorg/pnpm-config-myorg/0.0.9/0e6f2aea83935148ec1adfd3fd8c2afefd324516
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(codeBlock`
+      configDependencies:
+        '@myorg/pnpm-config-myorg':
+          integrity: 0.1.0
+          tarball: https://npm.pkg.github.com/download/@myorg/pnpm-config-myorg/0.1.0/0e6f2aea83935148ec1adfd3fd8c2afefd324516
+    `);
+  });
+
+  it('handles pnpm configDependencies (object) with newDigest and downloadUrl', () => {
+    const upgrade = {
+      depType: 'pnpm.configDependencies',
+      depName: '@myorg/pnpm-config-myorg',
+      currentValue:
+        '0.0.9+sha512-M2/VDjgxKrrY6lAo9rcCC1GE40uJBRHKFqvtdQTAdAPasr2MG0qfN/HeLByjd1bYiKWK2MWv0gDfUGGbs+DXDQ==',
+      currentVersion: '0.0.9',
+      newValue: '0.1.0',
+      newVersion: '0.1.0',
+      newDigest: 'sha512-def',
+      downloadUrl:
+        'https://npm.pkg.github.com/download/@myorg/pnpm-config-myorg/0.1.0/new-hash',
+    };
+    const pnpmWorkspaceYaml = codeBlock`
+      configDependencies:
+        '@myorg/pnpm-config-myorg':
+          integrity: 0.0.9+sha512-M2/VDjgxKrrY6lAo9rcCC1GE40uJBRHKFqvtdQTAdAPasr2MG0qfN/HeLByjd1bYiKWK2MWv0gDfUGGbs+DXDQ==
+          tarball: https://npm.pkg.github.com/download/@myorg/pnpm-config-myorg/0.0.9/0e6f2aea83935148ec1adfd3fd8c2afefd324516
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(codeBlock`
+      configDependencies:
+        '@myorg/pnpm-config-myorg':
+          integrity: 0.1.0+sha512-def
+          tarball: https://npm.pkg.github.com/download/@myorg/pnpm-config-myorg/0.1.0/new-hash
+    `);
+  });
 });

@@ -46,9 +46,10 @@ export interface LockFile {
 }
 
 export interface PnpmWorkspaceFile {
-  packages: string[];
+  packages?: string[];
   catalog?: Record<string, string>;
   catalogs?: Record<string, Record<string, string>>;
+  configDependencies?: Record<string, any>;
 }
 
 /**

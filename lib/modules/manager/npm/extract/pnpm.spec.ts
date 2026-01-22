@@ -390,6 +390,45 @@ describe('modules/manager/npm/extract/pnpm', () => {
       });
     });
 
+    it('parses configDependencies in pnpm-workspace.yaml file', async () => {
+      expect(
+        await extractPnpmWorkspaceFile(
+          {
+            configDependencies: {
+              '@pnpm/plugin-better-defaults':
+                '0.2.1+sha512-3Fmur80S7+vmOKMmTdKS6JofiuvpUaBIdKEpgDyr9571FHo5Z4O2nrRUaSflxvwEakeYxIaFZ5MBaqAUnYHaeg==',
+              '@myorg/pnpm-config': {
+                integrity:
+                  '0.0.9+sha512-M2/VDjgxKrrY6lAo9rcCC1GE40uJBRHKFqvtdQTAdAPasr2MG0qfN/HeLByjd1bYiKWK2MWv0gDfUGGbs+DXDQ==',
+                tarball:
+                  'https://npm.pkg.github.com/download/@myorg/pnpm-config/0.0.9/0e6f2aea83935148ec1adfd3fd8c2afefd324516',
+              },
+            },
+          },
+          'pnpm-workspace.yaml',
+        ),
+      ).toMatchObject({
+        deps: [
+          {
+            currentValue:
+              '0.2.1+sha512-3Fmur80S7+vmOKMmTdKS6JofiuvpUaBIdKEpgDyr9571FHo5Z4O2nrRUaSflxvwEakeYxIaFZ5MBaqAUnYHaeg==',
+            datasource: 'npm',
+            depName: '@pnpm/plugin-better-defaults',
+            depType: 'pnpm.configDependencies',
+            prettyDepType: 'pnpm.configDependencies',
+          },
+          {
+            currentValue:
+              '0.0.9+sha512-M2/VDjgxKrrY6lAo9rcCC1GE40uJBRHKFqvtdQTAdAPasr2MG0qfN/HeLByjd1bYiKWK2MWv0gDfUGGbs+DXDQ==',
+            datasource: 'npm',
+            depName: '@myorg/pnpm-config',
+            depType: 'pnpm.configDependencies',
+            prettyDepType: 'pnpm.configDependencies',
+          },
+        ],
+      });
+    });
+
     it('finds relevant lockfile', async () => {
       const lockfileContent = codeBlock`
         lockfileVersion: '9.0'
