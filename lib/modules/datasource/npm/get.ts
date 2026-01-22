@@ -112,7 +112,7 @@ export async function getDependency(
     res.homepage ??= latestVersion?.homepage;
 
     const { sourceUrl, sourceDirectory } = PackageSource.parse(res.repository);
-
+    console.log('DEBUG: versions count', Object.keys(res.versions).length);
     // Simplify response before caching and returning
     const dep: ReleaseResult = {
       homepage: res.homepage,
@@ -181,6 +181,10 @@ export async function getDependency(
       dep.isPrivate = true;
     }
 
+    console.log(
+      'DEBUG: dep.releases[0]',
+      JSON.stringify(dep.releases[0], null, 2),
+    );
     logger.trace({ dep }, 'dep');
     return dep;
   } catch (err) {
