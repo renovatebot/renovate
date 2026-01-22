@@ -5,6 +5,12 @@ export const PnpmCatalogs = z.object({
   catalog: z.optional(z.record(z.string())),
   catalogs: z.optional(z.record(z.record(z.string()))),
 });
+export type PnpmCatalogs = z.infer<typeof PnpmCatalogs>;
+
+export const PnpmConfigDependencies = z.object({
+  configDependencies: z.optional(z.record(z.any())),
+});
+export type PnpmConfigDependencies = z.infer<typeof PnpmConfigDependencies>;
 
 export const YarnCatalogs = z.object({
   catalog: z.optional(z.record(z.string())),
@@ -30,9 +36,10 @@ export type YarnConfig = z.infer<typeof YarnConfig>;
 
 export const PnpmWorkspaceFile = z
   .object({
-    packages: z.array(z.string()),
+    packages: z.array(z.string()).optional(),
   })
-  .and(PnpmCatalogs);
+  .and(PnpmCatalogs)
+  .and(PnpmConfigDependencies);
 export type PnpmWorkspaceFile = z.infer<typeof PnpmWorkspaceFile>;
 
 export const PackageManager = z
