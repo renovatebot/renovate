@@ -2035,7 +2035,7 @@ const options: RenovateOptions[] = [
   {
     name: 'dependencyDashboardReportStatistics',
     description:
-      'Controls whether repository statistic information is reported in the dependency dashboard.',
+      'Controls if repository statistics are shown in the Dependency Dashboard.',
     type: 'boolean',
     default: true,
   },
