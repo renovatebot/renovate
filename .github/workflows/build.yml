@@ -745,6 +745,10 @@ jobs:
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    concurrency:
+      group: ${{ github.workflow }}-release-${{ github.ref }}
+      # never cancel a release that has already started, as it may have started pushing artifacts
+      cancel-in-progress: false
     permissions:
       contents: write
       issues: write
