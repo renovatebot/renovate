@@ -1,5 +1,5 @@
-import type { parser } from '@jrnv/good-enough-parser';
-import { query as q } from '@jrnv/good-enough-parser';
+import type { parser } from '@renovatebot/good-enough-parser';
+import { query as q } from '@renovatebot/good-enough-parser';
 import { regEx } from '../../../../util/regex';
 import type { Ctx } from '../types';
 import {

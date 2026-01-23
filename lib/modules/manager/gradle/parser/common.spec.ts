@@ -1,4 +1,4 @@
-import type { lexer } from '@jrnv/good-enough-parser';
+import type { lexer } from '@renovatebot/good-enough-parser';
 import type { Ctx } from '../types';
 import {
   cleanupTempVars,

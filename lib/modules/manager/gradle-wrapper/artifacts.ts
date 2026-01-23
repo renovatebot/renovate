@@ -1,4 +1,4 @@
-import { lang, query as q } from '@jrnv/good-enough-parser';
+import { lang, query as q } from '@renovatebot/good-enough-parser';
 import { isTruthy } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';

@@ -42,9 +42,6 @@ importers:
       '@cdktf/hcl2json':
         specifier: 0.21.0
         version: 0.21.0
-      '@jrnv/good-enough-parser':
-        specifier: 1.1.24
-        version: 1.1.24
       '@opentelemetry/api':
         specifier: 1.9.0
         version: 1.9.0
@@ -99,6 +96,9 @@ importers:
       '@renovatebot/detect-tools':
         specifier: 1.2.8
         version: 1.2.8
+      '@renovatebot/good-enough-parser':
+        specifier: 1.1.24
+        version: 1.1.24
       '@renovatebot/osv-offline':
         specifier: 2.0.1
         version: 2.0.1
@@ -1275,10 +1275,6 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@jrnv/good-enough-parser@1.1.24':
-    resolution: {integrity: sha512-t7jEi36IXEW2GFgaHeeZnywd+d1VAzKZ3sKVFGM9ycEgKEcXNkGi1ZIyd9125S8Rc5CJpLi9/3NGodIPE53rAQ==}
-    engines: {node: '>=18.12.0', yarn: ^1.17.0}
-
   '@jsonjoy.com/base64@1.1.2':
     resolution: {integrity: sha512-q6XAnWQDIMA3+FTiOYajoYqySkO+JSat0ytXGSuRdq9uXE7o92gzuQwQM14xaCRlBLGq3v5miDGC4vkVTn54xA==}
     engines: {node: '>=10.0'}
@@ -1739,6 +1735,10 @@ packages:
 
   '@renovatebot/detect-tools@1.2.8':
     resolution: {integrity: sha512-TDHJeRQxFPzaZuUSNBqWLmg0MBTion3E4Tz6bTZFll4ZyjWm0OyJ+u4sYb8whSjVryjRwCK0vALAq65TFNKg3A==}
+
+  '@renovatebot/good-enough-parser@1.1.24':
+    resolution: {integrity: sha512-8Saxgtu9ajFTtttLX4p9yztPnaxbluWO//aQFMS8gure4htffyvxZ4bwPmz7bBzIcXNOLjaVbrW0eTpNZw3uCg==}
+    engines: {node: '>=18.12.0', yarn: ^1.17.0}
 
   '@renovatebot/osv-offline-db@2.0.1':
     resolution: {integrity: sha512-DB3tPESeQ3Qw0hysgZJogxYJLIcQ0g9nR7xTuYFXTrJzwchRIftNqMd/K5lTeC7tFpjz8JwAY6D669sgUp2oYQ==}
@@ -7919,13 +7919,6 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@jrnv/good-enough-parser@1.1.24':
-    dependencies:
-      '@thi.ng/zipper': 1.0.3
-      '@types/moo': 0.5.5
-      klona: 2.0.6
-      moo: 0.5.2
-
   '@jsonjoy.com/base64@1.1.2(tslib@2.8.1)':
     dependencies:
       tslib: 2.8.1
@@ -8405,6 +8398,13 @@ snapshots:
       toml-eslint-parser: 0.12.0
       upath: 2.0.1
       zod: 3.25.76
+
+  '@renovatebot/good-enough-parser@1.1.24':
+    dependencies:
+      '@thi.ng/zipper': 1.0.3
+      '@types/moo': 0.5.5
+      klona: 2.0.6
+      moo: 0.5.2
 
   '@renovatebot/osv-offline-db@2.0.1':
     dependencies:

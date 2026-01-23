@@ -1,4 +1,4 @@
-import { lang, query as q } from '@jrnv/good-enough-parser';
+import { lang, query as q } from '@renovatebot/good-enough-parser';
 import { Ctx } from './context';
 import { extensionTags } from './extension-tags';
 import type { ResultFragment } from './fragments';
