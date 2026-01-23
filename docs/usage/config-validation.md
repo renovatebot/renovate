@@ -103,3 +103,7 @@ The next time Renovate runs on that repo it will:
 1. Add a passing or failing status to the branch, depending on the outcome of the config validation run.
 1. If there's an _open_ pull request with validation errors from the _reconfigure_ branch then Renovate comments in the PR with details.
 1. Validate each commit the next time Renovate runs on the repository, until the PR is merged.
+
+<!-- prettier-ignore -->
+!!! note
+    The reconfigure branch **must** be pushed to the source repository that Renovate runs against, not a fork.
