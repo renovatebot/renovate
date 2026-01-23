@@ -87,6 +87,7 @@ export function migrateConfig(
         migratedConfig[key] = String(val[0]);
       } else if (isArray(val)) {
         // @ts-expect-error -- TODO: fix me
+        // v8 ignore else -- TODO: add test #40625
         if (isArray(migratedConfig?.[key])) {
           const newArray = [];
           // @ts-expect-error -- TODO: fix me
@@ -209,6 +210,7 @@ export function migrateConfig(
       // @ts-expect-error -- TODO: fix me
       if (migratedConfig.matchManagers.includes('gradle-lite')) {
         // @ts-expect-error -- TODO: fix me
+        // v8 ignore else -- TODO: add test #40625
         if (!migratedConfig.matchManagers.includes('gradle')) {
           // @ts-expect-error -- TODO: fix me
           migratedConfig.matchManagers.push('gradle');

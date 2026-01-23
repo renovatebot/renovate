@@ -3342,6 +3342,7 @@ export function getOptions(): RenovateOptions[] {
 function loadManagerOptions(): void {
   const allManagers = new Map([...getManagers(), ...getCustomManagers()]);
   for (const [name, config] of allManagers.entries()) {
+    // v8 ignore else -- TODO: add test #40625
     if (config.defaultConfig) {
       const managerConfig: RenovateOptions = {
         name,

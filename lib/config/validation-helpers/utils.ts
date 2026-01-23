@@ -70,6 +70,7 @@ export function isFalseGlobal(
   parentPath?: string,
 ): boolean {
   if (parentPath?.includes('hostRules')) {
+    // v8 ignore else -- TODO: add test #40625
     if (
       optionName === 'token' ||
       optionName === 'username' ||

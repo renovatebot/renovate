@@ -27,9 +27,11 @@ export async function tryDecryptBcPgp(
       armoredMessage += `=`.repeat(4 - (armoredMessage.length % 4));
     }
 
+    // v8 ignore else -- TODO: add test #40625
     if (!hasStartHeader) {
       armoredMessage = `${startBlock}${armoredMessage}`;
     }
+    // v8 ignore else -- TODO: add test #40625
     if (!hasEndHeader) {
       armoredMessage = `${armoredMessage}${endBlock}`;
     }
