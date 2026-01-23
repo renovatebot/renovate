@@ -1,6 +1,7 @@
 import { isNumber, isString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
+import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import type { Pr } from '../../../../modules/platform';
@@ -100,7 +101,7 @@ export async function ensureOnboardingPr(
   if (existingPr) {
     const wasClosed = await ensureOnboardingAutoCloseAge(existingPr);
     if (wasClosed) {
-      return;
+      throw new Error(REPOSITORY_CLOSED_ONBOARDING);
     }
 
     // skip pr-update if branch is conflicted
