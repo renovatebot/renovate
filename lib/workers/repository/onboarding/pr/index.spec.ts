@@ -2,6 +2,7 @@ import type { RequestError, Response } from 'got';
 import { DateTime } from 'luxon';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
+import { InheritConfig } from '../../../../config/inherit';
 import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
@@ -353,6 +354,35 @@ describe('workers/repository/onboarding/pr/index', () => {
             title: 'Configure Renovate',
             bodyStruct,
             createdAt: '2020-02-29T01:40:21Z',
+            number: 1,
+          }),
+        );
+        await expect(ensureOnboardingPr(config, {}, branches)).rejects.toThrow(
+          REPOSITORY_CLOSED_ONBOARDING,
+        );
+        expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+        expect(platform.updatePr).toHaveBeenCalledWith({
+          number: 1,
+          state: 'closed',
+          prTitle: 'Configure Renovate',
+        });
+      });
+
+      it('prefers inherited onboardingAutoCloseAge over global config', async () => {
+        const now = DateTime.now();
+        vi.setSystemTime(now.toMillis());
+        // PR was created 36 hours ago (1.5 days)
+        const createdAt = now.minus({ hour: 36 });
+
+        config.baseBranch = 'some-branch';
+        GlobalConfig.set({ onboardingAutoCloseAge: 2 });
+        InheritConfig.set({ onboardingAutoCloseAge: 1 });
+
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({
+            title: 'Configure Renovate',
+            bodyStruct,
+            createdAt: createdAt.toISO(),
             number: 1,
           }),
         );

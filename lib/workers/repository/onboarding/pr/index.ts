@@ -9,6 +9,7 @@ import { platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
+import { getInheritedOrGlobal } from '../../../../util/common';
 import { getElapsedDays } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
 import { getFile } from '../../../../util/git';
@@ -27,7 +28,6 @@ import { isOnboardingBranchConflicted } from '../branch/onboarding-branch-cache'
 import {
   OnboardingState,
   getDefaultConfigFileName,
-  getOnboardingAutoCloseAge,
   getSemanticCommitPrTitle,
 } from '../common';
 import { getBaseBranchDesc } from './base-branch';
@@ -42,7 +42,7 @@ import { getExpectedPrList } from './pr-list';
 async function ensureOnboardingAutoCloseAge(existingPr: Pr): Promise<boolean> {
   // check if the existing pr crosses the onboarding autoclose age
   const ageOfOnboardingPr = getElapsedDays(existingPr.createdAt!, false);
-  const onboardingAutoCloseAge = GlobalConfig.get('onboardingAutoCloseAge')!;
+  const onboardingAutoCloseAge = getInheritedOrGlobal('onboardingAutoCloseAge');
   if (onboardingAutoCloseAge) {
     logger.debug(
       {

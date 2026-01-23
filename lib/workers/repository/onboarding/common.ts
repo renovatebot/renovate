@@ -1,45 +1,7 @@
-import { isNumber } from '@sindresorhus/is';
 import { getConfigFileNames } from '../../../config/app-strings';
-import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
-
-export function getOnboardingAutoCloseAge(
-  inheritedOnboardingAutoCloseAge: number | undefined,
-): number | null {
-  const globalOnboardingAutoCloseAge = GlobalConfig.get(
-    'onboardingAutoCloseAge',
-  )!;
-
-  if (
-    !isNumber(inheritedOnboardingAutoCloseAge) &&
-    !isNumber(globalOnboardingAutoCloseAge)
-  ) {
-    return null;
-  }
-
-  if (!isNumber(inheritedOnboardingAutoCloseAge)) {
-    return globalOnboardingAutoCloseAge;
-  }
-
-  if (!isNumber(globalOnboardingAutoCloseAge)) {
-    return inheritedOnboardingAutoCloseAge;
-  }
-
-  if (globalOnboardingAutoCloseAge < inheritedOnboardingAutoCloseAge) {
-    logger.warn(
-      {
-        inheritedOnboardingAutoCloseAge,
-        globalOnboardingAutoCloseAge,
-      },
-      'Re-setting "onboardingAutoCloseAge" value as it crosses the global limit',
-    );
-    return globalOnboardingAutoCloseAge;
-  }
-
-  return inheritedOnboardingAutoCloseAge;
-}
 
 export function getSemanticCommitPrTitle(config: RenovateConfig): string {
   return `${config.semanticCommitType ?? 'chore'}: ${config.onboardingPrTitle}`;

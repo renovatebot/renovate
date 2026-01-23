@@ -11,10 +11,11 @@ import { platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
+import { getInheritedOrGlobal } from '../../../../util/common';
 import { getElapsedDays } from '../../../../util/date';
 import { readLocalFile } from '../../../../util/fs';
 import { getBranchCommit } from '../../../../util/git';
-import { getOnboardingAutoCloseAge, getSemanticCommitPrTitle } from '../common';
+import { getSemanticCommitPrTitle } from '../common';
 
 async function findFile(fileName: string): Promise<boolean> {
   logger.debug(`findFile(${fileName})`);
@@ -162,7 +163,9 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
       closedOnboardingPr.createdAt!,
       false,
     );
-    const onboardingAutoCloseAge = GlobalConfig.get('onboardingAutoCloseAge');
+    const onboardingAutoCloseAge = getInheritedOrGlobal(
+      'onboardingAutoCloseAge',
+    );
     if (onboardingAutoCloseAge) {
       logger.debug(
         {

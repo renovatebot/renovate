@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../../config/global';
+import { InheritConfig } from '../../../../config/inherit';
 import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform/types';
@@ -156,6 +157,30 @@ describe('workers/repository/onboarding/branch/check', () => {
       platform.findPr.mockResolvedValue(
         partial<Pr>({
           createdAt: '2020-02-29T01:40:21Z',
+          title: 'Configure Renovate',
+          bodyStruct,
+        }),
+      );
+      scm.getFileList.mockResolvedValue([]);
+      await expect(isOnboarded(config)).rejects.toThrow(
+        REPOSITORY_CLOSED_ONBOARDING,
+      );
+      expect(platform.ensureComment).not.toHaveBeenCalled();
+    });
+
+    it('prefers inherited onboardingAutoCloseAge over global config', async () => {
+      const now = DateTime.now();
+      vi.setSystemTime(now.toMillis());
+      // PR was created 36 hours ago (1.5 days)
+      const createdAt = now.minus({ hour: 36 });
+
+      GlobalConfig.set({ onboardingAutoCloseAge: 2 });
+      InheritConfig.set({ onboardingAutoCloseAge: 1 });
+
+      cache.getCache.mockReturnValue({});
+      platform.findPr.mockResolvedValue(
+        partial<Pr>({
+          createdAt: createdAt.toISO(),
           title: 'Configure Renovate',
           bodyStruct,
         }),
