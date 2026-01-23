@@ -21,6 +21,7 @@ export function cleanupHttpCache(cacheData: RepoCacheData): void {
   const now = DateTime.now();
   for (const [url, item] of Object.entries(httpCache)) {
     const parsed = HttpCache.safeParse(item);
+    // v8 ignore else -- TODO: add test #40625
     if (parsed.success && parsed.data) {
       const item = parsed.data;
       const expiry = DateTime.fromISO(item.timestamp).plus({ days: ttlDays });

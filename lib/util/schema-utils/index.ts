@@ -289,7 +289,7 @@ export const Toml = z.string().transform((str, ctx) => {
 export const Ini = z.string().transform((str, ctx): Record<string, unknown> => {
   try {
     return ini.parse(str);
-  } catch {
+  } catch /* v8 ignore next -- TODO: add test #40625 */ {
     ctx.addIssue({ code: 'custom', message: 'Invalid INI' });
     return z.NEVER;
   }

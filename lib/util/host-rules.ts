@@ -149,6 +149,7 @@ export function find(search: HostRuleSearch): CombinedHostRule {
 
     if (rule.hostType) {
       hostTypeMatch = false;
+      // v8 ignore else -- TODO: add test #40625
       if (search.hostType === rule.hostType) {
         hostTypeMatch = true;
       }
@@ -163,6 +164,7 @@ export function find(search: HostRuleSearch): CombinedHostRule {
 
     if (!isUndefined(rule.readOnly)) {
       readOnlyMatch = false;
+      // v8 ignore else -- TODO: add test #40625
       if (search.readOnly === rule.readOnly) {
         readOnlyMatch = true;
         hostTypeMatch = true; // When we match `readOnly`, we don't care about `hostType`

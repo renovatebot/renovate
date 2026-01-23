@@ -21,6 +21,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       return null;
     }
 
+    // v8 ignore else -- TODO: add test #40625
     if (isPlainObject(httpCache.httpResponse)) {
       httpCache.httpResponse.cached = true;
     }
@@ -49,6 +50,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     }
   }
 
+  // v8 ignore next -- TODO: add test #40625
   bypassServer<T>(
     _method: string,
     _url: string,

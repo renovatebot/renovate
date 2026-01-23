@@ -12,6 +12,7 @@ export function clone<T = unknown>(input: T): T {
   } catch (err) {
     logger.warn({ err }, 'error cloning object');
     const str = quickStringify(input);
+    // v8 ignore else -- not easily testable
     if (str) {
       return JSON.parse(str) as T;
     }
