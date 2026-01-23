@@ -15,6 +15,10 @@ vi.mock('../../../../util/cache/repository');
 const cache = vi.mocked(_cache);
 
 describe('workers/repository/onboarding/branch/check', () => {
+  beforeAll(() => {
+    GlobalConfig.reset();
+  });
+
   const config = partial<RenovateConfig>({
     requireConfig: 'required',
     suppressNotifications: [],
