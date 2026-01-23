@@ -97,8 +97,8 @@ importers:
         specifier: 1.2.8
         version: 1.2.8
       '@renovatebot/good-enough-parser':
-        specifier: 1.1.24
-        version: 1.1.24
+        specifier: 1.2.0
+        version: 1.2.0
       '@renovatebot/osv-offline':
         specifier: 2.0.1
         version: 2.0.1
@@ -1736,8 +1736,8 @@ packages:
   '@renovatebot/detect-tools@1.2.8':
     resolution: {integrity: sha512-TDHJeRQxFPzaZuUSNBqWLmg0MBTion3E4Tz6bTZFll4ZyjWm0OyJ+u4sYb8whSjVryjRwCK0vALAq65TFNKg3A==}
 
-  '@renovatebot/good-enough-parser@1.1.24':
-    resolution: {integrity: sha512-8Saxgtu9ajFTtttLX4p9yztPnaxbluWO//aQFMS8gure4htffyvxZ4bwPmz7bBzIcXNOLjaVbrW0eTpNZw3uCg==}
+  '@renovatebot/good-enough-parser@1.2.0':
+    resolution: {integrity: sha512-5HrZJqZJzjzhghtJ85nNG8/dE97MQ1LOvo+T4dMGZg1s56HnZEZkm5KENNhQ+dwqC6vk5DdOcZ8J0oQOcn8gng==}
     engines: {node: '>=18.12.0', yarn: ^1.17.0}
 
   '@renovatebot/osv-offline-db@2.0.1':
@@ -2291,9 +2291,6 @@ packages:
 
   '@types/moo@0.5.10':
     resolution: {integrity: sha512-W6KzyZjXUYpwQfLK1O1UDzqcqYlul+lO7Bt71luyIIyNlOZwJaNeWWdqFs1C/f2hohZvUFHMk6oFNe9Rg48DbA==}
-
-  '@types/moo@0.5.5':
-    resolution: {integrity: sha512-eXQpwnkI4Ntw5uJg6i2PINdRFWLr55dqjuYQaLHNjvqTzF14QdNWbCbml9sza0byyXNA0hZlHtcdN+VNDcgVHA==}
 
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
@@ -8399,10 +8396,10 @@ snapshots:
       upath: 2.0.1
       zod: 3.25.76
 
-  '@renovatebot/good-enough-parser@1.1.24':
+  '@renovatebot/good-enough-parser@1.2.0':
     dependencies:
       '@thi.ng/zipper': 1.0.3
-      '@types/moo': 0.5.5
+      '@types/moo': 0.5.10
       klona: 2.0.6
       moo: 0.5.2
 
@@ -9094,8 +9091,6 @@ snapshots:
   '@types/minimist@1.2.5': {}
 
   '@types/moo@0.5.10': {}
-
-  '@types/moo@0.5.5': {}
 
   '@types/ms@2.1.0': {}
 
