@@ -8,6 +8,7 @@ export class RebaseStalePrsMigration extends AbstractMigration {
   override run(value: unknown): void {
     const rebaseConflictedPrs = this.get('rebaseConflictedPrs');
 
+    // v8 ignore else -- TODO: add test #40625
     if (rebaseConflictedPrs !== false) {
       if (isBoolean(value)) {
         this.setSafely(

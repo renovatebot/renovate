@@ -34,6 +34,7 @@ export function createDefaultStreams(
     stream: process.stdout,
   };
 
+  // v8 ignore else -- TODO: add test #40625
   if (getEnv('LOG_FORMAT') !== 'json') {
     // TODO: typings (#9615)
     const prettyStdOut = new RenovateStream() as any;
@@ -158,6 +159,7 @@ export function levels(
   level: bunyan.LogLevelString,
 ): void {
   bunyanLogger.levels(name, level);
+  // v8 ignore else -- TODO: add test #40625
   if (name === 'stdout') {
     stdoutLevel = level;
   }

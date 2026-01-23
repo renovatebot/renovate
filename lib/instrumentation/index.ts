@@ -111,10 +111,9 @@ export function init(): void {
 
   instrumentations = [
     new HttpInstrumentation({
-      /* v8 ignore next -- not easily testable */
+      /* v8 ignore start -- not easily testable */
       applyCustomAttributesOnSpan: (span, request, response) => {
         // ignore 404 errors when the branch protection of Github could not be found. This is expected if no rules are configured
-        /* v8 ignore next -- not easily testable */
         if (
           request instanceof ClientRequest &&
           request.host === `api.github.com` &&
@@ -124,6 +123,7 @@ export function init(): void {
           span.setStatus({ code: SpanStatusCode.OK });
         }
       },
+      /* v8 ignore stop -- not easily testable */
     }),
     new BunyanInstrumentation(),
     new RedisInstrumentation(),
