@@ -45,6 +45,8 @@ export type YarnConfig = z.infer<typeof YarnConfig>;
 export const PnpmWorkspaceFile = z
   .object({
     packages: z.array(z.string()).optional(),
+    minimumReleaseAge: z.number().nullish(),
+    minimumReleaseAgeExclude: z.array(z.string()).optional(),
   })
   .and(PnpmCatalogs)
   .and(PnpmConfigDependencies);
