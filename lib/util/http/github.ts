@@ -156,6 +156,7 @@ function handleGotError(
   if (err.statusCode === 401) {
     // Warn once for github.com token if unauthorized
     const hostname = parseUrl(url)?.hostname;
+    // v8 ignore else -- TODO: add test #40625
     if (hostname === 'github.com' || hostname === 'api.github.com') {
       logger.once.warn('github.com token 401 unauthorized');
     }
@@ -215,6 +216,7 @@ function constructAcceptString(input?: any): string {
     typeof input === 'string' ? input.split(regEx(/\s*,\s*/)) : [];
 
   // TODO: regression of #6736
+  // v8 ignore else -- TODO: add test #40625
   if (
     !acceptStrings.some((x) => x === defaultAccept) &&
     (!acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
@@ -391,6 +393,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       const env = getEnv();
       if (next?.url && linkHeader?.last?.page) {
         let lastPage = parseInt(linkHeader.last.page);
+        // v8 ignore else -- TODO: add test #40625
         if (!env.RENOVATE_PAGINATE_ALL && httpOptions.paginate !== 'all') {
           lastPage = Math.min(pageLimit, lastPage);
         }
@@ -416,13 +419,17 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
           },
         );
         const pages = await p.all(queue);
+        // v8 ignore else -- TODO: add test #40625
         if (httpOptions.paginationField && isPlainObject(result.body)) {
           const paginatedResult = result.body[httpOptions.paginationField];
+          // v8 ignore else -- TODO: add test #40625
           if (isArray<T>(paginatedResult)) {
             for (const nextPage of pages) {
+              // v8 ignore else -- TODO: add test #40625
               if (isPlainObject(nextPage.body)) {
                 const nextPageResults =
                   nextPage.body[httpOptions.paginationField];
+                // v8 ignore else -- TODO: add test #40625
                 if (isArray<T>(nextPageResults)) {
                   paginatedResult.push(...nextPageResults);
                 }
@@ -431,6 +438,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
           }
         } else if (isArray<T>(result.body)) {
           for (const nextPage of pages) {
+            // v8 ignore else -- TODO: add test #40625
             if (isArray<T>(nextPage.body)) {
               result.body.push(...nextPage.body);
             }

@@ -86,6 +86,7 @@ export async function renameLocalFile(
 }
 
 export async function ensureDir(dirName: string): Promise<void> {
+  // v8 ignore else -- TODO: add test #40625
   if (isNonEmptyString(dirName)) {
     await fs.ensureDir(dirName);
   }
@@ -226,6 +227,7 @@ export async function findUpLocal(
   // Return relative path if file is inside of local dir
   if (safePath.startsWith(localDir)) {
     let relativePath = safePath.replace(localDir, '');
+    // v8 ignore else -- TODO: add test #40625
     if (relativePath.startsWith('/')) {
       relativePath = relativePath.substring(1);
     }

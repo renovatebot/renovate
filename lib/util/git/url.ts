@@ -43,6 +43,7 @@ export function getHttpUrl(url: string, token?: string): string {
       // HTTPS URLs look like https://git.my.com/scm/project/repo.git
       // git-url-parse can't detect bitbucket-server from SSH URL
       // and thus doesn't know it should insert '/scm/'
+      // v8 ignore else -- TODO: add test #40625
       if (origProtocol === 'ssh') {
         parsedUrl.source = 'bitbucket-server';
       }
