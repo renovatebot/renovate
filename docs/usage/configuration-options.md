@@ -1503,7 +1503,9 @@ Set this to `false` if you prefer not to see abandoned packages in your dependen
 
 Controls if repository statistics are shown in the Dependency Dashboard.
 
-When enabled (default), Renovate will display a collapsible section in the dependency dashboard listing repository statistics.
+When enabled (default), Renovate shows the repository statistics on the Dependency Dashboard.
+
+You can collapse the section with the statistics when looking at the Dependency Dashboard issue.
 
 Set this config option to `false` if you don't want to see repository statistics in your Dependency Dashboard.
 
