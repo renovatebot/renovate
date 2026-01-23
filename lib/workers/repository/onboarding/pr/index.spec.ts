@@ -242,6 +242,31 @@ describe('workers/repository/onboarding/pr/index', () => {
         vi.useFakeTimers();
       });
 
+      it('ensures comment, if onboarding cache is up-to-date, but when onboarding pr is over onboardingAutoCloseAge', async () => {
+        OnboardingState.onboardingCacheValid = true;
+        const now = DateTime.now();
+        vi.setSystemTime(now.toMillis());
+        const createdAt = now.minus({ hour: 48 });
+
+        config.baseBranch = 'some-branch';
+        GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({
+            title: 'Configure Renovate',
+            bodyStruct,
+            createdAt: createdAt.toISO(),
+            number: 1,
+          }),
+        );
+        await ensureOnboardingPr(config, {}, branches);
+        expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+        expect(platform.updatePr).toHaveBeenCalledWith({
+          number: 1,
+          state: 'closed',
+          prTitle: 'Configure Renovate',
+        });
+      });
+
       it('does not comment, when onboarding pr is exactly at onboardingAutoCloseAge', async () => {
         const now = DateTime.now();
         vi.setSystemTime(now.toMillis());
