@@ -150,6 +150,21 @@ describe('workers/repository/reconfigure/validate', () => {
     });
   });
 
+  it('migrates config before validating', async () => {
+    await validateReconfigureBranch(
+      config,
+      { ...reconfigureConfig, baseBranches: ['main'] },
+      configFileName,
+      null,
+    );
+    expect(platform.setBranchStatus).toHaveBeenCalledExactlyOnceWith({
+      branchName: 'prefix/reconfigure',
+      context: 'renovate/config-validation',
+      description: 'Validation Successful',
+      state: 'green',
+    });
+  });
+
   it('handles array fields which accept strings', async () => {
     await validateReconfigureBranch(
       config,
