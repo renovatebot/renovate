@@ -34,6 +34,7 @@
     "vitest": "GIT_ALLOW_PROTOCOL=file LOG_LEVEL=fatal vitest run --logHeapUsage",
     "lint": "run-s ls-lint type-check oxlint eslint prettier markdown-lint git-check doc-fence-check",
     "lint-fix": "run-s oxlint-fix eslint-fix prettier-fix markdown-lint-fix",
+    "check": "tsx tools/check/index.ts",
     "ls-lint": "ls-lint",
     "markdown-lint": "markdownlint-cli2",
     "markdown-lint-fix": "markdownlint-cli2 --fix",
