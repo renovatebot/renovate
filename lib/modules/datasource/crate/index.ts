@@ -11,6 +11,7 @@ import { toSha256 } from '../../../util/hash';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import { acquireLock } from '../../../util/mutex';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import { joinUrlParts, parseUrl } from '../../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
 import { Datasource } from '../datasource';
@@ -61,7 +62,7 @@ export class CrateDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The release timestamp is determined from the `version.created_at` field from the response.';
+    'The release timestamp is determined from `pubtime` field from crates.io index if available, or `version.created_at` field from crates.io API otherwise.';
 
   @cache({
     namespace: `datasource-${CrateDatasource.id}`,
@@ -138,6 +139,10 @@ export class CrateDatasource extends Datasource {
 
         if (line.rust_version) {
           release.constraints = { rust: [line.rust_version] };
+        }
+
+        if (line.pubtime) {
+          release.releaseTimestamp = asTimestamp(line.pubtime);
         }
 
         return release;
@@ -456,11 +461,13 @@ export class CrateDatasource extends Datasource {
     { packageName, registryUrl }: PostprocessReleaseConfig,
     release: Release,
   ): Promise<PostprocessReleaseResult> {
-    if (registryUrl !== 'https://crates.io') {
+    if (release.releaseTimestamp || registryUrl !== 'https://crates.io') {
       return release;
     }
 
     const url = `https://crates.io/api/v1/crates/${packageName}/${release.versionOrig ?? release.version}`;
+    // Getting release timestamp could become unnecessary if the manual backfill of `pubtime` mentioned in
+    // https://github.com/rust-lang/cargo/issues/15491 is done for all packages.
     const { body: releaseTimestamp } = await this.http.getJson(
       url,
       { cacheProvider: memCacheProvider },
