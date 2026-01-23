@@ -107,6 +107,7 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: true,
     globalOnly: true,
+    cli: false,
   },
   {
     name: 'userAgent',
