@@ -46,6 +46,15 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
 
+    it('returns if onboarded cache is valid', async () => {
+      OnboardingState.onboardingCacheValid = true;
+      await expect(
+        ensureOnboardingPr(config, packageFiles, branches),
+      ).resolves.not.toThrow();
+      expect(platform.createPr).toHaveBeenCalledTimes(0);
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
+    });
+
     it.each`
       onboardingRebaseCheckbox | prUpdateRequested | expected
       ${false}                 | ${false}          | ${1}
