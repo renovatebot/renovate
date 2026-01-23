@@ -1,13 +1,18 @@
+import { isEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
 import upath from 'upath';
+import type { Scalar, YAMLSeq } from 'yaml';
+import { isScalar, isSeq, parseDocument } from 'yaml';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureCacheDir,
+  localPathExists,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
+import { matchRegexOrGlob } from '../../../util/string-match';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from './constants';
 import { getNodeToolConstraint } from './post-update/node-version';
@@ -25,13 +30,31 @@ const versionWithHashRegString = '^(?<version>.*)\\+(?<hash>.*)';
 // Execute 'corepack use' command for npm manager updates
 // This step is necessary because Corepack recommends attaching a hash after the version
 // The hash is generated only after running 'corepack use' and cannot be fetched from the npm registry
-export async function updateArtifacts({
-  packageFileName,
-  config,
-  updatedDeps,
-  newPackageFileContent: existingPackageFileContent,
-}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  logger.debug(`npm.updateArtifacts(${packageFileName})`);
+export async function updateArtifacts(
+  updateArtifactsConfig: UpdateArtifact,
+): Promise<UpdateArtifactsResult[] | null> {
+  logger.debug(`npm.updateArtifacts(${updateArtifactsConfig.packageFileName})`);
+  let res: UpdateArtifactsResult[] = [];
+  res.push((await handlePackageManagerUpdates(updateArtifactsConfig)) ?? {});
+  res.push((await updatePnpmWorkspace(updateArtifactsConfig)) ?? {});
+
+  res = res.filter(isNonEmptyObject);
+  if (res.length === 0) {
+    return null;
+  }
+
+  return res;
+}
+
+async function handlePackageManagerUpdates(
+  updateArtifactsConfig: UpdateArtifact,
+): Promise<UpdateArtifactsResult | null> {
+  const {
+    packageFileName,
+    config,
+    updatedDeps,
+    newPackageFileContent: existingPackageFileContent,
+  } = updateArtifactsConfig;
   const packageManagerUpdate = updatedDeps.find(
     (dep) => dep.depType === 'packageManager',
   );
@@ -101,25 +124,150 @@ export async function updateArtifacts({
       return null;
     }
     logger.debug('Returning updated package.json');
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: packageFileName,
-          contents: newPackageFileContent,
-        },
+    return {
+      file: {
+        type: 'addition',
+        path: packageFileName,
+        contents: newPackageFileContent,
       },
-    ];
+    };
   } catch (err) {
     logger.warn({ err }, 'Error updating package.json');
     await resetNpmrcContent(pkgFileDir, npmrcContent);
-    return [
-      {
-        artifactError: {
-          fileName: packageFileName,
-          stderr: err.message,
-        },
+    return {
+      artifactError: {
+        fileName: packageFileName,
+        stderr: err.message,
       },
-    ];
+    };
   }
+}
+
+/**
+ * Update the minimumReleaseAgeExclude setting in pnpm-workspace.yaml if needed
+ */
+async function updatePnpmWorkspace(
+  updateArtifactsConfig: UpdateArtifact,
+): Promise<UpdateArtifactsResult | null> {
+  const upgrades = updateArtifactsConfig.updatedDeps.filter(
+    (u) => u.isVulnerabilityAlert,
+  );
+  // return early if no security updates are present
+  if (isEmptyArray(upgrades)) {
+    return null;
+  }
+
+  const pnpmShrinkwrap = upgrades[0].managerData?.pnpmShrinkwrap as string;
+  const lockFileDir = upath.dirname(pnpmShrinkwrap);
+  const pnpmWorkspaceFilePath = upath.join(lockFileDir, 'pnpm-workspace.yaml');
+
+  if (!(await localPathExists(pnpmWorkspaceFilePath))) {
+    return null;
+  }
+
+  const packageFileContent = (await readLocalFile(
+    pnpmWorkspaceFilePath,
+    'utf8',
+  ))!;
+  const doc = parseDocument(packageFileContent);
+
+  if (!doc.get('minimumReleaseAge')) {
+    return null;
+  }
+
+  let updated = false;
+
+  for (const upgrade of upgrades) {
+    let excludeNode = doc.get('minimumReleaseAgeExclude') as YAMLSeq | null;
+    const newVersion = upgrade.newVersion ?? upgrade.newValue;
+
+    /* v8 ignore if -- should not happen, adding for type narrowing*/
+    if (excludeNode && !isSeq(excludeNode)) {
+      return null;
+    }
+
+    if (!excludeNode) {
+      logger.debug('Adding new exclude block');
+      excludeNode = doc.createNode([]) as YAMLSeq;
+      const newItem = doc.createNode(`${upgrade.depName}@${newVersion}`);
+      newItem.commentBefore = ` Renovate security update: ${upgrade.depName}@${newVersion}`;
+      excludeNode.items.push(newItem);
+      doc.set('minimumReleaseAgeExclude', excludeNode);
+      updated = true;
+      continue;
+    }
+
+    const { item: matchedItem, allExcluded } = getMatchedItem(
+      upgrade.depName!,
+      excludeNode.items,
+    );
+
+    if (allExcluded) {
+      continue;
+    }
+
+    if (isScalar<string>(matchedItem)) {
+      matchedItem.commentBefore = ` Renovate security update: ${upgrade.depName}@${newVersion}`;
+
+      // normalize value (no quote handling needed)
+      matchedItem.value = matchedItem.value + ` || ${newVersion}`;
+      updated = true;
+    } else {
+      // add new entry
+      const newItem = doc.createNode(`${upgrade.depName}@${newVersion}`);
+      newItem.commentBefore = ` Renovate security update: ${upgrade.depName}@${newVersion}`;
+
+      excludeNode.items.push(newItem);
+      updated = true;
+    }
+  }
+
+  if (!updated) {
+    return null;
+  }
+
+  const newContent = doc.toString();
+  await writeLocalFile(pnpmWorkspaceFilePath, newContent);
+
+  return {
+    file: {
+      type: 'addition',
+      path: pnpmWorkspaceFilePath,
+      contents: newContent,
+    },
+  };
+}
+
+function getMatchedItem(
+  depName: string,
+  items: unknown[],
+): {
+  item: Scalar | null;
+  allExcluded: boolean;
+} {
+  for (const item of items) {
+    /* v8 ignore if -- should not happen */
+    if (!isScalar(item) || !isString(item.value)) {
+      continue;
+    }
+
+    if (item.value.startsWith(`${depName}@`)) {
+      return {
+        allExcluded: false,
+        item,
+      };
+    }
+
+    if (item.value === depName || matchRegexOrGlob(depName, item.value)) {
+      return {
+        allExcluded: true,
+        item,
+      };
+    }
+  }
+
+  return {
+    item: null,
+    allExcluded: false,
+  };
 }

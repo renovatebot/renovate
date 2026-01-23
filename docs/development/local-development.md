@@ -148,6 +148,14 @@ We test all PRs using the same tests, run on GitHub Actions.
 
 Refactor PRs should ideally not change or remove tests (adding tests is OK).
 
+### Quick Local CI
+
+For fast iteration during development, use `pnpm check`, which runs all checks in parallel and only tests the shards affected by your changes:
+
+```bash
+pnpm check
+```
+
 ### Vitest
 
 Run the Vitest unit tests with the `pnpm vitest` command.

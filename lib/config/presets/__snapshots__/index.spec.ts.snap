@@ -13,6 +13,7 @@ exports[`config/presets/index > getPreset > gets linters 1`] = `
     "packages:tslint",
   ],
   "matchPackageNames": [
+    "oxlint",
     "prettier",
     "remark-lint",
     "standard",
@@ -182,6 +183,7 @@ exports[`config/presets/index > resolveConfigPresets > resolves linters 1`] = `
     "stylelint**",
     "codelyzer",
     "/\\btslint\\b/",
+    "oxlint",
     "prettier",
     "remark-lint",
     "standard",
@@ -218,6 +220,7 @@ exports[`config/presets/index > resolveConfigPresets > resolves nested groups 1`
         "stylelint**",
         "codelyzer",
         "/\\btslint\\b/",
+        "oxlint",
         "prettier",
         "remark-lint",
         "standard",

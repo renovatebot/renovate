@@ -796,8 +796,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
           ` && ` +
           `install-tool yarn-slim 1.22.18` +
           ` && ` +
-          // NOTE that this has a `|| true` appended inside the `exec(...)` function
-          `sed -i 's/ steps,/ steps.slice(0,1),/' some-dir/.yarn/cli.js` +
+          `sed -i 's/ steps,/ steps.slice(0,1),/' some-dir/.yarn/cli.js || true` +
           ` && ` +
           `yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts` +
           `"`,
