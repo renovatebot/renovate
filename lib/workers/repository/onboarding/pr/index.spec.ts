@@ -2,6 +2,7 @@ import type { RequestError, Response } from 'got';
 import { DateTime } from 'luxon';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
+import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import type { Pr } from '../../../../modules/platform';
@@ -258,7 +259,9 @@ describe('workers/repository/onboarding/pr/index', () => {
             number: 1,
           }),
         );
-        await ensureOnboardingPr(config, {}, branches);
+        await expect(ensureOnboardingPr(config, {}, branches)).rejects.toThrow(
+          REPOSITORY_CLOSED_ONBOARDING,
+        );
         expect(platform.ensureComment).toHaveBeenCalledTimes(1);
         expect(platform.updatePr).toHaveBeenCalledWith({
           number: 1,
@@ -304,7 +307,9 @@ describe('workers/repository/onboarding/pr/index', () => {
             number: 1,
           }),
         );
-        await ensureOnboardingPr(config, {}, branches);
+        await expect(ensureOnboardingPr(config, {}, branches)).rejects.toThrow(
+          REPOSITORY_CLOSED_ONBOARDING,
+        );
         expect(platform.ensureComment).toHaveBeenCalledTimes(1);
         expect(platform.updatePr).toHaveBeenCalledWith({
           number: 1,
@@ -329,7 +334,9 @@ describe('workers/repository/onboarding/pr/index', () => {
             number: 1,
           }),
         );
-        await ensureOnboardingPr(config, {}, branches);
+        await expect(ensureOnboardingPr(config, {}, branches)).rejects.toThrow(
+          REPOSITORY_CLOSED_ONBOARDING,
+        );
         expect(platform.ensureComment).toHaveBeenCalledTimes(1);
         expect(platform.updatePr).toHaveBeenCalledWith({
           number: 1,
@@ -349,7 +356,9 @@ describe('workers/repository/onboarding/pr/index', () => {
             number: 1,
           }),
         );
-        await ensureOnboardingPr(config, {}, branches);
+        await expect(ensureOnboardingPr(config, {}, branches)).rejects.toThrow(
+          REPOSITORY_CLOSED_ONBOARDING,
+        );
         expect(platform.ensureComment).toHaveBeenCalledTimes(1);
         expect(platform.updatePr).toHaveBeenCalledWith({
           number: 1,
