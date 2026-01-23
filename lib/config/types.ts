@@ -160,6 +160,13 @@ export interface RenovateSharedConfig {
   versionCompatibility?: string;
 }
 
+/**
+ * Contains all options with globalOnly=true && inheritConfigSupport=true
+ */
+export interface GlobalInheritableConfig {
+  configFileNames?: string[];
+}
+
 // Config options used only within the global worker
 // The below should contain config options where stage=global
 /** @deprecated use `RepoGlobalConfig` instead **/
@@ -204,7 +211,7 @@ export interface GlobalOnlyConfigLegacy {
  *
  * Should only contain config options where globalOnly=true.
  */
-export interface RepoGlobalConfig {
+export interface RepoGlobalConfig extends GlobalInheritableConfig {
   allowedCommands?: string[];
   allowCustomCrateRegistries?: boolean;
   allowPlugins?: boolean;

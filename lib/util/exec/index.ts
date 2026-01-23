@@ -21,7 +21,7 @@ import type {
   Opt,
   RawExecOptions,
 } from './types';
-import { asRawCommands, getChildEnv } from './utils';
+import { getChildEnv } from './utils';
 
 function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
   const extraEnvKeys = Object.keys(extraEnv);
@@ -113,7 +113,7 @@ async function prepareRawExec(
     const cwd = getCwd(opts);
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
     const dockerCommand = await generateDockerCommand(
-      asRawCommands(rawCommands),
+      rawCommands,
       [
         ...(await generateInstallCommands(opts.toolConstraints)),
         ...preCommands,
