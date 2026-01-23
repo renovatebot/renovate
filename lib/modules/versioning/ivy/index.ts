@@ -115,7 +115,6 @@ function getSatisfyingVersion(
 
 function getNewValue({
   currentValue,
-  rangeStrategy,
   newVersion,
 }: NewValueConfig): string | null {
   if (isVersion(currentValue)) {

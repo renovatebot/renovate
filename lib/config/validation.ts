@@ -401,13 +401,12 @@ export async function validateConfig(
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {
                 if (isObject(packageRule)) {
+                  const { config: resolved } = await resolveConfigPresets(
+                    packageRule as RenovateConfig,
+                    config,
+                  );
                   const resolvedRule = migrateConfig({
-                    packageRules: [
-                      await resolveConfigPresets(
-                        packageRule as RenovateConfig,
-                        config,
-                      ),
-                    ],
+                    packageRules: [resolved],
                   }).migratedConfig.packageRules![0];
                   warnings.push(
                     ...matchBaseBranchesValidator.check({

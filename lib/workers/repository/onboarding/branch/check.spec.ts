@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon';
+import { GlobalConfig } from '../../../../config/global';
 import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform/types';
@@ -78,22 +80,92 @@ describe('workers/repository/onboarding/branch/check', () => {
     expect(platform.ensureComment).toHaveBeenCalledOnce();
   });
 
-  // incase pr was autolcosed becasue if it passing the onboardingAutoCloseAge
-  it('continues with normal logic if closedPr exists - skips closing comment', async () => {
-    cache.getCache.mockReturnValue({});
-    platform.findPr.mockResolvedValue(
-      partial<Pr>({
-        createdAt: '2020-02-29T01:40:21Z',
-        title: 'Configure Renovate',
-        bodyStruct,
-      }),
-    );
-    scm.getFileList.mockResolvedValue([]);
-    config.onboardingAutoCloseAge = 1;
-    await expect(isOnboarded(config)).rejects.toThrow(
-      REPOSITORY_CLOSED_ONBOARDING,
-    );
-    expect(platform.ensureComment).not.toHaveBeenCalled();
+  describe('when closedPr exists and onboardingAutoCloseAge is set', () => {
+    beforeAll(() => {
+      vi.useFakeTimers();
+    });
+
+    it('adds closing comment if exactly at onboardingAutoCloseAge', async () => {
+      const now = DateTime.now();
+      vi.setSystemTime(now.toMillis());
+      // at exactly 1 day ago, this should trigger
+      const createdAt = now.minus({ hour: 24 });
+
+      GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+      cache.getCache.mockReturnValue({});
+      platform.findPr.mockResolvedValue(
+        partial<Pr>({
+          createdAt: createdAt.toISO(),
+          title: 'Configure Renovate',
+          bodyStruct,
+        }),
+      );
+      scm.getFileList.mockResolvedValue([]);
+      await expect(isOnboarded(config)).rejects.toThrow(
+        REPOSITORY_CLOSED_ONBOARDING,
+      );
+      expect(platform.ensureComment).toHaveBeenCalledOnce();
+    });
+
+    it('skips closing comment if onboarding pr is slightly older than onboardingAutoCloseAge', async () => {
+      const now = DateTime.now();
+      vi.setSystemTime(now.toMillis());
+      // we're currently 25 hours ahead of the creation time, which is 1.x days since the PR was created, which means that an `onboardingAutoCloseAge=1` SHOULD NOT trigger, as it's > 1
+      const createdAt = now.minus({ hour: 25 });
+
+      GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+      cache.getCache.mockReturnValue({});
+      platform.findPr.mockResolvedValue(
+        partial<Pr>({
+          createdAt: createdAt.toISO(),
+          title: 'Configure Renovate',
+          bodyStruct,
+        }),
+      );
+      scm.getFileList.mockResolvedValue([]);
+      await expect(isOnboarded(config)).rejects.toThrow(
+        REPOSITORY_CLOSED_ONBOARDING,
+      );
+      expect(platform.ensureComment).not.toHaveBeenCalled();
+    });
+
+    it('skips closing comment if onboarding pr is 1 day older than onboardingAutoCloseAge', async () => {
+      const now = DateTime.now();
+      vi.setSystemTime(now.toMillis());
+      const createdAt = now.minus({ hour: 48 });
+
+      GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+      cache.getCache.mockReturnValue({});
+      platform.findPr.mockResolvedValue(
+        partial<Pr>({
+          createdAt: createdAt.toISO(),
+          title: 'Configure Renovate',
+          bodyStruct,
+        }),
+      );
+      scm.getFileList.mockResolvedValue([]);
+      await expect(isOnboarded(config)).rejects.toThrow(
+        REPOSITORY_CLOSED_ONBOARDING,
+      );
+      expect(platform.ensureComment).not.toHaveBeenCalled();
+    });
+
+    it('skips closing comment if onboarding pr is significantly older than onboardingAutoCloseAge', async () => {
+      GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+      cache.getCache.mockReturnValue({});
+      platform.findPr.mockResolvedValue(
+        partial<Pr>({
+          createdAt: '2020-02-29T01:40:21Z',
+          title: 'Configure Renovate',
+          bodyStruct,
+        }),
+      );
+      scm.getFileList.mockResolvedValue([]);
+      await expect(isOnboarded(config)).rejects.toThrow(
+        REPOSITORY_CLOSED_ONBOARDING,
+      );
+      expect(platform.ensureComment).not.toHaveBeenCalled();
+    });
   });
 
   it('checks git file list for config file when in fork mode', async () => {

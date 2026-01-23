@@ -14,9 +14,7 @@ describe('util/cache/package/index', () => {
     expect(
       await set('_test-namespace', 'some-key', 'some-value', 5),
     ).toBeUndefined();
-    expect(async () => {
-      await cleanup({});
-    }).not.toThrow();
+    await expect(cleanup({})).resolves.toBeUndefined();
   });
 
   it('sets and gets file', async () => {

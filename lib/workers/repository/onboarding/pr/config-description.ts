@@ -29,7 +29,8 @@ function getDescriptionArray(config: RenovateConfig): string[] {
 
 export function getConfigDesc(
   config: RenovateConfig,
-  packageFiles?: Record<string, PackageFile[]>,
+  // TODO: remove unused parameter
+  _packageFiles?: Record<string, PackageFile[]>,
 ): string {
   // TODO: type (#22198)
   const configFile = getDefaultConfigFileName(config);

@@ -16,7 +16,7 @@ nav:
       - 'Bazel': 'bazel.md'
       - 'Bicep': 'bicep.md'
       - 'Docker': 'docker.md'
-      - 'Golang': 'golang.md'
+      - 'Go (Golang)': 'golang.md'
       - 'Java': 'java.md'
       - 'JavaScript': 'javascript.md'
       - 'Node.js Versions': 'node.md'

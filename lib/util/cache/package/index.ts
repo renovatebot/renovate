@@ -94,6 +94,7 @@ export async function init(config: AllConfig): Promise<void> {
     return;
   }
 
+  // v8 ignore else -- TODO: add test #40625
   if (config.cacheDir) {
     fileCache.init(config.cacheDir);
     cacheProxy = {

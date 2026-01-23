@@ -2199,10 +2199,13 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
-      expect(exec.exec).toHaveBeenCalledExactlyOnceWith('echo semver', {
-        cwd: '/localDir',
-        extraEnv: {},
-      });
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'echo semver',
+        expect.objectContaining({
+          cwd: '/localDir',
+          extraEnv: {},
+        }),
+      );
     });
 
     it('executes post-upgrade tasks with multiple dependecy in one branch', async () => {
@@ -2327,14 +2330,22 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
-      expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo some-dep-name-1', {
-        cwd: '/localDir',
-        extraEnv: {},
-      });
-      expect(exec.exec).toHaveBeenNthCalledWith(2, 'echo some-dep-name-2', {
-        cwd: '/localDir',
-        extraEnv: {},
-      });
+      expect(exec.exec).toHaveBeenNthCalledWith(
+        1,
+        'echo some-dep-name-1',
+        expect.objectContaining({
+          cwd: '/localDir',
+          extraEnv: {},
+        }),
+      );
+      expect(exec.exec).toHaveBeenNthCalledWith(
+        2,
+        'echo some-dep-name-2',
+        expect.objectContaining({
+          cwd: '/localDir',
+          extraEnv: {},
+        }),
+      );
       expect(exec.exec).toHaveBeenCalledTimes(2);
       const calledWithConfig = commit.commitFilesToBranch.mock.calls[0][0];
       const updatedArtifacts = calledWithConfig.updatedArtifacts;
@@ -2476,10 +2487,14 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
-      expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
-        cwd: '/localDir',
-        extraEnv: {},
-      });
+      expect(exec.exec).toHaveBeenNthCalledWith(
+        1,
+        'echo hardcoded-string',
+        expect.objectContaining({
+          cwd: '/localDir',
+          extraEnv: {},
+        }),
+      );
       expect(exec.exec).toHaveBeenCalledTimes(1);
       expect(
         findFileContent(
@@ -2681,10 +2696,14 @@ describe('workers/repository/update/branch/index', () => {
           result: 'done',
           commitSha: null,
         });
-        expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
-          cwd: '/localDir',
-          extraEnv: {},
-        });
+        expect(exec.exec).toHaveBeenNthCalledWith(
+          1,
+          'echo hardcoded-string',
+          expect.objectContaining({
+            cwd: '/localDir',
+            extraEnv: {},
+          }),
+        );
         expect(exec.exec).toHaveBeenCalledTimes(1);
         expect(
           findFileContent(

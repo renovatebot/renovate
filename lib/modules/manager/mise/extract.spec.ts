@@ -56,8 +56,10 @@ describe('modules/manager/mise/extract', () => {
       aws-cli = "2.25.10"
       aws-vault = "6.6.1"
       buf = "1.27.0"
+      caddy = "2.10.2"
       ccache = "4.11.3"
       committed = "1.1.7"
+      conan = "2.24.0"
       consul = "1.14.3"
       dotenv-linter = "3.3.0"
       hivemind = "1.1.0"
@@ -78,6 +80,8 @@ describe('modules/manager/mise/extract', () => {
       sops = "3.10.2"
       sqlite = "3.50.1"
       stripe = "1.25.0"
+      swiftformat = "0.58.0"
+      swiftlint = "0.55.1"
       taplo = "0.10.0"
       terragrunt = "0.72.6"
       tilt = "0.34.0"
@@ -122,6 +126,13 @@ describe('modules/manager/mise/extract', () => {
             packageName: 'bufbuild/buf',
           },
           {
+            currentValue: '2.10.2',
+            datasource: 'github-releases',
+            depName: 'caddy',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'caddyserver/caddy',
+          },
+          {
             currentValue: '4.11.3',
             datasource: 'github-releases',
             depName: 'ccache',
@@ -134,6 +145,12 @@ describe('modules/manager/mise/extract', () => {
             depName: 'committed',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'crate-ci/committed',
+          },
+          {
+            currentValue: '2.24.0',
+            datasource: 'github-releases',
+            depName: 'conan',
+            packageName: 'conan-io/conan',
           },
           {
             currentValue: '1.14.3',
@@ -269,6 +286,18 @@ describe('modules/manager/mise/extract', () => {
             depName: 'stripe',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'stripe/stripe-cli',
+          },
+          {
+            currentValue: '0.58.0',
+            datasource: 'github-releases',
+            depName: 'swiftformat',
+            packageName: 'nicklockwood/SwiftFormat',
+          },
+          {
+            currentValue: '0.55.1',
+            datasource: 'github-releases',
+            depName: 'swiftlint',
+            packageName: 'realm/SwiftLint',
           },
           {
             currentValue: '0.10.0',
