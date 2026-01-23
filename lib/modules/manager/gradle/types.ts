@@ -1,4 +1,4 @@
-import type { lexer } from 'good-enough-parser';
+import type { lexer } from '@jrnv/good-enough-parser';
 import type { PackageDependency } from '../types';
 
 export interface GradleManagerData {

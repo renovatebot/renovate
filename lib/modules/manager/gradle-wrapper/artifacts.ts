@@ -1,5 +1,5 @@
+import { lang, query as q } from '@jrnv/good-enough-parser';
 import { isTruthy } from '@sindresorhus/is';
-import { lang, query as q } from 'good-enough-parser';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';

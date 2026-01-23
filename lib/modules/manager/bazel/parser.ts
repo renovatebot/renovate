@@ -1,5 +1,5 @@
-import type { lexer, parser } from 'good-enough-parser';
-import { lang, query as q } from 'good-enough-parser';
+import type { lexer, parser } from '@jrnv/good-enough-parser';
+import { lang, query as q } from '@jrnv/good-enough-parser';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { hash } from '../../../util/hash';

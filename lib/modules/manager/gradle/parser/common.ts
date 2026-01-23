@@ -1,5 +1,5 @@
-import type { lexer, parser } from 'good-enough-parser';
-import { query as q } from 'good-enough-parser';
+import type { lexer, parser } from '@jrnv/good-enough-parser';
+import { query as q } from '@jrnv/good-enough-parser';
 import { clone } from '../../../../util/clone';
 import { regEx } from '../../../../util/regex';
 import type {

@@ -1,4 +1,4 @@
-import { query as q } from 'good-enough-parser';
+import { query as q } from '@jrnv/good-enough-parser';
 import type { Ctx } from '../types';
 import {
   cleanupTempVars,

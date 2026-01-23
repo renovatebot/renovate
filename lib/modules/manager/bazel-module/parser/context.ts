@@ -35,6 +35,10 @@ export class Ctx implements CtxCompatible {
   results: ResultFragment[];
   stack: AllFragments[];
 
+  // Temporary state for use_repo_rule parsing
+  _tempVariableName?: string;
+  _tempStrings?: string[];
+
   constructor(source: string) {
     this.source = source;
     this.results = [];

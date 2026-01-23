@@ -1,6 +1,6 @@
+import type { lexer, parser } from '@jrnv/good-enough-parser';
+import { lang, query as q } from '@jrnv/good-enough-parser';
 import { RANGE_PATTERN } from '@renovatebot/pep440';
-import type { lexer, parser } from 'good-enough-parser';
-import { lang, query as q } from 'good-enough-parser';
 import { regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
 import { normalizePythonDepName } from '../../datasource/pypi/common';
