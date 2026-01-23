@@ -1505,7 +1505,7 @@ Controls if repository statistics are shown in the Dependency Dashboard.
 
 When enabled (default), Renovate will display a collapsible section in the dependency dashboard listing repository statistics.
 
-Set this to `false` if you prefer not to see repository statistic information in your dependency dashboard.
+Set this config option to `false` if you don't want to see repository statistics in your Dependency Dashboard.
 
 ## dependencyDashboardTitle
 
