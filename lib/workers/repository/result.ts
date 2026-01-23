@@ -19,9 +19,27 @@ import {
 import { logger } from '../../logger';
 
 export type ProcessStatus =
+  /**
+   * The repository has been disabled, and will not be processed.
+   *
+   * See {@link RepositoryErrors} for information on which statuses lead to this.
+   */
   | 'disabled'
+  /**
+   * The repository has onboarded to Renovate, so will see PRs and/or branches raised by Renovate.
+   *
+   * The repository has not yet merged any PRs, or the repository performs branch-based automerge and those have not been detected (TODO #40635).
+   */
   | 'onboarded'
+  /**
+   * The repository has onboarded to Renovate, and has merged at least 1 Renovate PR.
+   *
+   * The repository may also perform branch-based automerge which has not been detected (TODO #40635).
+   */
   | 'activated'
+  /**
+   * The repository has an onboarding PR from Renovate that has not yet been reviewed and merged.
+   */
   | 'onboarding'
   | 'unknown';
 
