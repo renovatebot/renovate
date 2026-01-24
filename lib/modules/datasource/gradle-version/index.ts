@@ -1,4 +1,4 @@
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { regEx } from '../../../util/regex';
 import { asTimestamp } from '../../../util/timestamp';
 import * as gradleVersioning from '../../versioning/gradle';
@@ -28,12 +28,7 @@ export class GradleVersionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'We use the URL: https://github.com/gradle/gradle.';
 
-  @cache({
-    namespace: `datasource-${GradleVersionDatasource.id}`,
-    // TODO: types (#22198)
-    key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
-  })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     /* v8 ignore next 3 -- should never happen */
@@ -98,5 +93,15 @@ export class GradleVersionDatasource extends Datasource {
 
     const [major, minor, patch = '0'] = versionPart.split('.');
     return `v${major}.${minor}.${patch}${suffix}`;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${GradleVersionDatasource.id}`,
+        key: `${config.registryUrl}`,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

@@ -1,7 +1,7 @@
 import urlJoin from 'url-join';
 import { ZodError } from 'zod';
 import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { Result } from '../../../util/result';
 import { Datasource } from '../datasource';
 import { ReleasesConfig } from '../schema';
@@ -26,12 +26,9 @@ export class BuildpacksRegistryDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `source_code_url` field of the release object in the results.';
 
-  @cache({
-    namespace: `datasource-${BuildpacksRegistryDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl}:${packageName}`,
-  })
-  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  private async _getReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     const result = Result.parse(config, ReleasesConfig)
       .transform(({ packageName, registryUrl }) => {
         const url = urlJoin(
@@ -68,5 +65,15 @@ export class BuildpacksRegistryDatasource extends Datasource {
     }
 
     return val;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${BuildpacksRegistryDatasource.id}`,
+        key: `${config.registryUrl}:${config.packageName}`,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

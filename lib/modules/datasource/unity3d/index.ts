@@ -1,4 +1,4 @@
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { asTimestamp } from '../../../util/timestamp';
 import * as Unity3dVersioning from '../../versioning/unity3d';
 import { Datasource } from '../datasource';
@@ -98,18 +98,23 @@ export class Unity3dDatasource extends Datasource {
     return result;
   }
 
-  @cache({
-    namespace: `datasource-${Unity3dDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     return await this.getByStream(
       registryUrl,
       packageName === 'm_EditorVersionWithRevision',
+    );
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${Unity3dDatasource.id}`,
+        key: `${config.registryUrl}:${config.packageName}`,
+      },
+      () => this._getReleases(config),
     );
   }
 }

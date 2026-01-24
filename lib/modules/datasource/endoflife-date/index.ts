@@ -1,6 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -22,13 +22,7 @@ export class EndoflifeDateDatasource extends Datasource {
     super(EndoflifeDateDatasource.id);
   }
 
-  @cache({
-    namespace: `datasource-${datasource}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `${registryUrl!}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -53,5 +47,15 @@ export class EndoflifeDateDatasource extends Datasource {
     } catch (err) {
       this.handleGenericErrors(err);
     }
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${datasource}`,
+        key: `${config.registryUrl!}:${config.packageName}`,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

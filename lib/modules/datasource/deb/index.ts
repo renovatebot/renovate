@@ -1,6 +1,6 @@
 import readline from 'readline';
 import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import * as fs from '../../../util/fs';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -57,13 +57,7 @@ export class DebDatasource extends Datasource {
    * @param lastTimestamp - The timestamp of the last modification.
    * @returns a list of packages with minimal Metadata.
    */
-  @cache({
-    namespace: `datasource-${DebDatasource.id}`,
-    key: (extractedFile: string, lastTimestamp: Date) =>
-      `${extractedFile}:${lastTimestamp.getTime()}`,
-    ttlMinutes: 24 * 60,
-  })
-  async parseExtractedPackageIndex(
+  private async _parseExtractedPackageIndex(
     extractedFile: string,
     _lastTimestamp: Date,
   ): Promise<Record<string, PackageDescription[]>> {
@@ -109,11 +103,7 @@ export class DebDatasource extends Datasource {
     return allPackages;
   }
 
-  @cache({
-    namespace: `datasource-${DebDatasource.id}`,
-    key: (componentUrl: string) => componentUrl,
-  })
-  async getPackageIndex(
+  private async _getPackageIndex(
     componentUrl: string,
   ): Promise<Record<string, PackageDescription[]>> {
     const { extractedFile, lastTimestamp } = await downloadAndExtractPackage(
@@ -129,12 +119,7 @@ export class DebDatasource extends Datasource {
    * @param config - Configuration for fetching releases.
    * @returns The release result if the package is found, otherwise null.
    */
-  @cache({
-    namespace: `datasource-${DebDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -174,5 +159,41 @@ export class DebDatasource extends Datasource {
     }
 
     return aggregatedRelease;
+  }
+
+  parseExtractedPackageIndex(
+    extractedFile: string,
+    lastTimestamp: Date,
+  ): Promise<Record<string, PackageDescription[]>> {
+    return cached(
+      {
+        namespace: `datasource-${DebDatasource.id}`,
+        key: `${extractedFile}:${lastTimestamp.getTime()}`,
+        ttlMinutes: 24 * 60,
+      },
+      () => this._parseExtractedPackageIndex(extractedFile, lastTimestamp),
+    );
+  }
+
+  getPackageIndex(
+    componentUrl: string,
+  ): Promise<Record<string, PackageDescription[]>> {
+    return cached(
+      {
+        namespace: `datasource-${DebDatasource.id}`,
+        key: componentUrl,
+      },
+      () => this._getPackageIndex(componentUrl),
+    );
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${DebDatasource.id}`,
+        key: `${config.registryUrl}:${config.packageName}`,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

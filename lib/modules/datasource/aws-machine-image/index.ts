@@ -1,7 +1,7 @@
 import type { Filter, Image } from '@aws-sdk/client-ec2';
 import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { asTimestamp } from '../../../util/timestamp';
 import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image';
 import { Datasource } from '../datasource';
@@ -77,12 +77,7 @@ export class AwsMachineImageDatasource extends Datasource {
     return [filters, config];
   }
 
-  @cache({
-    namespace: `datasource-${AwsMachineImageDatasource.id}`,
-    key: (serializedAmiFilter: string) =>
-      `getSortedAwsMachineImages:${serializedAmiFilter}`,
-  })
-  async getSortedAwsMachineImages(
+  private async _getSortedAwsMachineImages(
     serializedAmiFilter: string,
   ): Promise<Image[]> {
     const [amiFilter, clientConfig] = this.loadConfig(serializedAmiFilter);
@@ -102,12 +97,7 @@ export class AwsMachineImageDatasource extends Datasource {
     });
   }
 
-  @cache({
-    namespace: `datasource-${AwsMachineImageDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig, newValue: string) =>
-      `getDigest:${packageName}:${newValue ?? ''}`,
-  })
-  override async getDigest(
+  private async _getDigest(
     { packageName: serializedAmiFilter }: GetReleasesConfig,
     newValue?: string,
   ): Promise<string | null> {
@@ -133,11 +123,7 @@ export class AwsMachineImageDatasource extends Datasource {
     return res?.releases?.[0]?.newDigest ?? /* v8 ignore next */ null; // TODO: needs test
   }
 
-  @cache({
-    namespace: `datasource-${AwsMachineImageDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName: serializedAmiFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const images = await this.getSortedAwsMachineImages(serializedAmiFilter);
@@ -157,5 +143,38 @@ export class AwsMachineImageDatasource extends Datasource {
         },
       ],
     };
+  }
+
+  getSortedAwsMachineImages(serializedAmiFilter: string): Promise<Image[]> {
+    return cached(
+      {
+        namespace: `datasource-${AwsMachineImageDatasource.id}`,
+        key: `getSortedAwsMachineImages:${serializedAmiFilter}`,
+      },
+      () => this._getSortedAwsMachineImages(serializedAmiFilter),
+    );
+  }
+
+  override getDigest(
+    config: GetReleasesConfig,
+    newValue?: string,
+  ): Promise<string | null> {
+    return cached(
+      {
+        namespace: `datasource-${AwsMachineImageDatasource.id}`,
+        key: `getDigest:${config.packageName}:${newValue ?? ''}`,
+      },
+      () => this._getDigest(config, newValue),
+    );
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${AwsMachineImageDatasource.id}`,
+        key: `getReleases:${config.packageName}`,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

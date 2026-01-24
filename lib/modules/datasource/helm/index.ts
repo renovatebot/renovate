@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { ensureTrailingSlash } from '../../../util/url';
 import * as helmVersioning from '../../versioning/helm';
 import { Datasource } from '../datasource';
@@ -29,11 +29,9 @@ export class HelmDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `home` field or the `sources` field in the results.';
 
-  @cache({
-    namespace: `datasource-${HelmDatasource.id}`,
-    key: (helmRepository: string) => `repository-data:${helmRepository}`,
-  })
-  async getRepositoryData(helmRepository: string): Promise<HelmRepositoryData> {
+  private async _getRepositoryData(
+    helmRepository: string,
+  ): Promise<HelmRepositoryData> {
     const { val, err } = await this.http
       .getYamlSafe(
         'index.yaml',
@@ -47,6 +45,16 @@ export class HelmDatasource extends Datasource {
     }
 
     return val;
+  }
+
+  getRepositoryData(helmRepository: string): Promise<HelmRepositoryData> {
+    return cached(
+      {
+        namespace: `datasource-${HelmDatasource.id}`,
+        key: `repository-data:${helmRepository}`,
+      },
+      () => this._getRepositoryData(helmRepository),
+    );
   }
 
   async getReleases({

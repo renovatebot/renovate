@@ -1,4 +1,4 @@
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { asTimestamp } from '../../../util/timestamp';
 import * as Unity3dPackagesVersioning from '../../versioning/unity3d-packages';
 import { Datasource } from '../datasource';
@@ -20,12 +20,7 @@ export class Unity3dPackagesDatasource extends Datasource {
     super(Unity3dPackagesDatasource.id);
   }
 
-  @cache({
-    namespace: `datasource-${Unity3dPackagesDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -62,5 +57,15 @@ export class Unity3dPackagesDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${Unity3dPackagesDatasource.id}`,
+        key: `${config.registryUrl}:${config.packageName}`,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

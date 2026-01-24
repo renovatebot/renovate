@@ -2,7 +2,7 @@ import { isNullOrUndefined } from '@sindresorhus/is';
 import pMap from 'p-map';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { regEx } from '../../../util/regex';
 import { joinUrlParts } from '../../../util/url';
 import * as semanticVersioning from '../../versioning/semver';
@@ -33,13 +33,7 @@ export class DenoDatasource extends Datasource {
     super(DenoDatasource.id);
   }
 
-  @cache({
-    namespace: `datasource-${DenoDatasource.id}`,
-    key: ({ packageName, registryUrl }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `getReleases:${registryUrl}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -69,11 +63,9 @@ export class DenoDatasource extends Datasource {
     return await this.getReleaseResult(moduleAPIURL);
   }
 
-  @cache({
-    namespace: `datasource-${DenoDatasource.id}`,
-    key: (moduleAPIURL) => `getReleaseResult:${moduleAPIURL}`,
-  })
-  async getReleaseResult(moduleAPIURL: string): Promise<ReleaseResult> {
+  private async _getReleaseResult(
+    moduleAPIURL: string,
+  ): Promise<ReleaseResult> {
     const detailsCacheKey = `details:${moduleAPIURL}`;
     const releasesCache: Record<string, Release> =
       (await packageCache.get(
@@ -128,5 +120,25 @@ export class DenoDatasource extends Datasource {
     }
 
     return { releases, tags };
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${DenoDatasource.id}`,
+        key: `getReleases:${config.registryUrl}:${config.packageName}`,
+      },
+      () => this._getReleases(config),
+    );
+  }
+
+  getReleaseResult(moduleAPIURL: string): Promise<ReleaseResult> {
+    return cached(
+      {
+        namespace: `datasource-${DenoDatasource.id}`,
+        key: `getReleaseResult:${moduleAPIURL}`,
+      },
+      () => this._getReleaseResult(moduleAPIURL),
+    );
   }
 }

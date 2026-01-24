@@ -1,4 +1,4 @@
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { GitlabHttp } from '../../../util/http/gitlab';
 import { asTimestamp } from '../../../util/timestamp';
 import { Datasource } from '../datasource';
@@ -24,13 +24,7 @@ export class GitlabReleasesDatasource extends Datasource {
     this.http = new GitlabHttp(GitlabReleasesDatasource.id);
   }
 
-  @cache({
-    namespace: `datasource-${GitlabReleasesDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `${registryUrl}/${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -62,5 +56,16 @@ export class GitlabReleasesDatasource extends Datasource {
     } catch (e) {
       this.handleGenericErrors(e);
     }
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${GitlabReleasesDatasource.id}`,
+        // TODO: types (#22198)
+        key: `${config.registryUrl}/${config.packageName}`,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

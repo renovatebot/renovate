@@ -1,7 +1,7 @@
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { coerceArray } from '../../../util/array';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { HttpError } from '../../../util/http';
 import { Timestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
@@ -30,13 +30,7 @@ export class CondaDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `dev_url` field in the results.';
 
-  @cache({
-    namespace: `datasource-${datasource}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `${registryUrl}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -96,5 +90,15 @@ export class CondaDatasource extends Datasource {
     }
 
     return result.releases.length ? result : null;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${datasource}`,
+        key: `${config.registryUrl}:${config.packageName}`,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

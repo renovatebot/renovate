@@ -1,4 +1,4 @@
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { regEx } from '../../../util/regex';
 import { GitDatasource } from '../git-refs/base';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
@@ -15,11 +15,7 @@ export class GitTagsDatasource extends GitDatasource {
   override readonly sourceUrlNote =
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
-  @cache({
-    namespace: `datasource-${GitTagsDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => packageName,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const rawRefs = await this.getRawRefs({ packageName });
@@ -45,6 +41,16 @@ export class GitTagsDatasource extends GitDatasource {
     };
 
     return result;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${GitTagsDatasource.id}`,
+        key: config.packageName,
+      },
+      () => this._getReleases(config),
+    );
   }
 
   override async getDigest(

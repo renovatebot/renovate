@@ -3,7 +3,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { getChildEnv } from '../../../util/exec/utils';
 import { privateCacheDir, readCacheFile } from '../../../util/fs';
 import { simpleGitConfig } from '../../../util/git/config';
@@ -64,15 +64,7 @@ export class CrateDatasource extends Datasource {
   override readonly releaseTimestampNote =
     'The release timestamp is determined from `pubtime` field from crates.io index if available, or `version.created_at` field from crates.io API otherwise.';
 
-  @cache({
-    namespace: `datasource-${CrateDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `${registryUrl}/${packageName}`,
-    cacheable: ({ registryUrl }: GetReleasesConfig) =>
-      CrateDatasource.areReleasesCacheable(registryUrl),
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -155,15 +147,7 @@ export class CrateDatasource extends Datasource {
     return result;
   }
 
-  @cache({
-    namespace: `datasource-${CrateDatasource.id}-metadata`,
-    key: (info: RegistryInfo, packageName: string) =>
-      `${info.rawUrl}/${packageName}`,
-    cacheable: (info: RegistryInfo) =>
-      CrateDatasource.areReleasesCacheable(info.rawUrl),
-    ttlMinutes: 24 * 60, // 24 hours
-  })
-  public async getCrateMetadata(
+  private async _getCrateMetadata(
     info: RegistryInfo,
     packageName: string,
   ): Promise<CrateMetadata | null> {
@@ -447,17 +431,7 @@ export class CrateDatasource extends Datasource {
     return [packageName.slice(0, 2), packageName.slice(2, 4), packageName];
   }
 
-  @cache({
-    namespace: `datasource-crate`,
-    key: (
-      { registryUrl, packageName }: PostprocessReleaseConfig,
-      { version }: Release,
-    ) => `postprocessRelease:${registryUrl}:${packageName}:${version}`,
-    ttlMinutes: 7 * 24 * 60,
-    cacheable: ({ registryUrl }: PostprocessReleaseConfig, _: Release) =>
-      registryUrl === 'https://crates.io',
-  })
-  override async postprocessRelease(
+  private async _postprocessRelease(
     { packageName, registryUrl }: PostprocessReleaseConfig,
     release: Release,
   ): Promise<PostprocessReleaseResult> {
@@ -475,5 +449,46 @@ export class CrateDatasource extends Datasource {
     );
     release.releaseTimestamp = releaseTimestamp;
     return release;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${CrateDatasource.id}`,
+        key: `${config.registryUrl}/${config.packageName}`,
+        cacheable: CrateDatasource.areReleasesCacheable(config.registryUrl),
+      },
+      () => this._getReleases(config),
+    );
+  }
+
+  public getCrateMetadata(
+    info: RegistryInfo,
+    packageName: string,
+  ): Promise<CrateMetadata | null> {
+    return cached(
+      {
+        namespace: `datasource-${CrateDatasource.id}-metadata`,
+        key: `${info.rawUrl}/${packageName}`,
+        cacheable: CrateDatasource.areReleasesCacheable(info.rawUrl),
+        ttlMinutes: 24 * 60,
+      },
+      () => this._getCrateMetadata(info, packageName),
+    );
+  }
+
+  override postprocessRelease(
+    config: PostprocessReleaseConfig,
+    release: Release,
+  ): Promise<PostprocessReleaseResult> {
+    return cached(
+      {
+        namespace: `datasource-crate`,
+        key: `postprocessRelease:${config.registryUrl}:${config.packageName}:${release.version}`,
+        ttlMinutes: 7 * 24 * 60,
+        cacheable: config.registryUrl === 'https://crates.io',
+      },
+      () => this._postprocessRelease(config, release),
+    );
   }
 }

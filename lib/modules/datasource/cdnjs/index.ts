@@ -1,7 +1,7 @@
 import { ZodError } from 'zod';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import type { HttpError } from '../../../util/http';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import { Result } from '../../../util/result';
@@ -30,14 +30,9 @@ export class CdnjsDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `repository` field in the results.';
 
-  @cache({
-    namespace: `datasource-${CdnjsDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => {
-      const library = packageName.split('/')[0];
-      return `getReleases:${library}`;
-    },
-  })
-  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  private async _getReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     const result = Result.parse(config, ReleasesConfig)
       .transform(({ packageName, registryUrl }) => {
         const [library] = packageName.split('/');
@@ -80,12 +75,7 @@ export class CdnjsDatasource extends Datasource {
     return val;
   }
 
-  @cache({
-    namespace: `datasource-${CdnjsDatasource.id}`,
-    key: ({ registryUrl, packageName }: DigestConfig, newValue: string) =>
-      `getDigest:${registryUrl}:${packageName}:${newValue}}`,
-  })
-  override async getDigest(
+  private async _getDigest(
     config: DigestConfig,
     newValue: string,
   ): Promise<string | null> {
@@ -115,6 +105,30 @@ export class CdnjsDatasource extends Datasource {
     }
 
     return val;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const library = config.packageName.split('/')[0];
+    return cached(
+      {
+        namespace: `datasource-${CdnjsDatasource.id}`,
+        key: `getReleases:${library}`,
+      },
+      () => this._getReleases(config),
+    );
+  }
+
+  override getDigest(
+    config: DigestConfig,
+    newValue: string,
+  ): Promise<string | null> {
+    return cached(
+      {
+        namespace: `datasource-${CdnjsDatasource.id}`,
+        key: `getDigest:${config.registryUrl}:${config.packageName}:${newValue}}`,
+      },
+      () => this._getDigest(config, newValue),
+    );
   }
 
   override handleHttpErrors(err: HttpError): void {

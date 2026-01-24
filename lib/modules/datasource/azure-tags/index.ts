@@ -1,4 +1,4 @@
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import type { PackageCacheNamespace } from '../../../util/cache/package/namespaces';
 import { ensureTrailingSlash } from '../../../util/url';
 import * as azureApi from '../../platform/azure/azure-got-wrapper';
@@ -23,12 +23,7 @@ export class AzureTagsDatasource extends Datasource {
     return `${normalizedUrl}_git/${packageName}`;
   }
 
-  @cache({
-    namespace: AzureTagsDatasource.cacheNamespace,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      AzureTagsDatasource.getCacheKey(registryUrl!, packageName, 'tags'),
-  })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
     packageName: repo,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -50,5 +45,19 @@ export class AzureTagsDatasource extends Datasource {
     };
 
     return dependency;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: AzureTagsDatasource.cacheNamespace,
+        key: AzureTagsDatasource.getCacheKey(
+          config.registryUrl!,
+          config.packageName,
+          'tags',
+        ),
+      },
+      () => this._getReleases(config),
+    );
   }
 }

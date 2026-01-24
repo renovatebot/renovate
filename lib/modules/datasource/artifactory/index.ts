@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { parse } from '../../../util/html';
 import { HttpError } from '../../../util/http';
 import { regEx } from '../../../util/regex';
@@ -26,13 +26,7 @@ export class ArtifactoryDatasource extends Datasource {
   override readonly releaseTimestampNote =
     'The release timestamp is determined from the date-like text, next to the version hyperlink tag in the results.';
 
-  @cache({
-    namespace: `datasource-${datasource}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `${registryUrl}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -110,5 +104,15 @@ export class ArtifactoryDatasource extends Datasource {
     }
 
     return result.releases.length ? result : null;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${datasource}`,
+        key: `${config.registryUrl}:${config.packageName}`,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

@@ -1,4 +1,4 @@
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import * as p from '../../../util/promises';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -30,12 +30,7 @@ export class DotnetVersionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'We use the URL https://github.com/dotnet/sdk for the `dotnet-sdk` package and, the https://github.com/dotnet/runtime URL for the `dotnet-runtime` package.';
 
-  @cache({
-    namespace: `datasource-${DotnetVersionDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => packageName,
-    ttlMinutes: 1440,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     if (!(packageName === 'dotnet-sdk' || packageName === 'dotnet-runtime')) {
@@ -67,13 +62,7 @@ export class DotnetVersionDatasource extends Datasource {
     }
   }
 
-  @cache({
-    namespace: `datasource-${DotnetVersionDatasource.id}`,
-    key: (releaseUrl: string, packageName: string) =>
-      `${releaseUrl}:${packageName}`,
-    ttlMinutes: 1440,
-  })
-  async getChannelReleases(
+  private async _getChannelReleases(
     releaseUrl: string,
     packageName: string,
   ): Promise<Release[]> {
@@ -85,5 +74,30 @@ export class DotnetVersionDatasource extends Datasource {
     } catch (err) {
       this.handleGenericErrors(err);
     }
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${DotnetVersionDatasource.id}`,
+        key: config.packageName,
+        ttlMinutes: 1440,
+      },
+      () => this._getReleases(config),
+    );
+  }
+
+  getChannelReleases(
+    releaseUrl: string,
+    packageName: string,
+  ): Promise<Release[]> {
+    return cached(
+      {
+        namespace: `datasource-${DotnetVersionDatasource.id}`,
+        key: `${releaseUrl}:${packageName}`,
+        ttlMinutes: 1440,
+      },
+      () => this._getChannelReleases(releaseUrl, packageName),
+    );
   }
 }

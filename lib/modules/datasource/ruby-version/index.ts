@@ -1,6 +1,6 @@
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { parse } from '../../../util/html';
 import type { HttpError } from '../../../util/http';
 import { asTimestamp } from '../../../util/timestamp';
@@ -28,8 +28,7 @@ export class RubyVersionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'We use the URL: https://github.com/ruby/ruby.';
 
-  @cache({ namespace: `datasource-${RubyVersionDatasource.id}`, key: 'all' })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const res: ReleaseResult = {
@@ -69,6 +68,16 @@ export class RubyVersionDatasource extends Datasource {
     }
 
     return res;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${RubyVersionDatasource.id}`,
+        key: 'all',
+      },
+      () => this._getReleases(config),
+    );
   }
 
   override handleHttpErrors(err: HttpError): never | void {

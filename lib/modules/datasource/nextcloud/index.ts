@@ -1,4 +1,4 @@
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { regEx } from '../../../util/regex';
 import { asTimestamp } from '../../../util/timestamp';
 import * as semver from '../../versioning/semver';
@@ -21,12 +21,7 @@ export class NextcloudDatasource extends Datasource {
     super(NextcloudDatasource.id);
   }
 
-  @cache({
-    namespace: `datasource-${NextcloudDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -77,5 +72,15 @@ export class NextcloudDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${NextcloudDatasource.id}`,
+        key: `${config.registryUrl}:${config.packageName}`,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

@@ -3,7 +3,7 @@ import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import * as awsEksAddonVersioning from '../../versioning/aws-eks-addon';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -20,11 +20,7 @@ export class AwsEKSAddonDataSource extends Datasource {
     super(AwsEKSAddonDataSource.id);
   }
 
-  @cache({
-    namespace: `datasource-${AwsEKSAddonDataSource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName: serializedFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const res = EksAddonsFilter.safeParse(serializedFilter);
@@ -79,5 +75,15 @@ export class AwsEKSAddonDataSource extends Datasource {
       });
     }
     return this.clients[cacheKey];
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${AwsEKSAddonDataSource.id}`,
+        key: `getReleases:${config.packageName}`,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { joinUrlParts } from '../../../util/url';
 import * as hexVersioning from '../../versioning/hex';
 import { Datasource } from '../datasource';
@@ -24,11 +24,7 @@ export class HexDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `Github` field in the results.';
 
-  @cache({
-    namespace: `datasource-${HexDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => packageName,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -67,5 +63,15 @@ export class HexDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${HexDatasource.id}`,
+        key: config.packageName,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

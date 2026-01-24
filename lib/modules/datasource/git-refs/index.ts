@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { regEx } from '../../../util/regex';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { GitDatasource } from './base';
@@ -21,11 +21,7 @@ export class GitRefsDatasource extends GitDatasource {
   override readonly sourceUrlNote =
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
-  @cache({
-    namespace: `datasource-${GitRefsDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => packageName,
-  })
-  override async getReleases({
+  private async _getReleases({
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     let rawRefs: RawRefs[] | null = null;
@@ -60,6 +56,18 @@ export class GitRefsDatasource extends GitDatasource {
     };
 
     return result;
+  }
+
+  override getReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${GitRefsDatasource.id}`,
+        key: config.packageName,
+      },
+      () => this._getReleases(config),
+    );
   }
 
   override async getDigest(

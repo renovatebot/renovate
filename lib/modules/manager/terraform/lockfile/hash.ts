@@ -7,7 +7,7 @@ import {
   deduplicateArray,
   isNotNullOrUndefined,
 } from '../../../../util/array';
-import { cache } from '../../../../util/cache/package/decorator';
+import { cached } from '../../../../util/cache/package/cached';
 import * as fs from '../../../../util/fs';
 import { ensureCacheDir } from '../../../../util/fs';
 import { Http } from '../../../../util/http';
@@ -106,12 +106,7 @@ export class TerraformProviderHash {
     );
   }
 
-  @cache({
-    namespace: `terraform-provider-hash`,
-    key: (build: TerraformBuild) => `calculateSingleHash:${build.url}`,
-    ttlMinutes: TerraformProviderHash.hashCacheTTL,
-  })
-  static async calculateSingleHash(
+  private static async _calculateSingleHash(
     build: TerraformBuild,
     cacheDir: string,
   ): Promise<string> {
@@ -136,6 +131,20 @@ export class TerraformProviderHash {
       // delete zip file
       await fs.rmCache(downloadFileName);
     }
+  }
+
+  static calculateSingleHash(
+    build: TerraformBuild,
+    cacheDir: string,
+  ): Promise<string> {
+    return cached(
+      {
+        namespace: `terraform-provider-hash`,
+        key: `calculateSingleHash:${build.url}`,
+        ttlMinutes: TerraformProviderHash.hashCacheTTL,
+      },
+      () => TerraformProviderHash._calculateSingleHash(build, cacheDir),
+    );
   }
 
   static async calculateHashScheme1Hashes(

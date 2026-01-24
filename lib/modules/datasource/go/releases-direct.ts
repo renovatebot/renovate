@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { regEx } from '../../../util/regex';
 import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
@@ -87,11 +87,9 @@ export class GoDirectDatasource extends Datasource {
    *  - Call the respective getReleases in github/gitlab to retrieve the tags
    *  - Filter module tags according to the module path
    */
-  @cache({
-    namespace: `datasource-${GoDirectDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => packageName,
-  })
-  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  private async _getReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     const { packageName } = config;
 
     let res: ReleaseResult | null = null;
@@ -150,5 +148,15 @@ export class GoDirectDatasource extends Datasource {
       releases: filterByPrefix(packageName, res.releases),
       sourceUrl,
     };
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${GoDirectDatasource.id}`,
+        key: config.packageName,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

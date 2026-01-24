@@ -1,6 +1,6 @@
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
@@ -39,11 +39,7 @@ export class GalaxyCollectionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The `sourceUrl` is determined from the `repository` field in the results.';
 
-  @cache({
-    namespace: `datasource-${GalaxyCollectionDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -130,13 +126,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     }
   }
 
-  @cache({
-    namespace: `datasource-${GalaxyCollectionDatasource.id}`,
-    key: (_packageName: string, versionsUrl: string, basicRelease: Release) =>
-      `getVersionDetails:${versionsUrl}:${basicRelease.version}`,
-    ttlMinutes: 10080, // 1 week
-  })
-  async getVersionDetails(
+  private async _getVersionDetails(
     packageName: string,
     versionsUrl: string,
     basicRelease: Release,
@@ -162,5 +152,30 @@ export class GalaxyCollectionDatasource extends Datasource {
       isDeprecated: basicRelease.isDeprecated,
       releaseTimestamp: basicRelease.releaseTimestamp,
     };
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${GalaxyCollectionDatasource.id}`,
+        key: `getReleases:${config.packageName}`,
+      },
+      () => this._getReleases(config),
+    );
+  }
+
+  getVersionDetails(
+    packageName: string,
+    versionsUrl: string,
+    basicRelease: Release,
+  ): Promise<Release> {
+    return cached(
+      {
+        namespace: `datasource-${GalaxyCollectionDatasource.id}`,
+        key: `getVersionDetails:${versionsUrl}:${basicRelease.version}`,
+        ttlMinutes: 10080,
+      },
+      () => this._getVersionDetails(packageName, versionsUrl, basicRelease),
+    );
   }
 }

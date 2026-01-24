@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { GitlabHttp } from '../../../util/http/gitlab';
 import { asTimestamp } from '../../../util/timestamp';
 import { joinUrlParts } from '../../../util/url';
@@ -27,12 +27,7 @@ export class GitlabTagsDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
-  @cache({
-    namespace: `datasource-${GitlabTagsDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `getReleases:${getDepHost(registryUrl)}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
     packageName: repo,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -67,17 +62,22 @@ export class GitlabTagsDatasource extends Datasource {
     return dependency;
   }
 
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${GitlabTagsDatasource.id}`,
+        key: `getReleases:${getDepHost(config.registryUrl)}:${config.packageName}`,
+      },
+      () => this._getReleases(config),
+    );
+  }
+
   /**
    * gitlab.getDigest
    *
    * Returs the latest commit hash of the repository.
    */
-  @cache({
-    namespace: `datasource-${GitlabTagsDatasource.id}`,
-    key: ({ registryUrl, packageName }: DigestConfig) =>
-      `getDigest:${getDepHost(registryUrl)}:${packageName}`,
-  })
-  override async getDigest(
+  private async _getDigest(
     { packageName: repo, registryUrl }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
@@ -121,5 +121,18 @@ export class GitlabTagsDatasource extends Datasource {
     }
 
     return digest;
+  }
+
+  override getDigest(
+    config: DigestConfig,
+    newValue?: string,
+  ): Promise<string | null> {
+    return cached(
+      {
+        namespace: `datasource-${GitlabTagsDatasource.id}`,
+        key: `getDigest:${getDepHost(config.registryUrl)}:${config.packageName}`,
+      },
+      () => this._getDigest(config, newValue),
+    );
   }
 }

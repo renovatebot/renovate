@@ -2,7 +2,7 @@ import { isNonEmptyArray } from '@sindresorhus/is';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { getQueryString, joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -107,13 +107,7 @@ export class RepologyDatasource extends Datasource {
     return packages;
   }
 
-  @cache({
-    ttlMinutes: 60,
-    namespace: `datasource-${RepologyDatasource.id}`,
-    key: (registryUrl: string, repoName: string, pkgName: string) =>
-      joinUrlParts(registryUrl, repoName, pkgName),
-  })
-  async queryPackage(
+  private async _queryPackage(
     registryUrl: string,
     repoName: string,
     pkgName: string,
@@ -183,6 +177,21 @@ export class RepologyDatasource extends Datasource {
     );
 
     return undefined;
+  }
+
+  queryPackage(
+    registryUrl: string,
+    repoName: string,
+    pkgName: string,
+  ): Promise<RepologyPackage[] | undefined> {
+    return cached(
+      {
+        namespace: `datasource-${RepologyDatasource.id}`,
+        key: joinUrlParts(registryUrl, repoName, pkgName),
+        ttlMinutes: 60,
+      },
+      () => this._queryPackage(registryUrl, repoName, pkgName),
+    );
   }
 
   async getReleases({

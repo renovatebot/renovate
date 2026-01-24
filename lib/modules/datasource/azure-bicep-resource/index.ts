@@ -1,4 +1,4 @@
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import * as azureRestApiVersioningApi from '../../versioning/azure-rest-api';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -32,11 +32,7 @@ export class AzureBicepResourceDatasource extends Datasource {
     return `https://learn.microsoft.com/en-us/azure/templates/${namespaceProvider}/change-log/${type}`;
   }
 
-  @cache({
-    namespace: `datasource-${AzureBicepResourceDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => `getReleases-${packageName}`,
-  })
-  async getReleases(
+  private async _getReleases(
     getReleasesConfig: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     const resourceVersionIndex = await this.getResourceVersionIndex();
@@ -54,16 +50,32 @@ export class AzureBicepResourceDatasource extends Datasource {
     return { releases };
   }
 
-  @cache({
-    namespace: `datasource-${AzureBicepResourceDatasource.id}`,
-    key: 'getResourceVersionIndex',
-    ttlMinutes: 24 * 60,
-  })
-  async getResourceVersionIndex(): Promise<BicepResourceVersionIndex> {
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${AzureBicepResourceDatasource.id}`,
+        key: `getReleases-${config.packageName}`,
+      },
+      () => this._getReleases(config),
+    );
+  }
+
+  private async _getResourceVersionIndex(): Promise<BicepResourceVersionIndex> {
     const { body } = await this.http.getJson(
       BICEP_TYPES_INDEX_URL,
       BicepResourceVersionIndex,
     );
     return body;
+  }
+
+  getResourceVersionIndex(): Promise<BicepResourceVersionIndex> {
+    return cached(
+      {
+        namespace: `datasource-${AzureBicepResourceDatasource.id}`,
+        key: 'getResourceVersionIndex',
+        ttlMinutes: 24 * 60,
+      },
+      () => this._getResourceVersionIndex(),
+    );
   }
 }

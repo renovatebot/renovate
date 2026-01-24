@@ -1,6 +1,6 @@
 import { isString, isUndefined } from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { GithubHttp } from '../../../util/http/github';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
@@ -62,13 +62,7 @@ export class ConanDatasource extends Datasource {
     return result;
   }
 
-  @cache({
-    namespace: `datasource-${datasource}`,
-    key: ({ registryUrl, packageName }: DigestConfig, newValue?: string) =>
-      // TODO: types (#22198)
-      `getDigest:${registryUrl!}:${packageName}:${newValue!}`,
-  })
-  override async getDigest(
+  private async _getDigest(
     { registryUrl, packageName }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
@@ -92,13 +86,21 @@ export class ConanDatasource extends Datasource {
     return digest;
   }
 
-  @cache({
-    namespace: `datasource-${datasource}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `getReleases:${registryUrl}:${packageName}`,
-  })
-  async getReleases({
+  override getDigest(
+    config: DigestConfig,
+    newValue?: string,
+  ): Promise<string | null> {
+    return cached(
+      {
+        namespace: `datasource-${datasource}`,
+        // TODO: types (#22198)
+        key: `getDigest:${config.registryUrl!}:${config.packageName}:${newValue!}`,
+      },
+      () => this._getDigest(config, newValue),
+    );
+  }
+
+  private async _getReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -195,5 +197,16 @@ export class ConanDatasource extends Datasource {
     }
 
     return null;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${datasource}`,
+        // TODO: types (#22198)
+        key: `getReleases:${config.registryUrl}:${config.packageName}`,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

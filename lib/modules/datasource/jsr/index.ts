@@ -1,6 +1,6 @@
 import { isNull } from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { joinUrlParts } from '../../../util/url';
 import { id as semverId } from '../../versioning/semver';
 import { Datasource } from '../datasource';
@@ -31,13 +31,7 @@ export class JsrDatasource extends Datasource {
     super(JsrDatasource.id);
   }
 
-  @cache({
-    namespace: `datasource-${JsrDatasource.id}`,
-    key: ({ packageName, registryUrl }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `getReleases:${registryUrl}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -73,5 +67,15 @@ export class JsrDatasource extends Datasource {
     }
 
     return result.releases.length ? result : null;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${JsrDatasource.id}`,
+        key: `getReleases:${config.registryUrl}:${config.packageName}`,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

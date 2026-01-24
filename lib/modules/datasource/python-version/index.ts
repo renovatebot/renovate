@@ -1,4 +1,4 @@
-import { cache } from '../../../util/cache/package/decorator';
+import { cached } from '../../../util/cache/package/cached';
 import { id as versioning } from '../../versioning/python';
 import { Datasource } from '../datasource';
 import { EndoflifeDateDatasource } from '../endoflife-date';
@@ -41,11 +41,7 @@ export class PythonVersionDatasource extends Datasource {
     });
   }
 
-  @cache({
-    namespace: `datasource-${datasource}`,
-    key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
-  })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     /* v8 ignore next 3 -- should never happen */
@@ -88,5 +84,15 @@ export class PythonVersionDatasource extends Datasource {
     }
 
     return result.releases.length ? result : null;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${datasource}`,
+        key: `${config.registryUrl}`,
+      },
+      () => this._getReleases(config),
+    );
   }
 }
