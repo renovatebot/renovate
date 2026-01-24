@@ -1,5 +1,6 @@
 import type { Category } from '../../../constants';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
+import { GithubDigestDatasource } from '../../datasource/github-digest';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 export { extractPackageFile } from './extract';
@@ -17,6 +18,7 @@ export const defaultConfig = {
 
 export const supportedDatasources = [
   GiteaTagsDatasource.id,
-  GithubTagsDatasource.id,
+  GithubDigestDatasource.id,
   GithubRunnersDatasource.id,
+  GithubTagsDatasource.id,
 ];
