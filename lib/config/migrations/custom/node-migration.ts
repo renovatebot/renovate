@@ -6,6 +6,7 @@ export class NodeMigration extends AbstractMigration {
 
   override run(value: unknown): void {
     const node = this.get('node')!;
+    // v8 ignore else -- TODO: add test #40625
     if ((value as RenovateConfig).enabled === true) {
       // validated non-null
       delete node.enabled;

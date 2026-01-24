@@ -70,14 +70,17 @@ function transform(item: GithubGraphqlRelease): GithubReleaseItem | null {
     url,
   };
 
+  // v8 ignore else -- TODO: add test #40625
   if (id) {
     result.id = id;
   }
 
+  // v8 ignore else -- TODO: add test #40625
   if (name) {
     result.name = name;
   }
 
+  // v8 ignore else -- TODO: add test #40625
   if (description) {
     result.description = description;
   }

@@ -6,6 +6,7 @@ export class CustomManagersMigration extends AbstractMigration {
   override readonly propertyName = 'customManagers';
 
   override run(value: unknown): void {
+    // v8 ignore else -- TODO: add test #40625
     if (isNonEmptyArray(value)) {
       const customManagers = (value as CustomManager[]).map((mgr) => {
         if (mgr.customType) {

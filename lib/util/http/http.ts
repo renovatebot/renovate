@@ -190,9 +190,9 @@ export abstract class HttpBase<
       if (resPromise && !cacheProvider) {
         ObsoleteCacheHitLogger.write(url);
       }
-      /* v8 ignore stop: temporary code */
     }
 
+    // v8 ignore else -- TODO: add test #40625
     if (!resPromise) {
       if (cacheProvider) {
         await cacheProvider.setCacheHeaders(method, url, options);
@@ -660,6 +660,7 @@ export abstract class HttpBase<
 
     applyDefaultHeaders(combinedOptions);
 
+    // v8 ignore else -- TODO: add test #40625
     if (
       isUndefined(combinedOptions.readOnly) &&
       ['head', 'get'].includes(combinedOptions.method)

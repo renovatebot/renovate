@@ -85,8 +85,13 @@ describe('workers/repository/onboarding/branch/check', () => {
   });
 
   describe('when closedPr exists and onboardingAutoCloseAge is set', () => {
+    beforeAll(() => {
+      vi.useFakeTimers();
+    });
+
     it('adds closing comment if exactly at onboardingAutoCloseAge', async () => {
       const now = DateTime.now();
+      vi.setSystemTime(now.toMillis());
       // at exactly 1 day ago, this should trigger
       const createdAt = now.minus({ hour: 24 });
 
@@ -106,9 +111,10 @@ describe('workers/repository/onboarding/branch/check', () => {
       expect(platform.ensureComment).toHaveBeenCalledOnce();
     });
 
-    it('adds closing comment if PR created partially over onboardingAutoCloseAge', async () => {
+    it('skips closing comment if onboarding pr is slightly older than onboardingAutoCloseAge', async () => {
       const now = DateTime.now();
-      // we're currently 25 hours ahead of the creation time, which is 1.x days since the PR was created, which means that an `onboardingAutoCloseAge=1` will trigger
+      vi.setSystemTime(now.toMillis());
+      // we're currently 25 hours ahead of the creation time, which is 1.x days since the PR was created, which means that an `onboardingAutoCloseAge=1` SHOULD NOT trigger, as it's > 1
       const createdAt = now.minus({ hour: 25 });
 
       GlobalConfig.set({ onboardingAutoCloseAge: 1 });
@@ -124,11 +130,12 @@ describe('workers/repository/onboarding/branch/check', () => {
       await expect(isOnboarded(config)).rejects.toThrow(
         REPOSITORY_CLOSED_ONBOARDING,
       );
-      expect(platform.ensureComment).toHaveBeenCalled();
+      expect(platform.ensureComment).not.toHaveBeenCalled();
     });
 
     it('skips closing comment if onboarding pr is 1 day older than onboardingAutoCloseAge', async () => {
       const now = DateTime.now();
+      vi.setSystemTime(now.toMillis());
       const createdAt = now.minus({ hour: 48 });
 
       GlobalConfig.set({ onboardingAutoCloseAge: 1 });
