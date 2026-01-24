@@ -20,7 +20,7 @@ import {
   UNKNOWN_ERROR,
 } from '../../constants/error-messages';
 import { instrument } from '../../instrumentation';
-import { instrumentStandalone } from '../../instrumentation/decorator';
+import { instrumented } from '../../instrumentation/instrumented';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
@@ -398,7 +398,7 @@ export function isCloned(): boolean {
   return gitInitialized;
 }
 
-export const syncGit = instrumentStandalone(
+export const syncGit = instrumented(
   { name: 'syncGit' },
   async function (): Promise<void> {
     if (gitInitialized) {
