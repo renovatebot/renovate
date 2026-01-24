@@ -36,7 +36,11 @@ type CacheLoadError = CacheNotFoundError | CacheStaleError;
 type CacheError = CacheNotFoundError | CacheStaleError | CacheInvalidError;
 
 export class MetadataCache {
-  constructor(private readonly http: Http) {}
+  private readonly http: Http;
+
+  constructor(http: Http) {
+    this.http = http;
+  }
 
   async getRelease(
     registryUrl: string,

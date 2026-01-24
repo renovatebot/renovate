@@ -9,9 +9,12 @@ interface ErrorResult {
 }
 
 export class Lazy<T> {
+  private readonly executor: () => T;
   private _result?: ValueResult<T> | ErrorResult;
 
-  constructor(private readonly executor: () => T) {}
+  constructor(executor: () => T) {
+    this.executor = executor;
+  }
 
   hasValue(): boolean {
     return !!this._result;

@@ -255,7 +255,11 @@ const allowedTemplateFields = new Set([
 ]);
 
 class CompileInputProxyHandler implements ProxyHandler<CompileInput> {
-  constructor(private warnVariables: Set<string>) {}
+  private warnVariables: Set<string>;
+
+  constructor(warnVariables: Set<string>) {
+    this.warnVariables = warnVariables;
+  }
 
   get(target: CompileInput, prop: keyof CompileInput): unknown {
     if (prop === 'env') {

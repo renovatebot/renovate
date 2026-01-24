@@ -91,7 +91,11 @@ export function instrumentGit(git: SimpleGit): InstrumentedSimpleGit {
  * @see SimpleGit
  */
 export class InstrumentedSimpleGit {
-  constructor(private git: SimpleGit) {}
+  private git: SimpleGit;
+
+  constructor(git: SimpleGit) {
+    this.git = git;
+  }
 
   version(): Response<VersionResult> {
     return this.git.version();

@@ -6,8 +6,11 @@ import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
 import type { HttpCache } from './schema';
 
 export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
-  constructor(private aggressive = false) {
+  private aggressive: boolean;
+
+  constructor(aggressive = false) {
     super();
+    this.aggressive = aggressive;
   }
 
   override load(method: string, url: string): Promise<unknown> {

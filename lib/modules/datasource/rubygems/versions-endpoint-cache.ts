@@ -135,7 +135,11 @@ export type VersionsResult = Result<
 >;
 
 export class VersionsEndpointCache {
-  constructor(private readonly http: Http) {}
+  private readonly http: Http;
+
+  constructor(http: Http) {
+    this.http = http;
+  }
 
   private cacheRequests = new Map<string, Promise<VersionsEndpointResult>>();
 
