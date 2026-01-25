@@ -3,6 +3,7 @@ import js from '@eslint/js';
 import vitest from '@vitest/eslint-plugin';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
+import fileExtensionInImportTs from 'eslint-plugin-file-extension-in-import-ts';
 import * as importX from 'eslint-plugin-import-x';
 import oxlint from 'eslint-plugin-oxlint';
 import eslintPluginPromise from 'eslint-plugin-promise';
@@ -76,7 +77,15 @@ export default tseslint.config(
   eslintConfigPrettier,
   {
     ...jsFiles,
+    plugins: {
+      'file-extension-in-import-ts': fileExtensionInImportTs,
+    },
     rules: {
+      'file-extension-in-import-ts/file-extension-in-import-ts': [
+        'error',
+        'always',
+        { extMapping: { '.ts': '.ts' } },
+      ],
       'import-x/default': 2,
       'import-x/named': 2,
       'import-x/namespace': 2,

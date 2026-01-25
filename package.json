@@ -2,10 +2,10 @@
   "name": "renovate",
   "description": "Automated dependency updates. Flexible so you don't need to be.",
   "version": "0.0.0-semantic-release",
-  "type": "commonjs",
+  "type": "module",
   "bin": {
-    "renovate": "dist/renovate.js",
-    "renovate-config-validator": "dist/config-validator.js"
+    "renovate": "dist/renovate.cjs",
+    "renovate-config-validator": "dist/config-validator.cjs"
   },
   "scripts": {
     "build": "run-s clean 'generate:*' 'compile:*' create-json-schema",
@@ -13,7 +13,7 @@
     "build:docs": "tsx tools/generate-docs.ts",
     "clean": "rimraf dist tmp",
     "clean-cache": "node tools/clean-cache.mjs",
-    "compile:ts": "tsc -p tsconfig.app.json",
+    "compile:ts": "rolldown -c",
     "config-validator": "tsx lib/config-validator.ts",
     "create-json-schema": "tsx tools/generate-schema.ts && prettier --write --cache 'renovate-schema.json' renovate-global-schema.json",
     "debug": "tsx --inspect-brk lib/renovate.ts",
@@ -336,6 +336,7 @@
     "eslint-config-prettier": "10.1.8",
     "eslint-formatter-gha": "1.6.0",
     "eslint-import-resolver-typescript": "4.4.4",
+    "eslint-plugin-file-extension-in-import-ts": "2.1.1",
     "eslint-plugin-import-x": "4.16.1",
     "eslint-plugin-oxlint": "1.39.0",
     "eslint-plugin-promise": "7.2.1",
@@ -353,6 +354,7 @@
     "nyc": "17.1.0",
     "oxlint": "1.39.0",
     "rimraf": "6.1.2",
+    "rolldown": "1.0.0-rc.1",
     "semantic-release": "25.0.2",
     "tar": "7.5.4",
     "tmp-promise": "3.0.3",
