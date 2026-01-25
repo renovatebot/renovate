@@ -21,34 +21,38 @@ const lockableChannelOriginalUrl = regEx(
   '^https://(?:channels\\.nixos\\.org|nixos\\.org/channels)/(?<channel>[^/]+)/nixexprs\\.tar\\.xz$',
 );
 
-export async function extractPackageFile(
+/**
+ * Shared extraction logic for flake.lock format files (used by both nix and devenv managers)
+ */
+export async function extractFlakeLock(
   content: string,
   packageFile: string,
+  lockFileName: string,
   config?: ExtractConfig,
 ): Promise<PackageFileContent | null> {
-  const flakeLockFile = getSiblingFileName(packageFile, 'flake.lock');
-  const flakeLockContents = await readLocalFile(flakeLockFile, 'utf8');
+  const lockFile = getSiblingFileName(packageFile, lockFileName);
+  const lockFileContents = await readLocalFile(lockFile, 'utf8');
 
-  logger.trace(`nix.extractPackageFile(${flakeLockFile})`);
+  logger.trace(`extractFlakeLock(${lockFile})`);
 
   const deps: PackageDependency[] = [];
 
-  const flakeLockParsed = NixFlakeLock.safeParse(flakeLockContents);
-  if (!flakeLockParsed.success) {
+  const lockFileParsed = NixFlakeLock.safeParse(lockFileContents);
+  if (!lockFileParsed.success) {
     logger.debug(
-      { flakeLockFile, error: flakeLockParsed.error },
-      `invalid flake.lock file`,
+      { lockFile, error: lockFileParsed.error },
+      `invalid ${lockFileName} file`,
     );
     return null;
   }
 
-  const flakeLock = flakeLockParsed.data;
+  const flakeLock = lockFileParsed.data;
   const rootInputs = flakeLock.nodes.root.inputs;
 
   if (!rootInputs) {
     logger.debug(
-      { flakeLockFile, error: flakeLockParsed.error },
-      `flake.lock is missing "root" node`,
+      { lockFile, error: lockFileParsed.error },
+      `${lockFileName} is missing "root" node`,
     );
     return null;
   }
@@ -71,7 +75,7 @@ export async function extractPackageFile(
 
     if (flakeLocked === undefined) {
       logger.debug(
-        { flakeLockFile, flakeInput },
+        { lockFile, flakeInput },
         `input is missing locked, skipping`,
       );
       continue;
@@ -79,7 +83,7 @@ export async function extractPackageFile(
 
     if (flakeOriginal === undefined) {
       logger.debug(
-        { flakeLockFile, flakeInput },
+        { lockFile, flakeInput },
         `input is missing original, skipping`,
       );
       continue;
@@ -88,7 +92,7 @@ export async function extractPackageFile(
     // indirect inputs cannot be reliably updated because they depend on the flake registry
     if (flakeOriginal.type === 'indirect' || flakeLocked.type === 'indirect') {
       logger.debug(
-        { flakeLockFile, flakeInput },
+        { lockFile, flakeInput },
         `input is type indirect, skipping`,
       );
       continue;
@@ -96,17 +100,14 @@ export async function extractPackageFile(
 
     // cannot update local path inputs
     if (flakeOriginal.type === 'path' || flakeLocked.type === 'path') {
-      logger.debug(
-        { flakeLockFile, flakeInput },
-        `input is type path, skipping`,
-      );
+      logger.debug({ lockFile, flakeInput }, `input is type path, skipping`);
       continue;
     }
 
     // if no rev is being tracked, we cannot update this input
     if (flakeLocked.rev === undefined) {
       logger.debug(
-        { flakeLockFile, flakeInput },
+        { lockFile, flakeInput },
         `locked input is not tracking a rev, skipping`,
       );
       continue;
@@ -120,10 +121,10 @@ export async function extractPackageFile(
       newDigest &&
       flakeOriginal.rev &&
       flakeOriginal.rev === currentDigest && // currentDigest is the old digest
-      content.includes(newDigest) // flake.nix contains the new digest
+      content.includes(newDigest) // package file contains the new digest
     ) {
       logger.debug(
-        { flakeLockFile, flakeInput },
+        { lockFile, flakeInput },
         `overriding rev ${flakeOriginal.rev} with new digest ${newDigest}`,
       );
       flakeOriginal.rev = newDigest;
@@ -203,4 +204,12 @@ export async function extractPackageFile(
   }
 
   return null;
+}
+
+export async function extractPackageFile(
+  content: string,
+  packageFile: string,
+  config?: ExtractConfig,
+): Promise<PackageFileContent | null> {
+  return await extractFlakeLock(content, packageFile, 'flake.lock', config);
 }

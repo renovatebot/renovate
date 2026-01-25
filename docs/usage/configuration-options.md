@@ -2590,6 +2590,7 @@ Supported lock files:
 | `composer`        | `composer.lock`                                    |
 | `conan`           | `conan.lock`                                       |
 | `devbox`          | `devbox.lock`                                      |
+| `devenv`          | `devenv.lock`                                      |
 | `gleam`           | `manifest.toml`                                    |
 | `gradle`          | `gradle.lockfile`                                  |
 | `helmv3`          | `Chart.lock`                                       |
