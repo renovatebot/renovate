@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import type { LongCommitSha } from '../../../util/git/types';
-import { LooseArray } from '../../../util/schema-utils';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
 
 export const LastPipelineId = z
   .object({

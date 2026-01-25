@@ -5,14 +5,14 @@ import type {
 } from '@aws-sdk/client-s3';
 import { GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { isNonEmptyString } from '@sindresorhus/is';
-import { logger } from '../../../../logger';
-import { getEnv } from '../../../env';
-import { outputCacheFile } from '../../../fs';
-import { getS3Client, parseS3Url } from '../../../s3';
-import { streamToString } from '../../../streams';
-import { getLocalCacheFileName } from '../common';
-import type { RepoCacheRecord } from '../schema';
-import { RepoCacheBase } from './base';
+import { logger } from '../../../../logger/index.ts';
+import { getEnv } from '../../../env.ts';
+import { outputCacheFile } from '../../../fs/index.ts';
+import { getS3Client, parseS3Url } from '../../../s3.ts';
+import { streamToString } from '../../../streams.ts';
+import { getLocalCacheFileName } from '../common.ts';
+import type { RepoCacheRecord } from '../schema.ts';
+import { RepoCacheBase } from './base.ts';
 
 export class RepoCacheS3 extends RepoCacheBase {
   private readonly s3Client;

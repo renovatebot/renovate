@@ -1,8 +1,8 @@
-import { cached } from '../../../util/cache/package/cached';
-import * as azureRestApiVersioningApi from '../../versioning/azure-rest-api';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { BicepResourceVersionIndex } from './schema';
+import { cached } from '../../../util/cache/package/cached.ts';
+import * as azureRestApiVersioningApi from '../../versioning/azure-rest-api/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { BicepResourceVersionIndex } from './schema.ts';
 
 const BICEP_TYPES_INDEX_URL =
   'https://raw.githubusercontent.com/Azure/bicep-types-az/main/generated/index.json';

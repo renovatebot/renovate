@@ -1,11 +1,11 @@
-import { logger } from '../../logger';
+import { logger } from '../../logger/index.ts';
 import type {
   LookupUpdateConfig,
   UpdateResult,
-} from '../../workers/repository/process/lookup/types';
-import { getDatasourceFor } from './common';
-import { Datasource } from './datasource';
-import type { Release } from './types';
+} from '../../workers/repository/process/lookup/types.ts';
+import { getDatasourceFor } from './common.ts';
+import { Datasource } from './datasource.ts';
+import type { Release } from './types.ts';
 
 type Config = Partial<LookupUpdateConfig & UpdateResult>;
 

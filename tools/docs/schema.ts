@@ -1,11 +1,11 @@
-import { getOptions } from '../../lib/config/options';
+import { getOptions } from '../../lib/config/options/index.ts';
 import type {
   RenovateOptions,
   RenovateRequiredOption,
-} from '../../lib/config/types';
+} from '../../lib/config/types.ts';
 import { pkg } from '../../lib/expose.cjs';
-import { hasKey } from '../../lib/util/object';
-import { updateFile } from '../utils';
+import { hasKey } from '../../lib/util/object.ts';
+import { updateFile } from '../utils/index.ts';
 
 type JsonSchemaBasicType =
   | 'string'

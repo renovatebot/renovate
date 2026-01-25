@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import * as fragments from './fragments';
-import { parse } from '.';
+import * as fragments from './fragments.ts';
+import { parse } from './index.ts';
 
 describe('modules/manager/bazel-module/parser/index', () => {
   describe('parse', () => {

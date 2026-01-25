@@ -5,11 +5,11 @@ import {
   extractPackage,
   extractRegistries,
   resolveParents,
-} from './extract';
-import { Fixtures } from '~test/fixtures';
-import { fs, logger } from '~test/util';
+} from './extract.ts';
+import { Fixtures } from '~test/fixtures.js';
+import { fs, logger } from '~test/util.js';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const simpleContent = Fixtures.get('simple.pom.xml');
 const mirrorSettingsContent = Fixtures.get('mirror.settings.xml');

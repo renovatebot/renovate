@@ -1,5 +1,5 @@
-import { instrumented } from './instrumented';
-import { disableInstrumentations } from '.';
+import { disableInstrumentations } from './index.ts';
+import { instrumented } from './instrumented.ts';
 
 afterAll(disableInstrumentations);
 

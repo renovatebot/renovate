@@ -5,12 +5,23 @@ import {
   isUndefined,
 } from '@sindresorhus/is';
 import fs from 'fs-extra';
-import type { AllConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { getParsedContent, migrateAndValidateConfig } from './util';
+import type { AllConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { getParsedContent, migrateAndValidateConfig } from './util.ts';
+
+async function findDefaultConfigFile(): Promise<string | null> {
+  // Check for ESM-compatible .cjs first, then legacy .js
+  for (const name of ['config.cjs', 'config.js']) {
+    if (await fs.pathExists(name)) {
+      return name;
+    }
+  }
+  return null;
+}
 
 export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
-  const configFile = env.RENOVATE_CONFIG_FILE ?? 'config.js';
+  const configFile =
+    env.RENOVATE_CONFIG_FILE ?? (await findDefaultConfigFile()) ?? 'config.cjs';
 
   const configFileExists = await fs.pathExists(configFile);
   if (env.RENOVATE_CONFIG_FILE && !configFileExists) {

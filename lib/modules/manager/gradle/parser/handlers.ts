@@ -1,24 +1,24 @@
 import upath from 'upath';
-import { logger } from '../../../../logger';
-import { getSiblingFileName } from '../../../../util/fs';
-import { regEx } from '../../../../util/regex';
-import { parseUrl } from '../../../../util/url';
-import type { PackageDependency } from '../../types';
-import type { parseGradle as parseGradleCallback } from '../parser';
+import { logger } from '../../../../logger/index.ts';
+import { getSiblingFileName } from '../../../../util/fs/index.ts';
+import { regEx } from '../../../../util/regex.ts';
+import { parseUrl } from '../../../../util/url.ts';
+import type { PackageDependency } from '../../types.ts';
+import type { parseGradle as parseGradleCallback } from '../parser.ts';
 import type {
   ContentDescriptorMatcher,
   ContentDescriptorSpec,
   Ctx,
   GradleManagerData,
-} from '../types';
-import { isDependencyString, parseDependencyString } from '../utils';
+} from '../types.ts';
+import { isDependencyString, parseDependencyString } from '../utils.ts';
 import {
   GRADLE_PLUGINS,
   GRADLE_TEST_SUITES,
   findVariable,
   interpolateString,
   loadFromTokenMap,
-} from './common';
+} from './common.ts';
 
 // needed to break circular dependency
 let parseGradle: typeof parseGradleCallback;

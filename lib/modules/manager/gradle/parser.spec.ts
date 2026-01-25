@@ -1,20 +1,20 @@
 import { isTruthy } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import {
+  GRADLE_PLUGINS,
+  GRADLE_TEST_SUITES,
+  REGISTRY_URLS,
+} from './parser/common.ts';
+import {
   parseGradle,
   parseJavaToolchainVersion,
   parseKotlinSource,
   parseProps,
-} from './parser';
-import {
-  GRADLE_PLUGINS,
-  GRADLE_TEST_SUITES,
-  REGISTRY_URLS,
-} from './parser/common';
-import { Fixtures } from '~test/fixtures';
-import { fs, logger } from '~test/util';
+} from './parser.ts';
+import { Fixtures } from '~test/fixtures.js';
+import { fs, logger } from '~test/util.js';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 function mockFs(): void {
   fs.getSiblingFileName.mockImplementation(

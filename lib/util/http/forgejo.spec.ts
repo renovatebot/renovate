@@ -1,5 +1,5 @@
-import { ForgejoHttp, setBaseUrl } from './forgejo';
-import * as httpMock from '~test/http-mock';
+import { ForgejoHttp, setBaseUrl } from './forgejo.ts';
+import * as httpMock from '~test/http-mock.js';
 
 describe('util/http/forgejo', () => {
   const baseUrl = 'https://code.forgejo.org/api/v1';

@@ -3,12 +3,12 @@ import { gunzip } from 'node:zlib';
 import { promisify } from 'util';
 import sax from 'sax';
 import { XmlDocument } from 'xmldoc';
-import { logger } from '../../../logger';
-import { cached } from '../../../util/cache/package/cached';
-import type { HttpResponse } from '../../../util/http';
-import { joinUrlParts } from '../../../util/url';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { cached } from '../../../util/cache/package/cached.ts';
+import type { HttpResponse } from '../../../util/http/index.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 
 const gunzipAsync = promisify(gunzip);
 

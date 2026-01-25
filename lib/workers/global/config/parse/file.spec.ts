@@ -6,12 +6,12 @@ import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { expect } from 'vitest';
-import { logger } from '../../../../logger';
-import customConfig from './__fixtures__/config';
-import * as file from './file';
+import { logger } from '../../../../logger/index.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+import customConfig from './__fixtures__/config.mjs';
+import * as file from './file.ts';
 
 describe('workers/global/config/parse/file', () => {
   const processExitSpy = vi.spyOn(process, 'exit');

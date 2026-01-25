@@ -2,10 +2,10 @@ import {
   DescribeDBEngineVersionsCommand,
   RDSClient,
 } from '@aws-sdk/client-rds';
-import { cached } from '../../../util/cache/package/cached';
-import { Lazy } from '../../../util/lazy';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { cached } from '../../../util/cache/package/cached.ts';
+import { Lazy } from '../../../util/lazy.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 
 export class AwsRdsDatasource extends Datasource {
   static readonly id = 'aws-rds';

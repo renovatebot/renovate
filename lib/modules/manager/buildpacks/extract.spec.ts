@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 
-import { extractPackageFile } from '.';
+import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/buildpacks/extract', () => {
   describe('extractPackageFile()', () => {

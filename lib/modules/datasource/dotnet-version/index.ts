@@ -1,12 +1,12 @@
-import { cached } from '../../../util/cache/package/cached';
-import * as p from '../../../util/promises';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import { cached } from '../../../util/cache/package/cached.ts';
+import * as p from '../../../util/promises.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import {
   DotnetRuntimeReleases,
   DotnetSdkReleases,
   ReleasesIndex,
-} from './schema';
+} from './schema.ts';
 
 export class DotnetVersionDatasource extends Datasource {
   static readonly id = 'dotnet-version';

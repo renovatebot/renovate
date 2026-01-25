@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { MaybeTimestamp } from '../../../util/timestamp';
-import type { Release } from '../types';
+import { MaybeTimestamp } from '../../../util/timestamp.ts';
+import type { Release } from '../types.ts';
 
 export const PythonRelease = z
   .object({

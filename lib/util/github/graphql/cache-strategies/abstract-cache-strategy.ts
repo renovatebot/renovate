@@ -1,12 +1,12 @@
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
-import type { PackageCacheNamespace } from '../../../cache/package/types';
+import type { PackageCacheNamespace } from '../../../cache/package/types.ts';
 import type {
   GithubDatasourceItem,
   GithubGraphqlCacheRecord,
   GithubGraphqlCacheStrategy,
-} from '../types';
-import { isDateExpired } from '../util';
+} from '../types.ts';
+import { isDateExpired } from '../util.ts';
 
 /**
  * Cache strategy handles the caching Github GraphQL items

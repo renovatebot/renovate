@@ -1,10 +1,10 @@
-import { cached } from '../../../util/cache/package/cached';
-import { regEx } from '../../../util/regex';
-import { asTimestamp } from '../../../util/timestamp';
-import * as semver from '../../versioning/semver';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { Applications } from './schema';
+import { cached } from '../../../util/cache/package/cached.ts';
+import { regEx } from '../../../util/regex.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import * as semver from '../../versioning/semver/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { Applications } from './schema.ts';
 
 export class NextcloudDatasource extends Datasource {
   static readonly id = 'nextcloud';

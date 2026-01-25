@@ -4,28 +4,28 @@ import type { Options, RetryObject } from 'got';
 import type { Merge, SetRequired } from 'type-fest';
 import type { infer as Infer } from 'zod';
 import { ZodType } from 'zod';
-import { GlobalConfig } from '../../config/global';
-import { HOST_DISABLED } from '../../constants/error-messages';
+import { GlobalConfig } from '../../config/global.ts';
+import { HOST_DISABLED } from '../../constants/error-messages.ts';
 import { pkg } from '../../expose.cjs';
-import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as memCache from '../cache/memory';
-import { getEnv } from '../env';
-import { hash } from '../hash';
-import { acquireLock } from '../mutex';
-import { type AsyncResult, Result } from '../result';
-import { Toml } from '../schema-utils';
-import { ObsoleteCacheHitLogger } from '../stats';
-import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url';
-import { parseSingleYaml } from '../yaml';
-import { applyAuthorization, removeAuthorization } from './auth';
-import type { HttpCacheProvider } from './cache/types';
-import { fetch, stream } from './got';
-import { applyHostRule, findMatchingRule } from './host-rules';
+import { logger } from '../../logger/index.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import * as memCache from '../cache/memory/index.ts';
+import { getEnv } from '../env.ts';
+import { hash } from '../hash.ts';
+import { acquireLock } from '../mutex.ts';
+import { type AsyncResult, Result } from '../result.ts';
+import { Toml } from '../schema-utils/index.ts';
+import { ObsoleteCacheHitLogger } from '../stats.ts';
+import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url.ts';
+import { parseSingleYaml } from '../yaml.ts';
+import { applyAuthorization, removeAuthorization } from './auth.ts';
+import type { HttpCacheProvider } from './cache/types.ts';
+import { fetch, stream } from './got.ts';
+import { applyHostRule, findMatchingRule } from './host-rules.ts';
 
-import { getQueue } from './queue';
-import { getRetryAfter, wrapWithRetry } from './retry-after';
-import { getThrottle } from './throttle';
+import { getQueue } from './queue.ts';
+import { getRetryAfter, wrapWithRetry } from './retry-after.ts';
+import { getThrottle } from './throttle.ts';
 import type {
   GotOptions,
   GotStreamOptions,
@@ -34,8 +34,8 @@ import type {
   HttpOptions,
   HttpResponse,
   SafeJsonError,
-} from './types';
-import { copyResponse } from './util';
+} from './types.ts';
+import { copyResponse } from './util.ts';
 
 export interface InternalJsonUnsafeOptions<
   Opts extends HttpOptions = HttpOptions,

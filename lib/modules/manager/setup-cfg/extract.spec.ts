@@ -1,5 +1,5 @@
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { extractPackageFile } from './index.ts';
+import { Fixtures } from '~test/fixtures.js';
 
 describe('modules/manager/setup-cfg/extract', () => {
   describe('extractPackageFile()', () => {

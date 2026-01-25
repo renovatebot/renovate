@@ -1,6 +1,6 @@
-import { processResult } from './result';
-import type { RenovateConfig } from '~test/util';
-import { partial } from '~test/util';
+import { processResult } from './result.ts';
+import type { RenovateConfig } from '~test/util.js';
+import { partial } from '~test/util.js';
 
 let config: RenovateConfig;
 

@@ -1,8 +1,8 @@
-import { getPkgReleases } from '..';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import { GalaxyDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { getPkgReleases } from '../index.ts';
+import { GalaxyDatasource } from './index.ts';
+import { Fixtures } from '~test/fixtures.js';
+import * as httpMock from '~test/http-mock.js';
 
 const baseUrl = 'https://galaxy.ansible.com/';
 

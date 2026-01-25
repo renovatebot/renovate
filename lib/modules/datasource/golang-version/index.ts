@@ -1,11 +1,14 @@
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cached } from '../../../util/cache/package/cached';
-import { regEx } from '../../../util/regex';
-import { asTimestamp } from '../../../util/timestamp';
-import { joinUrlParts } from '../../../util/url';
-import { isVersion, id as semverVersioningId } from '../../versioning/semver';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { cached } from '../../../util/cache/package/cached.ts';
+import { regEx } from '../../../util/regex.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import {
+  isVersion,
+  id as semverVersioningId,
+} from '../../versioning/semver/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 
 const lineTerminationRegex = regEx(`\r?\n`);
 const releaseBeginningChar = '\t{';

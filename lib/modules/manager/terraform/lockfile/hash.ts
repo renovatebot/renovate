@@ -1,19 +1,19 @@
 import crypto from 'node:crypto';
 import extract from 'extract-zip';
 import upath from 'upath';
-import { logger } from '../../../../logger';
+import { logger } from '../../../../logger/index.ts';
 import {
   coerceArray,
   deduplicateArray,
   isNotNullOrUndefined,
-} from '../../../../util/array';
-import { cached } from '../../../../util/cache/package/cached';
-import * as fs from '../../../../util/fs';
-import { ensureCacheDir } from '../../../../util/fs';
-import { Http } from '../../../../util/http';
-import * as p from '../../../../util/promises';
-import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
-import type { TerraformBuild } from '../../../datasource/terraform-provider/types';
+} from '../../../../util/array.ts';
+import { cached } from '../../../../util/cache/package/cached.ts';
+import * as fs from '../../../../util/fs/index.ts';
+import { ensureCacheDir } from '../../../../util/fs/index.ts';
+import { Http } from '../../../../util/http/index.ts';
+import * as p from '../../../../util/promises.ts';
+import { TerraformProviderDatasource } from '../../../datasource/terraform-provider/index.ts';
+import type { TerraformBuild } from '../../../datasource/terraform-provider/types.ts';
 
 export class TerraformProviderHash {
   static http = new Http(TerraformProviderDatasource.id);

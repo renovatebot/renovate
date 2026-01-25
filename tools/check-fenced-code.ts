@@ -2,13 +2,16 @@ import { format } from 'node:util';
 import type { ValidateFunction } from 'ajv';
 import { Ajv } from 'ajv';
 import draft7MetaSchema from 'ajv/lib/refs/json-schema-draft-07.json' with { type: 'json' };
-import addFormats from 'ajv-formats';
+import _addFormats from 'ajv-formats';
+
+const addFormats =
+  _addFormats as unknown as typeof import('ajv-formats').default;
 import fs from 'fs-extra';
 import { glob } from 'glob';
-import type { Token } from 'markdown-it';
 import MarkdownIt from 'markdown-it';
-import { migrateConfig } from '../lib/config/migration';
-import type { RenovateConfig } from '../lib/config/types';
+import type Token from 'markdown-it/lib/token.mjs';
+import { migrateConfig } from '../lib/config/migration.ts';
+import type { RenovateConfig } from '../lib/config/types.ts';
 
 const errorTitle = 'Invalid JSON in fenced code block';
 const errorBody =

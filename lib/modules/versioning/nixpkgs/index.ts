@@ -3,9 +3,9 @@ import {
   isNonEmptyArray,
   isNonEmptyStringAndNotWhitespace,
 } from '@sindresorhus/is';
-import type { RegExpVersion } from '../regex';
-import { RegExpVersioningApi } from '../regex';
-import type { VersioningApiConstructor } from '../types';
+import type { RegExpVersion } from '../regex/index.ts';
+import { RegExpVersioningApi } from '../regex/index.ts';
+import type { VersioningApiConstructor } from '../types.ts';
 
 export const id = 'nixpkgs';
 export const displayName = 'Nixpkgs';

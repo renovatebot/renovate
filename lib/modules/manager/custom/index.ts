@@ -1,5 +1,5 @@
-import type { ManagerApi } from '../types';
-import customManagers from './api';
+import type { ManagerApi } from '../types.ts';
+import customManagers from './api.ts';
 
 export const customManagerList = Array.from(customManagers.keys());
 export const getCustomManagers = (): Map<string, ManagerApi> => customManagers;

@@ -1,8 +1,8 @@
-import fs from 'fs-extra';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import fs from 'fs-extra';
 import upath from 'upath';
-import { customManagerList as customManagers } from './custom';
+import { customManagerList as customManagers } from './custom/index.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

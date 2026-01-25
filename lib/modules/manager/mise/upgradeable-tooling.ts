@@ -1,14 +1,14 @@
-import { regEx } from '../../../util/regex';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { HexpmBobDatasource } from '../../datasource/hexpm-bob';
-import { JavaVersionDatasource } from '../../datasource/java-version';
-import { NodeVersionDatasource } from '../../datasource/node-version';
-import { RubyVersionDatasource } from '../../datasource/ruby-version';
-import * as regexVersioning from '../../versioning/regex';
-import * as semverVersioning from '../../versioning/semver';
-import type { ToolingConfig } from '../asdf/upgradeable-tooling';
-import { upgradeableTooling } from '../asdf/upgradeable-tooling';
+import { regEx } from '../../../util/regex.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { HexpmBobDatasource } from '../../datasource/hexpm-bob/index.ts';
+import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
+import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
+import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import * as regexVersioning from '../../versioning/regex/index.ts';
+import * as semverVersioning from '../../versioning/semver/index.ts';
+import type { ToolingConfig } from '../asdf/upgradeable-tooling.ts';
+import { upgradeableTooling } from '../asdf/upgradeable-tooling.ts';
 
 export interface ToolingDefinition {
   config: ToolingConfig;

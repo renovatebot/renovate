@@ -1,4 +1,4 @@
-import type { GlobalInheritableConfig, RenovateConfig } from './types';
+import type { GlobalInheritableConfig, RenovateConfig } from './types.ts';
 
 export const NOT_PRESET = Symbol('not-present');
 

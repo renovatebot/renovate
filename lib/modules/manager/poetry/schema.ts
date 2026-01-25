@@ -1,28 +1,28 @@
 import { z } from 'zod';
-import { logger } from '../../../logger';
-import { getEnv } from '../../../util/env';
-import { parseGitUrl } from '../../../util/git/url';
-import { regEx } from '../../../util/regex';
+import { logger } from '../../../logger/index.ts';
+import { getEnv } from '../../../util/env.ts';
+import { parseGitUrl } from '../../../util/git/url.ts';
+import { regEx } from '../../../util/regex.ts';
 import {
   LooseArray,
   LooseRecord,
   Toml,
   withDepType,
-} from '../../../util/schema-utils';
-import { uniq } from '../../../util/uniq';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import { PypiDatasource } from '../../datasource/pypi';
-import { normalizePythonDepName } from '../../datasource/pypi/common';
-import * as gitVersioning from '../../versioning/git';
-import * as pep440Versioning from '../../versioning/pep440';
-import * as poetryVersioning from '../../versioning/poetry';
-import { DependencyGroup, ProjectSection } from '../pep621/schema';
-import { depTypes } from '../pep621/utils';
-import { dependencyPattern } from '../pip_requirements/extract';
-import type { PackageDependency, PackageFileContent } from '../types';
+} from '../../../util/schema-utils/index.ts';
+import { uniq } from '../../../util/uniq.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import * as gitVersioning from '../../versioning/git/index.ts';
+import * as pep440Versioning from '../../versioning/pep440/index.ts';
+import * as poetryVersioning from '../../versioning/poetry/index.ts';
+import { DependencyGroup, ProjectSection } from '../pep621/schema.ts';
+import { depTypes } from '../pep621/utils.ts';
+import { dependencyPattern } from '../pip_requirements/extract.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 const PoetryOptionalDependencyMixin = z
   .object({

@@ -1,10 +1,10 @@
 import { DateTime } from 'luxon';
 import type { RedisClusterOptions } from 'redis';
 import { createClient, createCluster } from 'redis';
-import { logger } from '../../../logger';
-import { compressToBase64, decompressFromBase64 } from '../../compress';
-import { regEx } from '../../regex';
-import type { PackageCacheNamespace } from './types';
+import { logger } from '../../../logger/index.ts';
+import { compressToBase64, decompressFromBase64 } from '../../compress.ts';
+import { regEx } from '../../regex.ts';
+import type { PackageCacheNamespace } from './types.ts';
 
 let client:
   | ReturnType<typeof createClient>

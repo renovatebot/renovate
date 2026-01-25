@@ -1,19 +1,19 @@
 import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as memCache from '../../cache/memory';
-import * as packageCache from '../../cache/package';
-import type { PackageCacheNamespace } from '../../cache/package/types';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as memCache from '../../cache/memory/index.ts';
+import * as packageCache from '../../cache/package/index.ts';
+import type { PackageCacheNamespace } from '../../cache/package/types.ts';
 import type {
   GithubGraphqlResponse,
   GithubHttp,
   GithubHttpOptions,
-} from '../../http/github';
-import type { HttpResponse } from '../../http/types';
-import { getApiBaseUrl } from '../url';
-import { GithubGraphqlMemoryCacheStrategy } from './cache-strategies/memory-cache-strategy';
-import { GithubGraphqlPackageCacheStrategy } from './cache-strategies/package-cache-strategy';
+} from '../../http/github.ts';
+import type { HttpResponse } from '../../http/types.ts';
+import { getApiBaseUrl } from '../url.ts';
+import { GithubGraphqlMemoryCacheStrategy } from './cache-strategies/memory-cache-strategy.ts';
+import { GithubGraphqlPackageCacheStrategy } from './cache-strategies/package-cache-strategy.ts';
 import type {
   GithubDatasourceItem,
   GithubGraphqlCacheStrategy,
@@ -23,7 +23,7 @@ import type {
   GithubGraphqlRepoResponse,
   GithubPackageConfig,
   RawQueryResponse,
-} from './types';
+} from './types.ts';
 
 /**
  * We know empirically that certain type of GraphQL errors

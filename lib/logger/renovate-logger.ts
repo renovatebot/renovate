@@ -1,9 +1,9 @@
 import { isString } from '@sindresorhus/is';
 import type * as bunyan from 'bunyan';
-import { once, reset as onceReset } from './once';
-import { getRemappedLevel } from './remap';
-import type { Logger } from './types';
-import { getMessage, toMeta, withSanitizer } from './utils';
+import { once, reset as onceReset } from './once.ts';
+import { getRemappedLevel } from './remap.ts';
+import type { Logger } from './types.ts';
+import { getMessage, toMeta, withSanitizer } from './utils.ts';
 
 const loggerLevels: bunyan.LogLevelString[] = [
   'trace',

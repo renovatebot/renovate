@@ -1,10 +1,10 @@
 import { isEmptyArray, isEmptyObject } from '@sindresorhus/is';
 import { z } from 'zod';
-import { filterMap } from '../../../util/filter-map';
-import { newlineRegex } from '../../../util/regex';
-import { LooseArray } from '../../../util/schema-utils';
-import { MaybeTimestamp } from '../../../util/timestamp';
-import type { Release } from '../types';
+import { filterMap } from '../../../util/filter-map.ts';
+import { newlineRegex } from '../../../util/regex.ts';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
+import { MaybeTimestamp } from '../../../util/timestamp.ts';
+import type { Release } from '../types.ts';
 
 export const MarshalledVersionInfo = LooseArray(
   z

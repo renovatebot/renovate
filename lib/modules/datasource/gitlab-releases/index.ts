@@ -1,9 +1,9 @@
-import { cached } from '../../../util/cache/package/cached';
-import { GitlabHttp } from '../../../util/http/gitlab';
-import { asTimestamp } from '../../../util/timestamp';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import type { GitlabRelease } from './types';
+import { cached } from '../../../util/cache/package/cached.ts';
+import { GitlabHttp } from '../../../util/http/gitlab.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import type { GitlabRelease } from './types.ts';
 
 export class GitlabReleasesDatasource extends Datasource {
   static readonly id = 'gitlab-releases';

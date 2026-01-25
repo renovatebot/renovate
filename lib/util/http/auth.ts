@@ -5,8 +5,8 @@ import {
   GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
-} from '../../constants';
-import type { GotOptions } from './types';
+} from '../../constants/index.ts';
+import type { GotOptions } from './types.ts';
 
 export type AuthGotOptions = Pick<
   GotOptions,

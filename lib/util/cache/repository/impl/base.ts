@@ -1,14 +1,14 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import { compressToBase64, decompressFromBase64 } from '../../../compress';
-import { hash } from '../../../hash';
-import { safeStringify } from '../../../stringify';
-import { CACHE_REVISION } from '../common';
-import { cleanupHttpCache } from '../http-cache';
-import type { RepoCacheRecord } from '../schema';
-import { RepoCacheV13 } from '../schema';
-import type { RepoCache, RepoCacheData } from '../types';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
+import { compressToBase64, decompressFromBase64 } from '../../../compress.ts';
+import { hash } from '../../../hash.ts';
+import { safeStringify } from '../../../stringify.ts';
+import { CACHE_REVISION } from '../common.ts';
+import { cleanupHttpCache } from '../http-cache.ts';
+import type { RepoCacheRecord } from '../schema.ts';
+import { RepoCacheV13 } from '../schema.ts';
+import type { RepoCache, RepoCacheData } from '../types.ts';
 
 export abstract class RepoCacheBase implements RepoCache {
   protected platform = GlobalConfig.get('platform')!;

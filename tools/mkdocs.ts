@@ -1,9 +1,9 @@
 import type { SpawnSyncReturns } from 'child_process';
 import { Command } from 'commander';
 import fs from 'fs-extra';
-import { logger } from '../lib/logger';
-import { generateDocs } from './docs';
-import { exec } from './utils/exec';
+import { logger } from '../lib/logger/index.ts';
+import { generateDocs } from './docs/index.ts';
+import { exec } from './utils/exec.ts';
 
 process.on('unhandledRejection', (err) => {
   // Will print "unhandledRejection err is not defined"

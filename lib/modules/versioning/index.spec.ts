@@ -1,17 +1,17 @@
-import { getOptions } from '../../config/options';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadModules } from '../../util/modules';
-import { isVersioningApiConstructor } from './common';
-import type { GenericVersion } from './generic';
-import { GenericVersioningApi } from './generic';
-import * as semverVersioning from './semver';
-import * as semverCoercedVersioning from './semver-coerced';
-import type { VersioningApi, VersioningApiConstructor } from './types';
-import * as allVersioning from '.';
+import { getOptions } from '../../config/options/index.ts';
+import { loadModules } from '../../util/modules.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+import { isVersioningApiConstructor } from './common.ts';
+import type { GenericVersion } from './generic.ts';
+import { GenericVersioningApi } from './generic.ts';
+import * as allVersioning from './index.ts';
+import * as semverVersioning from './semver/index.ts';
+import * as semverCoercedVersioning from './semver-coerced/index.ts';
+import type { VersioningApi, VersioningApiConstructor } from './types.ts';
 
 const supportedSchemes = getOptions().find(
   (option) => option.name === 'versioning',

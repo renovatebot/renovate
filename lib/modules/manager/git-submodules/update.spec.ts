@@ -1,21 +1,21 @@
-import type { SimpleGit } from 'simple-git';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import type { SimpleGit } from 'simple-git';
 import { simpleGit } from 'simple-git';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { mock } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import * as hostRules from '../../../util/host-rules';
-import type { Upgrade } from '../types';
-import { updateDependency } from '.';
-import { fs } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-vi.mock('../../../util/fs');
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import type { Upgrade } from '../types.ts';
+import { updateDependency } from './index.ts';
+import { fs } from '~test/util.js';
+vi.mock('../../../util/fs/index.ts');
 
 vi.mock('simple-git');
 const simpleGitFactoryMock = vi.mocked(simpleGit);

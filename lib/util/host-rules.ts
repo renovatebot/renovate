@@ -1,10 +1,10 @@
 import { isFalsy, isString, isTruthy, isUndefined } from '@sindresorhus/is';
-import { logger } from '../logger';
-import type { CombinedHostRule, HostRule } from '../types';
-import { clone } from './clone';
-import * as sanitize from './sanitize';
-import { toBase64 } from './string';
-import { isHttpUrl, massageHostUrl, parseUrl } from './url';
+import { logger } from '../logger/index.ts';
+import type { CombinedHostRule, HostRule } from '../types/index.ts';
+import { clone } from './clone.ts';
+import * as sanitize from './sanitize.ts';
+import { toBase64 } from './string.ts';
+import { isHttpUrl, massageHostUrl, parseUrl } from './url.ts';
 
 let hostRules: HostRule[] = [];
 

@@ -1,9 +1,9 @@
-import { cached } from '../../../util/cache/package/cached';
-import { asTimestamp } from '../../../util/timestamp';
-import * as Unity3dPackagesVersioning from '../../versioning/unity3d-packages';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { UnityPackageReleasesJSON } from './schema';
+import { cached } from '../../../util/cache/package/cached.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import * as Unity3dPackagesVersioning from '../../versioning/unity3d-packages/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { UnityPackageReleasesJSON } from './schema.ts';
 
 export class Unity3dPackagesDatasource extends Datasource {
   static readonly id = 'unity3d-packages';

@@ -1,4 +1,4 @@
-import { getTerragruntDependencyType } from './util';
+import { getTerragruntDependencyType } from './util.ts';
 
 describe('modules/manager/terragrunt/util', () => {
   describe('getTerragruntDependencyType()', () => {

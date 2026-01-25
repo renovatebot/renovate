@@ -1,12 +1,12 @@
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { HttpError } from '../../../util/http';
-import { joinUrlParts } from '../../../util/url';
-import * as devboxVersioning from '../../versioning/devbox';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { datasource, defaultRegistryUrl } from './common';
-import { DevboxResponse } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import * as devboxVersioning from '../../versioning/devbox/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { datasource, defaultRegistryUrl } from './common.ts';
+import { DevboxResponse } from './schema.ts';
 
 export class DevboxDatasource extends Datasource {
   static readonly id = datasource;

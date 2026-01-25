@@ -1,4 +1,4 @@
-import { GithubContentResponse, GithubVulnerabilityAlert } from './schema';
+import { GithubContentResponse, GithubVulnerabilityAlert } from './schema.ts';
 describe('modules/platform/github/schema', () => {
   it('should be parse directory response', () => {
     const { error } = GithubContentResponse.safeParse([

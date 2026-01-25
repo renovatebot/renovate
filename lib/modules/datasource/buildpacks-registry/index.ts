@@ -1,12 +1,12 @@
 import urlJoin from 'url-join';
 import { ZodError } from 'zod';
-import { logger } from '../../../logger';
-import { cached } from '../../../util/cache/package/cached';
-import { Result } from '../../../util/result';
-import { Datasource } from '../datasource';
-import { ReleasesConfig } from '../schema';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { BuildpacksRegistryResponse } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { cached } from '../../../util/cache/package/cached.ts';
+import { Result } from '../../../util/result.ts';
+import { Datasource } from '../datasource.ts';
+import { ReleasesConfig } from '../schema.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { BuildpacksRegistryResponse } from './schema.ts';
 
 export class BuildpacksRegistryDatasource extends Datasource {
   static readonly id = 'buildpacks-registry';

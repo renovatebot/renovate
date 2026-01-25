@@ -14,14 +14,14 @@ import type {
   TaskOptions,
   VersionResult,
 } from 'simple-git';
-import { instrument } from '../../instrumentation';
+import { instrument } from '../../instrumentation/index.ts';
 
-import type { RenovateSpanOptions } from '../../instrumentation/types';
+import type { RenovateSpanOptions } from '../../instrumentation/types.ts';
 import {
   ATTR_VCS_GIT_OPERATION_TYPE,
   ATTR_VCS_GIT_SUBCOMMAND,
-} from '../../instrumentation/types';
-import type { GitOperationType } from './types';
+} from '../../instrumentation/types.ts';
+import type { GitOperationType } from './types.ts';
 
 function isGitOperationType(
   subcommand: string,

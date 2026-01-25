@@ -3,23 +3,23 @@ import {
   isNonEmptyObject,
   isPlainObject,
 } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import type { SkipReason } from '../../../types';
-import { detectPlatform } from '../../../util/common';
-import { find } from '../../../util/host-rules';
-import { regEx } from '../../../util/regex';
-import { parseSingleYaml } from '../../../util/yaml';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import { parseLine } from '../gomod/line-parser';
-import { extractDependency as npmExtractDependency } from '../npm/extract/common/dependency';
-import { pep508ToPackageDependency } from '../pep621/utils';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { logger } from '../../../logger/index.ts';
+import type { SkipReason } from '../../../types/index.ts';
+import { detectPlatform } from '../../../util/common.ts';
+import { find } from '../../../util/host-rules.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import { parseLine } from '../gomod/line-parser.ts';
+import { extractDependency as npmExtractDependency } from '../npm/extract/common/dependency.ts';
+import { pep508ToPackageDependency } from '../pep621/utils.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 import {
   matchesPrecommitConfigHeuristic,
   matchesPrecommitDependencyHeuristic,
-} from './parsing';
-import type { PreCommitConfig } from './types';
+} from './parsing.ts';
+import type { PreCommitConfig } from './types.ts';
 
 /**
  * Determines the datasource(id) to be used for this dependency

@@ -1,13 +1,13 @@
 import { isNullOrUndefined, isPlainObject, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
-import { logger } from '../../../logger';
-import * as memCache from '../../../util/cache/memory';
-import { getCache } from '../../../util/cache/repository';
-import type { BitbucketServerHttp } from '../../../util/http/bitbucket-server';
-import { getQueryString } from '../../../util/url';
-import type { BbsPr, BbsPrCacheData, BbsRestPr } from './types';
-import { prInfo } from './utils';
+import { logger } from '../../../logger/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import type { BitbucketServerHttp } from '../../../util/http/bitbucket-server.ts';
+import { getQueryString } from '../../../util/url.ts';
+import type { BbsPr, BbsPrCacheData, BbsRestPr } from './types.ts';
+import { prInfo } from './utils.ts';
 
 /* v8 ignore next */
 function migrateBitbucketServerCache(platform: unknown): void {

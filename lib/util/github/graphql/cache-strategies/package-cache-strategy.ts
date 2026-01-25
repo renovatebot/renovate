@@ -1,6 +1,9 @@
-import * as packageCache from '../../../cache/package';
-import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
-import { AbstractGithubGraphqlCacheStrategy } from './abstract-cache-strategy';
+import * as packageCache from '../../../cache/package/index.ts';
+import type {
+  GithubDatasourceItem,
+  GithubGraphqlCacheRecord,
+} from '../types.ts';
+import { AbstractGithubGraphqlCacheStrategy } from './abstract-cache-strategy.ts';
 
 /**
  * Package cache strategy meant to be used for public packages.

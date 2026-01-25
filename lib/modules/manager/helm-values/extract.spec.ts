@@ -1,7 +1,7 @@
-import type { ExtractConfig } from '../types';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
-import { partial } from '~test/util';
+import type { ExtractConfig } from '../types.ts';
+import { extractPackageFile } from './index.ts';
+import { Fixtures } from '~test/fixtures.js';
+import { partial } from '~test/util.js';
 
 const helmDefaultChartInitValues = Fixtures.get(
   'default_chart_init_values.yaml',

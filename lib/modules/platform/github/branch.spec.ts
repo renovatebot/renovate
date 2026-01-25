@@ -1,5 +1,5 @@
-import { remoteBranchExists } from './branch';
-import * as httpMock from '~test/http-mock';
+import { remoteBranchExists } from './branch.ts';
+import * as httpMock from '~test/http-mock.js';
 
 describe('modules/platform/github/branch', () => {
   it('should return true if the branch exists', async () => {

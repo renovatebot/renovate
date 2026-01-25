@@ -1,14 +1,18 @@
 import { isTruthy } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { cached } from '../../../util/cache/package/cached';
-import { HttpError } from '../../../util/http';
-import * as p from '../../../util/promises';
-import { regEx } from '../../../util/regex';
-import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
-import * as pep440Versioning from '../../versioning/pep440';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { GalaxyV3, GalaxyV3DetailedVersion, GalaxyV3Versions } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { cached } from '../../../util/cache/package/cached.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import * as p from '../../../util/promises.ts';
+import { regEx } from '../../../util/regex.ts';
+import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
+import * as pep440Versioning from '../../versioning/pep440/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import {
+  GalaxyV3,
+  GalaxyV3DetailedVersion,
+  GalaxyV3Versions,
+} from './schema.ts';
 
 const ansibleProtocolRegex = regEx(/^\S+\/api\/ansible\/.+/);
 const repositoryRegex = regEx(

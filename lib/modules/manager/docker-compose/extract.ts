@@ -1,10 +1,10 @@
 import { isString, isTruthy } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { parseSingleYaml } from '../../../util/yaml';
-import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageFileContent } from '../types';
-import { DockerComposeFile } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import type { ExtractConfig, PackageFileContent } from '../types.ts';
+import { DockerComposeFile } from './schema.ts';
 
 class LineMapper {
   private imageLines: { line: string; lineNumber: number; used: boolean }[];

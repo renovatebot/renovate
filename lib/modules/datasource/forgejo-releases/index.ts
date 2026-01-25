@@ -1,11 +1,15 @@
-import { cached } from '../../../util/cache/package/cached';
-import type { PackageCacheNamespace } from '../../../util/cache/package/types';
-import { ForgejoHttp } from '../../../util/http/forgejo';
-import { Datasource } from '../datasource';
-import { ForgejoTagsDatasource } from '../forgejo-tags';
-import { Commits, Tag } from '../forgejo-tags/schema';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { Releases } from './schema';
+import { cached } from '../../../util/cache/package/cached.ts';
+import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
+import { ForgejoHttp } from '../../../util/http/forgejo.ts';
+import { Datasource } from '../datasource.ts';
+import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
+import { Commits, Tag } from '../forgejo-tags/schema.ts';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  ReleaseResult,
+} from '../types.ts';
+import { Releases } from './schema.ts';
 
 export class ForgejoReleasesDatasource extends Datasource {
   static readonly id = 'forgejo-releases';

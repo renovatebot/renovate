@@ -1,6 +1,6 @@
 import type { SpanKind } from '@opentelemetry/api';
-import type { RenovateSpanAttributes } from './types';
-import { instrument } from '.';
+import { instrument } from './index.ts';
+import type { RenovateSpanAttributes } from './types.ts';
 
 interface InstrumentedOptions {
   /**

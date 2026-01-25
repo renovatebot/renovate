@@ -1,10 +1,10 @@
-import { logger } from '../../../logger';
-import { cached } from '../../../util/cache/package/cached';
-import { asTimestamp } from '../../../util/timestamp';
-import { joinUrlParts } from '../../../util/url';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { OrbResponse } from './types';
+import { logger } from '../../../logger/index.ts';
+import { cached } from '../../../util/cache/package/cached.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { OrbResponse } from './types.ts';
 
 const MAX_VERSIONS = 100;
 

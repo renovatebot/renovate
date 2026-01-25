@@ -1,16 +1,20 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import * as memCache from '../../../util/cache/memory';
-import { getCache } from '../../../util/cache/repository';
-import type { ForgejoHttp } from '../../../util/http/forgejo';
-import type { HttpResponse } from '../../../util/http/types';
-import { getQueryString, parseLinkHeader, parseUrl } from '../../../util/url';
-import type { Pr } from '../types';
-import type { ForgejoPrCacheData, PR } from './types';
-import { API_PATH, toRenovatePR } from './utils';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import type { ForgejoHttp } from '../../../util/http/forgejo.ts';
+import type { HttpResponse } from '../../../util/http/types.ts';
+import {
+  getQueryString,
+  parseLinkHeader,
+  parseUrl,
+} from '../../../util/url.ts';
+import type { Pr } from '../types.ts';
+import type { ForgejoPrCacheData, PR } from './types.ts';
+import { API_PATH, toRenovatePR } from './utils.ts';
 
 export class ForgejoPrCache {
   private cache: ForgejoPrCacheData;

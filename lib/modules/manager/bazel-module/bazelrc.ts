@@ -1,8 +1,8 @@
 import upath from 'upath';
-import { logger } from '../../../logger';
-import { isNotNullOrUndefined } from '../../../util/array';
-import * as fs from '../../../util/fs';
-import { regEx } from '../../../util/regex';
+import { logger } from '../../../logger/index.ts';
+import { isNotNullOrUndefined } from '../../../util/array.ts';
+import * as fs from '../../../util/fs/index.ts';
+import { regEx } from '../../../util/regex.ts';
 
 const importRegex = regEx(`^(?<type>(?:try-)?import)\\s+(?<path>\\S+)$`);
 const optionRegex = regEx(

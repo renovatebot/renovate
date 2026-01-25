@@ -1,5 +1,5 @@
-import { hostRulesFromEnv } from './host-rules-from-env';
-import { logger } from '~test/util';
+import { hostRulesFromEnv } from './host-rules-from-env.ts';
+import { logger } from '~test/util.js';
 
 describe('workers/global/config/parse/host-rules-from-env', () => {
   it('supports docker username/password', () => {

@@ -1,16 +1,16 @@
-import upath from 'upath';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadModules } from '../../util/modules';
-import { getDatasourceList } from '../datasource';
-import * as customManager from './custom';
-import type { ManagerApi } from './types';
-import * as manager from '.';
+import upath from 'upath';
+import { loadModules } from '../../util/modules.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+import { getDatasourceList } from '../datasource/index.ts';
+import * as customManager from './custom/index.ts';
+import * as manager from './index.ts';
+import type { ManagerApi } from './types.ts';
 
-vi.mock('../../util/fs');
+vi.mock('../../util/fs/index.ts');
 
 const datasources = getDatasourceList();
 

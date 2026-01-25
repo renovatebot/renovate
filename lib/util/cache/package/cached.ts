@@ -1,11 +1,11 @@
 import { isUndefined } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import { acquireLock } from '../../mutex';
-import { resolveTtlValues } from './ttl';
-import type { DecoratorCachedRecord, PackageCacheNamespace } from './types';
-import * as packageCache from '.';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import { acquireLock } from '../../mutex.ts';
+import * as packageCache from './index.ts';
+import { resolveTtlValues } from './ttl.ts';
+import type { DecoratorCachedRecord, PackageCacheNamespace } from './types.ts';
 
 interface CachedOptions {
   /**

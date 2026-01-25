@@ -1,7 +1,11 @@
-import { cached } from '../../../util/cache/package/cached';
-import { regEx } from '../../../util/regex';
-import { GitDatasource } from '../git-refs/base';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import { cached } from '../../../util/cache/package/cached.ts';
+import { regEx } from '../../../util/regex.ts';
+import { GitDatasource } from '../git-refs/base.ts';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  ReleaseResult,
+} from '../types.ts';
 
 export class GitTagsDatasource extends GitDatasource {
   static override readonly id = 'git-tags';

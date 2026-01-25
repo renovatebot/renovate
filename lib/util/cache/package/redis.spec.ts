@@ -1,5 +1,5 @@
 import { createClient, createCluster } from 'redis';
-import { init, normalizeRedisUrl } from './redis';
+import { init, normalizeRedisUrl } from './redis.ts';
 
 vi.mock('redis');
 

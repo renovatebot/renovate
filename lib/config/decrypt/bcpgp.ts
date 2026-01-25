@@ -1,8 +1,8 @@
 import type { RuntimeType } from '@renovatebot/pgp';
 import { decrypt, isSupportedRuntime } from '@renovatebot/pgp';
-import { logger } from '../../logger';
-import { getEnv } from '../../util/env';
-import { regEx } from '../../util/regex';
+import { logger } from '../../logger/index.ts';
+import { getEnv } from '../../util/env.ts';
+import { regEx } from '../../util/regex.ts';
 
 export async function tryDecryptBcPgp(
   privateKey: string,

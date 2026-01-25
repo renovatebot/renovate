@@ -1,6 +1,6 @@
-import type { Category } from '../../../constants';
-import { HelmDatasource } from '../../datasource/helm';
-export { extractPackageFile } from './extract';
+import type { Category } from '../../../constants/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'Helm v2 Chart Dependencies';
 export const url =

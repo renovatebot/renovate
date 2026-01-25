@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Json, LooseRecord, Yaml } from '../../../util/schema-utils';
+import { Json, LooseRecord, Yaml } from '../../../util/schema-utils/index.ts';
 
 export const PnpmCatalogs = z.object({
   catalog: z.optional(z.record(z.string())),

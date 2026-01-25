@@ -2,15 +2,15 @@ import URL from 'node:url';
 import type { SimpleGit } from 'simple-git';
 import { simpleGit as Git } from 'simple-git';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import { simpleGitConfig } from '../../../util/git/config';
-import { getHttpUrl } from '../../../util/git/url';
-import { regEx } from '../../../util/regex';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import * as semVerVersioning from '../../versioning/semver';
-import type { ExtractConfig, PackageFileContent } from '../types';
-import type { GitModule } from './types';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import { simpleGitConfig } from '../../../util/git/config.ts';
+import { getHttpUrl } from '../../../util/git/url.ts';
+import { regEx } from '../../../util/regex.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import * as semVerVersioning from '../../versioning/semver/index.ts';
+import type { ExtractConfig, PackageFileContent } from '../types.ts';
+import type { GitModule } from './types.ts';
 
 async function getUrl(
   git: SimpleGit,

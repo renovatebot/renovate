@@ -1,11 +1,11 @@
-import { logger } from '../../../logger';
-import { cached } from '../../../util/cache/package/cached';
-import { ensureTrailingSlash } from '../../../util/url';
-import * as helmVersioning from '../../versioning/helm';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { HelmRepositoryData } from './schema';
-import { HelmRepository } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { cached } from '../../../util/cache/package/cached.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import * as helmVersioning from '../../versioning/helm/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { HelmRepositoryData } from './schema.ts';
+import { HelmRepository } from './schema.ts';
 
 export class HelmDatasource extends Datasource {
   static readonly id = 'helm';

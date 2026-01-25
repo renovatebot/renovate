@@ -1,10 +1,10 @@
-import { logger } from '../../../logger';
-import { cached } from '../../../util/cache/package/cached';
-import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider';
-import { id as semver } from '../../versioning/semver-coerced';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { Registry } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { cached } from '../../../util/cache/package/cached.ts';
+import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider.ts';
+import { id as semver } from '../../versioning/semver-coerced/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { Registry } from './schema.ts';
 
 export class TypstDatasource extends Datasource {
   static readonly id = 'typst';

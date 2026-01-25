@@ -1,13 +1,17 @@
-import { cached } from '../../../util/cache/package/cached';
-import type { PackageCacheNamespace } from '../../../util/cache/package/types';
-import { BitbucketHttp } from '../../../util/http/bitbucket';
-import { asTimestamp } from '../../../util/timestamp';
-import { ensureTrailingSlash } from '../../../util/url';
-import { RepoInfo } from '../../platform/bitbucket/schema';
-import type { PagedResult } from '../../platform/bitbucket/types';
-import { Datasource } from '../datasource';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import type { BitbucketCommit, BitbucketTag } from './types';
+import { cached } from '../../../util/cache/package/cached.ts';
+import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
+import { BitbucketHttp } from '../../../util/http/bitbucket.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import { RepoInfo } from '../../platform/bitbucket/schema.ts';
+import type { PagedResult } from '../../platform/bitbucket/types.ts';
+import { Datasource } from '../datasource.ts';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  ReleaseResult,
+} from '../types.ts';
+import type { BitbucketCommit, BitbucketTag } from './types.ts';
 
 export class BitbucketTagsDatasource extends Datasource {
   static readonly id = 'bitbucket-tags';

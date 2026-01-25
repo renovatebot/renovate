@@ -1,11 +1,14 @@
 // TODO #22198
-import cleanGitRef from 'clean-git-ref';
-import slugify from 'slugify';
-import { logger } from '../../../logger';
-import { hash } from '../../../util/hash';
-import { regEx } from '../../../util/regex';
-import * as template from '../../../util/template';
-import type { BranchUpgradeConfig } from '../../types';
+import _cleanGitRef from 'clean-git-ref';
+import _slugify from 'slugify';
+import { logger } from '../../../logger/index.ts';
+
+const cleanGitRef = _cleanGitRef as unknown as typeof import('clean-git-ref');
+const slugify = _slugify as unknown as typeof import('slugify').default;
+import { hash } from '../../../util/hash.ts';
+import { regEx } from '../../../util/regex.ts';
+import * as template from '../../../util/template/index.ts';
+import type { BranchUpgradeConfig } from '../../types.ts';
 
 const MIN_HASH_LENGTH = 6;
 

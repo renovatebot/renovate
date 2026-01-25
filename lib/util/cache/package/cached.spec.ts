@@ -1,10 +1,10 @@
-import { GlobalConfig } from '../../../config/global';
-import * as memCache from '../memory';
-import { cached } from './cached';
-import * as file from './file';
-import * as packageCache from '.';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as memCache from '../memory/index.ts';
+import { cached } from './cached.ts';
+import * as file from './file.ts';
+import * as packageCache from './index.ts';
 
-vi.mock('./file');
+vi.mock('./file.ts');
 
 describe('util/cache/package/cached', () => {
   const setCache = file.set;

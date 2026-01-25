@@ -1,6 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import { regEx } from '../../../util/regex';
-import { AbstractMigration } from '../base/abstract-migration';
+import { regEx } from '../../../util/regex.ts';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export class MatchStringsMigration extends AbstractMigration {
   override readonly propertyName = 'matchStrings';

@@ -4,25 +4,25 @@ import {
   isNonEmptyString,
   isNullOrUndefined,
 } from '@sindresorhus/is';
-import { logger } from '../../../../../logger';
-import { getPkgReleases } from '../../../../../modules/datasource';
-import type { Release } from '../../../../../modules/datasource/types';
-import * as allVersioning from '../../../../../modules/versioning';
-import * as packageCache from '../../../../../util/cache/package';
-import type { PackageCacheNamespace } from '../../../../../util/cache/package/types';
-import { memoize } from '../../../../../util/memoize';
-import { regEx } from '../../../../../util/regex';
-import { parseUrl, trimSlashes } from '../../../../../util/url';
-import type { BranchUpgradeConfig } from '../../../../types';
-import { slugifyUrl } from './common';
-import { addReleaseNotes } from './release-notes';
-import { getInRangeReleases } from './releases';
+import { logger } from '../../../../../logger/index.ts';
+import { getPkgReleases } from '../../../../../modules/datasource/index.ts';
+import type { Release } from '../../../../../modules/datasource/types.ts';
+import * as allVersioning from '../../../../../modules/versioning/index.ts';
+import * as packageCache from '../../../../../util/cache/package/index.ts';
+import type { PackageCacheNamespace } from '../../../../../util/cache/package/types.ts';
+import { memoize } from '../../../../../util/memoize.ts';
+import { regEx } from '../../../../../util/regex.ts';
+import { parseUrl, trimSlashes } from '../../../../../util/url.ts';
+import type { BranchUpgradeConfig } from '../../../../types.ts';
+import { slugifyUrl } from './common.ts';
+import { addReleaseNotes } from './release-notes.ts';
+import { getInRangeReleases } from './releases.ts';
 import type {
   ChangeLogError,
   ChangeLogPlatform,
   ChangeLogRelease,
   ChangeLogResult,
-} from './types';
+} from './types.ts';
 
 export abstract class ChangeLogSource {
   private readonly cacheNamespace: PackageCacheNamespace;

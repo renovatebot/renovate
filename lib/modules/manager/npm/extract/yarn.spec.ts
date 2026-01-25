@@ -2,11 +2,11 @@ import {
   extractYarnCatalogs,
   getYarnLock,
   getYarnVersionFromLock,
-} from './yarn';
-import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+} from './yarn.ts';
+import { Fixtures } from '~test/fixtures.js';
+import { fs } from '~test/util.js';
 
-vi.mock('../../../../util/fs');
+vi.mock('../../../../util/fs/index.ts');
 
 describe('modules/manager/npm/extract/yarn', () => {
   describe('.getYarnLock()', () => {

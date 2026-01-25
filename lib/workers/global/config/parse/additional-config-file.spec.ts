@@ -5,12 +5,12 @@ import fsExtra from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
-import { logger } from '../../../../logger';
-import customConfig from './__fixtures__/config';
-import * as file from './additional-config-file';
+import { logger } from '../../../../logger/index.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+import customConfig from './__fixtures__/config.mjs';
+import * as file from './additional-config-file.ts';
 
 describe('workers/global/config/parse/additional-config-file', () => {
   const processExitSpy = vi.spyOn(process, 'exit');

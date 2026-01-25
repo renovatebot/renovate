@@ -1,16 +1,16 @@
 import type { TypeOf, ZodType } from 'zod';
-import { GlobalConfig } from '../../../config/global';
-import { cached } from '../../../util/cache/package/cached';
-import * as hostRules from '../../../util/host-rules';
-import type { HttpOptions } from '../../../util/http/types';
-import { id as versioning } from '../../versioning/loose';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import { GlobalConfig } from '../../../config/global.ts';
+import { cached } from '../../../util/cache/package/cached.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import type { HttpOptions } from '../../../util/http/types.ts';
+import { id as versioning } from '../../versioning/loose/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import {
   AzurePipelinesFallbackTasks,
   AzurePipelinesJSON,
   AzurePipelinesTaskVersion,
-} from './schema';
+} from './schema.ts';
 
 const TASKS_URL_BASE =
   'https://raw.githubusercontent.com/renovatebot/azure-devops-marketplace/main';

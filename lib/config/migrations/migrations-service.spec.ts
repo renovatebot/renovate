@@ -2,13 +2,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import upath from 'upath';
-import type { RenovateConfig } from '../types';
-import { AbstractMigration } from './base/abstract-migration';
-import { MigrationsService } from './migrations-service';
-import type { Migration } from './types';
+import type { RenovateConfig } from '../types.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+import { AbstractMigration } from './base/abstract-migration.ts';
+import { MigrationsService } from './migrations-service.ts';
+import type { Migration } from './types.ts';
 
 describe('config/migrations/migrations-service', () => {
   it('should remove deprecated properties', () => {

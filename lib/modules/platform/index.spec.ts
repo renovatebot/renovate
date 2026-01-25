@@ -1,15 +1,15 @@
-import type { PlatformId } from '../../constants';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PLATFORM_NOT_FOUND } from '../../constants/error-messages';
-import { loadModules } from '../../util/modules';
-import api from './api';
-import type { Platform } from './types';
-import * as platform from '.';
-import * as httpMock from '~test/http-mock';
+import { PLATFORM_NOT_FOUND } from '../../constants/error-messages.ts';
+import type { PlatformId } from '../../constants/index.ts';
+import { loadModules } from '../../util/modules.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+import api from './api.ts';
+import * as platform from './index.ts';
+import type { Platform } from './types.ts';
+import * as httpMock from '~test/http-mock.js';
 
 vi.unmock('.');
 vi.unmock('./scm');

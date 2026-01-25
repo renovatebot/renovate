@@ -1,16 +1,16 @@
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cached } from '../../../util/cache/package/cached';
-import { HttpError } from '../../../util/http';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { cached } from '../../../util/cache/package/cached.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import {
   datasource,
   defaultRegistryUrl,
   pageSize,
   parsePackage,
-} from './common';
-import type { AdoptiumJavaResponse } from './types';
+} from './common.ts';
+import type { AdoptiumJavaResponse } from './types.ts';
 
 export class JavaVersionDatasource extends Datasource {
   static readonly id = datasource;

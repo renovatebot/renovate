@@ -1,9 +1,9 @@
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cached } from '../../../util/cache/package/cached';
-import type { HttpError } from '../../../util/http';
-import { ensureTrailingSlash } from '../../../util/url';
-import { Datasource } from '../datasource';
-import type { ServiceDiscoveryResult } from './types';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { cached } from '../../../util/cache/package/cached.ts';
+import type { HttpError } from '../../../util/http/index.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type { ServiceDiscoveryResult } from './types.ts';
 
 const terraformId = 'terraform';
 

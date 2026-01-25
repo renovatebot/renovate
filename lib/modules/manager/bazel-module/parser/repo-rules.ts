@@ -1,8 +1,8 @@
 import { query as q } from 'good-enough-parser';
 import type { parser } from 'good-enough-parser';
-import { regEx } from '../../../../util/regex';
-import { kvParams } from './common';
-import type { Ctx } from './context';
+import { regEx } from '../../../../util/regex.ts';
+import { kvParams } from './common.ts';
+import type { Ctx } from './context.ts';
 
 // Store for tracking use_repo_rule assignments during parsing
 const repoRuleVariables = new Map<
