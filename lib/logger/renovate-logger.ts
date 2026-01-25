@@ -20,11 +20,14 @@ export class RenovateLogger implements Logger {
   readonly logger: Logger = { once: { reset: onceReset } } as any;
   readonly once = this.logger.once;
 
-  constructor(
-    private readonly bunyanLogger: bunyan,
-    private context: string,
-    private meta: Record<string, unknown>,
-  ) {
+  private readonly bunyanLogger: bunyan;
+  private context: string;
+  private meta: Record<string, unknown>;
+
+  constructor(bunyanLogger: bunyan, context: string, meta: Record<string, unknown>) {
+    this.bunyanLogger = bunyanLogger;
+    this.context = context;
+    this.meta = meta;
     for (const level of loggerLevels) {
       this.logger[level] = this.logFactory(level) as never;
       this.logger.once[level] = this.logOnceFn(level);
