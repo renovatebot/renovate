@@ -1,7 +1,7 @@
 import { setTimeout } from 'timers/promises';
 import fs from 'fs-extra';
 import type { SimpleGit } from 'simple-git';
-import _simpleGit from 'simple-git';
+import { simpleGit as _simpleGit } from 'simple-git';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
@@ -19,7 +19,7 @@ import * as httpMock from '~test/http-mock';
 import { partial } from '~test/util';
 
 vi.mock('simple-git');
-const simpleGit = vi.mocked(_simpleGit);
+const simpleGit: MockedFunction<typeof _simpleGit> = vi.mocked(_simpleGit);
 
 const API_BASE_URL = CrateDatasource.CRATES_IO_API_BASE_URL;
 

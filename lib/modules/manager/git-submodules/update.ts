@@ -1,4 +1,4 @@
-import Git from 'simple-git';
+import { simpleGit as Git } from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';

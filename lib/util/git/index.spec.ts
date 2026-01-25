@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import type { PushResult } from 'simple-git';
-import Git from 'simple-git';
+import { simpleGit as Git } from 'simple-git';
 import tmp from 'tmp-promise';
 import { GlobalConfig } from '../../config/global';
 import {

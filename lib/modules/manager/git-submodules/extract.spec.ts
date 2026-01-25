@@ -6,7 +6,7 @@ import { GlobalConfig } from '../../../config/global';
 import * as hostRules from '../../../util/host-rules';
 import { extractPackageFile } from '.';
 
-vi.mock('simple-git', () => ({ default: vi.fn() }));
+vi.mock('simple-git', () => ({ simpleGit: vi.fn() }));
 const simpleGitFactoryMock = vi.mocked(Git);
 
 const gitMock = mock<SimpleGit>();
