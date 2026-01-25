@@ -3,10 +3,13 @@ import {
   getGitAuthenticatedEnvironmentVariables,
   getGitEnvironmentVariables,
 } from './auth';
+import { logger } from '~test/util';
 
 describe('util/git/auth', () => {
   afterEach(() => {
     delete process.env.GIT_CONFIG_COUNT;
+    delete process.env.GIT_CONFIG_KEY_0;
+    delete process.env.GIT_CONFIG_VALUE_0;
   });
 
   describe('getGitAuthenticatedEnvironmentVariables()', () => {
@@ -122,9 +125,11 @@ describe('util/git/auth', () => {
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '4',
+        GIT_CONFIG_KEY_0: '',
         GIT_CONFIG_KEY_1: 'url.https://ssh:token1234@github.com/.insteadOf',
         GIT_CONFIG_KEY_2: 'url.https://git:token1234@github.com/.insteadOf',
         GIT_CONFIG_KEY_3: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: '',
         GIT_CONFIG_VALUE_1: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_2: 'git@github.com:',
         GIT_CONFIG_VALUE_3: 'https://github.com/',
@@ -145,9 +150,11 @@ describe('util/git/auth', () => {
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '4',
+        GIT_CONFIG_KEY_0: '',
         GIT_CONFIG_KEY_1: 'url.https://ssh:token1234@github.com/.insteadOf',
         GIT_CONFIG_KEY_2: 'url.https://git:token1234@github.com/.insteadOf',
         GIT_CONFIG_KEY_3: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: '',
         GIT_CONFIG_VALUE_1: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_2: 'git@github.com:',
         GIT_CONFIG_VALUE_3: 'https://github.com/',
@@ -156,6 +163,8 @@ describe('util/git/auth', () => {
 
     it('returns url with token and already existing GIT_CONFIG_COUNT from environment', () => {
       process.env.GIT_CONFIG_COUNT = '1';
+      process.env.GIT_CONFIG_KEY_0 = 'key';
+      process.env.GIT_CONFIG_VALUE_0 = 'value';
       expect(
         getGitAuthenticatedEnvironmentVariables('https://github.com/', {
           token: 'token1234',
@@ -164,9 +173,11 @@ describe('util/git/auth', () => {
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '4',
+        GIT_CONFIG_KEY_0: 'key',
         GIT_CONFIG_KEY_1: 'url.https://ssh:token1234@github.com/.insteadOf',
         GIT_CONFIG_KEY_2: 'url.https://git:token1234@github.com/.insteadOf',
         GIT_CONFIG_KEY_3: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'value',
         GIT_CONFIG_VALUE_1: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_2: 'git@github.com:',
         GIT_CONFIG_VALUE_3: 'https://github.com/',
@@ -369,6 +380,118 @@ describe('util/git/auth', () => {
         GIT_CONFIG_VALUE_0: 'ssh://git@git.mycompany.com:7999/',
         GIT_CONFIG_VALUE_1: 'ssh://git@git.mycompany.com:7999/',
         GIT_CONFIG_VALUE_2: 'https://git.mycompany.com/scm/',
+      });
+    });
+
+    describe('when GIT_CONFIG_COUNT=1, but no values exist', () => {
+      beforeEach(() => {
+        process.env.GIT_CONFIG_COUNT = '1';
+      });
+      it('defaults them to an empty string', () => {
+        expect(
+          getGitAuthenticatedEnvironmentVariables('https://github.com/', {
+            token: 'token1234',
+            hostType: 'github',
+            matchHost: 'github.com',
+          }),
+        ).toStrictEqual({
+          GIT_CONFIG_COUNT: '4',
+          GIT_CONFIG_KEY_0: '',
+          GIT_CONFIG_KEY_1: 'url.https://ssh:token1234@github.com/.insteadOf',
+          GIT_CONFIG_KEY_2: 'url.https://git:token1234@github.com/.insteadOf',
+          GIT_CONFIG_KEY_3: 'url.https://token1234@github.com/.insteadOf',
+          GIT_CONFIG_VALUE_0: '',
+          GIT_CONFIG_VALUE_1: 'ssh://git@github.com/',
+          GIT_CONFIG_VALUE_2: 'git@github.com:',
+          GIT_CONFIG_VALUE_3: 'https://github.com/',
+        });
+      });
+
+      it('logs a warning', () => {
+        getGitAuthenticatedEnvironmentVariables('https://github.com/', {
+          token: 'token1234',
+          hostType: 'github',
+          matchHost: 'github.com',
+        });
+
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          'GIT_CONFIG_COUNT=1, but there was no value for GIT_CONFIG_KEY_0. Setting it to the empty string, which may break git',
+        );
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          'GIT_CONFIG_COUNT=1, but there was no value for GIT_CONFIG_VALUE_0. Setting it to the empty string, which may break git',
+        );
+      });
+    });
+
+    describe('when GIT_CONFIG_COUNT=2, with values', () => {
+      afterEach(() => {
+        delete process.env.GIT_CONFIG_COUNT;
+        delete process.env.GIT_CONFIG_KEY_0;
+        delete process.env.GIT_CONFIG_VALUE_0;
+        delete process.env.GIT_CONFIG_KEY_1;
+        delete process.env.GIT_CONFIG_VALUE_1;
+      });
+
+      it('handles existing values and merges them', () => {
+        process.env.GIT_CONFIG_COUNT = '2';
+        process.env.GIT_CONFIG_KEY_0 = 'url.https://foo.insteadOf';
+        process.env.GIT_CONFIG_KEY_1 = 'url.https://bar.insteadOf';
+        process.env.GIT_CONFIG_VALUE_0 = 'ssh://foo/';
+        process.env.GIT_CONFIG_VALUE_1 = 'ssh://bar/';
+
+        expect(
+          getGitAuthenticatedEnvironmentVariables('https://github.com/', {
+            token: 'token1234',
+            hostType: 'github',
+            matchHost: 'github.com',
+          }),
+        ).toStrictEqual({
+          GIT_CONFIG_COUNT: '5',
+          GIT_CONFIG_KEY_0: 'url.https://foo.insteadOf',
+          GIT_CONFIG_KEY_1: 'url.https://bar.insteadOf',
+          GIT_CONFIG_KEY_2: 'url.https://ssh:token1234@github.com/.insteadOf',
+          GIT_CONFIG_KEY_3: 'url.https://git:token1234@github.com/.insteadOf',
+          GIT_CONFIG_KEY_4: 'url.https://token1234@github.com/.insteadOf',
+          GIT_CONFIG_VALUE_0: 'ssh://foo/',
+          GIT_CONFIG_VALUE_1: 'ssh://bar/',
+          GIT_CONFIG_VALUE_2: 'ssh://git@github.com/',
+          GIT_CONFIG_VALUE_3: 'git@github.com:',
+          GIT_CONFIG_VALUE_4: 'https://github.com/',
+        });
+      });
+
+      it(`doesn't override provided environment variable with value from environment`, () => {
+        process.env.GIT_CONFIG_COUNT = '2';
+        process.env.GIT_CONFIG_KEY_0 = 'url.https://foo.insteadOf';
+        process.env.GIT_CONFIG_KEY_1 = 'url.https://bar.insteadOf';
+        process.env.GIT_CONFIG_VALUE_0 = 'ssh://foo/';
+        process.env.GIT_CONFIG_VALUE_1 = 'ssh://bar/';
+
+        expect(
+          getGitAuthenticatedEnvironmentVariables(
+            'https://github.com/',
+            {
+              token: 'token1234',
+              hostType: 'github',
+              matchHost: 'github.com',
+            },
+            {
+              GIT_CONFIG_KEY_0: 'to-be-overridden',
+            },
+          ),
+        ).toStrictEqual({
+          GIT_CONFIG_COUNT: '5',
+          GIT_CONFIG_KEY_0: 'to-be-overridden',
+          GIT_CONFIG_KEY_1: 'url.https://bar.insteadOf',
+          GIT_CONFIG_KEY_2: 'url.https://ssh:token1234@github.com/.insteadOf',
+          GIT_CONFIG_KEY_3: 'url.https://git:token1234@github.com/.insteadOf',
+          GIT_CONFIG_KEY_4: 'url.https://token1234@github.com/.insteadOf',
+          GIT_CONFIG_VALUE_0: 'ssh://foo/',
+          GIT_CONFIG_VALUE_1: 'ssh://bar/',
+          GIT_CONFIG_VALUE_2: 'ssh://git@github.com/',
+          GIT_CONFIG_VALUE_3: 'git@github.com:',
+          GIT_CONFIG_VALUE_4: 'https://github.com/',
+        });
       });
     });
   });

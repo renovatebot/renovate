@@ -71,11 +71,34 @@ export function getGitAuthenticatedEnvironmentVariables(
   }
 
   // create a shallow copy of the environmentVariables as base so we don't modify the input parameter object
-  // add the two new config key and value to the returnEnvironmentVariables object
-  // increase the CONFIG_COUNT by one for each rule and add it to the object
   const newEnvironmentVariables = {
     ...environmentVariables,
   };
+  // make sure we copy over any existing variables
+  if (gitConfigCount > 0) {
+    for (let i = 0; i < gitConfigCount; i++) {
+      let envKey = `GIT_CONFIG_KEY_${i}`;
+      newEnvironmentVariables[envKey] ??= env[envKey];
+      if (newEnvironmentVariables[envKey] === undefined) {
+        logger.once.warn(
+          `GIT_CONFIG_COUNT=${gitConfigCount}, but there was no value for ${envKey}. Setting it to the empty string, which may break git`,
+        );
+        newEnvironmentVariables[envKey] = '';
+      }
+
+      envKey = `GIT_CONFIG_VALUE_${i}`;
+      newEnvironmentVariables[envKey] ??= env[envKey];
+      if (newEnvironmentVariables[envKey] === undefined) {
+        logger.once.warn(
+          `GIT_CONFIG_COUNT=${gitConfigCount}, but there was no value for ${envKey}. Setting it to the empty string, which may break git`,
+        );
+        newEnvironmentVariables[envKey] = '';
+      }
+    }
+  }
+
+  // add the two new config key and value to the returnEnvironmentVariables object
+  // increase the CONFIG_COUNT by one for each rule and add it to the object
   for (const rule of authenticationRules) {
     newEnvironmentVariables[`GIT_CONFIG_KEY_${gitConfigCount}`] =
       `url.${rule.url}.insteadOf`;
