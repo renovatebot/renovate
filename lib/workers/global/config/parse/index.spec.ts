@@ -1,4 +1,6 @@
 import upath from 'upath';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { getConfigFileNames } from '../../../../config/app-strings';
 import * as _decrypt from '../../../../config/decrypt';
 import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages';
@@ -8,6 +10,9 @@ import getArgv from './__fixtures__/argv';
 import * as _fileConfigParser from './file';
 import * as _hostRulesFromEnv from './host-rules-from-env';
 import * as httpMock from '~test/http-mock';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 vi.mock('../../../../modules/datasource/npm');
 vi.mock('../../../../util/fs');

@@ -1,4 +1,6 @@
 import { getOptions } from '../../config/options';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { loadModules } from '../../util/modules';
 import { isVersioningApiConstructor } from './common';
 import type { GenericVersion } from './generic';
@@ -7,6 +9,9 @@ import * as semverVersioning from './semver';
 import * as semverCoercedVersioning from './semver-coerced';
 import type { VersioningApi, VersioningApiConstructor } from './types';
 import * as allVersioning from '.';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const supportedSchemes = getOptions().find(
   (option) => option.name === 'versioning',

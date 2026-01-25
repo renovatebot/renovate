@@ -1,4 +1,6 @@
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import fsExtra from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
@@ -7,6 +9,9 @@ import { expect } from 'vitest';
 import { logger } from '../../../../logger';
 import customConfig from './__fixtures__/config';
 import * as file from './file';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 describe('workers/global/config/parse/file', () => {
   const processExitSpy = vi.spyOn(process, 'exit');

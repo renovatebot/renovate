@@ -1,4 +1,6 @@
 import { dir } from 'tmp-promise';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { DirectoryResult } from 'tmp-promise';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
@@ -8,6 +10,9 @@ import type { StatusResult } from '../../../../util/git/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import * as postUpgradeCommands from './execute-post-upgrade-commands';
 import { fs, git, logger, partial } from '~test/util';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 vi.mock('../../../../util/exec');
 vi.mock('../../../../util/fs');

@@ -1,9 +1,14 @@
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import upath from 'upath';
 import type { RenovateConfig } from '../types';
 import { AbstractMigration } from './base/abstract-migration';
 import { MigrationsService } from './migrations-service';
 import type { Migration } from './types';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 describe('config/migrations/migrations-service', () => {
   it('should remove deprecated properties', () => {

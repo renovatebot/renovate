@@ -1,9 +1,14 @@
 import upath from 'upath';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { loadModules } from '../../util/modules';
 import { getDatasourceList } from '../datasource';
 import * as customManager from './custom';
 import type { ManagerApi } from './types';
 import * as manager from '.';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 vi.mock('../../util/fs');
 

@@ -1,4 +1,6 @@
 import type { SimpleGit } from 'simple-git';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { simpleGit } from 'simple-git';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
@@ -10,6 +12,9 @@ import * as hostRules from '../../../util/host-rules';
 import type { Upgrade } from '../types';
 import { updateDependency } from '.';
 import { fs } from '~test/util';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 vi.mock('../../../util/fs');
 
 vi.mock('simple-git');

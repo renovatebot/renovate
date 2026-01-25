@@ -1,10 +1,15 @@
 import { isArray, isString } from '@sindresorhus/is';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { Response, SimpleGit } from 'simple-git';
 import Git from 'simple-git';
 import { mock } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import * as hostRules from '../../../util/host-rules';
 import { extractPackageFile } from '.';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 vi.mock('simple-git', () => ({ simpleGit: vi.fn() }));
 const simpleGitFactoryMock = vi.mocked(Git);
