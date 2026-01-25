@@ -906,7 +906,7 @@ export async function processBranch(
     } else if (!(err instanceof ExternalHostError)) {
       logger.warn({ err }, `Error updating branch`);
     }
-    // Don't throw here - we don't want to stop the other renovations
+    // Don't throw here - we don't want to stop the other Renovate runs
     return {
       branchExists,
       prNo: branchPr?.number,
@@ -1069,7 +1069,7 @@ export async function processBranch(
       logger.debug('Passing PR error up');
       throw err;
     }
-    // Otherwise don't throw here - we don't want to stop the other renovations
+    // Otherwise don't throw here - we don't want to stop the other Renovate runs
     logger.error({ err }, `Error ensuring PR`);
   }
   if (!branchExists) {
