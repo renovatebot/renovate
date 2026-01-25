@@ -215,7 +215,7 @@
     "fs-extra": "11.3.3",
     "git-url-parse": "16.1.0",
     "github-url-from-git": "1.5.0",
-    "glob": "11.1.0",
+    "glob": "13.0.0",
     "global-agent": "3.0.0",
     "good-enough-parser": "1.1.23",
     "google-auth-library": "10.5.0",
@@ -291,7 +291,7 @@
     "@types/better-sqlite3": "7.6.13",
     "@types/breejs__later": "4.1.5",
     "@types/bunyan": "1.8.11",
-    "@types/cacache": "19.0.0",
+    "@types/cacache": "20.0.0",
     "@types/callsite": "1.0.34",
     "@types/changelog-filename-regex": "2.0.2",
     "@types/clean-git-ref": "2.0.2",
@@ -322,7 +322,7 @@
     "@types/tar": "6.1.13",
     "@types/tmp": "0.2.6",
     "@types/validate-npm-package-name": "4.0.2",
-    "@vitest/coverage-v8": "4.0.17",
+    "@vitest/coverage-v8": "4.0.18",
     "@vitest/eslint-plugin": "1.6.6",
     "ajv": "8.17.1",
     "ajv-formats": "3.0.1",
@@ -347,7 +347,7 @@
     "lint-staged": "16.2.7",
     "markdownlint-cli2": "0.20.0",
     "markdownlint-cli2-formatter-template": "0.0.4",
-    "memfs": "4.52.0",
+    "memfs": "4.53.0",
     "nock": "14.0.10",
     "npm-run-all2": "8.0.4",
     "nyc": "17.1.0",
@@ -361,9 +361,9 @@
     "typescript": "5.9.3",
     "typescript-eslint": "8.53.0",
     "unified": "11.0.5",
-    "vite": "8.0.0-beta.2",
+    "vite": "8.0.0-beta.8",
     "vite-tsconfig-paths": "5.1.4",
-    "vitest": "4.0.17",
+    "vitest": "4.0.18",
     "vitest-mock-extended": "3.1.0"
   },
   "packageManager": "pnpm@10.28.0",
@@ -390,7 +390,7 @@
     ],
     "overrides": {
       "esbuild": "0.27.2",
-      "vite": "8.0.0-beta.2"
+      "vite": "8.0.0-beta.8"
     }
   }
 }
