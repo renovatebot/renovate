@@ -1,7 +1,7 @@
 import { promises } from 'fs';
 import type { ErrorObject, ValidateFunction } from 'ajv';
 import { Ajv } from 'ajv';
-import draft7MetaSchema from 'ajv/lib/refs/json-schema-draft-07.json';
+import draft7MetaSchema from 'ajv/lib/refs/json-schema-draft-07.json' with { type: 'json' };
 import addFormats from 'ajv-formats';
 import { glob } from 'glob';
 

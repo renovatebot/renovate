@@ -1,4 +1,4 @@
-import replacementGroupsJson from '../../../data/replacements.json';
+import replacementGroupsJson from '../../../data/replacements.json' with { type: 'json' };
 import type { Preset } from '../types';
 import type { PresetTemplate, Replacement } from './auto-generate-replacements';
 import { addPresets } from './auto-generate-replacements';

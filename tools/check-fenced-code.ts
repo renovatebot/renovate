@@ -1,7 +1,7 @@
 import { format } from 'node:util';
 import type { ValidateFunction } from 'ajv';
 import { Ajv } from 'ajv';
-import draft7MetaSchema from 'ajv/lib/refs/json-schema-draft-07.json';
+import draft7MetaSchema from 'ajv/lib/refs/json-schema-draft-07.json' with { type: 'json' };
 import addFormats from 'ajv-formats';
 import fs from 'fs-extra';
 import { glob } from 'glob';
