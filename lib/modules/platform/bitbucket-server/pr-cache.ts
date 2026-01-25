@@ -27,12 +27,21 @@ export class BbsPrCache {
   private cache: BbsPrCacheData;
   private items: BbsPr[] = [];
 
+  private projectKey: string;
+  private repo: string;
+  private readonly ignorePrAuthor: boolean;
+  private author: string | null;
+
   private constructor(
-    private projectKey: string,
-    private repo: string,
-    private readonly ignorePrAuthor: boolean,
-    private author: string | null,
+    projectKey: string,
+    repo: string,
+    ignorePrAuthor: boolean,
+    author: string | null,
   ) {
+    this.projectKey = projectKey;
+    this.repo = repo;
+    this.ignorePrAuthor = ignorePrAuthor;
+    this.author = author;
     const repoCache = getCache();
     repoCache.platform ??= {};
     migrateBitbucketServerCache(repoCache.platform);

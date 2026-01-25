@@ -14,10 +14,12 @@ export class BitbucketPrCache {
   private items: Pr[] = [];
   private cache: BitbucketPrCacheData;
 
-  private constructor(
-    private repo: string,
-    private author: string | null,
-  ) {
+  private repo: string;
+  private author: string | null;
+
+  private constructor(repo: string, author: string | null) {
+    this.repo = repo;
+    this.author = author;
     const repoCache = getCache();
     repoCache.platform ??= {};
     repoCache.platform.bitbucket ??= {};

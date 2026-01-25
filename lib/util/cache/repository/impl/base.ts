@@ -15,10 +15,13 @@ export abstract class RepoCacheBase implements RepoCache {
   private oldHash: string | null = null;
   private data: RepoCacheData = {};
 
-  protected constructor(
-    protected readonly repository: string,
-    protected readonly fingerprint: string,
-  ) {}
+  protected readonly repository: string;
+  protected readonly fingerprint: string;
+
+  protected constructor(repository: string, fingerprint: string) {
+    this.repository = repository;
+    this.fingerprint = fingerprint;
+  }
 
   protected abstract read(): Promise<string | null>;
 

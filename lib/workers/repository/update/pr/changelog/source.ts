@@ -26,10 +26,18 @@ import type {
 
 export abstract class ChangeLogSource {
   private readonly cacheNamespace: PackageCacheNamespace;
+  private readonly platform: ChangeLogPlatform;
+  private readonly datasource:
+    | 'bitbucket-tags'
+    | 'bitbucket-server-tags'
+    | 'forgejo-tags'
+    | 'gitea-tags'
+    | 'github-tags'
+    | 'gitlab-tags';
 
   constructor(
-    private readonly platform: ChangeLogPlatform,
-    private readonly datasource:
+    platform: ChangeLogPlatform,
+    datasource:
       | 'bitbucket-tags'
       | 'bitbucket-server-tags'
       | 'forgejo-tags'
@@ -37,6 +45,8 @@ export abstract class ChangeLogSource {
       | 'github-tags'
       | 'gitlab-tags',
   ) {
+    this.platform = platform;
+    this.datasource = datasource;
     this.cacheNamespace = `changelog-${platform}-release`;
   }
 

@@ -40,8 +40,11 @@ class DummyDatasource extends Datasource {
   override defaultVersioning = 'python';
   override defaultRegistryUrls = ['https://reg1.com'];
 
-  constructor(private registriesMock: RegistriesMock = defaultRegistriesMock) {
+  private registriesMock: RegistriesMock;
+
+  constructor(registriesMock: RegistriesMock = defaultRegistriesMock) {
     super(datasource);
+    this.registriesMock = registriesMock;
   }
 
   override getReleases({
@@ -60,8 +63,11 @@ class DummyDatasource2 extends Datasource {
     return ['https://reg1.com'];
   };
 
-  constructor(private registriesMock: RegistriesMock = defaultRegistriesMock) {
+  private registriesMock: RegistriesMock;
+
+  constructor(registriesMock: RegistriesMock = defaultRegistriesMock) {
     super(datasource);
+    this.registriesMock = registriesMock;
   }
 
   override getReleases({
@@ -81,8 +87,11 @@ class DummyDatasource3 extends Datasource {
     return ['https://reg1.com'];
   };
 
-  constructor(private registriesMock: RegistriesMock = defaultRegistriesMock) {
+  private registriesMock: RegistriesMock;
+
+  constructor(registriesMock: RegistriesMock = defaultRegistriesMock) {
     super(datasource);
+    this.registriesMock = registriesMock;
   }
 
   override getReleases({
@@ -103,8 +112,11 @@ class DummyDatasource4 extends DummyDatasource3 {
 class DummyDatasource5 extends Datasource {
   override registryStrategy = undefined as never;
 
-  constructor(private registriesMock: RegistriesMock = defaultRegistriesMock) {
+  private registriesMock: RegistriesMock;
+
+  constructor(registriesMock: RegistriesMock = defaultRegistriesMock) {
     super(datasource);
+    this.registriesMock = registriesMock;
   }
 
   override getReleases({

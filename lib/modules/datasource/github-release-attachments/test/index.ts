@@ -3,10 +3,13 @@ import { partial } from '../../../../../test/util';
 import type { GithubRestRelease } from '../../../../util/github/types';
 
 export class GitHubReleaseAttachmentMocker {
-  constructor(
-    private readonly githubApiHost: string,
-    private readonly packageName: string,
-  ) {}
+  private readonly githubApiHost: string;
+  private readonly packageName: string;
+
+  constructor(githubApiHost: string, packageName: string) {
+    this.githubApiHost = githubApiHost;
+    this.packageName = packageName;
+  }
 
   release(version: string): GithubRestRelease {
     return this.withAssets(version, {});

@@ -24,7 +24,11 @@ export class RenovateLogger implements Logger {
   private context: string;
   private meta: Record<string, unknown>;
 
-  constructor(bunyanLogger: bunyan, context: string, meta: Record<string, unknown>) {
+  constructor(
+    bunyanLogger: bunyan,
+    context: string,
+    meta: Record<string, unknown>,
+  ) {
     this.bunyanLogger = bunyanLogger;
     this.context = context;
     this.meta = meta;

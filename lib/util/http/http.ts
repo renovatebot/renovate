@@ -78,14 +78,14 @@ export abstract class HttpBase<
 > {
   private readonly options: InternalGotOptions;
 
+  protected hostType: string;
+
   protected get baseUrl(): string | undefined {
     return undefined;
   }
 
-  constructor(
-    protected hostType: string,
-    options: HttpOptions = {},
-  ) {
+  constructor(hostType: string, options: HttpOptions = {}) {
+    this.hostType = hostType;
     const retryLimit = getEnv().NODE_ENV === 'test' ? 0 : 2;
     this.options = merge<InternalGotOptions>(
       options,

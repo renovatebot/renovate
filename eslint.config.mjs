@@ -238,6 +238,13 @@ export default tseslint.config(
           avoidQuotes: true,
         },
       ],
+
+      '@typescript-eslint/parameter-properties': [
+        'error',
+        {
+          prefer: 'class-property',
+        },
+      ],
     },
   },
   {

@@ -4,10 +4,13 @@ import type { CommitMessage } from '../../model/commit-message';
 import { CommitMessageFactory } from '../../model/commit-message-factory';
 
 export class ConfigMigrationCommitMessageFactory {
-  constructor(
-    private readonly config: RenovateConfig,
-    private readonly configFile: string,
-  ) {}
+  private readonly config: RenovateConfig;
+  private readonly configFile: string;
+
+  constructor(config: RenovateConfig, configFile: string) {
+    this.config = config;
+    this.configFile = configFile;
+  }
 
   private create(commitMessageTopic: string): CommitMessage {
     const { commitMessage } = this.config;
