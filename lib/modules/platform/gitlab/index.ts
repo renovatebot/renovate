@@ -824,6 +824,7 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
 
 export function massageMarkdown(input: string): string {
   const desc = input
+    .replace(regEx(/Pull Requests/g), 'Merge Requests')
     .replace(regEx(/Pull Request/g), 'Merge Request')
     .replace(regEx(/\bPR: #/g), 'MR: !')
     .replace(regEx(/\bPR\b/g), 'MR')

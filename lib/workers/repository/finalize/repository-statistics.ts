@@ -13,11 +13,23 @@ import type {
   BranchSummary,
 } from '../../types';
 
+interface RepositoryPrStats {
+  total: number;
+  open: number;
+  closed: number;
+  merged: number;
+}
+
 export function runRenovateRepoStats(
   config: RenovateConfig,
   prList: Pr[],
-): void {
-  const prStats = { total: 0, open: 0, closed: 0, merged: 0 };
+): RepositoryPrStats {
+  const prStats: RepositoryPrStats = {
+    total: 0,
+    open: 0,
+    closed: 0,
+    merged: 0,
+  };
 
   for (const pr of prList) {
     if (
@@ -42,6 +54,8 @@ export function runRenovateRepoStats(
     }
   }
   logger.debug({ stats: prStats }, `Renovate repository PR statistics`);
+
+  return prStats;
 }
 
 function branchCacheToMetadata({

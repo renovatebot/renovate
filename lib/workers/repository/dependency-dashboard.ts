@@ -20,7 +20,9 @@ import type { BranchConfig, SelectAllConfig } from '../types';
 import { extractRepoProblems } from './common';
 import type { ConfigMigrationResult } from './config-migration';
 import { getDepWarningsDashboard } from './errors-warnings';
+import { runRenovateRepoStats } from './finalize/repository-statistics';
 import { PackageFiles } from './package-files';
+import { calculateLibYears } from './process/libyear';
 import type { Vulnerability } from './process/types';
 import { Vulnerabilities } from './process/vulnerabilities';
 
@@ -597,6 +599,11 @@ export async function ensureDependencyDashboard(
   // add CVE section
   issueBody += await getDashboardMarkdownVulnerabilities(config, packageFiles);
 
+  // add statistics section
+  if (config.dependencyDashboardReportStatistics) {
+    issueBody += await getDashboardMarkdownStatistics(config, packageFiles);
+  }
+
   // fit the detected dependencies section
   const footer = getFooter(config);
   issueBody += PackageFiles.getDashboardMarkdown(
@@ -826,4 +833,45 @@ export async function getDashboardMarkdownVulnerabilities(
   }
 
   return result;
+}
+
+export async function getDashboardMarkdownStatistics(
+  config: RenovateConfig,
+  packageFiles: Record<string, PackageFile[]>,
+): Promise<string> {
+  if (!packageFiles) {
+    return '';
+  }
+
+  let statisticsMd = '## Statistics\n\n';
+
+  // PR Statistics
+  const prLists = await platform.getPrList();
+
+  if (prLists) {
+    const prStats = runRenovateRepoStats(config, prLists);
+
+    statisticsMd += '<details>\n';
+    statisticsMd += `<summary>Pull Requests</summary>\n\n`;
+    statisticsMd += '| PR State | Count |\n';
+    statisticsMd += '|---|---|\n';
+    statisticsMd += `| Open | ${prStats.open} |\n`;
+    statisticsMd += `| Closed | ${prStats.closed} |\n`;
+    statisticsMd += `| Merged | ${prStats.merged} |\n`;
+    statisticsMd += `| **Total** | **${prStats.total}** |\n`;
+    statisticsMd += '\n</details>\n\n';
+  }
+
+  // Lib Years & Dependency Status
+  const libYears = calculateLibYears(config, packageFiles);
+
+  statisticsMd += '<details>\n';
+  statisticsMd += `<summary>Dependency Status</summary>\n\n`;
+  statisticsMd += '| Status | Count |\n';
+  statisticsMd += '|---|---|\n';
+  statisticsMd += `| Outdated | ${libYears?.dependencyStatus.outdated} |\n`;
+  statisticsMd += `| **Total** | **${libYears?.dependencyStatus.total}** |\n`;
+  statisticsMd += '\n</details>\n\n';
+
+  return (statisticsMd += '\n');
 }

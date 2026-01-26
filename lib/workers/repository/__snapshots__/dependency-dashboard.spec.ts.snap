@@ -65,6 +65,19 @@ The following updates await pending status checks before automerging. To abort t
 
  - [ ] <!-- approvePr-branch=branchName9 -->pr9
 
+## Statistics
+
+<details>
+<summary>Dependency Status</summary>
+
+| Status | Count |
+|---|---|
+| Outdated | 0 |
+| **Total** | **0** |
+
+</details>
+
+
 ## Detected Dependencies
 
 None detected
@@ -87,6 +100,19 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 
 
 This repository currently has no open or pending branches.
+
+## Statistics
+
+<details>
+<summary>Dependency Status</summary>
+
+| Status | Count |
+|---|---|
+| Outdated | 0 |
+| **Total** | **1** |
+
+</details>
+
 
 ## Detected Dependencies
 
@@ -163,6 +189,19 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 This repository currently has no open or pending branches.
+
+## Statistics
+
+<details>
+<summary>Dependency Status</summary>
+
+| Status | Count |
+|---|---|
+| Outdated | 0 |
+| **Total** | **0** |
+
+</details>
+
 
 ## Detected Dependencies
 
@@ -272,6 +311,19 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 
 This repository currently has no open or pending branches.
 
+## Statistics
+
+<details>
+<summary>Dependency Status</summary>
+
+| Status | Count |
+|---|---|
+| Outdated | 0 |
+| **Total** | **0** |
+
+</details>
+
+
 ## Detected Dependencies
 
 <details><summary>Branch dev</summary>
@@ -338,6 +390,19 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 This repository currently has no open or pending branches.
+
+## Statistics
+
+<details>
+<summary>Dependency Status</summary>
+
+| Status | Count |
+|---|---|
+| Outdated | 0 |
+| **Total** | **0** |
+
+</details>
+
 
 ## Detected Dependencies
 
@@ -406,6 +471,19 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 
 This repository currently has no open or pending branches.
 
+## Statistics
+
+<details>
+<summary>Dependency Status</summary>
+
+| Status | Count |
+|---|---|
+| Outdated | 0 |
+| **Total** | **0** |
+
+</details>
+
+
 ## Detected Dependencies
 
 <details><summary>dockerfile (1)</summary>
@@ -459,6 +537,19 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 
 This repository currently has no open or pending branches.
 
+## Statistics
+
+<details>
+<summary>Dependency Status</summary>
+
+| Status | Count |
+|---|---|
+| Outdated | 0 |
+| **Total** | **0** |
+
+</details>
+
+
 ## Detected Dependencies
 
 None detected
@@ -471,6 +562,19 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 
 This repository currently has no open or pending branches.
 
+## Statistics
+
+<details>
+<summary>Dependency Status</summary>
+
+| Status | Count |
+|---|---|
+| Outdated | 0 |
+| **Total** | **0** |
+
+</details>
+
+
 ## Detected Dependencies
 
 None detected
@@ -482,6 +586,19 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 This repository currently has no open or pending branches.
+
+## Statistics
+
+<details>
+<summary>Dependency Status</summary>
+
+| Status | Count |
+|---|---|
+| Outdated | 0 |
+| **Total** | **0** |
+
+</details>
+
 
 ## Detected Dependencies
 
@@ -536,6 +653,19 @@ The following updates await pending status checks. To force their creation now, 
 
  - [ ] <!-- approvePr-branch=branchName1 -->pr1
 
+## Statistics
+
+<details>
+<summary>Dependency Status</summary>
+
+| Status | Count |
+|---|---|
+| Outdated | 0 |
+| **Total** | **0** |
+
+</details>
+
+
 ## Detected Dependencies
 
 None detected
@@ -558,6 +688,19 @@ The following updates await pending status checks. To force their creation now, 
 
  - [ ] <!-- approvePr-branch=branchName1 -->pr1
 
+## Statistics
+
+<details>
+<summary>Dependency Status</summary>
+
+| Status | Count |
+|---|---|
+| Outdated | 0 |
+| **Total** | **0** |
+
+</details>
+
+
 ## Detected Dependencies
 
 None detected
@@ -569,6 +712,19 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 "This is a header
 
 This repository currently has no open or pending branches.
+
+## Statistics
+
+<details>
+<summary>Dependency Status</summary>
+
+| Status | Count |
+|---|---|
+| Outdated | 0 |
+| **Total** | **0** |
+
+</details>
+
 
 ## Detected Dependencies
 
@@ -583,6 +739,19 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 "This is a header for platform:github
 
 This repository currently has no open or pending branches.
+
+## Statistics
+
+<details>
+<summary>Dependency Status</summary>
+
+| Status | Count |
+|---|---|
+| Outdated | 0 |
+| **Total** | **0** |
+
+</details>
+
 
 ## Detected Dependencies
 
@@ -609,6 +778,19 @@ The following branches are pending approval. To create them, click on a checkbox
 The following updates are awaiting their schedule. To get an update now, click on a checkbox below.
 
  - [x] <!-- unschedule-branch=branchName3 -->pr3
+
+## Statistics
+
+<details>
+<summary>Dependency Status</summary>
+
+| Status | Count |
+|---|---|
+| Outdated | 0 |
+| **Total** | **0** |
+
+</details>
+
 
 ## Detected Dependencies
 

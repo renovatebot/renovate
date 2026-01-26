@@ -2034,6 +2034,13 @@ const options: Readonly<RenovateOptions>[] = [
     default: true,
   },
   {
+    name: 'dependencyDashboardReportStatistics',
+    description:
+      'Controls if repository statistics are shown in the Dependency Dashboard.',
+    type: 'boolean',
+    default: true,
+  },
+  {
     name: 'internalChecksAsSuccess',
     description:
       'Whether to consider passing internal checks such as `minimumReleaseAge` when determining branch status.',
