@@ -5,6 +5,7 @@ import { logger } from '../../logger';
 import type { HostRule } from '../../types';
 import { setGitAuthor, setNoVerify, setPrivateKey } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
+import { parseUrl } from '../../util/url';
 import platforms from './api';
 import { setPlatformScmApi } from './scm';
 import type { Platform } from './types';
@@ -63,7 +64,7 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   // This is done for validation and will be overridden later once repo config is incorporated
   setGitAuthor(returnConfig.gitAuthor);
   const platformRule: HostRule = {
-    matchHost: new URL(returnConfig.endpoint).hostname,
+    matchHost: parseUrl(returnConfig.endpoint)?.hostname,
   };
   // There might have been platform-specific modifications to the token
   if (returnConfig.token) {
