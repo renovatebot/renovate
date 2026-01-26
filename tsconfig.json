@@ -18,7 +18,7 @@
     "noImplicitOverride": true,
     "experimentalDecorators": true,
     "useUnknownInCatchVariables": false /* we aren't prepared for enabling this by default since ts 4.4*/,
-    "isolatedModules": true /* required for rolldown */,
+    "isolatedModules": true /* required for tsdown */,
     "lib": ["es2023"],
     "types": ["node", "vitest/globals"],
     "checkJs": true,
