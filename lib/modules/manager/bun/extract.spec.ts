@@ -215,4 +215,257 @@ describe('modules/manager/bun/extract', () => {
       ]);
     });
   });
+
+  describe('catalogs', () => {
+    it('extracts catalog dependencies from root package.json', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'test',
+          version: '0.0.1',
+          workspaces: {
+            packages: ['packages/*'],
+            catalog: {
+              react: '^18.0.0',
+              'react-dom': '^18.0.0',
+            },
+            catalogs: {
+              testing: {
+                jest: '29.0.0',
+                'testing-library': '13.0.0',
+              },
+            },
+          },
+        }),
+      );
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'package.json',
+      ]);
+
+      expect(packageFiles).toMatchObject([
+        {
+          packageFile: 'package.json',
+          deps: [
+            {
+              depName: 'react',
+              currentValue: '^18.0.0',
+              datasource: 'npm',
+              depType: 'bun.catalog.default',
+              prettyDepType: 'bun.catalog.default',
+            },
+            {
+              depName: 'react-dom',
+              currentValue: '^18.0.0',
+              datasource: 'npm',
+              depType: 'bun.catalog.default',
+              prettyDepType: 'bun.catalog.default',
+            },
+            {
+              depName: 'jest',
+              currentValue: '29.0.0',
+              datasource: 'npm',
+              depType: 'bun.catalog.testing',
+              prettyDepType: 'bun.catalog.testing',
+            },
+            {
+              depName: 'testing-library',
+              currentValue: '13.0.0',
+              datasource: 'npm',
+              depType: 'bun.catalog.testing',
+              prettyDepType: 'bun.catalog.testing',
+            },
+          ],
+          managerData: {
+            packageJsonName: 'test',
+          },
+        },
+      ]);
+    });
+
+    it('resolves catalog references in workspace packages', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.getParentDir).mockReturnValue('');
+
+      vi.mocked(fs.readLocalFile)
+        // First call: main package file (with catalogs)
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'test',
+            version: '0.0.1',
+            workspaces: {
+              packages: ['packages/*'],
+              catalog: {
+                react: '^18.0.0',
+                'react-dom': '^18.0.0',
+              },
+              catalogs: {
+                testing: {
+                  jest: '29.0.0',
+                },
+              },
+            },
+          }),
+        )
+        // Second call: workspace package file (with catalog references)
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'pkg1',
+            version: '1.0.0',
+            dependencies: {
+              react: 'catalog:',
+              'react-dom': 'catalog:',
+            },
+            devDependencies: {
+              jest: 'catalog:testing',
+            },
+          }),
+        );
+
+      const matchedFiles = [
+        'bun.lock',
+        'package.json',
+        'packages/pkg1/package.json',
+      ];
+
+      const packageFiles = await extractAllPackageFiles({}, matchedFiles);
+
+      expect(packageFiles).toMatchObject([
+        {
+          packageFile: 'package.json',
+          deps: [
+            {
+              depType: 'bun.catalog.default',
+              depName: 'react',
+              currentValue: '^18.0.0',
+            },
+            {
+              depType: 'bun.catalog.default',
+              depName: 'react-dom',
+              currentValue: '^18.0.0',
+            },
+            {
+              depType: 'bun.catalog.testing',
+              depName: 'jest',
+              currentValue: '29.0.0',
+            },
+          ],
+        },
+        {
+          packageFile: 'packages/pkg1/package.json',
+          deps: [
+            {
+              depName: 'react',
+              depType: 'bun.catalog.default',
+              currentValue: '^18.0.0',
+              prettyDepType: 'bun.catalog.default',
+            },
+            {
+              depName: 'react-dom',
+              depType: 'bun.catalog.default',
+              currentValue: '^18.0.0',
+              prettyDepType: 'bun.catalog.default',
+            },
+            {
+              depName: 'jest',
+              depType: 'bun.catalog.testing',
+              currentValue: '29.0.0',
+              prettyDepType: 'bun.catalog.testing',
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('handles missing catalog references gracefully', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.getParentDir).mockReturnValue('');
+
+      vi.mocked(fs.readLocalFile)
+        // First call: main package file (with catalogs)
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'test',
+            version: '0.0.1',
+            workspaces: {
+              packages: ['packages/*'],
+              catalog: {
+                react: '^18.0.0',
+              },
+            },
+          }),
+        )
+        // Second call: workspace package file (with invalid catalog reference)
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'pkg1',
+            version: '1.0.0',
+            dependencies: {
+              'non-existent': 'catalog:',
+            },
+          }),
+        );
+
+      const matchedFiles = [
+        'bun.lock',
+        'package.json',
+        'packages/pkg1/package.json',
+      ];
+
+      const packageFiles = await extractAllPackageFiles({}, matchedFiles);
+
+      expect(packageFiles).toMatchObject([
+        {
+          packageFile: 'package.json',
+          deps: [
+            {
+              depType: 'bun.catalog.default',
+              depName: 'react',
+              currentValue: '^18.0.0',
+            },
+          ],
+        },
+        {
+          packageFile: 'packages/pkg1/package.json',
+          deps: [
+            {
+              depName: 'non-existent',
+              depType: 'bun.catalog.default',
+              currentValue: 'catalog:default',
+              prettyDepType: 'bun.catalog.default',
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('does not extract catalogs when none are present', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'test',
+          version: '0.0.1',
+          workspaces: {
+            packages: ['packages/*'],
+          },
+        }),
+      );
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'package.json',
+      ]);
+
+      expect(packageFiles).toMatchObject([
+        {
+          packageFile: 'package.json',
+          deps: [],
+          managerData: {
+            packageJsonName: 'test',
+          },
+        },
+      ]);
+    });
+  });
 });

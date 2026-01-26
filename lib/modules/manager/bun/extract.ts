@@ -1,4 +1,4 @@
-import { isArray, isString } from '@sindresorhus/is';
+import { isArray, isObject, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import {
   getParentDir,
@@ -9,7 +9,13 @@ import {
 import { extractPackageJson } from '../npm/extract/common/package-file';
 import type { NpmPackage } from '../npm/extract/types';
 import type { NpmManagerData } from '../npm/types';
-import type { ExtractConfig, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../types';
+import { type BunWorkspaces, extractBunCatalogs } from './catalogs';
 import { filesMatchingWorkspaces } from './utils';
 
 function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
@@ -18,8 +24,53 @@ function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
   );
 }
 
+function mergeExtractionResults(
+  regularResult: PackageFileContent<NpmManagerData> | null,
+  catalogResult: PackageFileContent<NpmManagerData> | null,
+): PackageFileContent<NpmManagerData> | null {
+  if (regularResult && catalogResult) {
+    return {
+      ...regularResult,
+      deps: [...catalogResult.deps, ...regularResult.deps],
+      managerData: {
+        ...catalogResult.managerData,
+        ...regularResult.managerData,
+      },
+    };
+  }
+  return regularResult ?? catalogResult;
+}
+
+function resolveWorkspaceCatalogRefs(
+  deps: PackageDependency[],
+  bunWorkspaces: BunWorkspaces,
+): PackageDependency[] {
+  return deps.map((dep) => {
+    const catalogRef = dep.currentValue?.startsWith('catalog:')
+      ? dep.currentValue.slice(8)
+      : null;
+    if (catalogRef === null || !dep.depName) {
+      return dep;
+    }
+    const catalogName = catalogRef || 'default';
+    const resolvedVersion =
+      catalogName === 'default'
+        ? (bunWorkspaces.catalog?.[dep.depName] ?? `catalog:${catalogName}`)
+        : (bunWorkspaces.catalogs?.[catalogName]?.[dep.depName] ??
+          `catalog:${catalogName}`);
+
+    return {
+      ...dep,
+      depType: `bun.catalog.${catalogName}`,
+      currentValue: resolvedVersion,
+      prettyDepType: `bun.catalog.${catalogName}`,
+    };
+  });
+}
+
 export async function processPackageFile(
   packageFile: string,
+  bunWorkspaces?: BunWorkspaces,
 ): Promise<PackageFile | null> {
   const fileContent = await readLocalFile(packageFile, 'utf8');
   if (!fileContent) {
@@ -33,13 +84,25 @@ export async function processPackageFile(
     logger.debug({ err }, 'Error parsing package.json');
     return null;
   }
-  const result = extractPackageJson(packageJson, packageFile);
-  if (!result) {
+
+  const regularResult = extractPackageJson(packageJson, packageFile);
+  const catalogResult = bunWorkspaces
+    ? null
+    : extractBunCatalogs(packageJson, packageFile);
+  const mergedResult = mergeExtractionResults(regularResult, catalogResult);
+  if (!mergedResult) {
     logger.debug({ packageFile }, 'No dependencies found');
     return null;
   }
+
+  const deps =
+    bunWorkspaces && mergedResult.deps.length
+      ? resolveWorkspaceCatalogRefs(mergedResult.deps, bunWorkspaces)
+      : mergedResult.deps;
+
   return {
-    ...result,
+    ...mergedResult,
+    deps,
     packageFile,
   };
 }
@@ -65,10 +128,23 @@ export async function extractAllPackageFiles(
     if (res) {
       packageFiles.push({ ...res, lockFiles: [lockFile] });
     }
-    // Check if package.json contains workspaces
-    const workspaces = res?.managerData?.workspaces;
 
-    if (!isArray(workspaces, isString)) {
+    const workspaces = res?.managerData?.workspaces;
+    let workspacePackages: string[] | undefined;
+    let bunWorkspaces: BunWorkspaces | undefined;
+
+    if (isArray(workspaces, isString)) {
+      workspacePackages = workspaces;
+    } else if (isObject(workspaces)) {
+      bunWorkspaces = workspaces as BunWorkspaces;
+      if (isArray(bunWorkspaces.packages, isString)) {
+        workspacePackages = bunWorkspaces.packages;
+      } else if (isString(bunWorkspaces.packages)) {
+        workspacePackages = [bunWorkspaces.packages];
+      }
+    }
+
+    if (!isArray(workspacePackages, isString)) {
       continue;
     }
 
@@ -77,12 +153,12 @@ export async function extractAllPackageFiles(
     const workspacePackageFiles = filesMatchingWorkspaces(
       pwd,
       allPackageJson,
-      workspaces,
+      workspacePackages,
     );
     if (workspacePackageFiles.length) {
       logger.debug({ workspacePackageFiles }, 'Found bun workspace files');
       for (const workspaceFile of workspacePackageFiles) {
-        const res = await processPackageFile(workspaceFile);
+        const res = await processPackageFile(workspaceFile, bunWorkspaces);
         if (res) {
           packageFiles.push({ ...res, lockFiles: [lockFile] });
         }
