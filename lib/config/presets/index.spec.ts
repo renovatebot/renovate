@@ -32,7 +32,7 @@ const packageCache = vi.mocked(_packageCache);
 const presetIkatyang = Fixtures.getJson('renovate-config-ikatyang.json');
 
 describe('config/presets/index', () => {
-  describe('resolvePreset', () => {
+  describe('resolveConfigPresets', () => {
     let config: AllConfig;
 
     beforeEach(() => {
@@ -49,7 +49,7 @@ describe('config/presets/index', () => {
           namespace: string,
           key: string,
           value: unknown,
-          minutes: number,
+          _minutes: number,
         ): Promise<void> => {
           memCache.set(`${namespace}-${key}`, value);
           return Promise.resolve();
@@ -82,7 +82,7 @@ describe('config/presets/index', () => {
       // @ts-expect-error -- invalid config
       config.foo = 1;
       config.extends = [];
-      const res = await presets.resolveConfigPresets(config);
+      const { config: res } = await presets.resolveConfigPresets(config);
       expect(config).toMatchObject(res);
       expect(res).toEqual({ foo: 1 });
     });
@@ -92,7 +92,8 @@ describe('config/presets/index', () => {
       local.getPreset.mockResolvedValueOnce({ extends: ['local>some/repo:c'] });
       local.getPreset.mockResolvedValueOnce({ extends: ['local>some/repo:c'] });
       local.getPreset.mockResolvedValueOnce({ foo: 1 });
-      expect(await presets.resolveConfigPresets(config)).toEqual({
+      const { config: res } = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({
         foo: 1,
       });
       expect(local.getPreset).toHaveBeenCalledTimes(3);
@@ -233,7 +234,7 @@ describe('config/presets/index', () => {
       config.foo = 1;
       config.ignoreDeps = [];
       config.extends = [':pinVersions'];
-      const res = await presets.resolveConfigPresets(config);
+      const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
         foo: 1,
         ignoreDeps: [],
@@ -267,7 +268,7 @@ describe('config/presets/index', () => {
           groupName: 'eslint',
         },
       ];
-      const res = await presets.resolveConfigPresets(config);
+      const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
         packageRules: [
           {
@@ -291,7 +292,7 @@ describe('config/presets/index', () => {
 
     it('resolves eslint', async () => {
       config.extends = ['packages:eslint'];
-      const res = await presets.resolveConfigPresets(config);
+      const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       // @ts-expect-error -- partial config
       expect(res.matchPackageNames).toHaveLength(10);
@@ -299,24 +300,24 @@ describe('config/presets/index', () => {
 
     it('resolves linters', async () => {
       config.extends = ['packages:linters'];
-      const res = await presets.resolveConfigPresets(config);
+      const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       // @ts-expect-error -- partial config
-      expect(res.matchPackageNames).toHaveLength(20);
+      expect(res.matchPackageNames).toHaveLength(21);
     });
 
     it('resolves nested groups', async () => {
       config.extends = [':automergeLinters'];
-      const res = await presets.resolveConfigPresets(config);
+      const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
-      expect(rule.matchPackageNames).toHaveLength(20);
+      expect(rule.matchPackageNames).toHaveLength(21);
     });
 
     it('migrates automerge in presets', async () => {
       config.extends = ['ikatyang:library'];
-      const res = await presets.resolveConfigPresets(config);
+      const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       expect(res.automerge).toBeUndefined();
       expect(res.minor!.automerge).toBeTrue();
@@ -324,7 +325,7 @@ describe('config/presets/index', () => {
 
     it('ignores presets', async () => {
       config.extends = ['config:recommended'];
-      const res = await presets.resolveConfigPresets(config, {}, [
+      const { config: res } = await presets.resolveConfigPresets(config, {}, [
         'config:recommended',
       ]);
       expect(config).toMatchObject(res);
@@ -337,11 +338,60 @@ describe('config/presets/index', () => {
         labels: ['self-hosted resolved'],
       });
 
-      const res = await presets.resolveConfigPresets(config);
+      const { config: res } = await presets.resolveConfigPresets(config);
 
       expect(res.labels).toEqual(['self-hosted resolved']);
       expect(local.getPreset.mock.calls).toHaveLength(1);
       expect(res).toMatchSnapshot();
+    });
+
+    it('returns the presets which have been merged into the resulting config', async () => {
+      config.extends = ['local>username/preset-repo'];
+      local.getPreset.mockResolvedValueOnce({
+        extends: ['security:openssf-scorecard'],
+        labels: ['self-hosted resolved'],
+      });
+
+      const {
+        visitedPresets: { merged },
+      } = await presets.resolveConfigPresets(config);
+
+      expect(merged).toEqual([
+        'local>username/preset-repo',
+        'security:openssf-scorecard',
+      ]);
+    });
+
+    it('de-duplicates the presets which have been meregd into the resulting config', async () => {
+      config.extends = [
+        'security:openssf-scorecard',
+        'local>username/preset-repo',
+        'security:openssf-scorecard',
+      ];
+
+      local.getPreset.mockResolvedValueOnce({
+        labels: ['self-hosted resolved'],
+        extends: ['security:openssf-scorecard'],
+        packageRules: [
+          {
+            extends: ['packages:eslint'],
+            groupName: 'eslint',
+          },
+        ],
+      });
+
+      const {
+        visitedPresets: { merged },
+      } = await presets.resolveConfigPresets(config);
+
+      expect(merged).toEqual(
+        // NOTE that we're not expecting to have a strict or stable ordering
+        expect.arrayContaining([
+          'local>username/preset-repo',
+          'security:openssf-scorecard',
+          'packages:eslint',
+        ]),
+      );
     });
 
     it('resolves self-hosted preset with templating', async () => {
@@ -353,7 +403,7 @@ describe('config/presets/index', () => {
           : Promise.reject(new Error('Failed to resolve self-hosted preset')),
       );
 
-      const res = await presets.resolveConfigPresets(config);
+      const { config: res } = await presets.resolveConfigPresets(config);
 
       expect(res.labels).toEqual(['self-hosted with template resolved']);
       expect(local.getPreset).toHaveBeenCalledExactlyOnceWith({
@@ -374,7 +424,7 @@ describe('config/presets/index', () => {
         })
         .mockResolvedValueOnce({ labels: ['self-hosted resolved'] });
 
-      const res = await presets.resolveConfigPresets(config);
+      const { config: res } = await presets.resolveConfigPresets(config);
 
       expect(res).toEqual({
         platform: 'gitlab',
@@ -402,7 +452,7 @@ describe('config/presets/index', () => {
       });
 
       expect(await presets.resolveConfigPresets(config)).toBeDefined();
-      const res = await presets.resolveConfigPresets(config);
+      const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
         packageRules: [
           {
@@ -441,7 +491,7 @@ describe('config/presets/index', () => {
       });
 
       expect(await presets.resolveConfigPresets(config)).toBeDefined();
-      const res = await presets.resolveConfigPresets(config);
+      const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
         packageRules: [
           {
@@ -482,7 +532,7 @@ describe('config/presets/index', () => {
       });
 
       expect(await presets.resolveConfigPresets(config)).toBeDefined();
-      const res = await presets.resolveConfigPresets(config);
+      const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
         packageRules: [
           {
@@ -642,7 +692,7 @@ describe('config/presets/index', () => {
       const res = await presets.getPreset('packages:linters', {});
       expect(res).toMatchSnapshot();
       // @ts-expect-error -- partial config
-      expect(res.matchPackageNames).toHaveLength(3);
+      expect(res.matchPackageNames).toHaveLength(4);
       expect(res.extends).toHaveLength(5);
     });
 

@@ -508,24 +508,24 @@ export async function deleteLabel(
 }
 
 export function ensureCommentRemoval(
-  ensureCommentRemoval:
+  _ensureCommentRemoval:
     | EnsureCommentRemovalConfigByTopic
     | EnsureCommentRemovalConfigByContent,
 ): Promise<void> {
   return Promise.resolve();
 }
 
-export function ensureIssueClosing(title: string): Promise<void> {
+export function ensureIssueClosing(_title: string): Promise<void> {
   return Promise.resolve();
 }
 
 export function ensureIssue(
-  issueConfig: EnsureIssueConfig,
+  _issueConfig: EnsureIssueConfig,
 ): Promise<EnsureIssueResult | null> {
   return Promise.resolve(null);
 }
 
-export function findIssue(title: string): Promise<Issue | null> {
+export function findIssue(_title: string): Promise<Issue | null> {
   return Promise.resolve(null);
 }
 

@@ -57,6 +57,7 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
           opts.url = nextUrl;
 
           const nextResult = await this.requestJsonUnsafe<T>(method, opts);
+          // v8 ignore else -- TODO: add test #40625
           if (isArray(nextResult.body)) {
             result.body.push(...nextResult.body);
           }

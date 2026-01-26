@@ -1,5 +1,5 @@
+import { lang, query as q } from '@renovatebot/good-enough-parser';
 import { isTruthy } from '@sindresorhus/is';
-import { lang, query as q } from 'good-enough-parser';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -190,7 +190,7 @@ export async function updateArtifacts({
       }
       logger.warn(
         { err },
-        'Error executing gradle wrapper update command. It can be not a critical one though.',
+        'Error executing gradle wrapper update command. This may not necessarily be a blocker to the update, so please verify with the gradle wrapper output logs.',
       );
     }
 

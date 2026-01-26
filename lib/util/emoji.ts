@@ -13,6 +13,7 @@ import { logger } from '../logger';
 import { regEx } from './regex';
 import { Result } from './result';
 import { Json } from './schema-utils';
+import { coerceString } from './string';
 
 let unicodeEmoji = true;
 
@@ -121,7 +122,7 @@ export function unemojify(text: string): string {
   return text.replace(emojiRegex, (emoji) => {
     const hexCode = stripHexCode(fromUnicodeToHexcode(emoji));
     const shortCode = shortCodesByHex.get(hexCode);
-    return shortCode ?? /* istanbul ignore next */ '�';
+    return coerceString(shortCode, '�');
   });
 }
 

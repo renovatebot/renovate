@@ -1,4 +1,4 @@
-import { lang, query as q } from 'good-enough-parser';
+import { lang, query as q } from '@renovatebot/good-enough-parser';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';

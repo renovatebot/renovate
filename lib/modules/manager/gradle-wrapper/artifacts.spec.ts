@@ -107,7 +107,6 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
           cmd: './gradlew :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip',
           options: {
             cwd: '/tmp/github/some/repo',
-            encoding: 'utf-8',
             env: {
               GRADLE_OPTS:
                 '-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false',
@@ -323,7 +322,6 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
           cmd: './gradlew :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip',
           options: {
             cwd: '/tmp/github/some/repo/sub',
-            encoding: 'utf-8',
             env: {
               GRADLE_OPTS:
                 '-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false',

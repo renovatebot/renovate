@@ -1,4 +1,4 @@
-import { query as q } from 'good-enough-parser';
+import { query as q } from '@renovatebot/good-enough-parser';
 import type { Ctx } from '../types';
 import {
   cleanupTempVars,
@@ -11,6 +11,8 @@ import {
   storeVarToken,
 } from './common';
 import { handleLibraryDep, handlePlugin } from './handlers';
+
+const qAlias = qStringValue.handler((ctx) => storeInTokenMap(ctx, 'alias'));
 
 const qVersionCatalogVersion = q
   .op<Ctx>('.')
@@ -34,8 +36,7 @@ const qVersionCatalogVersion = q
 
 // library("foo.bar", "foo", "bar")
 const qVersionCatalogDependencies = q
-  .sym<Ctx>('library', storeVarToken)
-  .handler((ctx) => storeInTokenMap(ctx, 'methodName'))
+  .sym<Ctx>('library')
   .tree({
     type: 'wrapped-tree',
     maxDepth: 1,
@@ -43,8 +44,7 @@ const qVersionCatalogDependencies = q
     endsWith: ')',
     search: q
       .begin<Ctx>()
-      .join(qStringValue)
-      .handler((ctx) => storeInTokenMap(ctx, 'alias'))
+      .join(qAlias)
       .op(',')
       .join(qGroupId)
       .op(',')
@@ -66,10 +66,9 @@ const qVersionCatalogPlugins = q
     endsWith: ')',
     search: q
       .begin<Ctx>()
-      .join(qStringValue)
-      .handler((ctx) => storeInTokenMap(ctx, 'alias'))
+      .join(qAlias)
       .op(',')
-      .alt(qStringValue)
+      .alt(qValueMatcher)
       .handler((ctx) => storeInTokenMap(ctx, 'pluginName'))
       .end(),
   })
@@ -85,11 +84,7 @@ const qVersionCatalogAliasDependencies = q
     maxDepth: 1,
     startsWith: '(',
     endsWith: ')',
-    search: q
-      .begin<Ctx>()
-      .join(qStringValue)
-      .handler((ctx) => storeInTokenMap(ctx, 'alias'))
-      .end(),
+    search: q.begin<Ctx>().join(qAlias).end(),
   })
   .op('.')
   .sym('to')

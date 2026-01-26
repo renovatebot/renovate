@@ -277,14 +277,14 @@ export abstract class ChangeLogSource {
     return trimSlashes(pathname).replace(regEx(/\.git$/), '');
   }
 
-  protected hasValidToken(config: BranchUpgradeConfig): {
+  protected hasValidToken(_config: BranchUpgradeConfig): {
     isValid: boolean;
     error?: ChangeLogError;
   } {
     return { isValid: true };
   }
 
-  protected shouldSkipPackage(config: BranchUpgradeConfig): boolean {
+  protected shouldSkipPackage(_config: BranchUpgradeConfig): boolean {
     return false;
   }
 

@@ -1,5 +1,5 @@
-import type { lexer } from 'good-enough-parser';
-import { query as q } from 'good-enough-parser';
+import type { lexer } from '@renovatebot/good-enough-parser';
+import { query as q } from '@renovatebot/good-enough-parser';
 import { regEx } from '../../../../util/regex';
 import type { Ctx } from '../types';
 import { qDotOrBraceExpr } from './common';

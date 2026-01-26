@@ -34,7 +34,6 @@ export async function updateArtifacts({
   packageFileName,
   updatedDeps,
   newPackageFileContent,
-  config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`cocoapods.getArtifacts(${packageFileName})`);
 

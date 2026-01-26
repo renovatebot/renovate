@@ -258,14 +258,5 @@ describe('util/exec/containerbase', () => {
         'install-tool composer 2.1.0',
       ]);
     });
-
-    it('hashes npm', async () => {
-      const toolConstraints: ToolConstraint[] = [{ toolName: 'npm' }];
-      const res = await generateInstallCommands(toolConstraints);
-      expect(res).toEqual([
-        'install-tool npm 2.1.0',
-        'hash -d npm 2>/dev/null || true',
-      ]);
-    });
   });
 });

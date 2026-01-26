@@ -116,7 +116,7 @@ function matches(version: string, range: string): boolean {
  * Check whether the `version` is compatible with the `current` value
  * constraint.
  */
-function isCompatible(version: string, current?: string): boolean {
+function isCompatible(version: string, _current?: string): boolean {
   return isValid(version);
 }
 

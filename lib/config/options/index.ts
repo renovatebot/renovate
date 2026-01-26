@@ -611,7 +611,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.25.16',
+    default: 'ghcr.io/containerbase/sidecar:13.26.6',
     globalOnly: true,
   },
   {
@@ -972,6 +972,14 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'allowShellExecutorForPostUpgradeCommands',
+    description:
+      'Whether to run commands for `postUpgradeTasks` inside a shell. This has security implications, as it means that they can call out to other commands or access shell variables. It is difficult to craft an `allowedCommands` regex to restrict this.',
+    globalOnly: true,
+    type: 'boolean',
+    default: true,
   },
   {
     name: 'allowCustomCrateRegistries',
@@ -2594,6 +2602,7 @@ const options: RenovateOptions[] = [
       'gomodUpdateImportPaths',
       'gomodSkipVendor',
       'gomodVendor',
+      'goGenerate',
       'helmUpdateSubChartArchives',
       'kustomizeInflateHelmCharts',
       'npmDedupe',
@@ -3333,6 +3342,7 @@ export function getOptions(): RenovateOptions[] {
 function loadManagerOptions(): void {
   const allManagers = new Map([...getManagers(), ...getCustomManagers()]);
   for (const [name, config] of allManagers.entries()) {
+    // v8 ignore else -- TODO: add test #40625
     if (config.defaultConfig) {
       const managerConfig: RenovateOptions = {
         name,

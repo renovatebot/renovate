@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -205,7 +206,7 @@ export class GithubGraphqlDatasourceFetcher<
         if (!shrinkResult) {
           throw err;
         }
-        const { body, ...options } = this.getRawQueryOptions();
+        const { body: _, ...options } = this.getRawQueryOptions();
         logger.debug(
           { options, newSize: this.itemsPerQuery },
           'Shrinking GitHub GraphQL page size after error',
@@ -228,10 +229,19 @@ export class GithubGraphqlDatasourceFetcher<
       'cachePrivatePackages',
       false,
     );
+    const skipStabilization = !is.undefined(this.datasourceAdapter.maxItems);
     this._cacheStrategy =
       cachePrivatePackages || this.isPersistent
-        ? new GithubGraphqlPackageCacheStrategy<ResultItem>(cacheNs, cacheKey)
-        : new GithubGraphqlMemoryCacheStrategy<ResultItem>(cacheNs, cacheKey);
+        ? new GithubGraphqlPackageCacheStrategy<ResultItem>(
+            cacheNs,
+            cacheKey,
+            skipStabilization,
+          )
+        : new GithubGraphqlMemoryCacheStrategy<ResultItem>(
+            cacheNs,
+            cacheKey,
+            skipStabilization,
+          );
     return this._cacheStrategy;
   }
 
@@ -243,7 +253,12 @@ export class GithubGraphqlDatasourceFetcher<
     let hasNextPage = true;
     let isPaginationDone = false;
     let nextCursor: string | undefined;
+    let itemCount = 0;
+    const maxItems = this.datasourceAdapter.maxItems;
     while (hasNextPage && !isPaginationDone && !this.hasReachedQueryLimit()) {
+      if (!is.undefined(maxItems) && itemCount >= maxItems) {
+        break;
+      }
       const queryResult = await this.doShrinkableQuery();
 
       const resultItems: ResultItem[] = [];
@@ -261,6 +276,7 @@ export class GithubGraphqlDatasourceFetcher<
         }
         resultItems.push(item);
       }
+      itemCount += resultItems.length;
 
       // It's important to call `getCacheStrategy()` after `doShrinkableQuery()`
       // because `doShrinkableQuery()` may change `this.isCacheable`.

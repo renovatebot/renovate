@@ -522,4 +522,127 @@ describe('modules/manager/homebrew/update', () => {
     expect(newContent).toBe(ibazel);
     expect(mockHandler.buildArchiveUrls).toHaveBeenCalled();
   });
+
+  it('updates npm scoped package dependency', async () => {
+    const content = codeBlock`
+      class ClaudeCode < Formula
+      desc "Anthropic's official CLI for Claude"
+      homepage "https://www.anthropic.com/claude-code"
+      url "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-0.1.0.tgz"
+      sha256 "345eae3fe4c682df3d8876141f32035bb2898263ce5a406e76e1d74ccb13f601"
+      license "Proprietary"
+      end
+    `;
+
+    const upgrade = {
+      currentValue: '0.1.0',
+      depName: '@anthropic-ai/claude-code',
+      managerData: {
+        type: 'npm' as const,
+        packageName: '@anthropic-ai/claude-code',
+        sha256:
+          '345eae3fe4c682df3d8876141f32035bb2898263ce5a406e76e1d74ccb13f601',
+        url: 'https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-0.1.0.tgz',
+      },
+      newValue: '0.2.0',
+    };
+
+    httpMock
+      .scope('https://registry.npmjs.org')
+      .get('/@anthropic-ai/claude-code/-/claude-code-0.2.0.tgz')
+      .reply(200, Readable.from(['foo']));
+
+    const newContent = await updateDependency({
+      fileContent: content,
+      upgrade,
+    });
+
+    expect(newContent).not.toBe(content);
+    expect(newContent).toContain(
+      'https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-0.2.0.tgz',
+    );
+    expect(newContent).toContain(
+      '2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae',
+    );
+  });
+
+  it('updates npm unscoped package dependency', async () => {
+    const content = codeBlock`
+      class Express < Formula
+      desc "Fast, unopinionated, minimalist web framework"
+      homepage "https://expressjs.com/"
+      url "https://registry.npmjs.org/express/-/express-4.18.2.tgz"
+      sha256 "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+      license "MIT"
+      end
+    `;
+
+    const upgrade = {
+      currentValue: '4.18.2',
+      depName: 'express',
+      managerData: {
+        type: 'npm' as const,
+        packageName: 'express',
+        sha256:
+          'abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234',
+        url: 'https://registry.npmjs.org/express/-/express-4.18.2.tgz',
+      },
+      newValue: '4.18.3',
+    };
+
+    httpMock
+      .scope('https://registry.npmjs.org')
+      .get('/express/-/express-4.18.3.tgz')
+      .reply(200, Readable.from(['bar']));
+
+    const newContent = await updateDependency({
+      fileContent: content,
+      upgrade,
+    });
+
+    expect(newContent).not.toBe(content);
+    expect(newContent).toContain(
+      'https://registry.npmjs.org/express/-/express-4.18.3.tgz',
+    );
+    expect(newContent).toContain(
+      'fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea04fae5511b68fbf8fb9',
+    );
+  });
+
+  it('returns unchanged content if npm tarball download fails', async () => {
+    const content = codeBlock`
+      class Express < Formula
+      desc "Fast, unopinionated, minimalist web framework"
+      homepage "https://expressjs.com/"
+      url "https://registry.npmjs.org/express/-/express-4.18.2.tgz"
+      sha256 "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+      license "MIT"
+      end
+    `;
+
+    const upgrade = {
+      currentValue: '4.18.2',
+      depName: 'express',
+      managerData: {
+        type: 'npm' as const,
+        packageName: 'express',
+        sha256:
+          'abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234',
+        url: 'https://registry.npmjs.org/express/-/express-4.18.2.tgz',
+      },
+      newValue: '4.18.3',
+    };
+
+    httpMock
+      .scope('https://registry.npmjs.org')
+      .get('/express/-/express-4.18.3.tgz')
+      .replyWithError('Not found');
+
+    const newContent = await updateDependency({
+      fileContent: content,
+      upgrade,
+    });
+
+    expect(newContent).toBe(content);
+  });
 });

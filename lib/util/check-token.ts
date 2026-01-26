@@ -39,6 +39,7 @@ export function checkGithubToken(
         dep.datasource === GithubReleaseAttachmentsDatasource.id)
     ) {
       dep.skipReason = 'github-token-required';
+      // v8 ignore else -- TODO: add test #40625
       if (dep.depName) {
         githubDeps.push(dep.depName);
       }
@@ -49,6 +50,7 @@ export function checkGithubToken(
     const warningLogged = memCache.get<boolean | undefined>(
       'github-token-required-warning-logged',
     );
+    // v8 ignore else -- TODO: add test #40625
     if (!warningLogged) {
       const withoutDuplicates = [...new Set(githubDeps)];
       logger.warn(

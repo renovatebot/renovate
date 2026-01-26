@@ -88,8 +88,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     const parsedCurrent = this._parse(current);
     return !!(
       parsedVersion &&
-      parsedCurrent &&
-      parsedVersion.compatibility === parsedCurrent.compatibility
+      parsedVersion.compatibility === parsedCurrent?.compatibility
     );
   }
 }
