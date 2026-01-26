@@ -835,8 +835,7 @@ describe('workers/repository/update/branch/index', () => {
       config.reuseExistingBranch = true;
       config.cacheFingerprintMatch = 'matched' as CacheFingerprintMatchResult;
       await branchWorker.processBranch(config);
-      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
-      expect(automerge.tryBranchAutomerge).toHaveBeenCalledWith(
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledExactlyOnceWith(
         expect.any(Object),
       );
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
