@@ -51,8 +51,6 @@ export async function tryDecryptBcPgp(
   }
 }
 
-// TODO: use `wasm-java` as default when we require node v24+.
-// Node v22 hungs on exit https://github.com/nodejs/node/issues/60584
 function runtime(): RuntimeType {
   const runtime = getEnv().RENOVATE_X_PGP_RUNTIME;
   if (runtime) {
@@ -60,9 +58,9 @@ function runtime(): RuntimeType {
       logger.trace({ runtime }, 'Using configured PGP runtime');
       return runtime;
     } else {
-      logger.once.warn({ runtime }, 'Unknown PGP runtime, using wasm-dotnet');
+      logger.once.warn({ runtime }, 'Unknown PGP runtime, using wasm-java');
     }
   }
-  logger.trace('Using default PGP runtime: wasm-dotnet');
-  return 'wasm-dotnet';
+  logger.trace('Using default PGP runtime: wasm-java');
+  return 'wasm-java';
 }
