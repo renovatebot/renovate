@@ -17,8 +17,6 @@ export interface NpmUrlParsedResult {
 export interface NpmManagerData {
   type: 'npm';
   packageName: string;
-  sha256: string | null;
-  url: string | null;
 }
 
 export class NpmUrlHandler extends HomebrewUrlHandler {
@@ -67,8 +65,6 @@ export class NpmUrlHandler extends HomebrewUrlHandler {
 
   createDependency(
     parsed: NpmUrlParsedResult,
-    sha256: string | null,
-    url: string,
   ): PackageDependency<NpmManagerData> {
     return {
       depName: parsed.packageName,
@@ -77,8 +73,6 @@ export class NpmUrlHandler extends HomebrewUrlHandler {
       managerData: {
         type: 'npm',
         packageName: parsed.packageName,
-        sha256,
-        url,
       },
     };
   }

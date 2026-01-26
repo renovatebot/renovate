@@ -38,6 +38,6 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   }
 
   // Create dependency using handler
-  const dep = result.handler.createDependency(result.parsed, sha256, url!);
+  const dep = result.handler.createDependency(result.parsed);
   return { deps: [dep] };
 }
