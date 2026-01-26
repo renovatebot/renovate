@@ -125,51 +125,51 @@ export interface AuthenticationRule {
   insteadOf: string;
 }
 
-export type GitOperationType =
+export const GitOperationType = [
   /**
    * The `git clone` sub-command.
    */
-  | 'clone'
+  'clone',
   /**
    * The `git reset` sub-command.
    */
-  | 'reset'
+  'reset',
   /**
    * The `git checkout` sub-command.
    */
-  | 'checkout'
+  'checkout',
   /**
    * The `git fetch` sub-command.
    */
-  | 'fetch'
+  'fetch',
   /**
    * The `git pull` sub-command.
    */
-  | 'pull'
+  'pull',
   /**
    * The `git push` sub-command.
    */
-  | 'push'
+  'push',
   /**
    * The `git clean` sub-command.
    */
-  | 'clean'
+  'clean',
   /**
    * The `git merge` sub-command.
    */
-  | 'merge'
+  'merge',
   /**
    * The `git submodule` sub-command.
    */
-  | 'submodule'
+  'submodule',
   /**
    * The `git commit` sub-command.
    */
-  | 'commit'
+  'commit',
   /**
    * The `git branch` sub-command.
    */
-  | 'branch'
+  'branch',
   /**
    * Any internal "plumbing" commands
    *
@@ -177,7 +177,7 @@ export type GitOperationType =
    *
    * See also: https://git-scm.com/book/en/v2/Git-Internals-Plumbing-and-Porcelain
    */
-  | 'plumbing'
+  'plumbing',
   /**
    * Any other operations i.e.
    *
@@ -193,4 +193,7 @@ export type GitOperationType =
    *
    * See also: https://git-scm.com/book/en/v2/Git-Internals-Plumbing-and-Porcelain
    */
-  | 'other';
+  'other',
+] as const;
+
+export type GitOperationType = (typeof GitOperationType)[number];
