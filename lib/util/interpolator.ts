@@ -119,6 +119,7 @@ export function replaceInterpolatedValuesInObject(
     }
     if (isArray(value)) {
       for (const [arrayIndex, arrayItem] of value.entries()) {
+        // v8 ignore else -- TODO: add test #40625
         if (isPlainObject(arrayItem)) {
           value[arrayIndex] = replaceInterpolatedValuesInObject(
             arrayItem,

@@ -98,6 +98,9 @@ function extractRepositoryAction(
     dep.packageName = packageName;
   }
 
+  // Extend replaceString to include relevant comment portions:
+  // - Pinned version: include only up to the version (truncate trailing text)
+  // - Ratchet exclude: include the full comment to preserve the marker
   if (
     commentData.pinnedVersion &&
     !is.undefined(commentData.index) &&

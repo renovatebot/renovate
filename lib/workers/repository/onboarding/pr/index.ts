@@ -1,8 +1,10 @@
 import { isNumber, isString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
+import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
+import type { Pr } from '../../../../modules/platform';
 import { platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
@@ -31,6 +33,53 @@ import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
 import { getExpectedPrList } from './pr-list';
 
+/**
+ * Given an existing PR, if onboardingAutoCloseAge has passed, close the PR.
+ *
+ * Returns true if the PR was closed.
+ */
+async function ensureOnboardingAutoCloseAge(existingPr: Pr): Promise<boolean> {
+  // check if the existing pr crosses the onboarding autoclose age
+  const ageOfOnboardingPr = getElapsedDays(existingPr.createdAt!, false);
+  const onboardingAutoCloseAge = GlobalConfig.get('onboardingAutoCloseAge')!;
+  if (onboardingAutoCloseAge) {
+    logger.debug(
+      {
+        onboardingAutoCloseAge,
+        createdAt: existingPr.createdAt!,
+        ageOfOnboardingPr,
+      },
+      `Determining that the onboarding PR created at \`${existingPr.createdAt!}\` was created ${ageOfOnboardingPr.toFixed(2)} days ago`,
+    );
+  }
+  if (
+    isNumber(onboardingAutoCloseAge) &&
+    ageOfOnboardingPr > onboardingAutoCloseAge
+  ) {
+    // close the pr
+    await platform.updatePr({
+      number: existingPr.number,
+      state: 'closed',
+      prTitle: existingPr.title,
+    });
+    // ensure comment
+    await ensureComment({
+      number: existingPr.number,
+      topic: `Renovate is disabled`,
+      content: `Renovate is disabled because the onboarding PR has been unmerged for more than ${onboardingAutoCloseAge} days. To enable Renovate, you can either (a) change this PR's title to get a new onboarding PR, and merge the new onboarding PR, or (b) create a Renovate config file, and commit that file to your base branch.`,
+    });
+    logger.debug(
+      {
+        ageOfOnboardingPr,
+        onboardingAutoCloseAge,
+      },
+      `Renovate is being disabled for this repository as the onboarding PR has been unmerged for more than ${onboardingAutoCloseAge} days`,
+    );
+    return true;
+  }
+  return false;
+}
+
 export async function ensureOnboardingPr(
   config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]> | null,
@@ -38,7 +87,6 @@ export async function ensureOnboardingPr(
 ): Promise<void> {
   if (
     config.repoIsOnboarded === true ||
-    OnboardingState.onboardingCacheValid ||
     (config.onboardingRebaseCheckbox && !OnboardingState.prUpdateRequested)
   ) {
     return;
@@ -51,34 +99,11 @@ export async function ensureOnboardingPr(
     config.defaultBranch,
   );
   if (existingPr) {
-    // check if the existing pr crosses the onboarding autoclose age
-    const ageOfOnboardingPr = getElapsedDays(existingPr.createdAt!);
-    const onboardingAutoCloseAge = GlobalConfig.get('onboardingAutoCloseAge')!;
-    if (
-      isNumber(onboardingAutoCloseAge) &&
-      ageOfOnboardingPr > onboardingAutoCloseAge
-    ) {
-      // close the pr
-      await platform.updatePr({
-        number: existingPr.number,
-        state: 'closed',
-        prTitle: existingPr.title,
-      });
-      // ensure comment
-      await ensureComment({
-        number: existingPr.number,
-        topic: `Renovate is disabled`,
-        content: `Renovate is disabled because the onboarding PR has been unmerged for more than ${onboardingAutoCloseAge} days. To enable Renovate, you can either (a) change this PR's title to get a new onboarding PR, and merge the new onboarding PR, or (b) create a Renovate config file, and commit that file to your base branch.`,
-      });
-      logger.debug(
-        {
-          ageOfOnboardingPr,
-          onboardingAutoCloseAge,
-        },
-        `Renovate is being disabled for this repository as the onboarding PR has been unmerged for more than ${onboardingAutoCloseAge} days`,
-      );
-      return;
+    const wasClosed = await ensureOnboardingAutoCloseAge(existingPr);
+    if (wasClosed) {
+      throw new Error(REPOSITORY_CLOSED_ONBOARDING);
     }
+
     // skip pr-update if branch is conflicted
     if (
       await isOnboardingBranchConflicted(
@@ -102,6 +127,11 @@ export async function ensureOnboardingPr(
       return;
     }
   }
+
+  if (OnboardingState.onboardingCacheValid) {
+    return;
+  }
+
   const onboardingConfigHashComment =
     await getOnboardingConfigHashComment(config);
   const rebaseCheckBox = getRebaseCheckbox(config.onboardingRebaseCheckbox);

@@ -826,6 +826,7 @@ async function validateGlobalConfig(
     });
   }
   if (val !== null) {
+    // v8 ignore else -- TODO: add test #40625
     if (type === 'string') {
       if (isString(val)) {
         if (
@@ -919,6 +920,7 @@ async function validateGlobalConfig(
         if (key === 'gitNoVerify') {
           const allowedValues = ['commit', 'push'];
           for (const value of val as string[]) {
+            // v8 ignore else -- TODO: add test #40625
             if (!allowedValues.includes(value)) {
               warnings.push({
                 topic: 'Configuration Error',
@@ -930,6 +932,7 @@ async function validateGlobalConfig(
         if (key === 'mergeConfidenceDatasources') {
           const allowedValues = supportedDatasources;
           for (const value of val as string[]) {
+            // v8 ignore else -- TODO: add test #40625
             if (!allowedValues.includes(value)) {
               warnings.push({
                 topic: 'Configuration Error',

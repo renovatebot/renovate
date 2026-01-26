@@ -161,6 +161,7 @@ export async function decryptConfig<T extends RenovateConfig = AllConfig>(
             throw error;
           }
           logger.debug(`Decrypted ${eKey} in ${path}`);
+          // v8 ignore if -- TODO: add test #40625
           if (eKey === 'npmToken') {
             const token = decryptedStr.replace(regEx(/\n$/), '');
             decryptedConfig[eKey] = token;

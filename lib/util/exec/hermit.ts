@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { findUpLocal } from '../fs';
 import { newlineRegex } from '../regex';
+import { coerceString } from '../string';
 import { rawExec } from './common';
 import type { RawExecOptions } from './types';
 
@@ -24,7 +25,7 @@ export async function findHermitCwd(cwd: string): Promise<string> {
 export async function getHermitEnvs(
   rawOptions: RawExecOptions,
 ): Promise<Record<string, string>> {
-  const cwd = rawOptions.cwd ?? /* istanbul ignore next */ '';
+  const cwd = coerceString(rawOptions.cwd);
   const hermitCwd = await findHermitCwd(cwd);
   logger.debug({ cwd, hermitCwd }, 'fetching hermit environment variables');
   // with -r will output the raw unquoted environment variables to consume

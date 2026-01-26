@@ -22,7 +22,10 @@ const program = new Command('pnpm release:prepare')
 void (async () => {
   await program.parseAsync();
   const opts = program.opts();
-  logger.info(`Publishing v${opts.version}...`);
+  if (!opts.version) {
+    throw new Error('--version is required');
+  }
+  logger.info(`Publishing v${opts.version.toString()}...`);
   const meta = await bake('push', opts);
 
   if (meta?.['push-slim']?.['containerimage.digest']) {
