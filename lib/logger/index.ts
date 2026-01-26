@@ -1,7 +1,7 @@
+import { randomUUID } from 'node:crypto';
 import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import * as bunyan from 'bunyan';
 import fs from 'fs-extra';
-import { nanoid } from 'nanoid';
 import upath from 'upath';
 import cmdSerializer from './cmd-serializer';
 import configSerializer from './config-serializer';
@@ -34,6 +34,7 @@ export function createDefaultStreams(
     stream: process.stdout,
   };
 
+  // v8 ignore else -- TODO: add test #40625
   if (getEnv('LOG_FORMAT') !== 'json') {
     // TODO: typings (#9615)
     const prettyStdOut = new RenovateStream() as any;
@@ -106,7 +107,7 @@ const defaultStreams = createDefaultStreams(
 );
 
 const bunyanLogger = serializedSanitizedLogger(defaultStreams);
-const logContext = getEnv('LOG_CONTEXT') ?? nanoid();
+const logContext = getEnv('LOG_CONTEXT') ?? randomUUID();
 const loggerInternal = new RenovateLogger(bunyanLogger, logContext, {});
 
 export const logger: Logger = loggerInternal;
@@ -158,6 +159,7 @@ export function levels(
   level: bunyan.LogLevelString,
 ): void {
   bunyanLogger.levels(name, level);
+  // v8 ignore else -- TODO: add test #40625
   if (name === 'stdout') {
     stdoutLevel = level;
   }

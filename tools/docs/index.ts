@@ -74,6 +74,11 @@ export async function generateDocs(
     logger.info('* json-schema');
     await generateSchema(dist, { version });
     await generateSchema(dist, {
+      filename: 'renovate-inherited-schema.json',
+      version,
+      isInherit: true,
+    });
+    await generateSchema(dist, {
       filename: 'renovate-global-schema.json',
       version,
       isGlobal: true,

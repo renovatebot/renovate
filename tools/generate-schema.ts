@@ -17,6 +17,10 @@ process.on('unhandledRejection', (err) => {
     logger.info('Generating json-schema');
     await generateSchema(dist);
     await generateSchema(dist, {
+      filename: 'renovate-inherited-schema.json',
+      isInherit: true,
+    });
+    await generateSchema(dist, {
       filename: 'renovate-global-schema.json',
       isGlobal: true,
     });

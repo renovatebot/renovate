@@ -1,4 +1,4 @@
-import { lang, query as q } from 'good-enough-parser';
+import { lang, query as q } from '@renovatebot/good-enough-parser';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { PackageDependency } from '../types';
 import { qApplyFrom } from './parser/apply-from';

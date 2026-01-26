@@ -1,3 +1,4 @@
+import { clone } from '../util/clone';
 import { getOptions } from './options';
 import type { AllConfig, RenovateOptions } from './types';
 
@@ -16,7 +17,7 @@ const defaultValueFactories = {
 export function getDefault(option: RenovateOptions): any {
   return option.default === undefined
     ? defaultValueFactories[option.type]()
-    : option.default;
+    : clone(option.default);
 }
 
 export function getConfig(): AllConfig {

@@ -95,6 +95,7 @@ export async function exportStats(config: RenovateConfig): Promise<void> {
       return;
     }
 
+    // v8 ignore else -- TODO: add test #40625
     if (config.reportType === 's3') {
       const s3Url = parseS3Url(config.reportPath!);
       if (isNullOrUndefined(s3Url)) {

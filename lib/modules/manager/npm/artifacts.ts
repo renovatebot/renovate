@@ -178,7 +178,7 @@ async function updatePnpmWorkspace(
   let updated = false;
 
   for (const upgrade of upgrades) {
-    let excludeNode = doc.get('minimumReleaseAgeExclude') as YAMLSeq | null;
+    let excludeNode = doc.getIn(['minimumReleaseAgeExclude']) as YAMLSeq | null;
     const newVersion = upgrade.newVersion ?? upgrade.newValue;
 
     /* v8 ignore if -- should not happen, adding for type narrowing*/
@@ -207,11 +207,54 @@ async function updatePnpmWorkspace(
     }
 
     if (isScalar<string>(matchedItem)) {
-      matchedItem.commentBefore = ` Renovate security update: ${upgrade.depName}@${newVersion}`;
+      // if we have a comment before the list, which includes the dependency
+      if (excludeNode?.commentBefore?.includes(`${upgrade.depName}@`)) {
+        // and it doesn't already have the version included in it
+        if (
+          !minimumReleaseAgeExcludeIncludesDepNameAndVersion(
+            excludeNode.commentBefore,
+            upgrade.depName,
+            newVersion,
+          )
+        ) {
+          // then append it
 
-      // normalize value (no quote handling needed)
-      matchedItem.value = matchedItem.value + ` || ${newVersion}`;
-      updated = true;
+          // normalize value (no quote handling needed)
+          excludeNode.commentBefore =
+            excludeNode.commentBefore + ` || ${newVersion}`;
+          updated = true;
+        }
+      }
+      // otherwise, if it's in our matched item's comment
+      else if (matchedItem.commentBefore) {
+        // add it
+        if (
+          !minimumReleaseAgeExcludeIncludesDepNameAndVersion(
+            matchedItem.commentBefore,
+            upgrade.depName,
+            newVersion,
+          )
+        ) {
+          // normalize value (no quote handling needed)
+          matchedItem.commentBefore =
+            matchedItem.commentBefore + ` || ${newVersion}`;
+          updated = true;
+        }
+      } else {
+        matchedItem.commentBefore = ` Renovate security update: ${upgrade.depName}@${newVersion}`;
+        updated = true;
+      }
+
+      if (
+        !minimumReleaseAgeExcludeIncludesDepNameAndVersion(
+          matchedItem.value,
+          upgrade.depName,
+          newVersion,
+        )
+      ) {
+        matchedItem.value = matchedItem.value + ` || ${newVersion}`;
+        updated = true;
+      }
     } else {
       // add new entry
       const newItem = doc.createNode(`${upgrade.depName}@${newVersion}`);
@@ -270,4 +313,21 @@ function getMatchedItem(
     item: null,
     allExcluded: false,
   };
+}
+
+/** determine whether a comment or a list item contains the depName at a given newVersion */
+function minimumReleaseAgeExcludeIncludesDepNameAndVersion(
+  line: string,
+  depName: string | undefined,
+  newVersion: string | undefined,
+): boolean {
+  if (line.includes(`${depName}@${newVersion}`)) {
+    return true;
+  }
+
+  if (line.includes(`|| ${newVersion}`)) {
+    return true;
+  }
+
+  return false;
 }

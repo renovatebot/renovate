@@ -116,6 +116,7 @@ export function exec(
     // if we're not in shell mode, we need to provide the command and arguments
     if (shell === false) {
       const parts = split(cmd);
+      // v8 ignore else -- TODO: add test #40625
       if (parts) {
         cmd = parts[0];
         args = parts.slice(1);

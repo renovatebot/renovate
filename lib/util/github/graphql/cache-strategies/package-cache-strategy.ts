@@ -23,6 +23,7 @@ export class GithubGraphqlPackageCacheStrategy<
       })
       .toUTC();
     const ttlMinutes = expiry.diff(this.now, ['minutes']).as('minutes');
+    // v8 ignore else -- TODO: add test #40625
     if (ttlMinutes && ttlMinutes > 0) {
       await packageCache.set(
         this.cacheNs,

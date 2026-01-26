@@ -513,10 +513,10 @@ jobs:
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --branches 96.82 \
-            --functions 99.79 \
-            --lines 99.02 \
-            --statements 99.03
+            --statements 99.86 \
+            --branches 97.53 \
+            --functions 99.94 \
+            --lines 99.85 \
 
   # Catch-all required check for test matrix and coverage
   test-success:
@@ -745,6 +745,10 @@ jobs:
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    concurrency:
+      group: ${{ github.workflow }}-release-${{ github.ref }}
+      # never cancel a release that has already started, as it may have started pushing artifacts
+      cancel-in-progress: false
     permissions:
       contents: write
       issues: write
@@ -786,7 +790,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@0c0916a7b7f39734b241ae340275c3d24d0f0a1b # v3.14.54
+        uses: containerbase/internal-tools@cf266a36ac247b4252860db20f554594213383c0 # v3.14.56
         with:
           command: docker-config
 

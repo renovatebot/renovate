@@ -1,4 +1,4 @@
-import { nanoid } from 'nanoid';
+import { randomUUID } from 'node:crypto';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import * as fs from '../../../util/fs';
@@ -29,7 +29,7 @@ export async function downloadAndExtractPackage(
   const compression = 'gz';
   const compressedFile = upath.join(
     fullCacheDir,
-    `${nanoid()}_${packageUrlHash}.${compression}`,
+    `${randomUUID()}_${packageUrlHash}.${compression}`,
   );
 
   const wasUpdated = await downloadPackageFile(

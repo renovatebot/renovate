@@ -56,6 +56,32 @@ $ npx --yes --package renovate -- renovate-config-validator first_config.json
  INFO: Config validated successfully
 ```
 
+### Providing global configuration
+
+If `renovate-config-validator` detects a `config.js`, or any [global self-hosed environment variables](./self-hosted-configuration.md), they will be set as global configuration.
+
+For instance, if you had a `config.js`:
+
+```javascript
+module.exports = {
+  // to mirror the Mend-hosted Renovate
+  globalExtends: ['global:safeEnv'],
+};
+```
+
+And a `renovate.json`:
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "env": {
+    "GONOSUMDB": "off"
+  }
+}
+```
+
+The `renovate-config-validator` would allow this to pass.
+
 ## Validate your config automatically
 
 You can create a [pre-commit](https://pre-commit.com) hook to validate your configuration automatically.
@@ -77,3 +103,7 @@ The next time Renovate runs on that repo it will:
 1. Add a passing or failing status to the branch, depending on the outcome of the config validation run.
 1. If there's an _open_ pull request with validation errors from the _reconfigure_ branch then Renovate comments in the PR with details.
 1. Validate each commit the next time Renovate runs on the repository, until the PR is merged.
+
+<!-- prettier-ignore -->
+!!! note
+    The reconfigure branch **must** be pushed to the source repository that Renovate runs against, not a fork.

@@ -3,6 +3,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
+import type { FileAddition } from '../../../util/git/types';
 import type { UpdateArtifactsConfig, Upgrade } from '../types';
 import * as rules from './post-update/rules';
 import { updateArtifacts } from '.';
@@ -430,6 +431,76 @@ minimumReleaseAgeExclude:
       ]);
     });
 
+    it('updates pnpm workspace - handles comment with version already present on an inner minimumReleaseAgeExclude setting', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - pnpm@5.6.7
+  # Renovate security update: lodash@4.17.21 || 4.17.23
+  - lodash@4.17.23`,
+      ); // for pnpm-workspace.yaml
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'lodash',
+            depType: 'devDependencies',
+            currentValue: '^4.17.15',
+            currentVersion: '4.17.21',
+            newVersion: '4.17.23',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      // no changes needed
+      expect(res).toBeNull();
+    });
+
+    it('updates pnpm workspace - handles comment on an inner minimumReleaseAgeExclude setting', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - pnpm@5.6.7
+  # Renovate security update: lodash@4.17.21
+  - lodash@4.17.21`,
+      ); // for pnpm-workspace.yaml
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'lodash',
+            depType: 'devDependencies',
+            currentValue: '^4.17.15',
+            currentVersion: '4.17.21',
+            newVersion: '4.17.23',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents:
+              'minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  - pnpm@5.6.7\n  # Renovate security update: lodash@4.17.21 || 4.17.23\n  - lodash@4.17.21 || 4.17.23\n',
+          },
+        },
+      ]);
+    });
+
     // As per https://github.com/renovatebot/renovate/issues/40610, we don't want to allow version constraints with i.e. a caret like `^4.17.15`
     it('updates pnpm workspace - uses newVersion over newValue in minimumReleaseAgeExclude', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
@@ -465,6 +536,140 @@ minimumReleaseAgeExclude:
           },
         },
       ]);
+    });
+
+    it('handles multiple security upgrades of the same package (at different versions) in a monorepo', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+
+      // for the first package file
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 10080`,
+      ); // for pnpm-workspace.yaml
+      let res = await updateArtifacts({
+        packageFileName: 'packages/a/package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'lodash',
+            depType: 'dependencies',
+            currentValue: '4.17.20',
+            newVersion: '4.17.21',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents:
+              'minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  # Renovate security update: lodash@4.17.21\n  - lodash@4.17.21\n',
+          },
+        },
+      ]);
+      expect(res).not.toBeNull();
+
+      const addition = res![0].file as FileAddition;
+      const newContents = addition.contents as string;
+
+      // then for the next update
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(newContents); // for pnpm-workspace.yaml
+
+      res = await updateArtifacts({
+        packageFileName: 'packages/b/package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'lodash',
+            depType: 'devDependencies',
+            currentValue: '4.17.20',
+            newVersion: '4.17.23',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents:
+              'minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  # Renovate security update: lodash@4.17.21 || 4.17.23\n  - lodash@4.17.21 || 4.17.23\n',
+          },
+        },
+      ]);
+    });
+
+    it('handles multiple security upgrades of the same package (at the same version) in a monorepo', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+
+      // for the first package file
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 10080`,
+      ); // for pnpm-workspace.yaml
+      let res = await updateArtifacts({
+        packageFileName: 'packages/a/package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'lodash',
+            depType: 'dependencies',
+            currentValue: '4.17.20',
+            newVersion: '4.17.21',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents:
+              'minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  # Renovate security update: lodash@4.17.21\n  - lodash@4.17.21\n',
+          },
+        },
+      ]);
+      expect(res).not.toBeNull();
+
+      const addition = res![0].file as FileAddition;
+      const newContents = addition.contents as string;
+
+      // then for the next update
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(newContents); // for pnpm-workspace.yaml
+
+      res = await updateArtifacts({
+        packageFileName: 'packages/b/package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'lodash',
+            depType: 'devDependencies',
+            currentValue: '4.17.20',
+            newVersion: '4.17.21',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      // no updates are needed, as they're at the same version
+      expect(res).toBeNull();
     });
 
     it('handles multiple security upgrades correctly (bug fix test)', async () => {

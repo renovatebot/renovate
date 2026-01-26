@@ -1,4 +1,3 @@
-import { URL } from 'node:url';
 import { isEmptyStringOrWhitespace } from '@sindresorhus/is';
 import { migrateDatasource } from '../../../../config/migrations/custom/datasource-migration';
 import { logger } from '../../../../logger';

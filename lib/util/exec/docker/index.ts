@@ -49,6 +49,7 @@ function expandVolumeOption(x: VolumeOption): VolumesPair | null {
   }
   if (Array.isArray(x) && x.length === 2) {
     const [from, to] = x;
+    // v8 ignore else -- TODO: add test #40625
     if (isNonEmptyString(from) && isNonEmptyString(to)) {
       return [from, to];
     }
@@ -242,6 +243,7 @@ export async function generateDockerCommand(
   volumeDirs.push(...volumes);
   result.push(...prepareVolumes(volumeDirs));
 
+  // v8 ignore else -- TODO: add test #40625
   if (envVars) {
     result.push(
       ...uniq(envVars)
