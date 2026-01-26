@@ -1,9 +1,9 @@
-import { cache } from '../../../util/cache/package/decorator';
-import { asTimestamp } from '../../../util/timestamp';
-import * as Unity3dVersioning from '../../versioning/unity3d';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { UnityReleasesJSON } from './schema';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import * as Unity3dVersioning from '../../versioning/unity3d/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { UnityReleasesJSON } from './schema.ts';
 
 export class Unity3dDatasource extends Datasource {
   static readonly baseUrl =

@@ -1,13 +1,13 @@
-import { logger } from '../../../logger';
-import { getSiblingFileName, localPathExists } from '../../../util/fs';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { coerceString } from '../../../util/string';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import { PodDatasource } from '../../datasource/pod';
-import type { PackageDependency, PackageFileContent } from '../types';
-import type { ParsedLine } from './types';
+import { logger } from '../../../logger/index.ts';
+import { getSiblingFileName, localPathExists } from '../../../util/fs/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { coerceString } from '../../../util/string.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import { PodDatasource } from '../../datasource/pod/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { ParsedLine } from './types.ts';
 
 const regexMappings = [
   regEx(`^\\s*pod\\s+(['"])(?<spec>[^'"/]+)(/(?<subspec>[^'"]+))?(['"])`),

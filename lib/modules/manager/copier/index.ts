@@ -1,8 +1,8 @@
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import * as pep440 from '../../versioning/pep440';
-export { updateArtifacts } from './artifacts';
-export { extractPackageFile } from './extract';
-export { updateDependency } from './update';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import * as pep440 from '../../versioning/pep440/index.ts';
+export { updateArtifacts } from './artifacts.ts';
+export { extractPackageFile } from './extract.ts';
+export { updateDependency } from './update.ts';
 
 export const url = 'https://copier.readthedocs.io';
 

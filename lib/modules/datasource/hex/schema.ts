@@ -1,8 +1,8 @@
 import { isPlainObject } from '@sindresorhus/is';
 import { z } from 'zod';
-import { LooseArray } from '../../../util/schema-utils';
-import { MaybeTimestamp } from '../../../util/timestamp';
-import type { Release, ReleaseResult } from '../types';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
+import { MaybeTimestamp } from '../../../util/timestamp.ts';
+import type { Release, ReleaseResult } from '../types.ts';
 
 export const HexRelease = z
   .object({

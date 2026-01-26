@@ -1,4 +1,4 @@
-import { PathRulesMigration } from './path-rules-migration';
+import { PathRulesMigration } from './path-rules-migration.ts';
 
 describe('config/migrations/custom/path-rules-migration', () => {
   it('should migrate to packageRules', async () => {

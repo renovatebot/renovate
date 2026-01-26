@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import * as gleamManager from '.';
-import { fs } from '~test/util';
+import * as gleamManager from './index.ts';
+import { fs } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/gleam/extract', () => {
   it('should extract dev and prod dependencies', async () => {

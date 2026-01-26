@@ -4,9 +4,9 @@ import {
   parseFloatingRange,
   parseRange,
   parseVersion,
-} from './parser';
-import { getFloatingRangeLowerBound, rangeToString } from './range';
-import { versionToString } from './version';
+} from './parser.ts';
+import { getFloatingRangeLowerBound, rangeToString } from './range.ts';
+import { versionToString } from './version.ts';
 
 describe('modules/versioning/nuget/parser', () => {
   describe('parseVersion', () => {

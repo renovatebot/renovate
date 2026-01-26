@@ -1,5 +1,5 @@
-import type { RepoGlobalConfig } from '../../config/types';
-import type { RepoParams } from './types';
+import type { RepoGlobalConfig } from '../../config/types.ts';
+import type { RepoParams } from './types.ts';
 
 describe('modules/platform/types', () => {
   it('`RepoParams` and `RepoGlobalConfig` types should be incompatible', () => {

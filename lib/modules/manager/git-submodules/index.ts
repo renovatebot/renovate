@@ -1,9 +1,9 @@
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import * as gitVersioning from '../../versioning/git';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import * as gitVersioning from '../../versioning/git/index.ts';
 
-export { default as extractPackageFile } from './extract';
-export { default as updateDependency } from './update';
-export { default as updateArtifacts } from './artifacts';
+export { default as extractPackageFile } from './extract.ts';
+export { default as updateDependency } from './update.ts';
+export { default as updateArtifacts } from './artifacts.ts';
 
 export const url = 'https://git-scm.com/docs/git-submodule';
 

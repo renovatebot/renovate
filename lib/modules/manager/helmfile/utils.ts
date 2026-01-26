@@ -1,12 +1,12 @@
 import upath from 'upath';
 
-import { getParentDir, localPathExists } from '../../../util/fs';
-import * as hostRules from '../../../util/host-rules';
-import { DockerDatasource } from '../../datasource/docker';
-import { generateLoginCmd } from '../helmv3/common';
-import type { RepositoryRule } from '../helmv3/types';
+import { getParentDir, localPathExists } from '../../../util/fs/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { generateLoginCmd } from '../helmv3/common.ts';
+import type { RepositoryRule } from '../helmv3/types.ts';
 
-import type { HelmRelease, HelmRepository } from './schema';
+import type { HelmRelease, HelmRepository } from './schema.ts';
 
 /** Returns true if a helmfile release contains kustomize specific keys **/
 export function kustomizationsKeysUsed(release: HelmRelease): boolean {

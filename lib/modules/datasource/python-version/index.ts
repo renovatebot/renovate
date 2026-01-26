@@ -1,12 +1,12 @@
-import { cache } from '../../../util/cache/package/decorator';
-import { id as versioning } from '../../versioning/python';
-import { Datasource } from '../datasource';
-import { EndoflifeDateDatasource } from '../endoflife-date';
-import { registryUrl as eolRegistryUrl } from '../endoflife-date/common';
-import { GithubReleasesDatasource } from '../github-releases';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { datasource, defaultRegistryUrl, githubBaseUrl } from './common';
-import { PythonRelease } from './schema';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { id as versioning } from '../../versioning/python/index.ts';
+import { Datasource } from '../datasource.ts';
+import { registryUrl as eolRegistryUrl } from '../endoflife-date/common.ts';
+import { EndoflifeDateDatasource } from '../endoflife-date/index.ts';
+import { GithubReleasesDatasource } from '../github-releases/index.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { datasource, defaultRegistryUrl, githubBaseUrl } from './common.ts';
+import { PythonRelease } from './schema.ts';
 
 export class PythonVersionDatasource extends Datasource {
   static readonly id = datasource;

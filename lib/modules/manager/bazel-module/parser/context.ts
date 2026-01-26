@@ -7,8 +7,8 @@ import type {
   ResultFragment,
   RuleFragment,
   UseRepoRuleFragment,
-} from './fragments';
-import * as fragments from './fragments';
+} from './fragments.ts';
+import * as fragments from './fragments.ts';
 
 // Represents the fields that the context must have.
 export interface CtxCompatible {

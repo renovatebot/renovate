@@ -1,37 +1,37 @@
 import { isNumber, isString } from '@sindresorhus/is';
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
-import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import type { PackageFile } from '../../../../modules/manager/types';
-import type { Pr } from '../../../../modules/platform';
-import { platform } from '../../../../modules/platform';
-import { ensureComment } from '../../../../modules/platform/comment';
-import { hashBody } from '../../../../modules/platform/pr-body';
-import { scm } from '../../../../modules/platform/scm';
-import { getElapsedDays } from '../../../../util/date';
-import { emojify } from '../../../../util/emoji';
-import { getFile } from '../../../../util/git';
-import { toSha256 } from '../../../../util/hash';
-import * as template from '../../../../util/template';
-import type { BranchConfig } from '../../../types';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { PackageFile } from '../../../../modules/manager/types.ts';
+import { ensureComment } from '../../../../modules/platform/comment.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { hashBody } from '../../../../modules/platform/pr-body.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { getElapsedDays } from '../../../../util/date.ts';
+import { emojify } from '../../../../util/emoji.ts';
+import { getFile } from '../../../../util/git/index.ts';
+import { toSha256 } from '../../../../util/hash.ts';
+import * as template from '../../../../util/template/index.ts';
+import type { BranchConfig } from '../../../types.ts';
 import {
   getDepWarningsOnboardingPR,
   getErrors,
   getWarnings,
-} from '../../errors-warnings';
-import { getPlatformPrOptions } from '../../update/pr';
-import { prepareLabels } from '../../update/pr/labels';
-import { addParticipants } from '../../update/pr/participants';
-import { isOnboardingBranchConflicted } from '../branch/onboarding-branch-cache';
+} from '../../errors-warnings.ts';
+import { getPlatformPrOptions } from '../../update/pr/index.ts';
+import { prepareLabels } from '../../update/pr/labels.ts';
+import { addParticipants } from '../../update/pr/participants.ts';
+import { isOnboardingBranchConflicted } from '../branch/onboarding-branch-cache.ts';
 import {
   OnboardingState,
   getDefaultConfigFileName,
   getSemanticCommitPrTitle,
-} from '../common';
-import { getBaseBranchDesc } from './base-branch';
-import { getConfigDesc } from './config-description';
-import { getExpectedPrList } from './pr-list';
+} from '../common.ts';
+import { getBaseBranchDesc } from './base-branch.ts';
+import { getConfigDesc } from './config-description.ts';
+import { getExpectedPrList } from './pr-list.ts';
 
 /**
  * Given an existing PR, if onboardingAutoCloseAge has passed, close the PR.

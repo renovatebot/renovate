@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { LooseRecord, Yaml } from '../../../util/schema-utils';
+import { LooseRecord, Yaml } from '../../../util/schema-utils/index.ts';
 
 const PubspecDependency = LooseRecord(
   z.string(),

@@ -7,8 +7,8 @@ import fs from 'fs-extra';
 import { glob } from 'glob';
 import type { Token } from 'markdown-it';
 import MarkdownIt from 'markdown-it';
-import { migrateConfig } from '../lib/config/migration';
-import type { RenovateConfig } from '../lib/config/types';
+import { migrateConfig } from '../lib/config/migration.ts';
+import type { RenovateConfig } from '../lib/config/types.ts';
 
 const errorTitle = 'Invalid JSON in fenced code block';
 const errorBody =

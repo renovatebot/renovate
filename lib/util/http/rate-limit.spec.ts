@@ -1,9 +1,9 @@
-import * as hostRules from '../host-rules';
+import * as hostRules from '../host-rules.ts';
 import {
   getConcurrentRequestsLimit,
   getThrottleIntervalMs,
   setHttpRateLimits,
-} from './rate-limits';
+} from './rate-limits.ts';
 
 describe('util/http/rate-limit', () => {
   beforeEach(() => {

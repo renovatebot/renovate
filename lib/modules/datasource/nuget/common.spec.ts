@@ -1,4 +1,4 @@
-import { sortNugetVersions } from './common';
+import { sortNugetVersions } from './common.ts';
 
 describe('modules/datasource/nuget/common', () => {
   it.each`

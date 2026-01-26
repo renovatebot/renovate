@@ -8,11 +8,11 @@ import {
   getJvmConfiguration,
   gradleWrapperFileName,
   prepareGradleCommand,
-} from './utils';
-import { fs, partial } from '~test/util';
+} from './utils.ts';
+import { fs, partial } from '~test/util.ts';
 
 const platform = vi.spyOn(os, 'platform');
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/gradle-wrapper/util', () => {
   describe('getJavaConstraint()', () => {

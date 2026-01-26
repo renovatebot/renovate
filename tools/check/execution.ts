@@ -1,11 +1,11 @@
 import { execa } from 'execa';
-import { formatCompletedLine, isTTY } from './tui.js';
+import { formatCompletedLine, isTTY } from './tui.ts';
 import type {
   CheckResult,
   ExecutionProgress,
   ParallelCheck,
   ProcessManager,
-} from './types.js';
+} from './types.ts';
 
 export async function runCommand(
   cmd: string,

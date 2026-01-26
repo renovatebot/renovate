@@ -1,8 +1,8 @@
-import { GlobalConfig } from '../../../config/global';
-import type { Pr } from '../../../modules/platform/types';
-import * as cleanup from './prune';
-import { git, partial, platform, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { Pr } from '../../../modules/platform/types.ts';
+import * as cleanup from './prune.ts';
+import { git, partial, platform, scm } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
 let config: RenovateConfig;
 

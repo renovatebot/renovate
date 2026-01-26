@@ -1,21 +1,21 @@
 import { isNonEmptyObject } from '@sindresorhus/is';
-import { getConfigFileNames } from '../../../../config/app-strings';
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
+import { getConfigFileNames } from '../../../../config/app-strings.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
 import {
   REPOSITORY_CLOSED_ONBOARDING,
   REPOSITORY_NO_CONFIG,
-} from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
-import { platform } from '../../../../modules/platform';
-import { ensureComment } from '../../../../modules/platform/comment';
-import { scm } from '../../../../modules/platform/scm';
-import { getCache } from '../../../../util/cache/repository';
-import { getElapsedDays } from '../../../../util/date';
-import { readLocalFile } from '../../../../util/fs';
-import { getBranchCommit } from '../../../../util/git';
-import { getSemanticCommitPrTitle } from '../common';
+} from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { ensureComment } from '../../../../modules/platform/comment.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { getCache } from '../../../../util/cache/repository/index.ts';
+import { getElapsedDays } from '../../../../util/date.ts';
+import { readLocalFile } from '../../../../util/fs/index.ts';
+import { getBranchCommit } from '../../../../util/git/index.ts';
+import { getSemanticCommitPrTitle } from '../common.ts';
 
 async function findFile(fileName: string): Promise<boolean> {
   logger.debug(`findFile(${fileName})`);

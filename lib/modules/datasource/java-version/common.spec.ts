@@ -1,6 +1,6 @@
-import { parsePackage } from './common';
-import type { PackageConfig } from './types';
-import { logger } from '~test/util';
+import { parsePackage } from './common.ts';
+import type { PackageConfig } from './types.ts';
+import { logger } from '~test/util.ts';
 
 describe('modules/datasource/java-version/common', () => {
   const archMock = vi.spyOn(process, 'arch', 'get');

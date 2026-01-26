@@ -2,13 +2,13 @@ import crypto from 'crypto';
 // TODO #22198
 import { isArray, isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
 import upath from 'upath';
-import { mergeChildConfig } from '../../../../config';
-import { GlobalConfig } from '../../../../config/global';
-import { addMeta, logger } from '../../../../logger';
-import type { ArtifactError } from '../../../../modules/manager/types';
-import { coerceArray } from '../../../../util/array';
-import { exec } from '../../../../util/exec';
-import type { ExecOptions } from '../../../../util/exec/types';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { mergeChildConfig } from '../../../../config/index.ts';
+import { addMeta, logger } from '../../../../logger/index.ts';
+import type { ArtifactError } from '../../../../modules/manager/types.ts';
+import { coerceArray } from '../../../../util/array.ts';
+import { exec } from '../../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../../util/exec/types.ts';
 import {
   ensureLocalDir,
   localPathIsFile,
@@ -16,15 +16,15 @@ import {
   privateCacheDir,
   readLocalFile,
   writeLocalFile,
-} from '../../../../util/fs';
-import { getRepoStatus } from '../../../../util/git';
-import { getGitEnvironmentVariables } from '../../../../util/git/auth';
-import type { FileChange } from '../../../../util/git/types';
-import { minimatch } from '../../../../util/minimatch';
-import { regEx } from '../../../../util/regex';
-import { sanitize } from '../../../../util/sanitize';
-import { compile } from '../../../../util/template';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
+} from '../../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../../util/git/auth.ts';
+import { getRepoStatus } from '../../../../util/git/index.ts';
+import type { FileChange } from '../../../../util/git/types.ts';
+import { minimatch } from '../../../../util/minimatch.ts';
+import { regEx } from '../../../../util/regex.ts';
+import { sanitize } from '../../../../util/sanitize.ts';
+import { compile } from '../../../../util/template/index.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 
 export interface PostUpgradeCommandsExecutionResult {
   updatedArtifacts: FileChange[];

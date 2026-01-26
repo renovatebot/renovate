@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import type { SkipReason } from '../../../types';
-import { Toml, withDepType } from '../../../util/schema-utils';
-import { CrateDatasource } from '../../datasource/crate';
-import type { PackageDependency } from '../types';
-import { applyGitSource } from '../util';
-import type { CargoManagerData } from './types';
+import type { SkipReason } from '../../../types/index.ts';
+import { Toml, withDepType } from '../../../util/schema-utils/index.ts';
+import { CrateDatasource } from '../../datasource/crate/index.ts';
+import type { PackageDependency } from '../types.ts';
+import { applyGitSource } from '../util.ts';
+import type { CargoManagerData } from './types.ts';
 
 const CargoDep = z.union([
   z

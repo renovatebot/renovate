@@ -1,4 +1,4 @@
-import { BinarySourceMigration } from './binary-source-migration';
+import { BinarySourceMigration } from './binary-source-migration.ts';
 
 describe('config/migrations/custom/binary-source-migration', () => {
   it('should migrate "auto" to "global"', async () => {

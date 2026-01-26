@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { filterMap } from '../../../util/filter-map';
-import { Yaml } from '../../../util/schema-utils';
-import { parseStep } from './utils';
+import { filterMap } from '../../../util/filter-map.ts';
+import { Yaml } from '../../../util/schema-utils/index.ts';
+import { parseStep } from './utils.ts';
 
 export const BitriseFile = Yaml.pipe(
   z

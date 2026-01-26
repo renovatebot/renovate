@@ -1,7 +1,7 @@
 import protobuf from 'protobufjs';
 import upath from 'upath';
-import { Package } from './package';
-import { Signed } from './signed';
+import { Package } from './package.ts';
+import { Signed } from './signed.ts';
 
 function protobufLoad(file: string): Promise<protobuf.Root> {
   const resolvedFile = upath.join(__dirname, file);

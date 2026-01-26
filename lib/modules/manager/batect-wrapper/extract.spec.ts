@@ -1,8 +1,8 @@
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { id as semverVersioning } from '../../versioning/semver';
-import type { PackageDependency } from '../types';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { id as semverVersioning } from '../../versioning/semver/index.ts';
+import type { PackageDependency } from '../types.ts';
+import { extractPackageFile } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 describe('modules/manager/batect-wrapper/extract', () => {
   describe('extractPackageFile()', () => {

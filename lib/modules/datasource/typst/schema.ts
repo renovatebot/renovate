@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { LooseArray } from '../../../util/schema-utils';
-import { asTimestamp } from '../../../util/timestamp';
-import type { ReleaseResult } from '../types';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import type { ReleaseResult } from '../types.ts';
 
 const ReleaseItem = z
   .object({

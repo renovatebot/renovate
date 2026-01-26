@@ -1,5 +1,5 @@
 import { isObject } from '@sindresorhus/is';
-import type { ToolchainObject } from './types';
+import type { ToolchainObject } from './types.ts';
 
 /**
  * Compare two parsed toolchain objects for sorting.

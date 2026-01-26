@@ -1,40 +1,40 @@
 import { isString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { readLocalFile } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
-import { isHttpUrl } from '../../../util/url';
-import { parseYaml } from '../../../util/yaml';
-import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
-import { DockerDatasource } from '../../datasource/docker';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import { HelmDatasource } from '../../datasource/helm';
-import { getDep } from '../dockerfile/extract';
-import { findDependencies } from '../helm-values/extract';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
-import { extractImage } from '../kustomize/extract';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { isHttpUrl } from '../../../util/url.ts';
+import { parseYaml } from '../../../util/yaml.ts';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import { findDependencies } from '../helm-values/extract.ts';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
+import { extractImage } from '../kustomize/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFile,
   PackageFileContent,
-} from '../types';
+} from '../types.ts';
 import {
   collectHelmRepos,
   isSystemManifest,
   systemManifestHeaderRegex,
-} from './common';
-import { FluxResource, type HelmRepository } from './schema';
+} from './common.ts';
+import { FluxResource, type HelmRepository } from './schema.ts';
 import type {
   FluxManagerData,
   FluxManifest,
   ResourceFluxManifest,
   SystemFluxManifest,
-} from './types';
+} from './types.ts';
 
 function readManifest(
   content: string,

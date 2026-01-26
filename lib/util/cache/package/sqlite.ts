@@ -4,9 +4,9 @@ import type { Database, Statement } from 'better-sqlite3';
 import { exists } from 'fs-extra';
 import upath from 'upath';
 import { sqlite } from '../../../expose.cjs';
-import { logger } from '../../../logger';
-import { ensureDir } from '../../fs';
-import type { PackageCacheNamespace } from './types';
+import { logger } from '../../../logger/index.ts';
+import { ensureDir } from '../../fs/index.ts';
+import type { PackageCacheNamespace } from './types.ts';
 
 const brotliCompress = promisify(zlib.brotliCompress);
 const brotliDecompress = promisify(zlib.brotliDecompress);

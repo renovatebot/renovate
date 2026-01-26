@@ -1,15 +1,18 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import pMap from 'p-map';
-import { logger } from '../../../logger';
-import * as packageCache from '../../../util/cache/package';
-import { cache } from '../../../util/cache/package/decorator';
-import { regEx } from '../../../util/regex';
-import { joinUrlParts } from '../../../util/url';
-import * as semanticVersioning from '../../versioning/semver';
-import { Datasource } from '../datasource';
-import type { Release } from '../index';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { DenoAPIModuleResponse, DenoAPIModuleVersionResponse } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import * as semanticVersioning from '../../versioning/semver/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { Release } from '../index.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import {
+  DenoAPIModuleResponse,
+  DenoAPIModuleVersionResponse,
+} from './schema.ts';
 
 export class DenoDatasource extends Datasource {
   static readonly id = 'deno';

@@ -1,6 +1,6 @@
-import * as httpMock from '../../../../../test/http-mock';
-import { partial } from '../../../../../test/util';
-import type { GithubRestRelease } from '../../../../util/github/types';
+import * as httpMock from '../../../../../test/http-mock.ts';
+import { partial } from '../../../../../test/util.ts';
+import type { GithubRestRelease } from '../../../../util/github/types.ts';
 
 export class GitHubReleaseAttachmentMocker {
   constructor(

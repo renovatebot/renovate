@@ -1,17 +1,20 @@
-import type { RenovateConfig } from '../../../config/types';
-import { addBranchStats } from '../../../instrumentation/reporting';
-import { logger } from '../../../logger';
-import type { Pr } from '../../../modules/platform';
-import { getCache, isCacheModified } from '../../../util/cache/repository';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { addBranchStats } from '../../../instrumentation/reporting.ts';
+import { logger } from '../../../logger/index.ts';
+import type { Pr } from '../../../modules/platform/index.ts';
+import {
+  getCache,
+  isCacheModified,
+} from '../../../util/cache/repository/index.ts';
 import type {
   BranchCache,
   BranchUpgradeCache,
-} from '../../../util/cache/repository/types';
+} from '../../../util/cache/repository/types.ts';
 import type {
   BaseBranchMetadata,
   BranchMetadata,
   BranchSummary,
-} from '../../types';
+} from '../../types.ts';
 
 export function runRenovateRepoStats(
   config: RenovateConfig,

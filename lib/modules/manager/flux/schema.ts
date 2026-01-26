@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { KubernetesResource } from '../kubernetes/schema';
+import { KubernetesResource } from '../kubernetes/schema.ts';
 
 export const HelmRelease = KubernetesResource.extend({
   apiVersion: z.string().startsWith('helm.toolkit.fluxcd.io/'),

@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { logger } from '../../../logger';
-import { Json, LooseArray } from '../../../util/schema-utils';
+import { logger } from '../../../logger/index.ts';
+import { Json, LooseArray } from '../../../util/schema-utils/index.ts';
 
 // OCI manifests
 

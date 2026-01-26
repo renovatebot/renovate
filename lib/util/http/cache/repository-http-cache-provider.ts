@@ -1,9 +1,9 @@
-import { get as memGet, set as memSet } from '../../cache/memory';
-import { getCache } from '../../cache/repository';
-import type { HttpResponse } from '../types';
-import { copyResponse } from '../util';
-import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
-import type { HttpCache } from './schema';
+import { get as memGet, set as memSet } from '../../cache/memory/index.ts';
+import { getCache } from '../../cache/repository/index.ts';
+import type { HttpResponse } from '../types.ts';
+import { copyResponse } from '../util.ts';
+import { AbstractHttpCacheProvider } from './abstract-http-cache-provider.ts';
+import type { HttpCache } from './schema.ts';
 
 export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
   constructor(private aggressive = false) {

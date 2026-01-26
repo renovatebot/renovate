@@ -1,7 +1,7 @@
 import { diffLines } from 'diff';
 import { markdownTable } from 'markdown-table';
-import { parseLine } from './line-parser';
-import type { ExtraDep } from './types';
+import { parseLine } from './line-parser.ts';
+import type { ExtraDep } from './types.ts';
 
 export function getExtraDeps(
   goModBefore: string,

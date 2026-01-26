@@ -6,8 +6,8 @@ import {
   PreparedExtensionTagFragment,
   RuleFragment,
   StringFragment,
-} from './fragments';
-import * as fragments from './fragments';
+} from './fragments.ts';
+import * as fragments from './fragments.ts';
 
 describe('modules/manager/bazel-module/parser/fragments', () => {
   it('.string()', () => {

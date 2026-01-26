@@ -1,12 +1,12 @@
-import type { Category } from '../../../constants';
-import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { PackagistDatasource } from '../../datasource/packagist';
-import { updateArtifacts } from './artifacts';
-import { extractPackageFile } from './extract';
-import { getRangeStrategy } from './range';
-import { updateLockedDependency } from './update-locked';
-import { composerVersioningId } from './utils';
+import type { Category } from '../../../constants/index.ts';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { PackagistDatasource } from '../../datasource/packagist/index.ts';
+import { updateArtifacts } from './artifacts.ts';
+import { extractPackageFile } from './extract.ts';
+import { getRangeStrategy } from './range.ts';
+import { updateLockedDependency } from './update-locked.ts';
+import { composerVersioningId } from './utils.ts';
 
 export const supportsLockFileMaintenance = true;
 

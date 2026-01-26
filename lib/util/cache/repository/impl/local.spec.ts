@@ -1,15 +1,15 @@
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import { compressToBase64 } from '../../../compress';
-import { hash } from '../../../hash';
-import { CACHE_REVISION } from '../common';
-import type { RepoCacheRecord } from '../schema';
-import type { RepoCacheData } from '../types';
-import { CacheFactory } from './cache-factory';
-import { RepoCacheLocal } from './local';
-import { fs } from '~test/util';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
+import { compressToBase64 } from '../../../compress.ts';
+import { hash } from '../../../hash.ts';
+import { CACHE_REVISION } from '../common.ts';
+import type { RepoCacheRecord } from '../schema.ts';
+import type { RepoCacheData } from '../types.ts';
+import { CacheFactory } from './cache-factory.ts';
+import { RepoCacheLocal } from './local.ts';
+import { fs } from '~test/util.ts';
 
-vi.mock('../../../fs');
+vi.mock('../../../fs/index.ts');
 
 async function createCacheRecord(
   data: RepoCacheData,

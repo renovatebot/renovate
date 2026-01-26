@@ -1,6 +1,6 @@
 import { openpgp } from '../../expose.cjs';
-import { logger } from '../../logger';
-import { regEx } from '../../util/regex';
+import { logger } from '../../logger/index.ts';
+import { regEx } from '../../util/regex.ts';
 
 let pgp: typeof import('openpgp') | null | undefined = undefined;
 

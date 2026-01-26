@@ -1,11 +1,11 @@
 import { DateTime } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
-import { clone } from '../../../../../util/clone';
-import * as githubGraphql from '../../../../../util/github/graphql';
-import type { GithubReleaseItem } from '../../../../../util/github/graphql/types';
-import { toBase64 } from '../../../../../util/string';
-import type { Timestamp } from '../../../../../util/timestamp';
-import type { BranchUpgradeConfig } from '../../../../types';
+import { clone } from '../../../../../util/clone.ts';
+import * as githubGraphql from '../../../../../util/github/graphql/index.ts';
+import type { GithubReleaseItem } from '../../../../../util/github/graphql/types.ts';
+import { toBase64 } from '../../../../../util/string.ts';
+import type { Timestamp } from '../../../../../util/timestamp.ts';
+import type { BranchUpgradeConfig } from '../../../../types.ts';
 import {
   addReleaseNotes,
   getReleaseList,
@@ -14,18 +14,18 @@ import {
   massageBody,
   releaseNotesCacheMinutes,
   shouldSkipChangelogMd,
-} from './release-notes';
+} from './release-notes.ts';
 import type {
   ChangeLogNotes,
   ChangeLogProject,
   ChangeLogRelease,
   ChangeLogResult,
-} from './types';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
-import { hostRules, partial } from '~test/util';
+} from './types.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { hostRules, partial } from '~test/util.ts';
 
-vi.mock('../../../../../util/host-rules', () => mockDeep());
+vi.mock('../../../../../util/host-rules.ts', () => mockDeep());
 
 const angularJsChangelogMd = Fixtures.get('angular-js.md');
 const jestChangelogMd = Fixtures.get('jest.md');

@@ -1,11 +1,11 @@
 import upath from 'upath';
-import type { ReleaseResult } from '..';
-import { getPkgReleases } from '..';
-import * as hostRules from '../../../util/host-rules';
-import { id as versioning } from '../../versioning/maven';
-import { ClojureDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import * as hostRules from '../../../util/host-rules.ts';
+import { id as versioning } from '../../versioning/maven/index.ts';
+import type { ReleaseResult } from '../index.ts';
+import { getPkgReleases } from '../index.ts';
+import { ClojureDatasource } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 
 const baseUrl = 'https://clojars.org/repo';
 const baseUrlCustom = 'https://custom.registry.renovatebot.com';

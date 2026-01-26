@@ -1,26 +1,26 @@
 import { isString, isUndefined } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { GithubHttp } from '../../../util/http/github';
-import { regEx } from '../../../util/regex';
-import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
-import * as allVersioning from '../../versioning';
-import { Datasource } from '../datasource';
+import { logger } from '../../../logger/index.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { GithubHttp } from '../../../util/http/github.ts';
+import { regEx } from '../../../util/regex.ts';
+import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
+import * as allVersioning from '../../versioning/index.ts';
+import { Datasource } from '../datasource.ts';
 import type {
   DigestConfig,
   GetReleasesConfig,
   Release,
   ReleaseResult,
-} from '../types';
-import { isArtifactoryServer } from '../util';
-import { datasource, defaultRegistryUrl, getConanPackage } from './common';
+} from '../types.ts';
+import { isArtifactoryServer } from '../util.ts';
+import { datasource, defaultRegistryUrl, getConanPackage } from './common.ts';
 import {
   ConanCenterReleases,
   ConanJSON,
   ConanLatestRevision,
   ConanProperties,
   ConanRevisionJSON,
-} from './schema';
+} from './schema.ts';
 
 export class ConanDatasource extends Datasource {
   static readonly id = datasource;

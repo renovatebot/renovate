@@ -1,6 +1,6 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import type { PackageDependency } from '../types';
+import { logger } from '../../../logger/index.ts';
+import type { PackageDependency } from '../types.ts';
 
 export const validMatchFields = [
   'depName',

@@ -1,31 +1,31 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
-import { GlobalConfig } from '../../../config/global';
-import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
-import { getEnv } from '../../../util/env';
-import { HttpError } from '../../../util/http';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
-import type { HttpResponse } from '../../../util/http/types';
-import { hasKey } from '../../../util/object';
-import { type AsyncResult, Result } from '../../../util/result';
-import { isDockerDigest } from '../../../util/string-match';
-import { asTimestamp } from '../../../util/timestamp';
+import { GlobalConfig } from '../../../config/global.ts';
+import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { getEnv } from '../../../util/env.ts';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import type { HttpResponse } from '../../../util/http/types.ts';
+import { hasKey } from '../../../util/object.ts';
+import { type AsyncResult, Result } from '../../../util/result.ts';
+import { isDockerDigest } from '../../../util/string-match.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
 import {
   ensurePathPrefix,
   joinUrlParts,
   parseLinkHeader,
-} from '../../../util/url';
-import { id as dockerVersioningId } from '../../versioning/docker';
-import { Datasource } from '../datasource';
+} from '../../../util/url.ts';
+import { id as dockerVersioningId } from '../../versioning/docker/index.ts';
+import { Datasource } from '../datasource.ts';
 import type {
   DigestConfig,
   GetReleasesConfig,
   Release,
   ReleaseResult,
-} from '../types';
-import { isArtifactoryServer } from '../util';
+} from '../types.ts';
+import { isArtifactoryServer } from '../util.ts';
 import {
   DOCKER_HUB,
   dockerDatasourceId,
@@ -39,16 +39,16 @@ import {
   isDockerHost,
   sourceLabel,
   sourceLabels,
-} from './common';
-import { DockerHubCache } from './dockerhub-cache';
-import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr';
-import type { DistributionManifest, OciImageManifest } from './schema';
+} from './common.ts';
+import { DockerHubCache } from './dockerhub-cache.ts';
+import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr.ts';
+import type { DistributionManifest, OciImageManifest } from './schema.ts';
 import {
   DockerHubTagsPage,
   ManifestJson,
   OciHelmConfig,
   OciImageConfig,
-} from './schema';
+} from './schema.ts';
 
 const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',

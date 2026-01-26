@@ -1,13 +1,13 @@
 import { isString, isUndefined } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import type { Decorator } from '../../decorator';
-import { decorate } from '../../decorator';
-import { acquireLock } from '../../mutex';
-import { resolveTtlValues } from './ttl';
-import type { DecoratorCachedRecord, PackageCacheNamespace } from './types';
-import * as packageCache from '.';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import type { Decorator } from '../../decorator/index.ts';
+import { decorate } from '../../decorator/index.ts';
+import { acquireLock } from '../../mutex.ts';
+import * as packageCache from './index.ts';
+import { resolveTtlValues } from './ttl.ts';
+import type { DecoratorCachedRecord, PackageCacheNamespace } from './types.ts';
 
 type HashFunction<T extends any[] = any[]> = (...args: T) => string;
 type NamespaceFunction<T extends any[] = any[]> = (

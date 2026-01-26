@@ -1,5 +1,5 @@
-import type { RequiredConfig } from '../../types';
-import { RequireConfigMigration } from './require-config-migration';
+import type { RequiredConfig } from '../../types.ts';
+import { RequireConfigMigration } from './require-config-migration.ts';
 
 describe('config/migrations/custom/require-config-migration', () => {
   it('should migrate requireConfig=true to requireConfig=required', async () => {

@@ -3,14 +3,14 @@ import detectIndent from 'detect-indent';
 import JSON5 from 'json5';
 import type { BuiltInParserName, Options } from 'prettier';
 import upath from 'upath';
-import { migrateConfig } from '../../../../config/migration';
+import { migrateConfig } from '../../../../config/migration.ts';
 import { prettier } from '../../../../expose.cjs';
-import { logger } from '../../../../logger';
-import { platform } from '../../../../modules/platform';
-import { scm } from '../../../../modules/platform/scm';
-import { readLocalFile } from '../../../../util/fs';
-import { EditorConfig } from '../../../../util/json-writer';
-import { detectRepoFileConfig } from '../../init/merge';
+import { logger } from '../../../../logger/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { readLocalFile } from '../../../../util/fs/index.ts';
+import { EditorConfig } from '../../../../util/json-writer/index.ts';
+import { detectRepoFileConfig } from '../../init/merge.ts';
 
 export interface MigratedData {
   content: string;

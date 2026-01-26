@@ -1,6 +1,9 @@
 import { z } from 'zod';
-import { LooseArray, LooseRecord } from '../../../../util/schema-utils';
-import * as starlark from './starlark';
+import {
+  LooseArray,
+  LooseRecord,
+} from '../../../../util/schema-utils/index.ts';
+import * as starlark from './starlark.ts';
 
 export const StringFragment = z.object({
   type: z.literal('string'),

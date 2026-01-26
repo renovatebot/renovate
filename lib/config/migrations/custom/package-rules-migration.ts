@@ -1,6 +1,6 @@
 import { isArray, isNonEmptyArray, isString } from '@sindresorhus/is';
-import type { PackageRule } from '../../types';
-import { AbstractMigration } from '../base/abstract-migration';
+import type { PackageRule } from '../../types.ts';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export const renameMap = {
   matchFiles: 'matchFileNames',
