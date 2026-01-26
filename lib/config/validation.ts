@@ -8,6 +8,7 @@ import is, {
   isString,
   isUndefined,
 } from '@sindresorhus/is';
+import type { PlatformId } from '../constants';
 import { allManagersList, getManagerList } from '../modules/manager';
 import { isCustomManager } from '../modules/manager/custom';
 import type { CustomManager } from '../modules/manager/custom/types';
@@ -816,7 +817,7 @@ async function validateGlobalConfig(
   warnings: ValidationMessage[],
   errors: ValidationMessage[],
   currentPath: string | undefined,
-  config: RenovateConfig,
+  config: AllConfig,
 ): Promise<void> {
   /* v8 ignore next 5 -- not testable yet */
   if (getDeprecationMessage(key)) {
@@ -831,11 +832,19 @@ async function validateGlobalConfig(
       if (isString(val)) {
         if (
           key === 'onboardingConfigFileName' &&
-          !getConfigFileNames().includes(val)
+          !getPossibleConfigFileNames({
+            configFileNames: config.configFileNames,
+            platform: config.platform,
+          }).includes(val)
         ) {
           warnings.push({
             topic: 'Configuration Error',
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${getConfigFileNames().join(', ')}.`,
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${getPossibleConfigFileNames(
+              {
+                configFileNames: config.configFileNames,
+                platform: config.platform,
+              },
+            ).join(', ')}.`,
           });
         } else if (
           key === 'repositoryCache' &&
@@ -993,4 +1002,19 @@ async function validateGlobalConfig(
       }
     }
   }
+}
+
+function getPossibleConfigFileNames({
+  configFileNames,
+  platform,
+}: {
+  configFileNames?: string[];
+  platform?: PlatformId;
+}): string[] {
+  const filenames = getConfigFileNames(platform);
+  if (isNonEmptyArray(configFileNames)) {
+    return filenames.concat(configFileNames);
+  }
+
+  return filenames;
 }

@@ -1722,6 +1722,33 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
 
+    it('handles prefixed onboardingConfigFileName', async () => {
+      const config = {
+        platform: 'forgejo',
+        onboardingConfigFileName: '.forgejo/renovate.json',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        // @ts-expect-error: not sure why
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('allows unique onboardingConfigFileName if it is set in configFileNames', async () => {
+      const config = {
+        onboardingConfigFileName: '.forgejo/renovate.json',
+        configFileNames: ['.forgejo/renovate.json'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
     it('errors if env object is defined but allowedEnv is empty or undefined', async () => {
       const config = {
         env: {
