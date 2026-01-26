@@ -1,4 +1,3 @@
-import URL from 'node:url';
 import type { AllConfig } from '../../config/types';
 import type { PlatformId } from '../../constants';
 import { PLATFORM_NOT_FOUND } from '../../constants/error-messages';
@@ -64,8 +63,7 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   // This is done for validation and will be overridden later once repo config is incorporated
   setGitAuthor(returnConfig.gitAuthor);
   const platformRule: HostRule = {
-    // TODO: null check (#22198)
-    matchHost: URL.parse(returnConfig.endpoint).hostname!,
+    matchHost: new URL(returnConfig.endpoint).hostname,
   };
   // There might have been platform-specific modifications to the token
   if (returnConfig.token) {
