@@ -271,7 +271,6 @@
     "zod": "3.25.76"
   },
   "optionalDependencies": {
-    "better-sqlite3": "12.6.2",
     "openpgp": "6.3.0",
     "re2": "1.23.0"
   },
@@ -288,7 +287,6 @@
     "@smithy/util-stream": "4.5.10",
     "@types/auth-header": "1.0.6",
     "@types/aws4": "1.11.6",
-    "@types/better-sqlite3": "7.6.13",
     "@types/breejs__later": "4.1.5",
     "@types/bunyan": "1.8.11",
     "@types/cacache": "20.0.0",
@@ -386,7 +384,6 @@
       "safe-json-stringify"
     ],
     "onlyBuiltDependencies": [
-      "better-sqlite3",
       "re2"
     ],
     "overrides": {
