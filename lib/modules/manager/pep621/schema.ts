@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
 import { PypiDatasource } from '../../datasource/pypi';
 import { normalizePythonDepName } from '../../datasource/pypi/common';
+import { api as pep440 } from '../../versioning/pep440';
 import type { PackageDependency } from '../types';
 import { depTypes, pep508ToPackageDependency } from './utils';
 
@@ -224,8 +225,14 @@ export const UvLockfile = Toml.pipe(
       }),
     ),
   }),
-).transform(({ package: pkg }) =>
-  Object.fromEntries(
-    pkg.map(({ name, version }): [string, string] => [name, version]),
-  ),
-);
+).transform(({ package: pkgs }) => {
+  const pkgMap: Record<string, string> = {};
+
+  for (const { name, version } of pkgs) {
+    if (!(name in pkgMap) || pep440.isGreaterThan(pkgMap[name], version)) {
+      pkgMap[name] = version;
+    }
+  }
+
+  return pkgMap;
+});
