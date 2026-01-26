@@ -763,4 +763,59 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         new-name: 1.1.0
     `);
   });
+
+  it('returns null if configDependencies is invalid structure', () => {
+    const upgrade = {
+      depType: 'pnpm.configDependencies',
+      depName: '@myorg/pnpm-config-myorg',
+      newValue: '0.1.0',
+    };
+    const pnpmWorkspaceYaml = codeBlock`
+      configDependencies:
+        '@myorg/pnpm-config-myorg':
+          integrity: 0.0.9
+          # missing tarball which is required by schema
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toBeNull();
+  });
+
+  it('returns original content if version is already updated', () => {
+    const upgrade = {
+      depType: 'pnpm.configDependencies',
+      depName: '@pnpm/plugin-better-defaults',
+      newValue: '0.2.1',
+    };
+    const pnpmWorkspaceYaml = codeBlock`
+      configDependencies:
+        '@pnpm/plugin-better-defaults': 0.2.1
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(pnpmWorkspaceYaml);
+  });
+
+  it('returns null if configDependencies value is an alias', () => {
+    const upgrade = {
+      depType: 'pnpm.configDependencies',
+      depName: 'react',
+      newValue: '19.0.0',
+    };
+    const pnpmWorkspaceYaml = codeBlock`
+      __deps:
+        react: &react 18.3.1
+      configDependencies:
+        react: *react
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toBeNull();
+  });
 });
