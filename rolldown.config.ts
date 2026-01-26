@@ -5,14 +5,14 @@ export default defineConfig({
   output: {
     dir: 'dist',
     format: 'cjs',
-    entryFileNames: '[name].cjs',
-    chunkFileNames: '[name].cjs',
+    entryFileNames: '[name].js',
+    chunkFileNames: '[name].js',
     sourcemap: true,
     preserveModules: true,
     preserveModulesRoot: 'lib',
   },
   moduleTypes: {
-    '.cjs': 'js',
+    '.js': 'js',
   },
   platform: 'node',
   external: (id) =>
