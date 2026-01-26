@@ -1,4 +1,5 @@
 import { isNonEmptyArray, isNonEmptyObject } from '@sindresorhus/is';
+import { setUserConfigFileNames } from '../../../../config/app-strings';
 import { setPrivateKeys } from '../../../../config/decrypt';
 import * as defaultsParser from '../../../../config/defaults';
 import { resolveConfigPresets } from '../../../../config/presets';
@@ -27,7 +28,7 @@ export async function resolveGlobalExtends(
   try {
     // Make a "fake" config to pass to resolveConfigPresets and resolve globalPresets
     const config = { extends: globalExtends, ignorePresets };
-    const resolvedConfig = await resolveConfigPresets(config);
+    const { config: resolvedConfig } = await resolveConfigPresets(config);
     return resolvedConfig;
   } catch (err) {
     logger.error({ err }, 'Error resolving config preset');
@@ -180,6 +181,15 @@ export async function parseConfigs(
 
   if (isNonEmptyObject(config.customEnvVariables)) {
     setCustomEnv(config.customEnvVariables);
+  }
+
+  if (isNonEmptyArray(config.configFileNames)) {
+    logger.debug(
+      { configFileNames: config.configFileNames },
+      'Updated the config filenames list',
+    );
+    setUserConfigFileNames(config.configFileNames);
+    delete config.configFileNames;
   }
 
   return config;

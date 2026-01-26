@@ -1,5 +1,6 @@
 import { isNumber, isString } from '@sindresorhus/is';
 import semver from 'semver';
+import { GlobalConfig } from '../../../config/global';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -153,7 +154,7 @@ function getLabelList(): Promise<Label[]> {
         logger.debug(`Retrieved ${labels.length} org labels`);
         return labels;
       })
-      .catch((err) => {
+      .catch(() => {
         // Will fail if owner of repo is not org or Gitea version < 1.12
         logger.debug(`Unable to fetch organization labels`);
         return [] as Label[];
@@ -226,10 +227,10 @@ const platform: Platform = {
       botUserID = user.id;
       botUserName = user.username;
       const env = getEnv();
-      /* v8 ignore start: experimental feature */
+      /* v8 ignore next: experimental feature */
       if (semver.valid(env.RENOVATE_X_PLATFORM_VERSION)) {
         defaults.version = env.RENOVATE_X_PLATFORM_VERSION!;
-      } /* v8 ignore stop */ else {
+      } else {
         defaults.version = await helper.getVersion({ token });
       }
       if (defaults.version?.includes('gitea-')) {
@@ -280,7 +281,6 @@ const platform: Platform = {
     cloneSubmodules,
     cloneSubmodulesFilter,
     gitUrl,
-    ignorePrAuthor,
   }: RepoParams): Promise<RepoResult> {
     let repo: Repo;
 
@@ -288,7 +288,7 @@ const platform: Platform = {
     config.repository = repository;
     config.cloneSubmodules = !!cloneSubmodules;
     config.cloneSubmodulesFilter = cloneSubmodulesFilter;
-    config.ignorePrAuthor = !!ignorePrAuthor;
+    config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor', false);
 
     // Try to fetch information about repository
     try {
@@ -792,10 +792,10 @@ const platform: Platform = {
         number,
         body,
       };
-    } catch (err) /* v8 ignore start */ {
+    } catch (err) /* v8 ignore next */ {
       logger.debug({ err, number }, 'Error getting issue');
       return null;
-    } /* v8 ignore stop */
+    }
   },
 
   async findIssue(title: string): Promise<Issue | null> {

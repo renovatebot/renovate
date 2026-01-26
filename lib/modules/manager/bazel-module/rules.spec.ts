@@ -253,7 +253,7 @@ describe('modules/manager/bazel-module/rules', () => {
       ${'bazel_dep, no version & single_version_override, with registry'}                | ${[bazelDepPkgDepNoVersion, singleVersionOverrideWithRegistryPkgDep]}              | ${expectedBazelDepNoVersionWithRegistry}
       ${'single_version_override, without version and registry'}                         | ${[bazelDepPkgDep, singleVersionOverrideWithoutVersionAndRegistryPkgDep]}          | ${[bazelDepPkgDep]}
       ${'bazel_dep, no version & single_version_override, without version and registry'} | ${[bazelDepPkgDepNoVersion, singleVersionOverrideWithoutVersionAndRegistryPkgDep]} | ${[bazelDepPkgDepNoVersion]}
-    `('with $msg', ({ msg, a, exp }) => {
+    `('with $msg', ({ a, exp }) => {
       const result = toPackageDependencies(a);
       expect(result).toEqual(exp);
     });

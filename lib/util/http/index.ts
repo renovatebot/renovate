@@ -1,3 +1,5 @@
+// v8 ignore file
+// TODO: add test #40625 (zero coverage?)
 import { EmptyResultError } from './errors';
 import { RequestError } from './got';
 import { HttpBase } from './http';

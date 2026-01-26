@@ -139,7 +139,7 @@ function addPullRequestNoteIfAttestationHasBeenLost(
     upgrade.prBodyNotes ??= [];
     upgrade.prBodyNotes.push(
       [
-        '> :exclamation: **Warning**',
+        '> :stop_sign: **Caution**',
         '>',
         `> ${name} ${currentVersion} was released with an attestation, but ${newVersion} has no attestation.`,
         `> Verify that release ${newVersion} was published by the expected author.`,
@@ -218,7 +218,7 @@ export async function ensurePr(
         const lastCommitTime = await getBranchLastCommitTime(branchName);
         if (getElapsedHours(lastCommitTime) >= config.prNotPendingHours) {
           logger.debug(
-            'Branch exceeds prNotPending hours - forcing PR creation',
+            `Branch exceeds prNotPending=${config.prNotPendingHours}, hours - forcing PR creation`,
           );
           config.forcePr = true;
         }
@@ -255,7 +255,7 @@ export async function ensurePr(
               elapsedHours < config.prNotPendingHours))
         ) {
           logger.debug(
-            `Branch is ${elapsedHours} hours old - skipping PR creation`,
+            `Branch is ${elapsedHours} hours old - skipping PR creation as prNotPendingHours is set to ${config.prNotPendingHours}`,
           );
           return {
             type: 'without-pr',

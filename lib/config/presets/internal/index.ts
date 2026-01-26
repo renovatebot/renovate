@@ -9,7 +9,6 @@ import * as groupPreset from './group';
 import * as helpersPreset from './helpers';
 import * as mergeConfidence from './merge-confidence';
 import * as monorepoPreset from './monorepos';
-import * as npm from './npm';
 import * as packagesPreset from './packages';
 import * as previewPreset from './preview';
 import * as replacements from './replacements';
@@ -30,7 +29,6 @@ export const groups: Record<string, Record<string, Preset>> = {
   helpers: helpersPreset.presets,
   mergeConfidence: mergeConfidence.presets,
   monorepo: monorepoPreset.presets,
-  npm: npm.presets,
   packages: packagesPreset.presets,
   preview: previewPreset.presets,
   replacements: replacements.presets,
@@ -44,4 +42,42 @@ export function getPreset({
   presetName,
 }: PresetConfig): Preset | undefined {
   return groups[repo] && presetName ? groups[repo][presetName] : undefined;
+}
+
+function computeInternalPresets(): string[] {
+  const internalPresets: string[] = [];
+
+  for (const k in groups) {
+    const v = groups[k];
+    for (const kk in v) {
+      if (k === 'default') {
+        internalPresets.push(`:${kk}`);
+        internalPresets.push(`default:${kk}`);
+      } else {
+        internalPresets.push(`${k}:${kk}`);
+      }
+    }
+  }
+
+  return internalPresets;
+}
+
+export const internalPresetNames = new Set(computeInternalPresets());
+
+export function isInternal(preset: string): boolean {
+  if (internalPresetNames.has(preset)) {
+    return true;
+  }
+
+  // a parameterised preset is one that  that is parameterised will receive the argument `(...)`.
+  // As we can't look up on the preset's values itself (as it could be in any property), we can look at the preset name itself, and see if it includes the start of an opening parenthesis
+  const withoutParameterParts = preset.split('(');
+  if (
+    withoutParameterParts?.length &&
+    internalPresetNames.has(withoutParameterParts[0])
+  ) {
+    return true;
+  }
+
+  return false;
 }

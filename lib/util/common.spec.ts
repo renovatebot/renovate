@@ -1,5 +1,7 @@
 import { codeBlock } from 'common-tags';
-import { detectPlatform, parseJson } from './common';
+import { GlobalConfig } from '../config/global';
+import { InheritConfig } from '../config/inherit';
+import { detectPlatform, getInheritedOrGlobal, parseJson } from './common';
 import * as hostRules from './host-rules';
 import { logger } from '~test/util';
 
@@ -64,6 +66,10 @@ describe('util/common', () => {
 
     it('uses host rules', () => {
       hostRules.add({
+        hostType: 'azure',
+        matchHost: 'az.example.com',
+      });
+      hostRules.add({
         hostType: 'bitbucket',
         matchHost: 'bb.example.com',
       });
@@ -87,7 +93,9 @@ describe('util/common', () => {
         hostType: 'unknown',
         matchHost: 'f.example.com',
       });
-
+      expect(detectPlatform('https://az.example.com/chalk/chalk')).toBe(
+        'azure',
+      );
       expect(detectPlatform('https://bb.example.com/chalk/chalk')).toBe(
         'bitbucket',
       );
@@ -178,6 +186,63 @@ describe('util/common', () => {
 
     it('throws error for invalid jsonc', () => {
       expect(() => parseJson(invalidJsonString, 'renovate.jsonc')).toThrow();
+    });
+  });
+
+  describe('getInheritedOrGlobal', () => {
+    beforeEach(() => {
+      GlobalConfig.reset();
+      InheritConfig.reset();
+    });
+
+    it('returns undefined if not set', () => {
+      expect(getInheritedOrGlobal('configFileNames')).toBeUndefined();
+    });
+
+    it('returns inherited value if only inherited value is set', () => {
+      InheritConfig.set({
+        configFileNames: ['inherited'],
+      });
+      expect(getInheritedOrGlobal('configFileNames')).toEqual(['inherited']);
+    });
+
+    it('returns global value if only global value is set', () => {
+      GlobalConfig.set({
+        configFileNames: ['global'],
+      });
+      expect(getInheritedOrGlobal('configFileNames')).toEqual(['global']);
+    });
+
+    it('returns inherited value - when both global + inherited are set', () => {
+      InheritConfig.set({
+        configFileNames: ['inherited'],
+      });
+      GlobalConfig.set({
+        configFileNames: ['global'],
+      });
+      expect(getInheritedOrGlobal('configFileNames')).toEqual(['inherited']);
+    });
+
+    // is not possiblle as config validation will error out: only for coverage
+    it('handles null inherited values', () => {
+      InheritConfig.set({
+        configFileNames: null as never,
+      });
+      GlobalConfig.set({
+        configFileNames: ['global'],
+      });
+      expect(getInheritedOrGlobal('configFileNames')).toBeNull();
+    });
+
+    // is not possiblle as config validation will error out: only for coverage
+    it('handles undefined inherited values', () => {
+      InheritConfig.set({
+        configFileNames: undefined as never,
+      });
+      GlobalConfig.set({
+        configFileNames: ['global'],
+      });
+      expect(getInheritedOrGlobal('configFileNames')).toBeUndefined();
     });
   });
 });

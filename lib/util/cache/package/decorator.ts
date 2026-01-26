@@ -1,4 +1,4 @@
-import { isFunction, isString, isUndefined } from '@sindresorhus/is';
+import { isString, isUndefined } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
@@ -62,34 +62,26 @@ export function cache<T>({
       return callback();
     }
 
-    let finalNamespace: PackageCacheNamespace | undefined;
-    if (isString(namespace)) {
-      finalNamespace = namespace;
-    } else if (isFunction(namespace)) {
-      finalNamespace = namespace.apply(instance, args);
-    }
+    const finalNamespace = isString(namespace)
+      ? namespace
+      : namespace.apply(instance, args);
 
-    let finalKey: string | undefined;
-    if (isString(key)) {
-      finalKey = key;
-    } else if (isFunction(key)) {
-      finalKey = key.apply(instance, args);
-    }
+    const finalKey = isString(key) ? key : key.apply(instance, args);
 
     // istanbul ignore if
     if (!finalNamespace || !finalKey) {
       return callback();
     }
 
-    finalKey = `cache-decorator:${finalKey}`;
+    const cacheKey = `cache-decorator:${finalKey}`;
 
     // prevent concurrent processing and cache writes
-    const releaseLock = await acquireLock(finalKey, finalNamespace);
+    const releaseLock = await acquireLock(cacheKey, finalNamespace);
 
     try {
-      const oldRecord = await packageCache.get<DecoratorCachedRecord>(
+      const cachedRecord = await packageCache.get<DecoratorCachedRecord>(
         finalNamespace,
-        finalKey,
+        cacheKey,
       );
 
       // eslint-disable-next-line prefer-const
@@ -114,51 +106,50 @@ export function cache<T>({
         hardTtlMinutes = softTtlMinutes;
       }
 
-      let oldData: unknown;
-      if (oldRecord) {
+      let fallbackValue: unknown;
+      if (cachedRecord) {
         const now = DateTime.local();
-        const cachedAt = DateTime.fromISO(oldRecord.cachedAt);
+        const cachedAt = DateTime.fromISO(cachedRecord.cachedAt);
 
         const softDeadline = cachedAt.plus({ minutes: softTtlMinutes });
         if (now < softDeadline) {
-          return oldRecord.value;
+          return cachedRecord.value;
         }
 
         const hardDeadline = cachedAt.plus({ minutes: hardTtlMinutes });
         if (now < hardDeadline) {
-          oldData = oldRecord.value;
+          fallbackValue = cachedRecord.value;
         }
       }
 
-      let newData: unknown;
-      if (oldData) {
-        try {
-          newData = await callback();
-        } catch (err) {
+      let newValue: unknown;
+      try {
+        newValue = await callback();
+      } catch (err) {
+        if (!isUndefined(fallbackValue)) {
           logger.debug(
             { err },
             'Package cache decorator: callback error, returning old data',
           );
-          return oldData;
+          return fallbackValue;
         }
-      } else {
-        newData = await callback();
+        throw err;
       }
 
-      if (!isUndefined(newData)) {
+      if (!isUndefined(newValue)) {
         const newRecord: DecoratorCachedRecord = {
           cachedAt: DateTime.local().toISO(),
-          value: newData,
+          value: newValue,
         };
         await packageCache.setWithRawTtl(
           finalNamespace,
-          finalKey,
+          cacheKey,
           newRecord,
           hardTtlMinutes,
         );
       }
 
-      return newData;
+      return newValue;
     } finally {
       releaseLock();
     }

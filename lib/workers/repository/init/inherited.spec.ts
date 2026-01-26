@@ -83,7 +83,7 @@ describe('workers/repository/init/inherited', () => {
   it('should warn if validateConfig returns warnings', async () => {
     platform.getRawFile.mockResolvedValue('{"binarySource": "docker"}');
     const res = await mergeInheritedConfig(config);
-    expect(res.binarySource).toBeUndefined();
+    expect(res).not.toContainKey('binarySource');
     expect(logger.warn).toHaveBeenCalled();
   });
 
@@ -182,9 +182,14 @@ describe('workers/repository/init/inherited', () => {
       '{"onboarding":false,"labels":["test"],"extends":[":automergeAll"]}',
     );
     presets.resolveConfigPresets.mockResolvedValue({
-      onboarding: false,
-      labels: ['test'],
-      automerge: true,
+      config: {
+        onboarding: false,
+        labels: ['test'],
+        automerge: true,
+      },
+      visitedPresets: {
+        merged: [],
+      },
     });
     const res = await mergeInheritedConfig(config);
     expect(res.labels).toEqual(['test']);
@@ -215,12 +220,17 @@ describe('workers/repository/init/inherited', () => {
         errors: [],
       });
     presets.resolveConfigPresets.mockResolvedValue({
-      onboarding: false,
-      labels: ['test'],
-      automerge: true,
+      config: {
+        onboarding: false,
+        labels: ['test'],
+        automerge: true,
+      },
+      visitedPresets: {
+        merged: [],
+      },
     });
     const res = await mergeInheritedConfig(config);
-    expect(res.binarySource).toBeUndefined();
+    expect(res).not.toContainKey('binarySource');
 
     expect(logger.warn).toHaveBeenCalledWith(
       {
@@ -254,8 +264,13 @@ describe('workers/repository/init/inherited', () => {
         ],
       });
     presets.resolveConfigPresets.mockResolvedValue({
-      labels: ['test'],
-      automerge: true,
+      config: {
+        labels: ['test'],
+        automerge: true,
+      },
+      visitedPresets: {
+        merged: [],
+      },
     });
     await expect(mergeInheritedConfig(config)).rejects.toThrow(
       CONFIG_VALIDATION,
@@ -283,9 +298,14 @@ describe('workers/repository/init/inherited', () => {
       errors: [],
     });
     presets.resolveConfigPresets.mockResolvedValue({
-      labels: ['test'],
-      automerge: true,
-      binarySource: 'docker', // global config option: should not be here
+      config: {
+        labels: ['test'],
+        automerge: true,
+        binarySource: 'docker', // global config option: should not be here
+      },
+      visitedPresets: {
+        merged: [],
+      },
     });
     const res = await mergeInheritedConfig(config);
     expect(res.labels).toEqual(['test']);

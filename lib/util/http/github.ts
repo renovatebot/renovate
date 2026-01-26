@@ -15,6 +15,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { getCache } from '../cache/repository';
 import { getEnv } from '../env';
+import * as hostRules from '../host-rules';
 import { maskToken } from '../mask';
 import * as p from '../promises';
 import { range } from '../range';
@@ -116,6 +117,30 @@ function handleGotError(
   }
   if (err.statusCode === 403 && message.includes('rate limit exceeded')) {
     logger.debug({ err }, 'GitHub failure: rate limit');
+
+    const parsed = parseUrl(baseUrl);
+
+    const rule = hostRules.find({ url: baseUrl });
+    if (rule.token || rule.password) {
+      logger.once.warn(
+        'Rate limit exceeded for api.github.com, even though we are authenticated',
+      );
+    } else {
+      if (parsed?.hostname === 'api.github.com') {
+        logger.once.warn(
+          {
+            documentationUrl:
+              'https://docs.renovatebot.com/getting-started/running/#githubcom-token-for-changelogs-and-tools',
+          },
+          `Rate limit exceeded for ${parsed.host}, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN`,
+        );
+      } else {
+        logger.once.warn(
+          `Rate limit exceeded for ${parsed!.host}, as no hostRules set for this host`,
+        );
+      }
+    }
+
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (
@@ -131,6 +156,7 @@ function handleGotError(
   if (err.statusCode === 401) {
     // Warn once for github.com token if unauthorized
     const hostname = parseUrl(url)?.hostname;
+    // v8 ignore else -- TODO: add test #40625
     if (hostname === 'github.com' || hostname === 'api.github.com') {
       logger.once.warn('github.com token 401 unauthorized');
     }
@@ -190,6 +216,7 @@ function constructAcceptString(input?: any): string {
     typeof input === 'string' ? input.split(regEx(/\s*,\s*/)) : [];
 
   // TODO: regression of #6736
+  // v8 ignore else -- TODO: add test #40625
   if (
     !acceptStrings.some((x) => x === defaultAccept) &&
     (!acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
@@ -366,6 +393,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       const env = getEnv();
       if (next?.url && linkHeader?.last?.page) {
         let lastPage = parseInt(linkHeader.last.page);
+        // v8 ignore else -- TODO: add test #40625
         if (!env.RENOVATE_PAGINATE_ALL && httpOptions.paginate !== 'all') {
           lastPage = Math.min(pageLimit, lastPage);
         }
@@ -391,13 +419,17 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
           },
         );
         const pages = await p.all(queue);
+        // v8 ignore else -- TODO: add test #40625
         if (httpOptions.paginationField && isPlainObject(result.body)) {
           const paginatedResult = result.body[httpOptions.paginationField];
+          // v8 ignore else -- TODO: add test #40625
           if (isArray<T>(paginatedResult)) {
             for (const nextPage of pages) {
+              // v8 ignore else -- TODO: add test #40625
               if (isPlainObject(nextPage.body)) {
                 const nextPageResults =
                   nextPage.body[httpOptions.paginationField];
+                // v8 ignore else -- TODO: add test #40625
                 if (isArray<T>(nextPageResults)) {
                   paginatedResult.push(...nextPageResults);
                 }
@@ -406,6 +438,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
           }
         } else if (isArray<T>(result.body)) {
           for (const nextPage of pages) {
+            // v8 ignore else -- TODO: add test #40625
             if (isArray<T>(nextPage.body)) {
               result.body.push(...nextPage.body);
             }

@@ -12,6 +12,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { getEnv } from '../env';
 import { hash } from '../hash';
+import { acquireLock } from '../mutex';
 import { type AsyncResult, Result } from '../result';
 import { Toml } from '../schema-utils';
 import { ObsoleteCacheHitLogger } from '../stats';
@@ -179,36 +180,47 @@ export abstract class HttpBase<
           )
         : null;
 
-    const cachedResponse = await cacheProvider?.bypassServer<unknown>(
-      method,
-      url,
-    );
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-
     let resPromise: Promise<HttpResponse<unknown>> | null = null;
 
     // Cache GET requests unless memCache=false
     if (memCacheKey) {
       resPromise = memCache.get(memCacheKey);
 
-      /* v8 ignore start: temporary code */
+      /* v8 ignore next: temporary code */
       if (resPromise && !cacheProvider) {
         ObsoleteCacheHitLogger.write(url);
       }
-      /* v8 ignore stop: temporary code */
     }
 
+    // v8 ignore else -- TODO: add test #40625
     if (!resPromise) {
       if (cacheProvider) {
         await cacheProvider.setCacheHeaders(method, url, options);
       }
 
       const startTime = Date.now();
-      const httpTask: GotTask = () => {
-        const queueMs = Date.now() - startTime;
-        return fetch(url, options, { queueMs });
+      const httpTask: GotTask = async () => {
+        let releaseLock: undefined | (() => void);
+        if (isReadMethod) {
+          releaseLock = await acquireLock(
+            `${options.method} ${url}`,
+            'http-mutex',
+          );
+        }
+        try {
+          const cachedResponse = await cacheProvider?.bypassServer<unknown>(
+            options.method,
+            url,
+          );
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+
+          const queueMs = Date.now() - startTime;
+          return fetch(url, options, { queueMs });
+        } finally {
+          releaseLock?.();
+        }
       };
 
       const throttle = getThrottle(url);
@@ -648,6 +660,7 @@ export abstract class HttpBase<
 
     applyDefaultHeaders(combinedOptions);
 
+    // v8 ignore else -- TODO: add test #40625
     if (
       isUndefined(combinedOptions.readOnly) &&
       ['head', 'get'].includes(combinedOptions.method)

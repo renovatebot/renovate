@@ -1,3 +1,5 @@
+import { logger } from '../../../logger';
+import { emojify } from '../../../util/emoji';
 import { regEx } from '../../../util/regex';
 
 const re = regEx(
@@ -9,10 +11,18 @@ export function smartTruncate(input: string, len: number): string {
   if (input.length < len) {
     return input;
   }
+  logger.debug(
+    `Truncating PR body due to platform limitation of ${len} characters`,
+  );
 
-  const reMatch = re.exec(input);
+  const note = emojify(
+    `> :information_source: **Note**\n> \n> This PR body was truncated due to platform limits.\n\n`,
+  );
+  const truncatedInput = note + input;
+
+  const reMatch = re.exec(truncatedInput);
   if (!reMatch?.groups) {
-    return input.substring(0, len);
+    return truncatedInput.substring(0, len);
   }
 
   const divider = `\n\n</details>\n\n---\n\n### Configuration`;
@@ -24,7 +34,7 @@ export function smartTruncate(input: string, len: number): string {
     len - (preNotes.length + postNotes.length + divider.length);
 
   if (availableLength <= 0) {
-    return input.substring(0, len);
+    return truncatedInput.substring(0, len);
   } else {
     return (
       preNotes + releaseNotes.slice(0, availableLength) + divider + postNotes

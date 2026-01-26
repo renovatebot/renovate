@@ -32,6 +32,7 @@ import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
 import { supportedDatasources } from './presets/internal/merge-confidence';
 import type {
+  AllConfig,
   AllowedParents,
   RenovateConfig,
   RenovateOptions,
@@ -156,7 +157,7 @@ function initOptions(): void {
 
 export async function validateConfig(
   configType: 'global' | 'inherit' | 'repo',
-  config: RenovateConfig,
+  config: AllConfig,
   isPreset?: boolean,
   parentPath?: string,
 ): Promise<ValidationResult> {
@@ -341,6 +342,13 @@ export async function validateConfig(
             if (key === 'extends') {
               for (const subval of val) {
                 if (isString(subval)) {
+                  if (configType !== 'global' && subval.startsWith('global:')) {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `${currentPath}: you cannot extend from "global:" presets in a repository config's "extends"`,
+                    });
+                  }
+
                   if (
                     parentName === 'packageRules' &&
                     subval.startsWith('group:')
@@ -393,13 +401,12 @@ export async function validateConfig(
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {
                 if (isObject(packageRule)) {
+                  const { config: resolved } = await resolveConfigPresets(
+                    packageRule as RenovateConfig,
+                    config,
+                  );
                   const resolvedRule = migrateConfig({
-                    packageRules: [
-                      await resolveConfigPresets(
-                        packageRule as RenovateConfig,
-                        config,
-                      ),
-                    ],
+                    packageRules: [resolved],
                   }).migratedConfig.packageRules![0];
                   warnings.push(
                     ...matchBaseBranchesValidator.check({
@@ -445,7 +452,7 @@ export async function validateConfig(
                     'separateMultipleMajor',
                     'separateMultipleMinor',
                     'versioning',
-                  ];
+                  ] as const;
                   if (isNonEmptyArray(resolvedRule.matchUpdateTypes)) {
                     for (const option of preLookupOptions) {
                       if (resolvedRule[option] !== undefined) {
@@ -618,7 +625,7 @@ export async function validateConfig(
             } else if (key === 'env') {
               const allowedEnvVars =
                 configType === 'global'
-                  ? ((config.allowedEnv as string[]) ?? [])
+                  ? (config.allowedEnv ?? [])
                   : GlobalConfig.get('allowedEnv', []);
               for (const [envVarName, envVarValue] of Object.entries(val)) {
                 if (!isString(envVarValue)) {
@@ -734,7 +741,7 @@ export async function validateConfig(
     if (key === 'hostRules' && isArray(val)) {
       const allowedHeaders =
         configType === 'global'
-          ? ((config.allowedHeaders as string[]) ?? [])
+          ? (config.allowedHeaders ?? [])
           : GlobalConfig.get('allowedHeaders', []);
       for (const rule of val as HostRule[]) {
         if (isNonEmptyString(rule.matchHost)) {
@@ -819,6 +826,7 @@ async function validateGlobalConfig(
     });
   }
   if (val !== null) {
+    // v8 ignore else -- TODO: add test #40625
     if (type === 'string') {
       if (isString(val)) {
         if (
@@ -912,6 +920,7 @@ async function validateGlobalConfig(
         if (key === 'gitNoVerify') {
           const allowedValues = ['commit', 'push'];
           for (const value of val as string[]) {
+            // v8 ignore else -- TODO: add test #40625
             if (!allowedValues.includes(value)) {
               warnings.push({
                 topic: 'Configuration Error',
@@ -923,6 +932,7 @@ async function validateGlobalConfig(
         if (key === 'mergeConfidenceDatasources') {
           const allowedValues = supportedDatasources;
           for (const value of val as string[]) {
+            // v8 ignore else -- TODO: add test #40625
             if (!allowedValues.includes(value)) {
               warnings.push({
                 topic: 'Configuration Error',

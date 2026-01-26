@@ -44,8 +44,6 @@ export async function generateLockFile(
   const lockFileName = upath.join(lockFileDir, 'pnpm-lock.yaml');
   logger.debug(`Spawning pnpm install to create ${lockFileName}`);
   let lockFile: string | null = null;
-  let stdout: string | undefined;
-  let stderr: string | undefined;
   const commands: string[] = [];
   try {
     const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
@@ -150,18 +148,18 @@ export async function generateLockFile(
       );
       try {
         await deleteLocalFile(lockFileName);
-        /* v8 ignore start -- needs test */
+        /* v8 ignore next -- needs test */
       } catch (err) {
         logger.debug(
           { err, lockFileName },
           'Error removing `pnpm-lock.yaml` for lock file maintenance',
         );
-      } /* v8 ignore stop -- needs test */
+      }
     }
 
     await exec(commands, execOptions);
     lockFile = await readLocalFile(lockFileName, 'utf8');
-    /* v8 ignore start -- needs test */
+    /* v8 ignore next -- needs test */
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
@@ -170,14 +168,14 @@ export async function generateLockFile(
       {
         commands,
         err,
-        stdout,
-        stderr,
+        stdout: err.stdout,
+        stderr: err.stderr,
         type: 'pnpm',
       },
       'lock file error',
     );
     return { error: true, stderr: err.stderr, stdout: err.stdout };
-  } /* v8 ignore stop -- needs test */
+  }
   return { lockFile };
 }
 

@@ -1,7 +1,11 @@
 import JSON5 from 'json5';
 import * as JSONC from 'jsonc-parser';
 import type { JsonValue } from 'type-fest';
+import { GlobalConfig } from '../config/global';
+import { InheritConfig, NOT_PRESET } from '../config/inherit';
+import type { GlobalInheritableConfig } from '../config/types';
 import {
+  AZURE_API_USING_HOST_TYPES,
   BITBUCKET_API_USING_HOST_TYPES,
   BITBUCKET_SERVER_API_USING_HOST_TYPES,
   FORGEJO_API_USING_HOST_TYPES,
@@ -64,6 +68,10 @@ export function detectPlatform(
 
   if (!hostType) {
     return null;
+  }
+
+  if (AZURE_API_USING_HOST_TYPES.includes(hostType)) {
+    return 'azure';
   }
 
   if (BITBUCKET_SERVER_API_USING_HOST_TYPES.includes(hostType)) {
@@ -138,4 +146,19 @@ export function parseJsonc(content: string): JsonValue {
     return value;
   }
   throw new Error('Invalid JSONC');
+}
+
+/**
+ * Use only if an option is inherited + globalOnly
+ * For globalOnly options use GlobalConfig.get
+ */
+export function getInheritedOrGlobal<Key extends keyof GlobalInheritableConfig>(
+  key: Key,
+): GlobalInheritableConfig[Key] {
+  const inheritedValue = InheritConfig.get(key);
+  if (inheritedValue !== NOT_PRESET) {
+    return inheritedValue;
+  }
+
+  return GlobalConfig.get(key);
 }

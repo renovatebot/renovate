@@ -150,7 +150,6 @@ const allToolConfig: Record<string, ToolConfig> = {
   npm: {
     datasource: 'npm',
     packageName: 'npm',
-    hash: true,
     versioning: npmVersioningId,
   },
   pdm: {
@@ -374,9 +373,6 @@ export async function generateInstallCommands(
       const { toolName } = toolConstraint;
       const installCommand = `install-tool ${toolName} ${quote(toolVersion)}`;
       installCommands.push(installCommand);
-      if (allToolConfig[toolName].hash) {
-        installCommands.push(`hash -d ${toolName} 2>/dev/null || true`);
-      }
     }
   }
   return installCommands;

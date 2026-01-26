@@ -179,12 +179,25 @@ export async function getPreset(
   return massage.massageConfig(migratedConfig);
 }
 
+export interface ResolveConfigPresetsResult {
+  config: AllConfig;
+  /** when resolving the given configuration, which internal/shared presets were discovered */
+  visitedPresets: {
+    /** which internal/shared presets were merged into the final config */
+    merged: string[];
+  };
+}
+
 export async function resolveConfigPresets(
   inputConfig: AllConfig,
   baseConfig?: RenovateConfig,
   _ignorePresets?: string[],
   existingPresets: string[] = [],
-): Promise<AllConfig> {
+): Promise<ResolveConfigPresetsResult> {
+  const allVisitedPresets = {
+    merged: new Set<string>(),
+  };
+
   let ignorePresets = clone(_ignorePresets);
   if (!ignorePresets || ignorePresets.length === 0) {
     ignorePresets = inputConfig.ignorePresets ?? [];
@@ -209,16 +222,22 @@ export async function resolveConfigPresets(
           inputConfig,
           existingPresets,
         );
-        const presetConfig = await resolveConfigPresets(
-          fetchedPreset,
-          baseConfig ?? inputConfig,
-          ignorePresets,
-          existingPresets.concat([preset]),
-        );
+        const { config: presetConfig, visitedPresets } =
+          await resolveConfigPresets(
+            fetchedPreset,
+            baseConfig ?? inputConfig,
+            ignorePresets,
+            existingPresets.concat([preset]),
+          );
         if (inputConfig?.ignoreDeps?.length === 0) {
           delete presetConfig.description;
         }
         config = mergeChildConfig(config, presetConfig);
+        allVisitedPresets.merged.add(preset);
+        // then also make sure we've noted any nested presets we've merged
+        for (const mergedPreset of visitedPresets.merged) {
+          allVisitedPresets.merged.add(mergedPreset);
+        }
       }
     }
   }
@@ -228,21 +247,28 @@ export async function resolveConfigPresets(
   delete config.extends;
   delete config.ignorePresets;
   logger.trace({ config }, `Post-merge resolve config`);
-  for (const [key, val] of Object.entries(config)) {
+  for (const [key, val] of Object.entries(config) as [
+    keyof AllConfig,
+    unknown,
+  ][]) {
     const ignoredKeys = ['content', 'onboardingConfig'];
     if (isArray(val)) {
       // Resolve nested objects inside arrays
-      config[key] = [];
+      config[key] = [] as never; // type can't be narrowed
       for (const element of val) {
         if (isObject(element)) {
-          (config[key] as RenovateConfig[]).push(
+          const { config: presetConfig, visitedPresets: visited } =
             await resolveConfigPresets(
               element as RenovateConfig,
               baseConfig,
               ignorePresets,
               existingPresets,
-            ),
-          );
+            );
+          (config[key] as RenovateConfig[]).push(presetConfig);
+
+          for (const mergedPreset of visited.merged) {
+            allVisitedPresets.merged.add(mergedPreset);
+          }
         } else {
           (config[key] as unknown[]).push(element);
         }
@@ -250,17 +276,32 @@ export async function resolveConfigPresets(
     } else if (isObject(val) && !ignoredKeys.includes(key)) {
       // Resolve nested objects
       logger.trace(`Resolving object "${key}"`);
-      config[key] = await resolveConfigPresets(
-        val as RenovateConfig,
-        baseConfig,
-        ignorePresets,
-        existingPresets,
-      );
+      const { config: presetConfig, visitedPresets: visited } =
+        await resolveConfigPresets(
+          val as RenovateConfig,
+          baseConfig,
+          ignorePresets,
+          existingPresets,
+        );
+      config[key] = presetConfig as never; // type can't be narrowed
+
+      for (const mergedPreset of visited.merged) {
+        allVisitedPresets.merged.add(mergedPreset);
+      }
     }
   }
   logger.trace({ config: inputConfig }, 'Input config');
-  logger.trace({ config }, 'Resolved config');
-  return config;
+  logger.trace(
+    { config, visitedPresets: allVisitedPresets },
+    'Resolved config',
+  );
+
+  return {
+    config,
+    visitedPresets: {
+      merged: Array.from(allVisitedPresets.merged),
+    },
+  };
 }
 
 async function fetchPreset(

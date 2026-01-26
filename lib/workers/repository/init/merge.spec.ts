@@ -35,7 +35,7 @@ function mockProcessExitOnce(): [MockInstance<NodeJS.Process['exit']>, Error] {
   const mockedError = new Error('mocked exit called');
 
   return [
-    vi.spyOn(process, 'exit').mockImplementationOnce((code?) => {
+    vi.spyOn(process, 'exit').mockImplementationOnce(() => {
       throw mockedError;
     }),
     mockedError,
@@ -391,6 +391,7 @@ describe('workers/repository/init/merge', () => {
         await mergeRenovateConfig({
           ...config,
           requireConfig: 'ignored',
+          // @ts-expect-error -- TODO: do we still need this?
           configFileParsed: undefined,
           warnings: undefined,
           secrets: undefined,

@@ -17,7 +17,7 @@ import { generateVersioning } from './versioning';
 export async function generateDocs(
   root = 'tmp',
   pack = true,
-  version = undefined,
+  version: string | undefined = undefined,
 ): Promise<void> {
   try {
     const dist = `${root}/docs`;
@@ -72,7 +72,7 @@ export async function generateDocs(
 
     // json-schema
     logger.info('* json-schema');
-    await generateSchema(dist, version);
+    await generateSchema(dist, { version });
     await generateSchema(dist, {
       filename: 'renovate-global-schema.json',
       version,

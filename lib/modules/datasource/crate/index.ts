@@ -9,7 +9,9 @@ import { privateCacheDir, readCacheFile } from '../../../util/fs';
 import { simpleGitConfig } from '../../../util/git/config';
 import { toSha256 } from '../../../util/hash';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
+import { acquireLock } from '../../../util/mutex';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import { joinUrlParts, parseUrl } from '../../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
 import { Datasource } from '../datasource';
@@ -27,6 +29,16 @@ import type {
   RegistryFlavor,
   RegistryInfo,
 } from './types';
+
+type CloneResult =
+  | {
+      err: Error;
+      clonePath?: undefined;
+    }
+  | {
+      clonePath: string;
+      err?: undefined;
+    };
 
 export class CrateDatasource extends Datasource {
   static readonly id = 'crate';
@@ -48,6 +60,10 @@ export class CrateDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `repository` field in the results.';
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from `pubtime` field from crates.io index if available, or `version.created_at` field from crates.io API otherwise.';
+
   @cache({
     namespace: `datasource-${CrateDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
@@ -60,7 +76,7 @@ export class CrateDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 6 -- should never happen */
+    /* v8 ignore if -- should never happen */
     if (!registryUrl) {
       logger.warn(
         'crate datasource: No registryUrl specified, cannot perform getReleases',
@@ -123,6 +139,10 @@ export class CrateDatasource extends Datasource {
 
         if (line.rust_version) {
           release.constraints = { rust: [line.rust_version] };
+        }
+
+        if (line.pubtime) {
+          release.releaseTimestamp = asTimestamp(line.pubtime);
         }
 
         return release;
@@ -304,48 +324,50 @@ export class CrateDatasource extends Datasource {
     }
     if (registry.flavor !== 'crates.io' && !registry.isSparse) {
       const cacheKey = `crate-datasource/registry-clone-path/${registryFetchUrl}`;
-      const cacheKeyForError = `crate-datasource/registry-clone-path/${registryFetchUrl}/error`;
+      const lockKey = registryFetchUrl;
 
-      // We need to ensure we don't run `git clone` in parallel. Therefore we store
-      // a promise of the running operation in the mem cache, which in the end resolves
-      // to the file path of the cloned repository.
+      const releaseLock = await acquireLock(lockKey, 'crate-registry');
+      try {
+        const cached = memCache.get<CloneResult>(cacheKey);
 
-      const clonePathPromise: Promise<string> | null = memCache.get(cacheKey);
-      let clonePath: string;
+        if (cached?.err) {
+          logger.warn(
+            { err: cached.err, packageName, registryFetchUrl },
+            'Previous git clone failed, bailing out.',
+          );
+          return null;
+        }
 
-      if (clonePathPromise) {
-        clonePath = await clonePathPromise;
-      } else {
-        clonePath = upath.join(
+        if (cached?.clonePath) {
+          registry.clonePath = cached.clonePath;
+          return registry;
+        }
+
+        const clonePath = upath.join(
           privateCacheDir(),
           CrateDatasource.cacheDirFromUrl(url),
         );
-        logger.info(
-          { clonePath, registryFetchUrl },
-          `Cloning private cargo registry`,
-        );
-        const clonePromise = CrateDatasource.clone(
+
+        const result = await CrateDatasource.clone(
           registryFetchUrl,
           clonePath,
           packageName,
-          cacheKeyForError,
         );
 
-        memCache.set(cacheKey, clonePromise);
-        await clonePromise;
+        memCache.set(cacheKey, result);
+
+        if (result.err) {
+          logger.warn(
+            { err: result.err, packageName, registryFetchUrl },
+            'Git clone failed, bailing out.',
+          );
+          return null;
+        }
+
+        registry.clonePath = result.clonePath;
+      } finally {
+        releaseLock();
       }
-
-      if (!clonePath) {
-        const err = memCache.get(cacheKeyForError);
-        logger.warn(
-          { err, packageName, registryFetchUrl },
-          'Previous git clone failed, bailing out.',
-        );
-
-        return null;
-      }
-
-      registry.clonePath = clonePath;
     }
 
     return registry;
@@ -355,8 +377,12 @@ export class CrateDatasource extends Datasource {
     registryFetchUrl: string,
     clonePath: string,
     packageName: string,
-    cacheKeyForError: string,
-  ): Promise<string | null> {
+  ): Promise<CloneResult> {
+    logger.info(
+      { clonePath, registryFetchUrl },
+      `Cloning private cargo registry`,
+    );
+
     const git = Git({
       ...simpleGitConfig(),
       maxConcurrentProcesses: 1,
@@ -366,7 +392,7 @@ export class CrateDatasource extends Datasource {
       await git.clone(registryFetchUrl, clonePath, {
         '--depth': 1,
       });
-      return clonePath;
+      return { clonePath };
     } catch (err) {
       if (
         err.message.includes(
@@ -379,24 +405,20 @@ export class CrateDatasource extends Datasource {
         );
         try {
           await git.clone(registryFetchUrl, clonePath);
-          return clonePath;
+          return { clonePath };
         } catch (err) {
           logger.warn(
             { err, packageName, registryFetchUrl },
             'failed cloning git registry',
           );
-          memCache.set(cacheKeyForError, err);
-
-          return null;
+          return { err };
         }
       } else {
         logger.warn(
           { err, packageName, registryFetchUrl },
           'failed cloning git registry',
         );
-        memCache.set(cacheKeyForError, err);
-
-        return null;
+        return { err };
       }
     }
   }
@@ -439,11 +461,13 @@ export class CrateDatasource extends Datasource {
     { packageName, registryUrl }: PostprocessReleaseConfig,
     release: Release,
   ): Promise<PostprocessReleaseResult> {
-    if (registryUrl !== 'https://crates.io') {
+    if (release.releaseTimestamp || registryUrl !== 'https://crates.io') {
       return release;
     }
 
     const url = `https://crates.io/api/v1/crates/${packageName}/${release.versionOrig ?? release.version}`;
+    // Getting release timestamp could become unnecessary if the manual backfill of `pubtime` mentioned in
+    // https://github.com/rust-lang/cargo/issues/15491 is done for all packages.
     const { body: releaseTimestamp } = await this.http.getJson(
       url,
       { cacheProvider: memCacheProvider },

@@ -49,6 +49,8 @@ export interface PnpmWorkspaceFile {
   packages: string[];
   catalog?: Record<string, string>;
   catalogs?: Record<string, Record<string, string>>;
+  minimumReleaseAge?: number;
+  minimumReleaseAgeExclude?: string[];
 }
 
 /**

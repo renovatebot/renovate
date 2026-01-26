@@ -1,5 +1,4 @@
-import { GithubContentResponse } from './schema';
-
+import { GithubContentResponse, GithubVulnerabilityAlert } from './schema';
 describe('modules/platform/github/schema', () => {
   it('should be parse directory response', () => {
     const { error } = GithubContentResponse.safeParse([
@@ -105,5 +104,38 @@ describe('modules/platform/github/schema', () => {
       },
     });
     expect(error).toBeUndefined();
+  });
+
+  it('should skip vulnerability alerts with unsupported ecosystems', () => {
+    const result = GithubVulnerabilityAlert.parse([
+      {
+        dismissed_reason: null,
+        security_advisory: {
+          description: 'Test advisory',
+          identifiers: [{ type: 'CVE', value: 'CVE-2024-1234' }],
+        },
+        security_vulnerability: {
+          first_patched_version: { identifier: '1.0.0' },
+          package: { ecosystem: 'dotnet', name: 'test-package' },
+          vulnerable_version_range: '< 1.0.0',
+        },
+        dependency: { manifest_path: 'package.json' },
+      },
+      {
+        dismissed_reason: null,
+        security_advisory: {
+          description: 'Test advisory',
+          identifiers: [{ type: 'CVE', value: 'CVE-2024-5678' }],
+        },
+        security_vulnerability: {
+          first_patched_version: { identifier: '2.0.0' },
+          package: { ecosystem: 'npm', name: 'valid-package' },
+          vulnerable_version_range: '< 2.0.0',
+        },
+        dependency: { manifest_path: 'package.json' },
+      },
+    ]);
+    expect(result).toHaveLength(1);
+    expect(result[0].security_vulnerability?.package.ecosystem).toBe('npm');
   });
 });

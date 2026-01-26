@@ -33,6 +33,7 @@ describe('modules/manager/devbox/extract', () => {
             depName: 'nodejs',
             currentValue: '20.1.8',
             datasource: 'devbox',
+            versioning: 'node',
           },
         ],
       });
@@ -55,6 +56,7 @@ describe('modules/manager/devbox/extract', () => {
             depName: 'nodejs',
             currentValue: '20.1.8',
             datasource: 'devbox',
+            versioning: 'node',
           },
         ],
       });
@@ -78,6 +80,7 @@ describe('modules/manager/devbox/extract', () => {
             datasource: 'devbox',
             depName: 'nodejs',
             skipReason: 'invalid-version',
+            versioning: 'node',
           },
         ],
       });
@@ -98,6 +101,7 @@ describe('modules/manager/devbox/extract', () => {
             depName: 'nodejs',
             currentValue: '20.1.8',
             datasource: 'devbox',
+            versioning: 'node',
           },
           {
             depName: 'yarn',
@@ -126,6 +130,7 @@ describe('modules/manager/devbox/extract', () => {
             depName: 'nodejs',
             currentValue: '20.1.8',
             datasource: 'devbox',
+            versioning: 'node',
           },
           {
             depName: 'yarn',
@@ -158,6 +163,7 @@ describe('modules/manager/devbox/extract', () => {
             depName: 'nodejs',
             currentValue: '20.1.8',
             datasource: 'devbox',
+            versioning: 'node',
           },
           {
             depName: 'yarn',
@@ -187,6 +193,7 @@ describe('modules/manager/devbox/extract', () => {
             depName: 'nodejs',
             currentValue: '20.1.8',
             datasource: 'devbox',
+            versioning: 'node',
           },
           {
             depName: 'yarn',
@@ -224,6 +231,7 @@ describe('modules/manager/devbox/extract', () => {
             depName: 'nodejs',
             currentValue: '20.1.8',
             datasource: 'devbox',
+            versioning: 'node',
           },
           {
             depName: 'yarn',
@@ -255,6 +263,7 @@ describe('modules/manager/devbox/extract', () => {
             depName: 'nodejs',
             currentValue: '20.1.8',
             datasource: 'devbox',
+            versioning: 'node',
           },
           {
             depName: 'yarn',

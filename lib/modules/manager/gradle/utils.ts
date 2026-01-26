@@ -127,36 +127,32 @@ function getFileRank(filename: string): number {
 }
 
 export function reorderFiles(packageFiles: string[]): string[] {
-  return packageFiles.sort((x, y) => {
-    const xAbs = toAbsolutePath(x);
-    const yAbs = toAbsolutePath(y);
-
-    const xDir = upath.dirname(xAbs);
-    const yDir = upath.dirname(yAbs);
-
-    if (xDir === yDir) {
-      const xRank = getFileRank(xAbs);
-      const yRank = getFileRank(yAbs);
-      if (xRank === yRank) {
-        if (xAbs > yAbs) {
+  return packageFiles
+    .map((path) => {
+      const absPath = toAbsolutePath(path);
+      return {
+        path,
+        absPath,
+        dir: upath.dirname(absPath),
+        rank: getFileRank(absPath),
+      };
+    })
+    .sort((a, b) => {
+      // Different directories: check parent-child relationship
+      if (a.dir !== b.dir) {
+        if (a.dir.startsWith(b.dir + '/')) {
           return 1;
         }
-        if (xAbs < yAbs) {
+        if (b.dir.startsWith(a.dir + '/')) {
           return -1;
         }
-      } else if (xRank > yRank) {
-        return 1;
-      } else if (yRank > xRank) {
-        return -1;
+        return a.dir.localeCompare(b.dir);
       }
-    } else if (xDir.startsWith(yDir)) {
-      return 1;
-    } else if (yDir.startsWith(xDir)) {
-      return -1;
-    }
 
-    return 0;
-  });
+      // Same effective directory: rank, if equal sort alphabetically
+      return a.rank - b.rank || a.absPath.localeCompare(b.absPath);
+    })
+    .map((entry) => entry.path);
 }
 
 export function getVars(

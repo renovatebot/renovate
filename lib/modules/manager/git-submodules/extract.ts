@@ -114,6 +114,7 @@ export default async function extractPackageFile(
       deps.push({
         depName: path,
         packageName: httpSubModuleUrl,
+        sourceUrl: httpSubModuleUrl,
         currentValue: branch ?? undefined,
         currentDigest,
         ...(semVerVersioning.api.isVersion(branch)

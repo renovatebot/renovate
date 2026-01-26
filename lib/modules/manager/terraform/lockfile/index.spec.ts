@@ -25,7 +25,7 @@ const adminConfig = {
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
 };
 
-const mockHash = vi.mocked(TerraformProviderHash).createHashes;
+const mockHash = vi.mocked(TerraformProviderHash.createHashes);
 const mockGetPkgReleases = vi.mocked(getPkgReleases);
 
 describe('modules/manager/terraform/lockfile/index', () => {

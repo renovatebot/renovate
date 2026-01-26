@@ -4,6 +4,7 @@ import vitest from '@vitest/eslint-plugin';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
 import * as importX from 'eslint-plugin-import-x';
+import oxlint from 'eslint-plugin-oxlint';
 import eslintPluginPromise from 'eslint-plugin-promise';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
@@ -30,7 +31,9 @@ export default tseslint.config(
       '**/.venv/',
       'tools/mkdocs/docs',
       'tools/mkdocs/site',
+      '.github/workflows/**/*.js',
       '.worktrees/**/*',
+      '.markdownlint-cli2.mjs',
     ],
   },
   {
@@ -282,6 +285,7 @@ export default tseslint.config(
     files: [
       '*.config.{cjs,cts,js,mjs,mts,ts}',
       'tools/**/*.{cjs,cts,js,mjs,mts,ts}',
+      '.markdownlint-cli.mjs',
     ],
 
     languageOptions: {
@@ -330,4 +334,9 @@ export default tseslint.config(
       '@typescript-eslint/no-floating-promises': 0,
     },
   },
+
+  // Disable ESLint rules that oxlint handles (must be last).
+  // This reads .oxlintrc.json and turns off corresponding ESLint rules,
+  // avoiding duplicate diagnostics while allowing gradual migration to oxlint.
+  ...oxlint.buildFromOxlintConfigFile('./.oxlintrc.json'),
 );

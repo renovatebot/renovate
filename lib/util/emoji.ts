@@ -13,6 +13,7 @@ import { logger } from '../logger';
 import { regEx } from './regex';
 import { Result } from './result';
 import { Json } from './schema-utils';
+import { coerceString } from './string';
 
 let unicodeEmoji = true;
 
@@ -30,6 +31,7 @@ type EmojiShortcodeMapping = z.infer<typeof EmojiShortcodes>;
 
 const patchedEmojis: EmojiShortcodeMapping = {
   '26A0-FE0F': ['warning'], // Colorful warning (⚠️) instead of black and white (⚠)
+  '2139-FE0F': ['information_source'], // Colorful info (ℹ️) instead of black and white (ℹ)
 };
 
 function initMapping(mapping: EmojiShortcodeMapping): void {
@@ -120,7 +122,7 @@ export function unemojify(text: string): string {
   return text.replace(emojiRegex, (emoji) => {
     const hexCode = stripHexCode(fromUnicodeToHexcode(emoji));
     const shortCode = shortCodesByHex.get(hexCode);
-    return shortCode ?? /* istanbul ignore next */ '�';
+    return coerceString(shortCode, '�');
   });
 }
 
