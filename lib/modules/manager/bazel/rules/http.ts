@@ -1,12 +1,12 @@
 import { isString, isTruthy } from '@sindresorhus/is';
 import { z } from 'zod';
-import { escapeRegExp, regEx } from '../../../../util/regex';
-import { parseUrl } from '../../../../util/url';
-import { GithubReleasesDatasource } from '../../../datasource/github-releases';
-import { GithubTagsDatasource } from '../../../datasource/github-tags';
-import { GitlabReleasesDatasource } from '../../../datasource/gitlab-releases';
-import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags';
-import type { PackageDependency } from '../../types';
+import { escapeRegExp, regEx } from '../../../../util/regex.ts';
+import { parseUrl } from '../../../../util/url.ts';
+import { GithubReleasesDatasource } from '../../../datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../../../datasource/github-tags/index.ts';
+import { GitlabReleasesDatasource } from '../../../datasource/gitlab-releases/index.ts';
+import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags/index.ts';
+import type { PackageDependency } from '../../types.ts';
 
 // Source: https://bazel.build/rules/lib/repo/http
 const archives = [

@@ -1,10 +1,8 @@
 import type { WriteStream } from 'node:fs';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
-import { add } from '../util/host-rules';
-import { addSecretForSanitizing as addSecret } from '../util/sanitize';
-import type { RenovateLogger } from './renovate-logger';
-import { ProblemStream } from './utils';
+import { add } from '../util/host-rules.ts';
+import { addSecretForSanitizing as addSecret } from '../util/sanitize.ts';
 import {
   addMeta,
   addStream,
@@ -19,8 +17,10 @@ import {
   setContext,
   setMeta,
   withMeta,
-} from '.';
-import { partial } from '~test/util';
+} from './index.ts';
+import type { RenovateLogger } from './renovate-logger.ts';
+import { ProblemStream } from './utils.ts';
+import { partial } from '~test/util.ts';
 
 const logContext = 'initial_context';
 

@@ -1,8 +1,8 @@
-import { cleanup, get, init, set } from '.';
+import { cleanup, get, init, set } from './index.ts';
 
-vi.mock('./file');
-vi.mock('./redis');
-vi.mock('./sqlite');
+vi.mock('./file.ts');
+vi.mock('./redis.ts');
+vi.mock('./sqlite.ts');
 
 describe('util/cache/package/index', () => {
   beforeEach(() => {

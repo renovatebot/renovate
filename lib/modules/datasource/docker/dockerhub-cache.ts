@@ -1,7 +1,7 @@
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
-import * as packageCache from '../../../util/cache/package';
-import type { DockerHubTag } from './schema';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import type { DockerHubTag } from './schema.ts';
 
 export interface DockerHubCacheData {
   items: Record<number, DockerHubTag>;

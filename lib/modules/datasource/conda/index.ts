@@ -1,15 +1,15 @@
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { coerceArray } from '../../../util/array';
-import { cache } from '../../../util/cache/package/decorator';
-import { HttpError } from '../../../util/http';
-import { Timestamp } from '../../../util/timestamp';
-import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { datasource, defaultRegistryUrl } from './common';
-import * as prefixDev from './prefix-dev';
-import type { CondaPackage } from './types';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import { Timestamp } from '../../../util/timestamp.ts';
+import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { datasource, defaultRegistryUrl } from './common.ts';
+import * as prefixDev from './prefix-dev.ts';
+import type { CondaPackage } from './types.ts';
 
 export class CondaDatasource extends Datasource {
   static readonly id = datasource;

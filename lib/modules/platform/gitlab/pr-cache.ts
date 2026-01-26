@@ -1,13 +1,16 @@
-import { logger } from '../../../logger';
-import * as memCache from '../../../util/cache/memory';
-import { getCache } from '../../../util/cache/repository';
-import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
-import type { GitlabHttp, GitlabHttpOptions } from '../../../util/http/gitlab';
-import { regEx } from '../../../util/regex';
-import { getQueryString } from '../../../util/url';
-import { GitLabMergeRequestsSchema } from './schema';
-import type { GitlabPr, GitlabPrCacheData } from './types';
-import { prInfo } from './utils';
+import { logger } from '../../../logger/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider.ts';
+import type {
+  GitlabHttp,
+  GitlabHttpOptions,
+} from '../../../util/http/gitlab.ts';
+import { regEx } from '../../../util/regex.ts';
+import { getQueryString } from '../../../util/url.ts';
+import { GitLabMergeRequestsSchema } from './schema.ts';
+import type { GitlabPr, GitlabPrCacheData } from './types.ts';
+import { prInfo } from './utils.ts';
 
 export class GitlabPrCache {
   private items: GitlabPr[] = [];

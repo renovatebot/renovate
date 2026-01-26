@@ -1,4 +1,4 @@
-import type { Preset } from '../types';
+import type { Preset } from '../types.ts';
 
 export const supportedDatasources = [
   'go',

@@ -15,10 +15,10 @@ import {
   TOTAL_SHARDS,
   getMatchingShards,
   getTestPatternsForShards,
-} from '../test-shards.js';
-import { parseCoverageJson } from './coverage.js';
-import { runChecksParallel, runCommand } from './execution.js';
-import { getChangedFiles } from './git.js';
+} from '../test-shards.ts';
+import { parseCoverageJson } from './coverage.ts';
+import { runChecksParallel, runCommand } from './execution.ts';
+import { getChangedFiles } from './git.ts';
 import {
   ANSI,
   formatCompletedLine,
@@ -31,7 +31,7 @@ import {
   renderProgress,
   startRenderLoop,
   stopRenderLoop,
-} from './tui.js';
+} from './tui.ts';
 import type {
   CheckResult,
   CheckResultWithCoverage,
@@ -39,7 +39,7 @@ import type {
   ExecutionProgress,
   ParallelCheck,
   ProcessManager,
-} from './types.js';
+} from './types.ts';
 
 // Module-level state for signal handler (set by main, checked by handler)
 let currentProgress: ExecutionProgress | null = null;

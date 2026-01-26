@@ -1,8 +1,8 @@
-import { getConfigFileNames } from './app-strings';
-import { GlobalConfig } from './global';
-import type { RenovateConfig } from './types';
-import * as configValidation from './validation';
-import { partial } from '~test/util';
+import { getConfigFileNames } from './app-strings.ts';
+import { GlobalConfig } from './global.ts';
+import type { RenovateConfig } from './types.ts';
+import * as configValidation from './validation.ts';
+import { partial } from '~test/util.ts';
 
 describe('config/validation', () => {
   describe('validateConfig(config)', () => {

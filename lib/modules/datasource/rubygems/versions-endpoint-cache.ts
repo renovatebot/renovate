@@ -1,14 +1,14 @@
 import { z } from 'zod';
-import { logger } from '../../../logger';
-import { getElapsedMinutes } from '../../../util/date';
-import type { Http } from '../../../util/http';
-import { HttpError } from '../../../util/http';
-import type { HttpOptions } from '../../../util/http/types';
-import { newlineRegex } from '../../../util/regex';
-import { Result } from '../../../util/result';
-import { LooseArray } from '../../../util/schema-utils';
-import { copystr } from '../../../util/string';
-import { parseUrl } from '../../../util/url';
+import { logger } from '../../../logger/index.ts';
+import { getElapsedMinutes } from '../../../util/date.ts';
+import type { Http } from '../../../util/http/index.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import type { HttpOptions } from '../../../util/http/types.ts';
+import { newlineRegex } from '../../../util/regex.ts';
+import { Result } from '../../../util/result.ts';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
+import { copystr } from '../../../util/string.ts';
+import { parseUrl } from '../../../util/url.ts';
 
 type PackageVersions = Map<string, string[]>;
 

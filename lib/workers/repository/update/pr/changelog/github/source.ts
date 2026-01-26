@@ -1,10 +1,10 @@
 import URL from 'node:url';
-import { GlobalConfig } from '../../../../../../config/global';
-import { logger } from '../../../../../../logger';
-import * as hostRules from '../../../../../../util/host-rules';
-import type { BranchUpgradeConfig } from '../../../../../types';
-import { ChangeLogSource } from '../source';
-import type { ChangeLogError } from '../types';
+import { GlobalConfig } from '../../../../../../config/global.ts';
+import { logger } from '../../../../../../logger/index.ts';
+import * as hostRules from '../../../../../../util/host-rules.ts';
+import type { BranchUpgradeConfig } from '../../../../../types.ts';
+import { ChangeLogSource } from '../source.ts';
+import type { ChangeLogError } from '../types.ts';
 export class GitHubChangeLogSource extends ChangeLogSource {
   constructor() {
     super('github', 'github-tags');

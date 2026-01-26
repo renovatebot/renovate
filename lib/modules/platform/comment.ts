@@ -1,7 +1,10 @@
-import { getCache } from '../../util/cache/repository';
-import { hash } from '../../util/hash';
-import type { EnsureCommentConfig, EnsureCommentRemovalConfig } from './types';
-import { platform } from '.';
+import { getCache } from '../../util/cache/repository/index.ts';
+import { hash } from '../../util/hash.ts';
+import { platform } from './index.ts';
+import type {
+  EnsureCommentConfig,
+  EnsureCommentRemovalConfig,
+} from './types.ts';
 
 export async function ensureComment(
   commentConfig: EnsureCommentConfig,

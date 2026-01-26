@@ -1,4 +1,4 @@
-import { getApiBaseUrl, getSourceUrlBase } from './url';
+import { getApiBaseUrl, getSourceUrlBase } from './url.ts';
 
 describe('util/github/url', () => {
   describe('getSourceUrlBase', () => {

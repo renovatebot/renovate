@@ -1,8 +1,8 @@
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { emojify } from '../../../../util/emoji';
-import { regEx } from '../../../../util/regex';
-import type { BranchConfig } from '../../../types';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { emojify } from '../../../../util/emoji.ts';
+import { regEx } from '../../../../util/regex.ts';
+import type { BranchConfig } from '../../../types.ts';
 
 export function getExpectedPrList(
   config: RenovateConfig,

@@ -1,12 +1,12 @@
-import { logger } from '../../../logger';
-import * as packageCache from '../../../util/cache/package';
-import { toSha256 } from '../../../util/hash';
-import type { Http } from '../../../util/http';
-import type { AsyncResult } from '../../../util/result';
-import { Result } from '../../../util/result';
-import { parseUrl } from '../../../util/url';
-import type { ReleaseResult } from '../types';
-import { getV1Releases } from './common';
+import { logger } from '../../../logger/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import { toSha256 } from '../../../util/hash.ts';
+import type { Http } from '../../../util/http/index.ts';
+import type { AsyncResult } from '../../../util/result.ts';
+import { Result } from '../../../util/result.ts';
+import { parseUrl } from '../../../util/url.ts';
+import type { ReleaseResult } from '../types.ts';
+import { getV1Releases } from './common.ts';
 
 interface CacheRecord {
   hash: string;

@@ -1,10 +1,10 @@
 import semver from 'semver';
 import { z } from 'zod';
-import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { GerritHttp } from '../../../util/http/gerrit';
-import type { HttpOptions } from '../../../util/http/types';
-import { getQueryString } from '../../../util/url';
+import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { GerritHttp } from '../../../util/http/gerrit.ts';
+import type { HttpOptions } from '../../../util/http/types.ts';
+import { getQueryString } from '../../../util/url.ts';
 import type {
   GerritAccountInfo,
   GerritBranchInfo,
@@ -14,12 +14,12 @@ import type {
   GerritMergeableInfo,
   GerritProjectInfo,
   GerritRequestDetail,
-} from './types';
+} from './types.ts';
 import {
   MAX_GERRIT_COMMENT_SIZE,
   MIN_GERRIT_VERSION,
   mapPrStateToGerritFilter,
-} from './utils';
+} from './utils.ts';
 
 class GerritClient {
   // memCache is disabled because GerritPrCache will provide a smarter caching

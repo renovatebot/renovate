@@ -1,13 +1,13 @@
 import { codeBlock } from 'common-tags';
-import { extractAllPackageFiles } from '..';
-import { logger } from '../../../../logger';
-import type { ExtractConfig } from '../../types';
-import { postExtract } from './post';
-import * as npmExtract from '.';
-import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+import { logger } from '../../../../logger/index.ts';
+import type { ExtractConfig } from '../../types.ts';
+import { extractAllPackageFiles } from '../index.ts';
+import * as npmExtract from './index.ts';
+import { postExtract } from './post/index.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 
-vi.mock('../../../../util/fs');
+vi.mock('../../../../util/fs/index.ts');
 
 const defaultExtractConfig = {
   skipInstalls: null,

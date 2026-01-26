@@ -1,20 +1,20 @@
-import type { Preset, PresetConfig } from '../types';
-import * as configAbandonments from './abandonments';
-import * as configPreset from './config';
-import * as customManagersPreset from './custom-managers';
-import * as defaultPreset from './default';
-import * as dockerPreset from './docker';
-import * as globalPreset from './global';
-import * as groupPreset from './group';
-import * as helpersPreset from './helpers';
-import * as mergeConfidence from './merge-confidence';
-import * as monorepoPreset from './monorepos';
-import * as packagesPreset from './packages';
-import * as previewPreset from './preview';
-import * as replacements from './replacements';
-import * as schedulePreset from './schedule';
-import * as securityPreset from './security';
-import * as workaroundsPreset from './workarounds';
+import type { Preset, PresetConfig } from '../types.ts';
+import * as configAbandonments from './abandonments.ts';
+import * as configPreset from './config.ts';
+import * as customManagersPreset from './custom-managers.ts';
+import * as defaultPreset from './default.ts';
+import * as dockerPreset from './docker.ts';
+import * as globalPreset from './global.ts';
+import * as groupPreset from './group.ts';
+import * as helpersPreset from './helpers.ts';
+import * as mergeConfidence from './merge-confidence.ts';
+import * as monorepoPreset from './monorepos.ts';
+import * as packagesPreset from './packages.ts';
+import * as previewPreset from './preview.ts';
+import * as replacements from './replacements.ts';
+import * as schedulePreset from './schedule.ts';
+import * as securityPreset from './security.ts';
+import * as workaroundsPreset from './workarounds.ts';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 

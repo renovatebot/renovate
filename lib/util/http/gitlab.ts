@@ -1,11 +1,11 @@
 import { isArray, isString } from '@sindresorhus/is';
 import { RequestError, type RetryObject } from 'got';
-import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import { getEnv } from '../env';
-import { parseLinkHeader, parseUrl } from '../url';
-import { HttpBase, type InternalJsonUnsafeOptions } from './http';
-import type { HttpMethod, HttpOptions, HttpResponse } from './types';
+import { logger } from '../../logger/index.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import { getEnv } from '../env.ts';
+import { parseLinkHeader, parseUrl } from '../url.ts';
+import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
+import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
 
 let baseUrl = 'https://gitlab.com/api/v4/';
 export const setBaseUrl = (url: string): void => {

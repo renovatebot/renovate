@@ -1,15 +1,15 @@
 import { codeBlock } from 'common-tags';
-import { getPkgReleases } from '..';
-import * as _packageCache from '../../../util/cache/package';
-import { regEx } from '../../../util/regex';
-import * as mavenVersioning from '../../versioning/maven';
-import { MAVEN_REPO } from '../maven/common';
-import { extractPageLinks } from './util';
-import { SbtPackageDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import * as _packageCache from '../../../util/cache/package/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import * as mavenVersioning from '../../versioning/maven/index.ts';
+import { getPkgReleases } from '../index.ts';
+import { MAVEN_REPO } from '../maven/common.ts';
+import { SbtPackageDatasource } from './index.ts';
+import { extractPageLinks } from './util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 
-vi.mock('../../../util/cache/package');
+vi.mock('../../../util/cache/package/index.ts');
 const packageCache = vi.mocked(_packageCache);
 
 describe('modules/datasource/sbt-package/index', () => {

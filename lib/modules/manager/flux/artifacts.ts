@@ -1,11 +1,11 @@
 import { quote } from 'shlex';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
-import { readLocalFile } from '../../../util/fs';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { isSystemManifest } from './common';
-import type { FluxManagerData } from './types';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { isSystemManifest } from './common.ts';
+import type { FluxManagerData } from './types.ts';
 
 export async function updateArtifacts({
   packageFileName,

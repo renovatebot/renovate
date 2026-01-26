@@ -1,17 +1,17 @@
 import { dir } from 'tmp-promise';
 import type { DirectoryResult } from 'tmp-promise';
 import upath from 'upath';
-import { GlobalConfig } from '../../../../config/global';
-import * as _exec from '../../../../util/exec';
-import * as _gitAuth from '../../../../util/git/auth';
-import type { StatusResult } from '../../../../util/git/types';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
-import * as postUpgradeCommands from './execute-post-upgrade-commands';
-import { fs, git, logger, partial } from '~test/util';
+import { GlobalConfig } from '../../../../config/global.ts';
+import * as _exec from '../../../../util/exec/index.ts';
+import * as _gitAuth from '../../../../util/git/auth.ts';
+import type { StatusResult } from '../../../../util/git/types.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
+import * as postUpgradeCommands from './execute-post-upgrade-commands.ts';
+import { fs, git, logger, partial } from '~test/util.ts';
 
-vi.mock('../../../../util/exec');
-vi.mock('../../../../util/fs');
-vi.mock('../../../../util/git/auth');
+vi.mock('../../../../util/exec/index.ts');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('../../../../util/git/auth.ts');
 
 const exec = vi.mocked(_exec);
 const gitAuth = vi.mocked(_gitAuth);

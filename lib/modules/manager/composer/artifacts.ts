@@ -4,18 +4,18 @@ import { z } from 'zod';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
 import {
   findGithubToken,
   takePersonalAccessTokenIfPossible,
-} from '../../../util/check-token';
-import { exec } from '../../../util/exec';
+} from '../../../util/check-token.ts';
+import { exec } from '../../../util/exec/index.ts';
 import type {
   CommandWithOptions,
   ExecOptions,
   ToolConstraint,
-} from '../../../util/exec/types';
+} from '../../../util/exec/types.ts';
 import {
   deleteLocalFile,
   ensureCacheDir,
@@ -24,17 +24,17 @@ import {
   localPathExists,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
-import { regEx } from '../../../util/regex';
-import { Json } from '../../../util/schema-utils';
-import { coerceString } from '../../../util/string';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { PackagistDatasource } from '../../datasource/packagist';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { Lockfile, PackageFile } from './schema';
-import type { AuthJson } from './types';
+} from '../../../util/fs/index.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { regEx } from '../../../util/regex.ts';
+import { Json } from '../../../util/schema-utils/index.ts';
+import { coerceString } from '../../../util/string.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { PackagistDatasource } from '../../datasource/packagist/index.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { Lockfile, PackageFile } from './schema.ts';
+import type { AuthJson } from './types.ts';
 import {
   extractConstraints,
   getComposerArguments,
@@ -42,7 +42,7 @@ import {
   getPhpConstraint,
   isArtifactAuthEnabled,
   requireComposerDependencyInstallation,
-} from './utils';
+} from './utils.ts';
 
 function getAuthJson(): string | null {
   const authJson: AuthJson = {};

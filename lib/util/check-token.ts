@@ -1,12 +1,12 @@
-import { GlobalConfig } from '../config/global';
-import { logger } from '../logger';
-import { GithubReleaseAttachmentsDatasource } from '../modules/datasource/github-release-attachments';
-import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
-import { GithubTagsDatasource } from '../modules/datasource/github-tags';
-import type { PackageFileContent } from '../modules/manager/types';
-import type { CombinedHostRule } from '../types';
-import * as memCache from '../util/cache/memory';
-import * as hostRules from './host-rules';
+import { GlobalConfig } from '../config/global.ts';
+import { logger } from '../logger/index.ts';
+import { GithubReleaseAttachmentsDatasource } from '../modules/datasource/github-release-attachments/index.ts';
+import { GithubReleasesDatasource } from '../modules/datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../modules/datasource/github-tags/index.ts';
+import type { PackageFileContent } from '../modules/manager/types.ts';
+import type { CombinedHostRule } from '../types/index.ts';
+import * as memCache from '../util/cache/memory/index.ts';
+import * as hostRules from './host-rules.ts';
 
 export function checkGithubToken(
   packageFiles: Record<string, PackageFileContent[]> = {},

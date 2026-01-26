@@ -1,29 +1,29 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import type { MockInstance } from 'vitest';
-import * as decrypt from '../../../config/decrypt';
-import { getConfig } from '../../../config/defaults';
-import * as _migrateAndValidate from '../../../config/migrate-validate';
-import * as _migrate from '../../../config/migration';
-import type { AllConfig } from '../../../config/types';
-import * as memCache from '../../../util/cache/memory';
-import * as repoCache from '../../../util/cache/repository';
-import { initRepoCache } from '../../../util/cache/repository/init';
-import type { RepoCacheData } from '../../../util/cache/repository/types';
-import { getUserEnv } from '../../../util/env';
-import * as _onboardingCache from '../onboarding/branch/onboarding-branch-cache';
-import { OnboardingState } from '../onboarding/common';
+import * as decrypt from '../../../config/decrypt.ts';
+import { getConfig } from '../../../config/defaults.ts';
+import * as _migrateAndValidate from '../../../config/migrate-validate.ts';
+import * as _migrate from '../../../config/migration.ts';
+import type { AllConfig } from '../../../config/types.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import * as repoCache from '../../../util/cache/repository/index.ts';
+import { initRepoCache } from '../../../util/cache/repository/init.ts';
+import type { RepoCacheData } from '../../../util/cache/repository/types.ts';
+import { getUserEnv } from '../../../util/env.ts';
+import * as _onboardingCache from '../onboarding/branch/onboarding-branch-cache.ts';
+import { OnboardingState } from '../onboarding/common.ts';
 import {
   checkForRepoConfigError,
   detectRepoFileConfig,
   mergeRenovateConfig,
   resolveStaticRepoConfig,
   setNpmTokenInNpmrc,
-} from './merge';
-import { fs, logger, partial, platform, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+} from './merge.ts';
+import { fs, logger, partial, platform, scm } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
-vi.mock('../onboarding/branch/onboarding-branch-cache');
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../onboarding/branch/onboarding-branch-cache.ts');
 
 const migrate = vi.mocked(_migrate);
 const migrateAndValidate = vi.mocked(_migrateAndValidate);
@@ -49,8 +49,8 @@ beforeEach(() => {
   config.warnings = [];
 });
 
-vi.mock('../../../config/migration');
-vi.mock('../../../config/migrate-validate');
+vi.mock('../../../config/migration.ts');
+vi.mock('../../../config/migrate-validate.ts');
 
 describe('workers/repository/init/merge', () => {
   afterEach(() => {

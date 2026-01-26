@@ -2,21 +2,25 @@ import type { Stats } from 'node:fs';
 import os from 'node:os';
 import { isTruthy } from '@sindresorhus/is';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions, ExtraEnv } from '../../../util/exec/types';
-import { chmodLocalFile, readLocalFile, statLocalFile } from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import type { StatusResult } from '../../../util/git/types';
-import { regEx } from '../../../util/regex';
-import mavenVersioning from '../../versioning/maven';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions, ExtraEnv } from '../../../util/exec/types.ts';
+import {
+  chmodLocalFile,
+  readLocalFile,
+  statLocalFile,
+} from '../../../util/fs/index.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
+import { regEx } from '../../../util/regex.ts';
+import mavenVersioning from '../../versioning/maven/index.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-} from '../types';
+} from '../types.ts';
 
 const DEFAULT_MAVEN_REPO_URL = 'https://repo.maven.apache.org/maven2';
 interface MavenWrapperPaths {

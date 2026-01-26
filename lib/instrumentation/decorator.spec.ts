@@ -1,5 +1,5 @@
-import { instrument, instrumentStandalone } from './decorator';
-import { disableInstrumentations } from '.';
+import { instrument, instrumentStandalone } from './decorator.ts';
+import { disableInstrumentations } from './index.ts';
 
 afterAll(disableInstrumentations);
 

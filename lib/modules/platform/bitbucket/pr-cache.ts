@@ -1,14 +1,14 @@
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
-import { logger } from '../../../logger';
-import * as memCache from '../../../util/cache/memory';
-import { getCache } from '../../../util/cache/repository';
-import { clone } from '../../../util/clone';
-import type { BitbucketHttp } from '../../../util/http/bitbucket';
-import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
-import type { Pr } from '../types';
-import type { BitbucketPrCacheData, PagedResult, PrResponse } from './types';
-import { prFieldsFilter, prInfo, prStates } from './utils';
+import { logger } from '../../../logger/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import { clone } from '../../../util/clone.ts';
+import type { BitbucketHttp } from '../../../util/http/bitbucket.ts';
+import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider.ts';
+import type { Pr } from '../types.ts';
+import type { BitbucketPrCacheData, PagedResult, PrResponse } from './types.ts';
+import { prFieldsFilter, prInfo, prStates } from './utils.ts';
 
 export class BitbucketPrCache {
   private items: Pr[] = [];

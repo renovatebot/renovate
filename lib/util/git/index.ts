@@ -6,9 +6,9 @@ import semver from 'semver';
 import type { Options, TaskOptions } from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
 import upath from 'upath';
-import { getConfigFileNames } from '../../config/app-strings';
-import { GlobalConfig } from '../../config/global';
-import type { RenovateConfig } from '../../config/types';
+import { getConfigFileNames } from '../../config/app-strings.ts';
+import { GlobalConfig } from '../../config/global.ts';
+import type { RenovateConfig } from '../../config/types.ts';
 import {
   CONFIG_VALIDATION,
   INVALID_PATH,
@@ -18,41 +18,41 @@ import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
   UNKNOWN_ERROR,
-} from '../../constants/error-messages';
-import { instrument } from '../../instrumentation';
-import { instrumentStandalone } from '../../instrumentation/decorator';
-import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import type { GitProtocol } from '../../types/git';
-import { incLimitedValue } from '../../workers/global/limits';
-import { getCache } from '../cache/repository';
-import { getEnv } from '../env';
-import { getChildEnv } from '../exec/utils';
-import { newlineRegex, regEx } from '../regex';
-import { matchRegexOrGlobList } from '../string-match';
-import { getGitEnvironmentVariables } from './auth';
-import { parseGitAuthor } from './author';
+} from '../../constants/error-messages.ts';
+import { instrumentStandalone } from '../../instrumentation/decorator.ts';
+import { instrument } from '../../instrumentation/index.ts';
+import { logger } from '../../logger/index.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import type { GitProtocol } from '../../types/git.ts';
+import { incLimitedValue } from '../../workers/global/limits.ts';
+import { getCache } from '../cache/repository/index.ts';
+import { getEnv } from '../env.ts';
+import { getChildEnv } from '../exec/utils.ts';
+import { newlineRegex, regEx } from '../regex.ts';
+import { matchRegexOrGlobList } from '../string-match.ts';
+import { getGitEnvironmentVariables } from './auth.ts';
+import { parseGitAuthor } from './author.ts';
 import {
   getCachedBehindBaseResult,
   setCachedBehindBaseResult,
-} from './behind-base-branch-cache';
-import { getNoVerify, simpleGitConfig } from './config';
+} from './behind-base-branch-cache.ts';
+import { getNoVerify, simpleGitConfig } from './config.ts';
 import {
   getCachedConflictResult,
   setCachedConflictResult,
-} from './conflicts-cache';
+} from './conflicts-cache.ts';
 import {
   bulkChangesDisallowed,
   checkForPlatformFailure,
   handleCommitError,
-} from './error';
-import type { InstrumentedSimpleGit } from './instrument';
-import { instrumentGit } from './instrument';
+} from './error.ts';
+import type { InstrumentedSimpleGit } from './instrument.ts';
+import { instrumentGit } from './instrument.ts';
 import {
   getCachedModifiedResult,
   setCachedModifiedResult,
-} from './modified-cache';
-import { configSigningKey, writePrivateKey } from './private-key';
+} from './modified-cache.ts';
+import { configSigningKey, writePrivateKey } from './private-key.ts';
 import type {
   CommitFilesConfig,
   CommitResult,
@@ -62,10 +62,10 @@ import type {
   StatusResult,
   StorageConfig,
   TreeItem,
-} from './types';
+} from './types.ts';
 
-export { setNoVerify } from './config';
-export { setPrivateKey } from './private-key';
+export { setNoVerify } from './config.ts';
+export { setPrivateKey } from './private-key.ts';
 
 // Retry parameters
 const retryCount = 5;

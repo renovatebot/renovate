@@ -1,9 +1,9 @@
 import { isFunction } from '@sindresorhus/is';
 import { z } from 'zod';
-import { logger } from '../../logger';
-import versionings from './api';
-import * as defaultVersioning from './semver-coerced';
-import type { VersioningApi } from './types';
+import { logger } from '../../logger/index.ts';
+import versionings from './api.ts';
+import * as defaultVersioning from './semver-coerced/index.ts';
+import type { VersioningApi } from './types.ts';
 
 export const Versioning = z
   .string()

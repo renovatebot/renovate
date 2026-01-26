@@ -1,4 +1,4 @@
-import { MetaCpanApiFileSearchResponse } from './schema';
+import { MetaCpanApiFileSearchResponse } from './schema.ts';
 
 describe('modules/datasource/cpan/schema', () => {
   describe('MetaCpanApiFileSearchResponse', () => {

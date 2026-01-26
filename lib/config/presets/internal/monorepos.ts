@@ -1,6 +1,6 @@
 import monorepoGroups from '../../../data/monorepo.json';
-import { toArray } from '../../../util/array';
-import type { Preset } from '../types';
+import { toArray } from '../../../util/array.ts';
+import type { Preset } from '../types.ts';
 
 export const presets: Record<string, Preset> = {};
 

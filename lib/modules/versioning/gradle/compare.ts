@@ -1,5 +1,5 @@
 import { isString } from '@sindresorhus/is';
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 
 export const TokenType = {
   Number: 1,

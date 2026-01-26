@@ -1,12 +1,12 @@
 import upath from 'upath';
-import { regEx } from '../../../util/regex';
-import { api as gradleVersioning } from '../../versioning/gradle';
-import type { PackageDependency } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import { api as gradleVersioning } from '../../versioning/gradle/index.ts';
+import type { PackageDependency } from '../types.ts';
 import type {
   GradleManagerData,
   PackageVariables,
   VariableRegistry,
-} from './types';
+} from './types.ts';
 
 const artifactRegex = regEx(
   '^[a-zA-Z][-_a-zA-Z0-9]*(?:\\.[a-zA-Z0-9][-_a-zA-Z0-9]*?)*$',

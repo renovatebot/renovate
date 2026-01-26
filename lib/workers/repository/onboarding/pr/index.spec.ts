@@ -1,17 +1,17 @@
 import type { RequestError, Response } from 'got';
 import { DateTime } from 'luxon';
-import { getConfig } from '../../../../config/defaults';
-import { GlobalConfig } from '../../../../config/global';
-import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import type { PackageFile } from '../../../../modules/manager/types';
-import type { Pr } from '../../../../modules/platform';
-import * as memCache from '../../../../util/cache/memory';
-import type { BranchConfig } from '../../../types';
-import { OnboardingState } from '../common';
-import { ensureOnboardingPr } from '.';
-import { partial, platform, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { PackageFile } from '../../../../modules/manager/types.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import * as memCache from '../../../../util/cache/memory/index.ts';
+import type { BranchConfig } from '../../../types.ts';
+import { OnboardingState } from '../common.ts';
+import { ensureOnboardingPr } from './index.ts';
+import { partial, platform, scm } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
 describe('workers/repository/onboarding/pr/index', () => {
   describe('ensureOnboardingPr()', () => {

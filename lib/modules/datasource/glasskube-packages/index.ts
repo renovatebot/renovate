@@ -1,9 +1,12 @@
-import { cache } from '../../../util/cache/package/decorator';
-import { joinUrlParts } from '../../../util/url';
-import * as glasskubeVersioning from '../../versioning/glasskube';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { GlasskubePackageManifest, GlasskubePackageVersions } from './schema';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import * as glasskubeVersioning from '../../versioning/glasskube/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import {
+  GlasskubePackageManifest,
+  GlasskubePackageVersions,
+} from './schema.ts';
 
 export class GlasskubePackagesDatasource extends Datasource {
   static readonly id = 'glasskube-packages';

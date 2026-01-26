@@ -1,12 +1,12 @@
-import type { PlatformId } from '../../../constants';
-import type { Nullish } from '../../../types';
-import { GlobalConfig } from '../../global';
-import * as forgejo from '../forgejo';
-import * as gitea from '../gitea';
-import * as github from '../github';
-import * as gitlab from '../gitlab';
-import type { Preset, PresetConfig } from '../types';
-import * as local from './common';
+import type { PlatformId } from '../../../constants/index.ts';
+import type { Nullish } from '../../../types/index.ts';
+import { GlobalConfig } from '../../global.ts';
+import * as forgejo from '../forgejo/index.ts';
+import * as gitea from '../gitea/index.ts';
+import * as github from '../github/index.ts';
+import * as gitlab from '../gitlab/index.ts';
+import type { Preset, PresetConfig } from '../types.ts';
+import * as local from './common.ts';
 
 interface Resolver {
   getPresetFromEndpoint(

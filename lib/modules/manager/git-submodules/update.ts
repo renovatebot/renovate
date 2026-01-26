@@ -1,11 +1,11 @@
 import Git from 'simple-git';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import { getChildEnv } from '../../../util/exec/utils';
-import { readLocalFile } from '../../../util/fs';
-import { getGitEnvironmentVariables } from '../../../util/git/auth';
-import type { UpdateDependencyConfig } from '../types';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import { getChildEnv } from '../../../util/exec/utils.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import type { UpdateDependencyConfig } from '../types.ts';
 
 export default async function updateDependency({
   fileContent,

@@ -1,16 +1,16 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
 import ini from 'ini';
-import { GlobalConfig } from '../../../config/global';
-import type { PackageRule } from '../../../config/types';
-import { logger } from '../../../logger';
-import type { HostRule } from '../../../types';
-import { getEnv } from '../../../util/env';
-import * as hostRules from '../../../util/host-rules';
-import { regEx } from '../../../util/regex';
-import { fromBase64 } from '../../../util/string';
-import { ensureTrailingSlash, isHttpUrl } from '../../../util/url';
-import { defaultRegistryUrls } from './common';
-import type { NpmrcRules } from './types';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { PackageRule } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import type { HostRule } from '../../../types/index.ts';
+import { getEnv } from '../../../util/env.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { regEx } from '../../../util/regex.ts';
+import { fromBase64 } from '../../../util/string.ts';
+import { ensureTrailingSlash, isHttpUrl } from '../../../util/url.ts';
+import { defaultRegistryUrls } from './common.ts';
+import type { NpmrcRules } from './types.ts';
 
 let npmrc: Record<string, any> = {};
 let npmrcRaw = '';

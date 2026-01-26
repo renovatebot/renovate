@@ -1,15 +1,15 @@
-import { getConfig } from '../../../config/defaults';
-import type { BranchUpgradeConfig } from '../../types';
-import * as _changelog from '../changelog';
-import { branchifyUpgrades } from './branchify';
-import * as _flatten from './flatten';
-import { type RenovateConfig, partial } from '~test/util';
+import { getConfig } from '../../../config/defaults.ts';
+import type { BranchUpgradeConfig } from '../../types.ts';
+import * as _changelog from '../changelog/index.ts';
+import { branchifyUpgrades } from './branchify.ts';
+import * as _flatten from './flatten.ts';
+import { type RenovateConfig, partial } from '~test/util.ts';
 
 const flattenUpdates = vi.mocked(_flatten).flattenUpdates;
 const embedChangelogs = vi.mocked(_changelog).embedChangelogs;
 
-vi.mock('./flatten');
-vi.mock('../changelog');
+vi.mock('./flatten.ts');
+vi.mock('../changelog/index.ts');
 
 let config: RenovateConfig;
 

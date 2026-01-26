@@ -1,13 +1,16 @@
-import { GlobalConfig } from '../../../../config/global';
-import { getPreset } from '../../../../config/presets/local';
-import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { getPreset } from '../../../../config/presets/local/index.ts';
+import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util.ts';
 import type {
   RenovateConfig,
   RenovateSharedConfig,
-} from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { clone } from '../../../../util/clone';
-import { EditorConfig, JSONWriter } from '../../../../util/json-writer';
+} from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { clone } from '../../../../util/clone.ts';
+import {
+  EditorConfig,
+  JSONWriter,
+} from '../../../../util/json-writer/index.ts';
 
 async function getOnboardingConfig(
   config: RenovateConfig,

@@ -1,13 +1,13 @@
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { parse } from '../../../util/html';
-import { HttpError } from '../../../util/http';
-import { regEx } from '../../../util/regex';
-import { asTimestamp } from '../../../util/timestamp';
-import { joinUrlParts } from '../../../util/url';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { datasource } from './common';
+import { logger } from '../../../logger/index.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { parse } from '../../../util/html.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { datasource } from './common.ts';
 
 export class ArtifactoryDatasource extends Datasource {
   static readonly id = datasource;

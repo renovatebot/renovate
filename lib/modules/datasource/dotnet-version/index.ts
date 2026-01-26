@@ -1,12 +1,12 @@
-import { cache } from '../../../util/cache/package/decorator';
-import * as p from '../../../util/promises';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import * as p from '../../../util/promises.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import {
   DotnetRuntimeReleases,
   DotnetSdkReleases,
   ReleasesIndex,
-} from './schema';
+} from './schema.ts';
 
 export class DotnetVersionDatasource extends Datasource {
   static readonly id = 'dotnet-version';

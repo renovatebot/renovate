@@ -1,13 +1,13 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
-import { logger } from '../../../logger';
+import { logger } from '../../../logger/index.ts';
 import {
   extractAllPackageFiles,
   extractPackageFile,
   get,
-} from '../../../modules/manager';
-import type { PackageFile } from '../../../modules/manager/types';
-import { readLocalFile } from '../../../util/fs';
-import type { WorkerExtractConfig } from '../../types';
+} from '../../../modules/manager/index.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import type { WorkerExtractConfig } from '../../types.ts';
 
 function massageDepNames(packageFiles: PackageFile[] | null): void {
   if (packageFiles) {

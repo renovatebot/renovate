@@ -1,25 +1,25 @@
 import fs from 'fs-extra';
-import { GlobalConfig } from '../../config/global';
-import { applySecretsAndVariablesToConfig } from '../../config/secrets';
-import type { RenovateConfig } from '../../config/types';
+import { GlobalConfig } from '../../config/global.ts';
+import { applySecretsAndVariablesToConfig } from '../../config/secrets.ts';
+import type { RenovateConfig } from '../../config/types.ts';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
   REPOSITORY_NO_CONFIG,
-} from '../../constants/error-messages';
+} from '../../constants/error-messages.ts';
 import { pkg } from '../../expose.cjs';
-import { instrument } from '../../instrumentation';
-import { addExtractionStats } from '../../instrumentation/reporting';
-import { ATTR_RENOVATE_SPLIT } from '../../instrumentation/types';
-import { logger, setMeta } from '../../logger';
-import { resetRepositoryLogLevelRemaps } from '../../logger/remap';
-import { removeDanglingContainers } from '../../util/exec/docker';
-import { deleteLocalFile, privateCacheDir } from '../../util/fs';
-import { isCloned } from '../../util/git';
-import { detectSemanticCommits } from '../../util/git/semantic';
-import * as queue from '../../util/http/queue';
-import * as throttle from '../../util/http/throttle';
-import { addSplit, getSplits, splitInit } from '../../util/split';
+import { instrument } from '../../instrumentation/index.ts';
+import { addExtractionStats } from '../../instrumentation/reporting.ts';
+import { ATTR_RENOVATE_SPLIT } from '../../instrumentation/types.ts';
+import { logger, setMeta } from '../../logger/index.ts';
+import { resetRepositoryLogLevelRemaps } from '../../logger/remap.ts';
+import { removeDanglingContainers } from '../../util/exec/docker/index.ts';
+import { deleteLocalFile, privateCacheDir } from '../../util/fs/index.ts';
+import { isCloned } from '../../util/git/index.ts';
+import { detectSemanticCommits } from '../../util/git/semantic.ts';
+import * as queue from '../../util/http/queue.ts';
+import * as throttle from '../../util/http/throttle.ts';
+import { addSplit, getSplits, splitInit } from '../../util/split.ts';
 import {
   AbandonedPackageStats,
   DatasourceCacheStats,
@@ -29,21 +29,21 @@ import {
   LookupStats,
   ObsoleteCacheHitLogger,
   PackageCacheStats,
-} from '../../util/stats';
-import { setBranchCache } from './cache';
-import { extractRepoProblems } from './common';
-import { configMigration } from './config-migration';
-import { ensureDependencyDashboard } from './dependency-dashboard';
-import handleError from './error';
-import { finalizeRepo } from './finalize';
-import { pruneStaleBranches } from './finalize/prune';
-import { initRepo } from './init';
-import { OnboardingState } from './onboarding/common';
-import { ensureOnboardingPr } from './onboarding/pr';
-import { extractDependencies, updateRepo } from './process';
-import type { ExtractResult } from './process/extract-update';
-import type { ProcessResult, RepositoryResult } from './result';
-import { processResult } from './result';
+} from '../../util/stats.ts';
+import { setBranchCache } from './cache.ts';
+import { extractRepoProblems } from './common.ts';
+import { configMigration } from './config-migration/index.ts';
+import { ensureDependencyDashboard } from './dependency-dashboard.ts';
+import handleError from './error.ts';
+import { finalizeRepo } from './finalize/index.ts';
+import { pruneStaleBranches } from './finalize/prune.ts';
+import { initRepo } from './init/index.ts';
+import { OnboardingState } from './onboarding/common.ts';
+import { ensureOnboardingPr } from './onboarding/pr/index.ts';
+import type { ExtractResult } from './process/extract-update.ts';
+import { extractDependencies, updateRepo } from './process/index.ts';
+import type { ProcessResult, RepositoryResult } from './result.ts';
+import { processResult } from './result.ts';
 
 // istanbul ignore next
 export async function renovateRepository(

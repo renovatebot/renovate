@@ -1,5 +1,5 @@
-import { regEx } from '../../../util/regex';
-import type { ToolchainObject, VersionObject } from './types';
+import { regEx } from '../../../util/regex.ts';
+import type { ToolchainObject, VersionObject } from './types.ts';
 
 /**
  * Parse a Rust toolchain string into a structured object.

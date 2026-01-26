@@ -1,8 +1,8 @@
 import { DateTime } from 'luxon';
 import { z } from 'zod';
-import { logger } from '../../../logger';
-import * as memCache from '../../../util/cache/memory';
-import { getCache } from '../../../util/cache/repository';
+import { logger } from '../../../logger/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
 
 const GithubIssueBase = z.object({
   number: z.number(),

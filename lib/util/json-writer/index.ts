@@ -1,3 +1,3 @@
-export * from './json-writer';
-export * from './editor-config';
-export * from './indentation-type';
+export * from './json-writer.ts';
+export * from './editor-config.ts';
+export * from './indentation-type.ts';
