@@ -80,8 +80,7 @@ export function satisfiesDateRange(
       return dateMs > rangeMs;
     case '<=':
       return dateMs >= rangeMs;
-    // istanbul ignore next: can never happen
-    default:
-      return dateMs === rangeMs;
   }
+  // v8 ignore next: can never happen
+  return null;
 }

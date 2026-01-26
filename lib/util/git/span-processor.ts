@@ -9,12 +9,15 @@ import { GitOperationStats } from '../stats';
 import type { GitOperationType } from './types';
 
 export class GitOperationSpanProcessor implements SpanProcessor {
-  async forceFlush(): Promise<void> {
+  forceFlush(): Promise<void> {
+    return Promise.resolve();
+  }
+
+  onStart(_span: Span, _parentContext: Context): void {
     // no implementation
   }
-  onStart(span: Span, parentContext: Context): void {
-    // no implementation
-  }
+
+  // v8 ignore next -- TODO: add test #40625
   onEnd(span: ReadableSpan): void {
     if (!span.ended) {
       return;
@@ -35,7 +38,8 @@ export class GitOperationSpanProcessor implements SpanProcessor {
       ns / 1_000_000,
     );
   }
-  async shutdown(): Promise<void> {
-    // no implementation
+
+  shutdown(): Promise<void> {
+    return Promise.resolve();
   }
 }

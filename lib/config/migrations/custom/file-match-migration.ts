@@ -6,6 +6,7 @@ export class FileMatchMigration extends AbstractMigration {
   override readonly propertyName = 'fileMatch';
 
   override run(value: unknown): void {
+    // v8 ignore else -- TODO: add test #40625
     if (isString(value) || isArray(value, isString)) {
       const fileMatch = isArray(value) ? value : [value];
 

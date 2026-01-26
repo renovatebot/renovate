@@ -29,6 +29,7 @@ export async function get<T = never>(
   try {
     const res = await cacache.get(cacheFileName, getKey(namespace, key));
     const cachedValue = JSON.parse(res.data.toString());
+    // v8 ignore else -- TODO: add test #40625
     if (cachedValue) {
       if (DateTime.local() < DateTime.fromISO(cachedValue.expiry)) {
         logger.trace({ namespace, key }, 'Returning cached value');

@@ -18,14 +18,28 @@ describe('util/date', () => {
   });
 
   describe('getElapsedDays', () => {
-    it('returns elapsed days', () => {
-      const t = t0.minus({ days: 42 });
-      expect(getElapsedDays(t.toISO()!)).toBe(42);
+    describe('by default', () => {
+      it('returns elapsed days', () => {
+        const t = t0.minus({ days: 42 });
+        expect(getElapsedDays(t.toISO()!)).toBe(42);
+      });
+
+      it("returns floor'd version of floating point when partial days", () => {
+        const t = t0.minus({ days: 42, hours: 12 });
+        expect(getElapsedDays(t.toISO()!)).toBe(42);
+      });
     });
 
-    it('rounds down', () => {
-      const t = t0.minus({ days: 42, hours: 12 });
-      expect(getElapsedDays(t.toISO()!)).toBe(42);
+    describe('when floor=false', () => {
+      it('returns floating point when partial days', () => {
+        const t = t0.minus({ days: 42, hours: 12 });
+        expect(getElapsedDays(t.toISO()!, false)).toBe(42.5);
+      });
+
+      it('returns all decimal places', () => {
+        const t = t0.minus({ days: 42, hours: 2 });
+        expect(getElapsedDays(t.toISO()!, false)).toBe(42.083333333333336);
+      });
     });
   });
 

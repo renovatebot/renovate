@@ -13,6 +13,7 @@ import {
 } from './docker';
 import { getHermitEnvs, isHermit } from './hermit';
 import type {
+  CommandWithOptions,
   DockerOptions,
   ExecOptions,
   ExecResult,
@@ -57,6 +58,7 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
     env: childEnv,
     maxBuffer,
     timeout,
+    ...(opts.shell !== undefined && { shell: opts.shell }),
     stdin: 'pipe',
     stdout: opts.ignoreStdout ? 'ignore' : 'pipe',
     stderr: 'pipe',
@@ -68,12 +70,16 @@ function isDocker(docker: Opt<DockerOptions>): docker is DockerOptions {
 }
 
 interface RawExecArguments {
-  rawCommands: string[];
+  rawCommands: (string | CommandWithOptions)[];
   rawOptions: RawExecOptions;
 }
 
 async function prepareRawExec(
-  cmd: string | string[],
+  cmd:
+    | string
+    | string[]
+    | CommandWithOptions[]
+    | (string | CommandWithOptions)[],
   opts: ExecOptions,
 ): Promise<RawExecArguments> {
   const { docker } = opts;
@@ -151,7 +157,11 @@ async function prepareRawExec(
 }
 
 export async function exec(
-  cmd: string | string[],
+  cmd:
+    | string
+    | string[]
+    | CommandWithOptions[]
+    | (string | CommandWithOptions)[],
   opts: ExecOptions = {},
 ): Promise<ExecResult> {
   const { docker } = opts;

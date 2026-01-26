@@ -33,6 +33,9 @@ const MetaCpanApiFile = z
       maturity,
       status,
     }): CpanRelease | undefined => {
+      if (!module[0]?.version) {
+        return undefined;
+      }
       return {
         version: module[0].version,
         distribution,

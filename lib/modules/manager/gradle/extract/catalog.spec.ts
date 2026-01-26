@@ -155,6 +155,11 @@ describe('modules/manager/gradle/extract/catalog', () => {
     ]);
   });
 
+  it('ignores empty TOML file', () => {
+    const res = parseCatalog('gradle/libs.versions.toml', '');
+    expect(res).toBeEmptyArray();
+  });
+
   it('changes the dependency version, not the comment version', () => {
     const input = codeBlock`
       [versions]

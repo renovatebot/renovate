@@ -18,6 +18,7 @@ export class HostRulesMigration extends AbstractMigration {
 
       for (const [key, value] of Object.entries(hostRule)) {
         if (key === 'platform') {
+          // v8 ignore else -- TODO: add test #40625
           if (isString(value)) {
             newRule.hostType ??= value;
           }
@@ -25,6 +26,7 @@ export class HostRulesMigration extends AbstractMigration {
         }
 
         if (key === 'matchHost') {
+          // v8 ignore else -- TODO: add test #40625
           if (isString(value)) {
             newRule.matchHost ??= massageHostUrl(value);
           }
@@ -32,6 +34,7 @@ export class HostRulesMigration extends AbstractMigration {
         }
 
         if (key === 'hostType') {
+          // v8 ignore else -- TODO: add test #40625
           if (isString(value)) {
             newRule.hostType ??= migrateDatasource(value);
           }
@@ -45,6 +48,7 @@ export class HostRulesMigration extends AbstractMigration {
           key === 'hostName' ||
           key === 'domainName'
         ) {
+          // v8 ignore else -- TODO: add test #40625
           if (isString(value)) {
             newRule.matchHost ??= massageHostUrl(value);
           }

@@ -52,6 +52,7 @@ export class BitbucketServerHttp extends HttpBase<BitbucketServerHttpOptions> {
     );
 
     if (paginate && isPagedResult(result.body)) {
+      // v8 ignore else -- TODO: add test #40625
       if (opts.httpOptions) {
         delete opts.httpOptions.cacheProvider;
         opts.httpOptions.memCache = false;
