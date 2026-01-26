@@ -111,6 +111,43 @@ export function createGemToolConfig(name: string): BackendToolingConfig {
 }
 
 /**
+ * Create a tooling config for github backend
+ * @link https://mise.jdx.dev/dev-tools/backends/github.html
+ */
+export function createGithubToolConfig(
+  name: string,
+  version: string,
+  toolOptions: MiseToolOptions,
+): BackendToolingConfig {
+  let extractVersion: string | undefined = undefined;
+  const hasVPrefix = version.startsWith('v');
+
+  if (isString(toolOptions.version_prefix)) {
+    const prefix = toolOptions.version_prefix;
+    if (prefix === '') {
+      // Empty prefix - no extractVersion needed if version has 'v'
+      if (!hasVPrefix) {
+        extractVersion = '^(?<version>.+)';
+      }
+    } else {
+      // Custom prefix - escape special regex chars
+      const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      extractVersion = `^${escapedPrefix}(?<version>.+)`;
+    }
+  } else if (!hasVPrefix) {
+    // Default: strip 'v' prefix if current version doesn't have it
+    extractVersion = '^v?(?<version>.+)';
+  }
+
+  return {
+    packageName: name,
+    datasource: GithubReleasesDatasource.id,
+    currentValue: version,
+    ...(isString(extractVersion) ? { extractVersion } : {}),
+  };
+}
+
+/**
  * Create a tooling config for go backend
  * @link https://mise.jdx.dev/dev-tools/backends/go.html
  */

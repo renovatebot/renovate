@@ -62,6 +62,8 @@ Renovate's `mise` manager supports the following [backends](https://mise.jdx.dev
 - [`asdf`](https://mise.jdx.dev/dev-tools/backends/asdf.html)
 - [`aqua`](https://mise.jdx.dev/dev-tools/backends/aqua.html)
 - [`cargo`](https://mise.jdx.dev/dev-tools/backends/cargo.html)
+- [`gem`](https://mise.jdx.dev/dev-tools/backends/gem.html)
+- [`github`](https://mise.jdx.dev/dev-tools/backends/github.html)
 - [`go`](https://mise.jdx.dev/dev-tools/backends/go.html)
 - [`npm`](https://mise.jdx.dev/dev-tools/backends/npm.html)
 - [`pipx`](https://mise.jdx.dev/dev-tools/backends/pipx.html)
@@ -98,6 +100,10 @@ Renovate's `mise` manager does not support the following tool syntax:
 
 - Some of `ubi` backend tools with [`tag_regex`](https://mise.jdx.dev/dev-tools/backends/ubi.html#ubi-uses-weird-versions) option.
   The `tag_regex` option is used as `extractVersion`, but the regex engines are not the same between mise and Renovate.
+  If the version is not updated or updated incorrectly, override `extractVersion` manually in the Renovate config.
+
+- Some of `github` backend tools with [`version_prefix`](https://mise.jdx.dev/dev-tools/backends/github.html) option.
+  The `version_prefix` option is converted to `extractVersion` by escaping special regex characters.
   If the version is not updated or updated incorrectly, override `extractVersion` manually in the Renovate config.
 
 ### Supported default registry tool short names
