@@ -1,7 +1,7 @@
+import { randomUUID } from 'node:crypto';
 import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import * as bunyan from 'bunyan';
 import fs from 'fs-extra';
-import { nanoid } from 'nanoid';
 import upath from 'upath';
 import cmdSerializer from './cmd-serializer';
 import configSerializer from './config-serializer';
@@ -107,7 +107,7 @@ const defaultStreams = createDefaultStreams(
 );
 
 const bunyanLogger = serializedSanitizedLogger(defaultStreams);
-const logContext = getEnv('LOG_CONTEXT') ?? nanoid();
+const logContext = getEnv('LOG_CONTEXT') ?? randomUUID();
 const loggerInternal = new RenovateLogger(bunyanLogger, logContext, {});
 
 export const logger: Logger = loggerInternal;

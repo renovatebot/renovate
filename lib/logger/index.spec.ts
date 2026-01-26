@@ -25,8 +25,8 @@ import { partial } from '~test/util';
 const logContext = 'initial_context';
 
 vi.unmock('.');
-vi.mock('nanoid', () => ({
-  nanoid: () => 'initial_context',
+vi.mock('node:crypto', () => ({
+  randomUUID: vi.fn(() => 'initial_context'),
 }));
 
 const bunyanDebugSpy = vi.spyOn(bunyan.prototype, 'debug');
