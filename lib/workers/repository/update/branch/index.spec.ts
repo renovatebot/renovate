@@ -805,7 +805,6 @@ describe('workers/repository/update/branch/index', () => {
       await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledExactlyOnceWith(
         expect.any(Object),
-        true,
       );
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
@@ -839,7 +838,6 @@ describe('workers/repository/update/branch/index', () => {
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledWith(
         expect.any(Object),
-        true,
       );
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
@@ -863,7 +861,6 @@ describe('workers/repository/update/branch/index', () => {
       await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledExactlyOnceWith(
         expect.any(Object),
-        false,
       );
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
@@ -889,7 +886,6 @@ describe('workers/repository/update/branch/index', () => {
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledWith(
         expect.any(Object),
-        false,
       );
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });

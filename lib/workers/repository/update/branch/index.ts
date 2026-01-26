@@ -765,7 +765,7 @@ export async function processBranch(
       const allowBehindBase =
         config.allowBranchAutomergeBehindBase === true &&
         (config.rebaseWhen === 'conflicted' || config.rebaseWhen === 'never');
-      const mergeStatus = await tryBranchAutomerge(config, allowBehindBase);
+      const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
         if (GlobalConfig.get('dryRun')) {

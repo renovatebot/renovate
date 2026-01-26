@@ -159,7 +159,6 @@ export interface BranchConfig
   automergedPreviously?: boolean;
   baseBranch: string;
   branchAutomergeFailureMessage?: string;
-  allowBranchAutomergeBehindBase?: boolean;
 
   /** ??? never set
    * @deprecated never set

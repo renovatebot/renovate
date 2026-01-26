@@ -18,7 +18,6 @@ export type AutomergeResult =
 
 export async function tryBranchAutomerge(
   config: RenovateConfig,
-  allowBehindBase: boolean,
 ): Promise<AutomergeResult> {
   logger.debug('Checking if we can automerge branch');
   if (!(config.automerge && config.automergeType === 'branch')) {
@@ -47,6 +46,9 @@ export async function tryBranchAutomerge(
         logger.info(`DRY-RUN: Would automerge branch ${config.branchName!}`);
       } else {
         await scm.checkoutBranch(config.baseBranch!);
+        const allowBehindBase =
+          config.allowBranchAutomergeBehindBase === true &&
+          (config.rebaseWhen === 'conflicted' || config.rebaseWhen === 'never');
         await scm.mergeAndPush(config.branchName!, allowBehindBase);
       }
       logger.info({ branch: config.branchName }, 'Branch automerged');
