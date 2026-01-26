@@ -12,6 +12,7 @@ const extractPackageFile = (content: string) => extract(content, 'build.sbt');
 
 const sbt = Fixtures.get(`sample.sbt`);
 const sbtScalaVersionVariable = Fixtures.get(`scala-version-variable.sbt`);
+const sbtScalaVersionObject = Fixtures.get(`scala-version-object.sbt`);
 const sbtMissingScalaVersion = Fixtures.get(`missing-scala-version.sbt`);
 const sbtDependencyFile = Fixtures.get(`dependency-file.scala`);
 const sbtPrivateVariableDependencyFile = Fixtures.get(
@@ -91,6 +92,19 @@ describe('modules/manager/sbt/extract', () => {
             packageName: 'org.example:waldo',
             currentValue: '0.0.9',
           },
+        ],
+        packageFileVersion: '3.2.1',
+      });
+    });
+
+    it('extracts deps when scala version is defined in an object', () => {
+      expect(extractPackageFile(sbtScalaVersionObject)).toMatchSnapshot({
+        deps: [
+          {
+            packageName: 'org.scala-lang:scala-library',
+            currentValue: '2.12.10',
+          },
+          { packageName: 'org.example:foo', currentValue: '0.0.8' },
         ],
         packageFileVersion: '3.2.1',
       });

@@ -486,6 +486,34 @@ exports[`modules/manager/sbt/extract > extractPackageFile() > extracts deps when
 }
 `;
 
+exports[`modules/manager/sbt/extract > extractPackageFile() > extracts deps when scala version is defined in an object 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "2.12.10",
+      "datasource": "maven",
+      "depName": "scala",
+      "packageName": "org.scala-lang:scala-library",
+      "registryUrls": [],
+      "separateMinorPatch": true,
+    },
+    {
+      "currentValue": "0.0.8",
+      "datasource": "sbt-package",
+      "depName": "org.example:foo",
+      "packageName": "org.example:foo",
+      "registryUrls": [],
+      "sharedVariableName": "versions.example",
+      "variableName": "versions.example",
+    },
+  ],
+  "managerData": {
+    "scalaVersion": "2.12",
+  },
+  "packageFileVersion": "3.2.1",
+}
+`;
+
 exports[`modules/manager/sbt/extract > extractPackageFile() > extracts deps when scala version is defined with ThisBuild scope 1`] = `
 {
   "deps": [
