@@ -377,8 +377,8 @@ importers:
         specifier: 1.1.28
         version: 1.1.28(eslint-plugin-import@2.32.0)(eslint-plugin-promise@7.2.1(eslint@9.39.2))(eslint@9.39.2)
       '@containerbase/istanbul-reports-html':
-        specifier: 1.1.25
-        version: 1.1.25
+        specifier: 1.1.27
+        version: 1.1.27
       '@containerbase/semantic-release-pnpm':
         specifier: 1.3.15
         version: 1.3.15(semantic-release@25.0.2(typescript@5.9.3))
@@ -974,8 +974,8 @@ packages:
       eslint-plugin-import: ^2.31.0
       eslint-plugin-promise: ^7.0.0
 
-  '@containerbase/istanbul-reports-html@1.1.25':
-    resolution: {integrity: sha512-N6Ze1r9u5IL4JXJqKqiZD+oSW0UF0j1gWU1SrD6rici3SjPrDTBGKnBVQlUZiRyvewmx6v6SPrimtxDWAUyJpg==}
+  '@containerbase/istanbul-reports-html@1.1.27':
+    resolution: {integrity: sha512-mxAy/sMbrJah+RV7vrEZpuUGWfDV4tDTx3LNCvBhlIrBKB3z0+Qfd1X0mvSta8+PI8KQybm0H+7KSY+MU44rCw==}
     engines: {node: ^20.9.0 || ^22.11.0 || ^24.0.0, pnpm: ^10.0.0}
 
   '@containerbase/semantic-release-pnpm@1.3.15':
@@ -7719,7 +7719,7 @@ snapshots:
       eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.39.2)(typescript@5.9.3))(eslint-import-resolver-typescript@4.4.4)(eslint@9.39.2)
       eslint-plugin-promise: 7.2.1(eslint@9.39.2)
 
-  '@containerbase/istanbul-reports-html@1.1.25':
+  '@containerbase/istanbul-reports-html@1.1.27':
     dependencies:
       istanbul-lib-report: 3.0.1
       istanbul-reports: 3.2.0
