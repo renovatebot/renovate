@@ -134,6 +134,7 @@ const uvOptionsWithArguments = [
   '--fork-strategy',
   '--exclude-newer',
   '--exclude-newer-package',
+  '--group',
   ...commonOptionsWithArguments,
 ];
 export const optionsWithArguments = [
