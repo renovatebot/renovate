@@ -11,6 +11,7 @@ import { newlineRegex, regEx } from '../../../../../util/regex';
 import { coerceString } from '../../../../../util/string';
 import { isHttpUrl, joinUrlParts } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
+import * as azure from './azure';
 import * as bitbucket from './bitbucket';
 import * as bitbucketServer from './bitbucket-server';
 import * as forgejo from './forgejo';
@@ -38,6 +39,8 @@ export async function getReleaseList(
   const { apiBaseUrl, repository, type } = project;
   try {
     switch (type) {
+      case 'azure':
+        return azure.getReleaseList(project, release);
       case 'bitbucket':
         return bitbucket.getReleaseList(project, release);
       case 'bitbucket-server':
@@ -91,6 +94,7 @@ export function massageBody(
   input: string | undefined | null,
   baseUrl: string,
 ): string {
+  const baseUrlForRegex = baseUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   let body = coerceString(input);
   // Convert line returns
   body = body.replace(regEx(/\r\n/g), '\n');
@@ -98,7 +102,7 @@ export function massageBody(
   body = body.replace(regEx(/^<a name="[^"]*"><\/a>\n/), '');
   body = body.replace(
     regEx(
-      `^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*/[^/]*/compare/.*?\\n`,
+      `^##? \\[[^\\]]*\\]\\(${baseUrlForRegex}[^/]*/[^/]*/compare/.*?\\n`,
       undefined,
       false,
     ),
@@ -106,7 +110,7 @@ export function massageBody(
   );
   // Clean-up unnecessary commits link
   body = `\n${body}\n`.replace(
-    regEx(`\\n${baseUrl}[^/]+/[^/]+/compare/[^\\n]+(\\n|$)`),
+    regEx(`\\n${baseUrlForRegex}[^/]+/[^/]+/compare/[^\\n]+(\\n|$)`),
     '\n',
   );
   // Reduce headings size
@@ -272,6 +276,12 @@ export async function getReleaseNotesMdFileInner(
   const sourceDirectory = project.sourceDirectory!;
   try {
     switch (type) {
+      case 'azure':
+        return await azure.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory,
+        );
       case 'bitbucket':
         return await bitbucket.getReleaseNotesMd(
           repository,
@@ -378,6 +388,7 @@ export async function getReleaseNotesMd(
             ' ',
           );
           const [heading] = deParenthesizedSection.split(newlineRegex);
+          const [parenthesizedHeading] = section.split(newlineRegex);
           const title = heading
             .replace(regEx(/^\s*#*\s*/), '')
             .split(' ')
@@ -389,11 +400,22 @@ export async function getReleaseNotesMd(
             project,
             changelogFile,
           );
-          const mdHeadingLink = title
-            .filter((word) => !isHttpUrl(word))
-            .join('-')
-            .replace(regEx(/[^A-Za-z0-9-]/g), '');
-          const url = `${notesSourceUrl}#${mdHeadingLink}`;
+          const mdHeadingLink =
+            project.type === 'azure'
+              ? encodeURIComponent(
+                  parenthesizedHeading
+                    .replace(regEx(/^\s*#*\s*/), '')
+                    .toLowerCase()
+                    .replace(regEx(/\s+/), '-'),
+                )
+              : title
+                  .filter((word) => !isHttpUrl(word))
+                  .join('-')
+                  .replace(regEx(/[^A-Za-z0-9-]/g), '');
+          const url =
+            project.type === 'azure'
+              ? `${notesSourceUrl}&anchor=${mdHeadingLink}`
+              : `${notesSourceUrl}#${mdHeadingLink}`;
           // Look for version in title
           for (const word of title) {
             if (word.includes(version) && !isHttpUrl(word)) {
@@ -542,6 +564,10 @@ function getNotesSourceUrl(
       changelogFile,
       '?at=HEAD',
     );
+  }
+
+  if (project.type === 'azure') {
+    return joinUrlParts(baseUrl, '_git', repository, '?path=', changelogFile);
   }
 
   return joinUrlParts(
