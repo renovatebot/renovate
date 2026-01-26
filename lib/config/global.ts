@@ -13,6 +13,7 @@ export class GlobalConfig {
     'allowedUnsafeExecutions',
     'autodiscoverRepoOrder',
     'autodiscoverRepoSort',
+    'bbUseDevelopmentBranch',
     'binarySource',
     'cacheDir',
     'cacheHardTtlMinutes',

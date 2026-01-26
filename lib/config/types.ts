@@ -219,6 +219,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   allowShellExecutorForPostUpgradeCommands?: boolean;
   allowedEnv?: string[];
   allowedHeaders?: string[];
+  bbUseDevelopmentBranch?: boolean;
   binarySource?: BinarySource;
   cacheDir?: string;
   cacheHardTtlMinutes?: number;
