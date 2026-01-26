@@ -1,4 +1,3 @@
-import url from 'node:url';
 import { isNonEmptyString, isString } from '@sindresorhus/is';
 import ini from 'ini';
 import { GlobalConfig } from '../../../config/global';
@@ -185,8 +184,8 @@ export function resolvePackageUrl(
   registryUrl: string,
   packageName: string,
 ): string {
-  return url.resolve(
-    ensureTrailingSlash(registryUrl),
+  return new URL(
     encodeURIComponent(packageName).replace(regEx(/^%40/), '@'),
-  );
+    ensureTrailingSlash(registryUrl),
+  ).href;
 }
