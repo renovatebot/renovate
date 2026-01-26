@@ -260,7 +260,7 @@ export async function validateConfig(
         !optionParents[key].includes(parentName as AllowedParents)
       ) {
         // TODO: types (#22198)
-        const options = optionParents[key]?.sort().join(', ');
+        const options = optionParents[key]?.toSorted().join(', ');
         const message = `"${key}" can't be used in "${parentName}". Allowed objects: ${options}.`;
         warnings.push({
           topic: `${parentPath ? `${parentPath}.` : ''}${key}`,

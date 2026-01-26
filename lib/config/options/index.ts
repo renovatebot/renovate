@@ -1,3 +1,4 @@
+import { isArray, isObject } from '@sindresorhus/is';
 import { AllManagersListLiteral } from '../../manager-list.generated';
 import { getManagers } from '../../modules/manager';
 import { getCustomManagers } from '../../modules/manager/custom';
@@ -6,7 +7,7 @@ import { getVersioningList } from '../../modules/versioning';
 import { supportedDatasources } from '../presets/internal/merge-confidence';
 import { type RenovateOptions, UpdateTypesOptions } from '../types';
 
-const options: RenovateOptions[] = [
+const options: Readonly<RenovateOptions>[] = [
   {
     name: 'mode',
     description: 'Mode of operation.',
@@ -3335,7 +3336,7 @@ const options: RenovateOptions[] = [
   },
 ];
 
-export function getOptions(): RenovateOptions[] {
+export function getOptions(): Readonly<RenovateOptions>[] {
   return options;
 }
 
@@ -3344,7 +3345,7 @@ function loadManagerOptions(): void {
   for (const [name, config] of allManagers.entries()) {
     // v8 ignore else -- TODO: add test #40625
     if (config.defaultConfig) {
-      const managerConfig: RenovateOptions = {
+      const managerConfig: Readonly<RenovateOptions> = {
         name,
         description: `Configuration object for the ${name} manager`,
         stage: 'package',
@@ -3359,4 +3360,27 @@ function loadManagerOptions(): void {
   }
 }
 
+function freeze(value: unknown): void {
+  if (isArray(value)) {
+    for (const v of value) {
+      freeze(v);
+    }
+
+    Object.freeze(value);
+  } else if (isObject(value)) {
+    for (const v of Object.values(value)) {
+      freeze(v);
+    }
+
+    Object.freeze(value);
+  }
+}
+
+function freezeConfigOptions(): void {
+  for (const option of options) {
+    freeze(option);
+  }
+}
+
 loadManagerOptions();
+freezeConfigOptions();
