@@ -1,4 +1,3 @@
-import URL from 'node:url';
 import type { SimpleGit } from 'simple-git';
 import Git from 'simple-git';
 import upath from 'upath';
@@ -32,7 +31,7 @@ async function getUrl(
   const remoteUrl = (
     await git.raw(['config', '--get', 'remote.origin.url'])
   ).trim();
-  return URL.resolve(`${remoteUrl}/`, path);
+  return new URL(path, `${remoteUrl}/`).href;
 }
 
 async function getBranch(

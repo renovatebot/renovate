@@ -1,4 +1,3 @@
-import url from 'node:url';
 import { isString } from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../logger';
@@ -106,10 +105,10 @@ export class PypiDatasource extends Datasource {
     packageName: string,
     hostUrl: string,
   ): Promise<ReleaseResult | null> {
-    const lookupUrl = url.resolve(
-      hostUrl,
+    const lookupUrl = new URL(
       `${normalizePythonDepName(packageName)}/json`,
-    );
+      hostUrl,
+    ).href;
     const dependency: ReleaseResult = { releases: [] };
     logger.trace({ lookupUrl }, 'Pypi api got lookup');
     const headers = await this.getAuthHeaders(lookupUrl);
@@ -255,10 +254,10 @@ export class PypiDatasource extends Datasource {
     packageName: string,
     hostUrl: string,
   ): Promise<ReleaseResult | null> {
-    const lookupUrl = url.resolve(
-      hostUrl,
+    const lookupUrl = new URL(
       ensureTrailingSlash(normalizePythonDepName(packageName)),
-    );
+      hostUrl,
+    ).href;
     const dependency: ReleaseResult = { releases: [] };
     const headers = await this.getAuthHeaders(lookupUrl);
     const response = await this.http.getText(lookupUrl, { headers });
