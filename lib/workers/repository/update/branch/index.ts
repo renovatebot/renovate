@@ -539,13 +539,6 @@ export async function processBranch(
       logger.debug(
         'A user manually requested all awaiting schedule PRs via the Dependency Dashboard.',
       );
-    } else if (
-      branchExists &&
-      config.rebaseWhen === 'never' &&
-      !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel)) &&
-      !dependencyDashboardCheck
-    ) {
-      logger.debug('rebaseWhen=never so skipping branch update check');
     }
     // if the base branch has been changed by user in renovate config, rebase onto the new baseBranch
     // we have already confirmed earlier that branch isn't modified, so its safe to use targetBranch here

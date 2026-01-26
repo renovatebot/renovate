@@ -801,6 +801,7 @@ describe('workers/repository/update/branch/index', () => {
       config.automergeType = 'branch';
       config.allowBranchAutomergeBehindBase = true;
       config.rebaseWhen = 'conflicted';
+      config.allowBranchAutomergeBehindBase = true;
       await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledExactlyOnceWith(
         expect.any(Object),
@@ -829,6 +830,7 @@ describe('workers/repository/update/branch/index', () => {
       config.automergeType = 'branch';
       config.allowBranchAutomergeBehindBase = true;
       config.rebaseWhen = 'never';
+      config.allowBranchAutomergeBehindBase = true;
       config.ignoreTests = true;
       config.prCreation = 'immediate';
       config.reuseExistingBranch = true;
@@ -860,6 +862,32 @@ describe('workers/repository/update/branch/index', () => {
       config.rebaseWhen = 'auto';
       await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledExactlyOnceWith(
+        expect.any(Object),
+        false,
+      );
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+    });
+
+    it('does not allow behind base automerge when experimental flag is false', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.rebaseWhen = 'conflicted';
+      config.allowBranchAutomergeBehindBase = false;
+      await branchWorker.processBranch(config);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledWith(
         expect.any(Object),
         false,
       );

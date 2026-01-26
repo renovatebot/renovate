@@ -69,7 +69,7 @@ describe('modules/platform/default-scm', () => {
   it('delegate mergeBranch to util/git allowBehindBase=true', async () => {
     git.mergeBranch.mockResolvedValueOnce();
     await defaultGitScm.mergeAndPush('branchName', true);
-    expect(git.mergeBranch).toHaveBeenCalledExactlyOnceWith('branchName');
+    expect(git.mergeBranch).toHaveBeenCalledExactlyOnceWith('branchName', true);
   });
 
   it('delegate mergeBranch to util/git', async () => {
