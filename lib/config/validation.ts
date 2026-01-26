@@ -8,7 +8,7 @@ import is, {
   isString,
   isUndefined,
 } from '@sindresorhus/is';
-import { PlatformId } from '../constants';
+import type { PlatformId } from '../constants';
 import { allManagersList, getManagerList } from '../modules/manager';
 import { isCustomManager } from '../modules/manager/custom';
 import type { CustomManager } from '../modules/manager/custom/types';
