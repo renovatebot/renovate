@@ -584,8 +584,8 @@ importers:
         specifier: 0.0.4
         version: 0.0.4(markdownlint-cli2@0.20.0)
       memfs:
-        specifier: 4.54.0
-        version: 4.54.0
+        specifier: 4.55.0
+        version: 4.55.0(tslib@2.8.1)
       nock:
         specifier: 14.0.10
         version: 14.0.10
@@ -1301,6 +1301,18 @@ packages:
 
   '@jsonjoy.com/json-pointer@1.0.2':
     resolution: {integrity: sha512-Fsn6wM2zlDzY1U+v4Nc8bo3bVqgfNTGcn6dMgs6FjrEnt4ZCe60o6ByKRjOGlI2gow0aE/Q41QOigdTqkyK5fg==}
+    engines: {node: '>=10.0'}
+    peerDependencies:
+      tslib: '2'
+
+  '@jsonjoy.com/node-fs-dependencies@4.55.0':
+    resolution: {integrity: sha512-gqO6MB5HAqVOytyjwDQ7E5BikL1dBC108d75YQrpIIIbzH1+4INDCtjB2JhGeXqUeBS7VNqGR/cvOKeHr6+pwA==}
+    engines: {node: '>=10.0'}
+    peerDependencies:
+      tslib: '2'
+
+  '@jsonjoy.com/node-fs-utils@4.55.0':
+    resolution: {integrity: sha512-y2c7ukrhzsJXMK4uHADSl2fXY3YUjgug8rfOW1BYL0C4wceC/kr6ewsEfMwwgwioY6wbiq0qrMa9Ui9fRzQKow==}
     engines: {node: '>=10.0'}
     peerDependencies:
       tslib: '2'
@@ -4769,8 +4781,10 @@ packages:
   mdurl@2.0.0:
     resolution: {integrity: sha512-Lf+9+2r+Tdp5wXDXC4PcIBjTDtq4UKjCPMQhKIuzpJNW0b96kVqSwW0bT7FhRSfmAiFYgP+SCRvdrDozfh0U5w==}
 
-  memfs@4.54.0:
-    resolution: {integrity: sha512-wiJ9YYUj2bVcpdJgIv6y1KrStknSdNhfM4+4+ttt0cHHMxVLZ3aOBoER8krt9lGY5HkR2ustUXiihhNPeNxXaQ==}
+  memfs@4.55.0:
+    resolution: {integrity: sha512-sayAf6AyB4fLSOsZzaXBV8cztWY8/pKhVDbUDwFuC9aI6lGa6R8ilKZe/TYsKebH0MZWrbMhCTYsctXrCT4NBA==}
+    peerDependencies:
+      tslib: '2'
 
   memorystream@0.3.1:
     resolution: {integrity: sha512-S3UwM3yj5mtUSEfP41UZmt/0SCoVYUcU1rkXv+BQ5Ig8ndL4sPoJNBUJERafdPb5jjHJGuMgytgKvKIf58XNBw==}
@@ -7981,6 +7995,15 @@ snapshots:
     dependencies:
       '@jsonjoy.com/codegen': 1.0.0(tslib@2.8.1)
       '@jsonjoy.com/util': 1.9.0(tslib@2.8.1)
+      tslib: 2.8.1
+
+  '@jsonjoy.com/node-fs-dependencies@4.55.0(tslib@2.8.1)':
+    dependencies:
+      tslib: 2.8.1
+
+  '@jsonjoy.com/node-fs-utils@4.55.0(tslib@2.8.1)':
+    dependencies:
+      '@jsonjoy.com/node-fs-dependencies': 4.55.0(tslib@2.8.1)
       tslib: 2.8.1
 
   '@jsonjoy.com/util@1.9.0(tslib@2.8.1)':
@@ -11893,9 +11916,11 @@ snapshots:
 
   mdurl@2.0.0: {}
 
-  memfs@4.54.0:
+  memfs@4.55.0(tslib@2.8.1):
     dependencies:
       '@jsonjoy.com/json-pack': 1.21.0(tslib@2.8.1)
+      '@jsonjoy.com/node-fs-dependencies': 4.55.0(tslib@2.8.1)
+      '@jsonjoy.com/node-fs-utils': 4.55.0(tslib@2.8.1)
       '@jsonjoy.com/util': 1.9.0(tslib@2.8.1)
       glob-to-regex.js: 1.2.0(tslib@2.8.1)
       thingies: 2.5.0(tslib@2.8.1)
