@@ -1475,6 +1475,10 @@ For example: `:warning:` will be replaced with `⚠️`.
 Some cloud providers offer services to receive metadata about the current instance, for example [AWS Instance metadata](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-instance-metadata.html) or [GCP VM metadata](https://cloud.google.com/compute/docs/metadata/overview).
 You can control if Renovate should try to access these services with the `useCloudMetadataServices` config option.
 
+<!-- prettier-ignore -->
+!!! note
+    This should only be set via an environment variable, as it is used before Renovate initialises its global configuration.
+
 ## userAgent
 
 If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
