@@ -133,7 +133,7 @@ export async function postUpgradeCommandsExecutor(
               // It is very likely this will be susceptible to these risks, even if you allowlist (via `allowedCommands`), as there may be special characters included in the given commands that can be leveraged here
               shell: GlobalConfig.get(
                 'allowShellExecutorForPostUpgradeCommands',
-                true,
+                false,
               ),
 
               cwd: workingDir,
