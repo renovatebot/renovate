@@ -1,4 +1,4 @@
-import type { FluxResource } from './schema';
+import type { FluxResource } from './schema.ts';
 
 export interface FluxManagerData {
   components?: string;

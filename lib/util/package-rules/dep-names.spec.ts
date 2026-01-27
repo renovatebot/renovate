@@ -1,4 +1,4 @@
-import { DepNameMatcher } from './dep-names';
+import { DepNameMatcher } from './dep-names.ts';
 
 describe('util/package-rules/dep-names', () => {
   const depNameMatcher = new DepNameMatcher();

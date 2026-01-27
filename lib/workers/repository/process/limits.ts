@@ -1,10 +1,10 @@
 import { DateTime } from 'luxon';
-import type { RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { platform } from '../../../modules/platform';
-import { scm } from '../../../modules/platform/scm';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import type { BranchConfig } from '../../types';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import { scm } from '../../../modules/platform/scm.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { BranchConfig } from '../../types.ts';
 
 export async function getPrHourlyCount(
   config: RenovateConfig,

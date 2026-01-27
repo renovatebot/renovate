@@ -1,14 +1,14 @@
-import type { Category } from '../../../constants';
-import type { RangeStrategy } from '../../../types';
-import { HackageDatasource } from '../../datasource/hackage';
-import * as pvpVersioning from '../../versioning/pvp';
+import type { Category } from '../../../constants/index.ts';
+import type { RangeStrategy } from '../../../types/index.ts';
+import { HackageDatasource } from '../../datasource/hackage/index.ts';
+import * as pvpVersioning from '../../versioning/pvp/index.ts';
 import type {
   PackageDependency,
   PackageFileContent,
   RangeConfig,
-} from '../types';
-import type { CabalDependency } from './extract';
-import { extractNamesAndRanges, findDepends } from './extract';
+} from '../types.ts';
+import type { CabalDependency } from './extract.ts';
+import { extractNamesAndRanges, findDepends } from './extract.ts';
 
 export const defaultConfig = {
   managerFilePatterns: ['/\\.cabal$/'],

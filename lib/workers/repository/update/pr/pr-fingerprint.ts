@@ -5,11 +5,11 @@ import type {
   RecreateWhen,
   UpdateType,
   ValidationMessage,
-} from '../../../../config/types';
-import { logger } from '../../../../logger';
-import type { PrCache } from '../../../../util/cache/repository/types';
-import { getElapsedHours } from '../../../../util/date';
-import type { BranchConfig } from '../../../types';
+} from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { PrCache } from '../../../../util/cache/repository/types.ts';
+import { getElapsedHours } from '../../../../util/date.ts';
+import type { BranchConfig } from '../../../types.ts';
 
 // BranchUpgradeConfig - filtered
 export interface FilteredBranchUpgradeConfig {

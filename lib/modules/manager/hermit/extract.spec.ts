@@ -1,8 +1,8 @@
-import { readLocalDirectory } from '../../../util/fs';
-import { HermitDatasource } from '../../datasource/hermit';
-import { extractPackageFile } from './extract';
+import { readLocalDirectory } from '../../../util/fs/index.ts';
+import { HermitDatasource } from '../../datasource/hermit/index.ts';
+import { extractPackageFile } from './extract.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const readdirMock = vi.mocked(readLocalDirectory);
 

@@ -1,12 +1,12 @@
-import * as _repositoryCache from '../cache/repository';
-import type { BranchCache, RepoCacheData } from '../cache/repository/types';
+import * as _repositoryCache from '../cache/repository/index.ts';
+import type { BranchCache, RepoCacheData } from '../cache/repository/types.ts';
 import {
   getCachedModifiedResult,
   setCachedModifiedResult,
-} from './modified-cache';
-import { logger, partial } from '~test/util';
+} from './modified-cache.ts';
+import { logger, partial } from '~test/util.ts';
 
-vi.mock('../cache/repository');
+vi.mock('../cache/repository/index.ts');
 const repositoryCache = vi.mocked(_repositoryCache);
 
 describe('util/git/modified-cache', () => {

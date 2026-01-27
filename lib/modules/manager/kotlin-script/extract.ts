@@ -1,7 +1,7 @@
 import { isString, isTruthy } from '@sindresorhus/is';
-import { regEx } from '../../../util/regex';
-import { MavenDatasource } from '../../datasource/maven';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import { MavenDatasource } from '../../datasource/maven/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 const dependsOnRegex = regEx(
   /@file\s*:\s*DependsOn\s*\(\s*(?<replaceString>"(?<groupId>.+):(?<artifactId>.+):(?<version>.+)")\s*\)/g,

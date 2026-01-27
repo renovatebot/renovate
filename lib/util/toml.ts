@@ -1,6 +1,6 @@
 import { getStaticTOMLValue, parseTOML } from 'toml-eslint-parser';
-import { regEx } from './regex';
-import { stripTemplates } from './string';
+import { regEx } from './regex.ts';
+import { stripTemplates } from './string.ts';
 
 export function parse(input: string): unknown {
   const ast = parseTOML(input);

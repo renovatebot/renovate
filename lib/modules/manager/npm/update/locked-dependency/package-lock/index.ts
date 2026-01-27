@@ -1,13 +1,16 @@
 import detectIndent from 'detect-indent';
 import type { PackageJson } from 'type-fest';
-import { logger } from '../../../../../../logger';
-import { api as semver } from '../../../../../versioning/npm';
-import type { UpdateLockedConfig, UpdateLockedResult } from '../../../../types';
-import { updateDependency } from '../../dependency';
-import { findFirstParentVersion } from '../common/parent-version';
-import { findDepConstraints } from './dep-constraints';
-import { getLockedDependencies } from './get-locked';
-import type { PackageLockOrEntry } from './types';
+import { logger } from '../../../../../../logger/index.ts';
+import { api as semver } from '../../../../../versioning/npm/index.ts';
+import type {
+  UpdateLockedConfig,
+  UpdateLockedResult,
+} from '../../../../types.ts';
+import { updateDependency } from '../../dependency/index.ts';
+import { findFirstParentVersion } from '../common/parent-version.ts';
+import { findDepConstraints } from './dep-constraints.ts';
+import { getLockedDependencies } from './get-locked.ts';
+import type { PackageLockOrEntry } from './types.ts';
 
 export async function updateLockedDependency(
   config: UpdateLockedConfig,

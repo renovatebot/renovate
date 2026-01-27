@@ -1,6 +1,6 @@
-import * as git from '../../util/git';
-import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
-import type { PlatformScm } from './types';
+import * as git from '../../util/git/index.ts';
+import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types.ts';
+import type { PlatformScm } from './types.ts';
 
 export class DefaultGitScm implements PlatformScm {
   branchExists(branchName: string): Promise<boolean> {

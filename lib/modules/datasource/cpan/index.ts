@@ -1,10 +1,10 @@
-import { cache } from '../../../util/cache/package/decorator';
-import { joinUrlParts } from '../../../util/url';
-import * as perlVersioning from '../../versioning/perl';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { MetaCpanApiFileSearchResponse } from './schema';
-import type { CpanRelease } from './types';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import * as perlVersioning from '../../versioning/perl/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { MetaCpanApiFileSearchResponse } from './schema.ts';
+import type { CpanRelease } from './types.ts';
 
 export class CpanDatasource extends Datasource {
   static readonly id = 'cpan';
@@ -43,15 +43,12 @@ export class CpanDatasource extends Datasource {
     try {
       const body = {
         query: {
-          filtered: {
-            query: { match_all: {} },
-            filter: {
-              and: [
-                { term: { 'module.name': packageName } },
-                { term: { 'module.authorized': true } },
-                { exists: { field: 'module.associated_pod' } },
-              ],
-            },
+          bool: {
+            filter: [
+              { term: { 'module.name': packageName } },
+              { term: { 'module.authorized': true } },
+              { exists: { field: 'module.associated_pod' } },
+            ],
           },
         },
         _source: [

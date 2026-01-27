@@ -1,6 +1,6 @@
-import { getPkgReleases } from '..';
-import { OrbDatasource } from '.';
-import * as httpMock from '~test/http-mock';
+import { getPkgReleases } from '../index.ts';
+import { OrbDatasource } from './index.ts';
+import * as httpMock from '~test/http-mock.ts';
 
 const orbData = {
   data: {

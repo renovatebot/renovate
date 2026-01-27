@@ -1,12 +1,12 @@
-import type { Decorator } from '.';
-import { decorate } from '.';
+import type { Decorator } from './index.ts';
+import { decorate } from './index.ts';
 
 interface WrapParameters {
   mock: (_: string) => string;
 }
 
 function wrap<T>({ mock }: WrapParameters): Decorator<T> {
-  return decorate(async ({ args, instance, callback }) => {
+  return decorate(async ({ callback }) => {
     mock('before');
     await callback();
     mock('after');

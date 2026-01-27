@@ -1,10 +1,10 @@
-import { cache } from '../../../util/cache/package/decorator';
-import { regEx } from '../../../util/regex';
-import { asTimestamp } from '../../../util/timestamp';
-import * as gradleVersioning from '../../versioning/gradle';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import type { GradleRelease } from './types';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { regEx } from '../../../util/regex.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import * as gradleVersioning from '../../versioning/gradle/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import type { GradleRelease } from './types.ts';
 
 export class GradleVersionDatasource extends Datasource {
   static readonly id = 'gradle-version';

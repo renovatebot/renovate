@@ -1,12 +1,13 @@
-import { AllManagersListLiteral } from '../../manager-list.generated';
-import { getManagers } from '../../modules/manager';
-import { getCustomManagers } from '../../modules/manager/custom';
-import { getPlatformList } from '../../modules/platform';
-import { getVersioningList } from '../../modules/versioning';
-import { supportedDatasources } from '../presets/internal/merge-confidence';
-import { type RenovateOptions, UpdateTypesOptions } from '../types';
+import { isArray, isObject } from '@sindresorhus/is';
+import { AllManagersListLiteral } from '../../manager-list.generated.ts';
+import { getCustomManagers } from '../../modules/manager/custom/index.ts';
+import { getManagers } from '../../modules/manager/index.ts';
+import { getPlatformList } from '../../modules/platform/index.ts';
+import { getVersioningList } from '../../modules/versioning/index.ts';
+import { supportedDatasources } from '../presets/internal/merge-confidence.ts';
+import { type RenovateOptions, UpdateTypesOptions } from '../types.ts';
 
-const options: RenovateOptions[] = [
+const options: Readonly<RenovateOptions>[] = [
   {
     name: 'mode',
     description: 'Mode of operation.',
@@ -611,7 +612,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.25.18',
+    default: 'ghcr.io/containerbase/sidecar:13.26.6',
     globalOnly: true,
   },
   {
@@ -972,6 +973,14 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'allowShellExecutorForPostUpgradeCommands',
+    description:
+      'Whether to run commands for `postUpgradeTasks` inside a shell. This has security implications, as it means that they can call out to other commands or access shell variables. It is difficult to craft an `allowedCommands` regex to restrict this.',
+    globalOnly: true,
+    type: 'boolean',
+    default: true,
   },
   {
     name: 'allowCustomCrateRegistries',
@@ -2594,6 +2603,7 @@ const options: RenovateOptions[] = [
       'gomodUpdateImportPaths',
       'gomodSkipVendor',
       'gomodVendor',
+      'goGenerate',
       'helmUpdateSubChartArchives',
       'kustomizeInflateHelmCharts',
       'npmDedupe',
@@ -3326,15 +3336,16 @@ const options: RenovateOptions[] = [
   },
 ];
 
-export function getOptions(): RenovateOptions[] {
+export function getOptions(): Readonly<RenovateOptions>[] {
   return options;
 }
 
 function loadManagerOptions(): void {
   const allManagers = new Map([...getManagers(), ...getCustomManagers()]);
   for (const [name, config] of allManagers.entries()) {
+    // v8 ignore else -- TODO: add test #40625
     if (config.defaultConfig) {
-      const managerConfig: RenovateOptions = {
+      const managerConfig: Readonly<RenovateOptions> = {
         name,
         description: `Configuration object for the ${name} manager`,
         stage: 'package',
@@ -3349,4 +3360,27 @@ function loadManagerOptions(): void {
   }
 }
 
+function freeze(value: unknown): void {
+  if (isArray(value)) {
+    for (const v of value) {
+      freeze(v);
+    }
+
+    Object.freeze(value);
+  } else if (isObject(value)) {
+    for (const v of Object.values(value)) {
+      freeze(v);
+    }
+
+    Object.freeze(value);
+  }
+}
+
+function freezeConfigOptions(): void {
+  for (const option of options) {
+    freeze(option);
+  }
+}
+
 loadManagerOptions();
+freezeConfigOptions();

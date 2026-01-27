@@ -1,10 +1,10 @@
-import { detectPlatform } from '../../util/common';
-import { parseGitUrl } from '../../util/git/url';
-import { GitRefsDatasource } from '../datasource/git-refs';
-import { GitTagsDatasource } from '../datasource/git-tags';
-import { GithubTagsDatasource } from '../datasource/github-tags';
-import { GitlabTagsDatasource } from '../datasource/gitlab-tags';
-import type { PackageDependency } from './types';
+import { detectPlatform } from '../../util/common.ts';
+import { parseGitUrl } from '../../util/git/url.ts';
+import { GitRefsDatasource } from '../datasource/git-refs/index.ts';
+import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../datasource/gitlab-tags/index.ts';
+import type { PackageDependency } from './types.ts';
 
 export function applyGitSource(
   dep: PackageDependency,

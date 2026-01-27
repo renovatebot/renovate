@@ -7,10 +7,10 @@ import {
   parse,
   read,
   sanitizeOptions,
-} from './bazelrc';
-import { fs } from '~test/util';
+} from './bazelrc.ts';
+import { fs } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 function mockReadLocalFile(files: Record<string, string | null>) {
   fs.readLocalFile.mockImplementation((file): Promise<any> => {

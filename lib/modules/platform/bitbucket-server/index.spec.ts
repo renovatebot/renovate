@@ -4,16 +4,16 @@ import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
-} from '../../../constants/error-messages';
-import * as repoCache from '../../../util/cache/repository';
-import type { LongCommitSha } from '../../../util/git/types';
-import { ensureTrailingSlash } from '../../../util/url';
-import * as bitbucket from '.';
-import * as httpMock from '~test/http-mock';
-import { git, hostRules, logger } from '~test/util';
+} from '../../../constants/error-messages.ts';
+import * as repoCache from '../../../util/cache/repository/index.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import * as bitbucket from './index.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { git, hostRules, logger } from '~test/util.ts';
 
 vi.mock('timers/promises');
-vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 function sshLink(projectKey: string, repositorySlug: string): string {
   return `ssh://git@stash.renovatebot.com:7999/${projectKey.toLowerCase()}/${repositorySlug}.git`;

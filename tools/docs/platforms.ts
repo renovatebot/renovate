@@ -1,9 +1,9 @@
 import { codeBlock } from 'common-tags';
-import { getPlatformList } from '../../lib/modules/platform';
-import { readFile, updateFile } from '../utils';
-import type { OpenItems } from './github-query-items';
-import { generateFeatureAndBugMarkdown } from './github-query-items';
-import { getModuleLink, replaceContent } from './utils';
+import { getPlatformList } from '../../lib/modules/platform/index.ts';
+import { readFile, updateFile } from '../utils/index.ts';
+import type { OpenItems } from './github-query-items.ts';
+import { generateFeatureAndBugMarkdown } from './github-query-items.ts';
+import { getModuleLink, replaceContent } from './utils.ts';
 
 export async function generatePlatforms(
   dist: string,

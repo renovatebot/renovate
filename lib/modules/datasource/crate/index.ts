@@ -1,33 +1,34 @@
 import Git from 'simple-git';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import * as memCache from '../../../util/cache/memory';
-import { cache } from '../../../util/cache/package/decorator';
-import { getChildEnv } from '../../../util/exec/utils';
-import { privateCacheDir, readCacheFile } from '../../../util/fs';
-import { simpleGitConfig } from '../../../util/git/config';
-import { toSha256 } from '../../../util/hash';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
-import { acquireLock } from '../../../util/mutex';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { joinUrlParts, parseUrl } from '../../../util/url';
-import * as cargoVersioning from '../../versioning/cargo';
-import { Datasource } from '../datasource';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { getChildEnv } from '../../../util/exec/utils.ts';
+import { privateCacheDir, readCacheFile } from '../../../util/fs/index.ts';
+import { simpleGitConfig } from '../../../util/git/config.ts';
+import { toSha256 } from '../../../util/hash.ts';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import { acquireLock } from '../../../util/mutex.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { joinUrlParts, parseUrl } from '../../../util/url.ts';
+import * as cargoVersioning from '../../versioning/cargo/index.ts';
+import { Datasource } from '../datasource.ts';
 import type {
   GetReleasesConfig,
   PostprocessReleaseConfig,
   PostprocessReleaseResult,
   Release,
   ReleaseResult,
-} from '../types';
-import { ReleaseTimestamp } from './schema';
+} from '../types.ts';
+import { ReleaseTimestamp } from './schema.ts';
 import type {
   CrateMetadata,
   CrateRecord,
   RegistryFlavor,
   RegistryInfo,
-} from './types';
+} from './types.ts';
 
 type CloneResult =
   | {
@@ -61,7 +62,7 @@ export class CrateDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The release timestamp is determined from the `version.created_at` field from the response.';
+    'The release timestamp is determined from `pubtime` field from crates.io index if available, or `version.created_at` field from crates.io API otherwise.';
 
   @cache({
     namespace: `datasource-${CrateDatasource.id}`,
@@ -138,6 +139,10 @@ export class CrateDatasource extends Datasource {
 
         if (line.rust_version) {
           release.constraints = { rust: [line.rust_version] };
+        }
+
+        if (line.pubtime) {
+          release.releaseTimestamp = asTimestamp(line.pubtime);
         }
 
         return release;
@@ -456,11 +461,13 @@ export class CrateDatasource extends Datasource {
     { packageName, registryUrl }: PostprocessReleaseConfig,
     release: Release,
   ): Promise<PostprocessReleaseResult> {
-    if (registryUrl !== 'https://crates.io') {
+    if (release.releaseTimestamp || registryUrl !== 'https://crates.io') {
       return release;
     }
 
     const url = `https://crates.io/api/v1/crates/${packageName}/${release.versionOrig ?? release.version}`;
+    // Getting release timestamp could become unnecessary if the manual backfill of `pubtime` mentioned in
+    // https://github.com/rust-lang/cargo/issues/15491 is done for all packages.
     const { body: releaseTimestamp } = await this.http.getJson(
       url,
       { cacheProvider: memCacheProvider },

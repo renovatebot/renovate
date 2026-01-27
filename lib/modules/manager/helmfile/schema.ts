@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { LooseArray, Yaml } from '../../../util/schema-utils';
+import { LooseArray, Yaml } from '../../../util/schema-utils/index.ts';
 
 export const HelmRepository = z.object({
   name: z.string(),

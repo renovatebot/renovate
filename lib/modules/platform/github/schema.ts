@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { logger } from '../../../logger';
-import { LooseArray } from '../../../util/schema-utils';
+import { logger } from '../../../logger/index.ts';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
 
 const Package = z.object({
   ecosystem: z

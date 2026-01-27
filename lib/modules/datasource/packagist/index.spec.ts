@@ -1,14 +1,14 @@
 import { mockDeep } from 'vitest-mock-extended';
-import { getPkgReleases } from '..';
-import type { HostRule } from '../../../types';
-import * as _hostRules from '../../../util/host-rules';
-import * as composerVersioning from '../../versioning/composer';
-import { id as versioning } from '../../versioning/loose';
-import { PackagistDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import type { HostRule } from '../../../types/index.ts';
+import * as _hostRules from '../../../util/host-rules.ts';
+import * as composerVersioning from '../../versioning/composer/index.ts';
+import { id as versioning } from '../../versioning/loose/index.ts';
+import { getPkgReleases } from '../index.ts';
+import { PackagistDatasource } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 
-vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 const hostRules = _hostRules;
 

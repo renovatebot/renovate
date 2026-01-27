@@ -1,21 +1,21 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import * as docker from '../../../util/exec/docker';
-import type { StatusResult } from '../../../util/git/types';
-import * as hostRules from '../../../util/host-rules';
-import * as _datasource from '../../datasource';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { PackagistDatasource } from '../../datasource/packagist';
-import type { UpdateArtifactsConfig } from '../types';
-import * as composer from '.';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { env, fs, git, partial } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import * as docker from '../../../util/exec/docker/index.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import * as _datasource from '../../datasource/index.ts';
+import { PackagistDatasource } from '../../datasource/packagist/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import * as composer from './index.ts';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { env, fs, git, partial } from '~test/util.ts';
 
-vi.mock('../../../util/exec/env');
-vi.mock('../../datasource', () => mockDeep());
-vi.mock('../../../util/fs');
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../datasource/index.ts', () => mockDeep());
+vi.mock('../../../util/fs/index.ts');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -741,7 +741,7 @@ describe('modules/manager/composer/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'composer update --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
-        options: { cwd: '/tmp/github/some/repo', encoding: 'utf-8' },
+        options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
   });
@@ -788,15 +788,11 @@ describe('modules/manager/composer/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'docker pull ghcr.io/containerbase/sidecar',
-        options: {
-          encoding: 'utf-8',
-        },
+        options: {},
       },
       {
         cmd: 'docker ps --filter name=renovate_sidecar -aq',
-        options: {
-          encoding: 'utf-8',
-        },
+        options: {},
       },
       {
         cmd:
@@ -1084,7 +1080,10 @@ describe('modules/manager/composer/artifacts', () => {
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
-        cmd: 'git stash pop || true',
+        cmd: {
+          command: ['git', 'stash', 'pop'],
+          ignoreFailure: true,
+        },
       },
       {
         cmd: 'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
@@ -1127,14 +1126,17 @@ describe('modules/manager/composer/artifacts', () => {
       },
       {
         cmd: 'composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
-        options: { cwd: '/tmp/github/some/repo', encoding: 'utf-8' },
+        options: { cwd: '/tmp/github/some/repo' },
       },
       {
-        cmd: 'git stash pop || true',
+        cmd: {
+          command: ['git', 'stash', 'pop'],
+          ignoreFailure: true,
+        },
       },
       {
         cmd: 'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
-        options: { cwd: '/tmp/github/some/repo', encoding: 'utf-8' },
+        options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
   });

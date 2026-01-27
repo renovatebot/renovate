@@ -1,4 +1,4 @@
-import { RequiredProviderExtractor } from './required-provider';
+import { RequiredProviderExtractor } from './required-provider.ts';
 
 describe('modules/manager/terraform/extractors/terraform-block/required-provider', () => {
   const extractor = new RequiredProviderExtractor();

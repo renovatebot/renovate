@@ -1,25 +1,27 @@
 import fs from 'fs-extra';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../../config/global';
-import * as docker from '../../../../util/exec/docker';
-import { getPkgReleases } from '../../../datasource';
-import type { PostUpdateConfig } from '../../types';
-import type { NpmManagerData } from '../types';
-import { getNodeToolConstraint } from './node-version';
-import * as yarnHelper from './yarn';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
-import type { ExecSnapshots } from '~test/exec-util';
-import { Fixtures } from '~test/fixtures';
-import * as util from '~test/util';
+import { GlobalConfig } from '../../../../config/global.ts';
+import * as docker from '../../../../util/exec/docker/index.ts';
+import { getPkgReleases } from '../../../datasource/index.ts';
+import type { PostUpdateConfig } from '../../types.ts';
+import type { NpmManagerData } from '../types.ts';
+import { getNodeToolConstraint } from './node-version.ts';
+import * as yarnHelper from './yarn.ts';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import type { ExecSnapshots } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as util from '~test/util.ts';
 
 vi.mock('fs-extra', async () =>
   (
-    await vi.importActual<typeof import('~test/fixtures')>('~test/fixtures')
+    await vi.importActual<typeof import('~test/fixtures.js')>(
+      '~test/fixtures.js',
+    )
   ).fsExtra(),
 );
-vi.mock('../../../../util/exec/env');
-vi.mock('./node-version');
-vi.mock('../../../datasource', () => mockDeep());
+vi.mock('../../../../util/exec/env.ts');
+vi.mock('./node-version.ts');
+vi.mock('../../../datasource/index.ts', () => mockDeep());
 
 delete process.env.NPM_CONFIG_CACHE;
 
@@ -738,10 +740,18 @@ describe('modules/manager/npm/post-update/yarn', () => {
     const config = util.partial<PostUpdateConfig<NpmManagerData>>({});
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe(plocktest1YarnLockV1);
-    const options = { encoding: 'utf-8', cwd: 'some-dir' };
+    const options = { cwd: 'some-dir' };
     expect(execSnapshots).toMatchObject([
       {
-        cmd: `sed -i 's/ steps,/ steps.slice(0,1),/' some-dir/.yarn/cli.js || true`,
+        cmd: {
+          command: [
+            'sed',
+            '-i',
+            `s/ steps,/ steps.slice(0,1),/`,
+            'some-dir/.yarn/cli.js',
+          ],
+          ignoreFailure: true,
+        },
         options,
       },
       {
@@ -777,7 +787,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     const config = util.partial<PostUpdateConfig<NpmManagerData>>({});
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe(plocktest1YarnLockV1);
-    const options = { encoding: 'utf-8' };
+    const options = {};
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull ghcr.io/containerbase/sidecar', options },
       {

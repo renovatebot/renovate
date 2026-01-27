@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Yaml } from '../../../util/schema-utils';
+import { Yaml } from '../../../util/schema-utils/index.ts';
 
 export const CrowStep = z.object({
   image: z.string().optional(),

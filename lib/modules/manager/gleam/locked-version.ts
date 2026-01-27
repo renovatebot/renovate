@@ -1,7 +1,7 @@
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { readLocalFile } from '../../../util/fs';
-import { ManifestToml } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { ManifestToml } from './schema.ts';
 
 export async function extractLockFileVersions(
   lockFilePath: string,

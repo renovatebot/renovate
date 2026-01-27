@@ -1,14 +1,14 @@
 import upath from 'upath';
-import { GlobalConfig } from '../../../../config/global';
-import { getNodeToolConstraint } from './node-version';
-import * as npmHelper from './npm';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { Fixtures } from '~test/fixtures';
-import { env, fs } from '~test/util';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { getNodeToolConstraint } from './node-version.ts';
+import * as npmHelper from './npm.ts';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { env, fs } from '~test/util.ts';
 
-vi.mock('../../../../util/exec/env');
-vi.mock('../../../../util/fs');
-vi.mock('./node-version');
+vi.mock('../../../../util/exec/env.ts');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('./node-version.ts');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -432,8 +432,6 @@ describe('modules/manager/npm/post-update/npm', () => {
           '&& ' +
           'install-tool npm 6.0.0 ' +
           '&& ' +
-          'hash -d npm 2>/dev/null || true ' +
-          '&& ' +
           'npm install --package-lock-only --no-audit' +
           '"',
       },
@@ -460,7 +458,6 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool node 16.16.0' },
       { cmd: 'install-tool npm 6.0.0' },
-      { cmd: 'hash -d npm 2>/dev/null || true' },
       {
         cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
       },

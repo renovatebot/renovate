@@ -1,23 +1,23 @@
 import { isFalsy } from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { exec } from '../../../util/exec';
-import type { ToolConstraint } from '../../../util/exec/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ToolConstraint } from '../../../util/exec/types.ts';
 import {
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getFile } from '../../../util/git';
-import { regEx } from '../../../util/regex';
-import { Result } from '../../../util/result';
-import { parseYaml } from '../../../util/yaml';
-import { generateHelmEnvs } from '../helmv3/common';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { Doc, LockVersion } from './schema';
-import { generateRegistryLoginCmd, isOCIRegistry } from './utils';
+} from '../../../util/fs/index.ts';
+import { getFile } from '../../../util/git/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { Result } from '../../../util/result.ts';
+import { parseYaml } from '../../../util/yaml.ts';
+import { generateHelmEnvs } from '../helmv3/common.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { Doc, LockVersion } from './schema.ts';
+import { generateRegistryLoginCmd, isOCIRegistry } from './utils.ts';
 
 export async function updateArtifacts({
   packageFileName,

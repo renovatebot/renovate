@@ -1,16 +1,16 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { getPkgReleases as _getPkgReleases } from '../../datasource';
-import type { UpdateArtifactsConfig } from '../types';
-import { updateArtifacts } from './artifacts';
-import { mockExecAll } from '~test/exec-util';
-import { fs } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { getPkgReleases as _getPkgReleases } from '../../datasource/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import { updateArtifacts } from './artifacts.ts';
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
-vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../../datasource/index.ts', () => mockDeep());
 
 const getPkgReleases = vi.mocked(_getPkgReleases);
 
@@ -104,15 +104,11 @@ requires-python = "<3.9"
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'docker pull ghcr.io/containerbase/sidecar',
-          options: {
-            encoding: 'utf-8',
-          },
+          options: {},
         },
         {
           cmd: 'docker ps --filter name=renovate_sidecar -aq',
-          options: {
-            encoding: 'utf-8',
-          },
+          options: {},
         },
         {
           cmd:
@@ -131,7 +127,6 @@ requires-python = "<3.9"
             '"',
           options: {
             cwd: '/tmp/github/some/repo',
-            encoding: 'utf-8',
             env: {
               CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
             },

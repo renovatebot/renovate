@@ -1,12 +1,15 @@
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
-import { parse } from '../../../util/html';
-import type { HttpError } from '../../../util/http';
-import { asTimestamp } from '../../../util/timestamp';
-import { isVersion, id as rubyVersioningId } from '../../versioning/ruby';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { parse } from '../../../util/html.ts';
+import type { HttpError } from '../../../util/http/index.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import {
+  isVersion,
+  id as rubyVersioningId,
+} from '../../versioning/ruby/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 
 export class RubyVersionDatasource extends Datasource {
   static readonly id = 'ruby-version';

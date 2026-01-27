@@ -1,18 +1,18 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../../config/global';
-import { getPkgReleases } from '../../../datasource';
-import type { UpdateArtifactsConfig } from '../../types';
-import { updateArtifacts } from '../index';
-import { TerraformProviderHash } from './hash';
-import { getNewConstraint } from './index';
-import { fs } from '~test/util';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { getPkgReleases } from '../../../datasource/index.ts';
+import type { UpdateArtifactsConfig } from '../../types.ts';
+import { updateArtifacts } from '../index.ts';
+import { TerraformProviderHash } from './hash.ts';
+import { getNewConstraint } from './index.ts';
+import { fs } from '~test/util.ts';
 
 // auto-mock fs
-vi.mock('../../../../util/fs');
-vi.mock('./hash');
-vi.mock('../../../datasource', () => mockDeep());
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('./hash.ts');
+vi.mock('../../../datasource/index.ts', () => mockDeep());
 
 const config = {
   constraints: {},

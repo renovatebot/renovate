@@ -2,10 +2,13 @@
 
 import 'source-map-support/register';
 import './punycode.cjs';
-import { instrument, shutdown as telemetryShutdown } from './instrumentation'; // has to be imported before logger and other libraries which are instrumentalised
-import { logger } from './logger';
-import { bootstrap } from './proxy';
-import { start } from './workers/global';
+import {
+  instrument,
+  shutdown as telemetryShutdown,
+} from './instrumentation/index.ts'; // has to be imported before logger and other libraries which are instrumentalised
+import { logger } from './logger/index.ts';
+import { bootstrap } from './proxy.ts';
+import { start } from './workers/global/index.ts';
 
 /* v8 ignore next 3 -- not easily testable */
 process.on('unhandledRejection', (err) => {

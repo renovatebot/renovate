@@ -1,7 +1,7 @@
-import type { Category } from '../../../constants';
-import { ClojureDatasource } from '../../datasource/clojure';
-import * as mavenVersioning from '../../versioning/maven';
-import { extractPackageFile } from './extract';
+import type { Category } from '../../../constants/index.ts';
+import { ClojureDatasource } from '../../datasource/clojure/index.ts';
+import * as mavenVersioning from '../../versioning/maven/index.ts';
+import { extractPackageFile } from './extract.ts';
 
 export { extractPackageFile };
 
