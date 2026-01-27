@@ -1,4 +1,4 @@
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { cached } from '../../../util/cache/package/cached.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as glasskubeVersioning from '../../versioning/glasskube/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -23,12 +23,7 @@ export class GlasskubePackagesDatasource extends Datasource {
     super(GlasskubePackagesDatasource.id);
   }
 
-  @cache({
-    namespace: `datasource-${GlasskubePackagesDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl}:${packageName}`,
-  })
-  override async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -75,5 +70,16 @@ export class GlasskubePackagesDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  override getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${GlasskubePackagesDatasource.id}`,
+        key: `${config.registryUrl}:${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

@@ -1,5 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { cached } from '../../../util/cache/package/cached.ts';
 import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider.ts';
 import { id as semver } from '../../versioning/semver-coerced/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -19,11 +19,7 @@ export class TypstDatasource extends Datasource {
     super(TypstDatasource.id);
   }
 
-  @cache({
-    namespace: `datasource-${TypstDatasource.id}:registry-releases`,
-    key: ({ packageName }: GetReleasesConfig) => packageName,
-  })
-  override async getReleases({
+  private async _getReleases({
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const [namespace, pkg] = packageName.split('/');
@@ -53,5 +49,16 @@ export class TypstDatasource extends Datasource {
 
     result.registryUrl = registryUrl;
     return result;
+  }
+
+  override getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return cached(
+      {
+        namespace: `datasource-${TypstDatasource.id}:registry-releases`,
+        key: config.packageName,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }
