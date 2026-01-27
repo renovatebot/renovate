@@ -1,4 +1,3 @@
-import URL from 'node:url';
 import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global.ts';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages.ts';
@@ -248,13 +247,13 @@ export async function initRepo({
     throw err;
   }
 
-  const { hostname } = URL.parse(defaults.endpoint);
+  const { hostname } = new URL(defaults.endpoint);
 
   // Converts API hostnames to their respective HTTP git hosts:
   // `api.bitbucket.org`  to `bitbucket.org`
   // `api-staging.<host>` to `staging.<host>`
   // TODO #22198
-  const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname!)?.[1];
+  const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname)?.[1];
 
   let auth = '';
   if (opts.token) {

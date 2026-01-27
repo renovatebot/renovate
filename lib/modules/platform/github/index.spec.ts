@@ -540,6 +540,24 @@ describe('modules/platform/github/index', () => {
       expect(config).toMatchSnapshot();
     });
 
+    // for coverage
+    it('no token', async () => {
+      hostRules.find.mockReturnValue({});
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await expect(github.initRepo({ repository: 'some/repo' })).toResolve();
+    });
+
+    // for coverage
+    it('app token', async () => {
+      hostRules.find.mockReturnValue({
+        token: 'x-access-token:123test',
+      });
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await expect(github.initRepo({ repository: 'some/repo' })).toResolve();
+    });
+
     it('should fork when using forkToken', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', false);
@@ -552,7 +570,7 @@ describe('modules/platform/github/index', () => {
       });
       const config = await github.initRepo({
         repository: 'some/repo',
-        forkToken: 'true',
+        forkToken: 'token',
         forkCreation: true,
       });
       expect(config).toMatchSnapshot();
