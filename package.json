@@ -24,6 +24,9 @@
     "lint-other": "vitest run --coverage false test/other/**.spec.ts",
     "oxlint": "oxlint --import-plugin",
     "oxlint-fix": "oxlint --import-plugin --fix",
+    "biome": "biome lint .",
+    "biome-ci": "biome lint --reporter=github .",
+    "biome-fix": "biome lint --write .",
     "eslint": "NODE_OPTIONS=--max-old-space-size=8192 eslint . --cache --cache-location .cache/eslint",
     "eslint-fix": "NODE_OPTIONS=--max-old-space-size=8192 eslint --cache --cache-location .cache/eslint --fix .",
     "eslint-ci": "NODE_OPTIONS=--max-old-space-size=8192 eslint . --cache --cache-strategy content --cache-location .cache/eslint --format gha",
@@ -32,8 +35,8 @@
     "git-check": "node tools/check-git-version.mjs",
     "jest": "GIT_ALLOW_PROTOCOL=file LOG_LEVEL=fatal vitest run --logHeapUsage",
     "vitest": "GIT_ALLOW_PROTOCOL=file LOG_LEVEL=fatal vitest run --logHeapUsage",
-    "lint": "run-s ls-lint type-check oxlint eslint prettier markdown-lint git-check doc-fence-check",
-    "lint-fix": "run-s oxlint-fix eslint-fix prettier-fix markdown-lint-fix",
+    "lint": "run-s ls-lint type-check oxlint biome eslint prettier markdown-lint git-check doc-fence-check",
+    "lint-fix": "run-s oxlint-fix biome-fix eslint-fix prettier-fix markdown-lint-fix",
     "check": "tsx tools/check/index.ts",
     "ls-lint": "ls-lint",
     "markdown-lint": "markdownlint-cli2",
@@ -275,6 +278,7 @@
     "re2": "1.23.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.3.13",
     "@commander-js/extra-typings": "14.0.0",
     "@containerbase/eslint-plugin": "1.1.29",
     "@containerbase/istanbul-reports-html": "1.1.27",

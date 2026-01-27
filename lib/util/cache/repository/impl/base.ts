@@ -14,11 +14,13 @@ export abstract class RepoCacheBase implements RepoCache {
   protected platform = GlobalConfig.get('platform')!;
   private oldHash: string | null = null;
   private data: RepoCacheData = {};
+  protected readonly repository: string;
+  protected readonly fingerprint: string;
 
-  protected constructor(
-    protected readonly repository: string,
-    protected readonly fingerprint: string,
-  ) {}
+  protected constructor(repository: string, fingerprint: string) {
+    this.repository = repository;
+    this.fingerprint = fingerprint;
+  }
 
   protected abstract read(): Promise<string | null>;
 

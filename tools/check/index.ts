@@ -74,8 +74,15 @@ function pnpmScript(name: string): ParallelCheck {
   return { name, cmd: 'pnpm', args: [name] };
 }
 
-const FIX_CHECKS = ['oxlint-fix', 'eslint-fix', 'prettier-fix'].map(pnpmScript);
-const FIXABLE_CHECKS = ['oxlint', 'eslint', 'prettier'].map(pnpmScript);
+const FIX_CHECKS = [
+  'oxlint-fix',
+  'biome-fix',
+  'eslint-fix',
+  'prettier-fix',
+].map(pnpmScript);
+const FIXABLE_CHECKS = ['oxlint', 'biome', 'eslint', 'prettier'].map(
+  pnpmScript,
+);
 const OTHER_CHECKS = [
   'ls-lint',
   'git-check',

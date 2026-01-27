@@ -72,15 +72,19 @@ export class GithubGraphqlDatasourceFetcher<
   private cursor: string | null = null;
 
   private isPersistent: boolean | undefined;
+  private http: GithubHttp;
+  private datasourceAdapter: GithubGraphqlDatasourceAdapter<
+    GraphqlItem,
+    ResultItem
+  >;
 
   constructor(
     packageConfig: GithubPackageConfig,
-    private http: GithubHttp,
-    private datasourceAdapter: GithubGraphqlDatasourceAdapter<
-      GraphqlItem,
-      ResultItem
-    >,
+    http: GithubHttp,
+    datasourceAdapter: GithubGraphqlDatasourceAdapter<GraphqlItem, ResultItem>,
   ) {
+    this.http = http;
+    this.datasourceAdapter = datasourceAdapter;
     const { packageName, registryUrl } = packageConfig;
     [this.repoOwner, this.repoName] = packageName.split('/');
     this.baseUrl = getApiBaseUrl(registryUrl).replace(/\/v3\/$/, '/'); // Replace for GHE

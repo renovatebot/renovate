@@ -13,11 +13,13 @@ const cacheNamespace = 'datasource-docker-hub-cache';
 export class DockerHubCache {
   private isChanged = false;
   private reconciledIds = new Set<number>();
+  private dockerRepository: string;
+  private cache: DockerHubCacheData;
 
-  private constructor(
-    private dockerRepository: string,
-    private cache: DockerHubCacheData,
-  ) {}
+  private constructor(dockerRepository: string, cache: DockerHubCacheData) {
+    this.dockerRepository = dockerRepository;
+    this.cache = cache;
+  }
 
   static async init(dockerRepository: string): Promise<DockerHubCache> {
     let repoCache = await packageCache.get<DockerHubCacheData>(

@@ -82,10 +82,10 @@ export abstract class HttpBase<
     return undefined;
   }
 
-  constructor(
-    protected hostType: string,
-    options: HttpOptions = {},
-  ) {
+  protected hostType: string;
+
+  constructor(hostType: string, options: HttpOptions = {}) {
+    this.hostType = hostType;
     const retryLimit = getEnv().NODE_ENV === 'test' ? 0 : 2;
     this.options = merge<InternalGotOptions>(
       options,

@@ -51,7 +51,10 @@ export class SqlitePackageCache {
     return res;
   }
 
-  private constructor(private client: Database) {
+  private client: Database;
+
+  private constructor(client: Database) {
+    this.client = client;
     client.pragma('journal_mode = WAL');
     client.pragma("encoding = 'UTF-8'");
 
