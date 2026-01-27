@@ -717,7 +717,7 @@ export async function initRepo({
   if (forkToken) {
     logger.debug('Using forkToken for git init');
     authToken = coerceToNull(config.forkToken);
-  } /* v8 ignore next */ else {
+  } /* v8 ignore else */ else {
     const tokenType = opts.token?.startsWith('x-access-token:')
       ? 'app'
       : 'personal access';
