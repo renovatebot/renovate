@@ -19,7 +19,7 @@ import {
   TEMPORARY_ERROR,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages.ts';
-import { instrumentStandalone } from '../../instrumentation/decorator.ts';
+import { instrumented } from '../../instrumentation/instrumented.ts';
 import { instrument } from '../../instrumentation/index.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
@@ -398,7 +398,7 @@ export function isCloned(): boolean {
   return gitInitialized;
 }
 
-export const syncGit = instrumentStandalone(
+export const syncGit = instrumented(
   { name: 'syncGit' },
   async function (): Promise<void> {
     if (gitInitialized) {

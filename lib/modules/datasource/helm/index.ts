@@ -29,7 +29,9 @@ export class HelmDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `home` field or the `sources` field in the results.';
 
-  private async _getRepositoryData(helmRepository: string): Promise<HelmRepositoryData> {
+  private async _getRepositoryData(
+    helmRepository: string,
+  ): Promise<HelmRepositoryData> {
     const { val, err } = await this.http
       .getYamlSafe(
         'index.yaml',

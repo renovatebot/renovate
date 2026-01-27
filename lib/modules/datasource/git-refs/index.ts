@@ -62,7 +62,9 @@ export class GitRefsDatasource extends GitDatasource {
     return result;
   }
 
-  override getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  override getReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return cached(
       {
         namespace: `datasource-${GitRefsDatasource.id}`,

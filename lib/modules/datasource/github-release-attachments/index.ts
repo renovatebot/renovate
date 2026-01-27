@@ -98,7 +98,10 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
     return digest;
   }
 
-  downloadAndDigest(asset: GithubRestAsset, algorithm: string): Promise<string> {
+  downloadAndDigest(
+    asset: GithubRestAsset,
+    algorithm: string,
+  ): Promise<string> {
     return cached(
       {
         ttlMinutes: 1440,

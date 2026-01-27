@@ -111,7 +111,9 @@ export class HermitDatasource extends Datasource {
    * getHermitSearchManifest fetch the index.json from release
    * named index, parses it and returned the parsed JSON result
    */
-  private async _getHermitSearchManifest(u: URL): Promise<HermitSearchResult[] | null> {
+  private async _getHermitSearchManifest(
+    u: URL,
+  ): Promise<HermitSearchResult[] | null> {
     const registryUrl = u.toString();
     const host = coerceString(u.host);
     const groups = this.pathRegex.exec(coerceString(u.pathname))?.groups;

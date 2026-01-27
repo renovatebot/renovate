@@ -87,7 +87,9 @@ export class GoDirectDatasource extends Datasource {
    *  - Call the respective getReleases in github/gitlab to retrieve the tags
    *  - Filter module tags according to the module path
    */
-  private async _getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  private async _getReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     const { packageName } = config;
 
     let res: ReleaseResult | null = null;

@@ -53,7 +53,9 @@ export class GoDatasource extends Datasource {
     /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?\d{14}-(?<digest>[a-f0-9]{12})/,
   );
 
-  private _getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  private _getReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.goproxy.getReleases(config);
   }
 

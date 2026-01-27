@@ -72,7 +72,9 @@ export class GlasskubePackagesDatasource extends Datasource {
     return result;
   }
 
-  override getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  override getReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return cached(
       {
         namespace: `datasource-${GlasskubePackagesDatasource.id}`,

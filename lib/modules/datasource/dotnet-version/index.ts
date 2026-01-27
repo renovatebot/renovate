@@ -88,7 +88,10 @@ export class DotnetVersionDatasource extends Datasource {
     }
   }
 
-  getChannelReleases(releaseUrl: string, packageName: string): Promise<Release[]> {
+  getChannelReleases(
+    releaseUrl: string,
+    packageName: string,
+  ): Promise<Release[]> {
     return cached(
       {
         namespace: `datasource-${DotnetVersionDatasource.id}`,

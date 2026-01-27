@@ -52,7 +52,9 @@ export class GoProxyDatasource extends Datasource {
 
   readonly direct = new GoDirectDatasource();
 
-  private async _getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  private async _getReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     const { packageName } = config;
     logger.trace(`goproxy.getReleases(${packageName})`);
     const goproxy = getEnv().GOPROXY ?? 'https://proxy.golang.org,direct';

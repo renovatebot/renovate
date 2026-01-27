@@ -51,7 +51,9 @@ export class TypstDatasource extends Datasource {
     return result;
   }
 
-  override getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  override getReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return cached(
       {
         namespace: `datasource-${TypstDatasource.id}:registry-releases`,

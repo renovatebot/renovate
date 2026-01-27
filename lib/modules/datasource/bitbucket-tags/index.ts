@@ -124,7 +124,11 @@ export class BitbucketTagsDatasource extends Datasource {
     return cached(
       {
         namespace: BitbucketTagsDatasource.cacheNamespace,
-        key: BitbucketTagsDatasource.getCacheKey(registryUrl, repo, `tag-${tag}`),
+        key: BitbucketTagsDatasource.getCacheKey(
+          registryUrl,
+          repo,
+          `tag-${tag}`,
+        ),
       },
       () => this._getTagCommit(registryUrl, repo, tag),
     );
@@ -143,7 +147,11 @@ export class BitbucketTagsDatasource extends Datasource {
     return cached(
       {
         namespace: BitbucketTagsDatasource.cacheNamespace,
-        key: BitbucketTagsDatasource.getCacheKey(registryUrl, repo, 'mainbranch'),
+        key: BitbucketTagsDatasource.getCacheKey(
+          registryUrl,
+          repo,
+          'mainbranch',
+        ),
         ttlMinutes: 60,
       },
       () => this._getMainBranch(registryUrl, repo),

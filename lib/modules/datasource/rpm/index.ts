@@ -76,7 +76,9 @@ export class RpmDatasource extends Datasource {
   }
 
   // Fetches the primary.xml.gz URL from the repomd.xml file.
-  private async _getPrimaryGzipUrl(registryUrl: string): Promise<string | null> {
+  private async _getPrimaryGzipUrl(
+    registryUrl: string,
+  ): Promise<string | null> {
     const repomdUrl = joinUrlParts(
       registryUrl,
       RpmDatasource.repomdXmlFileName,

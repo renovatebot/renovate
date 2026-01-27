@@ -332,7 +332,14 @@ export class NugetV3Api {
         key: `source-url:${registryUrl}:${packageName}`,
         ttlMinutes: 10080, // 1 week
       },
-      () => this._getSourceUrlFromNupkg(http, registryUrl, packageName, packageVersion, nupkgUrl),
+      () =>
+        this._getSourceUrlFromNupkg(
+          http,
+          registryUrl,
+          packageName,
+          packageVersion,
+          nupkgUrl,
+        ),
     );
   }
 
