@@ -1,6 +1,5 @@
 import { isNonEmptyObject } from '@sindresorhus/is';
 import { getConfigFileNames } from '../../../../config/app-strings.ts';
-import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import {
   REPOSITORY_CLOSED_ONBOARDING,
@@ -12,6 +11,7 @@ import type { Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { getCache } from '../../../../util/cache/repository/index.ts';
+import { getInheritedOrGlobal } from '../../../../util/common.ts';
 import { getElapsedDays } from '../../../../util/date.ts';
 import { readLocalFile } from '../../../../util/fs/index.ts';
 import { getBranchCommit } from '../../../../util/git/index.ts';
@@ -163,7 +163,9 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
       closedOnboardingPr.createdAt!,
       false,
     );
-    const onboardingAutoCloseAge = GlobalConfig.get('onboardingAutoCloseAge');
+    const onboardingAutoCloseAge = getInheritedOrGlobal(
+      'onboardingAutoCloseAge',
+    );
     if (onboardingAutoCloseAge) {
       logger.debug(
         {
