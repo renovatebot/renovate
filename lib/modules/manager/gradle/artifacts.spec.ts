@@ -25,6 +25,9 @@ const adminConfig: RepoGlobalConfig = {
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
   dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+
+  // although not enabled by default, let's assume it is
+  allowedUnsafeExecutions: ['gradleWrapper'],
 };
 
 const osPlatformSpy = vi.spyOn(os, 'platform');
@@ -84,7 +87,7 @@ describe('modules/manager/gradle/artifacts', () => {
   });
 
   describe('isGradleExecutionAllowed', () => {
-    it('returns true when allowedUnsafeExecutions is empty (as it is a default option)', () => {
+    it('returns false when allowedUnsafeExecutions is empty (as it not enabled by default option)', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedUnsafeExecutions: undefined,
@@ -92,7 +95,7 @@ describe('modules/manager/gradle/artifacts', () => {
 
       const res = isGradleExecutionAllowed('gradlew');
 
-      expect(res).toBeTrue();
+      expect(res).toBeFalse();
     });
 
     it('returns true when allowedUnsafeExecutions includes `gradleWrapper`', () => {
