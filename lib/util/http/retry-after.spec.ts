@@ -1,5 +1,5 @@
 import { RequestError } from 'got';
-import { getRetryAfter, wrapWithRetry } from './retry-after';
+import { getRetryAfter, wrapWithRetry } from './retry-after.ts';
 
 function requestError(
   response: {

@@ -41,15 +41,15 @@ import {
 } from '@opentelemetry/semantic-conventions';
 import { isPromise } from '@sindresorhus/is';
 import { pkg } from '../expose.cjs';
-import { getEnv } from '../util/env';
-import { GitOperationSpanProcessor } from '../util/git/span-processor';
-import type { RenovateSpanOptions } from './types';
+import { getEnv } from '../util/env.ts';
+import { GitOperationSpanProcessor } from '../util/git/span-processor.ts';
+import type { RenovateSpanOptions } from './types.ts';
 import {
   isTraceDebuggingEnabled,
   isTraceSendingEnabled,
   isTracingEnabled,
   massageThrowable,
-} from './utils';
+} from './utils.ts';
 
 let instrumentations: Instrumentation[] = [];
 

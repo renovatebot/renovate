@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { DistroInfo } from './distro';
+import { DistroInfo } from './distro.ts';
 
 describe('modules/versioning/distro', () => {
   const di = new DistroInfo('data/ubuntu-distro-info.json');

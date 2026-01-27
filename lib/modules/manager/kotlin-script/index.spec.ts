@@ -1,6 +1,6 @@
-import { regEx } from '../../../util/regex';
-import { isRegexMatch } from '../../../util/string-match';
-import { defaultConfig } from '.';
+import { regEx } from '../../../util/regex.ts';
+import { isRegexMatch } from '../../../util/string-match.ts';
+import { defaultConfig } from './index.ts';
 
 describe('modules/manager/kotlin-script/index', () => {
   it('managerFilePatterns regex is correct', () => {

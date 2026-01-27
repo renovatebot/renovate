@@ -17,6 +17,10 @@ The config options below _must_ be configured in the bot/admin config, so in eit
 
 For information about how to configure Renovate with a `config.js` see the [Using `config.js` documentation](./getting-started/running.md#using-configjs).
 
+<!-- prettier-ignore -->
+!!! tip
+    This documentation corresponds with the JSON schema in [`docs.renovatebot.com/renovate-global-schema.json`](renovate-global-schema.json), and any [inherited config options](./config-overview.md#inherited-config) are also present in [`docs.renovatebot.com/renovate-inherited-schema.json`](renovate-inherited-schema.json).
+
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
 <!-- prettier-ignore -->

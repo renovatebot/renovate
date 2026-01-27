@@ -1,28 +1,28 @@
 import { mockDeep } from 'vitest-mock-extended';
-import { PLATFORM_RATE_LIMIT_EXCEEDED } from '../../constants/error-messages';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as memCache from '../../util/cache/memory';
-import * as _packageCache from '../../util/cache/package';
-import { setCustomEnv } from '../../util/env';
-import { GlobalConfig } from '../global';
-import type { AllConfig } from '../types';
-import * as _github from './github';
-import * as _local from './local';
-import * as _npm from './npm';
+import { PLATFORM_RATE_LIMIT_EXCEEDED } from '../../constants/error-messages.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import * as memCache from '../../util/cache/memory/index.ts';
+import * as _packageCache from '../../util/cache/package/index.ts';
+import { setCustomEnv } from '../../util/env.ts';
+import { GlobalConfig } from '../global.ts';
+import type { AllConfig } from '../types.ts';
+import * as _github from './github/index.ts';
+import * as presets from './index.ts';
+import * as _local from './local/index.ts';
+import * as _npm from './npm/index.ts';
 import {
   PRESET_DEP_NOT_FOUND,
   PRESET_INVALID_JSON,
   PRESET_NOT_FOUND,
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
-} from './util';
-import * as presets from '.';
-import { Fixtures } from '~test/fixtures';
-import { logger } from '~test/util';
+} from './util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { logger } from '~test/util.ts';
 
-vi.mock('./npm');
-vi.mock('./github');
-vi.mock('./local');
-vi.mock('../../util/cache/package', () => mockDeep());
+vi.mock('./npm/index.ts');
+vi.mock('./github/index.ts');
+vi.mock('./local/index.ts');
+vi.mock('../../util/cache/package/index.ts', () => mockDeep());
 
 const npm = vi.mocked(_npm);
 const local = vi.mocked(_local);

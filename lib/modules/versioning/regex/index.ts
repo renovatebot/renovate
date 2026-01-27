@@ -1,8 +1,8 @@
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
-import { regEx } from '../../../util/regex';
-import type { GenericVersion } from '../generic';
-import { GenericVersioningApi } from '../generic';
-import type { VersioningApiConstructor } from '../types';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
+import { regEx } from '../../../util/regex.ts';
+import type { GenericVersion } from '../generic.ts';
+import { GenericVersioningApi } from '../generic.ts';
+import type { VersioningApiConstructor } from '../types.ts';
 
 export const id = 'regex';
 export const displayName = 'Regular Expression';

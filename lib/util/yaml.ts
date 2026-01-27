@@ -8,8 +8,8 @@ import type {
 } from 'yaml';
 import { parseAllDocuments, parseDocument, stringify } from 'yaml';
 import type { ZodType } from 'zod';
-import { logger } from '../logger';
-import { stripTemplates } from './string';
+import { logger } from '../logger/index.ts';
+import { stripTemplates } from './string.ts';
 
 export interface YamlOptions<
   ResT = unknown,

@@ -1,6 +1,6 @@
-import type { RenovateConfig } from '../../types';
-import { MigrationsService } from '../migrations-service';
-import { PackageRulesMigration, renameMap } from './package-rules-migration';
+import type { RenovateConfig } from '../../types.ts';
+import { MigrationsService } from '../migrations-service.ts';
+import { PackageRulesMigration, renameMap } from './package-rules-migration.ts';
 
 describe('config/migrations/custom/package-rules-migration', () => {
   it('should preserve config order', () => {

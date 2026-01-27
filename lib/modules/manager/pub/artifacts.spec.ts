@@ -1,19 +1,19 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import * as docker from '../../../util/exec/docker';
-import * as _datasource from '../../datasource';
-import type { UpdateArtifact, UpdateArtifactsConfig } from '../types';
-import * as pub from '.';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { env, fs } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import * as docker from '../../../util/exec/docker/index.ts';
+import * as _datasource from '../../datasource/index.ts';
+import type { UpdateArtifact, UpdateArtifactsConfig } from '../types.ts';
+import * as pub from './index.ts';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { env, fs } from '~test/util.ts';
 
-vi.mock('../../../util/exec/env');
-vi.mock('../../../util/fs');
-vi.mock('../../../util/http');
-vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../../../util/http/index.ts');
+vi.mock('../../datasource/index.ts', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 

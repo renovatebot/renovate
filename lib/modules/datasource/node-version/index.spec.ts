@@ -1,8 +1,8 @@
-import { getPkgReleases } from '..';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import { datasource, defaultRegistryUrl } from './common';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { getPkgReleases } from '../index.ts';
+import { datasource, defaultRegistryUrl } from './common.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 
 describe('modules/datasource/node-version/index', () => {
   describe('getReleases', () => {

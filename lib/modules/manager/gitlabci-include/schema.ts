@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { toArray } from '../../../util/array';
-import { LooseArray } from '../../../util/schema-utils';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import type { PackageDependency } from '../types';
+import { toArray } from '../../../util/array.ts';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import type { PackageDependency } from '../types.ts';
 
 const GitlabInclude = z
   .object({

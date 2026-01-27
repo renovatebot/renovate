@@ -1,12 +1,12 @@
-import * as _cache from '../../../../util/cache/repository';
+import * as _cache from '../../../../util/cache/repository/index.ts';
 import type {
   BranchCache,
   RepoCacheData,
-} from '../../../../util/cache/repository/types';
-import { getPrCache, setPrCache } from './pr-cache';
-import { logger } from '~test/util';
+} from '../../../../util/cache/repository/types.ts';
+import { getPrCache, setPrCache } from './pr-cache.ts';
+import { logger } from '~test/util.ts';
 
-vi.mock('../../../../util/cache/repository');
+vi.mock('../../../../util/cache/repository/index.ts');
 const cache = vi.mocked(_cache);
 
 describe('workers/repository/update/pr/pr-cache', () => {

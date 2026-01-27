@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { updateDependency } from '.';
+import { updateDependency } from './index.ts';
 
 describe('modules/manager/copier/update', () => {
   describe('updateDependency', () => {

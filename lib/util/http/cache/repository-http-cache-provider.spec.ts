@@ -1,11 +1,11 @@
-import { Http } from '..';
-import * as memCache from '../../cache/memory';
-import { getCache, resetCache } from '../../cache/repository';
+import * as memCache from '../../cache/memory/index.ts';
+import { getCache, resetCache } from '../../cache/repository/index.ts';
+import { Http } from '../index.ts';
 import {
   aggressiveRepoCacheProvider,
   repoCacheProvider,
-} from './repository-http-cache-provider';
-import * as httpMock from '~test/http-mock';
+} from './repository-http-cache-provider.ts';
+import * as httpMock from '~test/http-mock.ts';
 
 describe('util/http/cache/repository-http-cache-provider', () => {
   beforeEach(() => {

@@ -1,4 +1,4 @@
-import { SeparateMajorReleasesMigration } from './separate-major-release-migration';
+import { SeparateMajorReleasesMigration } from './separate-major-release-migration.ts';
 
 describe('config/migrations/custom/separate-major-release-migration', () => {
   it('should migrate', async () => {

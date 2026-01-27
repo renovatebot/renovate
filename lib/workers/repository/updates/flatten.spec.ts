@@ -1,9 +1,9 @@
 import { isNumber } from '@sindresorhus/is';
-import { getConfig } from '../../../config/defaults';
-import { flattenUpdates, sanitizeDepName } from './flatten';
-import type { RenovateConfig } from '~test/util';
+import { getConfig } from '../../../config/defaults.ts';
+import { flattenUpdates, sanitizeDepName } from './flatten.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
-vi.mock('../../../util/git/semantic');
+vi.mock('../../../util/git/semantic.ts');
 
 let config: RenovateConfig;
 

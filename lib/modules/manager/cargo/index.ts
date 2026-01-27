@@ -1,14 +1,14 @@
-import type { Category } from '../../../constants';
-import { CrateDatasource } from '../../datasource/crate';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import { updateArtifacts } from './artifacts';
-import { extractPackageFile } from './extract';
-export { bumpPackageVersion } from './update';
-export { getRangeStrategy } from './range';
-export { updateLockedDependency } from './update-locked';
+import type { Category } from '../../../constants/index.ts';
+import { CrateDatasource } from '../../datasource/crate/index.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import { updateArtifacts } from './artifacts.ts';
+import { extractPackageFile } from './extract.ts';
+export { bumpPackageVersion } from './update.ts';
+export { getRangeStrategy } from './range.ts';
+export { updateLockedDependency } from './update-locked.ts';
 
 export const supportsLockFileMaintenance = true;
 

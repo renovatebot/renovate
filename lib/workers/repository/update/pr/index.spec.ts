@@ -1,47 +1,47 @@
 import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../../../config/global';
+import { GlobalConfig } from '../../../../config/global.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
-} from '../../../../constants/error-messages';
-import * as _comment from '../../../../modules/platform/comment';
-import { getPrBodyStruct } from '../../../../modules/platform/pr-body';
-import type { Pr } from '../../../../modules/platform/types';
-import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import type { PrCache } from '../../../../util/cache/repository/types';
-import { fingerprint } from '../../../../util/fingerprint';
-import { toBase64 } from '../../../../util/string';
-import * as _limits from '../../../global/limits';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
-import { embedChangelogs } from '../../changelog';
-import * as _statusChecks from '../branch/status-checks';
-import * as _prBody from './body';
-import type { ChangeLogChange, ChangeLogRelease } from './changelog/types';
-import * as _participants from './participants';
-import * as _prCache from './pr-cache';
-import { generatePrBodyFingerprintConfig } from './pr-fingerprint';
-import { ensurePr } from '.';
-import { git, logger, partial, platform, scm } from '~test/util';
+} from '../../../../constants/error-messages.ts';
+import * as _comment from '../../../../modules/platform/comment.ts';
+import { getPrBodyStruct } from '../../../../modules/platform/pr-body.ts';
+import type { Pr } from '../../../../modules/platform/types.ts';
+import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import type { PrCache } from '../../../../util/cache/repository/types.ts';
+import { fingerprint } from '../../../../util/fingerprint.ts';
+import { toBase64 } from '../../../../util/string.ts';
+import * as _limits from '../../../global/limits.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
+import { embedChangelogs } from '../../changelog/index.ts';
+import * as _statusChecks from '../branch/status-checks.ts';
+import * as _prBody from './body/index.ts';
+import type { ChangeLogChange, ChangeLogRelease } from './changelog/types.ts';
+import { ensurePr } from './index.ts';
+import * as _participants from './participants.ts';
+import * as _prCache from './pr-cache.ts';
+import { generatePrBodyFingerprintConfig } from './pr-fingerprint.ts';
+import { git, logger, partial, platform, scm } from '~test/util.ts';
 
-vi.mock('../../changelog');
+vi.mock('../../changelog/index.ts');
 
-vi.mock('../../../global/limits');
+vi.mock('../../../global/limits.ts');
 const limits = vi.mocked(_limits);
 
-vi.mock('../branch/status-checks');
+vi.mock('../branch/status-checks.ts');
 const checks = vi.mocked(_statusChecks);
 
-vi.mock('./body');
+vi.mock('./body/index.ts');
 const prBody = vi.mocked(_prBody);
 
-vi.mock('./participants');
+vi.mock('./participants.ts');
 const participants = vi.mocked(_participants);
 
-vi.mock('../../../../modules/platform/comment');
+vi.mock('../../../../modules/platform/comment.ts');
 const comment = vi.mocked(_comment);
 
-vi.mock('./pr-cache');
+vi.mock('./pr-cache.ts');
 const prCache = vi.mocked(_prCache);
 
 describe('workers/repository/update/pr/index', () => {

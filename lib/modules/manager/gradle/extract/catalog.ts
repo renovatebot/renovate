@@ -1,10 +1,10 @@
 import { isPlainObject, isString } from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
-import type { SkipReason } from '../../../../types';
-import { hasKey } from '../../../../util/object';
-import { escapeRegExp, regEx } from '../../../../util/regex';
-import { massage, parse as parseToml } from '../../../../util/toml';
-import type { PackageDependency } from '../../types';
+import type { SkipReason } from '../../../../types/index.ts';
+import { hasKey } from '../../../../util/object.ts';
+import { escapeRegExp, regEx } from '../../../../util/regex.ts';
+import { massage, parse as parseToml } from '../../../../util/toml.ts';
+import type { PackageDependency } from '../../types.ts';
 import type {
   GradleCatalog,
   GradleCatalogArtifactDescriptor,
@@ -13,7 +13,7 @@ import type {
   GradleVersionCatalogVersion,
   GradleVersionPointerTarget,
   VersionPointer,
-} from '../types';
+} from '../types.ts';
 
 function findVersionIndex(
   content: string,

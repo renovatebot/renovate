@@ -1,11 +1,11 @@
 import { TimeoutError } from 'got';
 import { z } from 'zod';
-import { ExecError } from '../util/exec/exec-error';
+import { ExecError } from '../util/exec/exec-error.ts';
 import prepareError, {
   prepareZodIssues,
   sanitizeValue,
   validateLogLevel,
-} from './utils';
+} from './utils.ts';
 
 describe('logger/utils', () => {
   afterEach(() => {

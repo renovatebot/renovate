@@ -1,16 +1,16 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
-import type { MergeStrategy } from '../../../config/types';
+import type { MergeStrategy } from '../../../config/types.ts';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_BLOCKED,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import * as hostRules from '../../../util/host-rules';
-import { regEx } from '../../../util/regex';
-import { parseUrl } from '../../../util/url';
-import { getPrBodyStruct } from '../pr-body';
-import type { GitUrlOption, Pr } from '../types';
-import type { PR, PRMergeMethod, Repo } from './types';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
+import { getPrBodyStruct } from '../pr-body.ts';
+import type { GitUrlOption, Pr } from '../types.ts';
+import type { PR, PRMergeMethod, Repo } from './types.ts';
 
 export function smartLinks(body: string): string {
   return body?.replace(regEx(/\]\(\.\.\/pull\//g), '](pulls/');

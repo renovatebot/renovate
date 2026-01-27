@@ -1,12 +1,12 @@
 import { isArray, isPlainObject, isString } from '@sindresorhus/is';
-import type { RenovateConfig } from '../config/types';
+import type { RenovateConfig } from '../config/types.ts';
 import {
   CONFIG_SECRETS_INVALID,
   CONFIG_VALIDATION,
   CONFIG_VARIABLES_INVALID,
-} from '../constants/error-messages';
-import { logger } from '../logger';
-import { capitalize } from './string';
+} from '../constants/error-messages.ts';
+import { logger } from '../logger/index.ts';
+import { capitalize } from './string.ts';
 
 export interface InterpolatorOptions {
   name: 'secrets' | 'variables';

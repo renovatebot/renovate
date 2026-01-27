@@ -1,20 +1,20 @@
-import { deduplicateArray } from '../../../util/array';
-import { CrateDatasource } from '../../datasource/crate';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { GoDatasource } from '../../datasource/go';
-import { JavaVersionDatasource } from '../../datasource/java-version';
-import { NodeVersionDatasource } from '../../datasource/node-version';
-import { NpmDatasource } from '../../datasource/npm';
-import { NugetDatasource } from '../../datasource/nuget';
-import { PypiDatasource } from '../../datasource/pypi';
-import { RubyVersionDatasource } from '../../datasource/ruby-version';
-import { RubygemsDatasource } from '../../datasource/rubygems';
-import { supportedDatasources as asdfSupportedDatasources } from '../asdf';
+import { deduplicateArray } from '../../../util/array.ts';
+import { CrateDatasource } from '../../datasource/crate/index.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GoDatasource } from '../../datasource/go/index.ts';
+import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
+import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
+import { NpmDatasource } from '../../datasource/npm/index.ts';
+import { NugetDatasource } from '../../datasource/nuget/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
+import { supportedDatasources as asdfSupportedDatasources } from '../asdf/index.ts';
 
-export { extractPackageFile } from './extract';
+export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'mise-en-place';
 export const url = 'https://mise.jdx.dev';

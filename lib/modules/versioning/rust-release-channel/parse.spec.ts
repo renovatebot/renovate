@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parse } from './parse';
+import { parse } from './parse.ts';
 
 describe('modules/versioning/rust-release-channel/parse', () => {
   describe('channel names', () => {

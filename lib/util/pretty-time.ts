@@ -1,8 +1,8 @@
 import { isNonEmptyString, isNumber } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import ms from 'ms';
-import { logger } from '../logger';
-import { regEx } from './regex';
+import { logger } from '../logger/index.ts';
+import { regEx } from './regex.ts';
 
 const splitRegex = regEx(/(.*?[a-z]+)/);
 

@@ -1,16 +1,16 @@
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import type { GithubRestRelease } from '../../../util/github/types';
-import { getApiBaseUrl } from '../../../util/github/url';
-import { GithubHttp } from '../../../util/http/github';
-import { regEx } from '../../../util/regex';
-import { streamToString } from '../../../util/streams';
-import { coerceString } from '../../../util/string';
-import { parseUrl } from '../../../util/url';
-import { id } from '../../versioning/hermit';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { HermitSearchResult } from './types';
+import { logger } from '../../../logger/index.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import type { GithubRestRelease } from '../../../util/github/types.ts';
+import { getApiBaseUrl } from '../../../util/github/url.ts';
+import { GithubHttp } from '../../../util/http/github.ts';
+import { regEx } from '../../../util/regex.ts';
+import { streamToString } from '../../../util/streams.ts';
+import { coerceString } from '../../../util/string.ts';
+import { parseUrl } from '../../../util/url.ts';
+import { id } from '../../versioning/hermit/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { HermitSearchResult } from './types.ts';
 
 /**
  * Hermit Datasource searches a given package from the specified `hermit-packages`

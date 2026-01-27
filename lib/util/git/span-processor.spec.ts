@@ -1,5 +1,5 @@
-import { GitOperationSpanProcessor } from './span-processor';
-import { partial } from '~test/util';
+import { GitOperationSpanProcessor } from './span-processor.ts';
+import { partial } from '~test/util.ts';
 
 describe('util/git/span-processor', () => {
   it('creates an instance', async () => {

@@ -1,7 +1,7 @@
 import { isNumber } from '@sindresorhus/is';
-import { matchesHost } from '../host-rules';
-import * as hostRules from '../host-rules';
-import type { ConcurrencyLimitRule, ThrottleLimitRule } from './types';
+import { matchesHost } from '../host-rules.ts';
+import * as hostRules from '../host-rules.ts';
+import type { ConcurrencyLimitRule, ThrottleLimitRule } from './types.ts';
 
 // The first match wins
 const concurrencyDefaults: ConcurrencyLimitRule[] = [

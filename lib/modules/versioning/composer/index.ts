@@ -1,11 +1,11 @@
 import { isNumber } from '@sindresorhus/is';
 import semver from 'semver';
 import { parseRange } from 'semver-utils';
-import { logger } from '../../../logger';
-import type { RangeStrategy } from '../../../types/versioning';
-import { regEx } from '../../../util/regex';
-import { api as npm } from '../npm';
-import type { NewValueConfig, VersioningApi } from '../types';
+import { logger } from '../../../logger/index.ts';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import { regEx } from '../../../util/regex.ts';
+import { api as npm } from '../npm/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'composer';
 export const displayName = 'Composer';

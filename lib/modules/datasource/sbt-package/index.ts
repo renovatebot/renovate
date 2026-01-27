@@ -1,18 +1,18 @@
 import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
-import { logger } from '../../../logger';
-import * as packageCache from '../../../util/cache/package';
-import { cache } from '../../../util/cache/package/decorator';
-import { Http } from '../../../util/http';
-import { regEx } from '../../../util/regex';
-import type { Timestamp } from '../../../util/timestamp';
-import { asTimestamp } from '../../../util/timestamp';
-import { ensureTrailingSlash, trimTrailingSlash } from '../../../util/url';
-import * as ivyVersioning from '../../versioning/ivy';
-import { compare } from '../../versioning/maven/compare';
-import { MavenDatasource } from '../maven';
-import { MAVEN_REPO } from '../maven/common';
-import { downloadHttpContent, downloadHttpProtocol } from '../maven/util';
+import { logger } from '../../../logger/index.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import { Http } from '../../../util/http/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { ensureTrailingSlash, trimTrailingSlash } from '../../../util/url.ts';
+import * as ivyVersioning from '../../versioning/ivy/index.ts';
+import { compare } from '../../versioning/maven/compare.ts';
+import { MAVEN_REPO } from '../maven/common.ts';
+import { MavenDatasource } from '../maven/index.ts';
+import { downloadHttpContent, downloadHttpProtocol } from '../maven/util.ts';
 import type {
   GetReleasesConfig,
   PostprocessReleaseConfig,
@@ -20,8 +20,8 @@ import type {
   RegistryStrategy,
   Release,
   ReleaseResult,
-} from '../types';
-import { extractPageLinks, getLatestVersion } from './util';
+} from '../types.ts';
+import { extractPageLinks, getLatestVersion } from './util.ts';
 
 interface ScalaDepCoordinate {
   groupId: string;

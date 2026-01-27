@@ -1,21 +1,21 @@
 import { codeBlock } from 'common-tags';
-import type { RenovateConfig } from '../../lib/config/types';
-import type { Category } from '../../lib/constants';
-import { getManagers } from '../../lib/modules/manager';
+import type { RenovateConfig } from '../../lib/config/types.ts';
+import type { Category } from '../../lib/constants/index.ts';
 import {
   getCustomManagers,
   isCustomManager,
-} from '../../lib/modules/manager/custom';
-import { readFile, updateFile } from '../utils';
-import type { OpenItems } from './github-query-items';
-import { generateFeatureAndBugMarkdown } from './github-query-items';
+} from '../../lib/modules/manager/custom/index.ts';
+import { getManagers } from '../../lib/modules/manager/index.ts';
+import { readFile, updateFile } from '../utils/index.ts';
+import type { OpenItems } from './github-query-items.ts';
+import { generateFeatureAndBugMarkdown } from './github-query-items.ts';
 import {
   formatUrls,
   getDisplayName,
   getModuleLink,
   getNameWithUrl,
   replaceContent,
-} from './utils';
+} from './utils.ts';
 
 const noCategoryID = 'no-category';
 const noCategoryDisplayName = 'No Category';

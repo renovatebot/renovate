@@ -1,4 +1,4 @@
-import type { GlobalPreset } from '../types';
+import type { GlobalPreset } from '../types.ts';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 

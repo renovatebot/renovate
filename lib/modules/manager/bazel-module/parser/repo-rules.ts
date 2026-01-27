@@ -1,8 +1,8 @@
-import { query as q } from 'good-enough-parser';
-import type { parser } from 'good-enough-parser';
-import { regEx } from '../../../../util/regex';
-import { kvParams } from './common';
-import type { Ctx } from './context';
+import { query as q } from '@renovatebot/good-enough-parser';
+import type { parser } from '@renovatebot/good-enough-parser';
+import { regEx } from '../../../../util/regex.ts';
+import { kvParams } from './common.ts';
+import type { Ctx } from './context.ts';
 
 // Store for tracking use_repo_rule assignments during parsing
 const repoRuleVariables = new Map<
@@ -15,7 +15,7 @@ const repoRuleVariables = new Map<
 export const useRepoRuleAssignment = q
   .sym<Ctx>((ctx, token) => {
     // Store the variable name for later use
-    (ctx as any)._tempVariableName = token.value;
+    ctx._tempVariableName = token.value;
     return ctx;
   })
   .op('=')
@@ -28,18 +28,16 @@ export const useRepoRuleAssignment = q
     search: q.many(
       q.str<Ctx>((ctx, token) => {
         // Collect the string arguments
-        if (!(ctx as any)._tempStrings) {
-          (ctx as any)._tempStrings = [];
-        }
-        (ctx as any)._tempStrings.push(token.value);
+        ctx._tempStrings ??= [];
+        ctx._tempStrings.push(token.value);
         return ctx;
       }),
     ),
     postHandler: (ctx, _tree) => {
-      const variableName = (ctx as any)._tempVariableName;
-      const strings = (ctx as any)._tempStrings;
+      const variableName = ctx._tempVariableName;
+      const strings = ctx._tempStrings;
 
-      if (variableName && strings.length >= 2) {
+      if (variableName && strings && strings.length >= 2) {
         const bzlFile = strings[0];
         const ruleName = strings[1];
 
@@ -52,8 +50,8 @@ export const useRepoRuleAssignment = q
       }
 
       // Clean up
-      delete (ctx as any)._tempVariableName;
-      delete (ctx as any)._tempStrings;
+      delete ctx._tempVariableName;
+      delete ctx._tempStrings;
 
       return ctx;
     },

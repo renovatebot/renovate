@@ -4,9 +4,9 @@ import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { expect } from 'vitest';
-import { logger } from '../../../../logger';
-import customConfig from './__fixtures__/config';
-import * as file from './file';
+import { logger } from '../../../../logger/index.ts';
+import customConfig from './__fixtures__/config.js';
+import * as file from './file.ts';
 
 describe('workers/global/config/parse/file', () => {
   const processExitSpy = vi.spyOn(process, 'exit');

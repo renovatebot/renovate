@@ -1,9 +1,9 @@
 import { isNonEmptyArray, isNonEmptyString, isString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { GithubHttp } from '../../../util/http/github';
-import { getPrBodyStruct } from '../pr-body';
-import type { MergePRConfig } from '../types';
-import type { GhPr, GhRestPr } from './types';
+import { logger } from '../../../logger/index.ts';
+import { GithubHttp } from '../../../util/http/github.ts';
+import { getPrBodyStruct } from '../pr-body.ts';
+import type { MergePRConfig } from '../types.ts';
+import type { GhPr, GhRestPr } from './types.ts';
 
 export const githubApi = new GithubHttp();
 

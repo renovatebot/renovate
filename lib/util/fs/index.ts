@@ -4,9 +4,9 @@ import { isNonEmptyString } from '@sindresorhus/is';
 import { findUp } from 'find-up';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { GlobalConfig } from '../../config/global';
-import { logger } from '../../logger';
-import { ensureCachePath, ensureLocalPath, isValidPath } from './util';
+import { GlobalConfig } from '../../config/global.ts';
+import { logger } from '../../logger/index.ts';
+import { ensureCachePath, ensureLocalPath, isValidPath } from './util.ts';
 
 export const pipeline = util.promisify(stream.pipeline);
 

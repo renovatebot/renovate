@@ -1,17 +1,17 @@
 import { Marshal } from '@qnighy/marshal';
 import type { ZodError } from 'zod';
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { Http, HttpError } from '../../../util/http';
-import { AsyncResult, Result } from '../../../util/result';
-import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url';
-import * as rubyVersioning from '../../versioning/ruby';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { getV1Releases } from './common';
-import { MetadataCache } from './metadata-cache';
-import { GemInfo, MarshalledVersionInfo } from './schema';
-import { VersionsEndpointCache } from './versions-endpoint-cache';
+import { logger } from '../../../logger/index.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { Http, HttpError } from '../../../util/http/index.ts';
+import { AsyncResult, Result } from '../../../util/result.ts';
+import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url.ts';
+import * as rubyVersioning from '../../versioning/ruby/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { getV1Releases } from './common.ts';
+import { MetadataCache } from './metadata-cache.ts';
+import { GemInfo, MarshalledVersionInfo } from './schema.ts';
+import { VersionsEndpointCache } from './versions-endpoint-cache.ts';
 
 function unlessServerSide<
   T extends NonNullable<unknown>,

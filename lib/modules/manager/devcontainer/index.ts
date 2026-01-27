@@ -1,10 +1,10 @@
-import type { Category } from '../../../constants';
-import { DockerDatasource } from '../../datasource/docker';
-import { GolangVersionDatasource } from '../../datasource/golang-version';
-import { NodeVersionDatasource } from '../../datasource/node-version';
-import { PythonVersionDatasource } from '../../datasource/python-version';
-import { RubyVersionDatasource } from '../../datasource/ruby-version';
-export { extractPackageFile } from './extract';
+import type { Category } from '../../../constants/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { GolangVersionDatasource } from '../../datasource/golang-version/index.ts';
+import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
+import { PythonVersionDatasource } from '../../datasource/python-version/index.ts';
+import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+export { extractPackageFile } from './extract.ts';
 
 export const name = 'Dev Container';
 export const url =

@@ -1,7 +1,7 @@
-import type { ReleaseResult } from '../../../../modules/datasource/types';
-import { get as getVersioning } from '../../../../modules/versioning/index';
-import { asTimestamp } from '../../../../util/timestamp';
-import { calculateMostRecentTimestamp } from '../../../../workers/repository/process/lookup/timestamps';
+import type { ReleaseResult } from '../../../../modules/datasource/types.ts';
+import { get as getVersioning } from '../../../../modules/versioning/index.ts';
+import { asTimestamp } from '../../../../util/timestamp.ts';
+import { calculateMostRecentTimestamp } from '../../../../workers/repository/process/lookup/timestamps.ts';
 
 const versioning = getVersioning('semver');
 

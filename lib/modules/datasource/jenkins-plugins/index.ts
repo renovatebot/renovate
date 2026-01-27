@@ -1,14 +1,14 @@
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { clone } from '../../../util/clone';
-import { asTimestamp } from '../../../util/timestamp';
-import { ensureTrailingSlash } from '../../../util/url';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { clone } from '../../../util/clone.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import type {
   JenkinsPluginsInfoResponse,
   JenkinsPluginsVersionsResponse,
-} from './types';
+} from './types.ts';
 
 export class JenkinsPluginsDatasource extends Datasource {
   static readonly id = 'jenkins-plugins';

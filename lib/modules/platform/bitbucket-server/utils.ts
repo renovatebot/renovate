@@ -1,16 +1,15 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
-import { URL } from 'node:url';
 import { isNonEmptyString } from '@sindresorhus/is';
-import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { HostRule } from '../../../types';
-import type { GitOptions, GitProtocol } from '../../../types/git';
-import * as git from '../../../util/git';
-import { regEx } from '../../../util/regex';
-import { parseUrl } from '../../../util/url';
-import { getPrBodyStruct } from '../pr-body';
-import type { GitUrlOption } from '../types';
-import type { BbsPr, BbsRestPr, BbsRestRepo, BitbucketError } from './types';
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { GitOptions, GitProtocol } from '../../../types/git.ts';
+import type { HostRule } from '../../../types/index.ts';
+import * as git from '../../../util/git/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
+import { getPrBodyStruct } from '../pr-body.ts';
+import type { GitUrlOption } from '../types.ts';
+import type { BbsPr, BbsRestPr, BbsRestRepo, BitbucketError } from './types.ts';
 
 export const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
   'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException';

@@ -1,9 +1,9 @@
-import { cache } from '../../../util/cache/package/decorator';
-import type { PackageCacheNamespace } from '../../../util/cache/package/namespaces';
-import { ensureTrailingSlash } from '../../../util/url';
-import * as azureApi from '../../platform/azure/azure-got-wrapper';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import type { PackageCacheNamespace } from '../../../util/cache/package/namespaces.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import * as azureApi from '../../platform/azure/azure-got-wrapper.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 
 export class AzureTagsDatasource extends Datasource {
   static readonly id = 'azure-tags';

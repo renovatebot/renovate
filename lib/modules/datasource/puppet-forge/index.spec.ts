@@ -1,7 +1,7 @@
-import { getPkgReleases } from '..';
-import { PuppetForgeDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import { getPkgReleases } from '../index.ts';
+import { PuppetForgeDatasource } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 
 const puppetforgeReleases = Fixtures.get('puppetforge-response.json');
 
