@@ -64,7 +64,7 @@ export async function cached<T>(
     return fn();
   }
 
-  // istanbul ignore if
+  // istanbul ignore if -- TODO: add test #40625
   if (!namespace || !key) {
     return fn();
   }
