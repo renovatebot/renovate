@@ -1,4 +1,10 @@
-import { isString, isUndefined, isUrlString } from '@sindresorhus/is';
+import {
+  isEmptyString,
+  isNonEmptyString,
+  isString,
+  isUndefined,
+  isUrlString,
+} from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
@@ -121,19 +127,15 @@ export function createGithubToolConfig(
 ): BackendToolingConfig {
   let extractVersion: string | undefined = undefined;
   const hasVPrefix = version.startsWith('v');
+  const prefix = toolOptions.version_prefix;
 
-  if (isString(toolOptions.version_prefix)) {
-    const prefix = toolOptions.version_prefix;
-    if (prefix === '') {
-      // Empty prefix - no extractVersion needed if version has 'v'
-      if (!hasVPrefix) {
-        extractVersion = '^(?<version>.+)';
-      }
-    } else {
-      // Custom prefix - escape special regex chars
-      const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      extractVersion = `^${escapedPrefix}(?<version>.+)`;
-    }
+  if (isNonEmptyString(prefix)) {
+    // Custom prefix - escape special regex chars
+    const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    extractVersion = `^${escapedPrefix}(?<version>.+)`;
+  } else if (isEmptyString(prefix) && !hasVPrefix) {
+    // Empty prefix - no extractVersion needed if version starts with 'v'
+    extractVersion = '^(?<version>.+)';
   } else if (!hasVPrefix) {
     // Default: strip 'v' prefix if current version doesn't have it
     extractVersion = '^v?(?<version>.+)';
