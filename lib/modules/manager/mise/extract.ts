@@ -16,6 +16,7 @@ import {
   createCargoToolConfig,
   createDotnetToolConfig,
   createGemToolConfig,
+  createGithubToolConfig,
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
@@ -144,6 +145,8 @@ function getToolConfig(
       return createSpmToolConfig(toolName);
     case 'ubi':
       return createUbiToolConfig(toolName, version, toolOptions);
+    case 'github':
+      return createGithubToolConfig(toolName, version, toolOptions);
     default:
       // Unsupported backend
       return null;
