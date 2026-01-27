@@ -200,10 +200,5 @@ function createDependency(
     };
   }
 
-  return {
-    depName: name,
-    currentValue: version,
-    // Spread the config last to override other properties
-    ...config,
-  };
+  return Object.assign({ depName: name, currentValue: version }, config);
 }

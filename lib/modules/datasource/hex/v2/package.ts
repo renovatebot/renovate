@@ -5,7 +5,7 @@
 // source: package.proto
 
 // istanbul ignore file
-/* eslint-disable */
+
 import * as _m0 from 'protobufjs/minimal';
 
 export const protobufPackage = '';
@@ -432,7 +432,7 @@ function bytesFromBase64(b64: string): Uint8Array {
 
 type Builtin =
   | Date
-  | Function
+  | ((...args: never[]) => unknown)
   | Uint8Array
   | string
   | number
@@ -443,18 +443,19 @@ export type DeepPartial<T> = T extends Builtin
   ? T
   : T extends globalThis.Array<infer U>
     ? globalThis.Array<DeepPartial<U>>
-    : T extends ReadonlyArray<infer U>
-      ? ReadonlyArray<DeepPartial<U>>
-      : T extends {}
+    : T extends readonly (infer U)[]
+      ? readonly DeepPartial<U>[]
+      : T extends object
         ? { [K in keyof T]?: DeepPartial<T[K]> }
         : Partial<T>;
 
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin
   ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & {
-      [K in Exclude<keyof I, KeysOfUnion<P>>]: never;
-    };
+  : P & { [K in keyof P]: Exact<P[K], I[K]> } & Record<
+        Exclude<keyof I, KeysOfUnion<P>>,
+        never
+      >;
 
 function isSet(value: any): boolean {
   return value !== null && value !== undefined;

@@ -4,17 +4,17 @@ import { parseUrl } from '../url.ts';
 // TODO: remove when code is refactored (#9651)
 
 Object.defineProperty(HttpError.prototype, 'statusCode', {
-  get: function statusCode(this: HttpError) {
+  get(this: HttpError) {
     return this.response?.statusCode;
   },
   configurable: true, // required by azure tests
 });
 
 Object.defineProperty(HttpError.prototype, 'body', {
-  get: function body(this: HttpError): unknown {
+  get(this: HttpError): unknown {
     return this.response?.body;
   },
-  set: function body(this: HttpError, value: unknown): void {
+  set(this: HttpError, value: unknown): void {
     if (this.response) {
       this.response.body = value;
     }
@@ -23,20 +23,20 @@ Object.defineProperty(HttpError.prototype, 'body', {
 });
 
 Object.defineProperty(HttpError.prototype, 'headers', {
-  get: function headers(this: HttpError) {
+  get(this: HttpError) {
     return this.response?.headers;
   },
 });
 
 Object.defineProperty(HttpError.prototype, 'url', {
-  get: function url(this: HttpError) {
+  get(this: HttpError) {
     return this.response?.url;
   },
   configurable: true,
 });
 
 Object.defineProperty(HttpError.prototype, 'host', {
-  get: function url(this: HttpError) {
+  get(this: HttpError) {
     const urlStr = this.response?.url;
     const url = urlStr ? parseUrl(urlStr) : null;
     return url?.host;

@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import {
   EXTERNAL_HOST_ERROR,
@@ -23,7 +24,6 @@ import type {
   GetReleasesConfig,
   ReleaseResult,
 } from './types.ts';
-import { logger } from '~test/util.ts';
 
 const datasource = 'dummy';
 const packageName = 'package';

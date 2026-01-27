@@ -1,7 +1,7 @@
-import { setTimeout } from 'timers/promises';
 import { isArray, isEmptyArray, isNonEmptyArray } from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
+import { setTimeout } from 'timers/promises';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -75,6 +75,7 @@ import {
   getRepoUrl,
   prInfo,
 } from './utils.ts';
+
 export { extractRulesFromCodeOwnersLines } from './code-owners.ts';
 
 let config: {
@@ -830,7 +831,8 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/\bPRs\b/g), 'MRs')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
     // Strip unicode null characters as GitLab markdown does not permit them
-    .replace(regEx(/\u0000/g), ''); // eslint-disable-line no-control-regex
+    // oxlint-disable-next-line no-control-regex
+    .replace(regEx(/\u0000/g), '');
   return smartTruncate(desc, maxBodyLength());
 }
 

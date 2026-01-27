@@ -49,7 +49,7 @@ function checkNode(node, files, file) {
   }
 }
 
-describe('index', async () => {
+void describe('index', async () => {
   await describe('validate links', async () => {
     const todo = await glob('**/*.md', { cwd: 'tmp/docs' });
     const files = new Set(todo);

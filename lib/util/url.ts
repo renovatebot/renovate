@@ -1,10 +1,5 @@
-import {
-  isArray,
-  isNonEmptyString,
-  isString,
-  isUrlInstance,
-} from '@sindresorhus/is';
-// eslint-disable-next-line no-restricted-imports
+import { isNonEmptyString, isString, isUrlInstance } from '@sindresorhus/is';
+// oxlint-disable-next-line no-restricted-imports
 import _parseLinkHeader from 'parse-link-header';
 import urlJoin from 'url-join';
 import { logger } from '../logger/index.ts';
@@ -74,17 +69,22 @@ export function replaceUrlPath(baseUrl: string | URL, path: string): string {
   return urlJoin(origin, path);
 }
 
-export function getQueryString(params: Record<string, any>): string {
+type Primitive = string | number | boolean | null | undefined;
+
+export function getQueryString<
+  T extends { [K in keyof T]: Primitive | Primitive[] },
+>(params: T): string {
   const usp = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (isArray<object>(v)) {
+  for (const [k, val] of Object.entries(params)) {
+    const v = val as Primitive | Primitive[];
+    if (Array.isArray(v)) {
       for (const item of v) {
-        // TODO: fix me?
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string
-        usp.append(k, item.toString());
+        if (item !== null && item !== undefined) {
+          usp.append(k, String(item));
+        }
       }
-    } else {
-      usp.append(k, v.toString());
+    } else if (v !== null && v !== undefined) {
+      usp.append(k, String(v));
     }
   }
   return usp.toString();

@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { z } from 'zod';
+import { logger } from '~test/util.ts';
 import {
   Ini,
   Json,
@@ -16,7 +17,6 @@ import {
   withDebugMessage,
   withTraceMessage,
 } from './index.ts';
-import { logger } from '~test/util.ts';
 
 describe('util/schema-utils/index', () => {
   describe('LooseArray', () => {

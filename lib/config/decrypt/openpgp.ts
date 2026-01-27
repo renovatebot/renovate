@@ -25,7 +25,7 @@ export async function tryDecryptOpenPgp(
   try {
     const pk = await pgp.readPrivateKey({
       // prettier-ignore
-      armoredKey: privateKey.replace(regEx(/\n[ \t]+/g), '\n'), // little massage to help a common problem
+      armoredKey: privateKey.replace(regEx(/\n[ \t]+/g), "\n"), // little massage to help a common problem
     });
     const startBlock = '-----BEGIN PGP MESSAGE-----\n\n';
     const endBlock = '\n-----END PGP MESSAGE-----';

@@ -1,12 +1,12 @@
 import type { Indent } from 'detect-indent';
+import { Fixtures } from '~test/fixtures.ts';
+import { partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import type { Pr } from '../../../modules/platform/types.ts';
 import { checkConfigMigrationBranch } from './branch/index.ts';
 import { MigratedDataFactory } from './branch/migrated-data.ts';
 import { configMigration } from './index.ts';
 import { ensureConfigMigrationPr } from './pr/index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { partial } from '~test/util.ts';
 
 vi.mock('./pr/index.ts');
 vi.mock('./branch/index.ts');

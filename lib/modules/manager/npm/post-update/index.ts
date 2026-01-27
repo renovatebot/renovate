@@ -534,10 +534,9 @@ export async function getAdditionalFiles(
       /* v8 ignore next -- needs test */
       if (res.stderr?.includes(`Couldn't find any versions for`)) {
         for (const upgrade of config.upgrades) {
-          /* eslint-disable no-useless-escape */
           if (
             res.stderr.includes(
-              `Couldn't find any versions for \\\"${upgrade.depName}\\\"`,
+              `Couldn't find any versions for "${upgrade.depName}"`,
             )
           ) {
             logger.debug(
@@ -551,14 +550,13 @@ export async function getAdditionalFiles(
               NpmDatasource.id,
             );
           }
-          /* eslint-enable no-useless-escape */
         }
       }
 
       artifactErrors.push({
         lockFile: yarnLock,
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        stderr: res.stderr || res.stdout,
+
+        stderr: res.stderr ?? res.stdout,
       });
     } else {
       const existingContent = await getFile(
@@ -629,8 +627,8 @@ export async function getAdditionalFiles(
 
       artifactErrors.push({
         lockFile: pnpmShrinkwrap,
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        stderr: res.stderr || res.stdout,
+
+        stderr: res.stderr ?? res.stdout,
       });
     } else {
       const existingContent = await getFile(

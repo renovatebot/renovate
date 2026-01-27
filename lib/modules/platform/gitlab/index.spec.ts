@@ -1,6 +1,8 @@
 // TODO fix mocks
 import _timers from 'timers/promises';
 import { mockDeep } from 'vitest-mock-extended';
+import * as httpMock from '~test/http-mock.ts';
+import { git, hostRules, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
@@ -18,8 +20,6 @@ import { toBase64 } from '../../../util/string.ts';
 import type { RepoParams } from '../index.ts';
 import * as prBodyModule from '../utils/pr-body.ts';
 import * as gitlab from './index.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { git, hostRules, logger } from '~test/util.ts';
 
 vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../../util/git/index.ts', () => mockDeep());

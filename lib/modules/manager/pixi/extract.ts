@@ -1,6 +1,5 @@
 import { isString } from '@sindresorhus/is';
 import { z } from 'zod';
-
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getSiblingFileName, localPathExists } from '../../../util/fs/index.ts';

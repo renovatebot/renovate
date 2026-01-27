@@ -1,7 +1,7 @@
-import { pathToFileURL } from 'url';
 import { isFunction } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import upath from 'upath';
+import { pathToFileURL } from 'url';
 import { massageConfig } from '../../../../config/massage.ts';
 import { migrateConfig } from '../../../../config/migration.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';

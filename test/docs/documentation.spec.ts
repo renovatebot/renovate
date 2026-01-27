@@ -225,17 +225,16 @@ describe('docs/documentation', () => {
       });
     });
 
-    describe('docs/usage/templates.md', async () => {
-      async function getAdditionalHandlebarsHelpersHeaders(): Promise<
-        string[]
-      > {
+    describe('docs/usage/templates.md', () => {
+      let additionalHandlebarsHelpers: string[];
+
+      beforeAll(async () => {
         const content = await fs.readFile(`docs/usage/templates.md`, 'utf8');
         const matches = content.match(/\n### (.*?)\n/g) ?? [];
-        return matches.map((match) => match.substring(5, match.length - 1));
-      }
-
-      const additionalHandlebarsHelpers =
-        await getAdditionalHandlebarsHelpersHeaders();
+        additionalHandlebarsHelpers = matches.map((match) =>
+          match.substring(5, match.length - 1),
+        );
+      });
 
       it('has headers sorted alphabetically', () => {
         expect(additionalHandlebarsHelpers).toEqual(

@@ -80,10 +80,10 @@ describe('config/presets/internal/custom-managers', () => {
           currentValue: '1.5.7',
           datasource: 'github-releases',
           depName: 'hashicorp/terraform',
+          extractVersion: '^v(?<version>.+)$',
           replaceString:
             '# renovate: datasource=github-releases depName=hashicorp/terraform versioning=hashicorp extractVersion=^v(?<version>.+)$\n          TERRAFORM_VERSION: 1.5.7\n',
           versioning: 'hashicorp',
-          extractVersion: '^v(?<version>.+)$',
         },
         {
           currentValue: 'kustomize/v5.2.1',
@@ -98,12 +98,12 @@ describe('config/presets/internal/custom-managers', () => {
           currentValue: '5:28.5.1-1~ubuntu.24.04~noble',
           datasource: 'deb',
           depName: 'docker-ce-cli',
-          replaceString:
-            "# renovate: datasource=deb depName=docker-ce-cli versioning=deb registryUrl=https://download.docker.com/linux/ubuntu?suite=noble&components=stable&binaryArch=amd64\n          DOCKER_CE_CLI_VERSION: '5:28.5.1-1~ubuntu.24.04~noble'\n",
-          versioning: 'deb',
           registryUrls: [
             'https://download.docker.com/linux/ubuntu?suite=noble&components=stable&binaryArch=amd64',
           ],
+          replaceString:
+            "# renovate: datasource=deb depName=docker-ce-cli versioning=deb registryUrl=https://download.docker.com/linux/ubuntu?suite=noble&components=stable&binaryArch=amd64\n          DOCKER_CE_CLI_VERSION: '5:28.5.1-1~ubuntu.24.04~noble'\n",
+          versioning: 'deb',
         },
       ]);
     });
@@ -258,9 +258,9 @@ describe('config/presets/internal/custom-managers', () => {
           currentValue: 'v5.2.1',
           datasource: 'github-releases',
           depName: 'kubernetes-sigs/kustomize',
+          extractVersion: '^kustomize/(?<version>.+)$',
           replaceString:
             '# renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$ extractVersion=^kustomize/(?<version>.+)$\n  - export KUSTOMIZE_VERSION v5.2.1\n',
-          extractVersion: '^kustomize/(?<version>.+)$',
           versioning:
             'regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
         },
@@ -383,9 +383,9 @@ describe('config/presets/internal/custom-managers', () => {
           currentValue: 'v5.2.1',
           datasource: 'github-releases',
           depName: 'kubernetes-sigs/kustomize',
+          extractVersion: '^kustomize/(?<version>.+)$',
           replaceString:
             '# renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$ extractVersion=^kustomize/(?<version>.+)$\nENV KUSTOMIZE_VERSION v5.2.1\n',
-          extractVersion: '^kustomize/(?<version>.+)$',
           versioning:
             'regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
         },
@@ -489,10 +489,10 @@ describe('config/presets/internal/custom-managers', () => {
           currentValue: '1.5.7',
           datasource: 'github-releases',
           depName: 'hashicorp/terraform',
+          extractVersion: '^v(?<version>.+)$',
           replaceString:
             '# renovate: datasource=github-releases depName=hashicorp/terraform versioning=hashicorp extractVersion=^v(?<version>.+)$\n  TERRAFORM_VERSION: 1.5.7\n',
           versioning: 'hashicorp',
-          extractVersion: '^v(?<version>.+)$',
         },
         {
           currentValue: 'kustomize/v5.2.1',
@@ -507,12 +507,12 @@ describe('config/presets/internal/custom-managers', () => {
           currentValue: '5:28.5.1-1~ubuntu.24.04~noble',
           datasource: 'deb',
           depName: 'docker-ce-cli',
-          replaceString:
-            "# renovate: datasource=deb depName=docker-ce-cli versioning=deb registryUrl=https://download.docker.com/linux/ubuntu?suite=noble&components=stable&binaryArch=amd64\n  DOCKER_CE_CLI_VERSION: '5:28.5.1-1~ubuntu.24.04~noble'\n",
-          versioning: 'deb',
           registryUrls: [
             'https://download.docker.com/linux/ubuntu?suite=noble&components=stable&binaryArch=amd64',
           ],
+          replaceString:
+            "# renovate: datasource=deb depName=docker-ce-cli versioning=deb registryUrl=https://download.docker.com/linux/ubuntu?suite=noble&components=stable&binaryArch=amd64\n  DOCKER_CE_CLI_VERSION: '5:28.5.1-1~ubuntu.24.04~noble'\n",
+          versioning: 'deb',
         },
       ]);
     });

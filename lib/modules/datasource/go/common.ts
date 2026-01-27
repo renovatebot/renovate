@@ -5,7 +5,6 @@ import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
 import { getSourceUrl as gitlabSourceUrl } from '../gitlab-tags/util.ts';
-
 import type { DataSource } from './types.ts';
 
 export type GoproxyFallback =

@@ -1,10 +1,10 @@
+import * as httpMock from '~test/http-mock.ts';
 import { PLATFORM_NOT_FOUND } from '../../constants/error-messages.ts';
 import type { PlatformId } from '../../constants/index.ts';
 import { loadModules } from '../../util/modules.ts';
 import api from './api.ts';
 import * as platform from './index.ts';
 import type { Platform } from './types.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 vi.unmock('.');
 vi.unmock('./scm');

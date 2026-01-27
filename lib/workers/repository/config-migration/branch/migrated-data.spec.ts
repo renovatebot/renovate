@@ -1,5 +1,6 @@
 import detectIndent from 'detect-indent';
-
+import { Fixtures } from '~test/fixtures.ts';
+import { scm } from '~test/util.ts';
 import { migrateConfig } from '../../../../config/migration.ts';
 import { logger } from '../../../../logger/index.ts';
 import { readLocalFile } from '../../../../util/fs/index.ts';
@@ -9,8 +10,6 @@ import {
   MigratedDataFactory,
   applyPrettierFormatting,
 } from './migrated-data.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { scm } from '~test/util.ts';
 
 vi.mock('../../../../config/migration.ts');
 vi.mock('../../../../util/fs/index.ts');

@@ -27,7 +27,6 @@ import type {
 import { applyGitSource } from '../../util.ts';
 import { type PyProject, UvLockfile } from '../schema.ts';
 import { depTypes } from '../utils.ts';
-
 import { BasePyProjectProcessor } from './abstract.ts';
 
 const uvUpdateCMD = 'uv lock';

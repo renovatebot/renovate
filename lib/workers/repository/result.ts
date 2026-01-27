@@ -1,5 +1,4 @@
 import type { RenovateConfig } from '../../config/types.ts';
-
 import type {
   ConfigErrors,
   EXTERNAL_HOST_ERROR,
@@ -15,7 +14,6 @@ import {
   MISSING_API_CREDENTIALS,
   RepositoryErrors,
 } from '../../constants/error-messages.ts';
-
 import { logger } from '../../logger/index.ts';
 
 export type ProcessStatus =

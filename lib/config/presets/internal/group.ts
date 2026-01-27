@@ -3,8 +3,6 @@ import * as monorepos from './monorepos.ts';
 
 const nonPinUpdateTypes = ['digest', 'patch', 'minor', 'major'];
 
-/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
-
 const staticGroups = {
   all: {
     description: 'Group all updates together.',

@@ -1,5 +1,4 @@
 import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
-
 import { getRangeStrategy } from '../../../../modules/manager/index.ts';
 import type { LookupUpdate } from '../../../../modules/manager/types.ts';
 import * as allVersioning from '../../../../modules/versioning/index.ts';
