@@ -28,6 +28,9 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
+
+  // although not enabled by default, let's assume it is
+  allowedUnsafeExecutions: ['gradleWrapper'],
 };
 
 const config: UpdateArtifactsConfig = {
