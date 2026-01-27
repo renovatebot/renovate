@@ -90,6 +90,11 @@ describe('workers/repository/onboarding/branch/check', () => {
       vi.useFakeTimers();
     });
 
+    afterAll(() => {
+      vi.useRealTimers();
+      InheritConfig.reset();
+    });
+
     it('adds closing comment if exactly at onboardingAutoCloseAge', async () => {
       const now = DateTime.now();
       vi.setSystemTime(now.toMillis());
