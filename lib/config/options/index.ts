@@ -108,6 +108,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: true,
     globalOnly: true,
+    cli: false,
   },
   {
     name: 'userAgent',
