@@ -19,12 +19,18 @@ type LoggerFunction = (p1: string | Record<string, any>, p2?: string) => void;
 export class RenovateLogger implements Logger {
   readonly logger: Logger = { once: { reset: onceReset } } as any;
   readonly once = this.logger.once;
+  private readonly bunyanLogger: bunyan;
+  private context: string;
+  private meta: Record<string, unknown>;
 
   constructor(
-    private readonly bunyanLogger: bunyan,
-    private context: string,
-    private meta: Record<string, unknown>,
+    bunyanLogger: bunyan,
+    context: string,
+    meta: Record<string, unknown>,
   ) {
+    this.bunyanLogger = bunyanLogger;
+    this.context = context;
+    this.meta = meta;
     for (const level of loggerLevels) {
       this.logger[level] = this.logFactory(level) as never;
       this.logger.once[level] = this.logOnceFn(level);

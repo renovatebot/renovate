@@ -15,12 +15,16 @@ import { prInfo } from './utils.ts';
 export class GitlabPrCache {
   private items: GitlabPr[] = [];
   private cache: GitlabPrCacheData;
+  private repo: string;
+  private ignorePrAuthor: boolean;
 
   private constructor(
-    private repo: string,
+    repo: string,
     author: string | null,
-    private ignorePrAuthor: boolean,
+    ignorePrAuthor: boolean,
   ) {
+    this.repo = repo;
+    this.ignorePrAuthor = ignorePrAuthor;
     const repoCache = getCache();
     repoCache.platform ??= {};
     repoCache.platform.gitlab ??= {};

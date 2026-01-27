@@ -393,7 +393,10 @@ describe('logger/index', () => {
     add({ password: 'secret"password' });
 
     class SomeClass {
-      constructor(public field: string) {}
+      public field: string;
+      constructor(field: string) {
+        this.field = field;
+      }
     }
 
     const prBody = 'test';
@@ -444,7 +447,10 @@ describe('logger/index', () => {
     add({ password: 'secret"password' });
 
     class SomeClass {
-      constructor(public field: string) {}
+      public field: string;
+      constructor(field: string) {
+        this.field = field;
+      }
     }
 
     const childLogger = (logger as RenovateLogger).childLogger();

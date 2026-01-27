@@ -13,7 +13,10 @@ import type {
 } from './types.ts';
 
 export abstract class Datasource implements DatasourceApi {
-  protected constructor(public readonly id: string) {
+  public readonly id: string;
+
+  protected constructor(id: string) {
+    this.id = id;
     this.http = new Http(id);
   }
 

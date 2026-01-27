@@ -19,12 +19,18 @@ import { API_PATH, toRenovatePR } from './utils.ts';
 export class GiteaPrCache {
   private cache: GiteaPrCacheData;
   private items: Pr[] = [];
+  private repo: string;
+  private readonly ignorePrAuthor: boolean;
+  private author: string | null;
 
   private constructor(
-    private repo: string,
-    private readonly ignorePrAuthor: boolean,
-    private author: string | null,
+    repo: string,
+    ignorePrAuthor: boolean,
+    author: string | null,
   ) {
+    this.repo = repo;
+    this.ignorePrAuthor = ignorePrAuthor;
+    this.author = author;
     const repoCache = getCache();
     repoCache.platform ??= {};
     repoCache.platform.gitea ??= {};

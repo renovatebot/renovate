@@ -51,11 +51,19 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
     cacheRecord: GithubGraphqlCacheRecord<GithubItem>,
   ): Promise<void>;
 
+  protected readonly cacheNs: PackageCacheNamespace;
+  protected readonly cacheKey: string;
+  protected readonly skipStabilization: boolean;
+
   constructor(
-    protected readonly cacheNs: PackageCacheNamespace,
-    protected readonly cacheKey: string,
-    protected readonly skipStabilization = false,
-  ) {}
+    cacheNs: PackageCacheNamespace,
+    cacheKey: string,
+    skipStabilization = false,
+  ) {
+    this.cacheNs = cacheNs;
+    this.cacheKey = cacheKey;
+    this.skipStabilization = skipStabilization;
+  }
 
   /**
    * Load data previously persisted by this strategy
