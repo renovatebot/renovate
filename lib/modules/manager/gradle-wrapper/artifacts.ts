@@ -16,6 +16,7 @@ import type { StatusResult } from '../../../util/git/types.ts';
 import { Http } from '../../../util/http/index.ts';
 import { newlineRegex } from '../../../util/regex.ts';
 import { replaceAt } from '../../../util/string.ts';
+import { isGradleExecutionAllowed } from '../gradle/artifacts.ts';
 import { updateArtifacts as gradleUpdateArtifacts } from '../gradle/index.ts';
 import type {
   UpdateArtifact,
@@ -146,6 +147,15 @@ export async function updateArtifacts({
       logger.info('No gradlew found - skipping Artifacts update');
       return null;
     }
+
+    if (!isGradleExecutionAllowed(gradlewFile)) {
+      logger.trace(
+        'Not allowed to execute gradle due to allowedUnsafeExecutions - aborting update',
+      );
+
+      return null;
+    }
+
     cmd += ' :wrapper';
 
     let checksum: string | null = null;

@@ -116,6 +116,39 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       ]);
     });
 
+    it('aborts if allowedUnsafeExecutions does not include `gradleWrapper`', async () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedUnsafeExecutions: [],
+      });
+
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: [
+            'gradle/wrapper/gradle-wrapper.properties',
+            'gradlew',
+            'gradlew.bat',
+          ],
+        }),
+      );
+
+      const res = await updateArtifacts({
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
+        updatedDeps: [],
+        newPackageFileContent: Fixtures.get(
+          'expectedFiles/gradle/wrapper/gradle-wrapper.properties',
+        ),
+        config: { ...config, newValue: '6.3' },
+      });
+
+      expect(res).toBeNull();
+      expect(execSnapshots).toBeEmptyArray();
+      expect(logger.logger.trace).toHaveBeenCalledWith(
+        'Not allowed to execute gradle due to allowedUnsafeExecutions - aborting update',
+      );
+    });
+
     it('gradlew not found', async () => {
       const execSnapshots = mockExecAll();
       fs.statLocalFile.mockResolvedValue(
