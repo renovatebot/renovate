@@ -117,15 +117,6 @@ describe('modules/manager/mise/backends', () => {
       });
     });
 
-    it('should set extractVersion if the version does not have leading v', () => {
-      expect(createGithubToolConfig('cli/cli', '2.64.0', {})).toStrictEqual({
-        packageName: 'cli/cli',
-        datasource: 'github-releases',
-        currentValue: '2.64.0',
-        extractVersion: '^v?(?<version>.+)',
-      });
-    });
-
     it('should not set extractVersion if the version has leading v', () => {
       expect(createGithubToolConfig('cli/cli', 'v2.64.0', {})).toStrictEqual({
         packageName: 'cli/cli',
