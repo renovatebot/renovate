@@ -1,4 +1,3 @@
-import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
 import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
 import semver from 'semver';
@@ -129,7 +128,7 @@ export function isGHApp(): boolean {
 
 export async function detectGhe(token: string): Promise<void> {
   platformConfig.isGhe =
-    URL.parse(platformConfig.endpoint).host !== 'api.github.com';
+    new URL(platformConfig.endpoint).host !== 'api.github.com';
   if (platformConfig.isGhe) {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
@@ -199,7 +198,7 @@ export async function initPlatform({
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
       const ghHostname = platformConfig.isGhe
-        ? URL.parse(platformConfig.endpoint).hostname
+        ? new URL(platformConfig.endpoint).hostname
         : 'github.com';
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
@@ -713,28 +712,33 @@ export async function initRepo({
     }
   }
 
-  const parsedEndpoint = URL.parse(platformConfig.endpoint);
+  const parsedEndpoint = new URL(platformConfig.endpoint);
+  let authToken: string | null;
   if (forkToken) {
     logger.debug('Using forkToken for git init');
-    parsedEndpoint.auth = coerceToNull(config.forkToken);
+    authToken = coerceToNull(config.forkToken);
   } /* v8 ignore next */ else {
     const tokenType = opts.token?.startsWith('x-access-token:')
       ? 'app'
       : 'personal access';
     logger.debug(`Using ${tokenType} token for git init`);
-    parsedEndpoint.auth = opts.token ?? null;
+    authToken = opts.token ?? null;
   }
-  // TODO: null checks (#22198)
-  parsedEndpoint.host = parsedEndpoint.host!.replace(
+  if (authToken) {
+    const [username, password] = authToken.split(':');
+    parsedEndpoint.username = username;
+    parsedEndpoint.password = password ?? '';
+  }
+  parsedEndpoint.host = parsedEndpoint.host.replace(
     'api.github.com',
     'github.com',
   );
   parsedEndpoint.pathname = `${config.repository}.git`;
-  const url = URL.format(parsedEndpoint);
+  const url = parsedEndpoint.href;
   let upstreamUrl = undefined;
   if (forkCreation && config.parentRepo) {
     parsedEndpoint.pathname = config.parentRepo + '.git';
-    upstreamUrl = URL.format(parsedEndpoint);
+    upstreamUrl = parsedEndpoint.href;
   }
   await git.initRepo({
     ...config,

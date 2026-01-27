@@ -1,4 +1,3 @@
-import URL from 'node:url';
 import { GlobalConfig } from '../../../../../../config/global.ts';
 import { logger } from '../../../../../../logger/index.ts';
 import * as hostRules from '../../../../../../util/host-rules.ts';
@@ -42,8 +41,7 @@ export class GitHubChangeLogSource extends ChangeLogSource {
     error?: ChangeLogError;
   } {
     const sourceUrl = config.sourceUrl!;
-    const parsedUrl = URL.parse(sourceUrl);
-    const host = parsedUrl.host;
+    const { host } = new URL(sourceUrl);
     const manager = config.manager;
     const packageName = config.packageName;
 
