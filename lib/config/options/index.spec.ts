@@ -50,14 +50,17 @@ describe('config/options/index', () => {
       (o) => o.allowedValues && !isNullOrUndefined(o.default),
     );
 
-    it.each(optionsWithDefaults)('$name default is in allowedValues', (option) => {
-      const defaults = Array.isArray(option.default)
-        ? option.default
-        : [option.default];
-      for (const defVal of defaults) {
-        expect(option.allowedValues).toContain(defVal);
-      }
-    });
+    it.each(optionsWithDefaults)(
+      '$name default is in allowedValues',
+      (option) => {
+        const defaults = Array.isArray(option.default)
+          ? option.default
+          : [option.default];
+        for (const defVal of defaults) {
+          expect(option.allowedValues).toContain(defVal);
+        }
+      },
+    );
   });
 
   describe('requiredIf siblingProperties', () => {
@@ -71,9 +74,12 @@ describe('config/options/index', () => {
       ),
     );
 
-    it.each(siblingRefs)('$option → $property is valid option', ({ property }) => {
-      expect(optionNames).toContain(property);
-    });
+    it.each(siblingRefs)(
+      '$option → $property is valid option',
+      ({ property }) => {
+        expect(optionNames).toContain(property);
+      },
+    );
 
     const refsWithAllowedValues = siblingRefs
       .map((ref) => {

@@ -277,7 +277,7 @@ describe('modules/datasource/deb/index', () => {
     });
 
     it('should not lead to a race condition on parallel lookups', async () => {
-      vi.doUnmock('../../../util/mutex');
+      vi.unmock('../../../util/mutex');
       const packages = [
         'album',
         'album-data',

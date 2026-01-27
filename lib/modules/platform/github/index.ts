@@ -1,4 +1,3 @@
-import URL from 'node:url';
 import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
 import semver from 'semver';
 import { setTimeout } from 'timers/promises';
