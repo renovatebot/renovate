@@ -28,6 +28,7 @@ export interface CrateRecord {
   vers: string;
   yanked: boolean;
   rust_version?: string;
+  pubtime?: string;
 }
 
 export interface CrateMetadata {

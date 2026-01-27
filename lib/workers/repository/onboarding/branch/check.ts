@@ -1,21 +1,21 @@
 import { isNonEmptyObject } from '@sindresorhus/is';
-import { getConfigFileNames } from '../../../../config/app-strings';
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
+import { getConfigFileNames } from '../../../../config/app-strings.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
 import {
   REPOSITORY_CLOSED_ONBOARDING,
   REPOSITORY_NO_CONFIG,
-} from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
-import { platform } from '../../../../modules/platform';
-import { ensureComment } from '../../../../modules/platform/comment';
-import { scm } from '../../../../modules/platform/scm';
-import { getCache } from '../../../../util/cache/repository';
-import { getElapsedDays } from '../../../../util/date';
-import { readLocalFile } from '../../../../util/fs';
-import { getBranchCommit } from '../../../../util/git';
-import { getSemanticCommitPrTitle } from '../common';
+} from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { ensureComment } from '../../../../modules/platform/comment.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { getCache } from '../../../../util/cache/repository/index.ts';
+import { getElapsedDays } from '../../../../util/date.ts';
+import { readLocalFile } from '../../../../util/fs/index.ts';
+import { getBranchCommit } from '../../../../util/git/index.ts';
+import { getSemanticCommitPrTitle } from '../common.ts';
 
 async function findFile(fileName: string): Promise<boolean> {
   logger.debug(`findFile(${fileName})`);
@@ -159,8 +159,23 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   }
   logger.debug('Repo is not onboarded and no merged PRs exist');
   if (!config.suppressNotifications!.includes('onboardingClose')) {
-    const ageOfOnboardingPr = getElapsedDays(closedOnboardingPr.createdAt!);
+    const ageOfOnboardingPr = getElapsedDays(
+      closedOnboardingPr.createdAt!,
+      false,
+    );
     const onboardingAutoCloseAge = GlobalConfig.get('onboardingAutoCloseAge');
+    if (onboardingAutoCloseAge) {
+      logger.debug(
+        {
+          onboardingAutoCloseAge,
+          createdAt: closedOnboardingPr.createdAt!,
+          ageOfOnboardingPr,
+        },
+        `Determining that the closed onboarding PR was created at \`${closedOnboardingPr.createdAt!}\` was created ${ageOfOnboardingPr.toFixed(2)} days ago`,
+      );
+    }
+    // if we have onboardingAutoCloseAge, and it hasn't yet passed onboardingAutoCloseAge, add a comment
+    // if it /has/ passed, we'll comment this appropriately in `ensureOnboardingPr`, so there doesn't need to be a comment here
     if (
       !onboardingAutoCloseAge ||
       ageOfOnboardingPr <= onboardingAutoCloseAge

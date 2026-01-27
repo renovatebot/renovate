@@ -1,16 +1,20 @@
 import URL from 'node:url';
-import type { AllConfig } from '../../config/types';
-import type { PlatformId } from '../../constants';
-import { PLATFORM_NOT_FOUND } from '../../constants/error-messages';
-import { logger } from '../../logger';
-import type { HostRule } from '../../types';
-import { setGitAuthor, setNoVerify, setPrivateKey } from '../../util/git';
-import * as hostRules from '../../util/host-rules';
-import platforms from './api';
-import { setPlatformScmApi } from './scm';
-import type { Platform } from './types';
+import type { AllConfig } from '../../config/types.ts';
+import { PLATFORM_NOT_FOUND } from '../../constants/error-messages.ts';
+import type { PlatformId } from '../../constants/index.ts';
+import { logger } from '../../logger/index.ts';
+import type { HostRule } from '../../types/index.ts';
+import {
+  setGitAuthor,
+  setNoVerify,
+  setPrivateKey,
+} from '../../util/git/index.ts';
+import * as hostRules from '../../util/host-rules.ts';
+import platforms from './api.ts';
+import { setPlatformScmApi } from './scm.ts';
+import type { Platform } from './types.ts';
 
-export type * from './types';
+export type * from './types.ts';
 
 export const getPlatformList = (): string[] => Array.from(platforms.keys());
 

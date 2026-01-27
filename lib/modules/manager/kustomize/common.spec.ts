@@ -1,7 +1,7 @@
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { generateHelmEnvs } from './common';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { generateHelmEnvs } from './common.ts';
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI

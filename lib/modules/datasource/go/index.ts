@@ -1,23 +1,27 @@
 import { isString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { getEnv } from '../../../util/env';
-import { regEx } from '../../../util/regex';
-import { addSecretForSanitizing } from '../../../util/sanitize';
-import { parseUrl } from '../../../util/url';
-import { id as semverId } from '../../versioning/semver';
-import { BitbucketTagsDatasource } from '../bitbucket-tags';
-import { Datasource } from '../datasource';
-import { ForgejoTagsDatasource } from '../forgejo-tags';
-import { GitTagsDatasource } from '../git-tags';
-import { GiteaTagsDatasource } from '../gitea-tags';
-import { GithubTagsDatasource } from '../github-tags';
-import { GitlabTagsDatasource } from '../gitlab-tags';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { BaseGoDatasource } from './base';
-import { parseGoproxy } from './goproxy-parser';
-import { GoDirectDatasource } from './releases-direct';
-import { GoProxyDatasource } from './releases-goproxy';
+import { logger } from '../../../logger/index.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { getEnv } from '../../../util/env.ts';
+import { regEx } from '../../../util/regex.ts';
+import { addSecretForSanitizing } from '../../../util/sanitize.ts';
+import { parseUrl } from '../../../util/url.ts';
+import { id as semverId } from '../../versioning/semver/index.ts';
+import { BitbucketTagsDatasource } from '../bitbucket-tags/index.ts';
+import { Datasource } from '../datasource.ts';
+import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
+import { GitTagsDatasource } from '../git-tags/index.ts';
+import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
+import { GithubTagsDatasource } from '../github-tags/index.ts';
+import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  ReleaseResult,
+} from '../types.ts';
+import { BaseGoDatasource } from './base.ts';
+import { parseGoproxy } from './goproxy-parser.ts';
+import { GoDirectDatasource } from './releases-direct.ts';
+import { GoProxyDatasource } from './releases-goproxy.ts';
 
 export class GoDatasource extends Datasource {
   static readonly id = 'go';

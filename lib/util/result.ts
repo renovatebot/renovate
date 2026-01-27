@@ -5,8 +5,8 @@ import type {
   ZodType,
 } from 'zod';
 import { NEVER, ZodError, ZodIssueCode } from 'zod';
-import { logger } from '../logger';
-import type { Nullish } from '../types';
+import { logger } from '../logger/index.ts';
+import type { Nullish } from '../types/index.ts';
 
 type Val = NonNullable<unknown>;
 

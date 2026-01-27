@@ -1,9 +1,9 @@
-import { getDigest, getPkgReleases } from '..';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import { HttpError } from '../../../util/http';
-import { CdnjsDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import { getDigest, getPkgReleases } from '../index.ts';
+import { CdnjsDatasource } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 
 const baseUrl = 'https://api.cdnjs.com/';
 

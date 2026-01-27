@@ -1,6 +1,6 @@
-import { getDigest, getPkgReleases } from '..';
-import { ForgejoReleasesDatasource } from '.';
-import * as httpMock from '~test/http-mock';
+import { getDigest, getPkgReleases } from '../index.ts';
+import { ForgejoReleasesDatasource } from './index.ts';
+import * as httpMock from '~test/http-mock.ts';
 
 const datasource = ForgejoReleasesDatasource.id;
 

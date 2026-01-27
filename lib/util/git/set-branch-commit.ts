@@ -1,7 +1,7 @@
-import { logger } from '../../logger';
-import { getCache } from '../cache/repository';
-import type { BranchCache } from '../cache/repository/types';
-import { getBranchCommit } from '.';
+import { logger } from '../../logger/index.ts';
+import { getCache } from '../cache/repository/index.ts';
+import type { BranchCache } from '../cache/repository/types.ts';
+import { getBranchCommit } from './index.ts';
 
 /**
  * Called when a new commit is added to branch

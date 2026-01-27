@@ -2,9 +2,9 @@ import { isArray, isString } from '@sindresorhus/is';
 import type { Response, SimpleGit } from 'simple-git';
 import Git from 'simple-git';
 import { mock } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import * as hostRules from '../../../util/host-rules';
-import { extractPackageFile } from '.';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { extractPackageFile } from './index.ts';
 
 vi.mock('simple-git', () => ({ default: vi.fn() }));
 const simpleGitFactoryMock = vi.mocked(Git);
@@ -69,6 +69,23 @@ describe('modules/manager/git-submodules/extract', () => {
       );
     });
 
+    describe('submodule sourceUrl is determined from packageName', () => {
+      it('when using SSH clone URL', async () => {
+        const res = await extractPackageFile('', '.gitmodules.3', {});
+        expect(res?.deps).toHaveLength(1);
+        expect(res?.deps[0].sourceUrl).toBe(
+          'https://github.com/PowerShell/PowerShell-Docs',
+        );
+      });
+      it('when using a relative path', async () => {
+        const res = await extractPackageFile('', '.gitmodules.4', {});
+        expect(res?.deps).toHaveLength(1);
+        expect(res?.deps[0].sourceUrl).toBe(
+          'https://github.com/PowerShell/PowerShell-Docs',
+        );
+      });
+    });
+
     it('fallback to current branch if special value is detected', async () => {
       gitMock.branch.mockResolvedValueOnce({
         all: ['staging', 'main'],
@@ -101,6 +118,7 @@ describe('modules/manager/git-submodules/extract', () => {
             currentValue: 'staging',
             depName: 'PowerShell-Docs',
             packageName: 'https://github.com/PowerShell/PowerShell-Docs',
+            sourceUrl: 'https://github.com/PowerShell/PowerShell-Docs',
           },
         ],
       });
@@ -116,6 +134,7 @@ describe('modules/manager/git-submodules/extract', () => {
             currentValue: 'v0.0.1',
             depName: 'deps/renovate1',
             packageName: 'https://github.com/renovatebot/renovate.git',
+            sourceUrl: 'https://github.com/renovatebot/renovate.git',
             versioning: 'semver',
           },
           {
@@ -123,12 +142,14 @@ describe('modules/manager/git-submodules/extract', () => {
             currentValue: '0.0.1',
             depName: 'deps/renovate2',
             packageName: 'https://github.com/renovatebot/renovate.git',
+            sourceUrl: 'https://github.com/renovatebot/renovate.git',
             versioning: 'semver',
           },
           {
             currentDigest: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
             currentValue: 'not-a-semver',
             packageName: 'https://github.com/renovatebot/renovate.git',
+            sourceUrl: 'https://github.com/renovatebot/renovate.git',
             depName: 'deps/renovate3',
           },
         ],

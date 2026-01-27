@@ -28,13 +28,13 @@ import {
   SYSTEM_INSUFFICIENT_MEMORY,
   TEMPORARY_ERROR,
   UNKNOWN_ERROR,
-} from '../../constants/error-messages';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import handleError from './error';
-import { logger, partial } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+} from '../../constants/error-messages.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import handleError from './error.ts';
+import { logger, partial } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
-vi.mock('./error-config');
+vi.mock('./error-config.ts');
 
 let config: RenovateConfig;
 

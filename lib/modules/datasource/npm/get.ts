@@ -1,17 +1,17 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { z } from 'zod';
-import { HOST_DISABLED } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as hostRules from '../../../util/host-rules';
-import type { Http } from '../../../util/http';
-import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider';
-import type { HttpOptions } from '../../../util/http/types';
-import { regEx } from '../../../util/regex';
-import { asTimestamp } from '../../../util/timestamp';
-import { joinUrlParts } from '../../../util/url';
-import type { Release, ReleaseResult } from '../types';
-import type { NpmResponse } from './types';
+import { HOST_DISABLED } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider.ts';
+import type { Http } from '../../../util/http/index.ts';
+import type { HttpOptions } from '../../../util/http/types.ts';
+import { regEx } from '../../../util/regex.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import type { Release, ReleaseResult } from '../types.ts';
+import type { NpmResponse } from './types.ts';
 
 const SHORT_REPO_REGEX = regEx(
   /^((?<platform>bitbucket|github|gitlab):)?(?<shortRepo>[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)$/,

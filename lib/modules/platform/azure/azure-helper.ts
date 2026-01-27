@@ -4,15 +4,15 @@ import type {
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import { logger } from '../../../logger';
-import { streamToString } from '../../../util/streams';
-import { getNewBranchName } from '../util';
-import * as azureApi from './azure-got-wrapper';
-import { WrappedException } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { streamToString } from '../../../util/streams.ts';
+import { getNewBranchName } from '../util.ts';
+import * as azureApi from './azure-got-wrapper.ts';
+import { WrappedException } from './schema.ts';
 import {
   getBranchNameWithoutRefsPrefix,
   getBranchNameWithoutRefsheadsPrefix,
-} from './util';
+} from './util.ts';
 
 const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
 

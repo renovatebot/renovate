@@ -1,6 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import type { PlatformId } from '../constants';
-import { regEx } from '../util/regex';
+import type { PlatformId } from '../constants/index.ts';
+import { regEx } from '../util/regex.ts';
 
 const configFileNames = [
   'renovate.json',

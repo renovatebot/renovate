@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { extractPackageFile } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const miseFilename = 'mise.toml';
 
@@ -56,6 +56,7 @@ describe('modules/manager/mise/extract', () => {
       aws-cli = "2.25.10"
       aws-vault = "6.6.1"
       buf = "1.27.0"
+      caddy = "2.10.2"
       ccache = "4.11.3"
       committed = "1.1.7"
       conan = "2.24.0"
@@ -123,6 +124,13 @@ describe('modules/manager/mise/extract', () => {
             depName: 'buf',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'bufbuild/buf',
+          },
+          {
+            currentValue: '2.10.2',
+            datasource: 'github-releases',
+            depName: 'caddy',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'caddyserver/caddy',
           },
           {
             currentValue: '4.11.3',

@@ -2,22 +2,22 @@ import fs from 'fs-extra';
 import type { PushResult } from 'simple-git';
 import Git from 'simple-git';
 import tmp from 'tmp-promise';
-import { GlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global.ts';
 import {
   CONFIG_VALIDATION,
   INVALID_PATH,
   TEMPORARY_ERROR,
   UNKNOWN_ERROR,
-} from '../../constants/error-messages';
-import { newlineRegex, regEx } from '../regex';
-import * as _auth from './auth';
-import * as _behindBaseCache from './behind-base-branch-cache';
-import * as _conflictsCache from './conflicts-cache';
-import * as _modifiedCache from './modified-cache';
-import type { FileChange } from './types';
-import * as git from '.';
-import { setNoVerify } from '.';
-import { logger } from '~test/util';
+} from '../../constants/error-messages.ts';
+import { newlineRegex, regEx } from '../regex.ts';
+import * as _auth from './auth.ts';
+import * as _behindBaseCache from './behind-base-branch-cache.ts';
+import * as _conflictsCache from './conflicts-cache.ts';
+import * as git from './index.ts';
+import { setNoVerify } from './index.ts';
+import * as _modifiedCache from './modified-cache.ts';
+import type { FileChange } from './types.ts';
+import { logger } from '~test/util.ts';
 
 vi.mock('./conflicts-cache');
 vi.mock('./behind-base-branch-cache');

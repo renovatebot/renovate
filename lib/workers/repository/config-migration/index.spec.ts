@@ -1,16 +1,16 @@
 import type { Indent } from 'detect-indent';
-import { getConfig } from '../../../config/defaults';
-import type { Pr } from '../../../modules/platform/types';
-import { checkConfigMigrationBranch } from './branch';
-import { MigratedDataFactory } from './branch/migrated-data';
-import { ensureConfigMigrationPr } from './pr';
-import { configMigration } from './index';
-import { Fixtures } from '~test/fixtures';
-import { partial } from '~test/util';
+import { getConfig } from '../../../config/defaults.ts';
+import type { Pr } from '../../../modules/platform/types.ts';
+import { checkConfigMigrationBranch } from './branch/index.ts';
+import { MigratedDataFactory } from './branch/migrated-data.ts';
+import { configMigration } from './index.ts';
+import { ensureConfigMigrationPr } from './pr/index.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { partial } from '~test/util.ts';
 
-vi.mock('./pr');
-vi.mock('./branch');
-vi.mock('./branch/migrated-data');
+vi.mock('./pr/index.ts');
+vi.mock('./branch/index.ts');
+vi.mock('./branch/migrated-data.ts');
 
 const content = Fixtures.getJson('./migrated-data.json', './branch');
 const filename = 'renovate.json';

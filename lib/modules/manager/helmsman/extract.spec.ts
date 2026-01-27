@@ -1,5 +1,5 @@
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { extractPackageFile } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 const multiDepFile = Fixtures.get('validHelmsfile.yaml');
 const otherYamlFile = Fixtures.get('empty.yaml');

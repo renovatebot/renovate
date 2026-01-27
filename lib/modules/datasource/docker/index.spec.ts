@@ -3,19 +3,19 @@ import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import * as _googleAuth from 'google-auth-library';
 import { mockDeep } from 'vitest-mock-extended';
-import { getDigest, getPkgReleases } from '..';
-import { range } from '../../../../lib/util/range';
-import { GlobalConfig } from '../../../config/global';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import * as _hostRules from '../../../util/host-rules';
-import { DockerDatasource } from '.';
-import * as httpMock from '~test/http-mock';
-import { logger } from '~test/util';
+import { range } from '../../../../lib/util/range.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import * as _hostRules from '../../../util/host-rules.ts';
+import { getDigest, getPkgReleases } from '../index.ts';
+import { DockerDatasource } from './index.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
 
 const hostRules = vi.mocked(_hostRules);
 const googleAuth = vi.mocked(_googleAuth, true);
 
-vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('google-auth-library');
 
 const ecrMock = mockClient(ECRClient);

@@ -1,9 +1,13 @@
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { regEx } from '../../../util/regex';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { GitDatasource } from './base';
-import type { RawRefs } from './types';
+import { logger } from '../../../logger/index.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { regEx } from '../../../util/regex.ts';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  ReleaseResult,
+} from '../types.ts';
+import { GitDatasource } from './base.ts';
+import type { RawRefs } from './types.ts';
 
 // git will prompt for known hosts or passwords, unless we activate BatchMode
 process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';

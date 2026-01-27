@@ -1,5 +1,5 @@
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import { Http, HttpError } from '../../util/http';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import { Http, HttpError } from '../../util/http/index.ts';
 import type {
   DatasourceApi,
   DigestConfig,
@@ -10,7 +10,7 @@ import type {
   Release,
   ReleaseResult,
   SourceUrlSupport,
-} from './types';
+} from './types.ts';
 
 export abstract class Datasource implements DatasourceApi {
   protected constructor(public readonly id: string) {

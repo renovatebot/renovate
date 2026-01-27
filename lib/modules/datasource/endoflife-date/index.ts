@@ -1,11 +1,11 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { joinUrlParts } from '../../../util/url';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { datasource, registryUrl } from './common';
-import { EndoflifeDateVersions } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { datasource, registryUrl } from './common.ts';
+import { EndoflifeDateVersions } from './schema.ts';
 
 export class EndoflifeDateDatasource extends Datasource {
   static readonly id = datasource;

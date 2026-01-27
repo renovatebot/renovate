@@ -1,8 +1,8 @@
 import { SpanKind } from '@opentelemetry/api';
-import type { Decorator } from '../util/decorator';
-import { decorate } from '../util/decorator';
-import type { SpanParameters } from './types';
-import { instrument as instrumentFunc } from '.';
+import type { Decorator } from '../util/decorator/index.ts';
+import { decorate } from '../util/decorator/index.ts';
+import { instrument as instrumentFunc } from './index.ts';
+import type { SpanParameters } from './types.ts';
 
 /**
  * instruments a decorated method.

@@ -1,23 +1,23 @@
 import { isBoolean } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { queryReleases } from '../../../util/github/graphql';
+import { logger } from '../../../logger/index.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { queryReleases } from '../../../util/github/graphql/index.ts';
 import type {
   GithubDigestFile,
   GithubRestAsset,
   GithubRestRelease,
-} from '../../../util/github/types';
-import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
-import { hashStream } from '../../../util/hash';
-import { GithubHttp } from '../../../util/http/github';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { Datasource } from '../datasource';
+} from '../../../util/github/types.ts';
+import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url.ts';
+import { hashStream } from '../../../util/hash.ts';
+import { GithubHttp } from '../../../util/http/github.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { Datasource } from '../datasource.ts';
 import type {
   DigestConfig,
   GetReleasesConfig,
   Release,
   ReleaseResult,
-} from '../types';
+} from '../types.ts';
 
 export const cacheNamespace = 'datasource-github-releases';
 

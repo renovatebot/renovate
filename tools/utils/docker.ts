@@ -3,9 +3,9 @@ import path from 'node:path';
 import os from 'os';
 import { setTimeout } from 'timers/promises';
 import type { SemVer } from 'semver';
-import { logger } from '../../lib/logger';
-import { toMs } from '../../lib/util/pretty-time';
-import { exec } from './exec';
+import { logger } from '../../lib/logger/index.ts';
+import { toMs } from '../../lib/util/pretty-time.ts';
+import { exec } from './exec.ts';
 
 const file = 'tools/docker/bake.hcl';
 const tmp = fs.mkdtemp(path.join(os.tmpdir(), 'renovate-docker-bake-'));

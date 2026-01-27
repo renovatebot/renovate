@@ -1,7 +1,7 @@
-import type { RenovateConfig } from '../../../../config/types';
-import * as template from '../../../../util/template';
-import type { CommitMessage } from '../../model/commit-message';
-import { CommitMessageFactory } from '../../model/commit-message-factory';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import * as template from '../../../../util/template/index.ts';
+import { CommitMessageFactory } from '../../model/commit-message-factory.ts';
+import type { CommitMessage } from '../../model/commit-message.ts';
 
 export class ConfigMigrationCommitMessageFactory {
   constructor(
