@@ -1,7 +1,7 @@
 // TODO: types (#22198)
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
@@ -88,7 +88,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const url = config.registryUrl;
     const repo = TerraformProviderDatasource.getRepository(config);
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${TerraformProviderDatasource.id}`,
         key: `getReleases:${url}/${repo}`,
@@ -306,7 +306,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     repository: string,
     version: string,
   ): Promise<TerraformBuild[] | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${TerraformProviderDatasource.id}`,
         key: `getBuilds:${registryURL}/${repository}/${version}`,
@@ -341,7 +341,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   }
 
   getZipHashes(zipHashUrl: string): Promise<string[] | undefined> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${TerraformProviderDatasource.id}`,
         key: `getZipHashes:${zipHashUrl}`,
@@ -365,7 +365,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     backendLookUpName: string,
     version: string,
   ): Promise<VersionDetailResponse> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${TerraformProviderDatasource.id}`,
         key: `getReleaseBackendIndex:${backendLookUpName}/${version}`,

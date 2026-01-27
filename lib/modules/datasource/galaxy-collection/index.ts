@@ -1,6 +1,6 @@
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -109,7 +109,7 @@ export class GalaxyCollectionDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${GalaxyCollectionDatasource.id}`,
         key: `getReleases:${config.packageName}`,
@@ -174,7 +174,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     versionsUrl: string,
     basicRelease: Release,
   ): Promise<Release> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${GalaxyCollectionDatasource.id}`,
         key: `getVersionDetails:${versionsUrl}:${basicRelease.version}`,

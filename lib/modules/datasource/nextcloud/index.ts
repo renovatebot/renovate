@@ -1,4 +1,4 @@
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import * as semver from '../../versioning/semver/index.ts';
@@ -75,7 +75,7 @@ export class NextcloudDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${NextcloudDatasource.id}`,
         key: `${config.registryUrl}:${config.packageName}`,

@@ -1,4 +1,4 @@
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { id as versioning } from '../../versioning/python/index.ts';
 import { Datasource } from '../datasource.ts';
 import { registryUrl as eolRegistryUrl } from '../endoflife-date/common.ts';
@@ -87,7 +87,7 @@ export class PythonVersionDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${datasource}`,
         key: `${config.registryUrl}`,

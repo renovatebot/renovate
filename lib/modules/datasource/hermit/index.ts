@@ -1,5 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import type { GithubRestRelease } from '../../../util/github/types.ts';
 import { getApiBaseUrl } from '../../../util/github/url.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
@@ -97,7 +97,7 @@ export class HermitDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${HermitDatasource.id}`,
         key: `getReleases:${config.registryUrl ?? ''}-${config.packageName}`,
@@ -170,7 +170,7 @@ export class HermitDatasource extends Datasource {
   }
 
   getHermitSearchManifest(u: URL): Promise<HermitSearchResult[] | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${HermitDatasource.id}`,
         key: `getHermitSearchManifest:${u.toString()}`,

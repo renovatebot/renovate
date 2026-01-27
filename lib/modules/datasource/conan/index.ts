@@ -1,6 +1,6 @@
 import { isString, isUndefined } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import { regEx } from '../../../util/regex.ts';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
@@ -90,7 +90,7 @@ export class ConanDatasource extends Datasource {
     config: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${datasource}`,
         // TODO: types (#22198)
@@ -201,7 +201,7 @@ export class ConanDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${datasource}`,
         // TODO: types (#22198)

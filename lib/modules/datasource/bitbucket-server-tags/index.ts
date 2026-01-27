@@ -1,7 +1,7 @@
 import { ZodError } from 'zod';
 import { logger } from '../../../logger/index.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
 import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { BitbucketServerHttp } from '../../../util/http/bitbucket-server.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
@@ -115,7 +115,7 @@ export class BitbucketServerTagsDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: BitbucketServerTagsDatasource.cacheNamespace,
         key: BitbucketServerTagsDatasource.getCacheKey(
@@ -146,7 +146,7 @@ export class BitbucketServerTagsDatasource extends Datasource {
     tag: string,
     config: DigestConfig,
   ): Promise<string | null> {
-    return cached(
+    return withCache(
       {
         namespace: BitbucketServerTagsDatasource.cacheNamespace,
         key: BitbucketServerTagsDatasource.getCacheKey(
@@ -214,7 +214,7 @@ export class BitbucketServerTagsDatasource extends Datasource {
     config: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    return cached(
+    return withCache(
       {
         namespace: BitbucketServerTagsDatasource.cacheNamespace,
         key: BitbucketServerTagsDatasource.getCacheKey(

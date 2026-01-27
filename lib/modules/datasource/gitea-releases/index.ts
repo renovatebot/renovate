@@ -1,5 +1,5 @@
-import { cached } from '../../../util/cache/package/cached.ts';
 import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GiteaHttp } from '../../../util/http/gitea.ts';
 import { Datasource } from '../datasource.ts';
 import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
@@ -64,7 +64,7 @@ export class GiteaReleasesDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: GiteaReleasesDatasource.cacheNamespace,
         key: GiteaTagsDatasource.getCacheKey(
@@ -98,7 +98,7 @@ export class GiteaReleasesDatasource extends Datasource {
     repo: string,
     tag: string,
   ): Promise<string | null> {
-    return cached(
+    return withCache(
       {
         namespace: GiteaReleasesDatasource.cacheNamespace,
         key: GiteaTagsDatasource.getCacheKey(registryUrl, repo, `tag-${tag}`),
@@ -133,7 +133,7 @@ export class GiteaReleasesDatasource extends Datasource {
     config: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    return cached(
+    return withCache(
       {
         namespace: GiteaReleasesDatasource.cacheNamespace,
         key: GiteaTagsDatasource.getCacheKey(

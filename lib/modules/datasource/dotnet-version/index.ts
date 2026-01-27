@@ -1,4 +1,4 @@
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as p from '../../../util/promises.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
@@ -63,7 +63,7 @@ export class DotnetVersionDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${DotnetVersionDatasource.id}`,
         key: config.packageName,
@@ -92,7 +92,7 @@ export class DotnetVersionDatasource extends Datasource {
     releaseUrl: string,
     packageName: string,
   ): Promise<Release[]> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${DotnetVersionDatasource.id}`,
         key: `${releaseUrl}:${packageName}`,

@@ -1,8 +1,8 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import pMap from 'p-map';
 import { logger } from '../../../logger/index.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { regEx } from '../../../util/regex.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as semanticVersioning from '../../versioning/semver/index.ts';
@@ -67,7 +67,7 @@ export class DenoDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${DenoDatasource.id}`,
         // TODO: types (#22198)
@@ -138,7 +138,7 @@ export class DenoDatasource extends Datasource {
   }
 
   getReleaseResult(moduleAPIURL: string): Promise<ReleaseResult> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${DenoDatasource.id}`,
         key: `getReleaseResult:${moduleAPIURL}`,

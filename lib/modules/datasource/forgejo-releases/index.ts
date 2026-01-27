@@ -1,5 +1,5 @@
-import { cached } from '../../../util/cache/package/cached.ts';
 import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { ForgejoHttp } from '../../../util/http/forgejo.ts';
 import { Datasource } from '../datasource.ts';
 import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
@@ -64,7 +64,7 @@ export class ForgejoReleasesDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: ForgejoReleasesDatasource.cacheNamespace,
         key: ForgejoTagsDatasource.getCacheKey(
@@ -98,7 +98,7 @@ export class ForgejoReleasesDatasource extends Datasource {
     repo: string,
     tag: string,
   ): Promise<string | null> {
-    return cached(
+    return withCache(
       {
         namespace: ForgejoReleasesDatasource.cacheNamespace,
         key: ForgejoTagsDatasource.getCacheKey(registryUrl, repo, `tag-${tag}`),
@@ -133,7 +133,7 @@ export class ForgejoReleasesDatasource extends Datasource {
     config: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    return cached(
+    return withCache(
       {
         namespace: ForgejoReleasesDatasource.cacheNamespace,
         key: ForgejoTagsDatasource.getCacheKey(

@@ -3,7 +3,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { HttpError } from '../../../util/http/index.ts';
@@ -219,7 +219,7 @@ export class DockerDatasource extends Datasource {
     dockerRepository: string,
     configDigest: string,
   ): Promise<HttpResponse<OciImageConfig> | undefined> {
-    return cached(
+    return withCache(
       {
         namespace: 'datasource-docker-imageconfig',
         key: `${registryHost}:${dockerRepository}@${configDigest}`,
@@ -270,7 +270,7 @@ export class DockerDatasource extends Datasource {
     dockerRepository: string,
     configDigest: string,
   ): Promise<HttpResponse<OciHelmConfig> | undefined> {
-    return cached(
+    return withCache(
       {
         namespace: 'datasource-docker-imageconfig',
         key: `${registryHost}:${dockerRepository}@${configDigest}`,
@@ -448,7 +448,7 @@ export class DockerDatasource extends Datasource {
     dockerRepository: string,
     currentDigest: string,
   ): Promise<string | null | undefined> {
-    return cached(
+    return withCache(
       {
         namespace: 'datasource-docker-architecture',
         key: `${registryHost}:${dockerRepository}@${currentDigest}`,
@@ -632,7 +632,7 @@ export class DockerDatasource extends Datasource {
     dockerRepository: string,
     tag: string,
   ): Promise<Record<string, string> | undefined> {
-    return cached(
+    return withCache(
       {
         namespace: 'datasource-docker-labels',
         key: `${registryHost}:${dockerRepository}:${tag}`,
@@ -847,7 +847,7 @@ export class DockerDatasource extends Datasource {
     registryHost: string,
     dockerRepository: string,
   ): Promise<string[] | null> {
-    return cached(
+    return withCache(
       {
         namespace: 'datasource-docker-tags',
         key: `${registryHost}:${dockerRepository}`,
@@ -1032,7 +1032,7 @@ export class DockerDatasource extends Datasource {
       config.registryUrl!,
     );
     const digest = config.currentDigest ? `@${config.currentDigest}` : '';
-    return cached(
+    return withCache(
       {
         namespace: 'datasource-docker-digest',
         key: `${registryHost}:${dockerRepository}:${newTag}${digest}`,
@@ -1101,7 +1101,7 @@ export class DockerDatasource extends Datasource {
   }
 
   getDockerHubTags(dockerRepository: string): Promise<Release[] | null> {
-    return cached(
+    return withCache(
       {
         namespace: 'datasource-docker-hub-tags',
         key: `${dockerRepository}`,
@@ -1205,7 +1205,7 @@ export class DockerDatasource extends Datasource {
       config.packageName,
       config.registryUrl!,
     );
-    return cached(
+    return withCache(
       {
         namespace: 'datasource-docker-releases-v2',
         key: `${registryHost}:${dockerRepository}`,

@@ -1,5 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { clone } from '../../../util/clone.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
@@ -77,7 +77,7 @@ export class JenkinsPluginsDatasource extends Datasource {
   getJenkinsPluginInfo(
     updateSiteUrl: string,
   ): Promise<Record<string, ReleaseResult>> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${JenkinsPluginsDatasource.id}`,
         key: 'info',
@@ -118,7 +118,7 @@ export class JenkinsPluginsDatasource extends Datasource {
   getJenkinsPluginVersions(
     updateSiteUrl: string,
   ): Promise<Record<string, Release[]>> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${JenkinsPluginsDatasource.id}`,
         key: 'versions',

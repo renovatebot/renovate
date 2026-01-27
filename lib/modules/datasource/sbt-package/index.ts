@@ -1,8 +1,8 @@
 import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { Http } from '../../../util/http/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
@@ -369,7 +369,7 @@ export class SbtPackageDatasource extends MavenDatasource {
     config: PostprocessReleaseConfig,
     release: Release,
   ): Promise<PostprocessReleaseResult> {
-    return cached(
+    return withCache(
       {
         namespace: 'datasource-sbt-package',
         key: `postprocessRelease:${config.registryUrl}:${config.packageName}:${release.version}`,

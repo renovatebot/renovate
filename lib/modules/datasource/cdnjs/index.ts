@@ -1,7 +1,7 @@
 import { ZodError } from 'zod';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import type { HttpError } from '../../../util/http/index.ts';
 import { Result } from '../../../util/result.ts';
@@ -77,7 +77,7 @@ export class CdnjsDatasource extends Datasource {
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const library = config.packageName.split('/')[0];
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${CdnjsDatasource.id}`,
         key: `getReleases:${library}`,
@@ -123,7 +123,7 @@ export class CdnjsDatasource extends Datasource {
     config: DigestConfig,
     newValue: string,
   ): Promise<string | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${CdnjsDatasource.id}`,
         key: `getDigest:${config.registryUrl}:${config.packageName}:${newValue}}`,

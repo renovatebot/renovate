@@ -1,6 +1,6 @@
 import type { TypeOf, ZodType } from 'zod';
 import { GlobalConfig } from '../../../config/global.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import { id as versioning } from '../../versioning/loose/index.ts';
@@ -121,7 +121,7 @@ export class AzurePipelinesTasksDatasource extends Datasource {
     opts: HttpOptions,
     schema: Schema,
   ): Promise<TypeOf<Schema>> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${AzurePipelinesTasksDatasource.id}`,
         key: url,

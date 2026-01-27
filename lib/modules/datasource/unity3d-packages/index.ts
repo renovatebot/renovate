@@ -1,4 +1,4 @@
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import * as Unity3dPackagesVersioning from '../../versioning/unity3d-packages/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -60,7 +60,7 @@ export class Unity3dPackagesDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${Unity3dPackagesDatasource.id}`,
         key: `${config.registryUrl}:${config.packageName}`,

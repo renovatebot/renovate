@@ -1,5 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
@@ -67,7 +67,7 @@ export class GitlabTagsDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${GitlabTagsDatasource.id}`,
         key: `getReleases:${getDepHost(config.registryUrl)}:${config.packageName}`,
@@ -132,7 +132,7 @@ export class GitlabTagsDatasource extends Datasource {
     config: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${GitlabTagsDatasource.id}`,
         key: `getDigest:${getDepHost(config.registryUrl)}:${config.packageName}`,

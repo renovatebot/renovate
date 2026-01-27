@@ -2,7 +2,7 @@ import { isObject } from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import * as p from '../../../util/promises.ts';
@@ -65,7 +65,7 @@ export class PackagistDatasource extends Datasource {
   }
 
   getRegistryMeta(regUrl: string): Promise<RegistryMeta> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${PackagistDatasource.id}`,
         key: `getRegistryMeta:${regUrl}`,
@@ -100,18 +100,16 @@ export class PackagistDatasource extends Datasource {
     return packagistFile;
   }
 
-  async getPackagistFile(
+  getPackagistFile(
     regUrl: string,
     regFile: RegistryFile,
   ): Promise<PackagistFile> {
-    if (PackagistDatasource.isPrivatePackage(regUrl)) {
-      return this._getPackagistFile(regUrl, regFile);
-    }
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${PackagistDatasource.id}`,
         key: `getPackagistFile:${PackagistDatasource.getPackagistFileUrl(regUrl, regFile)}`,
         ttlMinutes: 1440,
+        cacheable: !PackagistDatasource.isPrivatePackage(regUrl),
       },
       () => this._getPackagistFile(regUrl, regFile),
     );
@@ -171,7 +169,7 @@ export class PackagistDatasource extends Datasource {
     metadataUrl: string,
     packageName: string,
   ): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${PackagistDatasource.id}`,
         key: `packagistV2Lookup:${registryUrl}:${metadataUrl}:${packageName}`,

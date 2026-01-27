@@ -1,4 +1,4 @@
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as glasskubeVersioning from '../../versioning/glasskube/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -75,7 +75,7 @@ export class GlasskubePackagesDatasource extends Datasource {
   override getReleases(
     config: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${GlasskubePackagesDatasource.id}`,
         key: `${config.registryUrl}:${config.packageName}`,

@@ -4,7 +4,7 @@ import { promisify } from 'util';
 import sax from 'sax';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import type { HttpResponse } from '../../../util/http/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
@@ -64,7 +64,7 @@ export class RpmDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${RpmDatasource.id}`,
         key: `${config.registryUrl}:${config.packageName}`,
@@ -125,7 +125,7 @@ export class RpmDatasource extends Datasource {
   }
 
   getPrimaryGzipUrl(registryUrl: string): Promise<string | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${RpmDatasource.id}`,
         key: registryUrl,

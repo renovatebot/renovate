@@ -1,12 +1,12 @@
 import { disableInstrumentations } from './index.ts';
-import { instrumented } from './instrumented.ts';
+import { withInstrumenting } from './with-instrumenting.ts';
 
 afterAll(disableInstrumentations);
 
-describe('instrumentation/instrumented', () => {
+describe('instrumentation/with-instrumenting', () => {
   it('wraps async function', async () => {
     const spy = vi.fn(() => Promise.resolve(42));
-    const wrapped = instrumented({ name: 'test-span' }, spy);
+    const wrapped = withInstrumenting({ name: 'test-span' }, spy);
 
     const result = await wrapped();
 
@@ -16,7 +16,7 @@ describe('instrumentation/instrumented', () => {
 
   it('instruments multiple calls', async () => {
     const spy = vi.fn(() => Promise.resolve('ok'));
-    const wrapped = instrumented({ name: 'test-span' }, spy);
+    const wrapped = withInstrumenting({ name: 'test-span' }, spy);
 
     await wrapped();
     await wrapped();
@@ -28,7 +28,7 @@ describe('instrumentation/instrumented', () => {
 
   it('propagates errors', async () => {
     const spy = vi.fn(() => Promise.reject(new Error('test error')));
-    const wrapped = instrumented({ name: 'test-span' }, spy);
+    const wrapped = withInstrumenting({ name: 'test-span' }, spy);
 
     await expect(wrapped()).rejects.toThrow('test error');
     expect(spy).toHaveBeenCalledTimes(1);
@@ -36,7 +36,7 @@ describe('instrumentation/instrumented', () => {
 
   it('accepts options', async () => {
     const spy = vi.fn(() => Promise.resolve('result'));
-    const wrapped = instrumented(
+    const wrapped = withInstrumenting(
       {
         name: 'test-span',
         attributes: { 'custom.attr': 'value' },
@@ -53,7 +53,7 @@ describe('instrumentation/instrumented', () => {
 
   it('passes arguments to wrapped function', async () => {
     const spy = vi.fn((a: number, b: string) => Promise.resolve(`${a}-${b}`));
-    const wrapped = instrumented({ name: 'test-span' }, spy);
+    const wrapped = withInstrumenting({ name: 'test-span' }, spy);
 
     const result = await wrapped(42, 'hello');
 

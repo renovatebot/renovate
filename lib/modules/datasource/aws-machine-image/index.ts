@@ -1,7 +1,7 @@
 import type { Filter, Image } from '@aws-sdk/client-ec2';
 import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -98,7 +98,7 @@ export class AwsMachineImageDatasource extends Datasource {
   }
 
   getSortedAwsMachineImages(serializedAmiFilter: string): Promise<Image[]> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${AwsMachineImageDatasource.id}`,
         key: `getSortedAwsMachineImages:${serializedAmiFilter}`,
@@ -137,7 +137,7 @@ export class AwsMachineImageDatasource extends Datasource {
     config: GetReleasesConfig,
     newValue?: string,
   ): Promise<string | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${AwsMachineImageDatasource.id}`,
         key: `getDigest:${config.packageName}:${newValue ?? ''}`,
@@ -170,7 +170,7 @@ export class AwsMachineImageDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${AwsMachineImageDatasource.id}`,
         key: `getReleases:${config.packageName}`,

@@ -1,7 +1,7 @@
 import { isTruthy } from '@sindresorhus/is';
 import { simpleGit } from 'simple-git';
 import { logger } from '../../../logger/index.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getChildEnv } from '../../../util/exec/utils.ts';
 import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
 import { simpleGitConfig } from '../../../util/git/config.ts';
@@ -72,7 +72,7 @@ export abstract class GitDatasource extends Datasource {
   }
 
   getRawRefs(config: GetReleasesConfig): Promise<RawRefs[] | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${gitId}`,
         key: config.packageName,

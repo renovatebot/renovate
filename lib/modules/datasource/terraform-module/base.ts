@@ -1,5 +1,5 @@
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import type { HttpError } from '../../../util/http/index.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
@@ -24,7 +24,7 @@ export abstract class TerraformDatasource extends Datasource {
   getTerraformServiceDiscoveryResult(
     registryUrl: string,
   ): Promise<ServiceDiscoveryResult> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${terraformId}`,
         key: TerraformDatasource.getDiscoveryUrl(registryUrl),

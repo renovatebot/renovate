@@ -1,4 +1,4 @@
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as perlVersioning from '../../versioning/perl/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -99,7 +99,7 @@ export class CpanDatasource extends Datasource {
   override getReleases(
     config: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${CpanDatasource.id}`,
         key: `${config.packageName}`,

@@ -2,7 +2,7 @@ import { isNonEmptyArray } from '@sindresorhus/is';
 import { HOST_DISABLED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getQueryString, joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -184,7 +184,7 @@ export class RepologyDatasource extends Datasource {
     repoName: string,
     pkgName: string,
   ): Promise<RepologyPackage[] | undefined> {
-    return cached(
+    return withCache(
       {
         ttlMinutes: 60,
         namespace: `datasource-${RepologyDatasource.id}`,

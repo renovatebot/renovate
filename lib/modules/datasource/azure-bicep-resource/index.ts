@@ -1,4 +1,4 @@
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as azureRestApiVersioningApi from '../../versioning/azure-rest-api/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -51,7 +51,7 @@ export class AzureBicepResourceDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${AzureBicepResourceDatasource.id}`,
         key: `getReleases-${config.packageName}`,
@@ -70,7 +70,7 @@ export class AzureBicepResourceDatasource extends Datasource {
   }
 
   getResourceVersionIndex(): Promise<BicepResourceVersionIndex> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${AzureBicepResourceDatasource.id}`,
         key: 'getResourceVersionIndex',

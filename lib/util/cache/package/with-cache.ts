@@ -46,7 +46,7 @@ interface CachedOptions {
  * @param fn - The async function to cache
  * @returns The cached or fresh result
  */
-export async function cached<T>(
+export async function withCache<T>(
   options: CachedOptions,
   fn: () => T | Promise<T>,
 ): Promise<T> {

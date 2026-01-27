@@ -7,7 +7,7 @@ import {
   deduplicateArray,
   isNotNullOrUndefined,
 } from '../../../../util/array.ts';
-import { cached } from '../../../../util/cache/package/cached.ts';
+import { withCache } from '../../../../util/cache/package/with-cache.ts';
 import * as fs from '../../../../util/fs/index.ts';
 import { ensureCacheDir } from '../../../../util/fs/index.ts';
 import { Http } from '../../../../util/http/index.ts';
@@ -137,7 +137,7 @@ export class TerraformProviderHash {
     build: TerraformBuild,
     cacheDir: string,
   ): Promise<string> {
-    return cached(
+    return withCache(
       {
         namespace: `terraform-provider-hash`,
         key: `calculateSingleHash:${build.url}`,

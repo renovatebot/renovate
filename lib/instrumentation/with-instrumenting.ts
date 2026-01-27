@@ -32,7 +32,7 @@ interface InstrumentedOptions {
  * @param fn - The async function to wrap
  * @returns A new function that instruments each call
  */
-export function instrumented<T, Args extends unknown[]>(
+export function withInstrumenting<T, Args extends unknown[]>(
   options: InstrumentedOptions,
   fn: (...args: Args) => Promise<T>,
 ): (...args: Args) => Promise<T> {

@@ -5,8 +5,8 @@ import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as fs from '../../../util/fs/index.ts';
 import { ensureCacheDir } from '../../../util/fs/index.ts';
@@ -326,7 +326,7 @@ export class NugetV3Api {
     packageVersion: string | null,
     nupkgUrl: string,
   ): Promise<string | null> {
-    return cached(
+    return withCache(
       {
         namespace: NugetV3Api.cacheNamespace,
         key: `source-url:${registryUrl}:${packageName}`,

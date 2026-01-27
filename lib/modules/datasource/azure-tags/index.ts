@@ -1,5 +1,5 @@
-import { cached } from '../../../util/cache/package/cached.ts';
 import type { PackageCacheNamespace } from '../../../util/cache/package/namespaces.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import * as azureApi from '../../platform/azure/azure-got-wrapper.ts';
 import { Datasource } from '../datasource.ts';
@@ -48,7 +48,7 @@ export class AzureTagsDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: AzureTagsDatasource.cacheNamespace,
         key: AzureTagsDatasource.getCacheKey(

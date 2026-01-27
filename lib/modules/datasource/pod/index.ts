@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import { HOST_DISABLED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import type { HttpError } from '../../../util/http/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
@@ -234,7 +234,7 @@ export class PodDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         ttlMinutes: 30,
         namespace: `datasource-${PodDatasource.id}`,

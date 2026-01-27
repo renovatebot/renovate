@@ -1,5 +1,5 @@
-import { cached } from '../../../util/cache/package/cached.ts';
 import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { BitbucketHttp } from '../../../util/http/bitbucket.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
@@ -87,7 +87,7 @@ export class BitbucketTagsDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: BitbucketTagsDatasource.cacheNamespace,
         key: BitbucketTagsDatasource.getCacheKey(
@@ -121,7 +121,7 @@ export class BitbucketTagsDatasource extends Datasource {
     repo: string,
     tag: string,
   ): Promise<string | null> {
-    return cached(
+    return withCache(
       {
         namespace: BitbucketTagsDatasource.cacheNamespace,
         key: BitbucketTagsDatasource.getCacheKey(
@@ -144,7 +144,7 @@ export class BitbucketTagsDatasource extends Datasource {
   }
 
   getMainBranch(registryUrl: string, repo: string): Promise<string> {
-    return cached(
+    return withCache(
       {
         namespace: BitbucketTagsDatasource.cacheNamespace,
         key: BitbucketTagsDatasource.getCacheKey(
@@ -191,7 +191,7 @@ export class BitbucketTagsDatasource extends Datasource {
     config: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    return cached(
+    return withCache(
       {
         namespace: BitbucketTagsDatasource.cacheNamespace,
         key: BitbucketTagsDatasource.getCacheKey(

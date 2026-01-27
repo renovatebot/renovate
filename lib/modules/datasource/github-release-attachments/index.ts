@@ -1,6 +1,6 @@
 import { isBoolean } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { queryReleases } from '../../../util/github/graphql/index.ts';
 import type {
   GithubDigestFile,
@@ -79,7 +79,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
     release: GithubRestRelease,
     digest: string,
   ): Promise<GithubDigestFile | null> {
-    return cached(
+    return withCache(
       {
         ttlMinutes: 1440,
         namespace: `datasource-${GithubReleaseAttachmentsDatasource.id}`,
@@ -102,7 +102,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
     asset: GithubRestAsset,
     algorithm: string,
   ): Promise<string> {
-    return cached(
+    return withCache(
       {
         ttlMinutes: 1440,
         namespace: `datasource-${GithubReleaseAttachmentsDatasource.id}`,

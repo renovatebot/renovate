@@ -1,5 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import { cached } from '../../../util/cache/package/cached.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { regEx } from '../../../util/regex.ts';
 import type {
   DigestConfig,
@@ -65,7 +65,7 @@ export class GitRefsDatasource extends GitDatasource {
   override getReleases(
     config: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
-    return cached(
+    return withCache(
       {
         namespace: `datasource-${GitRefsDatasource.id}`,
         key: config.packageName,
