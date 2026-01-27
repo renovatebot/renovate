@@ -1,13 +1,8 @@
-import { isString, isUndefined } from '@sindresorhus/is';
-import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../../config/global.ts';
-import { logger } from '../../../logger/index.ts';
+import { isString } from '@sindresorhus/is';
 import type { Decorator } from '../../decorator/index.ts';
 import { decorate } from '../../decorator/index.ts';
-import { acquireLock } from '../../mutex.ts';
-import * as packageCache from './index.ts';
-import { resolveTtlValues } from './ttl.ts';
-import type { DecoratorCachedRecord, PackageCacheNamespace } from './types.ts';
+import { cached } from './cached.ts';
+import type { PackageCacheNamespace } from './types.ts';
 
 type HashFunction<T extends any[] = any[]> = (...args: T) => string;
 type NamespaceFunction<T extends any[] = any[]> = (
@@ -53,15 +48,6 @@ export function cache<T>({
   ttlMinutes = 30,
 }: CacheParameters): Decorator<T> {
   return decorate(async ({ args, instance, callback, methodName }) => {
-    const cachePrivatePackages = GlobalConfig.get(
-      'cachePrivatePackages',
-      false,
-    );
-    const isCacheable = cachePrivatePackages || cacheable.apply(instance, args);
-    if (!isCacheable) {
-      return callback();
-    }
-
     const finalNamespace = isString(namespace)
       ? namespace
       : namespace.apply(instance, args);
@@ -73,85 +59,15 @@ export function cache<T>({
       return callback();
     }
 
-    const cacheKey = `cache-decorator:${finalKey}`;
-
-    // prevent concurrent processing and cache writes
-    const releaseLock = await acquireLock(cacheKey, finalNamespace);
-
-    try {
-      const cachedRecord = await packageCache.get<DecoratorCachedRecord>(
-        finalNamespace,
-        cacheKey,
-      );
-
-      // eslint-disable-next-line prefer-const
-      let { softTtlMinutes, hardTtlMinutes } = resolveTtlValues(
-        finalNamespace,
+    return await cached(
+      {
+        namespace: finalNamespace,
+        key: finalKey,
         ttlMinutes,
-      );
-
-      // The separation between "soft" and "hard" TTL allows us to treat
-      // data as obsolete according to the "soft" TTL while physically storing it
-      // according to the "hard" TTL.
-      //
-      // This helps us return obsolete data in case of upstream server errors,
-      // which is more useful than throwing exceptions ourselves.
-      //
-      // However, since the default hard TTL is one week, it could create
-      // unnecessary pressure on storage volume. Therefore,
-      // we cache only `getReleases` and `getDigest` results for an extended period.
-      //
-      // For other method names being decorated, the "soft" just equals the "hard" ttl.
-      if (methodName !== 'getReleases' && methodName !== 'getDigest') {
-        hardTtlMinutes = softTtlMinutes;
-      }
-
-      let fallbackValue: unknown;
-      if (cachedRecord) {
-        const now = DateTime.local();
-        const cachedAt = DateTime.fromISO(cachedRecord.cachedAt);
-
-        const softDeadline = cachedAt.plus({ minutes: softTtlMinutes });
-        if (now < softDeadline) {
-          return cachedRecord.value;
-        }
-
-        const hardDeadline = cachedAt.plus({ minutes: hardTtlMinutes });
-        if (now < hardDeadline) {
-          fallbackValue = cachedRecord.value;
-        }
-      }
-
-      let newValue: unknown;
-      try {
-        newValue = await callback();
-      } catch (err) {
-        if (!isUndefined(fallbackValue)) {
-          logger.debug(
-            { err },
-            'Package cache decorator: callback error, returning old data',
-          );
-          return fallbackValue;
-        }
-        throw err;
-      }
-
-      if (!isUndefined(newValue)) {
-        const newRecord: DecoratorCachedRecord = {
-          cachedAt: DateTime.local().toISO(),
-          value: newValue,
-        };
-        await packageCache.setWithRawTtl(
-          finalNamespace,
-          cacheKey,
-          newRecord,
-          hardTtlMinutes,
-        );
-      }
-
-      return newValue;
-    } finally {
-      releaseLock();
-    }
+        cacheable: cacheable.apply(instance, args),
+        fallback: methodName === 'getReleases' || methodName === 'getDigest',
+      },
+      callback,
+    );
   });
 }

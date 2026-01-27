@@ -1,7 +1,7 @@
 import { SpanKind } from '@opentelemetry/api';
 import type { Decorator } from '../util/decorator/index.ts';
 import { decorate } from '../util/decorator/index.ts';
-import { instrument as instrumentFunc } from './index.ts';
+import { instrumented } from './instrumented.ts';
 import type { SpanParameters } from './types.ts';
 
 /**
@@ -14,11 +14,10 @@ export function instrument<T>({
   kind = SpanKind.INTERNAL,
 }: SpanParameters): Decorator<T> {
   return decorate(async ({ callback }) => {
-    return await instrumentFunc(name, callback, {
-      attributes,
-      root: ignoreParentSpan,
-      kind,
-    });
+    return await instrumented(
+      { name, attributes, ignoreParentSpan, kind },
+      callback,
+    );
   });
 }
 
@@ -31,11 +30,10 @@ export function instrumentStandalone<T extends (...args: any[]) => any>(
   }: SpanParameters,
   fn: T,
 ): T {
-  return async function (...args: any[]) {
-    return await instrumentFunc(name, () => fn(...args), {
-      attributes,
-      root: ignoreParentSpan,
-      kind,
-    });
-  } as T;
+  return (async (...args: any[]) => {
+    return await instrumented(
+      { name, attributes, ignoreParentSpan, kind },
+      () => fn(...args),
+    );
+  }) as T;
 }
