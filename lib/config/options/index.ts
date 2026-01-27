@@ -245,6 +245,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'integer',
     default: null,
     globalOnly: true,
+    inheritConfigSupport: true,
     cli: false,
   },
   {
