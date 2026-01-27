@@ -5,7 +5,7 @@ import { logger } from '../../../logger/index.ts';
 import { acquireLock } from '../../mutex.ts';
 import * as packageCache from './index.ts';
 import { resolveTtlValues } from './ttl.ts';
-import type { DecoratorCachedRecord, PackageCacheNamespace } from './types.ts';
+import type { CachedRecord, PackageCacheNamespace } from './types.ts';
 
 interface CachedOptions {
   /**
@@ -75,7 +75,7 @@ export async function withCache<T>(
   const releaseLock = await acquireLock(cacheKey, namespace);
 
   try {
-    const cachedRecord = await packageCache.get<DecoratorCachedRecord>(
+    const cachedRecord = await packageCache.get<CachedRecord>(
       namespace,
       cacheKey,
     );
@@ -125,7 +125,7 @@ export async function withCache<T>(
     }
 
     if (!isUndefined(newValue)) {
-      const newRecord: DecoratorCachedRecord = {
+      const newRecord: CachedRecord = {
         cachedAt: DateTime.local().toISO(),
         value: newValue,
       };

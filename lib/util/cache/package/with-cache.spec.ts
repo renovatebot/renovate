@@ -1,8 +1,8 @@
 import { GlobalConfig } from '../../../config/global.ts';
 import * as memCache from '../memory/index.ts';
-import { withCache } from './with-cache.ts';
 import * as file from './file.ts';
 import * as packageCache from './index.ts';
+import { withCache } from './with-cache.ts';
 
 vi.mock('./file.ts');
 
