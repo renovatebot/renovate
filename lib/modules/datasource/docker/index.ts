@@ -1,4 +1,4 @@
-import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global.ts';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -893,7 +893,7 @@ export class DockerDatasource extends Datasource {
       }
 
       if (
-        isString(architecture) ||
+        isNonEmptyString(architecture) ||
         (manifestResponse &&
           !hasKey('docker-content-digest', manifestResponse.headers))
       ) {
