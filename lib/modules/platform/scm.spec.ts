@@ -1,7 +1,7 @@
-import type { PlatformId } from '../../constants';
-import { PLATFORM_NOT_FOUND } from '../../constants/error-messages';
-import { scm, setPlatformScmApi } from './scm';
-import { git } from '~test/util';
+import { PLATFORM_NOT_FOUND } from '../../constants/error-messages.ts';
+import type { PlatformId } from '../../constants/index.ts';
+import { scm, setPlatformScmApi } from './scm.ts';
+import { git } from '~test/util.ts';
 
 vi.unmock('./scm'); //mocked from test/setup
 

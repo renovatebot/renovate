@@ -1,15 +1,15 @@
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { UpdateArtifactsConfig } from '../types';
-import * as conan from '.';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { env, fs } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import * as conan from './index.ts';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { env, fs } from '~test/util.ts';
 
-vi.mock('../../../util/exec/env');
-vi.mock('../../../util/fs');
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../../util/fs/index.ts');
 
 process.env.CONTAINERBASE = 'true';
 const config: UpdateArtifactsConfig = {};

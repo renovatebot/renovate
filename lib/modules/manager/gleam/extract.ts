@@ -1,11 +1,11 @@
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { getSiblingFileName, localPathExists } from '../../../util/fs';
-import { HexDatasource } from '../../datasource/hex';
-import { api as versioning } from '../../versioning/hex';
-import type { PackageDependency, PackageFileContent } from '../types';
-import { extractLockFileVersions } from './locked-version';
-import { GleamToml } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { getSiblingFileName, localPathExists } from '../../../util/fs/index.ts';
+import { HexDatasource } from '../../datasource/hex/index.ts';
+import { api as versioning } from '../../versioning/hex/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { extractLockFileVersions } from './locked-version.ts';
+import { GleamToml } from './schema.ts';
 
 const dependencySections = ['dependencies', 'dev-dependencies'] as const;
 

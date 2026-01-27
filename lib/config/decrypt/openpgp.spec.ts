@@ -1,10 +1,10 @@
 import { codeBlock } from 'common-tags';
-import { CONFIG_VALIDATION } from '../../constants/error-messages';
-import { decryptConfig, setPrivateKeys } from '../decrypt';
-import { GlobalConfig } from '../global';
-import type { AllConfig } from '../types';
-import { tryDecryptOpenPgp } from './openpgp';
-import { Fixtures } from '~test/fixtures';
+import { CONFIG_VALIDATION } from '../../constants/error-messages.ts';
+import { decryptConfig, setPrivateKeys } from '../decrypt.ts';
+import { GlobalConfig } from '../global.ts';
+import type { AllConfig } from '../types.ts';
+import { tryDecryptOpenPgp } from './openpgp.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 const privateKey = Fixtures.get('private-pgp.pem', '..');
 const privateKeyEcc = codeBlock`
@@ -162,8 +162,8 @@ describe('config/decrypt/openpgp', () => {
           throw new Error('openpgp error');
         },
       }));
-      const pgp = await import('./openpgp.js');
-      const { logger } = await import('../../logger/index.js');
+      const pgp = await import('./openpgp.ts');
+      const { logger } = await import('../../logger/index.ts');
       expect(
         await pgp.tryDecryptOpenPgp(
           '',

@@ -1,13 +1,13 @@
 import _fs from 'fs-extra';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { exec as _exec } from '../../../util/exec';
-import { ExecError } from '../../../util/exec/exec-error';
-import type { UpdateArtifact } from '../types';
-import { updateArtifacts } from './artifacts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { ExecError } from '../../../util/exec/exec-error.ts';
+import { exec as _exec } from '../../../util/exec/index.ts';
+import type { UpdateArtifact } from '../types.ts';
+import { updateArtifacts } from './artifacts.ts';
 
-vi.mock('../../../util/exec');
+vi.mock('../../../util/exec/index.ts');
 vi.mock('fs-extra');
 
 const exec = vi.mocked(_exec);

@@ -1,5 +1,5 @@
-import type { PackageCacheNamespace } from '../../cache/package/types';
-import type { Timestamp } from '../../timestamp';
+import type { PackageCacheNamespace } from '../../cache/package/types.ts';
+import type { Timestamp } from '../../timestamp.ts';
 
 export interface GithubDatasourceItem {
   version: string;

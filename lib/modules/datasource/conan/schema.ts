@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { LooseArray } from '../../../util/schema-utils';
-import type { ReleaseResult } from '../types';
-import { conanDatasourceRegex } from './common';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
+import type { ReleaseResult } from '../types.ts';
+import { conanDatasourceRegex } from './common.ts';
 
 export const ConanCenterReleases = z
   .object({

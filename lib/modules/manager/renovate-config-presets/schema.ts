@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Json5 } from '../../../util/schema-utils';
+import { Json5 } from '../../../util/schema-utils/index.ts';
 
 export const RenovateJson = Json5.pipe(
   z.object({

@@ -2,18 +2,18 @@ import {
   isNonEmptyArray,
   isNonEmptyStringAndNotWhitespace,
 } from '@sindresorhus/is';
-import { logger } from '../../logger';
-import { filterMap } from '../../util/filter-map';
-import { regEx } from '../../util/regex';
-import { defaultVersioning } from '../versioning';
-import * as allVersioning from '../versioning';
-import datasources from './api';
-import { CustomDatasource } from './custom';
+import { logger } from '../../logger/index.ts';
+import { filterMap } from '../../util/filter-map.ts';
+import { regEx } from '../../util/regex.ts';
+import { defaultVersioning } from '../versioning/index.ts';
+import * as allVersioning from '../versioning/index.ts';
+import datasources from './api.ts';
+import { CustomDatasource } from './custom/index.ts';
 import type {
   DatasourceApi,
   GetPkgReleasesConfig,
   ReleaseResult,
-} from './types';
+} from './types.ts';
 
 export function getDatasourceFor(datasource: string): DatasourceApi | null {
   if (datasource?.startsWith('custom.')) {

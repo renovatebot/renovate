@@ -1,7 +1,7 @@
 import { isArray, isNumber, isString } from '@sindresorhus/is';
 import type { SimpleGitOptions } from 'simple-git';
-import { GlobalConfig } from '../../config/global';
-import type { GitNoVerifyOption } from './types';
+import { GlobalConfig } from '../../config/global.ts';
+import type { GitNoVerifyOption } from './types.ts';
 
 let noVerify: GitNoVerifyOption[] = ['push', 'commit'];
 

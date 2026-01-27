@@ -1,9 +1,9 @@
 import { codeBlock } from 'common-tags';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import type { ExtractConfig, PackageDependency } from '../types';
-import { extractAllPackageFiles, extractPackageFile } from '.';
-import { logger } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type { ExtractConfig, PackageDependency } from '../types.ts';
+import { extractAllPackageFiles, extractPackageFile } from './index.ts';
+import { logger } from '~test/util.ts';
 
 const config: ExtractConfig = {};
 

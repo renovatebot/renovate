@@ -1,16 +1,16 @@
 // TODO #22198
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
-import { platform } from '../../../../modules/platform';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
 import {
   ensureComment,
   ensureCommentRemoval,
-} from '../../../../modules/platform/comment';
-import { scm } from '../../../../modules/platform/scm';
-import type { BranchConfig } from '../../../types';
-import { isScheduledNow } from '../branch/schedule';
-import { resolveBranchStatus } from '../branch/status-checks';
+} from '../../../../modules/platform/comment.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import type { BranchConfig } from '../../../types.ts';
+import { isScheduledNow } from '../branch/schedule.ts';
+import { resolveBranchStatus } from '../branch/status-checks.ts';
 
 export type PrAutomergeBlockReason =
   | 'BranchModified'

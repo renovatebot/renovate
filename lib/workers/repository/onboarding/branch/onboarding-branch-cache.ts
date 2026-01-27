@@ -3,10 +3,10 @@ import {
   isNonEmptyString,
   isUndefined,
 } from '@sindresorhus/is';
-import { logger } from '../../../../logger';
-import { scm } from '../../../../modules/platform/scm';
-import { getCache } from '../../../../util/cache/repository';
-import { getBranchCommit } from '../../../../util/git';
+import { logger } from '../../../../logger/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { getCache } from '../../../../util/cache/repository/index.ts';
+import { getBranchCommit } from '../../../../util/git/index.ts';
 
 export function setOnboardingCache(
   defaultBranchSha: string,

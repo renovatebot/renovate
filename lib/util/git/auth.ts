@@ -1,14 +1,14 @@
 import { isEmptyString } from '@sindresorhus/is';
-import { PLATFORM_HOST_TYPES } from '../../constants/platforms';
-import { logger } from '../../logger';
-import type { HostRule } from '../../types';
-import { detectPlatform } from '../common';
-import { getEnv } from '../env';
-import { find, getAll } from '../host-rules';
-import { regEx } from '../regex';
-import { createURLFromHostOrURL, isHttpUrl } from '../url';
-import type { AuthenticationRule } from './types';
-import { parseGitUrl } from './url';
+import { PLATFORM_HOST_TYPES } from '../../constants/platforms.ts';
+import { logger } from '../../logger/index.ts';
+import type { HostRule } from '../../types/index.ts';
+import { detectPlatform } from '../common.ts';
+import { getEnv } from '../env.ts';
+import { find, getAll } from '../host-rules.ts';
+import { regEx } from '../regex.ts';
+import { createURLFromHostOrURL, isHttpUrl } from '../url.ts';
+import type { AuthenticationRule } from './types.ts';
+import { parseGitUrl } from './url.ts';
 
 const githubApiUrls = new Set([
   'github.com',

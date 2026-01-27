@@ -1,8 +1,8 @@
-import { GlobalConfig } from '../../../config/global';
-import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import * as modulesDatasource from '../../../modules/datasource';
-import type { VolumeOption } from '../types';
+import { GlobalConfig } from '../../../config/global.ts';
+import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import * as modulesDatasource from '../../../modules/datasource/index.ts';
+import type { VolumeOption } from '../types.ts';
 import {
   generateDockerCommand,
   getDockerTag,
@@ -11,11 +11,13 @@ import {
   removeDockerContainer,
   resetPrefetchedImages,
   sideCarImage,
-} from '.';
-import { mockExecAll, mockExecSequence } from '~test/exec-util';
-import { partial } from '~test/util';
+} from './index.ts';
+import { mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { partial } from '~test/util.ts';
 
-vi.mock('../../../modules/datasource', () => ({ getPkgReleases: vi.fn() }));
+vi.mock('../../../modules/datasource/index.ts', () => ({
+  getPkgReleases: vi.fn(),
+}));
 
 describe('util/exec/docker/index', () => {
   describe('prefetchDockerImage', () => {

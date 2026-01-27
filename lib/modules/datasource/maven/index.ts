@@ -1,12 +1,12 @@
 import type { XmlDocument } from 'xmldoc';
-import { logger } from '../../../logger';
-import * as packageCache from '../../../util/cache/package';
-import { asTimestamp } from '../../../util/timestamp';
-import { ensureTrailingSlash } from '../../../util/url';
-import mavenVersion from '../../versioning/maven';
-import * as mavenVersioning from '../../versioning/maven';
-import { compare } from '../../versioning/maven/compare';
-import { Datasource } from '../datasource';
+import { logger } from '../../../logger/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import { compare } from '../../versioning/maven/compare.ts';
+import mavenVersion from '../../versioning/maven/index.ts';
+import * as mavenVersioning from '../../versioning/maven/index.ts';
+import { Datasource } from '../datasource.ts';
 import type {
   GetReleasesConfig,
   PostprocessReleaseConfig,
@@ -14,9 +14,9 @@ import type {
   RegistryStrategy,
   Release,
   ReleaseResult,
-} from '../types';
-import { MAVEN_REPO } from './common';
-import type { MavenDependency, MetadataResults } from './types';
+} from '../types.ts';
+import { MAVEN_REPO } from './common.ts';
+import type { MavenDependency, MetadataResults } from './types.ts';
 import {
   createUrlForDependencyPom,
   downloadMaven,
@@ -24,7 +24,7 @@ import {
   getDependencyInfo,
   getDependencyParts,
   getMavenUrl,
-} from './util';
+} from './util.ts';
 
 function getLatestSuitableVersion(releases: Release[]): string | null {
   /* v8 ignore next 3 -- TODO: add test */

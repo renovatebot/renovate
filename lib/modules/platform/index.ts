@@ -10,7 +10,7 @@ import platforms from './api';
 import { setPlatformScmApi } from './scm';
 import type { Platform } from './types';
 
-export type * from './types';
+export type * from './types.ts';
 
 export const getPlatformList = (): string[] => Array.from(platforms.keys());
 

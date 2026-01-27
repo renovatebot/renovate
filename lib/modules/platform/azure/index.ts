@@ -17,16 +17,16 @@ import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { BranchStatus } from '../../../types';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { parseJson } from '../../../util/common';
-import * as git from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
-import { regEx } from '../../../util/regex';
-import { sanitize } from '../../../util/sanitize';
-import { ensureTrailingSlash } from '../../../util/url';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import { parseJson } from '../../../util/common.ts';
+import * as git from '../../../util/git/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { regEx } from '../../../util/regex.ts';
+import { sanitize } from '../../../util/sanitize.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -42,13 +42,13 @@ import type {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-} from '../types';
-import { getNewBranchName, repoFingerprint } from '../util';
-import { smartTruncate } from '../utils/pr-body';
-import * as azureApi from './azure-got-wrapper';
-import * as azureHelper from './azure-helper';
-import type { AzurePr } from './types';
-import { AzurePrVote } from './types';
+} from '../types.ts';
+import { getNewBranchName, repoFingerprint } from '../util.ts';
+import { smartTruncate } from '../utils/pr-body.ts';
+import * as azureApi from './azure-got-wrapper.ts';
+import * as azureHelper from './azure-helper.ts';
+import type { AzurePr } from './types.ts';
+import { AzurePrVote } from './types.ts';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
@@ -58,7 +58,7 @@ import {
   getStorageExtraCloneOpts,
   mapMergeStrategy,
   max4000Chars,
-} from './util';
+} from './util.ts';
 
 interface Config {
   repoForceRebase: boolean;

@@ -1,7 +1,7 @@
-import * as hostRules from '../host-rules';
-import { range } from '../range';
-import { BitbucketHttp, setBaseUrl } from './bitbucket';
-import * as httpMock from '~test/http-mock';
+import * as hostRules from '../host-rules.ts';
+import { range } from '../range.ts';
+import { BitbucketHttp, setBaseUrl } from './bitbucket.ts';
+import * as httpMock from '~test/http-mock.ts';
 
 const baseUrl = 'https://api.bitbucket.org';
 

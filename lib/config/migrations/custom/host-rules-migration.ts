@@ -1,11 +1,11 @@
 import { isString } from '@sindresorhus/is';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { HostRule } from '../../../types';
-import type { LegacyHostRule } from '../../../util/host-rules';
-import { massageHostUrl } from '../../../util/url';
-import { AbstractMigration } from '../base/abstract-migration';
-import { migrateDatasource } from './datasource-migration';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { HostRule } from '../../../types/index.ts';
+import type { LegacyHostRule } from '../../../util/host-rules.ts';
+import { massageHostUrl } from '../../../util/url.ts';
+import { AbstractMigration } from '../base/abstract-migration.ts';
+import { migrateDatasource } from './datasource-migration.ts';
 
 export class HostRulesMigration extends AbstractMigration {
   override readonly propertyName = 'hostRules';

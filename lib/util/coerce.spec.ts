@@ -1,4 +1,4 @@
-import { coerceToNull, coerceToUndefined } from './coerce';
+import { coerceToNull, coerceToUndefined } from './coerce.ts';
 
 describe('util/coerce', () => {
   describe('coerceToNull', () => {

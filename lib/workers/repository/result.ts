@@ -1,4 +1,4 @@
-import type { RenovateConfig } from '../../config/types';
+import type { RenovateConfig } from '../../config/types.ts';
 
 import type {
   ConfigErrors,
@@ -8,15 +8,15 @@ import type {
   SystemErrors,
   TemporaryErrors,
   UNKNOWN_ERROR,
-} from '../../constants/error-messages';
+} from '../../constants/error-messages.ts';
 import {
   CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,
   MISSING_API_CREDENTIALS,
   RepositoryErrors,
-} from '../../constants/error-messages';
+} from '../../constants/error-messages.ts';
 
-import { logger } from '../../logger';
+import { logger } from '../../logger/index.ts';
 
 export type ProcessStatus =
   /**

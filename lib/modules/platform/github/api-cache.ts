@@ -1,10 +1,14 @@
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
-import { logger } from '../../../logger';
-import type { ApiPageCache, ApiPageItem } from './types';
+import { logger } from '../../../logger/index.ts';
+import type { ApiPageCache, ApiPageItem } from './types.ts';
 
 export class ApiCache<T extends ApiPageItem> {
-  constructor(private cache: ApiPageCache<T>) {}
+  private cache: ApiPageCache<T>;
+
+  constructor(cache: ApiPageCache<T>) {
+    this.cache = cache;
+  }
 
   getItems(): T[] {
     const items = Object.values(this.cache.items);

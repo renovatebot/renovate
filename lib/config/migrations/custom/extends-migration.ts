@@ -1,7 +1,7 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
-import { GlobalConfig } from '../../global';
-import { removedPresets } from '../../presets/common';
-import { AbstractMigration } from '../base/abstract-migration';
+import { GlobalConfig } from '../../global.ts';
+import { removedPresets } from '../../presets/common.ts';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export class ExtendsMigration extends AbstractMigration {
   override readonly propertyName = 'extends';

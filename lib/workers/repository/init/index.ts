@@ -1,21 +1,21 @@
-import { GlobalConfig } from '../../../config/global';
-import { applySecretsAndVariablesToConfig } from '../../../config/secrets';
-import type { RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { setRepositoryLogLevelRemaps } from '../../../logger/remap';
-import { platform } from '../../../modules/platform';
-import * as memCache from '../../../util/cache/memory';
-import { clone } from '../../../util/clone';
-import { cloneSubmodules, setUserRepoConfig } from '../../../util/git';
-import { getAll } from '../../../util/host-rules';
-import { initMutexes } from '../../../util/mutex';
-import { checkIfConfigured } from '../configured';
-import { PackageFiles } from '../package-files';
-import type { WorkerPlatformConfig } from './apis';
-import { initApis } from './apis';
-import { initializeCaches, resetCaches } from './cache';
-import { getRepoConfig } from './config';
-import { detectVulnerabilityAlerts } from './vulnerability';
+import { GlobalConfig } from '../../../config/global.ts';
+import { applySecretsAndVariablesToConfig } from '../../../config/secrets.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import { setRepositoryLogLevelRemaps } from '../../../logger/remap.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { clone } from '../../../util/clone.ts';
+import { cloneSubmodules, setUserRepoConfig } from '../../../util/git/index.ts';
+import { getAll } from '../../../util/host-rules.ts';
+import { initMutexes } from '../../../util/mutex.ts';
+import { checkIfConfigured } from '../configured.ts';
+import { PackageFiles } from '../package-files.ts';
+import type { WorkerPlatformConfig } from './apis.ts';
+import { initApis } from './apis.ts';
+import { initializeCaches, resetCaches } from './cache.ts';
+import { getRepoConfig } from './config.ts';
+import { detectVulnerabilityAlerts } from './vulnerability.ts';
 
 function initializeConfig(config: RenovateConfig): RenovateConfig {
   return {

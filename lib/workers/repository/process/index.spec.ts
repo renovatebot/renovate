@@ -1,15 +1,19 @@
-import { getConfig } from '../../../config/defaults';
-import { GlobalConfig } from '../../../config/global';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
-import { addMeta } from '../../../logger';
-import { getCache } from '../../../util/cache/repository';
-import * as _extractUpdate from './extract-update';
-import { lookup } from './extract-update';
-import { extractDependencies, getBaseBranchConfig, updateRepo } from '.';
-import { git, logger, platform, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import { getConfig } from '../../../config/defaults.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
+import { addMeta } from '../../../logger/index.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import * as _extractUpdate from './extract-update.ts';
+import { lookup } from './extract-update.ts';
+import {
+  extractDependencies,
+  getBaseBranchConfig,
+  updateRepo,
+} from './index.ts';
+import { git, logger, platform, scm } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
-vi.mock('./extract-update');
+vi.mock('./extract-update.ts');
 
 const extract = vi.mocked(_extractUpdate).extract;
 

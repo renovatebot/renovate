@@ -1,9 +1,12 @@
-import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
-import { GithubScm } from './scm';
-import * as _github from '.';
-import { git } from '~test/util';
+import type {
+  CommitFilesConfig,
+  LongCommitSha,
+} from '../../../util/git/types.ts';
+import * as _github from './index.ts';
+import { GithubScm } from './scm.ts';
+import { git } from '~test/util.ts';
 
-vi.mock('.');
+vi.mock('./index.ts');
 const github = vi.mocked(_github);
 
 describe('modules/platform/github/scm', () => {

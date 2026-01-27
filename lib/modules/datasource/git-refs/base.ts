@@ -1,15 +1,15 @@
 import { isTruthy } from '@sindresorhus/is';
 import { simpleGit } from 'simple-git';
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { getChildEnv } from '../../../util/exec/utils';
-import { getGitEnvironmentVariables } from '../../../util/git/auth';
-import { simpleGitConfig } from '../../../util/git/config';
-import { getRemoteUrlWithToken } from '../../../util/git/url';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig } from '../types';
-import type { RawRefs } from './types';
+import { logger } from '../../../logger/index.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { getChildEnv } from '../../../util/exec/utils.ts';
+import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { simpleGitConfig } from '../../../util/git/config.ts';
+import { getRemoteUrlWithToken } from '../../../util/git/url.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig } from '../types.ts';
+import type { RawRefs } from './types.ts';
 
 const refMatch = regEx(/(?<hash>.*?)\s+refs\/(?<type>.*?)\/(?<value>.*)/);
 const headMatch = regEx(/(?<hash>.*?)\s+HEAD/);

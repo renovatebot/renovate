@@ -1,14 +1,14 @@
 import { isTruthy } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import semver from 'semver';
-import { logger } from '../../../logger';
-import type { BranchStatus } from '../../../types';
-import { parseJson } from '../../../util/common';
-import { getEnv } from '../../../util/env';
-import * as git from '../../../util/git';
-import { setBaseUrl } from '../../../util/http/gerrit';
-import { regEx } from '../../../util/regex';
-import { ensureTrailingSlash } from '../../../util/url';
+import { logger } from '../../../logger/index.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import { parseJson } from '../../../util/common.ts';
+import { getEnv } from '../../../util/env.ts';
+import * as git from '../../../util/git/index.ts';
+import { setBaseUrl } from '../../../util/http/gerrit.ts';
+import { regEx } from '../../../util/regex.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -26,14 +26,14 @@ import type {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-} from '../types';
-import { repoFingerprint } from '../util';
+} from '../types.ts';
+import { repoFingerprint } from '../util.ts';
 
-import { smartTruncate } from '../utils/pr-body';
-import { readOnlyIssueBody } from '../utils/read-only-issue-body';
-import { client } from './client';
-import { configureScm } from './scm';
-import type { GerritLabelTypeInfo, GerritProjectInfo } from './types';
+import { smartTruncate } from '../utils/pr-body.ts';
+import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
+import { client } from './client.ts';
+import { configureScm } from './scm.ts';
+import type { GerritLabelTypeInfo, GerritProjectInfo } from './types.ts';
 import {
   MAX_GERRIT_COMMENT_SIZE,
   REQUEST_DETAILS_FOR_PRS,
@@ -41,7 +41,7 @@ import {
   getGerritRepoUrl,
   mapBranchStatusToLabel,
   mapGerritChangeToPr,
-} from './utils';
+} from './utils.ts';
 
 export const id = 'gerrit';
 

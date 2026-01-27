@@ -1,10 +1,10 @@
-import * as hostRules from '../../util/host-rules';
-import { GitRefsDatasource } from '../datasource/git-refs';
-import { GitTagsDatasource } from '../datasource/git-tags';
-import { GithubTagsDatasource } from '../datasource/github-tags';
-import { GitlabTagsDatasource } from '../datasource/gitlab-tags';
-import { type PackageDependency } from './types';
-import { applyGitSource } from './util';
+import * as hostRules from '../../util/host-rules.ts';
+import { GitRefsDatasource } from '../datasource/git-refs/index.ts';
+import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../datasource/gitlab-tags/index.ts';
+import { type PackageDependency } from './types.ts';
+import { applyGitSource } from './util.ts';
 
 describe('modules/manager/util', () => {
   beforeEach(() => {

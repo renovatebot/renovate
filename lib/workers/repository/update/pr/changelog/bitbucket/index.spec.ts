@@ -1,10 +1,10 @@
-import type { ChangeLogProject, ChangeLogRelease } from '..';
-import type { BranchUpgradeConfig } from '../../../../../types';
-import { getReleaseList, getReleaseNotesMdFile } from '../release-notes';
-import { BitbucketChangeLogSource } from './source';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
-import { partial } from '~test/util';
+import type { BranchUpgradeConfig } from '../../../../../types.ts';
+import type { ChangeLogProject, ChangeLogRelease } from '../index.ts';
+import { getReleaseList, getReleaseNotesMdFile } from '../release-notes.ts';
+import { BitbucketChangeLogSource } from './source.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 
 const baseUrl = 'https://bitbucket.org/';
 const apiBaseUrl = 'https://api.bitbucket.org/';

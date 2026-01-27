@@ -1,13 +1,13 @@
 import { DescribeAddonVersionsCommand, EKSClient } from '@aws-sdk/client-eks';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { isTruthy } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { cache } from '../../../util/cache/package/decorator';
-import * as awsEksAddonVersioning from '../../versioning/aws-eks-addon';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { EksAddonsFilter } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import * as awsEksAddonVersioning from '../../versioning/aws-eks-addon/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { EksAddonsFilter } from './schema.ts';
 
 export class AwsEKSAddonDataSource extends Datasource {
   static readonly id = 'aws-eks-addon';

@@ -1,7 +1,7 @@
-import { logger } from '../logger';
-import * as memCache from './cache/memory';
-import type { GitOperationType } from './git/types';
-import { parseUrl } from './url';
+import { logger } from '../logger/index.ts';
+import * as memCache from './cache/memory/index.ts';
+import type { GitOperationType } from './git/types.ts';
+import { parseUrl } from './url.ts';
 
 type LookupStatsData = Record<string, number[]>;
 

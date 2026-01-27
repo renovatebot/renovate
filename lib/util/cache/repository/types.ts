@@ -2,11 +2,11 @@ import type {
   RepositoryCacheConfig,
   RepositoryCacheType,
   UpdateType,
-} from '../../../config/types';
-import type { PackageFile } from '../../../modules/manager/types';
-import type { RepoInitConfig } from '../../../workers/repository/init/types';
-import type { ExtractResult } from '../../../workers/repository/process/extract-update';
-import type { PrBlockedBy } from '../../../workers/types';
+} from '../../../config/types.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import type { RepoInitConfig } from '../../../workers/repository/init/types.ts';
+import type { ExtractResult } from '../../../workers/repository/process/extract-update.ts';
+import type { PrBlockedBy } from '../../../workers/types.ts';
 
 export interface BaseBranchCache {
   revision?: number;

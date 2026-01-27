@@ -1,14 +1,14 @@
 // TODO #22198
-import { logger } from '../../../../../logger';
-import type { Release } from '../../../../../modules/datasource';
+import { logger } from '../../../../../logger/index.ts';
+import type { Release } from '../../../../../modules/datasource/index.ts';
 import {
   getPkgReleases,
   isGetPkgReleasesConfig,
-} from '../../../../../modules/datasource';
-import type { VersioningApi } from '../../../../../modules/versioning';
-import { get } from '../../../../../modules/versioning';
-import { coerceArray } from '../../../../../util/array';
-import type { BranchUpgradeConfig } from '../../../../types';
+} from '../../../../../modules/datasource/index.ts';
+import type { VersioningApi } from '../../../../../modules/versioning/index.ts';
+import { get } from '../../../../../modules/versioning/index.ts';
+import { coerceArray } from '../../../../../util/array.ts';
+import type { BranchUpgradeConfig } from '../../../../types.ts';
 
 function matchesMMP(
   versioningApi: VersioningApi,

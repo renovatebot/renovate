@@ -7,13 +7,13 @@ import {
 import emojibaseEmojiRegex from 'emojibase-regex/emoji.js';
 import SHORTCODE_REGEX from 'emojibase-regex/shortcode.js';
 import { z } from 'zod';
-import type { RenovateConfig } from '../config/types';
-import dataFiles from '../data-files.generated';
-import { logger } from '../logger';
-import { regEx } from './regex';
-import { Result } from './result';
-import { Json } from './schema-utils';
-import { coerceString } from './string';
+import type { RenovateConfig } from '../config/types.ts';
+import dataFiles from '../data-files.generated.ts';
+import { logger } from '../logger/index.ts';
+import { regEx } from './regex.ts';
+import { Result } from './result.ts';
+import { Json } from './schema-utils/index.ts';
+import { coerceString } from './string.ts';
 
 let unicodeEmoji = true;
 

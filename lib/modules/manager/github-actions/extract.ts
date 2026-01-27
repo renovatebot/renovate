@@ -1,27 +1,27 @@
 import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../../config/global';
-import { logger, withMeta } from '../../../logger';
-import { detectPlatform } from '../../../util/common';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags';
-import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { GithubRunnersDatasource } from '../../datasource/github-runners';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import * as dockerVersioning from '../../versioning/docker';
-import * as nodeVersioning from '../../versioning/node';
-import * as npmVersioning from '../../versioning/npm';
-import { getDep } from '../dockerfile/extract';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger, withMeta } from '../../../logger/index.ts';
+import { detectPlatform } from '../../../util/common.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
+import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { GithubRunnersDatasource } from '../../datasource/github-runners/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import * as dockerVersioning from '../../versioning/docker/index.ts';
+import * as nodeVersioning from '../../versioning/node/index.ts';
+import * as npmVersioning from '../../versioning/npm/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import { CommunityActions } from './community';
-import type { DockerReference, RepositoryReference } from './parse';
-import { isSha, isShortSha, parseUsesLine } from './parse';
-import type { Steps } from './schema';
-import { Workflow } from './schema';
+} from '../types.ts';
+import { CommunityActions } from './community.ts';
+import type { DockerReference, RepositoryReference } from './parse.ts';
+import { isSha, isShortSha, parseUsesLine } from './parse.ts';
+import type { Steps } from './schema.ts';
+import { Workflow } from './schema.ts';
 
 // detects if we run against a Github Enterprise Server and adds the URL to the beginning of the registryURLs for looking up Actions
 // This reflects the behavior of how GitHub looks up Actions

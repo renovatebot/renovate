@@ -1,4 +1,4 @@
-import { NodeMigration } from './node-migration';
+import { NodeMigration } from './node-migration.ts';
 
 describe('config/migrations/custom/node-migration', () => {
   it('should migrate node to travis', async () => {

@@ -1,25 +1,25 @@
-import type { PackageFile } from '../../../modules/manager/types';
-import * as _repositoryCache from '../../../util/cache/repository';
-import type { BaseBranchCache } from '../../../util/cache/repository/types';
-import { fingerprint } from '../../../util/fingerprint';
-import type { LongCommitSha } from '../../../util/git/types';
-import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
-import * as _branchify from '../updates/branchify';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import * as _repositoryCache from '../../../util/cache/repository/index.ts';
+import type { BaseBranchCache } from '../../../util/cache/repository/types.ts';
+import { fingerprint } from '../../../util/fingerprint.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import { generateFingerprintConfig } from '../extract/extract-fingerprint-config.ts';
+import * as _branchify from '../updates/branchify.ts';
 import {
   EXTRACT_CACHE_REVISION,
   extract,
   isCacheExtractValid,
   lookup,
   update,
-} from './extract-update';
-import { logger, scm } from '~test/util';
+} from './extract-update.ts';
+import { logger, scm } from '~test/util.ts';
 
 const createVulnerabilitiesMock = vi.fn();
 
-vi.mock('./write');
-vi.mock('./sort');
-vi.mock('./fetch');
-vi.mock('./vulnerabilities', () => {
+vi.mock('./write.ts');
+vi.mock('./sort.ts');
+vi.mock('./fetch.ts');
+vi.mock('./vulnerabilities.ts', () => {
   return {
     __esModule: true,
     Vulnerabilities: class {
@@ -29,9 +29,9 @@ vi.mock('./vulnerabilities', () => {
     },
   };
 });
-vi.mock('../updates/branchify');
-vi.mock('../extract');
-vi.mock('../../../util/cache/repository');
+vi.mock('../updates/branchify.ts');
+vi.mock('../extract/index.ts');
+vi.mock('../../../util/cache/repository/index.ts');
 
 const branchify = vi.mocked(_branchify);
 const repositoryCache = vi.mocked(_repositoryCache);

@@ -2,27 +2,27 @@ import { isEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import type { Scalar, YAMLSeq } from 'yaml';
 import { isScalar, isSeq, parseDocument } from 'yaml';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   ensureCacheDir,
   localPathExists,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { regEx } from '../../../util/regex';
-import { matchRegexOrGlob } from '../../../util/string-match';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from './constants';
-import { getNodeToolConstraint } from './post-update/node-version';
-import { processHostRules } from './post-update/rules';
-import { lazyLoadPackageJson } from './post-update/utils';
+} from '../../../util/fs/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { matchRegexOrGlob } from '../../../util/string-match.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from './constants.ts';
+import { getNodeToolConstraint } from './post-update/node-version.ts';
+import { processHostRules } from './post-update/rules.ts';
+import { lazyLoadPackageJson } from './post-update/utils.ts';
 import {
   getNpmrcContent,
   resetNpmrcContent,
   updateNpmrcContent,
-} from './utils';
+} from './utils.ts';
 
 // eg. 8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589
 const versionWithHashRegString = '^(?<version>.*)\\+(?<hash>.*)';

@@ -1,5 +1,5 @@
-import type { Decorator } from '.';
-import { decorate } from '.';
+import type { Decorator } from './index.ts';
+import { decorate } from './index.ts';
 
 interface WrapParameters {
   mock: (_: string) => string;

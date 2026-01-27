@@ -1,22 +1,22 @@
 import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
-import { GlobalConfig } from '../../../config/global';
-import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { BranchStatus } from '../../../types';
-import { parseJson } from '../../../util/common';
-import * as git from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
-import type { BitbucketHttpOptions } from '../../../util/http/bitbucket';
-import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
+import { GlobalConfig } from '../../../config/global.ts';
+import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import { parseJson } from '../../../util/common.ts';
+import * as git from '../../../util/git/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import type { BitbucketHttpOptions } from '../../../util/http/bitbucket.ts';
+import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket.ts';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import {
   aggressiveRepoCacheProvider,
   repoCacheProvider,
-} from '../../../util/http/cache/repository-http-cache-provider';
-import type { HttpOptions } from '../../../util/http/types';
-import { regEx } from '../../../util/regex';
-import { sanitize } from '../../../util/sanitize';
-import { UUIDRegex, matchRegexOrGlobList } from '../../../util/string-match';
+} from '../../../util/http/cache/repository-http-cache-provider.ts';
+import type { HttpOptions } from '../../../util/http/types.ts';
+import { regEx } from '../../../util/regex.ts';
+import { sanitize } from '../../../util/sanitize.ts';
+import { UUIDRegex, matchRegexOrGlobList } from '../../../util/string-match.ts';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
@@ -34,13 +34,13 @@ import type {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-} from '../types';
-import { repoFingerprint } from '../util';
-import { smartTruncate } from '../utils/pr-body';
-import { readOnlyIssueBody } from '../utils/read-only-issue-body';
-import * as comments from './comments';
-import { BitbucketPrCache } from './pr-cache';
-import { RepoInfo, Repositories, UnresolvedPrTasks } from './schema';
+} from '../types.ts';
+import { repoFingerprint } from '../util.ts';
+import { smartTruncate } from '../utils/pr-body.ts';
+import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
+import * as comments from './comments.ts';
+import { BitbucketPrCache } from './pr-cache.ts';
+import { RepoInfo, Repositories, UnresolvedPrTasks } from './schema.ts';
 import type {
   Account,
   BitbucketStatus,
@@ -50,9 +50,9 @@ import type {
   PagedResult,
   PrResponse,
   RepoBranchingModel,
-} from './types';
-import * as utils from './utils';
-import { mergeBodyTransformer } from './utils';
+} from './types.ts';
+import * as utils from './utils.ts';
+import { mergeBodyTransformer } from './utils.ts';
 
 export const id = 'bitbucket';
 
