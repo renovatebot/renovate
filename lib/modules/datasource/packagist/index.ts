@@ -1,23 +1,23 @@
 import { isObject } from '@sindresorhus/is';
 import { z } from 'zod';
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
-import * as hostRules from '../../../util/host-rules';
-import type { HttpOptions } from '../../../util/http/types';
-import * as p from '../../../util/promises';
-import { replaceUrlPath, resolveBaseUrl } from '../../../util/url';
-import * as composerVersioning from '../../versioning/composer';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { RegistryFile } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import type { HttpOptions } from '../../../util/http/types.ts';
+import * as p from '../../../util/promises.ts';
+import { replaceUrlPath, resolveBaseUrl } from '../../../util/url.ts';
+import * as composerVersioning from '../../versioning/composer/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryFile } from './schema.ts';
 import {
   PackagesResponse,
   PackagistFile,
   RegistryMeta,
   extractDepReleases,
   parsePackagesResponses,
-} from './schema';
+} from './schema.ts';
 
 export class PackagistDatasource extends Datasource {
   static readonly id = 'packagist';

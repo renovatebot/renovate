@@ -1,6 +1,6 @@
 import data from '../../../data/abandonments.json';
-import type { PackageRule } from '../../types';
-import type { Preset } from '../types';
+import type { PackageRule } from '../../types.ts';
+import type { Preset } from '../types.ts';
 
 function loadAbandonmentPresets(): Record<string, Preset> {
   const packageRules: PackageRule[] = [

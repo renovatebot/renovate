@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 
 function splitFirstFrom(
   str: string,

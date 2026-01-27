@@ -1,4 +1,4 @@
-import { addSplit, getSplits, splitInit } from './split';
+import { addSplit, getSplits, splitInit } from './split.ts';
 
 describe('util/split', () => {
   it('adds splits and returns results', () => {

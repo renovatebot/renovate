@@ -3,19 +3,19 @@ import type { Readable } from 'node:stream';
 import { isNullOrUndefined } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { join, split } from 'shlex';
-import { instrument } from '../../instrumentation';
-import { logger } from '../../logger';
-import { getEnv } from '../env';
-import { sanitize } from '../sanitize';
-import type { ExecErrorData } from './exec-error';
-import { ExecError } from './exec-error';
+import { instrument } from '../../instrumentation/index.ts';
+import { logger } from '../../logger/index.ts';
+import { getEnv } from '../env.ts';
+import { sanitize } from '../sanitize.ts';
+import type { ExecErrorData } from './exec-error.ts';
+import { ExecError } from './exec-error.ts';
 import type {
   CommandWithOptions,
   DataListener,
   ExecResult,
   RawExecOptions,
-} from './types';
-import { asRawCommand, isCommandWithOptions } from './utils';
+} from './types.ts';
+import { asRawCommand, isCommandWithOptions } from './utils.ts';
 // https://man7.org/linux/man-pages/man7/signal.7.html#NAME
 // Non TERM/CORE signals
 // The following is step 3. in https://github.com/renovatebot/renovate/issues/16197#issuecomment-1171423890

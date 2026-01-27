@@ -1,9 +1,9 @@
 import type { Attributes, SpanKind, SpanOptions } from '@opentelemetry/api';
-import type { RenovateSplit } from '../config/types';
-import type { BunyanRecord } from '../logger/types';
-import type { PackageFile } from '../modules/manager/types';
-import type { BranchCache } from '../util/cache/repository/types';
-import type { GitOperationType } from '../util/git/types';
+import type { RenovateSplit } from '../config/types.ts';
+import type { BunyanRecord } from '../logger/types.ts';
+import type { PackageFile } from '../modules/manager/types.ts';
+import type { BranchCache } from '../util/cache/repository/types.ts';
+import type { GitOperationType } from '../util/git/types.ts';
 
 export type RenovateSpanOptions = {
   attributes?: RenovateSpanAttributes;

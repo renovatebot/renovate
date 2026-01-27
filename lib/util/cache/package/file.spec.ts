@@ -1,6 +1,6 @@
 import os from 'node:os';
 import cacache from 'cacache';
-import { cleanup, get, init, set } from './file';
+import { cleanup, get, init, set } from './file.ts';
 
 describe('util/cache/package/file', () => {
   it('returns if uninitiated', async () => {

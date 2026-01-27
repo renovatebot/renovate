@@ -1,5 +1,5 @@
-import type { RangeConfig } from '../types';
-import { getRangeStrategy } from '.';
+import type { RangeConfig } from '../types.ts';
+import { getRangeStrategy } from './index.ts';
 
 describe('modules/manager/nix/range', () => {
   it('returns replace if currentValue not null', () => {

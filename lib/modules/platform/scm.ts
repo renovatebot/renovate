@@ -1,11 +1,11 @@
 import type { Constructor } from 'type-fest';
-import type { PlatformId } from '../../constants';
-import { PLATFORM_NOT_FOUND } from '../../constants/error-messages';
-import { DefaultGitScm } from './default-scm';
-import { GerritScm } from './gerrit/scm';
-import { GithubScm } from './github/scm';
-import { LocalFs } from './local/scm';
-import type { PlatformScm } from './types';
+import { PLATFORM_NOT_FOUND } from '../../constants/error-messages.ts';
+import type { PlatformId } from '../../constants/index.ts';
+import { DefaultGitScm } from './default-scm.ts';
+import { GerritScm } from './gerrit/scm.ts';
+import { GithubScm } from './github/scm.ts';
+import { LocalFs } from './local/scm.ts';
+import type { PlatformScm } from './types.ts';
 
 export const platformScmImpls = new Map<PlatformId, Constructor<PlatformScm>>();
 platformScmImpls.set('azure', DefaultGitScm);

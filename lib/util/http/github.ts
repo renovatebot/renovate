@@ -10,30 +10,30 @@ import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
-} from '../../constants/error-messages';
-import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import { getCache } from '../cache/repository';
-import { getEnv } from '../env';
-import * as hostRules from '../host-rules';
-import { maskToken } from '../mask';
-import * as p from '../promises';
-import { range } from '../range';
-import { regEx } from '../regex';
-import { joinUrlParts, parseLinkHeader, parseUrl } from '../url';
-import { findMatchingRule } from './host-rules';
+} from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import { getCache } from '../cache/repository/index.ts';
+import { getEnv } from '../env.ts';
+import * as hostRules from '../host-rules.ts';
+import { maskToken } from '../mask.ts';
+import * as p from '../promises.ts';
+import { range } from '../range.ts';
+import { regEx } from '../regex.ts';
+import { joinUrlParts, parseLinkHeader, parseUrl } from '../url.ts';
+import { findMatchingRule } from './host-rules.ts';
 import {
   HttpBase,
   type InternalHttpOptions,
   type InternalJsonUnsafeOptions,
-} from './http';
-import type { GotLegacyError } from './legacy';
+} from './http.ts';
+import type { GotLegacyError } from './legacy.ts';
 import type {
   GraphqlOptions,
   HttpMethod,
   HttpOptions,
   HttpResponse,
-} from './types';
+} from './types.ts';
 
 const githubBaseUrl = 'https://api.github.com/';
 let baseUrl = githubBaseUrl;

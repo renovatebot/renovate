@@ -1,5 +1,5 @@
-import type { Preset } from '../types';
-import * as monorepos from './monorepos';
+import type { Preset } from '../types.ts';
+import * as monorepos from './monorepos.ts';
 
 const nonPinUpdateTypes = ['digest', 'patch', 'minor', 'major'];
 

@@ -1,16 +1,16 @@
 // TODO: types (#22198)
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
-import * as p from '../../../util/promises';
-import { regEx } from '../../../util/regex';
-import { asTimestamp } from '../../../util/timestamp';
-import { joinUrlParts } from '../../../util/url';
-import * as hashicorpVersioning from '../../versioning/hashicorp';
-import { TerraformDatasource } from '../terraform-module/base';
-import type { ServiceDiscoveryResult } from '../terraform-module/types';
-import { createSDBackendURL } from '../terraform-module/utils';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import * as p from '../../../util/promises.ts';
+import { regEx } from '../../../util/regex.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
+import { TerraformDatasource } from '../terraform-module/base.ts';
+import type { ServiceDiscoveryResult } from '../terraform-module/types.ts';
+import { createSDBackendURL } from '../terraform-module/utils.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import type {
   TerraformBuild,
   TerraformProvider,
@@ -19,7 +19,7 @@ import type {
   TerraformRegistryBuildResponse,
   TerraformRegistryVersions,
   VersionDetailResponse,
-} from './types';
+} from './types.ts';
 
 export class TerraformProviderDatasource extends TerraformDatasource {
   static override readonly id = 'terraform-provider';

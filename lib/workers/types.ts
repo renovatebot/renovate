@@ -5,8 +5,8 @@ import type {
   RenovateConfig,
   RenovateSharedConfig,
   ValidationMessage,
-} from '../config/types';
-import type { Release } from '../modules/datasource/types';
+} from '../config/types.ts';
+import type { Release } from '../modules/datasource/types.ts';
 import type {
   ArtifactError,
   ArtifactNotice,
@@ -14,16 +14,16 @@ import type {
   LookupUpdate,
   PackageDependency,
   PackageFile,
-} from '../modules/manager/types';
-import type { PlatformPrOptions } from '../modules/platform/types';
-import type { BranchStatus } from '../types';
-import type { FileChange } from '../util/git/types';
-import type { MergeConfidence } from '../util/merge-confidence/types';
-import type { Timestamp } from '../util/timestamp';
+} from '../modules/manager/types.ts';
+import type { PlatformPrOptions } from '../modules/platform/types.ts';
+import type { BranchStatus } from '../types/index.ts';
+import type { FileChange } from '../util/git/types.ts';
+import type { MergeConfidence } from '../util/merge-confidence/types.ts';
+import type { Timestamp } from '../util/timestamp.ts';
 import type {
   ChangeLogRelease,
   ChangeLogResult,
-} from './repository/update/pr/changelog/types';
+} from './repository/update/pr/changelog/types.ts';
 
 export type ReleaseWithNotes = Release & Partial<ChangeLogRelease>;
 

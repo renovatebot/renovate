@@ -1,7 +1,7 @@
-import { getPkgReleases } from '..';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import { datasource, defaultRegistryUrl } from './common';
-import * as httpMock from '~test/http-mock';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { getPkgReleases } from '../index.ts';
+import { datasource, defaultRegistryUrl } from './common.ts';
+import * as httpMock from '~test/http-mock.ts';
 
 const packageName = 'nodejs';
 

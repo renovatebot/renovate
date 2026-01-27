@@ -1,8 +1,8 @@
 import crypto from 'node:crypto';
 import { globSync } from 'glob';
 import { minimatch } from 'minimatch';
-import { testShards } from './test/shards';
-import type { RunsOn, ShardGroup } from './test/types';
+import { testShards } from './test/shards.ts';
+import type { RunsOn, ShardGroup } from './test/types.ts';
 
 const TOTAL_SHARDS = Object.keys(testShards).length;
 

@@ -1,19 +1,19 @@
 import type { SendHandle, Serializable } from 'node:child_process';
 import { Readable } from 'node:stream';
 import { execa as _execa } from 'execa';
-import * as _instrumentation from '../../instrumentation';
-import { regEx } from '../regex';
+import * as _instrumentation from '../../instrumentation/index.ts';
+import { regEx } from '../regex.ts';
 import {
   addSecretForSanitizing,
   clearGlobalSanitizedSecretsList,
   clearRepoSanitizedSecretsList,
-} from '../sanitize';
-import { exec, rawExec } from './common';
-import { ExecError } from './exec-error';
-import type { DataListener, RawExecOptions } from './types';
-import { logger, partial } from '~test/util';
+} from '../sanitize.ts';
+import { exec, rawExec } from './common.ts';
+import { ExecError } from './exec-error.ts';
+import type { DataListener, RawExecOptions } from './types.ts';
+import { logger, partial } from '~test/util.ts';
 
-vi.mock('../../instrumentation');
+vi.mock('../../instrumentation/index.ts');
 vi.mock('node:child_process');
 vi.mock('execa');
 vi.unmock('./common');

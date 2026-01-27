@@ -1,8 +1,8 @@
-import type { Category } from '../../../constants';
-import { DockerDatasource } from '../../datasource/docker';
-import * as dockerVersioning from '../../versioning/docker';
+import type { Category } from '../../../constants/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import * as dockerVersioning from '../../versioning/docker/index.ts';
 
-export { extractPackageFile } from './extract';
+export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'pyenv';
 export const url = 'https://github.com/pyenv/pyenv#readme';

@@ -1,39 +1,42 @@
 import { codeBlock } from 'common-tags';
-import * as hostRules from '../../../../../lib/util/host-rules';
-import { getConfig } from '../../../../config/defaults';
-import { supportedDatasources as presetSupportedDatasources } from '../../../../config/presets/internal/merge-confidence';
-import type { AllConfig } from '../../../../config/types';
-import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
-import { CustomDatasource } from '../../../../modules/datasource/custom';
-import { DockerDatasource } from '../../../../modules/datasource/docker';
-import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
-import { GithubReleasesDatasource } from '../../../../modules/datasource/github-releases';
-import { GithubTagsDatasource } from '../../../../modules/datasource/github-tags';
-import { GoDatasource } from '../../../../modules/datasource/go';
-import { MavenDatasource } from '../../../../modules/datasource/maven';
-import { NpmDatasource } from '../../../../modules/datasource/npm';
-import { PackagistDatasource } from '../../../../modules/datasource/packagist';
-import { PypiDatasource } from '../../../../modules/datasource/pypi';
-import { id as composerVersioningId } from '../../../../modules/versioning/composer';
-import { id as debianVersioningId } from '../../../../modules/versioning/debian';
-import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
-import { id as gitVersioningId } from '../../../../modules/versioning/git';
-import { id as mavenVersioningId } from '../../../../modules/versioning/maven';
-import { id as nodeVersioningId } from '../../../../modules/versioning/node';
-import { id as npmVersioningId } from '../../../../modules/versioning/npm';
-import { id as pep440VersioningId } from '../../../../modules/versioning/pep440';
-import { id as poetryVersioningId } from '../../../../modules/versioning/poetry';
-import type { HostRule } from '../../../../types';
-import * as memCache from '../../../../util/cache/memory';
-import { initConfig, resetConfig } from '../../../../util/merge-confidence';
-import * as McApi from '../../../../util/merge-confidence';
-import { Result } from '../../../../util/result';
-import type { Timestamp } from '../../../../util/timestamp';
-import type { LookupUpdateConfig } from './types';
-import * as lookup from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
-import { partial } from '~test/util';
+import * as hostRules from '../../../../../lib/util/host-rules.ts';
+import { getConfig } from '../../../../config/defaults.ts';
+import { supportedDatasources as presetSupportedDatasources } from '../../../../config/presets/internal/merge-confidence.ts';
+import type { AllConfig } from '../../../../config/types.ts';
+import { CONFIG_VALIDATION } from '../../../../constants/error-messages.ts';
+import { CustomDatasource } from '../../../../modules/datasource/custom/index.ts';
+import { DockerDatasource } from '../../../../modules/datasource/docker/index.ts';
+import { GitRefsDatasource } from '../../../../modules/datasource/git-refs/index.ts';
+import { GithubReleasesDatasource } from '../../../../modules/datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../../../../modules/datasource/github-tags/index.ts';
+import { GoDatasource } from '../../../../modules/datasource/go/index.ts';
+import { MavenDatasource } from '../../../../modules/datasource/maven/index.ts';
+import { NpmDatasource } from '../../../../modules/datasource/npm/index.ts';
+import { PackagistDatasource } from '../../../../modules/datasource/packagist/index.ts';
+import { PypiDatasource } from '../../../../modules/datasource/pypi/index.ts';
+import { id as composerVersioningId } from '../../../../modules/versioning/composer/index.ts';
+import { id as debianVersioningId } from '../../../../modules/versioning/debian/index.ts';
+import { id as dockerVersioningId } from '../../../../modules/versioning/docker/index.ts';
+import { id as gitVersioningId } from '../../../../modules/versioning/git/index.ts';
+import { id as mavenVersioningId } from '../../../../modules/versioning/maven/index.ts';
+import { id as nodeVersioningId } from '../../../../modules/versioning/node/index.ts';
+import { id as npmVersioningId } from '../../../../modules/versioning/npm/index.ts';
+import { id as pep440VersioningId } from '../../../../modules/versioning/pep440/index.ts';
+import { id as poetryVersioningId } from '../../../../modules/versioning/poetry/index.ts';
+import type { HostRule } from '../../../../types/index.ts';
+import * as memCache from '../../../../util/cache/memory/index.ts';
+import {
+  initConfig,
+  resetConfig,
+} from '../../../../util/merge-confidence/index.ts';
+import * as McApi from '../../../../util/merge-confidence/index.ts';
+import { Result } from '../../../../util/result.ts';
+import type { Timestamp } from '../../../../util/timestamp.ts';
+import * as lookup from './index.ts';
+import type { LookupUpdateConfig } from './types.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 
 const qJson = {
   ...Fixtures.getJson('01.json'),

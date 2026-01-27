@@ -1,17 +1,17 @@
 import { quote } from 'shlex';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { exec } from '../../../util/exec';
-import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
-import { readLocalFile } from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import { regEx } from '../../../util/regex';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions, ToolConstraint } from '../../../util/exec/types.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
-} from '../types';
+} from '../types.ts';
 
 function dependencyUrl(dep: PackageDependency): string {
   const url = dep.packageName!;

@@ -1,6 +1,6 @@
 import { isString } from '@sindresorhus/is';
-import { minimatch } from './minimatch';
-import { regEx } from './regex';
+import { minimatch } from './minimatch.ts';
+import { regEx } from './regex.ts';
 
 export type StringMatchPredicate = (s: string) => boolean;
 

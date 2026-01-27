@@ -1,13 +1,13 @@
-import type { AllConfig } from '../../../config/types';
-import { getEnv } from '../../env';
-import { PackageCacheStats } from '../../stats';
-import * as memCache from '../memory';
-import * as fileCache from './file';
-import { getCombinedKey } from './key';
-import * as redisCache from './redis';
-import { SqlitePackageCache } from './sqlite';
-import { getTtlOverride } from './ttl';
-import type { PackageCache, PackageCacheNamespace } from './types';
+import type { AllConfig } from '../../../config/types.ts';
+import { getEnv } from '../../env.ts';
+import { PackageCacheStats } from '../../stats.ts';
+import * as memCache from '../memory/index.ts';
+import * as fileCache from './file.ts';
+import { getCombinedKey } from './key.ts';
+import * as redisCache from './redis.ts';
+import { SqlitePackageCache } from './sqlite.ts';
+import { getTtlOverride } from './ttl.ts';
+import type { PackageCache, PackageCacheNamespace } from './types.ts';
 
 let cacheProxy: PackageCache | undefined;
 

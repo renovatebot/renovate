@@ -1,25 +1,25 @@
 import { isString } from '@sindresorhus/is';
 import { z } from 'zod';
 
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { getSiblingFileName, localPathExists } from '../../../util/fs';
-import { Result } from '../../../util/result';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { getSiblingFileName, localPathExists } from '../../../util/fs/index.ts';
+import { Result } from '../../../util/result.ts';
 import {
   ensureTrailingSlash,
   isHttpUrl,
   joinUrlParts,
-} from '../../../util/url';
-import type { RegistryStrategy } from '../../datasource';
-import { defaultRegistryUrl as defaultCondaRegistryApi } from '../../datasource/conda/common';
-import type { PackageFileContent } from '../types';
+} from '../../../util/url.ts';
+import { defaultRegistryUrl as defaultCondaRegistryApi } from '../../datasource/conda/common.ts';
+import type { RegistryStrategy } from '../../datasource/index.ts';
+import type { PackageFileContent } from '../types.ts';
 import {
   type Channels,
   type PixiConfig,
   PixiFile,
   type PixiPackageDependency,
   PixiPyProject,
-} from './schema';
+} from './schema.ts';
 
 export function getUserPixiConfig(
   content: string,

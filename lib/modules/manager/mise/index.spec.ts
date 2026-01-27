@@ -1,5 +1,5 @@
-import { matchRegexOrGlobList } from '../../../util/string-match';
-import { defaultConfig } from '.';
+import { matchRegexOrGlobList } from '../../../util/string-match.ts';
+import { defaultConfig } from './index.ts';
 
 describe('modules/manager/mise/index', () => {
   describe('managerFilePatterns', () => {

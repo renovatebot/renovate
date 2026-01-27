@@ -1,12 +1,12 @@
 import { mockDeep } from 'vitest-mock-extended';
-import { GoDatasource } from '../../datasource/go';
-import { NpmDatasource } from '../../datasource/npm';
-import { PypiDatasource } from '../../datasource/pypi';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
-import { hostRules } from '~test/util';
+import { GoDatasource } from '../../datasource/go/index.ts';
+import { NpmDatasource } from '../../datasource/npm/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { extractPackageFile } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { hostRules } from '~test/util.ts';
 
-vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 const filename = '.pre-commit.yaml';
 

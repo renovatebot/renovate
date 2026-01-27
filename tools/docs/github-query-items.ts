@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import { z } from 'zod';
-import { logger } from '../../lib/logger';
-import { exec } from '../../lib/util/exec';
+import { logger } from '../../lib/logger/index.ts';
+import { exec } from '../../lib/util/exec/index.ts';
 
 export interface ItemsEntity {
   url: string;

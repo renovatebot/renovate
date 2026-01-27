@@ -1,7 +1,7 @@
-import type { Category } from '../../../constants';
-import { PypiDatasource } from '../../datasource/pypi';
+import type { Category } from '../../../constants/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
 
-export { extractPackageFile } from './extract';
+export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'pip setup.py';
 export const url =

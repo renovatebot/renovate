@@ -1,12 +1,12 @@
 import { z } from 'zod';
-import { MavenDatasource } from '../../../datasource/maven';
-import { id as versioning } from '../../../versioning/gradle';
-import type { PackageDependency } from '../../types';
+import { MavenDatasource } from '../../../datasource/maven/index.ts';
+import { id as versioning } from '../../../versioning/gradle/index.ts';
+import type { PackageDependency } from '../../types.ts';
 import {
   ExtensionTagFragment,
   StringArrayFragment,
   StringFragment,
-} from './fragments';
+} from './fragments.ts';
 
 const artifactTag = 'artifact';
 const installTag = 'install';

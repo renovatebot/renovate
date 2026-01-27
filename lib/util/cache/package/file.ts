@@ -1,9 +1,9 @@
 import cacache from 'cacache';
 import { DateTime } from 'luxon';
 import upath from 'upath';
-import { logger } from '../../../logger';
-import { compressToBase64, decompressFromBase64 } from '../../compress';
-import type { PackageCacheNamespace } from './types';
+import { logger } from '../../../logger/index.ts';
+import { compressToBase64, decompressFromBase64 } from '../../compress.ts';
+import type { PackageCacheNamespace } from './types.ts';
 
 function getKey(namespace: PackageCacheNamespace, key: string): string {
   return `${namespace}-${key}`;

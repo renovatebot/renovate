@@ -1,5 +1,5 @@
-import { hasKey } from '../../../util/object';
-import type { PreCommitConfig, PreCommitDependency } from './types';
+import { hasKey } from '../../../util/object.ts';
+import type { PreCommitConfig, PreCommitDependency } from './types.ts';
 
 /**
  * Type guard to determine whether the file matches pre-commit configuration format

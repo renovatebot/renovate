@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Json } from '../../schema-utils';
+import { Json } from '../../schema-utils/index.ts';
 
 export const RepoCacheV13 = Json.pipe(
   z

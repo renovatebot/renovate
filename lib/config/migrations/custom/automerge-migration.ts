@@ -1,5 +1,5 @@
 import { isObject } from '@sindresorhus/is';
-import { AbstractMigration } from '../base/abstract-migration';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export class AutomergeMigration extends AbstractMigration {
   override readonly propertyName = 'automerge';

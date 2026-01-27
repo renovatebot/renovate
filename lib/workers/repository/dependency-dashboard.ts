@@ -6,23 +6,23 @@ import {
   isTruthy,
 } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../config/global';
-import type { RenovateConfig } from '../../config/types';
-import { logger } from '../../logger';
-import type { PackageFile } from '../../modules/manager/types';
-import { platform } from '../../modules/platform';
-import { coerceArray } from '../../util/array';
-import { emojify } from '../../util/emoji';
-import { regEx } from '../../util/regex';
-import { coerceString } from '../../util/string';
-import * as template from '../../util/template';
-import type { BranchConfig, SelectAllConfig } from '../types';
-import { extractRepoProblems } from './common';
-import type { ConfigMigrationResult } from './config-migration';
-import { getDepWarningsDashboard } from './errors-warnings';
-import { PackageFiles } from './package-files';
-import type { Vulnerability } from './process/types';
-import { Vulnerabilities } from './process/vulnerabilities';
+import { GlobalConfig } from '../../config/global.ts';
+import type { RenovateConfig } from '../../config/types.ts';
+import { logger } from '../../logger/index.ts';
+import type { PackageFile } from '../../modules/manager/types.ts';
+import { platform } from '../../modules/platform/index.ts';
+import { coerceArray } from '../../util/array.ts';
+import { emojify } from '../../util/emoji.ts';
+import { regEx } from '../../util/regex.ts';
+import { coerceString } from '../../util/string.ts';
+import * as template from '../../util/template/index.ts';
+import type { BranchConfig, SelectAllConfig } from '../types.ts';
+import { extractRepoProblems } from './common.ts';
+import type { ConfigMigrationResult } from './config-migration/index.ts';
+import { getDepWarningsDashboard } from './errors-warnings.ts';
+import { PackageFiles } from './package-files.ts';
+import type { Vulnerability } from './process/types.ts';
+import { Vulnerabilities } from './process/vulnerabilities.ts';
 
 interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;

@@ -1,9 +1,9 @@
-import * as _cache from '../../../../util/cache/repository';
+import * as _cache from '../../../../util/cache/repository/index.ts';
 import type {
   OnboardingBranchCache,
   RepoCacheData,
-} from '../../../../util/cache/repository/types';
-import type { LongCommitSha } from '../../../../util/git/types';
+} from '../../../../util/cache/repository/types.ts';
+import type { LongCommitSha } from '../../../../util/git/types.ts';
 import {
   deleteOnboardingCache,
   getOnboardingConfigFromCache,
@@ -13,10 +13,10 @@ import {
   isOnboardingBranchModified,
   setOnboardingCache,
   setOnboardingConfigDetails,
-} from './onboarding-branch-cache';
-import { git, partial, scm } from '~test/util';
+} from './onboarding-branch-cache.ts';
+import { git, partial, scm } from '~test/util.ts';
 
-vi.mock('../../../../util/cache/repository');
+vi.mock('../../../../util/cache/repository/index.ts');
 const cache = vi.mocked(_cache);
 
 describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {

@@ -1,10 +1,10 @@
 import { isObject, isString } from '@sindresorhus/is';
 import type { Document } from 'yaml';
 import { CST, isCollection, isPair, isScalar, parseDocument } from 'yaml';
-import { logger } from '../../../../../logger';
-import type { UpdateDependencyConfig } from '../../../types';
-import { YarnConfig } from '../../schema';
-import { getNewGitValue, getNewNpmAliasValue } from './common';
+import { logger } from '../../../../../logger/index.ts';
+import type { UpdateDependencyConfig } from '../../../types.ts';
+import { YarnConfig } from '../../schema.ts';
+import { getNewGitValue, getNewNpmAliasValue } from './common.ts';
 
 export function updateYarnrcCatalogDependency({
   fileContent,

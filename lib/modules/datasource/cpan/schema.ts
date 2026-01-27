@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { LooseArray } from '../../../util/schema-utils';
-import { MaybeTimestamp } from '../../../util/timestamp';
-import type { CpanRelease } from './types';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
+import { MaybeTimestamp } from '../../../util/timestamp.ts';
+import type { CpanRelease } from './types.ts';
 
 /**
  * https://fastapi.metacpan.org/v1/file/_mapping

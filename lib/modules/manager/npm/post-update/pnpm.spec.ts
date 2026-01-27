@@ -1,15 +1,15 @@
 import { codeBlock } from 'common-tags';
-import { GlobalConfig } from '../../../../config/global';
-import type { PostUpdateConfig, Upgrade } from '../../types';
-import { getNodeToolConstraint } from './node-version';
-import * as pnpmHelper from './pnpm';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { Fixtures } from '~test/fixtures';
-import { env, fs, partial } from '~test/util';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { PostUpdateConfig, Upgrade } from '../../types.ts';
+import { getNodeToolConstraint } from './node-version.ts';
+import * as pnpmHelper from './pnpm.ts';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { env, fs, partial } from '~test/util.ts';
 
-vi.mock('../../../../util/exec/env');
-vi.mock('../../../../util/fs');
-vi.mock('./node-version');
+vi.mock('../../../../util/exec/env.ts');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('./node-version.ts');
 
 delete process.env.NPM_CONFIG_CACHE;
 process.env.CONTAINERBASE = 'true';

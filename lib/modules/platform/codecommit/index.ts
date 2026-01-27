@@ -8,14 +8,14 @@ import {
   PLATFORM_BAD_CREDENTIALS,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { BranchStatus, PrState } from '../../../types';
-import { coerceArray } from '../../../util/array';
-import { parseJson } from '../../../util/common';
-import * as git from '../../../util/git';
-import { regEx } from '../../../util/regex';
-import { sanitize } from '../../../util/sanitize';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { BranchStatus, PrState } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { parseJson } from '../../../util/common.ts';
+import * as git from '../../../util/git/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { sanitize } from '../../../util/sanitize.ts';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -32,10 +32,10 @@ import type {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-} from '../types';
-import { getNewBranchName, repoFingerprint } from '../util';
-import { smartTruncate } from '../utils/pr-body';
-import * as client from './codecommit-client';
+} from '../types.ts';
+import { getNewBranchName, repoFingerprint } from '../util.ts';
+import { smartTruncate } from '../utils/pr-body.ts';
+import * as client from './codecommit-client.ts';
 
 export interface CodeCommitPr extends Pr {
   body: string;
