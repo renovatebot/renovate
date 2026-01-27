@@ -3136,7 +3136,7 @@ const options: Readonly<RenovateOptions>[] = [
         which run automatically, and are not explicitly added in \`postUpgradeTasks\``,
     type: 'array',
     subType: 'string',
-    default: ['gradleWrapper'],
+    default: [],
     allowedValues: ['goGenerate', 'gradleWrapper'],
     stage: 'repository',
     globalOnly: true,
