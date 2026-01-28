@@ -71,7 +71,7 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
         // Try ESM import first (default for "type": "module")
         tmpConfig = await import(fileUrl);
       } catch (err) {
-        /* v8 ignore next 10 -- CJS fallback not testable in vitest */
+        /* v8 ignore start -- CJS fallback not testable in vitest */
         // If .js file fails with CJS syntax, fall back to require()
         // This provides backward compatibility for CJS config files
         if (
@@ -84,6 +84,7 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
         } else {
           throw err;
         }
+        /* v8 ignore stop */
       }
 
       /* v8 ignore next -- not testable */
