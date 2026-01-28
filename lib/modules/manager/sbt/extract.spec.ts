@@ -98,15 +98,30 @@ describe('modules/manager/sbt/extract', () => {
     });
 
     it('extracts deps when scala version is defined in an object', () => {
-      expect(extractPackageFile(sbtScalaVersionObject)).toMatchSnapshot({
+      expect(extractPackageFile(sbtScalaVersionObject)).toEqual({
         deps: [
           {
+            datasource: 'maven',
+            depName: 'scala',
             packageName: 'org.scala-lang:scala-library',
             currentValue: '2.12.10',
+            registryUrls: [],
+            separateMinorPatch: true,
           },
-          { packageName: 'org.example:foo', currentValue: '0.0.8' },
+          {
+            datasource: 'sbt-package',
+            depName: 'org.example:foo',
+            packageName: 'org.example:foo',
+            currentValue: '0.0.8',
+            registryUrls: [],
+            sharedVariableName: 'versions.example',
+            variableName: 'versions.example',
+          },
         ],
         packageFileVersion: '3.2.1',
+        managerData: {
+          scalaVersion: '2.12',
+        },
       });
     });
 
