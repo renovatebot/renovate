@@ -1,7 +1,7 @@
 import { lang, query as q } from '@renovatebot/good-enough-parser';
 import { Ctx } from './context.ts';
 import { extensionTags } from './extension-tags.ts';
-import type { ResultFragment } from './fragments';
+import type { ResultFragment } from './fragments.ts';
 import {
   clearRepoRuleVariables,
   repoRuleCall,
