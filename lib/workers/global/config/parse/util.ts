@@ -1,4 +1,5 @@
-import { pathToFileURL } from 'url';
+import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
 import { isFunction } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import upath from 'upath';
@@ -63,16 +64,35 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
       const absoluteFilePath = upath.isAbsolute(file)
         ? file
         : `${process.cwd()}/${file}`;
-      // use file url paths to avoid issues with windows paths
-      // typescript does not support file URL for import
-      const tmpConfig = await import(pathToFileURL(absoluteFilePath).href);
+      const fileUrl = pathToFileURL(absoluteFilePath).href;
+
+      let tmpConfig: unknown;
+      try {
+        // Try ESM import first (default for "type": "module")
+        tmpConfig = await import(fileUrl);
+      } catch (err) {
+        // If .js file fails with CJS syntax, fall back to require()
+        // This provides backward compatibility for CJS config files
+        if (
+          upath.extname(file) === '.js' &&
+          err instanceof SyntaxError &&
+          err.message.includes('Cannot use import statement') === false
+        ) {
+          const require = createRequire(import.meta.url);
+          tmpConfig = require(absoluteFilePath);
+        } else {
+          throw err;
+        }
+      }
+
       /* v8 ignore next -- not testable */
-      let config = tmpConfig.default ?? tmpConfig;
+      let config =
+        (tmpConfig as { default?: RenovateConfig }).default ?? tmpConfig;
       // Allow the config to be a function
       if (isFunction(config)) {
         config = config();
       }
-      return config;
+      return config as RenovateConfig;
     }
     default:
       throw new Error('Unsupported file type');

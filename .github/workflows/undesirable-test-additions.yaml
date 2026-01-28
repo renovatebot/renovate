@@ -48,14 +48,16 @@ jobs:
           git diff --name-status $BASE_BRANCH_REF > diff_name_status.txt
 
           echo "### Processing added files in '__fixtures__' directories..."
-          ADDED_FIXTURES=$(grep '^A' diff_name_status.txt | awk '{print $2}' | grep '/__fixtures__/' || true)
+          # Exclude config/parse/__fixtures__ as it contains test configs, not test data
+          ADDED_FIXTURES=$(grep '^A' diff_name_status.txt | awk '{print $2}' | grep '/__fixtures__/' | grep -v 'config/parse/__fixtures__/' || true)
           NUM_ADDED_FIXTURES=$(echo "$ADDED_FIXTURES" | grep -c . || true)
           echo "Added files in '__fixtures__':"
           echo "$ADDED_FIXTURES"
           echo "Total number of added files in '__fixtures__': $NUM_ADDED_FIXTURES"
 
           echo "### Processing deleted files in '__fixtures__' directories..."
-          DELETED_FIXTURES=$(grep '^D' diff_name_status.txt | awk '{print $2}' | grep '/__fixtures__/' || true)
+          # Exclude config/parse/__fixtures__ as it contains test configs, not test data
+          DELETED_FIXTURES=$(grep '^D' diff_name_status.txt | awk '{print $2}' | grep '/__fixtures__/' | grep -v 'config/parse/__fixtures__/' || true)
           NUM_DELETED_FIXTURES=$(echo "$DELETED_FIXTURES" | grep -c . || true)
           echo "Deleted files in '__fixtures__':"
           echo "$DELETED_FIXTURES"

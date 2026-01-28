@@ -7,7 +7,7 @@
     "strictNullChecks": true,
     "noEmit": true,
     /* https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping */
-    "target": "es2022",
+    "target": "es2023",
     "moduleResolution": "nodenext",
     "module": "nodenext",
     "allowImportingTsExtensions": true,
@@ -43,9 +43,5 @@
     "tools/mkdocs/site",
     ".github/workflows/**/*.js",
     ".worktrees/**/*"
-  ],
-  "ts-node": {
-    "transpileOnly": true,
-    "esm": false
-  }
+  ]
 }

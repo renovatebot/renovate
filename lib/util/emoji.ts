@@ -72,7 +72,10 @@ export function setEmojiConfig(config: RenovateConfig): void {
   unicodeEmoji = !!config.unicodeEmoji;
 }
 
-const shortCodeRegex = regEx(SHORTCODE_REGEX.source, 'g');
+const shortCodeRegex = regEx(
+  (SHORTCODE_REGEX as unknown as RegExp).source,
+  'g',
+);
 
 export function emojify(text: string): string {
   if (!unicodeEmoji) {
@@ -88,7 +91,7 @@ export function emojify(text: string): string {
 }
 
 const emojiRegexSrc = [emojibaseEmojiRegex, mathiasBynensEmojiRegex()].map(
-  ({ source }) => source,
+  (r) => (r as RegExp).source,
 );
 const emojiRegex = new RegExp(`(?:${emojiRegexSrc.join('|')})`, 'g'); // TODO #12875 cannot figure it out
 const excludedModifiers = new Set([

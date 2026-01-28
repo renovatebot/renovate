@@ -4,7 +4,7 @@ import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
-import customConfig from './__fixtures__/config.js';
+import customConfig from './__fixtures__/config.cjs';
 import * as file from './additional-config-file.ts';
 
 describe('workers/global/config/parse/additional-config-file', () => {
@@ -23,33 +23,35 @@ describe('workers/global/config/parse/additional-config-file', () => {
   });
 
   describe('.getConfig()', () => {
-    it.each([
-      ['custom js config file', 'config.js'],
-      ['custom js config file', 'config.cjs'],
-      ['custom js config file', 'config.mjs'],
-      ['custom js config file exporting a Promise', 'config-promise.js'],
-      ['custom js config file exporting a function', 'config-function.js'],
-      // The next two are different syntactic ways of expressing the same thing
-      [
-        'custom js config file exporting a function returning a Promise',
-        'config-function-promise.js',
-      ],
-      [
-        'custom js config file exporting an async function',
-        'config-async-function.js',
-      ],
-      ['.renovaterc', '.renovaterc'],
-      ['JSON5 config file', 'config.json5'],
-      ['YAML config file', 'config.yaml'],
-    ])('parses %s > %s', async (_fileType, filePath) => {
-      const configFile = upath.resolve(__dirname, './__fixtures__/', filePath);
+    it.each`
+      description                                            | filePath
+      ${'CJS .js config file (fallback)'}                    | ${'config.js'}
+      ${'CJS .cjs config file'}                              | ${'config.cjs'}
+      ${'ESM .mjs config file'}                              | ${'config.mjs'}
+      ${'ESM .js config file'}                               | ${'config-esm.js'}
+      ${'CJS config file exporting a Promise'}               | ${'config-promise.js'}
+      ${'CJS config file exporting a function'}              | ${'config-function.js'}
+      ${'CJS config file exporting a function with Promise'} | ${'config-function-promise.js'}
+      ${'CJS config file exporting an async function'}       | ${'config-async-function.js'}
+      ${'.renovaterc'}                                       | ${'.renovaterc'}
+      ${'JSON5 config file'}                                 | ${'config.json5'}
+      ${'YAML config file'}                                  | ${'config.yaml'}
+    `('parses $description > $filePath', async ({ filePath }) => {
+      const configFile = upath.resolve(
+        import.meta.dirname,
+        './__fixtures__/',
+        filePath,
+      );
       expect(
         await file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: configFile }),
       ).toEqual(customConfig);
     });
 
     it('migrates', async () => {
-      const configFile = upath.resolve(__dirname, './__fixtures__/config2.js');
+      const configFile = upath.resolve(
+        import.meta.dirname,
+        './__fixtures__/config2.js',
+      );
       // for coverage
       const relativePath = upath.relative(process.cwd(), configFile);
       const res = await file.getConfig({
@@ -119,7 +121,7 @@ describe('workers/global/config/parse/additional-config-file', () => {
       processExitSpy.mockImplementationOnce(() => undefined as never);
 
       const configFile = upath.resolve(
-        __dirname,
+        import.meta.dirname,
         './__fixtures__/config-ref-error.js-invalid',
       );
       const tmpDir = tmp.path;

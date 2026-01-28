@@ -18,7 +18,7 @@ const gitMock = mock<SimpleGit>();
 
 describe('modules/manager/git-submodules/update', () => {
   beforeEach(() => {
-    GlobalConfig.set({ localDir: `${__dirname}/__fixtures__` });
+    GlobalConfig.set({ localDir: `${import.meta.dirname}/__fixtures__` });
     // clear host rules
     hostRules.clear();
     // clear environment variables

@@ -22,7 +22,7 @@ const { hostRulesFromEnv } = vi.mocked(_hostRulesFromEnv);
 
 describe('workers/global/config/parse/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
-    let configParser: typeof import('.');
+    let configParser: typeof import('./index.ts');
     let defaultArgv: string[];
     let defaultEnv: NodeJS.ProcessEnv;
 
@@ -31,7 +31,7 @@ describe('workers/global/config/parse/index', () => {
       defaultArgv = getArgv();
       defaultEnv = {
         RENOVATE_CONFIG_FILE: upath.resolve(
-          __dirname,
+          import.meta.dirname,
           './__fixtures__/default.js',
         ),
       };
@@ -115,9 +115,12 @@ describe('workers/global/config/parse/index', () => {
 
     it('reads private key from file', async () => {
       fileConfigParser.getConfig.mockResolvedValue({});
-      const privateKeyPath = upath.join(__dirname, '__fixtures__/private.pem');
+      const privateKeyPath = upath.join(
+        import.meta.dirname,
+        '__fixtures__/private.pem',
+      );
       const privateKeyPathOld = upath.join(
-        __dirname,
+        import.meta.dirname,
         '__fixtures__/private.pem',
       );
       const env: NodeJS.ProcessEnv = {
@@ -311,7 +314,7 @@ describe('workers/global/config/parse/index', () => {
 
     it('overrides file config with additional file config', async () => {
       const additionalConfigPath = upath.join(
-        __dirname,
+        import.meta.dirname,
         '__fixtures__/additional-config.js',
       );
       fileConfigParser.getConfig.mockResolvedValueOnce({
@@ -326,7 +329,7 @@ describe('workers/global/config/parse/index', () => {
 
     it('merges extends from file config with additional file config', async () => {
       const additionalConfigPath = upath.join(
-        __dirname,
+        import.meta.dirname,
         '__fixtures__/additional-config.js',
       );
       fileConfigParser.getConfig.mockResolvedValueOnce({

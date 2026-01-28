@@ -2,7 +2,7 @@ import type { AllConfig } from '../../config/types.ts';
 import { PLATFORM_NOT_FOUND } from '../../constants/error-messages.ts';
 import type { PlatformId } from '../../constants/index.ts';
 import { logger } from '../../logger/index.ts';
-import type { HostRule } from '../../types';
+import type { HostRule } from '../../types/index.ts';
 import {
   setGitAuthor,
   setNoVerify,
