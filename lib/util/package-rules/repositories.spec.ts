@@ -1,4 +1,4 @@
-import { RepositoriesMatcher } from './repositories';
+import { RepositoriesMatcher } from './repositories.ts';
 
 describe('util/package-rules/repositories', () => {
   const repositoryMatcher = new RepositoriesMatcher();

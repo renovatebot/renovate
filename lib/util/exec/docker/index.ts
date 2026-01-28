@@ -1,20 +1,20 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { join } from 'shlex';
-import { GlobalConfig } from '../../../config/global';
-import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { getPkgReleases } from '../../../modules/datasource';
-import * as allVersioning from '../../../modules/versioning';
-import { newlineRegex, regEx } from '../../regex';
-import { uniq } from '../../uniq';
-import { rawExec } from '../common';
+import { GlobalConfig } from '../../../config/global.ts';
+import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { getPkgReleases } from '../../../modules/datasource/index.ts';
+import * as allVersioning from '../../../modules/versioning/index.ts';
+import { newlineRegex, regEx } from '../../regex.ts';
+import { uniq } from '../../uniq.ts';
+import { rawExec } from '../common.ts';
 import type {
   CommandWithOptions,
   DockerOptions,
   VolumeOption,
   VolumesPair,
-} from '../types';
-import { isCommandWithOptions } from '../utils';
+} from '../types.ts';
+import { isCommandWithOptions } from '../utils.ts';
 const prefetchedImages = new Map<string, string>();
 
 const digestRegex = regEx('Digest: (.*?)\n');
@@ -49,6 +49,7 @@ function expandVolumeOption(x: VolumeOption): VolumesPair | null {
   }
   if (Array.isArray(x) && x.length === 2) {
     const [from, to] = x;
+    // v8 ignore else -- TODO: add test #40625
     if (isNonEmptyString(from) && isNonEmptyString(to)) {
       return [from, to];
     }
@@ -242,6 +243,7 @@ export async function generateDockerCommand(
   volumeDirs.push(...volumes);
   result.push(...prepareVolumes(volumeDirs));
 
+  // v8 ignore else -- TODO: add test #40625
   if (envVars) {
     result.push(
       ...uniq(envVars)

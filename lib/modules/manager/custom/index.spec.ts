@@ -1,4 +1,4 @@
-import * as customManager from '.';
+import * as customManager from './index.ts';
 
 describe('modules/manager/custom/index', () => {
   it('getCustomManagerList', () => {

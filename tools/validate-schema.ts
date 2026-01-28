@@ -43,6 +43,7 @@ async function validateSchemas(): Promise<void> {
   const fileGlobsToValidate = [
     'renovate-schema.json',
     'renovate-global-schema.json',
+    'renovate-inherited-schema.json',
     'tools/schemas/*.json',
   ];
   const expandedFiles: string[] = (

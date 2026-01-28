@@ -1,8 +1,8 @@
 import type { RuntimeType } from '@renovatebot/pgp';
 import { decrypt, isSupportedRuntime } from '@renovatebot/pgp';
-import { logger } from '../../logger';
-import { getEnv } from '../../util/env';
-import { regEx } from '../../util/regex';
+import { logger } from '../../logger/index.ts';
+import { getEnv } from '../../util/env.ts';
+import { regEx } from '../../util/regex.ts';
 
 export async function tryDecryptBcPgp(
   privateKey: string,
@@ -27,9 +27,11 @@ export async function tryDecryptBcPgp(
       armoredMessage += `=`.repeat(4 - (armoredMessage.length % 4));
     }
 
+    // v8 ignore else -- TODO: add test #40625
     if (!hasStartHeader) {
       armoredMessage = `${startBlock}${armoredMessage}`;
     }
+    // v8 ignore else -- TODO: add test #40625
     if (!hasEndHeader) {
       armoredMessage = `${armoredMessage}${endBlock}`;
     }

@@ -1,9 +1,11 @@
 import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
-import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
-import type { BranchStatus } from '../../../types';
-import { repoFingerprint } from '../util';
-import { client as _client } from './client';
+import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import { repoFingerprint } from '../util.ts';
+import { client as _client } from './client.ts';
+import { writeToConfig } from './index.ts';
+import * as gerrit from './index.ts';
 import type {
   GerritAccountInfo,
   GerritChange,
@@ -11,15 +13,13 @@ import type {
   GerritLabelTypeInfo,
   GerritProjectInfo,
   GerritRevisionInfo,
-} from './types';
+} from './types.ts';
 import {
   REQUEST_DETAILS_FOR_PRS,
   TAG_PULL_REQUEST_BODY,
   mapGerritChangeToPr,
-} from './utils';
-import { writeToConfig } from '.';
-import * as gerrit from '.';
-import { git, hostRules, partial } from '~test/util';
+} from './utils.ts';
+import { git, hostRules, partial } from '~test/util.ts';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate';
 
@@ -34,8 +34,8 @@ const codeReviewLabel: GerritLabelTypeInfo = {
   default_value: 0,
 };
 
-vi.mock('../../../util/host-rules');
-vi.mock('./client');
+vi.mock('../../../util/host-rules.ts');
+vi.mock('./client.ts');
 const clientMock = vi.mocked(_client);
 
 describe('modules/platform/gerrit/index', () => {

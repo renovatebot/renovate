@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { LooseArray, multidocYaml } from '../../../util/schema-utils';
+import { LooseArray, multidocYaml } from '../../../util/schema-utils/index.ts';
 
 export const KubernetesResource = z.object({
   apiVersion: z.string(),

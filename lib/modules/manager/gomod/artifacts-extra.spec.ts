@@ -3,8 +3,8 @@ import {
   extraDepsTable,
   getExtraDeps,
   getExtraDepsNotice,
-} from './artifacts-extra';
-import type { ExtraDep } from './types';
+} from './artifacts-extra.ts';
+import type { ExtraDep } from './types.ts';
 
 describe('modules/manager/gomod/artifacts-extra', () => {
   const goModBefore = codeBlock`

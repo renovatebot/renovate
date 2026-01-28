@@ -1,7 +1,7 @@
-import { logger } from '../logger';
-import * as memCache from './cache/memory';
-import type { GitOperationType } from './git/types';
-import { parseUrl } from './url';
+import { logger } from '../logger/index.ts';
+import * as memCache from './cache/memory/index.ts';
+import type { GitOperationType } from './git/types.ts';
+import { parseUrl } from './url.ts';
 
 type LookupStatsData = Record<string, number[]>;
 
@@ -224,6 +224,7 @@ export class DatasourceCacheStats {
         continue;
       }
 
+      /* v8 ignore else -- TODO: add tests #40625 */
       if (action === 'skip') {
         result.long[datasource][registryUrl][packageName].write = 'skip';
         result.short[datasource][registryUrl].skip += 1;
@@ -429,6 +430,7 @@ export class HttpCacheStats {
 
   static incLocalHits(url: string): void {
     const baseUrl = HttpCacheStats.getBaseUrl(url);
+    /* v8 ignore else -- TODO: add tests #40625 */
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
@@ -440,6 +442,7 @@ export class HttpCacheStats {
 
   static incLocalMisses(url: string): void {
     const baseUrl = HttpCacheStats.getBaseUrl(url);
+    /* v8 ignore else -- TODO: add tests #40625 */
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
@@ -451,6 +454,7 @@ export class HttpCacheStats {
 
   static incRemoteHits(url: string): void {
     const baseUrl = HttpCacheStats.getBaseUrl(url);
+    /* v8 ignore else -- TODO: add tests #40625 */
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
@@ -461,6 +465,7 @@ export class HttpCacheStats {
 
   static incRemoteMisses(url: string): void {
     const baseUrl = HttpCacheStats.getBaseUrl(url);
+    /* v8 ignore else -- TODO: add tests #40625 */
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
@@ -474,6 +479,7 @@ export class HttpCacheStats {
     let report: Record<string, Record<string, HttpCacheHostStatsData>> = {};
     for (const [url, stats] of Object.entries(data)) {
       const parsedUrl = parseUrl(url);
+      /* v8 ignore else -- TODO: add tests #40625 */
       if (parsedUrl) {
         const { origin, pathname } = parsedUrl;
         report[origin] ??= {};

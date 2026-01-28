@@ -1,19 +1,23 @@
 import { ZodError } from 'zod';
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import type { PackageCacheNamespace } from '../../../util/cache/package/types';
-import { BitbucketServerHttp } from '../../../util/http/bitbucket-server';
-import { regEx } from '../../../util/regex';
-import { Result } from '../../../util/result';
-import { ensureTrailingSlash } from '../../../util/url';
-import { Datasource } from '../datasource';
-import { DigestsConfig, ReleasesConfig } from '../schema';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
+import { BitbucketServerHttp } from '../../../util/http/bitbucket-server.ts';
+import { regEx } from '../../../util/regex.ts';
+import { Result } from '../../../util/result.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import { DigestsConfig, ReleasesConfig } from '../schema.ts';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  ReleaseResult,
+} from '../types.ts';
 import {
   BitbucketServerCommits,
   BitbucketServerTag,
   BitbucketServerTags,
-} from './schema';
+} from './schema.ts';
 
 export class BitbucketServerTagsDatasource extends Datasource {
   static readonly id = 'bitbucket-server-tags';

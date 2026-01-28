@@ -1,19 +1,19 @@
 import upath from 'upath';
-import { GlobalConfig } from '../../../../config/global';
-import type { RepoGlobalConfig } from '../../../../config/types';
-import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import * as hostRules from '../../../../util/host-rules';
-import { getPkgReleases as _getPkgReleases } from '../../../datasource';
-import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types';
-import { parsePyProject } from '../extract';
-import { depTypes } from '../utils';
-import { PdmProcessor } from './pdm';
-import { mockExecAll } from '~test/exec-util';
-import { fs, partial } from '~test/util';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../../config/types.ts';
+import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import * as hostRules from '../../../../util/host-rules.ts';
+import { getPkgReleases as _getPkgReleases } from '../../../datasource/index.ts';
+import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
+import { parsePyProject } from '../extract.ts';
+import { depTypes } from '../utils.ts';
+import { PdmProcessor } from './pdm.ts';
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs, partial } from '~test/util.ts';
 
-vi.mock('../../../../util/fs');
-vi.mock('../../../datasource');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('../../../datasource/index.ts');
 
 const getPkgReleases = vi.mocked(_getPkgReleases);
 

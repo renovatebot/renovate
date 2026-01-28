@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import type { SkipReason } from '../../../../types';
-import { CrateDatasource } from '../../../datasource/crate';
-import type { CargoManagerData } from '../../cargo/types';
-import type { PackageDependency } from '../../types';
-import { applyGitSource } from '../../util';
-import { ExtensionTagFragment, StringFragment } from './fragments';
+import type { SkipReason } from '../../../../types/index.ts';
+import { CrateDatasource } from '../../../datasource/crate/index.ts';
+import type { CargoManagerData } from '../../cargo/types.ts';
+import type { PackageDependency } from '../../types.ts';
+import { applyGitSource } from '../../util.ts';
+import { ExtensionTagFragment, StringFragment } from './fragments.ts';
 
 export const crateExtensionPrefix = 'crate';
 

@@ -1,13 +1,13 @@
-import { lang, query as q } from 'good-enough-parser';
-import { Ctx } from './context';
-import { extensionTags } from './extension-tags';
+import { lang, query as q } from '@renovatebot/good-enough-parser';
+import { Ctx } from './context.ts';
+import { extensionTags } from './extension-tags.ts';
 import type { ResultFragment } from './fragments';
 import {
   clearRepoRuleVariables,
   repoRuleCall,
   useRepoRuleAssignment,
-} from './repo-rules';
-import { rules } from './rules';
+} from './repo-rules.ts';
+import { rules } from './rules.ts';
 
 const rule = q.alt<Ctx>(
   rules,

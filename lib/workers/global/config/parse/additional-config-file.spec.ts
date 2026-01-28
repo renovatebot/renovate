@@ -3,9 +3,9 @@ import fsExtra from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
-import { logger } from '../../../../logger';
-import customConfig from './__fixtures__/config';
-import * as file from './additional-config-file';
+import { logger } from '../../../../logger/index.ts';
+import customConfig from './__fixtures__/config.js';
+import * as file from './additional-config-file.ts';
 
 describe('workers/global/config/parse/additional-config-file', () => {
   const processExitSpy = vi.spyOn(process, 'exit');

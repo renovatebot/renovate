@@ -1,10 +1,10 @@
-import type { Category } from '../../../constants';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { NpmDatasource } from '../../datasource/npm';
+import type { Category } from '../../../constants/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { NpmDatasource } from '../../datasource/npm/index.ts';
 
-export { updateArtifacts } from './artifacts';
-export { extractAllPackageFiles } from './extract';
-export { getRangeStrategy, updateDependency } from '../npm';
+export { updateArtifacts } from './artifacts.ts';
+export { extractAllPackageFiles } from './extract.ts';
+export { getRangeStrategy, updateDependency } from '../npm/index.ts';
 
 export const url = 'https://bun.sh/docs/cli/install';
 export const categories: Category[] = ['js'];

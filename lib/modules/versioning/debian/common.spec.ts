@@ -1,7 +1,7 @@
-import dataFiles from '../../../data-files.generated';
-import { logger } from '../../../logger';
-import { DistroInfo } from '../distro';
-import { RollingReleasesData } from './common';
+import dataFiles from '../../../data-files.generated.ts';
+import { logger } from '../../../logger/index.ts';
+import { DistroInfo } from '../distro.ts';
+import { RollingReleasesData } from './common.ts';
 
 describe('modules/versioning/debian/common', () => {
   it('no rolling release data', () => {

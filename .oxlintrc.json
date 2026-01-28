@@ -19,6 +19,7 @@
         "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
       }
     ],
+    "import/extensions": ["error", "always", { "ignorePackages": true }],
     "import/no-cycle": "error",
     "import/default": "error",
     "import/named": "error",
@@ -29,7 +30,8 @@
         "disallowTypeAnnotations": false
       }
     ],
-    "no-unused-vars": "off"
+    "no-unused-vars": "error",
+    "no-unassigned-vars": "error"
   },
   "overrides": [
     {

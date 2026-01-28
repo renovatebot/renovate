@@ -1,16 +1,16 @@
 import { isArray, isString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
+import { logger } from '../../../logger/index.ts';
 import {
   getParentDir,
   getSiblingFileName,
   readLocalFile,
-} from '../../../util/fs';
+} from '../../../util/fs/index.ts';
 
-import { extractPackageJson } from '../npm/extract/common/package-file';
-import type { NpmPackage } from '../npm/extract/types';
-import type { NpmManagerData } from '../npm/types';
-import type { ExtractConfig, PackageFile } from '../types';
-import { filesMatchingWorkspaces } from './utils';
+import { extractPackageJson } from '../npm/extract/common/package-file.ts';
+import type { NpmPackage } from '../npm/extract/types.ts';
+import type { NpmManagerData } from '../npm/types.ts';
+import type { ExtractConfig, PackageFile } from '../types.ts';
+import { filesMatchingWorkspaces } from './utils.ts';
 
 function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
   return (

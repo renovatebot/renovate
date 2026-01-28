@@ -1,8 +1,8 @@
-import type { Category } from '../../../constants';
-import { PypiDatasource } from '../../datasource/pypi';
-import { id as versioning } from '../../versioning/pep440';
+import type { Category } from '../../../constants/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { id as versioning } from '../../versioning/pep440/index.ts';
 
-export { extractPackageFile } from './extract';
+export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'Setuptools (setup.cfg)';
 export const url =

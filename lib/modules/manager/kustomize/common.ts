@@ -1,8 +1,8 @@
 import semver from 'semver';
 import upath from 'upath';
-import type { ExtraEnv } from '../../../util/exec/types';
-import { privateCacheDir } from '../../../util/fs';
-import type { UpdateArtifactsConfig } from '../types';
+import type { ExtraEnv } from '../../../util/exec/types.ts';
+import { privateCacheDir } from '../../../util/fs/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
 
 export function generateHelmEnvs(config: UpdateArtifactsConfig): ExtraEnv {
   const cacheDir = privateCacheDir();

@@ -1,5 +1,5 @@
-import { getConfig } from '../../../../config/defaults';
-import { ConfigMigrationCommitMessageFactory } from './commit-message';
+import { getConfig } from '../../../../config/defaults.ts';
+import { ConfigMigrationCommitMessageFactory } from './commit-message.ts';
 
 describe('workers/repository/config-migration/branch/commit-message', () => {
   const config = getConfig();

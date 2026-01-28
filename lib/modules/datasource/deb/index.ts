@@ -1,14 +1,17 @@
 import readline from 'readline';
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import * as fs from '../../../util/fs';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { packageKeys, requiredPackageKeys } from './common';
-import { downloadAndExtractPackage } from './packages';
-import { formatReleaseResult, releaseMetaInformationMatches } from './release';
-import type { PackageDescription } from './types';
-import { constructComponentUrls } from './url';
+import { logger } from '../../../logger/index.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import * as fs from '../../../util/fs/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { packageKeys, requiredPackageKeys } from './common.ts';
+import { downloadAndExtractPackage } from './packages.ts';
+import {
+  formatReleaseResult,
+  releaseMetaInformationMatches,
+} from './release.ts';
+import type { PackageDescription } from './types.ts';
+import { constructComponentUrls } from './url.ts';
 
 export class DebDatasource extends Datasource {
   static readonly id = 'deb';

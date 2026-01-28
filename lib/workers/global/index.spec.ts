@@ -1,18 +1,18 @@
 import { ERROR, WARN } from 'bunyan';
 import fs from 'fs-extra';
-import { GlobalConfig } from '../../config/global';
-import { DockerDatasource } from '../../modules/datasource/docker';
-import * as platform from '../../modules/platform';
-import * as secrets from '../../util/sanitize';
-import * as repositoryWorker from '../repository';
-import * as configParser from './config/parse';
-import * as limits from './limits';
-import * as globalWorker from '.';
-import { logger } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import { GlobalConfig } from '../../config/global.ts';
+import { DockerDatasource } from '../../modules/datasource/docker/index.ts';
+import * as platform from '../../modules/platform/index.ts';
+import * as secrets from '../../util/sanitize.ts';
+import * as repositoryWorker from '../repository/index.ts';
+import * as configParser from './config/parse/index.ts';
+import * as globalWorker from './index.ts';
+import * as limits from './limits.ts';
+import { logger } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
-vi.mock('../repository');
-vi.mock('../../util/fs');
+vi.mock('../repository/index.ts');
+vi.mock('../../util/fs/index.ts');
 
 vi.mock('fs-extra', async () => {
   const realFs = await vi.importActual<typeof fs>('fs-extra');

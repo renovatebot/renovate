@@ -1,5 +1,5 @@
-import { clone } from '../clone';
-import type { HttpResponse } from './types';
+import { clone } from '../clone.ts';
+import type { HttpResponse } from './types.ts';
 
 // Copying will help to avoid circular structure
 // and mutation of the cached response.

@@ -1,5 +1,5 @@
-import type { Timestamp } from '../../../../util/timestamp';
-import { adapter } from './branches-query-adapter';
+import type { Timestamp } from '../../../../util/timestamp.ts';
+import { adapter } from './branches-query-adapter.ts';
 
 describe('util/github/graphql/query-adapters/branches-query-adapter', () => {
   it('transforms Commit type', () => {

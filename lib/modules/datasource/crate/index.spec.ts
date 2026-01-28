@@ -6,16 +6,17 @@ import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import type { MockedFunction } from 'vitest';
-import { getPkgReleases } from '..';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import * as memCache from '../../../util/cache/memory';
-import type { RegistryInfo } from './types';
-import { CrateDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
-import { partial } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
+import { getPkgReleases } from '../index.ts';
+import { CrateDatasource } from './index.ts';
+import type { RegistryInfo } from './types.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 
 vi.mock('simple-git');
 const simpleGit = vi.mocked(_simpleGit);
@@ -488,6 +489,23 @@ describe('modules/datasource/crate/index', () => {
         {
           packageName: 'clap',
           registryUrl: 'https://example.com',
+        },
+        releaseOrig,
+      );
+
+      expect(res).toBe(releaseOrig);
+    });
+
+    it('no-op for release with timestamp', async () => {
+      const releaseOrig = {
+        version: '4.5.17',
+        releaseTimestamp: '2024-09-04T19:16:41.355Z' as Timestamp,
+      };
+
+      const res = await datasource.postprocessRelease(
+        {
+          packageName: 'clap',
+          registryUrl: 'https://crates.io',
         },
         releaseOrig,
       );
