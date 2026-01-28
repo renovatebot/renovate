@@ -1,11 +1,11 @@
 import upath from 'upath';
-import { loadModules } from '../../util/modules';
-import { getDatasourceList } from '../datasource';
-import * as customManager from './custom';
-import type { ManagerApi } from './types';
-import * as manager from '.';
+import { loadModules } from '../../util/modules.ts';
+import { getDatasourceList } from '../datasource/index.ts';
+import * as customManager from './custom/index.ts';
+import * as manager from './index.ts';
+import type { ManagerApi } from './types.ts';
 
-vi.mock('../../util/fs');
+vi.mock('../../util/fs/index.ts');
 
 const datasources = getDatasourceList();
 

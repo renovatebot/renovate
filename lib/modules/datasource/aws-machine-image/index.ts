@@ -1,12 +1,12 @@
 import type { Filter, Image } from '@aws-sdk/client-ec2';
 import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
-import { cache } from '../../../util/cache/package/decorator';
-import { asTimestamp } from '../../../util/timestamp';
-import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { AwsClientConfig, ParsedConfig } from './types';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { AwsClientConfig, ParsedConfig } from './types.ts';
 
 export class AwsMachineImageDatasource extends Datasource {
   static readonly id = 'aws-machine-image';

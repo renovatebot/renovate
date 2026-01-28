@@ -1,25 +1,25 @@
 import { isNonEmptyArray, isNonEmptyObject } from '@sindresorhus/is';
-import { setUserConfigFileNames } from '../../../../config/app-strings';
-import { setPrivateKeys } from '../../../../config/decrypt';
-import * as defaultsParser from '../../../../config/defaults';
-import { resolveConfigPresets } from '../../../../config/presets';
-import { applySecretsAndVariablesToConfig } from '../../../../config/secrets';
-import type { AllConfig } from '../../../../config/types';
-import { mergeChildConfig } from '../../../../config/utils';
-import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages';
-import { logger, setContext } from '../../../../logger';
-import { detectAllGlobalConfig } from '../../../../modules/manager';
-import { coerceArray } from '../../../../util/array';
-import { setCustomEnv } from '../../../../util/env';
-import { readSystemFile } from '../../../../util/fs';
-import { addSecretForSanitizing } from '../../../../util/sanitize';
-import { ensureTrailingSlash } from '../../../../util/url';
-import * as additionalConfigFileParser from './additional-config-file';
-import * as cliParser from './cli';
-import * as codespaces from './codespaces';
-import * as envParser from './env';
-import * as fileParser from './file';
-import { hostRulesFromEnv } from './host-rules-from-env';
+import { setUserConfigFileNames } from '../../../../config/app-strings.ts';
+import { setPrivateKeys } from '../../../../config/decrypt.ts';
+import * as defaultsParser from '../../../../config/defaults.ts';
+import { resolveConfigPresets } from '../../../../config/presets/index.ts';
+import { applySecretsAndVariablesToConfig } from '../../../../config/secrets.ts';
+import type { AllConfig } from '../../../../config/types.ts';
+import { mergeChildConfig } from '../../../../config/utils.ts';
+import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages.ts';
+import { logger, setContext } from '../../../../logger/index.ts';
+import { detectAllGlobalConfig } from '../../../../modules/manager/index.ts';
+import { coerceArray } from '../../../../util/array.ts';
+import { setCustomEnv } from '../../../../util/env.ts';
+import { readSystemFile } from '../../../../util/fs/index.ts';
+import { addSecretForSanitizing } from '../../../../util/sanitize.ts';
+import { ensureTrailingSlash } from '../../../../util/url.ts';
+import * as additionalConfigFileParser from './additional-config-file.ts';
+import * as cliParser from './cli.ts';
+import * as codespaces from './codespaces.ts';
+import * as envParser from './env.ts';
+import * as fileParser from './file.ts';
+import { hostRulesFromEnv } from './host-rules-from-env.ts';
 
 export async function resolveGlobalExtends(
   globalExtends: string[],

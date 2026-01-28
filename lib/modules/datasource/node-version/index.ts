@@ -1,11 +1,11 @@
-import { cache } from '../../../util/cache/package/decorator';
-import { asTimestamp } from '../../../util/timestamp';
-import { joinUrlParts } from '../../../util/url';
-import { id as versioning } from '../../versioning/node';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { datasource, defaultRegistryUrl } from './common';
-import type { NodeRelease } from './types';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { id as versioning } from '../../versioning/node/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { datasource, defaultRegistryUrl } from './common.ts';
+import type { NodeRelease } from './types.ts';
 
 export class NodeVersionDatasource extends Datasource {
   static readonly id = datasource;

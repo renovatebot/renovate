@@ -1,15 +1,15 @@
-import { logger } from '../../../logger';
-import { Result } from '../../../util/result';
-import { parseSingleYaml } from '../../../util/yaml';
-import { OrbDatasource } from '../../datasource/orb';
-import * as npmVersioning from '../../versioning/npm';
-import { getDep } from '../dockerfile/extract';
+import { logger } from '../../../logger/index.ts';
+import { Result } from '../../../util/result.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { OrbDatasource } from '../../datasource/orb/index.ts';
+import * as npmVersioning from '../../versioning/npm/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import { CircleCiFile, type CircleCiOrb } from './schema';
+} from '../types.ts';
+import { CircleCiFile, type CircleCiOrb } from './schema.ts';
 
 function extractDefinition(
   deps: PackageDependency[],

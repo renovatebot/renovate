@@ -1,12 +1,12 @@
-import type { RenovateConfig } from '../../../config/types';
-import * as _html from '../../../modules/manager/html';
-import * as _fileMatch from './file-match';
-import { getManagerPackageFiles } from './manager-files';
-import { fs, partial } from '~test/util';
+import type { RenovateConfig } from '../../../config/types.ts';
+import * as _html from '../../../modules/manager/html/index.ts';
+import * as _fileMatch from './file-match.ts';
+import { getManagerPackageFiles } from './manager-files.ts';
+import { fs, partial } from '~test/util.ts';
 
-vi.mock('./file-match');
-vi.mock('../../../modules/manager/html');
-vi.mock('../../../util/fs');
+vi.mock('./file-match.ts');
+vi.mock('../../../modules/manager/html/index.ts');
+vi.mock('../../../util/fs/index.ts');
 
 const fileMatch = vi.mocked(_fileMatch);
 const html = vi.mocked(_html);

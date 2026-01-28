@@ -1,5 +1,5 @@
-import { GlobalConfig } from '../../config/global';
-import { setNoVerify, simpleGitConfig } from './config';
+import { GlobalConfig } from '../../config/global.ts';
+import { setNoVerify, simpleGitConfig } from './config.ts';
 
 describe('util/git/config', () => {
   beforeEach(() => {

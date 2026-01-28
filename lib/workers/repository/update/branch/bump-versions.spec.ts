@@ -1,10 +1,10 @@
 import { codeBlock } from 'common-tags';
-import * as templates from '../../../../util/template';
-import type { BranchConfig } from '../../../types';
-import { bumpVersions } from './bump-versions';
-import { fs, logger, partial, scm } from '~test/util';
+import * as templates from '../../../../util/template/index.ts';
+import type { BranchConfig } from '../../../types.ts';
+import { bumpVersions } from './bump-versions.ts';
+import { fs, logger, partial, scm } from '~test/util.ts';
 
-vi.mock('../../../../util/fs');
+vi.mock('../../../../util/fs/index.ts');
 
 describe('workers/repository/update/branch/bump-versions', () => {
   describe('bumpVersions', () => {

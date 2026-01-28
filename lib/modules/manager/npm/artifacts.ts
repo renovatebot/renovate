@@ -2,27 +2,27 @@ import { isEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import type { Scalar, YAMLSeq } from 'yaml';
 import { isScalar, isSeq, parseDocument } from 'yaml';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   ensureCacheDir,
   localPathExists,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { regEx } from '../../../util/regex';
-import { matchRegexOrGlob } from '../../../util/string-match';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from './constants';
-import { getNodeToolConstraint } from './post-update/node-version';
-import { processHostRules } from './post-update/rules';
-import { lazyLoadPackageJson } from './post-update/utils';
+} from '../../../util/fs/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { matchRegexOrGlob } from '../../../util/string-match.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from './constants.ts';
+import { getNodeToolConstraint } from './post-update/node-version.ts';
+import { processHostRules } from './post-update/rules.ts';
+import { lazyLoadPackageJson } from './post-update/utils.ts';
 import {
   getNpmrcContent,
   resetNpmrcContent,
   updateNpmrcContent,
-} from './utils';
+} from './utils.ts';
 
 // eg. 8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589
 const versionWithHashRegString = '^(?<version>.*)\\+(?<hash>.*)';
@@ -178,7 +178,7 @@ async function updatePnpmWorkspace(
   let updated = false;
 
   for (const upgrade of upgrades) {
-    let excludeNode = doc.get('minimumReleaseAgeExclude') as YAMLSeq | null;
+    let excludeNode = doc.getIn(['minimumReleaseAgeExclude']) as YAMLSeq | null;
     const newVersion = upgrade.newVersion ?? upgrade.newValue;
 
     /* v8 ignore if -- should not happen, adding for type narrowing*/
@@ -207,11 +207,54 @@ async function updatePnpmWorkspace(
     }
 
     if (isScalar<string>(matchedItem)) {
-      matchedItem.commentBefore = ` Renovate security update: ${upgrade.depName}@${newVersion}`;
+      // if we have a comment before the list, which includes the dependency
+      if (excludeNode?.commentBefore?.includes(`${upgrade.depName}@`)) {
+        // and it doesn't already have the version included in it
+        if (
+          !minimumReleaseAgeExcludeIncludesDepNameAndVersion(
+            excludeNode.commentBefore,
+            upgrade.depName,
+            newVersion,
+          )
+        ) {
+          // then append it
 
-      // normalize value (no quote handling needed)
-      matchedItem.value = matchedItem.value + ` || ${newVersion}`;
-      updated = true;
+          // normalize value (no quote handling needed)
+          excludeNode.commentBefore =
+            excludeNode.commentBefore + ` || ${newVersion}`;
+          updated = true;
+        }
+      }
+      // otherwise, if it's in our matched item's comment
+      else if (matchedItem.commentBefore) {
+        // add it
+        if (
+          !minimumReleaseAgeExcludeIncludesDepNameAndVersion(
+            matchedItem.commentBefore,
+            upgrade.depName,
+            newVersion,
+          )
+        ) {
+          // normalize value (no quote handling needed)
+          matchedItem.commentBefore =
+            matchedItem.commentBefore + ` || ${newVersion}`;
+          updated = true;
+        }
+      } else {
+        matchedItem.commentBefore = ` Renovate security update: ${upgrade.depName}@${newVersion}`;
+        updated = true;
+      }
+
+      if (
+        !minimumReleaseAgeExcludeIncludesDepNameAndVersion(
+          matchedItem.value,
+          upgrade.depName,
+          newVersion,
+        )
+      ) {
+        matchedItem.value = matchedItem.value + ` || ${newVersion}`;
+        updated = true;
+      }
     } else {
       // add new entry
       const newItem = doc.createNode(`${upgrade.depName}@${newVersion}`);
@@ -270,4 +313,21 @@ function getMatchedItem(
     item: null,
     allExcluded: false,
   };
+}
+
+/** determine whether a comment or a list item contains the depName at a given newVersion */
+function minimumReleaseAgeExcludeIncludesDepNameAndVersion(
+  line: string,
+  depName: string | undefined,
+  newVersion: string | undefined,
+): boolean {
+  if (line.includes(`${depName}@${newVersion}`)) {
+    return true;
+  }
+
+  if (line.includes(`|| ${newVersion}`)) {
+    return true;
+  }
+
+  return false;
 }

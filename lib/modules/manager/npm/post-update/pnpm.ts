@@ -1,30 +1,30 @@
 import { isNumber, isNumericString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
-import { GlobalConfig } from '../../../../config/global';
-import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import { exec } from '../../../../util/exec';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { exec } from '../../../../util/exec/index.ts';
 import type {
   ExecOptions,
   ExtraEnv,
   ToolConstraint,
-} from '../../../../util/exec/types';
+} from '../../../../util/exec/types.ts';
 import {
   deleteLocalFile,
   ensureCacheDir,
   getSiblingFileName,
   localPathExists,
   readLocalFile,
-} from '../../../../util/fs';
-import { uniqueStrings } from '../../../../util/string';
-import { parseSingleYaml } from '../../../../util/yaml';
-import type { PostUpdateConfig, Upgrade } from '../../types';
-import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from '../constants';
-import type { PnpmWorkspaceFile } from '../extract/types';
-import { getNodeToolConstraint } from './node-version';
-import type { GenerateLockFileResult, PnpmLockFile } from './types';
-import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
+} from '../../../../util/fs/index.ts';
+import { uniqueStrings } from '../../../../util/string.ts';
+import { parseSingleYaml } from '../../../../util/yaml.ts';
+import type { PostUpdateConfig, Upgrade } from '../../types.ts';
+import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from '../constants.ts';
+import type { PnpmWorkspaceFile } from '../extract/types.ts';
+import { getNodeToolConstraint } from './node-version.ts';
+import type { GenerateLockFileResult, PnpmLockFile } from './types.ts';
+import { getPackageManagerVersion, lazyLoadPackageJson } from './utils.ts';
 
 function getPnpmConstraintFromUpgrades(upgrades: Upgrade[]): string | null {
   for (const upgrade of upgrades) {

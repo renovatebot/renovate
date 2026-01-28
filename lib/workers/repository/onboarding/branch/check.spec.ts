@@ -1,15 +1,16 @@
 import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../../../config/global';
-import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform/types';
-import * as _cache from '../../../../util/cache/repository';
-import type { LongCommitSha } from '../../../../util/git/types';
-import { isOnboarded } from './check';
-import { git, partial, platform, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { InheritConfig } from '../../../../config/inherit.ts';
+import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { Pr } from '../../../../modules/platform/types.ts';
+import * as _cache from '../../../../util/cache/repository/index.ts';
+import type { LongCommitSha } from '../../../../util/git/types.ts';
+import { isOnboarded } from './check.ts';
+import { git, partial, platform, scm } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
-vi.mock('../../../../util/cache/repository');
+vi.mock('../../../../util/cache/repository/index.ts');
 
 const cache = vi.mocked(_cache);
 
@@ -85,8 +86,18 @@ describe('workers/repository/onboarding/branch/check', () => {
   });
 
   describe('when closedPr exists and onboardingAutoCloseAge is set', () => {
+    beforeAll(() => {
+      vi.useFakeTimers();
+    });
+
+    afterAll(() => {
+      vi.useRealTimers();
+      InheritConfig.reset();
+    });
+
     it('adds closing comment if exactly at onboardingAutoCloseAge', async () => {
       const now = DateTime.now();
+      vi.setSystemTime(now.toMillis());
       // at exactly 1 day ago, this should trigger
       const createdAt = now.minus({ hour: 24 });
 
@@ -106,9 +117,10 @@ describe('workers/repository/onboarding/branch/check', () => {
       expect(platform.ensureComment).toHaveBeenCalledOnce();
     });
 
-    it('adds closing comment if PR created partially over onboardingAutoCloseAge', async () => {
+    it('skips closing comment if onboarding pr is slightly older than onboardingAutoCloseAge', async () => {
       const now = DateTime.now();
-      // we're currently 25 hours ahead of the creation time, which is 1.x days since the PR was created, which means that an `onboardingAutoCloseAge=1` will trigger
+      vi.setSystemTime(now.toMillis());
+      // we're currently 25 hours ahead of the creation time, which is 1.x days since the PR was created, which means that an `onboardingAutoCloseAge=1` SHOULD NOT trigger, as it's > 1
       const createdAt = now.minus({ hour: 25 });
 
       GlobalConfig.set({ onboardingAutoCloseAge: 1 });
@@ -124,11 +136,12 @@ describe('workers/repository/onboarding/branch/check', () => {
       await expect(isOnboarded(config)).rejects.toThrow(
         REPOSITORY_CLOSED_ONBOARDING,
       );
-      expect(platform.ensureComment).toHaveBeenCalled();
+      expect(platform.ensureComment).not.toHaveBeenCalled();
     });
 
     it('skips closing comment if onboarding pr is 1 day older than onboardingAutoCloseAge', async () => {
       const now = DateTime.now();
+      vi.setSystemTime(now.toMillis());
       const createdAt = now.minus({ hour: 48 });
 
       GlobalConfig.set({ onboardingAutoCloseAge: 1 });
@@ -153,6 +166,30 @@ describe('workers/repository/onboarding/branch/check', () => {
       platform.findPr.mockResolvedValue(
         partial<Pr>({
           createdAt: '2020-02-29T01:40:21Z',
+          title: 'Configure Renovate',
+          bodyStruct,
+        }),
+      );
+      scm.getFileList.mockResolvedValue([]);
+      await expect(isOnboarded(config)).rejects.toThrow(
+        REPOSITORY_CLOSED_ONBOARDING,
+      );
+      expect(platform.ensureComment).not.toHaveBeenCalled();
+    });
+
+    it('prefers inherited onboardingAutoCloseAge over global config', async () => {
+      const now = DateTime.now();
+      vi.setSystemTime(now.toMillis());
+      // PR was created 36 hours ago (1.5 days)
+      const createdAt = now.minus({ hour: 36 });
+
+      GlobalConfig.set({ onboardingAutoCloseAge: 2 });
+      InheritConfig.set({ onboardingAutoCloseAge: 1 });
+
+      cache.getCache.mockReturnValue({});
+      platform.findPr.mockResolvedValue(
+        partial<Pr>({
+          createdAt: createdAt.toISO(),
           title: 'Configure Renovate',
           bodyStruct,
         }),

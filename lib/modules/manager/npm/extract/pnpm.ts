@@ -8,28 +8,26 @@ import {
 import { findPackages } from 'find-packages';
 import upath from 'upath';
 import type { z } from 'zod';
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
 import {
   findLocalSiblingOrParent,
   getSiblingFileName,
   localPathExists,
   readLocalFile,
-} from '../../../../util/fs';
-import { parseSingleYaml } from '../../../../util/yaml';
-import { NpmDatasource } from '../../../datasource/npm';
+} from '../../../../util/fs/index.ts';
+import { parseSingleYaml } from '../../../../util/yaml.ts';
 import type {
   PackageDependency,
   PackageFile,
   PackageFileContent,
 } from '../../types';
-import type { PnpmDependency, PnpmLockFile } from '../post-update/types';
+import type { PnpmDependency, PnpmLockFile } from '../post-update/types.ts';
 import type { PnpmCatalogs, PnpmConfigDependencies } from '../schema';
-import { PnpmWorkspaceFile } from '../schema';
-import type { NpmManagerData } from '../types';
-import { extractCatalogDeps } from './common/catalogs';
-import { extractDependency } from './common/dependency';
-import type { Catalog, LockFile } from './types';
+import { PnpmWorkspaceFile } from '../schema.ts';
+import type { NpmManagerData } from '../types.ts';
+import { extractCatalogDeps } from './common/catalogs.ts';
+import type { Catalog, LockFile } from './types.ts';
 
 export const PNPM_CONFIG_DEPENDENCY = 'pnpm.configDependencies';
 

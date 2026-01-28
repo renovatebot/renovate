@@ -1,4 +1,4 @@
-import type { PackageRule } from '../types';
+import type { PackageRule } from '../types.ts';
 
 export interface CheckManagerArgs {
   resolvedRule: PackageRule;

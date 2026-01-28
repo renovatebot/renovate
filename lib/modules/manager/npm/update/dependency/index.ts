@@ -1,22 +1,22 @@
 import { isArray, isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { dequal } from 'dequal';
-import { logger } from '../../../../../logger';
-import { escapeRegExp, regEx } from '../../../../../util/regex';
-import { matchAt, replaceAt } from '../../../../../util/string';
-import type { UpdateDependencyConfig, Upgrade } from '../../../types';
+import { logger } from '../../../../../logger/index.ts';
+import { escapeRegExp, regEx } from '../../../../../util/regex.ts';
+import { matchAt, replaceAt } from '../../../../../util/string.ts';
+import type { UpdateDependencyConfig, Upgrade } from '../../../types.ts';
 import type {
   DependenciesMeta,
   NpmPackage,
   OverrideDependency,
   RecursiveOverride,
-} from '../../extract/types';
-import type { NpmDepType, NpmManagerData } from '../../types';
-import { getNewGitValue, getNewNpmAliasValue } from './common';
+} from '../../extract/types.ts';
+import type { NpmDepType, NpmManagerData } from '../../types.ts';
+import { getNewGitValue, getNewNpmAliasValue } from './common.ts';
 import {
   updatePnpmCatalogDependency,
   updatePnpmConfigDependency,
 } from './pnpm';
-import { updateYarnrcCatalogDependency } from './yarn';
+import { updateYarnrcCatalogDependency } from './yarn.ts';
 
 function renameObjKey(
   oldObj: DependenciesMeta,

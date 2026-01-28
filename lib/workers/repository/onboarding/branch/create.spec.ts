@@ -1,9 +1,9 @@
-import { getConfig } from '../../../../config/defaults';
-import { createOnboardingBranch } from './create';
-import type { RenovateConfig } from '~test/util';
-import { scm } from '~test/util';
+import { getConfig } from '../../../../config/defaults.ts';
+import { createOnboardingBranch } from './create.ts';
+import type { RenovateConfig } from '~test/util.ts';
+import { scm } from '~test/util.ts';
 
-vi.mock('./config', () => ({
+vi.mock('./config.ts', () => ({
   getOnboardingConfigContents: () =>
     JSON.stringify({
       foo: 'bar',

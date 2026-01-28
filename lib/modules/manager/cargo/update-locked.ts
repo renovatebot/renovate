@@ -1,6 +1,6 @@
-import { logger } from '../../../logger';
-import type { UpdateLockedConfig, UpdateLockedResult } from '../types';
-import { extractLockFileContentVersions } from './locked-version';
+import { logger } from '../../../logger/index.ts';
+import type { UpdateLockedConfig, UpdateLockedResult } from '../types.ts';
+import { extractLockFileContentVersions } from './locked-version.ts';
 
 export function updateLockedDependency(
   config: UpdateLockedConfig,

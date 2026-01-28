@@ -2,7 +2,7 @@ import { setTimeout } from 'timers/promises';
 import { isArray, isEmptyArray, isNonEmptyArray } from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
-import { GlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -12,23 +12,23 @@ import {
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
   TEMPORARY_ERROR,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { BranchStatus } from '../../../types';
-import { coerceArray } from '../../../util/array';
-import { noLeadingAtSymbol, parseJson } from '../../../util/common';
-import { getEnv } from '../../../util/env';
-import * as git from '../../../util/git';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
-import type { GitlabHttpOptions } from '../../../util/http/gitlab';
-import { setBaseUrl } from '../../../util/http/gitlab';
-import type { HttpResponse } from '../../../util/http/types';
-import { parseInteger } from '../../../util/number';
-import * as p from '../../../util/promises';
-import { regEx } from '../../../util/regex';
-import { sanitize } from '../../../util/sanitize';
-import type { EmailAddress } from '../../../util/schema-utils';
-import { ensureTrailingSlash, getQueryString } from '../../../util/url';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { noLeadingAtSymbol, parseJson } from '../../../util/common.ts';
+import { getEnv } from '../../../util/env.ts';
+import * as git from '../../../util/git/index.ts';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import type { GitlabHttpOptions } from '../../../util/http/gitlab.ts';
+import { setBaseUrl } from '../../../util/http/gitlab.ts';
+import type { HttpResponse } from '../../../util/http/types.ts';
+import { parseInteger } from '../../../util/number.ts';
+import * as p from '../../../util/promises.ts';
+import { regEx } from '../../../util/regex.ts';
+import { sanitize } from '../../../util/sanitize.ts';
+import type { EmailAddress } from '../../../util/schema-utils/index.ts';
+import { ensureTrailingSlash, getQueryString } from '../../../util/url.ts';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
@@ -47,35 +47,35 @@ import type {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-} from '../types';
-import { repoFingerprint } from '../util';
-import { smartTruncate } from '../utils/pr-body';
+} from '../types.ts';
+import { repoFingerprint } from '../util.ts';
+import { smartTruncate } from '../utils/pr-body.ts';
 import {
   getMemberUserIDs,
   getMemberUsernames,
   getUserID,
   gitlabApi,
   isUserBusy,
-} from './http';
-import { getMR, updateMR } from './merge-request';
-import { GitlabPrCache } from './pr-cache';
-import type { GitLabMergeRequest } from './schema';
-import { LastPipelineId } from './schema';
+} from './http.ts';
+import { getMR, updateMR } from './merge-request.ts';
+import { GitlabPrCache } from './pr-cache.ts';
+import type { GitLabMergeRequest } from './schema.ts';
+import { LastPipelineId } from './schema.ts';
 import type {
   GitlabComment,
   GitlabIssue,
   GitlabPr,
   MergeMethod,
   RepoResponse,
-} from './types';
+} from './types.ts';
 import {
   DRAFT_PREFIX,
   DRAFT_PREFIX_DEPRECATED,
   defaults,
   getRepoUrl,
   prInfo,
-} from './utils';
-export { extractRulesFromCodeOwnersLines } from './code-owners';
+} from './utils.ts';
+export { extractRulesFromCodeOwnersLines } from './code-owners.ts';
 
 let config: {
   repository: string;

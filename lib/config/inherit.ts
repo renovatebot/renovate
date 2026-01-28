@@ -1,10 +1,11 @@
-import type { GlobalInheritableConfig, RenovateConfig } from './types';
+import type { GlobalInheritableConfig, RenovateConfig } from './types.ts';
 
 export const NOT_PRESET = Symbol('not-present');
 
 export class InheritConfig {
   static OPTIONS: readonly (keyof GlobalInheritableConfig)[] = [
     'configFileNames',
+    'onboardingAutoCloseAge',
   ];
 
   private static config: GlobalInheritableConfig = {};

@@ -1,14 +1,14 @@
 // TODO #22198
 import { isNumber, isString, isUndefined } from '@sindresorhus/is';
-import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import { extractPackageFile } from '../../../../modules/manager';
-import type { PackageDependency } from '../../../../modules/manager/types';
-import { writeLocalFile } from '../../../../util/fs';
-import { escapeRegExp, regEx } from '../../../../util/regex';
-import { matchAt, replaceAt } from '../../../../util/string';
-import { compile } from '../../../../util/template';
-import type { BranchUpgradeConfig } from '../../../types';
+import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { extractPackageFile } from '../../../../modules/manager/index.ts';
+import type { PackageDependency } from '../../../../modules/manager/types.ts';
+import { writeLocalFile } from '../../../../util/fs/index.ts';
+import { escapeRegExp, regEx } from '../../../../util/regex.ts';
+import { matchAt, replaceAt } from '../../../../util/string.ts';
+import { compile } from '../../../../util/template/index.ts';
+import type { BranchUpgradeConfig } from '../../../types.ts';
 
 export async function confirmIfDepUpdated(
   upgrade: BranchUpgradeConfig,

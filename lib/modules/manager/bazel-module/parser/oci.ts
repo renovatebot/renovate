@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { DockerDatasource } from '../../../datasource/docker';
-import type { PackageDependency } from '../../types';
-import { ExtensionTagFragment, StringFragment } from './fragments';
+import { DockerDatasource } from '../../../datasource/docker/index.ts';
+import type { PackageDependency } from '../../types.ts';
+import { ExtensionTagFragment, StringFragment } from './fragments.ts';
 
 export const ociExtensionPrefix = 'oci';
 

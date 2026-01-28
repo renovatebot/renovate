@@ -1,13 +1,13 @@
-import { resolveConfigPresets } from '../';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
-import { regEx } from '../../../util/regex';
-import { massageConfig } from '../../massage';
-import { validateConfig } from '../../validation';
-import * as npm from '../npm';
-import * as internal from '.';
+import { resolveConfigPresets } from '..//index.ts';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
+import { regEx } from '../../../util/regex.ts';
+import { massageConfig } from '../../massage.ts';
+import { validateConfig } from '../../validation.ts';
+import * as npm from '../npm/index.ts';
+import * as internal from './index.ts';
 
-vi.mock('../npm');
-vi.mock('../../../modules/datasource/npm');
+vi.mock('../npm/index.ts');
+vi.mock('../../../modules/datasource/npm/index.ts');
 
 const getPresetSpy = vi.spyOn(npm, 'getPreset');
 

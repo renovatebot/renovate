@@ -1,5 +1,5 @@
-import type { NewValueConfig, VersioningApi } from '../types';
-import { BzlmodVersion } from './bzlmod-version';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
+import { BzlmodVersion } from './bzlmod-version.ts';
 
 export const id = 'bazel-module';
 export const displayName = 'Bazel Module';

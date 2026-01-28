@@ -1,12 +1,12 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
-import { HOST_DISABLED } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
-import { getQueryString, joinUrlParts } from '../../../util/url';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { RepologyPackage, RepologyPackageType } from './types';
+import { HOST_DISABLED } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { getQueryString, joinUrlParts } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RepologyPackage, RepologyPackageType } from './types.ts';
 
 const packageTypes: RepologyPackageType[] = ['binname', 'srcname'];
 

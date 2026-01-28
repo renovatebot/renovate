@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { logger } from '../../../../logger';
-import type { CustomExtractConfig } from '../types';
-import { defaultConfig, displayName, extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { logger } from '../../../../logger/index.ts';
+import type { CustomExtractConfig } from '../types.ts';
+import { defaultConfig, displayName, extractPackageFile } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 const dockerfileContent = Fixtures.get(`Dockerfile`);
 const ansibleYamlContent = Fixtures.get(`ansible.yml`);

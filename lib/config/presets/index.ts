@@ -7,30 +7,30 @@ import {
 import {
   CONFIG_VALIDATION,
   PLATFORM_RATE_LIMIT_EXCEEDED,
-} from '../../constants/error-messages';
-import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as memCache from '../../util/cache/memory';
-import * as packageCache from '../../util/cache/package';
-import { clone } from '../../util/clone';
-import { regEx } from '../../util/regex';
-import * as template from '../../util/template';
-import { GlobalConfig } from '../global';
-import * as massage from '../massage';
-import * as migration from '../migration';
-import type { AllConfig, RenovateConfig } from '../types';
-import { mergeChildConfig } from '../utils';
-import { removedPresets } from './common';
-import * as forgejo from './forgejo';
-import * as gitea from './gitea';
-import * as github from './github';
-import * as gitlab from './gitlab';
-import * as http from './http';
-import * as internal from './internal';
-import * as local from './local';
-import * as npm from './npm';
-import { parsePreset } from './parse';
-import type { Preset, PresetApi } from './types';
+} from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import * as memCache from '../../util/cache/memory/index.ts';
+import * as packageCache from '../../util/cache/package/index.ts';
+import { clone } from '../../util/clone.ts';
+import { regEx } from '../../util/regex.ts';
+import * as template from '../../util/template/index.ts';
+import { GlobalConfig } from '../global.ts';
+import * as massage from '../massage.ts';
+import * as migration from '../migration.ts';
+import type { AllConfig, RenovateConfig } from '../types.ts';
+import { mergeChildConfig } from '../utils.ts';
+import { removedPresets } from './common.ts';
+import * as forgejo from './forgejo/index.ts';
+import * as gitea from './gitea/index.ts';
+import * as github from './github/index.ts';
+import * as gitlab from './gitlab/index.ts';
+import * as http from './http/index.ts';
+import * as internal from './internal/index.ts';
+import * as local from './local/index.ts';
+import * as npm from './npm/index.ts';
+import { parsePreset } from './parse.ts';
+import type { Preset, PresetApi } from './types.ts';
 import {
   PRESET_DEP_NOT_FOUND,
   PRESET_INVALID,
@@ -38,7 +38,7 @@ import {
   PRESET_NOT_FOUND,
   PRESET_PROHIBITED_SUBPRESET,
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
-} from './util';
+} from './util.ts';
 
 const presetSources: Record<string, PresetApi> = {
   forgejo,

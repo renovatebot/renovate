@@ -1,4 +1,4 @@
-import * as npmUpdater from '../..';
+import * as npmUpdater from '../../index.ts';
 
 describe('modules/manager/npm/update/package-version/index', () => {
   describe('.bumpPackageVersion()', () => {
@@ -62,7 +62,7 @@ describe('modules/manager/npm/update/package-version/index', () => {
           throw new Error('semver inc');
         },
       }));
-      const npmUpdater1 = await import('./index.js');
+      const npmUpdater1 = await import('./index.ts');
       const { bumpedContent } = npmUpdater1.bumpPackageVersion(
         content,
         '0.0.2',

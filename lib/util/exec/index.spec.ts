@@ -1,28 +1,28 @@
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../config/global';
-import type { RepoGlobalConfig } from '../../config/types';
-import { TEMPORARY_ERROR } from '../../constants/error-messages';
-import { setCustomEnv } from '../env';
-import * as dockerModule from './docker';
-import { getHermitEnvs } from './hermit';
+import { GlobalConfig } from '../../config/global.ts';
+import type { RepoGlobalConfig } from '../../config/types.ts';
+import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
+import { setCustomEnv } from '../env.ts';
+import * as dockerModule from './docker/index.ts';
+import { getHermitEnvs } from './hermit.ts';
+import { exec } from './index.ts';
 import type {
   CommandWithOptions,
   ExecOptions,
   ExecResult,
   RawExecOptions,
   VolumeOption,
-} from './types';
-import { asRawCommand } from './utils';
-import { exec } from '.';
-import { exec as cpExec, envMock } from '~test/exec-util';
+} from './types.ts';
+import { asRawCommand } from './utils.ts';
+import { exec as cpExec, envMock } from '~test/exec-util.ts';
 
 const getHermitEnvsMock = vi.mocked(getHermitEnvs);
 
-vi.mock('./hermit', async () => ({
-  ...(await vi.importActual<typeof import('./hermit')>('./hermit')),
+vi.mock('./hermit.ts', async () => ({
+  ...(await vi.importActual<typeof import('./hermit.ts')>('./hermit')),
   getHermitEnvs: vi.fn(),
 }));
-vi.mock('../../modules/datasource', () => mockDeep());
+vi.mock('../../modules/datasource/index.ts', () => mockDeep());
 
 interface TestInput {
   processEnv: Record<string, string>;

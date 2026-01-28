@@ -1,11 +1,11 @@
 import { styleText } from 'node:util';
-import { filterTestOutput } from './test-filter.js';
+import { filterTestOutput } from './test-filter.ts';
 import type {
   CheckResultWithCoverage,
   CoverageInfo,
   ExecutionProgress,
   ProcessManager,
-} from './types.js';
+} from './types.ts';
 
 export const TUI = {
   NAME_WIDTH: 36,

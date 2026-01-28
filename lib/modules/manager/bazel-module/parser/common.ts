@@ -1,7 +1,7 @@
-import { query as q } from 'good-enough-parser';
-import { regEx } from '../../../../util/regex';
-import type { Ctx } from './context';
-import * as starlark from './starlark';
+import { query as q } from '@renovatebot/good-enough-parser';
+import { regEx } from '../../../../util/regex.ts';
+import type { Ctx } from './context.ts';
+import * as starlark from './starlark.ts';
 
 const booleanValuesRegex = regEx(`^${starlark.booleanStringValues.join('|')}$`);
 

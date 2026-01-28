@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from '../../../modules/manager';
-import { matchRegexOrGlobList } from '../../../util/string-match';
-import { presets } from './custom-managers';
+import { extractPackageFile } from '../../../modules/manager/index.ts';
+import { matchRegexOrGlobList } from '../../../util/string-match.ts';
+import { presets } from './custom-managers.ts';
 
 describe('config/presets/internal/custom-managers', () => {
   describe('Update `_VERSION` environment variables in Azure Pipelines files', () => {

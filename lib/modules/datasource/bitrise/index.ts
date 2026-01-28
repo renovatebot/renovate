@@ -1,16 +1,16 @@
 import { isArray } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import { detectPlatform } from '../../../util/common';
-import { parseGitUrl } from '../../../util/git/url';
-import { GithubHttp } from '../../../util/http/github';
-import { fromBase64 } from '../../../util/string';
-import { joinUrlParts } from '../../../util/url';
-import { GithubContentResponse } from '../../platform/github/schema';
-import semver from '../../versioning/semver';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { BitriseStepFile } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { detectPlatform } from '../../../util/common.ts';
+import { parseGitUrl } from '../../../util/git/url.ts';
+import { GithubHttp } from '../../../util/http/github.ts';
+import { fromBase64 } from '../../../util/string.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { GithubContentResponse } from '../../platform/github/schema.ts';
+import semver from '../../versioning/semver/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { BitriseStepFile } from './schema.ts';
 
 export class BitriseDatasource extends Datasource {
   static readonly id = 'bitrise';

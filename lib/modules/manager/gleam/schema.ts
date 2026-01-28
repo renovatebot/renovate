@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Toml } from '../../../util/schema-utils';
+import { Toml } from '../../../util/schema-utils/index.ts';
 
 export const GleamToml = Toml.pipe(
   z.object({
