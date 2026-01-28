@@ -126,7 +126,7 @@ export class CdnjsDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${CdnjsDatasource.id}`,
-        key: `getDigest:${config.registryUrl}:${config.packageName}:${newValue}}`,
+        key: `getDigest:${config.registryUrl}:${config.packageName}:${newValue}`,
         fallback: true,
       },
       () => this._getDigest(config, newValue),
