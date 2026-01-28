@@ -1,4 +1,4 @@
-import { openpgp } from '../../expose.cjs';
+import { openpgp } from '../../expose.ts';
 import { logger } from '../../logger/index.ts';
 import { regEx } from '../../util/regex.ts';
 

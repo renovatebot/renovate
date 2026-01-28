@@ -8,7 +8,9 @@ import {
   isTruthy,
 } from '@sindresorhus/is';
 import type { CvssVector } from 'ae-cvss-calculator';
-import { fromVector } from 'ae-cvss-calculator';
+import * as _aeCvss from 'ae-cvss-calculator';
+
+const { fromVector } = _aeCvss as unknown as typeof _aeCvss.default;
 import { z } from 'zod';
 import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
 import type { PackageRule, RenovateConfig } from '../../../config/types.ts';

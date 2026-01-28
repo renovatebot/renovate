@@ -22,7 +22,7 @@ import type {
   RenovateRepository,
 } from '../../config/types.ts';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages.ts';
-import { pkg } from '../../expose.cjs';
+import { pkg } from '../../expose.ts';
 import { instrument } from '../../instrumentation/index.ts';
 import {
   exportStats,

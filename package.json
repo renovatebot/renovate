@@ -3,24 +3,14 @@
   "description": "Automated dependency updates. Flexible so you don't need to be.",
   "version": "0.0.0-semantic-release",
   "type": "module",
+  "main": "dist/renovate.js",
+  "types": "dist/renovate.d.ts",
   "bin": {
-    "renovate": "dist/cjs/renovate.js",
-    "renovate-config-validator": "dist/cjs/config-validator.js"
-  },
-  "exports": {
-    ".": {
-      "import": "./dist/esm/renovate.js",
-      "require": "./dist/cjs/renovate.js",
-      "types": "./dist/esm/renovate.d.ts"
-    },
-    "./dist/*": {
-      "import": "./dist/esm/*",
-      "require": "./dist/cjs/*"
-    }
+    "renovate": "dist/renovate.js",
+    "renovate-config-validator": "dist/config-validator.js"
   },
   "scripts": {
-    "build": "run-s clean 'generate:*' 'compile:*' generate-dist-package-json create-json-schema",
-    "generate-dist-package-json": "echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json && echo '{\"type\":\"module\"}' > dist/esm/package.json",
+    "build": "run-s clean 'generate:*' 'compile:*' create-json-schema",
     "build:docker": "tsx tools/docker.ts",
     "build:docs": "tsx tools/generate-docs.ts",
     "clean": "rimraf dist tmp",

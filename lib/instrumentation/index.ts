@@ -40,7 +40,7 @@ import {
   ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
 import { isPromise } from '@sindresorhus/is';
-import { pkg } from '../expose.cjs';
+import { pkg } from '../expose.ts';
 import { getEnv } from '../util/env.ts';
 import { GitOperationSpanProcessor } from '../util/git/span-processor.ts';
 import type { RenovateSpanOptions } from './types.ts';
