@@ -1,6 +1,6 @@
 import { isBoolean } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { queryReleases } from '../../../util/github/graphql/index.ts';
 import type {
   GithubDigestFile,
@@ -51,13 +51,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
     this.http = new GithubHttp(GithubReleaseAttachmentsDatasource.id);
   }
 
-  @cache({
-    ttlMinutes: 1440,
-    namespace: `datasource-${GithubReleaseAttachmentsDatasource.id}`,
-    key: (release: GithubRestRelease, digest: string) =>
-      `findDigestFile:${release.html_url}:${digest}`,
-  })
-  async findDigestFile(
+  private async _findDigestFile(
     release: GithubRestRelease,
     digest: string,
   ): Promise<GithubDigestFile | null> {
@@ -81,19 +75,41 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
     return null;
   }
 
-  @cache({
-    ttlMinutes: 1440,
-    namespace: `datasource-${GithubReleaseAttachmentsDatasource.id}`,
-    key: (asset: GithubRestAsset, algorithm: string) =>
-      `downloadAndDigest:${asset.browser_download_url}:${algorithm}`,
-  })
-  async downloadAndDigest(
+  findDigestFile(
+    release: GithubRestRelease,
+    digest: string,
+  ): Promise<GithubDigestFile | null> {
+    return withCache(
+      {
+        ttlMinutes: 1440,
+        namespace: `datasource-${GithubReleaseAttachmentsDatasource.id}`,
+        key: `findDigestFile:${release.html_url}:${digest}`,
+      },
+      () => this._findDigestFile(release, digest),
+    );
+  }
+
+  private async _downloadAndDigest(
     asset: GithubRestAsset,
     algorithm: string,
   ): Promise<string> {
     const res = this.http.stream(asset.browser_download_url);
     const digest = await hashStream(res, algorithm);
     return digest;
+  }
+
+  downloadAndDigest(
+    asset: GithubRestAsset,
+    algorithm: string,
+  ): Promise<string> {
+    return withCache(
+      {
+        ttlMinutes: 1440,
+        namespace: `datasource-${GithubReleaseAttachmentsDatasource.id}`,
+        key: `downloadAndDigest:${asset.browser_download_url}:${algorithm}`,
+      },
+      () => this._downloadAndDigest(asset, algorithm),
+    );
   }
 
   async findAssetWithDigest(

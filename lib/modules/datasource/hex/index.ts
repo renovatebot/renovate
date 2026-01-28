@@ -1,5 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as hexVersioning from '../../versioning/hex/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -24,11 +24,7 @@ export class HexDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `Github` field in the results.';
 
-  @cache({
-    namespace: `datasource-${HexDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => packageName,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -67,5 +63,16 @@ export class HexDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${HexDatasource.id}`,
+        key: config.packageName,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

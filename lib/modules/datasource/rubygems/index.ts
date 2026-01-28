@@ -1,7 +1,7 @@
 import { Marshal } from '@qnighy/marshal';
 import type { ZodError } from 'zod';
 import { logger } from '../../../logger/index.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { Http, HttpError } from '../../../util/http/index.ts';
 import { AsyncResult, Result } from '../../../util/result.ts';
 import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url.ts';
@@ -53,17 +53,7 @@ export class RubygemsDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `source_code_uri` field in the results.';
 
-  @cache({
-    namespace: `datasource-${RubygemsDatasource.id}`,
-    key: ({ packageName, registryUrl }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `releases:${registryUrl!}:${packageName}`,
-    cacheable: ({ registryUrl }: GetReleasesConfig) => {
-      const registryHostname = parseUrl(registryUrl)?.hostname;
-      return registryHostname === 'rubygems.org';
-    },
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -111,6 +101,20 @@ export class RubygemsDatasource extends Datasource {
 
     logger.debug({ packageName, registryUrl }, `Rubygems fetch error: ${err}`);
     return null;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const registryHostname = parseUrl(config.registryUrl)?.hostname;
+    return withCache(
+      {
+        namespace: `datasource-${RubygemsDatasource.id}`,
+        // TODO: types (#22198)
+        key: `releases:${config.registryUrl!}:${config.packageName}`,
+        fallback: true,
+        cacheable: registryHostname === 'rubygems.org',
+      },
+      () => this._getReleases(config),
+    );
   }
 
   private getReleasesViaInfoEndpoint(

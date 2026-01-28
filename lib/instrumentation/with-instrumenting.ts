@@ -26,20 +26,22 @@ interface InstrumentedOptions {
 }
 
 /**
- * Wraps an async function in an OpenTelemetry span.
+ * Creates a wrapped version of an async function that instruments each call.
  *
  * @param options - Instrumentation options
- * @param fn - The async function to instrument
- * @returns The result of the function
+ * @param fn - The async function to wrap
+ * @returns A new function that instruments each call
  */
-export function instrumented<T>(
+export function withInstrumenting<T, Args extends unknown[]>(
   options: InstrumentedOptions,
-  fn: () => T | Promise<T>,
-): T | Promise<T> {
+  fn: (...args: Args) => Promise<T>,
+): (...args: Args) => Promise<T> {
   const { name, attributes, ignoreParentSpan, kind } = options;
-  return instrument(name, fn, {
-    attributes,
-    root: ignoreParentSpan,
-    kind,
-  });
+  return (...args: Args): Promise<T> => {
+    return instrument(name, () => fn(...args), {
+      attributes,
+      root: ignoreParentSpan,
+      kind,
+    });
+  };
 }

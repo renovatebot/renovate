@@ -1,5 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { clone } from '../../../util/clone.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
@@ -56,12 +56,7 @@ export class JenkinsPluginsDatasource extends Datasource {
     return result;
   }
 
-  @cache({
-    namespace: `datasource-${JenkinsPluginsDatasource.id}`,
-    key: 'info',
-    ttlMinutes: 1440,
-  })
-  async getJenkinsPluginInfo(
+  private async _getJenkinsPluginInfo(
     updateSiteUrl: string,
   ): Promise<Record<string, ReleaseResult>> {
     const { plugins } =
@@ -79,11 +74,20 @@ export class JenkinsPluginsDatasource extends Datasource {
     return info;
   }
 
-  @cache({
-    namespace: `datasource-${JenkinsPluginsDatasource.id}`,
-    key: 'versions',
-  })
-  async getJenkinsPluginVersions(
+  getJenkinsPluginInfo(
+    updateSiteUrl: string,
+  ): Promise<Record<string, ReleaseResult>> {
+    return withCache(
+      {
+        namespace: `datasource-${JenkinsPluginsDatasource.id}`,
+        key: 'info',
+        ttlMinutes: 1440,
+      },
+      () => this._getJenkinsPluginInfo(updateSiteUrl),
+    );
+  }
+
+  private async _getJenkinsPluginVersions(
     updateSiteUrl: string,
   ): Promise<Record<string, Release[]>> {
     const { plugins } =
@@ -109,6 +113,18 @@ export class JenkinsPluginsDatasource extends Datasource {
       });
     }
     return versions;
+  }
+
+  getJenkinsPluginVersions(
+    updateSiteUrl: string,
+  ): Promise<Record<string, Release[]>> {
+    return withCache(
+      {
+        namespace: `datasource-${JenkinsPluginsDatasource.id}`,
+        key: 'versions',
+      },
+      () => this._getJenkinsPluginVersions(updateSiteUrl),
+    );
   }
 
   private async getJenkinsUpdateCenterResponse<T>(url: string): Promise<T> {

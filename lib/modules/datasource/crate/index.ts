@@ -3,7 +3,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getChildEnv } from '../../../util/exec/utils.ts';
 import { privateCacheDir, readCacheFile } from '../../../util/fs/index.ts';
 import { simpleGitConfig } from '../../../util/git/config.ts';
@@ -64,15 +64,7 @@ export class CrateDatasource extends Datasource {
   override readonly releaseTimestampNote =
     'The release timestamp is determined from `pubtime` field from crates.io index if available, or `version.created_at` field from crates.io API otherwise.';
 
-  @cache({
-    namespace: `datasource-${CrateDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `${registryUrl}/${packageName}`,
-    cacheable: ({ registryUrl }: GetReleasesConfig) =>
-      CrateDatasource.areReleasesCacheable(registryUrl),
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -155,15 +147,20 @@ export class CrateDatasource extends Datasource {
     return result;
   }
 
-  @cache({
-    namespace: `datasource-${CrateDatasource.id}-metadata`,
-    key: (info: RegistryInfo, packageName: string) =>
-      `${info.rawUrl}/${packageName}`,
-    cacheable: (info: RegistryInfo) =>
-      CrateDatasource.areReleasesCacheable(info.rawUrl),
-    ttlMinutes: 24 * 60, // 24 hours
-  })
-  public async getCrateMetadata(
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${CrateDatasource.id}`,
+        // TODO: types (#22198)
+        key: `${config.registryUrl}/${config.packageName}`,
+        cacheable: CrateDatasource.areReleasesCacheable(config.registryUrl),
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
+  }
+
+  private async _getCrateMetadata(
     info: RegistryInfo,
     packageName: string,
   ): Promise<CrateMetadata | null> {
@@ -195,6 +192,21 @@ export class CrateDatasource extends Datasource {
     }
 
     return null;
+  }
+
+  public getCrateMetadata(
+    info: RegistryInfo,
+    packageName: string,
+  ): Promise<CrateMetadata | null> {
+    return withCache(
+      {
+        namespace: `datasource-${CrateDatasource.id}-metadata`,
+        key: `${info.rawUrl}/${packageName}`,
+        cacheable: CrateDatasource.areReleasesCacheable(info.rawUrl),
+        ttlMinutes: 24 * 60, // 24 hours
+      },
+      () => this._getCrateMetadata(info, packageName),
+    );
   }
 
   public async fetchCrateRecordsPayload(
@@ -447,17 +459,7 @@ export class CrateDatasource extends Datasource {
     return [packageName.slice(0, 2), packageName.slice(2, 4), packageName];
   }
 
-  @cache({
-    namespace: `datasource-crate`,
-    key: (
-      { registryUrl, packageName }: PostprocessReleaseConfig,
-      { version }: Release,
-    ) => `postprocessRelease:${registryUrl}:${packageName}:${version}`,
-    ttlMinutes: 7 * 24 * 60,
-    cacheable: ({ registryUrl }: PostprocessReleaseConfig, _: Release) =>
-      registryUrl === 'https://crates.io',
-  })
-  override async postprocessRelease(
+  private async _postprocessRelease(
     { packageName, registryUrl }: PostprocessReleaseConfig,
     release: Release,
   ): Promise<PostprocessReleaseResult> {
@@ -475,5 +477,20 @@ export class CrateDatasource extends Datasource {
     );
     release.releaseTimestamp = releaseTimestamp;
     return release;
+  }
+
+  override postprocessRelease(
+    config: PostprocessReleaseConfig,
+    release: Release,
+  ): Promise<PostprocessReleaseResult> {
+    return withCache(
+      {
+        namespace: `datasource-crate`,
+        key: `postprocessRelease:${config.registryUrl}:${config.packageName}:${release.version}`,
+        ttlMinutes: 7 * 24 * 60,
+        cacheable: config.registryUrl === 'https://crates.io',
+      },
+      () => this._postprocessRelease(config, release),
+    );
   }
 }

@@ -2,7 +2,7 @@ import {
   DescribeDBEngineVersionsCommand,
   RDSClient,
 } from '@aws-sdk/client-rds';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { Lazy } from '../../../util/lazy.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -19,11 +19,7 @@ export class AwsRdsDatasource extends Datasource {
     this.rds = new Lazy(() => new RDSClient({}));
   }
 
-  @cache({
-    namespace: `datasource-${AwsRdsDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName: serializedFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const cmd = new DescribeDBEngineVersionsCommand({
@@ -39,5 +35,16 @@ export class AwsRdsDatasource extends Datasource {
           isDeprecated: version.Status === 'deprecated',
         })),
     };
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${AwsRdsDatasource.id}`,
+        key: `getReleases:${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

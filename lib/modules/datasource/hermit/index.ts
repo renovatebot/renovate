@@ -1,5 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import type { GithubRestRelease } from '../../../util/github/types.ts';
 import { getApiBaseUrl } from '../../../util/github/url.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
@@ -42,12 +42,7 @@ export class HermitDatasource extends Datasource {
     this.pathRegex = regEx('^/(?<owner>[^/]+)/(?<repo>[^/]+)$');
   }
 
-  @cache({
-    namespace: `datasource-${HermitDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `getReleases:${registryUrl ?? ''}-${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -101,15 +96,24 @@ export class HermitDatasource extends Datasource {
     };
   }
 
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${HermitDatasource.id}`,
+        key: `getReleases:${config.registryUrl ?? ''}-${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
+  }
+
   /**
    * getHermitSearchManifest fetch the index.json from release
    * named index, parses it and returned the parsed JSON result
    */
-  @cache({
-    namespace: `datasource-${HermitDatasource.id}`,
-    key: (u) => `getHermitSearchManifest:${u.toString()}`,
-  })
-  async getHermitSearchManifest(u: URL): Promise<HermitSearchResult[] | null> {
+  private async _getHermitSearchManifest(
+    u: URL,
+  ): Promise<HermitSearchResult[] | null> {
     const registryUrl = u.toString();
     const host = coerceString(u.host);
     const groups = this.pathRegex.exec(coerceString(u.pathname))?.groups;
@@ -163,5 +167,15 @@ export class HermitDatasource extends Datasource {
     }
 
     return null;
+  }
+
+  getHermitSearchManifest(u: URL): Promise<HermitSearchResult[] | null> {
+    return withCache(
+      {
+        namespace: `datasource-${HermitDatasource.id}`,
+        key: `getHermitSearchManifest:${u.toString()}`,
+      },
+      () => this._getHermitSearchManifest(u),
+    );
   }
 }

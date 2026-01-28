@@ -1,7 +1,7 @@
 // TODO: types (#22198)
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
@@ -49,15 +49,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the the `source` field in the results.';
 
-  @cache({
-    namespace: `datasource-${TerraformProviderDatasource.id}`,
-    key: (getReleasesConfig: GetReleasesConfig) => {
-      const url = getReleasesConfig.registryUrl;
-      const repo = TerraformProviderDatasource.getRepository(getReleasesConfig);
-      return `getReleases:${url}/${repo}`;
-    },
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -90,6 +82,19 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       serviceDiscovery,
       registryUrl,
       repository,
+    );
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const url = config.registryUrl;
+    const repo = TerraformProviderDatasource.getRepository(config);
+    return withCache(
+      {
+        namespace: `datasource-${TerraformProviderDatasource.id}`,
+        key: `getReleases:${url}/${repo}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
     );
   }
 
@@ -190,12 +195,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     return dep;
   }
 
-  @cache({
-    namespace: `datasource-${TerraformProviderDatasource.id}`,
-    key: (registryURL: string, repository: string, version: string) =>
-      `getBuilds:${registryURL}/${repository}/${version}`,
-  })
-  async getBuilds(
+  private async _getBuilds(
     registryURL: string,
     repository: string,
     version: string,
@@ -301,11 +301,23 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     return result;
   }
 
-  @cache({
-    namespace: `datasource-${TerraformProviderDatasource.id}`,
-    key: (zipHashUrl: string) => `getZipHashes:${zipHashUrl}`,
-  })
-  async getZipHashes(zipHashUrl: string): Promise<string[] | undefined> {
+  getBuilds(
+    registryURL: string,
+    repository: string,
+    version: string,
+  ): Promise<TerraformBuild[] | null> {
+    return withCache(
+      {
+        namespace: `datasource-${TerraformProviderDatasource.id}`,
+        key: `getBuilds:${registryURL}/${repository}/${version}`,
+      },
+      () => this._getBuilds(registryURL, repository, version),
+    );
+  }
+
+  private async _getZipHashes(
+    zipHashUrl: string,
+  ): Promise<string[] | undefined> {
     // The hashes are formatted as the result of sha256sum in plain text, each line: <hash>\t<filename>
     let rawHashData: string;
     try {
@@ -328,12 +340,17 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       .map((line) => line.split(/\s/)[0]);
   }
 
-  @cache({
-    namespace: `datasource-${TerraformProviderDatasource.id}`,
-    key: (backendLookUpName: string, version: string) =>
-      `getReleaseBackendIndex:${backendLookUpName}/${version}`,
-  })
-  async getReleaseBackendIndex(
+  getZipHashes(zipHashUrl: string): Promise<string[] | undefined> {
+    return withCache(
+      {
+        namespace: `datasource-${TerraformProviderDatasource.id}`,
+        key: `getZipHashes:${zipHashUrl}`,
+      },
+      () => this._getZipHashes(zipHashUrl),
+    );
+  }
+
+  private async _getReleaseBackendIndex(
     backendLookUpName: string,
     version: string,
   ): Promise<VersionDetailResponse> {
@@ -342,5 +359,18 @@ export class TerraformProviderDatasource extends TerraformDatasource {
         `${TerraformProviderDatasource.defaultRegistryUrls[1]}/${backendLookUpName}/${version}/index.json`,
       )
     ).body;
+  }
+
+  getReleaseBackendIndex(
+    backendLookUpName: string,
+    version: string,
+  ): Promise<VersionDetailResponse> {
+    return withCache(
+      {
+        namespace: `datasource-${TerraformProviderDatasource.id}`,
+        key: `getReleaseBackendIndex:${backendLookUpName}/${version}`,
+      },
+      () => this._getReleaseBackendIndex(backendLookUpName, version),
+    );
   }
 }

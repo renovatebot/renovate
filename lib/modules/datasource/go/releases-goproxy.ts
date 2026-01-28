@@ -1,7 +1,7 @@
 import { isNonEmptyStringAndNotWhitespace, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
 import { filterMap } from '../../../util/filter-map.ts';
 import { HttpError } from '../../../util/http/index.ts';
@@ -52,11 +52,9 @@ export class GoProxyDatasource extends Datasource {
 
   readonly direct = new GoDirectDatasource();
 
-  @cache({
-    namespace: `datasource-${GoProxyDatasource.id}`,
-    key: (config: GetReleasesConfig) => GoProxyDatasource.getCacheKey(config),
-  })
-  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  private async _getReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     const { packageName } = config;
     logger.trace(`goproxy.getReleases(${packageName})`);
     const goproxy = getEnv().GOPROXY ?? 'https://proxy.golang.org,direct';
@@ -117,6 +115,17 @@ export class GoProxyDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${GoProxyDatasource.id}`,
+        key: GoProxyDatasource.getCacheKey(config),
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 
   /**

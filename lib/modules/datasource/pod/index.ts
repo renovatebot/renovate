@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import { HOST_DISABLED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import type { HttpError } from '../../../util/http/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
@@ -201,14 +201,7 @@ export class PodDatasource extends Datasource {
     return null;
   }
 
-  @cache({
-    ttlMinutes: 30,
-    namespace: `datasource-${PodDatasource.id}`,
-    key: ({ packageName, registryUrl }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `${registryUrl}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -238,5 +231,18 @@ export class PodDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        ttlMinutes: 30,
+        namespace: `datasource-${PodDatasource.id}`,
+        // TODO: types (#22198)
+        key: `${config.registryUrl}:${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

@@ -1,7 +1,7 @@
 import { ZodError } from 'zod';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import type { HttpError } from '../../../util/http/index.ts';
 import { Result } from '../../../util/result.ts';
@@ -30,14 +30,9 @@ export class CdnjsDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `repository` field in the results.';
 
-  @cache({
-    namespace: `datasource-${CdnjsDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => {
-      const library = packageName.split('/')[0];
-      return `getReleases:${library}`;
-    },
-  })
-  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  private async _getReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     const result = Result.parse(config, ReleasesConfig)
       .transform(({ packageName, registryUrl }) => {
         const [library] = packageName.split('/');
@@ -80,12 +75,19 @@ export class CdnjsDatasource extends Datasource {
     return val;
   }
 
-  @cache({
-    namespace: `datasource-${CdnjsDatasource.id}`,
-    key: ({ registryUrl, packageName }: DigestConfig, newValue: string) =>
-      `getDigest:${registryUrl}:${packageName}:${newValue}}`,
-  })
-  override async getDigest(
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const library = config.packageName.split('/')[0];
+    return withCache(
+      {
+        namespace: `datasource-${CdnjsDatasource.id}`,
+        key: `getReleases:${library}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
+  }
+
+  private async _getDigest(
     config: DigestConfig,
     newValue: string,
   ): Promise<string | null> {
@@ -115,6 +117,20 @@ export class CdnjsDatasource extends Datasource {
     }
 
     return val;
+  }
+
+  override getDigest(
+    config: DigestConfig,
+    newValue: string,
+  ): Promise<string | null> {
+    return withCache(
+      {
+        namespace: `datasource-${CdnjsDatasource.id}`,
+        key: `getDigest:${config.registryUrl}:${config.packageName}:${newValue}`,
+        fallback: true,
+      },
+      () => this._getDigest(config, newValue),
+    );
   }
 
   override handleHttpErrors(err: HttpError): void {

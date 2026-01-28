@@ -1,4 +1,4 @@
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { id as versioning } from '../../versioning/python/index.ts';
 import { Datasource } from '../datasource.ts';
 import { registryUrl as eolRegistryUrl } from '../endoflife-date/common.ts';
@@ -41,11 +41,7 @@ export class PythonVersionDatasource extends Datasource {
     });
   }
 
-  @cache({
-    namespace: `datasource-${datasource}`,
-    key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
-  })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     /* v8 ignore next 3 -- should never happen */
@@ -88,5 +84,16 @@ export class PythonVersionDatasource extends Datasource {
     }
 
     return result.releases.length ? result : null;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${datasource}`,
+        key: `${config.registryUrl}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }
