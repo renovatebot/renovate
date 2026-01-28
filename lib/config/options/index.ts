@@ -601,6 +601,8 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     globalOnly: true,
     default: 'renovate_',
+    deprecationMsg:
+      'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
   },
   {
     name: 'dockerCliOptions',
@@ -608,6 +610,8 @@ const options: Readonly<RenovateOptions>[] = [
       'Pass CLI flags to `docker run` command when `binarySource=docker`.',
     type: 'string',
     globalOnly: true,
+    deprecationMsg:
+      'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
   },
   {
     name: 'dockerSidecarImage',
@@ -616,6 +620,8 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     default: 'ghcr.io/renovatebot/base-image:12.31.1',
     globalOnly: true,
+    deprecationMsg:
+      'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
   },
   {
     name: 'dockerUser',
@@ -623,6 +629,8 @@ const options: Readonly<RenovateOptions>[] = [
       'Set the `UID` and `GID` for Docker-based binaries if you use `binarySource=docker`.',
     globalOnly: true,
     type: 'string',
+    deprecationMsg:
+      'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
   },
   {
     name: 'composerIgnorePlatformReqs',
