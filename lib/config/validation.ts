@@ -102,7 +102,20 @@ function getDeprecationMessage(option: string): string | undefined {
     commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
     prTitle: `Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.`,
   };
-  return deprecatedOptions[option];
+  if (deprecatedOptions[option]) {
+    return deprecatedOptions[option];
+  }
+
+  const found = options.find((o) => o.name === option);
+  if (!found) {
+    return undefined;
+  }
+
+  if (!found.deprecationMsg) {
+    return undefined;
+  }
+
+  return `The '${option}' option is deprecated: ${found.deprecationMsg}`;
 }
 
 function isInhertConfigOption(key: string): boolean {

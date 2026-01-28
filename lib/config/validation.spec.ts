@@ -1,3 +1,4 @@
+import type { HostRule } from '../types/index.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
 import type { RenovateConfig } from './types.ts';
@@ -20,6 +21,28 @@ describe('config/validation', () => {
         expect(warnings).toMatchSnapshot();
       },
     );
+
+    // NOTE that this should always refer to a deprecated option, but at some point, we may have removed them all, so we'll need to think about how to handle that, at that point
+    it('returns the deprecationMsg for `dnsCache` as a warning', async () => {
+      const config: RenovateConfig = {
+        hostRules: [
+          {
+            dnsCache: true,
+          } as HostRule,
+        ],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toMatchObject([
+        {
+          topic: 'Deprecation Warning',
+          message: `The 'dnsCache' option is deprecated: This option is deprecated and will be removed in a future release.`,
+        },
+      ]);
+    });
 
     it('allow enabled field in vulnerabilityAlerts', async () => {
       const config = {
