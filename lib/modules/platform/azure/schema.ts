@@ -1,4 +1,4 @@
-import type { WrappedException as _WrappedException } from 'azure-devops-node-api/interfaces/common/VSSInterfaces';
+import type { WrappedException as _WrappedException } from 'azure-devops-node-api/interfaces/common/VSSInterfaces.js';
 import { z } from 'zod';
 import { Json } from '../../../util/schema-utils/index.ts';
 
