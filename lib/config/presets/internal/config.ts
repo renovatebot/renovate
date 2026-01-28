@@ -14,6 +14,7 @@ export const presets: Record<string, Preset> = {
       ':pinDevDependencies',
       'abandonments:recommended',
       'security:minimumReleaseAgeNpm',
+      ':maintainLockFilesWeekly',
     ],
   },
   'js-app': {
