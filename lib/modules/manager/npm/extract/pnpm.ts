@@ -312,7 +312,7 @@ function extractConfigDeps(
 }
 
 export async function extractPnpmWorkspaceFile(
-  workspaceFile: PnpmWorkspaceFile,
+  workspaceFile: PnpmCatalogs & PnpmConfigDependencies,
   packageFile: string,
 ): Promise<PackageFileContent<NpmManagerData> | null> {
   logger.trace(`pnpm.extractPnpmWorkspaceFile(${packageFile})`);
