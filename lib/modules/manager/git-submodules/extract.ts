@@ -1,5 +1,5 @@
 import type { SimpleGit } from 'simple-git';
-import Git from 'simple-git';
+import { simpleGit } from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
@@ -17,7 +17,7 @@ async function getUrl(
   submoduleName: string,
 ): Promise<string> {
   const path = (
-    await Git(simpleGitConfig()).raw([
+    await simpleGit(simpleGitConfig()).raw([
       'config',
       '--file',
       gitModulesPath,
@@ -40,7 +40,7 @@ async function getBranch(
   submoduleName: string,
 ): Promise<string | null> {
   const branchFromConfig = (
-    await Git(simpleGitConfig()).raw([
+    await simpleGit(simpleGitConfig()).raw([
       'config',
       '--file',
       gitModulesPath,
@@ -89,7 +89,7 @@ export default async function extractPackageFile(
   _config: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   const localDir = GlobalConfig.get('localDir');
-  const git = Git(localDir, simpleGitConfig());
+  const git = simpleGit(localDir, simpleGitConfig());
   const gitModulesPath = upath.join(localDir, packageFile);
 
   const depNames = await getModules(git, gitModulesPath);

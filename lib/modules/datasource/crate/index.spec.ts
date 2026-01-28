@@ -1,7 +1,7 @@
 import { setTimeout } from 'timers/promises';
 import fs from 'fs-extra';
 import type { SimpleGit } from 'simple-git';
-import _simpleGit from 'simple-git';
+import { simpleGit as _simpleGit } from 'simple-git';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
