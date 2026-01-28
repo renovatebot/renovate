@@ -1,19 +1,19 @@
 import { isArray, isString } from '@sindresorhus/is';
 import type { Response, SimpleGit } from 'simple-git';
-import Git from 'simple-git';
+import { simpleGit } from 'simple-git';
 import { mock } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { extractPackageFile } from './index.ts';
 
-vi.mock('simple-git', () => ({ default: vi.fn() }));
-const simpleGitFactoryMock = vi.mocked(Git);
+vi.mock('simple-git', () => ({ simpleGit: vi.fn() }));
+const simpleGitFactoryMock = vi.mocked(simpleGit);
 
 const gitMock = mock<SimpleGit>();
 
 describe('modules/manager/git-submodules/extract', () => {
   beforeEach(async () => {
-    const { simpleGit: Git } =
+    const { simpleGit } =
       await vi.importActual<typeof import('simple-git')>('simple-git');
     GlobalConfig.set({ localDir: `${__dirname}/__fixtures__` });
     // clear host rules
@@ -22,7 +22,7 @@ describe('modules/manager/git-submodules/extract', () => {
     process.env = {};
 
     simpleGitFactoryMock.mockImplementation((...args: any[]) => {
-      const git = Git(...args);
+      const git = simpleGit(...args);
 
       gitMock.env.mockImplementation(() => gitMock);
       gitMock.subModule.mockResolvedValue(

@@ -1,4 +1,4 @@
-import Git from 'simple-git';
+import { simpleGit } from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
@@ -395,7 +395,7 @@ export class CrateDatasource extends Datasource {
       `Cloning private cargo registry`,
     );
 
-    const git = Git({
+    const git = simpleGit({
       ...simpleGitConfig(),
       maxConcurrentProcesses: 1,
     }).env(getChildEnv());
