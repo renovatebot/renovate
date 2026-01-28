@@ -2,7 +2,7 @@ import { isObject } from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import * as p from '../../../util/promises.ts';
@@ -58,14 +58,20 @@ export class PackagistDatasource extends Datasource {
     return body;
   }
 
-  @cache({
-    namespace: `datasource-${PackagistDatasource.id}`,
-    key: (regUrl: string) => `getRegistryMeta:${regUrl}`,
-  })
-  async getRegistryMeta(regUrl: string): Promise<RegistryMeta> {
+  private async _getRegistryMeta(regUrl: string): Promise<RegistryMeta> {
     const url = resolveBaseUrl(regUrl, 'packages.json');
     const result = await this.getJson(url, RegistryMeta);
     return result;
+  }
+
+  getRegistryMeta(regUrl: string): Promise<RegistryMeta> {
+    return withCache(
+      {
+        namespace: `datasource-${PackagistDatasource.id}`,
+        key: `getRegistryMeta:${regUrl}`,
+      },
+      () => this._getRegistryMeta(regUrl),
+    );
   }
 
   private static isPrivatePackage(regUrl: string): boolean {
@@ -85,21 +91,28 @@ export class PackagistDatasource extends Datasource {
     return url;
   }
 
-  @cache({
-    namespace: `datasource-${PackagistDatasource.id}`,
-    key: (regUrl: string, regFile: RegistryFile) =>
-      `getPackagistFile:${PackagistDatasource.getPackagistFileUrl(regUrl, regFile)}`,
-    cacheable: (regUrl: string) =>
-      !PackagistDatasource.isPrivatePackage(regUrl),
-    ttlMinutes: 1440,
-  })
-  async getPackagistFile(
+  private async _getPackagistFile(
     regUrl: string,
     regFile: RegistryFile,
   ): Promise<PackagistFile> {
     const url = PackagistDatasource.getPackagistFileUrl(regUrl, regFile);
     const packagistFile = await this.getJson(url, PackagistFile);
     return packagistFile;
+  }
+
+  getPackagistFile(
+    regUrl: string,
+    regFile: RegistryFile,
+  ): Promise<PackagistFile> {
+    return withCache(
+      {
+        namespace: `datasource-${PackagistDatasource.id}`,
+        key: `getPackagistFile:${PackagistDatasource.getPackagistFileUrl(regUrl, regFile)}`,
+        ttlMinutes: 1440,
+        cacheable: !PackagistDatasource.isPrivatePackage(regUrl),
+      },
+      () => this._getPackagistFile(regUrl, regFile),
+    );
   }
 
   async fetchProviderPackages(
@@ -124,13 +137,7 @@ export class PackagistDatasource extends Datasource {
     });
   }
 
-  @cache({
-    namespace: `datasource-${PackagistDatasource.id}`,
-    key: (registryUrl: string, metadataUrl: string, packageName: string) =>
-      `packagistV2Lookup:${registryUrl}:${metadataUrl}:${packageName}`,
-    ttlMinutes: 10,
-  })
-  async packagistV2Lookup(
+  private async _packagistV2Lookup(
     registryUrl: string,
     metadataUrl: string,
     packageName: string,
@@ -155,6 +162,21 @@ export class PackagistDatasource extends Datasource {
       devPromise,
     ]).then((responses) => responses.filter(isObject));
     return parsePackagesResponses(packageName, responses);
+  }
+
+  packagistV2Lookup(
+    registryUrl: string,
+    metadataUrl: string,
+    packageName: string,
+  ): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${PackagistDatasource.id}`,
+        key: `packagistV2Lookup:${registryUrl}:${metadataUrl}:${packageName}`,
+        ttlMinutes: 10,
+      },
+      () => this._packagistV2Lookup(registryUrl, metadataUrl, packageName),
+    );
   }
 
   public getPkgUrl(

@@ -4,7 +4,7 @@ import { promisify } from 'util';
 import sax from 'sax';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import type { HttpResponse } from '../../../util/http/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
@@ -45,13 +45,7 @@ export class RpmDatasource extends Datasource {
    * @param packageName - the name of the package to fetch releases for.
    * @returns The release result if the package is found, otherwise null.
    */
-  @cache({
-    namespace: `datasource-${RpmDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl}:${packageName}`,
-    ttlMinutes: 1440,
-  })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -69,13 +63,22 @@ export class RpmDatasource extends Datasource {
     }
   }
 
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${RpmDatasource.id}`,
+        key: `${config.registryUrl}:${config.packageName}`,
+        ttlMinutes: 1440,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
+  }
+
   // Fetches the primary.xml.gz URL from the repomd.xml file.
-  @cache({
-    namespace: `datasource-${RpmDatasource.id}`,
-    key: (registryUrl: string) => registryUrl,
-    ttlMinutes: 1440,
-  })
-  async getPrimaryGzipUrl(registryUrl: string): Promise<string | null> {
+  private async _getPrimaryGzipUrl(
+    registryUrl: string,
+  ): Promise<string | null> {
     const repomdUrl = joinUrlParts(
       registryUrl,
       RpmDatasource.repomdXmlFileName,
@@ -119,6 +122,17 @@ export class RpmDatasource extends Datasource {
       '/',
     );
     return joinUrlParts(registryUrlWithoutRepodata, href);
+  }
+
+  getPrimaryGzipUrl(registryUrl: string): Promise<string | null> {
+    return withCache(
+      {
+        namespace: `datasource-${RpmDatasource.id}`,
+        key: registryUrl,
+        ttlMinutes: 1440,
+      },
+      () => this._getPrimaryGzipUrl(registryUrl),
+    );
   }
 
   async getReleasesByPackageName(

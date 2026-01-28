@@ -1,6 +1,6 @@
 import type { TypeOf, ZodType } from 'zod';
 import { GlobalConfig } from '../../../config/global.ts';
-import { cache } from '../../../util/cache/package/decorator.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import { id as versioning } from '../../versioning/loose/index.ts';
@@ -107,18 +107,28 @@ export class AzurePipelinesTasksDatasource extends Datasource {
     return null;
   }
 
-  @cache({
-    namespace: `datasource-${AzurePipelinesTasksDatasource.id}`,
-    key: (url: string) => url,
-    ttlMinutes: 24 * 60,
-  })
-  async getTasks<Schema extends ZodType>(
+  private async _getTasks<Schema extends ZodType>(
     url: string,
     opts: HttpOptions,
     schema: Schema,
   ): Promise<TypeOf<Schema>> {
     const { body } = await this.http.getJson(url, opts, schema);
     return body;
+  }
+
+  getTasks<Schema extends ZodType>(
+    url: string,
+    opts: HttpOptions,
+    schema: Schema,
+  ): Promise<TypeOf<Schema>> {
+    return withCache(
+      {
+        namespace: `datasource-${AzurePipelinesTasksDatasource.id}`,
+        key: url,
+        ttlMinutes: 24 * 60,
+      },
+      () => this._getTasks(url, opts, schema),
+    );
   }
 
   static compareSemanticVersions = (key: string) => (a: any, b: any) => {

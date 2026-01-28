@@ -17,7 +17,6 @@
     "resolveJsonModule": true,
     "noUnusedLocals": true,
     "noImplicitOverride": true,
-    "experimentalDecorators": true,
     "useUnknownInCatchVariables": false /* we aren't prepared for enabling this by default since ts 4.4*/,
     "isolatedModules": true /* required for tsdown */,
     "lib": ["es2023"],

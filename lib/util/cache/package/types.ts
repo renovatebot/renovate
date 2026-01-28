@@ -13,7 +13,7 @@ export interface PackageCache {
   cleanup?(): Promise<void>;
 }
 
-export interface DecoratorCachedRecord {
+export interface CachedRecord {
   value: unknown;
   cachedAt: string;
 }

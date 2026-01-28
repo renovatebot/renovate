@@ -1,12 +1,12 @@
 import { GlobalConfig } from '../../../config/global.ts';
 import * as memCache from '../memory/index.ts';
-import { cached } from './cached.ts';
 import * as file from './file.ts';
 import * as packageCache from './index.ts';
+import { withCache } from './with-cache.ts';
 
 vi.mock('./file.ts');
 
-describe('util/cache/package/cached', () => {
+describe('util/cache/package/with-cache', () => {
   const setCache = file.set;
   const getValue = vi.fn();
   let count = 1;
@@ -28,13 +28,13 @@ describe('util/cache/package/cached', () => {
     const fn = () => getValue();
 
     expect(
-      await cached({ namespace: '_test-namespace', key: 'some-key' }, fn),
+      await withCache({ namespace: '_test-namespace', key: 'some-key' }, fn),
     ).toBe('111');
     expect(
-      await cached({ namespace: '_test-namespace', key: 'some-key' }, fn),
+      await withCache({ namespace: '_test-namespace', key: 'some-key' }, fn),
     ).toBe('111');
     expect(
-      await cached({ namespace: '_test-namespace', key: 'some-key' }, fn),
+      await withCache({ namespace: '_test-namespace', key: 'some-key' }, fn),
     ).toBe('111');
 
     expect(getValue).toHaveBeenCalledTimes(1);
@@ -50,19 +50,19 @@ describe('util/cache/package/cached', () => {
     const fn = () => getValue();
 
     expect(
-      await cached(
+      await withCache(
         { namespace: '_test-namespace', key: 'key', cacheable: false },
         fn,
       ),
     ).toBe('111');
     expect(
-      await cached(
+      await withCache(
         { namespace: '_test-namespace', key: 'key', cacheable: false },
         fn,
       ),
     ).toBe('222');
     expect(
-      await cached(
+      await withCache(
         { namespace: '_test-namespace', key: 'key', cacheable: false },
         fn,
       ),
@@ -77,19 +77,19 @@ describe('util/cache/package/cached', () => {
     const fn = () => getValue();
 
     expect(
-      await cached(
+      await withCache(
         { namespace: '_test-namespace', key: 'key', cacheable: false },
         fn,
       ),
     ).toBe('111');
     expect(
-      await cached(
+      await withCache(
         { namespace: '_test-namespace', key: 'key', cacheable: false },
         fn,
       ),
     ).toBe('111');
     expect(
-      await cached(
+      await withCache(
         { namespace: '_test-namespace', key: 'key', cacheable: false },
         fn,
       ),
@@ -111,13 +111,13 @@ describe('util/cache/package/cached', () => {
     };
 
     expect(
-      await cached({ namespace: '_test-namespace', key: 'key' }, fn),
+      await withCache({ namespace: '_test-namespace', key: 'key' }, fn),
     ).toBeNull();
     expect(
-      await cached({ namespace: '_test-namespace', key: 'key' }, fn),
+      await withCache({ namespace: '_test-namespace', key: 'key' }, fn),
     ).toBeNull();
     expect(
-      await cached({ namespace: '_test-namespace', key: 'key' }, fn),
+      await withCache({ namespace: '_test-namespace', key: 'key' }, fn),
     ).toBeNull();
 
     expect(getValue).toHaveBeenCalledTimes(1);
@@ -136,13 +136,13 @@ describe('util/cache/package/cached', () => {
     };
 
     expect(
-      await cached({ namespace: '_test-namespace', key: 'key' }, fn),
+      await withCache({ namespace: '_test-namespace', key: 'key' }, fn),
     ).toBeUndefined();
     expect(
-      await cached({ namespace: '_test-namespace', key: 'key' }, fn),
+      await withCache({ namespace: '_test-namespace', key: 'key' }, fn),
     ).toBeUndefined();
     expect(
-      await cached({ namespace: '_test-namespace', key: 'key' }, fn),
+      await withCache({ namespace: '_test-namespace', key: 'key' }, fn),
     ).toBeUndefined();
 
     expect(getValue).toHaveBeenCalledTimes(3);
@@ -153,7 +153,7 @@ describe('util/cache/package/cached', () => {
     const fn = () => getValue();
 
     expect(
-      await cached(
+      await withCache(
         { namespace: '_test-namespace', key: 'key', ttlMinutes: 60 },
         fn,
       ),
@@ -177,7 +177,7 @@ describe('util/cache/package/cached', () => {
       const fn = () => getValue();
 
       expect(
-        await cached(
+        await withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -191,7 +191,7 @@ describe('util/cache/package/cached', () => {
 
       vi.advanceTimersByTime(60 * 1000 - 1);
       expect(
-        await cached(
+        await withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -211,7 +211,7 @@ describe('util/cache/package/cached', () => {
 
       vi.advanceTimersByTime(1);
       expect(
-        await cached(
+        await withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -238,7 +238,7 @@ describe('util/cache/package/cached', () => {
       const fn = () => getValue();
 
       expect(
-        await cached(
+        await withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -258,7 +258,7 @@ describe('util/cache/package/cached', () => {
 
       vi.advanceTimersByTime(120 * 1000 - 1);
       expect(
-        await cached(
+        await withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -273,7 +273,7 @@ describe('util/cache/package/cached', () => {
 
       vi.advanceTimersByTime(1);
       expect(
-        await cached(
+        await withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -296,7 +296,7 @@ describe('util/cache/package/cached', () => {
       const fn = () => getValue();
 
       expect(
-        await cached(
+        await withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -317,7 +317,7 @@ describe('util/cache/package/cached', () => {
       vi.advanceTimersByTime(60 * 1000);
       getValue.mockRejectedValueOnce(new Error('test'));
       expect(
-        await cached(
+        await withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -335,7 +335,7 @@ describe('util/cache/package/cached', () => {
       const fn = () => getValue();
 
       expect(
-        await cached(
+        await withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -356,7 +356,7 @@ describe('util/cache/package/cached', () => {
       vi.advanceTimersByTime(2 * 60 * 1000 - 1);
       getValue.mockRejectedValueOnce(new Error('test'));
       expect(
-        await cached(
+        await withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -370,7 +370,7 @@ describe('util/cache/package/cached', () => {
       vi.advanceTimersByTime(1);
       getValue.mockRejectedValueOnce(new Error('test'));
       await expect(
-        cached(
+        withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -386,7 +386,7 @@ describe('util/cache/package/cached', () => {
       const fn = () => getValue();
 
       expect(
-        await cached(
+        await withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -409,7 +409,7 @@ describe('util/cache/package/cached', () => {
       getValue.mockRejectedValueOnce(new Error('test'));
       // Error should propagate since fallback is disabled
       await expect(
-        cached(
+        withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
