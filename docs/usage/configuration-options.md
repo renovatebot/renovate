@@ -1918,6 +1918,10 @@ For example, to group all non-major devDependencies updates together into a sing
 }
 ```
 
+<!-- prettier-ignore -->
+!!! note
+    Replacement updates will never be grouped.
+
 ## groupSlug
 
 By default, Renovate will "slugify" the groupName to determine the branch name.
@@ -3721,6 +3725,10 @@ Use the `replacementName` config option to set the name of a replacement package
 Can be used in combination with `replacementVersion`.
 
 You can suggest a new community package rule by editing [the `replacements.json` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/data/replacements.json) and opening a pull request.
+
+<!-- prettier-ignore -->
+!!! note
+    Replacement updates will never be grouped.
 
 ### replacementNameTemplate
 
