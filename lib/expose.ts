@@ -2,9 +2,8 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 
-// need to use dynamic path so that typescript does not include package.json in dist folder after compilation
-const filePath = new URL('../package.json', import.meta.url).pathname;
-export const pkg = require(filePath) as typeof import('../package.json');
+export const pkg =
+  require('../package.json') as typeof import('../package.json');
 
 /**
  * return's re2
