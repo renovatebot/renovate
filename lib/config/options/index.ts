@@ -613,7 +613,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.26.6',
+    default: 'ghcr.io/containerbase/sidecar:14.0.1',
     globalOnly: true,
   },
   {
