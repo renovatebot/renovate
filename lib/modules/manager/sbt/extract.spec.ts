@@ -133,6 +133,29 @@ describe('modules/manager/sbt/extract', () => {
       });
     });
 
+    it('skips deps when dotted symbolds do not resolve to anything', () => {
+      const content = `
+        scalaVersion := versions.scala
+        version := "3.2.1"
+        libraryDependencies += "org.example" % "foo" % versions.example
+      `;
+      expect(extractPackageFile(content)).toEqual({
+        deps: [
+          {
+            datasource: 'sbt-package',
+            depName: 'org.example:foo',
+            packageName: 'org.example:foo',
+            currentValue: undefined,
+            registryUrls: [],
+          },
+        ],
+        packageFileVersion: '3.2.1',
+        managerData: {
+          scalaVersion: undefined,
+        },
+      });
+    });
+
     it('extracts packageFileVersion when scala version is defined in a variable', () => {
       const content = `
         val fileVersion = "1.2.3"
