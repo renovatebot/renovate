@@ -506,7 +506,7 @@ exports[`modules/manager/sbt/extract > extractPackageFile() > extracts deps when
     },
   ],
   "managerData": {
-    "scalaVersion": "2.12.10",
+    "scalaVersion": "2.12",
   },
   "packageFileVersion": undefined,
 }
