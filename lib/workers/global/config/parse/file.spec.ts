@@ -24,20 +24,25 @@ describe('workers/global/config/parse/file', () => {
   });
 
   describe('.getConfig()', () => {
-    it.each`
-      description                                            | filePath
-      ${'CJS .js config file (fallback)'}                    | ${'config.js'}
-      ${'CJS .cjs config file'}                              | ${'config.cjs'}
-      ${'ESM .mjs config file'}                              | ${'config.mjs'}
-      ${'ESM .js config file'}                               | ${'config-esm.js'}
-      ${'CJS config file exporting a Promise'}               | ${'config-promise.js'}
-      ${'CJS config file exporting a function'}              | ${'config-function.js'}
-      ${'CJS config file exporting a function with Promise'} | ${'config-function-promise.js'}
-      ${'CJS config file exporting an async function'}       | ${'config-async-function.js'}
-      ${'.renovaterc'}                                       | ${'.renovaterc'}
-      ${'JSON5 config file'}                                 | ${'config.json5'}
-      ${'YAML config file'}                                  | ${'config.yaml'}
-    `('parses $description > $filePath', async ({ filePath }) => {
+    it.each([
+      ['custom js config file', 'config.js'],
+      ['custom js config file', 'config.cjs'],
+      ['custom js config file', 'config.mjs'],
+      ['custom js config file exporting a Promise', 'config-promise.js'],
+      ['custom js config file exporting a function', 'config-function.js'],
+      // The next two are different syntactic ways of expressing the same thing
+      [
+        'custom js config file exporting a function returning a Promise',
+        'config-function-promise.js',
+      ],
+      [
+        'custom js config file exporting an async function',
+        'config-async-function.js',
+      ],
+      ['.renovaterc', '.renovaterc'],
+      ['JSON5 config file', 'config.json5'],
+      ['YAML config file', 'config.yaml'],
+    ])('parses %s > %s', async (_fileType, filePath) => {
       const configFile = upath.resolve(
         import.meta.dirname,
         './__fixtures__/',
