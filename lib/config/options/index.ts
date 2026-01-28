@@ -108,6 +108,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: true,
     globalOnly: true,
+    cli: false,
   },
   {
     name: 'userAgent',
@@ -600,6 +601,8 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     globalOnly: true,
     default: 'renovate_',
+    deprecationMsg:
+      'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
   },
   {
     name: 'dockerCliOptions',
@@ -607,6 +610,8 @@ const options: Readonly<RenovateOptions>[] = [
       'Pass CLI flags to `docker run` command when `binarySource=docker`.',
     type: 'string',
     globalOnly: true,
+    deprecationMsg:
+      'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
   },
   {
     name: 'dockerSidecarImage',
@@ -615,6 +620,8 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     default: 'ghcr.io/containerbase/sidecar:13.26.7',
     globalOnly: true,
+    deprecationMsg:
+      'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
   },
   {
     name: 'dockerUser',
@@ -622,6 +629,8 @@ const options: Readonly<RenovateOptions>[] = [
       'Set the `UID` and `GID` for Docker-based binaries if you use `binarySource=docker`.',
     globalOnly: true,
     type: 'string',
+    deprecationMsg:
+      'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
   },
   {
     name: 'composerIgnorePlatformReqs',
@@ -981,7 +990,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Whether to run commands for `postUpgradeTasks` inside a shell. This has security implications, as it means that they can call out to other commands or access shell variables. It is difficult to craft an `allowedCommands` regex to restrict this.',
     globalOnly: true,
     type: 'boolean',
-    default: true,
+    default: false,
   },
   {
     name: 'allowCustomCrateRegistries',
@@ -3137,7 +3146,7 @@ const options: Readonly<RenovateOptions>[] = [
         which run automatically, and are not explicitly added in \`postUpgradeTasks\``,
     type: 'array',
     subType: 'string',
-    default: ['gradleWrapper'],
+    default: [],
     allowedValues: ['goGenerate', 'gradleWrapper'],
     stage: 'repository',
     globalOnly: true,

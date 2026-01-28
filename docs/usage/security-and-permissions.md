@@ -94,16 +94,16 @@ In certain scenarios, code from the monitored repository is executed as part of 
 This is particularly true during, for example:
 
 - `postUpgradeTasks`, where scripts specified by the repository are run
-- when a wrapper within the repository is called, like `gradlew`
+- when a wrapper within the repository is called, like `gradlew` (if setting [`allowedUnsafeExecutions=["gradleWrapper"]`](./self-hosted-configuration.md#allowedunsafeexecutions).
 
 These scripts can contain arbitrary code.
 This may pose a significant security risk if the repository's integrity is compromised, or if the repository maintainers have malicious intentions.
 
 Because such insider attack is an inherent and unavoidable risk, the Renovate project will not issue CVEs (or GHSAs) for such attacks or weaknesses other than in exceptional circumstances.
 
-Note that when Renovate runs `postUpgradeTasks`, the script executes inside a shell, which means that they can call out to other commands or access shell variables, if the allowlist via `allowedCommands` does not restrict it.
+If you require `postUpgradeTasks` to run inside a shell, you can enable this using [`allowShellExecutorForPostUpgradeCommands=true`](./self-hosted-configuration.md#allowshellexecutorforpostupgradecommands).
+Note that this means that these commands can call out to other commands or access shell variables, if the allowlist via `allowedCommands` does not restrict it.
 As it is difficult to craft a regular expression that may deny usage of special characters to shells, it is likely that this will not be possible to avoid at this time.
-This can be disabled using [`allowShellExecutorForPostUpgradeCommands=false`](./self-hosted-configuration.md#allowshellexecutorforpostupgradecommands).
 
 ###### Execution of code (outsider attack)
 
