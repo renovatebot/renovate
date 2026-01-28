@@ -16,6 +16,22 @@ describe('workers/repository/updates/branch-name', () => {
       expect(upgrade.branchName).toBe('some-variable-name-grouptopic');
     });
 
+    it('ignores grouping of replacement update', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+        updateType: 'replacement',
+        depName: 'axios',
+        depNameSanitized: 'axios',
+        branchTopic: '{{depNameSanitized}}-replacement', // default for replacements
+        branchName: '{{branchPrefix}}{{additionalBranchPrefix}}{{branchTopic}}', // default
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('axios-replacement');
+    });
+
     it('uses groupName if no slug defined, ignores sharedVariableName', () => {
       const upgrade = partial<BranchUpgradeConfig>({
         groupName: 'some group name',

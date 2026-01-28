@@ -63,7 +63,8 @@ export function generateBranchName(update: BranchUpgradeConfig): void {
     );
     update.groupName = update.sharedVariableName;
   }
-  if (update.groupName) {
+
+  if (update.groupName && update.updateType !== 'replacement') {
     update.groupName = template.compile(update.groupName, update);
     logger.trace('Using group branchName template');
     // TODO: types (#22198)
