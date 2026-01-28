@@ -17,6 +17,7 @@ import {
   readLocalFile,
 } from '../../../../util/fs/index.ts';
 import { parseSingleYaml } from '../../../../util/yaml.ts';
+import { NpmDatasource } from '../../../datasource/npm/index.ts';
 import type {
   PackageDependency,
   PackageFile,
@@ -27,6 +28,7 @@ import type { PnpmCatalogs, PnpmConfigDependencies } from '../schema';
 import { PnpmWorkspaceFile } from '../schema.ts';
 import type { NpmManagerData } from '../types.ts';
 import { extractCatalogDeps } from './common/catalogs.ts';
+import { extractDependency } from './common/dependency.ts';
 import type { Catalog, LockFile } from './types.ts';
 
 export const PNPM_CONFIG_DEPENDENCY = 'pnpm.configDependencies';
