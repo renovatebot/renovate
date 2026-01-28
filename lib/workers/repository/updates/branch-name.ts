@@ -65,7 +65,12 @@ export function generateBranchName(update: BranchUpgradeConfig): void {
   }
 
   if (update.groupName) {
-    if (update.updateType !== 'replacement') {
+    if (update.updateType === 'replacement') {
+      logger.debug(
+        { depName: update.depName },
+        'Ignoring grouped branch name for replacement update',
+      );
+    } else {
       update.groupName = template.compile(update.groupName, update);
       logger.trace('Using group branchName template');
       // TODO: types (#22198)
@@ -95,11 +100,6 @@ export function generateBranchName(update: BranchUpgradeConfig): void {
       }
       update.branchTopic = update.group!.branchTopic ?? update.branchTopic;
       update.branchName = update.group!.branchName ?? update.branchName;
-    } else {
-      logger.debug(
-        { depName: update.depName },
-        'Ignoring grouped branch name for replacement update',
-      );
     }
   }
 
