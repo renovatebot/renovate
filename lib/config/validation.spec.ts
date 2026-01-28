@@ -6,17 +6,20 @@ import { partial } from '~test/util.ts';
 
 describe('config/validation', () => {
   describe('validateConfig(config)', () => {
-    it('returns deprecation warnings', async () => {
-      const config = {
-        prTitle: 'something',
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'repo',
-        config,
-      );
-      expect(warnings).toHaveLength(1);
-      expect(warnings).toMatchSnapshot();
-    });
+    it.each(['branchName', 'commitMessage', 'prTitle'])(
+      `returns custom deprecation warnings for %s`,
+      async (option: string) => {
+        const config = {
+          [option]: 'something',
+        };
+        const { warnings } = await configValidation.validateConfig(
+          'repo',
+          config,
+        );
+        expect(warnings).toHaveLength(1);
+        expect(warnings).toMatchSnapshot();
+      },
+    );
 
     it('allow enabled field in vulnerabilityAlerts', async () => {
       const config = {
