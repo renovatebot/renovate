@@ -4,7 +4,7 @@
  * Usage: pnpm check [options]
  *
  * Options:
- *   --no-fix          Skip auto-fix (eslint-fix, prettier-fix)
+ *   --no-fix          Skip auto-fix (oxlint-fix, biome-fix, prettier-fix)
  *   --no-test         Skip tests
  *   --full            Run full vitest instead of only affected shards
  *   --base <branch>   Compare against different base branch (default: main)
@@ -74,15 +74,8 @@ function pnpmScript(name: string): ParallelCheck {
   return { name, cmd: 'pnpm', args: [name] };
 }
 
-const FIX_CHECKS = [
-  'oxlint-fix',
-  'biome-fix',
-  'eslint-fix',
-  'prettier-fix',
-].map(pnpmScript);
-const FIXABLE_CHECKS = ['oxlint', 'biome', 'eslint', 'prettier'].map(
-  pnpmScript,
-);
+const FIX_CHECKS = ['biome-fix', 'oxlint-fix', 'prettier-fix'].map(pnpmScript);
+const FIXABLE_CHECKS = ['biome', 'oxlint', 'prettier'].map(pnpmScript);
 const OTHER_CHECKS = [
   'ls-lint',
   'git-check',
@@ -147,8 +140,8 @@ async function main(): Promise<void> {
 
   const testChecks = buildTestChecks(args, changedFiles);
 
-  // Fix checks run sequentially first (eslint-fix, prettier-fix)
-  // When skipped, we run the non-fix variants (eslint, prettier) in parallel
+  // Fix checks run sequentially first (oxlint-fix, biome-fix, prettier-fix)
+  // When skipped, we run the non-fix variants (oxlint, biome, prettier) in parallel
   const fixChecks: ParallelCheck[] = args.noFix ? [] : [...FIX_CHECKS];
   const lintChecks: ParallelCheck[] = [
     ...(args.noFix ? FIXABLE_CHECKS : []),

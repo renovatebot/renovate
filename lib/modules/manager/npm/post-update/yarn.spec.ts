@@ -1,5 +1,9 @@
 import fs from 'fs-extra';
 import { mockDeep } from 'vitest-mock-extended';
+import type { ExecSnapshots } from '~test/exec-util.ts';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as util from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import * as docker from '../../../../util/exec/docker/index.ts';
 import { getPkgReleases } from '../../../datasource/index.ts';
@@ -7,10 +11,6 @@ import type { PostUpdateConfig } from '../../types.ts';
 import type { NpmManagerData } from '../types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import * as yarnHelper from './yarn.ts';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
-import type { ExecSnapshots } from '~test/exec-util.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as util from '~test/util.ts';
 
 vi.mock('fs-extra', async () =>
   (

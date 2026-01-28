@@ -87,8 +87,10 @@ describe('modules/manager/haskell-cabal/extract', () => {
       },
     );
 
-    // The first hyphen makes the package name invalid
-    expect(splitSingleDependency('-invalid-package-name')).toBeNull();
+    it('returns null for invalid package name', () => {
+      // The first hyphen makes the package name invalid
+      expect(splitSingleDependency('-invalid-package-name')).toBeNull();
+    });
   });
 
   describe('extractNamesAndRanges()', () => {

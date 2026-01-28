@@ -1,4 +1,5 @@
 import { mockDeep } from 'vitest-mock-extended';
+import { exec as cpExec, envMock } from '~test/exec-util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import type { RepoGlobalConfig } from '../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
@@ -14,7 +15,6 @@ import type {
   VolumeOption,
 } from './types.ts';
 import { asRawCommand } from './utils.ts';
-import { exec as cpExec, envMock } from '~test/exec-util.ts';
 
 const getHermitEnvsMock = vi.mocked(getHermitEnvs);
 

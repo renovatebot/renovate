@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import type { PushResult } from 'simple-git';
 import Git from 'simple-git';
 import tmp from 'tmp-promise';
+import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import {
   CONFIG_VALIDATION,
@@ -17,7 +18,6 @@ import * as git from './index.ts';
 import { setNoVerify } from './index.ts';
 import * as _modifiedCache from './modified-cache.ts';
 import type { FileChange } from './types.ts';
-import { logger } from '~test/util.ts';
 
 vi.mock('./conflicts-cache');
 vi.mock('./behind-base-branch-cache');
@@ -34,7 +34,7 @@ const auth = vi.mocked(_auth);
 // Class is no longer exported
 const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
 
-describe('util/git/index', { timeout: 10000 }, () => {
+describe('util/git/index', () => {
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
   let base: tmp.DirectoryResult;
@@ -42,6 +42,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
   let defaultBranch: string;
 
   beforeAll(async () => {
+    vi.setConfig({ testTimeout: 10000 });
     base = await tmp.dir({ unsafeCleanup: true });
     const repo = Git(base.path);
     await repo.init();
@@ -104,7 +105,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     await repo.checkout(defaultBranch);
 
-    // eslint-disable-next-line vitest/no-standalone-expect
+    // oxlint-disable-next-line vitest/no-standalone-expect
     expect(git.getBranchList()).toBeEmptyArray();
   });
 

@@ -1,3 +1,6 @@
+import { Fixtures } from '~test/fixtures.ts';
+import type { RenovateConfig } from '~test/util.ts';
+import { partial } from '~test/util.ts';
 import { logger } from '../../../logger/index.ts';
 import { platform } from '../../../modules/platform/index.ts';
 import * as cache from '../../../util/cache/repository/index.ts';
@@ -11,9 +14,6 @@ import {
   runBranchSummary,
   runRenovateRepoStats,
 } from './repository-statistics.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { partial } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 vi.mock('../../../modules/platform/github/pr.ts');
 vi.mock('../../../util/http/github.ts');

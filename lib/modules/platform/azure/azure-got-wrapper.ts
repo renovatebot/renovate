@@ -2,8 +2,8 @@ import * as azure from 'azure-devops-node-api';
 import { getBasicHandler, getHandlerFromToken } from 'azure-devops-node-api';
 import type { ICoreApi } from 'azure-devops-node-api/CoreApi';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
-import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
 import type { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces';
+import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
 import type { HostRule } from '../../../types/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 

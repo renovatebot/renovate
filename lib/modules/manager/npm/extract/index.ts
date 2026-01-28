@@ -14,7 +14,6 @@ import {
 } from '../../../../util/fs/index.ts';
 import { newlineRegex, regEx } from '../../../../util/regex.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
-
 import type {
   ExtractConfig,
   PackageFile,

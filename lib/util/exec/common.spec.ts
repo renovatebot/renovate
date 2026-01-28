@@ -1,6 +1,7 @@
 import type { SendHandle, Serializable } from 'node:child_process';
 import { Readable } from 'node:stream';
 import { execa as _execa } from 'execa';
+import { logger, partial } from '~test/util.ts';
 import * as _instrumentation from '../../instrumentation/index.ts';
 import { regEx } from '../regex.ts';
 import {
@@ -11,7 +12,6 @@ import {
 import { exec, rawExec } from './common.ts';
 import { ExecError } from './exec-error.ts';
 import type { DataListener, RawExecOptions } from './types.ts';
-import { logger, partial } from '~test/util.ts';
 
 vi.mock('../../instrumentation/index.ts');
 vi.mock('node:child_process');

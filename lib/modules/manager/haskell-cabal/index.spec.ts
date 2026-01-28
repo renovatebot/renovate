@@ -29,17 +29,19 @@ describe('modules/manager/haskell-cabal/index', () => {
       },
     );
 
-    expect(extractPackageFile(minimalCabalFile).deps).toStrictEqual([
-      {
-        autoReplaceStringTemplate: '{{{depName}}} {{{newValue}}}',
-        currentValue: '>=4.20',
-        datasource: 'hackage',
-        depName: 'base',
-        packageName: 'base',
-        replaceString: 'base>=4.20',
-        versioning: 'pvp',
-      },
-    ]);
+    it('extracts dependencies from minimal cabal file', () => {
+      expect(extractPackageFile(minimalCabalFile).deps).toStrictEqual([
+        {
+          autoReplaceStringTemplate: '{{{depName}}} {{{newValue}}}',
+          currentValue: '>=4.20',
+          datasource: 'hackage',
+          depName: 'base',
+          packageName: 'base',
+          replaceString: 'base>=4.20',
+          versioning: 'pvp',
+        },
+      ]);
+    });
   });
 
   describe('getRangeStrategy()', () => {

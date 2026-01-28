@@ -1,14 +1,14 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { env, fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifact, UpdateArtifactsConfig } from '../types.ts';
 import * as pub from './index.ts';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { env, fs } from '~test/util.ts';
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');

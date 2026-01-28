@@ -1,4 +1,5 @@
 import type { Response } from 'got';
+import { partial } from '~test/util.ts';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import type {
   BbsRestRepo,
@@ -11,7 +12,6 @@ import {
   getInvalidReviewers,
   getRepoGitUrl,
 } from './utils.ts';
-import { partial } from '~test/util.ts';
 
 vi.unmock('../../../util/git');
 

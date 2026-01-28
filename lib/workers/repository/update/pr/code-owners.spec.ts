@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
 import { mock } from 'vitest-mock-extended';
+import { fs, git, platform } from '~test/util.ts';
 import * as bitbucketserver from '../../../../modules/platform/bitbucket-server/index.ts';
 import * as gitlab from '../../../../modules/platform/gitlab/index.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
 import type { LongCommitSha } from '../../../../util/git/types.ts';
 import { codeOwnersForPr } from './code-owners.ts';
-import { fs, git, platform } from '~test/util.ts';
 
 vi.mock('../../../../util/fs/index.ts');
 

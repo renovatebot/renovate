@@ -1,8 +1,8 @@
-import { resolveConfigPresets } from '..//index.ts';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
 import { regEx } from '../../../util/regex.ts';
 import { massageConfig } from '../../massage.ts';
 import { validateConfig } from '../../validation.ts';
+import { resolveConfigPresets } from '..//index.ts';
 import * as npm from '../npm/index.ts';
 import * as internal from './index.ts';
 
@@ -26,28 +26,38 @@ describe('config/presets/internal/index', () => {
     );
   });
 
-  for (const [groupName, groupPresets] of Object.entries(internal.groups)) {
-    for (const [presetName, presetConfig] of Object.entries(groupPresets)) {
-      const preset = `${groupName}:${presetName}`;
-      if (presetName !== 'description' && !ignoredPresets.includes(preset)) {
-        it(`${preset} validates`, async () => {
-          try {
-            const { config } = await resolveConfigPresets(
-              massageConfig(presetConfig),
-            );
-            const configType = groupName === 'global' ? 'global' : 'repo';
-            const res = await validateConfig(configType, config, true);
-            expect(res.errors).toHaveLength(0);
-            expect(res.warnings).toHaveLength(0);
-          } catch (err) {
-            if (err.validationError) {
-              throw new Error(err.validationError);
-            }
-            throw err;
-          }
-        });
+  const presetsToTest = Object.entries(internal.groups).flatMap(
+    ([groupName, groupPresets]) =>
+      Object.entries(groupPresets)
+        .filter(
+          ([presetName]) =>
+            presetName !== 'description' &&
+            !ignoredPresets.includes(`${groupName}:${presetName}`),
+        )
+        .map(([presetName, presetConfig]) => ({
+          groupName,
+          preset: `${groupName}:${presetName}`,
+          presetConfig,
+        })),
+  );
+
+  for (const { groupName, preset, presetConfig } of presetsToTest) {
+    it(`${preset} validates`, async () => {
+      try {
+        const { config } = await resolveConfigPresets(
+          massageConfig(presetConfig),
+        );
+        const configType = groupName === 'global' ? 'global' : 'repo';
+        const res = await validateConfig(configType, config, true);
+        expect(res.errors).toHaveLength(0);
+        expect(res.warnings).toHaveLength(0);
+      } catch (err) {
+        if (err.validationError) {
+          throw new Error(err.validationError);
+        }
+        throw err;
       }
-    }
+    });
   }
 
   it('internal presets should not contain handlebars', () => {

@@ -24,7 +24,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'replace',
 ];
 
-/* eslint-disable @typescript-eslint/unbound-method */
+/* oxlint-disable typescript/unbound-method -- methods don't use `this` */
 const {
   equals,
   getMajor,
@@ -35,7 +35,7 @@ const {
   matches: mavenMatches,
   sortVersions,
 } = maven;
-/* eslint-enable @typescript-eslint/unbound-method */
+/* oxlint-enable typescript/unbound-method */
 
 function isValid(str: string): boolean {
   if (!str) {

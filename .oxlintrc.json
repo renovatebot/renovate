@@ -1,8 +1,63 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
-  "plugins": ["import", "typescript"],
+  "plugins": ["import", "typescript", "promise", "vitest"],
+  "jsPlugins": ["./tools/lint/rules.js"],
   "categories": {},
   "rules": {
+    "constructor-super": "error",
+    "for-direction": "error",
+    "no-async-promise-executor": "error",
+    "no-case-declarations": "error",
+    "no-class-assign": "error",
+    "no-compare-neg-zero": "error",
+    "no-cond-assign": "error",
+    "no-const-assign": "error",
+    "no-constant-binary-expression": "error",
+    "no-constant-condition": "error",
+    "no-control-regex": "error",
+    "no-debugger": "error",
+    "no-delete-var": "error",
+    "no-dupe-class-members": "error",
+    "no-dupe-else-if": "error",
+    "no-dupe-keys": "error",
+    "no-duplicate-case": "error",
+    "no-empty": "error",
+    "no-empty-character-class": "error",
+    "no-empty-pattern": "error",
+    "no-empty-static-block": "error",
+    "no-ex-assign": "error",
+    "no-extra-boolean-cast": "error",
+    "no-fallthrough": "error",
+    "no-func-assign": "error",
+    "no-global-assign": "error",
+    "no-import-assign": "error",
+    "no-invalid-regexp": "error",
+    "no-irregular-whitespace": "error",
+    "no-loss-of-precision": "error",
+    "no-new-native-nonconstructor": "error",
+    "no-nonoctal-decimal-escape": "error",
+    "no-obj-calls": "error",
+    "no-prototype-builtins": "error",
+    "no-redeclare": "error",
+    "no-regex-spaces": "error",
+    "no-self-assign": "error",
+    "no-setter-return": "error",
+    "no-shadow-restricted-names": "error",
+    "no-sparse-arrays": "error",
+    "no-this-before-super": "error",
+    "no-unsafe-finally": "error",
+    "no-unsafe-negation": "error",
+    "no-unsafe-optional-chaining": "error",
+    "no-unused-labels": "error",
+    "no-unused-private-class-members": "error",
+    "no-useless-backreference": "error",
+    "no-useless-catch": "error",
+    "no-useless-escape": "error",
+    "no-with": "error",
+    "require-yield": "error",
+    "use-isnan": "error",
+    "valid-typeof": "error",
+
     "eqeqeq": "error",
     "no-console": "error",
     "no-param-reassign": "error",
@@ -10,13 +65,21 @@
     "no-template-curly-in-string": "error",
     "curly": "error",
     "radix": ["error", "as-needed"],
-    "sort-imports": [
+    "require-await": "error",
+    "no-unused-vars": [
       "error",
       {
-        "ignoreCase": false,
-        "ignoreDeclarationSort": true,
-        "ignoreMemberSort": false,
-        "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
+        "vars": "all",
+        "args": "none",
+        "ignoreRestSiblings": true
+      }
+    ],
+    "no-unassigned-vars": "error",
+    "no-var": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": ["nock", "parse-link-header", "path"]
       }
     ],
     "import/extensions": ["error", "always", { "ignorePackages": true }],
@@ -24,20 +87,127 @@
     "import/default": "error",
     "import/named": "error",
     "import/namespace": "error",
+    "import/no-self-import": "error",
+    "import/no-duplicates": "warn",
+    "import/no-named-as-default": "warn",
+    "import/no-absolute-path": "error",
+    "import/no-dynamic-require": "error",
+    "import/export": "error",
+
+    "renovate/no-tools-import": "error",
+
     "typescript/consistent-type-imports": [
       "error",
       {
         "disallowTypeAnnotations": false
       }
     ],
-    "no-unused-vars": "error",
-    "no-unassigned-vars": "error"
+    "typescript/adjacent-overload-signatures": "error",
+    "typescript/array-type": "error",
+    "typescript/ban-ts-comment": "error",
+    "typescript/ban-tslint-comment": "error",
+    "typescript/consistent-generic-constructors": "error",
+    "typescript/consistent-indexed-object-style": "error",
+    "typescript/consistent-type-definitions": "error",
+    "typescript/no-confusing-non-null-assertion": "error",
+    "typescript/no-duplicate-enum-values": "error",
+    "typescript/no-empty-object-type": "error",
+    "typescript/no-explicit-any": "off",
+    "typescript/no-extra-non-null-assertion": "error",
+    "typescript/no-inferrable-types": "error",
+    "typescript/no-misused-new": "error",
+    "typescript/no-namespace": "error",
+    "typescript/no-non-null-asserted-optional-chain": "error",
+    "typescript/no-non-null-assertion": "off",
+    "typescript/no-require-imports": "error",
+    "typescript/no-this-alias": "error",
+    "typescript/no-unnecessary-type-constraint": "error",
+    "typescript/no-unsafe-declaration-merging": "error",
+    "typescript/no-unsafe-function-type": "error",
+    "typescript/no-wrapper-object-types": "error",
+    "typescript/prefer-as-const": "error",
+    "typescript/prefer-for-of": "error",
+    "typescript/prefer-function-type": "error",
+    "typescript/prefer-namespace-keyword": "error",
+    "typescript/triple-slash-reference": "error",
+    "typescript/explicit-function-return-type": [
+      "error",
+      {
+        "allowExpressions": true,
+        "allowTypedFunctionExpressions": true
+      }
+    ],
+    "typescript/consistent-type-assertions": [
+      "error",
+      {
+        "assertionStyle": "as",
+        "objectLiteralTypeAssertions": "allow"
+      }
+    ],
+
+    "promise/always-return": "error",
+    "promise/catch-or-return": "error",
+    "promise/no-return-wrap": "error",
+    "promise/param-names": "error",
+    "promise/no-nesting": "warn",
+    "promise/no-promise-in-callback": "warn",
+    "promise/no-callback-in-promise": "warn",
+    "promise/no-new-statics": "error",
+    "promise/valid-params": "warn",
+
+    "typescript/await-thenable": "error",
+    "typescript/no-floating-promises": "error",
+    "typescript/no-for-in-array": "error",
+    "typescript/no-implied-eval": "error",
+    "typescript/no-misused-promises": "error",
+    "typescript/no-unnecessary-type-assertion": "error",
+    "typescript/only-throw-error": "error",
+    "typescript/prefer-promise-reject-errors": "error",
+    "typescript/require-await": "error",
+    "typescript/restrict-plus-operands": "error",
+    "typescript/restrict-template-expressions": [
+      "error",
+      {
+        "allowNumber": true,
+        "allowBoolean": true
+      }
+    ],
+    "typescript/unbound-method": [
+      "error",
+      {
+        "ignoreStatic": true
+      }
+    ],
+    "typescript/no-redundant-type-constituents": "error",
+    "typescript/prefer-optional-chain": "error",
+    "typescript/prefer-nullish-coalescing": "error",
+    "typescript/no-unsafe-argument": "off",
+    "typescript/no-unsafe-assignment": "off",
+    "typescript/no-unsafe-call": "off",
+    "typescript/no-unsafe-member-access": "off",
+    "typescript/no-unsafe-return": "off"
   },
   "overrides": [
     {
       "files": ["**/*.spec.ts", "test/**"],
       "rules": {
-        "no-template-curly-in-string": "off"
+        "no-template-curly-in-string": "off",
+        "typescript/explicit-function-return-type": "off",
+        "typescript/unbound-method": "off",
+        "renovate/test-root-describe": "error",
+        "vitest/expect-expect": "error",
+        "vitest/no-conditional-expect": "error",
+        "vitest/no-disabled-tests": "warn",
+        "vitest/no-focused-tests": "error",
+        "vitest/no-commented-out-tests": "error",
+        "vitest/no-identical-title": "error",
+        "vitest/no-import-node-test": "error",
+        "vitest/no-interpolation-in-snapshots": "error",
+        "vitest/no-mocks-import": "error",
+        "vitest/no-standalone-expect": "error",
+        "vitest/valid-describe-callback": "error",
+        "vitest/valid-expect": ["error", { "maxArgs": 2 }],
+        "vitest/valid-title": "error"
       }
     },
     {
@@ -57,6 +227,16 @@
       ],
       "rules": {
         "no-console": "off"
+      }
+    },
+    {
+      "files": ["lib/config/presets/internal/*.ts"],
+      "rules": {
+        "sort-keys": [
+          "error",
+          "asc",
+          { "caseSensitive": false, "natural": true }
+        ]
       }
     }
   ],
@@ -80,6 +260,8 @@
     "tools/mkdocs/site",
     ".github/workflows/**/*.js",
     ".worktrees/**/*",
-    ".markdownlint-cli2.mjs"
+    ".markdownlint-cli2.mjs",
+    "lib/modules/datasource/hex/v2/package.ts",
+    "lib/modules/datasource/hex/v2/signed.ts"
   ]
 }

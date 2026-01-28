@@ -1,3 +1,4 @@
+import * as fragments from './fragments.ts';
 import {
   ArrayFragment,
   AttributeFragment,
@@ -7,7 +8,6 @@ import {
   RuleFragment,
   StringFragment,
 } from './fragments.ts';
-import * as fragments from './fragments.ts';
 
 describe('modules/manager/bazel-module/parser/fragments', () => {
   it('.string()', () => {

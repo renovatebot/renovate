@@ -2,7 +2,6 @@ import { query as q } from '@renovatebot/good-enough-parser';
 import { regEx } from '../../../../util/regex.ts';
 import { kvParams } from './common.ts';
 import type { Ctx } from './context.ts';
-
 import { mavenExtensionPrefix, mavenExtensionTags } from './maven.ts';
 import { ociExtensionPrefix, ociExtensionTags } from './oci.ts';
 

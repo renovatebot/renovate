@@ -1,6 +1,9 @@
 import * as _fsExtra from 'fs-extra';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { env, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
@@ -17,9 +20,6 @@ import {
 } from './artifacts.ts';
 import { updateArtifacts } from './index.ts';
 import type { PipfileLock } from './types.ts';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { env, git, partial } from '~test/util.ts';
 
 // mock for cjs require for `@renovatebot/detect-tools`
 // https://github.com/vitest-dev/vitest/discussions/3134

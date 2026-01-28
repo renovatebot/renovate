@@ -1,10 +1,10 @@
+import { platform } from '~test/util.ts';
 import { GlobalConfig } from '../../global.ts';
 import * as _forgejo from '../forgejo/index.ts';
 import * as _gitea from '../gitea/index.ts';
 import * as _github from '../github/index.ts';
 import * as _gitlab from '../gitlab/index.ts';
 import * as local from './index.ts';
-import { platform } from '~test/util.ts';
 
 vi.mock('../forgejo/index.ts');
 vi.mock('../gitea/index.ts');
@@ -36,7 +36,7 @@ describe('config/presets/local/index', () => {
         // @ts-expect-error -- testing invalid platform
         platform: 'unsupported-platform',
       });
-      // eslint-disable-next-line vitest/no-unneeded-async-expect-function -- local isn't async
+      // oxlint-disable-next-line vitest/no-unneeded-async-expect-function -- local isn't async
       await expect(async () => {
         await local.getPreset({
           repo: 'some/repo',
@@ -49,7 +49,7 @@ describe('config/presets/local/index', () => {
       GlobalConfig.set({
         platform: undefined,
       });
-      // eslint-disable-next-line vitest/no-unneeded-async-expect-function -- local isn't async
+      // oxlint-disable-next-line vitest/no-unneeded-async-expect-function -- local isn't async
       await expect(async () => {
         await local.getPreset({
           repo: 'some/repo',

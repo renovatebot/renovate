@@ -3,12 +3,12 @@ import os from 'node:os';
 import type { StatusResult } from 'simple-git';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { resetPrefetchedImages } from '../../../util/exec/docker/index.ts';
 import { getPkgReleases } from '../../datasource/index.ts';
 import { updateArtifacts } from './index.ts';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { env, fs, git, partial } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 vi.mock('../../../util/exec/env.ts');

@@ -1,7 +1,7 @@
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 
-export { extractPackageFile } from './extract.ts';
 export { updateArtifacts } from './artifacts.ts';
+export { extractPackageFile } from './extract.ts';
 export { getRangeStrategy } from './range.ts';
 
 export const supportsLockFileMaintenance = true;

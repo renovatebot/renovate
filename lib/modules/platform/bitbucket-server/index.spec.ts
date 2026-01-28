@@ -1,5 +1,7 @@
 import { isTruthy } from '@sindresorhus/is';
 import { mockDeep } from 'vitest-mock-extended';
+import * as httpMock from '~test/http-mock.ts';
+import { git, hostRules, logger } from '~test/util.ts';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
@@ -9,8 +11,6 @@ import * as repoCache from '../../../util/cache/repository/index.ts';
 import type { LongCommitSha } from '../../../util/git/types.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import * as bitbucket from './index.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { git, hostRules, logger } from '~test/util.ts';
 
 vi.mock('timers/promises');
 vi.mock('../../../util/host-rules.ts', () => mockDeep());

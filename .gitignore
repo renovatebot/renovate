@@ -12,7 +12,6 @@
 renovate-0.0.0-semantic-release.tgz
 renovate-v0.0.0-semantic-release.tgz
 /test/e2e/node_modules
-.eslintcache
 junit.xml
 /test-results
 renovate-schema.json

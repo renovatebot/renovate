@@ -47,6 +47,7 @@ function isZodResult<Input, Output extends Val>(
     return (
       'data' in input &&
       typeof input.data !== 'undefined' &&
+      typeof input.data !== 'undefined' &&
       input.data !== null
     );
   } else {

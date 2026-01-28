@@ -21,7 +21,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   const sha256 = extractRubyString(content, 'sha256');
 
   // Validate SHA256
-  if (!sha256 || sha256?.length !== 64) {
+  if (sha256?.length !== 64) {
     logger.debug('Error: Invalid sha256 field');
     return {
       deps: [{ depName: className, skipReason: 'invalid-sha256' }],

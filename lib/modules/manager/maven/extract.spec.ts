@@ -1,4 +1,6 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, logger } from '~test/util.ts';
 import {
   extractAllPackageFiles,
   extractExtensions,
@@ -6,8 +8,6 @@ import {
   extractRegistries,
   resolveParents,
 } from './extract.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { fs, logger } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 

@@ -1,6 +1,8 @@
 import os from 'node:os';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { env, fs, git, logger, partial, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
@@ -10,8 +12,6 @@ import type { StatusResult } from '../../../util/git/types.ts';
 import { getPkgReleases } from '../../datasource/index.ts';
 import { isGradleExecutionAllowed } from './artifacts.ts';
 import { updateArtifacts } from './index.ts';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
-import { env, fs, git, logger, partial, scm } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 vi.mock('../../../util/exec/env.ts');

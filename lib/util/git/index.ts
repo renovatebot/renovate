@@ -1,10 +1,10 @@
 import URL from 'node:url';
-import { setTimeout } from 'timers/promises';
 import { isBoolean, isNonEmptyObject, isString } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import semver from 'semver';
 import type { Options, TaskOptions } from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
+import { setTimeout } from 'timers/promises';
 import upath from 'upath';
 import { getConfigFileNames } from '../../config/app-strings.ts';
 import { GlobalConfig } from '../../config/global.ts';
@@ -114,7 +114,7 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
   }
 
   // Can't be `undefined` here.
-  // eslint-disable-next-line @typescript-eslint/only-throw-error
+  // oxlint-disable-next-line typescript/only-throw-error
   throw lastError;
 }
 

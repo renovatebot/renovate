@@ -1,6 +1,5 @@
 import { quote } from 'shlex';
 import upath from 'upath';
-
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import type { ExtraEnv } from '../../../util/exec/types.ts';

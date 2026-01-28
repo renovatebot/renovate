@@ -23,7 +23,7 @@ export function processHostRules(): HostRulesResult {
   // Include host rules without specific type to mimic the behavior used when determining dependencies with updates.
   const noTypeHostRules = hostRules
     .getAll()
-    .filter((rule) => rule.hostType === null || rule.hostType === undefined);
+    .filter((rule) => rule.hostType === undefined);
   logger.debug(
     `Found ${noTypeHostRules.length} host rule(s) without host type`,
   );

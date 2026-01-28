@@ -1,7 +1,7 @@
-import { setTimeout } from 'timers/promises';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import ignore from 'ignore';
 import semver from 'semver';
+import { setTimeout } from 'timers/promises';
 import type { PartialDeep } from 'type-fest';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
@@ -828,7 +828,7 @@ async function retry<T extends (...arg0: any[]) => Promise<any>>(
 
   logger.debug(`All ${maxAttempts} retry attempts exhausted`);
   // Can't be `undefined` here.
-  // eslint-disable-next-line @typescript-eslint/only-throw-error
+  // oxlint-disable-next-line typescript/only-throw-error
   throw lastError;
 }
 

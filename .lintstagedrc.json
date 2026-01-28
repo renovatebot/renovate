@@ -1,3 +1,7 @@
 {
-  "*": "prettier --ignore-unknown --write"
+  "*.{js,ts,mjs,mts,cjs,cts,jsx,tsx}": [
+    "biome check --write --formatter-enabled=false --linter-enabled=false",
+    "prettier --write"
+  ],
+  "!(*.{js,ts,mjs,mts,cjs,cts,jsx,tsx})": "prettier --ignore-unknown --write"
 }

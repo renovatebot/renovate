@@ -603,7 +603,7 @@ export async function ensurePr(
   } catch (err) {
     if (
       err instanceof ExternalHostError ||
-      err.message === REPOSITORY_CHANGED ||
+      err?.message === REPOSITORY_CHANGED ||
       err.message === PLATFORM_RATE_LIMIT_EXCEEDED ||
       err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
     ) {

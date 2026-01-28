@@ -131,9 +131,10 @@ export default function prepareError(err: Error): Record<string, unknown> {
     return prepareZodError(err);
   }
 
-  const response: Record<string, unknown> = {
-    ...err,
-  };
+  const response: Record<string, unknown> = {};
+  for (const key of Object.keys(err)) {
+    response[key] = (err as unknown as Record<string, unknown>)[key];
+  }
 
   // Required as message is non-enumerable
   if (!response.message && err.message) {
