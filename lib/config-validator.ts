@@ -6,6 +6,7 @@ import { dequal } from 'dequal';
 import { pathExists, readFile } from 'fs-extra';
 import { getConfigFileNames } from './config/app-strings.ts';
 import { GlobalConfig } from './config/global.ts';
+import { filterConfig, mergeChildConfig } from './config/index.ts';
 import { massageConfig } from './config/massage.ts';
 import { migrateConfig } from './config/migration.ts';
 import type { RenovateConfig } from './config/types.ts';
@@ -30,6 +31,41 @@ async function partiallyGlobalInitialize(): Promise<void> {
   // NOTE that this doesn't allow command-line arguments
   const globalConfig = await parseConfigs(getEnv(), []);
   GlobalConfig.set(globalConfig);
+}
+
+async function applyRepositoryConfig(
+  parsedContent: RenovateConfig,
+  repository: string | undefined,
+): Promise<RenovateConfig> {
+  if (!repository) {
+    return parsedContent;
+  }
+
+  const globalConfig = await parseConfigs(getEnv(), []);
+  const repositories = globalConfig.repositories ?? [];
+  const repositoryEntry = repositories.find((repo) => {
+    if (typeof repo === 'string') {
+      return repo === repository;
+    }
+    return repo.repository === repository;
+  });
+
+  if (!repositoryEntry) {
+    return parsedContent;
+  }
+
+  const repoConfig = mergeChildConfig(
+    globalConfig,
+    typeof repositoryEntry === 'string'
+      ? { repository: repositoryEntry }
+      : repositoryEntry,
+  );
+
+  const filteredConfig = filterConfig(repoConfig, 'repository');
+
+  const finalConfig = mergeChildConfig(filteredConfig, parsedContent);
+  logger.info(`Applied repository-specific config for: ${repository}`);
+  return finalConfig;
 }
 
 async function validate(
@@ -96,6 +132,7 @@ Examples:
   $ renovate-config-validator first_config.json
   $ renovate-config-validator --strict config.js
   $ renovate-config-validator --no-global renovate.json5
+  $ renovate-config-validator --no-global --repository owner/repo renovate.json
   $ env RENOVATE_CONFIG_FILE=obscure-name.json renovate-config-validator
 
 Global configuration:
@@ -117,11 +154,25 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
       'When specifying [config-files], do not treat them as global self-hosted configuration file(s)',
       true,
     )
+    .option(
+      '--repository <repository>',
+      'Simulate repository-specific config merging (requires --no-global when specifying files)',
+    )
     // allow us to manage the exit code
     .exitOverride();
 
   program.action(async (files, opts) => {
     const strict = opts.strict ?? false;
+    const repository = opts.repository;
+
+    // Validate --repository usage
+    if (repository && files.length > 0 && opts.global !== false) {
+      logger.error(
+        '--repository can only be used with --no-global when specifying config files',
+      );
+      returnVal = 1;
+      return;
+    }
 
     if (files.length) {
       let isGlobalConfig = true;
@@ -139,7 +190,11 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
           const parsedContent = await getParsedContent(file);
           try {
             logger.info(`Validating ${file} as ${configType} config`);
-            await validate(configType, file, parsedContent, strict);
+            const finalConfig = await applyRepositoryConfig(
+              parsedContent,
+              configType === 'repo' ? repository : undefined,
+            );
+            await validate(configType, file, finalConfig, strict);
           } catch (err) {
             logger.warn({ file, err }, 'File is not valid Renovate config');
             returnVal = 1;
@@ -160,7 +215,11 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
           const parsedContent = await getParsedContent(file);
           try {
             logger.info(`Validating ${file}`);
-            await validate('repo', file, parsedContent, strict);
+            const finalConfig = await applyRepositoryConfig(
+              parsedContent,
+              repository,
+            );
+            await validate('repo', file, finalConfig, strict);
           } catch (err) {
             logger.warn({ file, err }, 'File is not valid Renovate config');
             returnVal = 1;
