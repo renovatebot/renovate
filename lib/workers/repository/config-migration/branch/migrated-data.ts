@@ -93,7 +93,7 @@ export async function applyPrettierFormatting(
       // TODO: support editor config `indent_style` and `indent_size`
     }
 
-    return prettier().format(content, options);
+    return (await prettier()).format(content, options);
   } finally {
     logger.trace('applyPrettierFormatting - END');
   }

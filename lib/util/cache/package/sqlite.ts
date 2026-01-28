@@ -37,7 +37,7 @@ export class SqlitePackageCache {
 
   static async init(cacheDir: string): Promise<SqlitePackageCache> {
     // simply let it throw if it fails, so no test coverage needed
-    const Sqlite = sqlite();
+    const Sqlite = await sqlite();
     const sqliteDir = upath.join(cacheDir, 'renovate/renovate-cache-sqlite');
     await ensureDir(sqliteDir);
     const sqliteFile = upath.join(sqliteDir, 'db.sqlite');

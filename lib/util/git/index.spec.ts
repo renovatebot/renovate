@@ -1258,7 +1258,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
   });
 
-  describe('syncsimpleGit()', () => {
+  describe('syncGit()', () => {
     it('should clone a specified base branch', async () => {
       tmpDir = await tmp.dir({ unsafeCleanup: true });
       GlobalConfig.set({
@@ -1376,7 +1376,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       });
     });
 
-    describe('syncsimpleGit()', () => {
+    describe('syncGit()', () => {
       it('should fetch from upstream and update local branch', async () => {
         tmpDir2 = await tmp.dir({ unsafeCleanup: true });
         GlobalConfig.set({ localDir: tmpDir2.path });

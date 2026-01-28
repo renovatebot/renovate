@@ -10,7 +10,7 @@ export async function tryDecryptOpenPgp(
 ): Promise<string | null> {
   if (pgp === undefined) {
     try {
-      pgp = openpgp();
+      pgp = await openpgp();
     } catch (err) {
       logger.warn({ err }, 'Could load openpgp');
       pgp = null;

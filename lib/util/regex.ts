@@ -20,7 +20,7 @@ if (getEnv().RENOVATE_X_IGNORE_RE2) {
   status = { type: 'ignored' };
 } else {
   try {
-    const RE2 = re2();
+    const RE2 = await re2();
     // Test if native is working
     new RE2('.*').exec('test');
     RegEx = RE2;

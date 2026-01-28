@@ -3,9 +3,9 @@ import type { ErrorObject, ValidateFunction } from 'ajv';
 import { Ajv } from 'ajv';
 import draft7MetaSchema from 'ajv/lib/refs/json-schema-draft-07.json' with { type: 'json' };
 import _addFormats from 'ajv-formats';
-import { glob } from 'glob';
 
 const addFormats = _addFormats as unknown as typeof _addFormats.default;
+import { glob } from 'glob';
 
 async function validateFileAgainstSchema(
   validate: ValidateFunction,

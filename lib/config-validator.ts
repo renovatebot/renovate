@@ -4,8 +4,6 @@ import 'source-map-support/register.js';
 import './punycode.cjs';
 import { dequal } from 'dequal';
 import fs from 'fs-extra';
-
-const { pathExists, readFile } = fs;
 import { getConfigFileNames } from './config/app-strings.ts';
 import { GlobalConfig } from './config/global.ts';
 import { massageConfig } from './config/massage.ts';
@@ -18,6 +16,8 @@ import { getEnv } from './util/env.ts';
 import { getConfig as getFileConfig } from './workers/global/config/parse/file.ts';
 import { parseConfigs } from './workers/global/config/parse/index.ts';
 import { getParsedContent } from './workers/global/config/parse/util.ts';
+
+const { pathExists, readFile } = fs;
 
 let returnVal = 0;
 

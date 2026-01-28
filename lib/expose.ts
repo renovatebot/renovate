@@ -1,35 +1,32 @@
-import { createRequire } from 'node:module';
-
-const require = createRequire(import.meta.url);
-
 // need to use dynamic path so that typescript does not include package.json in dist folder after compilation
 const filePath = new URL('../package.json', import.meta.url).pathname;
-export const pkg = require(filePath) as typeof import('../package.json');
+export const pkg = (await import(filePath, { with: { type: 'json' } }))
+  .default as typeof import('../package.json');
 
 /**
  * return's re2
  */
-export function re2(): RegExpConstructor {
-  return require('re2');
+export async function re2(): Promise<RegExpConstructor> {
+  return (await import('re2')).default;
 }
 
 /**
  * return's prettier
  */
-export function prettier(): typeof import('prettier') {
-  return require('prettier');
+export async function prettier(): Promise<typeof import('prettier')> {
+  return await import('prettier');
 }
 
 /**
  * return's openpgp
  */
-export function openpgp(): typeof import('openpgp') {
-  return require('openpgp');
+export async function openpgp(): Promise<typeof import('openpgp')> {
+  return await import('openpgp');
 }
 
 /**
  * return's sqlite
  */
-export function sqlite(): typeof import('better-sqlite3') {
-  return require('better-sqlite3');
+export async function sqlite(): Promise<typeof import('better-sqlite3')> {
+  return (await import('better-sqlite3')).default;
 }
