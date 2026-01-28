@@ -357,7 +357,7 @@
     "oxlint": "1.41.0",
     "rimraf": "6.1.2",
     "semantic-release": "25.0.2",
-    "tar": "7.5.4",
+    "tar": "7.5.6",
     "tmp-promise": "3.0.3",
     "tsdown": "0.20.1",
     "tsx": "4.21.0",
