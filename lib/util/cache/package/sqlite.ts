@@ -2,14 +2,13 @@ import { promisify } from 'node:util';
 import zlib, { constants } from 'node:zlib';
 import type { Database, Statement } from 'better-sqlite3';
 import fs from 'fs-extra';
-
-const { exists } = fs;
 import upath from 'upath';
 import { sqlite } from '../../../expose.ts';
 import { logger } from '../../../logger/index.ts';
 import { ensureDir } from '../../fs/index.ts';
 import type { PackageCacheNamespace } from './types.ts';
 
+const { exists } = fs;
 const brotliCompress = promisify(zlib.brotliCompress);
 const brotliDecompress = promisify(zlib.brotliDecompress);
 
