@@ -1844,6 +1844,24 @@ describe('config/validation', () => {
   });
 
   describe('validate globalOptions()', () => {
+    // TODO #40742 #40747
+    it('binarySource=docker is deprecated', async () => {
+      const config: GlobalConfig = {
+        binarySource: 'docker',
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Deprecation Warning',
+          message:
+            'Usage of `binarySource=docker` is deprecated, and will be removed in the future. Please migrate to `binarySource=install`. Feedback on the usage of `binarySource=docker` is welcome at https://github.com/renovatebot/renovate/discussions/40742',
+        },
+      ]);
+    });
+
     it('binarySource', async () => {
       const config = {
         binarySource: 'invalid' as never,
