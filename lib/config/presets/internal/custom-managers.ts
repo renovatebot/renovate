@@ -52,8 +52,8 @@ export const presets: Record<string, Preset> = {
         managerFilePatterns: [
           '**/[Dd]ockerfile*',
           '**/[Cc]ontainerfile*',
-          '**/.[Dd]ockerfile*',
-          '**/.[Cc]ontainerfile*',
+          '**/*.[Dd]ockerfile*',
+          '**/*.[Cc]ontainerfile*',
         ],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s(?:ENV|ARG)\\s+[A-Za-z0-9_]+?_VERSION[ =]["\']?(?<currentValue>.+?)["\']?\\s',
