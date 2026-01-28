@@ -1,26 +1,26 @@
-import { lang, query as q } from 'good-enough-parser';
-import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { parseUrl } from '../../../util/url';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { MavenDatasource } from '../../datasource/maven';
-import { MAVEN_REPO } from '../../datasource/maven/common';
-import { SbtPackageDatasource } from '../../datasource/sbt-package';
+import { lang, query as q } from '@renovatebot/good-enough-parser';
+import { logger } from '../../../logger/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { MAVEN_REPO } from '../../datasource/maven/common.ts';
+import { MavenDatasource } from '../../datasource/maven/index.ts';
+import { SbtPackageDatasource } from '../../datasource/sbt-package/index.ts';
 import {
   SBT_PLUGINS_REPO,
   SbtPluginDatasource,
-} from '../../datasource/sbt-plugin';
-import { get } from '../../versioning';
-import * as mavenVersioning from '../../versioning/maven';
-import * as semverVersioning from '../../versioning/semver';
+} from '../../datasource/sbt-plugin/index.ts';
+import { get } from '../../versioning/index.ts';
+import * as mavenVersioning from '../../versioning/maven/index.ts';
+import * as semverVersioning from '../../versioning/semver/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFile,
   PackageFileContent,
-} from '../types';
-import { normalizeScalaVersion, sortPackageFiles } from './util';
+} from '../types.ts';
+import { normalizeScalaVersion, sortPackageFiles } from './util.ts';
 
 type Vars = Record<string, string>;
 

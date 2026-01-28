@@ -1,11 +1,11 @@
-import { cache } from '../../../util/cache/package/decorator';
-import { GitlabHttp } from '../../../util/http/gitlab';
-import { asTimestamp } from '../../../util/timestamp';
-import { joinUrlParts } from '../../../util/url';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { datasource } from './common';
-import type { GitlabPackage } from './types';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { GitlabHttp } from '../../../util/http/gitlab.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { datasource } from './common.ts';
+import type { GitlabPackage } from './types.ts';
 
 // Gitlab Packages API: https://docs.gitlab.com/ee/api/packages.html
 

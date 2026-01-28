@@ -1,11 +1,15 @@
-import { cache } from '../../../util/cache/package/decorator';
-import type { PackageCacheNamespace } from '../../../util/cache/package/types';
-import { GiteaHttp } from '../../../util/http/gitea';
-import { regEx } from '../../../util/regex';
-import { ensureTrailingSlash } from '../../../util/url';
-import { Datasource } from '../datasource';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { Commits, Tag, Tags } from './schema';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
+import { GiteaHttp } from '../../../util/http/gitea.ts';
+import { regEx } from '../../../util/regex.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  ReleaseResult,
+} from '../types.ts';
+import { Commits, Tag, Tags } from './schema.ts';
 
 export class GiteaTagsDatasource extends Datasource {
   static readonly id = 'gitea-tags';

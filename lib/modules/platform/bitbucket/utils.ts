@@ -1,13 +1,13 @@
-import type { MergeStrategy } from '../../../config/types';
-import type { BranchStatus } from '../../../types';
-import { getPrBodyStruct } from '../pr-body';
-import type { Pr } from '../types';
+import type { MergeStrategy } from '../../../config/types.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import { getPrBodyStruct } from '../pr-body.ts';
+import type { Pr } from '../types.ts';
 import type {
   BitbucketBranchState,
   BitbucketMergeStrategy,
   MergeRequestBody,
   PrResponse,
-} from './types';
+} from './types.ts';
 
 const bitbucketMergeStrategies = new Map<MergeStrategy, BitbucketMergeStrategy>(
   [

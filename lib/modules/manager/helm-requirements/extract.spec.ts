@@ -1,7 +1,7 @@
-import { extractPackageFile } from '.';
-import { fs } from '~test/util';
+import { extractPackageFile } from './index.ts';
+import { fs } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/helm-requirements/extract', () => {
   describe('extractPackageFile()', () => {

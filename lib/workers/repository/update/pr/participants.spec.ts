@@ -1,15 +1,15 @@
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
-import type { Pr } from '../../../../modules/platform/types';
-import * as _util from '../../../../util/sample';
-import * as _codeOwners from './code-owners';
-import { addParticipants } from './participants';
-import { partial, platform } from '~test/util';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import type { Pr } from '../../../../modules/platform/types.ts';
+import * as _util from '../../../../util/sample.ts';
+import * as _codeOwners from './code-owners.ts';
+import { addParticipants } from './participants.ts';
+import { partial, platform } from '~test/util.ts';
 
-vi.mock('../../../../util/sample');
+vi.mock('../../../../util/sample.ts');
 const util = vi.mocked(_util);
 
-vi.mock('./code-owners');
+vi.mock('./code-owners.ts');
 const codeOwners = vi.mocked(_codeOwners);
 
 describe('workers/repository/update/pr/participants', () => {

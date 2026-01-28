@@ -1,5 +1,5 @@
-import { GenericDockerImageRefExtractor } from './generic-docker-image-ref';
-import { generic_image_datasource, generic_image_resource } from './utils';
+import { GenericDockerImageRefExtractor } from './generic-docker-image-ref.ts';
+import { generic_image_datasource, generic_image_resource } from './utils.ts';
 
 describe('modules/manager/terraform/extractors/resources/generic-docker-image-ref', () => {
   const extractor = new GenericDockerImageRefExtractor();

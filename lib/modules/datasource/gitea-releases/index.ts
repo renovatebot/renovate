@@ -1,11 +1,15 @@
-import { cache } from '../../../util/cache/package/decorator';
-import type { PackageCacheNamespace } from '../../../util/cache/package/types';
-import { GiteaHttp } from '../../../util/http/gitea';
-import { Datasource } from '../datasource';
-import { GiteaTagsDatasource } from '../gitea-tags';
-import { Commits, Tag } from '../gitea-tags/schema';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { Releases } from './schema';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
+import { GiteaHttp } from '../../../util/http/gitea.ts';
+import { Datasource } from '../datasource.ts';
+import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
+import { Commits, Tag } from '../gitea-tags/schema.ts';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  ReleaseResult,
+} from '../types.ts';
+import { Releases } from './schema.ts';
 
 export class GiteaReleasesDatasource extends Datasource {
   static readonly id = 'gitea-releases';

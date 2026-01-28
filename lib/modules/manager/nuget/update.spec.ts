@@ -1,5 +1,5 @@
 import { XmlDocument } from 'xmldoc';
-import { bumpPackageVersion } from '.';
+import { bumpPackageVersion } from './index.ts';
 
 const simpleContent =
   '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>0.0.1</Version></PropertyGroup></Project>';

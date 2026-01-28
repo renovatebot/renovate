@@ -1,4 +1,4 @@
-import rustReleaseChannel from '.';
+import rustReleaseChannel from './index.ts';
 
 describe('modules/versioning/rust-release-channel/index', () => {
   test.each`

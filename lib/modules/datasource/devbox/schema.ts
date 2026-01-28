@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { MaybeTimestamp } from '../../../util/timestamp';
+import { MaybeTimestamp } from '../../../util/timestamp.ts';
 
 export const DevboxRelease = z.object({
   version: z.string(),

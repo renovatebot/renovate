@@ -1,5 +1,5 @@
 import slugify from 'slugify';
-import { regEx } from '../../../../../util/regex';
+import { regEx } from '../../../../../util/regex.ts';
 
 export function slugifyUrl(url: string): string {
   const r = regEx(/[:/.]+/g);

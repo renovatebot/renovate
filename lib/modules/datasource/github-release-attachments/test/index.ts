@@ -1,12 +1,15 @@
-import * as httpMock from '../../../../../test/http-mock';
-import { partial } from '../../../../../test/util';
-import type { GithubRestRelease } from '../../../../util/github/types';
+import * as httpMock from '../../../../../test/http-mock.ts';
+import { partial } from '../../../../../test/util.ts';
+import type { GithubRestRelease } from '../../../../util/github/types.ts';
 
 export class GitHubReleaseAttachmentMocker {
-  constructor(
-    private readonly githubApiHost: string,
-    private readonly packageName: string,
-  ) {}
+  private readonly githubApiHost: string;
+  private readonly packageName: string;
+
+  constructor(githubApiHost: string, packageName: string) {
+    this.githubApiHost = githubApiHost;
+    this.packageName = packageName;
+  }
 
   release(version: string): GithubRestRelease {
     return this.withAssets(version, {});

@@ -216,6 +216,9 @@ jobs:
       - name: Lint with oxlint
         run: pnpm oxlint -f github
 
+      - name: Lint with biome
+        run: pnpm biome-ci
+
       - name: Restore eslint cache
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
@@ -513,10 +516,10 @@ jobs:
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --branches 96.83 \
-            --functions 99.83 \
-            --lines 99.60 \
-            --statements 99.60
+            --statements 99.86 \
+            --branches 97.53 \
+            --functions 99.94 \
+            --lines 99.85 \
 
   # Catch-all required check for test matrix and coverage
   test-success:
@@ -790,7 +793,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@0c0916a7b7f39734b241ae340275c3d24d0f0a1b # v3.14.54
+        uses: containerbase/internal-tools@ba7608315e3b06fe54e06a75755031e8bab48a82 # v3.14.57
         with:
           command: docker-config
 

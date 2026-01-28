@@ -1,18 +1,18 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import * as _datasource from '../../datasource';
-import type { UpdateArtifactsConfig } from '../types';
-import { updateArtifacts } from '.';
-import { mockExecAll } from '~test/exec-util';
-import { fs } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import * as _datasource from '../../datasource/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import { updateArtifacts } from './index.ts';
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs } from '~test/util.ts';
 
 const datasource = vi.mocked(_datasource);
 
-vi.mock('../../../util/exec/common');
-vi.mock('../../../util/fs');
-vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/exec/common.ts');
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../../datasource/index.ts', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 

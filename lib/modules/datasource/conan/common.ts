@@ -1,5 +1,5 @@
-import { regEx } from '../../../util/regex';
-import type { ConanPackage } from './types';
+import { regEx } from '../../../util/regex.ts';
+import type { ConanPackage } from './types.ts';
 
 export const defaultRegistryUrl = 'https://center2.conan.io/';
 

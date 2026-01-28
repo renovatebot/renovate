@@ -1,8 +1,8 @@
-import { logger } from '../../../../logger';
-import { platform } from '../../../../modules/platform';
-import { scm } from '../../../../modules/platform/scm';
-import type { RangeStrategy } from '../../../../types';
-import type { BranchConfig } from '../../../types';
+import { logger } from '../../../../logger/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import type { RangeStrategy } from '../../../../types/index.ts';
+import type { BranchConfig } from '../../../types.ts';
 
 async function shouldKeepUpdated(
   config: BranchConfig,

@@ -1,7 +1,10 @@
-import { logger } from '../../../logger';
-import { BitbucketHttp } from '../../../util/http/bitbucket';
-import type { EnsureCommentConfig, EnsureCommentRemovalConfig } from '../types';
-import type { Account, Config, PagedResult } from './types';
+import { logger } from '../../../logger/index.ts';
+import { BitbucketHttp } from '../../../util/http/bitbucket.ts';
+import type {
+  EnsureCommentConfig,
+  EnsureCommentRemovalConfig,
+} from '../types.ts';
+import type { Account, Config, PagedResult } from './types.ts';
 
 export const REOPEN_PR_COMMENT_KEYWORD = 'reopen!';
 

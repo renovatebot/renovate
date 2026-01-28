@@ -1,4 +1,4 @@
-import type { ShardConfig } from './types';
+import type { ShardConfig } from './types.ts';
 
 /**
  * Configuration for test shards that can be run with `TEST_SHARD` environment variable.

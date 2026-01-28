@@ -10,25 +10,25 @@ import {
 import type { CvssVector } from 'ae-cvss-calculator';
 import { fromVector } from 'ae-cvss-calculator';
 import { z } from 'zod';
-import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type { PackageRule, RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { getDefaultVersioning } from '../../../modules/datasource/common';
+import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
+import type { PackageRule, RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import { getDefaultVersioning } from '../../../modules/datasource/common.ts';
 import type {
   PackageDependency,
   PackageFile,
-} from '../../../modules/manager/types';
-import type { VersioningApi } from '../../../modules/versioning';
-import { get as getVersioning } from '../../../modules/versioning';
-import { sanitizeMarkdown } from '../../../util/markdown';
-import * as p from '../../../util/promises';
-import { regEx } from '../../../util/regex';
-import { titleCase } from '../../../util/string';
+} from '../../../modules/manager/types.ts';
+import type { VersioningApi } from '../../../modules/versioning/index.ts';
+import { get as getVersioning } from '../../../modules/versioning/index.ts';
+import { sanitizeMarkdown } from '../../../util/markdown.ts';
+import * as p from '../../../util/promises.ts';
+import { regEx } from '../../../util/regex.ts';
+import { titleCase } from '../../../util/string.ts';
 import type {
   DependencyVulnerabilities,
   SeverityDetails,
   Vulnerability,
-} from './types';
+} from './types.ts';
 
 export class Vulnerabilities {
   private osvOffline: OsvOffline | undefined;

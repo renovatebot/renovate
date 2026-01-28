@@ -1,4 +1,4 @@
-import { GoModTidyMigration } from './go-mod-tidy-migration';
+import { GoModTidyMigration } from './go-mod-tidy-migration.ts';
 
 describe('config/migrations/custom/go-mod-tidy-migration', () => {
   it('should add postUpdateOptions option when true', async () => {

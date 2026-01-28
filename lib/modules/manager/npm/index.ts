@@ -1,17 +1,17 @@
-import type { Category } from '../../../constants';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { NodeVersionDatasource } from '../../datasource/node-version';
-import { NpmDatasource } from '../../datasource/npm';
+import type { Category } from '../../../constants/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
+import { NpmDatasource } from '../../datasource/npm/index.ts';
 
-export { detectGlobalConfig } from './detect';
-export { extractAllPackageFiles } from './extract';
+export { detectGlobalConfig } from './detect.ts';
+export { extractAllPackageFiles } from './extract/index.ts';
 export {
   bumpPackageVersion,
   updateDependency,
   updateLockedDependency,
-} from './update';
-export { getRangeStrategy } from './range';
-export { updateArtifacts } from './artifacts';
+} from './update/index.ts';
+export { getRangeStrategy } from './range.ts';
+export { updateArtifacts } from './artifacts.ts';
 
 export const supportsLockFileMaintenance = true;
 

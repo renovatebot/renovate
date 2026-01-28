@@ -1,14 +1,14 @@
 import { codeBlock } from 'common-tags';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import type { StatusResult } from '../../../util/git/types';
-import type { UpdateArtifact } from '../types';
-import { updateArtifacts } from './artifacts';
-import { mockExecAll } from '~test/exec-util';
-import { fs, git, partial } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
+import type { UpdateArtifact } from '../types.ts';
+import { updateArtifacts } from './artifacts.ts';
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs, git, partial } from '~test/util.ts';
 
-vi.mock('../../../util/exec/env');
-vi.mock('../../../util/fs');
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../../util/fs/index.ts');
 
 const globalConfig: RepoGlobalConfig = {
   localDir: '',

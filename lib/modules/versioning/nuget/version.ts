@@ -1,5 +1,5 @@
-import { regEx } from '../../../util/regex';
-import type { NugetVersion } from './types';
+import { regEx } from '../../../util/regex.ts';
+import type { NugetVersion } from './types.ts';
 
 // We can't just use `Number.parseInt()` beacause it parses `123abc` as `123`,
 // which leads to incorrect version comparison.

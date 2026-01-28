@@ -1,14 +1,14 @@
 import crypto from 'node:crypto';
-import { HOST_DISABLED } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
-import type { HttpError } from '../../../util/http';
-import { GithubHttp } from '../../../util/http/github';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { Datasource } from '../datasource';
-import { massageGithubUrl } from '../metadata';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { HOST_DISABLED } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { GithubHttp } from '../../../util/http/github.ts';
+import type { HttpError } from '../../../util/http/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { Datasource } from '../datasource.ts';
+import { massageGithubUrl } from '../metadata.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 
 type URLFormatOptions =
   | 'withShardWithSpec'

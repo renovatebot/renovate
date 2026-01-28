@@ -1,5 +1,5 @@
-import { logger } from '../../../../../logger';
-import type { Upgrade } from '../../../types';
+import { logger } from '../../../../../logger/index.ts';
+import type { Upgrade } from '../../../types.ts';
 
 export function getNewGitValue(upgrade: Upgrade): string | null {
   if (!upgrade.currentRawValue) {

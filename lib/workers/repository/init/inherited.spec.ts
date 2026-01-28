@@ -1,21 +1,21 @@
 import {
   getConfigFileNames,
   setUserConfigFileNames,
-} from '../../../config/app-strings';
-import * as decrypt from '../../../config/decrypt';
-import * as presets_ from '../../../config/presets';
-import type { RenovateConfig } from '../../../config/types';
-import * as validation from '../../../config/validation';
+} from '../../../config/app-strings.ts';
+import * as decrypt from '../../../config/decrypt.ts';
+import * as presets_ from '../../../config/presets/index.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import * as validation from '../../../config/validation.ts';
 import {
   CONFIG_INHERIT_NOT_FOUND,
   CONFIG_INHERIT_PARSE_ERROR,
   CONFIG_VALIDATION,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { mergeInheritedConfig } from './inherited';
-import { hostRules, platform } from '~test/util';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { mergeInheritedConfig } from './inherited.ts';
+import { hostRules, platform } from '~test/util.ts';
 
-vi.mock('../../../config/presets');
+vi.mock('../../../config/presets/index.ts');
 
 const presets = vi.mocked(presets_);
 

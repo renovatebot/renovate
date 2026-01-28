@@ -3,29 +3,29 @@ import extract from 'extract-zip';
 import semver from 'semver';
 import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as packageCache from '../../../util/cache/package';
-import { cache } from '../../../util/cache/package/decorator';
-import { getEnv } from '../../../util/env';
-import * as fs from '../../../util/fs';
-import { ensureCacheDir } from '../../../util/fs';
-import type { Http } from '../../../util/http';
-import { HttpError } from '../../../util/http';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
-import * as p from '../../../util/promises';
-import { regEx } from '../../../util/regex';
-import { asTimestamp } from '../../../util/timestamp';
-import { ensureTrailingSlash } from '../../../util/url';
-import { api as versioning } from '../../versioning/nuget';
-import type { Release, ReleaseResult } from '../types';
-import { massageUrl, removeBuildMeta, sortNugetVersions } from './common';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import { getEnv } from '../../../util/env.ts';
+import * as fs from '../../../util/fs/index.ts';
+import { ensureCacheDir } from '../../../util/fs/index.ts';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import type { Http } from '../../../util/http/index.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import * as p from '../../../util/promises.ts';
+import { regEx } from '../../../util/regex.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import { api as versioning } from '../../versioning/nuget/index.ts';
+import type { Release, ReleaseResult } from '../types.ts';
+import { massageUrl, removeBuildMeta, sortNugetVersions } from './common.ts';
 import type {
   CatalogEntry,
   CatalogPage,
   PackageRegistration,
   ServicesIndexRaw,
-} from './types';
+} from './types.ts';
 
 export class NugetV3Api {
   static readonly cacheNamespace = 'datasource-nuget-v3';

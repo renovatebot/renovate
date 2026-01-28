@@ -1,17 +1,17 @@
 import type { Response } from 'got';
-import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import type {
   BbsRestRepo,
   BitbucketError,
   BitbucketErrorResponse,
-} from './types';
+} from './types.ts';
 import {
   BITBUCKET_INVALID_REVIEWERS_EXCEPTION,
   getExtraCloneOpts,
   getInvalidReviewers,
   getRepoGitUrl,
-} from './utils';
-import { partial } from '~test/util';
+} from './utils.ts';
+import { partial } from '~test/util.ts';
 
 vi.unmock('../../../util/git');
 

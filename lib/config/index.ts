@@ -1,13 +1,13 @@
-import { logger } from '../logger';
-import { allManagersList, get } from '../modules/manager';
-import * as options from './options';
+import { logger } from '../logger/index.ts';
+import { allManagersList, get } from '../modules/manager/index.ts';
+import * as options from './options/index.ts';
 import type {
   AllConfig,
   ManagerConfig,
   RenovateConfig,
   RenovateConfigStage,
-} from './types';
-import { mergeChildConfig } from './utils';
+} from './types.ts';
+import { mergeChildConfig } from './utils.ts';
 
 export { mergeChildConfig };
 

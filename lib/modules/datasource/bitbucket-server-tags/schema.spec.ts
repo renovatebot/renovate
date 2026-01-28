@@ -1,4 +1,4 @@
-import { BitbucketServerCommits, BitbucketServerTags } from './schema';
+import { BitbucketServerCommits, BitbucketServerTags } from './schema.ts';
 
 describe('modules/datasource/bitbucket-server-tags/schema', () => {
   it('parses BitbucketServerTags', () => {

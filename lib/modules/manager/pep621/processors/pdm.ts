@@ -1,22 +1,28 @@
 import { quote } from 'shlex';
-import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import { exec } from '../../../../util/exec';
-import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
-import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
-import { getGitEnvironmentVariables } from '../../../../util/git/auth';
-import { Result } from '../../../../util/result';
-import { PypiDatasource } from '../../../datasource/pypi';
+import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { exec } from '../../../../util/exec/index.ts';
+import type {
+  ExecOptions,
+  ToolConstraint,
+} from '../../../../util/exec/types.ts';
+import {
+  getSiblingFileName,
+  readLocalFile,
+} from '../../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../../util/git/auth.ts';
+import { Result } from '../../../../util/result.ts';
+import { PypiDatasource } from '../../../datasource/pypi/index.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
   Upgrade,
-} from '../../types';
-import { PdmLockfile, type PyProject } from '../schema';
-import type { Pep621ManagerData } from '../types';
-import { depTypes } from '../utils';
-import { BasePyProjectProcessor } from './abstract';
+} from '../../types.ts';
+import { PdmLockfile, type PyProject } from '../schema.ts';
+import type { Pep621ManagerData } from '../types.ts';
+import { depTypes } from '../utils.ts';
+import { BasePyProjectProcessor } from './abstract.ts';
 
 const pdmUpdateCMD = 'pdm update --no-sync --update-eager';
 

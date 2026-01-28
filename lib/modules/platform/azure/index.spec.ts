@@ -17,18 +17,18 @@ import { mockDeep } from 'vitest-mock-extended';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_NOT_FOUND,
-} from '../../../constants/error-messages';
-import type { logger as _logger } from '../../../logger';
-import type * as _git from '../../../util/git';
-import type * as _hostRules from '../../../util/host-rules';
-import type { Platform, RepoParams } from '../types';
-import { AzurePrVote } from './types';
-import { partial } from '~test/util';
+} from '../../../constants/error-messages.ts';
+import type { logger as _logger } from '../../../logger/index.ts';
+import type * as _git from '../../../util/git/index.ts';
+import type * as _hostRules from '../../../util/host-rules.ts';
+import type { Platform, RepoParams } from '../types.ts';
+import { AzurePrVote } from './types.ts';
+import { partial } from '~test/util.ts';
 
-vi.mock('./azure-got-wrapper', () => mockDeep());
-vi.mock('./azure-helper', () => mockDeep());
-vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('../../../util/sanitize', () =>
+vi.mock('./azure-got-wrapper.ts', () => mockDeep());
+vi.mock('./azure-helper.ts', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
+vi.mock('../../../util/sanitize.ts', () =>
   mockDeep({ sanitize: (s: string) => s }),
 );
 vi.mock('timers/promises');
@@ -36,8 +36,8 @@ vi.mock('timers/promises');
 describe('modules/platform/azure/index', () => {
   let hostRules: Mocked<typeof _hostRules>;
   let azure: Platform;
-  let azureApi: Mocked<typeof import('./azure-got-wrapper')>;
-  let azureHelper: Mocked<typeof import('./azure-helper')>;
+  let azureApi: Mocked<typeof import('./azure-got-wrapper.ts')>;
+  let azureHelper: Mocked<typeof import('./azure-helper.ts')>;
   let git: Mocked<typeof _git>;
   let logger: MockedObject<typeof _logger>;
 
@@ -49,7 +49,9 @@ describe('modules/platform/azure/index', () => {
     azureApi = await vi.importMock('./azure-got-wrapper');
     azureHelper = await vi.importMock('./azure-helper');
     logger = (
-      await vi.importMock<typeof import('../../../logger')>('../../../logger')
+      await vi.importMock<typeof import('../../../logger/index.ts')>(
+        '../../../logger',
+      )
     ).logger;
     git = await vi.importMock('../../../util/git');
     git.branchExists.mockReturnValue(true);

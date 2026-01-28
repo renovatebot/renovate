@@ -1,8 +1,8 @@
-import { logger } from '../../lib/logger';
-import type { ModuleApi } from '../../lib/types';
-import { regEx } from '../../lib/util/regex';
-import { capitalize } from '../../lib/util/string';
-import { readFile } from '../utils';
+import { logger } from '../../lib/logger/index.ts';
+import type { ModuleApi } from '../../lib/types/index.ts';
+import { regEx } from '../../lib/util/regex.ts';
+import { capitalize } from '../../lib/util/string.ts';
+import { readFile } from '../utils/index.ts';
 
 const replaceStart =
   '<!-- Autogenerate in https://github.com/renovatebot/renovate -->';

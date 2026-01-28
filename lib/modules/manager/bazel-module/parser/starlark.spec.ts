@@ -1,4 +1,4 @@
-import * as starlark from './starlark';
+import * as starlark from './starlark.ts';
 
 describe('modules/manager/bazel-module/parser/starlark', () => {
   it.each`

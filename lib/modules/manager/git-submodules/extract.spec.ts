@@ -2,9 +2,9 @@ import { isArray, isString } from '@sindresorhus/is';
 import type { Response, SimpleGit } from 'simple-git';
 import Git from 'simple-git';
 import { mock } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import * as hostRules from '../../../util/host-rules';
-import { extractPackageFile } from '.';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { extractPackageFile } from './index.ts';
 
 vi.mock('simple-git', () => ({ default: vi.fn() }));
 const simpleGitFactoryMock = vi.mocked(Git);

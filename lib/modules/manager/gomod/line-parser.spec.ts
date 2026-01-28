@@ -1,4 +1,4 @@
-import { parseLine } from './line-parser';
+import { parseLine } from './line-parser.ts';
 
 describe('modules/manager/gomod/line-parser', () => {
   it('should return null for invalid input', () => {

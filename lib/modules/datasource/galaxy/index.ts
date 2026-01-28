@@ -1,10 +1,10 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import * as pep440Versioning from '../../versioning/pep440';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { GalaxyV1 } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import * as pep440Versioning from '../../versioning/pep440/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { GalaxyV1 } from './schema.ts';
 
 export class GalaxyDatasource extends Datasource {
   static readonly id = 'galaxy';

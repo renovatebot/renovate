@@ -1,8 +1,8 @@
-import { getConfigFileNames } from './app-strings';
-import { GlobalConfig } from './global';
-import type { RenovateConfig } from './types';
-import * as configValidation from './validation';
-import { partial } from '~test/util';
+import { getConfigFileNames } from './app-strings.ts';
+import { GlobalConfig } from './global.ts';
+import type { RenovateConfig } from './types.ts';
+import * as configValidation from './validation.ts';
+import { partial } from '~test/util.ts';
 
 describe('config/validation', () => {
   describe('validateConfig(config)', () => {
@@ -1713,6 +1713,33 @@ describe('config/validation', () => {
           SOME_VAR: 'SOME_VALUE',
         },
         allowedEnv: ['SOME*'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('handles prefixed onboardingConfigFileName', async () => {
+      const config = {
+        platform: 'forgejo',
+        onboardingConfigFileName: '.forgejo/renovate.json',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        // @ts-expect-error: not sure why
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('allows unique onboardingConfigFileName if it is set in configFileNames', async () => {
+      const config = {
+        onboardingConfigFileName: '.forgejo/renovate.json',
+        configFileNames: ['.forgejo/renovate.json'],
       };
       const { warnings, errors } = await configValidation.validateConfig(
         'global',

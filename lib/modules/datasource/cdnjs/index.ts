@@ -1,19 +1,19 @@
 import { ZodError } from 'zod';
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
-import type { HttpError } from '../../../util/http';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
-import { Result } from '../../../util/result';
-import { Datasource } from '../datasource';
-import { DigestsConfig, ReleasesConfig } from '../schema';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { cache } from '../../../util/cache/package/decorator.ts';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import type { HttpError } from '../../../util/http/index.ts';
+import { Result } from '../../../util/result.ts';
+import { Datasource } from '../datasource.ts';
+import { DigestsConfig, ReleasesConfig } from '../schema.ts';
 import type {
   DigestConfig,
   GetReleasesConfig,
   Release,
   ReleaseResult,
-} from '../types';
-import { CdnjsAPISriResponse, CdnjsAPIVersionResponse } from './schema';
+} from '../types.ts';
+import { CdnjsAPISriResponse, CdnjsAPIVersionResponse } from './schema.ts';
 
 export class CdnjsDatasource extends Datasource {
   static readonly id = 'cdnjs';

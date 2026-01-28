@@ -1,8 +1,8 @@
 import { isTruthy } from '@sindresorhus/is';
-import { logger } from '../../../../logger';
-import { regEx } from '../../../../util/regex';
-import { Result } from '../../../../util/result';
-import { YarnConfig } from '../schema';
+import { logger } from '../../../../logger/index.ts';
+import { regEx } from '../../../../util/regex.ts';
+import { Result } from '../../../../util/result.ts';
+import { YarnConfig } from '../schema.ts';
 
 const registryRegEx = regEx(
   /^"?(@(?<scope>[^:]+):)?registry"? "?(?<registryUrl>[^"]+)"?$/gm,

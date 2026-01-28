@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { extractPackageFile } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 const aide = Fixtures.get('aide.rb.sample');
 const ibazel = Fixtures.get('ibazel.rb.sample');

@@ -1,7 +1,7 @@
 import { isNonEmptyString, isObject } from '@sindresorhus/is';
-import type { NewValueConfig, VersioningApi } from '../types';
-import { parse } from './parse';
-import { sortParsed } from './util';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
+import { parse } from './parse.ts';
+import { sortParsed } from './util.ts';
 
 export const id = 'rust-release-channel';
 export const displayName = 'Rust Release Channel';
