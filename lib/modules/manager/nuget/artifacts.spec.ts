@@ -252,7 +252,7 @@ describe('modules/manager/nuget/artifacts', () => {
     GlobalConfig.set({
       ...adminConfig,
       binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
     });
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
@@ -282,7 +282,7 @@ describe('modules/manager/nuget/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'docker pull ghcr.io/containerbase/sidecar',
+        cmd: 'docker pull ghcr.io/renovatebot/base-image',
       },
       {
         cmd: 'docker ps --filter name=renovate_sidecar -aq',
@@ -296,7 +296,7 @@ describe('modules/manager/nuget/artifacts', () => {
           '-e MSBUILDDISABLENODEREUSE ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool dotnet 7.0.100' +
           ' && ' +

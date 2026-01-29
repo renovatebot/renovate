@@ -701,7 +701,7 @@ Setting a different limit is useful for registries that ignore the `n` parameter
 
 ## dockerSidecarImage
 
-By default Renovate pulls the sidecar Docker containers from `ghcr.io/containerbase/sidecar`.
+By default Renovate pulls the sidecar Docker containers from `ghcr.io/renovatebot/base-image`.
 You can use the `dockerSidecarImage` option to override this default.
 
 Say you want to pull a custom image from `ghcr.io/your_company/sidecar`.
@@ -713,7 +713,7 @@ You would put this in your configuration file:
 }
 ```
 
-Now when Renovate pulls a new `sidecar` image, the final image is `ghcr.io/your_company/sidecar` instead of `ghcr.io/containerbase/sidecar`.
+Now when Renovate pulls a new `sidecar` image, the final image is `ghcr.io/your_company/sidecar` instead of `ghcr.io/renovatebot/base-image`.
 
 ## dockerUser
 

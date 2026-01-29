@@ -23,7 +23,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'), // `join` fixes Windows CI
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+  dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -488,7 +488,7 @@ describe('modules/manager/vendir/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([
-        { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+        { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
         {
           cmd:
@@ -498,7 +498,7 @@ describe('modules/manager/vendir/artifacts', () => {
             '-v "/tmp/cache/containerbase":"/tmp/cache/containerbase" ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/containerbase/sidecar' +
+            'ghcr.io/renovatebot/base-image' +
             ' bash -l -c "' +
             'install-tool vendir 0.35.0' +
             ' && ' +

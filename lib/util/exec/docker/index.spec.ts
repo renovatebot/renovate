@@ -219,13 +219,13 @@ describe('util/exec/docker/index', () => {
       (opts ? `${opts} ` : '') +
       `-e FOO -e BAR ` +
       `-w "/tmp/foobar" ` +
-      `ghcr.io/containerbase/sidecar ` +
+      `ghcr.io/renovatebot/base-image ` +
       `bash -l -c "foo && bar"`;
 
     beforeEach(() => {
       GlobalConfig.set({
         dockerUser: 'some-user',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
       });
     });
 
@@ -263,7 +263,7 @@ describe('util/exec/docker/index', () => {
           `--user=some-user ` +
           `-e FOO -e BAR ` +
           `-w "/tmp/foobar" ` +
-          `ghcr.io/containerbase/sidecar ` +
+          `ghcr.io/renovatebot/base-image ` +
           `bash -l -c "foo && bar || true && bleh && baz && ls"`,
       );
     });
@@ -292,7 +292,7 @@ describe('util/exec/docker/index', () => {
           `--user=some-user ` +
           `-e FOO -e BAR ` +
           `-w "/tmp/foobar" ` +
-          `ghcr.io/containerbase/sidecar ` +
+          `ghcr.io/renovatebot/base-image ` +
           `bash -l -c "pre && foo && bar || true && bleh && baz"`,
       );
     });
@@ -322,7 +322,7 @@ describe('util/exec/docker/index', () => {
         cacheDir: '/tmp/cache',
         containerbaseDir: '/tmp/containerbase',
         dockerUser: 'some-user',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
       });
       const volumes: VolumeOption[] = ['/tmp/foo'];
       const res = await generateDockerCommand(commands, preCommands, {
@@ -343,7 +343,7 @@ describe('util/exec/docker/index', () => {
         cacheDir: '/tmp/cache',
         containerbaseDir: '/tmp/cache/containerbase',
         dockerUser: 'some-user',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
       });
       const volumes: VolumeOption[] = ['/tmp/foo'];
       const res = await generateDockerCommand(commands, preCommands, {
@@ -360,7 +360,7 @@ describe('util/exec/docker/index', () => {
       GlobalConfig.set({
         dockerUser: 'some-user',
         dockerCliOptions: '--memory=4g --cpus=".5"',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
       });
       const res = await generateDockerCommand(commands, preCommands, {
         ...dockerOptions,

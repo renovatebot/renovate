@@ -18,7 +18,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+  dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
 };
 
 describe('modules/manager/conan/artifacts', () => {

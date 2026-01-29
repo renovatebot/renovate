@@ -48,7 +48,7 @@ describe('util/exec/index', () => {
   const globalConfig: RepoGlobalConfig = {
     cacheDir,
     containerbaseDir,
-    dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+    dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
   };
 
   beforeEach(() => {
@@ -64,7 +64,7 @@ describe('util/exec/index', () => {
   });
 
   const image = dockerModule.sideCarImage;
-  const fullImage = `ghcr.io/containerbase/sidecar`;
+  const fullImage = `ghcr.io/renovatebot/base-image`;
   const name = `renovate_${image}`;
   const inCmd = 'echo hello';
   const outCmd = ['echo hello'];
@@ -471,7 +471,7 @@ describe('util/exec/index', () => {
           },
         ],
         adminConfig: {
-          dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+          dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
           binarySource: 'docker',
         },
       },
