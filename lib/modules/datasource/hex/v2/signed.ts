@@ -6,7 +6,7 @@
 
 // istanbul ignore file
 /* eslint-disable */
-import * as _m0 from 'protobufjs/minimal';
+import * as _m0 from 'protobufjs/minimal.js';
 
 export const protobufPackage = '';
 

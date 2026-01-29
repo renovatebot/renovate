@@ -1,15 +1,18 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
-import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type { ManagerConfig, RenovateConfig } from '../../../config/types';
-import { instrument } from '../../../instrumentation';
-import { logger } from '../../../logger';
-import { getEnabledManagersList, hashMap } from '../../../modules/manager';
-import { isCustomManager } from '../../../modules/manager/custom';
-import { scm } from '../../../modules/platform/scm';
-import type { ExtractResult, WorkerExtractConfig } from '../../types';
-import { getMatchingFiles } from './file-match';
-import { getManagerPackageFiles } from './manager-files';
-import { processSupersedesManagers } from './supersedes';
+import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
+import type { ManagerConfig, RenovateConfig } from '../../../config/types.ts';
+import { instrument } from '../../../instrumentation/index.ts';
+import { logger } from '../../../logger/index.ts';
+import { isCustomManager } from '../../../modules/manager/custom/index.ts';
+import {
+  getEnabledManagersList,
+  hashMap,
+} from '../../../modules/manager/index.ts';
+import { scm } from '../../../modules/platform/scm.ts';
+import type { ExtractResult, WorkerExtractConfig } from '../../types.ts';
+import { getMatchingFiles } from './file-match.ts';
+import { getManagerPackageFiles } from './manager-files.ts';
+import { processSupersedesManagers } from './supersedes.ts';
 
 export async function extractAllDependencies(
   config: RenovateConfig,

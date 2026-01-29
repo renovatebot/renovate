@@ -1,38 +1,38 @@
-import type { PackageFile } from '../../../../../modules/manager/types';
-import { prDebugDataRe } from '../../../../../modules/platform/pr-body';
-import * as _template from '../../../../../util/template';
-import * as _changelogs from './changelogs';
-import * as _configDescription from './config-description';
-import * as _controls from './controls';
-import * as _footer from './footer';
-import * as _header from './header';
-import * as _notes from './notes';
-import * as _table from './updates-table';
-import { getPrBody } from '.';
-import { platform } from '~test/util';
+import type { PackageFile } from '../../../../../modules/manager/types.ts';
+import { prDebugDataRe } from '../../../../../modules/platform/pr-body.ts';
+import * as _template from '../../../../../util/template/index.ts';
+import * as _changelogs from './changelogs.ts';
+import * as _configDescription from './config-description.ts';
+import * as _controls from './controls.ts';
+import * as _footer from './footer.ts';
+import * as _header from './header.ts';
+import { getPrBody } from './index.ts';
+import * as _notes from './notes.ts';
+import * as _table from './updates-table.ts';
+import { platform } from '~test/util.ts';
 
-vi.mock('./changelogs');
+vi.mock('./changelogs.ts');
 const changelogs = vi.mocked(_changelogs);
 
-vi.mock('./config-description');
+vi.mock('./config-description.ts');
 const configDescription = vi.mocked(_configDescription);
 
-vi.mock('./controls');
+vi.mock('./controls.ts');
 const controls = vi.mocked(_controls);
 
-vi.mock('./footer');
+vi.mock('./footer.ts');
 const footer = vi.mocked(_footer);
 
-vi.mock('./header');
+vi.mock('./header.ts');
 const header = vi.mocked(_header);
 
-vi.mock('./notes');
+vi.mock('./notes.ts');
 const notes = vi.mocked(_notes);
 
-vi.mock('./updates-table');
+vi.mock('./updates-table.ts');
 const table = vi.mocked(_table);
 
-vi.mock('../../../../../util/template');
+vi.mock('../../../../../util/template/index.ts');
 const template = vi.mocked(_template);
 
 describe('workers/repository/update/pr/body/index', () => {

@@ -1,7 +1,7 @@
-import { logger } from '../../../logger';
-import { gitlabApi } from './http';
-import type { GitLabMergeRequest } from './schema';
-import type { UpdateMergeRequest } from './types';
+import { logger } from '../../../logger/index.ts';
+import { gitlabApi } from './http.ts';
+import type { GitLabMergeRequest } from './schema.ts';
+import type { UpdateMergeRequest } from './types.ts';
 
 export async function getMR(
   repository: string,

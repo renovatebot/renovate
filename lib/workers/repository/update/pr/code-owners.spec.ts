@@ -1,13 +1,13 @@
 import { codeBlock } from 'common-tags';
 import { mock } from 'vitest-mock-extended';
-import type { Pr } from '../../../../modules/platform';
-import * as bitbucketserver from '../../../../modules/platform/bitbucket-server';
-import * as gitlab from '../../../../modules/platform/gitlab';
-import type { LongCommitSha } from '../../../../util/git/types';
-import { codeOwnersForPr } from './code-owners';
-import { fs, git, platform } from '~test/util';
+import * as bitbucketserver from '../../../../modules/platform/bitbucket-server/index.ts';
+import * as gitlab from '../../../../modules/platform/gitlab/index.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import type { LongCommitSha } from '../../../../util/git/types.ts';
+import { codeOwnersForPr } from './code-owners.ts';
+import { fs, git, platform } from '~test/util.ts';
 
-vi.mock('../../../../util/fs');
+vi.mock('../../../../util/fs/index.ts');
 
 describe('workers/repository/update/pr/code-owners', () => {
   beforeAll(() => {

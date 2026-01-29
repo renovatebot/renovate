@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { extractLockFileVersions, parseLockFile } from './locked-version';
-import { fs } from '~test/util';
+import { extractLockFileVersions, parseLockFile } from './locked-version.ts';
+import { fs } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const lockFileContent = codeBlock`
   packages = [

@@ -4,45 +4,45 @@ import {
   isNonEmptyString,
   isString,
 } from '@sindresorhus/is';
-import { mergeChildConfig } from '../../../config';
-import { getConfigFileNames } from '../../../config/app-strings';
-import { decryptConfig } from '../../../config/decrypt';
-import { migrateAndValidate } from '../../../config/migrate-validate';
-import { migrateConfig } from '../../../config/migration';
-import { parseFileConfig } from '../../../config/parse';
-import * as presets from '../../../config/presets';
-import { applySecretsAndVariablesToConfig } from '../../../config/secrets';
-import type { AllConfig, RenovateConfig } from '../../../config/types';
-import * as configValidation from '../../../config/validation';
+import { getConfigFileNames } from '../../../config/app-strings.ts';
+import { decryptConfig } from '../../../config/decrypt.ts';
+import { mergeChildConfig } from '../../../config/index.ts';
+import { migrateAndValidate } from '../../../config/migrate-validate.ts';
+import { migrateConfig } from '../../../config/migration.ts';
+import { parseFileConfig } from '../../../config/parse.ts';
+import * as presets from '../../../config/presets/index.ts';
+import { applySecretsAndVariablesToConfig } from '../../../config/secrets.ts';
+import type { AllConfig, RenovateConfig } from '../../../config/types.ts';
+import * as configValidation from '../../../config/validation.ts';
 import {
   CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import * as npmApi from '../../../modules/datasource/npm';
-import { platform } from '../../../modules/platform';
-import { scm } from '../../../modules/platform/scm';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { getCache } from '../../../util/cache/repository';
-import { parseJson } from '../../../util/common';
-import { setUserEnv } from '../../../util/env';
-import { readLocalFile, readSystemFile } from '../../../util/fs';
-import * as hostRules from '../../../util/host-rules';
-import * as queue from '../../../util/http/queue';
-import * as throttle from '../../../util/http/throttle';
-import { maskToken } from '../../../util/mask';
-import { regEx } from '../../../util/regex';
-import { getOnboardingConfig } from '../onboarding/branch/config';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import * as npmApi from '../../../modules/datasource/npm/index.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import { scm } from '../../../modules/platform/scm.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import { parseJson } from '../../../util/common.ts';
+import { setUserEnv } from '../../../util/env.ts';
+import { readLocalFile, readSystemFile } from '../../../util/fs/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import * as queue from '../../../util/http/queue.ts';
+import * as throttle from '../../../util/http/throttle.ts';
+import { maskToken } from '../../../util/mask.ts';
+import { regEx } from '../../../util/regex.ts';
+import { getOnboardingConfig } from '../onboarding/branch/config.ts';
 import {
   getOnboardingConfigFromCache,
   getOnboardingFileNameFromCache,
   setOnboardingConfigDetails,
-} from '../onboarding/branch/onboarding-branch-cache';
+} from '../onboarding/branch/onboarding-branch-cache.ts';
 import {
   OnboardingState,
   getDefaultConfigFileName,
-} from '../onboarding/common';
-import type { RepoFileConfig } from './types';
+} from '../onboarding/common.ts';
+import type { RepoFileConfig } from './types.ts';
 
 export async function detectConfigFile(): Promise<string | null> {
   const fileList = await scm.getFileList();

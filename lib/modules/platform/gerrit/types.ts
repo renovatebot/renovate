@@ -1,4 +1,4 @@
-import type { FindPRConfig } from '../types';
+import type { FindPRConfig } from '../types.ts';
 
 export interface GerritFindPRConfig extends FindPRConfig {
   label?: string;

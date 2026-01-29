@@ -1,4 +1,4 @@
-import { extractJsrPackageName } from './util';
+import { extractJsrPackageName } from './util.ts';
 
 describe('modules/datasource/jsr/util', () => {
   it('should extract package name', () => {

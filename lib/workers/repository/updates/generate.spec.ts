@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
-import { getConfig } from '../../../config/defaults';
-import type { UpdateType } from '../../../config/types';
-import { NpmDatasource } from '../../../modules/datasource/npm';
-import type { Timestamp } from '../../../util/timestamp';
-import type { BranchUpgradeConfig } from '../../types';
-import { generateBranchConfig } from './generate';
-import { logger } from '~test/util';
+import { getConfig } from '../../../config/defaults.ts';
+import type { UpdateType } from '../../../config/types.ts';
+import { NpmDatasource } from '../../../modules/datasource/npm/index.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
+import type { BranchUpgradeConfig } from '../../types.ts';
+import { generateBranchConfig } from './generate.ts';
+import { logger } from '~test/util.ts';
 
 const {
   commitMessage,

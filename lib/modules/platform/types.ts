@@ -1,7 +1,11 @@
 import type { DateTime } from 'luxon';
-import type { MergeStrategy } from '../../config/types';
-import type { BranchStatus, HostRule, VulnerabilityAlert } from '../../types';
-import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
+import type { MergeStrategy } from '../../config/types.ts';
+import type {
+  BranchStatus,
+  HostRule,
+  VulnerabilityAlert,
+} from '../../types/index.ts';
+import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types.ts';
 
 type VulnerabilityKey = string;
 type VulnerabilityRangeKey = string;

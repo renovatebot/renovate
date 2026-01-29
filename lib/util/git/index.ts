@@ -7,9 +7,9 @@ import semver from 'semver';
 import type { Options, TaskOptions } from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
 import upath from 'upath';
-import { getConfigFileNames } from '../../config/app-strings';
-import { GlobalConfig } from '../../config/global';
-import type { RenovateConfig } from '../../config/types';
+import { getConfigFileNames } from '../../config/app-strings.ts';
+import { GlobalConfig } from '../../config/global.ts';
+import type { RenovateConfig } from '../../config/types.ts';
 import {
   CONFIG_VALIDATION,
   INVALID_PATH,
@@ -19,41 +19,41 @@ import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
   UNKNOWN_ERROR,
-} from '../../constants/error-messages';
-import { instrument } from '../../instrumentation';
-import { instrumentStandalone } from '../../instrumentation/decorator';
-import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import type { GitProtocol } from '../../types/git';
-import { incCountValue, incLimitedValue } from '../../workers/global/limits';
-import { getCache } from '../cache/repository';
-import { getEnv } from '../env';
-import { getChildEnv } from '../exec/utils';
-import { newlineRegex, regEx } from '../regex';
-import { matchRegexOrGlobList } from '../string-match';
-import { getGitEnvironmentVariables } from './auth';
-import { parseGitAuthor } from './author';
+} from '../../constants/error-messages.ts';
+import { instrument } from '../../instrumentation/index.ts';
+import { withInstrumenting } from '../../instrumentation/with-instrumenting.ts';
+import { logger } from '../../logger/index.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import type { GitProtocol } from '../../types/git.ts';
+import { incCountValue, incLimitedValue } from '../../workers/global/limits.ts';
+import { getCache } from '../cache/repository/index.ts';
+import { getEnv } from '../env.ts';
+import { getChildEnv } from '../exec/utils.ts';
+import { newlineRegex, regEx } from '../regex.ts';
+import { matchRegexOrGlobList } from '../string-match.ts';
+import { getGitEnvironmentVariables } from './auth.ts';
+import { parseGitAuthor } from './author.ts';
 import {
   getCachedBehindBaseResult,
   setCachedBehindBaseResult,
-} from './behind-base-branch-cache';
-import { getNoVerify, simpleGitConfig } from './config';
+} from './behind-base-branch-cache.ts';
+import { getNoVerify, simpleGitConfig } from './config.ts';
 import {
   getCachedConflictResult,
   setCachedConflictResult,
-} from './conflicts-cache';
+} from './conflicts-cache.ts';
 import {
   bulkChangesDisallowed,
   checkForPlatformFailure,
   handleCommitError,
-} from './error';
-import type { InstrumentedSimpleGit } from './instrument';
-import { instrumentGit } from './instrument';
+} from './error.ts';
+import type { InstrumentedSimpleGit } from './instrument.ts';
+import { instrumentGit } from './instrument.ts';
 import {
   getCachedModifiedResult,
   setCachedModifiedResult,
-} from './modified-cache';
-import { configSigningKey, writePrivateKey } from './private-key';
+} from './modified-cache.ts';
+import { configSigningKey, writePrivateKey } from './private-key.ts';
 import type {
   CommitFilesConfig,
   CommitResult,
@@ -63,10 +63,10 @@ import type {
   StatusResult,
   StorageConfig,
   TreeItem,
-} from './types';
+} from './types.ts';
 
-export { setNoVerify } from './config';
-export { setPrivateKey } from './private-key';
+export { setNoVerify } from './config.ts';
+export { setPrivateKey } from './private-key.ts';
 
 // Retry parameters
 const retryCount = 5;
@@ -132,7 +132,7 @@ async function getDefaultBranch(git: InstrumentedSimpleGit): Promise<string> {
   // see https://stackoverflow.com/a/62352647/3005034
   try {
     let res = await git.raw(['rev-parse', '--abbrev-ref', 'origin/HEAD']);
-    /* v8 ignore next -- TODO: add test */
+    /* v8 ignore next -- TODO: add test #40625 */
     if (!res) {
       logger.debug('Could not determine default branch using git rev-parse');
       const headPrefix = 'HEAD branch: ';
@@ -144,8 +144,7 @@ async function getDefaultBranch(git: InstrumentedSimpleGit): Promise<string> {
     }
 
     return res.replace('origin/', '').trim();
-    /* v8 ignore next -- TODO: add test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.debug({ err }, 'Error getting default branch');
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
@@ -182,18 +181,17 @@ export async function validateGitVersion(): Promise<boolean> {
   const globalGit = instrumentGit(simpleGit());
   try {
     const { major, minor, patch, installed } = await globalGit.version();
-    /* v8 ignore next 4 -- TODO: add test */
+    /* v8 ignore if -- TODO: add test #40625 */
     if (!installed) {
       logger.error('Git not installed');
       return false;
     }
     version = `${major}.${minor}.${patch}`;
-    /* v8 ignore next 4 */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.error({ err }, 'Error fetching git version');
     return false;
   }
-  /* v8 ignore next 7 -- TODO: add test */
+  /* v8 ignore if -- TODO: add test #40625 */
   if (!(version && semver.gte(version, GIT_MINIMUM_VERSION))) {
     logger.error(
       { detectedVersion: version, minimumVersion: GIT_MINIMUM_VERSION },
@@ -229,8 +227,7 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
           sha as LongCommitSha;
       });
     logger.trace({ branchCommits: config.branchCommits }, 'branch commits');
-    /* v8 ignore next 11 -- TODO: add test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -273,7 +270,7 @@ async function resetToBranch(branchName: string): Promise<void> {
   await git.raw(['clean', '-fd']);
 }
 
-/* v8 ignore next 4 -- TODO: add test */
+/* v8 ignore next -- TODO: add test #40625 */
 export async function resetToCommit(commit: LongCommitSha): Promise<void> {
   logger.debug(`resetToCommit(${commit})`);
   await git.raw(['reset', '--hard', commit]);
@@ -311,22 +308,23 @@ export function setGitAuthor(gitAuthor: string | undefined): void {
 
 export async function writeGitAuthor(): Promise<void> {
   const { gitAuthorName, gitAuthorEmail, writeGitDone } = config;
-  /* v8 ignore next 3 -- TODO: add test */
+  /* v8 ignore if -- TODO: add test #40625 */
   if (writeGitDone) {
     return;
   }
   config.writeGitDone = true;
   try {
+    // v8 ignore else -- TODO: add test #40625
     if (gitAuthorName) {
       logger.debug(`Setting git author name: ${gitAuthorName}`);
       await git.addConfig('user.name', gitAuthorName);
     }
+    // v8 ignore else -- TODO: add test #40625
     if (gitAuthorEmail) {
       logger.debug(`Setting git author email: ${gitAuthorEmail}`);
       await git.addConfig('user.email', gitAuthorEmail);
     }
-    /* v8 ignore next 11 -- TODO: add test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -361,8 +359,7 @@ export async function getSubmodules(): Promise<string[]> {
       .trim()
       .split(regEx(/[\n\s]/))
       .filter((_e: string, i: number) => i % 2);
-    /* v8 ignore next 4 -- TODO: add test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.warn({ err }, 'Error getting submodules');
     return [];
   }
@@ -402,17 +399,17 @@ export function isCloned(): boolean {
   return gitInitialized;
 }
 
-export const syncGit = instrumentStandalone(
+export const syncGit = withInstrumenting(
   { name: 'syncGit' },
   async function (): Promise<void> {
     if (gitInitialized) {
-      /* v8 ignore next 3 -- TODO: add test */
+      /* v8 ignore if -- TODO: add test #40625 */
       if (getEnv().RENOVATE_X_CLEAR_HOOKS) {
         await git.raw(['config', 'core.hooksPath', '/dev/null']);
       }
       return;
     }
-    /* v8 ignore next 3 -- failsafe TODO: add test */
+    /* v8 ignore if -- TODO: add test #40625 */
     if (GlobalConfig.get('platform') === 'local') {
       throw new Error('Cannot sync git when platform=local');
     }
@@ -438,8 +435,7 @@ export const syncGit = instrumentStandalone(
           const durationMs = Math.round(Date.now() - fetchStart);
           logger.info({ durationMs }, 'git fetch completed');
           clone = false;
-          /* v8 ignore next -- TODO: add test */
-        } catch (err) {
+        } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
           if (err.message === REPOSITORY_EMPTY) {
             throw err;
           }
@@ -476,8 +472,7 @@ export const syncGit = instrumentStandalone(
           await gitRetry(() =>
             instrument('emptyDirAndClone', emptyDirAndClone),
           );
-          /* v8 ignore next 10 -- TODO: add test */
-        } catch (err) {
+        } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
           logger.debug({ err }, 'git clone error');
           if (err.message?.includes('No space left on device')) {
             throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
@@ -495,8 +490,7 @@ export const syncGit = instrumentStandalone(
       config.currentBranchSha = (
         await git.raw(['rev-parse', 'HEAD'])
       ).trim() as LongCommitSha;
-      /* v8 ignore next -- TODO: add test */
-    } catch (err) {
+    } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
       if (err.message?.includes('fatal: not a git repository')) {
         throw new Error(REPOSITORY_CHANGED);
       }
@@ -509,8 +503,7 @@ export const syncGit = instrumentStandalone(
     try {
       const latestCommit = (await git.log({ n: 1 })).latest;
       logger.debug({ latestCommit }, 'latest repository commit');
-      /* v8 ignore next -- TODO: add test */
-    } catch (err) {
+    } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
       const errChecked = checkForPlatformFailure(err);
       if (errChecked) {
         throw errChecked;
@@ -524,7 +517,7 @@ export const syncGit = instrumentStandalone(
       config.currentBranch ??
       config.defaultBranch ??
       (await getDefaultBranch(git));
-    /* v8 ignore next -- TODO: add test */
+    /* v8 ignore next -- TODO: add test #40625 */
     delete getCache()?.semanticCommits;
 
     // If upstreamUrl is set then the bot is running in fork mode
@@ -537,6 +530,7 @@ export const syncGit = instrumentStandalone(
         );
         // Add remote if it does not exist
         const remotes = await git.getRemotes(true);
+        // v8 ignore else -- TODO: add test #40625
         if (!remotes.some((remote) => remote.name === RENOVATE_FORK_UPSTREAM)) {
           logger.debug(`Adding remote ${RENOVATE_FORK_UPSTREAM}`);
           await git.addRemote(RENOVATE_FORK_UPSTREAM, upstreamUrl);
@@ -597,6 +591,7 @@ export async function getBranchUpdateDate(
 
 export async function getCommitMessages(): Promise<string[]> {
   logger.debug('getCommitMessages');
+  // v8 ignore else -- TODO: add test #40625
   if (GlobalConfig.get('platform') !== 'local') {
     await syncGit();
   }
@@ -606,8 +601,7 @@ export async function getCommitMessages(): Promise<string[]> {
       format: { message: '%s' },
     });
     return res.all.map((commit) => commit.message);
-    /* v8 ignore next 3 -- TODO: add test */
-  } catch {
+  } catch /* v8 ignore next -- TODO: add test #40625 */ {
     return [];
   }
 }
@@ -630,6 +624,7 @@ export async function checkoutBranch(
       await git.raw(['rev-parse', 'HEAD'])
     ).trim() as LongCommitSha;
     const latestCommitDate = await getCommitDate(config.currentBranchSha);
+    // v8 ignore else -- TODO: add test #40625
     if (latestCommitDate) {
       logger.debug(
         { branchName, latestCommitDate, sha: config.currentBranchSha },
@@ -638,8 +633,7 @@ export async function checkoutBranch(
     }
     await git.reset(ResetMode.HARD);
     return config.currentBranchSha;
-    /* v8 ignore next 11 -- TODO: add test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -671,7 +665,7 @@ export async function checkoutBranchFromRemote(
     return config.currentBranchSha;
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
-    /* v8 ignore next 3 -- hard to test */
+    /* v8 ignore if -- TODO: add test #40625 */
     if (errChecked) {
       throw errChecked;
     }
@@ -714,8 +708,7 @@ export async function getFileList(): Promise<string[]> {
   let files: string;
   try {
     files = await git.raw(['ls-tree', '-r', `refs/heads/${branch}`]);
-    /* v8 ignore next 10 -- TODO: add test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     if (err.message?.includes('fatal: Not a valid object name')) {
       logger.debug(
         { err },
@@ -725,7 +718,7 @@ export async function getFileList(): Promise<string[]> {
     }
     throw err;
   }
-  /* v8 ignore next 3 -- TODO: add test */
+  /* v8 ignore if -- TODO: add test #40625 */
   if (!files) {
     return [];
   }
@@ -774,8 +767,7 @@ export async function isBranchBehindBase(
     );
     setCachedBehindBaseResult(branchName, isBehind);
     return isBehind;
-    /* v8 ignore next 7 -- TODO: add test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -821,8 +813,7 @@ export async function isBranchModified(
     for (const commit of commits.all) {
       committedAuthors.add(commit.author_email);
     }
-    /* v8 ignore next 10 -- TODO: add test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     if (err.message?.includes('fatal: bad revision')) {
       logger.debug(
         { err },
@@ -836,6 +827,7 @@ export async function isBranchModified(
 
   const includedAuthors = new Set(committedAuthors);
 
+  // v8 ignore else -- TODO: add test #40625
   if (gitAuthorEmail) {
     includedAuthors.delete(gitAuthorEmail);
   }
@@ -929,7 +921,7 @@ export async function isBranchConflicted(
     await git.merge(['--no-commit', '--no-ff', `origin/${branch}`]);
   } catch (err) {
     result = true;
-    /* v8 ignore next -- TODO: add test */
+    /* v8 ignore if -- TODO: add test #40625 */
     if (!err?.git?.conflicts?.length) {
       logger.debug(
         { baseBranch, branch, err },
@@ -942,8 +934,7 @@ export async function isBranchConflicted(
       if (origBranch !== baseBranch) {
         await git.checkout(origBranch);
       }
-      /* v8 ignore next -- TODO: add test */
-    } catch (err) {
+    } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
       logger.debug(
         { baseBranch, branch, err },
         'isBranchConflicted: cleanup error',
@@ -969,19 +960,19 @@ export async function deleteBranch(branchName: string): Promise<void> {
     logger.debug(`Deleted remote branch: ${branchName}`);
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
-    /* v8 ignore next 3 -- TODO: add test */
+    /* v8 ignore if -- TODO: add test #40625 */
     if (errChecked) {
       throw errChecked;
     }
     logger.debug(`No remote branch to delete with name: ${branchName}`);
   }
   try {
-    /* v8 ignore next 2 -- TODO: add test (always throws) */
     await deleteLocalBranch(branchName);
+    /* v8 ignore next -- TODO: add test #40625 (always throws) */
     logger.debug(`Deleted local branch: ${branchName}`);
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
-    /* v8 ignore next 3 -- TODO: add test */
+    /* v8 ignore if -- TODO: add test #40625 */
     if (errChecked) {
       throw errChecked;
     }
@@ -1099,8 +1090,7 @@ async function getBranchFilesFromRef(
       git.diffSummary([refName, `${refName}^`]),
     );
     return diff.files.map((file) => file.file);
-    /* v8 ignore next 8 -- TODO: add test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.warn({ err }, 'getBranchFilesFromRef error');
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
@@ -1122,7 +1112,7 @@ export async function getFile(
     return content;
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
-    /* v8 ignore next 3 -- TODO: add test */
+    /* v8 ignore if -- TODO: add test #40625 */
     if (errChecked) {
       throw errChecked;
     }
@@ -1203,8 +1193,7 @@ export async function prepareCommit({
         try {
           await git.rm([fileName]);
           deletedFiles.push(fileName);
-          /* v8 ignore next 8 -- TODO: add test */
-        } catch (err) {
+        } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
           const errChecked = checkForPlatformFailure(err);
           if (errChecked) {
             throw errChecked;
@@ -1220,9 +1209,9 @@ export async function prepareCommit({
           continue;
         } else {
           let contents: Buffer;
+          /* v8 ignore else -- TODO: add test #40625 */
           if (typeof file.contents === 'string') {
             contents = Buffer.from(file.contents);
-            /* v8 ignore next 3 -- TODO: add test */
           } else {
             contents = file.contents;
           }
@@ -1237,7 +1226,7 @@ export async function prepareCommit({
           }
         }
         try {
-          /* v8 ignore next 2 -- TODO: add test */
+          /* v8 ignore next -- TODO: add test #40625 */
           const addParams =
             fileName === getConfigFileNames()[0] ? ['-f', fileName] : fileName;
           await git.add(addParams);
@@ -1245,8 +1234,7 @@ export async function prepareCommit({
             await git.raw(['update-index', '--chmod=+x', fileName]);
           }
           addedModifiedFiles.push(fileName);
-          /* v8 ignore next 11 -- TODO: add test */
-        } catch (err) {
+        } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
           if (
             !err.message.includes(
               'The following paths are ignored by one of your .gitignore files',
@@ -1302,8 +1290,7 @@ export async function prepareCommit({
     };
 
     return result;
-    /* v8 ignore next 3 -- TODO: add test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     return handleCommitError(err, branchName, files);
   }
 }
@@ -1337,8 +1324,7 @@ export async function pushCommit({
     incLimitedValue('Commits');
     incCountValue('HourlyCommits');
     result = true;
-    /* v8 ignore next 3 -- TODO: add test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     handleCommitError(err, sourceRef, files);
   }
   return result;
@@ -1356,8 +1342,7 @@ export async function fetchBranch(
     config.branchCommits[branchName] = commit;
     config.branchIsModified[branchName] = false;
     return commit;
-    /* v8 ignore next 3 -- TODO: add test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     return handleCommitError(err, branchName);
   }
 }
@@ -1372,6 +1357,7 @@ export async function commitFiles(
         sourceRef: commitConfig.branchName,
         files: commitConfig.files,
       });
+      // v8 ignore else -- TODO: add test #40625
       if (pushResult) {
         const { branchName } = commitConfig;
         const { commitSha } = commitResult;
@@ -1381,8 +1367,7 @@ export async function commitFiles(
       }
     }
     return null;
-    /* v8 ignore next -- TODO: add test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     if (err.message.includes('[rejected] (stale info)')) {
       throw new Error(REPOSITORY_CHANGED);
     }
@@ -1477,28 +1462,27 @@ export async function clearRenovateRefs(): Promise<void> {
       .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), '').trim())
       .filter((line) => line.startsWith('refs/renovate/branches/'));
     renovateRefs.push(...refs);
-    /* v8 ignore next 3 -- TODO: add test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.warn({ err }, `Renovate refs cleanup error`);
   }
 
+  // v8 ignore else -- TODO: add test #40625
   if (renovateRefs.length) {
     try {
       const pushOpts = ['--delete', 'origin', ...renovateRefs];
       await git.push(pushOpts);
     } catch (err) {
+      /* v8 ignore else -- TODO: add test #40625 */
       if (bulkChangesDisallowed(err)) {
         for (const ref of renovateRefs) {
           try {
             const pushOpts = ['--delete', 'origin', ref];
             await git.push(pushOpts);
-            /* v8 ignore next 4 -- TODO: add test */
-          } catch (err) {
+          } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
             logger.debug({ err }, 'Error deleting "refs/renovate/branches/*"');
             break;
           }
         }
-        /* v8 ignore next 3 -- TODO: add test */
       } else {
         logger.warn({ err }, 'Error deleting "refs/renovate/branches/*"');
       }
@@ -1540,9 +1524,8 @@ export async function listCommitTree(
   commitSha: LongCommitSha,
 ): Promise<TreeItem[]> {
   const commitOutput = await git.catFile(['-p', commitSha]);
-  const { treeSha } =
-    /* v8 ignore next -- will never happen ? */
-    treeShaRegex.exec(commitOutput)?.groups ?? {};
+  /* v8 ignore next -- will never happen */
+  const { treeSha } = treeShaRegex.exec(commitOutput)?.groups ?? {};
   const contents = await git.catFile(['-p', treeSha]);
   const lines = contents.split(newlineRegex);
   const result: TreeItem[] = [];
@@ -1584,7 +1567,7 @@ export async function syncForkWithUpstream(branchName: string): Promise<void> {
     `Synchronizing fork with "${RENOVATE_FORK_UPSTREAM}" remote for branch ${branchName}`,
   );
   const remotes = await getRemotes();
-  /* v8 ignore next 3 -- this should not be possible if upstreamUrl exists */
+  /* v8 ignore if -- this should not be possible if upstreamUrl exists */
   if (!remotes.some((r) => r === RENOVATE_FORK_UPSTREAM)) {
     throw new Error('No upstream remote exists, cannot sync fork');
   }
@@ -1597,7 +1580,7 @@ export async function syncForkWithUpstream(branchName: string): Promise<void> {
     }
     await resetHardFromRemote(`${RENOVATE_FORK_UPSTREAM}/${branchName}`);
     await forcePushToRemote(branchName, 'origin');
-  } catch (err) /* v8 ignore next 3 -- shouldn't happen */ {
+  } catch (err) /* v8 ignore next -- shouldn't happen */ {
     logger.error({ err }, 'Error synchronizing fork');
     throw new Error(UNKNOWN_ERROR);
   }

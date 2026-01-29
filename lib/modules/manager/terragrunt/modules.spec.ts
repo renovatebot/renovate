@@ -1,4 +1,4 @@
-import { gitTagsRefMatchRegex, githubRefMatchRegex } from './modules';
+import { gitTagsRefMatchRegex, githubRefMatchRegex } from './modules.ts';
 
 describe('modules/manager/terragrunt/modules', () => {
   describe('githubRefMatchRegex', () => {

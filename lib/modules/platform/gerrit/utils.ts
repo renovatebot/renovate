@@ -1,18 +1,18 @@
-import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { BranchStatus, PrState } from '../../../types';
-import type { LongCommitSha } from '../../../util/git/types';
-import * as hostRules from '../../../util/host-rules';
-import { regEx } from '../../../util/regex';
-import { joinUrlParts, parseUrl } from '../../../util/url';
-import { hashBody } from '../pr-body';
-import type { Pr } from '../types';
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { BranchStatus, PrState } from '../../../types/index.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { regEx } from '../../../util/regex.ts';
+import { joinUrlParts, parseUrl } from '../../../util/url.ts';
+import { hashBody } from '../pr-body.ts';
+import type { Pr } from '../types.ts';
 import type {
   GerritChange,
   GerritChangeStatus,
   GerritLabelTypeInfo,
   GerritRequestDetail,
-} from './types';
+} from './types.ts';
 
 export const MIN_GERRIT_VERSION = '3.0.0';
 

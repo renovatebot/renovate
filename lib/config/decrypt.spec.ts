@@ -2,10 +2,10 @@ import {
   decryptConfig,
   getAzureCollection,
   validateDecryptedValue,
-} from './decrypt';
-import { GlobalConfig } from './global';
-import type { RenovateConfig } from './types';
-import { logger } from '~test/util';
+} from './decrypt.ts';
+import { GlobalConfig } from './global.ts';
+import type { RenovateConfig } from './types.ts';
+import { logger } from '~test/util.ts';
 
 const repository = 'abc/def';
 

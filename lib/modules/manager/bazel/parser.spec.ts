@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { parse } from './parser';
-import { extract } from './rules';
+import { parse } from './parser.ts';
+import { extract } from './rules/index.ts';
 
 describe('modules/manager/bazel/parser', () => {
   it('parses rules input', () => {

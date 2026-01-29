@@ -1,33 +1,36 @@
 import { mock } from 'vitest-mock-extended';
-import { getConfigFileNames } from '../../../../config/app-strings';
-import { getConfig } from '../../../../config/defaults';
-import { GlobalConfig } from '../../../../config/global';
+import { getConfigFileNames } from '../../../../config/app-strings.ts';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
   REPOSITORY_NO_PACKAGE_FILES,
-} from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
-import * as memCache from '../../../../util/cache/memory';
-import * as _cache from '../../../../util/cache/repository';
-import type { RepoCacheData } from '../../../../util/cache/repository/types';
-import type { FileAddition, LongCommitSha } from '../../../../util/git/types';
-import { OnboardingState } from '../common';
-import * as _config from './config';
-import * as _onboardingCache from './onboarding-branch-cache';
-import * as _rebase from './rebase';
-import { checkOnboardingBranch } from '.';
-import { fs, git, platform, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+} from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import * as memCache from '../../../../util/cache/memory/index.ts';
+import * as _cache from '../../../../util/cache/repository/index.ts';
+import type { RepoCacheData } from '../../../../util/cache/repository/types.ts';
+import type {
+  FileAddition,
+  LongCommitSha,
+} from '../../../../util/git/types.ts';
+import { OnboardingState } from '../common.ts';
+import * as _config from './config.ts';
+import { checkOnboardingBranch } from './index.ts';
+import * as _onboardingCache from './onboarding-branch-cache.ts';
+import * as _rebase from './rebase.ts';
+import { fs, git, platform, scm } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
 const configModule: any = _config;
 
-vi.mock('../../../../util/cache/repository');
-vi.mock('../../../../util/fs');
-vi.mock('./config');
-vi.mock('./rebase');
-vi.mock('./onboarding-branch-cache');
+vi.mock('../../../../util/cache/repository/index.ts');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('./config.ts');
+vi.mock('./rebase.ts');
+vi.mock('./onboarding-branch-cache.ts');
 
 const cache = vi.mocked(_cache);
 const rebase = vi.mocked(_rebase);

@@ -1,5 +1,5 @@
-import { logger } from '../../../../../../logger';
-import type { YarnLock, YarnLockEntrySummary } from './types';
+import { logger } from '../../../../../../logger/index.ts';
+import type { YarnLock, YarnLockEntrySummary } from './types.ts';
 
 export function parseEntry(depNameConstraint: string): {
   entryName: string;

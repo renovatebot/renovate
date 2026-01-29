@@ -8,7 +8,7 @@ import {
   createPipxToolConfig,
   createSpmToolConfig,
   createUbiToolConfig,
-} from './backends';
+} from './backends.ts';
 
 describe('modules/manager/mise/backends', () => {
   describe('createAquaToolConfig()', () => {

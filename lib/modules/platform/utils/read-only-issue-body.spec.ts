@@ -1,5 +1,5 @@
-import { readOnlyIssueBody } from './read-only-issue-body';
-import { Fixtures } from '~test/fixtures';
+import { readOnlyIssueBody } from './read-only-issue-body.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 const issueBody = Fixtures.get('issue-body.txt');
 

@@ -6,17 +6,17 @@ import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
-} from '../../constants/error-messages';
-import { GithubReleasesDatasource } from '../../modules/datasource/github-releases';
-import * as _repositoryCache from '../cache/repository';
-import type { RepoCacheData } from '../cache/repository/types';
-import * as hostRules from '../host-rules';
-import { GithubHttp, setBaseUrl } from './github';
-import type { GraphqlPageCache } from './github';
-import * as httpMock from '~test/http-mock';
-import { logger } from '~test/util';
+} from '../../constants/error-messages.ts';
+import { GithubReleasesDatasource } from '../../modules/datasource/github-releases/index.ts';
+import * as _repositoryCache from '../cache/repository/index.ts';
+import type { RepoCacheData } from '../cache/repository/types.ts';
+import * as hostRules from '../host-rules.ts';
+import { GithubHttp, setBaseUrl } from './github.ts';
+import type { GraphqlPageCache } from './github.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
 
-vi.mock('../cache/repository');
+vi.mock('../cache/repository/index.ts');
 const repositoryCache = vi.mocked(_repositoryCache);
 
 const githubApiHost = 'https://api.github.com';

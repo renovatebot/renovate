@@ -1,11 +1,11 @@
-import type { BranchStatus } from '../../../types';
+import type { BranchStatus } from '../../../types/index.ts';
 import type {
   Issue,
   PlatformParams,
   PlatformResult,
   Pr,
   RepoResult,
-} from '../types';
+} from '../types.ts';
 
 export const id = 'local';
 

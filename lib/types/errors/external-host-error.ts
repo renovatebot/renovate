@@ -1,4 +1,4 @@
-import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
+import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages.ts';
 
 export class ExternalHostError extends Error {
   hostType: string | undefined;

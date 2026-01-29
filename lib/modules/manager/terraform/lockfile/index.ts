@@ -1,18 +1,18 @@
 import { isTruthy } from '@sindresorhus/is';
-import { logger } from '../../../../logger';
-import * as p from '../../../../util/promises';
-import { escapeRegExp, regEx } from '../../../../util/regex';
-import type { GetPkgReleasesConfig } from '../../../datasource';
-import { getPkgReleases } from '../../../datasource';
-import { get as getVersioning } from '../../../versioning';
+import { logger } from '../../../../logger/index.ts';
+import * as p from '../../../../util/promises.ts';
+import { escapeRegExp, regEx } from '../../../../util/regex.ts';
+import type { GetPkgReleasesConfig } from '../../../datasource/index.ts';
+import { getPkgReleases } from '../../../datasource/index.ts';
+import { get as getVersioning } from '../../../versioning/index.ts';
 import type {
   UpdateArtifact,
   UpdateArtifactsResult,
   Upgrade,
-} from '../../types';
-import { massageProviderLookupName } from '../util';
-import { TerraformProviderHash } from './hash';
-import type { ProviderLock, ProviderLockUpdate } from './types';
+} from '../../types.ts';
+import { massageProviderLookupName } from '../util.ts';
+import { TerraformProviderHash } from './hash.ts';
+import type { ProviderLock, ProviderLockUpdate } from './types.ts';
 import {
   extractLocks,
   findLockFile,
@@ -20,7 +20,7 @@ import {
   massageNewValue,
   readLockFile,
   writeLockUpdates,
-} from './util';
+} from './util.ts';
 
 async function updateAllLocks(
   locks: ProviderLock[],

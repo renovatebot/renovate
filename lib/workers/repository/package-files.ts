@@ -1,8 +1,8 @@
 import { isEmptyArray, isEmptyObject, isTruthy } from '@sindresorhus/is';
-import { logger } from '../../logger';
-import type { PackageFile } from '../../modules/manager/types';
-import { clone } from '../../util/clone';
-import { emojify } from '../../util/emoji';
+import { logger } from '../../logger/index.ts';
+import type { PackageFile } from '../../modules/manager/types.ts';
+import { clone } from '../../util/clone.ts';
+import { emojify } from '../../util/emoji.ts';
 
 export class PackageFiles {
   private static data = new Map<string, Record<string, PackageFile[]> | null>();

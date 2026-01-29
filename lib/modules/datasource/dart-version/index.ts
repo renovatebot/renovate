@@ -1,8 +1,8 @@
 import { isString } from '@sindresorhus/is';
-import { regEx } from '../../../util/regex';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import type { DartResponse } from './types';
+import { regEx } from '../../../util/regex.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import type { DartResponse } from './types.ts';
 
 export const stableVersionRegex = regEx(/^\d+\.\d+\.\d+$/);
 /**

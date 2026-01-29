@@ -102,10 +102,10 @@ Allowed values are `js-java`, `wasm-java` and `wasm-dotnet`.
 
 <!-- prettier-ignore -->
 !!! note
-    `wasm-java` will block a proper NodeJS exit. It needs NodeJS v24+ to properly clean up the WASM runtime.
-    `js-java` is not recommended due to performance reasons.
+    `js-java` and `wasm-dotnet` are not recommended due to performance reasons.
+    Incompatible with `RENOVATE_X_USE_OPENPGP`.
 
-Default: `wasm-dotnet`.
+Default: `wasm-java`.
 
 ## `RENOVATE_X_PLATFORM_VERSION`
 
@@ -148,6 +148,10 @@ If set to a valid path pointing to a file containing a _valid_ Renovate configur
 Suppress the pre-commit support warning in PR bodies.
 
 ## `RENOVATE_X_USE_OPENPGP`
+
+<!-- prettier-ignore -->
+!!! note
+    Incompatible with `RENOVATE_X_PGP_RUNTIME`.
 
 Use `openpgp` instead of [Bouncy Castle](https://www.bouncycastle.org/) for `PGP` decryption.
 
