@@ -22,9 +22,9 @@ import type {
   PackageDependency,
   PackageFile,
   PackageFileContent,
-} from '../../types';
+} from '../../types.ts';
 import type { PnpmDependency, PnpmLockFile } from '../post-update/types.ts';
-import type { PnpmCatalogs, PnpmConfigDependencies } from '../schema';
+import type { PnpmCatalogs, PnpmConfigDependencies } from '../schema.ts';
 import { PnpmWorkspaceFile } from '../schema.ts';
 import type { NpmManagerData } from '../types.ts';
 import { extractCatalogDeps } from './common/catalogs.ts';
@@ -46,7 +46,6 @@ export async function extractPnpmFilters(
       (await readLocalFile(fileName, 'utf8'))!,
     );
     if (
-      !contents.packages ||
       !Array.isArray(contents.packages) ||
       !contents.packages.every((item) => isString(item))
     ) {
