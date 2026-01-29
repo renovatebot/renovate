@@ -30,7 +30,14 @@
         "disallowTypeAnnotations": false
       }
     ],
-    "no-unused-vars": "error",
+    "no-unused-vars": [
+      "error",
+      {
+        "varsIgnorePattern": "^_",
+        "argsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ],
     "no-unassigned-vars": "error"
   },
   "overrides": [

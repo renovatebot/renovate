@@ -79,7 +79,7 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
           const require = createRequire(import.meta.url);
           try {
             tmpConfig = require(absoluteFilePath);
-          } catch (requireErr) {
+          } catch (_requireErr) {
             // If require also fails (e.g. strict ESM package), throw the original import error
             // to encourage the user to fix their config format.
             throw err;
