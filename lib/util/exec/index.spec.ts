@@ -48,7 +48,7 @@ describe('util/exec/index', () => {
   const globalConfig: RepoGlobalConfig = {
     cacheDir,
     containerbaseDir,
-    dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+    dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
   };
 
   beforeEach(() => {
@@ -63,9 +63,9 @@ describe('util/exec/index', () => {
     process.env = processEnvOrig;
   });
 
-  const image = dockerModule.sideCarImage;
-  const fullImage = `ghcr.io/containerbase/sidecar`;
-  const name = `renovate_${image}`;
+  const sideCarName = dockerModule.sideCarName;
+  const fullImage = `ghcr.io/renovatebot/base-image`;
+  const name = `renovate_${sideCarName}`;
   const inCmd = 'echo hello';
   const outCmd = ['echo hello'];
   const volume_1 = '/path/to/volume-1';
@@ -453,9 +453,9 @@ describe('util/exec/index', () => {
         inCmd,
         inOpts: { docker },
         outCmd: [
-          `docker pull ghcr.io/containerbase/${image}`,
+          `docker pull ghcr.io/renovatebot/base-image`,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ghcr.io/containerbase/${image} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ghcr.io/renovatebot/base-image bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -471,7 +471,7 @@ describe('util/exec/index', () => {
           },
         ],
         adminConfig: {
-          dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+          dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
           binarySource: 'docker',
         },
       },
@@ -485,8 +485,8 @@ describe('util/exec/index', () => {
         inOpts: { docker },
         outCmd: [
           dockerPullCmd,
-          `docker ps --filter name=myprefix_${image} -aq`,
-          `docker run --rm --name=myprefix_${image} --label=myprefix_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
+          `docker ps --filter name=myprefix_${sideCarName} -aq`,
+          `docker run --rm --name=myprefix_${sideCarName} --label=myprefix_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -967,16 +967,16 @@ describe('util/exec/index', () => {
       `echo hello`,
       `echo hello`,
       `docker pull ${fullImage}`,
-      `docker ps --filter name=renovate_${image} -aq`,
-      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
-      `docker ps --filter name=renovate_${image} -aq`,
-      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
+      `docker ps --filter name=renovate_${sideCarName} -aq`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
+      `docker ps --filter name=renovate_${sideCarName} -aq`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
       `echo hello`,
       `echo hello`,
-      `docker ps --filter name=renovate_${image} -aq`,
-      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
-      `docker ps --filter name=renovate_${image} -aq`,
-      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
+      `docker ps --filter name=renovate_${sideCarName} -aq`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
+      `docker ps --filter name=renovate_${sideCarName} -aq`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
     ]);
   });
 

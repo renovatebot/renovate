@@ -191,7 +191,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     GlobalConfig.set({
       ...adminConfig,
       binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
     });
     fs.readLocalFile.mockResolvedValueOnce('new content');
     fs.ensureCacheDir.mockResolvedValueOnce('/tmp/cache');
@@ -219,7 +219,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     ]);
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -229,7 +229,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
           '-e PIP_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool python 3.10.2 ' +
           '&& ' +

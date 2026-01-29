@@ -50,7 +50,7 @@ const adminConfig: RepoGlobalConfig = {
 const dockerAdminConfig = {
   ...adminConfig,
   binarySource: 'docker',
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+  dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
 } satisfies RepoGlobalConfig;
 
 const config: UpdateArtifactsConfig = {};
@@ -556,7 +556,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -568,7 +568,7 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e WORKON_HOME ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar' +
+          'ghcr.io/renovatebot/base-image' +
           ' bash -l -c "' +
           'install-tool python 3.7.6' +
           ' && ' +
@@ -859,7 +859,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -871,7 +871,7 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e WORKON_HOME ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar' +
+          'ghcr.io/renovatebot/base-image' +
           ' bash -l -c "' +
           'install-tool python 3.10.2' +
           ' && ' +
@@ -946,7 +946,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -958,7 +958,7 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e WORKON_HOME ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar' +
+          'ghcr.io/renovatebot/base-image' +
           ' bash -l -c "' +
           'install-tool python 3.10.2' +
           ' && ' +
@@ -1032,7 +1032,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -1044,7 +1044,7 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e WORKON_HOME ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar' +
+          'ghcr.io/renovatebot/base-image' +
           ' bash -l -c "' +
           'install-tool python 3.10.2' +
           ' && ' +
