@@ -1,4 +1,4 @@
-import { logger } from '../../../logger.ts';
+import { logger } from '../../../logger/index.ts';
 import { escapeRegExp, regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type { UpdateDependencyConfig } from '../types.ts';
