@@ -3,7 +3,7 @@ import type {
   RenovateOptions,
   RenovateRequiredOption,
 } from '../../lib/config/types.ts';
-import { pkg } from '../../lib/expose.cjs';
+import { pkg } from '../../lib/expose.ts';
 import { hasKey } from '../../lib/util/object.ts';
 import { updateFile } from '../utils/index.ts';
 

@@ -51,7 +51,7 @@ describe('modules/versioning/index', () => {
     }
     const vers = allVersioning.getVersionings();
 
-    const loadedVers = await loadModules(__dirname);
+    const loadedVers = await loadModules(import.meta.dirname);
     expect(Array.from(vers.keys())).toEqual(Object.keys(loadedVers));
 
     for (const name of vers.keys()) {

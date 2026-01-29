@@ -1,8 +1,10 @@
 import { promises } from 'fs';
 import type { ErrorObject, ValidateFunction } from 'ajv';
 import { Ajv } from 'ajv';
-import draft7MetaSchema from 'ajv/lib/refs/json-schema-draft-07.json';
-import addFormats from 'ajv-formats';
+import draft7MetaSchema from 'ajv/lib/refs/json-schema-draft-07.json' with { type: 'json' };
+import _addFormats from 'ajv-formats';
+
+const addFormats = _addFormats as unknown as typeof _addFormats.default;
 import { glob } from 'glob';
 
 async function validateFileAgainstSchema(

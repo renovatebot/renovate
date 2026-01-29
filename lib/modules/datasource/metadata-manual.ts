@@ -1,5 +1,5 @@
-import changelogUrlsJson from '../../data/changelog-urls.json';
-import sourceUrlsJson from '../../data/source-urls.json';
+import changelogUrlsJson from '../../data/changelog-urls.json' with { type: 'json' };
+import sourceUrlsJson from '../../data/source-urls.json' with { type: 'json' };
 
 const { $schema: _changelogSchema, ...changelogUrls } = changelogUrlsJson;
 // Only necessary when the changelog data cannot be found in the package's source repository
