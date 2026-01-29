@@ -15,7 +15,7 @@ describe('modules/manager/git-submodules/extract', () => {
   beforeEach(async () => {
     const { simpleGit } =
       await vi.importActual<typeof import('simple-git')>('simple-git');
-    GlobalConfig.set({ localDir: `${__dirname}/__fixtures__` });
+    GlobalConfig.set({ localDir: `${import.meta.dirname}/__fixtures__` });
     // clear host rules
     hostRules.clear();
     // clear environment variables

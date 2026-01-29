@@ -76,8 +76,11 @@ describe('modules/manager/index', () => {
     const customMgrs = customManager.getCustomManagers();
 
     const loadedMgr = {
-      ...(await loadModules(__dirname, validate)), // validate built-in managers
-      ...(await loadModules(upath.join(__dirname, 'custom'), validate)), // validate custom managers
+      ...(await loadModules(import.meta.dirname, validate)), // validate built-in managers
+      ...(await loadModules(
+        upath.join(import.meta.dirname, 'custom'),
+        validate,
+      )), // validate custom managers
     };
     delete loadedMgr.custom;
 

@@ -1,13 +1,14 @@
 import { promisify } from 'node:util';
 import zlib, { constants } from 'node:zlib';
 import type { Database, Statement } from 'better-sqlite3';
-import { exists } from 'fs-extra';
+import fs from 'fs-extra';
 import upath from 'upath';
-import { sqlite } from '../../../expose.cjs';
+import { sqlite } from '../../../expose.ts';
 import { logger } from '../../../logger/index.ts';
 import { ensureDir } from '../../fs/index.ts';
 import type { PackageCacheNamespace } from './types.ts';
 
+const { exists } = fs;
 const brotliCompress = promisify(zlib.brotliCompress);
 const brotliDecompress = promisify(zlib.brotliDecompress);
 
@@ -35,7 +36,7 @@ export class SqlitePackageCache {
 
   static async init(cacheDir: string): Promise<SqlitePackageCache> {
     // simply let it throw if it fails, so no test coverage needed
-    const Sqlite = sqlite();
+    const Sqlite = await sqlite();
     const sqliteDir = upath.join(cacheDir, 'renovate/renovate-cache-sqlite');
     await ensureDir(sqliteDir);
     const sqliteFile = upath.join(sqliteDir, 'db.sqlite');

@@ -67,7 +67,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         }),
       );
       GlobalConfig.set({
-        localDir: __dirname,
+        localDir: import.meta.dirname,
         allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
@@ -117,7 +117,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         }),
       );
       GlobalConfig.set({
-        localDir: __dirname,
+        localDir: import.meta.dirname,
         allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
@@ -452,7 +452,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         }),
       );
       GlobalConfig.set({
-        localDir: __dirname,
+        localDir: import.meta.dirname,
         allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
@@ -554,7 +554,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         }),
       );
       GlobalConfig.set({
-        localDir: __dirname,
+        localDir: import.meta.dirname,
         allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
@@ -629,7 +629,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         }),
       );
       GlobalConfig.set({
-        localDir: __dirname,
+        localDir: import.meta.dirname,
         allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
@@ -717,7 +717,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         }),
       );
       GlobalConfig.set({
-        localDir: __dirname,
+        localDir: import.meta.dirname,
         allowedCommands: ['some-command'],
       });
       fs.localPathIsFile

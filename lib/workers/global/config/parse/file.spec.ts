@@ -5,7 +5,7 @@ import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { expect } from 'vitest';
 import { logger } from '../../../../logger/index.ts';
-import customConfig from './__fixtures__/config.js';
+import customConfig from './__fixtures__/config.cjs';
 import * as file from './file.ts';
 
 describe('workers/global/config/parse/file', () => {
@@ -43,14 +43,21 @@ describe('workers/global/config/parse/file', () => {
       ['JSON5 config file', 'config.json5'],
       ['YAML config file', 'config.yaml'],
     ])('parses %s > %s', async (_fileType, filePath) => {
-      const configFile = upath.resolve(__dirname, './__fixtures__/', filePath);
+      const configFile = upath.resolve(
+        import.meta.dirname,
+        './__fixtures__/',
+        filePath,
+      );
       expect(
         await file.getConfig({ RENOVATE_CONFIG_FILE: configFile }),
       ).toEqual(customConfig);
     });
 
     it('migrates', async () => {
-      const configFile = upath.resolve(__dirname, './__fixtures__/config2.js');
+      const configFile = upath.resolve(
+        import.meta.dirname,
+        './__fixtures__/config2.js',
+      );
       // for coverage
       const relativePath = upath.relative(process.cwd(), configFile);
       const res = await file.getConfig({ RENOVATE_CONFIG_FILE: relativePath });
@@ -120,7 +127,7 @@ describe('workers/global/config/parse/file', () => {
       processExitSpy.mockImplementationOnce(() => undefined as never);
 
       const configFile = upath.resolve(
-        __dirname,
+        import.meta.dirname,
         './__fixtures__/config-ref-error.js-invalid',
       );
       const tmpDir = tmp.path;

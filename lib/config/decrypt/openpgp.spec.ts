@@ -157,7 +157,7 @@ describe('config/decrypt/openpgp', () => {
     });
 
     it('fails to load openpgp', async () => {
-      vi.doMock('../../expose.cjs', () => ({
+      vi.doMock('../../expose.ts', () => ({
         openpgp: () => {
           throw new Error('openpgp error');
         },
