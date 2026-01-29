@@ -9,7 +9,6 @@ import { generateInstallCommands, isDynamicInstall } from './containerbase.ts';
 import {
   generateDockerCommand,
   removeDockerContainer,
-  sideCarImage,
 } from './docker/index.ts';
 import { getHermitEnvs, isHermit } from './hermit.ts';
 import type {
@@ -81,6 +80,7 @@ async function prepareRawExec(
     | CommandWithOptions[]
     | (string | CommandWithOptions)[],
   opts: ExecOptions,
+  sideCarImage: string,
 ): Promise<RawExecArguments> {
   const { docker } = opts;
   const preCommands = opts.preCommands ?? [];
@@ -119,6 +119,7 @@ async function prepareRawExec(
         ...preCommands,
       ],
       dockerOptions,
+      sideCarImage,
     );
     rawCommands = [dockerCommand];
   } else if (isDynamicInstall(opts.toolConstraints)) {
@@ -166,8 +167,13 @@ export async function exec(
 ): Promise<ExecResult> {
   const { docker } = opts;
   const dockerChildPrefix = GlobalConfig.get('dockerChildPrefix', 'renovate_');
+  const sideCarImage = GlobalConfig.get('dockerSidecarImage')!;
 
-  const { rawCommands, rawOptions } = await prepareRawExec(cmd, opts);
+  const { rawCommands, rawOptions } = await prepareRawExec(
+    cmd,
+    opts,
+    sideCarImage,
+  );
   const useDocker = isDocker(docker);
 
   let res: ExecResult = { stdout: '', stderr: '' };
