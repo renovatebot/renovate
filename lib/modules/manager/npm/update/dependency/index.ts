@@ -15,7 +15,7 @@ import { getNewGitValue, getNewNpmAliasValue } from './common.ts';
 import {
   updatePnpmCatalogDependency,
   updatePnpmConfigDependency,
-} from './pnpm';
+} from './pnpm.ts';
 import { updateYarnrcCatalogDependency } from './yarn.ts';
 
 function renameObjKey(
