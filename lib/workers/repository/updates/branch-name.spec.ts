@@ -32,6 +32,22 @@ describe('workers/repository/updates/branch-name', () => {
       expect(upgrade.branchName).toBe('axios-replacement');
     });
 
+    it('ignores grouping of lockfile maintenance update', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+        updateType: 'lockFileMaintenance',
+        depName: 'axios',
+        depNameSanitized: 'axios',
+        branchTopic: 'lock-file-maintenance', // default for lockFileMaintenance
+        branchName: '{{branchPrefix}}{{additionalBranchPrefix}}{{branchTopic}}', // default
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('lock-file-maintenance');
+    });
+
     it('uses groupName if no slug defined, ignores sharedVariableName', () => {
       const upgrade = partial<BranchUpgradeConfig>({
         groupName: 'some group name',
