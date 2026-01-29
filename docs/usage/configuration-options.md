@@ -1920,7 +1920,7 @@ For example, to group all non-major devDependencies updates together into a sing
 
 <!-- prettier-ignore -->
 !!! note
-    Replacement updates will never be grouped.
+    Replacement updates and lock file maintenance will never be grouped.
 
 ## groupSlug
 
@@ -3728,7 +3728,7 @@ You can suggest a new community package rule by editing [the `replacements.json`
 
 <!-- prettier-ignore -->
 !!! note
-    Replacement updates will never be grouped.
+    Replacement updates and lock file maintenance will never be grouped.
 
 ### replacementNameTemplate
 
