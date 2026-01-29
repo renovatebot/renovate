@@ -6,7 +6,7 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../../../constants/error-messages.ts';
-import { pkg } from '../../../../expose.cjs';
+import { pkg } from '../../../../expose.ts';
 import { logger } from '../../../../logger/index.ts';
 import { ensureComment } from '../../../../modules/platform/comment.ts';
 import type {

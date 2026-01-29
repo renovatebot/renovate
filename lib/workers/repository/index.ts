@@ -7,7 +7,7 @@ import {
   REPOSITORY_FORKED,
   REPOSITORY_NO_CONFIG,
 } from '../../constants/error-messages.ts';
-import { pkg } from '../../expose.cjs';
+import { pkg } from '../../expose.ts';
 import { instrument } from '../../instrumentation/index.ts';
 import { addExtractionStats } from '../../instrumentation/reporting.ts';
 import { ATTR_RENOVATE_SPLIT } from '../../instrumentation/types.ts';

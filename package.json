@@ -2,7 +2,9 @@
   "name": "renovate",
   "description": "Automated dependency updates. Flexible so you don't need to be.",
   "version": "0.0.0-semantic-release",
-  "type": "commonjs",
+  "type": "module",
+  "main": "dist/renovate.js",
+  "types": "dist/renovate.d.ts",
   "bin": {
     "renovate": "dist/renovate.js",
     "renovate-config-validator": "dist/config-validator.js"

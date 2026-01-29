@@ -2,8 +2,10 @@
 import './legacy.ts';
 
 import type { Options } from 'got';
-import got, { RequestError } from 'got';
+import _got, { RequestError } from 'got';
 import type { SetRequired } from 'type-fest';
+
+const got = _got as unknown as typeof _got.default;
 import { logger } from '../../logger/index.ts';
 import { coerceNumber } from '../number.ts';
 import { type HttpRequestStatsDataPoint, HttpStats } from '../stats.ts';

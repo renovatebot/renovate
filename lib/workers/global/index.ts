@@ -22,7 +22,7 @@ import type {
   RenovateRepository,
 } from '../../config/types.ts';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages.ts';
-import { pkg } from '../../expose.cjs';
+import { pkg } from '../../expose.ts';
 import { instrument } from '../../instrumentation/index.ts';
 import {
   exportStats,
@@ -82,7 +82,7 @@ function haveReachedLimits(): boolean {
 
 /* istanbul ignore next */
 function checkEnv(): void {
-  const range = pkg.engines!.node!;
+  const range = pkg.engines.node;
   if (process.release?.name !== 'node' || !process.versions?.node) {
     logger.warn(
       { release: process.release, versions: process.versions },
