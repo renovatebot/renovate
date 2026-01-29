@@ -29,7 +29,7 @@ describe('workers/repository/updates/branch-name', () => {
       expect(upgrade.branchName).toBe('axios-replacement');
       expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
         { depName: 'axios' },
-        'Ignoring grouped branch name for replacement update or lockfile maintenance',
+        'Ignoring grouped branch name for replacement update',
       );
     });
 
@@ -46,7 +46,7 @@ describe('workers/repository/updates/branch-name', () => {
       expect(upgrade.branchName).toBe('lock-file-maintenance');
       expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
         { depName: 'axios' },
-        'Ignoring grouped branch name for replacement update or lockfile maintenance',
+        'Ignoring grouped branch name for lockFileMaintenance update',
       );
     });
 
