@@ -66,7 +66,7 @@ describe('util/exec/docker/index', () => {
       ]);
       await removeDockerContainer('bar', 'foo_');
       expect(execSnapshots).toMatchObject([
-        { cmd: 'docker ps --filter name=foo_bar -aq' },
+        { cmd: 'docker ps --filter name=foo_sidecar -aq' },
         { cmd: 'docker rm -f 12345' },
       ]);
     });
