@@ -67,10 +67,10 @@ export function generateBranchName(update: BranchUpgradeConfig): void {
   }
 
   if (update.groupName) {
-    if (update.updateType === 'replacement') {
+    if (['lockFileMaintenance', 'replacement'].includes(update.updateType!)) {
       logger.debug(
         { depName: update.depName },
-        'Ignoring grouped branch name for replacement update',
+        'Ignoring grouped branch name for replacement update or lockfile maintenance',
       );
     } else {
       update.groupName = template.compile(update.groupName, update);

@@ -10,9 +10,6 @@ const staticGroups = {
     description: 'Group all updates together.',
     groupName: 'all dependencies',
     groupSlug: 'all',
-    lockFileMaintenance: {
-      enabled: false,
-    },
     packageRules: [
       {
         groupName: 'all dependencies',
