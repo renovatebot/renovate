@@ -270,6 +270,37 @@ describe('modules/manager/npm/artifacts', () => {
       expect(res).toBeNull();
     });
 
+    it('returns null if the pnpmShrinkwrap file is not found', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 10080`,
+      );
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            currentValue: '8.15.5',
+            managerData: {
+              // to be super explicit it's not set
+              pnpmShrinkwrap: undefined,
+
+              // data from testing in https://github.com/JamieTanna-Mend-testing/pnpm-test-mra-no-workspace/pull/3
+              hasPackageManager: false,
+              npmrcFileName: null,
+              yarnZeroInstall: false,
+            },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+
+      expect(res).toBeNull();
+    });
+
     it('returns null if no minimumReleaseAge setting found', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
       fs.localPathExists.mockResolvedValueOnce(true);
