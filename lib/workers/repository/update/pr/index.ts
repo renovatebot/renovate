@@ -1,49 +1,53 @@
 import { isArray, isNonEmptyArray, isNumber } from '@sindresorhus/is';
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
-} from '../../../../constants/error-messages';
-import { pkg } from '../../../../expose.cjs';
-import { logger } from '../../../../logger';
+} from '../../../../constants/error-messages.ts';
+import { pkg } from '../../../../expose.ts';
+import { logger } from '../../../../logger/index.ts';
+import { ensureComment } from '../../../../modules/platform/comment.ts';
 import type {
   PlatformPrOptions,
   Pr,
   PrDebugData,
   UpdatePrConfig,
-} from '../../../../modules/platform';
-import { platform } from '../../../../modules/platform';
-import { ensureComment } from '../../../../modules/platform/comment';
+} from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
 import {
   getPrBodyStruct,
   hashBody,
-} from '../../../../modules/platform/pr-body';
-import { scm } from '../../../../modules/platform/scm';
-import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import { getElapsedHours } from '../../../../util/date';
-import { stripEmojis } from '../../../../util/emoji';
-import { fingerprint } from '../../../../util/fingerprint';
-import { getBranchLastCommitTime } from '../../../../util/git';
-import { memoize } from '../../../../util/memoize';
-import { incCountValue, isLimitReached } from '../../../global/limits';
+} from '../../../../modules/platform/pr-body.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import { getElapsedHours } from '../../../../util/date.ts';
+import { stripEmojis } from '../../../../util/emoji.ts';
+import { fingerprint } from '../../../../util/fingerprint.ts';
+import { getBranchLastCommitTime } from '../../../../util/git/index.ts';
+import { memoize } from '../../../../util/memoize.ts';
+import { incCountValue, isLimitReached } from '../../../global/limits.ts';
 import type {
   BranchConfig,
   BranchUpgradeConfig,
   PrBlockedBy,
-} from '../../../types';
-import { embedChangelogs } from '../../changelog';
-import { resolveBranchStatus } from '../branch/status-checks';
-import { getPrBody } from './body';
-import { getChangedLabels, prepareLabels, shouldUpdateLabels } from './labels';
-import { addParticipants } from './participants';
-import { getPrCache, setPrCache } from './pr-cache';
+} from '../../../types.ts';
+import { embedChangelogs } from '../../changelog/index.ts';
+import { resolveBranchStatus } from '../branch/status-checks.ts';
+import { getPrBody } from './body/index.ts';
+import {
+  getChangedLabels,
+  prepareLabels,
+  shouldUpdateLabels,
+} from './labels.ts';
+import { addParticipants } from './participants.ts';
+import { getPrCache, setPrCache } from './pr-cache.ts';
 import {
   generatePrBodyFingerprintConfig,
   validatePrCache,
-} from './pr-fingerprint';
-import { tryReuseAutoclosedPr } from './pr-reuse';
+} from './pr-fingerprint.ts';
+import { tryReuseAutoclosedPr } from './pr-reuse.ts';
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions,
@@ -139,7 +143,7 @@ function addPullRequestNoteIfAttestationHasBeenLost(
     upgrade.prBodyNotes ??= [];
     upgrade.prBodyNotes.push(
       [
-        '> :exclamation: **Warning**',
+        '> :stop_sign: **Caution**',
         '>',
         `> ${name} ${currentVersion} was released with an attestation, but ${newVersion} has no attestation.`,
         `> Verify that release ${newVersion} was published by the expected author.`,
@@ -218,7 +222,7 @@ export async function ensurePr(
         const lastCommitTime = await getBranchLastCommitTime(branchName);
         if (getElapsedHours(lastCommitTime) >= config.prNotPendingHours) {
           logger.debug(
-            'Branch exceeds prNotPending hours - forcing PR creation',
+            `Branch exceeds prNotPending=${config.prNotPendingHours}, hours - forcing PR creation`,
           );
           config.forcePr = true;
         }
@@ -255,7 +259,7 @@ export async function ensurePr(
               elapsedHours < config.prNotPendingHours))
         ) {
           logger.debug(
-            `Branch is ${elapsedHours} hours old - skipping PR creation`,
+            `Branch is ${elapsedHours} hours old - skipping PR creation as prNotPendingHours is set to ${config.prNotPendingHours}`,
           );
           return {
             type: 'without-pr',

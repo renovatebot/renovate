@@ -1,10 +1,10 @@
 import { isUndefined } from '@sindresorhus/is';
-import { logger } from '../../logger';
-import { stripEmojis } from '../../util/emoji';
-import { toSha256 } from '../../util/hash';
-import { regEx } from '../../util/regex';
-import { fromBase64 } from '../../util/string';
-import type { PrBodyStruct } from './types';
+import { logger } from '../../logger/index.ts';
+import { stripEmojis } from '../../util/emoji.ts';
+import { toSha256 } from '../../util/hash.ts';
+import { regEx } from '../../util/regex.ts';
+import { fromBase64 } from '../../util/string.ts';
+import type { PrBodyStruct } from './types.ts';
 
 export const prDebugDataRe = regEx(
   /\n?<!--renovate-debug:(?<payload>.*?)-->\n?/,

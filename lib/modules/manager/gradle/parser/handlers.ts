@@ -1,24 +1,24 @@
 import upath from 'upath';
-import { logger } from '../../../../logger';
-import { getSiblingFileName } from '../../../../util/fs';
-import { regEx } from '../../../../util/regex';
-import { parseUrl } from '../../../../util/url';
-import type { PackageDependency } from '../../types';
-import type { parseGradle as parseGradleCallback } from '../parser';
+import { logger } from '../../../../logger/index.ts';
+import { getSiblingFileName } from '../../../../util/fs/index.ts';
+import { regEx } from '../../../../util/regex.ts';
+import { parseUrl } from '../../../../util/url.ts';
+import type { PackageDependency } from '../../types.ts';
+import type { parseGradle as parseGradleCallback } from '../parser.ts';
 import type {
   ContentDescriptorMatcher,
   ContentDescriptorSpec,
   Ctx,
   GradleManagerData,
-} from '../types';
-import { isDependencyString, parseDependencyString } from '../utils';
+} from '../types.ts';
+import { isDependencyString, parseDependencyString } from '../utils.ts';
 import {
   GRADLE_PLUGINS,
   GRADLE_TEST_SUITES,
   findVariable,
   interpolateString,
   loadFromTokenMap,
-} from './common';
+} from './common.ts';
 
 // needed to break circular dependency
 let parseGradle: typeof parseGradleCallback;
@@ -226,10 +226,14 @@ export function handleLongFormDep(ctx: Ctx): Ctx {
 
 export function handlePlugin(ctx: Ctx): Ctx {
   const methodName = loadFromTokenMap(ctx, 'methodName')[0];
-  const pluginName = loadFromTokenMap(ctx, 'pluginName')[0];
+  const pluginNameTokens = loadFromTokenMap(ctx, 'pluginName');
   const pluginVersion = loadFromTokenMap(ctx, 'version');
 
-  const plugin = pluginName.value;
+  const plugin = interpolateString(pluginNameTokens, ctx);
+  if (!plugin) {
+    return ctx;
+  }
+
   const depName =
     methodName.value === 'kotlin' ? `org.jetbrains.kotlin.${plugin}` : plugin;
   const packageName = `${depName}:${depName}.gradle.plugin`;

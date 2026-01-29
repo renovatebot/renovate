@@ -1,14 +1,14 @@
 import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { getSiblingFileName, localPathExists } from '../../../util/fs';
-import { parseSingleYaml } from '../../../util/yaml';
-import { HelmDatasource } from '../../datasource/helm';
+import { logger } from '../../../logger/index.ts';
+import { getSiblingFileName, localPathExists } from '../../../util/fs/index.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import { parseRepository, resolveAlias } from './utils';
+} from '../types.ts';
+import { parseRepository, resolveAlias } from './utils.ts';
 
 export async function extractPackageFile(
   content: string,

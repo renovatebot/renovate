@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { MaybeTimestamp } from '../../../util/timestamp';
+import { MaybeTimestamp } from '../../../util/timestamp.ts';
 
 export const Release = z.object({
   name: z.string(),

@@ -1,7 +1,7 @@
-import { DockerDatasource } from '../../../../modules/datasource/docker';
-import getArgv from './__fixtures__/argv';
-import * as cli from './cli';
-import type { ParseConfigOptions } from './types';
+import { DockerDatasource } from '../../../../modules/datasource/docker/index.ts';
+import getArgv from './__fixtures__/argv.ts';
+import * as cli from './cli.ts';
+import type { ParseConfigOptions } from './types.ts';
 
 describe('workers/global/config/parse/cli', () => {
   let argv: string[];

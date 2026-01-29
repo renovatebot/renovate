@@ -1,14 +1,14 @@
 import { isTruthy } from '@sindresorhus/is';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
-import { isValidLocalPath, readLocalFile } from '../../../util/fs';
-import { HttpError } from '../../../util/http';
-import { joinUrlParts } from '../../../util/url';
-import { id as bazelVersioningId } from '../../versioning/bazel-module';
-import { BzlmodVersion } from '../../versioning/bazel-module/bzlmod-version';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { BazelModuleMetadata } from './schema';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { isValidLocalPath, readLocalFile } from '../../../util/fs/index.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { BzlmodVersion } from '../../versioning/bazel-module/bzlmod-version.ts';
+import { id as bazelVersioningId } from '../../versioning/bazel-module/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { BazelModuleMetadata } from './schema.ts';
 
 export class BazelDatasource extends Datasource {
   static readonly id = 'bazel';
@@ -30,12 +30,7 @@ export class BazelDatasource extends Datasource {
     super(BazelDatasource.id);
   }
 
-  @cache({
-    namespace: `datasource-${BazelDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl!}:${packageName}`,
-  })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -84,5 +79,16 @@ export class BazelDatasource extends Datasource {
     }
 
     return result.releases.length ? result : null;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${BazelDatasource.id}`,
+        key: `${config.registryUrl!}:${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
   }
 }

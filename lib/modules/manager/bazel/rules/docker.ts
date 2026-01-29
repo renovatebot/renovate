@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { DockerDatasource } from '../../../datasource/docker';
-import { id as dockerVersioning } from '../../../versioning/docker';
-import type { PackageDependency } from '../../types';
+import { DockerDatasource } from '../../../datasource/docker/index.ts';
+import { id as dockerVersioning } from '../../../versioning/docker/index.ts';
+import type { PackageDependency } from '../../types.ts';
 
 export const dockerRules = ['container_pull', '_container_pull'] as const;
 

@@ -1,4 +1,4 @@
-import { AutomergePatchMigration } from './automerge-patch-migration';
+import { AutomergePatchMigration } from './automerge-patch-migration.ts';
 
 describe('config/migrations/custom/automerge-patch-migration', () => {
   it('should migrate value to object', async () => {

@@ -1,11 +1,11 @@
-import { logger } from '../../../logger';
-import { getSiblingFileName, readLocalFile } from '../../../util/fs';
-import { getHttpUrl, parseGitUrl } from '../../../util/git/url';
-import { regEx } from '../../../util/regex';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
-import type { PackageDependency, PackageFileContent } from '../types';
-import { NixFlakeLock } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
+import { getHttpUrl, parseGitUrl } from '../../../util/git/url.ts';
+import { regEx } from '../../../util/regex.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { id as nixpkgsVersioning } from '../../versioning/nixpkgs/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { NixFlakeLock } from './schema.ts';
 
 // as documented upstream
 // https://github.com/NixOS/nix/blob/master/doc/manual/source/protocols/tarball-fetcher.md#gitea-and-forgejo-support

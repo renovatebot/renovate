@@ -1,8 +1,8 @@
-import { GitRefsDatasource } from '../../datasource/git-refs';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 
-export { updateArtifacts } from './artifacts';
-export { extractPackageFile } from './extract';
-export { updateDependency } from './update';
+export { updateArtifacts } from './artifacts.ts';
+export { extractPackageFile } from './extract.ts';
+export { updateDependency } from './update.ts';
 
 export const supportedDatasources = [GitRefsDatasource.id];
 export const supportsLockFileMaintenance = true;

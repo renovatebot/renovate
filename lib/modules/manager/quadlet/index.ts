@@ -1,6 +1,6 @@
-import type { Category } from '../../../constants';
-import { DockerDatasource } from '../../datasource/docker';
-export { extractPackageFile } from './extract';
+import type { Category } from '../../../constants/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+export { extractPackageFile } from './extract.ts';
 
 export const url =
   'https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html';

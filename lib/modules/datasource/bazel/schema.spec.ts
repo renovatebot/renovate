@@ -1,5 +1,5 @@
-import { BazelModuleMetadata } from './schema';
-import { Fixtures } from '~test/fixtures';
+import { BazelModuleMetadata } from './schema.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 describe('modules/datasource/bazel/schema', () => {
   describe('BazelModuleMetadata', () => {

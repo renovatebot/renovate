@@ -1,9 +1,9 @@
 import { DateTime } from 'luxon';
-import type { RenovateConfig } from '../../../config/types';
-import { addLibYears } from '../../../instrumentation/reporting';
-import type { LibYearsWithStatus } from '../../../instrumentation/types';
-import { logger } from '../../../logger';
-import type { PackageFile } from '../../../modules/manager/types';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { addLibYears } from '../../../instrumentation/reporting.ts';
+import type { LibYearsWithStatus } from '../../../instrumentation/types.ts';
+import { logger } from '../../../logger/index.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
 
 interface DepInfo {
   depName: string;

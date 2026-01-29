@@ -1,9 +1,9 @@
 import { codeBlock } from 'common-tags';
-import { GolangVersionDatasource } from '../../datasource/golang-version';
-import { NodeVersionDatasource } from '../../datasource/node-version';
-import { PythonVersionDatasource } from '../../datasource/python-version';
-import { RubyVersionDatasource } from '../../datasource/ruby-version';
-import { extractPackageFile } from '.';
+import { GolangVersionDatasource } from '../../datasource/golang-version/index.ts';
+import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
+import { PythonVersionDatasource } from '../../datasource/python-version/index.ts';
+import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/devcontainer/extract', () => {
   describe('extractPackageFile()', () => {

@@ -1,4 +1,4 @@
-import { extractPackageFile } from '.';
+import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/terraform-version/extract', () => {
   describe('extractPackageFile()', () => {

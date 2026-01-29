@@ -1,9 +1,9 @@
-import * as _packageCache from '../../../util/cache/package';
-import { Http } from '../../../util/http';
-import { MetadataCache } from './metadata-cache';
-import * as httpMock from '~test/http-mock';
+import * as _packageCache from '../../../util/cache/package/index.ts';
+import { Http } from '../../../util/http/index.ts';
+import { MetadataCache } from './metadata-cache.ts';
+import * as httpMock from '~test/http-mock.ts';
 
-vi.mock('../../../util/cache/package');
+vi.mock('../../../util/cache/package/index.ts');
 const packageCache = vi.mocked(_packageCache);
 
 describe('modules/datasource/rubygems/metadata-cache', () => {

@@ -1,4 +1,4 @@
-import pvp from '.';
+import pvp from './index.ts';
 
 describe('modules/versioning/pvp/index', () => {
   describe('.isGreaterThan(version, other)', () => {

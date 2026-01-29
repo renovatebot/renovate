@@ -1,4 +1,4 @@
-import { UpdateLockFilesMigration } from './update-lock-files-migration';
+import { UpdateLockFilesMigration } from './update-lock-files-migration.ts';
 
 describe('config/migrations/custom/update-lock-files-migration', () => {
   it('should replace false value', async () => {

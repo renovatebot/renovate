@@ -1,5 +1,5 @@
 import type { HTMLElement, Options } from 'node-html-parser';
-import _parse from 'node-html-parser';
+import { parse as _parse } from 'node-html-parser';
 
 export type { HTMLElement, Options };
 

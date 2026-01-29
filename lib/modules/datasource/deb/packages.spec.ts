@@ -1,18 +1,21 @@
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import * as upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { toSha256 } from '../../../util/hash';
-import { Http } from '../../../util/http';
+import { GlobalConfig } from '../../../config/global.ts';
+import { toSha256 } from '../../../util/hash.ts';
+import { Http } from '../../../util/http/index.ts';
 
-import { cacheSubDir } from './common';
-import { computeFileChecksum, mockFetchInReleaseContent } from './index.spec';
-import { downloadAndExtractPackage } from './packages';
-import { getComponentUrl, getPackageUrl } from './url';
-import * as utils from './utils';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
-import { fs } from '~test/util';
+import { cacheSubDir } from './common.ts';
+import {
+  computeFileChecksum,
+  mockFetchInReleaseContent,
+} from './index.spec.ts';
+import { downloadAndExtractPackage } from './packages.ts';
+import { getComponentUrl, getPackageUrl } from './url.ts';
+import * as utils from './utils.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { fs } from '~test/util.ts';
 
 const debBaseUrl = 'http://deb.debian.org';
 

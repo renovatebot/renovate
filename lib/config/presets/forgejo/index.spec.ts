@@ -1,10 +1,10 @@
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { setBaseUrl } from '../../../util/http/forgejo';
-import { toBase64 } from '../../../util/string';
-import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util';
-import * as forgejo from '.';
-import { hostRules } from '~test/host-rules';
-import * as httpMock from '~test/http-mock';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { setBaseUrl } from '../../../util/http/forgejo.ts';
+import { toBase64 } from '../../../util/string.ts';
+import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util.ts';
+import * as forgejo from './index.ts';
+import { hostRules } from '~test/host-rules.ts';
+import * as httpMock from '~test/http-mock.ts';
 
 const forgejoApiHost = forgejo.Endpoint;
 const basePath = '/api/v1/repos/some/repo/contents';

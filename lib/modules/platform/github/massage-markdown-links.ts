@@ -1,9 +1,9 @@
 import type { RootContent } from 'mdast';
 import { remark } from 'remark';
 import type { Plugin, Transformer } from 'unified';
-import { logger } from '../../../logger';
-import { coerceNumber } from '../../../util/number';
-import { regEx } from '../../../util/regex';
+import { logger } from '../../../logger/index.ts';
+import { coerceNumber } from '../../../util/number.ts';
+import { regEx } from '../../../util/regex.ts';
 
 interface UrlMatch {
   start: number;
@@ -69,8 +69,8 @@ export function massageMarkdownLinks(content: string): string {
       return leftPart + replaceTo + rightPart;
     }, content);
     return result.trimEnd() + rightSpaces;
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.warn({ err }, `Unable to massage markdown text`);
     return content;
-  } /* v8 ignore stop */
+  }
 }

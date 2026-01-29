@@ -1,5 +1,5 @@
-import type { UpdateType } from '../../../config/types';
-import { sortBranches } from './sort';
+import type { UpdateType } from '../../../config/types.ts';
+import { sortBranches } from './sort.ts';
 
 describe('workers/repository/process/sort', () => {
   describe('sortBranches()', () => {

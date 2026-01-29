@@ -1,7 +1,7 @@
 import { isNumber } from '@sindresorhus/is';
-import { GlobalConfig } from '../../../config/global';
-import { matchRegexOrGlob } from '../../string-match';
-import type { PackageCacheNamespace } from './types';
+import { GlobalConfig } from '../../../config/global.ts';
+import { matchRegexOrGlob } from '../../string-match.ts';
+import type { PackageCacheNamespace } from './types.ts';
 
 /**
  * This MUST NOT be used outside of cache implementation
