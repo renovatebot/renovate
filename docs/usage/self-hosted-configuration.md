@@ -677,7 +677,7 @@ You can skip the host part, and use only the datasource and credentials.
 
 Adds a custom prefix to the default Renovate sidecar Docker containers name and label.
 
-For example, if you set `dockerChildPrefix=myprefix_` then the final container created from the `containerbase/sidecar` is:
+For example, if you set `dockerChildPrefix=myprefix_` then the final container created from the `ghcr.io/renovatebot/base-image` is:
 
 - called `myprefix_sidecar` instead of `renovate_sidecar`
 - labeled `myprefix_child` instead of `renovate_child`
