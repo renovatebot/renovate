@@ -1,4 +1,4 @@
-import apk from '.';
+import apk from './index.ts';
 
 describe('modules/versioning/apk/index', () => {
   describe('isValid', () => {
