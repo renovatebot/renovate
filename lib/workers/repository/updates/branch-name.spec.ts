@@ -29,7 +29,24 @@ describe('workers/repository/updates/branch-name', () => {
       expect(upgrade.branchName).toBe('axios-replacement');
       expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
         { depName: 'axios' },
-        'Ignoring grouped branch name for replacement update',
+        'Ignoring grouped branch name for replacement update or lockfile maintenance',
+      );
+    });
+
+    it('ignores grouping of lockfile maintenance update', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        groupName: 'grouptopic',
+        updateType: 'lockFileMaintenance',
+        depName: 'axios',
+        depNameSanitized: 'axios',
+        branchTopic: 'lock-file-maintenance', // default for lockFileMaintenance
+        branchName: '{{branchPrefix}}{{additionalBranchPrefix}}{{branchTopic}}', // default
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('lock-file-maintenance');
+      expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
+        { depName: 'axios' },
+        'Ignoring grouped branch name for replacement update or lockfile maintenance',
       );
     });
 
