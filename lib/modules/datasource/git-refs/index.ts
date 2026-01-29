@@ -87,7 +87,6 @@ export class GitRefsDatasource extends GitDatasource {
       logger.debug({ err, packageName }, 'Error getting git-refs');
     }
 
-    /* v8 ignore next 3 -- TODO: add test */
     if (!rawRefs) {
       return null;
     }
