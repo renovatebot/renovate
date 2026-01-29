@@ -65,36 +65,44 @@ export function generateBranchName(update: BranchUpgradeConfig): void {
     );
     update.groupName = update.sharedVariableName;
   }
+
   if (update.groupName) {
-    update.groupName = template.compile(update.groupName, update);
-    logger.trace('Using group branchName template');
-    // TODO: types (#22198)
-    logger.trace(
-      `Dependency ${update.depName!} is part of group ${update.groupName}`,
-    );
-    if (update.groupSlug) {
-      update.groupSlug = template.compile(update.groupSlug, update);
+    if (update.updateType === 'replacement') {
+      logger.debug(
+        { depName: update.depName },
+        'Ignoring grouped branch name for replacement update',
+      );
     } else {
-      update.groupSlug = update.groupName;
-    }
-    update.groupSlug = slugify(update.groupSlug, {
-      lower: true,
-    });
-    if (update.updateType === 'major' && update.separateMajorMinor) {
-      if (update.separateMultipleMajor) {
-        update.groupSlug = `major-${newMajor}-${update.groupSlug}`;
+      update.groupName = template.compile(update.groupName, update);
+      logger.trace('Using group branchName template');
+      // TODO: types (#22198)
+      logger.trace(
+        `Dependency ${update.depName!} is part of group ${update.groupName}`,
+      );
+      if (update.groupSlug) {
+        update.groupSlug = template.compile(update.groupSlug, update);
       } else {
-        update.groupSlug = `major-${update.groupSlug}`;
+        update.groupSlug = update.groupName;
       }
+      update.groupSlug = slugify(update.groupSlug, {
+        lower: true,
+      });
+      if (update.updateType === 'major' && update.separateMajorMinor) {
+        if (update.separateMultipleMajor) {
+          update.groupSlug = `major-${newMajor}-${update.groupSlug}`;
+        } else {
+          update.groupSlug = `major-${update.groupSlug}`;
+        }
+      }
+      if (update.updateType === 'minor' && update.separateMultipleMinor) {
+        update.groupSlug = `minor-${newMajor}.${newMinor}-${update.groupSlug}`;
+      }
+      if (update.updateType === 'patch' && update.separateMinorPatch) {
+        update.groupSlug = `patch-${update.groupSlug}`;
+      }
+      update.branchTopic = update.group!.branchTopic ?? update.branchTopic;
+      update.branchName = update.group!.branchName ?? update.branchName;
     }
-    if (update.updateType === 'minor' && update.separateMultipleMinor) {
-      update.groupSlug = `minor-${newMajor}.${newMinor}-${update.groupSlug}`;
-    }
-    if (update.updateType === 'patch' && update.separateMinorPatch) {
-      update.groupSlug = `patch-${update.groupSlug}`;
-    }
-    update.branchTopic = update.group!.branchTopic ?? update.branchTopic;
-    update.branchName = update.group!.branchName ?? update.branchName;
   }
 
   if (update.hashedBranchLength) {

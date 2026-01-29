@@ -136,7 +136,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(1);
     });
 
-    it('executes command with shell mode by default', async () => {
+    it('does not execute command with shell mode by default', async () => {
       const commands = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
@@ -187,7 +187,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         'some-command',
         expect.objectContaining({
           cwd: localDir,
-          shell: true,
+          shell: false,
         }),
       );
       expect(res.artifactErrors).toHaveLength(0);

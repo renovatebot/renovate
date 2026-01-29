@@ -274,21 +274,25 @@ If the "development branch" is configured but the branch itself does not exist (
 
 Renovate often needs to use third-party tools in its PRs, like `npm` to update `package-lock.json` or `go` to update `go.sum`.
 
-Renovate supports four possible ways to access those tools:
+Renovate supports three possible ways to access those tools:
 
 - `global`: Uses pre-installed tools, e.g. `npm` installed via `npm install -g npm`.
 - `install` (default): Downloads and installs tools at runtime if running in a [Containerbase](https://github.com/containerbase/base) environment, otherwise falls back to `global`
-- `docker`: Runs tools inside Docker "sidecar" containers using `docker run`.
 - `hermit`: Uses the [Hermit](https://github.com/cashapp/hermit) tool installation approach.
 
-Starting in v36, Renovate's default Docker image (previously referred to as the "slim" image) uses `binarySource=install` while the "full" Docker image uses `binarySource=global`.
 If you are running Renovate in an environment where runtime download and install of tools is not possible then you should use the "full" image.
 
 If you are building your own Renovate image, e.g. by installing Renovate using `npm`, then you will need to ensure that all necessary tools are installed globally before running Renovate so that `binarySource=global` will work.
 
-The `binarySource=docker` approach should not be necessary in most cases now and `binarySource=install` is recommended instead.
-If you have a use case where you cannot use `binarySource=install` but can use `binarySource=docker` then please share it in a GitHub Discussion so that the maintainers can understand it.
+<!-- prettier-ignore -->
+!!! warning
+    The usage of `binarySource=docker` is deprecated, and [will be removed in the future](https://github.com/renovatebot/renovate/issues/40747).
+
+We also have a deprecated `docker` mode.
+
 For this to work, `docker` needs to be installed and the Docker socket available to Renovate.
+
+If you are using this mode, and cannot migrate to `binarySource=install`, [please provide feedback in this Discussion](https://github.com/renovatebot/renovate/discussions/40742).
 
 ## cacheDir
 
@@ -1474,6 +1478,10 @@ For example: `:warning:` will be replaced with `⚠️`.
 
 Some cloud providers offer services to receive metadata about the current instance, for example [AWS Instance metadata](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-instance-metadata.html) or [GCP VM metadata](https://cloud.google.com/compute/docs/metadata/overview).
 You can control if Renovate should try to access these services with the `useCloudMetadataServices` config option.
+
+<!-- prettier-ignore -->
+!!! note
+    This should only be set via an environment variable, as it is used before Renovate initialises its global configuration.
 
 ## userAgent
 
