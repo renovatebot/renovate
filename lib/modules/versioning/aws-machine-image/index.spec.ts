@@ -1,4 +1,4 @@
-import aws from '.';
+import aws from './index.ts';
 
 describe('modules/versioning/aws-machine-image/index', () => {
   describe('parse(version)', () => {

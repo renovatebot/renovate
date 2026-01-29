@@ -1,27 +1,47 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
-import { findUpLocal, readLocalFile, writeLocalFile } from '../../../util/fs';
-import { getFiles, getRepoStatus } from '../../../util/git';
-import { regEx } from '../../../util/regex';
-import { scm } from '../../platform/scm';
+import { GlobalConfig } from '../../../config/global.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
+import {
+  findUpLocal,
+  readLocalFile,
+  writeLocalFile,
+} from '../../../util/fs/index.ts';
+import { getFiles, getRepoStatus } from '../../../util/git/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { scm } from '../../platform/scm.ts';
 import {
   extraEnv,
   extractGradleVersion,
   getJavaConstraint,
   gradleWrapperFileName,
   prepareGradleCommand,
-} from '../gradle-wrapper/utils';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+} from '../gradle-wrapper/utils.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import {
   isGcvLockFile,
   isGcvPropsFile,
-} from './extract/consistent-versions-plugin';
-import { isGradleBuildFile } from './utils';
+} from './extract/consistent-versions-plugin.ts';
+import { isGradleBuildFile } from './utils.ts';
+
+export function isGradleExecutionAllowed(command: string): boolean {
+  const allowlist = GlobalConfig.get('allowedUnsafeExecutions', [
+    'gradleWrapper',
+  ]);
+
+  if (!allowlist.includes('gradleWrapper')) {
+    logger.once.warn(
+      `Gradle wrapper command, \`${command}\`, was requested to run, but \`gradleWrapper\` is not permitted in the allowedUnsafeExecutions`,
+    );
+    return false;
+  }
+
+  return true;
+}
 
 // .lockfile is gradle default lockfile, /versions.lock is gradle-consistent-versions plugin lockfile
 function isLockFile(fileName: string): boolean {
@@ -173,6 +193,13 @@ export async function updateArtifacts({
   ) {
     logger.trace(
       'No build.gradle(.kts) file or not in root project - skipping lock file maintenance',
+    );
+    return null;
+  }
+
+  if (!isGradleExecutionAllowed(gradlewFile)) {
+    logger.trace(
+      'Not allowed to execute gradle due to allowedUnsafeExecutions - aborting update',
     );
     return null;
   }

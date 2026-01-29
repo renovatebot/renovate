@@ -1,11 +1,5 @@
 import { ClientRequest } from 'node:http';
-import type {
-  Context,
-  Span,
-  SpanOptions,
-  Tracer,
-  TracerProvider,
-} from '@opentelemetry/api';
+import type { Context, Span, Tracer, TracerProvider } from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
 import { ProxyTracerProvider, SpanStatusCode } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
@@ -45,14 +39,17 @@ import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
+import { isPromise } from '@sindresorhus/is';
 import { pkg } from '../expose.cjs';
-import { getEnv } from '../util/env';
+import { getEnv } from '../util/env.ts';
+import { GitOperationSpanProcessor } from '../util/git/span-processor.ts';
+import type { RenovateSpanOptions } from './types.ts';
 import {
   isTraceDebuggingEnabled,
   isTraceSendingEnabled,
   isTracingEnabled,
   massageThrowable,
-} from './utils';
+} from './utils.ts';
 
 let instrumentations: Instrumentation[] = [];
 
@@ -73,6 +70,7 @@ export function init(): void {
   if (isTraceSendingEnabled()) {
     const exporter = new OTLPTraceExporter();
     spanProcessors.push(new BatchSpanProcessor(exporter));
+    spanProcessors.push(new GitOperationSpanProcessor());
   }
 
   const env = getEnv();
@@ -125,7 +123,7 @@ export function init(): void {
           span.setStatus({ code: SpanStatusCode.OK });
         }
       },
-      /* v8 ignore stop */
+      /* v8 ignore stop -- not easily testable */
     }),
     new BunyanInstrumentation(),
     new RedisInstrumentation(),
@@ -135,8 +133,8 @@ export function init(): void {
   });
 }
 
-/* v8 ignore start -- not easily testable */
 // https://github.com/open-telemetry/opentelemetry-js-api/issues/34
+/* v8 ignore next -- not easily testable */
 export async function shutdown(): Promise<void> {
   const traceProvider = getTracerProvider();
   if (traceProvider instanceof NodeTracerProvider) {
@@ -148,7 +146,6 @@ export async function shutdown(): Promise<void> {
     }
   }
 }
-/* v8 ignore stop */
 
 export function disableInstrumentations(): void {
   for (const instrumentation of instrumentations) {
@@ -171,18 +168,24 @@ export function instrument<F extends () => ReturnType<F>>(
 export function instrument<F extends () => ReturnType<F>>(
   name: string,
   fn: F,
-  options: SpanOptions,
+  options: RenovateSpanOptions,
 ): ReturnType<F>;
 export function instrument<F extends () => ReturnType<F>>(
   name: string,
   fn: F,
-  options: SpanOptions = {},
+  options: RenovateSpanOptions,
+  context: Context,
+): ReturnType<F>;
+export function instrument<F extends () => ReturnType<F>>(
+  name: string,
+  fn: F,
+  options: RenovateSpanOptions = {},
   context: Context = api.context.active(),
 ): ReturnType<F> {
   return getTracer().startActiveSpan(name, options, context, (span: Span) => {
     try {
       const ret = fn();
-      if (ret instanceof Promise) {
+      if (isPromise(ret)) {
         return ret
           .catch((e) => {
             span.recordException(e);

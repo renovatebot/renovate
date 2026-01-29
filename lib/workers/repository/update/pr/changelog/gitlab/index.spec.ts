@@ -1,16 +1,15 @@
-import { getChangeLogJSON } from '..';
-import * as semverVersioning from '../../../../../../modules/versioning/semver';
-import * as hostRules from '../../../../../../util/host-rules';
-import type { Timestamp } from '../../../../../../util/timestamp';
-import type { BranchUpgradeConfig } from '../../../../../types';
-import { GitLabChangeLogSource } from './source';
-import * as httpMock from '~test/http-mock';
-import { partial } from '~test/util';
+import * as semverVersioning from '../../../../../../modules/versioning/semver/index.ts';
+import * as hostRules from '../../../../../../util/host-rules.ts';
+import type { Timestamp } from '../../../../../../util/timestamp.ts';
+import type { BranchUpgradeConfig } from '../../../../../types.ts';
+import { getChangeLogJSON } from '../index.ts';
+import { GitLabChangeLogSource } from './source.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
   branchName: '',
-  endpoint: 'https://gitlab.com/api/v4/ ',
   packageName: 'renovate',
   versioning: semverVersioning.id,
   currentVersion: '5.2.0',
@@ -268,7 +267,6 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://gitlab-enterprise.example.com/meno/dropzone/',
-          endpoint: 'https://gitlab-enterprise.example.com/',
         }),
       ).toMatchSnapshot({
         hasReleaseNotes: false,
@@ -301,9 +299,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          platform: 'gitlab',
           sourceUrl: 'https://git.test.com/meno/dropzone/',
-          endpoint: 'https://git.test.com/api/v4/',
         }),
       ).toMatchSnapshot({
         hasReleaseNotes: false,

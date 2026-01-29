@@ -2,14 +2,14 @@ import { pathToFileURL } from 'url';
 import { isFunction } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import upath from 'upath';
-import { massageConfig } from '../../../../config/massage';
-import { migrateConfig } from '../../../../config/migration';
-import type { RenovateConfig } from '../../../../config/types';
-import { validateConfig } from '../../../../config/validation';
-import { logger } from '../../../../logger';
-import { parseJson } from '../../../../util/common';
-import { readSystemFile } from '../../../../util/fs';
-import { parseSingleYaml } from '../../../../util/yaml';
+import { massageConfig } from '../../../../config/massage.ts';
+import { migrateConfig } from '../../../../config/migration.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { validateConfig } from '../../../../config/validation.ts';
+import { logger } from '../../../../logger/index.ts';
+import { parseJson } from '../../../../util/common.ts';
+import { readSystemFile } from '../../../../util/fs/index.ts';
+import { parseSingleYaml } from '../../../../util/yaml.ts';
 
 export async function migrateAndValidateConfig(
   config: RenovateConfig,

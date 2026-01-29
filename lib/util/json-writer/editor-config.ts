@@ -1,10 +1,10 @@
 import type { Props } from 'editorconfig';
 import { parse } from 'editorconfig';
 import upath from 'upath';
-import { GlobalConfig } from '../../config/global';
-import { logger } from '../../logger';
-import type { CodeFormat } from './code-format';
-import type { IndentationType } from './indentation-type';
+import { GlobalConfig } from '../../config/global.ts';
+import { logger } from '../../logger/index.ts';
+import type { CodeFormat } from './code-format.ts';
+import type { IndentationType } from './indentation-type.ts';
 
 export class EditorConfig {
   public static async getCodeFormat(fileName: string): Promise<CodeFormat> {

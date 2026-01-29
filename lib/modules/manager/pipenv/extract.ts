@@ -1,16 +1,16 @@
 import { pipenv as pipenvDetect } from '@renovatebot/detect-tools';
 import { RANGE_PATTERN } from '@renovatebot/pep440';
 import { isArray, isObject, isString } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import type { SkipReason } from '../../../types';
-import { getParentDir, localPathExists } from '../../../util/fs';
-import { ensureLocalPath } from '../../../util/fs/util';
-import { regEx } from '../../../util/regex';
-import { parse as parseToml } from '../../../util/toml';
-import { PypiDatasource } from '../../datasource/pypi';
-import { normalizePythonDepName } from '../../datasource/pypi/common';
-import type { PackageDependency, PackageFileContent } from '../types';
-import type { PipFile, PipRequirement, PipSource } from './types';
+import { logger } from '../../../logger/index.ts';
+import type { SkipReason } from '../../../types/index.ts';
+import { getParentDir, localPathExists } from '../../../util/fs/index.ts';
+import { ensureLocalPath } from '../../../util/fs/util.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parse as parseToml } from '../../../util/toml.ts';
+import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { PipFile, PipRequirement, PipSource } from './types.ts';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
 export const packagePattern = '[A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9]';

@@ -1,11 +1,11 @@
 import { isNullOrUndefined, isString } from '@sindresorhus/is';
-import type { PackageDependency } from '../../../types';
-import { TerraformProviderExtractor } from '../../base';
+import type { PackageDependency } from '../../../types.ts';
+import { TerraformProviderExtractor } from '../../base.ts';
 import type {
   TerraformDefinitionFile,
   TerraformRequiredProvider,
-} from '../../hcl/types';
-import type { ProviderLock } from '../../lockfile/types';
+} from '../../hcl/types.ts';
+import type { ProviderLock } from '../../lockfile/types.ts';
 
 export class RequiredProviderExtractor extends TerraformProviderExtractor {
   getCheckList(): string[] {

@@ -1,9 +1,11 @@
 import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
-import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
-import type { BranchStatus } from '../../../types';
-import { repoFingerprint } from '../util';
-import { client as _client } from './client';
+import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import { repoFingerprint } from '../util.ts';
+import { client as _client } from './client.ts';
+import { writeToConfig } from './index.ts';
+import * as gerrit from './index.ts';
 import type {
   GerritAccountInfo,
   GerritChange,
@@ -11,15 +13,13 @@ import type {
   GerritLabelTypeInfo,
   GerritProjectInfo,
   GerritRevisionInfo,
-} from './types';
+} from './types.ts';
 import {
   REQUEST_DETAILS_FOR_PRS,
   TAG_PULL_REQUEST_BODY,
   mapGerritChangeToPr,
-} from './utils';
-import { writeToConfig } from '.';
-import * as gerrit from '.';
-import { git, hostRules, partial } from '~test/util';
+} from './utils.ts';
+import { git, hostRules, partial } from '~test/util.ts';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate';
 
@@ -34,8 +34,8 @@ const codeReviewLabel: GerritLabelTypeInfo = {
   default_value: 0,
 };
 
-vi.mock('../../../util/host-rules');
-vi.mock('./client');
+vi.mock('../../../util/host-rules.ts');
+vi.mock('./client.ts');
 const clientMock = vi.mocked(_client);
 
 describe('modules/platform/gerrit/index', () => {
@@ -57,6 +57,7 @@ describe('modules/platform/gerrit/index', () => {
       repository: 'test/repo',
       labels: {},
     });
+    clientMock.getGerritVersion.mockResolvedValue('3.0.0');
     await gerrit.initPlatform({
       endpoint: gerritEndpointUrl,
       username: 'user',
@@ -65,14 +66,16 @@ describe('modules/platform/gerrit/index', () => {
   });
 
   describe('initPlatform()', () => {
-    it('should throw if no endpoint', () => {
+    it('should throw if no endpoint', async () => {
       expect.assertions(1);
-      expect(() => gerrit.initPlatform({})).toThrow();
+      await expect(() => gerrit.initPlatform({})).rejects.toThrow();
     });
 
-    it('should throw if no username/password', () => {
+    it('should throw if no username/password', async () => {
       expect.assertions(1);
-      expect(() => gerrit.initPlatform({ endpoint: 'endpoint' })).toThrow();
+      await expect(() =>
+        gerrit.initPlatform({ endpoint: 'endpoint' }),
+      ).rejects.toThrow();
     });
 
     it('should init', async () => {
@@ -83,6 +86,28 @@ describe('modules/platform/gerrit/index', () => {
           password: '123',
         }),
       ).toEqual({ endpoint: 'https://dev.gerrit.com/renovate/' });
+    });
+
+    it('should throw if auth fails', async () => {
+      clientMock.getGerritVersion.mockRejectedValue(new Error('Auth failed'));
+      await expect(
+        gerrit.initPlatform({
+          endpoint: gerritEndpointUrl,
+          username: 'abc',
+          password: '123',
+        }),
+      ).rejects.toThrow('Init: Authentication failure');
+    });
+
+    it('should throw if version is unparseable', async () => {
+      clientMock.getGerritVersion.mockResolvedValue('not-a-valid-version');
+      await expect(
+        gerrit.initPlatform({
+          endpoint: gerritEndpointUrl,
+          username: 'abc',
+          password: '123',
+        }),
+      ).rejects.toThrow('Unable to parse Gerrit version: not-a-valid-version');
     });
   });
 
@@ -125,6 +150,23 @@ describe('modules/platform/gerrit/index', () => {
       });
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
         url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+      });
+    });
+
+    it('initRepo() - passes cloneSubmodules', async () => {
+      clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
+      clientMock.findChanges.mockResolvedValueOnce([]);
+
+      await gerrit.initRepo({
+        repository: 'test/repo',
+        cloneSubmodules: true,
+        cloneSubmodulesFilter: ['test'],
+      });
+
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
+        url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+        cloneSubmodules: true,
+        cloneSubmodulesFilter: ['test'],
       });
     });
 
@@ -188,6 +230,7 @@ describe('modules/platform/gerrit/index', () => {
             commit_with_footers: 'Renovate-Branch: source',
           }),
         },
+        created: '2025-04-14 16:33:37.000000000',
       });
       clientMock.findChanges.mockResolvedValueOnce([change]);
       await expect(
@@ -202,7 +245,9 @@ describe('modules/platform/gerrit/index', () => {
 
   describe('getPr()', () => {
     it('getPr() - found', async () => {
-      const change = partial<GerritChange>({});
+      const change = partial<GerritChange>({
+        created: '2025-04-14 16:33:37.000000000',
+      });
       clientMock.getChange.mockResolvedValueOnce(change);
       await expect(gerrit.getPr(123456)).resolves.toEqual(
         mapGerritChangeToPr(change),
@@ -254,6 +299,23 @@ describe('modules/platform/gerrit/index', () => {
         TAG_PULL_REQUEST_BODY,
       );
     });
+  });
+
+  it('updatePr() - targetBranch set => move the change', async () => {
+    const change = partial<GerritChange>({ branch: 'main' });
+    clientMock.getChange.mockResolvedValueOnce(change);
+    clientMock.moveChange.mockResolvedValueOnce(
+      partial<GerritChange>({ branch: 'new-main' }),
+    );
+    await gerrit.updatePr({
+      number: 123456,
+      prTitle: 'title',
+      targetBranch: 'new-main',
+    });
+    expect(clientMock.moveChange).toHaveBeenCalledExactlyOnceWith(
+      123456,
+      'new-main',
+    );
   });
 
   describe('createPr()', () => {
@@ -330,12 +392,11 @@ describe('modules/platform/gerrit/index', () => {
       await expect(
         gerrit.getBranchPr('renovate/dependency-1.x'),
       ).resolves.toBeNull();
-      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
+      expect(clientMock.getBranchChange).toHaveBeenCalledExactlyOnceWith(
         'test/repo',
         {
           branchName: 'renovate/dependency-1.x',
           state: 'open',
-          singleChange: true,
           requestDetails: REQUEST_DETAILS_FOR_PRS,
         },
       );
@@ -350,21 +411,21 @@ describe('modules/platform/gerrit/index', () => {
             commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
           }),
         },
+        created: '2025-04-14T16:33:37.000000000',
       });
-      clientMock.findChanges.mockResolvedValueOnce([change]);
+      clientMock.getBranchChange.mockResolvedValueOnce(change);
       await expect(
         gerrit.getBranchPr('renovate/dependency-1.x', 'master'),
       ).resolves.toHaveProperty('number', 123456);
-      expect(clientMock.findChanges.mock.lastCall).toEqual([
+      expect(clientMock.getBranchChange).toHaveBeenCalledExactlyOnceWith(
         'test/repo',
         {
           state: 'open',
           branchName: 'renovate/dependency-1.x',
-          singleChange: true,
           targetBranch: 'master',
           requestDetails: REQUEST_DETAILS_FOR_PRS,
         },
-      ]);
+      );
     });
 
     it('getBranchPr() - found even without targetBranch', async () => {
@@ -376,21 +437,21 @@ describe('modules/platform/gerrit/index', () => {
             commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
           }),
         },
+        created: '2025-04-14 16:33:37.000000000',
       });
-      clientMock.findChanges.mockResolvedValueOnce([change]);
+      clientMock.getBranchChange.mockResolvedValueOnce(change);
       await expect(
         gerrit.getBranchPr('renovate/dependency-1.x', undefined),
       ).resolves.toHaveProperty('number', 123456);
-      expect(clientMock.findChanges.mock.lastCall).toEqual([
+      expect(clientMock.getBranchChange).toHaveBeenCalledExactlyOnceWith(
         'test/repo',
         {
           state: 'open',
           branchName: 'renovate/dependency-1.x',
-          singleChange: true,
           targetBranch: undefined,
           requestDetails: REQUEST_DETAILS_FOR_PRS,
         },
-      ]);
+      );
     });
   });
 
@@ -415,6 +476,7 @@ describe('modules/platform/gerrit/index', () => {
             commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
           }),
         },
+        created: '2025-04-14 16:33:37.000000000',
       });
       clientMock.findChanges.mockResolvedValueOnce([change, change, change]);
       await expect(gerrit.getPrList()).resolves.toHaveLength(3);

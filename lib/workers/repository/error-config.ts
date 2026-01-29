@@ -1,9 +1,9 @@
 // TODO #22198
-import { GlobalConfig } from '../../config/global';
-import type { RenovateConfig } from '../../config/types';
-import { logger } from '../../logger';
-import type { Pr } from '../../modules/platform';
-import { platform } from '../../modules/platform';
+import { GlobalConfig } from '../../config/global.ts';
+import type { RenovateConfig } from '../../config/types.ts';
+import { logger } from '../../logger/index.ts';
+import type { Pr } from '../../modules/platform/index.ts';
+import { platform } from '../../modules/platform/index.ts';
 
 export function raiseConfigWarningIssue(
   config: RenovateConfig,

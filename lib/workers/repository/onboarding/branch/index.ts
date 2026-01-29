@@ -1,28 +1,28 @@
 import { isNonEmptyObject, isNullOrUndefined } from '@sindresorhus/is';
-import { mergeChildConfig } from '../../../../config';
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
-import { REPOSITORY_NO_PACKAGE_FILES } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import { type Pr, platform } from '../../../../modules/platform';
-import { scm } from '../../../../modules/platform/scm';
-import { getCache } from '../../../../util/cache/repository';
-import { getBranchCommit, setGitAuthor } from '../../../../util/git';
-import { checkIfConfigured } from '../../configured';
-import { extractAllDependencies } from '../../extract';
-import { mergeRenovateConfig } from '../../init/merge';
-import { OnboardingState } from '../common';
-import { getOnboardingPr, isOnboarded } from './check';
-import { getOnboardingConfig } from './config';
-import { createOnboardingBranch } from './create';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { mergeChildConfig } from '../../../../config/index.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { REPOSITORY_NO_PACKAGE_FILES } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { type Pr, platform } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { getCache } from '../../../../util/cache/repository/index.ts';
+import { getBranchCommit, setGitAuthor } from '../../../../util/git/index.ts';
+import { checkIfConfigured } from '../../configured.ts';
+import { extractAllDependencies } from '../../extract/index.ts';
+import { mergeRenovateConfig } from '../../init/merge.ts';
+import { OnboardingState } from '../common.ts';
+import { getOnboardingPr, isOnboarded } from './check.ts';
+import { getOnboardingConfig } from './config.ts';
+import { createOnboardingBranch } from './create.ts';
 import {
   deleteOnboardingCache,
   hasOnboardingBranchChanged,
   isOnboardingBranchConflicted,
   isOnboardingBranchModified,
   setOnboardingCache,
-} from './onboarding-branch-cache';
-import { rebaseOnboardingBranch } from './rebase';
+} from './onboarding-branch-cache.ts';
+import { rebaseOnboardingBranch } from './rebase.ts';
 
 export async function checkOnboardingBranch(
   config: RenovateConfig,

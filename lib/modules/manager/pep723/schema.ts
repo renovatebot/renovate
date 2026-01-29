@@ -1,8 +1,8 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { z } from 'zod';
-import { Toml } from '../../../util/schema-utils';
-import { depTypes, pep508ToPackageDependency } from '../pep621/utils';
-import type { PackageFileContent } from '../types';
+import { Toml } from '../../../util/schema-utils/index.ts';
+import { depTypes, pep508ToPackageDependency } from '../pep621/utils.ts';
+import type { PackageFileContent } from '../types.ts';
 
 const Pep723Dep = z
   .string()

@@ -1,5 +1,8 @@
-import { logger } from '../../../logger';
-import { checkRangeAndRemoveUnnecessaryRangeLimit, getNewValue } from './range';
+import { logger } from '../../../logger/index.ts';
+import {
+  checkRangeAndRemoveUnnecessaryRangeLimit,
+  getNewValue,
+} from './range.ts';
 
 describe('modules/versioning/pep440/range', () => {
   it.each`

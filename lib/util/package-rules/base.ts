@@ -1,5 +1,8 @@
-import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import type { MatcherApi } from './types';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import type { MatcherApi } from './types.ts';
 
 export abstract class Matcher implements MatcherApi {
   /**

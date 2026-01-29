@@ -1,12 +1,12 @@
-import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
-import type { Repo } from './types';
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
+import type { Repo } from './types.ts';
 import {
   getMergeMethod,
   getRepoUrl,
   trimTrailingApiPath,
   usableRepo,
-} from './utils';
-import { partial } from '~test/util';
+} from './utils.ts';
+import { partial } from '~test/util.ts';
 
 describe('modules/platform/gitea/utils', () => {
   const mockRepo = partial<Repo>({

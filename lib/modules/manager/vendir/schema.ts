@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { regEx } from '../../../util/regex';
-import { LooseArray } from '../../../util/schema-utils';
+import { regEx } from '../../../util/regex.ts';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
 
 export const VendirResource = z.object({
   apiVersion: z.literal('vendir.k14s.io/v1alpha1'),

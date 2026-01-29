@@ -1,11 +1,14 @@
 import { isNullOrUndefined, isString, isTruthy } from '@sindresorhus/is';
 import slugify from 'slugify';
-import { mergeChildConfig } from '../../config';
-import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { logger } from '../../logger';
-import type { StageName } from '../../types/skip-reason';
-import { compile } from '../template';
-import matchers from './matchers';
+import { mergeChildConfig } from '../../config/index.ts';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import { logger } from '../../logger/index.ts';
+import type { StageName } from '../../types/skip-reason.ts';
+import { compile } from '../template/index.ts';
+import matchers from './matchers.ts';
 
 async function matchesRule(
   inputConfig: PackageRuleInputConfig,
@@ -94,8 +97,8 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
   return config;
 }
 
-function removeMatchers(
-  packageRule: PackageRule & PackageRuleInputConfig,
+function removeMatchers<T extends Record<string, unknown>>(
+  packageRule: T,
 ): Record<string, unknown> {
   for (const key of Object.keys(packageRule)) {
     if (key.startsWith('match') || key.startsWith('exclude')) {

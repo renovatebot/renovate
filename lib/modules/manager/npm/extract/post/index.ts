@@ -1,7 +1,7 @@
-import type { PackageFile } from '../../../types';
-import type { NpmManagerData } from '../../types';
-import { getLockedVersions } from './locked-versions';
-import { detectMonorepos } from './monorepo';
+import type { PackageFile } from '../../../types.ts';
+import type { NpmManagerData } from '../../types.ts';
+import { getLockedVersions } from './locked-versions.ts';
+import { detectMonorepos } from './monorepo.ts';
 
 export async function postExtract(
   packageFiles: PackageFile<NpmManagerData>[],

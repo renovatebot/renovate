@@ -17,6 +17,10 @@ The config options below _must_ be configured in the bot/admin config, so in eit
 
 For information about how to configure Renovate with a `config.js` see the [Using `config.js` documentation](./getting-started/running.md#using-configjs).
 
+<!-- prettier-ignore -->
+!!! tip
+    This documentation corresponds with the JSON schema in [`docs.renovatebot.com/renovate-global-schema.json`](renovate-global-schema.json), and any [inherited config options](./config-overview.md#inherited-config) are also present in [`docs.renovatebot.com/renovate-inherited-schema.json`](renovate-inherited-schema.json).
+
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
 <!-- prettier-ignore -->
@@ -28,6 +32,8 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 ## allowPlugins
 
 ## allowScripts
+
+## allowShellExecutorForPostUpgradeCommands
 
 ## allowedCommands
 
@@ -111,6 +117,21 @@ module.exports = {
   allowedHeaders: ['custom-header'],
 };
 ```
+
+## allowedUnsafeExecutions
+
+This should be configured to a list of commands which are allowed to be run automatically as part of a dependency upgrade.
+
+This is a separate class of commands that could be executed compared to [`allowedCommands`](#allowedcommands), or package managers that are controlled with [`allowScripts=true`](#allowscripts) and [`ignoreScripts=false`](./configuration-options.md#ignorescripts), where seemingly "safe" commands can result in code execution.
+As there is a security risk of running these commands automatically when a dependency upgrades, self hosted implementations need to explicitly declare which commands are permitted for their installation.
+For more details of where this may be found, see ["Trusting Repository Developers"](./security-and-permissions.md#trusting-repository-developers).
+
+Allowed options:
+
+| Option          | Description                                                                   |
+| --------------- | ----------------------------------------------------------------------------- |
+| `goGenerate`    | Allows the `goGenerate` `postUpdateCommand` to run after a go mod update.     |
+| `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle. |
 
 ## autodiscover
 
@@ -205,6 +226,13 @@ The order method for autodiscover server side repository search.
 ## autodiscoverRepoSort
 
 The sort method for autodiscover server side repository search.
+
+Platform supported sort options:
+
+| Platform       | Supported sort options                      |
+| -------------- | ------------------------------------------- |
+| GitLab         | `created_at`, `updated_at`, `id`            |
+| Forgejo, Gitea | `alpha`, `created`, `updated`, `size`, `id` |
 
 > If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
 
@@ -449,9 +477,10 @@ Other valid cache namespaces are as follows:
 - `datasource-terraform-provider`
 - `datasource-terraform`
 - `datasource-typst:cache-provider`
-- `datasource-typst:releases`
+- `datasource-typst:registry-releases`
 - `datasource-unity3d`
 - `datasource-unity3d-packages`
+- `github-branches-datasource-v1`
 - `github-releases-datasource-v2`
 - `github-tags-datasource-v2`
 - `merge-confidence`
@@ -648,7 +677,7 @@ You can skip the host part, and use only the datasource and credentials.
 
 Adds a custom prefix to the default Renovate sidecar Docker containers name and label.
 
-For example, if you set `dockerChildPrefix=myprefix_` then the final container created from the `containerbase/sidecar` is:
+For example, if you set `dockerChildPrefix=myprefix_` then the final container created from the `ghcr.io/renovatebot/base-image` is:
 
 - called `myprefix_sidecar` instead of `renovate_sidecar`
 - labeled `myprefix_child` instead of `renovate_child`
@@ -672,7 +701,7 @@ Setting a different limit is useful for registries that ignore the `n` parameter
 
 ## dockerSidecarImage
 
-By default Renovate pulls the sidecar Docker containers from `ghcr.io/containerbase/sidecar`.
+By default Renovate pulls the sidecar Docker containers from `ghcr.io/renovatebot/base-image`.
 You can use the `dockerSidecarImage` option to override this default.
 
 Say you want to pull a custom image from `ghcr.io/your_company/sidecar`.
@@ -684,7 +713,7 @@ You would put this in your configuration file:
 }
 ```
 
-Now when Renovate pulls a new `sidecar` image, the final image is `ghcr.io/your_company/sidecar` instead of `ghcr.io/containerbase/sidecar`.
+Now when Renovate pulls a new `sidecar` image, the final image is `ghcr.io/your_company/sidecar` instead of `ghcr.io/renovatebot/base-image`.
 
 ## dockerUser
 
@@ -1014,6 +1043,12 @@ Only set this to `false` if all three statements are true:
 - You've configured Renovate entirely on the bot side (e.g. empty `renovate.json` in repositories)
 - You want to run Renovate on every repository the bot has access to
 - You want to skip all onboarding PRs
+
+## onboardingAutoCloseAge
+
+Maximum number of days after which Renovate will stop trying to onboard the repository, and will close any existing onboarding PRs.
+
+By default this option is set to `null`.
 
 ## onboardingBranch
 

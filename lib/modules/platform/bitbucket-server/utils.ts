@@ -1,16 +1,15 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
-import { URL } from 'node:url';
 import { isNonEmptyString } from '@sindresorhus/is';
-import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { HostRule } from '../../../types';
-import type { GitOptions, GitProtocol } from '../../../types/git';
-import * as git from '../../../util/git';
-import { regEx } from '../../../util/regex';
-import { parseUrl } from '../../../util/url';
-import { getPrBodyStruct } from '../pr-body';
-import type { GitUrlOption } from '../types';
-import type { BbsPr, BbsRestPr, BbsRestRepo, BitbucketError } from './types';
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { GitOptions, GitProtocol } from '../../../types/git.ts';
+import type { HostRule } from '../../../types/index.ts';
+import * as git from '../../../util/git/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
+import { getPrBodyStruct } from '../pr-body.ts';
+import type { GitUrlOption } from '../types.ts';
+import type { BbsPr, BbsRestPr, BbsRestRepo, BitbucketError } from './types.ts';
 
 export const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
   'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException';
@@ -84,14 +83,18 @@ function generateUrlFromEndpoint(
   repository: string,
 ): string {
   const url = new URL(defaultEndpoint);
+  const authString =
+    opts.username && opts.password
+      ? `${opts.username}:${opts.password}`
+      : (opts.username ?? '');
+
   const generatedUrl = git.getUrl({
     protocol: url.protocol as GitProtocol,
     // TODO: types (#22198)
-    auth: `${opts.username}:${opts.password}`,
+    auth: authString,
     host: `${url.host}${url.pathname}${
-      /* v8 ignore start */
+      /* v8 ignore next */
       url.pathname.endsWith('/') ? '' : '/'
-      /* v8 ignore stop */
     }scm`,
     repository,
   });
@@ -119,26 +122,40 @@ export function getRepoGitUrl(
   info: BbsRestRepo,
   opts: HostRule,
 ): string {
-  if (gitUrl === 'ssh') {
-    const sshUrl = info.links.clone?.find(({ name }) => name === 'ssh');
-    if (sshUrl === undefined) {
-      throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
+  switch (gitUrl) {
+    case 'endpoint': {
+      const generatedUrl = generateUrlFromEndpoint(
+        defaultEndpoint,
+        opts,
+        repository,
+      );
+      logger.debug(`Using endpoint URL: ${generatedUrl}`);
+      return generatedUrl;
     }
-    logger.debug(`Using ssh URL: ${sshUrl.href}`);
-    return sshUrl.href;
+    case 'ssh': {
+      const sshUrl = info.links.clone?.find(({ name }) => name === 'ssh');
+      if (sshUrl === undefined) {
+        throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
+      }
+      logger.debug(`Using ssh URL: ${sshUrl.href}`);
+      return sshUrl.href;
+    }
+    case undefined:
+    case 'default': {
+      let cloneUrl = info.links.clone?.find(({ name }) => name === 'http');
+      if (cloneUrl) {
+        // Inject auth into the API provided URL
+        return injectAuth(cloneUrl.href, opts);
+      }
+      // Http access might be disabled, try to find ssh url in this case
+      cloneUrl = info.links.clone?.find(({ name }) => name === 'ssh');
+      if (cloneUrl) {
+        return cloneUrl.href;
+      }
+      // SSH urls can be used directly
+      return generateUrlFromEndpoint(defaultEndpoint, opts, repository);
+    }
   }
-  let cloneUrl = info.links.clone?.find(({ name }) => name === 'http');
-  if (cloneUrl) {
-    // Inject auth into the API provided URL
-    return injectAuth(cloneUrl.href, opts);
-  }
-  // Http access might be disabled, try to find ssh url in this case
-  cloneUrl = info.links.clone?.find(({ name }) => name === 'ssh');
-  if (gitUrl === 'endpoint' || !cloneUrl) {
-    return generateUrlFromEndpoint(defaultEndpoint, opts, repository);
-  }
-  // SSH urls can be used directly
-  return cloneUrl.href;
 }
 
 export function getExtraCloneOpts(opts: HostRule): GitOptions {

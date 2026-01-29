@@ -1,19 +1,19 @@
 import upath from 'upath';
-import { getConfigFileNames } from '../../../../config/app-strings';
-import * as _decrypt from '../../../../config/decrypt';
-import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages';
-import { getCustomEnv } from '../../../../util/env';
-import { getParentDir, readSystemFile } from '../../../../util/fs';
-import getArgv from './__fixtures__/argv';
-import * as _fileConfigParser from './file';
-import * as _hostRulesFromEnv from './host-rules-from-env';
-import * as httpMock from '~test/http-mock';
+import { getConfigFileNames } from '../../../../config/app-strings.ts';
+import * as _decrypt from '../../../../config/decrypt.ts';
+import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages.ts';
+import { getCustomEnv } from '../../../../util/env.ts';
+import { getParentDir, readSystemFile } from '../../../../util/fs/index.ts';
+import getArgv from './__fixtures__/argv.ts';
+import * as _fileConfigParser from './file.ts';
+import * as _hostRulesFromEnv from './host-rules-from-env.ts';
+import * as httpMock from '~test/http-mock.ts';
 
-vi.mock('../../../../modules/datasource/npm');
-vi.mock('../../../../util/fs');
-vi.mock('../../../../config/decrypt');
-vi.mock('./host-rules-from-env');
-vi.mock('./file');
+vi.mock('../../../../modules/datasource/npm.ts');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('../../../../config/decrypt.ts');
+vi.mock('./host-rules-from-env.ts');
+vi.mock('./file.ts');
 
 const decrypt = vi.mocked(_decrypt);
 const fileConfigParser = vi.mocked(_fileConfigParser);

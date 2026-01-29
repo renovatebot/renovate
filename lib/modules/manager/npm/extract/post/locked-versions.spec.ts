@@ -1,21 +1,21 @@
-import type { PackageFile } from '../../../types';
-import type { NpmManagerData } from '../../types';
-import * as _npm from '../npm';
-import * as _pnpm from '../pnpm';
-import * as _yarn from '../yarn';
-import { getLockedVersions } from './locked-versions';
-import { logger } from '~test/util';
+import type { PackageFile } from '../../../types.ts';
+import type { NpmManagerData } from '../../types.ts';
+import * as _npm from '../npm.ts';
+import * as _pnpm from '../pnpm.ts';
+import * as _yarn from '../yarn.ts';
+import { getLockedVersions } from './locked-versions.ts';
+import { logger } from '~test/util.ts';
 
 const npm = vi.mocked(_npm);
 const pnpm = vi.mocked(_pnpm);
 const yarn = vi.mocked(_yarn);
 
-vi.mock('../npm');
-vi.mock('../yarn', async () => ({
-  ...(await vi.importActual<typeof import('../yarn')>('../yarn')),
+vi.mock('../npm.ts');
+vi.mock('../yarn.ts', async () => ({
+  ...(await vi.importActual<typeof import('../yarn.ts')>('../yarn')),
   getYarnLock: vi.fn(),
 }));
-vi.mock('../pnpm');
+vi.mock('../pnpm.ts');
 
 describe('modules/manager/npm/extract/post/locked-versions', () => {
   describe('.getLockedVersions()', () => {

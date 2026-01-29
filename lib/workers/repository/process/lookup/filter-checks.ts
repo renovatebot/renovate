@@ -1,21 +1,21 @@
 import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
-import { mergeChildConfig } from '../../../../config';
-import type { MinimumReleaseAgeBehaviour } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import type { Release } from '../../../../modules/datasource';
-import { postprocessRelease } from '../../../../modules/datasource/postprocess-release';
-import type { VersioningApi } from '../../../../modules/versioning';
-import { getElapsedMs } from '../../../../util/date';
+import { mergeChildConfig } from '../../../../config/index.ts';
+import type { MinimumReleaseAgeBehaviour } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { Release } from '../../../../modules/datasource/index.ts';
+import { postprocessRelease } from '../../../../modules/datasource/postprocess-release.ts';
+import type { VersioningApi } from '../../../../modules/versioning/index.ts';
+import { getElapsedMs } from '../../../../util/date.ts';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
-} from '../../../../util/merge-confidence';
-import { coerceNumber } from '../../../../util/number';
-import { applyPackageRules } from '../../../../util/package-rules';
-import { toMs } from '../../../../util/pretty-time';
-import type { LookupUpdateConfig, UpdateResult } from './types';
-import { getUpdateType } from './update-type';
+} from '../../../../util/merge-confidence/index.ts';
+import { coerceNumber } from '../../../../util/number.ts';
+import { applyPackageRules } from '../../../../util/package-rules/index.ts';
+import { toMs } from '../../../../util/pretty-time.ts';
+import type { LookupUpdateConfig, UpdateResult } from './types.ts';
+import { getUpdateType } from './update-type.ts';
 
 export interface InternalChecksResult {
   release?: Release;
@@ -82,7 +82,12 @@ export async function filterInternalChecks(
       // Now check for a minimumReleaseAge config
       const { minimumConfidence, minimumReleaseAge, updateType } =
         releaseConfig;
-      if (isNonEmptyString(minimumReleaseAge)) {
+
+      const minimumReleaseAgeMs = isNonEmptyString(minimumReleaseAge)
+        ? coerceNumber(toMs(minimumReleaseAge), 0)
+        : 0;
+
+      if (minimumReleaseAgeMs) {
         const minimumReleaseAgeBehaviour =
           releaseConfig.minimumReleaseAgeBehaviour;
 
@@ -91,7 +96,7 @@ export async function filterInternalChecks(
           // we should skip this if we have a timestamp that isn't passing checks:
           if (
             getElapsedMs(candidateRelease.releaseTimestamp) <
-            coerceNumber(toMs(minimumReleaseAge), 0)
+            minimumReleaseAgeMs
           ) {
             // Skip it if it doesn't pass checks
             logger.trace(
@@ -149,7 +154,7 @@ export async function filterInternalChecks(
     }
 
     if (candidateVersionsWithoutReleaseTimestamp['timestamp-required'].length) {
-      logger.debug(
+      logger.once.debug(
         {
           depName,
           versions:
@@ -164,7 +169,7 @@ export async function filterInternalChecks(
       logger.once.warn(
         "Some release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
       );
-      logger.debug(
+      logger.once.debug(
         {
           depName,
           versions:

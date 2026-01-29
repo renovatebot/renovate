@@ -1,7 +1,7 @@
-import type { Category } from '../../../constants';
-import { BuildpacksRegistryDatasource } from '../../datasource/buildpacks-registry';
-import { DockerDatasource } from '../../datasource/docker';
-export { extractPackageFile } from './extract';
+import type { Category } from '../../../constants/index.ts';
+import { BuildpacksRegistryDatasource } from '../../datasource/buildpacks-registry/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+export { extractPackageFile } from './extract.ts';
 
 export const defaultConfig = {
   commitMessageTopic: 'buildpack {{depName}}',

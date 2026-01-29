@@ -1,6 +1,6 @@
 import RE2 from 're2';
-import { CONFIG_VALIDATION } from '../constants/error-messages';
-import { regEx } from './regex';
+import { CONFIG_VALIDATION } from '../constants/error-messages.ts';
+import { regEx } from './regex.ts';
 
 describe('util/regex', () => {
   it('uses RE2', () => {
@@ -33,7 +33,7 @@ describe('util/regex', () => {
       },
     }));
 
-    const regex = await import('./regex.js');
+    const regex = await import('./regex.ts');
     expect(regex.regEx('foo')).toBeInstanceOf(RegExp);
   });
 });

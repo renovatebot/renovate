@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { z } from 'zod';
-import { parseSingleYaml, parseYaml } from './yaml';
+import { parseSingleYaml, parseYaml } from './yaml.ts';
 
 describe('util/yaml', () => {
   describe('loadAll', () => {

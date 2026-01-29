@@ -1,47 +1,49 @@
 import fs from 'fs-extra';
-import { GlobalConfig } from '../../config/global';
-import { applySecretsAndVariablesToConfig } from '../../config/secrets';
-import type { RenovateConfig } from '../../config/types';
+import { GlobalConfig } from '../../config/global.ts';
+import { applySecretsAndVariablesToConfig } from '../../config/secrets.ts';
+import type { RenovateConfig } from '../../config/types.ts';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
   REPOSITORY_NO_CONFIG,
-} from '../../constants/error-messages';
+} from '../../constants/error-messages.ts';
 import { pkg } from '../../expose.cjs';
-import { instrument } from '../../instrumentation';
-import { addExtractionStats } from '../../instrumentation/reporting';
-import { logger, setMeta } from '../../logger';
-import { resetRepositoryLogLevelRemaps } from '../../logger/remap';
-import { removeDanglingContainers } from '../../util/exec/docker';
-import { deleteLocalFile, privateCacheDir } from '../../util/fs';
-import { isCloned } from '../../util/git';
-import { detectSemanticCommits } from '../../util/git/semantic';
-import * as queue from '../../util/http/queue';
-import * as throttle from '../../util/http/throttle';
-import { addSplit, getSplits, splitInit } from '../../util/split';
+import { instrument } from '../../instrumentation/index.ts';
+import { addExtractionStats } from '../../instrumentation/reporting.ts';
+import { ATTR_RENOVATE_SPLIT } from '../../instrumentation/types.ts';
+import { logger, setMeta } from '../../logger/index.ts';
+import { resetRepositoryLogLevelRemaps } from '../../logger/remap.ts';
+import { removeDanglingContainers } from '../../util/exec/docker/index.ts';
+import { deleteLocalFile, privateCacheDir } from '../../util/fs/index.ts';
+import { isCloned } from '../../util/git/index.ts';
+import { detectSemanticCommits } from '../../util/git/semantic.ts';
+import * as queue from '../../util/http/queue.ts';
+import * as throttle from '../../util/http/throttle.ts';
+import { addSplit, getSplits, splitInit } from '../../util/split.ts';
 import {
   AbandonedPackageStats,
   DatasourceCacheStats,
+  GitOperationStats,
   HttpCacheStats,
   HttpStats,
   LookupStats,
   ObsoleteCacheHitLogger,
   PackageCacheStats,
-} from '../../util/stats';
-import { setBranchCache } from './cache';
-import { extractRepoProblems } from './common';
-import { configMigration } from './config-migration';
-import { ensureDependencyDashboard } from './dependency-dashboard';
-import handleError from './error';
-import { finalizeRepo } from './finalize';
-import { pruneStaleBranches } from './finalize/prune';
-import { initRepo } from './init';
-import { OnboardingState } from './onboarding/common';
-import { ensureOnboardingPr } from './onboarding/pr';
-import { extractDependencies, updateRepo } from './process';
-import type { ExtractResult } from './process/extract-update';
-import type { ProcessResult } from './result';
-import { processResult } from './result';
+} from '../../util/stats.ts';
+import { setBranchCache } from './cache.ts';
+import { extractRepoProblems } from './common.ts';
+import { configMigration } from './config-migration/index.ts';
+import { ensureDependencyDashboard } from './dependency-dashboard.ts';
+import handleError from './error.ts';
+import { finalizeRepo } from './finalize/index.ts';
+import { pruneStaleBranches } from './finalize/prune.ts';
+import { initRepo } from './init/index.ts';
+import { OnboardingState } from './onboarding/common.ts';
+import { ensureOnboardingPr } from './onboarding/pr/index.ts';
+import type { ExtractResult } from './process/extract-update.ts';
+import { extractDependencies, updateRepo } from './process/index.ts';
+import type { ProcessResult, RepositoryResult } from './result.ts';
+import { processResult } from './result.ts';
 
 // istanbul ignore next
 export async function renovateRepository(
@@ -58,7 +60,7 @@ export async function renovateRepository(
       localDir: string;
       errorRes?: string;
     }> => {
-      let errorRes: string | undefined;
+      let errorRes: RepositoryResult | undefined;
       let config = GlobalConfig.set(
         applySecretsAndVariablesToConfig({
           config: repoConfig,
@@ -95,6 +97,11 @@ export async function renovateRepository(
 
       return { config, localDir, errorRes };
     },
+    {
+      attributes: {
+        [ATTR_RENOVATE_SPLIT]: 'init',
+      },
+    },
   );
 
   try {
@@ -107,9 +114,9 @@ export async function renovateRepository(
       config.repoIsOnboarded! ||
       !OnboardingState.onboardingCacheValid ||
       OnboardingState.prUpdateRequested;
-    const extractResult = await instrument('extract', () =>
-      performExtract ? extractDependencies(config) : emptyExtract(config),
-    );
+    const extractResult = performExtract
+      ? await extractDependencies(config)
+      : emptyExtract(config);
     addExtractionStats(config, extractResult);
 
     const { branches, branchList, packageFiles } = extractResult;
@@ -122,12 +129,24 @@ export async function renovateRepository(
       GlobalConfig.get('dryRun') !== 'lookup' &&
       GlobalConfig.get('dryRun') !== 'extract'
     ) {
-      await instrument('onboarding', () =>
-        ensureOnboardingPr(config, packageFiles, branches),
+      await instrument(
+        'onboarding',
+        () => ensureOnboardingPr(config, packageFiles, branches),
+        {
+          attributes: {
+            [ATTR_RENOVATE_SPLIT]: 'onboarding',
+          },
+        },
       );
       addSplit('onboarding');
-      const res = await instrument('update', () =>
-        updateRepo(config, branches),
+      const res = await instrument(
+        'update',
+        () => updateRepo(config, branches),
+        {
+          attributes: {
+            [ATTR_RENOVATE_SPLIT]: 'update',
+          },
+        },
       );
       setMeta({ repository: config.repository });
       addSplit('update');
@@ -189,6 +208,7 @@ export async function renovateRepository(
   LookupStats.report();
   ObsoleteCacheHitLogger.report();
   AbandonedPackageStats.report();
+  GitOperationStats.report();
   const cloned = isCloned();
   /* v8 ignore next 11 -- coverage not required of these `undefined` checks, as we're happy receiving an `undefined` in the logs */
   logger.info(
@@ -208,11 +228,23 @@ export async function renovateRepository(
 
 // istanbul ignore next: renovateRepository is ignored
 function emptyExtract(config: RenovateConfig): ExtractResult {
-  return {
-    branches: [],
-    branchList: [config.onboardingBranch!], // to prevent auto closing
-    packageFiles: {},
-  };
+  return instrument(
+    'extract',
+    () => {
+      addSplit('extract');
+      addSplit('lookup');
+      return {
+        branches: [],
+        branchList: [config.onboardingBranch!], // to prevent auto closing
+        packageFiles: {},
+      };
+    },
+    {
+      attributes: {
+        [ATTR_RENOVATE_SPLIT]: 'extract',
+      },
+    },
+  );
 }
 
 export function printRepositoryProblems(repository: string | undefined): void {

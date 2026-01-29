@@ -7,12 +7,13 @@ import {
 import emojibaseEmojiRegex from 'emojibase-regex/emoji.js';
 import SHORTCODE_REGEX from 'emojibase-regex/shortcode.js';
 import { z } from 'zod';
-import type { RenovateConfig } from '../config/types';
-import dataFiles from '../data-files.generated';
-import { logger } from '../logger';
-import { regEx } from './regex';
-import { Result } from './result';
-import { Json } from './schema-utils';
+import type { RenovateConfig } from '../config/types.ts';
+import dataFiles from '../data-files.generated.ts';
+import { logger } from '../logger/index.ts';
+import { regEx } from './regex.ts';
+import { Result } from './result.ts';
+import { Json } from './schema-utils/index.ts';
+import { coerceString } from './string.ts';
 
 let unicodeEmoji = true;
 
@@ -30,6 +31,7 @@ type EmojiShortcodeMapping = z.infer<typeof EmojiShortcodes>;
 
 const patchedEmojis: EmojiShortcodeMapping = {
   '26A0-FE0F': ['warning'], // Colorful warning (⚠️) instead of black and white (⚠)
+  '2139-FE0F': ['information_source'], // Colorful info (ℹ️) instead of black and white (ℹ)
 };
 
 function initMapping(mapping: EmojiShortcodeMapping): void {
@@ -120,7 +122,7 @@ export function unemojify(text: string): string {
   return text.replace(emojiRegex, (emoji) => {
     const hexCode = stripHexCode(fromUnicodeToHexcode(emoji));
     const shortCode = shortCodesByHex.get(hexCode);
-    return shortCode ?? /* istanbul ignore next */ '�';
+    return coerceString(shortCode, '�');
   });
 }
 

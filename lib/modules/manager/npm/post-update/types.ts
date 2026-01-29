@@ -1,6 +1,6 @@
-import type { FileChange } from '../../../../util/git/types';
-import type { PackageFile } from '../../types';
-import type { NpmManagerData } from '../types';
+import type { FileChange } from '../../../../util/git/types.ts';
+import type { PackageFile } from '../../types.ts';
+import type { NpmManagerData } from '../types.ts';
 
 export interface DetermineLockFileDirsResult {
   yarnLockDirs: string[];

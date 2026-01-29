@@ -23,10 +23,10 @@ import {
   PLATFORM_BAD_CREDENTIALS,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
-} from '../../../constants/error-messages';
-import type { Platform } from '../types';
-import { getCodeCommitUrl } from './codecommit-client';
-import { git, logger } from '~test/util';
+} from '../../../constants/error-messages.ts';
+import type { Platform } from '../types.ts';
+import { getCodeCommitUrl } from './codecommit-client.ts';
+import { git, logger } from '~test/util.ts';
 
 const codeCommitClient = mockClient(CodeCommitClient);
 
@@ -175,7 +175,7 @@ describe('modules/platform/codecommit/index', () => {
         codeCommit.initRepo({ repository: 'repositoryName' }),
       ).resolves.toEqual({
         repoFingerprint:
-          'f0bcfd81abefcdf9ae5e5de58d1a868317503ea76422309bc212d1ef25a1e67789d0bfa752a7e2abd4510f4f3e4f60cdaf6202a42883fb97bb7110ab3600785e',
+          '1b375a58e9961e5c2c8cdc497c5975beb287d538b4692918a3306b92db181cd125c5bd0b1bf8e399cf31cd5f1d24b6dad5a80bdf061f6003cf1c33790525f9c6',
         defaultBranch: 'main',
         isFork: false,
       });

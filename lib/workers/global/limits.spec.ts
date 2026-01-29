@@ -1,4 +1,4 @@
-import type { BranchConfig, BranchUpgradeConfig } from '../types';
+import type { BranchConfig, BranchUpgradeConfig } from '../types.ts';
 import {
   calcLimit,
   hasMultipleLimits,
@@ -8,8 +8,8 @@ import {
   resetAllLimits,
   setCount,
   setMaxLimit,
-} from './limits';
-import { logger, partial } from '~test/util';
+} from './limits.ts';
+import { logger, partial } from '~test/util.ts';
 
 describe('workers/global/limits', () => {
   beforeEach(() => {
@@ -96,7 +96,7 @@ describe('workers/global/limits', () => {
       expect(calcLimit(upgrades, 'prConcurrentLimit')).toBe(12);
     });
 
-    it('returns 0 if atleast one upgrade has no limit in the branch', () => {
+    it('returns 0 if at least one upgrade has no limit in the branch', () => {
       const upgrades = partial<BranchUpgradeConfig>([
         {
           prHourlyLimit: 10,

@@ -1,7 +1,10 @@
 import { isUndefined } from '@sindresorhus/is';
-import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { getRegexOrGlobPredicate } from '../string-match';
-import { Matcher } from './base';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import { getRegexOrGlobPredicate } from '../string-match.ts';
+import { Matcher } from './base.ts';
 
 export class NewValueMatcher extends Matcher {
   override matches(
