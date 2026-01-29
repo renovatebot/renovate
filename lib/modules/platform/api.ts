@@ -1,15 +1,15 @@
-import type { PlatformId } from '../../constants';
-import * as azure from './azure';
-import * as bitbucket from './bitbucket';
-import * as bitbucketServer from './bitbucket-server';
-import * as codecommit from './codecommit';
-import * as forgejo from './forgejo';
-import * as gerrit from './gerrit';
-import * as gitea from './gitea';
-import * as github from './github';
-import * as gitlab from './gitlab';
-import * as local from './local';
-import type { Platform } from './types';
+import type { PlatformId } from '../../constants/index.ts';
+import * as azure from './azure/index.ts';
+import * as bitbucket from './bitbucket/index.ts';
+import * as bitbucketServer from './bitbucket-server/index.ts';
+import * as codecommit from './codecommit/index.ts';
+import * as forgejo from './forgejo/index.ts';
+import * as gerrit from './gerrit/index.ts';
+import * as gitea from './gitea/index.ts';
+import * as github from './github/index.ts';
+import * as gitlab from './gitlab/index.ts';
+import * as local from './local/index.ts';
+import type { Platform } from './types.ts';
 
 const api = new Map<PlatformId, Platform>();
 export default api;

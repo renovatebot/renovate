@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { extractPackageFile } from '.';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { extractPackageFile } from './index.ts';
 
 const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
@@ -11,7 +11,7 @@ const adminConfig: RepoGlobalConfig = {
 };
 
 // auto-mock fs
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/tflint-plugin/extract', () => {
   beforeEach(() => {

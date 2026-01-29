@@ -1,4 +1,4 @@
-import { normalizeScalaVersion, sortPackageFiles } from './util';
+import { normalizeScalaVersion, sortPackageFiles } from './util.ts';
 
 describe('modules/manager/sbt/util', () => {
   describe('sortPackageFiles()', () => {

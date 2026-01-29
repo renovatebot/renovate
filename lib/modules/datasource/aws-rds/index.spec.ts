@@ -7,8 +7,8 @@ import {
   RDSClient,
 } from '@aws-sdk/client-rds';
 import { mockClient } from 'aws-sdk-client-mock';
-import { getPkgReleases } from '..';
-import { AwsRdsDatasource } from '.';
+import { getPkgReleases } from '../index.ts';
+import { AwsRdsDatasource } from './index.ts';
 
 const rdsMock = mockClient(RDSClient);
 

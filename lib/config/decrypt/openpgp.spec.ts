@@ -1,10 +1,10 @@
 import { codeBlock } from 'common-tags';
-import { CONFIG_VALIDATION } from '../../constants/error-messages';
-import { decryptConfig, setPrivateKeys } from '../decrypt';
-import { GlobalConfig } from '../global';
-import type { RenovateConfig } from '../types';
-import { tryDecryptOpenPgp } from './openpgp';
-import { Fixtures } from '~test/fixtures';
+import { CONFIG_VALIDATION } from '../../constants/error-messages.ts';
+import { decryptConfig, setPrivateKeys } from '../decrypt.ts';
+import { GlobalConfig } from '../global.ts';
+import type { AllConfig } from '../types.ts';
+import { tryDecryptOpenPgp } from './openpgp.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 const privateKey = Fixtures.get('private-pgp.pem', '..');
 const privateKeyEcc = codeBlock`
@@ -28,7 +28,7 @@ const repository = 'abc/def';
 
 describe('config/decrypt/openpgp', () => {
   describe('decryptConfig()', () => {
-    let config: RenovateConfig;
+    let config: AllConfig;
 
     beforeAll(() => {
       process.env.RENOVATE_X_USE_OPENPGP = 'true';
@@ -157,13 +157,13 @@ describe('config/decrypt/openpgp', () => {
     });
 
     it('fails to load openpgp', async () => {
-      vi.doMock('../../expose.cjs', () => ({
+      vi.doMock('../../expose.ts', () => ({
         openpgp: () => {
           throw new Error('openpgp error');
         },
       }));
-      const pgp = await import('./openpgp.js');
-      const { logger } = await import('../../logger/index.js');
+      const pgp = await import('./openpgp.ts');
+      const { logger } = await import('../../logger/index.ts');
       expect(
         await pgp.tryDecryptOpenPgp(
           '',

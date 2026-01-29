@@ -1,9 +1,9 @@
-import { GlobalConfig } from '../../../config/global';
-import { updateArtifacts } from '.';
-import { mockExecAll } from '~test/exec-util';
-import { fs } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import { updateArtifacts } from './index.ts';
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/flux/artifacts', () => {
   beforeAll(() => {
@@ -44,6 +44,9 @@ describe('modules/manager/flux/artifacts', () => {
     expect(snapshots).toMatchObject([
       {
         cmd: 'flux install --export --components source-controller,kustomize-controller,helm-controller,notification-controller > clusters/my-cluster/flux-system/gotk-components.yaml',
+        options: {
+          shell: true,
+        },
       },
     ]);
   });

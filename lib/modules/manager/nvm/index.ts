@@ -1,8 +1,8 @@
-import type { Category } from '../../../constants';
-import { NodeVersionDatasource } from '../../datasource/node-version';
-import * as nodeVersioning from '../../versioning/node';
+import type { Category } from '../../../constants/index.ts';
+import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
+import * as nodeVersioning from '../../versioning/node/index.ts';
 
-export { extractPackageFile } from './extract';
+export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'nvm';
 export const url = 'https://github.com/nvm-sh/nvm#readme';

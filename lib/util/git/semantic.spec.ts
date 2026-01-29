@@ -1,7 +1,7 @@
-import { initRepoCache } from '../cache/repository/init';
-import { detectSemanticCommits } from './semantic';
-import type { RenovateConfig } from '~test/util';
-import { git, partial } from '~test/util';
+import { initRepoCache } from '../cache/repository/init.ts';
+import { detectSemanticCommits } from './semantic.ts';
+import type { RenovateConfig } from '~test/util.ts';
+import { git, partial } from '~test/util.ts';
 
 let config: RenovateConfig;
 

@@ -2,32 +2,32 @@ import { isString } from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { getEnv } from '../../../util/env';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
-import { filterMap } from '../../../util/filter-map';
+import { GlobalConfig } from '../../../config/global.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { getEnv } from '../../../util/env.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
+import { filterMap } from '../../../util/filter-map.ts';
 import {
   ensureCacheDir,
   findLocalSiblingOrParent,
   isValidLocalPath,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import { getGitEnvironmentVariables } from '../../../util/git/auth';
-import { regEx } from '../../../util/regex';
-import { isValid } from '../../versioning/semver';
+} from '../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { isValid } from '../../versioning/semver/index.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-} from '../types';
-import { getExtraDepsNotice } from './artifacts-extra';
+} from '../types.ts';
+import { getExtraDepsNotice } from './artifacts-extra.ts';
 
 const { major, valid } = semver;
 
@@ -132,6 +132,9 @@ export async function updateArtifacts({
       vendorDir &&
       (await readLocalFile(vendorModulesFileName)) !== null);
   let massagedGoMod = newGoModContent;
+  const useGoGenerate = !!config.postUpdateOptions?.includes('goGenerate');
+  const allowedUnsafeExecutions = GlobalConfig.get('allowedUnsafeExecutions');
+  const goGenerateAllowed = allowedUnsafeExecutions?.includes('goGenerate');
 
   if (config.postUpdateOptions?.includes('gomodMassage')) {
     // Regex match inline replace directive, example:
@@ -330,6 +333,17 @@ export async function updateArtifacts({
       execCommands.push(`${cmd} ${args}`);
     }
 
+    if (useGoGenerate) {
+      if (goGenerateAllowed) {
+        logger.debug('go generate command included');
+        execCommands.push(`${cmd} generate ./...`);
+      } else {
+        logger.once.warn(
+          `go generate command requested as a post update action, but goGenerate is not permitted in the allowedUnsafeExecutions`,
+        );
+      }
+    }
+
     await exec(execCommands, execOptions);
 
     const status = await getRepoStatus();
@@ -380,9 +394,12 @@ export async function updateArtifacts({
       }
     }
 
+    const alreadyAdded = new Set<string>();
+    const alreadyDeleted = new Set<string>();
     if (useVendor) {
       for (const f of status.modified.concat(status.not_added)) {
         if (vendorDir && f.startsWith(vendorDir)) {
+          alreadyAdded.add(f);
           res.push({
             file: {
               type: 'addition',
@@ -393,12 +410,15 @@ export async function updateArtifacts({
         }
       }
       for (const f of coerceArray(status.deleted)) {
-        res.push({
-          file: {
-            type: 'deletion',
-            path: f,
-          },
-        });
+        if (vendorDir && f.startsWith(vendorDir)) {
+          alreadyDeleted.add(f);
+          res.push({
+            file: {
+              type: 'deletion',
+              path: f,
+            },
+          });
+        }
       }
     }
 
@@ -431,6 +451,38 @@ export async function updateArtifacts({
 
       logger.debug('Found updated go.mod after go.sum update');
       res.push(artifactResult);
+      alreadyAdded.add(goModFileName);
+    }
+
+    // add all files added when in `go generate` mode.
+    // unfortunately there is not a good way as there is with vendoring or go import path updates to detect this.
+    // Do this at the very very end to ensure we only capture files which would have been explicitly
+    // modified, added, or deleted from a `go generate` invocation
+    if (useGoGenerate && goGenerateAllowed) {
+      logger.debug(
+        'Updating all modified files since generated files were added',
+      );
+      for (const f of status.modified.concat(status.created)) {
+        if (!alreadyAdded.has(f)) {
+          res.push({
+            file: {
+              type: 'addition',
+              path: f,
+              contents: await readLocalFile(f),
+            },
+          });
+        }
+      }
+      for (const f of coerceArray(status.deleted)) {
+        if (!alreadyDeleted.has(f)) {
+          res.push({
+            file: {
+              type: 'deletion',
+              path: f,
+            },
+          });
+        }
+      }
     }
     return res;
   } catch (err) {

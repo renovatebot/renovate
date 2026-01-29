@@ -1,13 +1,16 @@
 import { isEmptyArray } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { getCache } from '../../../util/cache/repository';
-import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
-import type { GithubHttp, GithubHttpOptions } from '../../../util/http/github';
-import { parseLinkHeader } from '../../../util/url';
-import { ApiCache } from './api-cache';
-import { coerceRestPr } from './common';
-import type { ApiPageCache, GhPr, GhRestPr } from './types';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider.ts';
+import type {
+  GithubHttp,
+  GithubHttpOptions,
+} from '../../../util/http/github.ts';
+import { parseLinkHeader } from '../../../util/url.ts';
+import { ApiCache } from './api-cache.ts';
+import { coerceRestPr } from './common.ts';
+import type { ApiPageCache, GhPr, GhRestPr } from './types.ts';
 
 function getPrApiCache(): ApiCache<GhPr> {
   const repoCache = getCache();
@@ -129,10 +132,10 @@ export async function getPrCache(
       },
       `PR cache: getPrList success`,
     );
-  } catch (err) /* v8 ignore start */ {
+  } catch (err) /* v8 ignore next */ {
     logger.debug({ err }, 'PR cache: getPrList err');
     throw new ExternalHostError(err, 'github');
-  } /* v8 ignore stop */
+  }
 
   return prApiCache.getItems();
 }

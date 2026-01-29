@@ -1,6 +1,6 @@
 import { isInteger, isNumber, isUndefined } from '@sindresorhus/is';
-import { logger } from '../../logger';
-import type { BranchConfig, BranchUpgradeConfig } from '../types';
+import { logger } from '../../logger/index.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../types.ts';
 
 export type Limit = 'Commits';
 interface LimitValue {
@@ -36,7 +36,11 @@ function handleCommitsLimit(): boolean {
     return false;
   }
   const { max, current } = limit;
-  return max - current <= 0;
+  const res = max - current <= 0;
+  if (res) {
+    logger.debug({ current, max }, 'Commits limit reached');
+  }
+  return res;
 }
 
 export type CountName = 'ConcurrentPRs' | 'HourlyPRs' | 'Branches';
@@ -81,6 +85,7 @@ function handleConcurrentLimits(
 
   // if a limit is defined ( >0 ) and limit reached return true ie. limit has been reached
   if (hourlyLimit && hourlyPrCount >= hourlyLimit) {
+    logger.debug({ hourlyPrCount, hourlyLimit }, 'Hourly PRs limit reached');
     return true;
   }
 
@@ -88,6 +93,7 @@ function handleConcurrentLimits(
   const currentCount = getCount(key);
 
   if (limitValue && currentCount >= limitValue) {
+    logger.debug({ limitKey, currentCount }, `${key} limit reached`);
     return true;
   }
 
@@ -98,9 +104,10 @@ export function calcLimit(
   upgrades: BranchUpgradeConfig[],
   limitName: BranchLimitName,
 ): number {
+  const uniqueUpgrades = new Map(upgrades.map((u) => [u.depName, u]));
   logger.debug(
     {
-      limits: upgrades.map((upg) => {
+      limits: Array.from(uniqueUpgrades.values()).map((upg) => {
         return { depName: upg.depName, [limitName]: upg[limitName] };
       }),
     },
@@ -130,7 +137,7 @@ export function calcLimit(
     // no limit
     if (limit === 0 || limit === null) {
       logger.debug(
-        `${limitName} of this branch is unlimited, because atleast one of the upgrade has it's ${limitName} set to "No limit" ie. 0 or null`,
+        `${limitName} of this branch is unlimited, because at least one of the upgrade has it's ${limitName} set to "No limit" ie. 0 or null`,
       );
       return 0;
     }

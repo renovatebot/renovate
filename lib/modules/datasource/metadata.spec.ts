@@ -1,19 +1,19 @@
-import type { Timestamp } from '../../util/timestamp';
-import { GitTagsDatasource } from './git-tags';
-import { HelmDatasource } from './helm';
-import { MavenDatasource } from './maven';
+import type { Timestamp } from '../../util/timestamp.ts';
+import { GitTagsDatasource } from './git-tags/index.ts';
+import { HelmDatasource } from './helm/index.ts';
+import { MavenDatasource } from './maven/index.ts';
 import {
   addMetaData,
   massageGithubUrl,
   massageGitlabUrl,
   massageUrl,
   shouldDeleteHomepage,
-} from './metadata';
-import { NpmDatasource } from './npm';
-import { PypiDatasource } from './pypi';
-import type { ReleaseResult } from './types';
-import { hostRules } from '~test/host-rules';
-import { partial } from '~test/util';
+} from './metadata.ts';
+import { NpmDatasource } from './npm/index.ts';
+import { PypiDatasource } from './pypi/index.ts';
+import type { ReleaseResult } from './types.ts';
+import { hostRules } from '~test/host-rules.ts';
+import { partial } from '~test/util.ts';
 
 describe('modules/datasource/metadata', () => {
   it('Should handle manualChangelogUrls', () => {
@@ -126,6 +126,7 @@ describe('modules/datasource/metadata', () => {
       addMetaData(dep, datasource, packageName);
       expect(dep).toMatchObject({
         sourceUrl: expectedSourceUrl,
+        sourceDirectory: expectedSourceDirectory,
       });
     },
   );
@@ -137,7 +138,7 @@ describe('modules/datasource/metadata', () => {
     ${'git@somehost.com:group/sub-group/repo.git'} | ${'https://somehost.com/group/sub-group/repo'}
   `(
     'Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts: $sourceUrl -> $expectedSourceUrl',
-    ({ sourceUrl, expectedSourceUrl, expectedSourceDirectory }) => {
+    ({ sourceUrl, expectedSourceUrl }) => {
       const dep: ReleaseResult = { sourceUrl, releases: [] };
       const datasource = GitTagsDatasource.id;
       const packageName = 'some-dep';

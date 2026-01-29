@@ -352,6 +352,20 @@ exports[`modules/manager/cargo/extract > extractPackageFile() > extracts multipl
     "skipReason": "git-dependency",
   },
   {
+    "currentValue": "1.0.0",
+    "datasource": "github-tags",
+    "depName": "git_dep_with_custom_hostname",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": true,
+    },
+    "packageName": "a/b",
+    "registryUrls": [
+      "https://git.example.com",
+    ],
+    "skipReason": undefined,
+  },
+  {
     "currentValue": "0.0.0",
     "datasource": "crate",
     "depName": "same_version_1__",

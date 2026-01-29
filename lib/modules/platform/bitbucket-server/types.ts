@@ -1,5 +1,5 @@
 import type { HTTPError, Response } from 'got';
-import type { Pr } from '../types';
+import type { Pr } from '../types.ts';
 
 export interface BbsConfig {
   bbUseDefaultReviewers: boolean;

@@ -1,7 +1,7 @@
-import { logger } from '../../../../logger';
-import { coerceString } from '../../../../util/string';
-import type { UpdateLockedConfig, UpdateLockedResult } from '../../types';
-import { extractLocks } from './util';
+import { logger } from '../../../../logger/index.ts';
+import { coerceString } from '../../../../util/string.ts';
+import type { UpdateLockedConfig, UpdateLockedResult } from '../../types.ts';
+import { extractLocks } from './util.ts';
 
 export function updateLockedDependency(
   config: UpdateLockedConfig,

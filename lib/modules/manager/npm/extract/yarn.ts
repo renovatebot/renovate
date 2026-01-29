@@ -1,17 +1,17 @@
 import { isString } from '@sindresorhus/is';
 import { miscUtils, structUtils } from '@yarnpkg/core';
 import { parseSyml } from '@yarnpkg/parsers';
-import { logger } from '../../../../logger';
+import { logger } from '../../../../logger/index.ts';
 import {
   getSiblingFileName,
   localPathExists,
   readLocalFile,
-} from '../../../../util/fs';
-import type { PackageFileContent } from '../../types';
-import type { YarnCatalogs } from '../schema';
-import type { NpmManagerData } from '../types';
-import { extractCatalogDeps } from './common/catalogs';
-import type { Catalog, LockFile } from './types';
+} from '../../../../util/fs/index.ts';
+import type { PackageFileContent } from '../../types.ts';
+import type { YarnCatalogs } from '../schema.ts';
+import type { NpmManagerData } from '../types.ts';
+import { extractCatalogDeps } from './common/catalogs.ts';
+import type { Catalog, LockFile } from './types.ts';
 
 export async function getYarnLock(filePath: string): Promise<LockFile> {
   // TODO #22198
@@ -70,10 +70,10 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
 export function getZeroInstallPaths(yarnrcYml: string): string[] {
   let conf: any;
   try {
-    conf = parseSyml(yarnrcYml); /* v8 ignore start -- needs test */
+    conf = parseSyml(yarnrcYml); /* v8 ignore next -- needs test */
   } catch (err) {
     logger.warn({ err }, 'Error parsing .yarnrc.yml');
-  } /* v8 ignore stop -- needs test */
+  }
   const paths = [
     conf?.cacheFolder ?? './.yarn/cache',
     '.pnp.cjs',

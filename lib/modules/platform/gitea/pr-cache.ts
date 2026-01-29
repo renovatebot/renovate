@@ -1,32 +1,46 @@
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import * as memCache from '../../../util/cache/memory';
-import { getCache } from '../../../util/cache/repository';
-import type { GiteaHttp } from '../../../util/http/gitea';
-import type { HttpResponse } from '../../../util/http/types';
-import { getQueryString, parseLinkHeader, parseUrl } from '../../../util/url';
-import type { Pr } from '../types';
-import type { GiteaPrCacheData, PR } from './types';
-import { API_PATH, toRenovatePR } from './utils';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import type { GiteaHttp } from '../../../util/http/gitea.ts';
+import type { HttpResponse } from '../../../util/http/types.ts';
+import {
+  getQueryString,
+  parseLinkHeader,
+  parseUrl,
+} from '../../../util/url.ts';
+import type { Pr } from '../types.ts';
+import type { GiteaPrCacheData, PR } from './types.ts';
+import { API_PATH, toRenovatePR } from './utils.ts';
 
 export class GiteaPrCache {
   private cache: GiteaPrCacheData;
   private items: Pr[] = [];
+  private repo: string;
+  private readonly ignorePrAuthor: boolean;
+  private author: string | null;
 
   private constructor(
-    private repo: string,
-    private readonly ignorePrAuthor: boolean,
-    private author: string | null,
+    repo: string,
+    ignorePrAuthor: boolean,
+    author: string | null,
   ) {
+    this.repo = repo;
+    this.ignorePrAuthor = ignorePrAuthor;
+    this.author = author;
     const repoCache = getCache();
     repoCache.platform ??= {};
     repoCache.platform.gitea ??= {};
     let pullRequestCache = repoCache.platform.gitea.pullRequestsCache as
       | GiteaPrCacheData
       | undefined;
-    if (pullRequestCache?.author !== author) {
+    if (
+      isNullOrUndefined(pullRequestCache) ||
+      pullRequestCache.author !== author
+    ) {
       pullRequestCache = {
         items: {},
         updated_at: null,

@@ -1,11 +1,11 @@
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import type { UpdateType } from '../../../config/types';
-import * as terraformLockfile from '../terraform/lockfile';
-import type { UpdateArtifactsConfig } from '../types';
-import { updateArtifacts } from './artifacts';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { UpdateType } from '../../../config/types.ts';
+import * as terraformLockfile from '../terraform/lockfile/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import { updateArtifacts } from './artifacts.ts';
 
-vi.mock('../terraform/lockfile');
+vi.mock('../terraform/lockfile/index.ts');
 
 const config = {
   constraints: {},

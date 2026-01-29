@@ -1,17 +1,17 @@
 import type { StatusResult } from 'simple-git';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import * as docker from '../../../util/exec/docker';
-import type { UpdateArtifactsConfig } from '../types';
-import { updateArtifacts } from '.';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
-import { env, fs, git, hostRules, partial } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import * as docker from '../../../util/exec/docker/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import { updateArtifacts } from './index.ts';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { env, fs, git, hostRules, partial } from '~test/util.ts';
 
-vi.mock('../../../util/exec/env');
-vi.mock('../../../util/fs');
-vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -22,8 +22,8 @@ const adminConfig: RepoGlobalConfig = {
 const dockerAdminConfig = {
   ...adminConfig,
   binarySource: 'docker',
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
-};
+  dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+} satisfies RepoGlobalConfig;
 
 process.env.CONTAINERBASE = 'true';
 
@@ -200,7 +200,7 @@ describe('modules/manager/nix/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -209,7 +209,7 @@ describe('modules/manager/nix/artifacts', () => {
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool nix 2.10.0 ' +
           '&& ' +
@@ -330,7 +330,7 @@ describe('modules/manager/nix/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -339,7 +339,7 @@ describe('modules/manager/nix/artifacts', () => {
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool nix 2.10.0 ' +
           '&& ' +

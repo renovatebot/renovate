@@ -43,6 +43,7 @@ describe('modules/versioning/versioning-metadata', () => {
       expect(versioningObj.urls).toBeArray();
       expect(versioningObj.supportsRanges).toBeBoolean();
       if (versioningObj.supportsRanges === true) {
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(versioningObj.supportedRangeStrategies).toBeArrayOfStrings();
       }
     });

@@ -1,9 +1,9 @@
 import type { SpawnSyncReturns } from 'child_process';
 import { Command } from 'commander';
 import fs from 'fs-extra';
-import { logger } from '../lib/logger';
-import { generateDocs } from './docs';
-import { exec } from './utils/exec';
+import { logger } from '../lib/logger/index.ts';
+import { generateDocs } from './docs/index.ts';
+import { exec } from './utils/exec.ts';
 
 process.on('unhandledRejection', (err) => {
   // Will print "unhandledRejection err is not defined"
@@ -23,7 +23,7 @@ program
     logger.info('* running mkdocs build');
     const args = ['run', 'mkdocs', 'build'];
     if (opts.strict) {
-      // args.push('--strict');
+      args.push('--strict');
     }
     const res = exec('pdm', args, {
       cwd: 'tools/mkdocs',
@@ -43,7 +43,7 @@ program
     logger.info('* running mkdocs serve');
     const args = ['run', 'mkdocs', 'serve'];
     if (opts.strict) {
-      // args.push('--strict');
+      args.push('--strict');
     }
     const res = exec('pdm', args, {
       cwd: 'tools/mkdocs',

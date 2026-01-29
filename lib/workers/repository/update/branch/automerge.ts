@@ -1,10 +1,10 @@
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { platform } from '../../../../modules/platform';
-import { scm } from '../../../../modules/platform/scm';
-import { isScheduledNow } from './schedule';
-import { resolveBranchStatus } from './status-checks';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { isScheduledNow } from './schedule.ts';
+import { resolveBranchStatus } from './status-checks.ts';
 
 export type AutomergeResult =
   | 'automerged'
@@ -50,11 +50,13 @@ export async function tryBranchAutomerge(
       }
       logger.info({ branch: config.branchName }, 'Branch automerged');
       return 'automerged'; // Branch no longer exists
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) {
+      /* v8 ignore if -- TODO: needs test */
       if (err.message === 'not ready') {
         logger.debug('Branch is not ready for automerge');
         return 'not ready';
       }
+      /* v8 ignore if -- TODO: needs test */
       if (
         err.message.includes('refusing to merge unrelated histories') ||
         err.message.includes('Not possible to fast-forward') ||
@@ -66,6 +68,7 @@ export async function tryBranchAutomerge(
         logger.info('Branch is not up to date - cannot automerge');
         return 'stale';
       }
+      /* v8 ignore if -- TODO: needs test */
       if (err.message.includes('Protected branch')) {
         if (err.message.includes('status check')) {
           logger.debug(

@@ -1,9 +1,9 @@
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
-import { getPkgReleases } from '..';
-import * as hostRules from '../../../util/host-rules';
-import { PypiDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import * as hostRules from '../../../util/host-rules.ts';
+import { getPkgReleases } from '../index.ts';
+import { PypiDatasource } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 
 vi.mock('google-auth-library');
 
@@ -205,9 +205,12 @@ describe('modules/datasource/pypi/index', () => {
         ],
       };
       googleAuth.mockImplementationOnce(
-        vi.fn().mockImplementationOnce(() => ({
-          getAccessToken: vi.fn().mockResolvedValue('some-token'),
-        })),
+        // TODO: fix typing
+        vi.fn<any>(
+          class {
+            getAccessToken = vi.fn().mockResolvedValue('some-token');
+          },
+        ),
       );
       const res = await getPkgReleases({
         ...config,
@@ -229,9 +232,12 @@ describe('modules/datasource/pypi/index', () => {
         ],
       };
       googleAuth.mockImplementation(
-        vi.fn().mockImplementation(() => ({
-          getAccessToken: vi.fn().mockResolvedValue(undefined),
-        })),
+        // TODO: fix typing
+        vi.fn<any>(
+          class {
+            getAccessToken = vi.fn();
+          },
+        ),
       );
       const res = await getPkgReleases({
         ...config,
@@ -304,6 +310,25 @@ describe('modules/datasource/pypi/index', () => {
         packageName: 'flexget',
       });
       expect(result?.sourceUrl).toBeUndefined();
+    });
+
+    it('does not mistake sponsors in project name as sponsors url', async () => {
+      const info = {
+        name: 'example',
+        home_page: 'https://example.com',
+        project_urls: {
+          random: 'https://github.com/renovatebot/example-sponsors',
+        },
+      };
+      httpMock
+        .scope(baseUrl)
+        .get('/example/json')
+        .reply(200, { ...JSON.parse(res1), info });
+      const result = await getPkgReleases({
+        datasource,
+        packageName: 'example',
+      });
+      expect(result?.sourceUrl).toBe(info.project_urls.random);
     });
 
     it('normalizes the package name according to PEP 503', async () => {
@@ -779,9 +804,12 @@ describe('modules/datasource/pypi/index', () => {
       ],
     };
     googleAuth.mockImplementationOnce(
-      vi.fn().mockImplementationOnce(() => ({
-        getAccessToken: vi.fn().mockResolvedValue('some-token'),
-      })),
+      // TODO: fix typing
+      vi.fn<any>(
+        class {
+          getAccessToken = vi.fn().mockResolvedValue('some-token');
+        },
+      ),
     );
     expect(
       await getPkgReleases({

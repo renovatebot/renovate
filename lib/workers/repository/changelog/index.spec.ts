@@ -1,9 +1,9 @@
-import type { BranchUpgradeConfig } from '../../types';
-import { getChangeLogJSON } from '../update/pr/changelog';
-import { embedChangelogs } from '.';
-import { partial } from '~test/util';
+import type { BranchUpgradeConfig } from '../../types.ts';
+import { getChangeLogJSON } from '../update/pr/changelog/index.ts';
+import { embedChangelogs } from './index.ts';
+import { partial } from '~test/util.ts';
 
-vi.mock('../update/pr/changelog');
+vi.mock('../update/pr/changelog/index.ts');
 
 vi.mocked(getChangeLogJSON).mockResolvedValue({
   hasReleaseNotes: true,
