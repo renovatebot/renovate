@@ -1,8 +1,8 @@
-import { GlobalConfig } from '../../../config/global';
-import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import * as modulesDatasource from '../../../modules/datasource';
-import type { VolumeOption } from '../types';
+import { GlobalConfig } from '../../../config/global.ts';
+import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import * as modulesDatasource from '../../../modules/datasource/index.ts';
+import type { VolumeOption } from '../types.ts';
 import {
   generateDockerCommand,
   getDockerTag,
@@ -11,11 +11,13 @@ import {
   removeDockerContainer,
   resetPrefetchedImages,
   sideCarImage,
-} from '.';
-import { mockExecAll, mockExecSequence } from '~test/exec-util';
-import { partial } from '~test/util';
+} from './index.ts';
+import { mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { partial } from '~test/util.ts';
 
-vi.mock('../../../modules/datasource', () => ({ getPkgReleases: vi.fn() }));
+vi.mock('../../../modules/datasource/index.ts', () => ({
+  getPkgReleases: vi.fn(),
+}));
 
 describe('util/exec/docker/index', () => {
   describe('prefetchDockerImage', () => {
@@ -235,6 +237,64 @@ describe('util/exec/docker/index', () => {
         dockerOptions,
       );
       expect(res).toBe(command(image));
+    });
+
+    it('adds `|| true` if ignoreFailure is set on a pre-command', async () => {
+      mockExecAll();
+      const res = await generateDockerCommand(
+        ['ls'],
+        [
+          'foo',
+          {
+            command: ['bar'],
+            ignoreFailure: true,
+          },
+          {
+            command: ['bleh'],
+          },
+          'baz',
+        ],
+        dockerOptions,
+      );
+      expect(res).toBe(
+        `docker run --rm ` +
+          `--name=renovate_${image} ` +
+          `--label=renovate_child ` +
+          `--user=some-user ` +
+          `-e FOO -e BAR ` +
+          `-w "/tmp/foobar" ` +
+          `ghcr.io/containerbase/sidecar ` +
+          `bash -l -c "foo && bar || true && bleh && baz && ls"`,
+      );
+    });
+
+    it('adds `|| true` if ignoreFailure is set on a command', async () => {
+      mockExecAll();
+      const res = await generateDockerCommand(
+        [
+          'foo',
+          {
+            command: ['bar'],
+            ignoreFailure: true,
+          },
+          {
+            command: ['bleh'],
+          },
+          'baz',
+        ],
+        ['pre'],
+        dockerOptions,
+      );
+      expect(res).toBe(
+        `docker run --rm ` +
+          `--name=renovate_${image} ` +
+          `--label=renovate_child ` +
+          `--user=some-user ` +
+          `-e FOO -e BAR ` +
+          `-w "/tmp/foobar" ` +
+          `ghcr.io/containerbase/sidecar ` +
+          `bash -l -c "pre && foo && bar || true && bleh && baz"`,
+      );
     });
 
     it('handles volumes', async () => {

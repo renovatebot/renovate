@@ -1,4 +1,4 @@
-import { presets } from './group';
+import { presets } from './group.ts';
 
 const exceptions = new Set(['monorepos', 'recommended']);
 

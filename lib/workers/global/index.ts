@@ -12,32 +12,35 @@ import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
 import semver from 'semver';
 import upath from 'upath';
-import * as configParser from '../../config';
-import { GlobalConfig } from '../../config/global';
-import { resolveConfigPresets } from '../../config/presets';
-import { validateConfigSecretsAndVariables } from '../../config/secrets';
+import { GlobalConfig } from '../../config/global.ts';
+import * as configParser from '../../config/index.ts';
+import { resolveConfigPresets } from '../../config/presets/index.ts';
+import { validateConfigSecretsAndVariables } from '../../config/secrets.ts';
 import type {
   AllConfig,
   RenovateConfig,
   RenovateRepository,
-} from '../../config/types';
-import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
+} from '../../config/types.ts';
+import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages.ts';
 import { pkg } from '../../expose.cjs';
-import { instrument } from '../../instrumentation';
-import { exportStats, finalizeReport } from '../../instrumentation/reporting';
-import { getProblems, logLevel, logger, setMeta } from '../../logger';
-import { setGlobalLogLevelRemaps } from '../../logger/remap';
-import { getEnv } from '../../util/env';
-import * as hostRules from '../../util/host-rules';
-import * as queue from '../../util/http/queue';
-import * as throttle from '../../util/http/throttle';
-import { regexEngineStatus } from '../../util/regex';
-import { addSecretForSanitizing } from '../../util/sanitize';
-import * as repositoryWorker from '../repository';
-import { autodiscoverRepositories } from './autodiscover';
-import { parseConfigs } from './config/parse';
-import { globalFinalize, globalInitialize } from './initialize';
-import { isLimitReached } from './limits';
+import { instrument } from '../../instrumentation/index.ts';
+import {
+  exportStats,
+  finalizeReport,
+} from '../../instrumentation/reporting.ts';
+import { getProblems, logLevel, logger, setMeta } from '../../logger/index.ts';
+import { setGlobalLogLevelRemaps } from '../../logger/remap.ts';
+import { getEnv } from '../../util/env.ts';
+import * as hostRules from '../../util/host-rules.ts';
+import * as queue from '../../util/http/queue.ts';
+import * as throttle from '../../util/http/throttle.ts';
+import { regexEngineStatus } from '../../util/regex.ts';
+import { addSecretForSanitizing } from '../../util/sanitize.ts';
+import * as repositoryWorker from '../repository/index.ts';
+import { autodiscoverRepositories } from './autodiscover.ts';
+import { parseConfigs } from './config/parse/index.ts';
+import { globalFinalize, globalInitialize } from './initialize.ts';
+import { isLimitReached } from './limits.ts';
 
 export async function getRepositoryConfig(
   globalConfig: RenovateConfig,

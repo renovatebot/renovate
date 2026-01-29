@@ -1,6 +1,6 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
-import { get } from '../../../modules/manager';
-import type { ExtractResults } from './types';
+import { get } from '../../../modules/manager/index.ts';
+import type { ExtractResults } from './types.ts';
 
 export function processSupersedesManagers(extracts: ExtractResults[]): void {
   const rejected: Record<string, string[]> = {};

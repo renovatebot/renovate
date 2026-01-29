@@ -1,4 +1,4 @@
-import pep440 from '.';
+import pep440 from './index.ts';
 
 describe('modules/versioning/pep440/index', () => {
   it.each`

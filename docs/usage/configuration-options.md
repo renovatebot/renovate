@@ -52,6 +52,10 @@ If a config option has a `parent` defined, it means it's only allowed to configu
 When an array or object configuration option is `mergeable`, it means that values inside it will be added to any existing object or array that existed with the same name.
 
 <!-- prettier-ignore -->
+!!! tip
+    This documentation corresponds with the JSON schema in [`docs.renovatebot.com/renovate-schema.json`](renovate-schema.json).
+
+<!-- prettier-ignore -->
 !!! note
     Config options with `type=string` are always non-mergeable, so `mergeable=false`.
 
@@ -1133,6 +1137,10 @@ Example:
   ]
 }
 ```
+
+<!--prettier-ignore-->
+!!! note
+    You do not need to add leading and trailing slashes in `matchStrings`.
 
 ### matchStringsStrategy
 
@@ -4320,6 +4328,7 @@ Renovate applies _all_ `registryAliases` objects, from top to bottom.
 This feature works with the following managers:
 
 - [`ansible`](modules/manager/ansible/index.md)
+- [`bazel-module`](modules/manager/bazel-module/index.md)
 - [`bitbucket-pipelines`](modules/manager/bitbucket-pipelines/index.md)
 - [`circleci`](modules/manager/circleci/index.md)
 - [`crow`](modules/manager/crow/index.md)

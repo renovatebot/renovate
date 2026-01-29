@@ -1,13 +1,13 @@
 import { z } from 'zod';
-import { regEx } from '../../../../util/regex';
-import type { PackageDependency } from '../../types';
-import type { Fragment, FragmentData, Target } from '../types';
-import { DockerTarget, dockerRules } from './docker';
-import { GitTarget, gitRules } from './git';
-import { GoTarget, goRules } from './go';
-import { HttpTarget, httpRules } from './http';
-import { MavenTarget, mavenRules } from './maven';
-import { OciTarget, ociRules } from './oci';
+import { regEx } from '../../../../util/regex.ts';
+import type { PackageDependency } from '../../types.ts';
+import type { Fragment, FragmentData, Target } from '../types.ts';
+import { DockerTarget, dockerRules } from './docker.ts';
+import { GitTarget, gitRules } from './git.ts';
+import { GoTarget, goRules } from './go.ts';
+import { HttpTarget, httpRules } from './http.ts';
+import { MavenTarget, mavenRules } from './maven.ts';
+import { OciTarget, ociRules } from './oci.ts';
 
 const Target = z.union([
   DockerTarget,

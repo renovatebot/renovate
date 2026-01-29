@@ -26,7 +26,7 @@ body:
     attributes:
       label: Which version of Renovate are you using?
       description: |
-        Please do not say 'latest' version (as Renovate ships many updates daily), but instead note the exact version.
+        Please do not say 'latest' version (as Renovate ships many updates daily) or the major version number, but instead note the exact version.
         You can find it by checking the `INFO: Repository started` log line.
     validations:
       required: false

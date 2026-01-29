@@ -1,14 +1,20 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
-import { GlobalConfig } from '../../../config/global';
-import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { getPkgReleases } from '../../../modules/datasource';
-import * as allVersioning from '../../../modules/versioning';
-import { newlineRegex, regEx } from '../../regex';
-import { uniq } from '../../uniq';
-import { rawExec } from '../common';
-import type { DockerOptions, Opt, VolumeOption, VolumesPair } from '../types';
-
+import { join } from 'shlex';
+import { GlobalConfig } from '../../../config/global.ts';
+import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { getPkgReleases } from '../../../modules/datasource/index.ts';
+import * as allVersioning from '../../../modules/versioning/index.ts';
+import { newlineRegex, regEx } from '../../regex.ts';
+import { uniq } from '../../uniq.ts';
+import { rawExec } from '../common.ts';
+import type {
+  CommandWithOptions,
+  DockerOptions,
+  VolumeOption,
+  VolumesPair,
+} from '../types.ts';
+import { isCommandWithOptions } from '../utils.ts';
 const prefetchedImages = new Map<string, string>();
 
 const digestRegex = regEx('Digest: (.*?)\n');
@@ -43,6 +49,7 @@ function expandVolumeOption(x: VolumeOption): VolumesPair | null {
   }
   if (Array.isArray(x) && x.length === 2) {
     const [from, to] = x;
+    // v8 ignore else -- TODO: add test #40625
     if (isNonEmptyString(from) && isNonEmptyString(to)) {
       return [from, to];
     }
@@ -63,12 +70,6 @@ function prepareVolumes(volumes: VolumeOption[]): string[] {
   );
   const unique: VolumesPair[] = uniq<VolumesPair>(filtered, volumesEql);
   return unique.map(([from, to]) => `-v "${from}":"${to}"`);
-}
-
-function prepareCommands(commands: Opt<string>[]): string[] {
-  return commands.filter<string>((command): command is string =>
-    isString(command),
-  );
 }
 
 export async function getDockerTag(
@@ -200,8 +201,8 @@ export async function removeDanglingContainers(): Promise<void> {
 }
 
 export async function generateDockerCommand(
-  commands: string[],
-  preCommands: string[],
+  commands: (string | CommandWithOptions)[],
+  preCommands: (string | CommandWithOptions)[],
   options: DockerOptions,
 ): Promise<string> {
   const { envVars, cwd } = options;
@@ -242,6 +243,7 @@ export async function generateDockerCommand(
   volumeDirs.push(...volumes);
   result.push(...prepareVolumes(volumeDirs));
 
+  // v8 ignore else -- TODO: add test #40625
   if (envVars) {
     result.push(
       ...uniq(envVars)
@@ -267,9 +269,36 @@ export async function generateDockerCommand(
   await prefetchDockerImage(taggedImage);
   result.push(taggedImage);
 
-  const bashCommand = [...prepareCommands(preCommands), ...commands].join(
-    ' && ',
-  );
+  const bashCommandParts = [];
+
+  for (const preCommand of preCommands) {
+    if (
+      isCommandWithOptions(preCommand) &&
+      isString(join(preCommand.command))
+    ) {
+      if (preCommand.ignoreFailure) {
+        bashCommandParts.push(`${join(preCommand.command)} || true`);
+      } else {
+        bashCommandParts.push(join(preCommand.command));
+      }
+    } else if (isString(preCommand)) {
+      bashCommandParts.push(preCommand);
+    }
+  }
+
+  for (const command of commands) {
+    if (isCommandWithOptions(command)) {
+      if (command.ignoreFailure) {
+        bashCommandParts.push(`${join(command.command)} || true`);
+      } else {
+        bashCommandParts.push(join(command.command));
+      }
+    } else {
+      bashCommandParts.push(command);
+    }
+  }
+
+  const bashCommand = bashCommandParts.join(' && ');
   result.push(`bash -l -c "${bashCommand.replace(regEx(/"/g), '\\"')}"`); // lgtm [js/incomplete-sanitization]
 
   return result.join(' ');

@@ -1,9 +1,9 @@
 import { DateTime } from 'luxon';
-import type { Pr } from '../../../modules/platform/types';
-import type { BranchConfig } from '../../types';
-import * as limits from './limits';
-import { partial, platform, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import type { Pr } from '../../../modules/platform/types.ts';
+import type { BranchConfig } from '../../types.ts';
+import * as limits from './limits.ts';
+import { partial, platform, scm } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
 let config: RenovateConfig;
 

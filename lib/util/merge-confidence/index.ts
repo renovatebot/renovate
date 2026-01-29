@@ -1,16 +1,16 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
-import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence';
-import type { AllConfig, UpdateType } from '../../config/types';
-import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as packageCache from '../cache/package';
-import * as hostRules from '../host-rules';
-import { Http } from '../http';
-import { memCacheProvider } from '../http/cache/memory-http-cache-provider';
-import { regEx } from '../regex';
-import { ensureTrailingSlash, joinUrlParts } from '../url';
-import { MERGE_CONFIDENCE } from './common';
-import type { MergeConfidence } from './types';
+import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence.ts';
+import type { AllConfig, UpdateType } from '../../config/types.ts';
+import { logger } from '../../logger/index.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import * as packageCache from '../cache/package/index.ts';
+import * as hostRules from '../host-rules.ts';
+import { memCacheProvider } from '../http/cache/memory-http-cache-provider.ts';
+import { Http } from '../http/index.ts';
+import { regEx } from '../regex.ts';
+import { ensureTrailingSlash, joinUrlParts } from '../url.ts';
+import { MERGE_CONFIDENCE } from './common.ts';
+import type { MergeConfidence } from './types.ts';
 
 const hostType = 'merge-confidence';
 const http = new Http(hostType);

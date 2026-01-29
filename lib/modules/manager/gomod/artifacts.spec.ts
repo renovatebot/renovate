@@ -1,33 +1,33 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import * as docker from '../../../util/exec/docker';
-import type { StatusResult } from '../../../util/git/types';
-import * as _hostRules from '../../../util/host-rules';
-import * as _datasource from '../../datasource';
-import type { UpdateArtifactsConfig } from '../types';
-import * as _artifactsExtra from './artifacts-extra';
-import * as gomod from '.';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { env, fs, git, partial } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import * as docker from '../../../util/exec/docker/index.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
+import * as _hostRules from '../../../util/host-rules.ts';
+import * as _datasource from '../../datasource/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import * as _artifactsExtra from './artifacts-extra.ts';
+import * as gomod from './index.ts';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { env, fs, git, partial } from '~test/util.ts';
 
-type FS = typeof import('../../../util/fs');
+type FS = typeof import('../../../util/fs/index.ts');
 
-vi.mock('../../../util/exec/env');
-vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('../../../util/http');
-vi.mock('../../../util/fs', async () => {
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
+vi.mock('../../../util/http/index.ts');
+vi.mock('../../../util/fs/index.ts', async () => {
   // restore
   return mockDeep({
     isValidLocalPath: (await vi.importActual<FS>('../../../util/fs'))
       .isValidLocalPath,
   });
 });
-vi.mock('../../datasource', () => mockDeep());
-vi.mock('./artifacts-extra', () => mockDeep());
+vi.mock('../../datasource/index.ts', () => mockDeep());
+vi.mock('./artifacts-extra.ts', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 

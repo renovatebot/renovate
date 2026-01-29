@@ -1,4 +1,4 @@
-import { defaultVersioning } from '../versioning';
+import { defaultVersioning } from '../versioning/index.ts';
 import {
   applyConstraintsFiltering,
   applyExtractVersion,
@@ -8,11 +8,11 @@ import {
   getDefaultVersioning,
   isGetPkgReleasesConfig,
   sortAndRemoveDuplicates,
-} from './common';
-import { CustomDatasource } from './custom';
-import { NpmDatasource } from './npm';
-import type { ReleaseResult } from './types';
-import { logger } from '~test/util';
+} from './common.ts';
+import { CustomDatasource } from './custom/index.ts';
+import { NpmDatasource } from './npm/index.ts';
+import type { ReleaseResult } from './types.ts';
+import { logger } from '~test/util.ts';
 
 describe('modules/datasource/common', () => {
   describe('getDatasourceFor', () => {

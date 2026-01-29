@@ -1,13 +1,13 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { extractAllPackageFiles, extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import { extractAllPackageFiles, extractPackageFile } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI

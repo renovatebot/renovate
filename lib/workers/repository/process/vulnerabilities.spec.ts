@@ -1,11 +1,11 @@
 import type { Osv, OsvOffline } from '@renovatebot/osv-offline';
 import { codeBlock } from 'common-tags';
 import { mockFn } from 'vitest-mock-extended';
-import { getConfig } from '../../../config/defaults';
-import type { PackageFile } from '../../../modules/manager/types';
-import { Vulnerabilities } from './vulnerabilities';
-import { logger } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import { getConfig } from '../../../config/defaults.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import { Vulnerabilities } from './vulnerabilities.ts';
+import { logger } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
 const getVulnerabilitiesMock =
   mockFn<typeof OsvOffline.prototype.getVulnerabilities>();

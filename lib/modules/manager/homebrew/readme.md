@@ -64,7 +64,7 @@ end
 Formulas with the following characteristics will be skipped:
 
 - Non-GitHub and non-NPM URLs (e.g., SourceForge, custom domains)
-- NPPM packages from custom registries (only `registry.npmjs.org` is supported)
+- NPM packages from custom registries (only `registry.npmjs.org` is supported)
 - Missing or invalid `sha256` field
 - Git repository URLs (e.g., `url "https://github.com/owner/repo.git"`)
 - Invalid class definitions

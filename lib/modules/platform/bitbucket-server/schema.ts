@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { EmailAddress } from '../../../util/schema-utils';
+import { EmailAddress } from '../../../util/schema-utils/index.ts';
 
 export const User = z.object({
   displayName: z.string(),

@@ -1,22 +1,22 @@
-import { logger } from '../../../logger';
-import { platform } from '../../../modules/platform';
-import * as cache from '../../../util/cache/repository';
+import { logger } from '../../../logger/index.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import * as cache from '../../../util/cache/repository/index.ts';
 import type {
   BaseBranchCache,
   BranchCache,
   BranchUpgradeCache,
   RepoCacheData,
-} from '../../../util/cache/repository/types';
+} from '../../../util/cache/repository/types.ts';
 import {
   runBranchSummary,
   runRenovateRepoStats,
-} from './repository-statistics';
-import { Fixtures } from '~test/fixtures';
-import { partial } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+} from './repository-statistics.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { partial } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
-vi.mock('../../../modules/platform/github/pr');
-vi.mock('../../../util/http/github');
+vi.mock('../../../modules/platform/github/pr.ts');
+vi.mock('../../../util/http/github.ts');
 
 const prJson = Fixtures.getJson('./pr-list.json');
 const result = Object.keys(prJson).map((key) => {

@@ -1,8 +1,8 @@
-import { asTimestamp } from '../../../util/timestamp';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { PUPPET_FORGE } from './common';
-import type { PuppetModule } from './types';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { PUPPET_FORGE } from './common.ts';
+import type { PuppetModule } from './types.ts';
 
 export class PuppetForgeDatasource extends Datasource {
   static id = 'puppet-forge';

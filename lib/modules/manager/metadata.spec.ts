@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import upath from 'upath';
-import { customManagerList as customManagers } from './custom';
+import { customManagerList as customManagers } from './custom/index.ts';
 
 describe('modules/manager/metadata', () => {
   const managerList: string[] = fs

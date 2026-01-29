@@ -1,17 +1,16 @@
-import { URL } from 'node:url';
 import { isEmptyStringOrWhitespace } from '@sindresorhus/is';
-import { migrateDatasource } from '../../../../config/migrations/custom/datasource-migration';
-import { logger } from '../../../../logger';
-import * as template from '../../../../util/template';
-import type { PackageDependency } from '../../types';
-import type { ValidMatchFields } from '../utils';
-import { validMatchFields } from '../utils';
+import { migrateDatasource } from '../../../../config/migrations/custom/datasource-migration.ts';
+import { logger } from '../../../../logger/index.ts';
+import * as template from '../../../../util/template/index.ts';
+import type { PackageDependency } from '../../types.ts';
+import type { ValidMatchFields } from '../utils.ts';
+import { validMatchFields } from '../utils.ts';
 import type {
   ExtractionTemplate,
   PackageFileInfo,
   RegexManagerConfig,
   RegexManagerTemplates,
-} from './types';
+} from './types.ts';
 
 function updateDependency(
   dependency: PackageDependency,

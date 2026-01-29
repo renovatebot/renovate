@@ -1,11 +1,11 @@
-import { getChangeLogJSON } from '..';
-import * as semverVersioning from '../../../../../../modules/versioning/semver';
-import * as hostRules from '../../../../../../util/host-rules';
-import type { Timestamp } from '../../../../../../util/timestamp';
-import type { BranchUpgradeConfig } from '../../../../../types';
-import { GitLabChangeLogSource } from './source';
-import * as httpMock from '~test/http-mock';
-import { partial } from '~test/util';
+import * as semverVersioning from '../../../../../../modules/versioning/semver/index.ts';
+import * as hostRules from '../../../../../../util/host-rules.ts';
+import type { Timestamp } from '../../../../../../util/timestamp.ts';
+import type { BranchUpgradeConfig } from '../../../../../types.ts';
+import { getChangeLogJSON } from '../index.ts';
+import { GitLabChangeLogSource } from './source.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
