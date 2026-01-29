@@ -1,7 +1,7 @@
-import { logger } from '../../../logger';
-import { escapeRegExp, regEx } from '../../../util/regex';
-import { parseUrl } from '../../../util/url';
-import type { UpdateDependencyConfig } from '../types';
+import { logger } from '../../../logger.ts';
+import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
+import type { UpdateDependencyConfig } from '../types.ts';
 
 export function updateDependency({
   fileContent,
