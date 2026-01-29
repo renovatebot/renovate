@@ -115,7 +115,7 @@ export async function extractPackageFile(
     dep.currentDigest = flakeLocked.rev;
 
     switch (flakeLocked.type) {
-      case 'git':
+      case 'git': {
         const gitUrl = parseGitUrl(flakeOriginal.url!);
 
         if (gitUrl.protocols.includes('file')) {
@@ -124,6 +124,7 @@ export async function extractPackageFile(
 
         dep.packageName = gitUrl.toString();
         break;
+      }
 
       case 'github':
         // set to nixpkgs if it is a nixpkgs reference
