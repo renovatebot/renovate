@@ -758,6 +758,11 @@ describe('modules/platform/gerrit/client', () => {
 
     it('does nothing when no hashtags provided', async () => {
       await expect(client.setHashtags(123456, {})).toResolve();
+      await expect(client.setHashtags(123456, { add: [] })).toResolve();
+      await expect(client.setHashtags(123456, { remove: [] })).toResolve();
+      await expect(
+        client.setHashtags(123456, { add: [], remove: [] }),
+      ).toResolve();
     });
   });
 
