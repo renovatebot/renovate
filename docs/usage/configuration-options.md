@@ -4690,6 +4690,36 @@ We recommend that you only configure the `timezone` option if _both_ of these ar
 
 Please see the above link for valid timezone names.
 
+## toolSettings
+
+When Renovate updates a dependency and needs to invoke processes leveraging Java, for example Gradle for [the `gradle-wrapper` manager](./modules/manager/gradle-wrapper/index.md), the repository's Gradle Wrapper will be invoked, if present.
+
+The JVM heap size for the Java invocations is 512m by default.
+This can be overridden using the following options.
+
+This option can be used on the repository level and in the [Renovate configuration](./self-hosted-configuration.md) using the following options.
+
+<!-- prettier-ignore -->
+!!! note
+    The JVM memory settings specified in the global self-hosted configuration set by the administrator in [`toolSettings.jvmMaxMemory`](./self-hosted-configuration.md) limits the memory settings for all repositories.
+    The default limit for all repositories is 512m.
+
+<!-- prettier-ignore -->
+!!! note
+    The JVM memory settings are considered for the `gradle-wrapper` manager.
+
+### jvmMaxMemory
+
+Maximum heap size in MB for Java VMs.
+Defaults to `512` for both the repository level and self-hosted configuration.
+
+To allow repositories to use _more_ than 512m of heap during the Gradle Wrapper update, configure the `jvmMaxMemory` option in the [`toolSettings.jvmMaxMemory`](./self-hosted-configuration.md).
+
+### jvmMemory
+
+Initial heap size in MB for Java VMs. Must be less than or equal to `jvmMaxMemory`.
+Defaults to `jvmMaxMemory`.
+
 ## updateInternalDeps
 
 Renovate defaults to skipping any internal package dependencies within monorepos.
