@@ -152,15 +152,15 @@ export class GerritScm extends DefaultGitScm {
           }
           // If a change already exists, we push to the same target branch to
           // avoid creating a new change if the base branch has changed.
-          // updatePr() will take care of moving the existing change to a different base
-          // branch if needed.
-          const changeBranch = existingChange?.branch ?? commit.baseBranch!;
+          // updatePr() will later take care of moving the existing change to a
+          // different base branch if needed.
           const pushResult = await git.pushCommit({
             sourceRef: commit.branchName,
-            targetRef: `refs/for/${changeBranch}`,
+            targetRef: `refs/for/${existingChange.branch}`,
             files: commit.files,
             pushOptions,
           });
+          /* v8 ignore else -- should never happen */
           if (pushResult) {
             return commitSha;
           }
