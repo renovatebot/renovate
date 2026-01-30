@@ -1,7 +1,13 @@
 import { isArray, isUndefined } from '@sindresorhus/is';
-import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { anyMatchRegexOrGlobList, matchRegexOrGlobList } from '../string-match';
-import { Matcher } from './base';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import {
+  anyMatchRegexOrGlobList,
+  matchRegexOrGlobList,
+} from '../string-match.ts';
+import { Matcher } from './base.ts';
 
 export class FileNamesMatcher extends Matcher {
   override matches(

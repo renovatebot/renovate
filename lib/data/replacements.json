@@ -17,8 +17,9 @@
       "replacements:fakerjs-to-scoped",
       "replacements:fastify-to-scoped",
       "replacements:framer-motion-to-motion",
-      "replacements:hapi-to-scoped",
       "replacements:google-github-action-release-please-to-googleapis",
+      "replacements:grafana-oss-to-grafana",
+      "replacements:hapi-to-scoped",
       "replacements:jade-to-pug",
       "replacements:joi-to-scoped",
       "replacements:joi-to-unscoped",
@@ -707,6 +708,17 @@
       }
     ]
   },
+  "grafana-oss-to-grafana": {
+    "description": "`grafana/grafana-oss` was replaced by `grafana/grafana` with the same images",
+    "packageRules": [
+      {
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["/^(?:docker\\.io/)?grafana/grafana-oss$/"],
+        "matchCurrentVersion": "12.1.1",
+        "replacementName": "grafana/grafana"
+      }
+    ]
+  },
   "hapi-to-scoped": {
     "description": "`hapi` became scoped.",
     "packageRules": [
@@ -1036,6 +1048,7 @@
   },
   "tsconfig-bases-node": {
     "description": "`@tsconfig-bases` node updates.",
+    "extends": ["customManagers:tsconfigNodeVersions"],
     "packageRules": [
       {
         "matchDatasources": ["npm"],

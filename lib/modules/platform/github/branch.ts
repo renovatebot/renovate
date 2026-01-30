@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { regEx } from '../../../util/regex';
-import { githubApi } from './common';
+import { regEx } from '../../../util/regex.ts';
+import { githubApi } from './common.ts';
 
 const MatchingRef = z
   .object({ ref: z.string() })

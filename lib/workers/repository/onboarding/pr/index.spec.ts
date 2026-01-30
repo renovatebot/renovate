@@ -1,15 +1,18 @@
 import type { RequestError, Response } from 'got';
-import { getConfig } from '../../../../config/defaults';
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import type { PackageFile } from '../../../../modules/manager/types';
-import type { Pr } from '../../../../modules/platform';
-import * as memCache from '../../../../util/cache/memory';
-import type { BranchConfig } from '../../../types';
-import { OnboardingState } from '../common';
-import { ensureOnboardingPr } from '.';
-import { partial, platform, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import { DateTime } from 'luxon';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { InheritConfig } from '../../../../config/inherit.ts';
+import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { PackageFile } from '../../../../modules/manager/types.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import * as memCache from '../../../../util/cache/memory/index.ts';
+import type { BranchConfig } from '../../../types.ts';
+import { OnboardingState } from '../common.ts';
+import { ensureOnboardingPr } from './index.ts';
+import { partial, platform, scm } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
 describe('workers/repository/onboarding/pr/index', () => {
   describe('ensureOnboardingPr()', () => {
@@ -38,6 +41,15 @@ describe('workers/repository/onboarding/pr/index', () => {
 
     it('returns if onboarded', async () => {
       config.repoIsOnboarded = true;
+      await expect(
+        ensureOnboardingPr(config, packageFiles, branches),
+      ).resolves.not.toThrow();
+      expect(platform.createPr).toHaveBeenCalledTimes(0);
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
+    });
+
+    it('returns if onboarded cache is valid', async () => {
+      OnboardingState.onboardingCacheValid = true;
       await expect(
         ensureOnboardingPr(config, packageFiles, branches),
       ).resolves.not.toThrow();
@@ -225,6 +237,165 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
+    });
+
+    describe('when onboardingAutoCloseAge is set', () => {
+      beforeAll(() => {
+        vi.useFakeTimers();
+      });
+
+      it('ensures comment, if onboarding cache is up-to-date, but when onboarding pr is over onboardingAutoCloseAge', async () => {
+        OnboardingState.onboardingCacheValid = true;
+        const now = DateTime.now();
+        vi.setSystemTime(now.toMillis());
+        const createdAt = now.minus({ hour: 48 });
+
+        config.baseBranch = 'some-branch';
+        GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({
+            title: 'Configure Renovate',
+            bodyStruct,
+            createdAt: createdAt.toISO(),
+            number: 1,
+          }),
+        );
+        await expect(ensureOnboardingPr(config, {}, branches)).rejects.toThrow(
+          REPOSITORY_CLOSED_ONBOARDING,
+        );
+        expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+        expect(platform.updatePr).toHaveBeenCalledWith({
+          number: 1,
+          state: 'closed',
+          prTitle: 'Configure Renovate',
+        });
+      });
+
+      it('does not comment, when onboarding pr is exactly at onboardingAutoCloseAge', async () => {
+        const now = DateTime.now();
+        vi.setSystemTime(now.toMillis());
+        // at exactly 1 day ago, which means that an `onboardingAutoCloseAge=1` SHOULD NOT trigger, as it's > 1
+        const createdAt = now.minus({ hour: 24 });
+
+        config.baseBranch = 'some-branch';
+        GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({
+            title: 'Configure Renovate',
+            bodyStruct,
+            createdAt: createdAt.toISO(),
+            number: 1,
+          }),
+        );
+        await ensureOnboardingPr(config, {}, branches);
+        expect(platform.ensureComment).toHaveBeenCalledTimes(0);
+        expect(platform.createPr).toHaveBeenCalledTimes(0);
+      });
+
+      it('ensures comment, when onboarding pr is partially over onboardingAutoCloseAge', async () => {
+        const now = DateTime.now();
+        vi.setSystemTime(now.toMillis());
+        // we're currently 1 day and 1 second ahead of the creation time, which is 1.x days since the PR was created, which means that an `onboardingAutoCloseAge=1` should trigger, as it's > 1
+        const createdAt = now.minus({ hour: 24, seconds: 1 });
+
+        config.baseBranch = 'some-branch';
+        GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({
+            title: 'Configure Renovate',
+            bodyStruct,
+            createdAt: createdAt.toISO(),
+            number: 1,
+          }),
+        );
+        await expect(ensureOnboardingPr(config, {}, branches)).rejects.toThrow(
+          REPOSITORY_CLOSED_ONBOARDING,
+        );
+        expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+        expect(platform.updatePr).toHaveBeenCalledWith({
+          number: 1,
+          state: 'closed',
+          prTitle: 'Configure Renovate',
+        });
+      });
+
+      it('ensures comment, when onboarding pr is 1 day older than onboardingAutoCloseAge', async () => {
+        const now = DateTime.now();
+        vi.setSystemTime(now.toMillis());
+        // we're currently 25 hours ahead of the creation time, which is 1.x days since the PR was created, which means that an `onboardingAutoCloseAge=1` should trigger, as it's > 1
+        const createdAt = now.minus({ hour: 48 });
+
+        config.baseBranch = 'some-branch';
+        GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({
+            title: 'Configure Renovate',
+            bodyStruct,
+            createdAt: createdAt.toISO(),
+            number: 1,
+          }),
+        );
+        await expect(ensureOnboardingPr(config, {}, branches)).rejects.toThrow(
+          REPOSITORY_CLOSED_ONBOARDING,
+        );
+        expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+        expect(platform.updatePr).toHaveBeenCalledWith({
+          number: 1,
+          state: 'closed',
+          prTitle: 'Configure Renovate',
+        });
+      });
+
+      it('ensures comment,when onboarding pr is significantly older than onboardingAutoCloseAge', async () => {
+        config.baseBranch = 'some-branch';
+        GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({
+            title: 'Configure Renovate',
+            bodyStruct,
+            createdAt: '2020-02-29T01:40:21Z',
+            number: 1,
+          }),
+        );
+        await expect(ensureOnboardingPr(config, {}, branches)).rejects.toThrow(
+          REPOSITORY_CLOSED_ONBOARDING,
+        );
+        expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+        expect(platform.updatePr).toHaveBeenCalledWith({
+          number: 1,
+          state: 'closed',
+          prTitle: 'Configure Renovate',
+        });
+      });
+
+      it('prefers inherited onboardingAutoCloseAge over global config', async () => {
+        const now = DateTime.now();
+        vi.setSystemTime(now.toMillis());
+        // PR was created 36 hours ago (1.5 days)
+        const createdAt = now.minus({ hour: 36 });
+
+        config.baseBranch = 'some-branch';
+        GlobalConfig.set({ onboardingAutoCloseAge: 2 });
+        InheritConfig.set({ onboardingAutoCloseAge: 1 });
+
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({
+            title: 'Configure Renovate',
+            bodyStruct,
+            createdAt: createdAt.toISO(),
+            number: 1,
+          }),
+        );
+        await expect(ensureOnboardingPr(config, {}, branches)).rejects.toThrow(
+          REPOSITORY_CLOSED_ONBOARDING,
+        );
+        expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+        expect(platform.updatePr).toHaveBeenCalledWith({
+          number: 1,
+          state: 'closed',
+          prTitle: 'Configure Renovate',
+        });
+      });
     });
 
     it('does nothing in dry run when PR is conflicted', async () => {

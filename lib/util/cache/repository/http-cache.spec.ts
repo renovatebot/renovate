@@ -1,6 +1,6 @@
 import { DateTime, Settings } from 'luxon';
-import { GlobalConfig } from '../../../config/global';
-import { cleanupHttpCache } from './http-cache';
+import { GlobalConfig } from '../../../config/global.ts';
+import { cleanupHttpCache } from './http-cache.ts';
 
 describe('util/cache/repository/http-cache', () => {
   beforeEach(() => {

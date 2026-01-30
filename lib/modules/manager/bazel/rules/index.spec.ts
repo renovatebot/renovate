@@ -1,5 +1,5 @@
-import { parseArchiveUrl } from './http';
-import { extractDepsFromFragmentData } from '.';
+import { parseArchiveUrl } from './http.ts';
+import { extractDepsFromFragmentData } from './index.ts';
 
 describe('modules/manager/bazel/rules/index', () => {
   it('parses archiveUrl', () => {

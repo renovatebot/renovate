@@ -1,29 +1,29 @@
 import { isDate, isUndefined } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
-import { logger } from '../../../../../logger';
-import * as memCache from '../../../../../util/cache/memory';
-import * as packageCache from '../../../../../util/cache/package';
-import type { PackageCacheNamespace } from '../../../../../util/cache/package/types';
-import { detectPlatform } from '../../../../../util/common';
-import { linkify } from '../../../../../util/markdown';
-import { newlineRegex, regEx } from '../../../../../util/regex';
-import { coerceString } from '../../../../../util/string';
-import { isHttpUrl, joinUrlParts } from '../../../../../util/url';
-import type { BranchUpgradeConfig } from '../../../../types';
-import * as bitbucket from './bitbucket';
-import * as bitbucketServer from './bitbucket-server';
-import * as forgejo from './forgejo';
-import * as gitea from './gitea';
-import * as github from './github';
-import * as gitlab from './gitlab';
+import { logger } from '../../../../../logger/index.ts';
+import * as memCache from '../../../../../util/cache/memory/index.ts';
+import * as packageCache from '../../../../../util/cache/package/index.ts';
+import type { PackageCacheNamespace } from '../../../../../util/cache/package/types.ts';
+import { detectPlatform } from '../../../../../util/common.ts';
+import { linkify } from '../../../../../util/markdown.ts';
+import { newlineRegex, regEx } from '../../../../../util/regex.ts';
+import { coerceString } from '../../../../../util/string.ts';
+import { isHttpUrl, joinUrlParts } from '../../../../../util/url.ts';
+import type { BranchUpgradeConfig } from '../../../../types.ts';
+import * as bitbucket from './bitbucket/index.ts';
+import * as bitbucketServer from './bitbucket-server/index.ts';
+import * as forgejo from './forgejo/index.ts';
+import * as gitea from './gitea/index.ts';
+import * as github from './github/index.ts';
+import * as gitlab from './gitlab/index.ts';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
   ChangeLogProject,
   ChangeLogRelease,
   ChangeLogResult,
-} from './types';
+} from './types.ts';
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading', 'fence']);

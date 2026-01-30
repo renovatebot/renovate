@@ -1,23 +1,23 @@
 import { mockDeep } from 'vitest-mock-extended';
-import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
-import * as _hostRules from '../../../util/host-rules';
-import { Http } from '../../../util/http';
+import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages.ts';
+import * as _hostRules from '../../../util/host-rules.ts';
+import { Http } from '../../../util/http/index.ts';
 import {
   dockerDatasourceId,
   findHelmSourceUrl,
   findLatestStable,
   getAuthHeaders,
   getRegistryRepository,
-} from './common';
-import type { OciHelmConfig } from './schema';
-import * as httpMock from '~test/http-mock';
-import { partial } from '~test/util';
+} from './common.ts';
+import type { OciHelmConfig } from './schema.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 
 const hostRules = vi.mocked(_hostRules);
 
 const http = new Http(dockerDatasourceId);
 
-vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 describe('modules/datasource/docker/common', () => {
   describe('getRegistryRepository', () => {

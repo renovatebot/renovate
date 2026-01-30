@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { ApiCache } from './api-cache';
+import { ApiCache } from './api-cache.ts';
 
 describe('modules/platform/github/api-cache', () => {
   const now = DateTime.fromISO('2000-01-01T00:00:00.000+00:00');

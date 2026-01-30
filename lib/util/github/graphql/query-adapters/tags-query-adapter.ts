@@ -1,7 +1,10 @@
 import { z } from 'zod';
-import { Timestamp } from '../../../timestamp';
-import type { GithubGraphqlDatasourceAdapter, GithubTagItem } from '../types';
-import { prepareQuery } from '../util';
+import { Timestamp } from '../../../timestamp.ts';
+import type {
+  GithubGraphqlDatasourceAdapter,
+  GithubTagItem,
+} from '../types.ts';
+import { prepareQuery } from '../util.ts';
 
 const key = 'github-tags-datasource-v2';
 

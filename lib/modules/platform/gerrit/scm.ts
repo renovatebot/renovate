@@ -1,11 +1,14 @@
 import { randomUUID } from 'crypto';
-import { logger } from '../../../logger';
-import * as git from '../../../util/git';
-import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
-import { hash } from '../../../util/hash';
-import { DefaultGitScm } from '../default-scm';
-import { client } from './client';
-import type { GerritFindPRConfig } from './types';
+import { logger } from '../../../logger/index.ts';
+import * as git from '../../../util/git/index.ts';
+import type {
+  CommitFilesConfig,
+  LongCommitSha,
+} from '../../../util/git/types.ts';
+import { hash } from '../../../util/hash.ts';
+import { DefaultGitScm } from '../default-scm.ts';
+import { client } from './client.ts';
+import type { GerritFindPRConfig } from './types.ts';
 
 let repository: string;
 let username: string;

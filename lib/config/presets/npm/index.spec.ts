@@ -1,6 +1,6 @@
-import { GlobalConfig } from '../../global';
-import * as npm from '.';
-import * as httpMock from '~test/http-mock';
+import { GlobalConfig } from '../../global.ts';
+import * as npm from './index.ts';
+import * as httpMock from '~test/http-mock.ts';
 
 describe('config/presets/npm/index', () => {
   beforeEach(() => {

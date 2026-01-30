@@ -134,11 +134,11 @@ exports[`modules/platform/bitbucket/index > getPrList() > filters PR list by aut
 ]
 `;
 
-exports[`modules/platform/bitbucket/index > massageMarkdown() > returns diff files 1`] = `
-"**foo**
+exports[`modules/platform/bitbucket/index > massageMarkdown() > removes html tags 1`] = `
+" - **foo**
 
 
-**text**
+	 - \`text\`
 
 
 

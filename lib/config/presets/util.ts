@@ -1,9 +1,9 @@
-import { logger } from '../../logger';
-import type { Nullish } from '../../types';
-import { parseJson } from '../../util/common';
-import { regEx } from '../../util/regex';
-import { ensureTrailingSlash } from '../../util/url';
-import type { FetchPresetConfig, Preset } from './types';
+import { logger } from '../../logger/index.ts';
+import type { Nullish } from '../../types/index.ts';
+import { parseJson } from '../../util/common.ts';
+import { regEx } from '../../util/regex.ts';
+import { ensureTrailingSlash } from '../../util/url.ts';
+import type { FetchPresetConfig, Preset } from './types.ts';
 
 export const PRESET_DEP_NOT_FOUND = 'dep not found';
 export const PRESET_INVALID = 'invalid preset';

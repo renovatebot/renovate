@@ -1,5 +1,5 @@
-import { DockerDatasource } from '../../datasource/docker';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 export function extractPackageFile(content: string): PackageFileContent {
   const dep: PackageDependency = {

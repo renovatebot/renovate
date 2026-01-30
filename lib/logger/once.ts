@@ -25,6 +25,7 @@ function getCallSite(omitFn: OmitFn): string | null {
     Error.captureStackTrace(res, omitFn);
 
     const [callsite] = res.stack;
+    // v8 ignore else -- TODO: add test #40625
     if (callsite) {
       result = callsite.toString();
     }

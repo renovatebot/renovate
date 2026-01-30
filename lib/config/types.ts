@@ -1,19 +1,19 @@
-import type { Category, PlatformId } from '../constants';
-import type { LogLevelRemap } from '../logger/types';
-import type { ManagerName } from '../manager-list.generated';
-import type { CustomManager } from '../modules/manager/custom/types';
-import type { RepoSortMethod, SortMethod } from '../modules/platform/types';
+import type { Category, PlatformId } from '../constants/index.ts';
+import type { LogLevelRemap } from '../logger/types.ts';
+import type { ManagerName } from '../manager-list.generated.ts';
+import type { CustomManager } from '../modules/manager/custom/types.ts';
+import type { RepoSortMethod, SortMethod } from '../modules/platform/types.ts';
 import type {
   AutoMergeType,
   HostRule,
   Nullish,
   RangeStrategy,
   SkipReason,
-} from '../types';
-import type { StageName } from '../types/skip-reason';
-import type { GitNoVerifyOption } from '../util/git/types';
-import type { MergeConfidence } from '../util/merge-confidence/types';
-import type { Timestamp } from '../util/timestamp';
+} from '../types/index.ts';
+import type { StageName } from '../types/skip-reason.ts';
+import type { GitNoVerifyOption } from '../util/git/types.ts';
+import type { MergeConfidence } from '../util/merge-confidence/types.ts';
+import type { Timestamp } from '../util/timestamp.ts';
 
 export type RenovateConfigStage =
   | 'global'
@@ -62,6 +62,7 @@ export interface RenovateSharedConfig {
   abandonmentThreshold?: Nullish<string>;
   addLabels?: string[];
   assignAutomerge?: boolean;
+  autoApprove?: boolean;
   autoReplaceGlobalMatch?: boolean;
   automerge?: boolean;
   automergeSchedule?: string[];
@@ -128,6 +129,7 @@ export interface RenovateSharedConfig {
   prHeader?: string;
   prPriority?: number;
   prTitle?: string;
+  prTitleStrict?: boolean;
   productLinks?: Record<string, string>;
   pruneBranchAfterAutomerge?: boolean;
   rangeStrategy?: RangeStrategy;
@@ -156,6 +158,14 @@ export interface RenovateSharedConfig {
   updateNotScheduled?: boolean;
   versioning?: string;
   versionCompatibility?: string;
+}
+
+/**
+ * Contains all options with globalOnly=true && inheritConfigSupport=true
+ */
+export interface GlobalInheritableConfig {
+  configFileNames?: string[];
+  onboardingAutoCloseAge?: number;
 }
 
 // Config options used only within the global worker
@@ -202,11 +212,12 @@ export interface GlobalOnlyConfigLegacy {
  *
  * Should only contain config options where globalOnly=true.
  */
-export interface RepoGlobalConfig {
+export interface RepoGlobalConfig extends GlobalInheritableConfig {
   allowedCommands?: string[];
   allowCustomCrateRegistries?: boolean;
   allowPlugins?: boolean;
   allowScripts?: boolean;
+  allowShellExecutorForPostUpgradeCommands?: boolean;
   allowedEnv?: string[];
   allowedHeaders?: string[];
   binarySource?: BinarySource;
@@ -242,6 +253,7 @@ export interface RepoGlobalConfig {
   configFileNames?: string[];
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
+  onboardingAutoCloseAge?: number;
 }
 
 /**
@@ -261,7 +273,7 @@ export interface LegacyAdminConfig {
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingRebaseCheckbox?: boolean;
   onboardingPrTitle?: string;
-  onboardingConfig?: RenovateSharedConfig;
+  onboardingConfig?: RenovateConfig;
   onboardingConfigFileName?: string;
 
   optimizeForDisabled?: boolean;
@@ -533,9 +545,8 @@ export type MergeStrategy =
   | 'rebase-merge'
   | 'squash';
 
-// ref: https://github.com/renovatebot/renovate/issues/39458
 // This list should be added to as any new unsafe execution commands should be permitted
-export type AllowedUnsafeExecution = 'goGenerate';
+export type AllowedUnsafeExecution = 'goGenerate' | 'gradleWrapper';
 
 // TODO: Proper typings
 export interface PackageRule

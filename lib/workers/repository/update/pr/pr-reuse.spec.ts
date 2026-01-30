@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../../../config/global';
-import { tryReuseAutoclosedPr } from './pr-reuse';
-import { platform } from '~test/util';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { tryReuseAutoclosedPr } from './pr-reuse.ts';
+import { platform } from '~test/util.ts';
 
 describe('workers/repository/update/pr/pr-reuse', () => {
   const tryReuseFn = platform.tryReuseAutoclosedPr;

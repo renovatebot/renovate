@@ -1,6 +1,6 @@
 import { isArray, isPlainObject } from '@sindresorhus/is';
-import { HttpBase, type InternalJsonUnsafeOptions } from './http';
-import type { HttpMethod, HttpOptions, HttpResponse } from './types';
+import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
+import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
 
 let baseUrl: string;
 export const setBaseUrl = (newBaseUrl: string): void => {

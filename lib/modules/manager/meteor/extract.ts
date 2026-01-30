@@ -1,7 +1,7 @@
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import { NpmDatasource } from '../../datasource/npm';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { NpmDatasource } from '../../datasource/npm/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 export function extractPackageFile(
   content: string,

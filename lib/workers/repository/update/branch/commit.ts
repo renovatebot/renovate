@@ -1,13 +1,13 @@
 // TODO #22198
 import { isNonEmptyArray } from '@sindresorhus/is';
-import { GlobalConfig } from '../../../../config/global';
-import { CONFIG_SECRETS_EXPOSED } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import { scm } from '../../../../modules/platform/scm';
-import type { LongCommitSha } from '../../../../util/git/types';
-import { minimatch } from '../../../../util/minimatch';
-import { sanitize } from '../../../../util/sanitize';
-import type { BranchConfig } from '../../../types';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { CONFIG_SECRETS_EXPOSED } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import type { LongCommitSha } from '../../../../util/git/types.ts';
+import { minimatch } from '../../../../util/minimatch.ts';
+import { sanitize } from '../../../../util/sanitize.ts';
+import type { BranchConfig } from '../../../types.ts';
 
 export function commitFilesToBranch(
   config: BranchConfig,

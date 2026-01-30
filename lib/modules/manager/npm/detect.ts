@@ -1,9 +1,9 @@
 import os from 'node:os';
 import { isNonEmptyString } from '@sindresorhus/is';
 import upath from 'upath';
-import { logger } from '../../../logger';
-import { readSystemFile } from '../../../util/fs';
-import type { GlobalManagerConfig } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { readSystemFile } from '../../../util/fs/index.ts';
+import type { GlobalManagerConfig } from '../types.ts';
 
 export async function detectGlobalConfig(): Promise<GlobalManagerConfig> {
   const res: GlobalManagerConfig = {};

@@ -1,20 +1,19 @@
-import url from 'node:url';
 import { isString } from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { getEnv } from '../../../util/env';
-import { parse } from '../../../util/html';
-import type { OutgoingHttpHeaders } from '../../../util/http/types';
-import { regEx } from '../../../util/regex';
-import { asTimestamp } from '../../../util/timestamp';
-import { ensureTrailingSlash, parseUrl } from '../../../util/url';
-import * as pep440 from '../../versioning/pep440';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { getGoogleAuthToken } from '../util';
-import { isGitHubRepo, normalizePythonDepName } from './common';
-import type { PypiJSON, PypiJSONRelease, Releases } from './types';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { getEnv } from '../../../util/env.ts';
+import { parse } from '../../../util/html.ts';
+import type { OutgoingHttpHeaders } from '../../../util/http/types.ts';
+import { regEx } from '../../../util/regex.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
+import * as pep440 from '../../versioning/pep440/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { getGoogleAuthToken } from '../util.ts';
+import { isGitHubRepo, normalizePythonDepName } from './common.ts';
+import type { PypiJSON, PypiJSONRelease, Releases } from './types.ts';
 
 export class PypiDatasource extends Datasource {
   static readonly id = 'pypi';
@@ -106,10 +105,10 @@ export class PypiDatasource extends Datasource {
     packageName: string,
     hostUrl: string,
   ): Promise<ReleaseResult | null> {
-    const lookupUrl = url.resolve(
-      hostUrl,
+    const lookupUrl = new URL(
       `${normalizePythonDepName(packageName)}/json`,
-    );
+      hostUrl,
+    ).href;
     const dependency: ReleaseResult = { releases: [] };
     logger.trace({ lookupUrl }, 'Pypi api got lookup');
     const headers = await this.getAuthHeaders(lookupUrl);
@@ -255,10 +254,10 @@ export class PypiDatasource extends Datasource {
     packageName: string,
     hostUrl: string,
   ): Promise<ReleaseResult | null> {
-    const lookupUrl = url.resolve(
-      hostUrl,
+    const lookupUrl = new URL(
       ensureTrailingSlash(normalizePythonDepName(packageName)),
-    );
+      hostUrl,
+    ).href;
     const dependency: ReleaseResult = { releases: [] };
     const headers = await this.getAuthHeaders(lookupUrl);
     const response = await this.http.getText(lookupUrl, { headers });

@@ -1,7 +1,7 @@
 import { RequestError } from 'got';
 import { DateTime } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   PLATFORM_UNKNOWN_ERROR,
@@ -10,32 +10,32 @@ import {
   REPOSITORY_FORK_MISSING,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
-} from '../../../constants/error-messages';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as repository from '../../../util/cache/repository';
-import * as _git from '../../../util/git';
-import type { LongCommitSha } from '../../../util/git/types';
-import * as _hostRules from '../../../util/host-rules';
-import { setBaseUrl } from '../../../util/http/github';
-import { toBase64 } from '../../../util/string';
-import { hashBody } from '../pr-body';
+} from '../../../constants/error-messages.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as repository from '../../../util/cache/repository/index.ts';
+import * as _git from '../../../util/git/index.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import * as _hostRules from '../../../util/host-rules.ts';
+import { setBaseUrl } from '../../../util/http/github.ts';
+import { toBase64 } from '../../../util/string.ts';
+import { hashBody } from '../pr-body.ts';
 import type {
   CreatePRConfig,
   ReattemptPlatformAutomergeConfig,
   UpdatePrConfig,
-} from '../types';
-import * as branch from './branch';
-import type { ApiPageCache, GhRestPr } from './types';
-import * as github from '.';
-import * as httpMock from '~test/http-mock';
-import { logger } from '~test/util';
+} from '../types.ts';
+import * as branch from './branch.ts';
+import * as github from './index.ts';
+import type { ApiPageCache, GhRestPr } from './types.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
 
 const githubApiHost = 'https://api.github.com';
 
 vi.mock('timers/promises');
 
-vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('../../../util/http/queue');
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
+vi.mock('../../../util/http/queue.ts');
 const hostRules = vi.mocked(_hostRules);
 
 const git = vi.mocked(_git);
@@ -540,6 +540,24 @@ describe('modules/platform/github/index', () => {
       expect(config).toMatchSnapshot();
     });
 
+    // for coverage
+    it('no token', async () => {
+      hostRules.find.mockReturnValue({});
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await expect(github.initRepo({ repository: 'some/repo' })).toResolve();
+    });
+
+    // for coverage
+    it('app token', async () => {
+      hostRules.find.mockReturnValue({
+        token: 'x-access-token:123test',
+      });
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await expect(github.initRepo({ repository: 'some/repo' })).toResolve();
+    });
+
     it('should fork when using forkToken', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', false);
@@ -552,7 +570,7 @@ describe('modules/platform/github/index', () => {
       });
       const config = await github.initRepo({
         repository: 'some/repo',
-        forkToken: 'true',
+        forkToken: 'token',
         forkCreation: true,
       });
       expect(config).toMatchSnapshot();

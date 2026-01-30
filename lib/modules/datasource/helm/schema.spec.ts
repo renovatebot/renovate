@@ -1,6 +1,6 @@
-import { Yaml } from '../../../util/schema-utils';
-import { HelmRepository } from './schema';
-import { Fixtures } from '~test/fixtures';
+import { Yaml } from '../../../util/schema-utils/index.ts';
+import { HelmRepository } from './schema.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 describe('modules/datasource/helm/schema', () => {
   describe('sourceUrl', () => {

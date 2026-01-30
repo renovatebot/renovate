@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { regEx } from '../../../util/regex';
-import { Yaml } from '../../../util/schema-utils';
+import { regEx } from '../../../util/regex.ts';
+import { Yaml } from '../../../util/schema-utils/index.ts';
 
 const GitSshUrl = z.string().regex(regEx(/^[^@]+@[^:]*:.+$/), {
   message: 'Invalid Git SSH URL format',

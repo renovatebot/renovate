@@ -98,7 +98,7 @@ This repository currently has no open or pending branches.
 
 <details><summary>Dockerfile (1)</summary>
 
- - \`ubuntu 20.04\`
+ - \`ubuntu 20.04\` → [Updates: \`22.04\`]
 
 </details>
 
@@ -111,13 +111,13 @@ This repository currently has no open or pending branches.
 <details><summary>package.json (8)</summary>
 
  - \`cookie-parser ^1.4.5\`
- - \`express ~4.17.1\`
+ - \`express ~4.17.1\` → [Updates: \`~4.18.0\`]
  - \`express-handlebars >=5.3.4\`
  - \`geoip-lite 1.4.*\`
- - \`nodemailer 6.7.0\`
- - \`redis 3.1.2-3.4.0\`
- - \`dotenv 10.0.0\`
- - \`nodemon 2.0.14\`
+ - \`nodemailer 6.7.0\` → [Updates: \`6.7.4\`]
+ - \`redis 3.1.2-3.4.0\` → [Updates: \`3.1.1\`, \`3.1.2\`, \`4.1.0\`]
+ - \`dotenv 10.0.0\` → [Updates: \`16.0.0\`]
+ - \`nodemon 2.0.14\` → [Updates: \`2.0.16\`]
 
 </details>
 
@@ -129,7 +129,7 @@ This repository currently has no open or pending branches.
 
 <details><summary>pyproject.toml (1)</summary>
 
- - \`six <=1.3.0\`
+ - \`six <=1.3.0\` → [Updates: \`<=1.16.0\`]
 
 </details>
 
@@ -174,7 +174,7 @@ This repository currently has no open or pending branches.
 
 <details><summary>Dockerfile (1)</summary>
 
- - \`ubuntu 20.04\`
+ - \`ubuntu 20.04\` → [Updates: \`22.04\`]
 
 </details>
 
@@ -187,13 +187,13 @@ This repository currently has no open or pending branches.
 <details><summary>package.json (8)</summary>
 
  - \`cookie-parser ^1.4.5\`
- - \`express ~4.17.1\`
+ - \`express ~4.17.1\` → [Updates: \`~4.18.0\`]
  - \`express-handlebars >=5.3.4\`
  - \`geoip-lite 1.4.*\`
- - \`nodemailer 6.7.0\`
- - \`redis 3.1.2-3.4.0\`
- - \`dotenv 10.0.0\`
- - \`nodemon 2.0.14\`
+ - \`nodemailer 6.7.0\` → [Updates: \`6.7.4\`]
+ - \`redis 3.1.2-3.4.0\` → [Updates: \`3.1.1\`, \`3.1.2\`, \`4.1.0\`]
+ - \`dotenv 10.0.0\` → [Updates: \`16.0.0\`]
+ - \`nodemon 2.0.14\` → [Updates: \`2.0.16\`]
 
 </details>
 
@@ -205,7 +205,7 @@ This repository currently has no open or pending branches.
 
 <details><summary>pyproject.toml (1)</summary>
 
- - \`six <=1.3.0\`
+ - \`six <=1.3.0\` → [Updates: \`<=1.16.0\`]
 
 </details>
 
@@ -223,7 +223,7 @@ This repository currently has no open or pending branches.
 
 <details><summary>Dockerfile (1)</summary>
 
- - \`ubuntu 20.04\`
+ - \`ubuntu 20.04\` → [Updates: \`22.04\`]
 
 </details>
 
@@ -236,13 +236,13 @@ This repository currently has no open or pending branches.
 <details><summary>package.json (8)</summary>
 
  - \`cookie-parser ^1.4.5\`
- - \`express ~4.17.1\`
+ - \`express ~4.17.1\` → [Updates: \`~4.18.0\`]
  - \`express-handlebars >=5.3.4\`
  - \`geoip-lite 1.4.*\`
- - \`nodemailer 6.7.0\`
- - \`redis 3.1.2-3.4.0\`
- - \`dotenv 10.0.0\`
- - \`nodemon 2.0.14\`
+ - \`nodemailer 6.7.0\` → [Updates: \`6.7.4\`]
+ - \`redis 3.1.2-3.4.0\` → [Updates: \`3.1.1\`, \`3.1.2\`, \`4.1.0\`]
+ - \`dotenv 10.0.0\` → [Updates: \`16.0.0\`]
+ - \`nodemon 2.0.14\` → [Updates: \`2.0.16\`]
 
 </details>
 
@@ -254,7 +254,7 @@ This repository currently has no open or pending branches.
 
 <details><summary>pyproject.toml (1)</summary>
 
- - \`six <=1.3.0\`
+ - \`six <=1.3.0\` → [Updates: \`<=1.16.0\`]
 
 </details>
 
@@ -282,7 +282,7 @@ This repository currently has no open or pending branches.
 
 <details><summary>Dockerfile (1)</summary>
 
- - \`ubuntu 20.04\`
+ - \`ubuntu 20.04\` → [Updates: \`22.04\`]
 
 </details>
 
@@ -295,13 +295,13 @@ This repository currently has no open or pending branches.
 <details><summary>package.json (8)</summary>
 
  - \`cookie-parser ^1.4.5\`
- - \`express ~4.17.1\`
+ - \`express ~4.17.1\` → [Updates: \`~4.18.0\`]
  - \`express-handlebars >=5.3.4\`
  - \`geoip-lite 1.4.*\`
- - \`nodemailer 6.7.0\`
- - \`redis 3.1.2-3.4.0\`
- - \`dotenv 10.0.0\`
- - \`nodemon 2.0.14\`
+ - \`nodemailer 6.7.0\` → [Updates: \`6.7.4\`]
+ - \`redis 3.1.2-3.4.0\` → [Updates: \`3.1.1\`, \`3.1.2\`, \`4.1.0\`]
+ - \`dotenv 10.0.0\` → [Updates: \`16.0.0\`]
+ - \`nodemon 2.0.14\` → [Updates: \`2.0.16\`]
 
 </details>
 
@@ -313,7 +313,7 @@ This repository currently has no open or pending branches.
 
 <details><summary>pyproject.toml (1)</summary>
 
- - \`six <=1.3.0\`
+ - \`six <=1.3.0\` → [Updates: \`<=1.16.0\`]
 
 </details>
 
@@ -349,7 +349,7 @@ This repository currently has no open or pending branches.
 
 <details><summary>Dockerfile (1)</summary>
 
- - \`ubuntu 20.04\`
+ - \`ubuntu 20.04\` → [Updates: \`22.04\`]
 
 </details>
 
@@ -362,13 +362,13 @@ This repository currently has no open or pending branches.
 <details><summary>package.json (8)</summary>
 
  - \`cookie-parser ^1.4.5\`
- - \`express ~4.17.1\`
+ - \`express ~4.17.1\` → [Updates: \`~4.18.0\`]
  - \`express-handlebars >=5.3.4\`
  - \`geoip-lite 1.4.*\`
- - \`nodemailer 6.7.0\`
- - \`redis 3.1.2-3.4.0\`
- - \`dotenv 10.0.0\`
- - \`nodemon 2.0.14\`
+ - \`nodemailer 6.7.0\` → [Updates: \`6.7.4\`]
+ - \`redis 3.1.2-3.4.0\` → [Updates: \`3.1.1\`, \`3.1.2\`, \`4.1.0\`]
+ - \`dotenv 10.0.0\` → [Updates: \`16.0.0\`]
+ - \`nodemon 2.0.14\` → [Updates: \`2.0.16\`]
 
 </details>
 
@@ -380,7 +380,7 @@ This repository currently has no open or pending branches.
 
 <details><summary>pyproject.toml (1)</summary>
 
- - \`six <=1.3.0\`
+ - \`six <=1.3.0\` → [Updates: \`<=1.16.0\`]
 
 </details>
 
@@ -413,7 +413,7 @@ This repository currently has no open or pending branches.
 
 <details><summary>Dockerfile (1)</summary>
 
- - \`ubuntu 20.04\`
+ - \`ubuntu 20.04\` → [Updates: \`22.04\`]
 
 </details>
 
@@ -426,13 +426,13 @@ This repository currently has no open or pending branches.
 <details><summary>package.json (8)</summary>
 
  - \`cookie-parser ^1.4.5\`
- - \`express ~4.17.1\`
+ - \`express ~4.17.1\` → [Updates: \`~4.18.0\`]
  - \`express-handlebars >=5.3.4\`
  - \`geoip-lite 1.4.*\`
- - \`nodemailer 6.7.0\`
- - \`redis 3.1.2-3.4.0\`
- - \`dotenv 10.0.0\`
- - \`nodemon 2.0.14\`
+ - \`nodemailer 6.7.0\` → [Updates: \`6.7.4\`]
+ - \`redis 3.1.2-3.4.0\` → [Updates: \`3.1.1\`, \`3.1.2\`, \`4.1.0\`]
+ - \`dotenv 10.0.0\` → [Updates: \`16.0.0\`]
+ - \`nodemon 2.0.14\` → [Updates: \`2.0.16\`]
 
 </details>
 
@@ -444,7 +444,7 @@ This repository currently has no open or pending branches.
 
 <details><summary>pyproject.toml (1)</summary>
 
- - \`six <=1.3.0\`
+ - \`six <=1.3.0\` → [Updates: \`<=1.16.0\`]
 
 </details>
 

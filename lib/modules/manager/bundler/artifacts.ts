@@ -3,29 +3,29 @@ import { quote } from 'shlex';
 import {
   BUNDLER_INVALID_CREDENTIALS,
   TEMPORARY_ERROR,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { HostRule } from '../../../types';
-import * as memCache from '../../../util/cache/memory';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { HostRule } from '../../../types/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   ensureCacheDir,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import { newlineRegex, regEx } from '../../../util/regex';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+} from '../../../util/fs/index.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import {
   getBundlerConstraint,
   getLockFilePath,
   getRubyConstraint,
-} from './common';
+} from './common.ts';
 import {
   findAllAuthenticatable,
   getAuthenticationHeaderValue,
-} from './host-rules';
+} from './host-rules.ts';
 
 const hostConfigVariablePrefix = 'BUNDLE_';
 

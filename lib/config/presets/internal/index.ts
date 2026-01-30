@@ -1,20 +1,20 @@
-import type { Preset, PresetConfig } from '../types';
-import * as configAbandonments from './abandonments';
-import * as configPreset from './config';
-import * as customManagersPreset from './custom-managers';
-import * as defaultPreset from './default';
-import * as dockerPreset from './docker';
-import * as globalPreset from './global';
-import * as groupPreset from './group';
-import * as helpersPreset from './helpers';
-import * as mergeConfidence from './merge-confidence';
-import * as monorepoPreset from './monorepos';
-import * as packagesPreset from './packages';
-import * as previewPreset from './preview';
-import * as replacements from './replacements';
-import * as schedulePreset from './schedule';
-import * as securityPreset from './security';
-import * as workaroundsPreset from './workarounds';
+import type { Preset, PresetConfig } from '../types.ts';
+import * as configAbandonments from './abandonments.ts';
+import * as configPreset from './config.ts';
+import * as customManagersPreset from './custom-managers.ts';
+import * as defaultPreset from './default.ts';
+import * as dockerPreset from './docker.ts';
+import * as globalPreset from './global.ts';
+import * as groupPreset from './group.ts';
+import * as helpersPreset from './helpers.ts';
+import * as mergeConfidence from './merge-confidence.ts';
+import * as monorepoPreset from './monorepos.ts';
+import * as packagesPreset from './packages.ts';
+import * as previewPreset from './preview.ts';
+import * as replacements from './replacements.ts';
+import * as schedulePreset from './schedule.ts';
+import * as securityPreset from './security.ts';
+import * as workaroundsPreset from './workarounds.ts';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
@@ -42,4 +42,42 @@ export function getPreset({
   presetName,
 }: PresetConfig): Preset | undefined {
   return groups[repo] && presetName ? groups[repo][presetName] : undefined;
+}
+
+function computeInternalPresets(): string[] {
+  const internalPresets: string[] = [];
+
+  for (const k in groups) {
+    const v = groups[k];
+    for (const kk in v) {
+      if (k === 'default') {
+        internalPresets.push(`:${kk}`);
+        internalPresets.push(`default:${kk}`);
+      } else {
+        internalPresets.push(`${k}:${kk}`);
+      }
+    }
+  }
+
+  return internalPresets;
+}
+
+export const internalPresetNames = new Set(computeInternalPresets());
+
+export function isInternal(preset: string): boolean {
+  if (internalPresetNames.has(preset)) {
+    return true;
+  }
+
+  // a parameterised preset is one that  that is parameterised will receive the argument `(...)`.
+  // As we can't look up on the preset's values itself (as it could be in any property), we can look at the preset name itself, and see if it includes the start of an opening parenthesis
+  const withoutParameterParts = preset.split('(');
+  if (
+    withoutParameterParts?.length &&
+    internalPresetNames.has(withoutParameterParts[0])
+  ) {
+    return true;
+  }
+
+  return false;
 }
