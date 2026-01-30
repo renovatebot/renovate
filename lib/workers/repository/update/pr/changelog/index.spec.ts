@@ -1,17 +1,17 @@
-import { GlobalConfig } from '../../../../../config/global';
-import * as semverVersioning from '../../../../../modules/versioning/semver';
-import * as githubGraphql from '../../../../../util/github/graphql';
-import * as hostRules from '../../../../../util/host-rules';
-import type { Timestamp } from '../../../../../util/timestamp';
-import type { BranchConfig } from '../../../../types';
-import * as releases from './releases';
-import { getChangeLogJSON } from '.';
-import * as httpMock from '~test/http-mock';
-import { partial } from '~test/util';
+import { GlobalConfig } from '../../../../../config/global.ts';
+import * as semverVersioning from '../../../../../modules/versioning/semver/index.ts';
+import * as githubGraphql from '../../../../../util/github/graphql/index.ts';
+import * as hostRules from '../../../../../util/host-rules.ts';
+import type { Timestamp } from '../../../../../util/timestamp.ts';
+import type { BranchConfig } from '../../../../types.ts';
+import { getChangeLogJSON } from './index.ts';
+import * as releases from './releases.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 
-vi.mock('../../../../../modules/datasource/npm');
-vi.mock('../../../../../util/github/graphql');
-vi.mock('./releases', { spy: true });
+vi.mock('../../../../../modules/datasource/npm/index.ts');
+vi.mock('../../../../../util/github/graphql/index.ts');
+vi.mock('./releases.ts', { spy: true });
 
 const githubApiHost = 'https://api.github.com';
 
@@ -20,7 +20,6 @@ const githubReleasesMock = vi.mocked(githubGraphql).queryReleases;
 const getInRangeReleasesMock = vi.mocked(releases).getInRangeReleases;
 
 const upgrade = partial<BranchConfig>({
-  endpoint: 'https://api.github.com/',
   packageName: 'renovate',
   versioning: semverVersioning.id,
   currentVersion: '1.0.0',
@@ -281,11 +280,12 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('will call getInRangeReleases when releases is undefined', async () => {
-      await getChangeLogJSON({
+      const param = {
         ...upgrade,
         releases: undefined,
-      });
-      expect(getInRangeReleasesMock).toHaveBeenCalledOnce();
+      };
+      await getChangeLogJSON(param);
+      expect(getInRangeReleasesMock).toHaveBeenCalledExactlyOnceWith(param);
     });
 
     it('supports github enterprise and github.com changelog', async () => {
@@ -300,7 +300,6 @@ describe('workers/repository/update/pr/changelog/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          endpoint: 'https://github-enterprise.example.com/',
         }),
       ).toMatchSnapshot({
         hasReleaseNotes: true,
@@ -341,7 +340,6 @@ describe('workers/repository/update/pr/changelog/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
-          endpoint: 'https://github-enterprise.example.com/',
         }),
       ).toMatchSnapshot({
         hasReleaseNotes: true,

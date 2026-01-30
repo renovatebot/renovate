@@ -46,3 +46,16 @@ oci.pull(
     tag = "1.27.1",
 )
 ```
+
+It also supports Docker images pulled with [rules_img pull](https://github.com/tweag/rules_img/blob/main/docs/pull.md#pull):
+
+```
+pull = use_repo_rule("@rules_img//img:pull.bzl", "pull")
+pull(
+    name = "ubuntu",
+    digest = "sha256:1e622c5f9ac0c0144d577702ba5f2cce79fc8e3cf89ec88291739cd4eee3b7b9",
+    registry = "index.docker.io",
+    repository = "library/ubuntu",
+    tag = "24.04",
+)
+```

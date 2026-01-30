@@ -1,7 +1,7 @@
 import { XmlDocument } from 'xmldoc';
-import * as hostRules from '../../../util/host-rules';
-import { createNuGetConfigXml } from './config-formatter';
-import type { Registry } from './types';
+import * as hostRules from '../../../util/host-rules.ts';
+import { createNuGetConfigXml } from './config-formatter.ts';
+import type { Registry } from './types.ts';
 
 describe('modules/manager/nuget/config-formatter', () => {
   describe('createNuGetConfigXml', () => {
@@ -160,7 +160,7 @@ describe('modules/manager/nuget/config-formatter', () => {
 
       const registryCredentialsWithSpecialName =
         packageSourceCredentials?.childNamed(
-          'my__x0020__very__x003f____x0020__weird__x0021__-regi__x0024__try_name',
+          'my_x0020_very_x003f__x0020_weird_x0021_-regi_x0024_try_name',
         );
 
       expect(

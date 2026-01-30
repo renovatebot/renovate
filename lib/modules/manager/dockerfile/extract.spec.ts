@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import type { PackageDependency } from '../types';
-import { extractVariables, getDep } from './extract';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import type { PackageDependency } from '../types.ts';
+import { extractVariables, getDep } from './extract.ts';
+import { extractPackageFile } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 const d1 = Fixtures.get('1.Dockerfile');
 const d2 = Fixtures.get('2.Dockerfile');
@@ -1303,6 +1303,27 @@ describe('modules/manager/dockerfile/extract', () => {
         },
       ]);
     });
+  });
+
+  it('handles same argument multiple times', () => {
+    const res = extractPackageFile(
+      'ARG DOCKER=docker\n' + 'FROM ${DOCKER}.io/library/${DOCKER}:29.1.1-dind',
+      '',
+      {},
+    )?.deps;
+    expect(res).toEqual([
+      {
+        autoReplaceStringTemplate:
+          'FROM ${DOCKER}.io/library/${DOCKER}:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}\n',
+        currentDigest: undefined,
+        currentValue: '29.1.1-dind',
+        datasource: 'docker',
+        depName: 'docker.io/library/docker',
+        depType: 'final',
+        packageName: 'docker.io/library/docker',
+        replaceString: 'FROM ${DOCKER}.io/library/${DOCKER}:29.1.1-dind\n',
+      },
+    ]);
   });
 
   it('handles empty optional parameters', () => {

@@ -8,11 +8,11 @@ import {
   getJvmConfiguration,
   gradleWrapperFileName,
   prepareGradleCommand,
-} from './utils';
-import { fs, partial } from '~test/util';
+} from './utils.ts';
+import { fs, partial } from '~test/util.ts';
 
 const platform = vi.spyOn(os, 'platform');
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/gradle-wrapper/util', () => {
   describe('getJavaConstraint()', () => {
@@ -70,7 +70,7 @@ describe('modules/manager/gradle-wrapper/util', () => {
     it('returns null if gradle-daemon-jvm.properties file not found', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
       expect(await getJvmConfiguration('sub/gradlew')).toBeNull();
-      expect(fs.readLocalFile).toHaveBeenCalledWith(
+      expect(fs.readLocalFile).toHaveBeenCalledExactlyOnceWith(
         'sub/gradle/gradle-daemon-jvm.properties',
         'utf8',
       );
@@ -91,7 +91,7 @@ describe('modules/manager/gradle-wrapper/util', () => {
       fs.localPathExists.mockResolvedValue(false);
       fs.readLocalFile.mockResolvedValue(null);
       expect(await getJavaLanguageVersion('sub/gradlew')).toBeNull();
-      expect(fs.readLocalFile).toHaveBeenCalledWith(
+      expect(fs.readLocalFile).toHaveBeenCalledExactlyOnceWith(
         'sub/build.gradle.kts',
         'utf8',
       );

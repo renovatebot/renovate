@@ -1,9 +1,12 @@
-import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
-import { GithubScm } from './scm';
-import * as _github from '.';
-import { git } from '~test/util';
+import type {
+  CommitFilesConfig,
+  LongCommitSha,
+} from '../../../util/git/types.ts';
+import * as _github from './index.ts';
+import { GithubScm } from './scm.ts';
+import { git } from '~test/util.ts';
 
-vi.mock('.');
+vi.mock('./index.ts');
 const github = vi.mocked(_github);
 
 describe('modules/platform/github/scm', () => {
@@ -26,7 +29,7 @@ describe('modules/platform/github/scm', () => {
       platformCommit: 'disabled',
     });
 
-    expect(git.commitFiles).toHaveBeenCalledWith({
+    expect(git.commitFiles).toHaveBeenCalledExactlyOnceWith({
       ...commitObj,
       platformCommit: 'disabled',
     });
@@ -40,7 +43,7 @@ describe('modules/platform/github/scm', () => {
     });
 
     expect(git.commitFiles).not.toHaveBeenCalled();
-    expect(github.commitFiles).toHaveBeenCalledWith({
+    expect(github.commitFiles).toHaveBeenCalledExactlyOnceWith({
       ...commitObj,
       platformCommit: 'enabled',
     });
@@ -52,7 +55,7 @@ describe('modules/platform/github/scm', () => {
       platformCommit: 'auto',
     });
 
-    expect(git.commitFiles).toHaveBeenCalledWith({
+    expect(git.commitFiles).toHaveBeenCalledExactlyOnceWith({
       ...commitObj,
       platformCommit: 'auto',
     });
@@ -68,7 +71,7 @@ describe('modules/platform/github/scm', () => {
     });
 
     expect(git.commitFiles).not.toHaveBeenCalled();
-    expect(github.commitFiles).toHaveBeenCalledWith({
+    expect(github.commitFiles).toHaveBeenCalledExactlyOnceWith({
       ...commitObj,
       platformCommit: 'auto',
     });

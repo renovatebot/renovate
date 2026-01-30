@@ -1,7 +1,7 @@
-import { DevboxDatasource } from '../../datasource/devbox';
+import { DevboxDatasource } from '../../datasource/devbox/index.ts';
 
-export { extractPackageFile } from './extract';
-export { updateArtifacts } from './artifacts';
+export { extractPackageFile } from './extract.ts';
+export { updateArtifacts } from './artifacts.ts';
 
 export const supportsLockFileMaintenance = true;
 

@@ -1,19 +1,19 @@
 import { codeBlock } from 'common-tags';
-import { GlobalConfig } from '../../../../config/global';
-import * as yaml from '../../../../util/yaml';
-import type { PackageFile } from '../../types';
-import type { NpmManagerData } from '../types';
+import { GlobalConfig } from '../../../../config/global.ts';
+import * as yaml from '../../../../util/yaml.ts';
+import type { PackageFile } from '../../types.ts';
+import type { NpmManagerData } from '../types.ts';
 import {
   detectPnpmWorkspaces,
   extractPnpmFilters,
   extractPnpmWorkspaceFile,
   findPnpmWorkspace,
   getPnpmLock,
-} from './pnpm';
-import { Fixtures } from '~test/fixtures';
-import { fs, getFixturePath, logger, partial } from '~test/util';
+} from './pnpm.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, getFixturePath, logger, partial } from '~test/util.ts';
 
-vi.mock('../../../../util/fs');
+vi.mock('../../../../util/fs/index.ts');
 
 describe('modules/manager/npm/extract/pnpm', () => {
   beforeAll(() => {
@@ -34,6 +34,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
       );
       const res = await extractPnpmFilters(workSpaceFilePath);
       expect(res).toBeUndefined();
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         {
           fileName: expect.any(String),
@@ -49,6 +50,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
 
       const res = await extractPnpmFilters('pnpm-workspace.yml');
       expect(res).toBeUndefined();
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({
           fileName: expect.any(String),
@@ -66,6 +68,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const packageFile = 'package.json';
       const res = await findPnpmWorkspace(packageFile);
       expect(res).toBeNull();
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({ packageFile }),
         'Failed to locate pnpm-workspace.yaml in a parent directory.',
@@ -79,6 +82,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const packageFile = 'package.json';
       const res = await findPnpmWorkspace(packageFile);
       expect(res).toBeNull();
+
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({
           workspaceYamlPath: 'pnpm-workspace.yaml',

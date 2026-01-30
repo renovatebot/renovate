@@ -1,7 +1,7 @@
-import is from '@sindresorhus/is';
-import { matchesHost } from '../host-rules';
-import * as hostRules from '../host-rules';
-import type { ConcurrencyLimitRule, ThrottleLimitRule } from './types';
+import { isNumber } from '@sindresorhus/is';
+import { matchesHost } from '../host-rules.ts';
+import * as hostRules from '../host-rules.ts';
+import type { ConcurrencyLimitRule, ThrottleLimitRule } from './types.ts';
 
 // The first match wins
 const concurrencyDefaults: ConcurrencyLimitRule[] = [
@@ -11,6 +11,10 @@ const concurrencyDefaults: ConcurrencyLimitRule[] = [
   },
   {
     matchHost: 'repology.org',
+    concurrency: 1,
+  },
+  {
+    matchHost: 'packages.typst.org',
     concurrency: 1,
   },
   {
@@ -69,7 +73,7 @@ export function getConcurrentRequestsLimit(url: string): number | null {
 
   const { concurrentRequestLimit: hostRuleLimit } = hostRules.find({ url });
   if (
-    is.number(hostRuleLimit) &&
+    isNumber(hostRuleLimit) &&
     hostRuleLimit > 0 &&
     hostRuleLimit < Number.MAX_SAFE_INTEGER
   ) {
@@ -96,7 +100,7 @@ export function getThrottleIntervalMs(url: string): number | null {
   let result: number | null = null;
 
   const { maxRequestsPerSecond } = hostRules.find({ url });
-  if (is.number(maxRequestsPerSecond) && maxRequestsPerSecond > 0) {
+  if (isNumber(maxRequestsPerSecond) && maxRequestsPerSecond > 0) {
     result = Math.ceil(1000 / maxRequestsPerSecond);
   }
 

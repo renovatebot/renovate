@@ -1,14 +1,14 @@
 import upath from 'upath';
-import { GlobalConfig } from '../../../../config/global';
-import { getNodeToolConstraint } from './node-version';
-import * as npmHelper from './npm';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { Fixtures } from '~test/fixtures';
-import { env, fs } from '~test/util';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { getNodeToolConstraint } from './node-version.ts';
+import * as npmHelper from './npm.ts';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { env, fs } from '~test/util.ts';
 
-vi.mock('../../../../util/exec/env');
-vi.mock('../../../../util/fs');
-vi.mock('./node-version');
+vi.mock('../../../../util/exec/env.ts');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('./node-version.ts');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -144,12 +144,12 @@ describe('modules/manager/npm/post-update/npm', () => {
       { skipInstalls, constraints: { npm: '^6.0.0' } },
     );
     expect(fs.renameLocalFile).toHaveBeenCalledTimes(1);
-    expect(fs.renameLocalFile).toHaveBeenCalledWith(
+    expect(fs.renameLocalFile).toHaveBeenCalledExactlyOnceWith(
       upath.join('some-dir', 'package-lock.json'),
       upath.join('some-dir', 'npm-shrinkwrap.json'),
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(fs.readLocalFile).toHaveBeenCalledWith(
+    expect(fs.readLocalFile).toHaveBeenCalledExactlyOnceWith(
       'some-dir/npm-shrinkwrap.json',
       'utf8',
     );
@@ -172,7 +172,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     );
     expect(fs.renameLocalFile).toHaveBeenCalledTimes(0);
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(fs.readLocalFile).toHaveBeenCalledWith(
+    expect(fs.readLocalFile).toHaveBeenCalledExactlyOnceWith(
       'some-dir/npm-shrinkwrap.json',
       'utf8',
     );
@@ -289,6 +289,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+
     expect(fs.readLocalFile).toHaveBeenCalledWith(
       'some-dir/npm-shrinkwrap.json',
       'utf8',
@@ -341,6 +342,9 @@ describe('modules/manager/npm/post-update/npm', () => {
 
   it('finds npm globally', async () => {
     const execSnapshots = mockExecAll();
+    const updates = [
+      { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: false },
+    ];
     // package.json
     fs.readLocalFile.mockResolvedValue('{}');
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
@@ -348,11 +352,17 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
+      {},
+      updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
     expect(res.lockFile).toBe('package-lock-contents');
-    // TODO: is that right?
-    expect(execSnapshots).toEqual([]);
+    // since there are no install npm commands, it means we are using the global npm
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
   });
 
   it('uses docker npm', async () => {
@@ -394,7 +404,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       cacheDir: '/tmp',
       binarySource: 'docker',
       allowScripts: true,
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
     });
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
@@ -408,7 +418,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -416,13 +426,11 @@ describe('modules/manager/npm/post-update/npm', () => {
           '-v "/tmp":"/tmp" ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool node 16.16.0 ' +
           '&& ' +
           'install-tool npm 6.0.0 ' +
-          '&& ' +
-          'hash -d npm 2>/dev/null || true ' +
           '&& ' +
           'npm install --package-lock-only --no-audit' +
           '"',
@@ -450,7 +458,31 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool node 16.16.0' },
       { cmd: 'install-tool npm 6.0.0' },
-      { cmd: 'hash -d npm 2>/dev/null || true' },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
+  });
+
+  it('does not install npm if no constraints specified', async () => {
+    GlobalConfig.set({
+      localDir: '',
+      cacheDir: '/tmp',
+      binarySource: 'install',
+    });
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { constraints: {} },
+      [{ isLockFileMaintenance: true }],
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0' },
       {
         cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
       },

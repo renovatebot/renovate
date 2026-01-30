@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { logger } from '../../../../logger';
-import type { CustomExtractConfig } from '../types';
-import { defaultConfig, displayName, extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { logger } from '../../../../logger/index.ts';
+import type { CustomExtractConfig } from '../types.ts';
+import { defaultConfig, displayName, extractPackageFile } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 const dockerfileContent = Fixtures.get(`Dockerfile`);
 const ansibleYamlContent = Fixtures.get(`ansible.yml`);
@@ -185,6 +185,7 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
+
     expect(logger.warn).toHaveBeenCalledWith(
       { value: 'this-is-not-a-valid-url-gradle' },
       'Invalid regex manager registryUrl',
@@ -680,4 +681,48 @@ describe('modules/manager/custom/regex/index', () => {
       });
     },
   );
+
+  it('uses package file as dep name', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: ['\\s*(?<currentValue>.+)\\s*$'],
+      depNameTemplate: '{{packageFile}}',
+      datasourceTemplate: 'npm',
+    };
+
+    const res = await extractPackageFile('1.0.0', 'xmldoc', config);
+
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'xmldoc',
+          currentValue: '1.0.0',
+          datasource: 'npm',
+        },
+      ],
+    });
+  });
+
+  it('uses package file dir as dep name', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: ['\\s*(?<currentValue>.+)\\s*$'],
+      depNameTemplate: '{{lookup (split packageFileDir "/") 1}}',
+      datasourceTemplate: 'npm',
+    };
+
+    const res = await extractPackageFile(
+      '1.0.0',
+      'packages/xmldoc/version.env',
+      config,
+    );
+
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'xmldoc',
+          currentValue: '1.0.0',
+          datasource: 'npm',
+        },
+      ],
+    });
+  });
 });

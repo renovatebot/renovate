@@ -1,8 +1,8 @@
 import { DateTime } from 'luxon';
 import { z } from 'zod';
-import { UtcDate } from '../../../util/schema-utils';
-import { MaybeTimestamp } from '../../../util/timestamp';
-import type { Release } from '../types';
+import { UtcDate } from '../../../util/schema-utils/index.ts';
+import { MaybeTimestamp } from '../../../util/timestamp.ts';
+import type { Release } from '../types.ts';
 
 const ExpireableField = z.union([
   UtcDate.transform((x) => {

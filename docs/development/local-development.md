@@ -11,19 +11,24 @@ For example, if you think anything is unclear, or you think something needs to b
 You need the following dependencies for local development:
 
 - Git `>=2.45.1`
-- Node.js `^22.13.0`
+- Node.js `^24.11.0`
 - pnpm `^10.0.0`
 - C++ compiler
 
 We recommend you use the version of Node.js defined in the repository's `.nvmrc` or use [Volta](https://volta.sh/) to manage your tool versions.
 Volta will apply automatically the correct version of Node.js and pnpm when you enter the repository directory.
 
+For building the documentation, you also need:
+
+- Python `>=3.11`
+- PDM `>=2.26.0`
+
 #### Linux
 
 You can use the following commands on Ubuntu.
 
 ```sh
-curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 sudo apt-get update
 sudo apt-get install -y git build-essential nodejs
 npm install -g pnpm
@@ -148,6 +153,14 @@ We test all PRs using the same tests, run on GitHub Actions.
 
 Refactor PRs should ideally not change or remove tests (adding tests is OK).
 
+### Quick Local CI
+
+For fast iteration during development, use `pnpm check`, which runs all checks in parallel and only tests the shards affected by your changes:
+
+```bash
+pnpm check
+```
+
 ### Vitest
 
 Run the Vitest unit tests with the `pnpm vitest` command.
@@ -173,6 +186,23 @@ If your code fails `pnpm test` due to a `prettier` rule then run `pnpm lint-fix`
 You usually don't need to fix any Prettier errors by hand.
 
 If you're only working on the documentation files, you can use the `pnpm doc-fix` command to format your work.
+
+### IDE extensions
+
+We recommend installing the extensions listed in `.vscode/extensions.json`.
+VS Code will prompt you to install them when you open the project.
+
+For linting, we use both ESLint and [oxlint](https://oxc.rs):
+
+- **ESLint** handles type-aware rules (requires TypeScript)
+- **oxlint** handles syntax rules (near-instant feedback)
+
+To get real-time oxlint diagnostics, install the extension for your editor:
+
+- **VS Code**: [oxc](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode)
+- **Zed**: [oxc](https://github.com/zed-extensions/oxc)
+- **IntelliJ/WebStorm**: [Oxlint](https://plugins.jetbrains.com/plugin/25948-oxlint)
+- **Neovim**: [nvim-oxlint](https://github.com/soulsam480/nvim-oxlint) or via native LSP
 
 ## Documentation
 

@@ -1,6 +1,6 @@
-import data from '../../../data/abandonments.json';
-import type { PackageRule } from '../../types';
-import type { Preset } from '../types';
+import data from '../../../data/abandonments.json' with { type: 'json' };
+import type { PackageRule } from '../../types.ts';
+import type { Preset } from '../types.ts';
 
 function loadAbandonmentPresets(): Record<string, Preset> {
   const packageRules: PackageRule[] = [
@@ -28,7 +28,11 @@ function loadAbandonmentPresets(): Record<string, Preset> {
   }
 
   return {
-    recommended: { packageRules },
+    recommended: {
+      description:
+        'Recommended configuration for abandoned packages, treating packages without a release for 1 year as abandoned, while taking into account community-sourced overrides.',
+      packageRules,
+    },
   };
 }
 

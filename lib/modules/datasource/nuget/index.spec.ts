@@ -1,20 +1,20 @@
 import { Readable } from 'stream';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { getPkgReleases } from '..';
-import { GlobalConfig } from '../../../config/global';
-import * as _packageCache from '../../../util/cache/package';
-import { id as versioning } from '../../versioning/nuget';
-import { parseRegistryUrl } from './common';
-import { NugetDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
-import { hostRules, logger } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as _packageCache from '../../../util/cache/package/index.ts';
+import { id as versioning } from '../../versioning/nuget/index.ts';
+import { getPkgReleases } from '../index.ts';
+import { parseRegistryUrl } from './common.ts';
+import { NugetDatasource } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { hostRules, logger } from '~test/util.ts';
 
 const datasource = NugetDatasource.id;
 
-vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('../../../util/cache/package', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
+vi.mock('../../../util/cache/package/index.ts', () => mockDeep());
 
 const packageCache = vi.mocked(_packageCache);
 
@@ -311,6 +311,7 @@ describe('modules/datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res!.releases).toHaveLength(1);
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           url: 'https://api.nuget.org/v3/index.json',
@@ -388,10 +389,11 @@ describe('modules/datasource/nuget/index', () => {
           packageName: 'NLog',
           registryUrls: ['https://some-registry/v3/index.json'],
         });
+
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'Determined sourceUrl https://github.com/NLog/NLog.git from https://some-registry/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg',
         );
-        expect(packageCache.setWithRawTtl).toHaveBeenCalledWith(
+        expect(packageCache.setWithRawTtl).toHaveBeenCalledExactlyOnceWith(
           'datasource-nuget-v3',
           'cache-decorator:source-url:https://some-registry/v3/index.json:NLog',
           {
@@ -461,7 +463,7 @@ describe('modules/datasource/nuget/index', () => {
           packageName: 'NLog',
           registryUrls: ['https://some-registry/v3/index.json'],
         });
-        expect(packageCache.setWithRawTtl).toHaveBeenCalledWith(
+        expect(packageCache.setWithRawTtl).toHaveBeenCalledExactlyOnceWith(
           'datasource-nuget-v3',
           'cache-decorator:source-url:https://some-registry/v3/index.json:NLog',
           {

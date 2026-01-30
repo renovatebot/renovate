@@ -1,14 +1,14 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import parseGithubUrl from 'github-url-from-git';
 import { z } from 'zod';
-import { logger } from '../../../logger';
-import type { SkipReason } from '../../../types';
-import { clone } from '../../../util/clone';
-import { regEx } from '../../../util/regex';
-import { BazelDatasource } from '../../datasource/bazel';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import type { PackageDependency } from '../types';
-import { RuleFragment, StringFragment } from './parser/fragments';
+import { logger } from '../../../logger/index.ts';
+import type { SkipReason } from '../../../types/index.ts';
+import { clone } from '../../../util/clone.ts';
+import { regEx } from '../../../util/regex.ts';
+import { BazelDatasource } from '../../datasource/bazel/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import type { PackageDependency } from '../types.ts';
+import { RuleFragment, StringFragment } from './parser/fragments.ts';
 
 // Rule Schemas
 
@@ -98,7 +98,7 @@ const GitOverrideToPackageDep = RuleFragment.extend({
       currentDigest: commit.value,
     };
     const ghPackageName = githubPackageName(remote.value);
-    if (is.nonEmptyString(ghPackageName)) {
+    if (isNonEmptyString(ghPackageName)) {
       override.datasource = GithubTagsDatasource.id;
       override.packageName = ghPackageName;
     } else {
@@ -262,7 +262,7 @@ export const GitRepositoryToPackageDep = RuleFragment.extend({
     }
 
     const ghPackageName = githubPackageName(remote.value);
-    if (is.nonEmptyString(ghPackageName)) {
+    if (isNonEmptyString(ghPackageName)) {
       gitRepo.datasource = GithubTagsDatasource.id;
       gitRepo.packageName = ghPackageName;
     } else {

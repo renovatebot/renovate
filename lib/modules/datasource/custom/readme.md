@@ -360,6 +360,8 @@ To work around a missing API, you can create dependency "files".
 These files are served via HTTP(S), so that Renovate can access them.
 For example, imagine the following file `versiontracker.json` for the software `something`:
 
+<!-- schema-validation-disable-next-block -->
+
 ```json
 [
   {

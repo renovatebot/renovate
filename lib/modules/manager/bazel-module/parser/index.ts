@@ -1,10 +1,20 @@
-import { lang, query as q } from 'good-enough-parser';
-import { Ctx } from './context';
-import { extensionTags } from './extension-tags';
-import type { ResultFragment } from './fragments';
-import { rules } from './rules';
+import { lang, query as q } from '@renovatebot/good-enough-parser';
+import { Ctx } from './context.ts';
+import { extensionTags } from './extension-tags.ts';
+import type { ResultFragment } from './fragments.ts';
+import {
+  clearRepoRuleVariables,
+  repoRuleCall,
+  useRepoRuleAssignment,
+} from './repo-rules.ts';
+import { rules } from './rules.ts';
 
-const rule = q.alt<Ctx>(rules, extensionTags);
+const rule = q.alt<Ctx>(
+  rules,
+  extensionTags,
+  useRepoRuleAssignment,
+  repoRuleCall,
+);
 
 const query = q.tree<Ctx>({
   type: 'root-tree',
@@ -15,6 +25,8 @@ const query = q.tree<Ctx>({
 const starlarkLang = lang.createLang('starlark');
 
 export function parse(input: string): ResultFragment[] {
+  clearRepoRuleVariables();
+
   const parsedResult = starlarkLang.query(input, query, new Ctx(input));
   return parsedResult?.results ?? [];
 }

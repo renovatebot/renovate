@@ -1,10 +1,11 @@
+// v8 ignore file
 /* IMPORTANT:
  * These namespaces below are used as part of the cacheTtlOverride feature
  * It's OK to add to them (e.g. for new datasources) but we should avoid
  * backwards-incompatible changes in non-major releases
  */
 
-/* v8 ignore start -- BTW don't forget to update `self-hosted-configuration.md` */
+/* v8 ignore next -- BTW don't forget to update `self-hosted-configuration.md` */
 export const packageCacheNamespaces = [
   '_test-namespace',
   'changelog-bitbucket-notes@v2',
@@ -25,6 +26,7 @@ export const packageCacheNamespaces = [
   'datasource-aws-eks-addon',
   'datasource-azure-bicep-resource',
   'datasource-azure-pipelines-tasks',
+  'datasource-azure-tags',
   'datasource-bazel',
   'datasource-bitbucket-tags',
   'datasource-bitbucket-server-tags',
@@ -76,6 +78,7 @@ export const packageCacheNamespaces = [
   'datasource-jsr',
   'datasource-maven:cache-provider',
   'datasource-maven:postprocess-reject',
+  'datasource-nextcloud',
   'datasource-node-version',
   'datasource-npm:cache-provider',
   'datasource-nuget-v3',
@@ -91,8 +94,11 @@ export const packageCacheNamespaces = [
   'datasource-terraform-module',
   'datasource-terraform-provider',
   'datasource-terraform',
+  'datasource-typst:cache-provider',
+  'datasource-typst:registry-releases',
   'datasource-unity3d',
   'datasource-unity3d-packages',
+  'github-branches-datasource-v1',
   'github-releases-datasource-v2',
   'github-tags-datasource-v2',
   'merge-confidence',

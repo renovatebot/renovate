@@ -1,10 +1,10 @@
 import { HTTPError } from 'got';
-import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
-import { GitlabReleasesDatasource } from '../../modules/datasource/gitlab-releases';
-import * as hostRules from '../host-rules';
-import { GitlabHttp, setBaseUrl } from './gitlab';
-import * as httpMock from '~test/http-mock';
-import { logger } from '~test/util';
+import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages.ts';
+import { GitlabReleasesDatasource } from '../../modules/datasource/gitlab-releases/index.ts';
+import * as hostRules from '../host-rules.ts';
+import { GitlabHttp, setBaseUrl } from './gitlab.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
 
 hostRules.add({
   hostType: 'gitlab',
@@ -53,6 +53,7 @@ describe('util/http/gitlab', () => {
       paginate: true,
     });
     expect(res.body).toHaveLength(4);
+
     expect(logger.logger.warn).toHaveBeenCalledWith(
       { err: expect.any(Error) },
       'Pagination error',

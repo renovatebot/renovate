@@ -1,27 +1,27 @@
 // TODO: add tests
 import upath from 'upath';
-import { GlobalConfig } from '../../../../config/global';
-import type { FileChange } from '../../../../util/git/types';
-import type { PostUpdateConfig } from '../../types';
-import * as npm from './npm';
-import * as pnpm from './pnpm';
-import * as rules from './rules';
-import type { AdditionalPackageFiles } from './types';
-import * as yarn from './yarn';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { FileChange } from '../../../../util/git/types.ts';
+import type { PostUpdateConfig } from '../../types.ts';
 import {
   determineLockFileDirs,
   getAdditionalFiles,
   updateYarnBinary,
   writeExistingFiles,
   writeUpdatedPackageFiles,
-} from './';
-import { Fixtures } from '~test/fixtures';
-import { fs, git, logger, partial, scm } from '~test/util';
+} from './/index.ts';
+import * as npm from './npm.ts';
+import * as pnpm from './pnpm.ts';
+import * as rules from './rules.ts';
+import type { AdditionalPackageFiles } from './types.ts';
+import * as yarn from './yarn.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, git, logger, partial, scm } from '~test/util.ts';
 
-vi.mock('../../../../util/fs');
-vi.mock('./npm');
-vi.mock('./yarn');
-vi.mock('./pnpm');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('./npm.ts');
+vi.mock('./yarn.ts');
+vi.mock('./pnpm.ts');
 
 describe('modules/manager/npm/post-update/index', () => {
   let baseConfig: PostUpdateConfig;
@@ -200,7 +200,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       expect(fs.deleteLocalFile).not.toHaveBeenCalled();
-      expect(git.getFile).toHaveBeenCalledOnce();
+      expect(git.getFile).toHaveBeenCalledExactlyOnceWith('package-lock.json');
     });
 
     it('writes .npmrc files', async () => {
@@ -217,8 +217,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ],
       });
 
-      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
-      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+      expect(fs.writeLocalFile).toHaveBeenCalledExactlyOnceWith(
         'packages/core/.npmrc',
         '#dummy\n',
       );
@@ -241,8 +240,7 @@ describe('modules/manager/npm/post-update/index', () => {
         },
       );
 
-      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
-      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+      expect(fs.writeLocalFile).toHaveBeenCalledExactlyOnceWith(
         'packages/core/.npmrc',
         '#dummy\n',
       );
@@ -258,7 +256,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       expect(fs.deleteLocalFile).not.toHaveBeenCalled();
-      expect(git.getFile).toHaveBeenCalledOnce();
+      expect(git.getFile).toHaveBeenCalledExactlyOnceWith('package-lock.json');
     });
 
     it('has no npm files', async () => {
@@ -422,6 +420,7 @@ describe('modules/manager/npm/post-update/index', () => {
       });
 
       expect(fs.readLocalFile).toHaveBeenCalledWith('.npmrc', 'utf8');
+
       expect(fs.writeLocalFile).toHaveBeenCalledWith('.npmrc', '# dummy');
       expect(fs.deleteLocalFile.mock.calls).toMatchObject([
         ['randomFolder/.npmrc'],
@@ -578,6 +577,7 @@ describe('modules/manager/npm/post-update/index', () => {
         updatedArtifacts: [],
       });
       expect(spyNpm).not.toHaveBeenCalled();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Skipping lock file generation',
       );
@@ -706,6 +706,7 @@ describe('modules/manager/npm/post-update/index', () => {
           },
           additionalFiles,
         );
+
         expect(fs.writeLocalFile).toHaveBeenCalledWith(
           '.yarnrc.yml',
           'npmRegistries:\n' +

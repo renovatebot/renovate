@@ -1,9 +1,9 @@
-import { getPkgReleases } from '..';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import { range } from '../../../util/range';
-import { datasource, defaultRegistryUrl, pageSize } from './common';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { range } from '../../../util/range.ts';
+import { getPkgReleases } from '../index.ts';
+import { datasource, defaultRegistryUrl, pageSize } from './common.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 
 function getPath(page: number, imageType = 'jdk', args = ''): string {
   return `/v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC${args}&page=${page}`;

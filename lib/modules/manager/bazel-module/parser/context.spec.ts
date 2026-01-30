@@ -1,5 +1,5 @@
-import { Ctx, CtxProcessingError } from './context';
-import * as fragments from './fragments';
+import { Ctx, CtxProcessingError } from './context.ts';
+import * as fragments from './fragments.ts';
 
 describe('modules/manager/bazel-module/parser/context', () => {
   describe('Ctx (failures cases)', () => {
@@ -55,6 +55,33 @@ describe('modules/manager/bazel-module/parser/context', () => {
           fragments.attribute('name', fragments.string('chicken'), true),
         ),
       );
+    });
+
+    it('throws if current use repo rule does not exist', () => {
+      const ctx = new Ctx('').startRule('foo');
+      expect(() => ctx.endUseRepoRule()).toThrow(
+        new Error('Requested current use repo rule, but does not exist.'),
+      );
+    });
+
+    it('throws if current repo rule call does not exist', () => {
+      const ctx = new Ctx('').startRule('foo');
+      expect(() => ctx.endRepoRuleCall(0)).toThrow(
+        new Error('Requested current repo rule call, but does not exist.'),
+      );
+    });
+
+    it('creates CtxProcessingError with parent type', () => {
+      const ctx = new Ctx('').startRule('parent');
+      ctx.startAttribute('name');
+      const parent = fragments.rule('parent');
+      const current = fragments.attribute('name');
+      const error = new CtxProcessingError(current, parent);
+      expect(error.message).toBe(
+        'Invalid context state. current: attribute, parent: rule',
+      );
+      expect(error.current).toBe(current);
+      expect(error.parent).toBe(parent);
     });
   });
 });

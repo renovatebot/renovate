@@ -1,6 +1,6 @@
-import is from '@sindresorhus/is';
-import type { PackageRule } from '../../types';
-import { AbstractMigration } from '../base/abstract-migration';
+import { isArray } from '@sindresorhus/is';
+import type { PackageRule } from '../../types.ts';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export class PackagesMigration extends AbstractMigration {
   override readonly deprecated = true;
@@ -9,8 +9,8 @@ export class PackagesMigration extends AbstractMigration {
   override run(value: unknown): void {
     const packageRules = this.get('packageRules');
 
-    let newPackageRules = is.array(packageRules) ? packageRules : [];
-    if (is.array<PackageRule>(value)) {
+    let newPackageRules = isArray(packageRules) ? packageRules : [];
+    if (isArray<PackageRule>(value)) {
       newPackageRules = newPackageRules.concat(value);
     }
     this.setHard('packageRules', newPackageRules);

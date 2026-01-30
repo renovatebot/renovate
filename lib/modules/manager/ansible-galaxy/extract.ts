@@ -1,9 +1,9 @@
-import { logger } from '../../../logger';
-import { newlineRegex, regEx } from '../../../util/regex';
-import type { PackageDependency, PackageFileContent } from '../types';
-import { extractCollections } from './collections';
-import { extractCollectionsMetaDataFile } from './collections-metadata';
-import { extractRoles } from './roles';
+import { logger } from '../../../logger/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { extractCollectionsMetaDataFile } from './collections-metadata.ts';
+import { extractCollections } from './collections.ts';
+import { extractRoles } from './roles.ts';
 
 export function getSliceEndNumber(
   start: number,

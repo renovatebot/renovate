@@ -1,4 +1,4 @@
-import { KubernetesApiVersioningApi } from './index';
+import { KubernetesApiVersioningApi } from './index.ts';
 
 describe('modules/versioning/kubernetes-api/index', () => {
   const versioning = new KubernetesApiVersioningApi();

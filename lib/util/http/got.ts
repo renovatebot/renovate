@@ -1,17 +1,19 @@
 // TODO: refactor code to remove this (#9651)
-import './legacy';
+import './legacy.ts';
 
 import type { Options } from 'got';
-import got, { RequestError } from 'got';
+import _got, { RequestError } from 'got';
 import type { SetRequired } from 'type-fest';
-import { logger } from '../../logger';
-import { coerceNumber } from '../number';
-import { type HttpRequestStatsDataPoint, HttpStats } from '../stats';
-import { coerceString } from '../string';
-import { hooks } from './hooks';
-import type { GotBufferOptions, GotOptions, HttpResponse } from './types';
+import { logger } from '../../logger/index.ts';
+import { coerceNumber } from '../number.ts';
+import { type HttpRequestStatsDataPoint, HttpStats } from '../stats.ts';
+import { coerceString } from '../string.ts';
+import { hooks } from './hooks.ts';
+import type { GotBufferOptions, GotOptions, HttpResponse } from './types.ts';
 
 export { RequestError } from 'got';
+
+const got = _got as unknown as typeof _got.default;
 
 type QueueStatsData = Pick<HttpRequestStatsDataPoint, 'queueMs'>;
 
@@ -32,6 +34,7 @@ export async function fetch(
     duration = coerceNumber(resp.timings.phases.total, 0);
     return resp;
   } catch (error) {
+    // v8 ignore else -- TODO: add test #40625
     if (error instanceof RequestError) {
       statusCode = coerceNumber(error.response?.statusCode, -1);
       duration = coerceNumber(error.timings?.phases.total, -1);

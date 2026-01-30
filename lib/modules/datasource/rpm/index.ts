@@ -3,12 +3,12 @@ import { gunzip } from 'node:zlib';
 import { promisify } from 'util';
 import sax from 'sax';
 import { XmlDocument } from 'xmldoc';
-import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
-import type { HttpResponse } from '../../../util/http';
-import { joinUrlParts } from '../../../util/url';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import type { HttpResponse } from '../../../util/http/index.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 
 const gunzipAsync = promisify(gunzip);
 
@@ -31,19 +31,21 @@ export class RpmDatasource extends Datasource {
   override readonly customRegistrySupport = true;
 
   /**
+   * Users can specify multiple repositories and the datasource will aggregate the releases
+   * @example
+   * Every Fedora release has "release" and "updates" repositories.
+   * To get the latest package version, these repositories should be aggregated.
+   */
+  override readonly registryStrategy = 'merge';
+
+  /**
    * Fetches the release information for a given package from the registry URL.
    *
    * @param registryUrl - the registryUrl should be the folder which contains repodata.xml and its corresponding file list <sha256>-primary.xml.gz, e.g.: https://packages.microsoft.com/azurelinux/3.0/prod/cloud-native/x86_64/repodata/
    * @param packageName - the name of the package to fetch releases for.
    * @returns The release result if the package is found, otherwise null.
    */
-  @cache({
-    namespace: `datasource-${RpmDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl}:${packageName}`,
-    ttlMinutes: 1440,
-  })
-  async getReleases({
+  private async _getReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -61,13 +63,22 @@ export class RpmDatasource extends Datasource {
     }
   }
 
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${RpmDatasource.id}`,
+        key: `${config.registryUrl}:${config.packageName}`,
+        ttlMinutes: 1440,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
+  }
+
   // Fetches the primary.xml.gz URL from the repomd.xml file.
-  @cache({
-    namespace: `datasource-${RpmDatasource.id}`,
-    key: (registryUrl: string) => registryUrl,
-    ttlMinutes: 1440,
-  })
-  async getPrimaryGzipUrl(registryUrl: string): Promise<string | null> {
+  private async _getPrimaryGzipUrl(
+    registryUrl: string,
+  ): Promise<string | null> {
     const repomdUrl = joinUrlParts(
       registryUrl,
       RpmDatasource.repomdXmlFileName,
@@ -111,6 +122,17 @@ export class RpmDatasource extends Datasource {
       '/',
     );
     return joinUrlParts(registryUrlWithoutRepodata, href);
+  }
+
+  getPrimaryGzipUrl(registryUrl: string): Promise<string | null> {
+    return withCache(
+      {
+        namespace: `datasource-${RpmDatasource.id}`,
+        key: registryUrl,
+        ttlMinutes: 1440,
+      },
+      () => this._getPrimaryGzipUrl(registryUrl),
+    );
   }
 
   async getReleasesByPackageName(

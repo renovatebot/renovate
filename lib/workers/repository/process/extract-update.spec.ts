@@ -1,25 +1,25 @@
-import type { PackageFile } from '../../../modules/manager/types';
-import * as _repositoryCache from '../../../util/cache/repository';
-import type { BaseBranchCache } from '../../../util/cache/repository/types';
-import { fingerprint } from '../../../util/fingerprint';
-import type { LongCommitSha } from '../../../util/git/types';
-import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
-import * as _branchify from '../updates/branchify';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import * as _repositoryCache from '../../../util/cache/repository/index.ts';
+import type { BaseBranchCache } from '../../../util/cache/repository/types.ts';
+import { fingerprint } from '../../../util/fingerprint.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import { generateFingerprintConfig } from '../extract/extract-fingerprint-config.ts';
+import * as _branchify from '../updates/branchify.ts';
 import {
   EXTRACT_CACHE_REVISION,
   extract,
   isCacheExtractValid,
   lookup,
   update,
-} from './extract-update';
-import { logger, scm } from '~test/util';
+} from './extract-update.ts';
+import { logger, scm } from '~test/util.ts';
 
 const createVulnerabilitiesMock = vi.fn();
 
-vi.mock('./write');
-vi.mock('./sort');
-vi.mock('./fetch');
-vi.mock('./vulnerabilities', () => {
+vi.mock('./write.ts');
+vi.mock('./sort.ts');
+vi.mock('./fetch.ts');
+vi.mock('./vulnerabilities.ts', () => {
   return {
     __esModule: true,
     Vulnerabilities: class {
@@ -29,9 +29,9 @@ vi.mock('./vulnerabilities', () => {
     },
   };
 });
-vi.mock('../updates/branchify');
-vi.mock('../extract');
-vi.mock('../../../util/cache/repository');
+vi.mock('../updates/branchify.ts');
+vi.mock('../extract/index.ts');
+vi.mock('../../../util/cache/repository/index.ts');
 
 const branchify = vi.mocked(_branchify);
 const repositoryCache = vi.mocked(_repositoryCache);
@@ -78,6 +78,7 @@ describe('workers/repository/process/extract-update', () => {
     it('runs with baseBranchPatterns', async () => {
       const config = {
         baseBranchPatterns: ['master', 'dev'],
+        baseBranches: ['master', 'dev'],
         repoIsOnboarded: true,
         enabledManagers: ['npm'],
         javascript: {
@@ -131,8 +132,16 @@ describe('workers/repository/process/extract-update', () => {
       const packageFiles = await extract(config);
       await lookup(config, packageFiles);
 
-      expect(createVulnerabilitiesMock).toHaveBeenCalledOnce();
-      expect(appendVulnerabilityPackageRulesMock).toHaveBeenCalledOnce();
+      expect(createVulnerabilitiesMock).toHaveBeenCalledExactlyOnceWith();
+      expect(
+        appendVulnerabilityPackageRulesMock,
+      ).toHaveBeenCalledExactlyOnceWith(
+        {
+          repoIsOnboarded: true,
+          osvVulnerabilityAlerts: true,
+        },
+        undefined,
+      );
     });
 
     it('handles exception when fetching vulnerabilities', async () => {
@@ -147,7 +156,7 @@ describe('workers/repository/process/extract-update', () => {
       const packageFiles = await extract(config);
       await lookup(config, packageFiles);
 
-      expect(createVulnerabilitiesMock).toHaveBeenCalledOnce();
+      expect(createVulnerabilitiesMock).toHaveBeenCalledExactlyOnceWith();
     });
   });
 
@@ -189,6 +198,7 @@ describe('workers/repository/process/extract-update', () => {
     it('sha mismatch', () => {
       cachedExtract.configHash = 'hash';
       expect(isCacheExtractValid('new_sha', 'hash', cachedExtract)).toBe(false);
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Cached extract result cannot be used due to base branch SHA change (old=sha, new=new_sha)`,
       );
@@ -198,6 +208,7 @@ describe('workers/repository/process/extract-update', () => {
     it('config change', () => {
       cachedExtract.configHash = 'hash';
       expect(isCacheExtractValid('sha', 'new_hash', cachedExtract)).toBe(false);
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Cached extract result cannot be used due to config change',
       );
@@ -206,7 +217,7 @@ describe('workers/repository/process/extract-update', () => {
 
     it('invalid if no extractionFingerprints', () => {
       cachedExtract.configHash = 'hash';
-      const { extractionFingerprints, ...restOfCache } = cachedExtract;
+      const { extractionFingerprints: _, ...restOfCache } = cachedExtract;
       expect(
         isCacheExtractValid(
           'sha',
@@ -214,6 +225,7 @@ describe('workers/repository/process/extract-update', () => {
           restOfCache as never as BaseBranchCache,
         ),
       ).toBe(false);
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Cached extract is missing extractionFingerprints, so cannot be used',
       );
@@ -230,6 +242,7 @@ describe('workers/repository/process/extract-update', () => {
     it('valid cache and config', () => {
       cachedExtract.configHash = 'hash';
       expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(true);
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Cached extract for sha=sha is valid and can be used',
       );

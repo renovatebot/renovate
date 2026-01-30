@@ -1,10 +1,10 @@
 import { mockDeep } from 'vitest-mock-extended';
-import * as _hostRules from '../../../util/host-rules';
-import { GoDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import * as _hostRules from '../../../util/host-rules.ts';
+import { GoDatasource } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 
-vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
 const hostRules = vi.mocked(_hostRules);
 
 const getReleasesDirectMock = vi.fn();
@@ -15,34 +15,38 @@ const getDigestGithubMock = vi.fn();
 const getDigestGitlabMock = vi.fn();
 const getDigestGitMock = vi.fn();
 const getDigestBitbucketMock = vi.fn();
-vi.mock('./releases-direct', () => {
+vi.mock('./releases-direct.ts', () => {
   return {
-    GoDirectDatasource: vi.fn().mockImplementation(() => {
-      return {
-        forgejo: {
+    GoDirectDatasource: vi.fn(
+      class {
+        forgejo = {
           getDigest: (...args: any[]) => getDigestForgejoMock(...args),
-        },
-        git: { getDigest: (...args: any[]) => getDigestGitMock(...args) },
-        gitea: { getDigest: (...args: any[]) => getDigestGiteaMock(...args) },
-        github: { getDigest: (...args: any[]) => getDigestGithubMock(...args) },
-        gitlab: { getDigest: (...args: any[]) => getDigestGitlabMock(...args) },
-        bitbucket: {
+        };
+        git = { getDigest: (...args: any[]) => getDigestGitMock(...args) };
+        gitea = { getDigest: (...args: any[]) => getDigestGiteaMock(...args) };
+        github = {
+          getDigest: (...args: any[]) => getDigestGithubMock(...args),
+        };
+        gitlab = {
+          getDigest: (...args: any[]) => getDigestGitlabMock(...args),
+        };
+        bitbucket = {
           getDigest: (...args: any[]) => getDigestBitbucketMock(...args),
-        },
-        getReleases: (...args: any[]) => getReleasesDirectMock(...args),
-      };
-    }),
+        };
+        getReleases = (...args: any[]) => getReleasesDirectMock(...args);
+      },
+    ),
   };
 });
 
 const getReleasesProxyMock = vi.fn();
-vi.mock('./releases-goproxy', () => {
+vi.mock('./releases-goproxy.ts', () => {
   return {
-    GoProxyDatasource: vi.fn().mockImplementation(() => {
-      return {
-        getReleases: () => getReleasesProxyMock(),
-      };
-    }),
+    GoProxyDatasource: vi.fn(
+      class {
+        getReleases = () => getReleasesProxyMock();
+      },
+    ),
   };
 });
 
@@ -155,7 +159,7 @@ describe('modules/datasource/go/index', () => {
         'v1.2.3',
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
-      expect(getDigestGithubMock).toHaveBeenCalledWith(
+      expect(getDigestGithubMock).toHaveBeenCalledExactlyOnceWith(
         {
           datasource: 'github-tags',
           packageName: 'golang/text',
@@ -176,7 +180,7 @@ describe('modules/datasource/go/index', () => {
         'v0.0.0',
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
-      expect(getDigestGithubMock).toHaveBeenCalledWith(
+      expect(getDigestGithubMock).toHaveBeenCalledExactlyOnceWith(
         {
           datasource: 'github-tags',
           packageName: 'golang/text',

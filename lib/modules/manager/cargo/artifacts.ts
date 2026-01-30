@@ -1,18 +1,23 @@
 import { quote } from 'shlex';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   findLocalSiblingOrParent,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import { getGitEnvironmentVariables } from '../../../util/git/auth';
-import { regEx } from '../../../util/regex';
-import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
-import { extractLockFileContentVersions } from './locked-version';
+} from '../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { regEx } from '../../../util/regex.ts';
+import { CrateDatasource } from '../../datasource/crate/index.ts';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsResult,
+  Upgrade,
+} from '../types.ts';
+import { extractLockFileContentVersions } from './locked-version.ts';
 
 async function cargoUpdate(
   manifestPath: string,
@@ -121,14 +126,23 @@ async function updateArtifactsImpl(
     if (isLockFileMaintenance) {
       await cargoUpdate(packageFileName, true, config.constraints?.rust);
     } else {
-      const missingDep = updatedDeps.find((dep) => !dep.lockedVersion);
-      if (missingDep) {
-        // If there is a dependency without a locked version then log a warning
-        // and perform a regular workspace lockfile update.
-        logger.warn(
-          { dependency: missingDep.depName },
-          'Missing locked version for dependency',
-        );
+      const hasNonCrateDep = updatedDeps.some(
+        (dep) => dep.datasource !== CrateDatasource.id,
+      );
+      const crateDepWithoutLockedVersion = updatedDeps.find(
+        (dep) => !dep.lockedVersion && dep.datasource === CrateDatasource.id,
+      );
+      // Non-crate dependencies (like git ones) do not have locked versions.
+      // For crate dependencies, a locked version is expected.
+      // In both situations, perform a regular workspace lockfile update.
+      if (hasNonCrateDep || crateDepWithoutLockedVersion) {
+        if (crateDepWithoutLockedVersion) {
+          // Only warn when a crate dependency has no locked version
+          logger.warn(
+            { dependency: crateDepWithoutLockedVersion.depName },
+            'Missing locked version for dependency',
+          );
+        }
         await cargoUpdate(packageFileName, false, config.constraints?.rust);
       } else {
         // If all dependencies have locked versions then update them precisely.

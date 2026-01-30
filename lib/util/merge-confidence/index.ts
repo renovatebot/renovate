@@ -1,16 +1,16 @@
-import is from '@sindresorhus/is';
-import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence';
-import type { AllConfig, UpdateType } from '../../config/types';
-import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as packageCache from '../cache/package';
-import * as hostRules from '../host-rules';
-import { Http } from '../http';
-import { memCacheProvider } from '../http/cache/memory-http-cache-provider';
-import { regEx } from '../regex';
-import { ensureTrailingSlash, joinUrlParts } from '../url';
-import { MERGE_CONFIDENCE } from './common';
-import type { MergeConfidence } from './types';
+import { isNullOrUndefined } from '@sindresorhus/is';
+import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence.ts';
+import type { AllConfig, UpdateType } from '../../config/types.ts';
+import { logger } from '../../logger/index.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import * as packageCache from '../cache/package/index.ts';
+import * as hostRules from '../host-rules.ts';
+import { memCacheProvider } from '../http/cache/memory-http-cache-provider.ts';
+import { Http } from '../http/index.ts';
+import { regEx } from '../regex.ts';
+import { ensureTrailingSlash, joinUrlParts } from '../url.ts';
+import { MERGE_CONFIDENCE } from './common.ts';
+import type { MergeConfidence } from './types.ts';
 
 const hostType = 'merge-confidence';
 const http = new Http(hostType);
@@ -35,7 +35,7 @@ export function initConfig({
   supportedDatasources =
     mergeConfidenceDatasources ?? presetSupportedDatasources;
 
-  if (!is.nullOrUndefined(token)) {
+  if (!isNullOrUndefined(token)) {
     logger.debug(`Merge confidence token found for ${apiBaseUrl}`);
   }
 }
@@ -95,7 +95,7 @@ export async function getMergeConfidenceLevel(
   newVersion: string,
   updateType: UpdateType,
 ): Promise<MergeConfidence | undefined> {
-  if (is.nullOrUndefined(apiBaseUrl) || is.nullOrUndefined(token)) {
+  if (isNullOrUndefined(apiBaseUrl) || isNullOrUndefined(token)) {
     return undefined;
   }
 
@@ -136,11 +136,13 @@ async function queryApi(
   newVersion: string,
 ): Promise<MergeConfidence> {
   // istanbul ignore if: defensive, already been validated before calling this function
-  if (is.nullOrUndefined(apiBaseUrl) || is.nullOrUndefined(token)) {
+  if (isNullOrUndefined(apiBaseUrl) || isNullOrUndefined(token)) {
     return 'neutral';
   }
 
-  const escapedPackageName = packageName.replace(regEx(/\//g), '%2f');
+  const escapedPackageName = packageName
+    .replace(regEx(/\//g), '%2f')
+    .replace(regEx(/:/g), '%3A');
   const url = joinUrlParts(
     apiBaseUrl,
     'api/mc/json',
@@ -200,7 +202,7 @@ async function queryApi(
 export async function initMergeConfidence(config: AllConfig): Promise<void> {
   initConfig(config);
 
-  if (is.nullOrUndefined(apiBaseUrl) || is.nullOrUndefined(token)) {
+  if (isNullOrUndefined(apiBaseUrl) || isNullOrUndefined(token)) {
     logger.trace('merge confidence API usage is disabled');
     return;
   }

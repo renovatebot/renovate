@@ -1,12 +1,12 @@
-import is from '@sindresorhus/is';
-import { HOST_DISABLED } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { cache } from '../../../util/cache/package/decorator';
-import { getQueryString, joinUrlParts } from '../../../util/url';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { RepologyPackage, RepologyPackageType } from './types';
+import { isNonEmptyArray } from '@sindresorhus/is';
+import { HOST_DISABLED } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { getQueryString, joinUrlParts } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RepologyPackage, RepologyPackageType } from './types.ts';
 
 const packageTypes: RepologyPackageType[] = ['binname', 'srcname'];
 
@@ -107,13 +107,7 @@ export class RepologyDatasource extends Datasource {
     return packages;
   }
 
-  @cache({
-    ttlMinutes: 60,
-    namespace: `datasource-${RepologyDatasource.id}`,
-    key: (registryUrl: string, repoName: string, pkgName: string) =>
-      joinUrlParts(registryUrl, repoName, pkgName),
-  })
-  async queryPackage(
+  private async _queryPackage(
     registryUrl: string,
     repoName: string,
     pkgName: string,
@@ -138,7 +132,7 @@ export class RepologyDatasource extends Datasource {
           const pkg = findPackageInResponse(response, repoName, pkgName, [
             pkgType,
           ]);
-          if (is.nonEmptyArray(pkg)) {
+          if (isNonEmptyArray(pkg)) {
             // exit immediately if package found
             return pkg;
           }
@@ -162,7 +156,7 @@ export class RepologyDatasource extends Datasource {
           pkgName,
           packageTypes,
         );
-        if (is.nonEmptyArray(pkg)) {
+        if (isNonEmptyArray(pkg)) {
           // exit immediately if package found
           return pkg;
         }
@@ -183,6 +177,21 @@ export class RepologyDatasource extends Datasource {
     );
 
     return undefined;
+  }
+
+  queryPackage(
+    registryUrl: string,
+    repoName: string,
+    pkgName: string,
+  ): Promise<RepologyPackage[] | undefined> {
+    return withCache(
+      {
+        ttlMinutes: 60,
+        namespace: `datasource-${RepologyDatasource.id}`,
+        key: joinUrlParts(registryUrl, repoName, pkgName),
+      },
+      () => this._queryPackage(registryUrl, repoName, pkgName),
+    );
   }
 
   async getReleases({

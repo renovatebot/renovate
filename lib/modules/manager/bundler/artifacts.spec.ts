@@ -1,29 +1,29 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
 import {
   BUNDLER_INVALID_CREDENTIALS,
   TEMPORARY_ERROR,
-} from '../../../constants/error-messages';
-import * as docker from '../../../util/exec/docker';
-import { ExecError } from '../../../util/exec/exec-error';
-import type { StatusResult } from '../../../util/git/types';
-import * as _datasource from '../../datasource';
-import type { UpdateArtifactsConfig } from '../types';
-import * as _bundlerHostRules from './host-rules';
-import { updateArtifacts } from '.';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
-import { env, fs, git, partial } from '~test/util';
+} from '../../../constants/error-messages.ts';
+import * as docker from '../../../util/exec/docker/index.ts';
+import { ExecError } from '../../../util/exec/exec-error.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
+import * as _datasource from '../../datasource/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import * as _bundlerHostRules from './host-rules.ts';
+import { updateArtifacts } from './index.ts';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { env, fs, git, partial } from '~test/util.ts';
 
 const datasource = vi.mocked(_datasource);
 const bundlerHostRules = vi.mocked(_bundlerHostRules);
 
-vi.mock('../../../util/exec/env');
-vi.mock('../../datasource', () => mockDeep());
-vi.mock('../../../util/fs');
-vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('./host-rules');
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../datasource/index.ts', () => mockDeep());
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
+vi.mock('./host-rules.ts');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -32,7 +32,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+  dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -278,7 +278,7 @@ describe('modules/manager/bundler/artifacts', () => {
           }),
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
-          { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+          { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
           { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
           {
             cmd:
@@ -288,7 +288,7 @@ describe('modules/manager/bundler/artifacts', () => {
               '-e GEM_HOME ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
-              'ghcr.io/containerbase/sidecar' +
+              'ghcr.io/renovatebot/base-image' +
               ' bash -l -c "' +
               'install-tool ruby 1.2.0' +
               ' && ' +
@@ -337,7 +337,7 @@ describe('modules/manager/bundler/artifacts', () => {
           }),
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
-          { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+          { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
           { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
           {
             cmd:
@@ -347,7 +347,7 @@ describe('modules/manager/bundler/artifacts', () => {
               '-e GEM_HOME ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
-              'ghcr.io/containerbase/sidecar' +
+              'ghcr.io/renovatebot/base-image' +
               ' bash -l -c "' +
               'install-tool ruby 1.2.5' +
               ' && ' +
@@ -398,7 +398,7 @@ describe('modules/manager/bundler/artifacts', () => {
           }),
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
-          { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+          { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
           { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
           {
             cmd:
@@ -408,7 +408,7 @@ describe('modules/manager/bundler/artifacts', () => {
               '-e GEM_HOME ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
-              'ghcr.io/containerbase/sidecar' +
+              'ghcr.io/renovatebot/base-image' +
               ' bash -l -c "' +
               'install-tool ruby 1.3.0' +
               ' && ' +
@@ -458,7 +458,7 @@ describe('modules/manager/bundler/artifacts', () => {
           }),
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
-          { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+          { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
           { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
           {
             cmd:
@@ -469,7 +469,7 @@ describe('modules/manager/bundler/artifacts', () => {
               '-e GEM_HOME ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
-              'ghcr.io/containerbase/sidecar' +
+              'ghcr.io/renovatebot/base-image' +
               ' bash -l -c "' +
               'install-tool ruby 1.2.0' +
               ' && ' +
@@ -489,7 +489,7 @@ describe('modules/manager/bundler/artifacts', () => {
         cmd: '',
         stdout: ' foo was resolved to',
         stderr: '',
-        options: { encoding: 'utf8' },
+        options: {},
       });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
@@ -544,7 +544,7 @@ describe('modules/manager/bundler/artifacts', () => {
           cmd: '',
           stdout: ' foo was resolved to',
           stderr: '',
-          options: { encoding: 'utf8' },
+          options: {},
         });
         fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
         const execSnapshots = mockExecAll(execError);
@@ -578,7 +578,7 @@ describe('modules/manager/bundler/artifacts', () => {
           cmd: '',
           stdout: '',
           stderr: '',
-          options: { encoding: 'utf8' },
+          options: {},
         });
         fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
         mockExecAll(execError);
@@ -600,7 +600,7 @@ describe('modules/manager/bundler/artifacts', () => {
           cmd: '',
           stdout: 'but that version could not be found',
           stderr: '',
-          options: { encoding: 'utf8' },
+          options: {},
         });
         fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
         mockExecAll(execError);
@@ -622,7 +622,7 @@ describe('modules/manager/bundler/artifacts', () => {
           cmd: '',
           stdout: 'Please supply credentials for this source',
           stderr: 'Please make sure you have the correct access rights',
-          options: { encoding: 'utf8' },
+          options: {},
         });
         fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
         mockExecAll(execError);
@@ -644,7 +644,7 @@ describe('modules/manager/bundler/artifacts', () => {
           cmd: '',
           stdout: 'foo was resolved to foo',
           stderr: 'bar was resolved to bar',
-          options: { encoding: 'utf8' },
+          options: {},
         });
         fs.readLocalFile.mockResolvedValue('Current Gemfile.lock');
         const execSnapshots = mockExecSequence([

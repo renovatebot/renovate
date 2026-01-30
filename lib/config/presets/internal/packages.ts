@@ -1,4 +1,4 @@
-import type { Preset } from '../types';
+import type { Preset } from '../types.ts';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
@@ -46,7 +46,11 @@ export const presets: Record<string, Preset> = {
   googleapis: {
     description: 'All `googleapis` packages.',
     matchDatasources: ['npm'],
-    matchPackageNames: ['google-auth-library', '@google-cloud/**'],
+    matchPackageNames: [
+      '@google-cloud/**',
+      'google-auth-library',
+      'googleapis',
+    ],
   },
   jsTest: {
     description: 'JavaScript test packages.',
@@ -101,7 +105,7 @@ export const presets: Record<string, Preset> = {
       'packages:stylelint',
       'packages:tslint',
     ],
-    matchPackageNames: ['prettier', 'remark-lint', 'standard'],
+    matchPackageNames: ['oxlint', 'prettier', 'remark-lint', 'standard'],
   },
   mapbox: {
     description: 'All Mapbox-related packages.',

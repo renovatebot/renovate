@@ -2,9 +2,9 @@ import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
-} from '../../types';
-import type { PyProject } from '../schema';
-import { BasePyProjectProcessor } from './abstract';
+} from '../../types.ts';
+import type { PyProject } from '../schema.ts';
+import { BasePyProjectProcessor } from './abstract.ts';
 
 export class HatchProcessor extends BasePyProjectProcessor {
   process(
@@ -19,16 +19,16 @@ export class HatchProcessor extends BasePyProjectProcessor {
   }
 
   extractLockedVersions(
-    project: PyProject,
+    _project: PyProject,
     deps: PackageDependency[],
-    packageFile: string,
+    _packageFile: string,
   ): Promise<PackageDependency[]> {
     return Promise.resolve(deps);
   }
 
   updateArtifacts(
-    updateArtifact: UpdateArtifact,
-    project: PyProject,
+    _updateArtifact: UpdateArtifact,
+    _project: PyProject,
   ): Promise<UpdateArtifactsResult[] | null> {
     // Hatch does not have lock files at the moment
     // https://github.com/pypa/hatch/issues/749

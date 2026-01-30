@@ -1,13 +1,16 @@
-import type { RenovateConfig } from '../../../../config/types';
-import * as template from '../../../../util/template';
-import type { CommitMessage } from '../../model/commit-message';
-import { CommitMessageFactory } from '../../model/commit-message-factory';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import * as template from '../../../../util/template/index.ts';
+import { CommitMessageFactory } from '../../model/commit-message-factory.ts';
+import type { CommitMessage } from '../../model/commit-message.ts';
 
 export class ConfigMigrationCommitMessageFactory {
-  constructor(
-    private readonly config: RenovateConfig,
-    private readonly configFile: string,
-  ) {}
+  private readonly config: RenovateConfig;
+  private readonly configFile: string;
+
+  constructor(config: RenovateConfig, configFile: string) {
+    this.config = config;
+    this.configFile = configFile;
+  }
 
   private create(commitMessageTopic: string): CommitMessage {
     const { commitMessage } = this.config;
@@ -39,6 +42,6 @@ export class ConfigMigrationCommitMessageFactory {
   }
 
   getPrTitle(): string {
-    return this.create(`Migrate renovate config`).toString();
+    return this.create(`Migrate Renovate config`).toString();
   }
 }

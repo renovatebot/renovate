@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { toArray } from '../../../util/array';
-import { LooseArray, LooseRecord } from '../../../util/schema-utils';
-import { trimLeadingSlash } from '../../../util/url';
+import { toArray } from '../../../util/array.ts';
+import { LooseArray, LooseRecord } from '../../../util/schema-utils/index.ts';
+import { trimLeadingSlash } from '../../../util/url.ts';
 
 const LocalInclude = z
   .union([

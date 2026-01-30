@@ -1,19 +1,20 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import * as docker from '../../../util/exec/docker';
-import { ExecError } from '../../../util/exec/exec-error';
-import * as _hostRules from '../../../util/host-rules';
-import type { UpdateArtifactsConfig } from '../types';
-import * as cargo from '.';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
-import { env, fs, git } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import * as docker from '../../../util/exec/docker/index.ts';
+import { ExecError } from '../../../util/exec/exec-error.ts';
+import * as _hostRules from '../../../util/host-rules.ts';
+import { CrateDatasource } from '../../datasource/crate/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import * as cargo from './index.ts';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { env, fs, git } from '~test/util.ts';
 
-vi.mock('../../../util/exec/env');
-vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('../../../util/http');
-vi.mock('../../../util/fs');
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
+vi.mock('../../../util/http/index.ts');
+vi.mock('../../../util/fs/index.ts');
 
 process.env.CONTAINERBASE = 'true';
 const hostRules = vi.mocked(_hostRules);
@@ -24,7 +25,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+  dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
 };
 
 describe('modules/manager/cargo/artifacts', () => {
@@ -44,6 +45,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -78,6 +80,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -101,6 +104,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -127,6 +131,7 @@ describe('modules/manager/cargo/artifacts', () => {
         packageName: 'dep1',
         lockedVersion: '1.0.0',
         newVersion: '1.0.1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -162,7 +167,7 @@ describe('modules/manager/cargo/artifacts', () => {
       cmd,
       stdout: '',
       stderr: '',
-      options: { encoding: 'utf8' },
+      options: {},
     });
     fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
@@ -176,6 +181,7 @@ describe('modules/manager/cargo/artifacts', () => {
         packageName: 'dep1',
         lockedVersion: '1.0.0',
         newVersion: '1.0.1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -243,7 +249,7 @@ describe('modules/manager/cargo/artifacts', () => {
         cmd: packageDep2Cmd,
         stdout: '',
         stderr: '... error: package ID specification ...',
-        options: { encoding: 'utf8' },
+        options: {},
       }),
       // Iter 2: packageDep3Cmd (updates dep3)
       { stdout: '', stderr: '' },
@@ -280,18 +286,21 @@ describe('modules/manager/cargo/artifacts', () => {
         packageName: 'dep1',
         lockedVersion: '1.0.0',
         newVersion: '1.0.1',
+        datasource: CrateDatasource.id,
       },
       {
         depName: 'dep2',
         packageName: 'dep2',
         lockedVersion: '1.0.0',
         newVersion: '1.0.2',
+        datasource: CrateDatasource.id,
       },
       {
         depName: 'dep3',
         packageName: 'dep3',
         lockedVersion: '1.0.0',
         newVersion: '1.0.3',
+        datasource: CrateDatasource.id,
       },
     ];
 
@@ -348,6 +357,7 @@ describe('modules/manager/cargo/artifacts', () => {
       {
         depName: 'renamedDep1',
         packageName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -377,6 +387,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -421,6 +432,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -440,7 +452,7 @@ describe('modules/manager/cargo/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       {},
       {
         cmd:
@@ -449,7 +461,7 @@ describe('modules/manager/cargo/artifacts', () => {
           '-v "/tmp/cache":"/tmp/cache" ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool rust 1.65.0' +
           ' && ' +
@@ -486,6 +498,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -505,7 +518,7 @@ describe('modules/manager/cargo/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       {},
       {
         cmd:
@@ -527,7 +540,7 @@ describe('modules/manager/cargo/artifacts', () => {
           '-e GIT_CONFIG_VALUE_5 ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool rust 1.65.0' +
           ' && ' +
@@ -591,6 +604,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -667,6 +681,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -726,6 +741,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -784,6 +800,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -807,7 +824,6 @@ describe('modules/manager/cargo/artifacts', () => {
         cmd: 'install-tool rust 1.65.0',
         options: {
           cwd: '/tmp/github/some/repo',
-          encoding: 'utf-8',
           env: {
             CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
           },
@@ -835,6 +851,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(

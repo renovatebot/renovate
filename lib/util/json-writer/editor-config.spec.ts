@@ -2,15 +2,15 @@ import fs from 'node:fs/promises';
 import editorconfig from 'editorconfig';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
-import { configFileNames } from '../../config/app-strings';
-import { GlobalConfig } from '../../config/global';
-import { EditorConfig } from './editor-config';
-import { Fixtures } from '~test/fixtures';
+import { getConfigFileNames } from '../../config/app-strings.ts';
+import { GlobalConfig } from '../../config/global.ts';
+import { EditorConfig } from './editor-config.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 // We can't use memfs, because `node:*` modules are not easily mockable
 vi.mock('editorconfig', { spy: true });
 
-const defaultConfigFile = configFileNames[0];
+const defaultConfigFile = getConfigFileNames()[0];
 
 describe('util/json-writer/editor-config', () => {
   let tmpDir: DirectoryResult | null;

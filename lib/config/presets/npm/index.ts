@@ -1,20 +1,20 @@
-import { logger } from '../../../logger';
+import { logger } from '../../../logger/index.ts';
 import {
   resolvePackageUrl,
   resolveRegistryUrl,
-} from '../../../modules/datasource/npm/npmrc';
+} from '../../../modules/datasource/npm/npmrc.ts';
 import type {
   NpmResponse,
   NpmResponseVersion,
-} from '../../../modules/datasource/npm/types';
-import { Http } from '../../../util/http';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
-import type { Preset, PresetConfig } from '../types';
+} from '../../../modules/datasource/npm/types.ts';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import { Http } from '../../../util/http/index.ts';
+import type { Preset, PresetConfig } from '../types.ts';
 import {
   PRESET_DEP_NOT_FOUND,
   PRESET_NOT_FOUND,
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
-} from '../util';
+} from '../util.ts';
 
 const id = 'npm';
 

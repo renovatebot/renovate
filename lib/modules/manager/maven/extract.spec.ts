@@ -5,11 +5,11 @@ import {
   extractPackage,
   extractRegistries,
   resolveParents,
-} from './extract';
-import { Fixtures } from '~test/fixtures';
-import { fs, logger } from '~test/util';
+} from './extract.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, logger } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const simpleContent = Fixtures.get('simple.pom.xml');
 const mirrorSettingsContent = Fixtures.get('mirror.settings.xml');
@@ -240,6 +240,7 @@ describe('modules/manager/maven/extract', () => {
         'some-file',
         {},
       );
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Your pom.xml contains windows line endings. This is not supported and may result in parsing issues.',
       );

@@ -1,9 +1,9 @@
-import * as _merge from '../init/merge';
-import { getReconfigureBranchName, getReconfigureConfig } from './utils';
-import { fs, logger } from '~test/util';
+import * as _merge from '../init/merge.ts';
+import { getReconfigureBranchName, getReconfigureConfig } from './utils.ts';
+import { fs, logger } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
-vi.mock('../init/merge');
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../init/merge.ts');
 
 const merge = vi.mocked(_merge);
 const reconfigureBranch = 'renovate/reconfigure';
@@ -41,6 +41,7 @@ describe('workers/repository/reconfigure/utils', () => {
         errMessage: 'Validation Failed - Unparsable config file',
         configFileName: 'renovate.json',
       });
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { err: expect.any(Object) },
         'Error while parsing config file',

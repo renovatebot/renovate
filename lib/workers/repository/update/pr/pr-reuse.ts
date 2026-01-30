@@ -1,13 +1,14 @@
 import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import { platform } from '../../../../modules/platform';
-import type { Pr } from '../../../../modules/platform/types';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import type { Pr } from '../../../../modules/platform/types.ts';
 
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
 export async function tryReuseAutoclosedPr(
   branchName: string,
+  newTitle: string,
 ): Promise<Pr | null> {
   if (!platform.tryReuseAutoclosedPr) {
     return null;
@@ -49,7 +50,7 @@ export async function tryReuseAutoclosedPr(
   }
 
   try {
-    const pr = await platform.tryReuseAutoclosedPr(autoclosedPr);
+    const pr = await platform.tryReuseAutoclosedPr(autoclosedPr, newTitle);
     return pr;
   } catch (err) {
     logger.debug(

@@ -1,7 +1,7 @@
 import { RequestError } from 'got';
 import { DateTime } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   PLATFORM_UNKNOWN_ERROR,
@@ -10,38 +10,39 @@ import {
   REPOSITORY_FORK_MISSING,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
-} from '../../../constants/error-messages';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as repository from '../../../util/cache/repository';
-import * as _git from '../../../util/git';
-import type { LongCommitSha } from '../../../util/git/types';
-import * as _hostRules from '../../../util/host-rules';
-import { setBaseUrl } from '../../../util/http/github';
-import { toBase64 } from '../../../util/string';
-import { hashBody } from '../pr-body';
+} from '../../../constants/error-messages.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as repository from '../../../util/cache/repository/index.ts';
+import * as _git from '../../../util/git/index.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import * as _hostRules from '../../../util/host-rules.ts';
+import { setBaseUrl } from '../../../util/http/github.ts';
+import { toBase64 } from '../../../util/string.ts';
+import { hashBody } from '../pr-body.ts';
 import type {
   CreatePRConfig,
   ReattemptPlatformAutomergeConfig,
   UpdatePrConfig,
-} from '../types';
-import * as branch from './branch';
-import type { ApiPageCache, GhRestPr } from './types';
-import * as github from '.';
-import * as httpMock from '~test/http-mock';
-import { logger } from '~test/util';
+} from '../types.ts';
+import * as branch from './branch.ts';
+import * as github from './index.ts';
+import type { ApiPageCache, GhRestPr } from './types.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
 
 const githubApiHost = 'https://api.github.com';
 
 vi.mock('timers/promises');
 
-vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('../../../util/http/queue');
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
+vi.mock('../../../util/http/queue.ts');
 const hostRules = vi.mocked(_hostRules);
 
 const git = vi.mocked(_git);
 
 describe('modules/platform/github/index', () => {
   beforeEach(() => {
+    GlobalConfig.reset();
     github.resetConfigs();
 
     setBaseUrl(githubApiHost);
@@ -539,6 +540,24 @@ describe('modules/platform/github/index', () => {
       expect(config).toMatchSnapshot();
     });
 
+    // for coverage
+    it('no token', async () => {
+      hostRules.find.mockReturnValue({});
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await expect(github.initRepo({ repository: 'some/repo' })).toResolve();
+    });
+
+    // for coverage
+    it('app token', async () => {
+      hostRules.find.mockReturnValue({
+        token: 'x-access-token:123test',
+      });
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await expect(github.initRepo({ repository: 'some/repo' })).toResolve();
+    });
+
     it('should fork when using forkToken', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', false);
@@ -551,7 +570,7 @@ describe('modules/platform/github/index', () => {
       });
       const config = await github.initRepo({
         repository: 'some/repo',
-        forkToken: 'true',
+        forkToken: 'token',
         forkCreation: true,
       });
       expect(config).toMatchSnapshot();
@@ -867,6 +886,10 @@ describe('modules/platform/github/index', () => {
     it('should detect repoForceRebase', async () => {
       httpMock
         .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(404);
+      httpMock
+        .scope(githubApiHost)
         .get('/repos/undefined/branches/main/protection')
         .reply(200, {
           required_pull_request_reviews: {
@@ -897,6 +920,10 @@ describe('modules/platform/github/index', () => {
     it('should handle 404', async () => {
       httpMock
         .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/dev')
+        .reply(404);
+      httpMock
+        .scope(githubApiHost)
         .get('/repos/undefined/branches/dev/protection')
         .reply(404);
       const res = await github.getBranchForceRebase('dev');
@@ -904,6 +931,10 @@ describe('modules/platform/github/index', () => {
     });
 
     it('should handle 403', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(404);
       httpMock
         .scope(githubApiHost)
         .get('/repos/undefined/branches/main/protection')
@@ -915,11 +946,194 @@ describe('modules/platform/github/index', () => {
     it('should throw 401', async () => {
       httpMock
         .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(404);
+      httpMock
+        .scope(githubApiHost)
         .get('/repos/undefined/branches/main/protection')
         .reply(401);
       await expect(
         github.getBranchForceRebase('main'),
       ).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    it('should return empty object when parentRepo is set', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, 'some/repo', false);
+      scope.get('/user').reply(200, {
+        login: 'forked',
+      });
+      scope.post('/repos/some/repo/forks').reply(200, {
+        full_name: 'forked/repo',
+        default_branch: 'master',
+      });
+      await github.initRepo({
+        repository: 'some/repo',
+        forkToken: 'fork-token',
+        forkCreation: true,
+      });
+
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeFalse();
+    });
+
+    it('should ignore non_fast_forward ruleset for determining rebase', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(200, [
+          {
+            type: 'non_fast_forward',
+            ruleset_source_type: 'Repository',
+            ruleset_source: 'owner/repo',
+            ruleset_id: 12345,
+          },
+        ]);
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/main/protection')
+        .reply(200, {
+          required_status_checks: {
+            strict: false,
+          },
+        });
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeFalse();
+    });
+
+    it('should detect strict required status checks ruleset', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(200, [
+          {
+            type: 'required_status_checks',
+            parameters: {
+              strict_required_status_checks_policy: true,
+            },
+            ruleset_source_type: 'Repository',
+            ruleset_source: 'owner/repo',
+            ruleset_id: 12345,
+          },
+        ]);
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeTrue();
+    });
+
+    it('should continue if no expected rulesets have been found', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(200, [
+          {
+            type: 'deletion',
+          },
+        ]);
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/main/protection')
+        .reply(200, {
+          required_status_checks: {
+            strict: true,
+          },
+        });
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeTrue();
+    });
+
+    it('should abort and throws on internal error', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(500);
+
+      await expect(github.getBranchForceRebase('main')).rejects.toThrow(
+        ExternalHostError,
+      );
+    });
+
+    it('should fallback to legacy branch protection when rulesets not found', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(404);
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/main/protection')
+        .reply(200, {
+          required_status_checks: {
+            strict: true,
+          },
+        });
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeTrue();
+    });
+
+    it('should return false when no force rebase rules found', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(200, [
+          {
+            type: 'pull_request',
+            parameters: {
+              required_approving_review_count: 1,
+            },
+            ruleset_source_type: 'Repository',
+            ruleset_source: 'owner/repo',
+            ruleset_id: 12345,
+          },
+        ]);
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/main/protection')
+        .reply(404);
+      const res = await github.getBranchForceRebase('main');
+      expect(res).toBeFalse();
+    });
+
+    it('should return cached result on subsequent calls', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/main')
+        .reply(404);
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/main/protection')
+        .reply(200, {
+          required_status_checks: {
+            strict: true,
+            contexts: [],
+          },
+        });
+
+      // First call should make HTTP request and cache the result
+      const firstResult = await github.getBranchForceRebase('main');
+      expect(firstResult).toBeTrue();
+
+      // Second call should return cached result without making HTTP request
+      // If cache is working, no additional HTTP requests should be made
+      const secondResult = await github.getBranchForceRebase('main');
+      expect(secondResult).toBeTrue();
+    });
+
+    it('should return cached false result on subsequent calls', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/rules/branches/dev')
+        .reply(404);
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/undefined/branches/dev/protection')
+        .reply(404);
+
+      // First call should make HTTP request and cache the result
+      const firstResult = await github.getBranchForceRebase('dev');
+      expect(firstResult).toBeFalse();
+
+      // Second call should return cached result without making HTTP request
+      const secondResult = await github.getBranchForceRebase('dev');
+      expect(secondResult).toBeFalse();
     });
   });
 
@@ -1151,10 +1365,10 @@ describe('modules/platform/github/index', () => {
         const scope = httpMock.scope(githubApiHost);
         initRepoMock(scope, 'some/repo');
         scope.get(pagePath(1)).reply(200, [renovatePr, otherPr]);
+        GlobalConfig.set({ ignorePrAuthor: true });
         await github.initRepo({
           repository: 'some/repo',
           renovateUsername: 'renovate-bot',
-          ignorePrAuthor: true,
         });
 
         const res = await github.getPrList();
@@ -1242,16 +1456,63 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
-      const pr = await github.tryReuseAutoclosedPr({
-        number: 91,
-        title: 'old title - autoclosed',
-        state: 'closed',
-        closedAt: DateTime.now().minus({ days: 6 }).toISO(),
-        sourceBranch: 'somebranch',
-        sha: '1234' as LongCommitSha,
-      });
+      const pr = await github.tryReuseAutoclosedPr(
+        {
+          number: 91,
+          title: 'old title - autoclosed',
+          state: 'closed',
+          closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+          sourceBranch: 'somebranch',
+          sha: '1234' as LongCommitSha,
+        },
+        'new title',
+      );
 
       expect(pr).toMatchObject({ number: 91, sourceBranch: 'somebranch' });
+    });
+
+    it('force pushes when local SHA differs from PR SHA', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .head('/repos/some/repo/git/commits/1234')
+        .reply(200)
+        .post('/repos/some/repo/git/refs')
+        .reply(201)
+        .patch('/repos/some/repo/pulls/91')
+        .reply(200, {
+          number: 91,
+          base: { sha: '1234' },
+          head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+          state: 'open',
+          title: 'old title',
+          updated_at: '01-09-2022',
+        });
+      await github.initRepo({ repository: 'some/repo' });
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
+      git.getBranchCommit.mockReturnValueOnce('5678' as LongCommitSha);
+
+      const pr = await github.tryReuseAutoclosedPr(
+        {
+          number: 91,
+          title: 'old title - autoclosed',
+          state: 'closed',
+          closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+          sourceBranch: 'somebranch',
+          sha: '1234' as LongCommitSha,
+        },
+        'new title',
+      );
+
+      expect(pr).toMatchObject({
+        number: 91,
+        sourceBranch: 'somebranch',
+        sha: '5678',
+      });
+      expect(git.forcePushToRemote).toHaveBeenCalledExactlyOnceWith(
+        'somebranch',
+        'origin',
+      );
     });
 
     it('aborts reopening if branch recreation fails', async () => {
@@ -1268,14 +1529,17 @@ describe('modules/platform/github/index', () => {
 
       await github.initRepo({ repository: 'some/repo' });
 
-      const pr = await github.tryReuseAutoclosedPr({
-        number: 91,
-        title: 'old title - autoclosed',
-        state: 'closed',
-        closedAt: DateTime.now().minus({ days: 6 }).toISO(),
-        sourceBranch: 'somebranch',
-        sha: '1234' as LongCommitSha,
-      });
+      const pr = await github.tryReuseAutoclosedPr(
+        {
+          number: 91,
+          title: 'old title - autoclosed',
+          state: 'closed',
+          closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+          sourceBranch: 'somebranch',
+          sha: '1234' as LongCommitSha,
+        },
+        'new title',
+      );
 
       expect(pr).toBeNull();
     });
@@ -1287,14 +1551,17 @@ describe('modules/platform/github/index', () => {
 
       await github.initRepo({ repository: 'some/repo' });
 
-      const pr = await github.tryReuseAutoclosedPr({
-        number: 91,
-        title: 'old title - autoclosed',
-        state: 'closed',
-        closedAt: DateTime.now().minus({ days: 6 }).toISO(),
-        sourceBranch: 'somebranch',
-        sha: '1234' as LongCommitSha,
-      });
+      const pr = await github.tryReuseAutoclosedPr(
+        {
+          number: 91,
+          title: 'old title - autoclosed',
+          state: 'closed',
+          closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+          sourceBranch: 'somebranch',
+          sha: '1234' as LongCommitSha,
+        },
+        'new title',
+      );
 
       expect(pr).toBeNull();
     });
@@ -1662,6 +1929,7 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getIssue(1);
       expect(res).toBeNull();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Issue #1 has been deleted',
       );
@@ -3193,6 +3461,7 @@ describe('modules/platform/github/index', () => {
           milestone: 1,
         });
         expect(pr?.number).toBe(123);
+
         expect(logger.logger.warn).toHaveBeenCalledWith(
           {
             err: {
@@ -3502,9 +3771,11 @@ describe('modules/platform/github/index', () => {
         .reply(200, pr);
 
       await expect(github.updatePr(pr)).toResolve();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Adding labels 'new_label' to #1234`,
       );
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Deleting label old_label from #1234`,
       );
@@ -3517,6 +3788,7 @@ describe('modules/platform/github/index', () => {
           message: 'Failed to add labels',
         });
         await expect(github.addLabels(2, ['fail'])).toResolve();
+
         expect(logger.logger.warn).toHaveBeenCalledWith(
           {
             err: expect.any(Object),
@@ -3764,6 +4036,7 @@ describe('modules/platform/github/index', () => {
       });
 
       expect(mergeResult).toBeTrue();
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Fast-forward merge strategy is not supported by Github. Falling back to merge strategy set for the repository.',
       );
@@ -3782,6 +4055,7 @@ describe('modules/platform/github/index', () => {
       });
 
       expect(mergeResult).toBeTrue();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           options: {
@@ -4064,6 +4338,7 @@ describe('modules/platform/github/index', () => {
         ]);
       await github.initRepo({ repository: 'some/repo' });
       await github.getVulnerabilityAlerts();
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { alerts: { 'npm/left-pad': { '0.0.2': '0.0.3' } } },
         'GitHub vulnerability details',

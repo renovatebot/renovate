@@ -1,33 +1,39 @@
-import is from '@sindresorhus/is';
+import {
+  isArray,
+  isNonEmptyObject,
+  isNullOrUndefined,
+  isPlainObject,
+} from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
-} from '../../constants/error-messages';
-import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import { getCache } from '../cache/repository';
-import { getEnv } from '../env';
-import { maskToken } from '../mask';
-import * as p from '../promises';
-import { range } from '../range';
-import { regEx } from '../regex';
-import { joinUrlParts, parseLinkHeader, parseUrl } from '../url';
-import { findMatchingRule } from './host-rules';
+} from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import { getCache } from '../cache/repository/index.ts';
+import { getEnv } from '../env.ts';
+import * as hostRules from '../host-rules.ts';
+import { maskToken } from '../mask.ts';
+import * as p from '../promises.ts';
+import { range } from '../range.ts';
+import { regEx } from '../regex.ts';
+import { joinUrlParts, parseLinkHeader, parseUrl } from '../url.ts';
+import { findMatchingRule } from './host-rules.ts';
 import {
   HttpBase,
   type InternalHttpOptions,
   type InternalJsonUnsafeOptions,
-} from './http';
-import type { GotLegacyError } from './legacy';
+} from './http.ts';
+import type { GotLegacyError } from './legacy.ts';
 import type {
   GraphqlOptions,
   HttpMethod,
   HttpOptions,
   HttpResponse,
-} from './types';
+} from './types.ts';
 
 const githubBaseUrl = 'https://api.github.com/';
 let baseUrl = githubBaseUrl;
@@ -70,7 +76,7 @@ function handleGotError(
   const path = url.toString();
   let message = err.message || '';
   const body = err.response?.body;
-  if (is.plainObject(body) && 'message' in body) {
+  if (isPlainObject(body) && 'message' in body) {
     message = String(body.message);
   }
   if (
@@ -111,6 +117,30 @@ function handleGotError(
   }
   if (err.statusCode === 403 && message.includes('rate limit exceeded')) {
     logger.debug({ err }, 'GitHub failure: rate limit');
+
+    const parsed = parseUrl(baseUrl);
+
+    const rule = hostRules.find({ url: baseUrl });
+    if (rule.token || rule.password) {
+      logger.once.warn(
+        'Rate limit exceeded for api.github.com, even though we are authenticated',
+      );
+    } else {
+      if (parsed?.hostname === 'api.github.com') {
+        logger.once.warn(
+          {
+            documentationUrl:
+              'https://docs.renovatebot.com/getting-started/running/#githubcom-token-for-changelogs-and-tools',
+          },
+          `Rate limit exceeded for ${parsed.host}, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN`,
+        );
+      } else {
+        logger.once.warn(
+          `Rate limit exceeded for ${parsed!.host}, as no hostRules set for this host`,
+        );
+      }
+    }
+
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (
@@ -126,6 +156,7 @@ function handleGotError(
   if (err.statusCode === 401) {
     // Warn once for github.com token if unauthorized
     const hostname = parseUrl(url)?.hostname;
+    // v8 ignore else -- TODO: add test #40625
     if (hostname === 'github.com' || hostname === 'api.github.com') {
       logger.once.warn('github.com token 401 unauthorized');
     }
@@ -185,6 +216,7 @@ function constructAcceptString(input?: any): string {
     typeof input === 'string' ? input.split(regEx(/\s*,\s*/)) : [];
 
   // TODO: regression of #6736
+  // v8 ignore else -- TODO: add test #40625
   if (
     !acceptStrings.some((x) => x === defaultAccept) &&
     (!acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
@@ -361,6 +393,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       const env = getEnv();
       if (next?.url && linkHeader?.last?.page) {
         let lastPage = parseInt(linkHeader.last.page);
+        // v8 ignore else -- TODO: add test #40625
         if (!env.RENOVATE_PAGINATE_ALL && httpOptions.paginate !== 'all') {
           lastPage = Math.min(pageLimit, lastPage);
         }
@@ -386,22 +419,27 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
           },
         );
         const pages = await p.all(queue);
-        if (httpOptions.paginationField && is.plainObject(result.body)) {
+        // v8 ignore else -- TODO: add test #40625
+        if (httpOptions.paginationField && isPlainObject(result.body)) {
           const paginatedResult = result.body[httpOptions.paginationField];
-          if (is.array<T>(paginatedResult)) {
+          // v8 ignore else -- TODO: add test #40625
+          if (isArray<T>(paginatedResult)) {
             for (const nextPage of pages) {
-              if (is.plainObject(nextPage.body)) {
+              // v8 ignore else -- TODO: add test #40625
+              if (isPlainObject(nextPage.body)) {
                 const nextPageResults =
                   nextPage.body[httpOptions.paginationField];
-                if (is.array<T>(nextPageResults)) {
+                // v8 ignore else -- TODO: add test #40625
+                if (isArray<T>(nextPageResults)) {
                   paginatedResult.push(...nextPageResults);
                 }
               }
             }
           }
-        } else if (is.array<T>(result.body)) {
+        } else if (isArray<T>(result.body)) {
           for (const nextPage of pages) {
-            if (is.array<T>(nextPage.body)) {
+            // v8 ignore else -- TODO: add test #40625
+            if (isArray<T>(nextPage.body)) {
               result.body.push(...nextPage.body);
             }
           }
@@ -479,8 +517,8 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       });
       const repositoryData = res?.data?.repository;
       if (
-        is.nonEmptyObject(repositoryData) &&
-        !is.nullOrUndefined(repositoryData[fieldName])
+        isNonEmptyObject(repositoryData) &&
+        !isNullOrUndefined(repositoryData[fieldName])
       ) {
         optimalCount = count;
 

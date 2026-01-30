@@ -1,29 +1,29 @@
 import fs from 'fs-extra';
-import { GlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global.ts';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
-} from '../../constants/error-messages';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as _packageCache from '../../util/cache/package';
-import { loadModules } from '../../util/modules';
-import datasources from './api';
-import { getDefaultVersioning } from './common';
-import { Datasource } from './datasource';
-import type {
-  DatasourceApi,
-  DigestConfig,
-  GetReleasesConfig,
-  ReleaseResult,
-} from './types';
+} from '../../constants/error-messages.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import * as _packageCache from '../../util/cache/package/index.ts';
+import { loadModules } from '../../util/modules.ts';
+import datasources from './api.ts';
+import { getDefaultVersioning } from './common.ts';
+import { Datasource } from './datasource.ts';
 import {
   getDatasourceList,
   getDatasources,
   getDigest,
   getPkgReleases,
   supportsDigests,
-} from '.';
-import { logger } from '~test/util';
+} from './index.ts';
+import type {
+  DatasourceApi,
+  DigestConfig,
+  GetReleasesConfig,
+  ReleaseResult,
+} from './types.ts';
+import { logger } from '~test/util.ts';
 
 const datasource = 'dummy';
 const packageName = 'package';
@@ -39,9 +39,11 @@ const defaultRegistriesMock: RegistriesMock = {
 class DummyDatasource extends Datasource {
   override defaultVersioning = 'python';
   override defaultRegistryUrls = ['https://reg1.com'];
+  private registriesMock: RegistriesMock;
 
-  constructor(private registriesMock: RegistriesMock = defaultRegistriesMock) {
+  constructor(registriesMock: RegistriesMock = defaultRegistriesMock) {
     super(datasource);
+    this.registriesMock = registriesMock;
   }
 
   override getReleases({
@@ -59,9 +61,11 @@ class DummyDatasource2 extends Datasource {
   override defaultRegistryUrls = function () {
     return ['https://reg1.com'];
   };
+  private registriesMock: RegistriesMock;
 
-  constructor(private registriesMock: RegistriesMock = defaultRegistriesMock) {
+  constructor(registriesMock: RegistriesMock = defaultRegistriesMock) {
     super(datasource);
+    this.registriesMock = registriesMock;
   }
 
   override getReleases({
@@ -80,9 +84,11 @@ class DummyDatasource3 extends Datasource {
   override defaultRegistryUrls = function () {
     return ['https://reg1.com'];
   };
+  private registriesMock: RegistriesMock;
 
-  constructor(private registriesMock: RegistriesMock = defaultRegistriesMock) {
+  constructor(registriesMock: RegistriesMock = defaultRegistriesMock) {
     super(datasource);
+    this.registriesMock = registriesMock;
   }
 
   override getReleases({
@@ -102,9 +108,11 @@ class DummyDatasource4 extends DummyDatasource3 {
 
 class DummyDatasource5 extends Datasource {
   override registryStrategy = undefined as never;
+  private registriesMock: RegistriesMock;
 
-  constructor(private registriesMock: RegistriesMock = defaultRegistriesMock) {
+  constructor(registriesMock: RegistriesMock = defaultRegistriesMock) {
     super(datasource);
+    this.registriesMock = registriesMock;
   }
 
   override getReleases({
@@ -118,7 +126,7 @@ class DummyDatasource5 extends Datasource {
   }
 }
 
-vi.mock('./metadata-manual', () => ({
+vi.mock('./metadata-manual.ts', () => ({
   manualChangelogUrls: {
     dummy: {
       package: 'https://foo.bar/package/CHANGELOG.md',
@@ -131,7 +139,7 @@ vi.mock('./metadata-manual', () => ({
   },
 }));
 
-vi.mock('../../util/cache/package');
+vi.mock('../../util/cache/package/index.ts');
 const packageCache = vi.mocked(_packageCache);
 
 describe('modules/datasource/index', () => {
@@ -150,7 +158,7 @@ describe('modules/datasource/index', () => {
       expect(getDatasources()).toBeDefined();
 
       const managerList = fs
-        .readdirSync(__dirname, { withFileTypes: true })
+        .readdirSync(import.meta.dirname, { withFileTypes: true })
         .filter(
           (dirent) => dirent.isDirectory() && !dirent.name.startsWith('_'),
         )
@@ -183,7 +191,7 @@ describe('modules/datasource/index', () => {
       }
 
       const loadedDs = await loadModules(
-        __dirname,
+        import.meta.dirname,
         validateDatasource,
         filterClassBasedDatasources,
       );
@@ -456,6 +464,7 @@ describe('modules/datasource/index', () => {
             releases: [{ version: '1.0.0' }],
             registryUrl: 'https://reg1.com',
           });
+
           expect(logger.logger.warn).toHaveBeenCalledWith(
             {
               datasource: 'dummy',
@@ -481,6 +490,7 @@ describe('modules/datasource/index', () => {
           });
 
           expect(res).toBeNull();
+
           expect(logger.logger.warn).toHaveBeenCalledWith(
             { datasource, packageName, registryUrls },
             'Excess registryUrls found for datasource lookup - using first configured only',
@@ -620,7 +630,7 @@ describe('modules/datasource/index', () => {
             expect(res).toMatchObject({
               releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
             });
-            expect(packageCache.set).toHaveBeenCalledWith(
+            expect(packageCache.set).toHaveBeenCalledExactlyOnceWith(
               'datasource-releases-dummy',
               'https://reg1.com:package',
               {
@@ -650,7 +660,7 @@ describe('modules/datasource/index', () => {
             expect(res).toMatchObject({
               releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
             });
-            expect(packageCache.set).not.toHaveBeenCalledWith();
+            expect(packageCache.set).not.toHaveBeenCalledExactlyOnceWith();
           });
 
           it('forces cache via GlobalConfig', async () => {
@@ -671,7 +681,12 @@ describe('modules/datasource/index', () => {
             expect(res).toMatchObject({
               releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
             });
-            expect(packageCache.set).toHaveBeenCalledOnce();
+            expect(packageCache.set).toHaveBeenCalledExactlyOnceWith(
+              'datasource-releases-dummy',
+              expect.any(String),
+              expect.any(Object),
+              expect.any(Number),
+            );
           });
         });
 

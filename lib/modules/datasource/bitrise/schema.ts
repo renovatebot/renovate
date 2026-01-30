@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { Yaml } from '../../../util/schema-utils';
-import { MaybeTimestamp } from '../../../util/timestamp';
+import { Yaml } from '../../../util/schema-utils/index.ts';
+import { MaybeTimestamp } from '../../../util/timestamp.ts';
 
 export const BitriseStepFile = Yaml.pipe(
   z.object({

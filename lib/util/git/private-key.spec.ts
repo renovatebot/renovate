@@ -3,24 +3,26 @@ import { codeBlock } from 'common-tags';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { any, mockFn } from 'vitest-mock-extended';
-import * as exec_ from '../exec';
-import * as sanitize_ from '../sanitize';
-import { toBase64 } from '../string';
+import * as exec_ from '../exec/index.ts';
+import * as sanitize_ from '../sanitize.ts';
+import { toBase64 } from '../string.ts';
 import {
   configSigningKey,
   setPrivateKey,
   writePrivateKey,
-} from './private-key';
-import { Fixtures } from '~test/fixtures';
-import { logger, mockedExtended } from '~test/util';
+} from './private-key.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { logger, mockedExtended } from '~test/util.ts';
 
 vi.mock('fs-extra', async () =>
   (
-    await vi.importActual<typeof import('~test/fixtures')>('~test/fixtures')
+    await vi.importActual<typeof import('~test/fixtures.js')>(
+      '~test/fixtures.js',
+    )
   ).fsExtra(),
 );
-vi.mock('../exec', () => ({ exec: mockFn() }));
-vi.mock('../sanitize', () => ({ addSecretForSanitizing: mockFn() }));
+vi.mock('../exec/index.ts', () => ({ exec: mockFn() }));
+vi.mock('../sanitize.ts', () => ({ addSecretForSanitizing: mockFn() }));
 
 const exec = mockedExtended(exec_);
 const sanitize = mockedExtended(sanitize_);
@@ -69,13 +71,16 @@ describe('util/git/private-key', () => {
       setPrivateKey('some-key', undefined);
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey(repoDir)).resolves.not.toThrow();
+
       expect(exec.exec).toHaveBeenCalledWith(
         `git config user.signingkey ${publicKey}`,
         { cwd: repoDir },
       );
+
       expect(exec.exec).toHaveBeenCalledWith('git config commit.gpgsign true', {
         cwd: repoDir,
       });
+
       expect(exec.exec).toHaveBeenCalledWith('git config gpg.format openpgp', {
         cwd: repoDir,
       });
@@ -142,6 +147,7 @@ some-private-key with-passphrase
       expect(exec.exec).toHaveBeenCalledWith(
         `ssh-keygen -p -f ${privateKeyFile} -P "${passphrase}" -N ""`,
       );
+
       expect(exec.exec).toHaveBeenCalledWith(
         `git config user.signingkey ${privateKeyFile}`,
         { cwd: repoDir },
@@ -189,6 +195,7 @@ some-private-key
       setPrivateKey(privateKey, undefined);
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey(repoDir)).resolves.not.toThrow();
+
       expect(exec.exec).toHaveBeenCalledWith(
         `git config user.signingkey ${privateKeyFile}`,
         { cwd: repoDir },
@@ -199,9 +206,11 @@ some-private-key
         privateKey,
       );
       expect((await fs.readFile(publicKeyFile)).toString()).toEqual(publicKey);
+
       expect(exec.exec).toHaveBeenCalledWith('git config commit.gpgsign true', {
         cwd: repoDir,
       });
+
       expect(exec.exec).toHaveBeenCalledWith('git config gpg.format ssh', {
         cwd: repoDir,
       });
@@ -271,9 +280,11 @@ some-private-key
         `git config user.signingkey ${publicKey}`,
         { cwd: repoDir },
       );
+
       expect(exec.exec).toHaveBeenCalledWith('git config commit.gpgsign true', {
         cwd: repoDir,
       });
+
       expect(exec.exec).toHaveBeenCalledWith('git config gpg.format openpgp', {
         cwd: repoDir,
       });
@@ -308,9 +319,11 @@ some-private-key
         `git config user.signingkey ${publicKey}`,
         { cwd: repoDir },
       );
+
       expect(exec.exec).toHaveBeenCalledWith('git config commit.gpgsign true', {
         cwd: repoDir,
       });
+
       expect(exec.exec).toHaveBeenCalledWith('git config gpg.format openpgp', {
         cwd: repoDir,
       });
@@ -396,6 +409,7 @@ some-private-key
         `git config user.signingkey ${publicKey}`,
         { cwd: repoDir },
       );
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Passphrase is not yet supported for GPG keys, it will be ignored',
       );
@@ -428,6 +442,7 @@ some-private-key
         `git config user.signingkey ${privateKeyFile}`,
         { cwd: repoDir },
       );
+
       expect(exec.exec).toHaveBeenCalledWith('git config gpg.format ssh', {
         cwd: repoDir,
       });
@@ -446,6 +461,7 @@ some-private-key
         base64Key,
         'global',
       );
+
       expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith(
         originalKey,
         'global',
@@ -463,10 +479,12 @@ some-private-key
         base64Key,
         'global',
       );
+
       expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith(
         originalKey,
         'global',
       );
+
       expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith(
         passphrase,
         'global',

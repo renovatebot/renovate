@@ -1,7 +1,7 @@
-import { RENOVATE_FORK_UPSTREAM } from '../../util/git';
-import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
-import { DefaultGitScm } from './default-scm';
-import { git, partial } from '~test/util';
+import { RENOVATE_FORK_UPSTREAM } from '../../util/git/index.ts';
+import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types.ts';
+import { DefaultGitScm } from './default-scm.ts';
+import { git, partial } from '~test/util.ts';
 
 describe('modules/platform/default-scm', () => {
   const defaultGitScm = new DefaultGitScm();
@@ -63,13 +63,13 @@ describe('modules/platform/default-scm', () => {
   it('delegate mergeAndPush to util/git', async () => {
     git.mergeBranch.mockResolvedValueOnce();
     await defaultGitScm.mergeAndPush('branchName');
-    expect(git.mergeBranch).toHaveBeenCalledWith('branchName');
+    expect(git.mergeBranch).toHaveBeenCalledExactlyOnceWith('branchName');
   });
 
   it('delegate mergeBranch to util/git', async () => {
     git.mergeToLocal.mockResolvedValueOnce();
     await defaultGitScm.mergeToLocal('branchName');
-    expect(git.mergeToLocal).toHaveBeenCalledWith('branchName');
+    expect(git.mergeToLocal).toHaveBeenCalledExactlyOnceWith('branchName');
   });
 
   it('syncs fork with upstream', async () => {
@@ -78,6 +78,8 @@ describe('modules/platform/default-scm', () => {
       RENOVATE_FORK_UPSTREAM,
     ]);
     await defaultGitScm.syncForkWithUpstream('branchName');
-    expect(git.syncForkWithUpstream).toHaveBeenCalledWith('branchName');
+    expect(git.syncForkWithUpstream).toHaveBeenCalledExactlyOnceWith(
+      'branchName',
+    );
   });
 });

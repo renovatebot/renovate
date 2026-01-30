@@ -1,13 +1,13 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../../../logger';
-import * as allVersioning from '../../../../../modules/versioning';
-import { detectPlatform } from '../../../../../util/common';
-import type { BranchUpgradeConfig } from '../../../../types';
-import api from './api';
-import type { ChangeLogSource } from './source';
-import type { ChangeLogResult } from './types';
+import { isNullOrUndefined } from '@sindresorhus/is';
+import { logger } from '../../../../../logger/index.ts';
+import * as allVersioning from '../../../../../modules/versioning/index.ts';
+import { detectPlatform } from '../../../../../util/common.ts';
+import type { BranchUpgradeConfig } from '../../../../types.ts';
+import api from './api.ts';
+import type { ChangeLogSource } from './source.ts';
+import type { ChangeLogResult } from './types.ts';
 
-export * from './types';
+export * from './types.ts';
 
 export async function getChangeLogJSON(
   config: BranchUpgradeConfig,
@@ -27,7 +27,7 @@ export async function getChangeLogJSON(
 
     const platform = detectPlatform(sourceUrl);
 
-    if (is.nullOrUndefined(platform)) {
+    if (isNullOrUndefined(platform)) {
       logger.info(
         { sourceUrl, hostType: platform },
         'Unknown platform, skipping changelog fetching.',
@@ -37,7 +37,7 @@ export async function getChangeLogJSON(
 
     const changeLogSource = getChangeLogSourceFor(platform);
 
-    if (is.nullOrUndefined(changeLogSource)) {
+    if (isNullOrUndefined(changeLogSource)) {
       logger.info(
         { sourceUrl, hostType: platform },
         'Unknown changelog source, skipping changelog fetching.',

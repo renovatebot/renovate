@@ -1,21 +1,20 @@
-import { getChangeLogJSON } from '..';
-import { GlobalConfig } from '../../../../../../config/global';
-import * as semverVersioning from '../../../../../../modules/versioning/semver';
-import * as githubGraphql from '../../../../../../util/github/graphql';
-import type { GithubTagItem } from '../../../../../../util/github/graphql/types';
-import * as hostRules from '../../../../../../util/host-rules';
-import type { Timestamp } from '../../../../../../util/timestamp';
-import type { BranchUpgradeConfig } from '../../../../../types';
-import * as httpMock from '~test/http-mock';
-import { partial } from '~test/util';
+import { GlobalConfig } from '../../../../../../config/global.ts';
+import * as semverVersioning from '../../../../../../modules/versioning/semver/index.ts';
+import * as githubGraphql from '../../../../../../util/github/graphql/index.ts';
+import type { GithubTagItem } from '../../../../../../util/github/graphql/types.ts';
+import * as hostRules from '../../../../../../util/host-rules.ts';
+import type { Timestamp } from '../../../../../../util/timestamp.ts';
+import type { BranchUpgradeConfig } from '../../../../../types.ts';
+import { getChangeLogJSON } from '../index.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 
-vi.mock('../../../../../../modules/datasource/npm');
+vi.mock('../../../../../../modules/datasource/npm/index.ts');
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
   branchName: '',
   packageName: 'renovate',
-  endpoint: 'https://api.github.com/',
   versioning: semverVersioning.id,
   currentVersion: '1.0.0',
   newVersion: '3.0.0',
@@ -261,7 +260,6 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          endpoint: 'https://github-enterprise.example.com/',
         }),
       ).toMatchSnapshot({
         hasReleaseNotes: true,
@@ -295,7 +293,6 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
-          endpoint: 'https://github-enterprise.example.com/',
         }),
       ).toMatchSnapshot({
         hasReleaseNotes: true,
@@ -337,7 +334,6 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
         manager: 'some-manager',
         branchName: '',
         packageName: 'correctPrefix/target',
-        endpoint: 'https://api.github.com/',
         versioning: 'npm',
         currentVersion: '1.0.0',
         newVersion: '1.0.2',

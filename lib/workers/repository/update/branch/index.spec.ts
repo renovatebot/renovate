@@ -1,71 +1,71 @@
 import { codeBlock } from 'common-tags';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
-import { getConfig } from '../../../../config/defaults';
-import { GlobalConfig } from '../../../../config/global';
-import type { RepoGlobalConfig } from '../../../../config/types';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../../config/types.ts';
 import {
   MANAGER_LOCKFILE_ERROR,
   REPOSITORY_CHANGED,
-} from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import * as _npmPostExtract from '../../../../modules/manager/npm/post-update';
+} from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import * as _npmPostExtract from '../../../../modules/manager/npm/post-update/index.ts';
 import type {
   ArtifactError,
   WriteExistingFilesResult,
-} from '../../../../modules/manager/npm/post-update/types';
+} from '../../../../modules/manager/npm/post-update/types.ts';
 import type {
   EnsureCommentConfig,
   Pr,
   PrBodyStruct,
   PrDebugData,
-} from '../../../../modules/platform';
-import { hashBody } from '../../../../modules/platform/pr-body';
-import * as _repoCache from '../../../../util/cache/repository';
-import * as _exec from '../../../../util/exec';
+} from '../../../../modules/platform/index.ts';
+import { hashBody } from '../../../../modules/platform/pr-body.ts';
+import * as _repoCache from '../../../../util/cache/repository/index.ts';
+import * as _exec from '../../../../util/exec/index.ts';
 import type {
   FileChange,
   LongCommitSha,
   StatusResult,
-} from '../../../../util/git/types';
-import * as _mergeConfidence from '../../../../util/merge-confidence';
-import * as _sanitize from '../../../../util/sanitize';
-import type { Timestamp } from '../../../../util/timestamp';
-import * as _limits from '../../../global/limits';
+} from '../../../../util/git/types.ts';
+import * as _mergeConfidence from '../../../../util/merge-confidence/index.ts';
+import * as _sanitize from '../../../../util/sanitize.ts';
+import type { Timestamp } from '../../../../util/timestamp.ts';
+import * as _limits from '../../../global/limits.ts';
 import type {
   BranchConfig,
   BranchUpgradeConfig,
   CacheFingerprintMatchResult,
-} from '../../../types';
-import type { ResultWithPr } from '../pr';
-import * as _prWorker from '../pr';
-import * as _prAutomerge from '../pr/automerge';
-import * as _automerge from './automerge';
-import * as _checkExisting from './check-existing';
-import * as _commit from './commit';
-import type { PackageFilesResult } from './get-updated';
-import * as _getUpdated from './get-updated';
-import * as _reuse from './reuse';
-import * as _schedule from './schedule';
-import * as branchWorker from '.';
-import { fs, git, partial, platform, scm } from '~test/util';
+} from '../../../types.ts';
+import * as _prAutomerge from '../pr/automerge.ts';
+import type { ResultWithPr } from '../pr/index.ts';
+import * as _prWorker from '../pr/index.ts';
+import * as _automerge from './automerge.ts';
+import * as _checkExisting from './check-existing.ts';
+import * as _commit from './commit.ts';
+import type { PackageFilesResult } from './get-updated.ts';
+import * as _getUpdated from './get-updated.ts';
+import * as branchWorker from './index.ts';
+import * as _reuse from './reuse.ts';
+import * as _schedule from './schedule.ts';
+import { fs, git, partial, platform, scm } from '~test/util.ts';
 
-vi.mock('./get-updated');
-vi.mock('./schedule');
-vi.mock('./check-existing');
-vi.mock('./reuse');
-vi.mock('../../../../modules/manager/npm/post-update');
-vi.mock('./automerge');
-vi.mock('./commit');
-vi.mock('../pr');
-vi.mock('../pr/automerge');
-vi.mock('../../changelog');
-vi.mock('../../../../util/exec');
-vi.mock('../../../../util/merge-confidence');
-vi.mock('../../../../util/sanitize');
-vi.mock('../../../../util/fs');
-vi.mock('../../../global/limits');
-vi.mock('../../../../util/cache/repository');
+vi.mock('./get-updated.ts');
+vi.mock('./schedule.ts');
+vi.mock('./check-existing.ts');
+vi.mock('./reuse.ts');
+vi.mock('../../../../modules/manager/npm/post-update/index.ts');
+vi.mock('./automerge.ts');
+vi.mock('./commit.ts');
+vi.mock('../pr/index.ts');
+vi.mock('../pr/automerge.ts');
+vi.mock('../../changelog/index.ts');
+vi.mock('../../../../util/exec/index.ts');
+vi.mock('../../../../util/merge-confidence/index.ts');
+vi.mock('../../../../util/sanitize.ts');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('../../../global/limits.ts');
+vi.mock('../../../../util/cache/repository/index.ts');
 
 const getUpdated = vi.mocked(_getUpdated);
 const schedule = vi.mocked(_schedule);
@@ -238,6 +238,57 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    describe('if release is missing releaseTimestamp with minimumReleaseAge set', () => {
+      it('skips branch if minimumReleaseAgeBehaviour=timestamp-required', async () => {
+        schedule.isScheduledNow.mockReturnValueOnce(true);
+        config.prCreation = 'not-pending';
+        config.upgrades = partial<BranchUpgradeConfig>([
+          {
+            releaseTimestamp: undefined,
+            minimumReleaseAge: '100 days',
+            minimumReleaseAgeBehaviour: 'timestamp-required',
+          },
+        ]);
+
+        const res = await branchWorker.processBranch(config);
+        expect(res).toEqual({
+          branchExists: false,
+          prNo: undefined,
+          result: 'pending',
+        });
+      });
+
+      it('does not skip branch if minimumReleaseAgeBehaviour=timestamp-optional', async () => {
+        schedule.isScheduledNow.mockReturnValueOnce(true);
+        config.prCreation = 'not-pending';
+        config.upgrades = partial<BranchUpgradeConfig>([
+          {
+            releaseTimestamp: undefined,
+            minimumReleaseAge: '100 days',
+            minimumReleaseAgeBehaviour: 'timestamp-optional',
+          },
+        ]);
+        scm.isBranchModified.mockResolvedValueOnce(false);
+        await branchWorker.processBranch(config);
+        expect(reuse.shouldReuseExistingBranch).toHaveBeenCalled();
+      });
+
+      it('does not skip branch if minimumReleaseAgeBehaviour=timestamp-required and minimumReleaseAge=0 days', async () => {
+        schedule.isScheduledNow.mockReturnValueOnce(true);
+        config.prCreation = 'not-pending';
+        config.upgrades = partial<BranchUpgradeConfig>([
+          {
+            releaseTimestamp: undefined,
+            minimumReleaseAge: '0 days',
+            minimumReleaseAgeBehaviour: 'timestamp-required',
+          },
+        ]);
+        scm.isBranchModified.mockResolvedValueOnce(false);
+        await branchWorker.processBranch(config);
+        expect(reuse.shouldReuseExistingBranch).toHaveBeenCalled();
+      });
+    });
+
     it('skips branch if minimumConfidence not met', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       config.prCreation = 'not-pending';
@@ -359,6 +410,7 @@ describe('workers/repository/update/branch/index', () => {
       checkExisting.prAlreadyExisted.mockResolvedValueOnce(pr);
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
+
       expect(logger.debug).toHaveBeenCalledWith(
         `Matching PR #${pr.number} was merged previously`,
       );
@@ -415,11 +467,11 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pr-edited',
       });
+
       expect(logger.debug).toHaveBeenCalledWith(
         `PR has been edited, PrNo:${pr.number}`,
       );
-      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-      expect(platform.ensureComment).toHaveBeenCalledWith(
+      expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ ...ensureCommentConfig }),
       );
     });
@@ -447,11 +499,11 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pr-edited',
       });
+
       expect(logger.debug).toHaveBeenCalledWith(
         `PR has been edited, PrNo:${pr.number}`,
       );
-      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-      expect(platform.ensureComment).toHaveBeenCalledWith(
+      expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ ...ensureCommentConfig }),
       );
     });
@@ -473,6 +525,7 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pr-edited',
       });
+
       expect(logger.debug).toHaveBeenCalledWith(
         `PR has been edited, PrNo:${pr.number}`,
       );
@@ -506,11 +559,11 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pr-edited',
       });
+
       expect(logger.debug).toHaveBeenCalledWith(
         `PR has been edited, PrNo:${pr.number}`,
       );
-      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-      expect(platform.ensureComment).toHaveBeenCalledWith(
+      expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ ...ensureCommentConfig }),
       );
     });
@@ -681,6 +734,29 @@ describe('workers/repository/update/branch/index', () => {
       expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: false,
         prNo: undefined,
+        result: 'pending',
+      });
+    });
+
+    it('returns if pending checks - but branch exists', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 5,
+          state: 'open',
+        }),
+      );
+      config.pendingChecks = true;
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        prNo: 5,
         result: 'pending',
       });
     });
@@ -1014,14 +1090,14 @@ describe('workers/repository/update/branch/index', () => {
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
-      expect(platform.ensureComment).toHaveBeenCalledWith({
+      expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith({
         content: codeBlock`
           ##### File name: go.mod
 
           some notice
         `,
         number: 123,
-        topic: 'ℹ Artifact update notice',
+        topic: 'ℹ️ Artifact update notice',
       });
     });
 
@@ -1133,6 +1209,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'not-scheduled',
         commitSha: null,
       });
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Branch cannot automerge now because automergeSchedule is off schedule - skipping',
       );
@@ -1188,7 +1265,7 @@ describe('workers/repository/update/branch/index', () => {
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
-      expect(platform.ensureComment).toHaveBeenCalledWith(
+      expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           content: expect.stringContaining(
             'You probably do not want to merge this PR as-is',
@@ -1226,7 +1303,7 @@ describe('workers/repository/update/branch/index', () => {
         },
       };
       await branchWorker.processBranch(inconfig);
-      expect(platform.ensureComment).toHaveBeenCalledWith(
+      expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           content: expect.stringContaining(customMessage),
         }),
@@ -1261,7 +1338,7 @@ describe('workers/repository/update/branch/index', () => {
         },
       };
       await branchWorker.processBranch(inconfig);
-      expect(platform.ensureComment).toHaveBeenCalledWith(
+      expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           content: expect.stringContaining(
             'Lock file error in some-manager - please review carefully.',
@@ -1429,6 +1506,7 @@ describe('workers/repository/update/branch/index', () => {
         baseBranch: 'new_base',
         cacheFingerprintMatch: 'matched',
       });
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Base branch changed by user, rebasing the branch onto new base',
       );
@@ -1467,6 +1545,7 @@ describe('workers/repository/update/branch/index', () => {
         reuseExistingBranch: true,
         cacheFingerprintMatch: 'no-fingerprint',
       });
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Existing branch needs updating. Restarting processBranch() with a clean branch',
       );
@@ -1502,6 +1581,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
         cacheFingerprintMatch: 'no-fingerprint',
       });
+
       expect(logger.debug).toHaveBeenCalledWith(
         'Existing branch needs updating. Restarting processBranch() with a clean branch',
       );
@@ -1564,6 +1644,7 @@ describe('workers/repository/update/branch/index', () => {
         prNo: 1,
         result: 'pr-edited',
       });
+
       expect(logger.info).toHaveBeenCalledWith(
         `DRY-RUN: Would ensure edited/blocked PR comment in PR #${pr.number}`,
       );
@@ -1609,6 +1690,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
+
       expect(logger.info).toHaveBeenCalledWith(
         `DRY-RUN: Would remove edited/blocked PR comment in PR #${pr.number}`,
       );
@@ -1656,6 +1738,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
+
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would ensure comment removal in PR #undefined',
       );
@@ -1938,12 +2021,13 @@ describe('workers/repository/update/branch/index', () => {
       const errorMessage = expect.stringContaining(
         "Post-upgrade command 'disallowed task' has not been added to the allowed list in allowedCommands",
       );
-      expect(platform.ensureComment).toHaveBeenCalledWith(
+      expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           content: errorMessage,
         }),
       );
-      expect(sanitize.sanitize).toHaveBeenCalledWith(errorMessage);
+      expect(sanitize.sanitize).toHaveBeenCalledTimes(2);
+      expect(sanitize.sanitize).toHaveBeenNthCalledWith(2, errorMessage);
     });
 
     it('handles post-upgrade task exec errors', async () => {
@@ -2022,12 +2106,12 @@ describe('workers/repository/update/branch/index', () => {
       });
 
       const errorMessage = expect.stringContaining('Meh, this went wrong!');
-      expect(platform.ensureComment).toHaveBeenCalledWith(
+      expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           content: errorMessage,
         }),
       );
-      expect(sanitize.sanitize).toHaveBeenCalledWith(errorMessage);
+      expect(sanitize.sanitize).toHaveBeenCalledExactlyOnceWith(errorMessage);
     });
 
     it('executes post-upgrade tasks with disabled post-upgrade command templating', async () => {
@@ -2115,10 +2199,13 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
-      expect(exec.exec).toHaveBeenCalledWith('echo semver', {
-        cwd: '/localDir',
-        extraEnv: {},
-      });
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'echo semver',
+        expect.objectContaining({
+          cwd: '/localDir',
+          extraEnv: {},
+        }),
+      );
     });
 
     it('executes post-upgrade tasks with multiple dependecy in one branch', async () => {
@@ -2243,14 +2330,22 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
-      expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo some-dep-name-1', {
-        cwd: '/localDir',
-        extraEnv: {},
-      });
-      expect(exec.exec).toHaveBeenNthCalledWith(2, 'echo some-dep-name-2', {
-        cwd: '/localDir',
-        extraEnv: {},
-      });
+      expect(exec.exec).toHaveBeenNthCalledWith(
+        1,
+        'echo some-dep-name-1',
+        expect.objectContaining({
+          cwd: '/localDir',
+          extraEnv: {},
+        }),
+      );
+      expect(exec.exec).toHaveBeenNthCalledWith(
+        2,
+        'echo some-dep-name-2',
+        expect.objectContaining({
+          cwd: '/localDir',
+          extraEnv: {},
+        }),
+      );
       expect(exec.exec).toHaveBeenCalledTimes(2);
       const calledWithConfig = commit.commitFilesToBranch.mock.calls[0][0];
       const updatedArtifacts = calledWithConfig.updatedArtifacts;
@@ -2339,7 +2434,6 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo hardcoded-string$'],
-        trustLevel: 'high',
         localDir: '/localDir',
       });
 
@@ -2393,10 +2487,14 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
-      expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
-        cwd: '/localDir',
-        extraEnv: {},
-      });
+      expect(exec.exec).toHaveBeenNthCalledWith(
+        1,
+        'echo hardcoded-string',
+        expect.objectContaining({
+          cwd: '/localDir',
+          extraEnv: {},
+        }),
+      );
       expect(exec.exec).toHaveBeenCalledTimes(1);
       expect(
         findFileContent(
@@ -2454,7 +2552,6 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo hardcoded-string$'],
-        trustLevel: 'high',
         localDir: '/localDir',
         cacheDir,
       });
@@ -2560,7 +2657,6 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo hardcoded-string$'],
-        trustLevel: 'high',
         localDir: '/localDir',
         cacheDir,
       });
@@ -2600,10 +2696,14 @@ describe('workers/repository/update/branch/index', () => {
           result: 'done',
           commitSha: null,
         });
-        expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
-          cwd: '/localDir',
-          extraEnv: {},
-        });
+        expect(exec.exec).toHaveBeenNthCalledWith(
+          1,
+          'echo hardcoded-string',
+          expect.objectContaining({
+            cwd: '/localDir',
+            extraEnv: {},
+          }),
+        );
         expect(exec.exec).toHaveBeenCalledTimes(1);
         expect(
           findFileContent(
@@ -2757,7 +2857,9 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: '123test',
       });
+
       expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
+
       expect(logger.debug).toHaveBeenCalledWith(
         'No package files need updating',
       );
@@ -2794,6 +2896,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
+
       expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
       expect(logger.debug).not.toHaveBeenCalledWith(
         'No package files need updating',
@@ -2864,6 +2967,43 @@ describe('workers/repository/update/branch/index', () => {
         await branchWorker.processBranch({
           ...config,
           dependencyDashboardAllRateLimited: true,
+        }),
+      ).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        commitSha: '123test',
+        prNo: 5,
+        result: 'done',
+      });
+    });
+
+    it('Dependency Dashboard open all awaiting schedule', async () => {
+      vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+          artifactErrors: [{}],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'schedule!',
+          state: 'open',
+          bodyStruct: {
+            hash: hashBody(`- [x] <!-- create-all-awaiting-schedule-prs -->`),
+            rebaseRequested: false,
+          },
+        }),
+      );
+      scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha); //TODO:not needed?
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          dependencyDashboardAllAwaitingSchedule: true,
         }),
       ).toEqual({
         branchExists: true,
@@ -2977,6 +3117,7 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
       await branchWorker.processBranch(config);
       expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
+
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would reattempt platform automerge for PR #123',
       );

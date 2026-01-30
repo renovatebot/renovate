@@ -1,5 +1,5 @@
-import semver from '../semver';
-import docker from '.';
+import semver from '../semver/index.ts';
+import docker from './index.ts';
 
 describe('modules/versioning/docker/index', () => {
   it.each`
