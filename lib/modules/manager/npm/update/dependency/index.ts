@@ -129,10 +129,7 @@ function removeAsString(
   const regex = regEx(`(?:,\\s*${keyValue}|${keyValue}\\s*,)`);
   const newContent = fileContent.replace(regex, '');
 
-  if (
-    newContent !== fileContent &&
-    dequal(parsedContents, JSON.parse(newContent))
-  ) {
+  if (dequal(parsedContents, JSON.parse(newContent))) {
     return newContent;
   }
 
