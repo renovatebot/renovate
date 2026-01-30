@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { logger } from '../../../logger/index.ts';
 import { extractPackageFile } from './extract.ts';
 
 const manifestFile = 'custom_components/example/manifest.json';
@@ -139,7 +140,7 @@ describe('modules/manager/homeassistant-manifest/extract', () => {
         domain: 'test',
         name: 'Test',
         requirements: [
-          'pycoolmaster@git+https://github.com/issacg/pycoolmaster.git@except_connect',
+          'pycoolmaster@git+https://github.com/issacg/pycoolmaster.git@v1.0.0',
           'aiohue==1.9.1',
         ],
       });
@@ -150,8 +151,8 @@ describe('modules/manager/homeassistant-manifest/extract', () => {
             datasource: 'git-tags',
             depName: 'pycoolmaster',
             packageName: 'https://github.com/issacg/pycoolmaster.git',
-            currentValue: 'except_connect',
-            currentVersion: 'except_connect',
+            currentValue: 'v1.0.0',
+            currentVersion: 'v1.0.0',
           },
           {
             datasource: 'pypi',
@@ -302,6 +303,10 @@ describe('modules/manager/homeassistant-manifest/extract', () => {
       });
       const result = extractPackageFile(content, manifestFile);
       expect(result).toBeNull();
+      expect(logger.debug).toHaveBeenCalledWith(
+        { packageFile: manifestFile, err: expect.anything() },
+        'Not a Home Assistant manifest',
+      );
     });
 
     it('handles unparseable requirement strings with skipReason', () => {
