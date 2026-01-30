@@ -111,7 +111,7 @@ function replaceAsString(
     }
   }
   /* v8 ignore next -- needs test */
-  throw new Error();
+  throw new Error('Could not replace dependency');
 }
 
 function removeAsString(
@@ -122,9 +122,9 @@ function removeAsString(
   currentValue: string,
 ): string {
   delete parsedContents[depType]![depName];
+
   const escapedDepName = escapeRegExp(depName);
   const escapedValue = escapeRegExp(currentValue);
-
   const keyValue = `"${escapedDepName}"\\s*:\\s*"${escapedValue}"`;
   const regex = regEx(`(?:,\\s*${keyValue}|${keyValue}\\s*,)`);
   const newContent = fileContent.replace(regex, '');
