@@ -1,20 +1,20 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import * as docker from '../../../util/exec/docker';
-import * as hostRules from '../../../util/host-rules';
-import * as _datasource from '../../datasource';
-import type { UpdateArtifactsConfig } from '../types';
-import * as helmfile from '.';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { env, fs, git } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import * as docker from '../../../util/exec/docker/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import * as _datasource from '../../datasource/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import * as helmfile from './index.ts';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { env, fs, git } from '~test/util.ts';
 
-vi.mock('../../datasource', () => mockDeep());
-vi.mock('../../../util/exec/env');
-vi.mock('../../../util/http');
-vi.mock('../../../util/fs');
+vi.mock('../../datasource/index.ts', () => mockDeep());
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../../util/http/index.ts');
+vi.mock('../../../util/fs/index.ts');
 
 const datasource = vi.mocked(_datasource);
 
@@ -24,7 +24,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'), // `join` fixes Windows CI
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+  dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -311,7 +311,7 @@ describe('modules/manager/helmfile/artifacts', () => {
     {
       binarySource: 'docker' as const,
       expectedCommands: [
-        { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+        { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
         {
           cmd:
@@ -324,7 +324,7 @@ describe('modules/manager/helmfile/artifacts', () => {
             '-e HELM_REPOSITORY_CACHE ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/containerbase/sidecar ' +
+            'ghcr.io/renovatebot/base-image ' +
             'bash -l -c "' +
             'install-tool helm v3.7.2' +
             ' && ' +

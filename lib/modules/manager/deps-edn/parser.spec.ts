@@ -1,6 +1,6 @@
 import { isPlainObject } from '@sindresorhus/is';
-import { parseDepsEdnFile } from './parser';
-import { Fixtures } from '~test/fixtures';
+import { parseDepsEdnFile } from './parser.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 describe('modules/manager/deps-edn/parser', () => {
   describe('parseEdnFile', () => {

@@ -1,4 +1,4 @@
-import { isNotNullOrUndefined, toArray } from './array';
+import { isNotNullOrUndefined, toArray } from './array.ts';
 
 describe('util/array', () => {
   it.each`

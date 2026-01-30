@@ -1,3 +1,21 @@
+import {
+  CodeCommitClient,
+  CreatePullRequestApprovalRuleCommand,
+  CreatePullRequestCommand,
+  DeleteCommentContentCommand,
+  GetCommentsForPullRequestCommand,
+  GetFileCommand,
+  GetPullRequestCommand,
+  GetRepositoryCommand,
+  ListPullRequestsCommand,
+  ListRepositoriesCommand,
+  PostCommentForPullRequestCommand,
+  PullRequestStatusEnum,
+  UpdateCommentCommand,
+  UpdatePullRequestDescriptionCommand,
+  UpdatePullRequestStatusCommand,
+  UpdatePullRequestTitleCommand,
+} from '@aws-sdk/client-codecommit';
 import type {
   CreatePullRequestApprovalRuleInput,
   CreatePullRequestApprovalRuleOutput,
@@ -19,6 +37,7 @@ import type {
   ListRepositoriesOutput,
   PostCommentForPullRequestInput,
   PostCommentForPullRequestOutput,
+  RepositoryMetadata,
   UpdateCommentInput,
   UpdateCommentOutput,
   UpdatePullRequestDescriptionInput,
@@ -28,30 +47,11 @@ import type {
   UpdatePullRequestTitleInput,
   UpdatePullRequestTitleOutput,
 } from '@aws-sdk/client-codecommit';
-import {
-  CodeCommitClient,
-  CreatePullRequestApprovalRuleCommand,
-  CreatePullRequestCommand,
-  DeleteCommentContentCommand,
-  GetCommentsForPullRequestCommand,
-  GetFileCommand,
-  GetPullRequestCommand,
-  GetRepositoryCommand,
-  ListPullRequestsCommand,
-  ListRepositoriesCommand,
-  PostCommentForPullRequestCommand,
-  PullRequestStatusEnum,
-  UpdateCommentCommand,
-  UpdatePullRequestDescriptionCommand,
-  UpdatePullRequestStatusCommand,
-  UpdatePullRequestTitleCommand,
-} from '@aws-sdk/client-codecommit';
-import type { RepositoryMetadata } from '@aws-sdk/client-codecommit/dist-types/models/models_0';
 import { isString } from '@sindresorhus/is';
 import * as aws4 from 'aws4';
-import { REPOSITORY_UNINITIATED } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { getEnv } from '../../../util/env';
+import { REPOSITORY_UNINITIATED } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { getEnv } from '../../../util/env.ts';
 
 let codeCommitClient: CodeCommitClient;
 

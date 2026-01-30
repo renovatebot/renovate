@@ -1,21 +1,21 @@
-import { GlobalConfig } from '../../../config/global';
-import * as _secrets from '../../../config/secrets';
-import * as _onboarding from '../onboarding/branch';
-import * as _apis from './apis';
-import * as _config from './config';
-import * as _merge from './merge';
-import { initRepo } from '.';
-import { logger, partial } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as _secrets from '../../../config/secrets.ts';
+import * as _onboarding from '../onboarding/branch/index.ts';
+import * as _apis from './apis.ts';
+import * as _config from './config.ts';
+import { initRepo } from './index.ts';
+import * as _merge from './merge.ts';
+import { logger, partial } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
-vi.mock('../onboarding/branch');
-vi.mock('../configured');
-vi.mock('../init/apis');
-vi.mock('../init/config');
-vi.mock('../init/merge');
-vi.mock('../../../config/secrets');
-vi.mock('../../../config/variables');
-vi.mock('../../../modules/platform', () => ({
+vi.mock('../onboarding/branch/index.ts');
+vi.mock('../configured.ts');
+vi.mock('../init/apis.ts');
+vi.mock('../init/config.ts');
+vi.mock('../init/merge.ts');
+vi.mock('../../../config/secrets.ts');
+vi.mock('../../../config/variables.ts');
+vi.mock('../../../modules/platform/index.ts', () => ({
   platform: { initRepo: vi.fn() },
   getPlatformList: vi.fn(),
 }));

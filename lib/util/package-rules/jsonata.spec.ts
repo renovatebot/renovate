@@ -1,4 +1,4 @@
-import { JsonataMatcher } from './jsonata';
+import { JsonataMatcher } from './jsonata.ts';
 
 describe('util/package-rules/jsonata', () => {
   const matcher = new JsonataMatcher();

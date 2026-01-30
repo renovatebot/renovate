@@ -1,7 +1,7 @@
-import type { BranchConfig } from '../../../types';
-import { getExpectedPrList } from './pr-list';
-import type { RenovateConfig } from '~test/util';
-import { partial } from '~test/util';
+import type { BranchConfig } from '../../../types.ts';
+import { getExpectedPrList } from './pr-list.ts';
+import type { RenovateConfig } from '~test/util.ts';
+import { partial } from '~test/util.ts';
 
 describe('workers/repository/onboarding/pr/pr-list', () => {
   describe('getExpectedPrList()', () => {
@@ -136,7 +136,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
 
 
 
-        🚸 Branch creation will be limited to maximum 1 per hour, so it doesn't swamp any CI resources or overwhelm the project. See docs for \`prhourlylimit\` for details.
+        🚸 Branch creation will be limited to maximum 1 per hour, so it doesn't swamp any CI resources or overwhelm the project. See docs for \`prHourlyLimit\` for details.
 
         "
       `);

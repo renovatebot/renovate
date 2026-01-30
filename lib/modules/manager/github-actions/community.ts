@@ -1,16 +1,16 @@
 import { z } from 'zod';
 
-import type { SkipReason, StageName } from '../../../types';
-import { escapeRegExp, regEx } from '../../../util/regex';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { NpmDatasource } from '../../datasource/npm';
-import { PypiDatasource } from '../../datasource/pypi';
-import { RubyVersionDatasource } from '../../datasource/ruby-version';
-import * as condaVersioning from '../../versioning/conda';
-import * as npmVersioning from '../../versioning/npm';
-import * as pep440versioning from '../../versioning/pep440';
-import * as rubyVersioning from '../../versioning/ruby';
-import type { PackageDependency } from '../types';
+import type { SkipReason, StageName } from '../../../types/index.ts';
+import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { NpmDatasource } from '../../datasource/npm/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import * as condaVersioning from '../../versioning/conda/index.ts';
+import * as npmVersioning from '../../versioning/npm/index.ts';
+import * as pep440versioning from '../../versioning/pep440/index.ts';
+import * as rubyVersioning from '../../versioning/ruby/index.ts';
+import type { PackageDependency } from '../types.ts';
 
 function matchAction(action: string): z.Schema {
   return z

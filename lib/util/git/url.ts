@@ -1,8 +1,8 @@
 import gitUrlParse from 'git-url-parse';
-import { logger } from '../../logger';
-import { detectPlatform } from '../common';
-import * as hostRules from '../host-rules';
-import { regEx } from '../regex';
+import { logger } from '../../logger/index.ts';
+import { detectPlatform } from '../common.ts';
+import * as hostRules from '../host-rules.ts';
+import { regEx } from '../regex.ts';
 
 export function parseGitUrl(url: string): gitUrlParse.GitUrl {
   return gitUrlParse(url);

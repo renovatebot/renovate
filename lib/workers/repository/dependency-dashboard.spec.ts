@@ -3,28 +3,28 @@ import { codeBlock } from 'common-tags';
 import type { MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
-import { getConfig } from '../../config/defaults';
-import { GlobalConfig } from '../../config/global';
+import { getConfig } from '../../config/defaults.ts';
+import { GlobalConfig } from '../../config/global.ts';
 import type {
   PackageDependency,
   PackageFile,
-} from '../../modules/manager/types';
-import type { Platform } from '../../modules/platform';
-import { massageMarkdown } from '../../modules/platform/github';
-import { clone } from '../../util/clone';
-import { emojify } from '../../util/emoji';
-import { regEx } from '../../util/regex';
-import { asTimestamp } from '../../util/timestamp';
-import type { BranchConfig, BranchUpgradeConfig } from '../types';
-import * as dependencyDashboard from './dependency-dashboard';
-import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard';
-import { PackageFiles } from './package-files';
-import { Fixtures } from '~test/fixtures';
-import { logger, platform } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+} from '../../modules/manager/types.ts';
+import { massageMarkdown } from '../../modules/platform/github/index.ts';
+import type { Platform } from '../../modules/platform/index.ts';
+import { clone } from '../../util/clone.ts';
+import { emojify } from '../../util/emoji.ts';
+import { regEx } from '../../util/regex.ts';
+import { asTimestamp } from '../../util/timestamp.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../types.ts';
+import * as dependencyDashboard from './dependency-dashboard.ts';
+import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard.ts';
+import { PackageFiles } from './package-files.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { logger, platform } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
 const createVulnerabilitiesMock = vi.fn();
-vi.mock('./process/vulnerabilities', () => {
+vi.mock('./process/vulnerabilities.ts', () => {
   return {
     __esModule: true,
     Vulnerabilities: class {

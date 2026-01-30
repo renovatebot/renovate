@@ -1,6 +1,6 @@
-import { openpgp } from '../../expose.cjs';
-import { logger } from '../../logger';
-import { regEx } from '../../util/regex';
+import { openpgp } from '../../expose.ts';
+import { logger } from '../../logger/index.ts';
+import { regEx } from '../../util/regex.ts';
 
 let pgp: typeof import('openpgp') | null | undefined = undefined;
 
@@ -10,7 +10,7 @@ export async function tryDecryptOpenPgp(
 ): Promise<string | null> {
   if (pgp === undefined) {
     try {
-      pgp = openpgp();
+      pgp = await openpgp();
     } catch (err) {
       logger.warn({ err }, 'Could load openpgp');
       pgp = null;

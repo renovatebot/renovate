@@ -1,4 +1,4 @@
-import { extractRulesFromCodeOwnersLines } from './code-owners';
+import { extractRulesFromCodeOwnersLines } from './code-owners.ts';
 
 describe('modules/platform/gitlab/code-owners', () => {
   describe('CodeOwnersParser', () => {

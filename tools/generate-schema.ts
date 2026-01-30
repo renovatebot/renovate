@@ -1,6 +1,6 @@
 import { ERROR } from 'bunyan';
-import { getProblems, logger } from '../lib/logger';
-import { generateSchema } from './docs/schema';
+import { getProblems, logger } from '../lib/logger/index.ts';
+import { generateSchema } from './docs/schema.ts';
 
 process.on('unhandledRejection', (err) => {
   // Will print "unhandledRejection err is not defined"
@@ -16,6 +16,10 @@ process.on('unhandledRejection', (err) => {
     // json-schema
     logger.info('Generating json-schema');
     await generateSchema(dist);
+    await generateSchema(dist, {
+      filename: 'renovate-inherited-schema.json',
+      isInherit: true,
+    });
     await generateSchema(dist, {
       filename: 'renovate-global-schema.json',
       isGlobal: true,

@@ -1,4 +1,4 @@
-import { RecreateClosedMigration } from './recreate-closed-migration';
+import { RecreateClosedMigration } from './recreate-closed-migration.ts';
 
 describe('config/migrations/custom/recreate-closed-migration', () => {
   it('should migrate true', async () => {

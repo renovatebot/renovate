@@ -1,48 +1,48 @@
 import { isNonEmptyString, isString, isUndefined } from '@sindresorhus/is';
-import { mergeChildConfig } from '../../../../config';
-import type { ValidationMessage } from '../../../../config/types';
-import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
+import { mergeChildConfig } from '../../../../config/index.ts';
+import type { ValidationMessage } from '../../../../config/types.ts';
+import { CONFIG_VALIDATION } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import {
+  getDatasourceFor,
+  getDefaultVersioning,
+} from '../../../../modules/datasource/common.ts';
 import type {
   GetDigestInputConfig,
   Release,
   ReleaseResult,
-} from '../../../../modules/datasource';
+} from '../../../../modules/datasource/index.ts';
 import {
   applyDatasourceFilters,
   getDigest,
   getRawPkgReleases,
   isGetPkgReleasesConfig,
   supportsDigests,
-} from '../../../../modules/datasource';
-import {
-  getDatasourceFor,
-  getDefaultVersioning,
-} from '../../../../modules/datasource/common';
-import { postprocessRelease } from '../../../../modules/datasource/postprocess-release';
-import { getRangeStrategy } from '../../../../modules/manager';
-import * as allVersioning from '../../../../modules/versioning';
-import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
-import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import { assignKeys } from '../../../../util/assign-keys';
-import { getElapsedDays } from '../../../../util/date';
-import { applyPackageRules } from '../../../../util/package-rules';
-import { regEx } from '../../../../util/regex';
-import { Result } from '../../../../util/result';
-import type { Timestamp } from '../../../../util/timestamp';
-import { calculateAbandonment } from './abandonment';
-import { getBucket } from './bucket';
-import { getCurrentVersion } from './current';
-import { filterVersions } from './filter';
-import { filterInternalChecks } from './filter-checks';
-import { generateUpdate } from './generate';
-import { getRollbackUpdate } from './rollback';
-import { calculateMostRecentTimestamp } from './timestamps';
-import type { LookupUpdateConfig, UpdateResult } from './types';
+} from '../../../../modules/datasource/index.ts';
+import { postprocessRelease } from '../../../../modules/datasource/postprocess-release.ts';
+import { getRangeStrategy } from '../../../../modules/manager/index.ts';
+import { id as dockerVersioningId } from '../../../../modules/versioning/docker/index.ts';
+import * as allVersioning from '../../../../modules/versioning/index.ts';
+import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import { assignKeys } from '../../../../util/assign-keys.ts';
+import { getElapsedDays } from '../../../../util/date.ts';
+import { applyPackageRules } from '../../../../util/package-rules/index.ts';
+import { regEx } from '../../../../util/regex.ts';
+import { Result } from '../../../../util/result.ts';
+import type { Timestamp } from '../../../../util/timestamp.ts';
+import { calculateAbandonment } from './abandonment.ts';
+import { getBucket } from './bucket.ts';
+import { getCurrentVersion } from './current.ts';
+import { filterInternalChecks } from './filter-checks.ts';
+import { filterVersions } from './filter.ts';
+import { generateUpdate } from './generate.ts';
+import { getRollbackUpdate } from './rollback.ts';
+import { calculateMostRecentTimestamp } from './timestamps.ts';
+import type { LookupUpdateConfig, UpdateResult } from './types.ts';
 import {
   addReplacementUpdateIfValid,
   isReplacementRulesConfigured,
-} from './utils';
+} from './utils.ts';
 
 async function getTimestamp(
   config: LookupUpdateConfig,

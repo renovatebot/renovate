@@ -1,11 +1,11 @@
 import upath from 'upath';
-import { GlobalConfig } from '../../config/global';
-import { logger } from '../../logger';
-import { findUpLocal } from '../fs';
-import { newlineRegex } from '../regex';
-import { coerceString } from '../string';
-import { rawExec } from './common';
-import type { RawExecOptions } from './types';
+import { GlobalConfig } from '../../config/global.ts';
+import { logger } from '../../logger/index.ts';
+import { findUpLocal } from '../fs/index.ts';
+import { newlineRegex } from '../regex.ts';
+import { coerceString } from '../string.ts';
+import { rawExec } from './common.ts';
+import type { RawExecOptions } from './types.ts';
 
 export function isHermit(): boolean {
   return GlobalConfig.get('binarySource') === 'hermit';

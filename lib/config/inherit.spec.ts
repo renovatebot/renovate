@@ -1,4 +1,4 @@
-import { InheritConfig, NOT_PRESET } from './inherit';
+import { InheritConfig, NOT_PRESET } from './inherit.ts';
 
 describe('config/inherit', () => {
   it('all values in OPTIONS are sorted', () => {

@@ -52,6 +52,10 @@ If a config option has a `parent` defined, it means it's only allowed to configu
 When an array or object configuration option is `mergeable`, it means that values inside it will be added to any existing object or array that existed with the same name.
 
 <!-- prettier-ignore -->
+!!! tip
+    This documentation corresponds with the JSON schema in [`docs.renovatebot.com/renovate-schema.json`](renovate-schema.json).
+
+<!-- prettier-ignore -->
 !!! note
     Config options with `type=string` are always non-mergeable, so `mergeable=false`.
 
@@ -1922,6 +1926,10 @@ For example, to group all non-major devDependencies updates together into a sing
 }
 ```
 
+<!-- prettier-ignore -->
+!!! note
+    Replacement updates and lock file maintenance will never be grouped.
+
 ## groupSlug
 
 By default, Renovate will "slugify" the groupName to determine the branch name.
@@ -3725,6 +3733,10 @@ Use the `replacementName` config option to set the name of a replacement package
 Can be used in combination with `replacementVersion`.
 
 You can suggest a new community package rule by editing [the `replacements.json` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/data/replacements.json) and opening a pull request.
+
+<!-- prettier-ignore -->
+!!! note
+    Replacement updates and lock file maintenance will never be grouped.
 
 ### replacementNameTemplate
 

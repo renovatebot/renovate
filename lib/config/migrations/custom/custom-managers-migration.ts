@@ -1,6 +1,6 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
-import type { CustomManager } from '../../../modules/manager/custom/types';
-import { AbstractMigration } from '../base/abstract-migration';
+import type { CustomManager } from '../../../modules/manager/custom/types.ts';
+import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export class CustomManagersMigration extends AbstractMigration {
   override readonly propertyName = 'customManagers';

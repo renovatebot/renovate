@@ -1,8 +1,11 @@
 import { glob } from 'glob';
-import { logger } from '../../../logger';
-import { rawExec } from '../../../util/exec/common';
-import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
-import type { PlatformScm } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { rawExec } from '../../../util/exec/common.ts';
+import type {
+  CommitFilesConfig,
+  LongCommitSha,
+} from '../../../util/git/types.ts';
+import type { PlatformScm } from '../types.ts';
 
 let fileList: string[] | undefined;
 export class LocalFs implements PlatformScm {

@@ -1,7 +1,7 @@
 import { isNonEmptyObject, isNullOrUndefined } from '@sindresorhus/is';
-import type { PagedResult } from '../../modules/platform/bitbucket/types';
-import { HttpBase, type InternalJsonUnsafeOptions } from './http';
-import type { HttpMethod, HttpOptions, HttpResponse } from './types';
+import type { PagedResult } from '../../modules/platform/bitbucket/types.ts';
+import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
+import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
 
 const MAX_PAGES = 100;
 const MAX_PAGELEN = 100;

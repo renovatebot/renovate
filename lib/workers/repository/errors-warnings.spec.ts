@@ -1,13 +1,13 @@
-import type { PackageFile } from '../../modules/manager/types';
+import type { PackageFile } from '../../modules/manager/types.ts';
 import {
   getDepWarningsDashboard,
   getDepWarningsOnboardingPR,
   getDepWarningsPR,
   getErrors,
   getWarnings,
-} from './errors-warnings';
-import type { RenovateConfig } from '~test/util';
-import { partial } from '~test/util';
+} from './errors-warnings.ts';
+import type { RenovateConfig } from '~test/util.ts';
+import { partial } from '~test/util.ts';
 
 describe('workers/repository/errors-warnings', () => {
   describe('getWarnings()', () => {

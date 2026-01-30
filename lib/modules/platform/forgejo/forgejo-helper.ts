@@ -1,11 +1,11 @@
 import { isBoolean } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import type { BranchStatus } from '../../../types';
-import { getCache } from '../../../util/cache/repository';
-import type { ForgejoHttpOptions } from '../../../util/http/forgejo';
-import { ForgejoHttp } from '../../../util/http/forgejo';
-import { fromBase64 } from '../../../util/string';
-import { getQueryString } from '../../../util/url';
+import { logger } from '../../../logger/index.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import type { ForgejoHttpOptions } from '../../../util/http/forgejo.ts';
+import { ForgejoHttp } from '../../../util/http/forgejo.ts';
+import { fromBase64 } from '../../../util/string.ts';
+import { getQueryString } from '../../../util/url.ts';
 import type {
   Branch,
   CombinedCommitStatus,
@@ -31,8 +31,8 @@ import type {
   RepoSearchParams,
   RepoSearchResults,
   User,
-} from './types';
-import { API_PATH } from './utils';
+} from './types.ts';
+import { API_PATH } from './utils.ts';
 
 export const forgejoHttp = new ForgejoHttp();
 

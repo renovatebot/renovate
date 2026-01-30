@@ -1,10 +1,13 @@
-import { logger } from '../../../logger';
-import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { HexDatasource } from '../../datasource/hex';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { logger } from '../../../logger/index.ts';
+import {
+  findLocalSiblingOrParent,
+  readLocalFile,
+} from '../../../util/fs/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { HexDatasource } from '../../datasource/hex/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 const depSectionRegExp = regEx(/defp\s+deps.*do/g);
 const depMatchRegExp = regEx(

@@ -1,9 +1,9 @@
-import type { HttpResponse } from '../../../util/http/types';
-import { asTimestamp } from '../../../util/timestamp';
-import { ensureTrailingSlash } from '../../../util/url';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { DartResult } from './types';
+import type { HttpResponse } from '../../../util/http/types.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { DartResult } from './types.ts';
 
 export class DartDatasource extends Datasource {
   static readonly id = 'dart';

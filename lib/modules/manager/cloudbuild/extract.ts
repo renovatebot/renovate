@@ -1,7 +1,7 @@
-import { logger } from '../../../logger';
-import { getDep } from '../dockerfile/extract';
-import type { PackageFileContent } from '../types';
-import { CloudbuildSteps } from './schema';
+import { logger } from '../../../logger/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import type { PackageFileContent } from '../types.ts';
+import { CloudbuildSteps } from './schema.ts';
 
 export function extractPackageFile(
   content: string,

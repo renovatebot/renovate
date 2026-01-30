@@ -1,5 +1,5 @@
-import type { JSONataManagerConfig } from './jsonata/types';
-import type { RegexManagerConfig } from './regex/types';
+import type { JSONataManagerConfig } from './jsonata/types.ts';
+import type { RegexManagerConfig } from './regex/types.ts';
 
 export interface CustomExtractConfig
   extends Partial<RegexManagerConfig>,

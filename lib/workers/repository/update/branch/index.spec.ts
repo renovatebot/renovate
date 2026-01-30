@@ -1,71 +1,71 @@
 import { codeBlock } from 'common-tags';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
-import { getConfig } from '../../../../config/defaults';
-import { GlobalConfig } from '../../../../config/global';
-import type { RepoGlobalConfig } from '../../../../config/types';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../../config/types.ts';
 import {
   MANAGER_LOCKFILE_ERROR,
   REPOSITORY_CHANGED,
-} from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import * as _npmPostExtract from '../../../../modules/manager/npm/post-update';
+} from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import * as _npmPostExtract from '../../../../modules/manager/npm/post-update/index.ts';
 import type {
   ArtifactError,
   WriteExistingFilesResult,
-} from '../../../../modules/manager/npm/post-update/types';
+} from '../../../../modules/manager/npm/post-update/types.ts';
 import type {
   EnsureCommentConfig,
   Pr,
   PrBodyStruct,
   PrDebugData,
-} from '../../../../modules/platform';
-import { hashBody } from '../../../../modules/platform/pr-body';
-import * as _repoCache from '../../../../util/cache/repository';
-import * as _exec from '../../../../util/exec';
+} from '../../../../modules/platform/index.ts';
+import { hashBody } from '../../../../modules/platform/pr-body.ts';
+import * as _repoCache from '../../../../util/cache/repository/index.ts';
+import * as _exec from '../../../../util/exec/index.ts';
 import type {
   FileChange,
   LongCommitSha,
   StatusResult,
-} from '../../../../util/git/types';
-import * as _mergeConfidence from '../../../../util/merge-confidence';
-import * as _sanitize from '../../../../util/sanitize';
-import type { Timestamp } from '../../../../util/timestamp';
-import * as _limits from '../../../global/limits';
+} from '../../../../util/git/types.ts';
+import * as _mergeConfidence from '../../../../util/merge-confidence/index.ts';
+import * as _sanitize from '../../../../util/sanitize.ts';
+import type { Timestamp } from '../../../../util/timestamp.ts';
+import * as _limits from '../../../global/limits.ts';
 import type {
   BranchConfig,
   BranchUpgradeConfig,
   CacheFingerprintMatchResult,
-} from '../../../types';
-import type { ResultWithPr } from '../pr';
-import * as _prWorker from '../pr';
-import * as _prAutomerge from '../pr/automerge';
-import * as _automerge from './automerge';
-import * as _checkExisting from './check-existing';
-import * as _commit from './commit';
-import type { PackageFilesResult } from './get-updated';
-import * as _getUpdated from './get-updated';
-import * as _reuse from './reuse';
-import * as _schedule from './schedule';
-import * as branchWorker from '.';
-import { fs, git, partial, platform, scm } from '~test/util';
+} from '../../../types.ts';
+import * as _prAutomerge from '../pr/automerge.ts';
+import type { ResultWithPr } from '../pr/index.ts';
+import * as _prWorker from '../pr/index.ts';
+import * as _automerge from './automerge.ts';
+import * as _checkExisting from './check-existing.ts';
+import * as _commit from './commit.ts';
+import type { PackageFilesResult } from './get-updated.ts';
+import * as _getUpdated from './get-updated.ts';
+import * as branchWorker from './index.ts';
+import * as _reuse from './reuse.ts';
+import * as _schedule from './schedule.ts';
+import { fs, git, partial, platform, scm } from '~test/util.ts';
 
-vi.mock('./get-updated');
-vi.mock('./schedule');
-vi.mock('./check-existing');
-vi.mock('./reuse');
-vi.mock('../../../../modules/manager/npm/post-update');
-vi.mock('./automerge');
-vi.mock('./commit');
-vi.mock('../pr');
-vi.mock('../pr/automerge');
-vi.mock('../../changelog');
-vi.mock('../../../../util/exec');
-vi.mock('../../../../util/merge-confidence');
-vi.mock('../../../../util/sanitize');
-vi.mock('../../../../util/fs');
-vi.mock('../../../global/limits');
-vi.mock('../../../../util/cache/repository');
+vi.mock('./get-updated.ts');
+vi.mock('./schedule.ts');
+vi.mock('./check-existing.ts');
+vi.mock('./reuse.ts');
+vi.mock('../../../../modules/manager/npm/post-update/index.ts');
+vi.mock('./automerge.ts');
+vi.mock('./commit.ts');
+vi.mock('../pr/index.ts');
+vi.mock('../pr/automerge.ts');
+vi.mock('../../changelog/index.ts');
+vi.mock('../../../../util/exec/index.ts');
+vi.mock('../../../../util/merge-confidence/index.ts');
+vi.mock('../../../../util/sanitize.ts');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('../../../global/limits.ts');
+vi.mock('../../../../util/cache/repository/index.ts');
 
 const getUpdated = vi.mocked(_getUpdated);
 const schedule = vi.mocked(_schedule);

@@ -1,12 +1,12 @@
-import { rawExec as _rawExec } from '../../../util/exec/common';
-import type { ExecResult } from '../../../util/exec/types';
-import { LocalFs } from './scm';
-import { partial } from '~test/util';
+import { rawExec as _rawExec } from '../../../util/exec/common.ts';
+import type { ExecResult } from '../../../util/exec/types.ts';
+import { LocalFs } from './scm.ts';
+import { partial } from '~test/util.ts';
 
 vi.mock('glob', () => ({
   glob: vi.fn().mockImplementation(() => Promise.resolve(['file1', 'file2'])),
 }));
-vi.mock('../../../util/exec/common');
+vi.mock('../../../util/exec/common.ts');
 const execSync = vi.mocked(_rawExec);
 
 describe('modules/platform/local/scm', () => {

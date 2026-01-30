@@ -1,13 +1,13 @@
 import type { PutObjectCommandInput } from '@aws-sdk/client-s3';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { isNullOrUndefined, isUndefined } from '@sindresorhus/is';
-import type { RenovateConfig } from '../config/types';
-import { getProblems, logger } from '../logger';
-import type { BranchCache } from '../util/cache/repository/types';
-import { writeSystemFile } from '../util/fs';
-import { getS3Client, parseS3Url } from '../util/s3';
-import type { ExtractResult } from '../workers/repository/process/extract-update';
-import type { LibYearsWithStatus, Report } from './types';
+import type { RenovateConfig } from '../config/types.ts';
+import { getProblems, logger } from '../logger/index.ts';
+import type { BranchCache } from '../util/cache/repository/types.ts';
+import { writeSystemFile } from '../util/fs/index.ts';
+import { getS3Client, parseS3Url } from '../util/s3.ts';
+import type { ExtractResult } from '../workers/repository/process/extract-update.ts';
+import type { LibYearsWithStatus, Report } from './types.ts';
 
 const report: Report = {
   problems: [],

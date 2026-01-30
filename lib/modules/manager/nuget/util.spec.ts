@@ -1,16 +1,16 @@
 import { codeBlock } from 'common-tags';
 import { XmlDocument } from 'xmldoc';
-import type { Registry } from './types';
-import { bumpPackageVersion } from './update';
+import type { Registry } from './types.ts';
+import { bumpPackageVersion } from './update.ts';
 import {
   applyRegistries,
   findGlobalJson,
   findVersion,
   getConfiguredRegistries,
-} from './util';
-import { fs } from '~test/util';
+} from './util.ts';
+import { fs } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/nuget/util', () => {
   describe('findVersion', () => {

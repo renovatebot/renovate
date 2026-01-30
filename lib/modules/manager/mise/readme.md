@@ -89,7 +89,7 @@ Renovate's `mise` manager does not support the following tool syntax:
   {
     "packageRules": [
       {
-        "depNames": ["aqua:biomejs/biome"],
+        "matchDepNames": ["aqua:biomejs/biome"],
         "extractVersion": "cli/(?<version>.+)"
       }
     ]

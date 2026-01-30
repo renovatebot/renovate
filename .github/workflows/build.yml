@@ -216,6 +216,9 @@ jobs:
       - name: Lint with oxlint
         run: pnpm oxlint -f github
 
+      - name: Lint with biome
+        run: pnpm biome-ci
+
       - name: Restore eslint cache
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
@@ -790,7 +793,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@cf266a36ac247b4252860db20f554594213383c0 # v3.14.56
+        uses: containerbase/internal-tools@5e8c787f8581a1dce11cedf56267f55822cb124d # v4.0.3
         with:
           command: docker-config
 

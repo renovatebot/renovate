@@ -56,6 +56,11 @@ $ npx --yes --package renovate -- renovate-config-validator first_config.json
  INFO: Config validated successfully
 ```
 
+<!-- prettier-ignore -->
+!!! note
+    If you specify the filename, `renovate-config-validator` treats the file(s) as global self-hosted configuration instead of repo-level configuration.
+    If this isn't intentional - for instance if you're validating a [shared config preset](./config-presets.md) or a non-standard filename - make sure you specify `--no-global`, i.e. `renovate-config-validator --no-global go-presets.json`.
+
 ### Providing global configuration
 
 If `renovate-config-validator` detects a `config.js`, or any [global self-hosed environment variables](./self-hosted-configuration.md), they will be set as global configuration.

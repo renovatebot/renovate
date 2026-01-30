@@ -1,5 +1,5 @@
-import { query as q } from 'good-enough-parser';
-import type { Ctx } from '../types';
+import { query as q } from '@renovatebot/good-enough-parser';
+import type { Ctx } from '../types.ts';
 import {
   cleanupTempVars,
   qArtifactId,
@@ -9,8 +9,8 @@ import {
   qValueMatcher,
   storeInTokenMap,
   storeVarToken,
-} from './common';
-import { handleLibraryDep, handlePlugin } from './handlers';
+} from './common.ts';
+import { handleLibraryDep, handlePlugin } from './handlers.ts';
 
 const qAlias = qStringValue.handler((ctx) => storeInTokenMap(ctx, 'alias'));
 

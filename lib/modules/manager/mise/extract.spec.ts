@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { extractPackageFile } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const miseFilename = 'mise.toml';
 
@@ -406,7 +406,7 @@ describe('modules/manager/mise/extract', () => {
           {
             depName: 'core:node',
             currentValue: '16',
-            packageName: 'nodejs',
+            packageName: 'node',
             datasource: 'node-version',
           },
           {

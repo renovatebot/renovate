@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { bulkChangesDisallowed } from './error';
+import { bulkChangesDisallowed } from './error.ts';
 
 const errorMsg = codeBlock`
   To https://github.com/the-org/st-mono.git

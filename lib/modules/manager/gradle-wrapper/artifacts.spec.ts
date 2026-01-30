@@ -2,24 +2,24 @@ import type { Stats } from 'node:fs';
 import os from 'node:os';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { resetPrefetchedImages } from '../../../util/exec/docker';
-import type { StatusResult } from '../../../util/git/types';
-import { getPkgReleases } from '../../datasource';
-import { updateArtifacts as gradleUpdateArtifacts } from '../gradle';
-import type { UpdateArtifactsConfig, UpdateArtifactsResult } from '../types';
-import { updateBuildFile, updateLockFiles } from './artifacts';
-import { updateArtifacts } from '.';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
-import { env, fs, git, logger, partial } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { resetPrefetchedImages } from '../../../util/exec/docker/index.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
+import { getPkgReleases } from '../../datasource/index.ts';
+import { updateArtifacts as gradleUpdateArtifacts } from '../gradle/index.ts';
+import type { UpdateArtifactsConfig, UpdateArtifactsResult } from '../types.ts';
+import { updateBuildFile, updateLockFiles } from './artifacts.ts';
+import { updateArtifacts } from './index.ts';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { env, fs, git, logger, partial } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
-vi.mock('../../../util/exec/env');
-vi.mock('../../datasource', () => mockDeep());
-vi.mock('../gradle');
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../datasource/index.ts', () => mockDeep());
+vi.mock('../gradle/index.ts');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -28,6 +28,9 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
+
+  // although not enabled by default, let's assume it is
+  allowedUnsafeExecutions: ['gradleWrapper'],
 };
 
 const config: UpdateArtifactsConfig = {
@@ -116,6 +119,39 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       ]);
     });
 
+    it('aborts if allowedUnsafeExecutions does not include `gradleWrapper`', async () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedUnsafeExecutions: [],
+      });
+
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: [
+            'gradle/wrapper/gradle-wrapper.properties',
+            'gradlew',
+            'gradlew.bat',
+          ],
+        }),
+      );
+
+      const res = await updateArtifacts({
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
+        updatedDeps: [],
+        newPackageFileContent: Fixtures.get(
+          'expectedFiles/gradle/wrapper/gradle-wrapper.properties',
+        ),
+        config: { ...config, newValue: '6.3' },
+      });
+
+      expect(res).toBeNull();
+      expect(execSnapshots).toBeEmptyArray();
+      expect(logger.logger.trace).toHaveBeenCalledWith(
+        'Not allowed to execute gradle due to allowedUnsafeExecutions - aborting update',
+      );
+    });
+
     it('gradlew not found', async () => {
       const execSnapshots = mockExecAll();
       fs.statLocalFile.mockResolvedValue(
@@ -176,7 +212,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       GlobalConfig.set({
         ...adminConfig,
         binarySource: 'docker',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
       });
 
       const result = await updateArtifacts({
@@ -196,7 +232,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([
-        { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+        { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
         {
           cmd:
@@ -206,7 +242,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
             '-e GRADLE_OPTS ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/containerbase/sidecar' +
+            'ghcr.io/renovatebot/base-image' +
             ' bash -l -c "' +
             'install-tool java 11.0.1' +
             ' && ' +
