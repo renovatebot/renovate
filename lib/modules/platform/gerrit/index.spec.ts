@@ -158,7 +158,8 @@ describe('modules/platform/gerrit/index', () => {
 
     it('initRepo() - passes cloneSubmodules', async () => {
       clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
-      clientMock.findChanges.mockResolvedValueOnce([]);
+      clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
+      clientMock.findChanges.mockResolvedValueOnce([]); // open changes for branch initialization
 
       await gerrit.initRepo({
         repository: 'test/repo',
@@ -170,6 +171,7 @@ describe('modules/platform/gerrit/index', () => {
         url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
         cloneSubmodules: true,
         cloneSubmodulesFilter: ['test'],
+        virtualBranches: [],
       });
     });
 
