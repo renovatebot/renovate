@@ -110,7 +110,7 @@ function replaceAsString(
       }
     }
   }
-  /* v8 ignore next -- needs test */
+  /* v8 ignore next -- hard to test */
   throw new Error('Could not replace dependency');
 }
 
@@ -129,12 +129,12 @@ function removeAsString(
   const regex = regEx(`(?:,\\s*${keyValue}|${keyValue}\\s*,)`);
   const newContent = fileContent.replace(regex, '');
 
+  /* v8 ignore else -- hard to test */
   if (dequal(parsedContents, JSON.parse(newContent))) {
     return newContent;
+  } else {
+    throw new Error('Could not remove dependency');
   }
-
-  /* v8 ignore next -- needs test */
-  throw new Error('Could not remove dependency');
 }
 
 export function updateDependency({
