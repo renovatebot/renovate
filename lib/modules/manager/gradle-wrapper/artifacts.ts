@@ -133,15 +133,73 @@ export async function updateLockFiles(
   });
 }
 
-export function gradleJvmArg(
-  globalWrapperConfig?: GradleWrapperOptions,
-): string {
-  let gradleWrapperJvmMaxMemory = globalWrapperConfig?.jvmMaxMemory ?? 256;
-  let gradleWrapperJvmMemory =
-    globalWrapperConfig?.jvmMemory ?? gradleWrapperJvmMaxMemory;
-  gradleWrapperJvmMaxMemory = Math.max(~~gradleWrapperJvmMaxMemory, 128);
-  gradleWrapperJvmMemory = Math.max(~~gradleWrapperJvmMemory, 128);
-  return ` -Dorg.gradle.jvmargs="-Xms${gradleWrapperJvmMemory}m -Xmx${gradleWrapperJvmMaxMemory}m"`;
+export function getGradleWrapperOptions(
+  repoConfig?: GradleWrapperOptions,
+): GradleWrapperOptions {
+  let defaults = GlobalConfig.get('gradleWrapper');
+  defaults ??= {
+    jvmMaxMemory: 256,
+    jvmMemory: 256,
+  };
+
+  const options: GradleWrapperOptions = {};
+
+  options.jvmMaxMemory = defaults?.jvmMaxMemory ?? 256;
+  options.jvmMemory = defaults?.jvmMemory ?? options.jvmMaxMemory;
+
+  if (options.jvmMaxMemory < 128 || options.jvmMemory < 128) {
+    logger.once.debug(
+      'Overriding low memory settings for Gradle Wrapper invocations to a minimum of 128M',
+    );
+
+    options.jvmMaxMemory = Math.max(options.jvmMaxMemory, 128);
+    options.jvmMemory = Math.max(options.jvmMemory, 128);
+  }
+
+  options.jvmMaxMemory = Math.floor(options.jvmMaxMemory);
+  options.jvmMemory = Math.floor(options.jvmMemory);
+
+  if (repoConfig === undefined) {
+    return options;
+  }
+
+  if (repoConfig?.jvmMaxMemory) {
+    if (repoConfig.jvmMaxMemory > options.jvmMaxMemory) {
+      logger.once.debug(
+        `A higher jvmMaxMemory (${repoConfig.jvmMaxMemory}) than the global configuration (${options.jvmMaxMemory}) is not permitted for Gradle Wrapper invocations. Using global configuration instead`,
+      );
+    }
+
+    options.jvmMaxMemory = Math.min(
+      options.jvmMaxMemory,
+      repoConfig.jvmMaxMemory,
+    );
+  }
+
+  if (repoConfig.jvmMemory) {
+    options.jvmMemory = repoConfig.jvmMemory;
+  }
+
+  // make sure that the starting memory can't be more than the max memory
+  options.jvmMemory = Math.min(options.jvmMemory, options.jvmMaxMemory);
+
+  if (options.jvmMaxMemory < 128 || options.jvmMemory < 128) {
+    logger.once.debug(
+      'Overriding low memory settings for Gradle Wrapper invocations to a minimum of 128M',
+    );
+
+    options.jvmMaxMemory = Math.max(options.jvmMaxMemory, 128);
+    options.jvmMemory = Math.max(options.jvmMemory, 128);
+  }
+
+  options.jvmMaxMemory = Math.floor(options.jvmMaxMemory);
+  options.jvmMemory = Math.floor(options.jvmMemory);
+
+  return options;
+}
+
+export function gradleJvmArg(config?: GradleWrapperOptions): string {
+  return ` -Dorg.gradle.jvmargs="-Xms${config?.jvmMemory}m -Xmx${config?.jvmMaxMemory}m"`;
 }
 
 export async function updateArtifacts({
@@ -174,8 +232,7 @@ export async function updateArtifacts({
     // This command line option effectively overrides any custom setting
     // in a project's `gradle.properties` file.
     // See https://github.com/renovatebot/renovate/issues/39558
-    const globalWrapperConfig = GlobalConfig.get('gradleWrapper');
-    cmd += gradleJvmArg(globalWrapperConfig);
+    cmd += gradleJvmArg(getGradleWrapperOptions(config.gradleWrapper));
     cmd += ' :wrapper';
 
     let checksum: string | null = null;

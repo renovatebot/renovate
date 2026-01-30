@@ -1879,6 +1879,24 @@ Under the hood, it creates a MR-level approval rule where `approvals_required` i
 This option works only when `automerge=true` and either `automergeType=pr` or `automergeType=branch`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
 
+## gradleWrapper
+
+When Renovate updates a dependency and needs to invoke Gradle, for instance with [the Gradle Wrapper manager](./modules/manager/gradle-wrapper/index.md) or when using [Gradle Verification Metadata](./modules/manager/gradle/index.md#dependency-verification), the repository's Gradle Wrapper will be invoked, if present.
+
+Repository level settings for tuning invocations to the Gradle Wrapper as part of updates to Gradle or the Gradle Wrapper.
+
+### jvmMaxMemory
+
+<!-- prettier-ignore -->
+!!! note
+    It is not possible for a repository to override the global self-hosted configuration set by the administrator in [`gradleWrapper.jvmMaxMemory`](./self-hosted-configuration.md#gradlewrapper).
+
+### jvmMemory
+
+<!-- prettier-ignore -->
+!!! note
+    It is not possible for a repository to override the global self-hosted configuration set by the administrator in [`gradleWrapper.jvmMaxMemory`](./self-hosted-configuration.md#gradlewrapper).
+
 ## goGetDirs
 
 By default, Renovate will run `go get -d -t ./...` to update the `go.sum`.

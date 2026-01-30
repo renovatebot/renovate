@@ -906,8 +906,9 @@ Use the `extends` field instead of this if, for example, you need the ability fo
 
 ### Gradle Wrapper Memory Settings
 
-Gradle Wrapper updates are performed via Gradle's `wrapper` task.
-Renovate will use the configured memory settings, which default to `256m` for Java heap memory.
+When Renovate updates a dependency and needs to invoke Gradle, for instance with [the Gradle Wrapper manager](./modules/manager/gradle-wrapper/index.md) or when using [Gradle Verification Metadata](./modules/manager/gradle/index.md#dependency-verification), the repository's Gradle Wrapper will be invoked, if present.
+
+Renovate will use the configured memory settings, configured by `jvmMaxMemory` and `jvmMemory`.
 
 These settings can be configured in the Renovate configuration using the following options:
 
@@ -916,11 +917,15 @@ These settings can be configured in the Renovate configuration using the followi
 Maximum heap size in MB for Gradle Wrapper.
 Defaults to `256`.
 
+Repository configuration cannot specify more memory than this.
+
 ### jvmMemory
 
 Initial heap size in MB for Gradle Wrapper.
-Must be less or equal to `jvmMaxMemory`.
+Must be less than or equal to `jvmMaxMemory`.
 Defaults to `jvmMaxMemory`.
+
+Repository configuration can specify more memory than this, but it must be less than the global configuration for `jvmMaxMemory`.
 
 ## httpCacheTtlDays
 

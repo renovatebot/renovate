@@ -463,6 +463,7 @@ export interface RenovateConfig
   minimumGroupSize?: number;
   configFileNames?: string[];
   minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
+  gradleWrapper?: GradleWrapperOptions;
 }
 
 const CustomDatasourceFormats = [

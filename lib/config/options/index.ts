@@ -3346,15 +3346,32 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'gradleWrapper',
-    description: 'Gradle wrapper update configuration.',
+    description:
+      'Gradle wrapper update configuration. Global self-hosted configuration takes precendence.',
     type: 'object',
     default: {
       jvmMaxMemory: 256,
       jvmMemory: 256,
     },
-    freeChoice: true,
-    stage: 'global',
-    globalOnly: true,
+    cli: false,
+  },
+  {
+    name: 'jvmMaxMemory',
+    description:
+      'Maximum JVM memory in MB to use for Gradle wrapper updates, defaults to 256. Repo configuration for this value will be ignored if it exceeds the global configuration for `gradleWrapper.jvmMaxMemory`',
+    type: 'integer',
+    parents: ['gradleWrapper'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'jvmMemory',
+    description:
+      'Initial JVM memory in MB to use for Gradle wrapper updates, defaults to `jvmMaxMemory`. Repo configuration for this value will be ignored if it exceeds the global configuration for `gradleWrapper.jvmMaxMemory`',
+    type: 'integer',
+    parents: ['gradleWrapper'],
+    cli: false,
+    env: false,
   },
 ];
 

@@ -9,7 +9,12 @@ import type { StatusResult } from '../../../util/git/types.ts';
 import { getPkgReleases } from '../../datasource/index.ts';
 import { updateArtifacts as gradleUpdateArtifacts } from '../gradle/index.ts';
 import type { UpdateArtifactsConfig, UpdateArtifactsResult } from '../types.ts';
-import { gradleJvmArg, updateBuildFile, updateLockFiles } from './artifacts.ts';
+import {
+  getGradleWrapperOptions,
+  gradleJvmArg,
+  updateBuildFile,
+  updateLockFiles,
+} from './artifacts.ts';
 import { updateArtifacts } from './index.ts';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
@@ -51,6 +56,9 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     GlobalConfig.set(adminConfig);
     resetPrefetchedImages();
 
+    // remove any test-specific overrides
+    delete config.gradleWrapper;
+
     fs.readLocalFile.mockResolvedValue('test');
     fs.statLocalFile.mockResolvedValue(
       partial<Stats>({
@@ -70,30 +78,225 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     });
   });
 
-  describe('gradleJvmArg()', () => {
-    it('should return default JVM args when no config is provided', () => {
-      const result = gradleJvmArg(undefined);
-      expect(result).toBe(' -Dorg.gradle.jvmargs="-Xms256m -Xmx256m"');
+  describe('getGradleWrapperOptions()', () => {
+    beforeEach(() => {
+      GlobalConfig.set({
+        ...adminConfig,
+        gradleWrapper: { jvmMemory: 256, jvmMaxMemory: 300 },
+      });
     });
 
-    it('should return custom JVM args when initial and max are provided', () => {
+    it('returns default values if no global or repo config', () => {
+      GlobalConfig.set({
+        ...adminConfig,
+      });
+
+      const res = getGradleWrapperOptions(undefined);
+
+      expect(res).toEqual({
+        jvmMemory: 256,
+        jvmMaxMemory: 256,
+      });
+    });
+
+    describe('does not allow floating point numbers', () => {
+      it('in global config', () => {
+        GlobalConfig.set({
+          ...adminConfig,
+          gradleWrapper: { jvmMemory: 256.5, jvmMaxMemory: 300.2 },
+        });
+
+        const res = getGradleWrapperOptions(undefined);
+
+        expect(res).toEqual({
+          jvmMemory: 256,
+          jvmMaxMemory: 300,
+        });
+      });
+
+      it('in repo config', () => {
+        config.gradleWrapper = {
+          jvmMemory: 128.8,
+          jvmMaxMemory: 200.4,
+        };
+
+        const res = getGradleWrapperOptions(config.gradleWrapper);
+
+        expect(res).toEqual({
+          jvmMemory: 128,
+          jvmMaxMemory: 200,
+        });
+      });
+    });
+
+    describe('when using repo config to override memory limits', () => {
+      it('when below global settings, repo settings are used', () => {
+        config.gradleWrapper = {
+          jvmMemory: 128,
+          jvmMaxMemory: 200,
+        };
+
+        const res = getGradleWrapperOptions(config.gradleWrapper);
+
+        expect(res).toEqual({
+          jvmMemory: 128,
+          jvmMaxMemory: 200,
+        });
+      });
+
+      it('when repo settings are the same as global settings, they are used', () => {
+        config.gradleWrapper = {
+          jvmMemory: 256,
+          jvmMaxMemory: 300,
+        };
+
+        const res = getGradleWrapperOptions(config.gradleWrapper);
+
+        expect(res).toEqual({
+          jvmMemory: 256,
+          jvmMaxMemory: 300,
+        });
+      });
+
+      it('when repo jvmMemory setting is higher than global setting, but lower than global jvmMaxMemory, the repo config is used', () => {
+        config.gradleWrapper = {
+          jvmMemory: 150,
+        };
+
+        const res = getGradleWrapperOptions(config.gradleWrapper);
+
+        expect(res).toMatchObject({
+          jvmMemory: 150,
+        });
+      });
+
+      it('when repo jvmMaxMemory setting is lower than global settings, it is applied', () => {
+        config.gradleWrapper = {
+          jvmMaxMemory: 190,
+        };
+
+        const res = getGradleWrapperOptions(config.gradleWrapper);
+
+        expect(res).toMatchObject({
+          jvmMaxMemory: 190,
+        });
+      });
+
+      it('when repo jvmMaxMemory setting is lower than global jvmMemory, jvmMemory is set to the same value', () => {
+        config.gradleWrapper = {
+          jvmMaxMemory: 200,
+        };
+
+        const res = getGradleWrapperOptions(config.gradleWrapper);
+
+        expect(res).toEqual({
+          jvmMemory: 200,
+          jvmMaxMemory: 200,
+        });
+      });
+
+      it('when repo jvmMaxMemory setting is lower than repo jvmMemory, jvmMemory is set to the same value', () => {
+        config.gradleWrapper = {
+          jvmMemory: 150,
+          jvmMaxMemory: 150,
+        };
+
+        const res = getGradleWrapperOptions(config.gradleWrapper);
+
+        expect(res).toEqual({
+          jvmMemory: 150,
+          jvmMaxMemory: 150,
+        });
+      });
+
+      it('when repo jvmMaxMemory setting is higher than global settings, they are ignored', () => {
+        config.gradleWrapper = {
+          jvmMaxMemory: 8192,
+        };
+
+        const res = getGradleWrapperOptions(config.gradleWrapper);
+
+        expect(res).toEqual({
+          jvmMemory: 256,
+          jvmMaxMemory: 300,
+        });
+      });
+
+      it('when repo jvmMaxMemory setting is higher than global settings, a debug log is logged', () => {
+        config.gradleWrapper = {
+          jvmMaxMemory: 8192,
+        };
+
+        getGradleWrapperOptions(config.gradleWrapper);
+
+        expect(logger.logger.once.debug).toHaveBeenCalledWith(
+          'A higher jvmMaxMemory (8192) than the global configuration (300) is not permitted for Gradle Wrapper invocations. Using global configuration instead',
+        );
+      });
+    });
+
+    // to provide a bit more safety to users, so they can't specify too little memory for Gradle
+    describe('a minimum of 128M is enforced', () => {
+      it('when global settings are lower than 128M, they are overridden to 128M', () => {
+        GlobalConfig.set({
+          ...adminConfig,
+          gradleWrapper: { jvmMemory: 100, jvmMaxMemory: 127 },
+        });
+
+        const res = getGradleWrapperOptions(undefined);
+
+        expect(res).toEqual({
+          jvmMemory: 128,
+          jvmMaxMemory: 128,
+        });
+      });
+
+      it('when global settings are lower than 128M, a debug log is logged', () => {
+        GlobalConfig.set({
+          ...adminConfig,
+          gradleWrapper: { jvmMemory: 100, jvmMaxMemory: 127 },
+        });
+
+        getGradleWrapperOptions(undefined);
+
+        expect(logger.logger.once.debug).toHaveBeenCalledWith(
+          'Overriding low memory settings for Gradle Wrapper invocations to a minimum of 128M',
+        );
+      });
+
+      it('when repo settings are lower than 128M, they are overridden to 128M', () => {
+        config.gradleWrapper = {
+          jvmMemory: 100,
+          jvmMaxMemory: 127,
+        };
+
+        const res = getGradleWrapperOptions(config.gradleWrapper);
+
+        expect(res).toEqual({
+          jvmMemory: 128,
+          jvmMaxMemory: 128,
+        });
+      });
+
+      it('when repo settings are lower than 128M, a debug log is logged', () => {
+        config.gradleWrapper = {
+          jvmMemory: 100,
+          jvmMaxMemory: 127,
+        };
+
+        getGradleWrapperOptions(config.gradleWrapper);
+
+        expect(logger.logger.once.debug).toHaveBeenCalledWith(
+          'Overriding low memory settings for Gradle Wrapper invocations to a minimum of 128M',
+        );
+      });
+    });
+  });
+
+  describe('gradleJvmArg()', () => {
+    it('takes the values given to it, and returns the JVM arguments', () => {
       const result = gradleJvmArg({ jvmMemory: 128, jvmMaxMemory: 384 });
       expect(result).toBe(' -Dorg.gradle.jvmargs="-Xms128m -Xmx384m"');
-    });
-
-    it('should return custom JVM args when max is provided', () => {
-      const result = gradleJvmArg({ jvmMaxMemory: 384 });
-      expect(result).toBe(' -Dorg.gradle.jvmargs="-Xms384m -Xmx384m"');
-    });
-
-    it('should emit integer heap settings', () => {
-      const result = gradleJvmArg({ jvmMaxMemory: 4242.42 });
-      expect(result).toBe(' -Dorg.gradle.jvmargs="-Xms4242m -Xmx4242m"');
-    });
-
-    it('should emit hard coded minimal heap settings', () => {
-      const result = gradleJvmArg({ jvmMaxMemory: 100.42 });
-      expect(result).toBe(' -Dorg.gradle.jvmargs="-Xms128m -Xmx128m"');
     });
   });
 

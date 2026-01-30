@@ -1,5 +1,6 @@
 import type { ReleaseType } from 'semver';
 import type {
+  GradleWrapperOptions,
   MatchStringsStrategy,
   UpdateType,
   ValidationMessage,
@@ -48,6 +49,7 @@ export interface UpdateArtifactsConfig {
   registryAliases?: Record<string, string>;
   skipArtifactsUpdate?: boolean;
   lockFiles?: string[];
+  gradleWrapper?: GradleWrapperOptions;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
