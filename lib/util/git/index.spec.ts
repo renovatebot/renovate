@@ -16,7 +16,7 @@ import * as _conflictsCache from './conflicts-cache.ts';
 import * as git from './index.ts';
 import { setNoVerify } from './index.ts';
 import * as _modifiedCache from './modified-cache.ts';
-import type { FileChange } from './types.ts';
+import type { FileChange, LongCommitSha } from './types.ts';
 import { logger } from '~test/util.ts';
 
 vi.mock('./conflicts-cache');
@@ -1467,7 +1467,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
   describe('virtualBranches', () => {
     it('fetches refspecs and populates branchCommits', async () => {
-      const originRepo = Git(origin.path);
+      const originRepo = simpleGit(origin.path);
       const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
       await originRepo.raw(['update-ref', 'refs/changes/45/12345/1', commit]);
 
@@ -1488,7 +1488,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('throws on fetch error', async () => {
-      const originRepo = Git(origin.path);
+      const originRepo = simpleGit(origin.path);
       const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
 
       await git.initRepo({
@@ -1506,7 +1506,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('handles multiple refspecs', async () => {
-      const baseRepo = Git(base.path);
+      const baseRepo = simpleGit(base.path);
       const commits: LongCommitSha[] = [];
 
       await fs.writeFile(base.path + '/temp_1.txt', 'content-1');
@@ -1523,7 +1523,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       commits.push(commit2);
       await baseRepo.raw(['update-ref', 'refs/changes/02/1002/1', commit2]);
 
-      const originRepo = Git(origin.path);
+      const originRepo = simpleGit(origin.path);
       await originRepo.fetch(['file://' + base.path, '+refs/*:refs/*']);
 
       await git.initRepo({
@@ -1552,7 +1552,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
   describe('deleteVirtualBranch()', () => {
     it('deletes local branch and remote tracking ref', async () => {
-      const originRepo = Git(origin.path);
+      const originRepo = simpleGit(origin.path);
       const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
       await originRepo.raw(['update-ref', 'refs/changes/50/12350/1', commit]);
 
