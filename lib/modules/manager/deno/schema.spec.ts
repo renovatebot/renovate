@@ -152,6 +152,10 @@ describe('modules/manager/deno/schema', () => {
         },
       ]);
     });
+
+    it('parses undefined compilerOptions.jsxImportSource', () => {
+      expect(CompilerOptionsJsxImportSource.parse(undefined)).toEqual([]);
+    });
   });
 
   describe('CompilerOptionsJsxImportSourceTypes', () => {
@@ -168,6 +172,10 @@ describe('modules/manager/deno/schema', () => {
           versioning: 'deno',
         },
       ]);
+    });
+
+    it('parses undefined compilerOptions.jsxImportSourceTypes', () => {
+      expect(CompilerOptionsJsxImportSourceTypes.parse(undefined)).toEqual([]);
     });
   });
 

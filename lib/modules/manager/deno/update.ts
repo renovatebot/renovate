@@ -53,8 +53,8 @@ function replaceAsString(
         return testContent;
       }
     }
-    /* v8 ignore next 3 -- needs test */
   }
+  /* v8 ignore next -- needs test */
   throw new Error();
 }
 
