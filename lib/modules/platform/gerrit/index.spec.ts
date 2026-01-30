@@ -360,6 +360,7 @@ describe('modules/platform/gerrit/index', () => {
             commit_with_footers: 'Renovate-Branch: source',
           }),
         },
+        created: '2025-04-14 16:33:37.000000000',
       });
       clientMock.findChanges.mockResolvedValueOnce([change]);
       const pr = await gerrit.createPr({
@@ -392,6 +393,7 @@ describe('modules/platform/gerrit/index', () => {
             commit_with_footers: 'Renovate-Branch: source',
           }),
         },
+        created: '2025-04-14 16:33:37.000000000',
       });
       clientMock.findChanges.mockResolvedValueOnce([change]);
       const pr = await gerrit.createPr({
@@ -427,6 +429,7 @@ describe('modules/platform/gerrit/index', () => {
             commit_with_footers: 'Renovate-Branch: source',
           }),
         },
+        created: '2025-04-14 16:33:37.000000000',
       });
       clientMock.findChanges.mockResolvedValueOnce([change]);
       const pr = await gerrit.createPr({
@@ -505,7 +508,7 @@ describe('modules/platform/gerrit/index', () => {
             commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
           }),
         },
-        created: '2025-04-14T16:33:37.000000000',
+        created: '2025-04-14 16:33:37.000000000',
       });
       clientMock.getBranchChange.mockResolvedValueOnce(change);
       await expect(
