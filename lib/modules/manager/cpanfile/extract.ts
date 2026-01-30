@@ -1,5 +1,5 @@
-import type { PackageFileContent } from '../types';
-import { parse } from './parser';
+import type { PackageFileContent } from '../types.ts';
+import { parse } from './parser.ts';
 
 export function extractPackageFile(
   content: string,

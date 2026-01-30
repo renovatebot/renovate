@@ -1,20 +1,20 @@
+import { randomUUID } from 'node:crypto';
 import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import * as bunyan from 'bunyan';
 import fs from 'fs-extra';
-import { nanoid } from 'nanoid';
 import upath from 'upath';
-import cmdSerializer from './cmd-serializer';
-import configSerializer from './config-serializer';
-import errSerializer from './err-serializer';
-import { RenovateStream } from './pretty-stdout';
-import { RenovateLogger } from './renovate-logger';
-import type { BunyanRecord, Logger } from './types';
+import cmdSerializer from './cmd-serializer.ts';
+import configSerializer from './config-serializer.ts';
+import errSerializer from './err-serializer.ts';
+import { RenovateStream } from './pretty-stdout.ts';
+import { RenovateLogger } from './renovate-logger.ts';
+import type { BunyanRecord, Logger } from './types.ts';
 import {
   ProblemStream,
   getEnv,
   validateLogLevel,
   withSanitizer,
-} from './utils';
+} from './utils.ts';
 
 const problems = new ProblemStream();
 let stdoutLevel = validateLogLevel(getEnv('LOG_LEVEL'), 'info');
@@ -34,6 +34,7 @@ export function createDefaultStreams(
     stream: process.stdout,
   };
 
+  // v8 ignore else -- TODO: add test #40625
   if (getEnv('LOG_FORMAT') !== 'json') {
     // TODO: typings (#9615)
     const prettyStdOut = new RenovateStream() as any;
@@ -106,7 +107,7 @@ const defaultStreams = createDefaultStreams(
 );
 
 const bunyanLogger = serializedSanitizedLogger(defaultStreams);
-const logContext = getEnv('LOG_CONTEXT') ?? nanoid();
+const logContext = getEnv('LOG_CONTEXT') ?? randomUUID();
 const loggerInternal = new RenovateLogger(bunyanLogger, logContext, {});
 
 export const logger: Logger = loggerInternal;
@@ -158,6 +159,7 @@ export function levels(
   level: bunyan.LogLevelString,
 ): void {
   bunyanLogger.levels(name, level);
+  // v8 ignore else -- TODO: add test #40625
   if (name === 'stdout') {
     stdoutLevel = level;
   }

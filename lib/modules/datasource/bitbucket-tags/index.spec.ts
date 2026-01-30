@@ -1,6 +1,6 @@
-import { getDigest, getPkgReleases } from '..';
-import { BitbucketTagsDatasource } from '.';
-import * as httpMock from '~test/http-mock';
+import { getDigest, getPkgReleases } from '../index.ts';
+import { BitbucketTagsDatasource } from './index.ts';
+import * as httpMock from '~test/http-mock.ts';
 
 const datasource = BitbucketTagsDatasource.id;
 

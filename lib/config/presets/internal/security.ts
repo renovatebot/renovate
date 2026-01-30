@@ -1,4 +1,4 @@
-import type { Preset } from '../types';
+import type { Preset } from '../types.ts';
 
 export const presets: Record<string, Preset> = {
   'openssf-scorecard': {
@@ -62,6 +62,15 @@ export const presets: Record<string, Preset> = {
         matchUpdateTypes: ['replacement'],
         prBodyNotes: [
           "⚠️ Renovate's replacement functionality [does not currently](https://github.com/renovatebot/renovate/issues/39400) wire in the release age for a package, so the Minimum Release Age checks can apply. You will need to manually validate the Minimum Release Age for these package(s).",
+        ],
+        minimumReleaseAge: null,
+      },
+      {
+        description: 'Do not require Minimum Release Age for package pinning',
+        matchDatasources: ['npm'],
+        matchUpdateTypes: ['pin'],
+        prBodyNotes: [
+          "⚠️ Renovate's pin functionality [does not currently](https://github.com/renovatebot/renovate/issues/40288) wire in the release age for a package, so the Minimum Release Age checks can apply. You will need to manually validate the Minimum Release Age for these package(s).",
         ],
         minimumReleaseAge: null,
       },

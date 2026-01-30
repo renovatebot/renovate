@@ -3,21 +3,21 @@ import { copyFile, stat } from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
-import { getPkgReleases } from '..';
-import { GlobalConfig } from '../../../config/global';
-import { hashStream, toSha256 } from '../../../util/hash';
-import type { GetPkgReleasesConfig } from '../types';
-import { cacheSubDir } from './common';
+import { GlobalConfig } from '../../../config/global.ts';
+import { hashStream, toSha256 } from '../../../util/hash.ts';
+import { getPkgReleases } from '../index.ts';
+import type { GetPkgReleasesConfig } from '../types.ts';
+import { cacheSubDir } from './common.ts';
+import { DebDatasource } from './index.ts';
 import {
   getBaseSuiteUrl,
   getComponentUrl,
   getPackageUrl,
   getRegistryUrl,
-} from './url';
-import { DebDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
-import { fs } from '~test/util';
+} from './url.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { fs } from '~test/util.ts';
 
 const debBaseUrl = 'http://deb.debian.org';
 

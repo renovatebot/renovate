@@ -1,5 +1,5 @@
-import api from './api';
-import { Versioning } from './schema';
+import api from './api.ts';
+import { Versioning } from './schema.ts';
 
 describe('modules/versioning/schema', () => {
   it('returns existing version scheme', () => {

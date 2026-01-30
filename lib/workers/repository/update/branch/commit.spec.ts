@@ -1,8 +1,8 @@
-import { GlobalConfig } from '../../../../config/global';
-import type { LongCommitSha } from '../../../../util/git/types';
-import type { BranchConfig } from '../../../types';
-import { commitFilesToBranch } from './commit';
-import { scm } from '~test/util';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { LongCommitSha } from '../../../../util/git/types.ts';
+import type { BranchConfig } from '../../../types.ts';
+import { commitFilesToBranch } from './commit.ts';
+import { scm } from '~test/util.ts';
 
 describe('workers/repository/update/branch/commit', () => {
   describe('commitFilesToBranch', () => {

@@ -1,19 +1,19 @@
 import { XmlDocument } from 'xmldoc';
-import { logger } from '../../../logger';
-import { Http } from '../../../util/http';
-import { regEx } from '../../../util/regex';
-import { ensureTrailingSlash } from '../../../util/url';
-import * as ivyVersioning from '../../versioning/ivy';
-import { compare } from '../../versioning/maven/compare';
-import { Datasource } from '../datasource';
-import { MAVEN_REPO } from '../maven/common';
-import { downloadHttpContent } from '../maven/util';
-import { extractPageLinks, getLatestVersion } from '../sbt-package/util';
+import { logger } from '../../../logger/index.ts';
+import { Http } from '../../../util/http/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import * as ivyVersioning from '../../versioning/ivy/index.ts';
+import { compare } from '../../versioning/maven/compare.ts';
+import { Datasource } from '../datasource.ts';
+import { MAVEN_REPO } from '../maven/common.ts';
+import { downloadHttpContent } from '../maven/util.ts';
+import { extractPageLinks, getLatestVersion } from '../sbt-package/util.ts';
 import type {
   GetReleasesConfig,
   RegistryStrategy,
   ReleaseResult,
-} from '../types';
+} from '../types.ts';
 
 export const SBT_PLUGINS_REPO =
   'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases';
@@ -45,9 +45,8 @@ export class SbtPluginDatasource extends Datasource {
     const pkgUrl = ensureTrailingSlash(searchRoot);
     const indexContent = await downloadHttpContent(this.http, pkgUrl);
     if (indexContent) {
-      const rootPath = new URL(pkgUrl).pathname;
       let artifactSubdirs = extractPageLinks(indexContent, (href) => {
-        const path = href.replace(rootPath, '');
+        const path = href.split('/').at(-1)!;
         if (
           path.startsWith(`${artifact}_native`) ||
           path.startsWith(`${artifact}_sjs`)
@@ -85,9 +84,8 @@ export class SbtPluginDatasource extends Datasource {
         const pkgUrl = ensureTrailingSlash(`${searchRoot}/${searchSubdir}`);
         const content = await downloadHttpContent(this.http, pkgUrl);
         if (content) {
-          const rootPath = new URL(pkgUrl).pathname;
           const subdirReleases = extractPageLinks(content, (href) => {
-            const path = href.replace(rootPath, '');
+            const path = href.split('/').at(-1)!;
             if (path.startsWith('.')) {
               return null;
             }

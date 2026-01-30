@@ -1,20 +1,20 @@
 import { z } from 'zod';
-import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
+import { logger } from '../../../logger/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import {
   Json,
   LooseArray,
   LooseRecord,
   withDebugMessage,
-} from '../../../util/schema-utils';
-import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { PackagistDatasource } from '../../datasource/packagist';
-import { api as semverComposer } from '../../versioning/composer';
-import type { PackageDependency, PackageFileContent } from '../types';
-import type { ComposerManagerData } from './types';
+} from '../../../util/schema-utils/index.ts';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { PackagistDatasource } from '../../datasource/packagist/index.ts';
+import { api as semverComposer } from '../../versioning/composer/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { ComposerManagerData } from './types.ts';
 
 export const ComposerRepo = z.object({
   type: z.literal('composer'),

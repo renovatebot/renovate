@@ -1,14 +1,14 @@
 import { quote } from 'shlex';
 import upath from 'upath';
 
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import type { ExtraEnv } from '../../../util/exec/types';
-import { privateCacheDir } from '../../../util/fs';
-import { addSecretForSanitizing } from '../../../util/sanitize';
-import { fromBase64 } from '../../../util/string';
-import { ecrRegex, getECRAuthToken } from '../../datasource/docker/ecr';
-import type { RepositoryRule } from './types';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import type { ExtraEnv } from '../../../util/exec/types.ts';
+import { privateCacheDir } from '../../../util/fs/index.ts';
+import { addSecretForSanitizing } from '../../../util/sanitize.ts';
+import { fromBase64 } from '../../../util/string.ts';
+import { ecrRegex, getECRAuthToken } from '../../datasource/docker/ecr.ts';
+import type { RepositoryRule } from './types.ts';
 
 export async function generateLoginCmd(
   repositoryRule: RepositoryRule,

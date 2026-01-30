@@ -1,9 +1,9 @@
 import { setTimeout } from 'timers/promises';
 import { RequestError } from 'got';
 import { DateTime } from 'luxon';
-import { logger } from '../../logger';
-import { parseUrl } from '../url';
-import type { Task } from './types';
+import { logger } from '../../logger/index.ts';
+import { parseUrl } from '../url.ts';
+import type { Task } from './types.ts';
 
 const hostDelays = new Map<string, Promise<unknown>>();
 

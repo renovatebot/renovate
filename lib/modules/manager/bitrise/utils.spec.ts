@@ -1,5 +1,5 @@
-import { BitriseDatasource } from '../../datasource/bitrise';
-import { parseStep } from './utils';
+import { BitriseDatasource } from '../../datasource/bitrise/index.ts';
+import { parseStep } from './utils.ts';
 
 describe('modules/manager/bitrise/utils', () => {
   describe('parseStep()', () => {

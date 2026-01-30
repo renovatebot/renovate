@@ -1,7 +1,7 @@
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { PRESET_DEP_NOT_FOUND } from '../util';
-import { fetchJSONFile, getPresetFromEndpoint } from './common';
-import { platform } from '~test/util';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { PRESET_DEP_NOT_FOUND } from '../util.ts';
+import { fetchJSONFile, getPresetFromEndpoint } from './common.ts';
+import { platform } from '~test/util.ts';
 
 describe('config/presets/local/common', () => {
   describe('fetchJSONFile', () => {

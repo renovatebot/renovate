@@ -2,11 +2,11 @@ import { codeBlock } from 'common-tags';
 import {
   extractPackageFile as extract,
   extractAllPackageFiles,
-} from './extract';
-import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+} from './extract.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const extractPackageFile = (content: string) => extract(content, 'build.sbt');
 

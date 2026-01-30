@@ -1,20 +1,20 @@
 import { isFunction, isNonEmptyArray, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
-import { GlobalConfig } from '../../config/global';
-import { HOST_DISABLED } from '../../constants/error-messages';
-import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import { coerceArray } from '../../util/array';
-import * as memCache from '../../util/cache/memory';
-import * as packageCache from '../../util/cache/package';
-import type { PackageCacheNamespace } from '../../util/cache/package/types';
-import { clone } from '../../util/clone';
-import { filterMap } from '../../util/filter-map';
-import { AsyncResult, Result } from '../../util/result';
-import { DatasourceCacheStats } from '../../util/stats';
-import { trimTrailingSlash } from '../../util/url';
-import * as versioning from '../versioning';
-import datasources from './api';
+import { GlobalConfig } from '../../config/global.ts';
+import { HOST_DISABLED } from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../util/array.ts';
+import * as memCache from '../../util/cache/memory/index.ts';
+import * as packageCache from '../../util/cache/package/index.ts';
+import type { PackageCacheNamespace } from '../../util/cache/package/types.ts';
+import { clone } from '../../util/clone.ts';
+import { filterMap } from '../../util/filter-map.ts';
+import { AsyncResult, Result } from '../../util/result.ts';
+import { DatasourceCacheStats } from '../../util/stats.ts';
+import { trimTrailingSlash } from '../../util/url.ts';
+import * as versioning from '../versioning/index.ts';
+import datasources from './api.ts';
 import {
   applyConstraintsFiltering,
   applyExtractVersion,
@@ -22,10 +22,10 @@ import {
   filterValidVersions,
   getDatasourceFor,
   sortAndRemoveDuplicates,
-} from './common';
-import { addMetaData } from './metadata';
-import { setNpmrc } from './npm';
-import { resolveRegistryUrl } from './npm/npmrc';
+} from './common.ts';
+import { addMetaData } from './metadata.ts';
+import { setNpmrc } from './npm/index.ts';
+import { resolveRegistryUrl } from './npm/npmrc.ts';
 import type {
   DatasourceApi,
   DigestConfig,
@@ -33,10 +33,10 @@ import type {
   GetPkgReleasesConfig,
   GetReleasesConfig,
   ReleaseResult,
-} from './types';
+} from './types.ts';
 
-export * from './types';
-export { isGetPkgReleasesConfig } from './common';
+export * from './types.ts';
+export { isGetPkgReleasesConfig } from './common.ts';
 
 export const getDatasources = (): Map<string, DatasourceApi> => datasources;
 export const getDatasourceList = (): string[] => Array.from(datasources.keys());

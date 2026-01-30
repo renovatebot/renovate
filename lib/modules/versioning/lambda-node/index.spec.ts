@@ -1,10 +1,10 @@
 import { DateTime } from 'luxon';
-import type { LambdaData } from './schedule';
-import { api as lambdaVer } from '.';
+import { api as lambdaVer } from './index.ts';
+import type { LambdaData } from './schedule.ts';
 
-vi.mock('../../../data-files.generated', async (importOriginal) => {
+vi.mock('../../../data-files.generated.ts', async (importOriginal) => {
   const dataFiles = (
-    await importOriginal<typeof import('../../../data-files.generated')>()
+    await importOriginal<typeof import('../../../data-files.generated.ts')>()
   ).default;
 
   const lambdaSchedule: LambdaData = JSON.parse(

@@ -1,6 +1,6 @@
 import { isArray, isNonEmptyObject } from '@sindresorhus/is';
-import { HttpBase, type InternalJsonUnsafeOptions } from './http';
-import type { HttpMethod, HttpOptions, HttpResponse } from './types';
+import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
+import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
 
 const MAX_LIMIT = 100;
 const MAX_PAGES = 100;
@@ -52,6 +52,7 @@ export class BitbucketServerHttp extends HttpBase<BitbucketServerHttpOptions> {
     );
 
     if (paginate && isPagedResult(result.body)) {
+      // v8 ignore else -- TODO: add test #40625
       if (opts.httpOptions) {
         delete opts.httpOptions.cacheProvider;
         opts.httpOptions.memCache = false;

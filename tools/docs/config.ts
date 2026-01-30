@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
-import { getOptions } from '../../lib/config/options';
-import { allManagersList } from '../../lib/modules/manager';
-import { getCliName } from '../../lib/workers/global/config/parse/cli';
-import { getEnvName } from '../../lib/workers/global/config/parse/env';
-import { readFile, updateFile } from '../utils';
+import { getOptions } from '../../lib/config/options/index.ts';
+import { allManagersList } from '../../lib/modules/manager/index.ts';
+import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
+import { getEnvName } from '../../lib/workers/global/config/parse/env.ts';
+import { readFile, updateFile } from '../utils/index.ts';
 
 const options = getOptions();
 const managers = new Set(allManagersList);

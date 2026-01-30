@@ -1,14 +1,14 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import { parseSingleYaml } from '../../../util/yaml';
-import { GoDatasource } from '../../datasource/go';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { GoDatasource } from '../../datasource/go/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import { type Module, OCBConfig } from './schema';
+} from '../types.ts';
+import { type Module, OCBConfig } from './schema.ts';
 
 export function extractPackageFile(
   content: string,

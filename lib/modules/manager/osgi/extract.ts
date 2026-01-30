@@ -1,14 +1,14 @@
 import { isArray, isNullOrUndefined } from '@sindresorhus/is';
 import json5 from 'json5';
 import { coerce, satisfies } from 'semver';
-import { logger } from '../../../logger';
-import { MavenDatasource } from '../../datasource/maven';
+import { logger } from '../../../logger/index.ts';
+import { MavenDatasource } from '../../datasource/maven/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import type { Bundle, FeatureModel } from './types';
+} from '../types.ts';
+import type { Bundle, FeatureModel } from './types.ts';
 
 export function extractPackageFile(
   content: string,

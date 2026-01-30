@@ -1,4 +1,15 @@
-Renovate can update the [mise](https://mise.jdx.dev/configuration.html#mise-toml) `mise.toml` file.
+Renovate can update [mise configuration files](https://mise.jdx.dev/configuration.html#mise-toml).
+
+### Supported configuration files
+
+Renovate supports all standard mise configuration file patterns:
+
+- `mise.toml`, `.mise.toml`
+- `mise/config.toml`, `.mise/config.toml`
+- `.config/mise.toml`, `.config/mise/config.toml`, `.config/mise/mise.toml`
+- `.rtx.toml` (legacy)
+- Environment-specific variants (e.g., `mise.production.toml`, `.mise.dev.toml`)
+- Local variants (e.g., `mise.local.toml`, `.mise.local.toml`)
 
 ### Renovate only updates primary versions
 
@@ -78,7 +89,7 @@ Renovate's `mise` manager does not support the following tool syntax:
   {
     "packageRules": [
       {
-        "depNames": ["aqua:biomejs/biome"],
+        "matchDepNames": ["aqua:biomejs/biome"],
         "extractVersion": "cli/(?<version>.+)"
       }
     ]

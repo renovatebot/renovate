@@ -1,7 +1,7 @@
 import { ZodError } from 'zod';
-import { DenoDatasource } from '.';
-import * as httpMock from '~test/http-mock';
-import { logger } from '~test/util';
+import { DenoDatasource } from './index.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
 
 describe('modules/datasource/deno/index', () => {
   const deno = new DenoDatasource();

@@ -1,5 +1,5 @@
-import type { PackageDependency } from '../../../types';
-import type { NpmManagerData } from '../../types';
+import type { PackageDependency } from '../../../types.ts';
+import type { NpmManagerData } from '../../types.ts';
 
 export function setNodeCommitTopic(
   dep: PackageDependency<NpmManagerData>,

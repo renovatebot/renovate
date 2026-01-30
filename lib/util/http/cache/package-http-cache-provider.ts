@@ -1,14 +1,14 @@
 import { isString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../../config/global';
-import * as packageCache from '../../cache/package';
-import { resolveTtlValues } from '../../cache/package/ttl';
-import type { PackageCacheNamespace } from '../../cache/package/types';
-import { regEx } from '../../regex';
-import { HttpCacheStats } from '../../stats';
-import type { HttpResponse } from '../types';
-import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
-import type { HttpCache } from './schema';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as packageCache from '../../cache/package/index.ts';
+import { resolveTtlValues } from '../../cache/package/ttl.ts';
+import type { PackageCacheNamespace } from '../../cache/package/types.ts';
+import { regEx } from '../../regex.ts';
+import { HttpCacheStats } from '../../stats.ts';
+import type { HttpResponse } from '../types.ts';
+import { AbstractHttpCacheProvider } from './abstract-http-cache-provider.ts';
+import type { HttpCache } from './schema.ts';
 
 export interface PackageHttpCacheProviderOptions {
   namespace: PackageCacheNamespace;

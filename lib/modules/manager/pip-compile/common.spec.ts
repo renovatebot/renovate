@@ -1,16 +1,16 @@
 import { mockDeep } from 'vitest-mock-extended';
-import { logger } from '../../../logger';
+import { logger } from '../../../logger/index.ts';
 import {
   allowedOptions,
   extractHeaderCommand,
   extractPythonVersion,
   getRegistryCredVarsFromPackageFiles,
   matchManager,
-} from './common';
-import { inferCommandExecDir } from './utils';
-import { hostRules } from '~test/util';
+} from './common.ts';
+import { inferCommandExecDir } from './utils.ts';
+import { hostRules } from '~test/util.ts';
 
-vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 function getCommandInHeader(command: string) {
   return `#

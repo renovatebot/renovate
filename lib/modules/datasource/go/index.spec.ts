@@ -1,10 +1,10 @@
 import { mockDeep } from 'vitest-mock-extended';
-import * as _hostRules from '../../../util/host-rules';
-import { GoDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import * as _hostRules from '../../../util/host-rules.ts';
+import { GoDatasource } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 
-vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
 const hostRules = vi.mocked(_hostRules);
 
 const getReleasesDirectMock = vi.fn();
@@ -15,7 +15,7 @@ const getDigestGithubMock = vi.fn();
 const getDigestGitlabMock = vi.fn();
 const getDigestGitMock = vi.fn();
 const getDigestBitbucketMock = vi.fn();
-vi.mock('./releases-direct', () => {
+vi.mock('./releases-direct.ts', () => {
   return {
     GoDirectDatasource: vi.fn(
       class {
@@ -40,7 +40,7 @@ vi.mock('./releases-direct', () => {
 });
 
 const getReleasesProxyMock = vi.fn();
-vi.mock('./releases-goproxy', () => {
+vi.mock('./releases-goproxy.ts', () => {
   return {
     GoProxyDatasource: vi.fn(
       class {
