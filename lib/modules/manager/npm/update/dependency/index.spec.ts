@@ -446,18 +446,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       expect(testContent).toEqual(expected);
     });
 
-    it('removes a dependency when a newer replacement already exists', () => {
-      const input = JSON.stringify(
-        {
-          dependencies: {
-            '@material-ui/core': '^4.9.13', // should be removed
-            '@mui/material': '^6.1.7', // should be kept as is
-          },
-        },
-        null,
-        2,
-      );
-
+    it('removes old dependency when newer replacement already exists', () => {
       const upgrade = {
         depType: 'dependencies',
         depName: '@material-ui/core',
@@ -465,19 +454,55 @@ describe('modules/manager/npm/update/dependency/index', () => {
         newValue: '^5.0.0',
       };
 
-      const res = npmUpdater.updateDependency({
-        fileContent: input,
-        upgrade,
+      // First item
+      let input = JSON.stringify(
+        {
+          dependencies: {
+            '@material-ui/core': '^4.9.13',
+            '@mui/material': '^6.1.7',
+          },
+        },
+        null,
+        2,
+      );
+      let res = npmUpdater.updateDependency({ fileContent: input, upgrade });
+      expect(JSON.parse(res!)?.dependencies).toEqual({
+        '@mui/material': '^6.1.7',
       });
 
-      expect(res).toBeJsonString();
-      const parsed = JSON.parse(res!);
-      expect(parsed.dependencies['@material-ui/core']).toBeUndefined();
-      expect(parsed.dependencies['@mui/material']).toBe('^6.1.7');
+      // Last item
+      input = JSON.stringify(
+        {
+          dependencies: {
+            '@mui/material': '^6.1.7',
+            '@material-ui/core': '^4.9.13',
+          },
+        },
+        null,
+        2,
+      );
+      res = npmUpdater.updateDependency({ fileContent: input, upgrade });
+      expect(JSON.parse(res!)?.dependencies).toEqual({
+        '@mui/material': '^6.1.7',
+      });
 
-      // Check that we don't have duplicate keys
-      const matches = res!.match(/"@mui\/material":/g);
-      expect(matches).toHaveLength(1);
+      // Middle item
+      input = JSON.stringify(
+        {
+          dependencies: {
+            pkg1: '1.0.0',
+            '@material-ui/core': '^4.9.13',
+            '@mui/material': '^6.1.7',
+          },
+        },
+        null,
+        2,
+      );
+      res = npmUpdater.updateDependency({ fileContent: input, upgrade });
+      expect(JSON.parse(res!)?.dependencies).toEqual({
+        pkg1: '1.0.0',
+        '@mui/material': '^6.1.7',
+      });
     });
   });
 });
