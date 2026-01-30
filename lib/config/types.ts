@@ -600,6 +600,7 @@ export type AllowedParents =
   | 'packageRules'
   | 'postUpgradeTasks'
   | 'vulnerabilityAlerts'
+  | 'gradleWrapper'
   | ManagerName
   | UpdateTypeOptions;
 export interface RenovateOptionBase {

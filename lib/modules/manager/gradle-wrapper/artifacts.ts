@@ -162,11 +162,10 @@ export async function updateArtifacts({
     // This command line option effectively overrides any custom setting
     // in a project's `gradle.properties` file.
     // See https://github.com/renovatebot/renovate/issues/39558
-    const globalConfig = GlobalConfig.get();
-    const gradleWrapperJvmMaxMemory =
-      globalConfig.gradleWrapper?.jvmMaxMemory ?? 256;
+    const globalWrapperConfig = GlobalConfig.get('gradleWrapper');
+    const gradleWrapperJvmMaxMemory = globalWrapperConfig?.jvmMaxMemory ?? 256;
     const gradleWrapperJvmMemory =
-      globalConfig.gradleWrapper?.jvmMemory ?? gradleWrapperJvmMaxMemory;
+      globalWrapperConfig?.jvmMemory ?? gradleWrapperJvmMaxMemory;
     cmd += ` -Dorg.gradle.jvmargs="-Xms${gradleWrapperJvmMemory}m -Xmx${gradleWrapperJvmMaxMemory}m"`;
     cmd += ' :wrapper';
 

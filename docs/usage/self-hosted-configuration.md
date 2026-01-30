@@ -902,6 +902,26 @@ Use the `extends` field instead of this if, for example, you need the ability fo
     When Renovate resolves `globalExtends` it does not fully process the configuration.
     This means that Renovate does not have the authentication it needs to fetch private things.
 
+## gradleWrapper
+
+### Gradle Wrapper Memory Settings
+
+Gradle Wrapper updates are performed via Gradle's `wrapper` task.
+Renovate will use the configured memory settings, which default to `256m` for Java heap memory.
+
+These settings can be configured in the Renovate configuration using the following options:
+
+### jvmMaxMemory
+
+Maximum heap size in MB for Gradle Wrapper.
+Defaults to `256`.
+
+### jvmMemory
+
+Initial heap size in MB for Gradle Wrapper.
+Must be less or equal to `jvmMaxMemory`.
+Defaults to `jvmMaxMemory`.
+
 ## httpCacheTtlDays
 
 This option sets the number of days that Renovate will cache HTTP responses.
