@@ -1,7 +1,7 @@
 import semver from 'semver';
-import type { RangeStrategy } from '../../../types/versioning';
-import { api as npm } from '../npm';
-import type { NewValueConfig, VersioningApi } from '../types';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import { api as npm } from '../npm/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'deno';
 export const displayName = 'deno';

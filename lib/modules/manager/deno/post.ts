@@ -1,17 +1,17 @@
 import is from '@sindresorhus/is';
 import { Minimatch } from 'minimatch';
 import upath from 'upath';
-import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
-import { api as semver } from '../../versioning/deno';
-import type { PackageDependency, PackageFile } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { api as semver } from '../../versioning/deno/index.ts';
+import type { PackageDependency, PackageFile } from '../types.ts';
 import {
   detectNodeCompatWorkspaces,
   extractDenoCompatiblePackageJson,
-} from './compat';
-import { DenoLock } from './schema';
-import type { DenoManagerData, LockFile, WorkspaceContext } from './types';
-import { denoLandRegex, depValueRegex } from './utils';
+} from './compat.ts';
+import { DenoLock } from './schema.ts';
+import type { DenoManagerData, LockFile, WorkspaceContext } from './types.ts';
+import { denoLandRegex, depValueRegex } from './utils.ts';
 
 export async function getDenoLock(filePath: string): Promise<LockFile> {
   const lockfileContent = await readLocalFile(filePath, 'utf8');

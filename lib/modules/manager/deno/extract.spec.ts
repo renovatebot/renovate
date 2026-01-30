@@ -1,13 +1,13 @@
 import { codeBlock } from 'common-tags';
 import { findPackages } from 'find-packages';
-import { fs } from '../../../../test/util';
-import { GlobalConfig } from '../../../config/global';
+import { fs } from '../../../../test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   extractAllPackageFiles,
   getLockFiles,
   processDenoExtract,
   processImportMap,
-} from './extract';
+} from './extract.ts';
 
 vi.mock('../../../util/fs');
 // used in detectNodeCompatWorkspaces()

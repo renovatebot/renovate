@@ -1,12 +1,12 @@
 import _fs from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import tmp from 'tmp-promise';
-import { mockExecAll } from '../../../../test/exec-util';
-import { GlobalConfig } from '../../../config/global';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { ExecError } from '../../../util/exec/exec-error';
-import type { UpdateArtifact } from '../types';
-import { updateArtifacts } from './artifacts';
+import { mockExecAll } from '../../../../test/exec-util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { ExecError } from '../../../util/exec/exec-error.ts';
+import type { UpdateArtifact } from '../types.ts';
+import { updateArtifacts } from './artifacts.ts';
 
 vi.mock('fs-extra');
 

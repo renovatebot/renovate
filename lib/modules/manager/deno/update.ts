@@ -1,13 +1,13 @@
 import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import upath from 'upath';
-import { logger } from '../../../logger';
-import { parseJsonc } from '../../../util/common';
-import { matchAt, replaceAt } from '../../../util/string';
-import { updateDependency as npmUpdateDependency } from '../npm';
-import type { UpdateDependencyConfig } from '../types';
-import { UpdateDenoJsonFile, UpdateImportMapJsonFile } from './schema';
-import type { DenoManagerData } from './types';
+import { logger } from '../../../logger/index.ts';
+import { parseJsonc } from '../../../util/common.ts';
+import { matchAt, replaceAt } from '../../../util/string.ts';
+import { updateDependency as npmUpdateDependency } from '../npm/index.ts';
+import type { UpdateDependencyConfig } from '../types.ts';
+import { UpdateDenoJsonFile, UpdateImportMapJsonFile } from './schema.ts';
+import type { DenoManagerData } from './types.ts';
 
 function getValueByDatasource(
   datasource: string,
@@ -250,8 +250,12 @@ export function updateDependency(
       for (const [key, value] of matches) {
         if (value && typeof value === 'object' && 'command' in value) {
           // prettier-ignore
-          (parsedContents.tasks[key] as { command: string }).command =
-            (parsedContents.tasks[key] as { command: string }).command.replace(searchCurrentValue, newString);
+          (parsedContents.tasks[key] as {
+                        command: string;
+                    }).command =
+                        (parsedContents.tasks[key] as {
+                            command: string;
+                        }).command.replace(searchCurrentValue, newString);
         }
         newFileContent = replaceAsString(
           parsedContents,

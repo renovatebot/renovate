@@ -1,14 +1,14 @@
 import is from '@sindresorhus/is';
 import { findPackages } from 'find-packages';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import { parseJson } from '../../../util/common';
-import { getSiblingFileName, readLocalFile } from '../../../util/fs';
-import { extractPackageJson } from '../npm/extract/common/package-file';
-import type { NpmPackage } from '../npm/extract/types';
-import type { PackageFile } from '../types';
-import type { DenoManagerData } from './types';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import { parseJson } from '../../../util/common.ts';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
+import { extractPackageJson } from '../npm/extract/common/package-file.ts';
+import type { NpmPackage } from '../npm/extract/types.ts';
+import type { PackageFile } from '../types.ts';
+import type { DenoManagerData } from './types.ts';
 
 export async function extractDenoCompatiblePackageJson(
   packageFile: string,

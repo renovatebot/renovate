@@ -1,15 +1,15 @@
 import is from '@sindresorhus/is';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   deleteLocalFile,
   readLocalFile,
   writeLocalFile,
-} from '../../../util/fs';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import type { DenoManagerData } from './types';
+} from '../../../util/fs/index.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import type { DenoManagerData } from './types.ts';
 
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact<DenoManagerData>,

@@ -11,7 +11,7 @@ import {
   UpdateDenoJsonFile,
   UpdateImportMapJsonFile,
   Workspace,
-} from './schema';
+} from './schema.ts';
 
 describe('modules/manager/deno/schema', () => {
   describe('Lock', () => {

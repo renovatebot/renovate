@@ -1,11 +1,11 @@
 import { findPackages } from 'find-packages';
-import { fs } from '../../../../test/util';
-import { GlobalConfig } from '../../../config/global';
+import { fs } from '../../../../test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   collectPackageJson,
   detectNodeCompatWorkspaces,
   extractDenoCompatiblePackageJson,
-} from './compat';
+} from './compat.ts';
 
 vi.mock('../../../util/fs');
 // used in detectNodeCompatWorkspaces()

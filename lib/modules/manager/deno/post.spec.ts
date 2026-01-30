@@ -1,13 +1,13 @@
 import { codeBlock } from 'common-tags';
 import { findPackages } from 'find-packages';
-import { fs } from '../../../../test/util';
-import { GlobalConfig } from '../../../config/global';
+import { fs } from '../../../../test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   collectPackageJsonAsWorkspaceMember,
   getDenoLock,
   getLockedVersion,
   normalizeWorkspace,
-} from './post';
+} from './post.ts';
 
 vi.mock('../../../util/fs');
 // used in detectNodeCompatWorkspaces()
@@ -210,15 +210,13 @@ describe('modules/manager/deno/post', () => {
           writeProjectManifest: Promise.resolve,
         },
       ]);
-      fs.readLocalFile.mockResolvedValueOnce(
-        codeBlock`
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
             {
               "dependencies": {
                 "hono": "^4.2.1"
               }
             }
-          `,
-      );
+          `);
       const packageFiles = [
         {
           deps: [],

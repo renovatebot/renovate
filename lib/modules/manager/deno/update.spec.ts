@@ -1,6 +1,6 @@
-import type { UpdateDependencyConfig } from '../types';
-import type { DenoManagerData } from './types';
-import { updateDependency } from './update';
+import type { UpdateDependencyConfig } from '../types.ts';
+import type { DenoManagerData } from './types.ts';
+import { updateDependency } from './update.ts';
 import { Fixtures } from '~test/fixtures';
 
 describe('modules/manager/deno/update', () => {

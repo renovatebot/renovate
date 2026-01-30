@@ -1,15 +1,19 @@
 import upath from 'upath';
-import { logger } from '../../../logger';
+import { logger } from '../../../logger/index.ts';
 import {
   getSiblingFileName,
   localPathIsFile,
   readLocalFile,
-} from '../../../util/fs';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import { collectPackageJson } from './compat';
-import { postExtract } from './post';
-import { DenoExtract, ImportMapExtract } from './schema';
-import type { DenoManagerData } from './types';
+} from '../../../util/fs/index.ts';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFile,
+} from '../types.ts';
+import { collectPackageJson } from './compat.ts';
+import { postExtract } from './post.ts';
+import { DenoExtract, ImportMapExtract } from './schema.ts';
+import type { DenoManagerData } from './types.ts';
 
 export async function extractAllPackageFiles(
   config: ExtractConfig,

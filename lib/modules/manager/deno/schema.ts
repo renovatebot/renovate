@@ -1,18 +1,21 @@
 import validateNpmPackageName from 'validate-npm-package-name';
 import { z } from 'zod';
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 import {
   Json,
   Jsonc,
   LooseArray,
   LooseRecord,
-} from '../../../util/schema-utils';
-import { joinUrlParts } from '../../../util/url';
-import { extractJsrPackageName } from '../../datasource/jsr/util';
-import { id as denoVersioningId, isValid } from '../../versioning/deno';
-import type { PackageDependency } from '../types';
-import type { DenoManagerData } from './types';
-import { denoLandRegex, depValueRegex } from './utils';
+} from '../../../util/schema-utils/index.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { extractJsrPackageName } from '../../datasource/jsr/util.ts';
+import {
+  id as denoVersioningId,
+  isValid,
+} from '../../versioning/deno/index.ts';
+import type { PackageDependency } from '../types.ts';
+import type { DenoManagerData } from './types.ts';
+import { denoLandRegex, depValueRegex } from './utils.ts';
 
 export const DenoLock = Json.pipe(
   // this schema is version 5

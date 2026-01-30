@@ -1,4 +1,4 @@
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 
 export const denoLandRegex = regEx(
   /(https:\/\/deno.land\/)(?<rawPackageName>[^@\s]+)(?:@(?<currentValue>[^/\s]+))?(?<filePath>\/[^\s]*)?/,
