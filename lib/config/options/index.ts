@@ -3352,24 +3352,7 @@ const options: Readonly<RenovateOptions>[] = [
       jvmMaxMemory: 256,
       jvmMemory: 256,
     },
-    stage: 'global',
-    globalOnly: true,
-  },
-  {
-    name: 'jvmMaxMemory',
-    description:
-      'Maximum JVM memory in MB to use for Gradle wrapper updates, defaults to 256.',
-    type: 'integer',
-    parents: ['gradleWrapper'],
-    stage: 'global',
-    globalOnly: true,
-  },
-  {
-    name: 'jvmMemory',
-    description:
-      'Initial JVM memory in MB to use for Gradle wrapper updates, defaults to `jvmMaxMemory`.',
-    type: 'integer',
-    parents: ['gradleWrapper'],
+    freeChoice: true,
     stage: 'global',
     globalOnly: true,
   },
