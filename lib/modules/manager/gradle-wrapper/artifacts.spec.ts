@@ -227,11 +227,16 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
           jvmMaxMemory: 8192,
         };
 
-        getGradleWrapperOptions(config.gradleWrapper);
+        const res = getGradleWrapperOptions(config.gradleWrapper);
 
         expect(logger.logger.once.debug).toHaveBeenCalledWith(
           'A higher jvmMaxMemory (8192) than the global configuration (300) is not permitted for Gradle Wrapper invocations. Using global configuration instead',
         );
+
+        expect(res).toEqual({
+          jvmMemory: 256,
+          jvmMaxMemory: 300,
+        });
       });
     });
 
