@@ -472,6 +472,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
   describe('mergeBranch(branchName)', () => {
     it('should perform a branch merge', async () => {
+      const mergeSpy = vi.spyOn(SimpleGit.prototype, 'merge');
       await git.mergeBranch('renovate/future_branch', false);
       const merged = await simpleGit(origin.path).branch([
         '--verbose',
@@ -488,7 +489,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     it('merges branch when branch is upto date with base', async () => {
       const mergeSpy = vi.spyOn(SimpleGit.prototype, 'merge');
       await git.mergeBranch('renovate/future_branch', true);
-      const merged = await Git(origin.path).branch([
+      const merged = await simpleGit(origin.path).branch([
         '--verbose',
         '--merged',
         defaultBranch,
@@ -502,7 +503,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('should throw when auto merge is enabled but branch is conflicted', async () => {
-      const workingRepo = Git(tmpDir.path);
+      const workingRepo = simpleGit(tmpDir.path);
 
       await workingRepo.checkout(['-b', 'renovate/test_conflict']);
       await fs.writeFile(
