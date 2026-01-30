@@ -139,7 +139,6 @@ function removeAsString(
   const newContent = contentBeforeDepType + newContentFromDepType;
 
   /* v8 ignore else -- hard to test */
-  // Compare the parsed JSON structure of old and new
   if (dequal(parsedContents, JSON.parse(newContent))) {
     return newContent;
   } else {
