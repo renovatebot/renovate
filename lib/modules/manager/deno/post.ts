@@ -116,7 +116,6 @@ export function getLockedVersion(
       ) {
         return value;
       }
-      continue;
     }
     return null;
   }
@@ -135,7 +134,6 @@ export async function collectPackageJsonAsWorkspaceMember(
   );
   for (const workspaceRoot of workspaceRoots) {
     const result = await detectNodeCompatWorkspaces(workspaceRoot);
-    /* v8 ignore next 3: hard to test */
     if (!result) {
       continue;
     }
@@ -214,10 +212,14 @@ export function normalizeWorkspace(
   }
   for (const packageFile of invalidPackageFiles) {
     const pkg = packageMap.get(packageFile);
-    if (pkg) {
-      // remove invalid workspace
-      delete pkg.managerData?.workspaces;
+    // packageFile always exists in packageMap since invalidPackageFiles comes from workspaceContexts
+    // which is built from packageFiles. This check is defensive programming.
+    /* v8 ignore next 3: hard to test - packageFile always exists in packageMap */
+    if (!pkg) {
+      continue;
     }
+    // remove invalid workspace
+    delete pkg.managerData?.workspaces;
   }
 
   // supply lock files to workspace members from their root
