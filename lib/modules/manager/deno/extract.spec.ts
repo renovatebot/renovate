@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import { findPackages } from 'find-packages';
 import { fs } from '../../../../test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
+import * as compat from './compat.ts';
 import {
   extractAllPackageFiles,
   getLockFiles,
@@ -10,6 +11,7 @@ import {
 } from './extract.ts';
 
 vi.mock('../../../util/fs');
+vi.mock('./compat.ts');
 // used in detectNodeCompatWorkspaces()
 vi.mock('find-packages', () => ({
   findPackages: vi.fn(),
@@ -132,6 +134,40 @@ describe('modules/manager/deno/extract', () => {
       fs.getSiblingFileName.mockReturnValueOnce('deno.json');
       fs.readLocalFile.mockResolvedValueOnce('invalid');
       expect(await extractAllPackageFiles({}, ['deno.json'])).toEqual([]);
+    });
+
+    it('multiple matched files with deno.json only', async () => {
+      // Mock for deno.json - returns valid package file
+      fs.readLocalFile.mockResolvedValueOnce(
+        JSON.stringify({
+          imports: {
+            dep1: 'npm:dep1@1.0.0',
+          },
+        }),
+      );
+      fs.getSiblingFileName.mockReturnValueOnce('deno.lock');
+      fs.localPathIsFile.mockResolvedValueOnce(false);
+
+      const result = await extractAllPackageFiles({}, ['deno.json']);
+      expect(result).toHaveLength(1);
+      expect(result[0].packageFile).toBe('deno.json');
+      expect(result[0].deps).toHaveLength(1);
+    });
+
+    it('deno.lock without package.json', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('deno.lock');
+      fs.localPathIsFile.mockResolvedValue(false);
+      expect(await extractAllPackageFiles({}, ['deno.lock'])).toEqual([]);
+    });
+
+    it('deno.lock when collectPackageJson returns null', async () => {
+      vi.mocked(compat.collectPackageJson).mockResolvedValueOnce(null);
+      expect(await extractAllPackageFiles({}, ['deno.lock'])).toEqual([]);
+    });
+
+    it('deno.lock when collectPackageJson returns empty array', async () => {
+      vi.mocked(compat.collectPackageJson).mockResolvedValueOnce([]);
+      expect(await extractAllPackageFiles({}, ['deno.lock'])).toEqual([]);
     });
 
     it('complex config with imports, scopes, tasks and lint', async () => {
@@ -328,6 +364,54 @@ describe('modules/manager/deno/extract', () => {
             writeProjectManifest: Promise.resolve,
           },
         ]);
+        // Mock collectPackageJson to return the npm workspace package files
+        vi.mocked(compat.collectPackageJson).mockImplementation((file) => {
+          if (file === 'deno.lock') {
+            return Promise.resolve([
+              {
+                deps: [
+                  {
+                    currentValue: '1.0.0',
+                    datasource: 'npm',
+                    depName: 'dep1',
+                    depType: 'dependencies',
+                    prettyDepType: 'dependency',
+                    lockedVersion: '1.0.0',
+                  },
+                ],
+                managerData: {
+                  packageName: 'root',
+                  workspaces: ['sub'],
+                },
+                extractedConstraints: {},
+                lockFiles: ['deno.lock'],
+                packageFile: 'package.json',
+                packageFileVersion: '0.0.1',
+              },
+              {
+                deps: [
+                  {
+                    currentValue: '2.0.0',
+                    datasource: 'npm',
+                    depName: 'dep2',
+                    depType: 'dependencies',
+                    lockedVersion: '2.0.0',
+                    prettyDepType: 'dependency',
+                  },
+                ],
+                managerData: {
+                  packageName: 'sub',
+                  workspaces: undefined,
+                },
+                extractedConstraints: {},
+                lockFiles: ['deno.lock'],
+                packageFile: 'sub/package.json',
+                packageFileVersion: '0.0.2',
+              },
+            ] as any);
+          }
+          return Promise.resolve(null);
+        });
         fs.getSiblingFileName.mockReturnValue('package.json');
         fs.readLocalFile.mockImplementation((fileName) => {
           if (fileName === 'package.json') {
