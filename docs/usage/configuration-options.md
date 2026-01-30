@@ -1879,6 +1879,17 @@ Under the hood, it creates a MR-level approval rule where `approvals_required` i
 This option works only when `automerge=true` and either `automergeType=pr` or `automergeType=branch`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
 
+## goGetDirs
+
+By default, Renovate will run `go get -d -t ./...` to update the `go.sum`.
+If you need to modify this path, for example in order to ignore directories, you can override the default `./...` value using this option:
+
+```json
+{
+  "goGetDirs": ["./some-project/", "./tools/..."]
+}
+```
+
 ## gradleWrapper
 
 When Renovate updates a dependency and needs to invoke Gradle, for instance with [the Gradle Wrapper manager](./modules/manager/gradle-wrapper/index.md), the repository's Gradle Wrapper will be invoked, if present.
@@ -1896,17 +1907,6 @@ Repository level settings for tuning invocations to the Gradle Wrapper as part o
 <!-- prettier-ignore -->
 !!! note
     It is not possible for a repository to override the global self-hosted configuration set by the administrator in [`gradleWrapper.jvmMaxMemory`](./self-hosted-configuration.md#gradlewrapper).
-
-## goGetDirs
-
-By default, Renovate will run `go get -d -t ./...` to update the `go.sum`.
-If you need to modify this path, for example in order to ignore directories, you can override the default `./...` value using this option:
-
-```json
-{
-  "goGetDirs": ["./some-project/", "./tools/..."]
-}
-```
 
 ## group
 
