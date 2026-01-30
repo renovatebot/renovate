@@ -22,29 +22,29 @@ export function isDatedCodeName(
 }
 
 export function getDatedContainerImageCodename(version: string): null | string {
-  const groups = datedRegex.exec(version);
-  if (!groups?.groups) {
+  const match = datedRegex.exec(version);
+  if (!match?.groups) {
     return null;
   }
-  return groups.groups.codename;
+  return match.groups.codename;
 }
 
 export function getDatedContainerImageVersion(version: string): null | number {
-  const groups = datedRegex.exec(version);
-  if (!groups?.groups) {
+  const match = datedRegex.exec(version);
+  if (!match?.groups) {
     return null;
   }
 
-  return parseInt(groups.groups.date);
+  return parseInt(match.groups.date);
 }
 
 export function getDatedContainerImageSuffix(version: string): null | string {
-  const groups = datedRegex.exec(version);
-  if (!groups?.groups?.suffix) {
+  const match = datedRegex.exec(version);
+  if (!match?.groups?.suffix) {
     return null;
   }
 
-  return groups.groups.suffix;
+  return match.groups.suffix;
 }
 
 export class RollingReleasesData {
