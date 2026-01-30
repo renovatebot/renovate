@@ -1,13 +1,13 @@
 import { codeBlock } from 'common-tags';
-import { extractAllPackageFiles } from '..';
-import { logger } from '../../../../logger';
-import type { ExtractConfig } from '../../types';
-import { postExtract } from './post';
-import * as npmExtract from '.';
-import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+import { logger } from '../../../../logger/index.ts';
+import type { ExtractConfig } from '../../types.ts';
+import { extractAllPackageFiles } from '../index.ts';
+import * as npmExtract from './index.ts';
+import { postExtract } from './post/index.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 
-vi.mock('../../../../util/fs');
+vi.mock('../../../../util/fs/index.ts');
 
 const defaultExtractConfig = {
   skipInstalls: null,
@@ -394,7 +394,7 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('finds complex yarn workspaces', async () => {
-      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+      fs.readLocalFile.mockImplementation((): Promise<any> => {
         return Promise.resolve(null);
       });
       const res = await npmExtract.extractPackageFile(
@@ -1279,14 +1279,8 @@ describe('modules/manager/npm/extract/index', () => {
       const yarnrc = codeBlock`
         nodeLinker: node-modules
 
-        plugins:
-          - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-            path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-            spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-        catalogs:
-          list:
-            is-positive: 1.0.0
+        catalog:
+          is-positive: 1.0.0
       `;
       fs.readLocalFile.mockResolvedValueOnce(yarnrc);
 
@@ -1319,14 +1313,8 @@ describe('modules/manager/npm/extract/index', () => {
       const yarnrc = codeBlock`
         nodeLinker: node-modules
 
-        plugins:
-          - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-            path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-            spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-        catalogs:
-          list:
-            is-positive: 1.0.0
+        catalog:
+          is-positive: 1.0.0
       `;
 
       fs.readLocalFile.mockResolvedValueOnce(yarnrc);
@@ -1357,14 +1345,8 @@ describe('modules/manager/npm/extract/index', () => {
       const yarnrc = codeBlock`
         nodeLinker: node-modules
 
-        plugins:
-          - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
-            path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
-            spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
-
-        catalogs:
-          list:
-            is-positive: 1.0.0
+        catalog:
+          is-positive: 1.0.0
       `;
 
       fs.readLocalFile.mockResolvedValueOnce(yarnrc);

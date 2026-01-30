@@ -5,8 +5,8 @@ import type {
   ZodType,
 } from 'zod';
 import { NEVER, ZodError, ZodIssueCode } from 'zod';
-import { logger } from '../logger';
-import type { Nullish } from '../types';
+import { logger } from '../logger/index.ts';
+import type { Nullish } from '../types/index.ts';
 
 type Val = NonNullable<unknown>;
 
@@ -98,7 +98,11 @@ function fromNullable<
  * - `.unwrap()` is the point of consumption
  */
 export class Result<T extends Val, E extends Val = Error> {
-  private constructor(private readonly res: Res<T, E>) {}
+  private readonly res: Res<T, E>;
+
+  private constructor(res: Res<T, E>) {
+    this.res = res;
+  }
 
   static ok<T extends Val>(val: T): Result<T, never> {
     return new Result({ ok: true, val });
@@ -626,7 +630,11 @@ export class Result<T extends Val, E extends Val = Error> {
 export class AsyncResult<T extends Val, E extends Val>
   implements PromiseLike<Result<T, E>>
 {
-  private constructor(private asyncResult: Promise<Result<T, E>>) {}
+  private asyncResult: Promise<Result<T, E>>;
+
+  private constructor(asyncResult: Promise<Result<T, E>>) {
+    this.asyncResult = asyncResult;
+  }
 
   then<TResult1 = Result<T, E>>(
     onfulfilled?:

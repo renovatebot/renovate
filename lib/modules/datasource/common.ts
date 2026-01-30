@@ -1,16 +1,19 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../logger';
-import { filterMap } from '../../util/filter-map';
-import { regEx } from '../../util/regex';
-import { defaultVersioning } from '../versioning';
-import * as allVersioning from '../versioning';
-import datasources from './api';
-import { CustomDatasource } from './custom';
+import {
+  isNonEmptyArray,
+  isNonEmptyStringAndNotWhitespace,
+} from '@sindresorhus/is';
+import { logger } from '../../logger/index.ts';
+import { filterMap } from '../../util/filter-map.ts';
+import { regEx } from '../../util/regex.ts';
+import { defaultVersioning } from '../versioning/index.ts';
+import * as allVersioning from '../versioning/index.ts';
+import datasources from './api.ts';
+import { CustomDatasource } from './custom/index.ts';
 import type {
   DatasourceApi,
   GetPkgReleasesConfig,
   ReleaseResult,
-} from './types';
+} from './types.ts';
 
 export function getDatasourceFor(datasource: string): DatasourceApi | null {
   if (datasource?.startsWith('custom.')) {
@@ -44,10 +47,10 @@ export function isGetPkgReleasesConfig(
   input: unknown,
 ): input is GetPkgReleasesConfig {
   return (
-    is.nonEmptyStringAndNotWhitespace(
+    isNonEmptyStringAndNotWhitespace(
       (input as GetPkgReleasesConfig).datasource,
     ) &&
-    is.nonEmptyStringAndNotWhitespace(
+    isNonEmptyStringAndNotWhitespace(
       (input as GetPkgReleasesConfig).packageName,
     )
   );
@@ -88,6 +91,7 @@ export function applyVersionCompatibility(
       },
       'versionCompatibility: matches',
     );
+    release.versionOrig ??= release.version;
     release.version = regexResult.groups.version;
     return release;
   });
@@ -203,7 +207,7 @@ export function applyConstraintsFiltering<
       }
 
       const constraint = releaseConstraints[name];
-      if (!is.nonEmptyArray(constraint)) {
+      if (!isNonEmptyArray(constraint)) {
         // A release with no constraints is OK
         continue;
       }

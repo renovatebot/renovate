@@ -1,12 +1,12 @@
 import { codeBlock, html } from 'common-tags';
-import { getPkgReleases } from '..';
-import { logger } from '../../../logger';
-import { CustomDatasource } from './index';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
-import { fs } from '~test/util';
+import { logger } from '../../../logger/index.ts';
+import { getPkgReleases } from '../index.ts';
+import { CustomDatasource } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { fs } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 describe('modules/datasource/custom/index', () => {
   describe('getReleases', () => {

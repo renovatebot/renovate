@@ -14,7 +14,7 @@ name: renovate-otel-demo
 services:
   # Jaeger for storing traces
   jaeger:
-    image: jaegertracing/jaeger:2.11.0
+    image: jaegertracing/jaeger:2.14.1
     ports:
       - '16686:16686' # Web UI
       - '4317' # OTLP gRPC
@@ -22,7 +22,7 @@ services:
 
   # Prometheus for storing metrics
   prometheus:
-    image: prom/prometheus:v3.7.3
+    image: prom/prometheus:v3.9.1
     ports:
       - '9090:9090' # Web UI
       - '4318' # OTLP HTTP
@@ -36,7 +36,7 @@ services:
   otel-collector:
     # Using the Contrib version to access the spanmetrics connector.
     # If you don't need the spanmetrics connector, you can use the standard version
-    image: otel/opentelemetry-collector-contrib:0.138.0
+    image: otel/opentelemetry-collector-contrib:0.144.0
     volumes:
       - ./otel-collector-config.yml:/etc/otelcol-contrib/config.yaml
     ports:
@@ -160,9 +160,9 @@ Select `Find Traces` to search for all Renovate traces and then select one of th
 
 ![pick trace](../assets/images/opentelemetry_choose_trace.png)
 
-You should be able to see now the full trace view which shows each HTTP request and internal spans.
+You should be able to see now the full trace view which shows more information about what is happening, such as HTTP requests, execution of commands or Git operations, and how long Renovate takes to process a given branch:
 
-![trace view](../assets/images/opentelemetry_trace_viewer.png)
+![A screenshot of the Jaeger OpenTelemetry tracing UI, which shows an in-depth tracing view of a Renovate run against a single repository. The trace view shows the Renovate "splits", i.e. `init`, `extract`, `lookup` and `update` shown, with a view of how long each of the splits take overall. The trace view also shows HTTP calls, calls to the `git` command-line tools, some function names like `extractAllDependencies`, package manager names like `composer` or `github-actions` under the `extract` and `lookup` splits, and general execution of commands (prefixed by `rawExec:`. The view also shows that under the `update` split, there is a trace per branch, so we can see that the `renovate/actions-checkout-6.x` took less time to process than the `renovate/phpstan-phpstan-2.x-lockfile` branch.](../assets/images/opentelemetry_trace_viewer.png)
 
 ### Metrics
 

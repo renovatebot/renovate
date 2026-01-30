@@ -1,34 +1,46 @@
-import is from '@sindresorhus/is';
+import {
+  ATTR_VCS_OWNER_NAME,
+  ATTR_VCS_PROVIDER_NAME,
+  ATTR_VCS_REPOSITORY_NAME,
+} from '@opentelemetry/semantic-conventions/incubating';
+import {
+  isNonEmptyString,
+  isNonEmptyStringAndNotWhitespace,
+  isString,
+} from '@sindresorhus/is';
 import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
 import semver from 'semver';
 import upath from 'upath';
-import * as configParser from '../../config';
-import { GlobalConfig } from '../../config/global';
-import { resolveConfigPresets } from '../../config/presets';
-import { validateConfigSecretsAndVariables } from '../../config/secrets';
+import { GlobalConfig } from '../../config/global.ts';
+import * as configParser from '../../config/index.ts';
+import { resolveConfigPresets } from '../../config/presets/index.ts';
+import { validateConfigSecretsAndVariables } from '../../config/secrets.ts';
 import type {
   AllConfig,
   RenovateConfig,
   RenovateRepository,
-} from '../../config/types';
-import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
-import { pkg } from '../../expose.cjs';
-import { instrument } from '../../instrumentation';
-import { exportStats, finalizeReport } from '../../instrumentation/reporting';
-import { getProblems, logLevel, logger, setMeta } from '../../logger';
-import { setGlobalLogLevelRemaps } from '../../logger/remap';
-import { getEnv } from '../../util/env';
-import * as hostRules from '../../util/host-rules';
-import * as queue from '../../util/http/queue';
-import * as throttle from '../../util/http/throttle';
-import { regexEngineStatus } from '../../util/regex';
-import { addSecretForSanitizing } from '../../util/sanitize';
-import * as repositoryWorker from '../repository';
-import { autodiscoverRepositories } from './autodiscover';
-import { parseConfigs } from './config/parse';
-import { globalFinalize, globalInitialize } from './initialize';
-import { isLimitReached } from './limits';
+} from '../../config/types.ts';
+import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages.ts';
+import { pkg } from '../../expose.ts';
+import { instrument } from '../../instrumentation/index.ts';
+import {
+  exportStats,
+  finalizeReport,
+} from '../../instrumentation/reporting.ts';
+import { getProblems, logLevel, logger, setMeta } from '../../logger/index.ts';
+import { setGlobalLogLevelRemaps } from '../../logger/remap.ts';
+import { getEnv } from '../../util/env.ts';
+import * as hostRules from '../../util/host-rules.ts';
+import * as queue from '../../util/http/queue.ts';
+import * as throttle from '../../util/http/throttle.ts';
+import { regexEngineStatus } from '../../util/regex.ts';
+import { addSecretForSanitizing } from '../../util/sanitize.ts';
+import * as repositoryWorker from '../repository/index.ts';
+import { autodiscoverRepositories } from './autodiscover.ts';
+import { parseConfigs } from './config/parse/index.ts';
+import { globalFinalize, globalInitialize } from './initialize.ts';
+import { isLimitReached } from './limits.ts';
 
 export async function getRepositoryConfig(
   globalConfig: RenovateConfig,
@@ -36,7 +48,7 @@ export async function getRepositoryConfig(
 ): Promise<RenovateConfig> {
   const repoConfig = configParser.mergeChildConfig(
     globalConfig,
-    is.string(repository) ? { repository } : repository,
+    isString(repository) ? { repository } : repository,
   );
   const repoParts = repoConfig.repository.split('/');
   repoParts.pop();
@@ -70,7 +82,7 @@ function haveReachedLimits(): boolean {
 
 /* istanbul ignore next */
 function checkEnv(): void {
-  const range = pkg.engines!.node!;
+  const range = pkg.engines.node;
   if (process.release?.name !== 'node' || !process.versions?.node) {
     logger.warn(
       { release: process.release, versions: process.versions },
@@ -110,10 +122,10 @@ export async function start(): Promise<number> {
   let config: AllConfig;
   const env = getEnv();
   try {
-    if (is.nonEmptyStringAndNotWhitespace(env.AWS_SECRET_ACCESS_KEY)) {
+    if (isNonEmptyStringAndNotWhitespace(env.AWS_SECRET_ACCESS_KEY)) {
       addSecretForSanitizing(env.AWS_SECRET_ACCESS_KEY, 'global');
     }
-    if (is.nonEmptyStringAndNotWhitespace(env.AWS_SESSION_TOKEN)) {
+    if (isNonEmptyStringAndNotWhitespace(env.AWS_SESSION_TOKEN)) {
       addSecretForSanitizing(env.AWS_SESSION_TOKEN, 'global');
     }
 
@@ -152,7 +164,7 @@ export async function start(): Promise<number> {
       autodiscoverRepositories(config),
     );
 
-    if (is.nonEmptyString(config.writeDiscoveredRepos)) {
+    if (isNonEmptyString(config.writeDiscoveredRepos)) {
       const content = JSON.stringify(config.repositories);
       await fs.writeFile(config.writeDiscoveredRepos, content);
       logger.info(
@@ -166,6 +178,11 @@ export async function start(): Promise<number> {
       if (haveReachedLimits()) {
         break;
       }
+
+      const { owner, repo } = repositoryToOwnerAndRepo(
+        typeof repository === 'string' ? repository : repository.repository,
+      );
+
       await instrument(
         'repository',
         async () => {
@@ -186,6 +203,10 @@ export async function start(): Promise<number> {
         },
         {
           attributes: {
+            [ATTR_VCS_PROVIDER_NAME]: config.platform,
+            [ATTR_VCS_OWNER_NAME]: owner,
+            [ATTR_VCS_REPOSITORY_NAME]: repo,
+            /** @deprecated TODO remove */
             repository:
               typeof repository === 'string'
                 ? repository
@@ -228,4 +249,14 @@ export async function start(): Promise<number> {
     return 1;
   }
   return 0;
+}
+
+function repositoryToOwnerAndRepo(fullName: string): {
+  owner: string;
+  repo: string;
+} {
+  const parts = fullName.split('/');
+  const repo = parts.pop() ?? '';
+  const owner = parts.join('/');
+  return { owner, repo };
 }

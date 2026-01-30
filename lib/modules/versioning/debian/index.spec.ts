@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
-import { logger } from '../../../logger';
-import { DebianVersioningApi } from '.';
+import { logger } from '../../../logger/index.ts';
+import { DebianVersioningApi } from './index.ts';
 
 describe('modules/versioning/debian/index', () => {
   const dt = DateTime.fromISO('2023-07-10');
@@ -359,15 +359,6 @@ describe('modules/versioning/debian/index', () => {
     ${'9'}            | ${undefined}  | ${undefined}   | ${'stable'}   | ${'12'}
     ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'12'}       | ${'stable'}
     ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'3'}        | ${'3'}
-    ${'oldstable'}    | ${'pin'}      | ${undefined}   | ${'11'}       | ${'11'}
-    ${'oldstable'}    | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'12'}
-    ${'oldstable'}    | ${'pin'}      | ${undefined}   | ${'bullseye'} | ${'11'}
-    ${'buster'}       | ${'pin'}      | ${undefined}   | ${'11'}       | ${'11'}
-    ${'buster'}       | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'12'}
-    ${'buster'}       | ${'pin'}      | ${undefined}   | ${'bullseye'} | ${'11'}
-    ${'10'}           | ${'pin'}      | ${undefined}   | ${'11'}       | ${'11'}
-    ${'10'}           | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'12'}
-    ${'10'}           | ${'pin'}      | ${undefined}   | ${'bullseye'} | ${'11'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {

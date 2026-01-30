@@ -1,13 +1,13 @@
-import is from '@sindresorhus/is';
-import { regEx } from '../../../util/regex';
-import { parseYaml } from '../../../util/yaml';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { HelmDatasource } from '../../datasource/helm';
-import { getDep } from '../dockerfile/extract';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
-import { checkIfStringIsPath } from '../terraform/util';
-import type { PackageDependency, PackageFileContent } from '../types';
-import { FleetFile, type FleetHelmBlock, GitRepo } from './schema';
+import { isUndefined } from '@sindresorhus/is';
+import { regEx } from '../../../util/regex.ts';
+import { parseYaml } from '../../../util/yaml.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
+import { checkIfStringIsPath } from '../terraform/util.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { FleetFile, type FleetHelmBlock, GitRepo } from './schema.ts';
 
 function extractGitRepo(doc: GitRepo): PackageDependency {
   const dep: PackageDependency = {
@@ -103,7 +103,7 @@ function extractFleetFile(doc: FleetFile): PackageDependency[] {
 
   result.push(extractFleetHelmBlock(doc.helm));
 
-  if (!is.undefined(doc.targetCustomizations)) {
+  if (!isUndefined(doc.targetCustomizations)) {
     // remove version from helm block to allow usage of variables defined in the global block, but do not create PRs
     // if there is no version defined in the customization.
     const helmBlockContext: FleetHelmBlock = { ...doc.helm };

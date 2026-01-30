@@ -1,7 +1,7 @@
-import is from '@sindresorhus/is';
-import type { PagedResult } from '../../modules/platform/bitbucket/types';
-import { HttpBase, type InternalJsonUnsafeOptions } from './http';
-import type { HttpMethod, HttpOptions, HttpResponse } from './types';
+import { isNonEmptyObject, isNullOrUndefined } from '@sindresorhus/is';
+import type { PagedResult } from '../../modules/platform/bitbucket/types.ts';
+import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
+import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
 
 const MAX_PAGES = 100;
 const MAX_PAGELEN = 100;
@@ -48,6 +48,7 @@ export class BitbucketHttp extends HttpBase<BitbucketHttpOptions> {
     );
 
     if (paginate && isPagedResult(result.body)) {
+      // v8 ignore else -- TODO: add test #40625
       if (opts.httpOptions) {
         opts.httpOptions.memCache = false;
       }
@@ -68,11 +69,11 @@ export class BitbucketHttp extends HttpBase<BitbucketHttpOptions> {
 
       // Override other page-related attributes
       resultBody.pagelen = resultBody.values.length;
-      /* v8 ignore start -- hard to test all branches */
+      /* v8 ignore next -- hard to test all branches */
       resultBody.size =
         page <= MAX_PAGES ? resultBody.values.length : undefined;
+      // v8 ignore next -- hard to test all branches
       resultBody.next = page <= MAX_PAGES ? nextURL : undefined;
-      /* v8 ignore stop */
     }
 
     return result as HttpResponse<T>;
@@ -80,9 +81,9 @@ export class BitbucketHttp extends HttpBase<BitbucketHttpOptions> {
 }
 
 function hasPagelen(url: URL): boolean {
-  return !is.nullOrUndefined(url.searchParams.get('pagelen'));
+  return !isNullOrUndefined(url.searchParams.get('pagelen'));
 }
 
 function isPagedResult<T>(obj: any): obj is PagedResult<T> {
-  return is.nonEmptyObject(obj) && Array.isArray(obj.values);
+  return isNonEmptyObject(obj) && Array.isArray(obj.values);
 }

@@ -1,14 +1,17 @@
-import { GlobalConfig } from '../../../config/global';
-import { ExecError } from '../../../util/exec/exec-error';
-import { localPathIsSymbolicLink, readLocalSymlink } from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
-import type { StatusResult } from '../../../util/git/types';
-import type { UpdateArtifact } from '../types';
-import { updateArtifacts } from '.';
-import { mockExecAll } from '~test/exec-util';
-import { partial } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import { ExecError } from '../../../util/exec/exec-error.ts';
+import {
+  localPathIsSymbolicLink,
+  readLocalSymlink,
+} from '../../../util/fs/index.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
+import type { UpdateArtifact } from '../types.ts';
+import { updateArtifacts } from './index.ts';
+import { mockExecAll } from '~test/exec-util.ts';
+import { partial } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const getRepoStatusMock = vi.mocked(getRepoStatus);
 
@@ -326,9 +329,7 @@ describe('modules/manager/hermit/artifacts', () => {
           stdout: '',
           stderr: 'error executing hermit uninstall',
           cmd: '',
-          options: {
-            encoding: 'utf-8',
-          },
+          options: {},
         }),
       );
 
@@ -422,9 +423,7 @@ describe('modules/manager/hermit/artifacts', () => {
           stdout: '',
           stderr: 'error executing hermit install',
           cmd: '',
-          options: {
-            encoding: 'utf-8',
-          },
+          options: {},
         }),
       );
 

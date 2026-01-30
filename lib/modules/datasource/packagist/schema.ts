@@ -1,9 +1,9 @@
-import is from '@sindresorhus/is';
+import { isUndefined } from '@sindresorhus/is';
 import { z } from 'zod';
-import { logger } from '../../../logger';
-import { LooseArray, LooseRecord } from '../../../util/schema-utils';
-import { MaybeTimestamp } from '../../../util/timestamp';
-import type { Release, ReleaseResult } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { LooseArray, LooseRecord } from '../../../util/schema-utils/index.ts';
+import { MaybeTimestamp } from '../../../util/timestamp.ts';
+import type { Release, ReleaseResult } from '../types.ts';
 
 export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
   // Ported from: https://github.com/composer/metadata-minifier/blob/main/src/MetadataMinifier.php#L17
@@ -25,12 +25,12 @@ export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
         continue;
       }
 
-      if (!is.undefined(val)) {
+      if (!isUndefined(val)) {
         prevVals[key] = val;
         continue;
       }
 
-      if (!is.undefined(prevVals[key])) {
+      if (!isUndefined(prevVals[key])) {
         x[key] = prevVals[key];
         continue;
       }

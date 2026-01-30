@@ -1,14 +1,14 @@
 // TODO #22198
-import is from '@sindresorhus/is';
-import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import { extractPackageFile } from '../../../../modules/manager';
-import type { PackageDependency } from '../../../../modules/manager/types';
-import { writeLocalFile } from '../../../../util/fs';
-import { escapeRegExp, regEx } from '../../../../util/regex';
-import { matchAt, replaceAt } from '../../../../util/string';
-import { compile } from '../../../../util/template';
-import type { BranchUpgradeConfig } from '../../../types';
+import { isNumber, isString, isUndefined } from '@sindresorhus/is';
+import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { extractPackageFile } from '../../../../modules/manager/index.ts';
+import type { PackageDependency } from '../../../../modules/manager/types.ts';
+import { writeLocalFile } from '../../../../util/fs/index.ts';
+import { escapeRegExp, regEx } from '../../../../util/regex.ts';
+import { matchAt, replaceAt } from '../../../../util/string.ts';
+import { compile } from '../../../../util/template/index.ts';
+import type { BranchUpgradeConfig } from '../../../types.ts';
 
 export async function confirmIfDepUpdated(
   upgrade: BranchUpgradeConfig,
@@ -43,14 +43,15 @@ export async function confirmIfDepUpdated(
       return false;
     }
     // istanbul ignore if
-    if (is.number(depIndex) && depIndex >= newExtract.deps.length) {
+    if (isNumber(depIndex) && depIndex >= newExtract.deps.length) {
       logger.debug(
         `Extracted ${packageFile!} after autoreplace has fewer deps than expected.`,
       );
       return false;
     }
     newUpgrade = newExtract.deps[depIndex!];
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
+    /* istanbul ignore next */
     logger.debug({ manager, packageFile, err }, 'Failed to parse newContent');
   }
 
@@ -225,9 +226,9 @@ export async function doAutoReplace(
     return await checkExistingBranch(upgrade, existingContent);
   }
   const replaceWithoutReplaceString =
-    is.string(newName) &&
+    isString(newName) &&
     newName !== depName &&
-    (is.undefined(upgrade.replaceString) ||
+    (isUndefined(upgrade.replaceString) ||
       !upgrade.replaceString?.includes(depName!));
   const replaceString = upgrade.replaceString ?? currentValue ?? currentDigest;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
@@ -290,7 +291,11 @@ export async function doAutoReplace(
       } else if (
         currentDigestShort &&
         newDigest &&
-        currentDigestShort !== newDigest
+        currentDigestShort !== newDigest &&
+        // Only use short digest replacement when there's no full currentDigest
+        // that already matches newDigest (otherwise we'd incorrectly replace
+        // part of an already-correct digest)
+        !(currentDigest && currentDigest === newDigest)
       ) {
         if (!newString.includes(currentDigestShort)) {
           logger.debug(
@@ -454,7 +459,8 @@ export async function doAutoReplace(
         newContent = existingContent;
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
+    /* istanbul ignore next */
     logger.debug({ packageFile, depName, err }, 'doAutoReplace error');
   }
   // istanbul ignore next

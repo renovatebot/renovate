@@ -1,6 +1,7 @@
-import { logger } from '../../logger';
-import { getCache } from '../cache/repository';
-import type { LongCommitSha } from './types';
+import { isNonEmptyObject } from '@sindresorhus/is';
+import { logger } from '../../logger/index.ts';
+import { getCache } from '../cache/repository/index.ts';
+import type { LongCommitSha } from './types.ts';
 
 export function getCachedBehindBaseResult(
   branchName: string,
@@ -14,7 +15,7 @@ export function getCachedBehindBaseResult(
   );
 
   if (
-    branch &&
+    isNonEmptyObject(branch) &&
     branch.sha === branchSha &&
     branch.baseBranch === baseBranch &&
     branch.baseBranchSha === baseBranchSha &&

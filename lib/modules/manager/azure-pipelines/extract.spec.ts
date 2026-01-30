@@ -1,14 +1,14 @@
 import { codeBlock } from 'common-tags';
-import { GlobalConfig } from '../../../config/global';
-import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks';
+import { GlobalConfig } from '../../../config/global.ts';
+import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks/index.ts';
 import {
   extractAzurePipelinesTasks,
   extractContainer,
   extractRepository,
   parseAzurePipelines,
-} from './extract';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+} from './extract.ts';
+import { extractPackageFile } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 const azurePipelinesFilename = 'azure-pipelines.yaml';
 

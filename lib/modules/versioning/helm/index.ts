@@ -1,6 +1,6 @@
-import type { RangeStrategy } from '../../../types/versioning';
-import { api as npm } from '../npm';
-import type { VersioningApi } from '../types';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import { api as npm } from '../npm/index.ts';
+import type { VersioningApi } from '../types.ts';
 
 export const id = 'helm';
 export const displayName = 'helm';
@@ -13,7 +13,6 @@ export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
   'widen',
-  'pin',
   'replace',
   'widen',
 ];

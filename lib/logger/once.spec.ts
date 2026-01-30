@@ -1,5 +1,5 @@
-import { once, reset } from './once';
-import { logger } from '.';
+import { logger } from './index.ts';
+import { once, reset } from './once.ts';
 
 vi.unmock('.');
 

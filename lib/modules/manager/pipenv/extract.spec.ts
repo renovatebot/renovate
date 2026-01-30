@@ -1,9 +1,9 @@
 import { codeBlock } from 'common-tags';
 import * as _fsExtra from 'fs-extra';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { GlobalConfig } from '../../../config/global.ts';
+import { extractPackageFile } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 // mock for cjs require for `@renovatebot/detect-tools`
 // https://github.com/vitest-dev/vitest/discussions/3134

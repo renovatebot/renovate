@@ -9,6 +9,7 @@ nav:
       - 'Self-hosted': 'self-hosted-configuration.md'
       - 'Presets': 'config-presets.md'
       - 'Validation': 'config-validation.md'
+      - 'JSON Schema': 'json-schema.md'
   - ... | mend-hosted
   - ... | key-concepts
   - ... | modules
@@ -16,7 +17,7 @@ nav:
       - 'Bazel': 'bazel.md'
       - 'Bicep': 'bicep.md'
       - 'Docker': 'docker.md'
-      - 'Golang': 'golang.md'
+      - 'Go (Golang)': 'golang.md'
       - 'Java': 'java.md'
       - 'JavaScript': 'javascript.md'
       - 'Node.js Versions': 'node.md'
@@ -43,7 +44,6 @@ nav:
       - 'Helper Presets': 'presets-helpers.md'
       - 'MergeConfidence Presets': 'presets-mergeConfidence.md'
       - 'Monorepo Presets': 'presets-monorepo.md'
-      - 'npm Presets': 'presets-npm.md'
       - 'Package Presets': 'presets-packages.md'
       - 'Preview Presets': 'presets-preview.md'
       - 'Replacement Presets': 'presets-replacements.md'

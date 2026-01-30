@@ -1,4 +1,4 @@
-import type { Preset } from '../types';
+import type { Preset } from '../types.ts';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
@@ -13,6 +13,8 @@ export const presets: Record<string, Preset> = {
       ':configMigration',
       ':pinDevDependencies',
       'abandonments:recommended',
+      'security:minimumReleaseAgeNpm',
+      ':maintainLockFilesWeekly',
     ],
   },
   'js-app': {
@@ -35,11 +37,14 @@ export const presets: Record<string, Preset> = {
       'mergeConfidence:age-confidence-badges',
       'replacements:all',
       'workarounds:all',
+      'helpers:githubDigestChangelogs',
+      'helpers:goXPackagesChangelogLink',
+      'helpers:goXPackagesNameLink',
     ],
   },
   semverAllMonthly: {
     description:
-      'Preserve SemVer ranges and update everything together once a month.',
+      'Preserve SemVer ranges and update everything together once a month. (excluding replacements and lockfile maintenance)',
     extends: [
       ':preserveSemverRanges',
       'group:all',
@@ -48,13 +53,12 @@ export const presets: Record<string, Preset> = {
     ],
     lockFileMaintenance: {
       commitMessageAction: 'Update',
-      extends: ['group:all'],
     },
     separateMajorMinor: false,
   },
   semverAllWeekly: {
     description:
-      'Preserve SemVer ranges and update everything together once a week.',
+      'Preserve SemVer ranges and update everything together once a week (excluding replacements and lockfile maintenance).',
     extends: [
       ':preserveSemverRanges',
       'group:all',
@@ -63,7 +67,6 @@ export const presets: Record<string, Preset> = {
     ],
     lockFileMaintenance: {
       commitMessageAction: 'Update',
-      extends: ['group:all'],
     },
     separateMajorMinor: false,
   },

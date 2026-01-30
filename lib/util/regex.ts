@@ -1,7 +1,7 @@
-import is from '@sindresorhus/is';
-import { CONFIG_VALIDATION } from '../constants/error-messages';
-import { re2 } from '../expose.cjs';
-import { getEnv } from './env';
+import { isRegExp } from '@sindresorhus/is';
+import { CONFIG_VALIDATION } from '../constants/error-messages.ts';
+import { re2 } from '../expose.ts';
+import { getEnv } from './env.ts';
 
 const cache = new Map<string, RegExp>();
 
@@ -41,7 +41,7 @@ export function regEx(
   if (canBeCached && flags?.includes('g')) {
     canBeCached = false;
   }
-  if (canBeCached && is.regExp(pattern) && pattern.flags.includes('g')) {
+  if (canBeCached && isRegExp(pattern) && pattern.flags.includes('g')) {
     canBeCached = false;
   }
 

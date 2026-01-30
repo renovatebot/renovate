@@ -1,13 +1,13 @@
 import { codeBlock } from 'common-tags';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { PypiDatasource } from '../../datasource/pypi';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { extractPackageFile } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const pyproject1toml = Fixtures.get('pyproject.1.toml');
 const pyproject2toml = Fixtures.get('pyproject.2.toml');
@@ -568,5 +568,52 @@ describe('modules/manager/poetry/extract', () => {
         packageFileVersion: undefined,
       });
     });
+  });
+
+  it('extracts dependencies from pep735 dependency-groups', async () => {
+    const content = codeBlock`
+        [dependency-groups]
+        typing = ["mypy==1.13.0", "types-requests"]
+        coverage = ["pytest-cov==5.0.0"]
+        all = [{include-group = "typing"}, {include-group = "coverage"}, "click==8.1.7"]
+      `;
+    const res = await extractPackageFile(content, 'pyproject.toml');
+    expect(res?.deps).toMatchObject([
+      {
+        packageName: 'mypy',
+        datasource: 'pypi',
+        depType: 'dependency-groups',
+        currentValue: '==1.13.0',
+        currentVersion: '1.13.0',
+        depName: 'mypy',
+        managerData: { depGroup: 'typing' },
+      },
+      {
+        packageName: 'types-requests',
+        datasource: 'pypi',
+        depType: 'dependency-groups',
+        skipReason: 'unspecified-version',
+        depName: 'types-requests',
+        managerData: { depGroup: 'typing' },
+      },
+      {
+        packageName: 'pytest-cov',
+        datasource: 'pypi',
+        depType: 'dependency-groups',
+        currentValue: '==5.0.0',
+        currentVersion: '5.0.0',
+        depName: 'pytest-cov',
+        managerData: { depGroup: 'coverage' },
+      },
+      {
+        packageName: 'click',
+        datasource: 'pypi',
+        depType: 'dependency-groups',
+        currentValue: '==8.1.7',
+        currentVersion: '8.1.7',
+        depName: 'click',
+        managerData: { depGroup: 'all' },
+      },
+    ]);
   });
 });

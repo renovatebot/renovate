@@ -1,4 +1,4 @@
-import { createSDBackendURL } from './utils';
+import { createSDBackendURL } from './utils.ts';
 
 describe('modules/datasource/terraform-module/utils', () => {
   describe('createSDBackendURL', () => {

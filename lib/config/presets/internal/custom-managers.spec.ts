@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from '../../../modules/manager';
-import { matchRegexOrGlobList } from '../../../util/string-match';
-import { presets } from './custom-managers';
+import { extractPackageFile } from '../../../modules/manager/index.ts';
+import { matchRegexOrGlobList } from '../../../util/string-match.ts';
+import { presets } from './custom-managers.ts';
 
 describe('config/presets/internal/custom-managers', () => {
   describe('Update `_VERSION` environment variables in Azure Pipelines files', () => {
@@ -394,14 +394,17 @@ describe('config/presets/internal/custom-managers', () => {
 
     describe('matches regexes patterns', () => {
       it.each`
-        path                    | expected
-        ${'Dockerfile'}         | ${true}
-        ${'foo/Dockerfile'}     | ${true}
-        ${'foo/bar/Dockerfile'} | ${true}
-        ${'Dockerfile-foo'}     | ${true}
-        ${'Dockerfilefoo'}      | ${true}
-        ${'foo/Dockerfile-foo'} | ${true}
-        ${'foo-Dockerfile'}     | ${false}
+        path                              | expected
+        ${'Dockerfile'}                   | ${true}
+        ${'foo/Dockerfile'}               | ${true}
+        ${'foo/bar/Dockerfile'}           | ${true}
+        ${'Dockerfile-foo'}               | ${true}
+        ${'Dockerfilefoo'}                | ${true}
+        ${'something.dockerfile'}         | ${true}
+        ${'something.containerfile'}      | ${true}
+        ${'foo/something.Dockerfile-foo'} | ${true}
+        ${'foo/Dockerfile-foo'}           | ${true}
+        ${'foo-Dockerfile'}               | ${false}
       `('$path', ({ path, expected }) => {
         expect(
           matchRegexOrGlobList(path, customManager!.managerFilePatterns),
@@ -803,6 +806,76 @@ describe('config/presets/internal/custom-managers', () => {
             '<!-- renovate: datasource=docker depName=mongo -->\n<mongo.container.version>4.4.6</mongo.container.version>',
         },
       ]);
+    });
+  });
+
+  describe('Update `tsconfig/node` version in tsconfig.json', () => {
+    const customManager = presets.tsconfigNodeVersions.customManagers?.[0];
+
+    it(`find in tsconfig.json extends string`, async () => {
+      const fileContent = codeBlock`
+        {
+            "extends": "@tsconfig/node20/tsconfig.json",
+            "include": ["src/**/*"]
+        }
+      `;
+
+      const res = await extractPackageFile(
+        'regex',
+        fileContent,
+        'tsconfig.json',
+        customManager!,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '20',
+          datasource: 'npm',
+          depName: '@tsconfig/node20',
+        },
+      ]);
+    });
+
+    it(`find in tsconfig.json extends array`, async () => {
+      const fileContent = codeBlock`
+        {
+            "extends": [
+              "@tsconfig/strictest/tsconfig.json",
+              "@tsconfig/node20/tsconfig.json"
+            ],
+            "include": ["src/**/*"]
+        }
+      `;
+
+      const res = await extractPackageFile(
+        'regex',
+        fileContent,
+        'tsconfig.json',
+        customManager!,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '20',
+          datasource: 'npm',
+          depName: '@tsconfig/node20',
+        },
+      ]);
+    });
+
+    describe('matches regexes patterns', () => {
+      it.each`
+        path                        | expected
+        ${'tsconfig.json'}          | ${true}
+        ${'tsconfig.base.json'}     | ${true}
+        ${'foo/tsconfig.json'}      | ${true}
+        ${'foo/tsconfig.base.json'} | ${true}
+        ${'tsconfig.yml'}           | ${false}
+      `('$path', ({ path, expected }) => {
+        expect(
+          matchRegexOrGlobList(path, customManager!.managerFilePatterns),
+        ).toBe(expected);
+      });
     });
   });
 });

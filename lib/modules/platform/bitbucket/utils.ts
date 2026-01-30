@@ -1,13 +1,13 @@
-import type { MergeStrategy } from '../../../config/types';
-import type { BranchStatus } from '../../../types';
-import { getPrBodyStruct } from '../pr-body';
-import type { Pr } from '../types';
+import type { MergeStrategy } from '../../../config/types.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import { getPrBodyStruct } from '../pr-body.ts';
+import type { Pr } from '../types.ts';
 import type {
   BitbucketBranchState,
   BitbucketMergeStrategy,
   MergeRequestBody,
   PrResponse,
-} from './types';
+} from './types.ts';
 
 const bitbucketMergeStrategies = new Map<MergeStrategy, BitbucketMergeStrategy>(
   [
@@ -53,9 +53,9 @@ export function prInfo(pr: PrResponse): Pr {
     sourceBranch: pr.source?.branch?.name,
     targetBranch: pr.destination?.branch?.name,
     title: pr.title,
-    state: /* v8 ignore start */ prStates.closed?.includes(pr.state)
+    state: /* v8 ignore next */ prStates.closed?.includes(pr.state)
       ? 'closed'
-      : pr.state?.toLowerCase() /* v8 ignore stop */,
+      : pr.state?.toLowerCase(),
     createdAt: pr.created_on,
   };
 }

@@ -1,30 +1,43 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../../../logger';
-import { getPkgReleases } from '../../../../../modules/datasource';
-import type { Release } from '../../../../../modules/datasource/types';
-import * as allVersioning from '../../../../../modules/versioning';
-import * as packageCache from '../../../../../util/cache/package';
-import type { PackageCacheNamespace } from '../../../../../util/cache/package/types';
-import { memoize } from '../../../../../util/memoize';
-import { regEx } from '../../../../../util/regex';
-import { parseUrl, trimSlashes } from '../../../../../util/url';
-import type { BranchUpgradeConfig } from '../../../../types';
-import { slugifyUrl } from './common';
-import { addReleaseNotes } from './release-notes';
-import { getInRangeReleases } from './releases';
+import {
+  isEmptyArray,
+  isFalsy,
+  isNonEmptyString,
+  isNullOrUndefined,
+} from '@sindresorhus/is';
+import { logger } from '../../../../../logger/index.ts';
+import { getPkgReleases } from '../../../../../modules/datasource/index.ts';
+import type { Release } from '../../../../../modules/datasource/types.ts';
+import * as allVersioning from '../../../../../modules/versioning/index.ts';
+import * as packageCache from '../../../../../util/cache/package/index.ts';
+import type { PackageCacheNamespace } from '../../../../../util/cache/package/types.ts';
+import { memoize } from '../../../../../util/memoize.ts';
+import { regEx } from '../../../../../util/regex.ts';
+import { parseUrl, trimSlashes } from '../../../../../util/url.ts';
+import type { BranchUpgradeConfig } from '../../../../types.ts';
+import { slugifyUrl } from './common.ts';
+import { addReleaseNotes } from './release-notes.ts';
+import { getInRangeReleases } from './releases.ts';
 import type {
   ChangeLogError,
   ChangeLogPlatform,
   ChangeLogRelease,
   ChangeLogResult,
-} from './types';
+} from './types.ts';
 
 export abstract class ChangeLogSource {
   private readonly cacheNamespace: PackageCacheNamespace;
+  private readonly platform: ChangeLogPlatform;
+  private readonly datasource:
+    | 'bitbucket-tags'
+    | 'bitbucket-server-tags'
+    | 'forgejo-tags'
+    | 'gitea-tags'
+    | 'github-tags'
+    | 'gitlab-tags';
 
   constructor(
-    private readonly platform: ChangeLogPlatform,
-    private readonly datasource:
+    platform: ChangeLogPlatform,
+    datasource:
       | 'bitbucket-tags'
       | 'bitbucket-server-tags'
       | 'forgejo-tags'
@@ -32,6 +45,8 @@ export abstract class ChangeLogSource {
       | 'github-tags'
       | 'gitlab-tags',
   ) {
+    this.platform = platform;
+    this.datasource = datasource;
     this.cacheNamespace = `changelog-${platform}-release`;
   }
 
@@ -55,7 +70,7 @@ export abstract class ChangeLogSource {
       })
     )?.releases;
 
-    if (is.nullOrUndefined(tags) || is.emptyArray(tags)) {
+    if (isNullOrUndefined(tags) || isEmptyArray(tags)) {
       logger.debug(
         `No ${this.datasource} tags found for repository: ${repository}`,
       );
@@ -98,7 +113,7 @@ export abstract class ChangeLogSource {
       return null;
     }
 
-    if (is.falsy(this.hasValidRepository(repository))) {
+    if (isFalsy(this.hasValidRepository(repository))) {
       logger.debug(`Invalid ${this.platform} URL found: ${sourceUrl}`);
       return null;
     }
@@ -162,7 +177,7 @@ export abstract class ChangeLogSource {
           next,
           tags,
         );
-        if (is.nonEmptyString(prevHead) && is.nonEmptyString(nextHead)) {
+        if (isNonEmptyString(prevHead) && isNonEmptyString(nextHead)) {
           release.compare.url = this.getCompareURL(
             baseUrl,
             repository,
@@ -235,10 +250,10 @@ export abstract class ChangeLogSource {
       release.version,
       tags,
     );
-    if (is.nonEmptyString(tagName)) {
+    if (isNonEmptyString(tagName)) {
       return tagName;
     }
-    if (is.nonEmptyString(release.gitRef)) {
+    if (isNonEmptyString(release.gitRef)) {
       return release.gitRef;
     }
     return null;
@@ -255,7 +270,7 @@ export abstract class ChangeLogSource {
 
   getBaseUrl(config: BranchUpgradeConfig): string {
     const parsedUrl = parseUrl(config.sourceUrl);
-    if (is.nullOrUndefined(parsedUrl)) {
+    if (isNullOrUndefined(parsedUrl)) {
       return '';
     }
     const protocol = parsedUrl.protocol.replace(regEx(/^git\+/), '');
@@ -265,21 +280,21 @@ export abstract class ChangeLogSource {
 
   getRepositoryFromUrl(config: BranchUpgradeConfig): string {
     const parsedUrl = parseUrl(config.sourceUrl);
-    if (is.nullOrUndefined(parsedUrl)) {
+    if (isNullOrUndefined(parsedUrl)) {
       return '';
     }
     const pathname = parsedUrl.pathname;
     return trimSlashes(pathname).replace(regEx(/\.git$/), '');
   }
 
-  protected hasValidToken(config: BranchUpgradeConfig): {
+  protected hasValidToken(_config: BranchUpgradeConfig): {
     isValid: boolean;
     error?: ChangeLogError;
   } {
     return { isValid: true };
   }
 
-  protected shouldSkipPackage(config: BranchUpgradeConfig): boolean {
+  protected shouldSkipPackage(_config: BranchUpgradeConfig): boolean {
     return false;
   }
 

@@ -1,13 +1,13 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
-import { ensureCacheDir, readLocalFile } from '../../../util/fs';
-import { escapeRegExp, regEx } from '../../../util/regex';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { extrasPattern } from './extract';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
+import { ensureCacheDir, readLocalFile } from '../../../util/fs/index.ts';
+import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { extrasPattern } from './extract.ts';
 
 /**
  * Create a RegExp that matches the first dependency pattern for
@@ -41,7 +41,7 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`pip_requirements.updateArtifacts(${packageFileName})`);
-  if (!is.nonEmptyArray(updatedDeps)) {
+  if (!isNonEmptyArray(updatedDeps)) {
     logger.debug('No updated pip_requirements deps - returning null');
     return null;
   }

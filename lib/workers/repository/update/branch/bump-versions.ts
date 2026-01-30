@@ -1,15 +1,15 @@
 import { type ReleaseType, inc } from 'semver';
-import type { BumpVersionConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { scm } from '../../../../modules/platform/scm';
-import { coerceArray } from '../../../../util/array';
-import { readLocalFile } from '../../../../util/fs';
-import type { FileChange } from '../../../../util/git/types';
-import { regEx } from '../../../../util/regex';
-import { matchRegexOrGlobList } from '../../../../util/string-match';
-import { compile } from '../../../../util/template';
-import type { BranchConfig } from '../../../types';
-import { getFilteredFileList } from '../../extract/file-match';
+import type { BumpVersionConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { coerceArray } from '../../../../util/array.ts';
+import { readLocalFile } from '../../../../util/fs/index.ts';
+import type { FileChange } from '../../../../util/git/types.ts';
+import { regEx } from '../../../../util/regex.ts';
+import { matchRegexOrGlobList } from '../../../../util/string-match.ts';
+import { compile } from '../../../../util/template/index.ts';
+import type { BranchConfig } from '../../../types.ts';
+import { getFilteredFileList } from '../../extract/file-match.ts';
 
 type ParseFileChangesResult =
   | { state: 'modified'; content: string | null }
@@ -143,7 +143,23 @@ async function bumpVersion(
       let newVersion: string | null = null;
       try {
         const bumpType = compile(rawBumpType, branchConfig);
-        newVersion = inc(version, bumpType as ReleaseType);
+        const parts = regEx('^(?<major>\\d+)(?:\\.(?<minor>\\d+))?$').exec(
+          version,
+        );
+        if (parts?.groups) {
+          const { major, minor } = parts.groups;
+          if (bumpType === 'major') {
+            newVersion = `${parseInt(major) + 1}${minor ? `.0` : ''}`;
+          } else if (bumpType === 'minor') {
+            newVersion = `${major}.${parseInt(minor) + 1}`;
+          } else {
+            throw new Error(
+              `Unsupported bump type for {major}.{minor} version: ${bumpType}`,
+            );
+          }
+        } else {
+          newVersion = inc(version, bumpType as ReleaseType);
+        }
       } catch (e) {
         addArtifactError(
           branchConfig,

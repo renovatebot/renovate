@@ -1,5 +1,5 @@
-import pep440 from '../../modules/versioning/pep440';
-import { CurrentVersionMatcher } from './current-version';
+import pep440 from '../../modules/versioning/pep440/index.ts';
+import { CurrentVersionMatcher } from './current-version.ts';
 
 describe('util/package-rules/current-version', () => {
   const matcher = new CurrentVersionMatcher();
