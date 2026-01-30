@@ -201,6 +201,12 @@ export async function getPr(number: number): Promise<Pr | null> {
 
 export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prConfig.number}, ${prConfig.prTitle})`);
+  /* v8 ignore next -- should never happen */
+  if (prConfig.prTitle) {
+    logger.warn(
+      'updatePr() called with prTitle - this should never happen as the title should be set via commitAndPush(), please report this issue.',
+    );
+  }
   // prConfig.prBody will only be set if the body has changed
   if (prConfig.prBody) {
     await client.addMessage(
