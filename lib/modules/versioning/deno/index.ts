@@ -48,6 +48,14 @@ export function getNewValue({
       return currentValue; // keep "latest" as is
     }
   }
+  if (currentValue === '*') {
+    if (rangeStrategy === 'pin') {
+      return newVersion;
+    }
+    if (rangeStrategy === 'update-lockfile') {
+      return currentValue; // keep "*" as is
+    }
+  }
   return npm.getNewValue({
     currentValue,
     rangeStrategy,
