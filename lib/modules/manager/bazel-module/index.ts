@@ -1,9 +1,9 @@
-import type { Category } from '../../../constants';
-import { BazelDatasource } from '../../datasource/bazel';
-import { DockerDatasource } from '../../datasource/docker';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { MavenDatasource } from '../../datasource/maven';
-import { extractPackageFile } from './extract';
+import type { Category } from '../../../constants/index.ts';
+import { BazelDatasource } from '../../datasource/bazel/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { MavenDatasource } from '../../datasource/maven/index.ts';
+import { extractPackageFile } from './extract.ts';
 
 export { extractPackageFile };
 

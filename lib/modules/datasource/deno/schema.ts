@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { getSourceUrl as getGithubSourceUrl } from '../../../util/github/url';
-import { LooseArray } from '../../../util/schema-utils';
-import { MaybeTimestamp } from '../../../util/timestamp';
-import type { Release } from '../types';
+import { getSourceUrl as getGithubSourceUrl } from '../../../util/github/url.ts';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
+import { MaybeTimestamp } from '../../../util/timestamp.ts';
+import type { Release } from '../types.ts';
 
 export const DenoApiTag = z.object({
   kind: z.string(),

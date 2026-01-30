@@ -1,35 +1,85 @@
 import { isNumber, isString } from '@sindresorhus/is';
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import type { PackageFile } from '../../../../modules/manager/types';
-import { platform } from '../../../../modules/platform';
-import { ensureComment } from '../../../../modules/platform/comment';
-import { hashBody } from '../../../../modules/platform/pr-body';
-import { scm } from '../../../../modules/platform/scm';
-import { getElapsedDays } from '../../../../util/date';
-import { emojify } from '../../../../util/emoji';
-import { getFile } from '../../../../util/git';
-import { toSha256 } from '../../../../util/hash';
-import * as template from '../../../../util/template';
-import type { BranchConfig } from '../../../types';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { PackageFile } from '../../../../modules/manager/types.ts';
+import { ensureComment } from '../../../../modules/platform/comment.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { hashBody } from '../../../../modules/platform/pr-body.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { getInheritedOrGlobal } from '../../../../util/common.ts';
+import { getElapsedDays } from '../../../../util/date.ts';
+import { emojify } from '../../../../util/emoji.ts';
+import { getFile } from '../../../../util/git/index.ts';
+import { toSha256 } from '../../../../util/hash.ts';
+import * as template from '../../../../util/template/index.ts';
+import type { BranchConfig } from '../../../types.ts';
 import {
   getDepWarningsOnboardingPR,
   getErrors,
   getWarnings,
-} from '../../errors-warnings';
-import { getPlatformPrOptions } from '../../update/pr';
-import { prepareLabels } from '../../update/pr/labels';
-import { addParticipants } from '../../update/pr/participants';
-import { isOnboardingBranchConflicted } from '../branch/onboarding-branch-cache';
+} from '../../errors-warnings.ts';
+import { getPlatformPrOptions } from '../../update/pr/index.ts';
+import { prepareLabels } from '../../update/pr/labels.ts';
+import { addParticipants } from '../../update/pr/participants.ts';
+import { isOnboardingBranchConflicted } from '../branch/onboarding-branch-cache.ts';
 import {
   OnboardingState,
   getDefaultConfigFileName,
   getSemanticCommitPrTitle,
-} from '../common';
-import { getBaseBranchDesc } from './base-branch';
-import { getConfigDesc } from './config-description';
-import { getExpectedPrList } from './pr-list';
+} from '../common.ts';
+import { getBaseBranchDesc } from './base-branch.ts';
+import { getConfigDesc } from './config-description.ts';
+import { getExpectedPrList } from './pr-list.ts';
+
+/**
+ * Given an existing PR, if onboardingAutoCloseAge has passed, close the PR.
+ *
+ * Returns true if the PR was closed.
+ */
+async function ensureOnboardingAutoCloseAge(existingPr: Pr): Promise<boolean> {
+  // check if the existing pr crosses the onboarding autoclose age
+  const ageOfOnboardingPr = getElapsedDays(existingPr.createdAt!, false);
+  const onboardingAutoCloseAge = getInheritedOrGlobal('onboardingAutoCloseAge');
+  if (onboardingAutoCloseAge) {
+    logger.debug(
+      {
+        onboardingAutoCloseAge,
+        createdAt: existingPr.createdAt!,
+        ageOfOnboardingPr,
+      },
+      `Determining that the onboarding PR created at \`${existingPr.createdAt!}\` was created ${ageOfOnboardingPr.toFixed(2)} days ago`,
+    );
+  }
+  if (
+    isNumber(onboardingAutoCloseAge) &&
+    ageOfOnboardingPr > onboardingAutoCloseAge
+  ) {
+    // close the pr
+    await platform.updatePr({
+      number: existingPr.number,
+      state: 'closed',
+      prTitle: existingPr.title,
+    });
+    // ensure comment
+    await ensureComment({
+      number: existingPr.number,
+      topic: `Renovate is disabled`,
+      content: `Renovate is disabled because the onboarding PR has been unmerged for more than ${onboardingAutoCloseAge} days. To enable Renovate, you can either (a) change this PR's title to get a new onboarding PR, and merge the new onboarding PR, or (b) create a Renovate config file, and commit that file to your base branch.`,
+    });
+    logger.debug(
+      {
+        ageOfOnboardingPr,
+        onboardingAutoCloseAge,
+      },
+      `Renovate is being disabled for this repository as the onboarding PR has been unmerged for more than ${onboardingAutoCloseAge} days`,
+    );
+    return true;
+  }
+  return false;
+}
 
 export async function ensureOnboardingPr(
   config: RenovateConfig,
@@ -38,7 +88,6 @@ export async function ensureOnboardingPr(
 ): Promise<void> {
   if (
     config.repoIsOnboarded === true ||
-    OnboardingState.onboardingCacheValid ||
     (config.onboardingRebaseCheckbox && !OnboardingState.prUpdateRequested)
   ) {
     return;
@@ -51,34 +100,11 @@ export async function ensureOnboardingPr(
     config.defaultBranch,
   );
   if (existingPr) {
-    // check if the existing pr crosses the onboarding autoclose age
-    const ageOfOnboardingPr = getElapsedDays(existingPr.createdAt!);
-    const onboardingAutoCloseAge = GlobalConfig.get('onboardingAutoCloseAge')!;
-    if (
-      isNumber(onboardingAutoCloseAge) &&
-      ageOfOnboardingPr > onboardingAutoCloseAge
-    ) {
-      // close the pr
-      await platform.updatePr({
-        number: existingPr.number,
-        state: 'closed',
-        prTitle: existingPr.title,
-      });
-      // ensure comment
-      await ensureComment({
-        number: existingPr.number,
-        topic: `Renovate is disabled`,
-        content: `Renovate is disabled because the onboarding PR has been unmerged for more than ${onboardingAutoCloseAge} days. To enable Renovate, you can either (a) change this PR's title to get a new onboarding PR, and merge the new onboarding PR, or (b) create a Renovate config file, and commit that file to your base branch.`,
-      });
-      logger.debug(
-        {
-          ageOfOnboardingPr,
-          onboardingAutoCloseAge,
-        },
-        `Renovate is being disabled for this repository as the onboarding PR has been umerged for more than ${onboardingAutoCloseAge} days`,
-      );
-      return;
+    const wasClosed = await ensureOnboardingAutoCloseAge(existingPr);
+    if (wasClosed) {
+      throw new Error(REPOSITORY_CLOSED_ONBOARDING);
     }
+
     // skip pr-update if branch is conflicted
     if (
       await isOnboardingBranchConflicted(
@@ -102,6 +128,11 @@ export async function ensureOnboardingPr(
       return;
     }
   }
+
+  if (OnboardingState.onboardingCacheValid) {
+    return;
+  }
+
   const onboardingConfigHashComment =
     await getOnboardingConfigHashComment(config);
   const rebaseCheckBox = getRebaseCheckbox(config.onboardingRebaseCheckbox);

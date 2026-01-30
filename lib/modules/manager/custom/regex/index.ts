@@ -1,20 +1,20 @@
 import { isTruthy } from '@sindresorhus/is';
 import upath from 'upath';
-import type { Category } from '../../../../constants';
-import { logger } from '../../../../logger';
-import type { MaybePromise } from '../../../../types';
+import type { Category } from '../../../../constants/index.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { MaybePromise } from '../../../../types/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../../types';
-import { validMatchFields } from '../utils';
-import { handleAny, handleCombination, handleRecursive } from './strategies';
+} from '../../types.ts';
+import { validMatchFields } from '../utils.ts';
+import { handleAny, handleCombination, handleRecursive } from './strategies.ts';
 import type {
   PackageFileInfo,
   RegexManagerConfig,
   RegexManagerTemplates,
-} from './types';
+} from './types.ts';
 
 export const categories: Category[] = ['custom'];
 

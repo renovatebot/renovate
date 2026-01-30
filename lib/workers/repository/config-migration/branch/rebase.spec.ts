@@ -1,13 +1,13 @@
 import type { Indent } from 'detect-indent';
 import JSON5 from 'json5';
-import { getConfig } from '../../../../config/defaults';
-import { GlobalConfig } from '../../../../config/global';
-import { MigratedDataFactory } from './migrated-data';
-import type { MigratedData } from './migrated-data';
-import { jsonStripWhitespaces, rebaseMigrationBranch } from './rebase';
-import { Fixtures } from '~test/fixtures';
-import { git, partial, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { MigratedDataFactory } from './migrated-data.ts';
+import type { MigratedData } from './migrated-data.ts';
+import { jsonStripWhitespaces, rebaseMigrationBranch } from './rebase.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { git, partial, scm } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
 const formattedMigratedData = Fixtures.getJson(
   './migrated-data-formatted.json',

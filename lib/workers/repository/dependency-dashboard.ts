@@ -6,23 +6,23 @@ import {
   isTruthy,
 } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../config/global';
-import type { RenovateConfig } from '../../config/types';
-import { logger } from '../../logger';
-import type { PackageFile } from '../../modules/manager/types';
-import { platform } from '../../modules/platform';
-import { coerceArray } from '../../util/array';
-import { emojify } from '../../util/emoji';
-import { regEx } from '../../util/regex';
-import { coerceString } from '../../util/string';
-import * as template from '../../util/template';
-import type { BranchConfig, SelectAllConfig } from '../types';
-import { extractRepoProblems } from './common';
-import type { ConfigMigrationResult } from './config-migration';
-import { getDepWarningsDashboard } from './errors-warnings';
-import { PackageFiles } from './package-files';
-import type { Vulnerability } from './process/types';
-import { Vulnerabilities } from './process/vulnerabilities';
+import { GlobalConfig } from '../../config/global.ts';
+import type { RenovateConfig } from '../../config/types.ts';
+import { logger } from '../../logger/index.ts';
+import type { PackageFile } from '../../modules/manager/types.ts';
+import { platform } from '../../modules/platform/index.ts';
+import { coerceArray } from '../../util/array.ts';
+import { emojify } from '../../util/emoji.ts';
+import { regEx } from '../../util/regex.ts';
+import { coerceString } from '../../util/string.ts';
+import * as template from '../../util/template/index.ts';
+import type { BranchConfig, SelectAllConfig } from '../types.ts';
+import { extractRepoProblems } from './common.ts';
+import type { ConfigMigrationResult } from './config-migration/index.ts';
+import { getDepWarningsDashboard } from './errors-warnings.ts';
+import { PackageFiles } from './package-files.ts';
+import type { Vulnerability } from './process/types.ts';
+import { Vulnerabilities } from './process/vulnerabilities.ts';
 
 interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;
@@ -682,7 +682,15 @@ export function getAbandonedPackagesMd(
     return '';
   }
 
-  let abandonedMd = emojify('> :information_source: **Note**\n> \n');
+  let abandonedMd = emojify(
+    '## Abandoned Dependencies\n\n> :information_source: **Note**\n> \n',
+  );
+
+  abandonedMd +=
+    'Packages are marked as abandoned when they exceed the [`abandonmentThreshold`](https://docs.renovatebot.com/configuration-options/#abandonmentthreshold) since their last release. ';
+  abandonedMd +=
+    'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n> \n';
+
   abandonedMd +=
     '> These dependencies have not received updates for an extended period and may be unmaintained:\n\n';
 
@@ -702,13 +710,9 @@ export function getAbandonedPackagesMd(
     }
   }
 
-  abandonedMd += '\n</details>\n\n';
-  abandonedMd +=
-    'Packages are marked as abandoned when they exceed the [`abandonmentThreshold`](https://docs.renovatebot.com/configuration-options/#abandonmentthreshold) since their last release.\n';
-  abandonedMd +=
-    'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n\n';
+  abandonedMd += '\n</details>\n\n\n';
 
-  return abandonedMd + '\n';
+  return abandonedMd;
 }
 
 function getFooter(config: RenovateConfig): string {

@@ -1,17 +1,16 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import upath from 'upath';
-import { GlobalConfig } from '../../config/global';
-import { TEMPORARY_ERROR } from '../../constants/error-messages';
-import { logger } from '../../logger';
-import { getCustomEnv, getUserEnv } from '../env';
-import { rawExec } from './common';
-import { generateInstallCommands, isDynamicInstall } from './containerbase';
+import { GlobalConfig } from '../../config/global.ts';
+import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
+import { getCustomEnv, getUserEnv } from '../env.ts';
+import { rawExec } from './common.ts';
+import { generateInstallCommands, isDynamicInstall } from './containerbase.ts';
 import {
   generateDockerCommand,
   removeDockerContainer,
-  sideCarImage,
-} from './docker';
-import { getHermitEnvs, isHermit } from './hermit';
+} from './docker/index.ts';
+import { getHermitEnvs, isHermit } from './hermit.ts';
 import type {
   CommandWithOptions,
   DockerOptions,
@@ -20,8 +19,8 @@ import type {
   ExtraEnv,
   Opt,
   RawExecOptions,
-} from './types';
-import { asRawCommands, getChildEnv } from './utils';
+} from './types.ts';
+import { getChildEnv } from './utils.ts';
 
 function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
   const extraEnvKeys = Object.keys(extraEnv);
@@ -81,6 +80,7 @@ async function prepareRawExec(
     | CommandWithOptions[]
     | (string | CommandWithOptions)[],
   opts: ExecOptions,
+  sideCarImage: string,
 ): Promise<RawExecArguments> {
   const { docker } = opts;
   const preCommands = opts.preCommands ?? [];
@@ -113,12 +113,13 @@ async function prepareRawExec(
     const cwd = getCwd(opts);
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
     const dockerCommand = await generateDockerCommand(
-      asRawCommands(rawCommands),
+      rawCommands,
       [
         ...(await generateInstallCommands(opts.toolConstraints)),
         ...preCommands,
       ],
       dockerOptions,
+      sideCarImage,
     );
     rawCommands = [dockerCommand];
   } else if (isDynamicInstall(opts.toolConstraints)) {
@@ -166,8 +167,13 @@ export async function exec(
 ): Promise<ExecResult> {
   const { docker } = opts;
   const dockerChildPrefix = GlobalConfig.get('dockerChildPrefix', 'renovate_');
+  const sideCarImage = GlobalConfig.get('dockerSidecarImage')!;
 
-  const { rawCommands, rawOptions } = await prepareRawExec(cmd, opts);
+  const { rawCommands, rawOptions } = await prepareRawExec(
+    cmd,
+    opts,
+    sideCarImage,
+  );
   const useDocker = isDocker(docker);
 
   let res: ExecResult = { stdout: '', stderr: '' };

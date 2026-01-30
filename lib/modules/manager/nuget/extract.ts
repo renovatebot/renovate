@@ -1,25 +1,25 @@
 import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
-import { logger } from '../../../logger';
-import { getSiblingFileName, localPathExists } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
-import { NugetDatasource } from '../../datasource/nuget';
-import * as semver from '../../versioning/semver';
-import { getDep } from '../dockerfile/extract';
+import { logger } from '../../../logger/index.ts';
+import { getSiblingFileName, localPathExists } from '../../../util/fs/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { NugetDatasource } from '../../datasource/nuget/index.ts';
+import * as semver from '../../versioning/semver/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import { extractMsbuildGlobalManifest } from './extract/global-manifest';
-import type { DotnetToolsManifest, NugetPackageDependency } from './types';
+} from '../types.ts';
+import { extractMsbuildGlobalManifest } from './extract/global-manifest.ts';
+import type { DotnetToolsManifest, NugetPackageDependency } from './types.ts';
 import {
   applyRegistries,
   findVersion,
   getConfiguredRegistries,
   isXmlElement,
-} from './util';
+} from './util.ts';
 
 /**
  * https://learn.microsoft.com/nuget/concepts/package-versioning

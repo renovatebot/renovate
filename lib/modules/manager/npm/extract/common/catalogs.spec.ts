@@ -1,5 +1,5 @@
-import type { Catalog } from '../types';
-import { extractCatalogDeps } from './catalogs';
+import type { Catalog } from '../types.ts';
+import { extractCatalogDeps } from './catalogs.ts';
 
 describe('modules/manager/npm/extract/common/catalogs', () => {
   it('returns correct dependencies for pnpm', () => {

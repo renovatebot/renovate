@@ -1,11 +1,11 @@
-import { addLibYears } from '../../../instrumentation/reporting';
-import type { PackageFile } from '../../../modules/manager/types';
-import type { Timestamp } from '../../../util/timestamp';
-import { calculateLibYears } from './libyear';
-import { logger } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import { addLibYears } from '../../../instrumentation/reporting.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
+import { calculateLibYears } from './libyear.ts';
+import { logger } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
-vi.mock('../../../instrumentation/reporting');
+vi.mock('../../../instrumentation/reporting.ts');
 
 describe('workers/repository/process/libyear', () => {
   const config: RenovateConfig = {};

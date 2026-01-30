@@ -1,6 +1,9 @@
 import { parse as jsoncWeaverParse } from '@felipecrs/jsonc-weaver';
 import JSON5 from 'json5';
 import type { JsonValue } from 'type-fest';
+import { GlobalConfig } from '../config/global.ts';
+import { InheritConfig, NOT_PRESET } from '../config/inherit.ts';
+import type { GlobalInheritableConfig } from '../config/types.ts';
 import {
   AZURE_API_USING_HOST_TYPES,
   BITBUCKET_API_USING_HOST_TYPES,
@@ -9,11 +12,11 @@ import {
   GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
-} from '../constants';
-import { logger } from '../logger';
-import type { Nullish } from '../types';
-import * as hostRules from './host-rules';
-import { parseUrl } from './url';
+} from '../constants/index.ts';
+import { logger } from '../logger/index.ts';
+import type { Nullish } from '../types/index.ts';
+import * as hostRules from './host-rules.ts';
+import { parseUrl } from './url.ts';
 
 /**
  * Tries to detect the `platform` from a url.
@@ -138,4 +141,19 @@ export function parseJsonWithFallback(
 
 export function parseJsonc(content: string): JsonValue {
   return jsoncWeaverParse(content);
+}
+
+/**
+ * Use only if an option is inherited + globalOnly
+ * For globalOnly options use GlobalConfig.get
+ */
+export function getInheritedOrGlobal<Key extends keyof GlobalInheritableConfig>(
+  key: Key,
+): GlobalInheritableConfig[Key] {
+  const inheritedValue = InheritConfig.get(key);
+  if (inheritedValue !== NOT_PRESET) {
+    return inheritedValue;
+  }
+
+  return GlobalConfig.get(key);
 }

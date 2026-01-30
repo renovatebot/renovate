@@ -1,8 +1,8 @@
-import type { Category } from '../../../constants';
-import { PypiDatasource } from '../../datasource/pypi';
-export { bumpPackageVersion } from './update';
-export { extractPackageFile } from './extract';
-export { updateArtifacts } from './artifacts';
+import type { Category } from '../../../constants/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
+export { bumpPackageVersion } from './update.ts';
+export { extractPackageFile } from './extract.ts';
+export { updateArtifacts } from './artifacts.ts';
 
 export const supportsLockFileMaintenance = true;
 

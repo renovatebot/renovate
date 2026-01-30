@@ -1,8 +1,8 @@
 import { DateTime } from 'luxon';
 import { z } from 'zod';
-import { logger } from '../../../logger';
-import * as memCache from '../../../util/cache/memory';
-import { getCache } from '../../../util/cache/repository';
+import { logger } from '../../../logger/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
 
 const GithubIssueBase = z.object({
   number: z.number(),
@@ -123,8 +123,7 @@ export class GithubIssueCache {
       // If we reached the item which is already in the cache,
       // it means sync is done.
       if (
-        cachedIssue &&
-        cachedIssue.number === issue.number &&
+        cachedIssue?.number === issue.number &&
         cachedIssue.lastModified === issue.lastModified
       ) {
         isReconciled = true;

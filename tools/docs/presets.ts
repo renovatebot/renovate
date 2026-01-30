@@ -1,6 +1,6 @@
-import { groups as presetGroups } from '../../lib/config/presets/internal';
-import { logger } from '../../lib/logger';
-import { updateFile } from '../utils';
+import { groups as presetGroups } from '../../lib/config/presets/internal/index.ts';
+import { logger } from '../../lib/logger/index.ts';
+import { updateFile } from '../utils/index.ts';
 
 function jsUcfirst(string: string): string {
   return string.charAt(0).toUpperCase() + string.slice(1);

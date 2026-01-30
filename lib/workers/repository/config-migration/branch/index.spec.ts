@@ -1,20 +1,20 @@
 import { mock } from 'vitest-mock-extended';
-import { getConfig } from '../../../../config/defaults';
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
-import { createConfigMigrationBranch } from './create';
-import type { MigratedData } from './migrated-data';
-import { rebaseMigrationBranch } from './rebase';
-import { checkConfigMigrationBranch } from '.';
-import { Fixtures } from '~test/fixtures';
-import { git, partial, platform, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { createConfigMigrationBranch } from './create.ts';
+import { checkConfigMigrationBranch } from './index.ts';
+import type { MigratedData } from './migrated-data.ts';
+import { rebaseMigrationBranch } from './rebase.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { git, partial, platform, scm } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
-vi.mock('./migrated-data');
-vi.mock('./rebase');
-vi.mock('./create');
-vi.mock('../../update/branch/handle-existing');
+vi.mock('./migrated-data.ts');
+vi.mock('./rebase.ts');
+vi.mock('./create.ts');
+vi.mock('../../update/branch/handle-existing.ts');
 
 const migratedData = Fixtures.getJson<MigratedData>('./migrated-data.json');
 

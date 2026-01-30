@@ -1,23 +1,23 @@
-import { logger } from '../../../logger';
-import { getHttpUrl } from '../../../util/git/url';
-import { parseSingleYaml } from '../../../util/yaml';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { HelmDatasource } from '../../datasource/helm';
-import { getDep } from '../dockerfile/extract';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
+import { logger } from '../../../logger/index.ts';
+import { getHttpUrl } from '../../../util/git/url.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
+} from '../types.ts';
 import type {
   GitRefDefinition,
   GithubReleaseDefinition,
   HelmChartDefinition,
   VendirDefinition,
-} from './schema';
-import { Vendir } from './schema';
+} from './schema.ts';
+import { Vendir } from './schema.ts';
 
 export function extractHelmChart(
   helmChart: HelmChartDefinition,

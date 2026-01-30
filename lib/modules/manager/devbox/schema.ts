@@ -1,15 +1,15 @@
 import { z } from 'zod';
-import { logger } from '../../../logger';
+import { logger } from '../../../logger/index.ts';
 import {
   Jsonc,
   LooseArray,
   LooseRecord,
   withDebugMessage,
-} from '../../../util/schema-utils';
-import { DevboxDatasource } from '../../datasource/devbox';
-import { api } from '../../versioning/devbox';
-import type { PackageDependency } from '../types';
-import { devboxToolVersioning } from './tool-versioning';
+} from '../../../util/schema-utils/index.ts';
+import { DevboxDatasource } from '../../datasource/devbox/index.ts';
+import { api } from '../../versioning/devbox/index.ts';
+import type { PackageDependency } from '../types.ts';
+import { devboxToolVersioning } from './tool-versioning.ts';
 
 const DevboxEntry = z
   .array(z.string())

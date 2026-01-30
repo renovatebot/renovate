@@ -1,8 +1,8 @@
 import type { MockInstance } from 'vitest';
-import type { RequiredConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import * as env from './env';
-import type { ParseConfigOptions } from './types';
+import type { RequiredConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import * as env from './env.ts';
+import type { ParseConfigOptions } from './types.ts';
 
 describe('workers/global/config/parse/env', () => {
   describe('.getConfig(env)', () => {

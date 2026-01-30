@@ -1,11 +1,11 @@
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 import type {
   NugetBracketRange,
   NugetExactRange,
   NugetFloatingRange,
   NugetRange,
   NugetVersion,
-} from './types';
+} from './types.ts';
 
 const versionRegex = regEx(
   /^(?<major>\d+)(?:\s*\.\s*(?<minor>\d+)(?:\s*\.\s*(?<patch>\d+)(?:\s*\.\s*(?<revision>\d+))?)?)?\s*(?:-(?<prerelease>[-a-zA-Z0-9]+(?:\.[-a-zA-Z0-9]+)*))?(?:\+(?<metadata>[-a-zA-Z0-9]+(?:\.[-a-zA-Z0-9]+)*))?$/,
