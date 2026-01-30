@@ -325,34 +325,19 @@ function removeDependency(
   delete parsedContents[depType]![depName];
   const escapedDepName = escapeRegExp(depName);
   const escapedValue = escapeRegExp(currentValue);
-  const regexes = [
-    // Try removing with trailing comma first
-    regEx(`(\\s*"${escapedDepName}"\\s*:\\s*"${escapedValue}"\\s*,)`),
-    // Try removing with preceding comma (if it's the last item)
-    regEx(`(,\\s*"${escapedDepName}"\\s*:\\s*"${escapedValue}"\\s*)`),
-    // Try removing without comma (single item)
-    regEx(`(\\s*"${escapedDepName}"\\s*:\\s*"${escapedValue}"\\s*)`),
-  ];
 
-  for (const regex of regexes) {
-    const newContent = fileContent.replace(regex, '');
-    if (
-      newContent !== fileContent &&
-      dequal(parsedContents, safeJsonParse(newContent))
-    ) {
-      return newContent;
-    }
+  const regex = regEx(
+    `(,)?\\s*"${escapedDepName}"\\s*:\\s*"${escapedValue}"\\s*,?`,
+  );
+  const newContent = fileContent.replace(regex, '$1');
+
+  if (
+    newContent !== fileContent &&
+    dequal(parsedContents, JSON.parse(newContent))
+  ) {
+    return newContent;
   }
 
   /* v8 ignore next -- needs test */
   throw new Error('Could not remove dependency');
-}
-
-function safeJsonParse(content: string): NpmPackage | null {
-  try {
-    return JSON.parse(content);
-  } catch {
-    /* v8 ignore next -- needs test */
-    return null;
-  }
 }
