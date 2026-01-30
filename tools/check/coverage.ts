@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import upath from 'upath';
 import { z } from 'zod';
-import type { CoverageInfo } from './types.js';
+import type { CoverageInfo } from './types.ts';
 
 const StatementLocation = z.object({
   start: z.object({ line: z.number() }),

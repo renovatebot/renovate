@@ -9,12 +9,12 @@ import {
   type ZodTypeDef,
   z,
 } from 'zod';
-import { logger } from '../../logger';
-import type { PackageDependency } from '../../modules/manager/types';
-import { parseJsonc } from '../common';
-import { parse as parseToml } from '../toml';
-import type { YamlOptions } from '../yaml';
-import { parseSingleYaml, parseYaml } from '../yaml';
+import { logger } from '../../logger/index.ts';
+import type { PackageDependency } from '../../modules/manager/types.ts';
+import { parseJsonc } from '../common.ts';
+import { parse as parseToml } from '../toml.ts';
+import type { YamlOptions } from '../yaml.ts';
+import { parseSingleYaml, parseYaml } from '../yaml.ts';
 
 interface ErrorContext<T> {
   error: z.ZodError;

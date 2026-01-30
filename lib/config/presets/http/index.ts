@@ -1,11 +1,11 @@
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { Http } from '../../../util/http';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
-import type { HttpResponse } from '../../../util/http/types';
-import { parseUrl } from '../../../util/url';
-import type { Preset, PresetConfig } from '../types';
-import { PRESET_DEP_NOT_FOUND, parsePreset } from '../util';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import { Http } from '../../../util/http/index.ts';
+import type { HttpResponse } from '../../../util/http/types.ts';
+import { parseUrl } from '../../../util/url.ts';
+import type { Preset, PresetConfig } from '../types.ts';
+import { PRESET_DEP_NOT_FOUND, parsePreset } from '../util.ts';
 
 const http = new Http('preset');
 

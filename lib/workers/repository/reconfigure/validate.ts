@@ -1,15 +1,15 @@
 import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
-import { massageConfig } from '../../../config/massage';
-import { migrateAndValidate } from '../../../config/migrate-validate';
-import type { RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import type { Pr } from '../../../modules/platform';
-import { platform } from '../../../modules/platform';
-import { ensureComment } from '../../../modules/platform/comment';
-import { getBranchCommit } from '../../../util/git';
-import { regEx } from '../../../util/regex';
-import { setReconfigureBranchCache } from './reconfigure-cache';
-import { getReconfigureBranchName, setBranchStatus } from './utils';
+import { massageConfig } from '../../../config/massage.ts';
+import { migrateAndValidate } from '../../../config/migrate-validate.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import { ensureComment } from '../../../modules/platform/comment.ts';
+import type { Pr } from '../../../modules/platform/index.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import { getBranchCommit } from '../../../util/git/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { setReconfigureBranchCache } from './reconfigure-cache.ts';
+import { getReconfigureBranchName, setBranchStatus } from './utils.ts';
 
 export async function validateReconfigureBranch(
   config: RenovateConfig,

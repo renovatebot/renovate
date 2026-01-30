@@ -1,13 +1,13 @@
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as _packageCache from '../../../util/cache/package';
-import * as hostRules from '../../../util/host-rules';
-import { Http } from '../../../util/http';
-import type { HttpResponse } from '../../../util/http/types';
-import { getDependency } from './get';
-import { resolveRegistryUrl, setNpmrc } from './npmrc';
-import * as httpMock from '~test/http-mock';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as _packageCache from '../../../util/cache/package/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { Http } from '../../../util/http/index.ts';
+import type { HttpResponse } from '../../../util/http/types.ts';
+import { getDependency } from './get.ts';
+import { resolveRegistryUrl, setNpmrc } from './npmrc.ts';
+import * as httpMock from '~test/http-mock.ts';
 
-vi.mock('../../../util/cache/package');
+vi.mock('../../../util/cache/package/index.ts');
 
 const packageCache = vi.mocked(_packageCache);
 

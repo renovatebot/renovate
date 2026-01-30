@@ -1,12 +1,12 @@
-import * as memCache from '../../../util/cache/memory';
-import { setBaseUrl } from '../../../util/http/bitbucket';
-import type { PlatformResult, RepoParams } from '../types';
-import type { PrTask } from './schema';
-import * as bitbucket from '.';
-import * as httpMock from '~test/http-mock';
-import { git, hostRules, logger } from '~test/util';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { setBaseUrl } from '../../../util/http/bitbucket.ts';
+import type { PlatformResult, RepoParams } from '../types.ts';
+import * as bitbucket from './index.ts';
+import type { PrTask } from './schema.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { git, hostRules, logger } from '~test/util.ts';
 
-vi.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules.ts');
 
 const baseUrl = 'https://api.bitbucket.org';
 

@@ -1,21 +1,47 @@
-import { getConfigFileNames } from './app-strings';
-import { GlobalConfig } from './global';
-import type { RenovateConfig } from './types';
-import * as configValidation from './validation';
-import { partial } from '~test/util';
+import type { HostRule } from '../types/index.ts';
+import { getConfigFileNames } from './app-strings.ts';
+import { GlobalConfig } from './global.ts';
+import type { RenovateConfig } from './types.ts';
+import * as configValidation from './validation.ts';
+import { partial } from '~test/util.ts';
 
 describe('config/validation', () => {
   describe('validateConfig(config)', () => {
-    it('returns deprecation warnings', async () => {
-      const config = {
-        prTitle: 'something',
+    it.each(['branchName', 'commitMessage', 'prTitle'])(
+      `returns custom deprecation warnings for %s`,
+      async (option: string) => {
+        const config = {
+          [option]: 'something',
+        };
+        const { warnings } = await configValidation.validateConfig(
+          'repo',
+          config,
+        );
+        expect(warnings).toHaveLength(1);
+        expect(warnings).toMatchSnapshot();
+      },
+    );
+
+    // NOTE that this should always refer to a deprecated option, but at some point, we may have removed them all, so we'll need to think about how to handle that, at that point
+    it('returns the deprecationMsg for `dnsCache` as a warning', async () => {
+      const config: RenovateConfig = {
+        hostRules: [
+          {
+            dnsCache: true,
+          } as HostRule,
+        ],
       };
-      const { warnings } = await configValidation.validateConfig(
+      const { errors, warnings } = await configValidation.validateConfig(
         'repo',
         config,
       );
-      expect(warnings).toHaveLength(1);
-      expect(warnings).toMatchSnapshot();
+      expect(errors).toHaveLength(0);
+      expect(warnings).toMatchObject([
+        {
+          topic: 'Deprecation Warning',
+          message: `The 'dnsCache' option is deprecated: This option is deprecated and will be removed in a future release.`,
+        },
+      ]);
     });
 
     it('allow enabled field in vulnerabilityAlerts', async () => {
@@ -1818,6 +1844,24 @@ describe('config/validation', () => {
   });
 
   describe('validate globalOptions()', () => {
+    // TODO #40742 #40747
+    it('binarySource=docker is deprecated', async () => {
+      const config: GlobalConfig = {
+        binarySource: 'docker',
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Deprecation Warning',
+          message:
+            'Usage of `binarySource=docker` is deprecated, and will be removed in the future. Please migrate to `binarySource=install`. Feedback on the usage of `binarySource=docker` is welcome at https://github.com/renovatebot/renovate/discussions/40742',
+        },
+      ]);
+    });
+
     it('binarySource', async () => {
       const config = {
         binarySource: 'invalid' as never,

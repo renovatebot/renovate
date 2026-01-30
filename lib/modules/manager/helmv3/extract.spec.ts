@@ -1,9 +1,9 @@
-import { DockerDatasource } from '../../datasource/docker';
-import type { ExtractConfig } from '../types';
-import { extractPackageFile } from '.';
-import { fs, partial } from '~test/util';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import type { ExtractConfig } from '../types.ts';
+import { extractPackageFile } from './index.ts';
+import { fs, partial } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const config = partial<ExtractConfig>({
   registryAliases: {

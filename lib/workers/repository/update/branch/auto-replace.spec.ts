@@ -1,18 +1,18 @@
 import { codeBlock } from 'common-tags';
-import { getConfig } from '../../../../config/defaults';
-import { GlobalConfig } from '../../../../config/global';
-import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
-import { extractPackageFile } from '../../../../modules/manager/html';
-import type { BranchUpgradeConfig } from '../../../types';
-import { doAutoReplace } from './auto-replace';
-import { Fixtures } from '~test/fixtures';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
+import { extractPackageFile } from '../../../../modules/manager/html/index.ts';
+import type { BranchUpgradeConfig } from '../../../types.ts';
+import { doAutoReplace } from './auto-replace.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 const sampleHtml = Fixtures.get(
   'sample.html',
   `../../../../modules/manager/html`,
 );
 
-vi.mock('../../../../util/fs');
+vi.mock('../../../../util/fs/index.ts');
 
 describe('workers/repository/update/branch/auto-replace', () => {
   describe('doAutoReplace', () => {

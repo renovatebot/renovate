@@ -4,9 +4,9 @@ import type {
   Span,
   SpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
-import { ATTR_VCS_GIT_OPERATION_TYPE } from '../../instrumentation/types';
-import { GitOperationStats } from '../stats';
-import type { GitOperationType } from './types';
+import { ATTR_VCS_GIT_OPERATION_TYPE } from '../../instrumentation/types.ts';
+import { GitOperationStats } from '../stats.ts';
+import type { GitOperationType } from './types.ts';
 
 export class GitOperationSpanProcessor implements SpanProcessor {
   forceFlush(): Promise<void> {

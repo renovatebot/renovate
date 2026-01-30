@@ -1,6 +1,6 @@
 import { isNumber, isString } from '@sindresorhus/is';
 import semver from 'semver';
-import { GlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -8,18 +8,18 @@ import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { BranchStatus } from '../../../types';
-import { deduplicateArray } from '../../../util/array';
-import { parseJson } from '../../../util/common';
-import { getEnv } from '../../../util/env';
-import * as git from '../../../util/git';
-import { setBaseUrl } from '../../../util/http/gitea';
-import { map } from '../../../util/promises';
-import { sanitize } from '../../../util/sanitize';
-import { ensureTrailingSlash } from '../../../util/url';
-import { getPrBodyStruct, hashBody } from '../pr-body';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import { deduplicateArray } from '../../../util/array.ts';
+import { parseJson } from '../../../util/common.ts';
+import { getEnv } from '../../../util/env.ts';
+import * as git from '../../../util/git/index.ts';
+import { setBaseUrl } from '../../../util/http/gitea.ts';
+import { map } from '../../../util/promises.ts';
+import { sanitize } from '../../../util/sanitize.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import { getPrBodyStruct, hashBody } from '../pr-body.ts';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
@@ -39,12 +39,12 @@ import type {
   RepoSortMethod,
   SortMethod,
   UpdatePrConfig,
-} from '../types';
-import { repoFingerprint } from '../util';
-import { smartTruncate } from '../utils/pr-body';
-import * as helper from './gitea-helper';
-import { giteaHttp } from './gitea-helper';
-import { GiteaPrCache } from './pr-cache';
+} from '../types.ts';
+import { repoFingerprint } from '../util.ts';
+import { smartTruncate } from '../utils/pr-body.ts';
+import * as helper from './gitea-helper.ts';
+import { giteaHttp } from './gitea-helper.ts';
+import { GiteaPrCache } from './pr-cache.ts';
 import type {
   CombinedCommitStatus,
   Comment,
@@ -52,7 +52,7 @@ import type {
   PRMergeMethod,
   PRUpdateParams,
   Repo,
-} from './types';
+} from './types.ts';
 import {
   DRAFT_PREFIX,
   getMergeMethod,
@@ -62,7 +62,7 @@ import {
   toRenovatePR,
   trimTrailingApiPath,
   usableRepo,
-} from './utils';
+} from './utils.ts';
 
 interface GiteaRepoConfig {
   ignorePrAuthor: boolean;

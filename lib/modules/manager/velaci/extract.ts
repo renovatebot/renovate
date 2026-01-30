@@ -1,9 +1,9 @@
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { parseSingleYaml } from '../../../util/yaml';
-import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFileContent } from '../types';
-import type { VelaPipelineConfiguration } from './types';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { VelaPipelineConfiguration } from './types.ts';
 
 export function extractPackageFile(
   file: string,

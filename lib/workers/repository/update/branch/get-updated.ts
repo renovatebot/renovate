@@ -1,7 +1,7 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
-import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import { get } from '../../../../modules/manager';
+import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { get } from '../../../../modules/manager/index.ts';
 import type {
   ArtifactError,
   ArtifactNotice,
@@ -10,12 +10,12 @@ import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-} from '../../../../modules/manager/types';
-import { getFile } from '../../../../util/git';
-import type { FileAddition, FileChange } from '../../../../util/git/types';
-import { coerceString } from '../../../../util/string';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
-import { doAutoReplace } from './auto-replace';
+} from '../../../../modules/manager/types.ts';
+import { getFile } from '../../../../util/git/index.ts';
+import type { FileAddition, FileChange } from '../../../../util/git/types.ts';
+import { coerceString } from '../../../../util/string.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
+import { doAutoReplace } from './auto-replace.ts';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];

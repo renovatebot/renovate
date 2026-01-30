@@ -1,6 +1,6 @@
 import { ERROR } from 'bunyan';
-import { getProblems, logger } from '../lib/logger';
-import { generateSchema } from './docs/schema';
+import { getProblems, logger } from '../lib/logger/index.ts';
+import { generateSchema } from './docs/schema.ts';
 
 process.on('unhandledRejection', (err) => {
   // Will print "unhandledRejection err is not defined"

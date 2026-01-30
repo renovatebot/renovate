@@ -1,16 +1,16 @@
 import { isBoolean } from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { queryReleases } from '../../../util/github/graphql';
-import { findCommitOfTag } from '../../../util/github/tags';
-import { getSourceUrl } from '../../../util/github/url';
-import { GithubHttp } from '../../../util/http/github';
-import { Datasource } from '../datasource';
+import { logger } from '../../../logger/index.ts';
+import { queryReleases } from '../../../util/github/graphql/index.ts';
+import { findCommitOfTag } from '../../../util/github/tags.ts';
+import { getSourceUrl } from '../../../util/github/url.ts';
+import { GithubHttp } from '../../../util/http/github.ts';
+import { Datasource } from '../datasource.ts';
 import type {
   DigestConfig,
   GetReleasesConfig,
   Release,
   ReleaseResult,
-} from '../types';
+} from '../types.ts';
 
 export const cacheNamespace = 'datasource-github-releases';
 

@@ -1,8 +1,8 @@
 import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import { HttpCache } from '../../http/cache/schema';
-import type { RepoCacheData } from './types';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import { HttpCache } from '../../http/cache/schema.ts';
+import type { RepoCacheData } from './types.ts';
 
 export function cleanupHttpCache(cacheData: RepoCacheData): void {
   const { httpCache } = cacheData;

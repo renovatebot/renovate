@@ -1,21 +1,23 @@
 #!/usr/bin/env node
 import { Command, CommanderError } from 'commander';
-import 'source-map-support/register';
+import 'source-map-support/register.js';
 import './punycode.cjs';
 import { dequal } from 'dequal';
-import { pathExists, readFile } from 'fs-extra';
-import { getConfigFileNames } from './config/app-strings';
-import { GlobalConfig } from './config/global';
-import { massageConfig } from './config/massage';
-import { migrateConfig } from './config/migration';
-import type { RenovateConfig } from './config/types';
-import { validateConfig } from './config/validation';
-import { pkg } from './expose.cjs';
-import { logger } from './logger';
-import { getEnv } from './util/env';
-import { parseConfigs } from './workers/global/config/parse';
-import { getConfig as getFileConfig } from './workers/global/config/parse/file';
-import { getParsedContent } from './workers/global/config/parse/util';
+import fs from 'fs-extra';
+import { getConfigFileNames } from './config/app-strings.ts';
+import { GlobalConfig } from './config/global.ts';
+import { massageConfig } from './config/massage.ts';
+import { migrateConfig } from './config/migration.ts';
+import type { RenovateConfig } from './config/types.ts';
+import { validateConfig } from './config/validation.ts';
+import { pkg } from './expose.ts';
+import { logger } from './logger/index.ts';
+import { getEnv } from './util/env.ts';
+import { getConfig as getFileConfig } from './workers/global/config/parse/file.ts';
+import { parseConfigs } from './workers/global/config/parse/index.ts';
+import { getParsedContent } from './workers/global/config/parse/util.ts';
+
+const { pathExists, readFile } = fs;
 
 let returnVal = 0;
 

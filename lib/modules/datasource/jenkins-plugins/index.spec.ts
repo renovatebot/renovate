@@ -1,12 +1,12 @@
-import { getPkgReleases } from '..';
-import type { Timestamp } from '../../../util/timestamp';
-import * as versioning from '../../versioning/docker';
+import type { Timestamp } from '../../../util/timestamp.ts';
+import * as versioning from '../../versioning/docker/index.ts';
+import { getPkgReleases } from '../index.ts';
+import { JenkinsPluginsDatasource } from './index.ts';
 import type {
   JenkinsPluginsInfoResponse,
   JenkinsPluginsVersionsResponse,
-} from './types';
-import { JenkinsPluginsDatasource } from '.';
-import * as httpMock from '~test/http-mock';
+} from './types.ts';
+import * as httpMock from '~test/http-mock.ts';
 
 const jenkinsPluginsInfo: JenkinsPluginsInfoResponse = {
   plugins: {

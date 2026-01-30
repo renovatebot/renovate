@@ -1,6 +1,6 @@
 import { klona } from 'klona/json';
-import { logger } from '../logger';
-import { quickStringify } from './stringify';
+import { logger } from '../logger/index.ts';
+import { quickStringify } from './stringify.ts';
 
 /**
  * Creates a deep clone of an object.

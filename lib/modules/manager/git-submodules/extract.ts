@@ -1,15 +1,15 @@
 import type { SimpleGit } from 'simple-git';
-import Git from 'simple-git';
+import { simpleGit } from 'simple-git';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import { simpleGitConfig } from '../../../util/git/config';
-import { getHttpUrl } from '../../../util/git/url';
-import { regEx } from '../../../util/regex';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import * as semVerVersioning from '../../versioning/semver';
-import type { ExtractConfig, PackageFileContent } from '../types';
-import type { GitModule } from './types';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import { simpleGitConfig } from '../../../util/git/config.ts';
+import { getHttpUrl } from '../../../util/git/url.ts';
+import { regEx } from '../../../util/regex.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import * as semVerVersioning from '../../versioning/semver/index.ts';
+import type { ExtractConfig, PackageFileContent } from '../types.ts';
+import type { GitModule } from './types.ts';
 
 async function getUrl(
   git: SimpleGit,
@@ -17,7 +17,7 @@ async function getUrl(
   submoduleName: string,
 ): Promise<string> {
   const path = (
-    await Git(simpleGitConfig()).raw([
+    await simpleGit(simpleGitConfig()).raw([
       'config',
       '--file',
       gitModulesPath,
@@ -40,7 +40,7 @@ async function getBranch(
   submoduleName: string,
 ): Promise<string | null> {
   const branchFromConfig = (
-    await Git(simpleGitConfig()).raw([
+    await simpleGit(simpleGitConfig()).raw([
       'config',
       '--file',
       gitModulesPath,
@@ -89,7 +89,7 @@ export default async function extractPackageFile(
   _config: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   const localDir = GlobalConfig.get('localDir');
-  const git = Git(localDir, simpleGitConfig());
+  const git = simpleGit(localDir, simpleGitConfig());
   const gitModulesPath = upath.join(localDir, packageFile);
 
   const depNames = await getModules(git, gitModulesPath);

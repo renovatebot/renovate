@@ -1,20 +1,20 @@
 import { Readable } from 'stream';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { getPkgReleases } from '..';
-import { GlobalConfig } from '../../../config/global';
-import * as _packageCache from '../../../util/cache/package';
-import { id as versioning } from '../../versioning/nuget';
-import { parseRegistryUrl } from './common';
-import { NugetDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
-import { hostRules, logger } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as _packageCache from '../../../util/cache/package/index.ts';
+import { id as versioning } from '../../versioning/nuget/index.ts';
+import { getPkgReleases } from '../index.ts';
+import { parseRegistryUrl } from './common.ts';
+import { NugetDatasource } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { hostRules, logger } from '~test/util.ts';
 
 const datasource = NugetDatasource.id;
 
-vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('../../../util/cache/package', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
+vi.mock('../../../util/cache/package/index.ts', () => mockDeep());
 
 const packageCache = vi.mocked(_packageCache);
 

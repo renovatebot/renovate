@@ -1,4 +1,4 @@
-import { BranchPrefixMigration } from './branch-prefix-migration';
+import { BranchPrefixMigration } from './branch-prefix-migration.ts';
 
 describe('config/migrations/custom/branch-prefix-migration', () => {
   it('should migrate template', async () => {

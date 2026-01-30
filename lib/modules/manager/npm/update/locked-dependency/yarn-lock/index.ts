@@ -1,10 +1,13 @@
 import { parseSyml } from '@yarnpkg/parsers';
-import { logger } from '../../../../../../logger';
-import { api as semver } from '../../../../../versioning/npm';
-import type { UpdateLockedConfig, UpdateLockedResult } from '../../../../types';
-import { getLockedDependencies } from './get-locked';
-import { replaceConstraintVersion } from './replace';
-import type { YarnLock, YarnLockEntryUpdate } from './types';
+import { logger } from '../../../../../../logger/index.ts';
+import { api as semver } from '../../../../../versioning/npm/index.ts';
+import type {
+  UpdateLockedConfig,
+  UpdateLockedResult,
+} from '../../../../types.ts';
+import { getLockedDependencies } from './get-locked.ts';
+import { replaceConstraintVersion } from './replace.ts';
+import type { YarnLock, YarnLockEntryUpdate } from './types.ts';
 
 export function updateLockedDependency(
   config: UpdateLockedConfig,

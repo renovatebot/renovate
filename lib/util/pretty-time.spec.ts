@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { satisfiesDateRange, toMs } from './pretty-time';
+import { satisfiesDateRange, toMs } from './pretty-time.ts';
 
 describe('util/pretty-time', () => {
   it.each`

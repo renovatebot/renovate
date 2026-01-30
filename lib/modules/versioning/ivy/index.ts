@@ -1,18 +1,18 @@
-import type { RangeStrategy } from '../../../types/versioning';
-import maven from '../maven';
+import type { RangeStrategy } from '../../../types/versioning.ts';
 import {
   TYPE_QUALIFIER,
   autoExtendMavenRange,
   isSubversion,
   tokenize,
-} from '../maven/compare';
-import type { NewValueConfig, VersioningApi } from '../types';
+} from '../maven/compare.ts';
+import maven from '../maven/index.ts';
+import type { NewValueConfig, VersioningApi } from '../types.ts';
 import {
   LATEST_REGEX,
   REV_TYPE_LATEST,
   REV_TYPE_SUBREV,
   parseDynamicRevision,
-} from './parse';
+} from './parse.ts';
 
 export const id = 'ivy';
 export const displayName = 'Ivy';

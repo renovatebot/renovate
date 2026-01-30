@@ -1,7 +1,7 @@
 import { Command } from 'commander';
-import { logger } from '../lib/logger';
-import { parseVersion } from './utils';
-import { bake, sign } from './utils/docker';
+import { logger } from '../lib/logger/index.ts';
+import { bake, sign } from './utils/docker.ts';
+import { parseVersion } from './utils/index.ts';
 
 process.on('unhandledRejection', (err) => {
   // Will print "unhandledRejection err is not defined"

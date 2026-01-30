@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import { Timestamp } from '../../../timestamp';
+import { Timestamp } from '../../../timestamp.ts';
 import type {
   GithubGraphqlDatasourceAdapter,
   GithubReleaseItem,
-} from '../types';
-import { prepareQuery } from '../util';
+} from '../types.ts';
+import { prepareQuery } from '../util.ts';
 
 const key = 'github-releases-datasource-v2';
 

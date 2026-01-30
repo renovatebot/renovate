@@ -1,5 +1,5 @@
 import { expect } from 'vitest';
-import { GitHubUrlHandler } from './github';
+import { GitHubUrlHandler } from './github.ts';
 
 describe('modules/manager/homebrew/handlers/github', () => {
   const handler = new GitHubUrlHandler();
