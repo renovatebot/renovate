@@ -223,11 +223,9 @@ export function updateDependency(
           return false;
         },
       );
-      for (const [key, value] of matches) {
-        if (typeof value === 'string') {
-          // prettier-ignore
-          parsedContents.tasks[key] = (parsedContents.tasks[key] as string).replace(searchCurrentValue, newString);
-        }
+      for (const [key] of matches) {
+        // prettier-ignore
+        parsedContents.tasks[key] = (parsedContents.tasks[key] as string).replace(searchCurrentValue, newString);
         newFileContent = replaceAsString(
           parsedContents,
           newFileContent ?? fileContent,
@@ -247,16 +245,14 @@ export function updateDependency(
           return false;
         },
       );
-      for (const [key, value] of matches) {
-        if (value && typeof value === 'object' && 'command' in value) {
-          // prettier-ignore
-          (parsedContents.tasks[key] as {
-                        command: string;
-                    }).command =
-                        (parsedContents.tasks[key] as {
-                            command: string;
-                        }).command.replace(searchCurrentValue, newString);
-        }
+      for (const [key] of matches) {
+        // prettier-ignore
+        (parsedContents.tasks[key] as {
+                      command: string;
+                  }).command =
+                      (parsedContents.tasks[key] as {
+                          command: string;
+                      }).command.replace(searchCurrentValue, newString);
         newFileContent = replaceAsString(
           parsedContents,
           newFileContent ?? fileContent,

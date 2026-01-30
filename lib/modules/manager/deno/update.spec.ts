@@ -64,6 +64,32 @@ describe('modules/manager/deno/update', () => {
         );
       });
 
+      it('returns null when scopes element not found', () => {
+        const fileContent = JSON.stringify(
+          {
+            scopes: {
+              'https://deno.land/x/': {
+                dep2: 'jsr:@scope/dep2@latest',
+              },
+            },
+          },
+          null,
+          2,
+        );
+
+        const upgrade: UpdateDependencyConfig['upgrade'] = {
+          depName: '@scope/dep1',
+          depType: 'scopes',
+          currentValue: 'latest',
+          newValue: '2.0.0',
+          datasource: 'jsr',
+          packageFile: 'deno.json',
+        };
+
+        const result = updateDependency({ fileContent, upgrade });
+        expect(result).toBeNull();
+      });
+
       it('updates dependency in tasks', () => {
         const fileContent = JSON.stringify(
           {
@@ -122,6 +148,60 @@ describe('modules/manager/deno/update', () => {
         );
       });
 
+      it('returns null when tasks element not found', () => {
+        const fileContent = JSON.stringify(
+          {
+            tasks: {
+              build: 'deno run -A npm:dep2@4.0.0',
+              dev: {
+                command: 'deno run --allow-net npm:dep2@14.0.1',
+              },
+            },
+          },
+          null,
+          2,
+        );
+
+        const upgrade: UpdateDependencyConfig['upgrade'] = {
+          depName: 'dep1',
+          depType: 'tasks',
+          currentValue: '4.0.0',
+          newValue: '4.1.0',
+          datasource: 'npm',
+          packageFile: 'deno.json',
+        };
+
+        const result = updateDependency({ fileContent, upgrade });
+        expect(result).toBeNull();
+      });
+
+      it('returns null when tasks.command element not found', () => {
+        const fileContent = JSON.stringify(
+          {
+            tasks: {
+              build: 'deno run -A npm:dep1@4.0.0',
+              dev: {
+                command: 'deno run --allow-net npm:dep2@14.0.1',
+              },
+            },
+          },
+          null,
+          2,
+        );
+
+        const upgrade: UpdateDependencyConfig['upgrade'] = {
+          depName: 'dep1',
+          depType: 'tasks.command',
+          currentValue: '14.0.1',
+          newValue: '16.0.0',
+          datasource: 'npm',
+          packageFile: 'deno.json',
+        };
+
+        const result = updateDependency({ fileContent, upgrade });
+        expect(result).toBeNull();
+      });
+
       it('updates dependency in compilerOptions.types', () => {
         const fileContent = JSON.stringify(
           {
@@ -147,6 +227,54 @@ describe('modules/manager/deno/update', () => {
         const result = updateDependency({ fileContent, upgrade });
         const parsed = JSON.parse(result!);
         expect(parsed.compilerOptions.types[0]).toBe('npm:@types/dep2@19.0.0');
+      });
+
+      it('returns null when compilerOptions.types is empty array', () => {
+        const fileContent = JSON.stringify(
+          {
+            compilerOptions: {
+              types: [],
+            },
+          },
+          null,
+          2,
+        );
+
+        const upgrade: UpdateDependencyConfig['upgrade'] = {
+          depName: '@types/dep2',
+          depType: 'compilerOptions.types',
+          currentValue: '18.0.0',
+          newValue: '19.0.0',
+          datasource: 'npm',
+          packageFile: 'deno.json',
+        };
+
+        const result = updateDependency({ fileContent, upgrade });
+        expect(result).toBeNull();
+      });
+
+      it('returns null when compilerOptions.types element not found', () => {
+        const fileContent = JSON.stringify(
+          {
+            compilerOptions: {
+              types: ['npm:@types/other@18.0.0'],
+            },
+          },
+          null,
+          2,
+        );
+
+        const upgrade: UpdateDependencyConfig['upgrade'] = {
+          depName: '@types/dep2',
+          depType: 'compilerOptions.types',
+          currentValue: '18.0.0',
+          newValue: '19.0.0',
+          datasource: 'npm',
+          packageFile: 'deno.json',
+        };
+
+        const result = updateDependency({ fileContent, upgrade });
+        expect(result).toBeNull();
       });
 
       it('updates dependency in compilerOptions.jsxImportSource', () => {
@@ -176,6 +304,54 @@ describe('modules/manager/deno/update', () => {
         expect(parsed.compilerOptions.jsxImportSource).toBe(
           'https://deno.land/x/dep2@19.0.0',
         );
+      });
+
+      it('returns null when compilerOptions.jsxImportSource does not exist', () => {
+        const fileContent = JSON.stringify(
+          {
+            compilerOptions: {
+              types: ['npm:@types/dep2@18.0.0'],
+            },
+          },
+          null,
+          2,
+        );
+
+        const upgrade: UpdateDependencyConfig['upgrade'] = {
+          depName: 'https://deno.land/x/dep2',
+          depType: 'compilerOptions.jsxImportSource',
+          currentValue: '18.0.0',
+          newValue: '19.0.0',
+          datasource: 'deno',
+          packageFile: 'deno.json',
+        };
+
+        const result = updateDependency({ fileContent, upgrade });
+        expect(result).toBeNull();
+      });
+
+      it('returns null when compilerOptions.jsxImportSourceTypes does not exist', () => {
+        const fileContent = JSON.stringify(
+          {
+            compilerOptions: {
+              types: ['npm:@types/dep2@18.0.0'],
+            },
+          },
+          null,
+          2,
+        );
+
+        const upgrade: UpdateDependencyConfig['upgrade'] = {
+          depName: '@types/dep2',
+          depType: 'compilerOptions.jsxImportSourceTypes',
+          currentValue: '18.0.0',
+          newValue: '19.0.0',
+          datasource: 'npm',
+          packageFile: 'deno.json',
+        };
+
+        const result = updateDependency({ fileContent, upgrade });
+        expect(result).toBeNull();
       });
 
       it('updates dependency in compilerOptions.jsxImportSourceTypes', () => {
@@ -233,6 +409,54 @@ describe('modules/manager/deno/update', () => {
         const result = updateDependency({ fileContent, upgrade });
         const parsed = JSON.parse(result!);
         expect(parsed.lint.plugins).toContain('npm:dep1@6.0.0');
+      });
+
+      it('returns null when lint.plugins element not found', () => {
+        const fileContent = JSON.stringify(
+          {
+            lint: {
+              plugins: ['npm:dep2@5.0.0'],
+            },
+          },
+          null,
+          2,
+        );
+
+        const upgrade: UpdateDependencyConfig['upgrade'] = {
+          depName: 'dep1',
+          depType: 'lint.plugins',
+          currentValue: '5.0.0',
+          newValue: '6.0.0',
+          datasource: 'npm',
+          packageFile: 'deno.json',
+        };
+
+        const result = updateDependency({ fileContent, upgrade });
+        expect(result).toBeNull();
+      });
+
+      it('returns null when lint.plugins is empty array', () => {
+        const fileContent = JSON.stringify(
+          {
+            lint: {
+              plugins: [],
+            },
+          },
+          null,
+          2,
+        );
+
+        const upgrade: UpdateDependencyConfig['upgrade'] = {
+          depName: 'dep1',
+          depType: 'lint.plugins',
+          currentValue: '5.0.0',
+          newValue: '6.0.0',
+          datasource: 'npm',
+          packageFile: 'deno.json',
+        };
+
+        const result = updateDependency({ fileContent, upgrade });
+        expect(result).toBeNull();
       });
 
       it('handles dependency without version', () => {
@@ -478,6 +702,66 @@ describe('modules/manager/deno/update', () => {
         const result = updateDependency({ fileContent, upgrade });
         const parsed = JSON.parse(result!);
         expect(parsed.imports.dep1).toContain('npm:dep1@2.0.0');
+      });
+
+      it('returns null when depType is not handled', () => {
+        const fileContent = JSON.stringify({
+          imports: {
+            dep1: 'npm:dep1@1.0.0',
+          },
+        });
+
+        const upgrade: UpdateDependencyConfig['upgrade'] = {
+          depName: 'dep1',
+          depType: 'unknown.type',
+          currentValue: '1.0.0',
+          newValue: '2.0.0',
+          datasource: 'npm',
+          packageFile: 'deno.json',
+        };
+
+        const result = updateDependency({ fileContent, upgrade });
+        expect(result).toBeNull();
+      });
+
+      it('returns null when compilerOptions.types does not exist', () => {
+        const fileContent = JSON.stringify({
+          compilerOptions: {
+            jsx: 'react',
+          },
+        });
+
+        const upgrade: UpdateDependencyConfig['upgrade'] = {
+          depName: '@types/dep2',
+          depType: 'compilerOptions.types',
+          currentValue: '18.0.0',
+          newValue: '19.0.0',
+          datasource: 'npm',
+          packageFile: 'deno.json',
+        };
+
+        const result = updateDependency({ fileContent, upgrade });
+        expect(result).toBeNull();
+      });
+
+      it('returns null when lint.plugins does not exist', () => {
+        const fileContent = JSON.stringify({
+          lint: {
+            rules: {},
+          },
+        });
+
+        const upgrade: UpdateDependencyConfig['upgrade'] = {
+          depName: 'dep1',
+          depType: 'lint.plugins',
+          currentValue: '5.0.0',
+          newValue: '6.0.0',
+          datasource: 'npm',
+          packageFile: 'deno.json',
+        };
+
+        const result = updateDependency({ fileContent, upgrade });
+        expect(result).toBeNull();
       });
     });
 
