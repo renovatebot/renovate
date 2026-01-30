@@ -114,6 +114,32 @@ function replaceAsString(
   throw new Error();
 }
 
+function removeAsString(
+  parsedContents: NpmPackage,
+  fileContent: string,
+  depType: NpmDepType,
+  depName: string,
+  currentValue: string,
+): string {
+  delete parsedContents[depType]![depName];
+  const escapedDepName = escapeRegExp(depName);
+  const escapedValue = escapeRegExp(currentValue);
+
+  const keyValue = `"${escapedDepName}"\\s*:\\s*"${escapedValue}"`;
+  const regex = regEx(`(?:,\\s*${keyValue}|${keyValue}\\s*,)`);
+  const newContent = fileContent.replace(regex, '');
+
+  if (
+    newContent !== fileContent &&
+    dequal(parsedContents, JSON.parse(newContent))
+  ) {
+    return newContent;
+  }
+
+  /* v8 ignore next -- needs test */
+  throw new Error('Could not remove dependency');
+}
+
 export function updateDependency({
   fileContent,
   upgrade,
@@ -313,30 +339,4 @@ function isOverrideObject(upgrade: Upgrade<NpmManagerData>): boolean {
     isArray(upgrade.managerData?.parents, isNonEmptyStringAndNotWhitespace) &&
     upgrade.depType === 'overrides'
   );
-}
-
-function removeAsString(
-  parsedContents: NpmPackage,
-  fileContent: string,
-  depType: NpmDepType,
-  depName: string,
-  currentValue: string,
-): string {
-  delete parsedContents[depType]![depName];
-  const escapedDepName = escapeRegExp(depName);
-  const escapedValue = escapeRegExp(currentValue);
-
-  const keyValue = `"${escapedDepName}"\\s*:\\s*"${escapedValue}"`;
-  const regex = regEx(`(?:,\\s*${keyValue}|${keyValue}\\s*,)`);
-  const newContent = fileContent.replace(regex, '');
-
-  if (
-    newContent !== fileContent &&
-    dequal(parsedContents, JSON.parse(newContent))
-  ) {
-    return newContent;
-  }
-
-  /* v8 ignore next -- needs test */
-  throw new Error('Could not remove dependency');
 }
