@@ -813,6 +813,6 @@ export interface BumpVersionConfig {
 }
 
 export interface GradleWrapperOptions {
-  jvmMaxMemory?: bigint;
-  jvmMemory?: bigint;
+  jvmMaxMemory?: number;
+  jvmMemory?: number;
 }

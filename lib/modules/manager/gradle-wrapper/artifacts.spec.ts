@@ -9,7 +9,7 @@ import type { StatusResult } from '../../../util/git/types.ts';
 import { getPkgReleases } from '../../datasource/index.ts';
 import { updateArtifacts as gradleUpdateArtifacts } from '../gradle/index.ts';
 import type { UpdateArtifactsConfig, UpdateArtifactsResult } from '../types.ts';
-import { updateBuildFile, updateLockFiles } from './artifacts.ts';
+import { gradleJvmArg, updateBuildFile, updateLockFiles } from './artifacts.ts';
 import { updateArtifacts } from './index.ts';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
@@ -70,50 +70,35 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     });
   });
 
-  describe('updateArtifacts()', () => {
-    it('Custom Gradle Wrapper initial heap memory setting', async () => {
-      const execSnapshots = mockExecAll();
-      httpMock
-        .scope('https://services.gradle.org')
-        .get('/distributions/gradle-6.3-bin.zip.sha256')
-        .reply(
-          200,
-          '038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768',
-        );
-      git.getRepoStatus.mockResolvedValueOnce(
-        partial<StatusResult>({
-          modified: ['gradle/wrapper/gradle-wrapper.properties'],
-        }),
-      );
-      GlobalConfig.set({
-        ...adminConfig,
-        gradleWrapper: { jvmMemory: BigInt(128) },
-      });
-
-      const result = await updateArtifacts({
-        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-        updatedDeps: [],
-        newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
-        config,
-      });
-
-      expect(result).toEqual([
-        {
-          file: {
-            contents: 'test',
-            path: 'gradle/wrapper/gradle-wrapper.properties',
-            type: 'addition',
-          },
-        },
-      ]);
-      expect(execSnapshots).toMatchObject([
-        {
-          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms128m -Xmx256m" :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768',
-        },
-      ]);
+  describe('gradleJvmArg()', () => {
+    it('should return default JVM args when no config is provided', () => {
+      const result = gradleJvmArg(undefined);
+      expect(result).toBe(' -Dorg.gradle.jvmargs="-Xms256m -Xmx256m"');
     });
 
-    it('Custom Gradle Wrapper maximum heap memory setting', async () => {
+    it('should return custom JVM args when initial and max are provided', () => {
+      const result = gradleJvmArg({ jvmMemory: 128, jvmMaxMemory: 384 });
+      expect(result).toBe(' -Dorg.gradle.jvmargs="-Xms128m -Xmx384m"');
+    });
+
+    it('should return custom JVM args when max is provided', () => {
+      const result = gradleJvmArg({ jvmMaxMemory: 384 });
+      expect(result).toBe(' -Dorg.gradle.jvmargs="-Xms384m -Xmx384m"');
+    });
+
+    it('should emit integer heap settings', () => {
+      const result = gradleJvmArg({ jvmMaxMemory: 4242.42 });
+      expect(result).toBe(' -Dorg.gradle.jvmargs="-Xms4242m -Xmx4242m"');
+    });
+
+    it('should emit hard coded minimal heap settings', () => {
+      const result = gradleJvmArg({ jvmMaxMemory: 100.42 });
+      expect(result).toBe(' -Dorg.gradle.jvmargs="-Xms128m -Xmx128m"');
+    });
+  });
+
+  describe('updateArtifacts()', () => {
+    it('Custom Gradle Wrapper heap settings are populated', async () => {
       const execSnapshots = mockExecAll();
       httpMock
         .scope('https://services.gradle.org')
@@ -129,7 +114,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       );
       GlobalConfig.set({
         ...adminConfig,
-        gradleWrapper: { jvmMaxMemory: BigInt(300) },
+        gradleWrapper: { jvmMaxMemory: 300 },
       });
 
       const result = await updateArtifacts({
@@ -151,48 +136,6 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: './gradlew -Dorg.gradle.jvmargs="-Xms300m -Xmx300m" :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768',
-        },
-      ]);
-    });
-
-    it('Custom Gradle Wrapper initial + maximum heap memory setting', async () => {
-      const execSnapshots = mockExecAll();
-      httpMock
-        .scope('https://services.gradle.org')
-        .get('/distributions/gradle-6.3-bin.zip.sha256')
-        .reply(
-          200,
-          '038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768',
-        );
-      git.getRepoStatus.mockResolvedValueOnce(
-        partial<StatusResult>({
-          modified: ['gradle/wrapper/gradle-wrapper.properties'],
-        }),
-      );
-      GlobalConfig.set({
-        ...adminConfig,
-        gradleWrapper: { jvmMemory: BigInt(100), jvmMaxMemory: BigInt(300) },
-      });
-
-      const result = await updateArtifacts({
-        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-        updatedDeps: [],
-        newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
-        config,
-      });
-
-      expect(result).toEqual([
-        {
-          file: {
-            contents: 'test',
-            path: 'gradle/wrapper/gradle-wrapper.properties',
-            type: 'addition',
-          },
-        },
-      ]);
-      expect(execSnapshots).toMatchObject([
-        {
-          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms100m -Xmx300m" :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768',
         },
       ]);
     });

@@ -3,6 +3,7 @@ import { isTruthy } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
+import type { GradleWrapperOptions } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
@@ -132,6 +133,17 @@ export async function updateLockFiles(
   });
 }
 
+export function gradleJvmArg(
+  globalWrapperConfig?: GradleWrapperOptions,
+): string {
+  let gradleWrapperJvmMaxMemory = globalWrapperConfig?.jvmMaxMemory ?? 256;
+  let gradleWrapperJvmMemory =
+    globalWrapperConfig?.jvmMemory ?? gradleWrapperJvmMaxMemory;
+  gradleWrapperJvmMaxMemory = Math.max(~~gradleWrapperJvmMaxMemory, 128);
+  gradleWrapperJvmMemory = Math.max(~~gradleWrapperJvmMemory, 128);
+  return ` -Dorg.gradle.jvmargs="-Xms${gradleWrapperJvmMemory}m -Xmx${gradleWrapperJvmMaxMemory}m"`;
+}
+
 export async function updateArtifacts({
   packageFileName,
   newPackageFileContent,
@@ -163,10 +175,7 @@ export async function updateArtifacts({
     // in a project's `gradle.properties` file.
     // See https://github.com/renovatebot/renovate/issues/39558
     const globalWrapperConfig = GlobalConfig.get('gradleWrapper');
-    const gradleWrapperJvmMaxMemory = globalWrapperConfig?.jvmMaxMemory ?? 256;
-    const gradleWrapperJvmMemory =
-      globalWrapperConfig?.jvmMemory ?? gradleWrapperJvmMaxMemory;
-    cmd += ` -Dorg.gradle.jvmargs="-Xms${gradleWrapperJvmMemory}m -Xmx${gradleWrapperJvmMaxMemory}m"`;
+    cmd += gradleJvmArg(globalWrapperConfig);
     cmd += ' :wrapper';
 
     let checksum: string | null = null;
