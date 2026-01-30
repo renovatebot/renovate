@@ -127,9 +127,19 @@ function removeAsString(
   const escapedValue = escapeRegExp(currentValue);
   const keyValue = `"${escapedDepName}"\\s*:\\s*"${escapedValue}"`;
   const regex = regEx(`(?:,\\s*${keyValue}|${keyValue}\\s*,)`);
-  const newContent = fileContent.replace(regex, '');
+
+  // Skip ahead to depType section
+  const searchIndex = fileContent.indexOf(`"${depType}"`) + depType.length;
+  logger.trace(`Starting search at index ${searchIndex}`);
+
+  // Only search within the content starting from the depType section
+  const contentBeforeDepType = fileContent.slice(0, searchIndex);
+  const contentFromDepType = fileContent.slice(searchIndex);
+  const newContentFromDepType = contentFromDepType.replace(regex, '');
+  const newContent = contentBeforeDepType + newContentFromDepType;
 
   /* v8 ignore else -- hard to test */
+  // Compare the parsed JSON structure of old and new
   if (dequal(parsedContents, JSON.parse(newContent))) {
     return newContent;
   } else {

@@ -504,5 +504,39 @@ describe('modules/manager/npm/update/dependency/index', () => {
         '@mui/material': '^6.1.7',
       });
     });
+
+    it('removes old dependency only from its depType when newer replacement already exists', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: '@material-ui/core',
+        newName: '@mui/material',
+        newValue: '^5.0.0',
+      };
+
+      // Same dependency exists in both dependencies and devDependencies
+      const input = JSON.stringify(
+        {
+          dependencies: {
+            '@material-ui/core': '^4.9.13',
+            '@mui/material': '^6.1.7',
+          },
+          devDependencies: {
+            '@material-ui/core': '^4.9.13',
+          },
+        },
+        null,
+        2,
+      );
+      const res = npmUpdater.updateDependency({ fileContent: input, upgrade });
+      const parsed = JSON.parse(res!);
+      // Should remove from dependencies only
+      expect(parsed.dependencies).toEqual({
+        '@mui/material': '^6.1.7',
+      });
+      // Should keep devDependencies intact
+      expect(parsed.devDependencies).toEqual({
+        '@material-ui/core': '^4.9.13',
+      });
+    });
   });
 });
