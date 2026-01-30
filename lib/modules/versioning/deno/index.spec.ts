@@ -127,6 +127,12 @@ describe('modules/versioning/deno/index', () => {
     ${'latest'}       | ${'widen'}           | ${'1.0.0'}       | ${'1.0.1'}              | ${null}
     ${'latest'}       | ${'pin'}             | ${'1.0.0'}       | ${'1.0.1'}              | ${'1.0.1'}
     ${'latest'}       | ${'update-lockfile'} | ${'1.0.0'}       | ${'1.0.1'}              | ${'latest'}
+    ${'latest'}       | ${'auto'}            | ${'1.0.0'}       | ${'1.0.1'}              | ${null}
+    ${'latest'}       | ${'future'}          | ${'1.0.0'}       | ${'1.0.1'}              | ${null}
+    ${'latest'}       | ${'in-range-only'}   | ${'1.0.0'}       | ${'1.0.1'}              | ${null}
+    ${'*'}            | ${'auto'}            | ${'1.0.0'}       | ${'1.0.1'}              | ${null}
+    ${'*'}            | ${'future'}          | ${'1.0.0'}       | ${'1.0.1'}              | ${null}
+    ${'*'}            | ${'in-range-only'}   | ${'1.0.0'}       | ${'1.0.1'}              | ${null}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {

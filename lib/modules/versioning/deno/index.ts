@@ -47,6 +47,8 @@ export function getNewValue({
     if (rangeStrategy === 'update-lockfile') {
       return currentValue; // keep "latest" as is
     }
+    // For other strategies (auto, future, in-range-only), treat as null
+    return null;
   }
   if (currentValue === '*') {
     if (rangeStrategy === 'pin') {
@@ -55,6 +57,8 @@ export function getNewValue({
     if (rangeStrategy === 'update-lockfile') {
       return currentValue; // keep "*" as is
     }
+    // For other strategies (auto, future, in-range-only), treat as null
+    return null;
   }
   return npm.getNewValue({
     currentValue,
