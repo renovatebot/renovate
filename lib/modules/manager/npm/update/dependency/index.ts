@@ -190,7 +190,7 @@ export function updateDependency({
         const newNameExists =
           parsedContents[depType as NpmDepType]?.[upgrade.newName];
         if (newNameExists) {
-          newFileContent = removeDependency(
+          newFileContent = removeAsString(
             parsedContents,
             newFileContent,
             depType as NpmDepType,
@@ -315,7 +315,7 @@ function isOverrideObject(upgrade: Upgrade<NpmManagerData>): boolean {
   );
 }
 
-function removeDependency(
+function removeAsString(
   parsedContents: NpmPackage,
   fileContent: string,
   depType: NpmDepType,
@@ -326,10 +326,9 @@ function removeDependency(
   const escapedDepName = escapeRegExp(depName);
   const escapedValue = escapeRegExp(currentValue);
 
-  const regex = regEx(
-    `(,)?\\s*"${escapedDepName}"\\s*:\\s*"${escapedValue}"\\s*,?`,
-  );
-  const newContent = fileContent.replace(regex, '$1');
+  const keyValue = `"${escapedDepName}"\\s*:\\s*"${escapedValue}"`;
+  const regex = regEx(`(?:,\\s*${keyValue}|${keyValue}\\s*,)`);
+  const newContent = fileContent.replace(regex, '');
 
   if (
     newContent !== fileContent &&
