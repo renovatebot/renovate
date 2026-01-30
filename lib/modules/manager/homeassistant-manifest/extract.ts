@@ -19,7 +19,7 @@ export function extractPackageFile(
         'Failed to parse manifest.json',
       );
     } else {
-      logger.trace(
+      logger.debug(
         { packageFile, err: result.error },
         'Not a Home Assistant manifest',
       );
