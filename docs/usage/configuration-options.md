@@ -1881,7 +1881,7 @@ Also, approval rules overriding should not be [prevented in GitLab settings](htt
 
 ## gradleWrapper
 
-When Renovate updates a dependency and needs to invoke Gradle, for instance with [the Gradle Wrapper manager](./modules/manager/gradle-wrapper/index.md) or when using [Gradle Verification Metadata](./modules/manager/gradle/index.md#dependency-verification), the repository's Gradle Wrapper will be invoked, if present.
+When Renovate updates a dependency and needs to invoke Gradle, for instance with [the Gradle Wrapper manager](./modules/manager/gradle-wrapper/index.md), the repository's Gradle Wrapper will be invoked, if present.
 
 Repository level settings for tuning invocations to the Gradle Wrapper as part of updates to Gradle or the Gradle Wrapper.
 

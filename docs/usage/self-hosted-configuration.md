@@ -906,7 +906,7 @@ Use the `extends` field instead of this if, for example, you need the ability fo
 
 ### Gradle Wrapper Memory Settings
 
-When Renovate updates a dependency and needs to invoke Gradle, for instance with [the Gradle Wrapper manager](./modules/manager/gradle-wrapper/index.md) or when using [Gradle Verification Metadata](./modules/manager/gradle/index.md#dependency-verification), the repository's Gradle Wrapper will be invoked, if present.
+When Renovate updates a dependency and needs to invoke Gradle, for instance with [the Gradle Wrapper manager](./modules/manager/gradle-wrapper/index.md), the repository's Gradle Wrapper will be invoked, if present.
 
 Renovate will use the configured memory settings, configured by `jvmMaxMemory` and `jvmMemory`.
 
