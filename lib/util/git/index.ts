@@ -28,6 +28,7 @@ import { incLimitedValue } from '../../workers/global/limits.ts';
 import { getCache } from '../cache/repository/index.ts';
 import { getEnv } from '../env.ts';
 import { getChildEnv } from '../exec/utils.ts';
+import { readLocalFile } from '../fs/index.ts';
 import { newlineRegex, regEx } from '../regex.ts';
 import { matchRegexOrGlobList } from '../string-match.ts';
 import { getGitEnvironmentVariables } from './auth.ts';
@@ -1081,6 +1082,9 @@ export async function getFile(
   filePath: string,
   branchName?: string,
 ): Promise<string | null> {
+  if (GlobalConfig.get('platform') === 'local') {
+    return readLocalFile(filePath, 'utf8');
+  }
   await syncGit();
   try {
     const content = await git.show([

@@ -560,6 +560,25 @@ describe('util/git/index', { timeout: 10000 }, () => {
     it('returns null for 404', async () => {
       expect(await git.getFile('some-path', 'some-branch')).toBeNull();
     });
+
+    it('reads from local filesystem if platform is local', async () => {
+      const tmpDir2 = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({ platform: 'local', localDir: tmpDir2.path });
+      await fs.writeFile(`${tmpDir2.path}/test-file.txt`, 'local content');
+
+      const res = await git.getFile('test-file.txt');
+
+      expect(res).toBe('local content');
+    });
+
+    it('returns null for 404 if platform is local', async () => {
+      const tmpDir2 = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({ platform: 'local', localDir: tmpDir2.path });
+
+      const res = await git.getFile('some-missing-path');
+
+      expect(res).toBeNull();
+    });
   });
 
   describe('getFiles(filePath)', () => {
