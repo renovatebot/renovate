@@ -64,13 +64,33 @@ describe('modules/platform/codecommit/index', () => {
     vi.useRealTimers();
   });
 
-  it('validates massageMarkdown functionality', () => {
-    const newStr = codeCommit.massageMarkdown(
-      '<details><summary>foo</summary>bar</details>text<details>\n<!--renovate-debug:hiddenmessage123-->',
-    );
-    expect(newStr).toBe(
-      '**foo**bartext\n[//]: # (<!--renovate-debug:hiddenmessage123-->)',
-    );
+  describe('massageMarkdown', () => {
+    it('validates massageMarkdown functionality', () => {
+      const newStr = codeCommit.massageMarkdown(
+        '<details><summary>foo</summary>bar</details>text<details>\n<!--renovate-debug:hiddenmessage123-->',
+      );
+      expect(newStr).toBe(
+        '**foo**bartext\n[//]: # (<!--renovate-debug:hiddenmessage123-->)',
+      );
+    });
+
+    it('replaces pr links', () => {
+      const body =
+        '[#123](../pull/123) [#124](../pull/124) [#125](../pull/125)';
+
+      expect(codeCommit.massageMarkdown(body)).toBe(
+        '[#123](../../pull-requests/123) [#124](../../pull-requests/124) [#125](../../pull-requests/125)',
+      );
+    });
+
+    it('replaces issue links', () => {
+      const body =
+        '[#123](../issues/123) [#124](../issues/124) [#125](../issues/125)';
+
+      expect(codeCommit.massageMarkdown(body)).toBe(
+        '[#123](#123) [#124](#124) [#125](#125)',
+      );
+    });
   });
 
   it('maxBodyLength', () => {
