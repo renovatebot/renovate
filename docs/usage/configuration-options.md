@@ -3887,7 +3887,7 @@ If you have enabled `automerge` and set `automergeType=pr` in the Renovate confi
 On GitHub and GitLab, Renovate re-enables the PR for platform-native automerge whenever it's rebased.
 
 `platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
-This option is available for Azure, Forgejo, Gitea, GitHub and GitLab.
+This option is available for Azure, Bitbucket Server, Forgejo, Gitea, GitHub and GitLab.
 It falls back to Renovate-based automerge if the platform-native automerge is not available.
 
 You can also fine-tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
