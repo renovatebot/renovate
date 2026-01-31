@@ -1892,21 +1892,31 @@ If you need to modify this path, for example in order to ignore directories, you
 
 ## gradleWrapper
 
-When Renovate updates a dependency and needs to invoke Gradle, for instance with [the Gradle Wrapper manager](./modules/manager/gradle-wrapper/index.md), the repository's Gradle Wrapper will be invoked, if present.
+When Renovate updates a dependency and needs to invoke Gradle for [the `gradle-wrapper` manager](./modules/manager/gradle-wrapper/index.md),
+the repository's Gradle Wrapper will be invoked, if present.
 
-Repository level settings for tuning invocations to the Gradle Wrapper as part of updates to Gradle or the Gradle Wrapper.
+The JVM heap size for the Gradle Wrapper invocation is 256m by default.
+This can be overridden using the following options.
+
+This option can be used on the repository level and in the [Renovate configuration](./self-hosted-configuration.md) using the following options.
+
+<!-- prettier-ignore -->
+!!! note
+    The Gradle Wrapper memory settings specified in the global self-hosted configuration set by the administrator in
+    [`gradleWrapper.jvmMaxMemory`](./self-hosted-configuration.md) limits the memory settings for all repositories.
+    The default limit for all repositories is 256m.
 
 ### jvmMaxMemory
 
-<!-- prettier-ignore -->
-!!! note
-    It is not possible for a repository to override the global self-hosted configuration set by the administrator in [`gradleWrapper.jvmMaxMemory`](./self-hosted-configuration.md#gradlewrapper).
+Maximum heap size in MB for Gradle Wrapper.
+Defaults to `256` for both the repository level and self-hosted configuration.
+
+To allow repositories to use _more_ than 256m of heap during the Gradle Wrapper update,
+configure the `jvmMaxMemory` option in the [`gradleWrapper.jvmMaxMemory`](./self-hosted-configuration.md).
 
 ### jvmMemory
 
-<!-- prettier-ignore -->
-!!! note
-    It is not possible for a repository to override the global self-hosted configuration set by the administrator in [`gradleWrapper.jvmMaxMemory`](./self-hosted-configuration.md#gradlewrapper).
+Initial heap size in MB for Gradle Wrapper. Must be less than or equal to `jvmMaxMemory`. Defaults to `jvmMaxMemory`.
 
 ## group
 
