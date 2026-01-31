@@ -205,6 +205,7 @@ export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
   newVersion?: string;
   updateType?: UpdateType;
   version?: string;
+  downloadUrl?: string;
   isLockFileMaintenance?: boolean;
   isRemediation?: boolean;
   isVulnerabilityAlert?: boolean;

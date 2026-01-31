@@ -12,7 +12,10 @@ import type {
 } from '../../extract/types.ts';
 import type { NpmDepType, NpmManagerData } from '../../types.ts';
 import { getNewGitValue, getNewNpmAliasValue } from './common.ts';
-import { updatePnpmCatalogDependency } from './pnpm.ts';
+import {
+  updatePnpmCatalogDependency,
+  updatePnpmConfigDependency,
+} from './pnpm.ts';
 import { updateYarnrcCatalogDependency } from './yarn.ts';
 
 function renameObjKey(
@@ -120,6 +123,9 @@ export function updateDependency({
 }: UpdateDependencyConfig): string | null {
   if (upgrade.depType?.startsWith('pnpm.catalog')) {
     return updatePnpmCatalogDependency({ fileContent, upgrade });
+  }
+  if (upgrade.depType === 'pnpm.configDependencies') {
+    return updatePnpmConfigDependency({ fileContent, upgrade });
   }
   if (upgrade.depType?.startsWith('yarn.catalog')) {
     return updateYarnrcCatalogDependency({ fileContent, upgrade });
