@@ -10,7 +10,7 @@ import {
   applyPrettierFormatting,
 } from './migrated-data.ts';
 import { Fixtures } from '~test/fixtures.ts';
-import { scm } from '~test/util.ts';
+import { platform, scm } from '~test/util.ts';
 
 vi.mock('../../../../config/migration.ts');
 vi.mock('../../../../util/fs/index.ts');
@@ -20,7 +20,8 @@ vi.mock('detect-indent');
 
 const migratedData = Fixtures.getJson('./migrated-data.json');
 const migratedDataJson5 = Fixtures.getJson('./migrated-data.json5');
-const migratedConfigObj = Fixtures.getJson('./migrated.json');
+const migratedConfigObj = Fixtures.getJsonc('./migrated.json');
+const renovateJson = Fixtures.get('./renovate.json');
 const formattedMigratedData = Fixtures.getJson(
   './migrated-data-formatted.json',
 );
@@ -40,6 +41,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
         isMigrated: true,
         migratedConfig: migratedConfigObj,
       });
+      platform.getRawFile.mockResolvedValue(renovateJson);
     });
 
     it('Calls getAsync a first when migration not needed', async () => {

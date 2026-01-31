@@ -11,7 +11,7 @@ import type { RenovateConfig } from '~test/util.ts';
 vi.mock('../../../../util/fs/index.ts');
 
 describe('workers/repository/config-migration/branch/create', () => {
-  const raw = Fixtures.getJson('./renovate.json');
+  const raw = Fixtures.getJsonc('./renovate.json');
   const indent = '  ';
   const renovateConfig = JSON.stringify(raw, undefined, indent) + '\n';
   const filename = 'renovate.json';
