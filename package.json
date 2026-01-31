@@ -212,7 +212,7 @@
     "emoji-regex": "10.6.0",
     "emojibase": "16.0.0",
     "emojibase-regex": "16.0.0",
-    "execa": "8.0.1",
+    "execa": "9.6.1",
     "extract-zip": "2.0.1",
     "find-packages": "10.0.4",
     "find-up": "7.0.0",
