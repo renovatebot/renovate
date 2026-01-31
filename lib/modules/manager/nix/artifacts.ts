@@ -4,23 +4,34 @@ import { logger } from '../../../logger/index.ts';
 import { findGithubToken } from '../../../util/check-token.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
-import { readLocalFile } from '../../../util/fs/index.ts';
+import {
+  ensureCacheDir,
+  getSiblingFileName,
+  readLocalFile,
+  writeLocalFile,
+} from '../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
-import { regEx } from '../../../util/regex.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 
 export async function updateArtifacts({
   packageFileName,
   config,
   updatedDeps,
+  newPackageFileContent,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  const lockFileName = packageFileName.replace(regEx(/\.nix$/), '.lock');
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  const lockFileName = getSiblingFileName(packageFileName, 'flake.lock');
+  const existingLockFileContent = await readLocalFile(lockFileName);
+
+  logger.trace({ packageFileName, updatedDeps }, 'nix.updateArtifacts');
+
   if (!existingLockFileContent) {
     logger.debug('No flake.lock found');
     return null;
   }
+
+  await writeLocalFile(packageFileName, newPackageFileContent);
 
   let cmd = `nix --extra-experimental-features 'nix-command flakes' `;
 
@@ -47,6 +58,10 @@ export async function updateArtifacts({
   }
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
+    extraEnv: {
+      ...getGitEnvironmentVariables(),
+      NIX_CACHE_HOME: await ensureCacheDir('nix'),
+    },
     toolConstraints: [
       {
         toolName: 'nix',

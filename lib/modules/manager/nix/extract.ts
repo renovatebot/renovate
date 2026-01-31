@@ -1,20 +1,16 @@
 import { logger } from '../../../logger/index.ts';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
+import { getHttpUrl, parseGitUrl } from '../../../util/git/url.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
-import { id as gitRefVersioning } from '../../versioning/git/index.ts';
 import { id as nixpkgsVersioning } from '../../versioning/nixpkgs/index.ts';
-import type {
-  ExtractConfig,
-  PackageDependency,
-  PackageFileContent,
-} from '../types.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
 import { NixFlakeLock } from './schema.ts';
 
 // as documented upstream
 // https://github.com/NixOS/nix/blob/master/doc/manual/source/protocols/tarball-fetcher.md#gitea-and-forgejo-support
 const lockableHTTPTarballProtocol = regEx(
-  '^https://(?<domain>[^/]+)/(?<owner>[^/]+)/(?<repo>[^/]+)/archive/(?<rev>.+).tar.gz$',
+  '^https://(?<domain>[^/]+)/(?<owner>[^/]+)/(?<repo>[^/]+)/archive/(?<rev>.+)\\.tar\\.gz$',
 );
 
 const lockableChannelOriginalUrl = regEx(
@@ -24,55 +20,53 @@ const lockableChannelOriginalUrl = regEx(
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  config?: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   const flakeLockFile = getSiblingFileName(packageFile, 'flake.lock');
   const flakeLockContents = await readLocalFile(flakeLockFile, 'utf8');
-
-  logger.trace(`nix.extractPackageFile(${flakeLockFile})`);
-
   const deps: PackageDependency[] = [];
+
+  logger.trace({ flakeLockFile }, 'nix.extractPackageFile()');
 
   const flakeLockParsed = NixFlakeLock.safeParse(flakeLockContents);
   if (!flakeLockParsed.success) {
     logger.debug(
       { flakeLockFile, error: flakeLockParsed.error },
-      `invalid flake.lock file`,
+      'invalid flake.lock file',
     );
     return null;
   }
 
   const flakeLock = flakeLockParsed.data;
-  const rootInputs = flakeLock.nodes.root.inputs;
+  const rootInputs = new Map(
+    Object.entries(flakeLock.nodes.root?.inputs ?? {}).map(([key, value]) => [
+      value,
+      key,
+    ]),
+  );
 
-  if (!rootInputs) {
-    logger.debug(
-      { flakeLockFile, error: flakeLockParsed.error },
-      `flake.lock is missing "root" node`,
-    );
+  if (!rootInputs.size) {
+    logger.debug({ flakeLockFile }, 'flake.lock is missing "root" node');
     return null;
   }
 
-  for (const [depName, flakeInput] of Object.entries(flakeLock.nodes)) {
+  for (const [node, flakeInput] of Object.entries(flakeLock.nodes)) {
     // the root input is a magic string for the entrypoint and only references other flake inputs
-    if (depName === 'root') {
+    if (node === 'root') {
       continue;
     }
 
-    // skip all locked and transitivie nodes as they cannot be updated by regular means
-    if (!(depName in rootInputs)) {
+    // skip all locked and transitive nodes as they cannot be updated by regular means
+    if (!rootInputs.has(node)) {
       continue;
     }
 
-    // flakeLocked example: { rev: '56a49ffef2908dad1e9a8adef1f18802bc760962', type: 'github' }
     const flakeLocked = flakeInput.locked;
-    // flakeOriginal example: { owner: 'NuschtOS', repo: 'search', type: 'github' }
     const flakeOriginal = flakeInput.original;
 
     if (flakeLocked === undefined) {
       logger.debug(
         { flakeLockFile, flakeInput },
-        `input is missing locked, skipping`,
+        'input is missing locked, skipping',
       );
       continue;
     }
@@ -80,7 +74,7 @@ export async function extractPackageFile(
     if (flakeOriginal === undefined) {
       logger.debug(
         { flakeLockFile, flakeInput },
-        `input is missing original, skipping`,
+        'input is missing original, skipping',
       );
       continue;
     }
@@ -89,7 +83,7 @@ export async function extractPackageFile(
     if (flakeOriginal.type === 'indirect' || flakeLocked.type === 'indirect') {
       logger.debug(
         { flakeLockFile, flakeInput },
-        `input is type indirect, skipping`,
+        'input is of type indirect, skipping',
       );
       continue;
     }
@@ -98,7 +92,7 @@ export async function extractPackageFile(
     if (flakeOriginal.type === 'path' || flakeLocked.type === 'path') {
       logger.debug(
         { flakeLockFile, flakeInput },
-        `input is type path, skipping`,
+        'input is of type path, skipping',
       );
       continue;
     }
@@ -107,45 +101,31 @@ export async function extractPackageFile(
     if (flakeLocked.rev === undefined) {
       logger.debug(
         { flakeLockFile, flakeInput },
-        `locked input is not tracking a rev, skipping`,
+        'locked input is not tracking a rev, skipping',
       );
       continue;
     }
 
-    // if there's a new digest, set the corresponding digest in the lockfile so confirmations pass
-    const currentDigest = config?.currentDigest;
-    const newDigest = config?.newDigest;
-    if (
-      currentDigest &&
-      newDigest &&
-      flakeOriginal.rev &&
-      flakeOriginal.rev === currentDigest && // currentDigest is the old digest
-      content.includes(newDigest) // flake.nix contains the new digest
-    ) {
-      logger.debug(
-        { flakeLockFile, flakeInput },
-        `overriding rev ${flakeOriginal.rev} with new digest ${newDigest}`,
-      );
-      flakeOriginal.rev = newDigest;
-    }
-
     const dep: PackageDependency = {
-      depName,
+      depName: rootInputs.get(node),
       datasource: GitRefsDatasource.id,
-      versioning: gitRefVersioning,
     };
 
-    // if rev is set, the flake contains a digest and can be updated directly
-    // otherwise set lockedVersion so it is updated during lock file maintenance
-    if (flakeOriginal.rev) {
-      dep.currentValue = flakeOriginal.ref;
-      dep.currentDigest = flakeOriginal.rev;
-      dep.replaceString = flakeOriginal.rev;
-    } else {
-      dep.lockedVersion = flakeLocked.rev;
-    }
+    dep.currentValue = flakeOriginal.ref?.replace(/^refs\/(heads|tags)\//, '');
+    dep.currentDigest = flakeLocked.rev;
 
     switch (flakeLocked.type) {
+      case 'git': {
+        const gitUrl = parseGitUrl(flakeOriginal.url!);
+
+        if (gitUrl.protocols.includes('file')) {
+          continue;
+        }
+
+        dep.packageName = gitUrl.toString();
+        break;
+      }
+
       case 'github':
         // set to nixpkgs if it is a nixpkgs reference
         if (
@@ -153,7 +133,6 @@ export async function extractPackageFile(
           flakeOriginal.repo?.toLowerCase() === 'nixpkgs'
         ) {
           dep.packageName = 'https://github.com/NixOS/nixpkgs';
-          dep.currentValue = flakeOriginal.ref;
           dep.versioning = nixpkgsVersioning;
           break;
         }
@@ -163,10 +142,6 @@ export async function extractPackageFile(
 
       case 'gitlab':
         dep.packageName = `https://${flakeOriginal.host ?? 'gitlab.com'}/${decodeURIComponent(flakeOriginal.owner!)}/${flakeOriginal.repo}`;
-        break;
-
-      case 'git':
-        dep.packageName = flakeOriginal.url;
         break;
 
       case 'sourcehut':
@@ -195,12 +170,16 @@ export async function extractPackageFile(
         break;
     }
 
+    if (flakeLocked.type !== 'tarball') {
+      dep.sourceUrl = getHttpUrl(dep.packageName!).replace(/\.git$/, '');
+    }
+
     deps.push(dep);
   }
 
-  if (deps.length) {
-    return { deps };
+  if (deps.length === 0) {
+    return null;
   }
 
-  return null;
+  return { deps };
 }
