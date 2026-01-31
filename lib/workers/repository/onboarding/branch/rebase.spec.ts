@@ -121,6 +121,21 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       expect(scm.commitAndPush).not.toHaveBeenCalled();
     });
 
+    it('uses semantic commit PR title when semanticCommits is enabled', async () => {
+      GlobalConfig.set({ localDir: '', platform: 'github' });
+      await rebaseOnboardingBranch(
+        {
+          ...config,
+          semanticCommits: 'enabled',
+        },
+        hash,
+      );
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
+      expect(scm.commitAndPush.mock.calls[0][0].prTitle).toBe(
+        'chore: Configure Renovate',
+      );
+    });
+
     // does not rebase on platforms that do not support html comments
     it.each`
       platform
