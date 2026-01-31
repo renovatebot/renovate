@@ -144,31 +144,34 @@ export class GerritScm extends DefaultGitScm {
         const fetchRefSpec = currentRevision.ref;
         await git.fetchRevSpec(fetchRefSpec); // fetch current ChangeSet for git diff
         hasChanges = await git.hasDiff('HEAD', 'FETCH_HEAD'); // avoid pushing empty patch sets
-      }
-      if (hasChanges || commit.force) {
-        const pushOptions = ['notify=NONE'];
-        if (commit.autoApprove) {
-          pushOptions.push('label=Code-Review+2');
-        }
-        if (commit.labels) {
-          for (const label of commit.labels) {
-            pushOptions.push(`hashtag=${label}`);
+        // Only push to refs/for/ when updating an existing change
+        if (hasChanges || commit.force) {
+          const pushOptions = ['notify=NONE'];
+          if (commit.autoApprove) {
+            pushOptions.push('label=Code-Review+2');
+          }
+          // If a change already exists, we push to the same target branch to
+          // avoid creating a new change if the base branch has changed.
+          // updatePr() will take care of moving the existing change to a different base
+          // branch if needed.
+          const changeBranch = existingChange.branch ?? commit.baseBranch!;
+          const pushResult = await git.pushCommit({
+            sourceRef: commit.branchName,
+            targetRef: `refs/for/${changeBranch}`,
+            files: commit.files,
+            pushOptions,
+          });
+          /* v8 ignore else -- should never happen */
+          if (pushResult) {
+            return commitSha;
           }
         }
-        // If a change already exists, we push to the same target branch to
-        // avoid creating a new change if the base branch has changed.
-        // updatePr() will take care of moving the existing change to a different base
-        // branch if needed.
-        const changeBranch = existingChange?.branch ?? commit.baseBranch!;
-        const pushResult = await git.pushCommit({
-          sourceRef: commit.branchName,
-          targetRef: `refs/for/${changeBranch}`,
-          files: commit.files,
-          pushOptions,
-        });
-        if (pushResult) {
-          return commitSha;
-        }
+      } else {
+        // The push will be done by createPr() to actually create the Gerrit change
+        logger.debug(
+          `Commit prepared for new change on branch ${commit.branchName}, but not pushed to refs/for/ yet`,
+        );
+        return commitSha;
       }
     }
     return null; // empty commit, no changes in this Gerrit Change

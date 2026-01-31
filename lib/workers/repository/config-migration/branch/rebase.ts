@@ -54,7 +54,8 @@ export async function rebaseMigrationBranch(
     ],
     message: commitMessage.toString(),
     platformCommit: config.platformCommit,
-    labels: config.labels,
+    // Only needed by Gerrit platform
+    prTitle: commitMessageFactory.getPrTitle(),
   });
 }
 
