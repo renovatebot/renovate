@@ -272,6 +272,114 @@ describe('modules/manager/npm/update/dependency/index', () => {
       );
     });
 
+    it('replaces version only when replacementVersion is used', () => {
+      const upgrade: Upgrade = {
+        depType: 'dependencies',
+        depName: 'dd-trace',
+        newName: 'dd-trace',
+        newValue: '5.79.0',
+      };
+      const input = JSON.stringify(
+        {
+          dependencies: {
+            'dd-trace': '5.80.0',
+          },
+        },
+        null,
+        2,
+      );
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input,
+        upgrade,
+      });
+      expect(testContent).toBeJsonString();
+      const parsed = JSON.parse(testContent!);
+      expect(parsed.dependencies['dd-trace']).toBe('5.79.0');
+    });
+
+    it('replaces version only in resolutions when replacementVersion is used', () => {
+      const upgrade: Upgrade = {
+        depType: 'dependencies',
+        depName: 'dd-trace',
+        newName: 'dd-trace',
+        newValue: '5.79.0',
+      };
+      const input = JSON.stringify(
+        {
+          dependencies: {
+            'dd-trace': '5.80.0',
+          },
+          resolutions: {
+            'dd-trace': '5.80.0',
+          },
+        },
+        null,
+        2,
+      );
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input,
+        upgrade,
+      });
+      expect(testContent).toBeJsonString();
+      const parsed = JSON.parse(testContent!);
+      expect(parsed.dependencies['dd-trace']).toBe('5.79.0');
+      expect(parsed.resolutions['dd-trace']).toBe('5.79.0');
+    });
+
+    it('replaces version only in glob resolutions when replacementVersion is used', () => {
+      const upgrade: Upgrade = {
+        depType: 'dependencies',
+        depName: 'dd-trace',
+        newName: 'dd-trace',
+        newValue: '5.79.0',
+      };
+      const input = JSON.stringify(
+        {
+          dependencies: {
+            'dd-trace': '5.80.0',
+          },
+          resolutions: {
+            '**/dd-trace': '5.80.0',
+          },
+        },
+        null,
+        2,
+      );
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input,
+        upgrade,
+      });
+      expect(testContent).toBeJsonString();
+      const parsed = JSON.parse(testContent!);
+      expect(parsed.dependencies['dd-trace']).toBe('5.79.0');
+      expect(parsed.resolutions['**/dd-trace']).toBe('5.79.0');
+    });
+
+    it('replaces version only with range when replacementVersion is used', () => {
+      const upgrade: Upgrade = {
+        depType: 'dependencies',
+        depName: 'lodash',
+        newName: 'lodash',
+        newValue: '^4.17.20',
+      };
+      const input = JSON.stringify(
+        {
+          dependencies: {
+            lodash: '^4.17.21',
+          },
+        },
+        null,
+        2,
+      );
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input,
+        upgrade,
+      });
+      expect(testContent).toBeJsonString();
+      const parsed = JSON.parse(testContent!);
+      expect(parsed.dependencies.lodash).toBe('^4.17.20');
+    });
+
     it('replaces glob package resolutions', () => {
       const upgrade = {
         depType: 'dependencies',
