@@ -58,10 +58,20 @@ export class GithubDigestDatasource extends Datasource {
         key: GithubDigestDatasource.getCacheKey(registryUrl, repo, 'releases'),
       },
       async () => {
-        const [tagsResult, branchesResult] = await Promise.all([
+        const [tagsSettled, branchesSettled] = await Promise.allSettled([
           queryTags(config, this.http),
           queryBranches(config, this.http),
         ]);
+
+        if (tagsSettled.status === 'rejected') {
+          throw tagsSettled.reason;
+        }
+        if (branchesSettled.status === 'rejected') {
+          throw branchesSettled.reason;
+        }
+
+        const tagsResult = tagsSettled.value;
+        const branchesResult = branchesSettled.value;
 
         // Tags take priority over branches when names conflict
         const releases: Release[] = tagsResult.map(

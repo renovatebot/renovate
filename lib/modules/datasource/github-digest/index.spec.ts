@@ -141,6 +141,28 @@ describe('modules/datasource/github-digest/index', () => {
         sourceUrl: 'https://github.com/some/repo',
       });
     });
+
+    it('throws when tags query fails', async () => {
+      vi.spyOn(githubGraphql, 'queryTags').mockRejectedValueOnce(
+        new Error('Tags query failed'),
+      );
+      vi.spyOn(githubGraphql, 'queryBranches').mockResolvedValueOnce([]);
+
+      await expect(github.getReleases({ packageName })).rejects.toThrow(
+        'Tags query failed',
+      );
+    });
+
+    it('throws when branches query fails', async () => {
+      vi.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([]);
+      vi.spyOn(githubGraphql, 'queryBranches').mockRejectedValueOnce(
+        new Error('Branches query failed'),
+      );
+
+      await expect(github.getReleases({ packageName })).rejects.toThrow(
+        'Branches query failed',
+      );
+    });
   });
 
   describe('getDigest', () => {
