@@ -3354,7 +3354,6 @@ const options: Readonly<RenovateOptions>[] = [
       jvmMemory: 256,
     },
     cli: false,
-    docAlsoGlobal: true,
   },
   {
     name: 'jvmMaxMemory',
