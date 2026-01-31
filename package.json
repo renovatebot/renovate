@@ -215,7 +215,7 @@
     "execa": "8.0.1",
     "extract-zip": "2.0.1",
     "find-packages": "10.0.4",
-    "find-up": "7.0.0",
+    "find-up": "8.0.0",
     "fs-extra": "11.3.3",
     "git-url-parse": "16.1.0",
     "github-url-from-git": "1.5.0",
