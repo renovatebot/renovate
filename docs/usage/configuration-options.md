@@ -1890,6 +1890,34 @@ If you need to modify this path, for example in order to ignore directories, you
 }
 ```
 
+## gradleWrapper
+
+When Renovate updates a dependency and needs to invoke Gradle for [the `gradle-wrapper` manager](./modules/manager/gradle-wrapper/index.md),
+the repository's Gradle Wrapper will be invoked, if present.
+
+The JVM heap size for the Gradle Wrapper invocation is 256m by default.
+This can be overridden using the following options.
+
+This option can be used on the repository level and in the [Renovate configuration](./self-hosted-configuration.md) using the following options.
+
+<!-- prettier-ignore -->
+!!! note
+    The Gradle Wrapper memory settings specified in the global self-hosted configuration set by the administrator in
+    [`gradleWrapper.jvmMaxMemory`](./self-hosted-configuration.md) limits the memory settings for all repositories.
+    The default limit for all repositories is 256m.
+
+### jvmMaxMemory
+
+Maximum heap size in MB for Gradle Wrapper.
+Defaults to `256` for both the repository level and self-hosted configuration.
+
+To allow repositories to use _more_ than 256m of heap during the Gradle Wrapper update,
+configure the `jvmMaxMemory` option in the [`gradleWrapper.jvmMaxMemory`](./self-hosted-configuration.md).
+
+### jvmMemory
+
+Initial heap size in MB for Gradle Wrapper. Must be less than or equal to `jvmMaxMemory`. Defaults to `jvmMaxMemory`.
+
 ## group
 
 The default configuration for groups are essentially internal to Renovate and you normally shouldn't need to modify them.

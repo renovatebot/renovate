@@ -254,6 +254,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
   onboardingAutoCloseAge?: number;
+  gradleWrapper?: GradleWrapperOptions;
 }
 
 /**
@@ -462,6 +463,7 @@ export interface RenovateConfig
   minimumGroupSize?: number;
   configFileNames?: string[];
   minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
+  gradleWrapper?: GradleWrapperOptions;
 }
 
 const CustomDatasourceFormats = [
@@ -599,6 +601,7 @@ export type AllowedParents =
   | 'packageRules'
   | 'postUpgradeTasks'
   | 'vulnerabilityAlerts'
+  | 'gradleWrapper'
   | ManagerName
   | UpdateTypeOptions;
 export interface RenovateOptionBase {
@@ -802,4 +805,9 @@ export interface BumpVersionConfig {
   filePatterns: string[];
   matchStrings: string[];
   name?: string;
+}
+
+export interface GradleWrapperOptions {
+  jvmMaxMemory?: number;
+  jvmMemory?: number;
 }
