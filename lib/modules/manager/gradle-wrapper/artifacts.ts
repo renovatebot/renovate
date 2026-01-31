@@ -214,10 +214,7 @@ export async function updateArtifacts({
     }
 
     // Limit the Gradle daemon Java heap memory size to prevent OOM errors
-    // leading to Renovate kernel-OOMs and timeouts.
-    // This command line option effectively overrides any custom setting
-    // in a project's `gradle.properties` file.
-    // See https://github.com/renovatebot/renovate/issues/39558
+    // leading to Renovate kernel-OOMs and timeouts. See #39558
     cmd += gradleJvmArg(getGradleWrapperOptions(config.gradleWrapper));
     cmd += ' :wrapper';
 

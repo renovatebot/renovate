@@ -99,6 +99,33 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       });
     });
 
+    it('returns default values if empty repo config', () => {
+      GlobalConfig.set({
+        ...adminConfig,
+      });
+
+      const res = getGradleWrapperOptions({});
+
+      expect(res).toEqual({
+        jvmMemory: 256,
+        jvmMaxMemory: 256,
+      });
+    });
+
+    it('returns default values if empty global config', () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        gradleWrapper: {},
+      });
+
+      const res = getGradleWrapperOptions(undefined);
+
+      expect(res).toEqual({
+        jvmMemory: 256,
+        jvmMaxMemory: 256,
+      });
+    });
+
     describe('does not allow floating point numbers', () => {
       it('in global config', () => {
         GlobalConfig.set({
