@@ -135,6 +135,7 @@ export interface RenovateSharedConfig {
   rangeStrategy?: RangeStrategy;
   rebaseLabel?: string;
   rebaseWhen?: string;
+  allowBranchAutomergeBehindBase?: boolean;
   recreateClosed?: boolean;
   recreateWhen?: RecreateWhen;
   repository?: string;
