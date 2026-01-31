@@ -96,6 +96,66 @@ describe('modules/manager/sbt/extract', () => {
       });
     });
 
+    it('extracts deps when scala version is defined in an object', () => {
+      const content = `
+        val versions = new {
+          scala = "2.12.10"
+          example = "0.0.8"
+        }
+        scalaVersion := versions.scala
+        version := "3.2.1"
+        libraryDependencies += "org.example" % "foo" % versions.example
+      `;
+      expect(extractPackageFile(content)).toEqual({
+        deps: [
+          {
+            datasource: 'maven',
+            depName: 'scala',
+            packageName: 'org.scala-lang:scala-library',
+            currentValue: '2.12.10',
+            registryUrls: [],
+            separateMinorPatch: true,
+          },
+          {
+            datasource: 'sbt-package',
+            depName: 'org.example:foo',
+            packageName: 'org.example:foo',
+            currentValue: '0.0.8',
+            registryUrls: [],
+            sharedVariableName: 'versions.example',
+            variableName: 'versions.example',
+          },
+        ],
+        packageFileVersion: '3.2.1',
+        managerData: {
+          scalaVersion: '2.12',
+        },
+      });
+    });
+
+    it('skips deps when dotted symbolds do not resolve to anything', () => {
+      const content = `
+        scalaVersion := versions.scala
+        version := "3.2.1"
+        libraryDependencies += "org.example" % "foo" % versions.example
+      `;
+      expect(extractPackageFile(content)).toEqual({
+        deps: [
+          {
+            datasource: 'sbt-package',
+            depName: 'org.example:foo',
+            packageName: 'org.example:foo',
+            currentValue: undefined,
+            registryUrls: [],
+          },
+        ],
+        packageFileVersion: '3.2.1',
+        managerData: {
+          scalaVersion: undefined,
+        },
+      });
+    });
+
     it('extracts packageFileVersion when scala version is defined in a variable', () => {
       const content = `
         val fileVersion = "1.2.3"
