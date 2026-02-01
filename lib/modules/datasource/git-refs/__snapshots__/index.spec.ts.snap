@@ -5,32 +5,32 @@ exports[`modules/datasource/git-refs/index > getReleases > returns versions filt
   "releases": [
     {
       "gitRef": "v1.0.0",
-      "newDigest": "a9920c014aebc28dc1b23e7efcc006d045512345",
+      "newDigest": "7b756026fb2de270240a889a413e7e3a9d4d4d85",
       "version": "v1.0.0",
     },
     {
       "gitRef": "v1.0.1",
-      "newDigest": "281fbfb58990ec98b237a923d67904c102bec34c",
+      "newDigest": "e173183f932ba8a31d0e4f23cc1070e8ebfa59d6",
       "version": "v1.0.1",
     },
     {
       "gitRef": "v1.0.2",
-      "newDigest": "9cb93e0b236385a4e2efd089d7c6a458f5ff321f",
+      "newDigest": "3936a6bced3587dc9fd464b0a910e0dfd4cfe10d",
       "version": "v1.0.2",
     },
     {
       "gitRef": "v1.0.3",
-      "newDigest": "8b0d0e0aec21ea059448ef0255387dbb82c61973",
+      "newDigest": "125ca9f3df4151e50046e5327ecb29ec4c13efab",
       "version": "v1.0.3",
     },
     {
       "gitRef": "v1.0.4",
-      "newDigest": "2b52829c7c1bd65b3501c450849c53b90b11fa0e",
+      "newDigest": "3ed9e7d7094fd4ee7751c24a3e6b706060f461ff",
       "version": "v1.0.4",
     },
     {
       "gitRef": "v1.0.5",
-      "newDigest": "2d138c34e4c6939d0a8686943e851c6528aa04db",
+      "newDigest": "6d7a933c2e6b7b39e992b1f93b6b42de083b28f0",
       "version": "v1.0.5",
     },
   ],
