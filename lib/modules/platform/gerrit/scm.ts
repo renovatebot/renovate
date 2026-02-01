@@ -1,11 +1,13 @@
 import { randomUUID } from 'crypto';
-import { logger } from '../../../logger';
-import * as git from '../../../util/git';
-import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
-import { hash } from '../../../util/hash';
-import { DefaultGitScm } from '../default-scm';
-import { client } from './client';
-import type { GerritFindPRConfig } from './types';
+import { logger } from '../../../logger/index.ts';
+import * as git from '../../../util/git/index.ts';
+import type {
+  CommitFilesConfig,
+  LongCommitSha,
+} from '../../../util/git/types.ts';
+import { hash } from '../../../util/hash.ts';
+import { DefaultGitScm } from '../default-scm.ts';
+import { client } from './client.ts';
 
 /**
  * Gerrit SCM strategy:
@@ -20,21 +22,21 @@ export function configureScm(repo: string): void {
   repository = repo;
 }
 
+// TODO: this can be optimzed further by avoiding client.findChanges() since the change was initialized locally as commit.branchName.
+// Note the change should be pushed to refs/for/<existing change branch> instead of just targetBranch, for the case when a change will be moved to a different target branch.
+// Not sure how to get the existing change branch without querying Gerrit API though. Maybe by storing this additional information when initializing the changes as branches?
+// git.fetchRevSpec() can also be replaced with some local git command.
 export class GerritScm extends DefaultGitScm {
   override async commitAndPush(
     commit: CommitFilesConfig,
   ): Promise<LongCommitSha | null> {
     logger.debug(`commitAndPush(${commit.branchName})`);
-    const searchConfig: GerritFindPRConfig = {
-      state: 'open',
+    const existingChange = await client.getBranchChange(repository, {
       branchName: commit.branchName,
+      state: 'open',
       targetBranch: commit.baseBranch,
-      singleChange: true,
       requestDetails: ['CURRENT_REVISION'],
-    };
-    const existingChange = (
-      await client.findChanges(repository, searchConfig)
-    ).pop();
+    });
 
     let hasChanges = true;
     const message =
@@ -72,9 +74,14 @@ export class GerritScm extends DefaultGitScm {
             pushOptions.push(`hashtag=${label}`);
           }
         }
+        // If a change already exists, we push to the same target branch to
+        // avoid creating a new change if the base branch has changed.
+        // updatePr() will take care of moving the existing change to a different base
+        // branch if needed.
+        const changeBranch = existingChange?.branch ?? commit.baseBranch!;
         const pushResult = await git.pushCommit({
           sourceRef: commit.branchName,
-          targetRef: `refs/for/${commit.baseBranch!}`,
+          targetRef: `refs/for/${changeBranch}`,
           files: commit.files,
           pushOptions,
         });

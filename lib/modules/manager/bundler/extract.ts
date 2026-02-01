@@ -1,14 +1,14 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { isHttpUrl } from '../../../util/url';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { RubyVersionDatasource } from '../../datasource/ruby-version';
-import { RubygemsDatasource } from '../../datasource/rubygems';
-import type { PackageDependency, PackageFileContent } from '../types';
-import { delimiters, extractRubyVersion, getLockFilePath } from './common';
-import { extractLockFileEntries } from './locked-version';
+import { isString } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { isHttpUrl } from '../../../util/url.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { delimiters, extractRubyVersion, getLockFilePath } from './common.ts';
+import { extractLockFileEntries } from './locked-version.ts';
 
 function formatContent(input: string): string {
   return input.replace(regEx(/^ {2}/), '') + '\n'; //remove leading whitespace and add a new line at the end
@@ -57,7 +57,7 @@ export async function extractPackageFile(
         groupLine = lines[lineNumber];
 
         // istanbul ignore if
-        if (!is.string(groupLine)) {
+        if (!isString(groupLine)) {
           logger.debug(
             { content, packageFile, type: 'groupLine' },
             'Bundler parsing error',
@@ -214,7 +214,7 @@ export async function extractPackageFile(
           lineNumber += 1;
           sourceLine = lines[lineNumber];
           // istanbul ignore if
-          if (!is.string(sourceLine)) {
+          if (!isString(sourceLine)) {
             logger.debug(
               { content, packageFile, type: 'sourceLine' },
               'Bundler parsing error',
@@ -254,7 +254,7 @@ export async function extractPackageFile(
         lineNumber += 1;
         platformsLine = lines[lineNumber];
         // istanbul ignore if
-        if (!is.string(platformsLine)) {
+        if (!isString(platformsLine)) {
           logger.debug(
             { content, packageFile, type: 'platformsLine' },
             'Bundler parsing error',
@@ -287,7 +287,7 @@ export async function extractPackageFile(
         lineNumber += 1;
         ifLine = lines[lineNumber];
         // istanbul ignore if
-        if (!is.string(ifLine)) {
+        if (!isString(ifLine)) {
           logger.debug(
             { content, packageFile, type: 'ifLine' },
             'Bundler parsing error',

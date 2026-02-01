@@ -1,5 +1,5 @@
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
+import { extractPackageFile } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 const typeBinFileContent = Fixtures.get('gradle-wrapper-bin.properties');
 const typeAllFileContent = Fixtures.get('gradle-wrapper-all.properties');

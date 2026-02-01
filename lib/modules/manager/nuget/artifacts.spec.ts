@@ -1,19 +1,19 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import * as docker from '../../../util/exec/docker';
-import type { UpdateArtifactsConfig } from '../types';
-import * as util from './util';
-import * as nuget from '.';
-import { envMock, mockExecAll } from '~test/exec-util';
-import { env, fs, git, scm } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import * as docker from '../../../util/exec/docker/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import * as nuget from './index.ts';
+import * as util from './util.ts';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { env, fs, git, scm } from '~test/util.ts';
 
-vi.mock('../../../util/exec/env');
-vi.mock('../../../util/fs');
-vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('./util');
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
+vi.mock('./util.ts');
 
 const { getDefaultRegistries, findGlobalJson } = vi.mocked(util);
 
@@ -31,7 +31,7 @@ const config: UpdateArtifactsConfig = {};
 describe('modules/manager/nuget/artifacts', () => {
   beforeEach(async () => {
     const realFs =
-      await vi.importActual<typeof import('../../../util/fs')>(
+      await vi.importActual<typeof import('../../../util/fs/index.ts')>(
         '../../../util/fs',
       );
     getDefaultRegistries.mockReturnValue([]);
@@ -252,7 +252,7 @@ describe('modules/manager/nuget/artifacts', () => {
     GlobalConfig.set({
       ...adminConfig,
       binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
     });
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
@@ -282,7 +282,7 @@ describe('modules/manager/nuget/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'docker pull ghcr.io/containerbase/sidecar',
+        cmd: 'docker pull ghcr.io/renovatebot/base-image',
       },
       {
         cmd: 'docker ps --filter name=renovate_sidecar -aq',
@@ -296,7 +296,7 @@ describe('modules/manager/nuget/artifacts', () => {
           '-e MSBUILDDISABLENODEREUSE ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
+          'ghcr.io/renovatebot/base-image ' +
           'bash -l -c "' +
           'install-tool dotnet 7.0.100' +
           ' && ' +

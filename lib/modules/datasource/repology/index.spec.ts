@@ -1,11 +1,11 @@
-import { getPkgReleases } from '..';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import * as hostRules from '../../../util/host-rules';
-import { id as versioning } from '../../versioning/loose';
-import type { RepologyPackage } from './types';
-import { RepologyDatasource } from './index';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { id as versioning } from '../../versioning/loose/index.ts';
+import { getPkgReleases } from '../index.ts';
+import { RepologyDatasource } from './index.ts';
+import type { RepologyPackage } from './types.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 
 const datasource = RepologyDatasource.id;
 

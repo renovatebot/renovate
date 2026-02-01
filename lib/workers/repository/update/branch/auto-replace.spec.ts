@@ -1,18 +1,18 @@
 import { codeBlock } from 'common-tags';
-import { getConfig } from '../../../../config/defaults';
-import { GlobalConfig } from '../../../../config/global';
-import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
-import { extractPackageFile } from '../../../../modules/manager/html';
-import type { BranchUpgradeConfig } from '../../../types';
-import { doAutoReplace } from './auto-replace';
-import { Fixtures } from '~test/fixtures';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
+import { extractPackageFile } from '../../../../modules/manager/html/index.ts';
+import type { BranchUpgradeConfig } from '../../../types.ts';
+import { doAutoReplace } from './auto-replace.ts';
+import { Fixtures } from '~test/fixtures.ts';
 
 const sampleHtml = Fixtures.get(
   'sample.html',
   `../../../../modules/manager/html`,
 );
 
-vi.mock('../../../../util/fs');
+vi.mock('../../../../util/fs/index.ts');
 
 describe('workers/repository/update/branch/auto-replace', () => {
   describe('doAutoReplace', () => {
@@ -218,11 +218,14 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.packageFile = '.gitlab-ci.yml';
       upgrade.autoReplaceStringTemplate =
         "'{{{depName}}}'\nref: {{{newValue}}}";
+      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStringsStrategy = 'combination';
 
       // If the new "name" is not added to the matchStrings, the regex matcher fails to extract from `newContent` as
       // there's nothing defined in there anymore that it can match
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         '[\'"]?(?<depName>pipeline-fragments\\/docker-lint)[\'"]?\\s*ref:\\s[\'"]?(?<currentValue>[\\d-]*)[\'"]?',
         '[\'"]?(?<depName>pipeline-solutions\\/gitlab\\/fragments\\/docker-lint)[\'"]?\\s*ref:\\s[\'"]?(?<currentValue>[\\d-]*)[\'"]?',
@@ -250,9 +253,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.replaceString =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
       upgrade.packageFile = 'k8s/base/defaults.yaml';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*\\\'?\\"?(?<depName>[^:]+):(?<currentValue>[^\\s\\\'\\"]+)\\\'?\\"?\\s*',
       ];
+      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = doAutoReplace(upgrade, yml, reuseExistingBranch);
       await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
@@ -315,9 +320,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.replaceString =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
       upgrade.packageFile = 'k8s/base/defaults.yaml';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*\\\'?\\"?(?<depName>[^:]+):(?<currentValue>[^\\s\\\'\\"]+)\\\'?\\"?\\s*',
       ];
+      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe(yml);
@@ -1313,9 +1320,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newName = 'some.other.url.com/some-new-repo';
       upgrade.newValue = '3.16';
       upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*?\\\'?\\"?(?<depName>[^:\\\'\\"]+):(?<currentValue>[^@\\\'\\"]+)@?(?<currentDigest>[^\\s\\\'\\"]+)?\\"?\\\'?\\s*',
       ];
+      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe('image: "some.other.url.com/some-new-repo:3.16"');
@@ -1337,9 +1346,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newName = 'some.other.url.com/some-new-repo';
       upgrade.newValue = '3.16';
       upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*[\\\'\\"]?(?<depName>[^:]+):(?<currentValue>[^@]+)?@?(?<currentDigest>[^\\s\\\'\\"]+)?[\\\'\\"]?\\s*',
       ];
+      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe(
@@ -1532,6 +1543,37 @@ describe('workers/repository/update/branch/auto-replace', () => {
               runs-on: ubuntu-latest
               steps:
                 - uses: some-other-action/checkout@2485f4 # tag=v2.0.0
+        `,
+      );
+    });
+
+    it('docker: replacement with same digest should not corrupt digest via currentDigestShort', async () => {
+      // Regression test for https://github.com/renovatebot/renovate/discussions/38703
+      // When doing a replacement where currentDigest === newDigest, the currentDigestShort
+      // should not be used to incorrectly replace part of the correct digest
+      const dockerfile = codeBlock`
+        FROM redis:8.2.1@sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621 AS base
+      `;
+      upgrade.manager = 'dockerfile';
+      upgrade.updateType = 'replacement';
+      upgrade.depName = 'redis';
+      upgrade.currentValue = '8.2.1';
+      upgrade.currentDigest =
+        'sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621';
+      upgrade.currentDigestShort = '5fa2edb';
+      upgrade.depIndex = 0;
+      upgrade.replaceString =
+        'redis:8.2.1@sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621';
+      upgrade.newName = 'docker.io/library/redis';
+      upgrade.newValue = '8.2.1';
+      // Same digest as currentDigest - this is the key scenario
+      upgrade.newDigest =
+        'sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        codeBlock`
+          FROM docker.io/library/redis:8.2.1@sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621 AS base
         `,
       );
     });

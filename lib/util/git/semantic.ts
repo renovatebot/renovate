@@ -1,7 +1,7 @@
 import conventionalCommitsDetector from 'conventional-commits-detector';
-import { logger } from '../../logger';
-import { getCache } from '../../util/cache/repository';
-import { getCommitMessages } from '.';
+import { logger } from '../../logger/index.ts';
+import { getCache } from '../../util/cache/repository/index.ts';
+import { getCommitMessages } from './index.ts';
 
 type DetectedSemanticCommit = 'enabled' | 'disabled';
 

@@ -1,18 +1,17 @@
-import { getChangeLogJSON } from '..';
-import * as semverVersioning from '../../../../../../modules/versioning/semver';
-import * as hostRules from '../../../../../../util/host-rules';
-import { toBase64 } from '../../../../../../util/string';
-import type { Timestamp } from '../../../../../../util/timestamp';
-import type { BranchUpgradeConfig } from '../../../../../types';
-import { GiteaChangeLogSource } from '../gitea/source';
-import { getReleaseNotesMd } from '.';
-import * as httpMock from '~test/http-mock';
-import { partial } from '~test/util';
+import * as semverVersioning from '../../../../../../modules/versioning/semver/index.ts';
+import * as hostRules from '../../../../../../util/host-rules.ts';
+import { toBase64 } from '../../../../../../util/string.ts';
+import type { Timestamp } from '../../../../../../util/timestamp.ts';
+import type { BranchUpgradeConfig } from '../../../../../types.ts';
+import { GiteaChangeLogSource } from '../gitea/source.ts';
+import { getChangeLogJSON } from '../index.ts';
+import { getReleaseNotesMd } from './index.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
   branchName: '',
-  endpoint: 'https://gitea.com/api/v1/',
   packageName: 'renovate',
   versioning: semverVersioning.id,
   currentVersion: '5.2.0',
@@ -338,7 +337,6 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://gitea-enterprise.example.com/meno/dropzone/',
-          endpoint: 'https://gitea-enterprise.example.com/',
         }),
       ).toMatchObject({
         hasReleaseNotes: false,
@@ -373,9 +371,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          platform: 'gitea',
           sourceUrl: 'https://git.test.com/meno/dropzone/',
-          endpoint: 'https://git.test.com/api/v1/',
         }),
       ).toMatchObject({
         hasReleaseNotes: false,

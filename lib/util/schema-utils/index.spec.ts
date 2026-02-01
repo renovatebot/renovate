@@ -15,8 +15,8 @@ import {
   multidocYaml,
   withDebugMessage,
   withTraceMessage,
-} from '.';
-import { logger } from '~test/util';
+} from './index.ts';
+import { logger } from '~test/util.ts';
 
 describe('util/schema-utils/index', () => {
   describe('LooseArray', () => {

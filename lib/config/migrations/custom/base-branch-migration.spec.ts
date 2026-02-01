@@ -1,4 +1,4 @@
-import { BaseBranchMigration } from './base-branch-migration';
+import { BaseBranchMigration } from './base-branch-migration.ts';
 
 describe('config/migrations/custom/base-branch-migration', () => {
   it('should migrate value to array', async () => {

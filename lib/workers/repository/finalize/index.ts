@@ -1,15 +1,15 @@
-import type { AllConfig, RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { platform } from '../../../modules/platform';
-import * as repositoryCache from '../../../util/cache/repository';
-import { clearRenovateRefs } from '../../../util/git';
-import { PackageFiles } from '../package-files';
-import { checkReconfigureBranch } from '../reconfigure';
-import { pruneStaleBranches } from './prune';
+import type { AllConfig, RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import * as repositoryCache from '../../../util/cache/repository/index.ts';
+import { clearRenovateRefs } from '../../../util/git/index.ts';
+import { PackageFiles } from '../package-files.ts';
+import { checkReconfigureBranch } from '../reconfigure/index.ts';
+import { pruneStaleBranches } from './prune.ts';
 import {
   runBranchSummary,
   runRenovateRepoStats,
-} from './repository-statistics';
+} from './repository-statistics.ts';
 
 // istanbul ignore next
 export async function finalizeRepo(
@@ -18,8 +18,8 @@ export async function finalizeRepo(
   repoConfig: AllConfig,
 ): Promise<void> {
   await checkReconfigureBranch(config, repoConfig);
-  await repositoryCache.saveCache();
   await pruneStaleBranches(config, branchList);
+  await repositoryCache.saveCache();
   await ensureIssuesClosing();
   await clearRenovateRefs();
   PackageFiles.clear();

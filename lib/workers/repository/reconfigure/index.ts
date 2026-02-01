@@ -1,26 +1,26 @@
-import { GlobalConfig } from '../../../config/global';
-import { applySecretsAndVariablesToConfig } from '../../../config/secrets';
-import type { AllConfig, RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { platform } from '../../../modules/platform';
-import { scm } from '../../../modules/platform/scm';
-import { getCache } from '../../../util/cache/repository';
-import { getBranchCommit } from '../../../util/git';
-import { mergeInheritedConfig } from '../init/inherited';
-import { mergeRenovateConfig } from '../init/merge';
-import { extractDependencies } from '../process';
-import type { ExtractResult } from '../process/extract-update';
-import { ensureReconfigurePrComment } from './comment';
+import { GlobalConfig } from '../../../config/global.ts';
+import { applySecretsAndVariablesToConfig } from '../../../config/secrets.ts';
+import type { AllConfig, RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import { scm } from '../../../modules/platform/scm.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import { getBranchCommit } from '../../../util/git/index.ts';
+import { mergeInheritedConfig } from '../init/inherited.ts';
+import { mergeRenovateConfig } from '../init/merge.ts';
+import type { ExtractResult } from '../process/extract-update.ts';
+import { extractDependencies } from '../process/index.ts';
+import { ensureReconfigurePrComment } from './comment.ts';
 import {
   deleteReconfigureBranchCache,
   setReconfigureBranchCache,
-} from './reconfigure-cache';
+} from './reconfigure-cache.ts';
 import {
   getReconfigureBranchName,
   getReconfigureConfig,
   setBranchStatus,
-} from './utils';
-import { validateReconfigureBranch } from './validate';
+} from './utils.ts';
+import { validateReconfigureBranch } from './validate.ts';
 
 export async function checkReconfigureBranch(
   config: RenovateConfig,

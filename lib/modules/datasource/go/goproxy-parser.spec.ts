@@ -1,5 +1,5 @@
-import * as memCache from '../../../util/cache/memory';
-import { parseGoproxy, parseNoproxy } from './goproxy-parser';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
 
 describe('modules/datasource/go/goproxy-parser', () => {
   beforeEach(() => {

@@ -1,10 +1,11 @@
 import { codeBlock } from 'common-tags';
-import type { ExtractConfig } from '../types';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+import * as hostRules from '../../../util/host-rules.ts';
+import type { ExtractConfig } from '../types.ts';
+import { extractPackageFile } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 function mockReadLocalFile(files: Record<string, string | null>) {
   fs.readLocalFile.mockImplementation((file): Promise<any> => {
@@ -34,6 +35,12 @@ describe('modules/manager/cargo/extract', () => {
     beforeEach(() => {
       delete process.env.CARGO_REGISTRIES_PRIVATE_CRATES_INDEX;
       delete process.env.CARGO_REGISTRIES_MCORBIN_INDEX;
+
+      hostRules.clear();
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'git.example.com',
+      });
     });
 
     it('returns null for invalid toml', async () => {
@@ -66,7 +73,7 @@ describe('modules/manager/cargo/extract', () => {
     it('extracts multiple dependencies simple', async () => {
       const res = await extractPackageFile(cargo1toml, 'Cargo.toml', config);
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(19);
+      expect(res?.deps).toHaveLength(20);
     });
 
     it('extracts multiple dependencies advanced', async () => {

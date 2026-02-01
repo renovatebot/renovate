@@ -1,14 +1,16 @@
 import { DateTime } from 'luxon';
-import { logger } from '../../../logger';
-import type { BranchStatus } from '../../../types';
-import { clone } from '../../../util/clone';
-import { parseJson } from '../../../util/common';
-import * as git from '../../../util/git';
-import type { VirtualBranch } from '../../../util/git/types';
-import { setBaseUrl } from '../../../util/http/gerrit';
-import { regEx } from '../../../util/regex';
-import { ensureTrailingSlash } from '../../../util/url';
-import { hashBody } from '../pr-body';
+import semver from 'semver';
+import { logger } from '../../../logger/index.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import { clone } from '../../../util/clone.ts';
+import { parseJson } from '../../../util/common.ts';
+import { getEnv } from '../../../util/env.ts';
+import * as git from '../../../util/git/index.ts';
+import type { VirtualBranch } from '../../../util/git/types.ts';
+import { setBaseUrl } from '../../../util/http/gerrit.ts';
+import { regEx } from '../../../util/regex.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import { hashBody } from '../pr-body.ts';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -26,27 +28,28 @@ import type {
   RepoParams,
   RepoResult,
   UpdatePrConfig,
-} from '../types';
-import { repoFingerprint } from '../util';
+} from '../types.ts';
+import { repoFingerprint } from '../util.ts';
 
-import { smartTruncate } from '../utils/pr-body';
-import { readOnlyIssueBody } from '../utils/read-only-issue-body';
-import { client } from './client';
-import { GerritPrCache } from './pr-cache';
-import { configureScm } from './scm';
+import { smartTruncate } from '../utils/pr-body.ts';
+import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
+import { client } from './client.ts';
+import { GerritPrCache } from './pr-cache.ts';
+import { configureScm } from './scm.ts';
 import type {
   GerritChange,
   GerritLabelTypeInfo,
   GerritProjectInfo,
-} from './types';
+} from './types.ts';
 import {
+  MAX_GERRIT_COMMENT_SIZE,
   REQUEST_DETAILS_FOR_PRS,
   TAG_PULL_REQUEST_BODY,
   extractSourceBranch,
   getGerritRepoUrl,
   mapBranchStatusToLabel,
   mapGerritChangeToPr,
-} from './utils';
+} from './utils.ts';
 
 export const id = 'gerrit';
 
@@ -68,7 +71,7 @@ export function writeToConfig(newConfig: typeof config): void {
   config = { ...config, ...newConfig };
 }
 
-export function initPlatform({
+export async function initPlatform({
   endpoint,
   username,
   password,
@@ -85,10 +88,40 @@ export function initPlatform({
   config.gerritUsername = username;
   defaults.endpoint = ensureTrailingSlash(endpoint);
   setBaseUrl(defaults.endpoint);
+
+  let gerritVersion: string;
+  try {
+    const env = getEnv();
+    /* v8 ignore if: experimental feature */
+    if (env.RENOVATE_X_PLATFORM_VERSION) {
+      gerritVersion = env.RENOVATE_X_PLATFORM_VERSION;
+    } else {
+      gerritVersion = await client.getGerritVersion({
+        username,
+        password,
+      });
+    }
+  } catch (err) {
+    logger.debug(
+      { err },
+      'Error authenticating with Gerrit. Check your credentials',
+    );
+    throw new Error('Init: Authentication failure');
+  }
+
+  logger.debug('Gerrit version is: ' + gerritVersion);
+  // Example: 3.13.0-rc3-148-gb478dbbb57
+  const parsed = semver.parse(gerritVersion);
+  if (!parsed) {
+    throw new Error(`Unable to parse Gerrit version: ${gerritVersion}`);
+  }
+  gerritVersion = `${parsed.major}.${parsed.minor}.${parsed.patch}`;
+  client.setGerritVersion(gerritVersion);
+
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
   };
-  return Promise.resolve(platformConfig);
+  return platformConfig;
 }
 
 /**
@@ -105,6 +138,8 @@ export async function getRepos(): Promise<string[]> {
  */
 export async function initRepo({
   repository,
+  cloneSubmodules,
+  cloneSubmodulesFilter,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo(${repository}, ${gitUrl})`);
@@ -170,6 +205,8 @@ export async function initRepo({
   configureScm(repository);
   await git.initRepo({
     url,
+    cloneSubmodules,
+    cloneSubmodulesFilter,
     virtualBranches,
   });
 
@@ -287,6 +324,7 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   const pr = clone(cached);
   let updated = false;
 
+  // prConfig.prBody will only be set if the body has changed
   if (prConfig.prBody) {
     await client.addMessage(
       prConfig.number,
@@ -299,7 +337,11 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
     pr.updatedAt = new Date().toISOString();
     updated = true;
   }
-
+  if (prConfig.targetBranch) {
+    await client.moveChange(prConfig.number, prConfig.targetBranch);
+    pr.targetBranch = prConfig.targetBranch;
+    updated = true;
+  }
   if (prConfig.state && prConfig.state === 'closed') {
     const change = await client.abandonChange(prConfig.number);
     pr.state = 'closed';
@@ -365,22 +407,27 @@ export async function getBranchPr(
   targetBranch?: string,
 ): Promise<Pr | null> {
   const prs = await GerritPrCache.getPrs(config.repository!);
-  const cached = prs.find((pr) => {
+  const cachedPrs = prs.filter((pr) => {
     if (pr.sourceBranch !== branchName) {
       return false;
     }
     if (pr.state !== 'open') {
       return false;
     }
-    if (targetBranch && pr.targetBranch !== targetBranch) {
-      return false;
-    }
     return true;
   });
+  let result: Pr | undefined;
+  if (targetBranch) {
+    const found = cachedPrs.find((pr) => pr.targetBranch === targetBranch);
+    if (found) {
+      result = found;
+    }
+  }
+  result ??= cachedPrs[0];
   logger.trace(
-    `getBranchPr: using cached gerrit change ${cached?.number} for ${branchName}`,
+    `getBranchPr: using cached gerrit change ${result?.number} for ${branchName}`,
   );
-  return cached ?? null;
+  return result ?? null;
 }
 
 export async function getPrList(): Promise<Pr[]> {
@@ -623,7 +670,7 @@ export function massageMarkdown(prBody: string, rebaseLabel: string): string {
 }
 
 export function maxBodyLength(): number {
-  return 16384; //TODO: check the real gerrit limit (max. chars)
+  return MAX_GERRIT_COMMENT_SIZE;
 }
 
 export async function deleteLabel(
@@ -634,24 +681,24 @@ export async function deleteLabel(
 }
 
 export function ensureCommentRemoval(
-  ensureCommentRemoval:
+  _ensureCommentRemoval:
     | EnsureCommentRemovalConfigByTopic
     | EnsureCommentRemovalConfigByContent,
 ): Promise<void> {
   return Promise.resolve();
 }
 
-export function ensureIssueClosing(title: string): Promise<void> {
+export function ensureIssueClosing(_title: string): Promise<void> {
   return Promise.resolve();
 }
 
 export function ensureIssue(
-  issueConfig: EnsureIssueConfig,
+  _issueConfig: EnsureIssueConfig,
 ): Promise<EnsureIssueResult | null> {
   return Promise.resolve(null);
 }
 
-export function findIssue(title: string): Promise<Issue | null> {
+export function findIssue(_title: string): Promise<Issue | null> {
   return Promise.resolve(null);
 }
 

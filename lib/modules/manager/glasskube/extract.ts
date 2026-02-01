@@ -1,19 +1,19 @@
-import is from '@sindresorhus/is';
-import { readLocalFile } from '../../../util/fs';
-import { parseYaml } from '../../../util/yaml';
-import { GlasskubePackagesDatasource } from '../../datasource/glasskube-packages';
+import { isFalsy } from '@sindresorhus/is';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { parseYaml } from '../../../util/yaml.ts';
+import { GlasskubePackagesDatasource } from '../../datasource/glasskube-packages/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFile,
   PackageFileContent,
-} from '../types';
+} from '../types.ts';
 import {
   GlasskubeResource,
   type Package,
   type PackageRepository,
-} from './schema';
-import type { GlasskubeResources } from './types';
+} from './schema.ts';
+import type { GlasskubeResources } from './types.ts';
 
 function parseResources(
   content: string,
@@ -74,7 +74,7 @@ function findRepository(
     if (name === repository.metadata.name) {
       return repository;
     }
-    if (is.falsy(name) && isDefaultRepository(repository)) {
+    if (isFalsy(name) && isDefaultRepository(repository)) {
       return repository;
     }
   }
@@ -92,7 +92,7 @@ function isDefaultRepository(repository: PackageRepository): boolean {
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config?: ExtractConfig,
+  _config?: ExtractConfig,
 ): PackageFileContent | null {
   const { packages, repositories } = parseResources(content, packageFile);
   const deps = resolvePackageDependencies(packages, repositories);
@@ -100,7 +100,7 @@ export function extractPackageFile(
 }
 
 export async function extractAllPackageFiles(
-  config: ExtractConfig,
+  _config: ExtractConfig,
   packageFiles: string[],
 ): Promise<PackageFile[] | null> {
   const allRepositories: PackageRepository[] = [];

@@ -1,9 +1,12 @@
-import is from '@sindresorhus/is';
-import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { logger } from '../../logger';
-import * as allVersioning from '../../modules/versioning';
-import { getRegexPredicate } from '../string-match';
-import { Matcher } from './base';
+import { isNullOrUndefined, isUndefined } from '@sindresorhus/is';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import { logger } from '../../logger/index.ts';
+import * as allVersioning from '../../modules/versioning/index.ts';
+import { getRegexPredicate } from '../string-match.ts';
+import { Matcher } from './base.ts';
 
 export class CurrentVersionMatcher extends Matcher {
   override matches(
@@ -15,11 +18,11 @@ export class CurrentVersionMatcher extends Matcher {
     }: PackageRuleInputConfig,
     { matchCurrentVersion }: PackageRule,
   ): boolean | null {
-    if (is.undefined(matchCurrentVersion)) {
+    if (isUndefined(matchCurrentVersion)) {
       return null;
     }
     const isUnconstrainedValue =
-      !!lockedVersion && is.nullOrUndefined(currentValue);
+      !!lockedVersion && isNullOrUndefined(currentValue);
     const versioningApi = allVersioning.get(versioning);
     const matchCurrentVersionStr = matchCurrentVersion.toString();
     const matchCurrentVersionPred = getRegexPredicate(matchCurrentVersionStr);
@@ -27,7 +30,7 @@ export class CurrentVersionMatcher extends Matcher {
     if (matchCurrentVersionPred) {
       const compareVersion = lockedVersion ?? currentVersion ?? currentValue;
       return (
-        !is.nullOrUndefined(compareVersion) &&
+        !isNullOrUndefined(compareVersion) &&
         matchCurrentVersionPred(compareVersion)
       );
     }
@@ -49,7 +52,7 @@ export class CurrentVersionMatcher extends Matcher {
     const compareVersion = versioningApi.isVersion(currentValue)
       ? currentValue // it's a version so we can match against it
       : (lockedVersion ?? currentVersion); // need to match against this currentVersion, if available
-    if (is.nullOrUndefined(compareVersion)) {
+    if (isNullOrUndefined(compareVersion)) {
       return false;
     }
     if (versioningApi.isVersion(compareVersion)) {

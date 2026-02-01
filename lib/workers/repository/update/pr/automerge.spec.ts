@@ -1,9 +1,9 @@
-import { GlobalConfig } from '../../../../config/global';
-import type { Pr } from '../../../../modules/platform';
-import type { BranchConfig } from '../../../types';
-import * as schedule from '../branch/schedule';
-import * as prAutomerge from './automerge';
-import { partial, platform, scm } from '~test/util';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import type { BranchConfig } from '../../../types.ts';
+import * as schedule from '../branch/schedule.ts';
+import * as prAutomerge from './automerge.ts';
+import { partial, platform, scm } from '~test/util.ts';
 
 describe('workers/repository/update/pr/automerge', () => {
   describe('checkAutoMerge(pr, config)', () => {

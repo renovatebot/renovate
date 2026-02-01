@@ -1,10 +1,13 @@
 import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
-import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
-import type { BranchStatus } from '../../../types';
-import { repoFingerprint } from '../util';
-import { client as _client } from './client';
-import { GerritPrCache as _GerritPrCache } from './pr-cache';
+import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import { repoFingerprint } from '../util.ts';
+import { client as _client } from './client.ts';
+import { writeToConfig } from './index.ts';
+import * as gerrit from './index.ts';
+import { GerritPrCache as _GerritPrCache } from './pr-cache.ts';
 import type {
   GerritAccountInfo,
   GerritChange,
@@ -12,15 +15,13 @@ import type {
   GerritLabelTypeInfo,
   GerritProjectInfo,
   GerritRevisionInfo,
-} from './types';
+} from './types.ts';
 import {
   REQUEST_DETAILS_FOR_PRS,
   TAG_PULL_REQUEST_BODY,
   mapGerritChangeToPr,
-} from './utils';
-import { writeToConfig } from '.';
-import * as gerrit from '.';
-import { git, hostRules, partial } from '~test/util';
+} from './utils.ts';
+import { git, hostRules, partial } from '~test/util.ts';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate';
 
@@ -35,9 +36,9 @@ const codeReviewLabel: GerritLabelTypeInfo = {
   default_value: 0,
 };
 
-vi.mock('../../../util/host-rules');
-vi.mock('./client');
-vi.mock('./pr-cache');
+vi.mock('../../../util/host-rules.ts');
+vi.mock('./client.ts');
+vi.mock('./pr-cache.ts');
 const clientMock = vi.mocked(_client);
 const prCacheMock = vi.mocked(_GerritPrCache);
 
@@ -60,6 +61,7 @@ describe('modules/platform/gerrit/index', () => {
       repository: 'test/repo',
       labels: {},
     });
+    clientMock.getGerritVersion.mockResolvedValue('3.0.0');
     await gerrit.initPlatform({
       endpoint: gerritEndpointUrl,
       username: 'user',
@@ -68,14 +70,16 @@ describe('modules/platform/gerrit/index', () => {
   });
 
   describe('initPlatform()', () => {
-    it('should throw if no endpoint', () => {
+    it('should throw if no endpoint', async () => {
       expect.assertions(1);
-      expect(() => gerrit.initPlatform({})).toThrow();
+      await expect(() => gerrit.initPlatform({})).rejects.toThrow();
     });
 
-    it('should throw if no username/password', () => {
+    it('should throw if no username/password', async () => {
       expect.assertions(1);
-      expect(() => gerrit.initPlatform({ endpoint: 'endpoint' })).toThrow();
+      await expect(() =>
+        gerrit.initPlatform({ endpoint: 'endpoint' }),
+      ).rejects.toThrow();
     });
 
     it('should init', async () => {
@@ -86,6 +90,28 @@ describe('modules/platform/gerrit/index', () => {
           password: '123',
         }),
       ).toEqual({ endpoint: 'https://dev.gerrit.com/renovate/' });
+    });
+
+    it('should throw if auth fails', async () => {
+      clientMock.getGerritVersion.mockRejectedValue(new Error('Auth failed'));
+      await expect(
+        gerrit.initPlatform({
+          endpoint: gerritEndpointUrl,
+          username: 'abc',
+          password: '123',
+        }),
+      ).rejects.toThrow('Init: Authentication failure');
+    });
+
+    it('should throw if version is unparseable', async () => {
+      clientMock.getGerritVersion.mockResolvedValue('not-a-valid-version');
+      await expect(
+        gerrit.initPlatform({
+          endpoint: gerritEndpointUrl,
+          username: 'abc',
+          password: '123',
+        }),
+      ).rejects.toThrow('Unable to parse Gerrit version: not-a-valid-version');
     });
   });
 
@@ -133,6 +159,25 @@ describe('modules/platform/gerrit/index', () => {
       });
     });
 
+    it('initRepo() - passes cloneSubmodules', async () => {
+      clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
+      clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
+      clientMock.findChanges.mockResolvedValueOnce([]); // open changes for branch initialization
+
+      await gerrit.initRepo({
+        repository: 'test/repo',
+        cloneSubmodules: true,
+        cloneSubmodulesFilter: ['test'],
+      });
+
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
+        url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+        cloneSubmodules: true,
+        cloneSubmodulesFilter: ['test'],
+        virtualBranches: [],
+      });
+    });
+
     it('initRepo() - abandon rejected changes', async () => {
       clientMock.getProjectInfo.mockResolvedValueOnce({
         ...projectInfo,
@@ -168,7 +213,7 @@ describe('modules/platform/gerrit/index', () => {
       clientMock.findChanges.mockResolvedValueOnce([
         partial<GerritChange>({
           _number: 12345,
-          current_revision: 'sha123',
+          current_revision: 'sha123' as LongCommitSha,
           revisions: {
             sha123: partial<GerritRevisionInfo>({
               ref: 'refs/changes/45/12345/1',
@@ -179,7 +224,7 @@ describe('modules/platform/gerrit/index', () => {
         }),
         partial<GerritChange>({
           _number: 12346,
-          current_revision: 'sha456',
+          current_revision: 'sha456' as LongCommitSha,
           revisions: {
             sha456: partial<GerritRevisionInfo>({
               ref: 'refs/changes/46/12346/1',
@@ -238,7 +283,7 @@ describe('modules/platform/gerrit/index', () => {
           _number: 123456,
           status: 'NEW',
           branch: 'master',
-          current_revision: 'some-revision',
+          current_revision: 'some-revision' as LongCommitSha,
           revisions: {
             'some-revision': partial<GerritRevisionInfo>({
               commit_with_footers: 'Renovate-Branch: branch',
@@ -285,12 +330,13 @@ describe('modules/platform/gerrit/index', () => {
     it('findPr() - refreshCache found and saves to cache', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
-        current_revision: 'some-revision',
+        current_revision: 'some-revision' as LongCommitSha,
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: source',
           }),
         },
+        created: '2025-04-14 16:33:37.000000000',
       });
       clientMock.findChanges.mockResolvedValueOnce([change]);
       prCacheMock.setPr.mockResolvedValueOnce();
@@ -313,7 +359,7 @@ describe('modules/platform/gerrit/index', () => {
     it('getPr() - found in cache', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
-        current_revision: 'some-revision',
+        current_revision: 'some-revision' as LongCommitSha,
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: branch',
@@ -337,7 +383,7 @@ describe('modules/platform/gerrit/index', () => {
     it('getPr() - refreshCache bypasses cache and queries client', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
-        current_revision: 'some-revision',
+        current_revision: 'some-revision' as LongCommitSha,
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: branch',
@@ -358,7 +404,7 @@ describe('modules/platform/gerrit/index', () => {
     it('getPr() - refreshCache saves to cache after fetching', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
-        current_revision: 'some-revision',
+        current_revision: 'some-revision' as LongCommitSha,
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: branch',
@@ -393,7 +439,7 @@ describe('modules/platform/gerrit/index', () => {
     it('updatePr() - closed => abandon the change', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
-        current_revision: 'some-revision',
+        current_revision: 'some-revision' as LongCommitSha,
         updated: '2025-04-14 16:40:00.000000000',
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
@@ -439,7 +485,7 @@ describe('modules/platform/gerrit/index', () => {
     it('updatePr() - new prBody => add as message and update cache', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
-        current_revision: 'some-revision',
+        current_revision: 'some-revision' as LongCommitSha,
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: branch',
@@ -470,6 +516,23 @@ describe('modules/platform/gerrit/index', () => {
     });
   });
 
+  it('updatePr() - targetBranch set => move the change', async () => {
+    const change = partial<GerritChange>({ branch: 'main' });
+    clientMock.getChange.mockResolvedValueOnce(change);
+    clientMock.moveChange.mockResolvedValueOnce(
+      partial<GerritChange>({ branch: 'new-main' }),
+    );
+    await gerrit.updatePr({
+      number: 123456,
+      prTitle: 'title',
+      targetBranch: 'new-main',
+    });
+    expect(clientMock.moveChange).toHaveBeenCalledExactlyOnceWith(
+      123456,
+      'new-main',
+    );
+  });
+
   describe('createPr()', () => {
     it('createPr() - no existing found => rejects', async () => {
       clientMock.findChanges.mockResolvedValueOnce([]);
@@ -489,7 +552,7 @@ describe('modules/platform/gerrit/index', () => {
       const change = partial<GerritChange>({
         _number: 123456,
         created: t0.minus({ minutes: 6 }).toISO().replace('T', ' '),
-        current_revision: 'some-revision',
+        current_revision: 'some-revision' as LongCommitSha,
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: source',
@@ -510,7 +573,7 @@ describe('modules/platform/gerrit/index', () => {
     it('createPr() - add body as message and save to cache', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
-        current_revision: 'some-revision',
+        current_revision: 'some-revision' as LongCommitSha,
         created: t0.minus({ seconds: 30 }).toISO().replace('T', ' '),
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
@@ -557,12 +620,13 @@ describe('modules/platform/gerrit/index', () => {
         _number: 123456,
         status: 'NEW',
         branch: 'master',
-        current_revision: 'some-revision',
+        current_revision: 'some-revision' as LongCommitSha,
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
           }),
         },
+        created: '2025-04-14T16:33:37.000000000',
       });
       const pr = mapGerritChangeToPr(change, {
         sourceBranch: 'renovate/dependency-1.x',
@@ -579,12 +643,13 @@ describe('modules/platform/gerrit/index', () => {
       const change = partial<GerritChange>({
         _number: 123456,
         status: 'NEW',
-        current_revision: 'some-revision',
+        current_revision: 'some-revision' as LongCommitSha,
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
           }),
         },
+        created: '2025-04-14 16:33:37.000000000',
       });
       const pr = mapGerritChangeToPr(change, {
         sourceBranch: 'renovate/dependency-1.x',
@@ -602,7 +667,7 @@ describe('modules/platform/gerrit/index', () => {
     it('refreshPr()', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
-        current_revision: 'some-revision',
+        current_revision: 'some-revision' as LongCommitSha,
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: branch',
@@ -630,12 +695,13 @@ describe('modules/platform/gerrit/index', () => {
 
     it('getPrList() - multiple results from cache', async () => {
       const change = partial<GerritChange>({
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
           }),
         },
+        created: '2025-04-14 16:33:37.000000000',
       });
       const pr = mapGerritChangeToPr(change)!;
       prCacheMock.getPrs.mockResolvedValueOnce([pr, pr, pr]);
@@ -647,7 +713,7 @@ describe('modules/platform/gerrit/index', () => {
     it('mergePr() - blocked by Verified', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
-        current_revision: 'some-revision',
+        current_revision: 'some-revision' as LongCommitSha,
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: branch',
@@ -667,7 +733,7 @@ describe('modules/platform/gerrit/index', () => {
     it('mergePr() - success and updates cache', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
-        current_revision: 'some-revision',
+        current_revision: 'some-revision' as LongCommitSha,
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: branch',
@@ -703,7 +769,7 @@ describe('modules/platform/gerrit/index', () => {
     it('mergePr() - other errors', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
-        current_revision: 'some-revision',
+        current_revision: 'some-revision' as LongCommitSha,
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: branch',
@@ -743,7 +809,7 @@ describe('modules/platform/gerrit/index', () => {
       const change = partial<GerritChange>({
         submittable: true,
         problems: [{ message: 'error1' }, { message: 'error2' }],
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
@@ -760,7 +826,7 @@ describe('modules/platform/gerrit/index', () => {
       const change = partial<GerritChange>({
         submittable: false,
         problems: [{ message: 'error1' }, { message: 'error2' }],
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
@@ -780,7 +846,7 @@ describe('modules/platform/gerrit/index', () => {
         labels: {
           Verified: { blocking: true },
         },
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
@@ -933,7 +999,7 @@ describe('modules/platform/gerrit/index', () => {
         async ({ ctx, branchState, expectedVote, expectedLabel }) => {
           const change = partial<GerritChange>({
             _number: 123456,
-            current_revision: 'abc',
+            current_revision: 'abc' as LongCommitSha,
             revisions: {
               abc: partial<GerritRevisionInfo>({
                 commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
@@ -977,7 +1043,7 @@ describe('modules/platform/gerrit/index', () => {
       it('does not call setLabel() if label does not exist in change', async () => {
         const change = partial<GerritChange>({
           _number: 123456,
-          current_revision: 'abc',
+          current_revision: 'abc' as LongCommitSha,
           revisions: {
             abc: partial<GerritRevisionInfo>({
               commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',

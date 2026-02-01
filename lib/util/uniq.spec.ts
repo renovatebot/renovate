@@ -1,4 +1,4 @@
-import { uniq } from './uniq';
+import { uniq } from './uniq.ts';
 
 describe('util/uniq', () => {
   it('should return an array with unique elements', () => {

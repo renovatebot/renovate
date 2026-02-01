@@ -1,10 +1,8 @@
 import type { WriteStream } from 'node:fs';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
-import { add } from '../util/host-rules';
-import { addSecretForSanitizing as addSecret } from '../util/sanitize';
-import type { RenovateLogger } from './renovate-logger';
-import { ProblemStream } from './utils';
+import { add } from '../util/host-rules.ts';
+import { addSecretForSanitizing as addSecret } from '../util/sanitize.ts';
 import {
   addMeta,
   addStream,
@@ -19,14 +17,16 @@ import {
   setContext,
   setMeta,
   withMeta,
-} from '.';
-import { partial } from '~test/util';
+} from './index.ts';
+import type { RenovateLogger } from './renovate-logger.ts';
+import { ProblemStream } from './utils.ts';
+import { partial } from '~test/util.ts';
 
 const logContext = 'initial_context';
 
 vi.unmock('.');
-vi.mock('nanoid', () => ({
-  nanoid: () => 'initial_context',
+vi.mock('node:crypto', () => ({
+  randomUUID: vi.fn(() => 'initial_context'),
 }));
 
 const bunyanDebugSpy = vi.spyOn(bunyan.prototype, 'debug');
@@ -393,7 +393,10 @@ describe('logger/index', () => {
     add({ password: 'secret"password' });
 
     class SomeClass {
-      constructor(public field: string) {}
+      public field: string;
+      constructor(field: string) {
+        this.field = field;
+      }
     }
 
     const prBody = 'test';
@@ -410,6 +413,70 @@ describe('logger/index', () => {
       someFn: () => 'secret"password',
       someObject: new SomeClass('secret"password'),
     });
+
+    expect(logged.foo).not.toBe('secret"password');
+    expect(logged.bar[0]).toBe('somethingelse');
+    expect(logged.foo).toContain('redacted');
+    expect(logged.bar[1]).toContain('redacted');
+    expect(logged.npmToken).not.toBe('token');
+    expect(logged.buffer).toBe('[content]');
+    expect(logged.content).toBe('[content]');
+    expect(logged.prBody).toBe(prBody);
+    expect(logged.secrets.foo).toBe('***********');
+    expect(logged.someFn).toBe('[function]');
+    expect(logged.someObject.field).toBe('**redacted**');
+  });
+
+  it('applies custom serializer while keeping default sanitizers', () => {
+    let logged: Record<string, any> = {};
+    vi.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
+      partial<WriteStream>({
+        writable: true,
+        write(x: string): boolean {
+          logged = JSON.parse(x);
+          return true;
+        },
+      }),
+    );
+
+    addStream({
+      name: 'logfile',
+      path: 'file.log',
+      level: 'error',
+    });
+    add({ password: 'secret"password' });
+
+    class SomeClass {
+      public field: string;
+      constructor(field: string) {
+        this.field = field;
+      }
+    }
+
+    const childLogger = (logger as RenovateLogger).childLogger();
+    childLogger.addSerializers({
+      baz: (baz: string): any => {
+        return 'baz custom serializer: ' + baz;
+      },
+    });
+
+    const prBody = 'test';
+    childLogger.error({
+      foo: 'secret"password',
+      bar: ['somethingelse', 'secret"password'],
+      baz: 'baz',
+      npmToken: 'token',
+      buffer: Buffer.from('test'),
+      content: 'test',
+      prBody,
+      secrets: {
+        foo: 'barsecret',
+      },
+      someFn: () => 'secret"password',
+      someObject: new SomeClass('secret"password'),
+    });
+
+    expect(logged.baz).toContain('baz custom serializer: baz');
 
     expect(logged.foo).not.toBe('secret"password');
     expect(logged.bar[0]).toBe('somethingelse');

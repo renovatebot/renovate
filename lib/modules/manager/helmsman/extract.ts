@@ -1,16 +1,16 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
-import { parseSingleYaml } from '../../../util/yaml';
-import { DockerDatasource } from '../../datasource/docker';
-import { HelmDatasource } from '../../datasource/helm';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
+import { isNonEmptyString, isTruthy } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
-} from '../types';
-import type { HelmsmanDocument } from './types';
+} from '../types.ts';
+import type { HelmsmanDocument } from './types.ts';
 
 const chartRegex = regEx('^(?<registryRef>[^/]*)/(?<packageName>[^/]*)$');
 
@@ -46,14 +46,14 @@ function createDep(
     return dep;
   }
 
-  if (!is.nonEmptyString(regexResult.groups.packageName)) {
+  if (!isNonEmptyString(regexResult.groups.packageName)) {
     dep.skipReason = 'invalid-name';
     return dep;
   }
   dep.packageName = regexResult.groups.packageName;
 
   const registryUrl = doc.helmRepos[regexResult.groups.registryRef];
-  if (!is.nonEmptyString(registryUrl)) {
+  if (!isNonEmptyString(registryUrl)) {
     dep.skipReason = 'no-repository';
     return dep;
   }
@@ -77,7 +77,7 @@ export function extractPackageFile(
 
     const deps = Object.keys(doc.apps)
       .map((key) => createDep(key, doc))
-      .filter(is.truthy); // filter null values
+      .filter(isTruthy); // filter null values
 
     if (deps.length === 0) {
       return null;

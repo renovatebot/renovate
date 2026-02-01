@@ -1,3 +1,21 @@
+import {
+  CodeCommitClient,
+  CreatePullRequestApprovalRuleCommand,
+  CreatePullRequestCommand,
+  DeleteCommentContentCommand,
+  GetCommentsForPullRequestCommand,
+  GetFileCommand,
+  GetPullRequestCommand,
+  GetRepositoryCommand,
+  ListPullRequestsCommand,
+  ListRepositoriesCommand,
+  PostCommentForPullRequestCommand,
+  PullRequestStatusEnum,
+  UpdateCommentCommand,
+  UpdatePullRequestDescriptionCommand,
+  UpdatePullRequestStatusCommand,
+  UpdatePullRequestTitleCommand,
+} from '@aws-sdk/client-codecommit';
 import type {
   CreatePullRequestApprovalRuleInput,
   CreatePullRequestApprovalRuleOutput,
@@ -19,6 +37,7 @@ import type {
   ListRepositoriesOutput,
   PostCommentForPullRequestInput,
   PostCommentForPullRequestOutput,
+  RepositoryMetadata,
   UpdateCommentInput,
   UpdateCommentOutput,
   UpdatePullRequestDescriptionInput,
@@ -28,30 +47,11 @@ import type {
   UpdatePullRequestTitleInput,
   UpdatePullRequestTitleOutput,
 } from '@aws-sdk/client-codecommit';
-import {
-  CodeCommitClient,
-  CreatePullRequestApprovalRuleCommand,
-  CreatePullRequestCommand,
-  DeleteCommentContentCommand,
-  GetCommentsForPullRequestCommand,
-  GetFileCommand,
-  GetPullRequestCommand,
-  GetRepositoryCommand,
-  ListPullRequestsCommand,
-  ListRepositoriesCommand,
-  PostCommentForPullRequestCommand,
-  PullRequestStatusEnum,
-  UpdateCommentCommand,
-  UpdatePullRequestDescriptionCommand,
-  UpdatePullRequestStatusCommand,
-  UpdatePullRequestTitleCommand,
-} from '@aws-sdk/client-codecommit';
-import type { RepositoryMetadata } from '@aws-sdk/client-codecommit/dist-types/models/models_0';
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import * as aws4 from 'aws4';
-import { REPOSITORY_UNINITIATED } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { getEnv } from '../../../util/env';
+import { REPOSITORY_UNINITIATED } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { getEnv } from '../../../util/env.ts';
 
 let codeCommitClient: CodeCommitClient;
 
@@ -60,10 +60,10 @@ export function buildCodeCommitClient(): void {
     codeCommitClient = new CodeCommitClient({});
   }
 
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (!codeCommitClient) {
     throw new Error('Failed to initialize codecommit client');
-  } /* v8 ignore stop */
+  }
 }
 
 export async function deleteComment(
@@ -301,10 +301,10 @@ export function getCodeCommitUrl(
   });
   const dateTime = signer.getDateTime();
 
-  /* v8 ignore start */
-  if (!is.string(dateTime)) {
+  /* v8 ignore next */
+  if (!isString(dateTime)) {
     throw new Error(REPOSITORY_UNINITIATED);
-  } /* v8 ignore stop */
+  }
 
   const token = `${dateTime}Z${signer.signature()}`;
 
@@ -313,10 +313,10 @@ export function getCodeCommitUrl(
   }`;
 
   // massaging username with the session token,
-  /* v8 ignore start */
+  /* v8 ignore next */
   if (username.includes('/')) {
     username = username.replace(/\//g, '%2F');
-  } /* v8 ignore stop */
+  }
   return `https://${username}:${token}@git-codecommit.${
     env.AWS_REGION ?? 'us-east-1'
   }.amazonaws.com/v1/repos/${repoName}`;

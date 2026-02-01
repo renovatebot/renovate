@@ -1,5 +1,5 @@
 import upath from 'upath';
-import { minimatch } from '../../../util/minimatch.js';
+import { minimatch } from '../../../util/minimatch.ts';
 
 export function fileMatchesWorkspaces(
   pwd: string,

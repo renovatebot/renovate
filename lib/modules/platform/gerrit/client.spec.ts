@@ -1,15 +1,16 @@
-import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
-import { setBaseUrl } from '../../../util/http/gerrit';
-import type { FindPRConfig } from '../types';
-import { client } from './client';
+import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
+import { setBaseUrl } from '../../../util/http/gerrit.ts';
+import type { FindPRConfig } from '../types.ts';
+import { client } from './client.ts';
 import type {
   GerritChange,
   GerritChangeMessageInfo,
   GerritFindPRConfig,
   GerritMergeableInfo,
-} from './types';
-import * as httpMock from '~test/http-mock';
-import { partial } from '~test/util';
+} from './types.ts';
+import { MIN_GERRIT_VERSION } from './utils.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate/';
 const jsonResultHeader = { 'content-type': 'application/json;charset=utf-8' };
@@ -17,6 +18,21 @@ const jsonResultHeader = { 'content-type': 'application/json;charset=utf-8' };
 describe('modules/platform/gerrit/client', () => {
   beforeAll(() => {
     setBaseUrl(gerritEndpointUrl);
+  });
+
+  describe('getGerritVersion()', () => {
+    it('returns version', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/config/server/version')
+        .reply(200, gerritRestResponse('3.9.1'), jsonResultHeader);
+      expect(
+        await client.getGerritVersion({
+          username: 'user',
+          password: 'pass',
+        }),
+      ).toBe('3.9.1');
+    });
   });
 
   describe('getRepos()', () => {
@@ -102,6 +118,8 @@ describe('modules/platform/gerrit/client', () => {
         'footer:Renovate-Branch=dependency-xyz',
         { branchName: 'dependency-xyz' },
       ],
+      ['message:"Renovate-Branch: "', { branchName: '' }],
+      ['hasfooter:Renovate-Branch', { branchName: '' }, '3.6.0'],
       ['label:Code-Review=-2', { branchName: 'dependency-xyz', label: '-2' }],
       [
         'branch:otherTarget',
@@ -137,9 +155,23 @@ describe('modules/platform/gerrit/client', () => {
             'fix(deps): "update dependency react-router-dom to ~> "v6.21.2""',
         },
       ],
+      [
+        'subject:"fix(deps): update dependency react-router-dom to v6.21.2"',
+        {
+          branchName: 'dependency-xyz',
+          prTitle: 'fix(deps): update dependency react-router-dom to v6.21.2',
+        },
+        '3.8.0',
+      ],
     ])(
       'query contains %p',
-      async (expectedQueryPart: string, config: GerritFindPRConfig) => {
+      async (
+        expectedQueryPart: string,
+        config: GerritFindPRConfig,
+        gerritVersion?: string,
+      ) => {
+        client.setGerritVersion(gerritVersion ?? MIN_GERRIT_VERSION);
+
         httpMock
           .scope(gerritEndpointUrl)
           .get('/a/changes/')
@@ -462,6 +494,123 @@ describe('modules/platform/gerrit/client', () => {
     });
   });
 
+  describe('moveChange()', () => {
+    it('move change to different branch', async () => {
+      const change = partial<GerritChange>({ branch: 'new-main' });
+      httpMock
+        .scope(gerritEndpointUrl)
+        .post('/a/changes/123456/move', {
+          destination_branch: 'new-main',
+        })
+        .reply(200, gerritRestResponse(change), jsonResultHeader);
+      await expect(client.moveChange(123456, 'new-main')).resolves.toEqual(
+        change,
+      );
+    });
+  });
+
+  describe('getBranchChange()', () => {
+    it('returns null when no changes found', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query(true)
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
+      await expect(
+        client.getBranchChange('test/repo', {
+          branchName: 'renovate/dependency-1.x',
+          state: 'open',
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('returns single change when only one found', async () => {
+      const change = partial<GerritChange>({
+        _number: 123,
+        branch: 'main',
+      });
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query(true)
+        .reply(200, gerritRestResponse([change]), jsonResultHeader);
+      await expect(
+        client.getBranchChange('test/repo', {
+          branchName: 'renovate/dependency-1.x',
+          state: 'open',
+        }),
+      ).resolves.toEqual(change);
+    });
+
+    it('returns first change when multiple found without targetBranch', async () => {
+      const change1 = partial<GerritChange>({
+        _number: 111,
+        branch: 'main',
+      });
+      const change2 = partial<GerritChange>({
+        _number: 222,
+        branch: 'develop',
+      });
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query(true)
+        .reply(200, gerritRestResponse([change1, change2]), jsonResultHeader);
+      await expect(
+        client.getBranchChange('test/repo', {
+          branchName: 'renovate/dependency-1.x',
+          state: 'open',
+        }),
+      ).resolves.toEqual(change1);
+    });
+
+    it('returns matching change when targetBranch specified and match found', async () => {
+      const change1 = partial<GerritChange>({
+        _number: 111,
+        branch: 'main',
+      });
+      const change2 = partial<GerritChange>({
+        _number: 222,
+        branch: 'develop',
+      });
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query(true)
+        .reply(200, gerritRestResponse([change1, change2]), jsonResultHeader);
+      await expect(
+        client.getBranchChange('test/repo', {
+          branchName: 'renovate/dependency-1.x',
+          state: 'open',
+          targetBranch: 'develop',
+        }),
+      ).resolves.toEqual(change2);
+    });
+
+    it('returns first change when targetBranch specified but no match found', async () => {
+      const change1 = partial<GerritChange>({
+        _number: 111,
+        branch: 'main',
+      });
+      const change2 = partial<GerritChange>({
+        _number: 222,
+        branch: 'develop',
+      });
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query(true)
+        .reply(200, gerritRestResponse([change1, change2]), jsonResultHeader);
+      await expect(
+        client.getBranchChange('test/repo', {
+          branchName: 'renovate/dependency-1.x',
+          state: 'open',
+          targetBranch: 'release',
+        }),
+      ).resolves.toEqual(change1);
+    });
+  });
+
   describe('getMessages()', () => {
     it('no messages', async () => {
       httpMock
@@ -515,12 +664,17 @@ describe('modules/platform/gerrit/client', () => {
     });
 
     it('add too big message', async () => {
-      const okMessage = 'a'.repeat(0x4000);
+      const okMessage = 'a'.repeat(16 * 1024); // 16KB
       const tooBigMessage = okMessage + 'b';
+      const truncationNotice = '\n\n[Truncated by Renovate]';
+      const truncatedMessage =
+        tooBigMessage.slice(0, 16 * 1024 - truncationNotice.length) +
+        truncationNotice;
+      httpMock.scope(gerritEndpointUrl);
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
-          message: okMessage,
+          message: truncatedMessage,
           notify: 'NONE',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);

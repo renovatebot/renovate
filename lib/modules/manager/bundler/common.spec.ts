@@ -1,16 +1,16 @@
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import type { UpdateArtifact } from '../types';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type { UpdateArtifact } from '../types.ts';
 import {
   getBundlerConstraint,
   getLockFilePath,
   getRubyConstraint,
-} from './common';
-import { Fixtures } from '~test/fixtures';
-import { fs, partial } from '~test/util';
+} from './common.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, partial } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const gemfile = Fixtures.get('Gemfile.sourceGroup');
 const lockedContent = Fixtures.get('Gemfile.gitlab-foss.lock');

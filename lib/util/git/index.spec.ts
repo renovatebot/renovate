@@ -1,23 +1,23 @@
 import fs from 'fs-extra';
 import type { PushResult } from 'simple-git';
-import Git from 'simple-git';
+import { simpleGit } from 'simple-git';
 import tmp from 'tmp-promise';
-import { GlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global.ts';
 import {
   CONFIG_VALIDATION,
   INVALID_PATH,
   TEMPORARY_ERROR,
   UNKNOWN_ERROR,
-} from '../../constants/error-messages';
-import { newlineRegex, regEx } from '../regex';
-import * as _auth from './auth';
-import * as _behindBaseCache from './behind-base-branch-cache';
-import * as _conflictsCache from './conflicts-cache';
-import * as _modifiedCache from './modified-cache';
-import type { FileChange } from './types';
-import * as git from '.';
-import { setNoVerify } from '.';
-import { logger } from '~test/util';
+} from '../../constants/error-messages.ts';
+import { newlineRegex, regEx } from '../regex.ts';
+import * as _auth from './auth.ts';
+import * as _behindBaseCache from './behind-base-branch-cache.ts';
+import * as _conflictsCache from './conflicts-cache.ts';
+import * as git from './index.ts';
+import { setNoVerify } from './index.ts';
+import * as _modifiedCache from './modified-cache.ts';
+import type { FileChange, LongCommitSha } from './types.ts';
+import { logger } from '~test/util.ts';
 
 vi.mock('./conflicts-cache');
 vi.mock('./behind-base-branch-cache');
@@ -32,7 +32,9 @@ const conflictsCache = vi.mocked(_conflictsCache);
 const modifiedCache = vi.mocked(_modifiedCache);
 const auth = vi.mocked(_auth);
 // Class is no longer exported
-const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
+const SimpleGit = simpleGit().constructor as {
+  prototype: ReturnType<typeof simpleGit>;
+};
 
 describe('util/git/index', { timeout: 10000 }, () => {
   const masterCommitDate = new Date();
@@ -43,7 +45,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
   beforeAll(async () => {
     base = await tmp.dir({ unsafeCleanup: true });
-    const repo = Git(base.path);
+    const repo = simpleGit(base.path);
     await repo.init();
     defaultBranch = (await repo.raw('branch', '--show-current')).trim();
     await repo.addConfig('user.email', 'Jest@example.com');
@@ -104,6 +106,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     await repo.checkout(defaultBranch);
 
+    // eslint-disable-next-line vitest/no-standalone-expect
     expect(git.getBranchList()).toBeEmptyArray();
   });
 
@@ -114,7 +117,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
   beforeEach(async () => {
     process.env = { ...OLD_ENV };
     origin = await tmp.dir({ unsafeCleanup: true });
-    const repo = Git(origin.path);
+    const repo = simpleGit(origin.path);
     await repo.clone(base.path, '.', ['--bare']);
     await repo.addConfig('commit.gpgsign', 'false');
     tmpDir = await tmp.dir({ unsafeCleanup: true });
@@ -127,7 +130,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     setNoVerify([]);
     await git.syncGit();
     // override some local git settings for better testing
-    const local = Git(tmpDir.path);
+    const local = simpleGit(tmpDir.path);
     await local.addConfig('commit.gpgsign', 'false');
     behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
   });
@@ -210,7 +213,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     describe('submodules', () => {
       beforeEach(async () => {
-        const repo = Git(base.path);
+        const repo = simpleGit(base.path);
 
         auth.getGitEnvironmentVariables.mockReturnValue({
           GIT_ALLOW_PROTOCOL: 'file',
@@ -218,10 +221,11 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
         const submoduleBasePath = base.path + '/submodule';
         await fs.mkdir(submoduleBasePath);
-        const submodule = Git(submoduleBasePath);
+        const submodule = simpleGit(submoduleBasePath);
         await submodule.init();
         await submodule.addConfig('user.email', 'Jest@example.com');
         await submodule.addConfig('user.name', 'Jest');
+        await submodule.addConfig('commit.gpgsign', 'false');
 
         await fs.writeFile(submoduleBasePath + '/init_file', 'init');
         await submodule.add('init_file');
@@ -239,7 +243,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       });
 
       it('verifies that the --recurse-submodule flag is needed', async () => {
-        const repo = Git(base.path);
+        const repo = simpleGit(base.path);
         expect((await repo.status()).isClean()).toBeTrue();
         await repo.checkout('stable');
         expect((await repo.status()).isClean()).toBeFalse();
@@ -256,7 +260,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       });
 
       afterEach(async () => {
-        const repo = Git(base.path);
+        const repo = simpleGit(base.path);
         const defaultBranch =
           (await repo.getConfig('init.defaultbranch')).value ?? 'master';
         await repo.checkout(defaultBranch);
@@ -277,7 +281,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('should exclude submodules', async () => {
-      const repo = Git(base.path);
+      const repo = simpleGit(base.path);
       await repo.submoduleAdd(base.path, 'submodule');
       await repo.submoduleAdd(base.path, 'file');
       await repo.commit('Add submodules');
@@ -469,7 +473,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
   describe('mergeBranch(branchName)', () => {
     it('should perform a branch merge', async () => {
       await git.mergeBranch('renovate/future_branch');
-      const merged = await Git(origin.path).branch([
+      const merged = await simpleGit(origin.path).branch([
         '--verbose',
         '--merged',
         defaultBranch,
@@ -501,7 +505,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
   describe('deleteBranch(branchName)', () => {
     it('should send delete', async () => {
       await git.deleteBranch('renovate/past_branch');
-      const branches = await Git(origin.path).branch({});
+      const branches = await simpleGit(origin.path).branch({});
       expect(branches.all).not.toContain('renovate/past_branch');
     });
 
@@ -608,7 +612,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         message: 'Create a link',
       });
       expect(commit).toBeString();
-      const tmpGit = Git(tmpDir.path);
+      const tmpGit = simpleGit(tmpDir.path);
       const lsTree = await tmpGit.raw(['ls-tree', commit!]);
       const files = lsTree
         .trim()
@@ -815,7 +819,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       });
       expect(commit).not.toBeNull();
 
-      const repo = Git(tmpDir.path);
+      const repo = simpleGit(tmpDir.path);
       const result = await repo.raw(['ls-tree', 'HEAD', 'some-executable']);
       expect(result).toStartWith('100755');
     });
@@ -865,7 +869,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
   describe('initRepo())', () => {
     it('should fetch latest', async () => {
-      const repo = Git(base.path);
+      const repo = simpleGit(base.path);
       await repo.checkout(['-b', 'test', defaultBranch]);
       await fs.writeFile(base.path + '/test', 'lorem ipsum');
       await repo.add(['test']);
@@ -895,7 +899,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('should set branch prefix', async () => {
-      const repo = Git(base.path);
+      const repo = simpleGit(base.path);
       await repo.checkout(['-b', 'renovate/test', defaultBranch]);
       await fs.writeFile(base.path + '/test', 'lorem ipsum');
       await repo.add(['test']);
@@ -921,7 +925,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('should fail clone ssh submodule', async () => {
-      const repo = Git(base.path);
+      const repo = simpleGit(base.path);
       await fs.writeFile(
         base.path + '/.gitmodules',
         '[submodule "test"]\npath=test\nurl=ssh://0.0.0.0',
@@ -956,7 +960,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       });
       git.getBranchCommit(defaultBranch);
       await git.syncGit();
-      const repo = Git(tmpDir.path);
+      const repo = simpleGit(tmpDir.path);
       const res = (await repo.raw(['config', 'extra.clone.config'])).trim();
       expect(res).toBe('test-extra-config-value');
     });
@@ -970,7 +974,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
   describe('isBranchConflicted', () => {
     beforeAll(async () => {
-      const repo = Git(base.path);
+      const repo = simpleGit(base.path);
       await repo.init();
 
       await repo.checkout(['-b', 'renovate/conflicted_branch', defaultBranch]);
@@ -1101,7 +1105,13 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
   describe('Renovate non-branch refs', () => {
     const lsRenovateRefs = async (): Promise<string[]> =>
-      (await Git(tmpDir.path).raw(['ls-remote', 'origin', 'refs/renovate/*']))
+      (
+        await simpleGit(tmpDir.path).raw([
+          'ls-remote',
+          'origin',
+          'refs/renovate/*',
+        ])
+      )
         .split(newlineRegex)
         .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
         .filter(Boolean);
@@ -1137,7 +1147,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     it('clears remote Renovate refs', async () => {
       const commit = git.getBranchCommit('develop')!;
-      const tmpGit = Git(tmpDir.path);
+      const tmpGit = simpleGit(tmpDir.path);
       await tmpGit.raw(['update-ref', 'refs/renovate/branches/aaa', commit]);
       await tmpGit.raw([
         'push',
@@ -1165,7 +1175,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     it('preserves unknown sections by default', async () => {
       const commit = git.getBranchCommit('develop')!;
-      const tmpGit = Git(tmpDir.path);
+      const tmpGit = simpleGit(tmpDir.path);
       await tmpGit.raw(['update-ref', 'refs/renovate/foo/bar', commit]);
       await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/foo/bar']);
       await git.clearRenovateRefs();
@@ -1260,7 +1270,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         defaultBranch: 'develop',
       });
       await git.syncGit();
-      const tmpGit = Git(tmpDir.path);
+      const tmpGit = simpleGit(tmpDir.path);
       const branch = (
         await tmpGit.raw(['rev-parse', '--abbrev-ref', 'HEAD'])
       ).trim();
@@ -1299,7 +1309,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     beforeAll(async () => {
       // create an upstream branch and one extra branch in it
       upstreamBase = await tmp.dir({ unsafeCleanup: true });
-      const upstream = Git(upstreamBase.path);
+      const upstream = simpleGit(upstreamBase.path);
       await upstream.init();
       const defaultUpsBranch = (
         await upstream.raw('branch', '--show-current')
@@ -1315,7 +1325,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
       // clone of upstream on local path
       upstreamOrigin = await tmp.dir({ unsafeCleanup: true });
-      const upstreamRepo = Git(upstreamOrigin.path);
+      const upstreamRepo = simpleGit(upstreamOrigin.path);
       await upstreamRepo.clone(upstreamBase.path, '.', ['--bare']);
       await upstreamRepo.addConfig('commit.gpgsign', 'false');
     });
@@ -1378,7 +1388,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         });
 
         await git.syncGit();
-        const tmpGit = Git(tmpDir2.path);
+        const tmpGit = simpleGit(tmpDir2.path);
 
         // make sure origin exists ie. fork repo is cloned
         const originRemote = (
@@ -1457,7 +1467,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
   describe('virtualBranches', () => {
     it('fetches refspecs and populates branchCommits', async () => {
-      const originRepo = Git(origin.path);
+      const originRepo = simpleGit(origin.path);
       const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
       await originRepo.raw(['update-ref', 'refs/changes/45/12345/1', commit]);
 
@@ -1478,7 +1488,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('throws on fetch error', async () => {
-      const originRepo = Git(origin.path);
+      const originRepo = simpleGit(origin.path);
       const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
 
       await git.initRepo({
@@ -1496,7 +1506,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('handles multiple refspecs', async () => {
-      const baseRepo = Git(base.path);
+      const baseRepo = simpleGit(base.path);
       const commits: LongCommitSha[] = [];
 
       await fs.writeFile(base.path + '/temp_1.txt', 'content-1');
@@ -1513,7 +1523,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       commits.push(commit2);
       await baseRepo.raw(['update-ref', 'refs/changes/02/1002/1', commit2]);
 
-      const originRepo = Git(origin.path);
+      const originRepo = simpleGit(origin.path);
       await originRepo.fetch(['file://' + base.path, '+refs/*:refs/*']);
 
       await git.initRepo({
@@ -1542,7 +1552,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
   describe('deleteVirtualBranch()', () => {
     it('deletes local branch and remote tracking ref', async () => {
-      const originRepo = Git(origin.path);
+      const originRepo = simpleGit(origin.path);
       const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
       await originRepo.raw(['update-ref', 'refs/changes/50/12350/1', commit]);
 

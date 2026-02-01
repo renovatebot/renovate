@@ -1,7 +1,8 @@
-import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
-import type { BranchStatus } from '../../../types';
-import { setBaseUrl } from '../../../util/http/gerrit';
-import { hashBody } from '../pr-body';
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
+import type { BranchStatus } from '../../../types/index.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import { setBaseUrl } from '../../../util/http/gerrit.ts';
+import { hashBody } from '../pr-body.ts';
 import type {
   GerritAccountInfo,
   GerritChange,
@@ -9,12 +10,12 @@ import type {
   GerritChangeStatus,
   GerritLabelTypeInfo,
   GerritRevisionInfo,
-} from './types';
-import * as utils from './utils';
-import { mapBranchStatusToLabel } from './utils';
-import { hostRules, partial } from '~test/util';
+} from './types.ts';
+import * as utils from './utils.ts';
+import { mapBranchStatusToLabel } from './utils.ts';
+import { hostRules, partial } from '~test/util.ts';
 
-vi.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules.ts');
 
 const baseUrl = 'https://gerrit.example.com';
 
@@ -90,7 +91,7 @@ describe('modules/platform/gerrit/utils', () => {
         reviewers: {
           REVIEWER: [partial<GerritAccountInfo>({ username: 'username' })],
         },
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers:
@@ -139,13 +140,14 @@ describe('modules/platform/gerrit/utils', () => {
         branch: 'main',
         subject: 'Fix for',
         reviewers: {},
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers:
               'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
           }),
         },
+        created: '2025-04-14 16:33:37.000000000',
       });
       expect(utils.mapGerritChangeToPr(change)).toEqual({
         number: 123456,
@@ -159,6 +161,7 @@ describe('modules/platform/gerrit/utils', () => {
           hash: hashBody(''),
         },
         updatedAt: undefined,
+        createdAt: '2025-04-14T16:33:37.000000000',
       });
     });
 
@@ -168,13 +171,14 @@ describe('modules/platform/gerrit/utils', () => {
         status: 'NEW',
         branch: 'main',
         subject: 'Fix for',
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers:
               'Some change\n\nRenovate-Broke: renovate/dependency-1.x\nChange-Id: ...',
           }),
         },
+        created: '2025-04-14 16:33:37.000000000',
       });
       expect(utils.mapGerritChangeToPr(change)).toBeNull();
     });
@@ -185,13 +189,14 @@ describe('modules/platform/gerrit/utils', () => {
         status: 'NEW',
         branch: 'main',
         subject: 'Fix for',
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers:
               'Some change\n\nRenovate-Broke: renovate/dependency-1.x\nChange-Id: ...',
           }),
         },
+        created: '2025-04-14 16:33:37.000000000',
       });
       expect(
         utils.mapGerritChangeToPr(change, {
@@ -208,6 +213,7 @@ describe('modules/platform/gerrit/utils', () => {
         bodyStruct: {
           hash: hashBody(''),
         },
+        createdAt: '2025-04-14T16:33:37.000000000',
       });
     });
 
@@ -217,13 +223,14 @@ describe('modules/platform/gerrit/utils', () => {
         status: 'NEW',
         branch: 'main',
         subject: 'Fix for',
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers:
               'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
           }),
         },
+        created: '2025-04-14 16:33:37.000000000',
       });
       expect(
         utils.mapGerritChangeToPr(change, {
@@ -240,6 +247,7 @@ describe('modules/platform/gerrit/utils', () => {
         bodyStruct: {
           hash: hashBody('PR Body'),
         },
+        createdAt: '2025-04-14T16:33:37.000000000',
       });
     });
   });
@@ -252,7 +260,7 @@ describe('modules/platform/gerrit/utils', () => {
 
     it('commit message with no footer', () => {
       const change = partial<GerritChange>({
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers: 'some message...',
@@ -264,7 +272,7 @@ describe('modules/platform/gerrit/utils', () => {
 
     it('commit message with footer', () => {
       const change = partial<GerritChange>({
-        current_revision: 'abc',
+        current_revision: 'abc' as LongCommitSha,
         revisions: {
           abc: partial<GerritRevisionInfo>({
             commit_with_footers:

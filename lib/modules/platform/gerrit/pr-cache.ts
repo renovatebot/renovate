@@ -1,10 +1,10 @@
-import { logger } from '../../../logger';
-import * as memCache from '../../../util/cache/memory';
-import { getCache } from '../../../util/cache/repository';
-import type { Pr } from '../types';
-import { client } from './client';
-import type { GerritChange } from './types';
-import { REQUEST_DETAILS_FOR_PRS, mapGerritChangeToPr } from './utils';
+import { logger } from '../../../logger/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import type { Pr } from '../types.ts';
+import { client } from './client.ts';
+import type { GerritChange } from './types.ts';
+import { REQUEST_DETAILS_FOR_PRS, mapGerritChangeToPr } from './utils.ts';
 
 /**
  * Page size for initial cache population (when cache is empty).
@@ -34,8 +34,10 @@ interface GerritPlatformCache {
 export class GerritPrCache {
   private cache: GerritPrCacheData;
   private items: Pr[] = [];
+  private repository: string;
 
-  private constructor(private repository: string) {
+  private constructor(repository: string) {
+    this.repository = repository;
     const repoCache = getCache();
     repoCache.platform ??= {};
     const platformCache = repoCache.platform as GerritPlatformCache;

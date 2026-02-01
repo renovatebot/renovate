@@ -1,5 +1,5 @@
-import type { LongCommitSha } from '../../../util/git/types';
-import type { FindPRConfig } from '../types';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import type { FindPRConfig } from '../types.ts';
 
 export interface GerritFindPRConfig extends FindPRConfig {
   label?: string;
