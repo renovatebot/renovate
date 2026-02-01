@@ -69,6 +69,7 @@ function branchCacheToMetadata({
 
 function filterDependencyDashboardData(
   branches: BranchCache[],
+  prStateMap: Map<number, string>,
 ): Partial<BranchCache>[] {
   const branchesFiltered: Partial<BranchCache>[] = [];
   for (const branch of branches) {
@@ -110,9 +111,12 @@ function filterDependencyDashboardData(
       upgradesFiltered.push(filteredUpgrade);
     }
 
-    const filteredBranch: Partial<BranchCache> = {
+    const prState = prNo != null ? prStateMap.get(prNo) : undefined;
+
+    const filteredBranch: Partial<BranchCache> & { prState?: string } = {
       branchName,
       prNo,
+      prState,
       prTitle,
       result,
       prBlockedBy,
@@ -124,9 +128,15 @@ function filterDependencyDashboardData(
   return branchesFiltered;
 }
 
-export function runBranchSummary(config: RenovateConfig): void {
+export function runBranchSummary(config: RenovateConfig, prList: Pr[]): void {
   const defaultBranch = config.defaultBranch;
   const { scan, branches } = getCache();
+
+  // Create O(1) lookup map: PR number -> PR state
+  const prStateMap = new Map<number, string>();
+  for (const pr of prList) {
+    prStateMap.set(pr.number, pr.state);
+  }
 
   const baseMetadata: BaseBranchMetadata[] = [];
   for (const [branchName, cached] of Object.entries(scan ?? {})) {
@@ -155,7 +165,10 @@ export function runBranchSummary(config: RenovateConfig): void {
   logger.debug(res, 'Branch summary');
 
   if (branches?.length) {
-    const branchesInformation = filterDependencyDashboardData(branches);
+    const branchesInformation = filterDependencyDashboardData(
+      branches,
+      prStateMap,
+    );
     addBranchStats(config, branchesInformation);
     logger.debug({ branchesInformation }, 'branches info extended');
   }

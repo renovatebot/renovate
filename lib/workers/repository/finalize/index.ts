@@ -36,7 +36,7 @@ export async function finalizeRepo(
     logger.debug('Repo is activated');
     config.repoIsActivated = true;
   }
-  runBranchSummary(config);
+  runBranchSummary(config, prList);
   runRenovateRepoStats(config, prList);
 }
 
