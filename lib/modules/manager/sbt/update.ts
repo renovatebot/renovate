@@ -16,7 +16,6 @@ export function bumpPackageVersion(
     { bumpVersion, currentValue },
     'Checking if we should bump build.sbt version',
   );
-  logger.warn({ content }, 'bumpPackageVersion content');
   let bumpedContent = content;
   const bumpedVersion = semver.inc(currentValue, bumpVersion);
   if (!bumpedVersion) {
@@ -56,7 +55,7 @@ export function updateDependency({
         'Updating version in shared variable for sbt dependency',
       );
 
-      const patternSharedVariable = new RegExp(
+      const patternSharedVariable = regEx(
         `${escapeRegExp(sharedVariableName)}(\\s*:\\s*String)?\\s*=\\s*"${currentValue}"`,
         'g',
       );
