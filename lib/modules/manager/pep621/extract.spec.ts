@@ -1,12 +1,12 @@
 import { codeBlock } from 'common-tags';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { depTypes } from './utils';
-import { extractPackageFile } from '.';
-import { Fixtures } from '~test/fixtures';
-import { fs } from '~test/util';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { extractPackageFile } from './index.ts';
+import { depTypes } from './utils.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 const pdmPyProject = Fixtures.get('pyproject_with_pdm.toml');
 const pdmSourcesPyProject = Fixtures.get('pyproject_pdm_sources.toml');

@@ -1,5 +1,5 @@
-import type { Result } from '../../../util/result';
-import type { ReleaseResult } from '../types';
+import type { Result } from '../../../util/result.ts';
+import type { ReleaseResult } from '../types.ts';
 
 export interface MetadataResults {
   tags?: Record<string, string>;

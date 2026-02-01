@@ -1,19 +1,19 @@
 import { codeBlock } from 'common-tags';
-import { GlobalConfig } from '../../../../config/global';
-import * as yaml from '../../../../util/yaml';
-import type { PackageFile } from '../../types';
-import type { NpmManagerData } from '../types';
+import { GlobalConfig } from '../../../../config/global.ts';
+import * as yaml from '../../../../util/yaml.ts';
+import type { PackageFile } from '../../types.ts';
+import type { NpmManagerData } from '../types.ts';
 import {
   detectPnpmWorkspaces,
   extractPnpmFilters,
   extractPnpmWorkspaceFile,
   findPnpmWorkspace,
   getPnpmLock,
-} from './pnpm';
-import { Fixtures } from '~test/fixtures';
-import { fs, getFixturePath, logger, partial } from '~test/util';
+} from './pnpm.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, getFixturePath, logger, partial } from '~test/util.ts';
 
-vi.mock('../../../../util/fs');
+vi.mock('../../../../util/fs/index.ts');
 
 describe('modules/manager/npm/extract/pnpm', () => {
   beforeAll(() => {

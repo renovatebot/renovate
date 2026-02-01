@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { isNonEmptyArray } from '@sindresorhus/is';
-import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
-import { logger } from '../../../../logger';
-import { get } from '../../../../modules/manager';
+import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
+import { logger } from '../../../../logger/index.ts';
+import { get } from '../../../../modules/manager/index.ts';
 import type {
   ArtifactError,
   ArtifactNotice,
@@ -11,12 +10,12 @@ import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-} from '../../../../modules/manager/types';
-import { getFile } from '../../../../util/git';
-import type { FileAddition, FileChange } from '../../../../util/git/types';
-import { coerceString } from '../../../../util/string';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
-import { doAutoReplace } from './auto-replace';
+} from '../../../../modules/manager/types.ts';
+import { getFile } from '../../../../util/git/index.ts';
+import type { FileAddition, FileChange } from '../../../../util/git/types.ts';
+import { coerceString } from '../../../../util/string.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
+import { doAutoReplace } from './auto-replace.ts';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
@@ -108,7 +107,7 @@ export async function getUpdatedPackageFiles(
   const lockFileMaintenanceFiles: string[] = [];
   let firstUpdate = true;
   for (const upgrade of config.upgrades) {
-    const manager = upgrade.manager!;
+    const manager = upgrade.manager;
     const packageFile = upgrade.packageFile!;
     const depName = upgrade.depName!;
     // TODO: fix types, can be undefined (#22198)
@@ -454,7 +453,8 @@ function patchConfigForArtifactsUpdate(
   packageFileName: string,
 ): UpdateArtifactsConfig {
   // drop any lockFiles that happen to be defined on the branch config
-  const { lockFiles, ...updatedConfig } = config;
+  const updatedConfig = { ...config };
+  delete updatedConfig.lockFiles;
   if (isNonEmptyArray(updatedConfig.packageFiles?.[manager])) {
     const managerPackageFiles: PackageFile[] =
       updatedConfig.packageFiles?.[manager];

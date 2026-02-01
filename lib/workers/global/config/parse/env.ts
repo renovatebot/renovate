@@ -1,12 +1,12 @@
 import { isArray } from '@sindresorhus/is';
 import JSON5 from 'json5';
-import { getOptions } from '../../../../config/options';
-import type { AllConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { parseJson } from '../../../../util/common';
-import { coersions } from './coersions';
-import type { ParseConfigOptions } from './types';
-import { migrateAndValidateConfig } from './util';
+import { getOptions } from '../../../../config/options/index.ts';
+import type { AllConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { parseJson } from '../../../../util/common.ts';
+import { coersions } from './coersions.ts';
+import type { ParseConfigOptions } from './types.ts';
+import { migrateAndValidateConfig } from './util.ts';
 
 function normalizePrefixes(
   env: NodeJS.ProcessEnv,
@@ -144,6 +144,7 @@ export async function getConfig(
       try {
         const parsed = JSON5.parse(envVal);
         if (isArray(parsed)) {
+          // @ts-expect-error -- type can't be narrowed
           config[option.name] = parsed;
         } else {
           logger.debug(
@@ -159,6 +160,7 @@ export async function getConfig(
       }
     } else {
       const coerce = coersions[option.type];
+      // @ts-expect-error -- type can't be narrowed
       config[option.name] = coerce(envVal);
       if (option.name === 'dryRun') {
         if ((config[option.name] as string) === 'true') {

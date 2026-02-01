@@ -1,5 +1,5 @@
 import type { Response } from 'got';
-import { hook, isResponseOk } from './hooks';
+import { hook, isResponseOk } from './hooks.ts';
 
 describe('util/http/hooks', () => {
   it.each`

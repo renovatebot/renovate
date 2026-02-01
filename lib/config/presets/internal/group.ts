@@ -1,5 +1,5 @@
-import type { Preset } from '../types';
-import * as monorepos from './monorepos';
+import type { Preset } from '../types.ts';
+import * as monorepos from './monorepos.ts';
 
 const nonPinUpdateTypes = ['digest', 'patch', 'minor', 'major'];
 
@@ -10,9 +10,6 @@ const staticGroups = {
     description: 'Group all updates together.',
     groupName: 'all dependencies',
     groupSlug: 'all',
-    lockFileMaintenance: {
-      enabled: false,
-    },
     packageRules: [
       {
         groupName: 'all dependencies',

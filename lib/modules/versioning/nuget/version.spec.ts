@@ -1,5 +1,5 @@
-import { parseVersion } from './parser';
-import { compare } from './version';
+import { parseVersion } from './parser.ts';
+import { compare } from './version.ts';
 
 describe('modules/versioning/nuget/version', () => {
   describe('compare', () => {

@@ -1,7 +1,7 @@
 import upath from 'upath';
-import { GlobalConfig } from '../../config/global';
-import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages';
-import { ensureCachePath, ensureLocalPath, isValidPath } from './util';
+import { GlobalConfig } from '../../config/global.ts';
+import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages.ts';
+import { ensureCachePath, ensureLocalPath, isValidPath } from './util.ts';
 
 describe('util/fs/util', () => {
   const localDir = upath.resolve('/foo');

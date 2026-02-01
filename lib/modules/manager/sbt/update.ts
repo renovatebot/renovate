@@ -1,11 +1,11 @@
 import type { ReleaseType } from 'semver';
 import semver from 'semver';
-import { logger } from '../../../logger';
-import { escapeRegExp, regEx } from '../../../util/regex';
+import { logger } from '../../../logger/index.ts';
+import { escapeRegExp, regEx } from '../../../util/regex.ts';
 import type {
   BumpPackageVersionResult,
   UpdateDependencyConfig,
-} from '../types';
+} from '../types.ts';
 
 export function bumpPackageVersion(
   content: string,

@@ -1,21 +1,22 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import { GlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global.ts';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
   BITBUCKET_SERVER_API_USING_HOST_TYPES,
+  FORGEJO_API_USING_HOST_TYPES,
   GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
-} from '../../constants';
-import { logger } from '../../logger';
-import { hasProxy } from '../../proxy';
-import type { HostRule } from '../../types';
-import * as hostRules from '../host-rules';
-import { matchRegexOrGlobList } from '../string-match';
-import { parseUrl } from '../url';
-import type { InternalHttpOptions } from './http';
-import { keepAliveAgents } from './keep-alive';
-import type { GotOptions } from './types';
+} from '../../constants/index.ts';
+import { logger } from '../../logger/index.ts';
+import { hasProxy } from '../../proxy.ts';
+import type { HostRule } from '../../types/index.ts';
+import * as hostRules from '../host-rules.ts';
+import { matchRegexOrGlobList } from '../string-match.ts';
+import { parseUrl } from '../url.ts';
+import type { InternalHttpOptions } from './http.ts';
+import { keepAliveAgents } from './keep-alive.ts';
+import type { GotOptions } from './types.ts';
 
 export type HostRulesGotOptions = Pick<
   GotOptions & InternalHttpOptions,
@@ -119,6 +120,21 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
     res = {
       ...hostRules.find({
         hostType: 'bitbucket-server',
+        url,
+      }),
+      ...res,
+    };
+  }
+
+  // Fallback to `forgejo` hostType
+  if (
+    hostType &&
+    FORGEJO_API_USING_HOST_TYPES.includes(hostType) &&
+    hostType !== 'forgejo'
+  ) {
+    res = {
+      ...hostRules.find({
+        hostType: 'forgejo',
         url,
       }),
       ...res,

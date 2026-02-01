@@ -105,3 +105,11 @@ Because of a safeguard in [GitLab's API](https://github.com/renovatebot/renovate
 ## Verifying users using push rules
 
 When verifying users using [push rules](https://docs.gitlab.com/ee/user/project/repository/push_rules.html#verify-users), you must use the name and email of the bot user for `gitAuthor`.
+
+## Repo autodiscover
+
+Renovate can discover repositories on GitLab using the `autodiscover` feature.
+
+You can change the default server-side sort method and order for autodiscover API.
+Set those via [`autodiscoverRepoSort`](../../../self-hosted-configuration.md#autodiscoverreposort) and [`autodiscoverRepoOrder`](../../../self-hosted-configuration.md#autodiscoverrepoorder).
+Read the [GitLab Projects API docs](https://docs.gitlab.com/api/projects/#list-all-projects) for more details.

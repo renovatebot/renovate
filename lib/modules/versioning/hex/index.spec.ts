@@ -1,4 +1,4 @@
-import { api as hexScheme } from '.';
+import { api as hexScheme } from './index.ts';
 
 describe('modules/versioning/hex/index', () => {
   it.each`

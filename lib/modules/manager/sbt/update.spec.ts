@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import * as sbtUpdater from '.';
+import * as sbtUpdater from './index.ts';
 
 describe('modules/manager/sbt/update', () => {
   describe('.bumpPackageVersion()', () => {

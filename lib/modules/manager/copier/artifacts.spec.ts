@@ -1,19 +1,19 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import type { StatusResult } from '../../../util/git/types';
-import * as _datasource from '../../datasource';
-import type { UpdateArtifactsConfig, Upgrade } from '../types';
-import { updateArtifacts } from '.';
-import { mockExecAll } from '~test/exec-util';
-import { fs, git, hostRules, partial } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
+import * as _datasource from '../../datasource/index.ts';
+import type { UpdateArtifactsConfig, Upgrade } from '../types.ts';
+import { updateArtifacts } from './index.ts';
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs, git, hostRules, partial } from '~test/util.ts';
 
 const datasource = vi.mocked(_datasource);
 
-vi.mock('../../../util/fs');
-vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../../datasource/index.ts', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
@@ -128,6 +128,28 @@ describe('modules/manager/copier/artifacts', () => {
           artifactError: {
             lockFile: '.copier-answers.yml',
             stderr: 'Unexpected number of dependencies: 0 (should be 1)',
+          },
+        },
+      ]);
+      expect(execSnapshots).toEqual([]);
+    });
+
+    it('reports an error updated deps is undefined', async () => {
+      const execSnapshots = mockExecAll();
+
+      const result = await updateArtifacts({
+        packageFileName: '.copier-answers.yml',
+        updatedDeps: null as never,
+        newPackageFileContent: '',
+        config,
+      });
+
+      expect(result).toEqual([
+        {
+          artifactError: {
+            lockFile: '.copier-answers.yml',
+            stderr:
+              'Unexpected number of dependencies: undefined (should be 1)',
           },
         },
       ]);

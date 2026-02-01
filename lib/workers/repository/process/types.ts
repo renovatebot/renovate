@@ -1,7 +1,7 @@
 import type { Osv } from '@renovatebot/osv-offline';
-import type { RenovateConfig } from '../../../config/types';
-import type { PackageFile } from '../../../modules/manager/types';
-import type { VersioningApi } from '../../../modules/versioning';
+import type { RenovateConfig } from '../../../config/types.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import type { VersioningApi } from '../../../modules/versioning/index.ts';
 
 export interface Vulnerability {
   packageFileConfig: RenovateConfig & PackageFile;

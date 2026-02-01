@@ -1,18 +1,21 @@
 import detectIndent from 'detect-indent';
 
-import { migrateConfig } from '../../../../config/migration';
-import { logger } from '../../../../logger';
-import { readLocalFile } from '../../../../util/fs';
-import { EditorConfig } from '../../../../util/json-writer';
-import { detectRepoFileConfig } from '../../init/merge';
-import { MigratedDataFactory, applyPrettierFormatting } from './migrated-data';
-import { Fixtures } from '~test/fixtures';
-import { scm } from '~test/util';
+import { migrateConfig } from '../../../../config/migration.ts';
+import { logger } from '../../../../logger/index.ts';
+import { readLocalFile } from '../../../../util/fs/index.ts';
+import { EditorConfig } from '../../../../util/json-writer/index.ts';
+import { detectRepoFileConfig } from '../../init/merge.ts';
+import {
+  MigratedDataFactory,
+  applyPrettierFormatting,
+} from './migrated-data.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { scm } from '~test/util.ts';
 
-vi.mock('../../../../config/migration');
-vi.mock('../../../../util/fs');
-vi.mock('../../../../util/json-writer');
-vi.mock('../../init/merge');
+vi.mock('../../../../config/migration.ts');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('../../../../util/json-writer/index.ts');
+vi.mock('../../init/merge.ts');
 vi.mock('detect-indent');
 
 const migratedData = Fixtures.getJson('./migrated-data.json');

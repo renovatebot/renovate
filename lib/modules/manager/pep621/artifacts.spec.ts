@@ -1,16 +1,16 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { getPkgReleases as _getPkgReleases } from '../../datasource';
-import type { UpdateArtifactsConfig } from '../types';
-import { updateArtifacts } from './artifacts';
-import { mockExecAll } from '~test/exec-util';
-import { fs } from '~test/util';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RepoGlobalConfig } from '../../../config/types.ts';
+import { getPkgReleases as _getPkgReleases } from '../../datasource/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import { updateArtifacts } from './artifacts.ts';
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs } from '~test/util.ts';
 
-vi.mock('../../../util/fs');
-vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../../datasource/index.ts', () => mockDeep());
 
 const getPkgReleases = vi.mocked(_getPkgReleases);
 
@@ -62,7 +62,7 @@ describe('modules/manager/pep621/artifacts', () => {
       GlobalConfig.set({
         ...adminConfig,
         binarySource: 'docker',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
       });
       fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
       fs.readLocalFile.mockResolvedValueOnce('old test content');
@@ -103,16 +103,12 @@ requires-python = "<3.9"
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'docker pull ghcr.io/containerbase/sidecar',
-          options: {
-            encoding: 'utf-8',
-          },
+          cmd: 'docker pull ghcr.io/renovatebot/base-image',
+          options: {},
         },
         {
           cmd: 'docker ps --filter name=renovate_sidecar -aq',
-          options: {
-            encoding: 'utf-8',
-          },
+          options: {},
         },
         {
           cmd:
@@ -121,7 +117,7 @@ requires-python = "<3.9"
             '-v "/tmp/cache":"/tmp/cache" ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/containerbase/sidecar ' +
+            'ghcr.io/renovatebot/base-image ' +
             'bash -l -c "' +
             'install-tool python 3.8.1 ' +
             '&& ' +
@@ -131,7 +127,6 @@ requires-python = "<3.9"
             '"',
           options: {
             cwd: '/tmp/github/some/repo',
-            encoding: 'utf-8',
             env: {
               CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
             },

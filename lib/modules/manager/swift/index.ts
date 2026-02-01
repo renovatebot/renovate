@@ -1,11 +1,11 @@
-import type { Category } from '../../../constants';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import * as swiftVersioning from '../../versioning/swift';
+import type { Category } from '../../../constants/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import * as swiftVersioning from '../../versioning/swift/index.ts';
 
-export { extractPackageFile } from './extract';
-export { getRangeStrategy } from './range';
+export { extractPackageFile } from './extract.ts';
+export { getRangeStrategy } from './range.ts';
 
 export const displayName = 'Swift Package Manager';
 export const url = 'https://www.swift.org/package-manager';

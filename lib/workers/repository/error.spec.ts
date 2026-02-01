@@ -28,13 +28,13 @@ import {
   SYSTEM_INSUFFICIENT_MEMORY,
   TEMPORARY_ERROR,
   UNKNOWN_ERROR,
-} from '../../constants/error-messages';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import handleError from './error';
-import { partial } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+} from '../../constants/error-messages.ts';
+import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import handleError from './error.ts';
+import { logger, partial } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
-vi.mock('./error-config');
+vi.mock('./error-config.ts');
 
 let config: RenovateConfig;
 
@@ -115,6 +115,36 @@ describe('workers/repository/error', () => {
     it('handles unknown error', async () => {
       const res = await handleError(config, new Error('abcdefg'));
       expect(res).toEqual(UNKNOWN_ERROR);
+    });
+
+    it('logs config validation errors as warnings by default', async () => {
+      const error = new Error(CONFIG_VALIDATION);
+      await handleError(config, error);
+      expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
+        { error },
+        'Repository has invalid config',
+      );
+      expect(logger.logger.error).not.toHaveBeenCalled();
+    });
+
+    it('logs config validation errors as warnings when configValidationError is false', async () => {
+      const error = new Error(CONFIG_VALIDATION);
+      await handleError({ ...config, configValidationError: false }, error);
+      expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
+        { error },
+        'Repository has invalid config',
+      );
+      expect(logger.logger.error).not.toHaveBeenCalled();
+    });
+
+    it('logs config validation errors as errors when configValidationError is true', async () => {
+      const error = new Error(CONFIG_VALIDATION);
+      await handleError({ ...config, configValidationError: true }, error);
+      expect(logger.logger.error).toHaveBeenCalledExactlyOnceWith(
+        { error },
+        'Repository has invalid config',
+      );
+      expect(logger.logger.warn).not.toHaveBeenCalled();
     });
   });
 });

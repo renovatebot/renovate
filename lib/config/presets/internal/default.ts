@@ -1,4 +1,4 @@
-import type { Preset } from '../types';
+import type { Preset } from '../types.ts';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 export const presets: Record<string, Preset> = {
@@ -276,6 +276,7 @@ export const presets: Record<string, Preset> = {
         encrypted: {
           token: '{{arg0}}',
         },
+        hostType: 'github',
         matchHost: 'github.com',
       },
     ],
@@ -421,7 +422,10 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinDigestsDisabled: {
-    description: 'Disable pinning of Docker dependency digests.',
+    description: `Disable pinning of dependency digests.
+
+Note: This preset does not revert the digest pinning set from within the packageRules, when set at root level or via extends).
+See [Docker - Disable digest pinning](./docker.md#disable-digest-pinning) for more details.`,
     pinDigests: false,
   },
   pinOnlyDevDependencies: {

@@ -1,6 +1,6 @@
-import dataFiles from '../../../data-files.generated';
-import { regEx } from '../../../util/regex';
-import { isStable } from '../node';
+import dataFiles from '../../../data-files.generated.ts';
+import { regEx } from '../../../util/regex.ts';
+import { isStable } from '../node/index.ts';
 
 interface LambdaSchedule {
   cycle: string;

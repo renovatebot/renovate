@@ -1,6 +1,6 @@
-import { isScheduledNow } from '../../../workers/repository/update/branch/schedule';
-import type { RenovateConfig } from '../../types';
-import { presets } from './schedule';
+import { isScheduledNow } from '../../../workers/repository/update/branch/schedule.ts';
+import type { RenovateConfig } from '../../types.ts';
+import { presets } from './schedule.ts';
 
 describe('config/presets/internal/schedule', () => {
   let config: RenovateConfig;

@@ -1,9 +1,12 @@
-import replacementGroupsJson from '../../../data/replacements.json';
-import type { Preset } from '../types';
-import type { PresetTemplate, Replacement } from './auto-generate-replacements';
-import { addPresets } from './auto-generate-replacements';
+import replacementGroupsJson from '../../../data/replacements.json' with { type: 'json' };
+import type { Preset } from '../types.ts';
+import type {
+  PresetTemplate,
+  Replacement,
+} from './auto-generate-replacements.ts';
+import { addPresets } from './auto-generate-replacements.ts';
 
-const { $schema, ...replacementPresets } = replacementGroupsJson;
+const { $schema: _, ...replacementPresets } = replacementGroupsJson;
 
 /* eslint sort-keys: ["error", "asc", {"caseSensitive": false, "natural": true}] */
 export const presets: Record<string, Preset> = replacementPresets;

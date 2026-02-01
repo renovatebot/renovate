@@ -1,10 +1,10 @@
 import type { ReleaseType } from 'semver';
 import semver from 'semver';
 import { XmlDocument } from 'xmldoc';
-import { logger } from '../../../logger';
-import { replaceAt } from '../../../util/string';
-import type { BumpPackageVersionResult } from '../types';
-import { findVersion } from './util';
+import { logger } from '../../../logger/index.ts';
+import { replaceAt } from '../../../util/string.ts';
+import type { BumpPackageVersionResult } from '../types.ts';
+import { findVersion } from './util.ts';
 
 export function bumpPackageVersion(
   content: string,

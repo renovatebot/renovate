@@ -3,35 +3,35 @@ import { parse } from 'auth-header';
 import {
   HOST_DISABLED,
   PAGE_NOT_FOUND_ERROR,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { HostRule } from '../../../types';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { coerceArray } from '../../../util/array';
-import { detectPlatform } from '../../../util/common';
-import { parseGitUrl } from '../../../util/git/url';
-import { toSha256 } from '../../../util/hash';
-import * as hostRules from '../../../util/host-rules';
-import type { Http } from '../../../util/http';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
+} from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { HostRule } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { detectPlatform } from '../../../util/common.ts';
+import { parseGitUrl } from '../../../util/git/url.ts';
+import { toSha256 } from '../../../util/hash.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import type { Http } from '../../../util/http/index.ts';
 import type {
   HttpOptions,
   HttpResponse,
   OutgoingHttpHeaders,
-} from '../../../util/http/types';
-import { regEx } from '../../../util/regex';
-import { addSecretForSanitizing } from '../../../util/sanitize';
+} from '../../../util/http/types.ts';
+import { regEx } from '../../../util/regex.ts';
+import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import {
   ensureTrailingSlash,
   parseUrl,
   trimTrailingSlash,
-} from '../../../util/url';
-import { api as dockerVersioning } from '../../versioning/docker';
-import { getGoogleAuthToken } from '../util';
-import { ecrRegex, getECRAuthToken } from './ecr';
-import { googleRegex } from './google';
-import type { OciHelmConfig } from './schema';
-import type { RegistryRepository } from './types';
+} from '../../../util/url.ts';
+import { api as dockerVersioning } from '../../versioning/docker/index.ts';
+import { getGoogleAuthToken } from '../util.ts';
+import { ecrRegex, getECRAuthToken } from './ecr.ts';
+import { googleRegex } from './google.ts';
+import type { OciHelmConfig } from './schema.ts';
+import type { RegistryRepository } from './types.ts';
 
 export const dockerDatasourceId = 'docker';
 
@@ -214,10 +214,12 @@ export async function getAuthHeaders(
       authorization: `Bearer ${token}`,
     };
   } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore if */
     if (err.host === 'quay.io') {
       // TODO: debug why quay throws errors (#9604)
       return null;
     }
+    /* v8 ignore if */
     if (err.statusCode === 401) {
       logger.debug(
         { registryHost, dockerRepository },
@@ -226,6 +228,7 @@ export async function getAuthHeaders(
       logger.debug({ err });
       return null;
     }
+    /* v8 ignore if */
     if (err.statusCode === 403) {
       logger.debug(
         { registryHost, dockerRepository },
@@ -237,15 +240,18 @@ export async function getAuthHeaders(
     if (err.name === 'RequestError' && isDockerHost(registryHost)) {
       throw new ExternalHostError(err);
     }
+    /* v8 ignore if */
     if (err.statusCode === 429 && isDockerHost(registryHost)) {
       throw new ExternalHostError(err);
     }
+    /* v8 ignore if */
     if (err.statusCode >= 500 && err.statusCode < 600) {
       throw new ExternalHostError(err);
     }
     if (err.message === PAGE_NOT_FOUND_ERROR) {
       throw err;
     }
+    /* v8 ignore if */
     if (err.message === HOST_DISABLED) {
       logger.trace({ registryHost, dockerRepository, err }, 'Host disabled');
       return null;
