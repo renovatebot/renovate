@@ -148,6 +148,7 @@ describe('modules/platform/gerrit/utils', () => {
           }),
         },
         created: '2025-04-14 16:33:37.000000000',
+        updated: '2025-04-14 16:35:00.000000000',
       });
       expect(utils.mapGerritChangeToPr(change)).toEqual({
         number: 123456,
@@ -160,7 +161,7 @@ describe('modules/platform/gerrit/utils', () => {
         bodyStruct: {
           hash: hashBody(''),
         },
-        updatedAt: undefined,
+        updatedAt: '2025-04-14T16:35:00.000000000',
         createdAt: '2025-04-14T16:33:37.000000000',
       });
     });
@@ -197,6 +198,7 @@ describe('modules/platform/gerrit/utils', () => {
           }),
         },
         created: '2025-04-14 16:33:37.000000000',
+        updated: '2025-04-14 16:40:00.000000000',
       });
       expect(
         utils.mapGerritChangeToPr(change, {
@@ -214,6 +216,7 @@ describe('modules/platform/gerrit/utils', () => {
           hash: hashBody(''),
         },
         createdAt: '2025-04-14T16:33:37.000000000',
+        updatedAt: '2025-04-14T16:40:00.000000000',
       });
     });
 
@@ -231,6 +234,7 @@ describe('modules/platform/gerrit/utils', () => {
           }),
         },
         created: '2025-04-14 16:33:37.000000000',
+        updated: '2025-04-14 16:40:00.000000000',
       });
       expect(
         utils.mapGerritChangeToPr(change, {
@@ -248,6 +252,7 @@ describe('modules/platform/gerrit/utils', () => {
           hash: hashBody('PR Body'),
         },
         createdAt: '2025-04-14T16:33:37.000000000',
+        updatedAt: '2025-04-14T16:40:00.000000000',
       });
     });
   });

@@ -416,6 +416,7 @@ export async function getBranchPr(
     }
     return true;
   });
+  // TODO: review this (refs https://github.com/renovatebot/renovate/pull/39046)
   let result: Pr | undefined;
   if (targetBranch) {
     const found = cachedPrs.find((pr) => pr.targetBranch === targetBranch);
