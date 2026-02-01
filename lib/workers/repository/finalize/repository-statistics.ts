@@ -111,7 +111,7 @@ function filterDependencyDashboardData(
       upgradesFiltered.push(filteredUpgrade);
     }
 
-    const prState = prNo != null ? prStateMap.get(prNo) : undefined;
+    const prState = typeof prNo === 'number' ? prStateMap.get(prNo) : undefined;
 
     const filteredBranch: Partial<BranchCache> & { prState?: string } = {
       branchName,
