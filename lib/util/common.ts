@@ -1,3 +1,4 @@
+import { isNumber } from '@sindresorhus/is';
 import JSON5 from 'json5';
 import * as JSONC from 'jsonc-parser';
 import type { JsonValue } from 'type-fest';
@@ -156,9 +157,21 @@ export function getInheritedOrGlobal<Key extends keyof GlobalInheritableConfig>(
   key: Key,
 ): GlobalInheritableConfig[Key] {
   const inheritedValue = InheritConfig.get(key);
+  const globalValue = GlobalConfig.get(key);
   if (inheritedValue !== NOT_PRESENT) {
+    // Don't allow inherited config to make `onboardingAutoCloseAge` a higher value than our global setting
+    if (
+      key === 'onboardingAutoCloseAge' &&
+      isNumber(inheritedValue) &&
+      isNumber(globalValue)
+    ) {
+      if (globalValue < inheritedValue) {
+        return globalValue;
+      }
+    }
+
     return inheritedValue;
   }
 
-  return GlobalConfig.get(key);
+  return globalValue;
 }
