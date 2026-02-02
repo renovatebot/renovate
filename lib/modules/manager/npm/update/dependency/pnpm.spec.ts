@@ -801,6 +801,26 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `);
   });
 
+  it('skips update if integrity or tarball are not scalars in pnpm configDependencies (object)', () => {
+    const upgrade = {
+      depType: 'pnpm.configDependencies',
+      depName: '@myorg/pnpm-config-myorg',
+      newValue: '0.1.0',
+      downloadUrl: 'https://new-tarball',
+    };
+    const pnpmWorkspaceYaml = codeBlock`
+      configDependencies:
+        '@myorg/pnpm-config-myorg':
+          integrity: { nested: "value" }
+          tarball: [ "item" ]
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toBeNull();
+  });
+
   it('handles scalar update with newName', () => {
     const upgrade = {
       depType: 'pnpm.configDependencies',
