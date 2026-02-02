@@ -445,6 +445,7 @@ Other valid cache namespaces are as follows:
 - `datasource-git`
 - `datasource-gitea-releases`
 - `datasource-gitea-tags`
+- `datasource-github-digest`
 - `datasource-github-release-attachments`
 - `datasource-gitlab-packages`
 - `datasource-gitlab-releases`

@@ -2880,6 +2880,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
+          number: 5,
           sourceBranch: 'old/some-branch',
           state: 'open',
         }),
@@ -2899,7 +2900,7 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: '123test',
       });
 
-      expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
+      expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR #5');
 
       expect(logger.debug).toHaveBeenCalledWith(
         'No package files need updating',
@@ -2918,6 +2919,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
+          number: 5,
           sourceBranch: 'old/some-branch',
           state: 'open',
         }),
@@ -2938,7 +2940,7 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: null,
       });
 
-      expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
+      expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR #5');
       expect(logger.debug).not.toHaveBeenCalledWith(
         'No package files need updating',
       );
