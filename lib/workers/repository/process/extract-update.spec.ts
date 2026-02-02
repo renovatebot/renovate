@@ -160,6 +160,16 @@ describe('workers/repository/process/extract-update', () => {
     });
   });
 
+  describe('update()', () => {
+    it('returns done for non-onboarded repos', async () => {
+      const config = {
+        repoIsOnboarded: false,
+      };
+      const res = await update(config, []);
+      expect(res).toBe('done');
+    });
+  });
+
   describe('isCacheExtractValid()', () => {
     let cachedExtract: BaseBranchCache;
 
