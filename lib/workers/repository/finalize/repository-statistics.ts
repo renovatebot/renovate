@@ -1,3 +1,4 @@
+import { isNumber } from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { addBranchStats } from '../../../instrumentation/reporting.ts';
 import { logger } from '../../../logger/index.ts';
@@ -111,7 +112,7 @@ function filterDependencyDashboardData(
       upgradesFiltered.push(filteredUpgrade);
     }
 
-    const prState = typeof prNo === 'number' ? prStateMap.get(prNo) : undefined;
+    const prState = isNumber(prNo) ? prStateMap.get(prNo) : undefined;
 
     const filteredBranch: Partial<BranchCache> & { prState?: string } = {
       branchName,
