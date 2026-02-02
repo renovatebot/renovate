@@ -1,6 +1,6 @@
 import type { GlobalInheritableConfig, RenovateConfig } from './types.ts';
 
-export const NOT_PRESET = Symbol('not-present');
+export const NOT_PRESENT = Symbol('not-present');
 
 export class InheritConfig {
   static OPTIONS: readonly (keyof GlobalInheritableConfig)[] = [
@@ -12,12 +12,12 @@ export class InheritConfig {
 
   static get<Key extends keyof GlobalInheritableConfig>(
     key: Key,
-  ): GlobalInheritableConfig[Key] | typeof NOT_PRESET {
+  ): GlobalInheritableConfig[Key] | typeof NOT_PRESENT {
     if (key in InheritConfig.config) {
       return InheritConfig.config[key];
     }
 
-    return NOT_PRESET;
+    return NOT_PRESENT;
   }
 
   static set(config: RenovateConfig & GlobalInheritableConfig): RenovateConfig {
