@@ -743,6 +743,64 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     expect(testContent).toBeNull();
   });
 
+  it('handles pnpm configDependencies (object) where integrity is an alias and tarball is scalar', () => {
+    const upgrade = {
+      depType: 'pnpm.configDependencies',
+      depName: '@myorg/pnpm-config-myorg',
+      newValue: '0.1.0',
+      downloadUrl: 'https://new-tarball',
+    };
+    const pnpmWorkspaceYaml = codeBlock`
+      __vars:
+        &int 0.0.9
+      configDependencies:
+        '@myorg/pnpm-config-myorg':
+          integrity: *int
+          tarball: https://old-tarball
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(codeBlock`
+      __vars:
+        &int 0.0.9
+      configDependencies:
+        '@myorg/pnpm-config-myorg':
+          integrity: *int
+          tarball: https://new-tarball
+    `);
+  });
+
+  it('handles pnpm configDependencies (object) where integrity is scalar and tarball is an alias', () => {
+    const upgrade = {
+      depType: 'pnpm.configDependencies',
+      depName: '@myorg/pnpm-config-myorg',
+      newValue: '0.1.0',
+      downloadUrl: 'https://new-tarball',
+    };
+    const pnpmWorkspaceYaml = codeBlock`
+      __vars:
+        &tar https://old-tarball
+      configDependencies:
+        '@myorg/pnpm-config-myorg':
+          integrity: 0.0.9
+          tarball: *tar
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(codeBlock`
+      __vars:
+        &tar https://old-tarball
+      configDependencies:
+        '@myorg/pnpm-config-myorg':
+          integrity: 0.1.0
+          tarball: *tar
+    `);
+  });
+
   it('handles scalar update with newName', () => {
     const upgrade = {
       depType: 'pnpm.configDependencies',

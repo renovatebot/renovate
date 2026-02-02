@@ -158,22 +158,24 @@ export function updatePnpmConfigDependency({
     const integrityPath = ['configDependencies', depName!, 'integrity'];
     const oldIntegrityNode = (oldNode as any).get('integrity', true);
     if (isScalar(oldIntegrityNode)) {
-      modifiedDocument = changeDependencyIn(document, integrityPath, {
+      const res = changeDependencyIn(document, integrityPath, {
         newValue,
       });
+      if (res) {
+        modifiedDocument = res;
+      }
     }
 
     // Also try to update 'tarball' if it exists
     const tarballPath = ['configDependencies', depName!, 'tarball'];
     const oldTarballNode = (oldNode as any).get('tarball', true);
     if (isScalar(oldTarballNode)) {
-      modifiedDocument = changeDependencyIn(
-        modifiedDocument ?? document,
-        tarballPath,
-        {
-          newValue: upgrade.downloadUrl,
-        },
-      );
+      const res = changeDependencyIn(document, tarballPath, {
+        newValue: upgrade.downloadUrl,
+      });
+      if (res) {
+        modifiedDocument = res;
+      }
     }
   }
 
