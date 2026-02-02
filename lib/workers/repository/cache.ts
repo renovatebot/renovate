@@ -94,7 +94,10 @@ async function generateBranchCache(
       // Get commit timestamp for hourly limit tracking
       const commitDate = await scm.getBranchUpdateDate(branchName);
       if (commitDate) {
-        commitTimestamp = commitDate.toISO()!;
+        const iso = commitDate.toISO();
+        if (iso) {
+          commitTimestamp = iso;
+        }
       }
     } else if (baseBranchSha && !branchSha && branch.prNo) {
       // if branch was deleted/ PR exists and ignored
