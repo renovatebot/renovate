@@ -1,3 +1,4 @@
+import { InputSerialization$ } from '@aws-sdk/client-s3';
 import { logger } from '../../../logger/index.ts';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -53,6 +54,17 @@ export async function extractPackageFile(
     return null;
   }
 
+  // collect all root input aliases, these are a map of input name -> alias, the alias is the item we want to
+  // update under nodes
+  const aliasVals = [];
+  for (const input in rootInputs) {
+    if (rootInputs[input] instanceof Array) {
+      continue;
+    }
+    aliasVals.push(rootInputs[input]);
+  }
+  const rootAliases = new Set(aliasVals);
+
   for (const [depName, flakeInput] of Object.entries(flakeLock.nodes)) {
     // the root input is a magic string for the entrypoint and only references other flake inputs
     if (depName === 'root') {
@@ -60,7 +72,7 @@ export async function extractPackageFile(
     }
 
     // skip all locked and transitivie nodes as they cannot be updated by regular means
-    if (!(depName in rootInputs)) {
+    if (!rootAliases.has(depName)) {
       continue;
     }
 
