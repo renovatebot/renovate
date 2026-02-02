@@ -280,7 +280,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.3.13",
     "@commander-js/extra-typings": "14.0.0",
-    "@containerbase/eslint-plugin": "1.1.29",
+    "@containerbase/eslint-plugin": "1.1.30",
     "@containerbase/istanbul-reports-html": "1.1.27",
     "@containerbase/semantic-release-pnpm": "1.3.16",
     "@eslint/js": "9.39.2",
