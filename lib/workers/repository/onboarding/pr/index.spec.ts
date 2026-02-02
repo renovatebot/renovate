@@ -396,6 +396,35 @@ describe('workers/repository/onboarding/pr/index', () => {
           prTitle: 'Configure Renovate',
         });
       });
+
+      it('does not allow inherited onboardingAutoCloseAge to be higher than global config', async () => {
+        const now = DateTime.now();
+        vi.setSystemTime(now.toMillis());
+        // PR was created 36 hours ago (1.5 days)
+        const createdAt = now.minus({ hour: 36 });
+
+        config.baseBranch = 'some-branch';
+        GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+        InheritConfig.set({ onboardingAutoCloseAge: 10 });
+
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({
+            title: 'Configure Renovate',
+            bodyStruct,
+            createdAt: createdAt.toISO(),
+            number: 1,
+          }),
+        );
+        await expect(ensureOnboardingPr(config, {}, branches)).rejects.toThrow(
+          REPOSITORY_CLOSED_ONBOARDING,
+        );
+        expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+        expect(platform.updatePr).toHaveBeenCalledWith({
+          number: 1,
+          state: 'closed',
+          prTitle: 'Configure Renovate',
+        });
+      });
     });
 
     it('does nothing in dry run when PR is conflicted', async () => {

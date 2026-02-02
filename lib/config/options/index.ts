@@ -618,7 +618,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.1.9',
+    default: 'ghcr.io/renovatebot/base-image:13.1.10',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -3192,7 +3192,14 @@ const options: Readonly<RenovateOptions>[] = [
     description: `Controls if platform-native auto-merge is used.`,
     type: 'boolean',
     default: true,
-    supportedPlatforms: ['azure', 'forgejo', 'gitea', 'github', 'gitlab'],
+    supportedPlatforms: [
+      'azure',
+      'bitbucket-server',
+      'forgejo',
+      'gitea',
+      'github',
+      'gitlab',
+    ],
   },
   {
     name: 'userStrings',
