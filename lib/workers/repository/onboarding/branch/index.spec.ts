@@ -44,6 +44,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       memCache.init();
       config = getConfig();
       config.repository = 'some/repo';
+      GlobalConfig.set({ onboardingBranch: config.onboardingBranch });
       OnboardingState.prUpdateRequested = false;
       scm.getFileList.mockResolvedValue([]);
       cache.getCache.mockReturnValue({});
@@ -318,7 +319,10 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it('skips processing onboarding branch when main/onboarding SHAs have not changed', async () => {
-      GlobalConfig.set({ platform: 'github' });
+      GlobalConfig.set({
+        platform: 'github',
+        onboardingBranch: config.onboardingBranch,
+      });
       const dummyCache = {
         onboardingBranchCache: {
           defaultBranchSha: 'default-sha',
@@ -428,7 +432,10 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     describe('tests onboarding rebase/retry checkbox handling', () => {
       beforeEach(() => {
-        GlobalConfig.set({ platform: 'github' });
+        GlobalConfig.set({
+          platform: 'github',
+          onboardingBranch: config.onboardingBranch,
+        });
         config.onboardingRebaseCheckbox = true;
         OnboardingState.prUpdateRequested = false;
         scm.getFileList.mockResolvedValueOnce(['package.json']);
@@ -438,7 +445,10 @@ describe('workers/repository/onboarding/branch/index', () => {
 
       it('detects unsupported platfom', async () => {
         const pl = 'bitbucket';
-        GlobalConfig.set({ platform: pl });
+        GlobalConfig.set({
+          platform: pl,
+          onboardingBranch: config.onboardingBranch,
+        });
         platform.getBranchPr.mockResolvedValueOnce(mock<Pr>({}));
 
         await checkOnboardingBranch(config);

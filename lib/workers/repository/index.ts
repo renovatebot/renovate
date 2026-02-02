@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import { GlobalConfig } from '../../config/global.ts';
 import { applySecretsAndVariablesToConfig } from '../../config/secrets.ts';
 import type { RenovateConfig } from '../../config/types.ts';
+import { getInheritedOrGlobal } from '../../util/common.ts';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
@@ -235,7 +236,7 @@ function emptyExtract(config: RenovateConfig): ExtractResult {
       addSplit('lookup');
       return {
         branches: [],
-        branchList: [config.onboardingBranch!], // to prevent auto closing
+        branchList: [getInheritedOrGlobal('onboardingBranch')!], // to prevent auto closing
         packageFiles: {},
       };
     },

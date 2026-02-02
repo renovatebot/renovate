@@ -1,4 +1,5 @@
 import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
 import { createOnboardingBranch } from './create.ts';
 import type { RenovateConfig } from '~test/util.ts';
 import { scm } from '~test/util.ts';
@@ -15,6 +16,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
   beforeEach(() => {
     config = getConfig();
+    GlobalConfig.set({ onboardingBranch: config.onboardingBranch });
   });
 
   describe('createOnboardingBranch', () => {
