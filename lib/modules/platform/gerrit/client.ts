@@ -1,10 +1,10 @@
-import semver from "semver";
-import { z } from "zod";
-import { REPOSITORY_ARCHIVED } from "../../../constants/error-messages.ts";
-import { logger } from "../../../logger/index.ts";
-import { GerritHttp } from "../../../util/http/gerrit.ts";
-import type { HttpOptions } from "../../../util/http/types.ts";
-import { getQueryString } from "../../../util/url.ts";
+import semver from 'semver';
+import { z } from 'zod';
+import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { GerritHttp } from '../../../util/http/gerrit.ts';
+import type { HttpOptions } from '../../../util/http/types.ts';
+import { getQueryString } from '../../../util/url.ts';
 import type {
   GerritAccountInfo,
   GerritBranchInfo,
@@ -15,12 +15,12 @@ import type {
   GerritMergeableInfo,
   GerritProjectInfo,
   GerritRequestDetail,
-} from "./types.ts";
+} from './types.ts';
 import {
   MAX_GERRIT_COMMENT_SIZE,
   MIN_GERRIT_VERSION,
   mapPrStateToGerritFilter,
-} from "./utils.ts";
+} from './utils.ts';
 
 class GerritClient {
   // memCache is disabled because GerritPrCache will provide a smarter caching
@@ -32,10 +32,10 @@ class GerritClient {
   }
 
   async getGerritVersion(
-    options: Pick<HttpOptions, "username" | "password">,
+    options: Pick<HttpOptions, 'username' | 'password'>,
   ): Promise<string> {
     const res = await this.gerritHttp.getJson(
-      "a/config/server/version",
+      'a/config/server/version',
       options,
       z.string(),
     );
@@ -44,7 +44,7 @@ class GerritClient {
 
   async getRepos(): Promise<string[]> {
     const res = await this.gerritHttp.getJsonUnchecked<string[]>(
-      "a/projects/?type=CODE&state=ACTIVE",
+      'a/projects/?type=CODE&state=ACTIVE',
     );
     return Object.keys(res.body);
   }
@@ -54,7 +54,7 @@ class GerritClient {
       await this.gerritHttp.getJsonUnchecked<GerritProjectInfo>(
         `a/projects/${encodeURIComponent(repository)}`,
       );
-    if (projectInfo.body.state !== "ACTIVE") {
+    if (projectInfo.body.state !== 'ACTIVE') {
       throw new Error(REPOSITORY_ARCHIVED);
     }
     return projectInfo.body;
@@ -71,7 +71,7 @@ class GerritClient {
     repository: string,
     config: Pick<
       GerritFindPRConfig,
-      "branchName" | "state" | "targetBranch" | "requestDetails"
+      'branchName' | 'state' | 'targetBranch' | 'requestDetails'
     >,
   ): Promise<GerritChange | null> {
     const changes = await this.findChanges(repository, {
@@ -123,7 +123,7 @@ class GerritClient {
 
     while (true) {
       query.S = allChanges.length + startOffset;
-      const queryString = `q=${filters.join("+")}&${getQueryString(query)}`;
+      const queryString = `q=${filters.join('+')}&${getQueryString(query)}`;
       const changes = await this.gerritHttp.getJsonUnchecked<GerritChange[]>(
         `a/changes/?${queryString}`,
       );
@@ -176,7 +176,7 @@ class GerritClient {
     await this.gerritHttp.postJson(`a/changes/${changeNumber}/abandon`, {
       body: {
         message,
-        notify: "OWNER_REVIEWERS", // Avoids notifying cc's
+        notify: 'OWNER_REVIEWERS', // Avoids notifying cc's
       },
     });
   }
@@ -203,7 +203,7 @@ class GerritClient {
     const message = this.normalizeMessage(fullMessage);
     await this.gerritHttp.postJson(
       `a/changes/${changeNumber}/revisions/current/review`,
-      { body: { message, tag, notify: "NONE" } },
+      { body: { message, tag, notify: 'NONE' } },
     );
   }
 
@@ -239,7 +239,7 @@ class GerritClient {
   ): Promise<void> {
     await this.gerritHttp.postJson(
       `a/changes/${changeNumber}/revisions/current/review`,
-      { body: { labels: { [label]: value }, notify: "NONE" } },
+      { body: { labels: { [label]: value }, notify: 'NONE' } },
     );
   }
 
@@ -266,7 +266,7 @@ class GerritClient {
       {
         body: {
           reviewers: reviewers.map((r) => ({ reviewer: r })),
-          notify: "OWNER_REVIEWERS", // Avoids notifying cc's
+          notify: 'OWNER_REVIEWERS', // Avoids notifying cc's
         },
       },
     );
@@ -292,7 +292,7 @@ class GerritClient {
         repo,
       )}/branches/${encodeURIComponent(branch)}/files/${encodeURIComponent(fileName)}/content`,
     );
-    return Buffer.from(base64Content.body, "base64").toString();
+    return Buffer.from(base64Content.body, 'base64').toString();
   }
 
   async moveChange(
@@ -317,7 +317,7 @@ class GerritClient {
     const encoder = new TextEncoder();
     const bytes = encoder.encode(msg);
     if (bytes.length > MAX_GERRIT_COMMENT_SIZE) {
-      const truncationNotice = "\n\n[Truncated by Renovate]";
+      const truncationNotice = '\n\n[Truncated by Renovate]';
       const truncationNoticeBytes = encoder.encode(truncationNotice);
       const maxContentBytes =
         MAX_GERRIT_COMMENT_SIZE - truncationNoticeBytes.length;
@@ -334,10 +334,10 @@ class GerritClient {
     searchConfig: GerritFindPRConfig,
   ): string[] {
     const filters = [
-      "owner:self",
+      'owner:self',
       `project:${repository}`,
-      "-is:wip",
-      "-is:private",
+      '-is:wip',
+      '-is:private',
     ];
     const filterState = mapPrStateToGerritFilter(searchConfig.state);
     if (filterState) {
@@ -345,8 +345,8 @@ class GerritClient {
     }
     if (searchConfig.branchName) {
       filters.push(`footer:Renovate-Branch=${searchConfig.branchName}`);
-    } else if (semver.gte(this.gerritVersion, "3.6.0")) {
-      filters.push("hasfooter:Renovate-Branch");
+    } else if (semver.gte(this.gerritVersion, '3.6.0')) {
+      filters.push('hasfooter:Renovate-Branch');
     } else {
       filters.push('message:"Renovate-Branch: "');
     }
@@ -360,7 +360,7 @@ class GerritClient {
       // Quotes in the search operators must be escaped with a backslash:
       //   https://gerrit-review.googlesource.com/Documentation/user-search.html#search-operators
       const escapedTitle = searchConfig.prTitle.replaceAll('"', '\\"');
-      if (semver.gte(this.gerritVersion, "3.8.0")) {
+      if (semver.gte(this.gerritVersion, '3.8.0')) {
         filters.push(`subject:"${escapedTitle}"`);
       } else {
         filters.push(`message:"${escapedTitle}"`);
