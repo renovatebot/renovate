@@ -13,7 +13,7 @@ export function setBranchNewCommit(
   branchName: string,
   baseBranch: string,
   commitSha: string,
-  commitTimestamp?: DateTime,
+  commitTimestamp: DateTime | null,
 ): void {
   logger.debug('setBranchCommit()');
   const cache = getCache();

@@ -196,12 +196,7 @@ export async function writeUpdates(
         if (res?.commitSha) {
           // Get the commit timestamp for the new commit
           const commitDate = await scm.getBranchUpdateDate(branchName);
-          setBranchNewCommit(
-            branchName,
-            baseBranch,
-            res.commitSha,
-            commitDate ?? undefined,
-          );
+          setBranchNewCommit(branchName, baseBranch, res.commitSha, commitDate);
         }
         if (
           branch.result === 'automerged' &&
