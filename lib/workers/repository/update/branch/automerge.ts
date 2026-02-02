@@ -48,7 +48,7 @@ export async function tryBranchAutomerge(
         await scm.checkoutBranch(config.baseBranch!);
         const allowBehindBase =
           config.allowBranchAutomergeBehindBase === true &&
-          (config.rebaseWhen === 'conflicted' || config.rebaseWhen === 'never');
+          ['conflicted', 'never'].includes(config.rebaseWhen!);
         await scm.mergeAndPush(config.branchName!, allowBehindBase);
       }
       logger.info({ branch: config.branchName }, 'Branch automerged');

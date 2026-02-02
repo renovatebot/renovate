@@ -768,7 +768,7 @@ export async function processBranch(
     if (!config.artifactErrors?.length && (!commitSha || config.ignoreTests)) {
       const allowBehindBase =
         config.allowBranchAutomergeBehindBase === true &&
-        (config.rebaseWhen === 'conflicted' || config.rebaseWhen === 'never');
+        ['conflicted', 'never'].includes(config.rebaseWhen!);
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
