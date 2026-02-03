@@ -9,7 +9,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
-import { NixFlakeLock } from './schema.ts';
+import { NixFlakeLock, type NixInput } from './schema.ts';
 
 // as documented upstream
 // https://github.com/NixOS/nix/blob/master/doc/manual/source/protocols/tarball-fetcher.md#gitea-and-forgejo-support
@@ -43,7 +43,7 @@ export async function extractPackageFile(
   }
 
   const flakeLock = flakeLockParsed.data;
-  const rootInputs = flakeLock.nodes.root.inputs;
+  const rootInputs = flakeLock.nodes.root?.inputs;
 
   if (!rootInputs) {
     logger.debug(
@@ -57,14 +57,14 @@ export async function extractPackageFile(
   // update under nodes
   const aliasVals = [];
   for (const input in rootInputs) {
-    if (rootInputs[input] instanceof Array) {
-      continue;
-    }
     aliasVals.push(rootInputs[input]);
   }
   const rootAliases = new Set(aliasVals);
 
-  for (const [depName, flakeInput] of Object.entries(flakeLock.nodes)) {
+  for (const [depName, flakeInput] of Object.entries(flakeLock.nodes) as [
+    string,
+    NixInput,
+  ][]) {
     // the root input is a magic string for the entrypoint and only references other flake inputs
     if (depName === 'root') {
       continue;

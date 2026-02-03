@@ -29,15 +29,26 @@ const OriginalInput = z.object({
   url: z.string().optional(),
 });
 
-const NixInput = z.object({
+export const NixInput = z.object({
   inputs: z.record(z.string(), z.string().or(z.array(z.string()))).optional(),
   locked: LockedInput.optional(),
   original: OriginalInput.optional(),
 });
 
+export type NixInput = z.infer<typeof NixInput>;
+
+// https://github.com/NixOS/nix/blob/f7fc24c/src/libflake/include/nix/flake/lockfile.hh
 export const NixFlakeLock = Json.pipe(
   z.object({
-    nodes: z.record(z.string(), NixInput),
+    nodes: z.union([
+      z.record(
+        z.literal('root'),
+        z.object({
+          inputs: z.record(z.string(), z.string()),
+        }),
+      ),
+      z.record(z.string(), NixInput),
+    ]),
     version: z.literal(7),
   }),
 );
