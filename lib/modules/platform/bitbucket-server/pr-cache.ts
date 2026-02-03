@@ -1,13 +1,13 @@
 import { isNullOrUndefined, isPlainObject, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
-import { logger } from '../../../logger';
-import * as memCache from '../../../util/cache/memory';
-import { getCache } from '../../../util/cache/repository';
-import type { BitbucketServerHttp } from '../../../util/http/bitbucket-server';
-import { getQueryString } from '../../../util/url';
-import type { BbsPr, BbsPrCacheData, BbsRestPr } from './types';
-import { prInfo } from './utils';
+import { logger } from '../../../logger/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { getCache } from '../../../util/cache/repository/index.ts';
+import type { BitbucketServerHttp } from '../../../util/http/bitbucket-server.ts';
+import { getQueryString } from '../../../util/url.ts';
+import type { BbsPr, BbsPrCacheData, BbsRestPr } from './types.ts';
+import { prInfo } from './utils.ts';
 
 /* v8 ignore next */
 function migrateBitbucketServerCache(platform: unknown): void {
@@ -26,13 +26,21 @@ function migrateBitbucketServerCache(platform: unknown): void {
 export class BbsPrCache {
   private cache: BbsPrCacheData;
   private items: BbsPr[] = [];
+  private projectKey: string;
+  private repo: string;
+  private readonly ignorePrAuthor: boolean;
+  private author: string | null;
 
   private constructor(
-    private projectKey: string,
-    private repo: string,
-    private readonly ignorePrAuthor: boolean,
-    private author: string | null,
+    projectKey: string,
+    repo: string,
+    ignorePrAuthor: boolean,
+    author: string | null,
   ) {
+    this.projectKey = projectKey;
+    this.repo = repo;
+    this.ignorePrAuthor = ignorePrAuthor;
+    this.author = author;
     const repoCache = getCache();
     repoCache.platform ??= {};
     migrateBitbucketServerCache(repoCache.platform);

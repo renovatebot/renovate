@@ -1,5 +1,5 @@
-import * as hostRules from '../../util/host-rules';
-import { getNewBranchName, repoFingerprint } from './util';
+import * as hostRules from '../../util/host-rules.ts';
+import { getNewBranchName, repoFingerprint } from './util.ts';
 
 describe('modules/platform/util', () => {
   beforeEach(() => hostRules.clear());

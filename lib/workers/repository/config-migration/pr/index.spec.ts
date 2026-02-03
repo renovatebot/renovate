@@ -1,17 +1,17 @@
 import type { Indent } from 'detect-indent';
 import type { RequestError, Response } from 'got';
 import { mock } from 'vitest-mock-extended';
-import { getConfig } from '../../../../config/defaults';
-import { GlobalConfig } from '../../../../config/global';
-import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
-import { hashBody } from '../../../../modules/platform/pr-body';
-import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message';
-import type { MigratedData } from '../branch/migrated-data';
-import { ensureConfigMigrationPr } from '.';
-import { Fixtures } from '~test/fixtures';
-import { partial, platform, scm } from '~test/util';
-import type { RenovateConfig } from '~test/util';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { hashBody } from '../../../../modules/platform/pr-body.ts';
+import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message.ts';
+import type { MigratedData } from '../branch/migrated-data.ts';
+import { ensureConfigMigrationPr } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { partial, platform, scm } from '~test/util.ts';
+import type { RenovateConfig } from '~test/util.ts';
 
 describe('workers/repository/config-migration/pr/index', () => {
   const spy = platform.massageMarkdown;

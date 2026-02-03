@@ -296,6 +296,7 @@ exports[`modules/datasource/crate/index > getReleases > processes real data: lib
       "version": "0.2.49",
     },
     {
+      "releaseTimestamp": "2019-03-05T11:06:03.000Z",
       "version": "0.2.50",
     },
     {

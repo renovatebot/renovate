@@ -1,10 +1,10 @@
-import type { Category } from '../../../constants';
-import { MavenDatasource } from '../../datasource/maven';
-import * as gradleVersioning from '../../versioning/gradle';
+import type { Category } from '../../../constants/index.ts';
+import { MavenDatasource } from '../../datasource/maven/index.ts';
+import * as gradleVersioning from '../../versioning/gradle/index.ts';
 
-export { extractAllPackageFiles } from './extract';
-export { updateDependency } from './update';
-export { updateArtifacts } from './artifacts';
+export { extractAllPackageFiles } from './extract.ts';
+export { updateDependency } from './update.ts';
+export { updateArtifacts } from './artifacts.ts';
 
 export const supportsLockFileMaintenance = true;
 

@@ -1,14 +1,14 @@
 import JSON5 from 'json5';
-import { GlobalConfig } from '../../../../config/global';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { scm } from '../../../../modules/platform/scm';
-import { getFile } from '../../../../util/git';
-import { quickStringify } from '../../../../util/stringify';
-import { getMigrationBranchName } from '../common';
-import { ConfigMigrationCommitMessageFactory } from './commit-message';
-import { MigratedDataFactory } from './migrated-data';
-import type { MigratedData } from './migrated-data';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { getFile } from '../../../../util/git/index.ts';
+import { quickStringify } from '../../../../util/stringify.ts';
+import { getMigrationBranchName } from '../common.ts';
+import { ConfigMigrationCommitMessageFactory } from './commit-message.ts';
+import { MigratedDataFactory } from './migrated-data.ts';
+import type { MigratedData } from './migrated-data.ts';
 
 export async function rebaseMigrationBranch(
   config: RenovateConfig,

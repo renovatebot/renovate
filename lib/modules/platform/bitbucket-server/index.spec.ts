@@ -1,19 +1,20 @@
 import { isTruthy } from '@sindresorhus/is';
+import semver from 'semver';
 import { mockDeep } from 'vitest-mock-extended';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
-} from '../../../constants/error-messages';
-import * as repoCache from '../../../util/cache/repository';
-import type { LongCommitSha } from '../../../util/git/types';
-import { ensureTrailingSlash } from '../../../util/url';
-import * as bitbucket from '.';
-import * as httpMock from '~test/http-mock';
-import { git, hostRules, logger } from '~test/util';
+} from '../../../constants/error-messages.ts';
+import * as repoCache from '../../../util/cache/repository/index.ts';
+import type { LongCommitSha } from '../../../util/git/types.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import * as bitbucket from './index.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { git, hostRules, logger } from '~test/util.ts';
 
 vi.mock('timers/promises');
-vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 function sshLink(projectKey: string, repositorySlug: string): string {
   return `ssh://git@stash.renovatebot.com:7999/${projectKey.toLowerCase()}/${repositorySlug}.git`;
@@ -1858,6 +1859,117 @@ describe('modules/platform/bitbucket-server/index', () => {
             },
           });
           expect(pr?.number).toBe(5);
+        });
+
+        it('should use platform automerge', async () => {
+          const scope = await initRepo();
+          scope
+            .post(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`,
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100&role.1=AUTHOR&username.1=abc`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [],
+            })
+            .post(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`,
+            )
+            .reply(200);
+
+          // Simulate version >= 8.15.0
+          vi.spyOn(semver, 'lt').mockReturnValue(false);
+
+          const pr = await bitbucket.createPr({
+            sourceBranch: 'branch',
+            targetBranch: 'master',
+            prTitle: 'title',
+            prBody: 'body',
+            platformPrOptions: {
+              usePlatformAutomerge: true,
+            },
+          });
+          expect(pr?.number).toBe(5);
+
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            { prNumber: 5 },
+            expect.stringContaining('automerge: success'),
+          );
+        });
+
+        it('platform-native automerge returns early if Bitbucket Server <= 8.15.0 is used', async () => {
+          const scope = await initRepo();
+          scope
+            .post(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`,
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100&role.1=AUTHOR&username.1=abc`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [],
+            });
+
+          // Assert version < 8.15.0
+          vi.spyOn(semver, 'lt').mockReturnValue(true);
+
+          await bitbucket.createPr({
+            sourceBranch: 'branch',
+            targetBranch: 'master',
+            prTitle: 'title',
+            prBody: 'body',
+            platformPrOptions: {
+              usePlatformAutomerge: true,
+            },
+          });
+
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            { prNumber: 5 },
+            expect.stringContaining('automerge: not supported'),
+          );
+        });
+
+        it('platform-native automerge catches errors gracefully', async () => {
+          const scope = await initRepo();
+          scope
+            .post(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`,
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100&role.1=AUTHOR&username.1=abc`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [],
+            })
+            .post(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`,
+            )
+            .reply(404);
+
+          // Simulate version >= 8.15.0
+          vi.spyOn(semver, 'lt').mockReturnValue(false);
+
+          await bitbucket.createPr({
+            sourceBranch: 'branch',
+            targetBranch: 'master',
+            prTitle: 'title',
+            prBody: 'body',
+            platformPrOptions: {
+              usePlatformAutomerge: true,
+            },
+          });
+
+          expect(logger.logger.warn).toHaveBeenCalledWith(
+            { err: expect.any(Error), prNumber: 5 },
+            expect.stringContaining('automerge: fail'),
+          );
         });
       });
 

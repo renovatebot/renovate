@@ -1,16 +1,16 @@
-import * as httpMock from '../../../../test/http-mock';
-import { reset as memCacheReset } from '../../../util/cache/memory';
+import * as httpMock from '../../../../test/http-mock.ts';
+import { reset as memCacheReset } from '../../../util/cache/memory/index.ts';
 import {
   getCache,
   resetCache as repoCacheReset,
-} from '../../../util/cache/repository';
+} from '../../../util/cache/repository/index.ts';
 import {
   BitbucketServerHttp,
   setBaseUrl,
-} from '../../../util/http/bitbucket-server';
-import { BbsPrCache } from './pr-cache';
-import type { BbsRestPr } from './types';
-import { prInfo } from './utils';
+} from '../../../util/http/bitbucket-server.ts';
+import { BbsPrCache } from './pr-cache.ts';
+import type { BbsRestPr } from './types.ts';
+import { prInfo } from './utils.ts';
 
 const http = new BitbucketServerHttp();
 const ignorePrAuthor = false;

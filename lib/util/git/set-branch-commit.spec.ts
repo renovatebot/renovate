@@ -1,11 +1,11 @@
-import * as _repositoryCache from '../cache/repository';
-import type { BranchCache, RepoCacheData } from '../cache/repository/types';
-import { setBranchNewCommit } from './set-branch-commit';
-import type { LongCommitSha } from './types';
-import { git, logger, partial } from '~test/util';
+import * as _repositoryCache from '../cache/repository/index.ts';
+import type { BranchCache, RepoCacheData } from '../cache/repository/types.ts';
+import { setBranchNewCommit } from './set-branch-commit.ts';
+import type { LongCommitSha } from './types.ts';
+import { git, logger, partial } from '~test/util.ts';
 
-vi.mock('../cache/repository');
-vi.mock('.');
+vi.mock('../cache/repository/index.ts');
+vi.mock('./index.ts');
 const repositoryCache = vi.mocked(_repositoryCache);
 
 describe('util/git/set-branch-commit', () => {

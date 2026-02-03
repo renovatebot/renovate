@@ -1,8 +1,8 @@
 import type { S3Client } from '@aws-sdk/client-s3';
 import { mock, mockDeep } from 'vitest-mock-extended';
-import type { RenovateConfig } from '../config/types';
-import type { PackageFile } from '../modules/manager/types';
-import type { BranchCache } from '../util/cache/repository/types';
+import type { RenovateConfig } from '../config/types.ts';
+import type { PackageFile } from '../modules/manager/types.ts';
+import type { BranchCache } from '../util/cache/repository/types.ts';
 import {
   addBranchStats,
   addExtractionStats,
@@ -11,14 +11,14 @@ import {
   finalizeReport,
   getReport,
   resetReport,
-} from './reporting';
-import type { Report } from './types';
-import { s3 } from '~test/s3';
-import { fs, logger } from '~test/util';
+} from './reporting.ts';
+import type { Report } from './types.ts';
+import { s3 } from '~test/s3.ts';
+import { fs, logger } from '~test/util.ts';
 
-vi.mock('../util/fs', () => mockDeep());
-vi.mock('../util/s3', () => mockDeep());
-vi.mock('../logger', () => mockDeep());
+vi.mock('../util/fs/index.ts', () => mockDeep());
+vi.mock('../util/s3.ts', () => mockDeep());
+vi.mock('../logger/index.ts', () => mockDeep());
 
 describe('instrumentation/reporting', () => {
   beforeEach(() => {

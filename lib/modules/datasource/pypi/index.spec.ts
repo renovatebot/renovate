@@ -1,9 +1,9 @@
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
-import { getPkgReleases } from '..';
-import * as hostRules from '../../../util/host-rules';
-import { PypiDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
-import * as httpMock from '~test/http-mock';
+import * as hostRules from '../../../util/host-rules.ts';
+import { getPkgReleases } from '../index.ts';
+import { PypiDatasource } from './index.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 
 vi.mock('google-auth-library');
 

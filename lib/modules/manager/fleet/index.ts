@@ -1,9 +1,9 @@
-import type { Category } from '../../../constants';
-import { DockerDatasource } from '../../datasource/docker';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { HelmDatasource } from '../../datasource/helm';
+import type { Category } from '../../../constants/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
 
-export { extractPackageFile } from './extract';
+export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'Rancher Fleet';
 export const url = 'https://fleet.rancher.io';

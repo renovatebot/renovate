@@ -1,4 +1,4 @@
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex.ts';
 import {
   ascendingRange,
   descendingRange,
@@ -7,7 +7,7 @@ import {
   lowerBound,
   matchVersion,
   upperBound,
-} from './pattern';
+} from './pattern.ts';
 
 function getVersionParts(input: string): [string, string] {
   const versionParts = input.split('-');

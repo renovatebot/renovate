@@ -1,11 +1,11 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import { GlobalConfig } from '../../../../config/global';
+import { GlobalConfig } from '../../../../config/global.ts';
 import {
   type MinimumReleaseAgeBehaviour,
   type RenovateConfig,
   type UpdateType,
-} from '../../../../config/types';
+} from '../../../../config/types.ts';
 import {
   CONFIG_VALIDATION,
   MANAGER_LOCKFILE_ERROR,
@@ -17,43 +17,47 @@ import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
   WORKER_FILE_UPDATE_FAILED,
-} from '../../../../constants/error-messages';
-import { logger, removeMeta } from '../../../../logger';
-import { getAdditionalFiles } from '../../../../modules/manager/npm/post-update';
-import type { Pr } from '../../../../modules/platform';
-import { platform } from '../../../../modules/platform';
+} from '../../../../constants/error-messages.ts';
+import { logger, removeMeta } from '../../../../logger/index.ts';
+import { getAdditionalFiles } from '../../../../modules/manager/npm/post-update/index.ts';
 import {
   ensureComment,
   ensureCommentRemoval,
-} from '../../../../modules/platform/comment';
-import { scm } from '../../../../modules/platform/scm';
-import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import { getElapsedMs } from '../../../../util/date';
-import { emojify } from '../../../../util/emoji';
+} from '../../../../modules/platform/comment.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { platform } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import { getElapsedMs } from '../../../../util/date.ts';
+import { emojify } from '../../../../util/emoji.ts';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
-} from '../../../../util/merge-confidence';
-import { coerceNumber } from '../../../../util/number';
-import { toMs } from '../../../../util/pretty-time';
-import * as template from '../../../../util/template';
-import { getCount, isLimitReached } from '../../../global/limits';
-import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
-import { embedChangelogs } from '../../changelog';
-import { ensurePr, getPlatformPrOptions } from '../pr';
-import { checkAutoMerge } from '../pr/automerge';
-import { setArtifactErrorStatus } from './artifacts';
-import { tryBranchAutomerge } from './automerge';
-import { bumpVersions } from './bump-versions';
-import { prAlreadyExisted } from './check-existing';
-import { commitFilesToBranch } from './commit';
-import executePostUpgradeCommands from './execute-post-upgrade-commands';
-import { getUpdatedPackageFiles } from './get-updated';
-import { handleClosedPr, handleModifiedPr } from './handle-existing';
-import { shouldReuseExistingBranch } from './reuse';
-import { isScheduledNow } from './schedule';
-import { setConfidence, setStability } from './status-checks';
+} from '../../../../util/merge-confidence/index.ts';
+import { coerceNumber } from '../../../../util/number.ts';
+import { toMs } from '../../../../util/pretty-time.ts';
+import * as template from '../../../../util/template/index.ts';
+import { getCount, isLimitReached } from '../../../global/limits.ts';
+import type {
+  BranchConfig,
+  BranchResult,
+  PrBlockedBy,
+} from '../../../types.ts';
+import { embedChangelogs } from '../../changelog/index.ts';
+import { checkAutoMerge } from '../pr/automerge.ts';
+import { ensurePr, getPlatformPrOptions } from '../pr/index.ts';
+import { setArtifactErrorStatus } from './artifacts.ts';
+import { tryBranchAutomerge } from './automerge.ts';
+import { bumpVersions } from './bump-versions.ts';
+import { prAlreadyExisted } from './check-existing.ts';
+import { commitFilesToBranch } from './commit.ts';
+import executePostUpgradeCommands from './execute-post-upgrade-commands.ts';
+import { getUpdatedPackageFiles } from './get-updated.ts';
+import { handleClosedPr, handleModifiedPr } from './handle-existing.ts';
+import { shouldReuseExistingBranch } from './reuse.ts';
+import { isScheduledNow } from './schedule.ts';
+import { setConfidence, setStability } from './status-checks.ts';
 
 async function rebaseCheck(
   config: RenovateConfig,
@@ -189,7 +193,7 @@ export async function processBranch(
     } else if (!branchPr && existingPr && !dependencyDashboardCheck) {
       logger.debug(
         { prTitle: config.prTitle },
-        'Closed PR already exists. Skipping branch.',
+        `Closed PR #${existingPr.number} already exists. Skipping branch.`,
       );
       await handleClosedPr(config, existingPr);
       return {
@@ -298,7 +302,7 @@ export async function processBranch(
         config.baseBranch,
       );
       if (branchPr) {
-        logger.debug('Found existing branch PR');
+        logger.debug(`Found existing branch PR #${branchPr.number}`);
         if (branchPr.state !== 'open') {
           logger.debug(
             'PR has been closed or merged since this run started - aborting',
@@ -718,6 +722,7 @@ export async function processBranch(
     if (branchPr) {
       const platformPrOptions = getPlatformPrOptions(config);
       if (
+        commitSha &&
         platformPrOptions.usePlatformAutomerge &&
         platform.reattemptPlatformAutomerge
       ) {

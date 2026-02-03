@@ -1,10 +1,10 @@
 import { gte, lt, lte, satisfies } from '@renovatebot/pep440';
 import { parse as parseRange } from '@renovatebot/pep440/lib/specifier.js';
 import { parse as parseVersion } from '@renovatebot/pep440/lib/version.js';
-import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
-import { regEx } from '../../../util/regex';
-import type { NewValueConfig } from '../types';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { regEx } from '../../../util/regex.ts';
+import type { NewValueConfig } from '../types.ts';
 
 const UserPolicyPrecisionMap = {
   Major: 0,
@@ -301,7 +301,7 @@ function handleUpperBound(range: Range, newVersion: string): string | null {
 }
 
 function updateRangeValue(
-  { currentValue, rangeStrategy, currentVersion, newVersion }: NewValueConfig,
+  { currentValue, newVersion }: NewValueConfig,
   range: Range,
 ): string | null {
   // used to exclude versions,

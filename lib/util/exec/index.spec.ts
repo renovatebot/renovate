@@ -1,21 +1,28 @@
 import { mockDeep } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../config/global';
-import type { RepoGlobalConfig } from '../../config/types';
-import { TEMPORARY_ERROR } from '../../constants/error-messages';
-import { setCustomEnv } from '../env';
-import * as dockerModule from './docker';
-import { getHermitEnvs } from './hermit';
-import type { ExecOptions, RawExecOptions, VolumeOption } from './types';
-import { exec } from '.';
-import { exec as cpExec, envMock } from '~test/exec-util';
+import { GlobalConfig } from '../../config/global.ts';
+import type { RepoGlobalConfig } from '../../config/types.ts';
+import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
+import { setCustomEnv } from '../env.ts';
+import * as dockerModule from './docker/index.ts';
+import { getHermitEnvs } from './hermit.ts';
+import { exec } from './index.ts';
+import type {
+  CommandWithOptions,
+  ExecOptions,
+  ExecResult,
+  RawExecOptions,
+  VolumeOption,
+} from './types.ts';
+import { asRawCommand } from './utils.ts';
+import { exec as cpExec, envMock } from '~test/exec-util.ts';
 
 const getHermitEnvsMock = vi.mocked(getHermitEnvs);
 
-vi.mock('./hermit', async () => ({
-  ...(await vi.importActual<typeof import('./hermit')>('./hermit')),
+vi.mock('./hermit.ts', async () => ({
+  ...(await vi.importActual<typeof import('./hermit.ts')>('./hermit')),
   getHermitEnvs: vi.fn(),
 }));
-vi.mock('../../modules/datasource', () => mockDeep());
+vi.mock('../../modules/datasource/index.ts', () => mockDeep());
 
 interface TestInput {
   processEnv: Record<string, string>;
@@ -41,7 +48,7 @@ describe('util/exec/index', () => {
   const globalConfig: RepoGlobalConfig = {
     cacheDir,
     containerbaseDir,
-    dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+    dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
   };
 
   beforeEach(() => {
@@ -56,9 +63,9 @@ describe('util/exec/index', () => {
     process.env = processEnvOrig;
   });
 
-  const image = dockerModule.sideCarImage;
-  const fullImage = `ghcr.io/containerbase/sidecar`;
-  const name = `renovate_${image}`;
+  const sideCarName = dockerModule.sideCarName;
+  const fullImage = `ghcr.io/renovatebot/base-image`;
+  const name = `renovate_${sideCarName}`;
   const inCmd = 'echo hello';
   const outCmd = ['echo hello'];
   const volume_1 = '/path/to/volume-1';
@@ -446,9 +453,9 @@ describe('util/exec/index', () => {
         inCmd,
         inOpts: { docker },
         outCmd: [
-          `docker pull ghcr.io/containerbase/${image}`,
+          `docker pull ghcr.io/renovatebot/base-image`,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ghcr.io/containerbase/${image} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ghcr.io/renovatebot/base-image bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -464,7 +471,7 @@ describe('util/exec/index', () => {
           },
         ],
         adminConfig: {
-          dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+          dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
           binarySource: 'docker',
         },
       },
@@ -478,8 +485,8 @@ describe('util/exec/index', () => {
         inOpts: { docker },
         outCmd: [
           dockerPullCmd,
-          `docker ps --filter name=myprefix_${image} -aq`,
-          `docker run --rm --name=myprefix_${image} --label=myprefix_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
+          `docker ps --filter name=myprefix_${sideCarName} -aq`,
+          `docker run --rm --name=myprefix_${sideCarName} --label=myprefix_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -787,6 +794,75 @@ describe('util/exec/index', () => {
     ],
 
     [
+      'Shell is not set if not specified',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {},
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
+          },
+        ],
+      },
+    ],
+
+    [
+      'Shell=true is set if specified',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          shell: true,
+        },
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+            shell: true,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
+          },
+        ],
+      },
+    ],
+
+    [
+      'Shell={string} is set if specified',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          shell: '/usr/bin/another-shell',
+        },
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+            shell: '/usr/bin/another-shell',
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
+          },
+        ],
+      },
+    ],
+
+    [
       'Hermit',
       {
         processEnv: {
@@ -845,7 +921,7 @@ describe('util/exec/index', () => {
     const actualCmd: string[] = [];
     const actualOpts: RawExecOptions[] = [];
     cpExec.mockImplementation((execCmd, execOpts) => {
-      actualCmd.push(execCmd);
+      actualCmd.push(asRawCommand(execCmd));
       actualOpts.push(execOpts);
 
       return Promise.resolve({ stdout: '', stderr: '' });
@@ -867,7 +943,7 @@ describe('util/exec/index', () => {
 
     const actualCmd: string[] = [];
     cpExec.mockImplementation((execCmd) => {
-      actualCmd.push(execCmd);
+      actualCmd.push(asRawCommand(execCmd));
       return Promise.resolve({ stdout: '', stderr: '' });
     });
 
@@ -891,17 +967,108 @@ describe('util/exec/index', () => {
       `echo hello`,
       `echo hello`,
       `docker pull ${fullImage}`,
-      `docker ps --filter name=renovate_${image} -aq`,
-      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
-      `docker ps --filter name=renovate_${image} -aq`,
-      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
+      `docker ps --filter name=renovate_${sideCarName} -aq`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
+      `docker ps --filter name=renovate_${sideCarName} -aq`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
       `echo hello`,
       `echo hello`,
-      `docker ps --filter name=renovate_${image} -aq`,
-      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
-      `docker ps --filter name=renovate_${image} -aq`,
-      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
+      `docker ps --filter name=renovate_${sideCarName} -aq`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
+      `docker ps --filter name=renovate_${sideCarName} -aq`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
     ]);
+  });
+
+  it('throws when an error is thrown', async () => {
+    process.env = processEnv;
+    cpExec.mockImplementation(() => {
+      throw new Error('some error occurred');
+    });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    const promise = exec('foobar');
+    await expect(promise).rejects.toThrow('some error occurred');
+  });
+
+  it('rejects and throws if an error is thrown, even if we specify ignoreFailure=true', async () => {
+    process.env = processEnv;
+    cpExec.mockImplementation(() => {
+      throw new Error('some error occurred');
+    });
+    GlobalConfig.set({ ...globalConfig });
+    const promise = exec([
+      {
+        command: ['foobar'],
+        ignoreFailure: true,
+      },
+    ]);
+    await expect(promise).rejects.toThrow('some error occurred');
+  });
+
+  it('does not reject and throw if rawExec returns an exit code, and we specify ignoreFailure=true', async () => {
+    process.env = processEnv;
+    const stdout = 'out';
+    const stderr = 'err';
+    cpExec.mockImplementation(
+      (): Promise<ExecResult> =>
+        // NOTE that this only makes sense as a return value when `ignoreFailure=true` is set
+        Promise.resolve({
+          stdout,
+          stderr,
+          exitCode: 10,
+        }),
+    );
+    GlobalConfig.set({ ...globalConfig });
+    const promise = exec([
+      {
+        command: ['foobar'],
+        // NOTE that the implementation would only work if `ignoreFailure: true`
+        ignoreFailure: true,
+      },
+    ]);
+    await expect(promise).resolves.toEqual({
+      stdout,
+      stderr,
+      exitCode: 10,
+    });
+  });
+
+  it('exec takes an array with both `string`s and `CommandWithOptions` as an argument', async () => {
+    const command: CommandWithOptions = {
+      command: ['exit 1'],
+      ignoreFailure: true,
+    };
+
+    cpExec.mockImplementationOnce(() => {
+      return Promise.resolve({ stdout: '', stderr: '' });
+    });
+
+    cpExec.mockImplementationOnce(() => {
+      return Promise.resolve({ stdout: 'out', stderr: 'err', exitCode: 5 });
+    });
+
+    await expect(exec(['ls', command])).resolves.toEqual({
+      stdout: 'out',
+      stderr: 'err',
+      exitCode: 5,
+    });
+  });
+
+  it('exec takes CommandWithOptions as an argument', async () => {
+    const command: CommandWithOptions = {
+      command: ['exit 1'],
+      ignoreFailure: true,
+    };
+
+    cpExec.mockImplementation(() => {
+      return Promise.resolve({ stdout: 'out', stderr: 'err', exitCode: 5 });
+    });
+
+    await expect(exec([command])).resolves.toEqual({
+      stdout: 'out',
+      stderr: 'err',
+      exitCode: 5,
+    });
   });
 
   it('Supports binarySource=install', async () => {
@@ -919,7 +1086,7 @@ describe('util/exec/index', () => {
     process.env = processEnv;
     const actualCmd: string[] = [];
     cpExec.mockImplementation((execCmd) => {
-      actualCmd.push(execCmd);
+      actualCmd.push(asRawCommand(execCmd));
       return Promise.resolve({ stdout: '', stderr: '' });
     });
 

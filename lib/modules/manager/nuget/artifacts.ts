@@ -1,9 +1,9 @@
 import { quote } from 'shlex';
 import upath from 'upath';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   ensureDir,
   getLocalFiles,
@@ -11,26 +11,26 @@ import {
   outputCacheFile,
   privateCacheDir,
   writeLocalFile,
-} from '../../../util/fs';
-import { getFiles } from '../../../util/git';
-import { regEx } from '../../../util/regex';
+} from '../../../util/fs/index.ts';
+import { getFiles } from '../../../util/git/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
-} from '../types';
-import { createNuGetConfigXml } from './config-formatter';
+} from '../types.ts';
+import { createNuGetConfigXml } from './config-formatter.ts';
 import {
   GLOBAL_JSON,
   MSBUILD_CENTRAL_FILE,
   NUGET_CENTRAL_FILE,
   getDependentPackageFiles,
-} from './package-tree';
+} from './package-tree.ts';
 import {
   findGlobalJson,
   getConfiguredRegistries,
   getDefaultRegistries,
-} from './util';
+} from './util.ts';
 
 async function createCachedNuGetConfigFile(
   nugetCacheDir: string,

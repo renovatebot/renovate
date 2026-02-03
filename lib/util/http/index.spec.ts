@@ -2,16 +2,16 @@ import { ZodError, z } from 'zod';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
-} from '../../constants/error-messages';
-import * as memCache from '../cache/memory';
-import { resetCache } from '../cache/repository';
-import * as hostRules from '../host-rules';
-import * as queue from './queue';
-import * as throttle from './throttle';
-import type { HttpResponse } from './types';
-import { Http, HttpError } from '.';
-import * as httpMock from '~test/http-mock';
-import { logger } from '~test/util';
+} from '../../constants/error-messages.ts';
+import * as memCache from '../cache/memory/index.ts';
+import { resetCache } from '../cache/repository/index.ts';
+import * as hostRules from '../host-rules.ts';
+import { Http, HttpError } from './index.ts';
+import * as queue from './queue.ts';
+import * as throttle from './throttle.ts';
+import type { HttpResponse } from './types.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
 
 const baseUrl = 'http://renovate.com';
 

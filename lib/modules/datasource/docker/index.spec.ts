@@ -3,19 +3,19 @@ import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import * as _googleAuth from 'google-auth-library';
 import { mockDeep } from 'vitest-mock-extended';
-import { getDigest, getPkgReleases } from '..';
-import { range } from '../../../../lib/util/range';
-import { GlobalConfig } from '../../../config/global';
-import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import * as _hostRules from '../../../util/host-rules';
-import { DockerDatasource } from '.';
-import * as httpMock from '~test/http-mock';
-import { logger } from '~test/util';
+import { range } from '../../../../lib/util/range.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import * as _hostRules from '../../../util/host-rules.ts';
+import { getDigest, getPkgReleases } from '../index.ts';
+import { DockerDatasource } from './index.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
 
 const hostRules = vi.mocked(_hostRules);
 const googleAuth = vi.mocked(_googleAuth, true);
 
-vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('google-auth-library');
 
 const ecrMock = mockClient(ECRClient);
@@ -987,6 +987,72 @@ describe('modules/datasource/docker/index', () => {
       expect(res).toBe(
         'sha256:5194622ded36da4097a53c4ec9d85bba370d9e826e88a74fa910c46ddbf3208c',
       );
+    });
+
+    it('treats empty string architecture as no architecture', async () => {
+      const currentDigest =
+        'sha256:81c09f6d42c2db8121bcd759565ea244cedc759f36a0f090ec7da9de4f7f8fe4';
+
+      httpMock
+        .scope(authUrl)
+        .get(
+          '/token?service=registry.docker.io&scope=repository:library/some-dep:pull',
+        )
+        .times(4)
+        .reply(200, { token: 'some-token' });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .times(3)
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .head('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.v2+json',
+        })
+        .get('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
+        })
+        .get('/library/some-dep/blobs/some-config-digest')
+        .reply(200, {
+          architecture: '', // Empty string architecture
+        });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .head('/library/some-dep/manifests/some-new-value')
+        .reply(200, undefined, {
+          'docker-content-digest': 'sha256:some-digest-from-head-request',
+        });
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'some-dep',
+          currentDigest,
+        },
+        'some-new-value',
+      );
+
+      // Should log empty string same as null
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        `Current digest ${currentDigest} relates to architecture `,
+      );
+      // Should use the digest from HEAD request (no architecture-specific logic)
+      expect(res).toBe('sha256:some-digest-from-head-request');
     });
 
     it('supports architecture-specific digest in OCI manifests with media type', async () => {

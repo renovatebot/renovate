@@ -1,16 +1,16 @@
-import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
-import { setBaseUrl } from '../../../util/http/gerrit';
-import type { FindPRConfig } from '../types';
-import { client } from './client';
+import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
+import { setBaseUrl } from '../../../util/http/gerrit.ts';
+import type { FindPRConfig } from '../types.ts';
+import { client } from './client.ts';
 import type {
   GerritChange,
   GerritChangeMessageInfo,
   GerritFindPRConfig,
   GerritMergeableInfo,
-} from './types';
-import { MIN_GERRIT_VERSION } from './utils';
-import * as httpMock from '~test/http-mock';
-import { partial } from '~test/util';
+} from './types.ts';
+import { MIN_GERRIT_VERSION } from './utils.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate/';
 const jsonResultHeader = { 'content-type': 'application/json;charset=utf-8' };

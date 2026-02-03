@@ -1,9 +1,9 @@
 import { isNullOrUndefined, isPlainObject } from '@sindresorhus/is';
-import { logger } from '../../../../../logger';
-import type { PackageDependency } from '../../../types';
-import { TerraformProviderExtractor } from '../../base';
-import type { TerraformDefinitionFile } from '../../hcl/types';
-import type { ProviderLock } from '../../lockfile/types';
+import { logger } from '../../../../../logger/index.ts';
+import type { PackageDependency } from '../../../types.ts';
+import { TerraformProviderExtractor } from '../../base.ts';
+import type { TerraformDefinitionFile } from '../../hcl/types.ts';
+import type { ProviderLock } from '../../lockfile/types.ts';
 
 export class ProvidersExtractor extends TerraformProviderExtractor {
   getCheckList(): string[] {

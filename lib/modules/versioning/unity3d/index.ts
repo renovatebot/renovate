@@ -1,7 +1,7 @@
-import { regEx } from '../../../util/regex';
-import type { GenericVersion } from '../generic';
-import { GenericVersioningApi } from '../generic';
-import type { VersioningApi } from '../types';
+import { regEx } from '../../../util/regex.ts';
+import type { GenericVersion } from '../generic.ts';
+import { GenericVersioningApi } from '../generic.ts';
+import type { VersioningApi } from '../types.ts';
 
 export const id = 'unity3d';
 export const displayName = 'Unity3D';

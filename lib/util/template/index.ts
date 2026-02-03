@@ -6,11 +6,11 @@ import {
   isString,
 } from '@sindresorhus/is';
 import handlebars, { type HelperOptions } from 'handlebars';
-import { GlobalConfig } from '../../config/global';
-import { logger } from '../../logger';
-import { toArray } from '../array';
-import { getChildEnv } from '../exec/utils';
-import { regEx } from '../regex';
+import { GlobalConfig } from '../../config/global.ts';
+import { logger } from '../../logger/index.ts';
+import { toArray } from '../array.ts';
+import { getChildEnv } from '../exec/utils.ts';
+import { regEx } from '../regex.ts';
 
 // Missing in handlebars
 type Options = HelperOptions & {
@@ -255,7 +255,11 @@ const allowedTemplateFields = new Set([
 ]);
 
 class CompileInputProxyHandler implements ProxyHandler<CompileInput> {
-  constructor(private warnVariables: Set<string>) {}
+  private warnVariables: Set<string>;
+
+  constructor(warnVariables: Set<string>) {
+    this.warnVariables = warnVariables;
+  }
 
   get(target: CompileInput, prop: keyof CompileInput): unknown {
     if (prop === 'env') {
