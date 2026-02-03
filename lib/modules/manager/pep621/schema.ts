@@ -6,7 +6,7 @@ import {
 } from '../../../util/schema-utils/index.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
-import { api as pep440 } from '../../versioning/pep440.ts';
+import { api as pep440 } from '../../versioning/pep440/index.ts';
 import type { PackageDependency } from '../types.ts';
 import { depTypes, pep508ToPackageDependency } from './utils.ts';
 
