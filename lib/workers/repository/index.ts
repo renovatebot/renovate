@@ -117,7 +117,7 @@ export async function renovateRepository(
       OnboardingState.prUpdateRequested;
     const extractResult = performExtract
       ? await extractDependencies(config)
-      : emptyExtract(config);
+      : emptyExtract();
     addExtractionStats(config, extractResult);
 
     const { branches, branchList, packageFiles } = extractResult;
@@ -228,7 +228,7 @@ export async function renovateRepository(
 }
 
 // istanbul ignore next: renovateRepository is ignored
-function emptyExtract(config: RenovateConfig): ExtractResult {
+function emptyExtract(): ExtractResult {
   return instrument(
     'extract',
     () => {
