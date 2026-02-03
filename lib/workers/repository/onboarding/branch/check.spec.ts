@@ -200,6 +200,30 @@ describe('workers/repository/onboarding/branch/check', () => {
       );
       expect(platform.ensureComment).not.toHaveBeenCalled();
     });
+
+    it('does not allow inherited onboardingAutoCloseAge to be higher than global config', async () => {
+      const now = DateTime.now();
+      vi.setSystemTime(now.toMillis());
+      // PR was created 36 hours ago (1.5 days)
+      const createdAt = now.minus({ hour: 36 });
+
+      GlobalConfig.set({ onboardingAutoCloseAge: 1 });
+      InheritConfig.set({ onboardingAutoCloseAge: 10 });
+
+      cache.getCache.mockReturnValue({});
+      platform.findPr.mockResolvedValue(
+        partial<Pr>({
+          createdAt: createdAt.toISO(),
+          title: 'Configure Renovate',
+          bodyStruct,
+        }),
+      );
+      scm.getFileList.mockResolvedValue([]);
+      await expect(isOnboarded(config)).rejects.toThrow(
+        REPOSITORY_CLOSED_ONBOARDING,
+      );
+      expect(platform.ensureComment).not.toHaveBeenCalled();
+    });
   });
 
   it('checks git file list for config file when in fork mode', async () => {

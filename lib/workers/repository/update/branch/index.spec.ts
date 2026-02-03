@@ -2839,6 +2839,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
+          number: 5,
           sourceBranch: 'old/some-branch',
           state: 'open',
         }),
@@ -2858,7 +2859,7 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: '123test',
       });
 
-      expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
+      expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR #5');
 
       expect(logger.debug).toHaveBeenCalledWith(
         'No package files need updating',
@@ -2877,6 +2878,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
+          number: 5,
           sourceBranch: 'old/some-branch',
           state: 'open',
         }),
@@ -2897,7 +2899,7 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: null,
       });
 
-      expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
+      expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR #5');
       expect(logger.debug).not.toHaveBeenCalledWith(
         'No package files need updating',
       );
@@ -3094,6 +3096,30 @@ describe('workers/repository/update/branch/index', () => {
           checkoutBranchCalledTimes - 1
         ],
       );
+    });
+
+    it('should not reattempt platform automerge without commitSha', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 123,
+          state: 'open',
+        }),
+      );
+      prWorker.getPlatformPrOptions.mockReturnValue({
+        usePlatformAutomerge: true,
+      });
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+      await branchWorker.processBranch(config);
+      expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
     });
 
     it('should not reattempt platform automerge in dry run', async () => {
