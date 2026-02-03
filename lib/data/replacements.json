@@ -52,7 +52,8 @@
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
       "replacements:xmldom-to-scoped",
-      "replacements:zap"
+      "replacements:zap",
+      "replacements:express-mung-to-express-response-middleware"
     ],
     "ignoreDeps": []
   },
