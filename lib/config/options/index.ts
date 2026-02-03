@@ -622,6 +622,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Set the `UID` and `GID` for Docker-based binaries if you use `binarySource=docker`.',
     globalOnly: true,
     type: 'string',
+    default: '12021',
   },
   {
     name: 'composerIgnorePlatformReqs',
