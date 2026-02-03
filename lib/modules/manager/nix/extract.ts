@@ -1,4 +1,3 @@
-import { InputSerialization$ } from '@aws-sdk/client-s3';
 import { logger } from '../../../logger/index.ts';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
