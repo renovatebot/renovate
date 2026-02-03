@@ -3,6 +3,7 @@ import { logger } from '../../../logger/index.ts';
 import * as git from '../../../util/git/index.ts';
 import type {
   CommitFilesConfig,
+  FileChange,
   LongCommitSha,
 } from '../../../util/git/types.ts';
 import { hash } from '../../../util/hash.ts';
@@ -15,6 +16,31 @@ let username: string;
 export function configureScm(repo: string, login: string): void {
   repository = repo;
   username = login;
+}
+
+export async function pushForReview(options: {
+  sourceRef: string;
+  targetBranch: string;
+  files: FileChange[];
+  autoApprove?: boolean;
+  labels?: string[];
+}): Promise<boolean> {
+  const pushOptions = ['notify=NONE'];
+  if (options.autoApprove) {
+    pushOptions.push('label=Code-Review+2');
+  }
+  if (options.labels) {
+    for (const label of options.labels) {
+      pushOptions.push(`hashtag=${label}`);
+    }
+  }
+
+  return await git.pushCommit({
+    sourceRef: options.sourceRef,
+    targetRef: `refs/for/${options.targetBranch}`,
+    files: options.files,
+    pushOptions,
+  });
 }
 
 export class GerritScm extends DefaultGitScm {
@@ -144,21 +170,16 @@ export class GerritScm extends DefaultGitScm {
         const fetchRefSpec = currentRevision.ref;
         await git.fetchRevSpec(fetchRefSpec); // fetch current ChangeSet for git diff
         hasChanges = await git.hasDiff('HEAD', 'FETCH_HEAD'); // avoid pushing empty patch sets
-        // Only push to refs/for/ when updating an existing change
         if (hasChanges || commit.force) {
-          const pushOptions = ['notify=NONE'];
-          if (commit.autoApprove) {
-            pushOptions.push('label=Code-Review+2');
-          }
           // Since the change already exists, we push to the same target branch to
           // avoid creating a new change if the base branch has changed.
           // updatePr() will later take care of moving the existing change to a
           // different base branch if needed.
-          const pushResult = await git.pushCommit({
+          const pushResult = await pushForReview({
             sourceRef: commit.branchName,
-            targetRef: `refs/for/${existingChange.branch}`,
+            targetBranch: existingChange.branch,
             files: commit.files,
-            pushOptions,
+            autoApprove: commit.autoApprove,
           });
           /* v8 ignore else -- should never happen */
           if (pushResult) {
@@ -168,7 +189,7 @@ export class GerritScm extends DefaultGitScm {
       } else {
         // The push will be done by createPr() to actually create the Gerrit change
         logger.debug(
-          `Commit prepared for new change on branch ${commit.branchName}, but not pushed to refs/for/ yet`,
+          `Commit prepared but not pushed for review yet (${commit.baseBranch})`,
         );
         return commitSha;
       }

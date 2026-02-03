@@ -31,7 +31,7 @@ import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
 import { client } from './client.ts';
-import { configureScm } from './scm.ts';
+import { configureScm, pushForReview } from './scm.ts';
 import type { GerritLabelTypeInfo, GerritProjectInfo } from './types.ts';
 import {
   MAX_GERRIT_COMMENT_SIZE,
@@ -239,21 +239,12 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
   logger.debug(
     `Pushing commit to refs/for/${prConfig.targetBranch} to create Gerrit change`,
   );
-  const pushOptions = ['notify=NONE'];
-  if (prConfig.platformPrOptions?.autoApprove) {
-    pushOptions.push('label=Code-Review+2');
-  }
-  if (prConfig.labels) {
-    for (const label of prConfig.labels) {
-      pushOptions.push(`hashtag=${label}`);
-    }
-  }
-
-  const pushResult = await git.pushCommit({
+  const pushResult = await pushForReview({
     sourceRef: prConfig.sourceBranch,
-    targetRef: `refs/for/${prConfig.targetBranch}`,
+    targetBranch: prConfig.targetBranch,
     files: [],
-    pushOptions,
+    autoApprove: prConfig.platformPrOptions?.autoApprove,
+    labels: prConfig.labels ?? undefined,
   });
 
   if (!pushResult) {
