@@ -1,8 +1,8 @@
 import type { AllConfig, RenovateConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { platform } from '../../../modules/platform/index.ts';
-import * as repositoryCache from '../../../util/cache/repository/index.ts';
 import { getInheritedOrGlobal } from '../../../util/common.ts';
+import * as repositoryCache from '../../../util/cache/repository/index.ts';
 import { clearRenovateRefs } from '../../../util/git/index.ts';
 import { PackageFiles } from '../package-files.ts';
 import { checkReconfigureBranch } from '../reconfigure/index.ts';
