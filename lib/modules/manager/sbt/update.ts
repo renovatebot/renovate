@@ -72,7 +72,7 @@ export function updateDependency({
         'Updating version for sbt dependency',
       );
 
-      const pattern = new RegExp(
+      const pattern = regEx(
         `"${escapeRegExp(groupId)}"\\s*(%|%%|%%%)\\s*"${escapeRegExp(artifactId)}"\\s*%\\s*"${escapeRegExp(currentValue)}"`,
         'g',
       );
@@ -95,7 +95,7 @@ export function updateDependency({
 
     const [newGroupId, newArtifactId] = newName.split(':', 2);
 
-    const pattern = new RegExp(
+    const pattern = regEx(
       `"${escapeRegExp(groupId)}"\\s*(%|%%|%%%)\\s*"${escapeRegExp(artifactId)}"`,
       'g',
     );
