@@ -150,7 +150,7 @@ export class GerritScm extends DefaultGitScm {
           if (commit.autoApprove) {
             pushOptions.push('label=Code-Review+2');
           }
-          // If a change already exists, we push to the same target branch to
+          // Since the change already exists, we push to the same target branch to
           // avoid creating a new change if the base branch has changed.
           // updatePr() will later take care of moving the existing change to a
           // different base branch if needed.
